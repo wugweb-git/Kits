@@ -1,21 +1,18 @@
 import React from 'react';
-import { Textarea } from '../../wugweb/Textarea';
+import { Switch } from '../../wugweb/Switch';
 import { Label } from '../../wugweb/Label';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
-import { Check, Copy, ChevronRight, X, AlertCircle } from 'lucide-react';
+import { Check, Copy, ChevronRight, X } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
 
-export function TextareaDoc() {
-  const [textValue, setTextValue] = React.useState('');
-  const [placeholder, setPlaceholder] = React.useState('Enter your message...');
-  const [hasError, setHasError] = React.useState(false);
+export function SwitchDoc() {
+  const [isChecked, setIsChecked] = React.useState(false);
   const [isDisabled, setIsDisabled] = React.useState(false);
-  
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
   
@@ -38,13 +35,15 @@ export function TextareaDoc() {
   };
 
   const generateCode = () => {
-    let code = `<Textarea\n`;
-    if (placeholder !== 'Enter your message...') code += `  placeholder="${placeholder}"\n`;
-    if (hasError) code += `  error={true}\n`;
-    if (isDisabled) code += `  disabled={true}\n`;
-    code += `  value={value}\n`;
-    code += `  onChange={(e) => setValue(e.target.value)}\n`;
-    code += `/>`;
+    let code = `<div className="flex items-center gap-2">\n`;
+    code += `  <Switch\n`;
+    code += `    id="airplane-mode"\n`;
+    code += `    checked={checked}\n`;
+    code += `    onCheckedChange={setChecked}\n`;
+    if (isDisabled) code += `    disabled={true}\n`;
+    code += `  />\n`;
+    code += `  <Label htmlFor="airplane-mode">Airplane Mode</Label>\n`;
+    code += `</div>`;
     return code;
   };
 
@@ -78,7 +77,7 @@ export function TextareaDoc() {
             fontSize: '14px',
             fontWeight: 'var(--font-weight-medium)',
           }}>
-            Textarea
+            Switch
           </span>
         </div>
         
@@ -91,7 +90,7 @@ export function TextareaDoc() {
               lineHeight: '1.2',
               marginBottom: spacing(2),
             }}>
-              Textarea
+              Switch
             </h1>
             <p style={{
               fontFamily: 'Inter Tight, sans-serif',
@@ -100,7 +99,7 @@ export function TextareaDoc() {
               color: 'var(--muted-foreground)',
               lineHeight: '1.6',
             }}>
-              A multi-line text input field for capturing longer form content like comments, messages, or descriptions.
+              A toggle control for turning settings on or off with immediate effect.
             </p>
           </div>
           
@@ -148,76 +147,33 @@ export function TextareaDoc() {
               padding: isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)',
               marginBottom: spacing(6),
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '250px',
+              minHeight: '200px',
             }}>
-              <div style={{ width: '100%', maxWidth: '500px' }}>
-                <Label htmlFor="playground-textarea" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Your Message
-                </Label>
-                <Textarea
-                  id="playground-textarea"
-                  placeholder={placeholder}
-                  value={textValue}
-                  onChange={(e) => setTextValue(e.target.value)}
-                  error={hasError}
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="playground-switch"
+                  checked={isChecked}
+                  onCheckedChange={setIsChecked}
                   disabled={isDisabled}
                 />
-                {hasError && (
-                  <div className="flex items-center gap-2" style={{ marginTop: 'var(--spacing-2)' }}>
-                    <AlertCircle size={14} color="var(--destructive)" />
-                    <span style={{
-                      fontFamily: 'Inter Tight, sans-serif',
-                      fontSize: '14px',
-                      color: 'var(--destructive)',
-                    }}>
-                      This field is required
-                    </span>
-                  </div>
-                )}
+                <Label htmlFor="playground-switch">
+                  Airplane Mode
+                </Label>
               </div>
             </div>
 
             {/* Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="textarea-placeholder" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Placeholder
-                </Label>
-                <Textarea
-                  id="textarea-placeholder"
-                  placeholder="Placeholder text"
-                  value={placeholder}
-                  onChange={(e) => setPlaceholder(e.target.value)}
-                  style={{ minHeight: '60px' }}
-                />
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="has-error"
-                    checked={hasError}
-                    onChange={(e) => setHasError(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="has-error">Show Error State</Label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is-disabled"
-                    checked={isDisabled}
-                    onChange={(e) => setIsDisabled(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="is-disabled">Disabled</Label>
-                </div>
-              </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="is-disabled"
+                checked={isDisabled}
+                onChange={(e) => setIsDisabled(e.target.checked)}
+                style={{ width: '20px', height: '20px' }}
+              />
+              <Label htmlFor="is-disabled">Disabled</Label>
             </div>
           </div>
 
@@ -226,7 +182,7 @@ export function TextareaDoc() {
             <CollapsibleCodeBlock
               code={generateCode()}
               language="tsx"
-              filename="Textarea.tsx"
+              filename="Switch.tsx"
               showLineNumbers
             />
           </div>
@@ -252,25 +208,25 @@ export function TextareaDoc() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <TokenCard
-              token="--input-background"
-              label="Background"
-              value="rgba(28, 28, 28, 1.00)"
-              isHighlighted={highlightedToken === '--input-background'}
-              onClick={() => handleTokenClick('--input-background')}
+              token="--muted"
+              label="Unchecked Background"
+              value="rgba(38, 38, 38, 1.00)"
+              isHighlighted={highlightedToken === '--muted'}
+              onClick={() => handleTokenClick('--muted')}
             />
             <TokenCard
-              token="--foreground"
-              label="Text Color"
+              token="--primary"
+              label="Checked Background"
               value="rgba(255, 255, 255, 1.00)"
-              isHighlighted={highlightedToken === '--foreground'}
-              onClick={() => handleTokenClick('--foreground')}
+              isHighlighted={highlightedToken === '--primary'}
+              onClick={() => handleTokenClick('--primary')}
             />
             <TokenCard
-              token="--border"
-              label="Border"
-              value="rgba(43, 43, 43, 1.00)"
-              isHighlighted={highlightedToken === '--border'}
-              onClick={() => handleTokenClick('--border')}
+              token="--primary-foreground"
+              label="Checked Thumb"
+              value="rgba(18, 18, 18, 1.00)"
+              isHighlighted={highlightedToken === '--primary-foreground'}
+              onClick={() => handleTokenClick('--primary-foreground')}
             />
             <TokenCard
               token="--ring"
@@ -280,18 +236,11 @@ export function TextareaDoc() {
               onClick={() => handleTokenClick('--ring')}
             />
             <TokenCard
-              token="--muted-foreground"
-              label="Placeholder"
-              value="rgba(161, 161, 161, 1.00)"
-              isHighlighted={highlightedToken === '--muted-foreground'}
-              onClick={() => handleTokenClick('--muted-foreground')}
-            />
-            <TokenCard
-              token="--destructive"
-              label="Error State"
-              value="rgba(239, 67, 67, 1.00)"
-              isHighlighted={highlightedToken === '--destructive'}
-              onClick={() => handleTokenClick('--destructive')}
+              token="--radius-full"
+              label="Border Radius"
+              value="9999px"
+              isHighlighted={highlightedToken === '--radius-full'}
+              onClick={() => handleTokenClick('--radius-full')}
             />
           </div>
         </CardContent>
@@ -350,7 +299,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for multi-line text input like comments or messages
+                  Use for settings that take effect immediately
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -360,7 +309,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Provide clear labels and helper text
+                  Use clear labels that describe the on state
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -370,17 +319,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Set appropriate height based on expected content
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Show character count for length-limited fields
+                  Provide visual feedback during state changes
                 </li>
               </ul>
             </div>
@@ -421,7 +360,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for single-line input (use Input instead)
+                  Use for actions requiring confirmation
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -431,7 +370,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Make the textarea too small to display content
+                  Use in forms requiring a submit action
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -441,17 +380,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Disable resize without good reason
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use without visible labels or context
+                  Use ambiguous labels like "Yes/No"
                 </li>
               </ul>
             </div>

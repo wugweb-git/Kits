@@ -1,21 +1,18 @@
 import React from 'react';
-import { Textarea } from '../../wugweb/Textarea';
+import { RadioGroup, RadioGroupItem } from '../../wugweb/RadioGroup';
 import { Label } from '../../wugweb/Label';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
-import { Check, Copy, ChevronRight, X, AlertCircle } from 'lucide-react';
+import { Check, Copy, ChevronRight, X } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
 
-export function TextareaDoc() {
-  const [textValue, setTextValue] = React.useState('');
-  const [placeholder, setPlaceholder] = React.useState('Enter your message...');
-  const [hasError, setHasError] = React.useState(false);
+export function RadioGroupDoc() {
+  const [selectedValue, setSelectedValue] = React.useState('default');
   const [isDisabled, setIsDisabled] = React.useState(false);
-  
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
   
@@ -38,13 +35,20 @@ export function TextareaDoc() {
   };
 
   const generateCode = () => {
-    let code = `<Textarea\n`;
-    if (placeholder !== 'Enter your message...') code += `  placeholder="${placeholder}"\n`;
-    if (hasError) code += `  error={true}\n`;
-    if (isDisabled) code += `  disabled={true}\n`;
-    code += `  value={value}\n`;
-    code += `  onChange={(e) => setValue(e.target.value)}\n`;
-    code += `/>`;
+    let code = `<RadioGroup value={value} onValueChange={setValue}${isDisabled ? ' disabled={true}' : ''}>\n`;
+    code += `  <div className="flex items-center gap-2">\n`;
+    code += `    <RadioGroupItem value="default" id="r1" />\n`;
+    code += `    <Label htmlFor="r1">Default</Label>\n`;
+    code += `  </div>\n`;
+    code += `  <div className="flex items-center gap-2">\n`;
+    code += `    <RadioGroupItem value="comfortable" id="r2" />\n`;
+    code += `    <Label htmlFor="r2">Comfortable</Label>\n`;
+    code += `  </div>\n`;
+    code += `  <div className="flex items-center gap-2">\n`;
+    code += `    <RadioGroupItem value="compact" id="r3" />\n`;
+    code += `    <Label htmlFor="r3">Compact</Label>\n`;
+    code += `  </div>\n`;
+    code += `</RadioGroup>`;
     return code;
   };
 
@@ -78,7 +82,7 @@ export function TextareaDoc() {
             fontSize: '14px',
             fontWeight: 'var(--font-weight-medium)',
           }}>
-            Textarea
+            Radio Group
           </span>
         </div>
         
@@ -91,7 +95,7 @@ export function TextareaDoc() {
               lineHeight: '1.2',
               marginBottom: spacing(2),
             }}>
-              Textarea
+              Radio Group
             </h1>
             <p style={{
               fontFamily: 'Inter Tight, sans-serif',
@@ -100,7 +104,7 @@ export function TextareaDoc() {
               color: 'var(--muted-foreground)',
               lineHeight: '1.6',
             }}>
-              A multi-line text input field for capturing longer form content like comments, messages, or descriptions.
+              A set of checkable buttons where only one can be selected at a time.
             </p>
           </div>
           
@@ -148,76 +152,40 @@ export function TextareaDoc() {
               padding: isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)',
               marginBottom: spacing(6),
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '250px',
+              minHeight: '200px',
             }}>
-              <div style={{ width: '100%', maxWidth: '500px' }}>
-                <Label htmlFor="playground-textarea" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Your Message
-                </Label>
-                <Textarea
-                  id="playground-textarea"
-                  placeholder={placeholder}
-                  value={textValue}
-                  onChange={(e) => setTextValue(e.target.value)}
-                  error={hasError}
-                  disabled={isDisabled}
-                />
-                {hasError && (
-                  <div className="flex items-center gap-2" style={{ marginTop: 'var(--spacing-2)' }}>
-                    <AlertCircle size={14} color="var(--destructive)" />
-                    <span style={{
-                      fontFamily: 'Inter Tight, sans-serif',
-                      fontSize: '14px',
-                      color: 'var(--destructive)',
-                    }}>
-                      This field is required
-                    </span>
-                  </div>
-                )}
-              </div>
+              <RadioGroup 
+                value={selectedValue} 
+                onValueChange={setSelectedValue}
+                disabled={isDisabled}
+              >
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="default" id="r1" />
+                  <Label htmlFor="r1">Default</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="comfortable" id="r2" />
+                  <Label htmlFor="r2">Comfortable</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <RadioGroupItem value="compact" id="r3" />
+                  <Label htmlFor="r3">Compact</Label>
+                </div>
+              </RadioGroup>
             </div>
 
             {/* Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="textarea-placeholder" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Placeholder
-                </Label>
-                <Textarea
-                  id="textarea-placeholder"
-                  placeholder="Placeholder text"
-                  value={placeholder}
-                  onChange={(e) => setPlaceholder(e.target.value)}
-                  style={{ minHeight: '60px' }}
-                />
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="has-error"
-                    checked={hasError}
-                    onChange={(e) => setHasError(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="has-error">Show Error State</Label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is-disabled"
-                    checked={isDisabled}
-                    onChange={(e) => setIsDisabled(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="is-disabled">Disabled</Label>
-                </div>
-              </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="is-disabled"
+                checked={isDisabled}
+                onChange={(e) => setIsDisabled(e.target.checked)}
+                style={{ width: '20px', height: '20px' }}
+              />
+              <Label htmlFor="is-disabled">Disabled</Label>
             </div>
           </div>
 
@@ -226,7 +194,7 @@ export function TextareaDoc() {
             <CollapsibleCodeBlock
               code={generateCode()}
               language="tsx"
-              filename="Textarea.tsx"
+              filename="RadioGroup.tsx"
               showLineNumbers
             />
           </div>
@@ -259,11 +227,11 @@ export function TextareaDoc() {
               onClick={() => handleTokenClick('--input-background')}
             />
             <TokenCard
-              token="--foreground"
-              label="Text Color"
+              token="--primary"
+              label="Selected Indicator"
               value="rgba(255, 255, 255, 1.00)"
-              isHighlighted={highlightedToken === '--foreground'}
-              onClick={() => handleTokenClick('--foreground')}
+              isHighlighted={highlightedToken === '--primary'}
+              onClick={() => handleTokenClick('--primary')}
             />
             <TokenCard
               token="--border"
@@ -280,18 +248,11 @@ export function TextareaDoc() {
               onClick={() => handleTokenClick('--ring')}
             />
             <TokenCard
-              token="--muted-foreground"
-              label="Placeholder"
-              value="rgba(161, 161, 161, 1.00)"
-              isHighlighted={highlightedToken === '--muted-foreground'}
-              onClick={() => handleTokenClick('--muted-foreground')}
-            />
-            <TokenCard
-              token="--destructive"
-              label="Error State"
-              value="rgba(239, 67, 67, 1.00)"
-              isHighlighted={highlightedToken === '--destructive'}
-              onClick={() => handleTokenClick('--destructive')}
+              token="--spacing-3"
+              label="Item Spacing"
+              value="12px"
+              isHighlighted={highlightedToken === '--spacing-3'}
+              onClick={() => handleTokenClick('--spacing-3')}
             />
           </div>
         </CardContent>
@@ -350,7 +311,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for multi-line text input like comments or messages
+                  Use for mutually exclusive options
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -360,7 +321,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Provide clear labels and helper text
+                  Provide 2-5 options for best UX
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -370,17 +331,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Set appropriate height based on expected content
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Show character count for length-limited fields
+                  Always have one option pre-selected
                 </li>
               </ul>
             </div>
@@ -421,7 +372,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for single-line input (use Input instead)
+                  Use for multiple selections (use checkboxes)
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -431,7 +382,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Make the textarea too small to display content
+                  Use for more than 7 options (use select)
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -441,17 +392,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Disable resize without good reason
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use without visible labels or context
+                  Nest radio groups within each other
                 </li>
               </ul>
             </div>

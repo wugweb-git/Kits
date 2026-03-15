@@ -1,21 +1,15 @@
 import React from 'react';
-import { Textarea } from '../../wugweb/Textarea';
-import { Label } from '../../wugweb/Label';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
-import { Check, Copy, ChevronRight, X, AlertCircle } from 'lucide-react';
+import { Check, Copy, ChevronRight, X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
+import { toast } from 'sonner@2.0.3';
 
-export function TextareaDoc() {
-  const [textValue, setTextValue] = React.useState('');
-  const [placeholder, setPlaceholder] = React.useState('Enter your message...');
-  const [hasError, setHasError] = React.useState(false);
-  const [isDisabled, setIsDisabled] = React.useState(false);
-  
+export function ToasterDoc() {
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
   
@@ -38,14 +32,32 @@ export function TextareaDoc() {
   };
 
   const generateCode = () => {
-    let code = `<Textarea\n`;
-    if (placeholder !== 'Enter your message...') code += `  placeholder="${placeholder}"\n`;
-    if (hasError) code += `  error={true}\n`;
-    if (isDisabled) code += `  disabled={true}\n`;
-    code += `  value={value}\n`;
-    code += `  onChange={(e) => setValue(e.target.value)}\n`;
-    code += `/>`;
-    return code;
+    return `import { toast } from 'sonner@2.0.3';
+
+// Default toast
+toast('Event has been created');
+
+// Success toast
+toast.success('Profile updated successfully');
+
+// Error toast
+toast.error('Failed to save changes');
+
+// Info toast
+toast.info('New updates available');
+
+// With description
+toast('Event created', {
+  description: 'Monday, January 3rd at 6:00pm',
+});
+
+// With action button
+toast('Event created', {
+  action: {
+    label: 'Undo',
+    onClick: () => console.log('Undo'),
+  },
+});`;
   };
 
   return (
@@ -78,7 +90,7 @@ export function TextareaDoc() {
             fontSize: '14px',
             fontWeight: 'var(--font-weight-medium)',
           }}>
-            Textarea
+            Toast
           </span>
         </div>
         
@@ -91,7 +103,7 @@ export function TextareaDoc() {
               lineHeight: '1.2',
               marginBottom: spacing(2),
             }}>
-              Textarea
+              Toast
             </h1>
             <p style={{
               fontFamily: 'Inter Tight, sans-serif',
@@ -100,7 +112,7 @@ export function TextareaDoc() {
               color: 'var(--muted-foreground)',
               lineHeight: '1.6',
             }}>
-              A multi-line text input field for capturing longer form content like comments, messages, or descriptions.
+              Non-intrusive notifications that appear temporarily to provide feedback about an operation or event.
             </p>
           </div>
           
@@ -110,7 +122,7 @@ export function TextareaDoc() {
               color: 'var(--accent)',
               backgroundColor: 'var(--accent-subtle)',
             }}>
-              Form Control
+              Feedback
             </Badge>
             <Button variant="outline" size="sm" onClick={copyPageLink}>
               {copiedLink ? <Check size={16} /> : <Copy size={16} />}
@@ -151,72 +163,60 @@ export function TextareaDoc() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '250px',
+              gap: 'var(--spacing-4)',
+              minHeight: '200px',
             }}>
-              <div style={{ width: '100%', maxWidth: '500px' }}>
-                <Label htmlFor="playground-textarea" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Your Message
-                </Label>
-                <Textarea
-                  id="playground-textarea"
-                  placeholder={placeholder}
-                  value={textValue}
-                  onChange={(e) => setTextValue(e.target.value)}
-                  error={hasError}
-                  disabled={isDisabled}
-                />
-                {hasError && (
-                  <div className="flex items-center gap-2" style={{ marginTop: 'var(--spacing-2)' }}>
-                    <AlertCircle size={14} color="var(--destructive)" />
-                    <span style={{
-                      fontFamily: 'Inter Tight, sans-serif',
-                      fontSize: '14px',
-                      color: 'var(--destructive)',
-                    }}>
-                      This field is required
-                    </span>
-                  </div>
-                )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ width: '100%', maxWidth: '500px' }}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => toast('Event has been created')}
+                >
+                  <Info size={16} />
+                  Default Toast
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => toast.success('Profile updated successfully')}
+                >
+                  <CheckCircle size={16} />
+                  Success Toast
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => toast.error('Failed to save changes')}
+                >
+                  <AlertCircle size={16} />
+                  Error Toast
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => toast.info('New updates available')}
+                >
+                  <Info size={16} />
+                  Info Toast
+                </Button>
               </div>
-            </div>
-
-            {/* Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="textarea-placeholder" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Placeholder
-                </Label>
-                <Textarea
-                  id="textarea-placeholder"
-                  placeholder="Placeholder text"
-                  value={placeholder}
-                  onChange={(e) => setPlaceholder(e.target.value)}
-                  style={{ minHeight: '60px' }}
-                />
-              </div>
-
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="has-error"
-                    checked={hasError}
-                    onChange={(e) => setHasError(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="has-error">Show Error State</Label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is-disabled"
-                    checked={isDisabled}
-                    onChange={(e) => setIsDisabled(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="is-disabled">Disabled</Label>
-                </div>
+              
+              <div className="grid grid-cols-1 gap-3" style={{ width: '100%', maxWidth: '500px' }}>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => toast('Event created', {
+                    description: 'Monday, January 3rd at 6:00pm',
+                  })}
+                >
+                  Toast with Description
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  onClick={() => toast('Event created', {
+                    action: {
+                      label: 'Undo',
+                      onClick: () => console.log('Undo'),
+                    },
+                  })}
+                >
+                  Toast with Action
+                </Button>
               </div>
             </div>
           </div>
@@ -226,7 +226,7 @@ export function TextareaDoc() {
             <CollapsibleCodeBlock
               code={generateCode()}
               language="tsx"
-              filename="Textarea.tsx"
+              filename="Toast.tsx"
               showLineNumbers
             />
           </div>
@@ -252,18 +252,39 @@ export function TextareaDoc() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <TokenCard
-              token="--input-background"
+              token="--popover"
               label="Background"
-              value="rgba(28, 28, 28, 1.00)"
-              isHighlighted={highlightedToken === '--input-background'}
-              onClick={() => handleTokenClick('--input-background')}
+              value="rgba(18, 18, 18, 1.00)"
+              isHighlighted={highlightedToken === '--popover'}
+              onClick={() => handleTokenClick('--popover')}
             />
             <TokenCard
-              token="--foreground"
+              token="--popover-foreground"
               label="Text Color"
               value="rgba(255, 255, 255, 1.00)"
-              isHighlighted={highlightedToken === '--foreground'}
-              onClick={() => handleTokenClick('--foreground')}
+              isHighlighted={highlightedToken === '--popover-foreground'}
+              onClick={() => handleTokenClick('--popover-foreground')}
+            />
+            <TokenCard
+              token="--success"
+              label="Success Color"
+              value="rgba(64, 192, 87, 1.00)"
+              isHighlighted={highlightedToken === '--success'}
+              onClick={() => handleTokenClick('--success')}
+            />
+            <TokenCard
+              token="--destructive"
+              label="Error Color"
+              value="rgba(239, 67, 67, 1.00)"
+              isHighlighted={highlightedToken === '--destructive'}
+              onClick={() => handleTokenClick('--destructive')}
+            />
+            <TokenCard
+              token="--accent"
+              label="Info Color"
+              value="rgba(255, 190, 26, 1.00)"
+              isHighlighted={highlightedToken === '--accent'}
+              onClick={() => handleTokenClick('--accent')}
             />
             <TokenCard
               token="--border"
@@ -271,27 +292,6 @@ export function TextareaDoc() {
               value="rgba(43, 43, 43, 1.00)"
               isHighlighted={highlightedToken === '--border'}
               onClick={() => handleTokenClick('--border')}
-            />
-            <TokenCard
-              token="--ring"
-              label="Focus Ring"
-              value="rgba(255, 190, 26, 1.00)"
-              isHighlighted={highlightedToken === '--ring'}
-              onClick={() => handleTokenClick('--ring')}
-            />
-            <TokenCard
-              token="--muted-foreground"
-              label="Placeholder"
-              value="rgba(161, 161, 161, 1.00)"
-              isHighlighted={highlightedToken === '--muted-foreground'}
-              onClick={() => handleTokenClick('--muted-foreground')}
-            />
-            <TokenCard
-              token="--destructive"
-              label="Error State"
-              value="rgba(239, 67, 67, 1.00)"
-              isHighlighted={highlightedToken === '--destructive'}
-              onClick={() => handleTokenClick('--destructive')}
             />
           </div>
         </CardContent>
@@ -350,7 +350,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for multi-line text input like comments or messages
+                  Use for confirmations and status updates
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -360,7 +360,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Provide clear labels and helper text
+                  Keep messages brief and actionable
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -370,7 +370,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Set appropriate height based on expected content
+                  Use appropriate toast type (success, error, info)
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -380,7 +380,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Show character count for length-limited fields
+                  Allow auto-dismiss for non-critical messages
                 </li>
               </ul>
             </div>
@@ -421,7 +421,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for single-line input (use Input instead)
+                  Show multiple toasts simultaneously
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -431,7 +431,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Make the textarea too small to display content
+                  Use for critical errors (use Dialog instead)
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -441,7 +441,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Disable resize without good reason
+                  Include lengthy or complex messages
                 </li>
                 <li style={{
                   fontFamily: 'Inter Tight, sans-serif',
@@ -451,7 +451,7 @@ export function TextareaDoc() {
                   position: 'relative',
                 }}>
                   <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use without visible labels or context
+                  Override auto-dismiss for every toast
                 </li>
               </ul>
             </div>
