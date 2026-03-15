@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap');
+
+:root {
+  /* The default font size for the application */
+  --font-size: 16px;
+  
+  /* Typography scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: 3rem;
+  
+  /* Font weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Dark mode color tokens */
+  /* The default background color for the application. */
+  --background: rgba(18, 18, 18, 1.00);
+  /* The default color for elements or text that appears on top of the background. */
+  --foreground: rgba(255, 255, 255, 1.00);
+  /* The background color for cards, modals, and other containers. */
+  --card: var(--surface-800);
+  /* The default color for text or elements that appear on top of cards, modals and other background containers. */
+  --card-foreground: rgba(255, 255, 255, 1.00);
+  /* The background color for dropdowns and tooltips. */
+  --popover: rgba(28, 28, 28, 1.00);
+  /* The default color for text or elements that appear on top of dropdowns and tooltips. */
+  --popover-foreground: rgba(255, 255, 255, 1.00);
+  /* The primary color used for buttons, links, and other interactive elements. */
+  --primary: rgba(255, 255, 255, 1.00);
+  /* The default color for text or elements that appear on top of primary colored elements. */
+  --primary-foreground: rgba(18, 18, 18, 1.00);
+  /* The secondary color used for secondary(but NOT-DESTRUCTIVE) buttons and interactive elements. */
+  --secondary: rgba(43, 43, 43, 1.00);
+  /* The default color for text or elements that appear on top of secondary colored elements. */
+  --secondary-foreground: rgba(255, 255, 255, 1.00);
+  /* The muted color used for less prominent elements, such as disabled buttons or disabled text. */
+  --muted: rgba(38, 38, 38, 1.00);
+  /* The default color for text or elements that appear on top of muted colored elements. */
+  --muted-foreground: rgba(161, 161, 161, 1.00);
+  /* The accent color used for highlights, links, and other interactive elements. */
+  --accent: rgba(255, 190, 26, 1.00);
+  /* The default color for text or elements that appear on top of accent colored elements. */
+  --accent-foreground: rgba(18, 18, 18, 1.00);
+  /* The color used for background in destructive actions, such as delete buttons or error messages. */
+  --destructive: rgba(239, 67, 67, 1.00);
+  /* The default color for text or elements that appear on top of destructive colored elements. */
+  --destructive-foreground: rgba(255, 255, 255, 1.00);
+  /* The default border color for elements such as inputs, buttons, and other containers. */
+  --border: rgba(43, 43, 43, 1.00);
+  /* The default background color for input fields once the text has been filled. Should be either transparent or match the input-background. */
+  --input: rgba(28, 28, 28, 1.00);
+  /* The default background color for input fields, text areas, and other input elements. */
+  --input-background: rgba(28, 28, 28, 1.00);
+  /* The default color for focus rings, outlines, and other focus indicators. */
+  --ring: rgba(255, 190, 26, 1.00);
+  /* Shadow for small elevations, such as cards or modals. */
+  
+  /* Success color for positive states and confirmations */
+  --success: rgba(34, 197, 94, 1.00);
+  --success-foreground: rgba(255, 255, 255, 1.00);
+  
+  /* Utility colors with opacity for overlays, focus states, and highlights */
+  --overlay-background: rgba(0, 0, 0, 0.6);
+  --accent-subtle: rgba(255, 190, 26, 0.1);
+  --destructive-subtle: rgba(239, 67, 67, 0.1);
+  --success-subtle: rgba(34, 197, 94, 0.1);
+  --focus-ring-accent: 0 0 0 3px rgba(255, 190, 26, 0.1);
+  --focus-ring-destructive: 0 0 0 3px rgba(239, 67, 67, 0.1);
+  
+  /* Social button colors for light backgrounds and dark borders */
+  --social-background: rgba(255, 255, 255, 1.00);
+  --social-foreground: rgba(5, 5, 5, 1.00);
+  --social-border: rgba(5, 5, 5, 1.00);
+  
+  /* The color for chart elements, such as a bar or line in a chart. */
+  --chart-1: rgba(255, 255, 255, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-2: rgba(68, 68, 68, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-3: rgba(161, 161, 161, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-4: rgba(255, 190, 26, 1.00);
+  /* The color for another chart element, such as a bar or line in a chart. */
+  --chart-5: rgba(239, 67, 67, 1.00);
+  /* The default border radius for small elements. */
+  --radius-0: 0px;
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+  --radius-4: 16px;
+  --radius-5: 20px;
+  --radius-6: 24px;
+  --radius-8: 32px;
+
+  --radius-sm: var(--radius-1);
+  /* The default border radius for medium elements. */
+  --radius-md: var(--radius-2);
+  /* The default border radius for large elements. */
+  --radius-lg: var(--radius-3);
+  /* The default border radius for circular elements. */
+  --radius-full: 9999px;
+  
+  /* Spacing tokens — 4-point grid system */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-9: 36px;
+  --spacing-10: 40px;
+  --spacing-11: 44px;
+  --spacing-12: 48px;
+  
+  /* Layout padding tokens for responsive design */
+  --layout-padding-desktop-left: 0px;      /* Desktop left padding (no padding, sidebar handles it) */
+  --layout-padding-desktop-right: 40px;    /* Desktop right padding (global gutter) */
+  --layout-padding-tablet: 50px;           /* Tablet left + right padding */
+  --layout-padding-mobile: 20px;           /* Mobile left + right padding */
+  --layout-content-gap-desktop: 40px;      /* Gap between sidebar and main content on desktop */
+  
+  /* 8pt Grid System */
+  --grid-columns-desktop: 12;
+  --grid-columns-tablet: 8;
+  --grid-columns-mobile: 4;
+  
+  --grid-gutter-desktop: 24px;  /* 3 * 8px */
+  --grid-gutter-tablet: 16px;   /* 2 * 8px */
+  --grid-gutter-mobile: 16px;   /* 2 * 8px */
+  
+  --grid-margin-desktop: 48px;  /* 6 * 8px */
+  --grid-margin-tablet: 32px;   /* 4 * 8px */
+  --grid-margin-mobile: 16px;   /* 2 * 8px */
+  
+  /* Section spacing — vertical gaps between major sections */
+  --section-spacing-desktop: 64px;   /* Desktop vertical spacing between major sections */
+  --section-spacing-tablet: 48px;    /* Tablet vertical spacing between major sections */
+  --section-spacing-mobile: 32px;    /* Mobile vertical spacing between major sections */
+  
+  /* Container sizing */
+  --layout-max-width: 1440px;        /* Maximum viewport width reference */
+  --sidebar-width: 280px;            /* Fixed sidebar width */
+  --header-height: 64px;             /* Fixed header height */
+  
+  /* The background color for sidebars, navigation menus, and other persistent elements. */
+  --sidebar: rgba(18, 18, 18, 1.00);
+  /* The default color for text or elements that appear on top of sidebars, navigation menus, and other persistent elements. */
+  --sidebar-foreground: rgba(255, 255, 255, 1.00);
+  /* The primary color used for buttons, links, and other interactive elements in sidebars and navigation menus. */
+  --sidebar-primary: rgba(43, 43, 43, 1.00);
+  /* The default color for text or elements that appear on top of primary colored elements in sidebars and navigation menus. */
+  --sidebar-primary-foreground: rgba(255, 255, 255, 1.00);
+  /* The accent color used for highlights, links, and other interactive elements in sidebars and navigation menus. */
+  --sidebar-accent: rgba(255, 190, 26, 1.00);
+  /* The default color for text or elements that appear on top of accent colored elements in sidebars and navigation menus. */
+  --sidebar-accent-foreground: rgba(18, 18, 18, 1.00);
+  /* The default border color for elements in sidebars and navigation menus. */
+  --sidebar-border: rgba(43, 43, 43, 1.00);
+  /* The default color for focus rings, outlines, and other focus indicators in sidebars and navigation menus. */
+  --sidebar-ring: rgba(255, 190, 26, 1.00);
+  
+  /* Motion & Animation Tokens */
+  /* Fast micro-interactions like button press */
+  --motion-duration-fast: 80ms;
+  /* Standard interactions like hover */
+  --motion-duration-normal: 120ms;
+  /* Slower transitions for emphasis */
+  --motion-duration-slow: 200ms;
+  /* Standard easing for most interactions */
+  --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Emphasized easing for important actions */
+  --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  /* Decelerated easing for entering elements */
+  --motion-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Enhanced Motion System — Coherent animation durations and easings */
+  /* Extra short for instant feedback */
+  --motion-duration-xs: 60ms;
+  /* Short for micro-interactions */
+  --motion-duration-short: 120ms;
+  /* Medium for standard transitions */
+  --motion-duration-medium: 180ms;
+  /* Long for page transitions and reveals */
+  --motion-duration-long: 320ms;
+  /* Soft easing for smooth, natural motion */
+  --motion-easing-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Fast-out for quick exits */
+  --motion-easing-fast-out: cubic-bezier(0.4, 0, 1, 1);
+  
+  /* Scroll reveal settings */
+  --reveal-translate-y: 24px;
+  --reveal-translate-y-mobile: 12px;
+  --reveal-stagger-delay: 80ms;
+  
+  --elevation-0: none;
+
+  /* Multi-tone Surface Tokens for Layered Dark UI */
+  /* Darkest surface - hero sections, primary backgrounds */
+  --surface-1000: rgba(10, 10, 10, 1.00);
+  --surface-950: rgba(14, 14, 14, 1.00);
+  /* Content section surfaces - alternating tones */
+  --surface-900: rgba(18, 18, 18, 1.00);
+  --surface-850: rgba(22, 22, 22, 1.00);
+  /* Elevated surfaces - cards, panels, feature blocks */
+  --surface-800: rgba(28, 28, 28, 1.00);
+  /* Lighter surfaces - hover states, inputs */
+  --surface-700: rgba(38, 38, 38, 1.00);
+  --surface-600: rgba(43, 43, 43, 1.00);
+  
+  /* Text color tokens for contrast on dark surfaces */
+  --text-primary: rgba(255, 255, 255, 1.00);
+  --text-secondary: rgba(161, 161, 161, 1.00);
+  --text-tertiary: rgba(115, 115, 115, 1.00);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-full: var(--radius-full);
+  --radius-0: var(--radius-0);
+  --radius-1: var(--radius-1);
+  --radius-2: var(--radius-2);
+  --radius-3: var(--radius-3);
+  --radius-4: var(--radius-4);
+  --radius-5: var(--radius-5);
+  --radius-6: var(--radius-6);
+  --radius-8: var(--radius-8);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: var(--font-size);
+  }
+}
+
+h1 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.25;
+}
+
+h2 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 36px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+}
+
+h3 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 24px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.25;
+}
+
+h4 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 20px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.5;
+}
+
+p {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
+
+span {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
+
+label {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
+
+button {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+}
+
+input {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
+
+html {
+  font-size: var(--font-size);
+}
