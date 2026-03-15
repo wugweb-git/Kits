@@ -433,6 +433,10 @@
     visibility: collapse;
   }
 
+  .invisible {
+    visibility: hidden;
+  }
+
   .visible {
     visibility: visible;
   }
@@ -3771,6 +3775,10 @@
     background-color: var(--primary);
   }
 
+  .data-\[state\=checked\]\:bg-\[var\(--primary-foreground\)\][data-state="checked"] {
+    background-color: var(--primary-foreground);
+  }
+
   .data-\[state\=checked\]\:bg-foreground[data-state="checked"] {
     background-color: var(--foreground);
   }
@@ -3890,6 +3898,10 @@
 
   .data-\[state\=unchecked\]\:bg-\[var\(--muted\)\][data-state="unchecked"] {
     background-color: var(--muted);
+  }
+
+  .data-\[state\=unchecked\]\:bg-\[var\(--muted-foreground\)\][data-state="unchecked"] {
+    background-color: var(--muted-foreground);
   }
 
   .data-\[state\=visible\]\:animate-in[data-state="visible"] {

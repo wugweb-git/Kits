@@ -5,10 +5,11 @@ import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Check, Copy, ChevronRight, X } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
+import { getSpacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function CheckboxDoc() {
   const [isChecked, setIsChecked] = React.useState(false);
@@ -26,7 +27,7 @@ export function CheckboxDoc() {
 
   const copyPageLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await copyToClipboard(window.location.href);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     } catch (err) {
@@ -56,13 +57,13 @@ export function CheckboxDoc() {
         color: 'var(--foreground)',
         paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
         paddingRight: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingTop: spacing(isMobile ? 8 : isTablet ? 10 : 12),
-        paddingBottom: spacing(isMobile ? 12 : isTablet ? 16 : 20),
+        paddingTop: getSpacing(isMobile ? 8 : isTablet ? 10 : 12),
+        paddingBottom: getSpacing(isMobile ? 12 : isTablet ? 16 : 20),
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: spacing(isMobile ? 8 : 12) }}>
-        <div className="flex items-center gap-2" style={{ marginBottom: spacing(3) }}>
+      <div style={{ marginBottom: getSpacing(isMobile ? 8 : 12) }}>
+        <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(3) }}>
           <span style={{ 
             color: 'var(--muted-foreground)',
             fontFamily: 'Inter Tight, sans-serif',
@@ -89,7 +90,7 @@ export function CheckboxDoc() {
               fontSize: isMobile ? '32px' : '48px',
               fontWeight: 'var(--font-weight-bold)',
               lineHeight: '1.2',
-              marginBottom: spacing(2),
+              marginBottom: getSpacing(2),
             }}>
               Checkbox
             </h1>
@@ -122,7 +123,7 @@ export function CheckboxDoc() {
 
       {/* Playground */}
       <Card style={{ 
-        marginBottom: spacing(8),
+        marginBottom: getSpacing(8),
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
         borderRadius: 'var(--radius-3)',
@@ -136,7 +137,7 @@ export function CheckboxDoc() {
               fontFamily: 'Inter Tight, sans-serif',
               fontSize: '20px',
               fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: spacing(6),
+              marginBottom: getSpacing(6),
             }}>
               Interactive Playground
             </h3>
@@ -146,7 +147,7 @@ export function CheckboxDoc() {
               backgroundColor: 'var(--surface-800)',
               borderRadius: 'var(--radius-3)',
               padding: isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)',
-              marginBottom: spacing(6),
+              marginBottom: getSpacing(6),
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -192,7 +193,7 @@ export function CheckboxDoc() {
 
       {/* Design Tokens */}
       <Card style={{ 
-        marginBottom: spacing(8),
+        marginBottom: getSpacing(8),
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
         borderRadius: 'var(--radius-3)',
@@ -202,7 +203,7 @@ export function CheckboxDoc() {
             fontFamily: 'Inter Tight, sans-serif',
             fontSize: '20px',
             fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: spacing(6),
+            marginBottom: getSpacing(6),
           }}>
             Design Tokens
           </h3>
@@ -258,14 +259,14 @@ export function CheckboxDoc() {
             fontFamily: 'Inter Tight, sans-serif',
             fontSize: '20px',
             fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: spacing(6),
+            marginBottom: getSpacing(6),
           }}>
             Usage Guidelines
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: spacing(4) }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
                 <div style={{
                   width: '24px',
                   height: '24px',
@@ -326,7 +327,7 @@ export function CheckboxDoc() {
             </div>
 
             <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: spacing(4) }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
                 <div style={{
                   width: '24px',
                   height: '24px',

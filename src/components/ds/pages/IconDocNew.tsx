@@ -1,29 +1,27 @@
 import React from 'react';
-import { Copy, Check, ChevronRight, Info, AlertCircle } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import { Input } from '../../wugweb/Input';
+import { Label } from '../../wugweb/Label';
+import { Badge } from '../../ui/badge';
 import { toast } from 'sonner@2.0.3';
-import { 
-  completeIconLibrary,
-  getAllCategories,
-  getIconsByCategory,
-  searchIcons,
-  SearchIcon as FigmaSearchIcon,
-  ArrowRightIcon,
-} from '../../wugweb/CompleteIconLibrary';
+import { copyToClipboard as safeCopy } from '../../../utils/clipboard';
 
 export function IconDocNew() {
-  const [selectedIcon, setSelectedIcon] = React.useState('arrow-right');
   const [selectedSize, setSelectedSize] = React.useState<16 | 20 | 24 | 32>(24);
   const [selectedColor, setSelectedColor] = React.useState('foreground');
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+  const handleCopy = async (text: string, label: string) => {
+    const success = await safeCopy(text);
+    if (success) {
       setCopiedCode(label);
       toast.success(`Copied ${label}`);
       setTimeout(() => setCopiedCode(null), 2000);
-    });
+    } else {
+      toast.error('Failed to copy');
+    }
   };
 
   const iconSizes = [16, 20, 24, 32] as const;
@@ -663,7 +661,7 @@ export function IconDocNew() {
               React
             </span>
             <button
-              onClick={() => copyToClipboard(reactCode, 'React code')}
+              onClick={() => handleCopy(reactCode, 'React code')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -724,7 +722,7 @@ export function IconDocNew() {
             {tokens.map((token) => (
               <button
                 key={token.name}
-                onClick={() => copyToClipboard(`var(${token.token})`, token.name)}
+                onClick={() => handleCopy(`var(${token.token})`, token.name)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

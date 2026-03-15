@@ -1,36 +1,33 @@
 import React from 'react';
-import { Button } from '../../ui/button';
+import { Switch } from '../../wugweb/Switch';
+import { Label } from '../../wugweb/Label';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Switch } from '../../ui/switch';
-import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink, CheckCircle2, XCircle, Sparkles } from 'lucide-react';
+import { Check, Copy, ChevronRight, X } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
+import { getSpacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { Button } from '../../wugweb/Button';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function ToggleDoc() {
-  const [selectedState, setSelectedState] = React.useState<'off' | 'on' | 'disabled'>('off');
+  const [isChecked, setIsChecked] = React.useState(false);
+  const [isDisabled, setIsDisabled] = React.useState(false);
+  const [showCode, setShowCode] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
-  const [showCode, setShowCode] = React.useState(true);
-  const [showGuidelines, setShowGuidelines] = React.useState(true);
-  const [showAccessibility, setShowAccessibility] = React.useState(true);
   
-  const { isMobile, isTablet, breakpoint } = useBreakpoint();
+  const { isMobile, isTablet } = useBreakpoint();
 
-  const handleTokenClick = (token: string, label: string, value?: string) => {
+  const handleTokenClick = (token: string) => {
     setHighlightedToken(token);
     setTimeout(() => setHighlightedToken(null), 2000);
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
@@ -41,8 +38,8 @@ export function ToggleDoc() {
 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
   <Switch 
     id="notifications"
-    checked={${selectedState === 'on'}}
-    disabled={${selectedState === 'disabled'}}
+    checked={${isChecked}}
+    disabled={${isDisabled}}
     onCheckedChange={(checked) => console.log(checked)}
     style={{
       '--primary': 'var(--foreground)',
@@ -55,7 +52,7 @@ export function ToggleDoc() {
       fontSize: 'var(--text-sm)',
       fontWeight: 'var(--font-weight-normal)',
       color: 'var(--foreground)',
-      cursor: '${selectedState === 'disabled' ? 'not-allowed' : 'pointer'}'
+      cursor: '${isDisabled ? 'not-allowed' : 'pointer'}'
     }}
   >
     Enable notifications
@@ -68,7 +65,7 @@ export function ToggleDoc() {
 // Thumb: var(--background)
 // Border Radius: var(--radius-full)`;
 
-  const sectionGap = spacing.sectionGap[breakpoint];
+  const sectionGap = getSpacing('sectionGap');
 
   return (
     <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: sectionGap, position: 'relative' }}>
@@ -142,11 +139,15 @@ export function ToggleDoc() {
                 <div style={{ flex: 1 }}>
                   <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', marginBottom: '8px', color: 'var(--foreground)' }}>State</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {(['off', 'on', 'disabled'] as const).map((state) => (
-                      <Button key={state} onClick={() => setSelectedState(state)} variant={selectedState === state ? 'default' : 'outline'} size="sm" className="smooth-transition button-press" style={{ fontSize: 'var(--text-sm)', textTransform: 'capitalize', background: selectedState === state ? 'var(--foreground)' : 'var(--background)', color: selectedState === state ? 'var(--background)' : 'var(--foreground)', borderColor: 'var(--border)' }}>
-                        {state}
-                      </Button>
-                    ))}
+                    <Button key="on" onClick={() => setIsChecked(true)} variant={isChecked ? 'default' : 'outline'} size="sm" className="smooth-transition button-press" style={{ fontSize: 'var(--text-sm)', textTransform: 'capitalize', background: isChecked ? 'var(--foreground)' : 'var(--background)', color: isChecked ? 'var(--background)' : 'var(--foreground)', borderColor: 'var(--border)' }}>
+                      On
+                    </Button>
+                    <Button key="off" onClick={() => setIsChecked(false)} variant={!isChecked ? 'default' : 'outline'} size="sm" className="smooth-transition button-press" style={{ fontSize: 'var(--text-sm)', textTransform: 'capitalize', background: !isChecked ? 'var(--foreground)' : 'var(--background)', color: !isChecked ? 'var(--background)' : 'var(--foreground)', borderColor: 'var(--border)' }}>
+                      Off
+                    </Button>
+                    <Button key="disabled" onClick={() => setIsDisabled(!isDisabled)} variant={isDisabled ? 'default' : 'outline'} size="sm" className="smooth-transition button-press" style={{ fontSize: 'var(--text-sm)', textTransform: 'capitalize', background: isDisabled ? 'var(--foreground)' : 'var(--background)', color: isDisabled ? 'var(--background)' : 'var(--foreground)', borderColor: 'var(--border)' }}>
+                      {isDisabled ? 'Enabled' : 'Disabled'}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -155,22 +156,22 @@ export function ToggleDoc() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Switch 
                     id="preview-toggle"
-                    checked={selectedState === 'on'}
-                    disabled={selectedState === 'disabled'}
-                    onCheckedChange={(checked) => setSelectedState(checked ? 'on' : 'off')}
+                    checked={isChecked}
+                    disabled={isDisabled}
+                    onCheckedChange={(checked) => setIsChecked(checked)}
                     className="data-[state=checked]:bg-[var(--foreground)] data-[state=unchecked]:bg-[var(--muted)]"
                   />
-                  <label 
+                  <Label 
                     htmlFor="preview-toggle" 
                     onClick={() => {
-                      if (selectedState !== 'disabled') {
-                        setSelectedState(selectedState === 'on' ? 'off' : 'on');
+                      if (!isDisabled) {
+                        setIsChecked(!isChecked);
                       }
                     }}
-                    style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-normal)', color: selectedState === 'disabled' ? 'var(--muted-foreground)' : 'var(--foreground)', cursor: selectedState === 'disabled' ? 'not-allowed' : 'pointer' }}
+                    style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-normal)', color: isDisabled ? 'var(--muted-foreground)' : 'var(--foreground)', cursor: isDisabled ? 'not-allowed' : 'pointer' }}
                   >
                     Enable notifications
-                  </label>
+                  </Label>
                 </div>
               </div>
             </div>
@@ -185,10 +186,10 @@ export function ToggleDoc() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '16px', width: '100%' }}>
-          <TokenCard label="Background (On)" token="--foreground" value="#191919" type="color" onClick={() => handleTokenClick('--foreground', 'Background (On)', '#191919')} isHighlighted={highlightedToken === '--foreground'} />
-          <TokenCard label="Background (Off)" token="--muted" value="#E1E1E1" type="color" onClick={() => handleTokenClick('--muted', 'Background (Off)', '#E1E1E1')} isHighlighted={highlightedToken === '--muted'} />
-          <TokenCard label="Thumb Color" token="--background" value="#FFFFFF" type="color" onClick={() => handleTokenClick('--background', 'Thumb Color', '#FFFFFF')} isHighlighted={highlightedToken === '--background'} />
-          <TokenCard label="Border Radius" token="--radius-full" value="50%" type="radius" onClick={() => handleTokenClick('--radius-full', 'Border Radius', '50%')} isHighlighted={highlightedToken === '--radius-full'} />
+          <TokenCard label="Background (On)" token="--foreground" value="#191919" type="color" onClick={() => handleTokenClick('--foreground')} isHighlighted={highlightedToken === '--foreground'} />
+          <TokenCard label="Background (Off)" token="--muted" value="#E1E1E1" type="color" onClick={() => handleTokenClick('--muted')} isHighlighted={highlightedToken === '--muted'} />
+          <TokenCard label="Thumb Color" token="--background" value="#FFFFFF" type="color" onClick={() => handleTokenClick('--background')} isHighlighted={highlightedToken === '--background'} />
+          <TokenCard label="Border Radius" token="--radius-full" value="50%" type="radius" onClick={() => handleTokenClick('--radius-full')} isHighlighted={highlightedToken === '--radius-full'} />
         </div>
       </section>
 
@@ -212,57 +213,6 @@ export function ToggleDoc() {
               <CollapsibleCodeBlock code={jsxCode} language="jsx" />
             </TabsContent>
           </Tabs>
-        </section>
-      )}
-
-      {/* Usage Guidelines */}
-      {showGuidelines && (
-        <section className="animate-fade-in-up" style={{ animationDelay: '400ms', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)' }}>Usage Guidelines</h2>
-            <Button onClick={() => setShowGuidelines(!showGuidelines)} variant="ghost" size="sm" style={{ gap: '8px' }}>
-              <X size={16} />
-              Hide
-            </Button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px', width: '100%' }}>
-            <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-              <CardContent style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-full)', background: 'rgba(0, 158, 105, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CheckCircle2 size={18} style={{ color: '#009E69' }} />
-                  </div>
-                  <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Do</h3>
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>
-                  <li>Use for immediate on/off actions</li>
-                  <li>Use for settings and preferences</li>
-                  <li>Provide clear labels indicating the action</li>
-                  <li>Show immediate visual feedback</li>
-                  <li>Use for binary choices with instant effect</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-              <CardContent style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-full)', background: 'rgba(239, 67, 67, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <XCircle size={18} style={{ color: 'var(--destructive)' }} />
-                  </div>
-                  <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Don't</h3>
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>
-                  <li>Use for actions requiring confirmation</li>
-                  <li>Use for multiple selections (use checkbox)</li>
-                  <li>Use for mutually exclusive options (use radio)</li>
-                  <li>Make the action unclear or ambiguous</li>
-                  <li>Disable without clear explanation</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
         </section>
       )}
 

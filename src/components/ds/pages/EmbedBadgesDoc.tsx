@@ -1,597 +1,501 @@
 import React from 'react';
-import { Card, CardContent } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Check, Copy, ChevronRight, Zap, Code2, Heart } from 'lucide-react';
-import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
-import { Button } from '../../wugweb/Button';
+import { EmbedBadge, BadgeVariant, BadgeSize } from '../../wugweb/EmbedBadge';
+import { Copy, Check } from 'lucide-react';
 
 export function EmbedBadgesDoc() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
-  const [copiedLink, setCopiedLink] = React.useState(false);
-  
-  const { isMobile, isTablet } = useBreakpoint();
 
-  const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    }
+  const handleCopy = (code: string, id: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(id);
+    setTimeout(() => setCopiedCode(null), 2000);
   };
 
-  const copyToClipboard = async (code: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopiedCode(id);
-      setTimeout(() => setCopiedCode(null), 2000);
-    } catch (err) {
-      setCopiedCode(id);
-      setTimeout(() => setCopiedCode(null), 2000);
-    }
+  const variants: BadgeVariant[] = ['designed', 'empowered'];
+  const sizes: BadgeSize[] = ['s', 'm', 'l'];
+
+  const generateHTMLCode = (variant: BadgeVariant, size: BadgeSize) => {
+    const utmCampaign = variant === 'designed' ? 'designed-by' : 'empowered-by';
+    const badgeText = variant === 'designed' ? 'Designed by' : 'Empowered by';
+    
+    return `<!-- ${badgeText} Wugweb Badge -->
+<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=${utmCampaign}" target="_blank" rel="noopener noreferrer">
+  <img src="https://wugweb.com/badges/${variant}-${size}.svg" alt="${badgeText} Wugweb" />
+</a>`;
   };
 
-  // Badge variants with GA tracking
-  const badges = [
-    {
-      id: 'designed-by-dark',
-      name: 'Designed by Wugweb',
-      theme: 'Dark',
-      size: 'Large',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=designed-by" target="_blank" rel="noopener noreferrer">
-  <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="180" height="40" rx="8" fill="#121212"/>
-    <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-    <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-    <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="30" y="16" font-family="Inter Tight, sans-serif" font-size="10" font-weight="500" fill="#A1A1A1">DESIGNED BY</text>
-    <text x="30" y="28" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="180" height="40" rx="8" fill="#121212"/>
-          <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-          <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-          <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-          <text x="30" y="16" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="500" fill="#A1A1A1">DESIGNED BY</text>
-          <text x="30" y="28" fontFamily="Inter Tight, sans-serif" fontSize="13" fontWeight="600" fill="#FFFFFF">Wugweb</text>
-        </svg>
-      ),
-    },
-    {
-      id: 'powered-by-dark',
-      name: 'Powered by Wugweb',
-      theme: 'Dark',
-      size: 'Large',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=powered-by" target="_blank" rel="noopener noreferrer">
-  <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="180" height="40" rx="8" fill="#121212"/>
-    <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-    <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-    <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="30" y="16" font-family="Inter Tight, sans-serif" font-size="10" font-weight="500" fill="#A1A1A1">POWERED BY</text>
-    <text x="30" y="28" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="180" height="40" rx="8" fill="#121212"/>
-          <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-          <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-          <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-          <text x="30" y="16" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="500" fill="#A1A1A1">POWERED BY</text>
-          <text x="30" y="28" fontFamily="Inter Tight, sans-serif" fontSize="13" fontWeight="600" fill="#FFFFFF">Wugweb</text>
-        </svg>
-      ),
-    },
-    {
-      id: 'built-with-dark',
-      name: 'Built with Wugweb',
-      theme: 'Dark',
-      size: 'Large',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=built-with" target="_blank" rel="noopener noreferrer">
-  <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="180" height="40" rx="8" fill="#121212"/>
-    <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-    <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-    <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="30" y="16" font-family="Inter Tight, sans-serif" font-size="10" font-weight="500" fill="#A1A1A1">BUILT WITH</text>
-    <text x="30" y="28" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="180" height="40" rx="8" fill="#121212"/>
-          <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-          <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-          <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-          <text x="30" y="16" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="500" fill="#A1A1A1">BUILT WITH</text>
-          <text x="30" y="28" fontFamily="Inter Tight, sans-serif" fontSize="13" fontWeight="600" fill="#FFFFFF">Wugweb</text>
-        </svg>
-      ),
-    },
-    {
-      id: 'made-with-light',
-      name: 'Made with Wugweb',
-      theme: 'Light',
-      size: 'Large',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=made-with" target="_blank" rel="noopener noreferrer">
-  <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="180" height="40" rx="8" fill="#FFFFFF"/>
-    <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#E5E5E5"/>
-    <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-    <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="30" y="16" font-family="Inter Tight, sans-serif" font-size="10" font-weight="500" fill="#737373">MADE WITH</text>
-    <text x="30" y="28" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#0A0A0A">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="180" height="40" rx="8" fill="#FFFFFF"/>
-          <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#E5E5E5"/>
-          <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-          <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-          <text x="30" y="16" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="500" fill="#737373">MADE WITH</text>
-          <text x="30" y="28" fontFamily="Inter Tight, sans-serif" fontSize="13" fontWeight="600" fill="#0A0A0A">Wugweb</text>
-        </svg>
-      ),
-    },
-    {
-      id: 'designed-by-small',
-      name: 'Designed by Wugweb',
-      theme: 'Dark',
-      size: 'Small',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=designed-by-sm" target="_blank" rel="noopener noreferrer">
-  <svg width="140" height="28" viewBox="0 0 140 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="140" height="28" rx="6" fill="#121212"/>
-    <rect x="0.5" y="0.5" width="139" height="27" rx="5.5" stroke="#2B2B2B"/>
-    <path d="M8 14L10 10L12 14L10 18L8 14Z" fill="#FFBE1A"/>
-    <path d="M12 14L14 10L16 14L14 18L12 14Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="22" y="12" font-family="Inter Tight, sans-serif" font-size="8" font-weight="500" fill="#A1A1A1">DESIGNED BY</text>
-    <text x="22" y="20" font-family="Inter Tight, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="140" height="28" viewBox="0 0 140 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="140" height="28" rx="6" fill="#121212"/>
-          <rect x="0.5" y="0.5" width="139" height="27" rx="5.5" stroke="#2B2B2B"/>
-          <path d="M8 14L10 10L12 14L10 18L8 14Z" fill="#FFBE1A"/>
-          <path d="M12 14L14 10L16 14L14 18L12 14Z" fill="#FFBE1A" opacity="0.6"/>
-          <text x="22" y="12" fontFamily="Inter Tight, sans-serif" fontSize="8" fontWeight="500" fill="#A1A1A1">DESIGNED BY</text>
-          <text x="22" y="20" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="600" fill="#FFFFFF">Wugweb</text>
-        </svg>
-      ),
-    },
-    {
-      id: 'minimal-dark',
-      name: 'Wugweb',
-      theme: 'Dark',
-      size: 'Minimal',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=minimal" target="_blank" rel="noopener noreferrer">
-  <svg width="100" height="28" viewBox="0 0 100 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100" height="28" rx="6" fill="#121212"/>
-    <rect x="0.5" y="0.5" width="99" height="27" rx="5.5" stroke="#2B2B2B"/>
-    <path d="M8 14L10 10L12 14L10 18L8 14Z" fill="#FFBE1A"/>
-    <path d="M12 14L14 10L16 14L14 18L12 14Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="22" y="17" font-family="Inter Tight, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="100" height="28" viewBox="0 0 100 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100" height="28" rx="6" fill="#121212"/>
-          <rect x="0.5" y="0.5" width="99" height="27" rx="5.5" stroke="#2B2B2B"/>
-          <path d="M8 14L10 10L12 14L10 18L8 14Z" fill="#FFBE1A"/>
-          <path d="M12 14L14 10L16 14L14 18L12 14Z" fill="#FFBE1A" opacity="0.6"/>
-          <text x="22" y="17" fontFamily="Inter Tight, sans-serif" fontSize="11" fontWeight="600" fill="#FFFFFF">Wugweb</text>
-        </svg>
-      ),
-    },
-    {
-      id: 'accent-badge',
-      name: 'Designed by Wugweb',
-      theme: 'Accent',
-      size: 'Large',
-      html: `<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=accent" target="_blank" rel="noopener noreferrer">
-  <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="180" height="40" rx="8" fill="#FFBE1A"/>
-    <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#0A0A0A"/>
-    <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#0A0A0A" opacity="0.6"/>
-    <text x="30" y="16" font-family="Inter Tight, sans-serif" font-size="10" font-weight="500" fill="#0A0A0A" opacity="0.7">DESIGNED BY</text>
-    <text x="30" y="28" font-family="Inter Tight, sans-serif" font-size="13" font-weight="700" fill="#0A0A0A">Wugweb</text>
-  </svg>
-</a>`,
-      preview: (
-        <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="180" height="40" rx="8" fill="#FFBE1A"/>
-          <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#0A0A0A"/>
-          <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#0A0A0A" opacity="0.6"/>
-          <text x="30" y="16" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="500" fill="#0A0A0A" opacity="0.7">DESIGNED BY</text>
-          <text x="30" y="28" fontFamily="Inter Tight, sans-serif" fontSize="13" fontWeight="700" fill="#0A0A0A">Wugweb</text>
-        </svg>
-      ),
-    },
-  ];
+  const generateReactCode = (variant: BadgeVariant, size: BadgeSize) => {
+    const utmCampaign = variant === 'designed' ? 'designed-by' : 'empowered-by';
+    
+    return `import { EmbedBadge } from './components/wugweb/EmbedBadge';
+
+<EmbedBadge
+  variant="${variant}"
+  size="${size}"
+  href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=${utmCampaign}"
+  target="_blank"
+/>`;
+  };
 
   return (
-    <div 
-      className="min-h-screen w-full"
-      style={{ 
-        backgroundColor: 'var(--background)',
-        color: 'var(--foreground)',
-        paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingRight: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingTop: spacing(isMobile ? 8 : isTablet ? 10 : 12),
-        paddingBottom: spacing(isMobile ? 12 : isTablet ? 16 : 20),
-      }}
-    >
+    <div style={{ 
+      maxWidth: '1400px', 
+      margin: '0 auto',
+      fontFamily: 'Inter Tight, sans-serif',
+    }}>
       {/* Header */}
-      <div style={{ marginBottom: spacing(isMobile ? 8 : 12) }}>
-        <div className="flex items-center gap-2" style={{ marginBottom: spacing(3) }}>
-          <span style={{ 
-            color: 'var(--muted-foreground)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
-            fontWeight: 'var(--font-weight-medium)',
-          }}>
-            Resources
-          </span>
-          <ChevronRight size={16} color="var(--muted-foreground)" />
-          <span style={{ 
-            color: 'var(--foreground)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
-            fontWeight: 'var(--font-weight-medium)',
-          }}>
-            Embed Badges
-          </span>
-        </div>
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: isMobile ? '32px' : '48px',
-              fontWeight: 'var(--font-weight-bold)',
-              lineHeight: '1.2',
-              marginBottom: spacing(2),
-            }}>
-              Embed Badges
-            </h1>
-            <p style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '18px',
-              fontWeight: 'var(--font-weight-regular)',
-              color: 'var(--muted-foreground)',
-              lineHeight: '1.6',
-            }}>
-              Show your support for Wugweb with these embeddable badges. Includes Google Analytics tracking for backlink monitoring.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" style={{
-              borderColor: 'var(--accent)',
-              color: 'var(--accent)',
-              backgroundColor: 'var(--accent-subtle)',
-            }}>
-              <Heart size={14} />
-              Attribution
-            </Badge>
-            <Button variant="outline" size="sm" onClick={copyPageLink}>
-              {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-              <span>{copiedLink ? 'Copied!' : 'Share'}</span>
-            </Button>
-          </div>
-        </div>
+      <div style={{ marginBottom: 'var(--spacing-6)' }}>
+        <h1 style={{ 
+          fontSize: 'var(--text-3xl)',
+          fontWeight: 'var(--font-weight-bold)',
+          color: 'var(--foreground)',
+          marginBottom: 'var(--spacing-2)',
+          margin: 0,
+        }}>
+          Embed Badges
+        </h1>
+        <p style={{ 
+          fontSize: 'var(--text-lg)',
+          color: 'var(--muted-foreground)',
+          margin: 0,
+          marginTop: 'var(--spacing-2)',
+        }}>
+          Show your support by embedding a Wugweb badge on your website or README with UTM tracking.
+        </p>
       </div>
 
-      {/* Info Card */}
-      <Card style={{ 
-        marginBottom: spacing(8),
-        backgroundColor: 'var(--accent-subtle)',
-        borderColor: 'var(--accent)',
+      {/* Introduction */}
+      <div style={{ 
+        backgroundColor: 'var(--card)',
+        border: '1px solid var(--border)',
         borderRadius: 'var(--radius-3)',
+        padding: 'var(--spacing-6)',
+        marginBottom: 'var(--spacing-6)',
       }}>
-        <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-          <div className="flex items-start gap-4">
+        <h2 style={{ 
+          fontSize: 'var(--text-xl)',
+          fontWeight: 'var(--font-weight-semibold)',
+          color: 'var(--foreground)',
+          marginBottom: 'var(--spacing-4)',
+          margin: 0,
+        }}>
+          About These Badges
+        </h2>
+        
+        <div style={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--spacing-3)',
+        }}>
+          <p style={{ 
+            fontSize: 'var(--text-base)',
+            color: 'var(--foreground)',
+            margin: 0,
+            lineHeight: 1.6,
+          }}>
+            These badges are designed to help you showcase your use of Wugweb design system. 
+            They include UTM tracking parameters to help us understand how our community is using and sharing our work.
+          </p>
+
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 'var(--spacing-4)',
+            marginTop: 'var(--spacing-2)',
+          }}>
             <div style={{
-              width: '40px',
-              height: '40px',
+              padding: 'var(--spacing-4)',
+              backgroundColor: 'var(--accent-subtle)',
               borderRadius: 'var(--radius-2)',
-              backgroundColor: 'var(--accent)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
+              border: '1px solid var(--accent)',
             }}>
-              <Zap size={20} color="var(--accent-foreground)" />
-            </div>
-            <div>
               <h3 style={{
-                fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '16px',
+                fontSize: 'var(--text-sm)',
                 fontWeight: 'var(--font-weight-semibold)',
-                marginBottom: spacing(2),
-                color: 'var(--foreground)',
+                color: 'var(--accent)',
+                marginBottom: 'var(--spacing-2)',
+                margin: 0,
               }}>
-                Tracking Enabled
+                "Designed by" Variant
               </h3>
               <p style={{
-                fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
-                color: 'var(--muted-foreground)',
-                lineHeight: '1.6',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--foreground)',
+                margin: 0,
+                lineHeight: 1.5,
               }}>
-                All badges include UTM parameters for Google Analytics tracking. Monitor backlinks with <code style={{
-                  backgroundColor: 'var(--background)',
-                  padding: '2px 6px',
-                  borderRadius: 'var(--radius-1)',
-                  fontFamily: 'monospace',
-                  fontSize: '13px',
-                }}>utm_source=badge</code>, <code style={{
-                  backgroundColor: 'var(--background)',
-                  padding: '2px 6px',
-                  borderRadius: 'var(--radius-1)',
-                  fontFamily: 'monospace',
-                  fontSize: '13px',
-                }}>utm_medium=referral</code>, and campaign-specific identifiers.
+                Shows the W icon. Perfect for footer attribution or project credits.
+              </p>
+            </div>
+
+            <div style={{
+              padding: 'var(--spacing-4)',
+              backgroundColor: 'var(--accent-subtle)',
+              borderRadius: 'var(--radius-2)',
+              border: '1px solid var(--accent)',
+            }}>
+              <h3 style={{
+                fontSize: 'var(--text-sm)',
+                fontWeight: 'var(--font-weight-semibold)',
+                color: 'var(--accent)',
+                marginBottom: 'var(--spacing-2)',
+                margin: 0,
+              }}>
+                "Empowered by" Variant
+              </h3>
+              <p style={{
+                fontSize: 'var(--text-sm)',
+                color: 'var(--foreground)',
+                margin: 0,
+                lineHeight: 1.5,
+              }}>
+                Shows the full logo. Ideal for landing pages and documentation.
               </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Badges Grid */}
-      <div className="grid grid-cols-1 gap-6" style={{ marginBottom: spacing(8) }}>
-        {badges.map((badge) => (
-          <Card key={badge.id} style={{ 
+      {/* Badge Variants Grid */}
+      {variants.map((variant) => (
+        <div 
+          key={variant}
+          style={{ 
             backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
+            border: '1px solid var(--border)',
             borderRadius: 'var(--radius-3)',
+            padding: 'var(--spacing-6)',
+            marginBottom: 'var(--spacing-6)',
+          }}
+        >
+          <h2 style={{ 
+            fontSize: 'var(--text-xl)',
+            fontWeight: 'var(--font-weight-semibold)',
+            color: 'var(--foreground)',
+            marginBottom: 'var(--spacing-4)',
+            margin: 0,
+            textTransform: 'capitalize',
           }}>
-            <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-              <div className="flex flex-col lg:flex-row gap-6">
-                {/* Preview */}
-                <div style={{ 
-                  flex: '0 0 auto',
-                  backgroundColor: badge.theme === 'Light' ? 'var(--background)' : 'var(--surface-800)',
-                  borderRadius: 'var(--radius-3)',
-                  padding: 'var(--spacing-8)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '1px solid var(--border)',
-                }}>
-                  {badge.preview}
-                </div>
-
-                {/* Details */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
-                  <div>
-                    <div className="flex items-center gap-2" style={{ marginBottom: spacing(2) }}>
-                      <h3 style={{
-                        fontFamily: 'Inter Tight, sans-serif',
-                        fontSize: '18px',
-                        fontWeight: 'var(--font-weight-semibold)',
-                        color: 'var(--foreground)',
-                      }}>
-                        {badge.name}
-                      </h3>
-                      <Badge variant="outline" style={{
-                        borderColor: 'var(--border)',
-                        color: 'var(--muted-foreground)',
-                        fontSize: '11px',
-                      }}>
-                        {badge.theme}
-                      </Badge>
-                      <Badge variant="outline" style={{
-                        borderColor: 'var(--border)',
-                        color: 'var(--muted-foreground)',
-                        fontSize: '11px',
-                      }}>
-                        {badge.size}
-                      </Badge>
-                    </div>
-                    <p style={{
-                      fontFamily: 'Inter Tight, sans-serif',
-                      fontSize: '14px',
-                      color: 'var(--muted-foreground)',
-                      lineHeight: '1.6',
+            {variant === 'designed' ? '"Designed by" Badge' : '"Empowered by" Badge'}
+          </h2>
+          
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: 'var(--spacing-4)',
+          }}>
+            {sizes.map((size) => {
+              const htmlCode = generateHTMLCode(variant, size);
+              const reactCode = generateReactCode(variant, size);
+              const htmlId = `${variant}-${size}-html`;
+              const reactId = `${variant}-${size}-react`;
+              
+              return (
+                <div
+                  key={`${variant}-${size}`}
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-2)',
+                    padding: 'var(--spacing-4)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--spacing-4)',
+                  }}
+                >
+                  {/* Size Label */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+                    <span style={{
+                      fontSize: 'var(--text-sm)',
+                      fontWeight: 'var(--font-weight-semibold)',
+                      color: 'var(--foreground)',
                     }}>
-                      Copy and paste this code into your website's HTML.
-                    </p>
+                      {size.toUpperCase()} Size
+                    </span>
+                    <span style={{
+                      fontSize: 'var(--text-xs)',
+                      padding: '2px 6px',
+                      backgroundColor: 'var(--accent-subtle)',
+                      color: 'var(--accent)',
+                      borderRadius: 'var(--radius-1)',
+                      fontWeight: 'var(--font-weight-medium)',
+                    }}>
+                      {size === 's' ? 'Small' : size === 'm' ? 'Medium' : 'Large'}
+                    </span>
                   </div>
 
-                  {/* Code Block */}
+                  {/* Preview */}
                   <div style={{
-                    backgroundColor: 'var(--surface-800)',
+                    backgroundColor: '#0A0A0A',
                     borderRadius: 'var(--radius-2)',
-                    border: '1px solid var(--border)',
-                    overflow: 'hidden',
+                    padding: 'var(--spacing-6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '100px',
                   }}>
-                    <div className="flex items-center justify-between" style={{
-                      padding: 'var(--spacing-3) var(--spacing-4)',
-                      borderBottom: '1px solid var(--border)',
-                      backgroundColor: 'var(--background)',
+                    <EmbedBadge
+                      variant={variant}
+                      size={size}
+                      href="https://wugweb.com"
+                      target="_blank"
+                    />
+                  </div>
+
+                  {/* HTML Code */}
+                  <div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 'var(--spacing-2)',
                     }}>
-                      <div className="flex items-center gap-2">
-                        <Code2 size={14} color="var(--muted-foreground)" />
-                        <span style={{
-                          fontFamily: 'Inter Tight, sans-serif',
-                          fontSize: '12px',
-                          fontWeight: 'var(--font-weight-medium)',
-                          color: 'var(--muted-foreground)',
-                        }}>
-                          HTML
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyToClipboard(badge.html, badge.id)}
+                      <span style={{
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: 'var(--font-weight-semibold)',
+                        color: 'var(--muted-foreground)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}>
+                        HTML
+                      </span>
+                      <button
+                        onClick={() => handleCopy(htmlCode, htmlId)}
                         style={{
                           padding: '4px 8px',
-                          height: 'auto',
+                          backgroundColor: copiedCode === htmlId ? 'var(--success)' : 'var(--accent)',
+                          color: copiedCode === htmlId ? 'var(--success-foreground)' : 'var(--accent-foreground)',
+                          border: 'none',
+                          borderRadius: 'var(--radius-1)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: 'var(--text-xs)',
+                          fontFamily: 'Inter Tight, sans-serif',
+                          fontWeight: 'var(--font-weight-medium)',
+                          transition: 'all 0.2s ease',
                         }}
                       >
-                        {copiedCode === badge.id ? (
+                        {copiedCode === htmlId ? (
                           <>
-                            <Check size={14} />
-                            <span style={{ fontSize: '12px' }}>Copied!</span>
+                            <Check size={12} />
+                            Copied
                           </>
                         ) : (
                           <>
-                            <Copy size={14} />
-                            <span style={{ fontSize: '12px' }}>Copy</span>
+                            <Copy size={12} />
+                            Copy
                           </>
                         )}
-                      </Button>
+                      </button>
                     </div>
-                    <div style={{ padding: 'var(--spacing-4)', overflowX: 'auto' }}>
-                      <pre style={{
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        color: 'var(--foreground)',
-                        margin: 0,
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-all',
+                    <pre style={{
+                      fontSize: 'var(--text-xs)',
+                      padding: 'var(--spacing-3)',
+                      backgroundColor: 'var(--card)',
+                      borderRadius: 'var(--radius-2)',
+                      overflow: 'auto',
+                      margin: 0,
+                      fontFamily: 'monospace',
+                      color: 'var(--foreground)',
+                      border: '1px solid var(--border)',
+                      lineHeight: 1.5,
+                    }}>
+                      {htmlCode}
+                    </pre>
+                  </div>
+
+                  {/* React Code */}
+                  <div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: 'var(--spacing-2)',
+                    }}>
+                      <span style={{
+                        fontSize: 'var(--text-xs)',
+                        fontWeight: 'var(--font-weight-semibold)',
+                        color: 'var(--muted-foreground)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
                       }}>
-                        {badge.html}
-                      </pre>
+                        REACT
+                      </span>
+                      <button
+                        onClick={() => handleCopy(reactCode, reactId)}
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: copiedCode === reactId ? 'var(--success)' : 'var(--accent)',
+                          color: copiedCode === reactId ? 'var(--success-foreground)' : 'var(--accent-foreground)',
+                          border: 'none',
+                          borderRadius: 'var(--radius-1)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          fontSize: 'var(--text-xs)',
+                          fontFamily: 'Inter Tight, sans-serif',
+                          fontWeight: 'var(--font-weight-medium)',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {copiedCode === reactId ? (
+                          <>
+                            <Check size={12} />
+                            Copied
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={12} />
+                            Copy
+                          </>
+                        )}
+                      </button>
                     </div>
+                    <pre style={{
+                      fontSize: 'var(--text-xs)',
+                      padding: 'var(--spacing-3)',
+                      backgroundColor: 'var(--card)',
+                      borderRadius: 'var(--radius-2)',
+                      overflow: 'auto',
+                      margin: 0,
+                      fontFamily: 'monospace',
+                      color: 'var(--foreground)',
+                      border: '1px solid var(--border)',
+                      lineHeight: 1.5,
+                    }}>
+                      {reactCode}
+                    </pre>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       {/* Usage Guidelines */}
-      <Card style={{ 
+      <div style={{ 
         backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
+        border: '1px solid var(--border)',
         borderRadius: 'var(--radius-3)',
+        padding: 'var(--spacing-6)',
       }}>
-        <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-          <h3 style={{
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: spacing(6),
-          }}>
-            Tracking Information
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 style={{
-                fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
-                fontWeight: 'var(--font-weight-semibold)',
-                marginBottom: spacing(3),
-                color: 'var(--foreground)',
-              }}>
-                Google Analytics Parameters
-              </h4>
-              <div className="flex flex-col gap-2">
-                <div style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '13px',
-                  color: 'var(--muted-foreground)',
-                }}>
-                  <code style={{
-                    backgroundColor: 'var(--surface-800)',
-                    padding: '2px 6px',
-                    borderRadius: 'var(--radius-1)',
-                    fontFamily: 'monospace',
-                    color: 'var(--accent)',
-                  }}>utm_source</code> = badge
-                </div>
-                <div style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '13px',
-                  color: 'var(--muted-foreground)',
-                }}>
-                  <code style={{
-                    backgroundColor: 'var(--surface-800)',
-                    padding: '2px 6px',
-                    borderRadius: 'var(--radius-1)',
-                    fontFamily: 'monospace',
-                    color: 'var(--accent)',
-                  }}>utm_medium</code> = referral
-                </div>
-                <div style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '13px',
-                  color: 'var(--muted-foreground)',
-                }}>
-                  <code style={{
-                    backgroundColor: 'var(--surface-800)',
-                    padding: '2px 6px',
-                    borderRadius: 'var(--radius-1)',
-                    fontFamily: 'monospace',
-                    color: 'var(--accent)',
-                  }}>utm_campaign</code> = designed-by / powered-by / built-with / etc.
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 style={{
-                fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
-                fontWeight: 'var(--font-weight-semibold)',
-                marginBottom: spacing(3),
-                color: 'var(--foreground)',
-              }}>
-                How to Track in GA4
-              </h4>
-              <ol style={{
-                fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '13px',
-                color: 'var(--muted-foreground)',
-                paddingLeft: 'var(--spacing-5)',
-                margin: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-2)',
-              }}>
-                <li>Navigate to Reports → Acquisition → Traffic acquisition</li>
-                <li>Add filter: <code style={{ backgroundColor: 'var(--surface-800)', padding: '2px 4px', borderRadius: 'var(--radius-1)', fontFamily: 'monospace', fontSize: '12px' }}>Session source/medium = badge / referral</code></li>
-                <li>View campaign breakdown for badge performance</li>
-              </ol>
-            </div>
-          </div>
-
-          <div style={{ 
-            marginTop: spacing(6),
-            padding: 'var(--spacing-4)',
-            backgroundColor: 'var(--surface-800)',
-            borderRadius: 'var(--radius-2)',
-            border: '1px solid var(--border)',
-          }}>
-            <p style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '13px',
+        <h2 style={{ 
+          fontSize: 'var(--text-xl)',
+          fontWeight: 'var(--font-weight-semibold)',
+          color: 'var(--foreground)',
+          marginBottom: 'var(--spacing-4)',
+          margin: 0,
+        }}>
+          Usage Guidelines
+        </h2>
+        
+        <div style={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--spacing-3)',
+        }}>
+          <div>
+            <h3 style={{
+              fontSize: 'var(--text-base)',
+              fontWeight: 'var(--font-weight-semibold)',
+              color: 'var(--foreground)',
+              marginBottom: 'var(--spacing-2)',
+              margin: 0,
+            }}>
+              Where to Place
+            </h3>
+            <ul style={{
+              fontSize: 'var(--text-sm)',
               color: 'var(--muted-foreground)',
               margin: 0,
-              lineHeight: '1.6',
+              paddingLeft: 'var(--spacing-4)',
+              lineHeight: 1.6,
             }}>
-              <strong style={{ color: 'var(--foreground)' }}>Note:</strong> All badges link to <code style={{
-                backgroundColor: 'var(--background)',
-                padding: '2px 6px',
+              <li>Footer sections of websites and web applications</li>
+              <li>README files in GitHub repositories</li>
+              <li>Documentation pages</li>
+              <li>About or Credits pages</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style={{
+              fontSize: 'var(--text-base)',
+              fontWeight: 'var(--font-weight-semibold)',
+              color: 'var(--foreground)',
+              marginBottom: 'var(--spacing-2)',
+              margin: 0,
+            }}>
+              UTM Tracking
+            </h3>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--muted-foreground)',
+              margin: 0,
+              lineHeight: 1.6,
+            }}>
+              All badges include UTM parameters to help track referrals:
+            </p>
+            <ul style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--muted-foreground)',
+              margin: 0,
+              marginTop: 'var(--spacing-2)',
+              paddingLeft: 'var(--spacing-4)',
+              lineHeight: 1.6,
+            }}>
+              <li><code style={{ 
+                backgroundColor: 'var(--muted)', 
+                padding: '2px 4px', 
                 borderRadius: 'var(--radius-1)',
                 fontFamily: 'monospace',
-              }}>https://wugweb.com</code> with tracking parameters. Update the domain to match your website if needed.
+              }}>utm_source=badge</code></li>
+              <li><code style={{ 
+                backgroundColor: 'var(--muted)', 
+                padding: '2px 4px', 
+                borderRadius: 'var(--radius-1)',
+                fontFamily: 'monospace',
+              }}>utm_medium=referral</code></li>
+              <li><code style={{ 
+                backgroundColor: 'var(--muted)', 
+                padding: '2px 4px', 
+                borderRadius: 'var(--radius-1)',
+                fontFamily: 'monospace',
+              }}>utm_campaign=designed-by</code> or <code style={{ 
+                backgroundColor: 'var(--muted)', 
+                padding: '2px 4px', 
+                borderRadius: 'var(--radius-1)',
+                fontFamily: 'monospace',
+              }}>empowered-by</code></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 style={{
+              fontSize: 'var(--text-base)',
+              fontWeight: 'var(--font-weight-semibold)',
+              color: 'var(--foreground)',
+              marginBottom: 'var(--spacing-2)',
+              margin: 0,
+            }}>
+              License
+            </h3>
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--muted-foreground)',
+              margin: 0,
+              lineHeight: 1.6,
+            }}>
+              These badges are free to use on any project that utilizes the Wugweb design system. 
+              Please keep the link to wugweb.com intact to help us grow our community.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

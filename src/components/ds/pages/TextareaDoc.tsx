@@ -5,17 +5,17 @@ import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Check, Copy, ChevronRight, X, AlertCircle } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
+import { getSpacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function TextareaDoc() {
-  const [textValue, setTextValue] = React.useState('');
-  const [placeholder, setPlaceholder] = React.useState('Enter your message...');
-  const [hasError, setHasError] = React.useState(false);
+  const [value, setValue] = React.useState('');
   const [isDisabled, setIsDisabled] = React.useState(false);
-  
+  const [isError, setIsError] = React.useState(false);
+  const [showCode, setShowCode] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
   
@@ -27,11 +27,8 @@ export function TextareaDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
@@ -39,9 +36,8 @@ export function TextareaDoc() {
 
   const generateCode = () => {
     let code = `<Textarea\n`;
-    if (placeholder !== 'Enter your message...') code += `  placeholder="${placeholder}"\n`;
-    if (hasError) code += `  error={true}\n`;
     if (isDisabled) code += `  disabled={true}\n`;
+    if (isError) code += `  error={true}\n`;
     code += `  value={value}\n`;
     code += `  onChange={(e) => setValue(e.target.value)}\n`;
     code += `/>`;
@@ -56,13 +52,13 @@ export function TextareaDoc() {
         color: 'var(--foreground)',
         paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
         paddingRight: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingTop: spacing(isMobile ? 8 : isTablet ? 10 : 12),
-        paddingBottom: spacing(isMobile ? 12 : isTablet ? 16 : 20),
+        paddingTop: getSpacing(isMobile ? 8 : isTablet ? 10 : 12),
+        paddingBottom: getSpacing(isMobile ? 12 : isTablet ? 16 : 20),
       }}
     >
       {/* Header */}
-      <div style={{ marginBottom: spacing(isMobile ? 8 : 12) }}>
-        <div className="flex items-center gap-2" style={{ marginBottom: spacing(3) }}>
+      <div style={{ marginBottom: getSpacing(isMobile ? 8 : 12) }}>
+        <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(3) }}>
           <span style={{ 
             color: 'var(--muted-foreground)',
             fontFamily: 'Inter Tight, sans-serif',
@@ -89,7 +85,7 @@ export function TextareaDoc() {
               fontSize: isMobile ? '32px' : '48px',
               fontWeight: 'var(--font-weight-bold)',
               lineHeight: '1.2',
-              marginBottom: spacing(2),
+              marginBottom: getSpacing(2),
             }}>
               Textarea
             </h1>
@@ -122,7 +118,7 @@ export function TextareaDoc() {
 
       {/* Playground */}
       <Card style={{ 
-        marginBottom: spacing(8),
+        marginBottom: getSpacing(8),
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
         borderRadius: 'var(--radius-3)',
@@ -136,7 +132,7 @@ export function TextareaDoc() {
               fontFamily: 'Inter Tight, sans-serif',
               fontSize: '20px',
               fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: spacing(6),
+              marginBottom: getSpacing(6),
             }}>
               Interactive Playground
             </h3>
@@ -146,7 +142,7 @@ export function TextareaDoc() {
               backgroundColor: 'var(--surface-800)',
               borderRadius: 'var(--radius-3)',
               padding: isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)',
-              marginBottom: spacing(6),
+              marginBottom: getSpacing(6),
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -159,13 +155,12 @@ export function TextareaDoc() {
                 </Label>
                 <Textarea
                   id="playground-textarea"
-                  placeholder={placeholder}
-                  value={textValue}
-                  onChange={(e) => setTextValue(e.target.value)}
-                  error={hasError}
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  error={isError}
                   disabled={isDisabled}
                 />
-                {hasError && (
+                {isError && (
                   <div className="flex items-center gap-2" style={{ marginTop: 'var(--spacing-2)' }}>
                     <AlertCircle size={14} color="var(--destructive)" />
                     <span style={{
@@ -182,31 +177,7 @@ export function TextareaDoc() {
 
             {/* Controls */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="textarea-placeholder" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Placeholder
-                </Label>
-                <Textarea
-                  id="textarea-placeholder"
-                  placeholder="Placeholder text"
-                  value={placeholder}
-                  onChange={(e) => setPlaceholder(e.target.value)}
-                  style={{ minHeight: '60px' }}
-                />
-              </div>
-
               <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="has-error"
-                    checked={hasError}
-                    onChange={(e) => setHasError(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="has-error">Show Error State</Label>
-                </div>
-
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
@@ -216,6 +187,17 @@ export function TextareaDoc() {
                     style={{ width: '20px', height: '20px' }}
                   />
                   <Label htmlFor="is-disabled">Disabled</Label>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="is-error"
+                    checked={isError}
+                    onChange={(e) => setIsError(e.target.checked)}
+                    style={{ width: '20px', height: '20px' }}
+                  />
+                  <Label htmlFor="is-error">Show Error State</Label>
                 </div>
               </div>
             </div>
@@ -235,7 +217,7 @@ export function TextareaDoc() {
 
       {/* Design Tokens */}
       <Card style={{ 
-        marginBottom: spacing(8),
+        marginBottom: getSpacing(8),
         backgroundColor: 'var(--card)',
         borderColor: 'var(--border)',
         borderRadius: 'var(--radius-3)',
@@ -245,7 +227,7 @@ export function TextareaDoc() {
             fontFamily: 'Inter Tight, sans-serif',
             fontSize: '20px',
             fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: spacing(6),
+            marginBottom: getSpacing(6),
           }}>
             Design Tokens
           </h3>
@@ -308,14 +290,14 @@ export function TextareaDoc() {
             fontFamily: 'Inter Tight, sans-serif',
             fontSize: '20px',
             fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: spacing(6),
+            marginBottom: getSpacing(6),
           }}>
             Usage Guidelines
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: spacing(4) }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
                 <div style={{
                   width: '24px',
                   height: '24px',
@@ -386,7 +368,7 @@ export function TextareaDoc() {
             </div>
 
             <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: spacing(4) }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
                 <div style={{
                   width: '24px',
                   height: '24px',

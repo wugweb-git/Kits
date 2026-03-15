@@ -1,36 +1,34 @@
 import React from 'react';
-import { Button } from '../../ui/button';
+import { Input } from '../../wugweb/Input';
+import { Label } from '../../wugweb/Label';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Copy, Check, ChevronRight, ExternalLink, CheckCircle2, XCircle, Keyboard, Sparkles, AlertCircle, X } from 'lucide-react';
+import { Check, Copy, ChevronRight, X, Eye, EyeOff, Search, Mail } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
+import { getSpacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { Button } from '../../wugweb/Button';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function InputTextDoc() {
-  const [selectedState, setSelectedState] = React.useState<'default' | 'focused' | 'disabled' | 'error'>('default');
+  const [value, setValue] = React.useState('');
+  const [isDisabled, setIsDisabled] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
+  const [showCode, setShowCode] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
-  const [showCode, setShowCode] = React.useState(true);
-  const [showGuidelines, setShowGuidelines] = React.useState(true);
-  const [showAccessibility, setShowAccessibility] = React.useState(true);
-  const [inputValue, setInputValue] = React.useState('');
   
-  const { isMobile, isTablet, breakpoint } = useBreakpoint();
+  const { isMobile, isTablet } = useBreakpoint();
 
-  const handleTokenClick = (token: string, label: string, value?: string) => {
+  const handleTokenClick = (token: string) => {
     setHighlightedToken(token);
     setTimeout(() => setHighlightedToken(null), 2000);
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
@@ -54,28 +52,20 @@ export function InputTextDoc() {
       boxSizing: 'border-box' as const
     };
 
-    if (selectedState === 'focused') {
-      return {
-        ...baseStyles,
-        borderColor: 'var(--ring)',
-        boxShadow: '0 0 0 3px rgba(255, 190, 26, 0.1)'
-      };
-    }
-
-    if (selectedState === 'error') {
-      return {
-        ...baseStyles,
-        borderColor: 'var(--destructive)',
-        boxShadow: 'none'
-      };
-    }
-
-    if (selectedState === 'disabled') {
+    if (isDisabled) {
       return {
         ...baseStyles,
         opacity: 0.5,
         cursor: 'not-allowed',
         background: 'var(--muted)'
+      };
+    }
+
+    if (isError) {
+      return {
+        ...baseStyles,
+        borderColor: 'var(--destructive)',
+        boxShadow: 'none'
       };
     }
 
@@ -158,7 +148,7 @@ export function InputTextDoc() {
   opacity: 0.6;
 }`;
 
-  const sectionGap = spacing.sectionGap[breakpoint];
+  const sectionGap = getSpacing('sectionGap');
 
   return (
     <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: sectionGap, position: 'relative', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
@@ -236,15 +226,22 @@ export function InputTextDoc() {
                     {(['default', 'focused', 'disabled', 'error'] as const).map((state) => (
                       <Button 
                         key={state} 
-                        onClick={() => setSelectedState(state)} 
-                        variant={selectedState === state ? 'default' : 'outline'} 
+                        onClick={() => {
+                          if (state === 'disabled') setIsDisabled(true);
+                          if (state === 'error') setIsError(true);
+                          if (state === 'default') {
+                            setIsDisabled(false);
+                            setIsError(false);
+                          }
+                        }} 
+                        variant={state === 'default' ? 'outline' : 'default'} 
                         size="sm" 
                         className="button-micro" 
                         style={{ 
                           fontSize: 'var(--text-sm)', 
                           textTransform: 'capitalize', 
-                          background: selectedState === state ? 'var(--accent)' : 'var(--background)', 
-                          color: selectedState === state ? 'var(--accent-foreground)' : 'var(--foreground)'
+                          background: state === 'default' ? 'var(--background)' : 'var(--accent)', 
+                          color: state === 'default' ? 'var(--foreground)' : 'var(--accent-foreground)'
                         }}
                       >
                         {state}
@@ -273,14 +270,14 @@ export function InputTextDoc() {
                       id="preview-input"
                       type="email"
                       placeholder="you@example.com"
-                      disabled={selectedState === 'disabled'}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
+                      disabled={isDisabled}
+                      value={value}
+                      onChange={(e) => setValue(e.target.value)}
                       className="smooth-transition"
                       style={getInputStyles()}
                     />
                     
-                    {selectedState === 'error' && (
+                    {isError && (
                       <span style={{
                         fontSize: 'var(--text-sm)',
                         color: 'var(--destructive)',
@@ -380,13 +377,13 @@ export function InputTextDoc() {
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '16px', width: '100%' }}>
-          <TokenCard label="Background" token="--background" value="#FFFFFF" color="var(--background)" onClick={() => handleTokenClick('--background', 'Background', '#FFFFFF')} isHighlighted={highlightedToken === '--background'} />
-          <TokenCard label="Border" token="--border" value="#DFDFDF" color="var(--border)" onClick={() => handleTokenClick('--border', 'Border', '#DFDFDF')} isHighlighted={highlightedToken === '--border'} />
-          <TokenCard label="Text Color" token="--foreground" value="#191919" color="var(--foreground)" onClick={() => handleTokenClick('--foreground', 'Text Color', '#191919')} isHighlighted={highlightedToken === '--foreground'} />
-          <TokenCard label="Focus Ring" token="--ring" value="#FFBE1A" color="var(--ring)" onClick={() => handleTokenClick('--ring', 'Focus Ring', '#FFBE1A')} isHighlighted={highlightedToken === '--ring'} />
-          <TokenCard label="Error" token="--destructive" value="#EF4343" color="var(--destructive)" onClick={() => handleTokenClick('--destructive', 'Error', '#EF4343')} isHighlighted={highlightedToken === '--destructive'} />
-          <TokenCard label="Placeholder" token="--muted-foreground" value="#7D7D7D" color="var(--muted-foreground)" onClick={() => handleTokenClick('--muted-foreground', 'Placeholder', '#7D7D7D')} isHighlighted={highlightedToken === '--muted-foreground'} />
-          <TokenCard label="Border Radius" token="--radius-md" value="6px" isRadius onClick={() => handleTokenClick('--radius-md', 'Border Radius', '6px')} isHighlighted={highlightedToken === '--radius-md'} />
+          <TokenCard label="Background" token="--background" value="#FFFFFF" color="var(--background)" onClick={() => handleTokenClick('--background')} isHighlighted={highlightedToken === '--background'} />
+          <TokenCard label="Border" token="--border" value="#DFDFDF" color="var(--border)" onClick={() => handleTokenClick('--border')} isHighlighted={highlightedToken === '--border'} />
+          <TokenCard label="Text Color" token="--foreground" value="#191919" color="var(--foreground)" onClick={() => handleTokenClick('--foreground')} isHighlighted={highlightedToken === '--foreground'} />
+          <TokenCard label="Focus Ring" token="--ring" value="#FFBE1A" color="var(--ring)" onClick={() => handleTokenClick('--ring')} isHighlighted={highlightedToken === '--ring'} />
+          <TokenCard label="Error" token="--destructive" value="#EF4343" color="var(--destructive)" onClick={() => handleTokenClick('--destructive')} isHighlighted={highlightedToken === '--destructive'} />
+          <TokenCard label="Placeholder" token="--muted-foreground" value="#7D7D7D" color="var(--muted-foreground)" onClick={() => handleTokenClick('--muted-foreground')} isHighlighted={highlightedToken === '--muted-foreground'} />
+          <TokenCard label="Border Radius" token="--radius-md" value="6px" isRadius onClick={() => handleTokenClick('--radius-md')} isHighlighted={highlightedToken === '--radius-md'} />
         </div>
       </section>
 
@@ -415,137 +412,6 @@ export function InputTextDoc() {
               <CollapsibleCodeBlock code={cssCode} language="css" />
             </TabsContent>
           </Tabs>
-        </section>
-      )}
-
-      {/* Usage Guidelines */}
-      {showGuidelines && (
-        <section className="animate-fade-in-up" style={{ animationDelay: '300ms', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)' }}>Usage Guidelines</h2>
-            <Button onClick={() => setShowGuidelines(!showGuidelines)} variant="ghost" size="sm" className="button-micro" style={{ gap: '8px' }}>
-              <X size={16} />
-              Hide
-            </Button>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
-            
-            {/* Do */}
-            <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-              <CardContent style={{ padding: isMobile ? '20px' : '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-full)', background: 'rgba(0, 158, 105, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <CheckCircle2 size={18} style={{ color: '#009E69' }} />
-                  </div>
-                  <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Do</h3>
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>
-                  <li>Always include clear, descriptive labels above inputs</li>
-                  <li>Use placeholder text for examples, not instructions</li>
-                  <li>Provide helpful error messages when validation fails</li>
-                  <li>Show focus states clearly for keyboard navigation</li>
-                  <li>Use appropriate input types (email, tel, search)</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Don't */}
-            <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-              <CardContent style={{ padding: isMobile ? '20px' : '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-full)', background: 'rgba(239, 67, 67, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <XCircle size={18} style={{ color: 'var(--destructive)' }} />
-                  </div>
-                  <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Don't</h3>
-                </div>
-                <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>
-                  <li>Don't use placeholder text as a replacement for labels</li>
-                  <li>Don't disable inputs without explaining why</li>
-                  <li>Don't make inputs too small or too large</li>
-                  <li>Don't use vague error messages like "Invalid input"</li>
-                  <li>Don't remove focus indicators for accessibility</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-          </div>
-        </section>
-      )}
-
-      {/* Accessibility */}
-      {showAccessibility && (
-        <section className="animate-fade-in-up" style={{ animationDelay: '350ms', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Accessibility</h2>
-            <Button onClick={() => setShowAccessibility(!showAccessibility)} variant="ghost" size="sm" className="button-micro" style={{ gap: '8px' }}>
-              <X size={16} />
-              Hide
-            </Button>
-          </div>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', marginBottom: '16px', margin: '0 0 16px 0' }}>
-            WCAG AA compliant input implementation
-          </p>
-
-          <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-            <CardContent style={{ padding: isMobile ? '20px' : '32px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                
-                {/* Color Contrast */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    <CheckCircle2 size={20} style={{ color: '#009E69', flexShrink: 0 }} />
-                    <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Color Contrast</h3>
-                  </div>
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', margin: 0, lineHeight: 1.6 }}>
-                    Text and border colors meet WCAG 2.1 AA standards with minimum 4.5:1 contrast ratio. Focus rings use accent color with 3:1 contrast.
-                  </p>
-                </div>
-
-                {/* Keyboard Navigation */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    <Keyboard size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>Keyboard Navigation</h3>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>
-                    <li>
-                      <kbd style={{ padding: '2px 6px', background: 'var(--muted)', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>Tab</kbd> - Navigate to input field
-                    </li>
-                    <li>
-                      <kbd style={{ padding: '2px 6px', background: 'var(--muted)', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>Shift+Tab</kbd> - Navigate backward
-                    </li>
-                    <li>
-                      <kbd style={{ padding: '2px 6px', background: 'var(--muted)', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>Enter</kbd> - Submit form (if in form)
-                    </li>
-                  </ul>
-                </div>
-
-                {/* ARIA & Labels */}
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    <Sparkles size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', margin: 0 }}>ARIA & Labels</h3>
-                  </div>
-                  <ul style={{ margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>
-                    <li>
-                      Use <code style={{ background: 'var(--muted)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>htmlFor</code> to associate labels with inputs
-                    </li>
-                    <li>
-                      Add <code style={{ background: 'var(--muted)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>aria-invalid</code> for error states
-                    </li>
-                    <li>
-                      Use <code style={{ background: 'var(--muted)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>aria-describedby</code> for error messages
-                    </li>
-                    <li>
-                      Include <code style={{ background: 'var(--muted)', padding: '2px 4px', borderRadius: 'var(--radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}>aria-required</code> for required fields
-                    </li>
-                  </ul>
-                </div>
-
-              </div>
-            </CardContent>
-          </Card>
         </section>
       )}
 

@@ -107,3 +107,9 @@ export const maxWidth = {
   tablet: '100%',
   desktop: '1440px'
 };
+
+// Helper function to get spacing values using CSS variables
+// Usage: spacing(4) returns 'var(--spacing-4)' which is 16px
+export function getSpacing(multiplier: number): string {
+  return `var(--spacing-${multiplier})`;
+}

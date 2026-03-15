@@ -59,6 +59,9 @@ import { LogoDoc } from './components/ds/pages/LogoDoc';
 import { FooterLinksDoc } from './components/ds/pages/FooterLinksDoc';
 import { NavigationMenuDoc } from './components/ds/pages/NavigationMenuDoc';
 import { GridDoc } from './components/ds/pages/GridDoc';
+import { EmbedBadgesDoc } from './components/ds/pages/EmbedBadgesDoc';
+import { LogoSystemDoc } from './components/ds/pages/LogoSystemDoc';
+import { LogoShowcase } from './components/ds/pages/LogoShowcase';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { Toaster } from './components/ui/sonner';
 import './styles/animations.css';
@@ -266,11 +269,31 @@ export default function App() {
         if (currentSubPage === 'footer-links') {
           return <FooterLinksDoc />;
         }
+        if (currentSubPage === 'embed-badges') {
+          return <EmbedBadgesDoc />;
+        }
+        if (currentSubPage === 'logo-system') {
+          return <LogoSystemDoc />;
+        }
+        if (currentSubPage === 'logo-showcase') {
+          return <LogoShowcase />;
+        }
         return <Components currentSubPage={currentSubPage} />;
       case 'patterns':
         return <Patterns />;
       case 'playground':
         return <Playground />;
+      case 'resources':
+        if (currentSubPage === 'embed-badges') {
+          return <EmbedBadgesDoc />;
+        }
+        if (currentSubPage === 'logo-system') {
+          return <LogoSystemDoc />;
+        }
+        if (currentSubPage === 'logo-showcase') {
+          return <LogoShowcase />;
+        }
+        return <Overview onNavigate={handleNavigate} />;
       case 'accessibility':
         return <Accessibility />;
       case 'guidelines':

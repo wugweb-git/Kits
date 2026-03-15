@@ -5,7 +5,7 @@ import {
   RectangleHorizontal, FormInput, CreditCard, SquareDashedBottom, Hash, Image as ImageIcon,
   ChevronDown, Upload, BookOpen, X, CheckSquare, ToggleRight, Sliders, ChevronDown as ChevronDownIcon,
   Square, Tag, MessageSquare, Bell, Navigation as NavigationIcon, Menu, Image as MediaIcon,
-  PlayCircle, Radio, UserCircle, Award, AlertCircle, BarChart2, Loader2, Layout
+  PlayCircle, Radio, UserCircle, Award, AlertCircle, BarChart2, Loader2, Layout, Award as BadgeIcon
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
@@ -158,6 +158,16 @@ const navItems = [
   },
   { id: 'patterns', label: 'Patterns', icon: Grid3x3 },
   { id: 'playground', label: 'Playground', icon: Sparkles },
+  { 
+    id: 'resources', 
+    label: 'Resources', 
+    icon: BookOpen,
+    subItems: [
+      { id: 'logo-showcase', label: 'Logo Showcase', icon: ImageIcon },
+      { id: 'logo-system', label: 'Logo System', icon: BadgeIcon },
+      { id: 'embed-badges', label: 'Embed Badges', icon: Award },
+    ]
+  },
   { id: 'accessibility', label: 'Accessibility', icon: Eye },
   { id: 'guidelines', label: 'Guidelines', icon: FileText },
   { id: 'contribute', label: 'Contribute', icon: Users },

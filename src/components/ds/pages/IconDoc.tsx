@@ -1,29 +1,27 @@
 import React from 'react';
-import { Copy, Check, ChevronRight, Info } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import { Input } from '../../wugweb/Input';
+import { Label } from '../../wugweb/Label';
+import { Badge } from '../../ui/badge';
 import { toast } from 'sonner@2.0.3';
-import { 
-  ArrowRightIcon, 
-  ArrowIcon, 
-  ChevronUpIcon, 
-  InfoIcon, 
-  HelpIcon, 
-  SearchIcon,
-  iconLibrary 
-} from '../../wugweb/IconLibrary';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function IconDoc() {
-  const [selectedIcon, setSelectedIcon] = React.useState('arrow-right');
   const [selectedSize, setSelectedSize] = React.useState<16 | 20 | 24 | 32>(24);
   const [selectedColor, setSelectedColor] = React.useState('foreground');
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedIcon, setSelectedIcon] = React.useState('ArrowRight');
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+  const handleCopy = async (text: string, label: string) => {
+    const success = await copyToClipboard(text);
+    if (success) {
       setCopiedCode(label);
       toast.success(`Copied ${label}`);
       setTimeout(() => setCopiedCode(null), 2000);
-    });
+    } else {
+      toast.error('Failed to copy');
+    }
   };
 
   const iconSizes = [16, 20, 24, 32] as const;
@@ -34,12 +32,12 @@ export function IconDoc() {
     { name: 'destructive', token: '--destructive' },
   ];
 
-  const filteredIcons = iconLibrary.filter(icon =>
-    icon.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredIcons = Object.keys(LucideIcons).filter(icon =>
+    icon.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const selectedIconData = iconLibrary.find(icon => icon.name === selectedIcon);
-  const IconComponent = selectedIconData?.component || ArrowRightIcon;
+  const selectedIconData = filteredIcons.find(icon => icon === selectedIcon);
+  const IconComponent = selectedIconData ? LucideIcons[selectedIconData] : LucideIcons.ArrowRight;
 
   const reactCode = `import ArrowRightIcon from './imports/ArrowRightIcon';
 
@@ -84,7 +82,7 @@ export function IconDoc() {
           color: 'var(--muted-foreground)',
         }}>
           <span>Components</span>
-          <ChevronRight size={14} />
+          <LucideIcons.ChevronRight size={14} />
           <span style={{ color: 'var(--foreground)' }}>Icons</span>
         </div>
 
@@ -185,7 +183,7 @@ export function IconDoc() {
                 position: 'relative',
                 zIndex: 1,
               }}>
-                <ArrowRightIcon size={48} />
+                <LucideIcons.ArrowRight size={48} />
               </div>
 
               {/* Labels */}
@@ -254,7 +252,7 @@ export function IconDoc() {
             position: 'relative',
             maxWidth: '400px',
           }}>
-            <SearchIcon 
+            <LucideIcons.Search 
               size={18} 
               style={{
                 position: 'absolute',
@@ -308,11 +306,11 @@ export function IconDoc() {
             gap: 'var(--spacing-3)',
           }}>
             {filteredIcons.map((icon) => {
-              const Icon = icon.component;
+              const Icon = LucideIcons[icon];
               return (
                 <button
-                  key={icon.name}
-                  onClick={() => setSelectedIcon(icon.name)}
+                  key={icon}
+                  onClick={() => setSelectedIcon(icon)}
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -320,22 +318,22 @@ export function IconDoc() {
                     justifyContent: 'center',
                     gap: 'var(--spacing-2)',
                     padding: 'var(--spacing-3)',
-                    background: selectedIcon === icon.name ? 'var(--accent-subtle)' : 'var(--surface-900)',
+                    background: selectedIcon === icon ? 'var(--accent-subtle)' : 'var(--surface-900)',
                     border: '1px solid',
-                    borderColor: selectedIcon === icon.name ? 'var(--accent)' : 'var(--border)',
+                    borderColor: selectedIcon === icon ? 'var(--accent)' : 'var(--border)',
                     borderRadius: 'var(--radius-md)',
                     cursor: 'pointer',
                     transition: 'all var(--motion-duration-fast) var(--motion-easing-standard)',
                     minHeight: '100px',
                   }}
                   onMouseEnter={(e) => {
-                    if (selectedIcon !== icon.name) {
+                    if (selectedIcon !== icon) {
                       e.currentTarget.style.borderColor = 'var(--accent)';
                       e.currentTarget.style.background = 'var(--surface-700)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (selectedIcon !== icon.name) {
+                    if (selectedIcon !== icon) {
                       e.currentTarget.style.borderColor = 'var(--border)';
                       e.currentTarget.style.background = 'var(--surface-900)';
                     }
@@ -350,11 +348,11 @@ export function IconDoc() {
                   </div>
                   <span style={{
                     fontSize: 'var(--text-xs)',
-                    color: selectedIcon === icon.name ? 'var(--accent)' : 'var(--foreground)',
+                    color: selectedIcon === icon ? 'var(--accent)' : 'var(--foreground)',
                     textAlign: 'center',
                     fontWeight: 'var(--font-weight-medium)',
                   }}>
-                    {icon.name}
+                    {icon}
                   </span>
                 </button>
               );
@@ -533,7 +531,7 @@ export function IconDoc() {
               React
             </span>
             <button
-              onClick={() => copyToClipboard(reactCode, 'React code')}
+              onClick={() => handleCopy(reactCode, 'React code')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -551,7 +549,7 @@ export function IconDoc() {
                 transition: 'all var(--motion-duration-fast) var(--motion-easing-standard)',
               }}
             >
-              {copiedCode === 'React code' ? <Check size={14} /> : <Copy size={14} />}
+              {copiedCode === 'React code' ? <LucideIcons.Check size={14} /> : <LucideIcons.Copy size={14} />}
               <span>{copiedCode === 'React code' ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
@@ -594,7 +592,7 @@ export function IconDoc() {
             {tokens.map((token) => (
               <button
                 key={token.name}
-                onClick={() => copyToClipboard(`var(${token.token})`, token.name)}
+                onClick={() => handleCopy(`var(${token.token})`, token.name)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -635,9 +633,9 @@ export function IconDoc() {
                   </div>
                 </div>
                 {copiedCode === token.name ? (
-                  <Check size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
+                  <LucideIcons.Check size={16} style={{ color: 'var(--success)', flexShrink: 0 }} />
                 ) : (
-                  <Copy size={16} style={{ color: 'var(--muted-foreground)', flexShrink: 0 }} />
+                  <LucideIcons.Copy size={16} style={{ color: 'var(--muted-foreground)', flexShrink: 0 }} />
                 )}
               </button>
             ))}
@@ -652,7 +650,7 @@ export function IconDoc() {
             display: 'flex',
             gap: 'var(--spacing-2)',
           }}>
-            <Info size={16} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: '2px' }} />
+            <LucideIcons.Info size={16} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: '2px' }} />
             <p style={{
               margin: 0,
               fontSize: 'var(--text-sm)',

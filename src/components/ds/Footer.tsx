@@ -80,6 +80,25 @@ export function Footer({ onNavigate }: FooterProps) {
             >
               Design System — Professional UI components and tokens for building consistent web applications.
             </p>
+            
+            {/* Wugweb Badge */}
+            <div style={{ marginTop: 'var(--spacing-4)' }}>
+              <a 
+                href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=designed-by" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Visit Wugweb"
+              >
+                <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="180" height="40" rx="8" fill="#121212"/>
+                  <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
+                  <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
+                  <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
+                  <text x="30" y="16" fontFamily="Inter Tight, sans-serif" fontSize="10" fontWeight="500" fill="#A1A1A1">DESIGNED BY</text>
+                  <text x="30" y="28" fontFamily="Inter Tight, sans-serif" fontSize="13" fontWeight="600" fill="#FFFFFF">Wugweb</text>
+                </svg>
+              </a>
+            </div>
           </div>
 
           {/* Center: Quick Links */}
@@ -168,7 +187,7 @@ export function Footer({ onNavigate }: FooterProps) {
             {/* Social Links */}
             <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)' }}>
               <a
-                href="https://github.com/wugweb/design-system"
+                href="https://github.com/wugweb-git/Kits"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="smooth-transition hover:text-accent button-press"

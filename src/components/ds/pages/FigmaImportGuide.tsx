@@ -1,17 +1,19 @@
 import React from 'react';
-import { Button } from '../../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
+import { Card, CardContent } from '../../ui/card';
+import { Button } from '../../wugweb/Button';
 import { Badge } from '../../ui/badge';
 import { Download, Upload, FileCode, Copy, CheckCircle2, AlertCircle } from 'lucide-react';
+import { copyToClipboard as safeCopy } from '../../../utils/clipboard';
 
 export function FigmaImportGuide() {
   const [copiedStep, setCopiedStep] = React.useState<number | null>(null);
 
-  const copyToClipboard = (text: string, stepNumber: number) => {
-    navigator.clipboard.writeText(text);
-    setCopiedStep(stepNumber);
-    setTimeout(() => setCopiedStep(null), 2000);
+  const copyToClipboard = async (text: string, stepNumber: number) => {
+    const success = await safeCopy(text);
+    if (success) {
+      setCopiedStep(stepNumber);
+      setTimeout(() => setCopiedStep(null), 2000);
+    }
   };
 
   return (

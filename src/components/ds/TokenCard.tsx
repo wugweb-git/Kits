@@ -1,5 +1,6 @@
 import React from 'react';
 import { Copy, Check } from 'lucide-react';
+import { copyToClipboard } from '../../utils/clipboard';
 
 interface TokenCardProps {
   name: string;
@@ -12,10 +13,12 @@ interface TokenCardProps {
 export function TokenCard({ name, value, usage, preview, copyValue }: TokenCardProps) {
   const [copied, setCopied] = React.useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(copyValue || value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    const success = await copyToClipboard(copyValue || value);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (

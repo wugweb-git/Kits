@@ -1,11 +1,8 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Button } from '../../ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
-import { componentRegistry, type Component, type ComponentState } from '../../../lib/component-registry';
-import { Copy, CheckCircle2, ExternalLink, AlertCircle, Code } from 'lucide-react';
+import { Card, CardContent } from '../../ui/card';
+import { Button } from '../../wugweb/Button';
+import { Check, Copy } from 'lucide-react';
+import { copyToClipboard as safeCopy } from '../../../utils/clipboard';
 
 interface ComponentDocProps {
   componentId: string;
@@ -36,7 +33,7 @@ export function ComponentDoc({ componentId }: ComponentDocProps) {
   const currentState = currentVariant?.states.find(s => s.name === activeState) || currentVariant?.states[0];
 
   const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
+    safeCopy(code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
