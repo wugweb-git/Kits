@@ -1,57 +1,49 @@
 import React from 'react';
 import { Card } from '../../wugweb/Card';
-import { Button } from '../../ui/button';
+import { Button } from '../../wugweb/Button';
 import { Badge } from '../../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Check, Copy, ExternalLink, X, ChevronRight, Image as ImageIcon, Tag, Layout, Smartphone, Monitor } from 'lucide-react';
+import { Check, Copy, ChevronRight, X, Share2, Heart, MessageCircle, Image as ImageIcon, Tag, Layout } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
+import { getSpacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Switch } from '../../ui/switch';
-import { cn } from '../../ui/utils';
+import { copyToClipboard } from '../../../utils/clipboard';
+import { Switch } from '../../wugweb/Switch';
 
 export function CardDoc() {
-  const [variant, setVariant] = React.useState<'default' | 'elevated' | 'outline' | 'ghost' | 'dark'>('default');
-  const [showThumbnail, setShowThumbnail] = React.useState(true);
-  const [showTags, setShowTags] = React.useState(true);
-  const [showAction, setShowAction] = React.useState(true);
-  const [isMobileView, setIsMobileView] = React.useState(false);
-  
   const [showCode, setShowCode] = React.useState(true);
-  const [showAccessibility, setShowAccessibility] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
+  const [activeVariant, setActiveVariant] = React.useState<'default' | 'outlined' | 'elevated'>('default');
+  const [isMobileView, setIsMobileView] = React.useState(false);
   
-  const { isMobile, isTablet, breakpoint } = useBreakpoint();
+  const { isMobile, isTablet } = useBreakpoint();
 
-  const handleTokenClick = (token: string, label: string, value?: string) => {
+  const handleTokenClick = (token: string) => {
     setHighlightedToken(token);
     setTimeout(() => setHighlightedToken(null), 2000);
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
-  const sectionGap = spacing.sectionGap[breakpoint];
+  const sectionGap = getSpacing('sectionGap');
 
   const demoImage = "https://images.unsplash.com/photo-1552835376-89b8cdfacb4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBtaW5pbWFsJTIwYXJjaGl0ZWN0dXJlJTIwYnVpbGRpbmd8ZW58MXx8fHwxNzY5NDQwNzUyfDA&ixlib=rb-4.1.0&q=80&w=1080";
 
   // Dynamic code generation
   const getDynamicCode = () => {
     const props = [];
-    if (variant !== 'default') props.push(`variant="${variant}"`);
-    if (showThumbnail) props.push(`thumbnail="${demoImage}"`);
-    if (showTags) props.push(`tags={['Architecture', 'Minimal', 'Design']}`);
-    if (showAction) props.push(`actionLabel="View Details"`);
+    if (activeVariant !== 'default') props.push(`variant="${activeVariant}"`);
+    if (showCode) props.push(`thumbnail="${demoImage}"`);
+    if (showCode) props.push(`tags={['Architecture', 'Minimal', 'Design']}`);
+    if (showCode) props.push(`actionLabel="View Details"`);
     
     const propsString = props.length > 0 ? `\n  ${props.join('\n  ')}` : '';
 
@@ -106,8 +98,16 @@ export function CardDemo() {
                 {copiedLink ? 'Copied!' : 'Copy Link'}
               </Button>
               <Button variant="outline" size="sm" className="button-micro focus-ring-accent" style={{ gap: '8px', background: 'var(--background)', borderColor: 'var(--border)' }}>
-                <ExternalLink size={16} />
-                View in Figma
+                <Share2 size={16} />
+                Share
+              </Button>
+              <Button variant="outline" size="sm" className="button-micro focus-ring-accent" style={{ gap: '8px', background: 'var(--background)', borderColor: 'var(--border)' }}>
+                <Heart size={16} />
+                Like
+              </Button>
+              <Button variant="outline" size="sm" className="button-micro focus-ring-accent" style={{ gap: '8px', background: 'var(--background)', borderColor: 'var(--border)' }}>
+                <MessageCircle size={16} />
+                Comment
               </Button>
             </div>
           </div>
@@ -127,17 +127,17 @@ export function CardDemo() {
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <label style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--foreground)' }}>Variant</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {(['default', 'elevated', 'outline', 'ghost', 'dark'] as const).map((v) => (
+                      {(['default', 'outlined', 'elevated'] as const).map((v) => (
                         <Button
                           key={v}
-                          variant={variant === v ? 'default' : 'outline'}
+                          variant={activeVariant === v ? 'default' : 'outline'}
                           size="sm"
                           className="button-micro"
-                          onClick={() => setVariant(v)}
+                          onClick={() => setActiveVariant(v)}
                           style={{ 
                             textTransform: 'capitalize',
-                            background: variant === v ? 'var(--accent)' : 'var(--background)',
-                            color: variant === v ? 'var(--accent-foreground)' : 'var(--foreground)'
+                            background: activeVariant === v ? 'var(--accent)' : 'var(--background)',
+                            color: activeVariant === v ? 'var(--accent-foreground)' : 'var(--foreground)'
                           }}
                         >
                           {v}
@@ -151,19 +151,19 @@ export function CardDemo() {
                     <label style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--foreground)' }}>Options</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Switch checked={showThumbnail} onCheckedChange={setShowThumbnail} id="thumbnail-toggle" />
+                            <Switch checked={showCode} onCheckedChange={setShowCode} id="thumbnail-toggle" />
                             <label htmlFor="thumbnail-toggle" style={{ fontSize: 'var(--text-sm)', color: 'var(--foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <ImageIcon size={14} /> Thumbnail
                             </label>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Switch checked={showTags} onCheckedChange={setShowTags} id="tags-toggle" />
+                            <Switch checked={showCode} onCheckedChange={setShowCode} id="tags-toggle" />
                             <label htmlFor="tags-toggle" style={{ fontSize: 'var(--text-sm)', color: 'var(--foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Tag size={14} /> Tags
                             </label>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                             <Switch checked={showAction} onCheckedChange={setShowAction} id="action-toggle" />
+                             <Switch checked={showCode} onCheckedChange={setShowCode} id="action-toggle" />
                              <label htmlFor="action-toggle" style={{ fontSize: 'var(--text-sm)', color: 'var(--foreground)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Layout size={14} /> Action
                             </label>
@@ -171,28 +171,6 @@ export function CardDemo() {
                     </div>
                  </div>
               </div>
-
-               {/* Viewport Control */}
-               <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <div style={{ display: 'flex', gap: '4px', padding: '4px', background: 'var(--surface-900)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                      <Button 
-                        size="sm" 
-                        variant={!isMobileView ? 'secondary' : 'ghost'} 
-                        onClick={() => setIsMobileView(false)}
-                        style={{ height: '32px', gap: '8px' }}
-                      >
-                        <Monitor size={14} /> Desktop
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant={isMobileView ? 'secondary' : 'ghost'} 
-                        onClick={() => setIsMobileView(true)}
-                        style={{ height: '32px', gap: '8px' }}
-                      >
-                        <Smartphone size={14} /> Mobile
-                      </Button>
-                  </div>
-               </div>
 
             </div>
 
@@ -215,12 +193,12 @@ export function CardDemo() {
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
                 }}>
                     <Card 
-                        variant={variant}
-                        thumbnail={showThumbnail ? demoImage : undefined}
+                        variant={activeVariant}
+                        thumbnail={showCode ? demoImage : undefined}
                         title="Modern Architecture"
                         description="Exploring the intersection of minimalism and functional design in contemporary urban spaces."
-                        tags={showTags ? ['Architecture', 'Minimal', 'Design'] : undefined}
-                        actionLabel={showAction ? "View Details" : undefined}
+                        tags={showCode ? ['Architecture', 'Minimal', 'Design'] : undefined}
+                        actionLabel={showCode ? "View Details" : undefined}
                         onAction={() => {}}
                     />
                 </div>
@@ -254,11 +232,11 @@ export function CardDemo() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '16px', width: '100%' }}>
-          <TokenCard label="Padding (Desktop)" token="--spacing-3" value="24px" color="transparent" onClick={() => handleTokenClick('--spacing-3', 'Padding', '24px')} isHighlighted={highlightedToken === '--spacing-3'} />
-          <TokenCard label="Padding (Mobile)" token="--layout-padding-mobile" value="20px" color="transparent" onClick={() => handleTokenClick('--layout-padding-mobile', 'Padding', '20px')} isHighlighted={highlightedToken === '--layout-padding-mobile'} />
-          <TokenCard label="Radius" token="--radius-lg" value="12px" isRadius onClick={() => handleTokenClick('--radius-lg', 'Radius', '12px')} isHighlighted={highlightedToken === '--radius-lg'} />
-          <TokenCard label="Background" token="--card" value="surface-800" color="var(--card)" onClick={() => handleTokenClick('--card', 'Background', '#1a1a1a')} isHighlighted={highlightedToken === '--card'} />
-          <TokenCard label="Border" token="--border" value="surface-600" color="var(--border)" onClick={() => handleTokenClick('--border', 'Border', '#444444')} isHighlighted={highlightedToken === '--border'} />
+          <TokenCard label="Padding (Desktop)" token="--spacing-3" value="24px" color="transparent" onClick={() => handleTokenClick('--spacing-3')} isHighlighted={highlightedToken === '--spacing-3'} />
+          <TokenCard label="Padding (Mobile)" token="--layout-padding-mobile" value="20px" color="transparent" onClick={() => handleTokenClick('--layout-padding-mobile')} isHighlighted={highlightedToken === '--layout-padding-mobile'} />
+          <TokenCard label="Radius" token="--radius-lg" value="12px" isRadius onClick={() => handleTokenClick('--radius-lg')} isHighlighted={highlightedToken === '--radius-lg'} />
+          <TokenCard label="Background" token="--card" value="surface-800" color="var(--card)" onClick={() => handleTokenClick('--card')} isHighlighted={highlightedToken === '--card'} />
+          <TokenCard label="Border" token="--border" value="surface-600" color="var(--border)" onClick={() => handleTokenClick('--border')} isHighlighted={highlightedToken === '--border'} />
         </div>
       </section>
 
@@ -282,40 +260,6 @@ export function CardDemo() {
               <CollapsibleCodeBlock code={getDynamicCode()} language="tsx" />
             </TabsContent>
           </Tabs>
-        </section>
-      )}
-
-      {/* Accessibility */}
-      {showAccessibility && (
-        <section className="animate-fade-in-up" style={{ animationDelay: '400ms', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'var(--card)' }}>
-            <div style={{ padding: isMobile ? '24px' : '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-                <div>
-                  <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Accessibility</h2>
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', margin: 0 }}>Built with WAI-ARIA patterns.</p>
-                </div>
-                <Button onClick={() => setShowAccessibility(!showAccessibility)} variant="ghost" size="sm" className="button-micro" style={{ gap: '8px' }}>
-                  <X size={16} />
-                  Hide
-                </Button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', gap: '12px', padding: '16px', background: 'var(--background)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                  <Check size={20} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Semantic Structure</div>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-                      <li>Uses valid semantic HTML tags.</li>
-                      <li>Images include standard <code>alt</code> text support.</li>
-                      <li>Contrast ratios meet WCAG AA standards.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
       )}
     </div>

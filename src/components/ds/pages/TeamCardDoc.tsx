@@ -5,18 +5,23 @@ import { AnatomyDiagram } from '../components/AnatomyDiagram';
 import { SectionDivider } from '../components/SectionDivider';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { toast } from 'sonner@2.0.3';
+import { copyToClipboard as safeCopyToClipboard } from '../../../utils/clipboard';
 
 export function TeamCardDoc() {
   const { isMobile, isTablet } = useBreakpoint();
   const [copiedStates, setCopiedStates] = React.useState<{ [key: string]: boolean }>({});
 
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedStates({ ...copiedStates, [id]: true });
-    toast.success('Copied to clipboard!');
-    setTimeout(() => {
-      setCopiedStates({ ...copiedStates, [id]: false });
-    }, 2000);
+  const handleCopy = async (text: string, id: string) => {
+    const success = await safeCopyToClipboard(text);
+    if (success) {
+      setCopiedStates({ ...copiedStates, [id]: true });
+      toast.success('Copied to clipboard!');
+      setTimeout(() => {
+        setCopiedStates({ ...copiedStates, [id]: false });
+      }, 2000);
+    } else {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const reactCode = `import { TeamCard } from './components/wugweb/TeamCard';

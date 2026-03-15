@@ -2,6 +2,7 @@ import React from 'react';
 import { Copy, Check, ChevronRight, Info, FileCode, Code2, Settings, Download, Trash2, Edit, ChevronDown, Check as CheckIcon } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { MenuItem } from '../../wugweb/MenuItem';
+import { copyToClipboard as safeCopyToClipboard } from '../../../utils/clipboard';
 
 export function MenuItemDoc() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
@@ -17,12 +18,15 @@ export function MenuItemDoc() {
     css: false,
   });
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+  const copyToClipboard = async (text: string, label: string) => {
+    const success = await safeCopyToClipboard(text);
+    if (success) {
       setCopiedCode(label);
       toast.success(`Copied ${label}`);
       setTimeout(() => setCopiedCode(null), 2000);
-    });
+    } else {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const toggleCodeBlock = (key: string) => {

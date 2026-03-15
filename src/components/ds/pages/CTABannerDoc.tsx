@@ -9,6 +9,7 @@ import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function CTABannerDoc() {
   const [title, setTitle] = React.useState('We speak your Industry\'s language.');
@@ -30,11 +31,11 @@ export function CTABannerDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    } else {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }

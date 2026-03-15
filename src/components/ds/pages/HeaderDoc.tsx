@@ -1,7 +1,10 @@
 import React from 'react';
-import { Copy, Check, ChevronRight, Info, FileCode, Monitor, Tablet, Smartphone } from 'lucide-react';
+import { Badge } from '../../ui/badge';
+import { Copy, Check, ChevronRight, Monitor, Tablet, Smartphone, Info, FileCode, Mail } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
-import { Header, HeaderNavItem, WugwebLogo, ContactIcon } from '../../wugweb/Header';
+import { copyToClipboard as safeCopy } from '../../../utils/clipboard';
+import { Header, HeaderNavItem } from '../../wugweb/Header';
+import { Logo } from '../../wugweb/Logo';
 
 export function HeaderDoc() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
@@ -9,12 +12,15 @@ export function HeaderDoc() {
   const [activeNav, setActiveNav] = React.useState<string>('#about');
   const [showAllVariants, setShowAllVariants] = React.useState(false);
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+  const handleCopy = async (text: string, label: string) => {
+    const success = await safeCopy(text);
+    if (success) {
       setCopiedCode(label);
       toast.success(`Copied ${label}`);
       setTimeout(() => setCopiedCode(null), 2000);
-    });
+    } else {
+      toast.error('Failed to copy');
+    }
   };
 
   const navItems: HeaderNavItem[] = [
@@ -661,7 +667,7 @@ function MyApp() {
                     }}>
                       Logo Component
                     </div>
-                    <WugwebLogo />
+                    <Logo brand="wugweb" variant="icon" />
                     <div style={{
                       fontSize: 'var(--text-xs)',
                       color: 'var(--muted-foreground)',
@@ -752,7 +758,7 @@ function MyApp() {
                       fontSize: 'var(--text-base)',
                       cursor: 'pointer',
                     }}>
-                      <ContactIcon />
+                      <Mail size={16} />
                       <span>Let's Talk</span>
                     </button>
                     <div style={{
@@ -956,7 +962,7 @@ function MyApp() {
               code={reactCode}
               language="tsx"
               copied={copiedCode === 'React code'}
-              onCopy={() => copyToClipboard(reactCode, 'React code')}
+              onCopy={() => handleCopy(reactCode, 'React code')}
             />
 
             <CodeBlock
@@ -964,7 +970,7 @@ function MyApp() {
               code={htmlCode}
               language="html"
               copied={copiedCode === 'HTML code'}
-              onCopy={() => copyToClipboard(htmlCode, 'HTML code')}
+              onCopy={() => handleCopy(htmlCode, 'HTML code')}
             />
 
             <CodeBlock
@@ -972,7 +978,7 @@ function MyApp() {
               code={cssCode}
               language="css"
               copied={copiedCode === 'CSS code'}
-              onCopy={() => copyToClipboard(cssCode, 'CSS code')}
+              onCopy={() => handleCopy(cssCode, 'CSS code')}
             />
           </div>
         </section>
@@ -993,7 +999,7 @@ function MyApp() {
               {tokens.map((token) => (
                 <button
                   key={token.name}
-                  onClick={() => copyToClipboard(`var(${token.token})`, token.name)}
+                  onClick={() => handleCopy(`var(${token.token})`, token.name)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

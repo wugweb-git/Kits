@@ -2,13 +2,13 @@ import React from 'react';
 import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
-import { Tabs as UITabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink, Home, Settings, User } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
+import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Tabs } from '../../wugweb/Tabs';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function TabsDoc() {
   const [selectedVariant, setSelectedVariant] = React.useState<'default' | 'underline' | 'pills'>('underline');
@@ -26,11 +26,11 @@ export function TabsDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    } else {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
@@ -306,7 +306,7 @@ const items = [
             </Button>
           </div>
 
-          <UITabs defaultValue="jsx" style={{ width: '100%' }}>
+          <Tabs defaultValue="jsx" style={{ width: '100%' }}>
             <TabsList style={{ marginBottom: '16px' }}>
               <TabsTrigger value="jsx">React + JSX</TabsTrigger>
               <TabsTrigger value="css">CSS</TabsTrigger>
@@ -319,7 +319,7 @@ const items = [
             <TabsContent value="css">
               <CollapsibleCodeBlock code={cssCode} language="css" />
             </TabsContent>
-          </UITabs>
+          </Tabs>
         </section>
       )}
 

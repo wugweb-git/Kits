@@ -10,6 +10,7 @@ import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Switch } from '../../ui/switch';
 import { cn } from '../../ui/utils';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function BadgeDoc() {
   const [tone, setTone] = React.useState<'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'info' | 'neutral'>('primary');
@@ -32,11 +33,11 @@ export function BadgeDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    } else {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }

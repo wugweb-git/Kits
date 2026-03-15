@@ -1,21 +1,13 @@
 /**
  * Safely copy text to clipboard with error handling
  * Returns true if successful, false otherwise
+ * 
+ * NOTE: In environments where Clipboard API is blocked by permissions policy,
+ * we use the fallback method exclusively to avoid errors.
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
-  // Try Clipboard API first only if we have user interaction context
-  if (navigator.clipboard && window.isSecureContext) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch (err) {
-      // Clipboard API blocked - fall back to execCommand
-      console.warn('Clipboard API blocked, using fallback:', err);
-      return fallbackCopyToClipboard(text);
-    }
-  }
-  
-  // Use fallback immediately if Clipboard API not available
+  // Always use fallback method due to Clipboard API being blocked in this environment
+  // This prevents "NotAllowedError: Failed to execute 'writeText' on 'Clipboard'"
   return fallbackCopyToClipboard(text);
 }
 

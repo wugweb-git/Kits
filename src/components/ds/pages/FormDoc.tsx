@@ -3,12 +3,12 @@ import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink, Send } from 'lucide-react';
+import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Form, FormField, FormSubmitButton } from '../../wugweb/Form';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function FormDoc() {
   const [selectedLayout, setSelectedLayout] = React.useState<'vertical' | 'horizontal' | 'inline'>('horizontal');
@@ -26,11 +26,11 @@ export function FormDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    } else {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }

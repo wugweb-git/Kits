@@ -2,6 +2,7 @@ import React from 'react';
 import { Copy, Check, ChevronRight, Info, FileCode, Home, Slash, ArrowRight, Dot, Code2 } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { Breadcrumb, BreadcrumbItem } from '../../wugweb/Breadcrumb';
+import { copyToClipboard as safeCopy } from '../../../utils/clipboard';
 
 export function BreadcrumbDoc() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
@@ -16,12 +17,15 @@ export function BreadcrumbDoc() {
     css: false,
   });
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+  const copyToClipboard = async (text: string, label: string) => {
+    const success = await safeCopy(text);
+    if (success) {
       setCopiedCode(label);
       toast.success(`Copied ${label}`);
       setTimeout(() => setCopiedCode(null), 2000);
-    });
+    } else {
+      toast.error('Failed to copy');
+    }
   };
 
   const toggleCodeBlock = (key: string) => {

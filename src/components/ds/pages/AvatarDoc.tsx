@@ -10,6 +10,7 @@ import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Avatar, AvatarGroup } from '../../wugweb/Avatar';
 import imgAvatar from 'figma:asset/f696e50d914cf017f3f0dedc0a291546425bc149.png';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function AvatarDoc() {
   const [selectedSize, setSelectedSize] = React.useState<'xs' | 'sm' | 'md' | 'lg' | 'xl'>('md');
@@ -27,11 +28,11 @@ export function AvatarDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    } else {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }

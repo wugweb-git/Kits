@@ -8,6 +8,7 @@ import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function SliderDoc() {
   const [sliderValue, setSliderValue] = React.useState([85]);
@@ -26,14 +27,9 @@ export function SliderDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    }
+    const success = await copyToClipboard(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const jsxCode = `import { Slider } from './components/ui/slider';

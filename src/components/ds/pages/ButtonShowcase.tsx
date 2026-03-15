@@ -1,19 +1,18 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Button as WugwebButton } from '../../wugweb/Button';
-import { Badge } from '../../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { ArrowRight, Trash2, Download, Check, X } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
-import { CheckCircle2, Copy } from 'lucide-react';
+import { Card, CardContent } from '../../ui/card';
+import { Button } from '../../wugweb/Button';
+import { Copy, Check } from 'lucide-react';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function ButtonShowcase() {
   const [copiedCode, setCopiedCode] = React.useState(false);
 
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
+  const copyCode = async (code: string) => {
+    const success = await copyToClipboard(code);
+    if (success) {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    }
   };
 
   return (

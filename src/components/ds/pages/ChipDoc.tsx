@@ -2,6 +2,7 @@ import React from 'react';
 import { Copy, Check, ChevronRight, Info, Tag, X, Settings, Filter } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { Chip } from '../../wugweb/Chip';
+import { copyToClipboard as safeCopyToClipboard } from '../../../utils/clipboard';
 
 export function ChipDoc() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
@@ -17,11 +18,15 @@ export function ChipDoc() {
     css: false,
   });
 
-  const copyToClipboard = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(id);
-    toast.success('Code copied to clipboard!');
-    setTimeout(() => setCopiedCode(null), 2000);
+  const copyToClipboard = async (code: string, id: string) => {
+    const success = await safeCopyToClipboard(code);
+    if (success) {
+      setCopiedCode(id);
+      toast.success('Code copied to clipboard!');
+      setTimeout(() => setCopiedCode(null), 2000);
+    } else {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const toggleCodeBlock = (id: string) => {

@@ -8,6 +8,7 @@ import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function TagDoc() {
   const [selectedVariant, setSelectedVariant] = React.useState<'filled' | 'outlined' | 'ghost'>('filled');
@@ -26,14 +27,9 @@ export function TagDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    }
+    const success = await copyToClipboard(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
   const getPadding = () => {

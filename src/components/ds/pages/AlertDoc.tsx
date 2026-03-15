@@ -2,6 +2,7 @@ import React from 'react';
 import { Copy, Check, ChevronRight, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner@2.0.3';
 import { Alert } from '../../wugweb/Alert';
+import { copyToClipboard as safeCopyToClipboard } from '../../../utils/clipboard';
 
 export function AlertDoc() {
   const [copiedCode, setCopiedCode] = React.useState<string | null>(null);
@@ -16,11 +17,15 @@ export function AlertDoc() {
     css: false,
   });
 
-  const copyToClipboard = (code: string, id: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(id);
-    toast.success('Code copied to clipboard!');
-    setTimeout(() => setCopiedCode(null), 2000);
+  const copyToClipboard = async (code: string, id: string) => {
+    const success = await safeCopyToClipboard(code);
+    if (success) {
+      setCopiedCode(id);
+      toast.success('Code copied to clipboard!');
+      setTimeout(() => setCopiedCode(null), 2000);
+    } else {
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const toggleCodeBlock = (id: string) => {

@@ -3,12 +3,13 @@ import { Button } from '../../ui/button';
 import { Card, CardContent } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink, AlertCircle } from 'lucide-react';
+import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { spacing } from '../../../utils/responsive';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { AlertDialog, AlertDialogActions } from '../../wugweb/AlertDialog';
+import { AlertDialog } from '../../wugweb/AlertDialog';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function AlertDialogDoc() {
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
@@ -27,17 +28,17 @@ export function AlertDialogDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    } else {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
-  const jsxCode = `import { AlertDialog, AlertDialogActions } from './components/wugweb/AlertDialog';
+  const jsxCode = `import { AlertDialog } from './components/wugweb/AlertDialog';
 
 const [isOpen, setIsOpen] = React.useState(false);
 
