@@ -7,7 +7,7 @@ import {
   Blocks, FileCode, Package, Lightbulb, BookOpen, GitBranch,
   Clock, Users, Search, Phone, FileText as TextIcon, Filter,
   List, Award, Bell, Tag, Square, Menu, ChevronRight, X,
-  TrendingUp, Activity
+  TrendingUp, Activity, Layers
 } from 'lucide-react';
 
 interface SidebarItem {
@@ -62,6 +62,8 @@ export function ContextualSidebar({
           { id: 'introduction', label: 'Introduction', icon: Home },
           { id: 'installation', label: 'Installation', icon: Package },
           { id: 'getting-started', label: 'Getting Started', icon: Zap },
+          { id: 'token-architecture', label: 'Token Architecture', icon: Layers, isNew: true },
+          { id: 'system-layers', label: 'System Layers', icon: GitBranch, isNew: true },
           {
             id: 'design-tokens',
             label: 'Design Tokens',

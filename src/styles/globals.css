@@ -1,276 +1,788 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap');
+/* ============================================================
+ * WUGWEB KITS — DESIGN TOKENS
+ * Single source of truth for all visual properties.
+ * 
+ * ARCHITECTURE: 4-Layer Token System (W3C DTCG / Tokens Studio)
+ * ─────────────────────────────────────────────────────────────
+ * Layer 1  — CORE    : Raw primitives. No meaning. Only values.
+ *                      --core-color-brand-yellow-500, --core-spacing-4
+ * Layer 1.5 — ALIAS  : Branding bridge. Maps Core → Brand names.
+ *                      --alias-color-brand-primary, --alias-surface-page
+ *                      ← SWAP THIS FILE TO SWITCH BRANDS
+ * Layer 2  — SEMANTIC: Intent layer. Answers "what is this FOR?"
+ *                      --accent, --background, --ts-h1-size, --z-index-modal
+ * Layer 3  — COMPONENT: Per-component overrides.
+ *                      --btn-radius, --card-padding, --dialog-shadow
+ *
+ * TOKEN TYPES (W3C DTCG compliant):
+ *   color · dimension (spacing, size) · radius · typography (composite)
+ *   shadow (composite) · border (composite) · opacity · motion · z-index · asset
+ *
+ * RULES (non-negotiable):
+ *   ✅ Always var(--token) — never hardcode hex or px in components
+ *   ✅ Font: 'Inter Tight', sans-serif — ONLY font face in use
+ *   ✅ Spacing via --spacing-n (4pt grid)
+ *   ✅ Z-index via --z-index-* — never raw numbers
+ *   ✅ Borders via --border-* composite tokens
+ *   ✅ Opacity via --opacity-* semantic tokens
+ *   ❌ No hex in components · No px in components · No direct core usage
+ * ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
+
+/* ============================================================
+ * LAYER 1 — CORE TOKENS (Raw Primitives)
+ * These have no semantic meaning. They are the raw palette,
+ * scale, and primitives the semantic layer draws from.
+ * Naming convention: --core-{category}-{name}-{scale}
+ * ============================================================ */
 :root {
-  /* The default font size for the application */
-  --font-size: 16px;
-  
-  /* Typography scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 2.25rem;
-  --text-3xl: 3rem;
-  --text-4xl: 4rem;
-  
-  /* Font weights */
-  --font-weight-regular: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  
-  /* Dark mode color tokens */
-  /* The default background color for the application. */
-  --background: rgba(18, 18, 18, 1.00);
-  /* The default color for elements or text that appears on top of the background. */
-  --foreground: rgba(255, 255, 255, 1.00);
-  /* The background color for cards, modals, and other containers. */
-  --card: var(--surface-800);
-  /* The default color for text or elements that appear on top of cards, modals and other background containers. */
-  --card-foreground: rgba(255, 255, 255, 1.00);
-  /* The background color for dropdowns and tooltips. */
-  --popover: rgba(28, 28, 28, 1.00);
-  /* The default color for text or elements that appear on top of dropdowns and tooltips. */
-  --popover-foreground: rgba(255, 255, 255, 1.00);
-  /* The primary color used for buttons, links, and other interactive elements. */
-  --primary: rgba(255, 255, 255, 1.00);
-  /* The default color for text or elements that appear on top of primary colored elements. */
-  --primary-foreground: rgba(18, 18, 18, 1.00);
-  /* The secondary color used for secondary(but NOT-DESTRUCTIVE) buttons and interactive elements. */
-  --secondary: rgba(43, 43, 43, 1.00);
-  /* The default color for text or elements that appear on top of secondary colored elements. */
-  --secondary-foreground: rgba(255, 255, 255, 1.00);
-  /* The muted color used for less prominent elements, such as disabled buttons or disabled text. */
-  --muted: rgba(38, 38, 38, 1.00);
-  /* The default color for text or elements that appear on top of muted colored elements. */
-  --muted-foreground: rgba(161, 161, 161, 1.00);
-  /* The accent color used for highlights, links, and other interactive elements. */
-  --accent: rgba(255, 190, 26, 1.00);
-  /* The default color for text or elements that appear on top of accent colored elements. */
-  --accent-foreground: rgba(18, 18, 18, 1.00);
-  /* The color used for background in destructive actions, such as delete buttons or error messages. */
-  --destructive: rgba(239, 67, 67, 1.00);
-  /* The default color for text or elements that appear on top of destructive colored elements. */
-  --destructive-foreground: rgba(255, 255, 255, 1.00);
-  /* The default border color for elements such as inputs, buttons, and other containers. */
-  --border: rgba(43, 43, 43, 1.00);
-  /* The default background color for input fields once the text has been filled. Should be either transparent or match the input-background. */
-  --input: rgba(28, 28, 28, 1.00);
-  /* The default background color for input fields, text areas, and other input elements. */
-  --input-background: rgba(28, 28, 28, 1.00);
-  /* The default color for focus rings, outlines, and other focus indicators. */
-  --ring: rgba(255, 190, 26, 1.00);
-  /* Shadow for small elevations, such as cards or modals. */
-  
-  /* Success color for positive states and confirmations */
-  --success: rgba(34, 197, 94, 1.00);
-  --success-foreground: rgba(255, 255, 255, 1.00);
-  
-  /* Utility colors with opacity for overlays, focus states, and highlights */
-  --overlay-background: rgba(0, 0, 0, 0.6);
-  --accent-subtle: rgba(255, 190, 26, 0.1);
-  --destructive-subtle: rgba(239, 67, 67, 0.1);
-  --success-subtle: rgba(34, 197, 94, 0.1);
-  --focus-ring-accent: 0 0 0 3px rgba(255, 190, 26, 0.1);
-  --focus-ring-destructive: 0 0 0 3px rgba(239, 67, 67, 0.1);
-  
-  /* Social button colors for light backgrounds and dark borders */
-  --social-background: rgba(255, 255, 255, 1.00);
-  --social-foreground: rgba(5, 5, 5, 1.00);
-  --social-border: rgba(5, 5, 5, 1.00);
-  
-  /* The color for chart elements, such as a bar or line in a chart. */
-  --chart-1: rgba(255, 255, 255, 1.00);
-  /* The color for another chart element, such as a bar or line in a chart. */
-  --chart-2: rgba(68, 68, 68, 1.00);
-  /* The color for another chart element, such as a bar or line in a chart. */
-  --chart-3: rgba(161, 161, 161, 1.00);
-  /* The color for another chart element, such as a bar or line in a chart. */
-  --chart-4: rgba(255, 190, 26, 1.00);
-  /* The color for another chart element, such as a bar or line in a chart. */
-  --chart-5: rgba(239, 67, 67, 1.00);
-  /* The default border radius for small elements. */
-  --radius-0: 0px;
-  --radius-1: 4px;
-  --radius-2: 8px;
-  --radius-3: 12px;
-  --radius-4: 16px;
-  --radius-5: 20px;
-  --radius-6: 24px;
-  --radius-8: 32px;
 
-  --radius-sm: var(--radius-1);
-  /* The default border radius for medium elements. */
-  --radius-md: var(--radius-2);
-  /* The default border radius for large elements. */
-  --radius-lg: var(--radius-3);
-  /* The default border radius for circular elements. */
-  --radius-full: 9999px;
-  
-  /* Spacing tokens — 4-point grid system */
-  --spacing-1: 4px;
-  --spacing-2: 8px;
-  --spacing-3: 12px;
-  --spacing-4: 16px;
-  --spacing-5: 20px;
-  --spacing-6: 24px;
-  --spacing-7: 28px;
-  --spacing-8: 32px;
-  --spacing-9: 36px;
-  --spacing-10: 40px;
-  --spacing-11: 44px;
-  --spacing-12: 48px;
-  
-  /* Layout padding tokens for responsive design */
-  --layout-padding-desktop-left: 0px;      /* Desktop left padding (no padding, sidebar handles it) */
-  --layout-padding-desktop-right: 40px;    /* Desktop right padding (global gutter) */
-  --layout-padding-tablet: 50px;           /* Tablet left + right padding */
-  --layout-padding-mobile: 20px;           /* Mobile left + right padding */
-  --layout-content-gap-desktop: 40px;      /* Gap between sidebar and main content on desktop */
-  
-  /* 8pt Grid System */
-  --grid-columns-desktop: 12;
-  --grid-columns-tablet: 8;
-  --grid-columns-mobile: 4;
-  
-  --grid-gutter-desktop: 24px;  /* 3 * 8px */
-  --grid-gutter-tablet: 16px;   /* 2 * 8px */
-  --grid-gutter-mobile: 16px;   /* 2 * 8px */
-  
-  --grid-margin-desktop: 48px;  /* 6 * 8px */
-  --grid-margin-tablet: 32px;   /* 4 * 8px */
-  --grid-margin-mobile: 16px;   /* 2 * 8px */
-  
-  /* Section spacing — vertical gaps between major sections */
-  --section-spacing-desktop: 64px;   /* Desktop vertical spacing between major sections */
-  --section-spacing-tablet: 48px;    /* Tablet vertical spacing between major sections */
-  --section-spacing-mobile: 32px;    /* Mobile vertical spacing between major sections */
-  
-  /* Container sizing */
-  --layout-max-width: 1440px;        /* Maximum viewport width reference */
-  --sidebar-width: 280px;            /* Fixed sidebar width */
-  --header-height: 64px;             /* Fixed header height */
-  
-  /* The background color for sidebars, navigation menus, and other persistent elements. */
-  --sidebar: rgba(18, 18, 18, 1.00);
-  /* The default color for text or elements that appear on top of sidebars, navigation menus, and other persistent elements. */
-  --sidebar-foreground: rgba(255, 255, 255, 1.00);
-  /* The primary color used for buttons, links, and other interactive elements in sidebars and navigation menus. */
-  --sidebar-primary: rgba(43, 43, 43, 1.00);
-  /* The default color for text or elements that appear on top of primary colored elements in sidebars and navigation menus. */
-  --sidebar-primary-foreground: rgba(255, 255, 255, 1.00);
-  /* The accent color used for highlights, links, and other interactive elements in sidebars and navigation menus. */
-  --sidebar-accent: rgba(255, 190, 26, 1.00);
-  /* The default color for text or elements that appear on top of accent colored elements in sidebars and navigation menus. */
-  --sidebar-accent-foreground: rgba(18, 18, 18, 1.00);
-  /* The default border color for elements in sidebars and navigation menus. */
-  --sidebar-border: rgba(43, 43, 43, 1.00);
-  /* The default color for focus rings, outlines, and other focus indicators in sidebars and navigation menus. */
-  --sidebar-ring: rgba(255, 190, 26, 1.00);
-  
-  /* Motion & Animation Tokens */
-  /* Fast micro-interactions like button press */
-  --motion-duration-fast: 80ms;
-  /* Standard interactions like hover */
-  --motion-duration-normal: 120ms;
-  /* Slower transitions for emphasis */
-  --motion-duration-slow: 200ms;
-  /* Standard easing for most interactions */
-  --motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  /* Emphasized easing for important actions */
-  --motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
-  /* Decelerated easing for entering elements */
-  --motion-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  /* ── 1a. Core Color — Brand ─────────────────────────────── */
+  --core-color-brand-yellow-50:  rgba(255, 250, 230, 1.00);
+  --core-color-brand-yellow-100: rgba(255, 242, 184, 1.00);
+  --core-color-brand-yellow-200: rgba(255, 226, 120, 1.00);
+  --core-color-brand-yellow-300: rgba(255, 210, 72, 1.00);
+  --core-color-brand-yellow-400: rgba(255, 198, 45, 1.00);
+  --core-color-brand-yellow-500: rgba(255, 190, 26, 1.00); /* ← Primary brand accent */
+  --core-color-brand-yellow-600: rgba(230, 165, 10, 1.00);
+  --core-color-brand-yellow-700: rgba(180, 126, 5, 1.00);
+  --core-color-brand-yellow-800: rgba(130, 90, 2, 1.00);
+  --core-color-brand-yellow-900: rgba(80, 54, 0, 1.00);
 
-  /* Enhanced Motion System — Coherent animation durations and easings */
-  /* Extra short for instant feedback */
-  --motion-duration-xs: 60ms;
-  /* Short for micro-interactions */
-  --motion-duration-short: 120ms;
-  /* Medium for standard transitions */
+  /* ── 1b. Core Color — Neutral (Gray Scale) ──────────────── */
+  --core-color-neutral-0:   rgba(255, 255, 255, 1.00);
+  --core-color-neutral-50:  rgba(250, 250, 250, 1.00);
+  --core-color-neutral-100: rgba(240, 240, 240, 1.00);
+  --core-color-neutral-200: rgba(220, 220, 220, 1.00);
+  --core-color-neutral-300: rgba(196, 196, 196, 1.00);
+  --core-color-neutral-400: rgba(161, 161, 161, 1.00);
+  --core-color-neutral-500: rgba(115, 115, 115, 1.00);
+  --core-color-neutral-600: rgba(82, 82, 82, 1.00);
+  --core-color-neutral-700: rgba(68, 68, 68, 1.00);
+  --core-color-neutral-800: rgba(43, 43, 43, 1.00);
+  --core-color-neutral-900: rgba(28, 28, 28, 1.00);
+  --core-color-neutral-950: rgba(18, 18, 18, 1.00);
+  --core-color-neutral-1000: rgba(10, 10, 10, 1.00);
+
+  /* ── 1c. Core Color — Surface (Dark UI layering) ────────── */
+  --core-color-surface-1000: rgba(10, 10, 10, 1.00);   /* Darkest — page chrome */
+  --core-color-surface-950:  rgba(14, 14, 14, 1.00);
+  --core-color-surface-900:  rgba(18, 18, 18, 1.00);   /* Primary background */
+  --core-color-surface-850:  rgba(22, 22, 22, 1.00);
+  --core-color-surface-800:  rgba(28, 28, 28, 1.00);   /* Cards, panels */
+  --core-color-surface-700:  rgba(38, 38, 38, 1.00);   /* Hover, muted */
+  --core-color-surface-600:  rgba(43, 43, 43, 1.00);   /* Borders, secondary */
+
+  /* ── 1d. Core Color — Semantic Status ───────────────────── */
+  --core-color-success-500: rgba(34, 197, 94, 1.00);
+  --core-color-success-900: rgba(6, 78, 36, 1.00);
+  --core-color-warning-500: rgba(234, 179, 8, 1.00);
+  --core-color-warning-900: rgba(101, 73, 0, 1.00);
+  --core-color-error-500:   rgba(239, 67, 67, 1.00);
+  --core-color-error-900:   rgba(100, 10, 10, 1.00);
+  --core-color-info-500:    rgba(59, 130, 246, 1.00);
+  --core-color-info-900:    rgba(12, 46, 115, 1.00);
+
+  /* ── 1e. Core Spacing (4pt grid) ────────────────────────── */
+  --core-spacing-0:   0px;
+  --core-spacing-px:  1px;
+  --core-spacing-0-5: 2px;
+  --core-spacing-1:   4px;
+  --core-spacing-2:   8px;
+  --core-spacing-3:   12px;
+  --core-spacing-4:   16px;
+  --core-spacing-5:   20px;
+  --core-spacing-6:   24px;
+  --core-spacing-7:   28px;
+  --core-spacing-8:   32px;
+  --core-spacing-9:   36px;
+  --core-spacing-10:  40px;
+  --core-spacing-11:  44px;
+  --core-spacing-12:  48px;
+  --core-spacing-14:  56px;
+  --core-spacing-16:  64px;
+  --core-spacing-20:  80px;
+  --core-spacing-24:  96px;
+  --core-spacing-32:  128px;
+
+  /* ── 1f. Core Radius ─────────────────────────────────────── */
+  --core-radius-0:    0px;
+  --core-radius-1:    4px;
+  --core-radius-2:    8px;
+  --core-radius-3:    12px;
+  --core-radius-4:    16px;
+  --core-radius-5:    20px;
+  --core-radius-6:    24px;
+  --core-radius-8:    32px;
+  --core-radius-full: 9999px;
+
+  /* ── 1g. Core Typography — Font Families ─────────────────── */
+  --core-font-family-base:  'Inter Tight', sans-serif;
+  --core-font-family-mono:  'ui-monospace', 'SFMono-Regular', 'Menlo', monospace;
+
+  /* ── 1h. Core Typography — Size Scale ───────────────────── */
+  --core-font-size-2xs: 0.625rem;    /* 10px */
+  --core-font-size-xs:  0.75rem;     /* 12px */
+  --core-font-size-sm:  0.875rem;    /* 14px */
+  --core-font-size-md:  1rem;        /* 16px */
+  --core-font-size-lg:  1.25rem;     /* 20px */
+  --core-font-size-xl:  1.5rem;      /* 24px */
+  --core-font-size-2xl: 2.25rem;     /* 36px */
+  --core-font-size-3xl: 3rem;        /* 48px */
+  --core-font-size-4xl: 4rem;        /* 64px */
+  --core-font-size-5xl: 5rem;        /* 80px */
+
+  /* ── 1i. Core Typography — Font Weights ─────────────────── */
+  --core-font-weight-regular:   400;
+  --core-font-weight-medium:    500;
+  --core-font-weight-semibold:  600;
+  --core-font-weight-bold:      700;
+  --core-font-weight-extrabold: 800;
+
+  /* ── 1j. Core Typography — Line Heights ─────────────────── */
+  --core-line-height-none:    1;
+  --core-line-height-tight:   1.2;
+  --core-line-height-snug:    1.375;
+  --core-line-height-normal:  1.5;
+  --core-line-height-relaxed: 1.625;
+  --core-line-height-loose:   2;
+
+  /* ── 1k. Core Typography — Letter Spacing ───────────────── */
+  --core-letter-spacing-tighter: -0.05em;
+  --core-letter-spacing-tight:   -0.025em;
+  --core-letter-spacing-normal:   0em;
+  --core-letter-spacing-wide:     0.025em;
+  --core-letter-spacing-wider:    0.05em;
+  --core-letter-spacing-widest:   0.1em;
+
+  /* ── 1l. Core Effects — Elevation (Box Shadows) ─────────── */
+  --core-shadow-none: none;
+  --core-shadow-xs:   0 1px 2px 0 rgba(0, 0, 0, 0.40);
+  --core-shadow-sm:   0 2px 4px 0 rgba(0, 0, 0, 0.45);
+  --core-shadow-md:   0 4px 12px 0 rgba(0, 0, 0, 0.50);
+  --core-shadow-lg:   0 8px 24px 0 rgba(0, 0, 0, 0.55);
+  --core-shadow-xl:   0 16px 48px 0 rgba(0, 0, 0, 0.60);
+  --core-shadow-2xl:  0 24px 64px 0 rgba(0, 0, 0, 0.65);
+  --core-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.40);
+
+  /* ── 1m. Core Effects — Blur ─────────────────────────────── */
+  --core-blur-none: 0px;
+  --core-blur-xs:   2px;
+  --core-blur-sm:   4px;
+  --core-blur-md:   8px;
+  --core-blur-lg:   16px;
+  --core-blur-xl:   24px;
+  --core-blur-2xl:  40px;
+
+  /* ── 1n. Core Effects — Opacity ──────────────────────────── */
+  --core-opacity-0:   0;
+  --core-opacity-5:   0.05;
+  --core-opacity-10:  0.10;
+  --core-opacity-20:  0.20;
+  --core-opacity-30:  0.30;
+  --core-opacity-40:  0.40;
+  --core-opacity-50:  0.50;
+  --core-opacity-60:  0.60;
+  --core-opacity-70:  0.70;
+  --core-opacity-80:  0.80;
+  --core-opacity-90:  0.90;
+  --core-opacity-100: 1;
+
+  /* ── 1o. Core Motion ─────────────────────────────────────── */
+  --core-duration-instant: 0ms;
+  --core-duration-xs:      60ms;
+  --core-duration-sm:      80ms;
+  --core-duration-md:      120ms;
+  --core-duration-lg:      200ms;
+  --core-duration-xl:      320ms;
+  --core-duration-2xl:     500ms;
+
+  --core-easing-linear:     linear;
+  --core-easing-standard:   cubic-bezier(0.4, 0, 0.2, 1);
+  --core-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --core-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --core-easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --core-easing-soft:       cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+
+/* ============================================================
+ * LAYER 1.5 — ALIAS TOKENS (Branding / Theming Bridge)
+ * 
+ * PURPOSE: Map Core tokens → Brand-meaningful names.
+ * This is what enables MULTI-BRAND THEMING.
+ * 
+ * Rule: Alias tokens ONLY reference Core tokens.
+ *       Semantic tokens ONLY reference Alias tokens.
+ *       This keeps swapping brands to a 1-file change.
+ * 
+ * W3C DTCG / Tokens Studio: These live in alias.json
+ * ============================================================ */
+:root {
+
+  /* ── Brand identity ────────────────────────────────────────── */
+  --alias-color-brand-primary:    var(--core-color-brand-yellow-500);   /* #FFBE1A — The brand */
+  --alias-color-brand-primary-50: var(--core-color-brand-yellow-50);
+  --alias-color-brand-primary-light: var(--core-color-brand-yellow-200);
+  --alias-color-brand-primary-dark:  var(--core-color-brand-yellow-700);
+
+  /* ── Neutral scale (aliased for theming swap) ─────────────── */
+  --alias-color-neutral-strong:   var(--core-color-neutral-0);       /* #FFF */
+  --alias-color-neutral-base:     var(--core-color-neutral-400);     /* #A1A1A1 */
+  --alias-color-neutral-muted:    var(--core-color-neutral-500);     /* #737373 */
+  --alias-color-neutral-subtle:   var(--core-color-neutral-700);     /* #444 */
+  --alias-color-neutral-inverse:  var(--core-color-neutral-950);     /* #121212 */
+
+  /* ── Surface scale ────────────────────────────────────────── */
+  --alias-surface-page:     var(--core-color-surface-900);    /* Main page bg */
+  --alias-surface-raised:   var(--core-color-surface-800);    /* Cards, panels */
+  --alias-surface-overlay:  var(--core-color-surface-800);    /* Modals, dropdowns */
+  --alias-surface-sunken:   var(--core-color-surface-700);    /* Inputs, muted areas */
+  --alias-surface-chrome:   var(--core-color-surface-1000);   /* Darkest chrome / sidebar */
+
+  /* ── Status ───────────────────────────────────────────────── */
+  --alias-color-success:    var(--core-color-success-500);
+  --alias-color-warning:    var(--core-color-warning-500);
+  --alias-color-error:      var(--core-color-error-500);
+  --alias-color-info:       var(--core-color-info-500);
+
+  /* ── Typography ───────────────────────────────────────────── */
+  --alias-font-family-base: var(--core-font-family-base);   /* 'Inter Tight', sans-serif */
+  --alias-font-family-mono: var(--core-font-family-mono);
+
+  /* ── Spacing ──────────────────────────────────────────────── */
+  --alias-space-component-xs:  var(--core-spacing-2);   /*  8px — tight component gaps */
+  --alias-space-component-sm:  var(--core-spacing-3);   /* 12px */
+  --alias-space-component-md:  var(--core-spacing-4);   /* 16px — standard component */
+  --alias-space-component-lg:  var(--core-spacing-6);   /* 24px — relaxed component */
+  --alias-space-layout-sm:     var(--core-spacing-8);   /* 32px — section gap mobile */
+  --alias-space-layout-md:     var(--core-spacing-12);  /* 48px — section gap tablet */
+  --alias-space-layout-lg:     var(--core-spacing-16);  /* 64px — section gap desktop */
+
+  /* ── Radius ───────────────────────────────────────────────── */
+  --alias-radius-tight:   var(--core-radius-1);    /* 4px  — chips, badges */
+  --alias-radius-base:    var(--core-radius-2);    /* 8px  — inputs, buttons */
+  --alias-radius-loose:   var(--core-radius-3);    /* 12px — cards, panels */
+  --alias-radius-round:   var(--core-radius-full); /* 9999px — pills */
+
+  /* ── Elevation ────────────────────────────────────────────── */
+  --alias-shadow-subtle:  var(--core-shadow-xs);
+  --alias-shadow-base:    var(--core-shadow-sm);
+  --alias-shadow-raised:  var(--core-shadow-md);
+  --alias-shadow-overlay: var(--core-shadow-lg);
+  --alias-shadow-modal:   var(--core-shadow-xl);
+
+  /* ── Motion ───────────────────────────────────────────────── */
+  --alias-motion-instant: var(--core-duration-xs);     /* 60ms */
+  --alias-motion-fast:    var(--core-duration-sm);     /* 80ms  — micro-interactions */
+  --alias-motion-base:    var(--core-duration-md);     /* 120ms — hover, focus */
+  --alias-motion-enter:   var(--core-duration-lg);     /* 200ms — appearing elements */
+  --alias-motion-page:    var(--core-duration-xl);     /* 320ms — page transitions */
+  --alias-motion-ease:    var(--core-easing-standard);
+}
+
+
+/* ============================================================
+ * LAYER 2 — SEMANTIC TOKENS (Intent Layer)
+ * These alias Core tokens with usage-based names.
+ * They answer: "What IS this color/value FOR?"
+ * Change a semantic token → everything using it updates.
+ * ============================================================ */
+:root {
+
+  /* ── 2a. Semantic Color — Background & Surfaces ─────────── */
+  --background:       var(--core-color-surface-900);    /* Page background */
+  --surface-1000:     var(--core-color-surface-1000);   /* Darkest chrome */
+  --surface-950:      var(--core-color-surface-950);
+  --surface-900:      var(--core-color-surface-900);    /* Page background */
+  --surface-850:      var(--core-color-surface-850);
+  --surface-800:      var(--core-color-surface-800);    /* Cards, modals */
+  --surface-700:      var(--core-color-surface-700);    /* Hover states */
+  --surface-600:      var(--core-color-surface-600);    /* Borders, secondary */
+
+  /* ── 2b. Semantic Color — Foreground (Text) ─────────────── */
+  --foreground:           var(--core-color-neutral-0);    /* Primary text on bg */
+  --text-primary:         var(--core-color-neutral-0);    /* Heading, primary text */
+  --text-secondary:       var(--core-color-neutral-400);  /* Secondary, body text */
+  --text-tertiary:        var(--core-color-neutral-500);  /* Captions, helper text */
+  --text-disabled:        var(--core-color-neutral-600);  /* Disabled state text */
+  --text-inverse:         var(--core-color-neutral-950);  /* Text on accent bg */
+  --text-placeholder:     var(--core-color-neutral-600);  /* Input placeholder */
+
+  /* ── 2c. Semantic Color — Brand / Accent ─────────────────── */
+  --accent:           var(--core-color-brand-yellow-500); /* Primary brand color */
+  --accent-foreground: var(--core-color-neutral-950);     /* Text ON accent bg */
+  --accent-subtle:     rgba(255, 190, 26, 0.10);          /* Tinted accent bg */
+  --accent-muted:      rgba(255, 190, 26, 0.20);          /* Deeper accent tint */
+  --ring:             var(--core-color-brand-yellow-500); /* Focus ring */
+
+  /* ── 2d. Semantic Color — Primary (UI primary action) ────── */
+  --primary:          var(--core-color-neutral-0);    /* Button bg, links */
+  --primary-foreground: var(--core-color-neutral-950);/* Text ON primary */
+
+  /* ── 2e. Semantic Color — Secondary (Non-destructive) ────── */
+  --secondary:          var(--core-color-surface-600);
+  --secondary-foreground: var(--core-color-neutral-0);
+
+  /* ── 2f. Semantic Color — Muted (Subdued elements) ─────────*/
+  --muted:          var(--core-color-surface-700);
+  --muted-foreground: var(--core-color-neutral-400);
+
+  /* ── 2g. Semantic Color — Card / Container ──────────────── */
+  --card:           var(--core-color-surface-800);
+  --card-foreground: var(--core-color-neutral-0);
+
+  /* ── 2h. Semantic Color — Popover / Overlay ─────────────── */
+  --popover:          var(--core-color-surface-800);
+  --popover-foreground: var(--core-color-neutral-0);
+
+  /* ── 2i. Semantic Color — Border / Divider ───────────────── */
+  --border:         var(--core-color-surface-600);
+  --border-subtle:  var(--core-color-surface-700);
+  --border-strong:  var(--core-color-neutral-700);
+
+  /* ── 2j. Semantic Color — Input ─────────────────────────── */
+  --input:            var(--core-color-surface-800);
+  --input-background: var(--core-color-surface-800);
+  --input-border:     var(--core-color-surface-600);
+  --input-border-focus: var(--core-color-brand-yellow-500);
+  --input-placeholder: var(--core-color-neutral-500);
+
+  /* ── 2k. Semantic Color — Status: Success ───────────────── */
+  --success:          var(--core-color-success-500);
+  --success-foreground: var(--core-color-neutral-0);
+  --success-subtle:   rgba(34, 197, 94, 0.10);
+  --success-muted:    rgba(34, 197, 94, 0.20);
+
+  /* ── 2l. Semantic Color — Status: Warning ───────────────── */
+  --warning:          var(--core-color-warning-500);
+  --warning-foreground: var(--core-color-neutral-950);
+  --warning-subtle:   rgba(234, 179, 8, 0.10);
+  --warning-muted:    rgba(234, 179, 8, 0.20);
+
+  /* ── 2m. Semantic Color — Status: Error / Destructive ────── */
+  --destructive:          var(--core-color-error-500);
+  --destructive-foreground: var(--core-color-neutral-0);
+  --destructive-subtle:   rgba(239, 67, 67, 0.10);
+  --destructive-muted:    rgba(239, 67, 67, 0.20);
+
+  /* ── 2n. Semantic Color — Status: Info ──────────────────── */
+  --info:           var(--core-color-info-500);
+  --info-foreground: var(--core-color-neutral-0);
+  --info-subtle:    rgba(59, 130, 246, 0.10);
+  --info-muted:     rgba(59, 130, 246, 0.20);
+
+  /* ── 2o. Semantic Color — Overlay ───────────────────────── */
+  --overlay-background: rgba(0, 0, 0, 0.60);
+  --overlay-light:      rgba(0, 0, 0, 0.30);
+  --overlay-heavy:      rgba(0, 0, 0, 0.80);
+
+  /* ── 2p. Semantic Color — Focus Rings ───────────────────── */
+  --focus-ring-accent:      0 0 0 3px rgba(255, 190, 26, 0.25);
+  --focus-ring-destructive: 0 0 0 3px rgba(239, 67, 67, 0.25);
+  --focus-ring-info:        0 0 0 3px rgba(59, 130, 246, 0.25);
+
+  /* ── 2q. Semantic Color — Social Buttons ────────────────── */
+  --social-background: var(--core-color-neutral-0);
+  --social-foreground: var(--core-color-neutral-1000);
+  --social-border:     var(--core-color-neutral-1000);
+
+  /* ── 2r. Semantic Color — Sidebar ───────────────────────── */
+  --sidebar:                  var(--core-color-surface-900);
+  --sidebar-foreground:       var(--core-color-neutral-0);
+  --sidebar-primary:          var(--core-color-surface-600);
+  --sidebar-primary-foreground: var(--core-color-neutral-0);
+  --sidebar-accent:           var(--core-color-brand-yellow-500);
+  --sidebar-accent-foreground: var(--core-color-neutral-950);
+  --sidebar-border:           var(--core-color-surface-600);
+  --sidebar-ring:             var(--core-color-brand-yellow-500);
+
+  /* ── 2s. Semantic Color — Charts ────────────────────────── */
+  --chart-1: var(--core-color-neutral-0);             /* White */
+  --chart-2: var(--core-color-neutral-700);            /* Dark gray */
+  --chart-3: var(--core-color-neutral-400);            /* Mid gray */
+  --chart-4: var(--core-color-brand-yellow-500);       /* Brand accent */
+  --chart-5: var(--core-color-error-500);              /* Error/danger */
+
+  /* ── 2t. Semantic Spacing (aliases from core) ────────────── */
+  --spacing-1:  var(--core-spacing-1);    /* 4px */
+  --spacing-2:  var(--core-spacing-2);    /* 8px */
+  --spacing-3:  var(--core-spacing-3);    /* 12px */
+  --spacing-4:  var(--core-spacing-4);    /* 16px */
+  --spacing-5:  var(--core-spacing-5);    /* 20px */
+  --spacing-6:  var(--core-spacing-6);    /* 24px */
+  --spacing-7:  var(--core-spacing-7);    /* 28px */
+  --spacing-8:  var(--core-spacing-8);    /* 32px */
+  --spacing-9:  var(--core-spacing-9);    /* 36px */
+  --spacing-10: var(--core-spacing-10);   /* 40px */
+  --spacing-11: var(--core-spacing-11);   /* 44px */
+  --spacing-12: var(--core-spacing-12);   /* 48px */
+
+  /* ── 2u. Semantic Radius (aliases from core) ─────────────── */
+  --radius-0:   var(--core-radius-0);
+  --radius-1:   var(--core-radius-1);    /* 4px */
+  --radius-2:   var(--core-radius-2);    /* 8px */
+  --radius-3:   var(--core-radius-3);    /* 12px */
+  --radius-4:   var(--core-radius-4);    /* 16px */
+  --radius-5:   var(--core-radius-5);    /* 20px */
+  --radius-6:   var(--core-radius-6);    /* 24px */
+  --radius-8:   var(--core-radius-8);    /* 32px */
+  --radius-full: var(--core-radius-full); /* 9999px */
+  --radius-sm:   var(--core-radius-1);   /* 4px — small elements */
+  --radius-md:   var(--core-radius-2);   /* 8px — medium elements */
+  --radius-lg:   var(--core-radius-3);   /* 12px — large elements */
+
+  /* ── 2v. Semantic Typography — Scale ─────────────────────── */
+  --font-size:     16px;                            /* Base document font size */
+  --text-2xs:      var(--core-font-size-2xs);       /* 10px */
+  --text-xs:       var(--core-font-size-xs);        /* 12px */
+  --text-sm:       var(--core-font-size-sm);        /* 14px */
+  --text-base:     var(--core-font-size-md);        /* 16px */
+  --text-lg:       var(--core-font-size-lg);        /* 20px */
+  --text-xl:       var(--core-font-size-xl);        /* 24px */
+  --text-2xl:      var(--core-font-size-2xl);       /* 36px */
+  --text-3xl:      var(--core-font-size-3xl);       /* 48px */
+  --text-4xl:      var(--core-font-size-4xl);       /* 64px */
+
+  /* ── 2w. Semantic Typography — Weights ───────────────────── */
+  --font-weight-regular:   var(--core-font-weight-regular);
+  --font-weight-medium:    var(--core-font-weight-medium);
+  --font-weight-semibold:  var(--core-font-weight-semibold);
+  --font-weight-bold:      var(--core-font-weight-bold);
+
+  /* ── 2x. Semantic Typography — Text Styles (Composite) ───── *
+   * These bundle size + weight + line-height for common roles. *
+   * Use these in components: `font-size: var(--ts-h1-size)`    */
+
+  /* Display */
+  --ts-display-size:       var(--core-font-size-4xl);    /* 64px */
+  --ts-display-weight:     var(--core-font-weight-bold);
+  --ts-display-line-height: var(--core-line-height-tight);
+  --ts-display-letter-spacing: var(--core-letter-spacing-tight);
+
+  /* Headings */
+  --ts-h1-size:       var(--core-font-size-3xl);    /* 48px */
+  --ts-h1-weight:     var(--core-font-weight-bold);
+  --ts-h1-line-height: var(--core-line-height-tight);
+
+  --ts-h2-size:       var(--core-font-size-2xl);    /* 36px */
+  --ts-h2-weight:     var(--core-font-weight-semibold);
+  --ts-h2-line-height: var(--core-line-height-snug);
+
+  --ts-h3-size:       var(--core-font-size-xl);     /* 24px */
+  --ts-h3-weight:     var(--core-font-weight-semibold);
+  --ts-h3-line-height: var(--core-line-height-snug);
+
+  --ts-h4-size:       var(--core-font-size-lg);     /* 20px */
+  --ts-h4-weight:     var(--core-font-weight-semibold);
+  --ts-h4-line-height: var(--core-line-height-normal);
+
+  /* Body */
+  --ts-body-lg-size:        var(--core-font-size-lg);   /* 20px */
+  --ts-body-lg-weight:      var(--core-font-weight-regular);
+  --ts-body-lg-line-height: var(--core-line-height-relaxed);
+
+  --ts-body-md-size:        var(--core-font-size-md);   /* 16px */
+  --ts-body-md-weight:      var(--core-font-weight-regular);
+  --ts-body-md-line-height: var(--core-line-height-normal);
+
+  --ts-body-sm-size:        var(--core-font-size-sm);   /* 14px */
+  --ts-body-sm-weight:      var(--core-font-weight-regular);
+  --ts-body-sm-line-height: var(--core-line-height-normal);
+
+  /* Label */
+  --ts-label-md-size:   var(--core-font-size-sm);   /* 14px */
+  --ts-label-md-weight: var(--core-font-weight-medium);
+  --ts-label-sm-size:   var(--core-font-size-xs);   /* 12px */
+  --ts-label-sm-weight: var(--core-font-weight-medium);
+
+  /* Caption */
+  --ts-caption-size:        var(--core-font-size-xs);   /* 12px */
+  --ts-caption-weight:      var(--core-font-weight-regular);
+  --ts-caption-line-height: var(--core-line-height-normal);
+
+  /* Code */
+  --ts-code-size:   var(--core-font-size-sm);     /* 14px */
+  --ts-code-weight: var(--core-font-weight-regular);
+
+  /* ── 2y. Semantic Effects — Elevation ────────────────────── */
+  --elevation-0:  var(--core-shadow-none);
+  --elevation-1:  var(--core-shadow-xs);    /* Subtle card lift */
+  --elevation-2:  var(--core-shadow-sm);    /* Card, chip hover */
+  --elevation-3:  var(--core-shadow-md);    /* Dropdown, popover */
+  --elevation-4:  var(--core-shadow-lg);    /* Dialog, drawer */
+  --elevation-5:  var(--core-shadow-xl);    /* Toast, tooltip */
+
+  /* ── 2z. Semantic Effects — Blur ─────────────────────────── */
+  --blur-overlay: var(--core-blur-md);     /* Modal backdrop blur */
+  --blur-glass:   var(--core-blur-lg);     /* Frosted glass panels */
+  --blur-navbar:  var(--core-blur-sm);     /* Navbar blur effect */
+
+  /* ── 2aa. Semantic Motion ────────────────────────────────── */
+  --motion-duration-xs:     var(--alias-motion-instant);
+  --motion-duration-fast:   var(--alias-motion-fast);
+  --motion-duration-short:  var(--alias-motion-base);
+  --motion-duration-normal: var(--alias-motion-base);
   --motion-duration-medium: 180ms;
-  /* Long for page transitions and reveals */
-  --motion-duration-long: 320ms;
-  /* Soft easing for smooth, natural motion */
-  --motion-easing-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  /* Fast-out for quick exits */
-  --motion-easing-fast-out: cubic-bezier(0.4, 0, 1, 1);
-  
-  /* Scroll reveal settings */
-  --reveal-translate-y: 24px;
+  --motion-duration-slow:   var(--alias-motion-enter);
+  --motion-duration-long:   var(--alias-motion-page);
+
+  --motion-easing-standard:   var(--core-easing-standard);
+  --motion-easing-emphasized: var(--core-easing-emphasized);
+  --motion-easing-decelerate: var(--core-easing-decelerate);
+  --motion-easing-soft:       var(--core-easing-soft);
+  --motion-easing-fast-out:   var(--core-easing-accelerate);
+
+  /* Scroll reveal */
+  --reveal-translate-y:        24px;
   --reveal-translate-y-mobile: 12px;
-  --reveal-stagger-delay: 80ms;
-  
-  --elevation-0: none;
+  --reveal-stagger-delay:      80ms;
 
-  /* Multi-tone Surface Tokens for Layered Dark UI */
-  /* Darkest surface - hero sections, primary backgrounds */
-  --surface-1000: rgba(10, 10, 10, 1.00);
-  --surface-950: rgba(14, 14, 14, 1.00);
-  /* Content section surfaces - alternating tones */
-  --surface-900: rgba(18, 18, 18, 1.00);
-  --surface-850: rgba(22, 22, 22, 1.00);
-  /* Elevated surfaces - cards, panels, feature blocks */
-  --surface-800: rgba(28, 28, 28, 1.00);
-  /* Lighter surfaces - hover states, inputs */
-  --surface-700: rgba(38, 38, 38, 1.00);
-  --surface-600: rgba(43, 43, 43, 1.00);
-  
-  /* Text color tokens for contrast on dark surfaces */
-  --text-primary: rgba(255, 255, 255, 1.00);
-  --text-secondary: rgba(161, 161, 161, 1.00);
-  --text-tertiary: rgba(115, 115, 115, 1.00);
+  /* ── 2ab. Semantic Z-Index ───────────────────────────────── */
+  /* RULE: Use ONLY these z-index values in components.        */
+  /* Never use raw numbers in components.                      */
+  --z-index-below:    -1;      /* Decorative elements below content */
+  --z-index-base:      0;      /* Default stacking context */
+  --z-index-raised:    1;      /* Slightly elevated (cards on hover) */
+  --z-index-dropdown: 100;     /* Dropdowns, autocomplete lists */
+  --z-index-sticky:   200;     /* Sticky headers, toolbars */
+  --z-index-overlay:  300;     /* Background overlays/backdrops */
+  --z-index-modal:    400;     /* Dialogs, modals, drawers */
+  --z-index-popover:  500;     /* Popovers, date-pickers */
+  --z-index-tooltip:  600;     /* Tooltips — always on top */
+  --z-index-toast:    700;     /* Toast notifications */
+  --z-index-max:      9999;    /* Emergency override only */
+
+  /* ── 2ac. Semantic Border Composite ─────────────────────── */
+  /* Composite tokens: width + style + color bundled.          */
+  /* Use as: border: var(--border-default)                     */
+  --border-default:        1px solid var(--border);
+  --border-subtle:         1px solid var(--border-subtle);
+  --border-strong:         1px solid var(--border-strong);
+  --border-accent:         1px solid var(--accent);
+  --border-destructive:    1px solid var(--destructive);
+  --border-success:        1px solid var(--success);
+  --border-focus:          2px solid var(--accent);
+
+  /* Border width scale */
+  --border-width-hairline: 0.5px;
+  --border-width-thin:     1px;
+  --border-width-base:     1px;
+  --border-width-thick:    2px;
+  --border-width-heavy:    4px;
+
+  /* ── 2ad. Semantic Opacity ───────────────────────────────── */
+  /* Named intent-based opacity values.                         */
+  /* Use as: opacity: var(--opacity-disabled)                   */
+  --opacity-visible:     1;      /* Fully visible */
+  --opacity-high:        0.9;    /* Near-full (subtle dimming) */
+  --opacity-medium:      0.7;    /* Medium dimming */
+  --opacity-low:         0.5;    /* Low visibility (not disabled) */
+  --opacity-disabled:    0.4;    /* Disabled state — key UX token */
+  --opacity-placeholder: 0.35;   /* Placeholder text */
+  --opacity-ghost:       0.15;   /* Ghost / watermark */
+  --opacity-invisible:   0;      /* Hidden but in DOM */
+
+  /* ── 2ae. Semantic Layout ────────────────────────────────── */
+  --layout-max-width:             1440px;
+  --layout-padding-desktop-left:  0px;
+  --layout-padding-desktop-right: 40px;
+  --layout-padding-tablet:        50px;
+  --layout-padding-mobile:        20px;
+  --layout-content-gap-desktop:   40px;
+  --sidebar-width:                280px;
+  --header-height:                64px;
+
+  /* Grid */
+  --grid-columns-desktop: 12;
+  --grid-columns-tablet:  8;
+  --grid-columns-mobile:  4;
+  --grid-gutter-desktop:  var(--core-spacing-6);   /* 24px */
+  --grid-gutter-tablet:   var(--core-spacing-4);   /* 16px */
+  --grid-gutter-mobile:   var(--core-spacing-4);   /* 16px */
+  --grid-margin-desktop:  var(--core-spacing-12);  /* 48px */
+  --grid-margin-tablet:   var(--core-spacing-8);   /* 32px */
+  --grid-margin-mobile:   var(--core-spacing-4);   /* 16px */
+
+  /* Section spacing */
+  --section-spacing-desktop: var(--core-spacing-16); /* 64px */
+  --section-spacing-tablet:  var(--core-spacing-12); /* 48px */
+  --section-spacing-mobile:  var(--core-spacing-8);  /* 32px */
 }
 
+
+/* ============================================================
+ * LAYER 3 — COMPONENT TOKENS
+ * Per-component overrides. These reference semantic tokens.
+ * Change a component token here → only that component updates.
+ * ============================================================ */
+:root {
+
+  /* ── 3a. Button Component ────────────────────────────────── */
+  --btn-height-sm:      32px;
+  --btn-height-md:      40px;
+  --btn-height-lg:      48px;
+  --btn-height-xl:      56px;
+  --btn-radius:         var(--radius-md);
+  --btn-padding-x-sm:   var(--spacing-3);
+  --btn-padding-x-md:   var(--spacing-5);
+  --btn-padding-x-lg:   var(--spacing-6);
+  --btn-padding-x-xl:   var(--spacing-8);
+  --btn-font-size-sm:   var(--text-sm);
+  --btn-font-size-md:   var(--text-base);
+  --btn-font-size-lg:   var(--text-lg);
+  --btn-font-weight:    var(--font-weight-semibold);
+  --btn-gap:            var(--spacing-2);
+
+  /* ── 3b. Input Component ─────────────────────────────────── */
+  --input-height-sm:    32px;
+  --input-height-md:    40px;
+  --input-height-lg:    48px;
+  --input-radius:       var(--radius-md);
+  --input-padding-x:    var(--spacing-3);
+  --input-font-size:    var(--text-base);
+  --input-border-width: 1px;
+
+  /* ── 3c. Card Component ──────────────────────────────────── */
+  --card-radius:    var(--radius-lg);
+  --card-padding:   var(--spacing-6);
+  --card-border:    var(--border);
+  --card-shadow:    var(--elevation-1);
+
+  /* ── 3d. Badge Component ─────────────────────────────────── */
+  --badge-radius:       var(--radius-full);
+  --badge-padding-x:    var(--spacing-2);
+  --badge-padding-y:    var(--spacing-1);
+  --badge-font-size:    var(--text-xs);
+  --badge-font-weight:  var(--font-weight-semibold);
+
+  /* ── 3e. Modal / Dialog ─────────────────────────────────── */
+  --dialog-radius:  var(--radius-lg);
+  --dialog-padding: var(--spacing-6);
+  --dialog-shadow:  var(--elevation-4);
+  --dialog-max-width-sm:  400px;
+  --dialog-max-width-md:  560px;
+  --dialog-max-width-lg:  720px;
+
+  /* ── 3f. Tooltip ─────────────────────────────────────────── */
+  --tooltip-radius:   var(--radius-sm);
+  --tooltip-padding:  var(--spacing-2) var(--spacing-3);
+  --tooltip-bg:       var(--core-color-neutral-900);
+  --tooltip-fg:       var(--core-color-neutral-0);
+  --tooltip-font-size: var(--text-xs);
+
+  /* ── 3g. Tag / Chip ──────────────────────────────────────── */
+  --tag-radius:       var(--radius-full);
+  --tag-padding-x:    var(--spacing-3);
+  --tag-padding-y:    var(--spacing-1);
+  --tag-font-size:    var(--text-xs);
+  --tag-font-weight:  var(--font-weight-medium);
+
+  /* ── 3h. Sidebar Component ───────────────────────────────── */
+  --sidebar-item-radius:   var(--radius-md);
+  --sidebar-item-padding:  var(--spacing-2) var(--spacing-3);
+  --sidebar-item-gap:      var(--spacing-1);
+  --sidebar-section-gap:   var(--spacing-6);
+  --sidebar-font-size:     var(--text-sm);
+
+  /* ── 3i. Header Component ────────────────────────────────── */
+  --header-bg:       var(--background);
+  --header-border:   var(--border);
+  --header-font-size: var(--text-base);
+
+  /* ── 3j. Table Component ─────────────────────────────────── */
+  --table-header-bg:    var(--core-color-surface-700);
+  --table-row-hover-bg: var(--core-color-surface-700);
+  --table-border:       var(--border);
+  --table-padding-x:    var(--spacing-4);
+  --table-padding-y:    var(--spacing-3);
+  --table-font-size:    var(--text-sm);
+
+  /* ── 3k. Progress Component ──────────────────────────────── */
+  --progress-height:    8px;
+  --progress-radius:    var(--radius-full);
+  --progress-bg:        var(--muted);
+  --progress-fill:      var(--accent);
+
+  /* ── 3l. Avatar Component ────────────────────────────────── */
+  --avatar-sm: 24px;
+  --avatar-md: 32px;
+  --avatar-lg: 40px;
+  --avatar-xl: 56px;
+  --avatar-2xl: 80px;
+  --avatar-radius: var(--radius-full);
+}
+
+
+/* ============================================================
+ * TAILWIND v4 — @theme bridge
+ * Exposes CSS variables as Tailwind utility classes.
+ * ============================================================ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-input-background: var(--input-background);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
+  /* Colors */
+  --color-background:                var(--background);
+  --color-foreground:                var(--foreground);
+  --color-card:                      var(--card);
+  --color-card-foreground:           var(--card-foreground);
+  --color-popover:                   var(--popover);
+  --color-popover-foreground:        var(--popover-foreground);
+  --color-primary:                   var(--primary);
+  --color-primary-foreground:        var(--primary-foreground);
+  --color-secondary:                 var(--secondary);
+  --color-secondary-foreground:      var(--secondary-foreground);
+  --color-muted:                     var(--muted);
+  --color-muted-foreground:          var(--muted-foreground);
+  --color-accent:                    var(--accent);
+  --color-accent-foreground:         var(--accent-foreground);
+  --color-destructive:               var(--destructive);
+  --color-destructive-foreground:    var(--destructive-foreground);
+  --color-success:                   var(--success);
+  --color-success-foreground:        var(--success-foreground);
+  --color-warning:                   var(--warning);
+  --color-warning-foreground:        var(--warning-foreground);
+  --color-info:                      var(--info);
+  --color-info-foreground:           var(--info-foreground);
+  --color-border:                    var(--border);
+  --color-input:                     var(--input);
+  --color-input-background:          var(--input-background);
+  --color-ring:                      var(--ring);
+  --color-chart-1:                   var(--chart-1);
+  --color-chart-2:                   var(--chart-2);
+  --color-chart-3:                   var(--chart-3);
+  --color-chart-4:                   var(--chart-4);
+  --color-chart-5:                   var(--chart-5);
+
+  /* Radius */
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
   --radius-full: var(--radius-full);
-  --radius-0: var(--radius-0);
-  --radius-1: var(--radius-1);
-  --radius-2: var(--radius-2);
-  --radius-3: var(--radius-3);
-  --radius-4: var(--radius-4);
-  --radius-5: var(--radius-5);
-  --radius-6: var(--radius-6);
-  --radius-8: var(--radius-8);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
+  --radius-0:    var(--radius-0);
+  --radius-1:    var(--radius-1);
+  --radius-2:    var(--radius-2);
+  --radius-3:    var(--radius-3);
+  --radius-4:    var(--radius-4);
+  --radius-5:    var(--radius-5);
+  --radius-6:    var(--radius-6);
+  --radius-8:    var(--radius-8);
+
+  /* Sidebar */
+  --color-sidebar:                   var(--sidebar);
+  --color-sidebar-foreground:        var(--sidebar-foreground);
+  --color-sidebar-primary:           var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent:            var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border:            var(--sidebar-border);
+  --color-sidebar-ring:              var(--sidebar-ring);
 }
 
+
+/* ============================================================
+ * BASE STYLES
+ * ============================================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -278,79 +790,84 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter Tight', sans-serif;
+    font-family: var(--core-font-family-base);
     font-size: var(--font-size);
+    line-height: var(--core-line-height-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
+/* ── Heading defaults (can be overridden per component) ────── */
 h1 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 48px;
-  font-weight: var(--font-weight-bold);
-  line-height: 1.25;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-h1-size);
+  font-weight: var(--ts-h1-weight);
+  line-height: var(--ts-h1-line-height);
 }
-
 h2 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 36px;
-  font-weight: var(--font-weight-semibold);
-  line-height: 1.25;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-h2-size);
+  font-weight: var(--ts-h2-weight);
+  line-height: var(--ts-h2-line-height);
 }
-
 h3 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 24px;
-  font-weight: var(--font-weight-semibold);
-  line-height: 1.25;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-h3-size);
+  font-weight: var(--ts-h3-weight);
+  line-height: var(--ts-h3-line-height);
 }
-
 h4 {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 20px;
-  font-weight: var(--font-weight-semibold);
-  line-height: 1.5;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-h4-size);
+  font-weight: var(--ts-h4-weight);
+  line-height: var(--ts-h4-line-height);
 }
-
 p {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 16px;
-  font-weight: var(--font-weight-regular);
-  line-height: 1.5;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-body-md-size);
+  font-weight: var(--ts-body-md-weight);
+  line-height: var(--ts-body-md-line-height);
 }
-
 span {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 16px;
-  font-weight: var(--font-weight-regular);
-  line-height: 1.5;
+  font-family: var(--core-font-family-base);
 }
-
 label {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 14px;
-  font-weight: var(--font-weight-regular);
-  line-height: 1.5;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-label-md-size);
+  font-weight: var(--ts-label-md-weight);
+  line-height: var(--core-line-height-normal);
 }
-
 button {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 16px;
-  font-weight: var(--font-weight-medium);
-  line-height: 1.5;
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-body-md-size);
+  font-weight: var(--btn-font-weight);
+  line-height: var(--core-line-height-normal);
 }
-
-input {
-  font-family: 'Inter Tight', sans-serif;
-  font-size: 16px;
+input, textarea, select {
+  font-family: var(--core-font-family-base);
+  font-size: var(--ts-body-md-size);
   font-weight: var(--font-weight-regular);
-  line-height: 1.5;
+  line-height: var(--core-line-height-normal);
 }
-
+code, pre, kbd, samp {
+  font-family: var(--core-font-family-mono);
+  font-size: var(--ts-code-size);
+}
 html {
   font-size: var(--font-size);
 }
 
+/* ── Utility classes ──────────────────────────────────────── */
 /* Hide scrollbar for navigation sections */
 .nav-sections-scroll::-webkit-scrollbar {
   display: none;
 }
+
+/* Elevation utilities */
+.elevation-0 { box-shadow: var(--elevation-0); }
+.elevation-1 { box-shadow: var(--elevation-1); }
+.elevation-2 { box-shadow: var(--elevation-2); }
+.elevation-3 { box-shadow: var(--elevation-3); }
+.elevation-4 { box-shadow: var(--elevation-4); }
+.elevation-5 { box-shadow: var(--elevation-5); }

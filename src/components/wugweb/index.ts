@@ -70,6 +70,7 @@ export { Banner } from './Banner';
 // Navigation
 export { MegaMenu } from './MegaMenu';
 export { BottomNavigation } from './BottomNavigation';
+export { NavigationMenu } from './NavigationMenu';
 
 // Layout & Structure
 export { ListGroup } from './ListGroup';

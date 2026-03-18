@@ -13,20 +13,16 @@ import { Changelog } from './components/ds/pages/Changelog';
 import { FigmaImportGuide } from './components/ds/pages/FigmaImportGuide';
 import { ComponentGallery } from './components/ds/pages/ComponentGallery';
 import { ComponentDoc } from './components/ds/pages/ComponentDoc';
-import { ButtonShowcase } from './components/ds/pages/ButtonShowcase';
 import { ButtonDoc } from './components/ds/pages/ButtonDoc';
 import { InputTextDoc } from './components/ds/pages/InputTextDoc';
 import { CheckboxDoc } from './components/ds/pages/CheckboxDoc';
 import { RadioGroupDoc } from './components/ds/pages/RadioGroupDoc';
-import { ToggleDoc } from './components/ds/pages/ToggleDoc';
 import { SwitchDoc } from './components/ds/pages/SwitchDoc';
 import { SelectDoc } from './components/ds/pages/SelectDoc';
 import { SliderDoc } from './components/ds/pages/SliderDoc';
 import { CardDoc } from './components/ds/pages/CardDoc';
 import { TagDoc } from './components/ds/pages/TagDoc';
 import { SocialButtonDoc } from './components/ds/pages/SocialButtonDoc';
-import { AllComponentsShowcase } from './components/ds/pages/AllComponentsShowcase';
-import { RadioButtonDoc } from './components/ds/pages/RadioButtonDoc';
 import { IconDocNew } from './components/ds/pages/IconDocNew';
 import { DropdownDoc } from './components/ds/pages/DropdownDoc';
 import { HeaderDoc } from './components/ds/pages/HeaderDoc';
@@ -77,8 +73,84 @@ import { ContextualSidebar } from './components/ds/ContextualSidebar';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { Toaster } from 'sonner@2.0.3';
 import './styles/animations.css';
+import KitsLogoUrl from './imports/Kits_Logo.svg';
+
+// ── Newly wired doc pages ─────────────────────────────────────────────────────
+// Form Controls
+import { SearchInputDoc } from './components/ds/pages/SearchInputDoc';
+import { NumberInputDoc } from './components/ds/pages/NumberInputDoc';
+import { NativeSelectDoc } from './components/ds/pages/NativeSelectDoc';
+import { ComboboxDoc } from './components/ds/pages/ComboboxDoc';
+import { DatePickerDoc } from './components/ds/pages/DatePickerDoc';
+import { TimePickerDoc } from './components/ds/pages/TimePickerDoc';
+import { FileInputDoc } from './components/ds/pages/FileInputDoc';
+import { WYSIWYGDoc } from './components/ds/pages/WYSIWYGDoc';
+// Data Display
+import { DataTableDoc } from './components/ds/pages/DataTableDoc';
+import { ListGroupDoc } from './components/ds/pages/ListGroupDoc';
+import { KbdDoc } from './components/ds/pages/KbdDoc';
+// Navigation
+import { MegaMenuDoc } from './components/ds/pages/MegaMenuDoc';
+import { BottomNavigationDoc } from './components/ds/pages/BottomNavigationDoc';
+import { StepperDoc } from './components/ds/pages/StepperDoc';
+// Feedback
+import { BannerDoc } from './components/ds/pages/BannerDoc';
+import { SpinnerDoc } from './components/ds/pages/SpinnerDoc';
+import { EmptyStateDoc } from './components/ds/pages/EmptyStateDoc';
+import { IndicatorDoc } from './components/ds/pages/IndicatorDoc';
+import { RatingDoc } from './components/ds/pages/RatingDoc';
+// Layout
+import { JumbotronDoc } from './components/ds/pages/JumbotronDoc';
+import { TimelineDoc } from './components/ds/pages/TimelineDoc';
+import { InputGroupDoc } from './components/ds/pages/InputGroupDoc';
+// Utilities
+import { ButtonGroupDoc } from './components/ds/pages/ButtonGroupDoc';
+import { ClipboardDoc } from './components/ds/pages/ClipboardDoc';
+import { SpeedDialDoc } from './components/ds/pages/SpeedDialDoc';
+import { ChatBubbleDoc } from './components/ds/pages/ChatBubbleDoc';
+import { DeviceMockupDoc } from './components/ds/pages/DeviceMockupDoc';
+// Charts
+import { LineChartDoc } from './components/ds/pages/LineChartDoc';
+import { PieChartDoc } from './components/ds/pages/PieChartDoc';
+import { RadarChartDoc } from './components/ds/pages/RadarChartDoc';
+import { RadialChartDoc } from './components/ds/pages/RadialChartDoc';
+// Docs section
+import { InstallationDoc } from './components/ds/pages/InstallationDoc';
+import { GettingStartedDoc } from './components/ds/pages/GettingStartedDoc';
+import { ThemingDoc } from './components/ds/pages/ThemingDoc';
+import { TokenArchitectureDoc } from './components/ds/pages/TokenArchitectureDoc';
+// ── Block sub-pages ────────────────────────────────────────────────────────────
+import { HeroSectionsBlock } from './components/ds/pages/blocks/HeroSectionsBlock';
+import { FeatureGridsBlock } from './components/ds/pages/blocks/FeatureGridsBlock';
+import { PricingTablesBlock } from './components/ds/pages/blocks/PricingTablesBlock';
+import { TestimonialsBlock } from './components/ds/pages/blocks/TestimonialsBlock';
+import { CTASectionsBlock } from './components/ds/pages/blocks/CTASectionsBlock';
+import { FormsBlock } from './components/ds/pages/blocks/FormsBlock';
+import { NavbarsBlock } from './components/ds/pages/blocks/NavbarsBlock';
+import { FootersBlock } from './components/ds/pages/blocks/FootersBlock';
+// ── System architecture ────────────────────────────────────────────────────────
+import { SystemLayersDoc } from './components/ds/pages/SystemLayersDoc';
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  // ── Favicon injection ────────────────────────────────────────────────────
+  React.useEffect(() => {
+    // Remove any existing favicons
+    const existing = document.querySelectorAll("link[rel*='icon']");
+    existing.forEach(el => el.remove());
+
+    // Set Kits SVG as favicon
+    const link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+    link.href = KitsLogoUrl;
+    document.head.appendChild(link);
+
+    // Set page title
+    document.title = 'Wugweb Kits — Design System';
+  }, []);
+  // ────────────────────────────────────────────────────────────────────────
+
   const [currentSection, setCurrentSection] = React.useState('docs');
   const [currentPage, setCurrentPage] = React.useState('overview');
   const [currentSubPage, setCurrentSubPage] = React.useState<string | undefined>(undefined);
@@ -104,11 +176,9 @@ export default function App() {
   };
 
   const handleNavigate = (page: string, subPage?: string) => {
-    // Trigger page transition animation
     setIsPageTransitioning(true);
     
     setTimeout(() => {
-      // Update section if navigating to standalone pages
       if (['patterns', 'playground', 'accessibility', 'guidelines', 'contribute', 'changelog'].includes(page)) {
         setCurrentSection(page);
         setCurrentPage(page);
@@ -121,12 +191,10 @@ export default function App() {
       setSelectedComponentId(null);
       setIsPageTransitioning(false);
       
-      // Close sidebar on mobile/tablet after navigation
       if (isMobile || isTablet) {
         setIsSidebarOpen(false);
       }
       
-      // Scroll to top on page change
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 150);
   };
@@ -157,203 +225,155 @@ export default function App() {
       return <ComponentDoc componentId={selectedComponentId} />;
     }
 
-    // Route based on section
     switch (currentSection) {
+      // ── DOCS ──────────────────────────────────────────────────────────────
       case 'docs':
-        // Docs section routing
         if (currentSubPage === 'introduction' || currentSubPage === undefined) {
           return <Overview onNavigate={handleNavigate} />;
         }
+        if (currentSubPage === 'getting-started') return <GettingStartedDoc />;
+        if (currentSubPage === 'installation') return <InstallationDoc />;
+        if (currentSubPage === 'theming') return <ThemingDoc />;
+        if (currentSubPage === 'token-architecture') return <TokenArchitectureDoc />;
+        if (currentSubPage === 'system-layers') return <SystemLayersDoc />;
         if (currentSubPage === 'colors' || currentSubPage === 'typography' || currentSubPage === 'spacing' || currentSubPage === 'radius') {
           return <Tokens currentSubPage={currentSubPage} />;
         }
-        if (currentSubPage === 'grid') {
-          return <GridDoc />;
-        }
-        if (currentSubPage === 'accessibility') {
-          return <Accessibility />;
-        }
-        if (currentSubPage === 'guidelines') {
-          return <Guidelines />;
-        }
+        if (currentSubPage === 'grid') return <GridDoc />;
+        if (currentSubPage === 'accessibility') return <Accessibility />;
+        if (currentSubPage === 'guidelines') return <Guidelines />;
         return <Overview onNavigate={handleNavigate} />;
 
+      // ── COMPONENTS ───────────────────────────────────────────────────────
       case 'components':
-        // Existing component routing
-        if (currentSubPage === 'overview') {
-          return <ComponentGallery onViewComponent={handleViewComponent} />;
-        }
-        if (currentSubPage === 'input' || currentSubPage === 'input-text') {
-          return <InputTextDoc />;
-        }
-        if (currentSubPage === 'checkbox') {
-          return <CheckboxDoc />;
-        }
-        if (currentSubPage === 'radio-group') {
-          return <RadioGroupDoc />;
-        }
-        if (currentSubPage === 'switch') {
-          return <SwitchDoc />;
-        }
-        if (currentSubPage === 'select') {
-          return <SelectDoc />;
-        }
-        if (currentSubPage === 'slider') {
-          return <SliderDoc />;
-        }
-        if (currentSubPage === 'calendar') {
-          return <CalendarDoc />;
-        }
-        if (currentSubPage === 'textarea') {
-          return <TextareaDoc />;
-        }
-        if (currentSubPage === 'card') {
-          return <CardDoc />;
-        }
-        if (currentSubPage === 'tag') {
-          return <TagDoc />;
-        }
-        if (currentSubPage === 'social-button') {
-          return <SocialButtonDoc />;
-        }
-        if (currentSubPage === 'radio') {
-          return <RadioButtonDoc />;
-        }
-        if (currentSubPage === 'dropdown') {
-          return <DropdownDoc />;
-        }
-        if (currentSubPage === 'header') {
-          return <HeaderDoc />;
-        }
-        if (currentSubPage === 'breadcrumb') {
-          return <BreadcrumbDoc />;
-        }
-        if (currentSubPage === 'pagination') {
-          return <PaginationDoc />;
-        }
-        if (currentSubPage === 'menu-item') {
-          return <MenuItemDoc />;
-        }
-        if (currentSubPage === 'chip') {
-          return <ChipDoc />;
-        }
-        if (currentSubPage === 'alert') {
-          return <AlertDoc />;
-        }
-        if (currentSubPage === 'badge') {
-          return <BadgeDoc />;
-        }
-        if (currentSubPage === 'team-card') {
-          return <TeamCardDoc />;
-        }
-        if (currentSubPage === 'topic-tile') {
-          return <TopicTileDoc />;
-        }
-        if (currentSubPage === 'cta-banner') {
-          return <CTABannerDoc />;
-        }
-        if (currentSubPage === 'accordion') {
-          return <AccordionDoc />;
-        }
-        if (currentSubPage === 'avatar') {
-          return <AvatarDoc />;
-        }
-        if (currentSubPage === 'collapsible') {
-          return <CollapsibleDoc />;
-        }
-        if (currentSubPage === 'drawer') {
-          return <DrawerDoc />;
-        }
-        if (currentSubPage === 'alert-dialog') {
-          return <AlertDialogDoc />;
-        }
-        if (currentSubPage === 'dialog') {
-          return <DialogDoc />;
-        }
-        if (currentSubPage === 'form') {
-          return <FormDoc />;
-        }
-        if (currentSubPage === 'tooltip') {
-          return <TooltipDoc />;
-        }
-        if (currentSubPage === 'toast' || currentSubPage === 'toaster') {
-          return <ToasterDoc />;
-        }
-        if (currentSubPage === 'popover') {
-          return <PopoverDoc />;
-        }
-        if (currentSubPage === 'tabs') {
-          return <TabsDoc />;
-        }
-        if (currentSubPage === 'bottom-sheet') {
-          return <BottomSheetDoc />;
-        }
-        if (currentSubPage === 'divider') {
-          return <DividerDoc />;
-        }
-        if (currentSubPage === 'side-menu') {
-          return <SideMenuDoc />;
-        }
-        if (currentSubPage === 'table') {
-          return <TableDoc />;
-        }
-        if (currentSubPage === 'chart') {
-          return <ChartDoc />;
-        }
-        if (currentSubPage === 'progress') {
-          return <ProgressDoc />;
-        }
-        if (currentSubPage === 'skeleton') {
-          return <SkeletonDoc />;
-        }
-        if (currentSubPage === 'logo') {
-          return <LogoDoc />;
-        }
-        if (currentSubPage === 'footer-links') {
-          return <FooterLinksDoc />;
-        }
+        if (currentSubPage === 'overview') return <ComponentGallery onViewComponent={handleViewComponent} />;
+
+        // ── Core ──
+        if (currentSubPage === 'button') return <ButtonDoc />;
+        if (currentSubPage === 'badge') return <BadgeDoc />;
+        if (currentSubPage === 'tag') return <TagDoc />;
+        if (currentSubPage === 'chip') return <ChipDoc />;
+        if (currentSubPage === 'avatar') return <AvatarDoc />;
+        if (currentSubPage === 'card') return <CardDoc />;
+        if (currentSubPage === 'divider') return <DividerDoc />;
+        if (currentSubPage === 'social-button') return <SocialButtonDoc />;
+
+        // ── Form Controls ──
+        if (currentSubPage === 'input' || currentSubPage === 'input-text') return <InputTextDoc />;
+        if (currentSubPage === 'search-input') return <SearchInputDoc />;
+        if (currentSubPage === 'number-input') return <NumberInputDoc />;
+        if (currentSubPage === 'native-select') return <NativeSelectDoc />;
+        if (currentSubPage === 'combobox') return <ComboboxDoc />;
+        if (currentSubPage === 'date-picker') return <DatePickerDoc />;
+        if (currentSubPage === 'time-picker') return <TimePickerDoc />;
+        if (currentSubPage === 'file-input') return <FileInputDoc />;
+        if (currentSubPage === 'wysiwyg') return <WYSIWYGDoc />;
+        if (currentSubPage === 'phone-input') return <PhoneInputDoc />;
+        if (currentSubPage === 'checkbox') return <CheckboxDoc />;
+        if (currentSubPage === 'radio-group') return <RadioGroupDoc />;
+        if (currentSubPage === 'radio') return <RadioGroupDoc />;
+        if (currentSubPage === 'switch' || currentSubPage === 'toggle') return <SwitchDoc />;
+        if (currentSubPage === 'select') return <SelectDoc />;
+        if (currentSubPage === 'slider') return <SliderDoc />;
+        if (currentSubPage === 'calendar') return <CalendarDoc />;
+        if (currentSubPage === 'textarea') return <TextareaDoc />;
+        if (currentSubPage === 'input-group') return <InputGroupDoc />;
+        if (currentSubPage === 'form') return <FormDoc />;
+
+        // ── Data Display ──
+        if (currentSubPage === 'data-table') return <DataTableDoc />;
+        if (currentSubPage === 'list-group') return <ListGroupDoc />;
+        if (currentSubPage === 'kbd') return <KbdDoc />;
+        if (currentSubPage === 'table') return <TableDoc />;
+
+        // ── Navigation ──
+        if (currentSubPage === 'navigation-menu') return <NavigationMenuDoc />;
+        if (currentSubPage === 'mega-menu') return <MegaMenuDoc />;
+        if (currentSubPage === 'bottom-navigation') return <BottomNavigationDoc />;
+        if (currentSubPage === 'stepper') return <StepperDoc />;
+        if (currentSubPage === 'dropdown') return <DropdownDoc />;
+        if (currentSubPage === 'header') return <HeaderDoc />;
+        if (currentSubPage === 'breadcrumb') return <BreadcrumbDoc />;
+        if (currentSubPage === 'pagination') return <PaginationDoc />;
+        if (currentSubPage === 'menu-item') return <MenuItemDoc />;
+        if (currentSubPage === 'tabs') return <TabsDoc />;
+        if (currentSubPage === 'side-menu') return <SideMenuDoc />;
+
+        // ── Feedback ──
+        if (currentSubPage === 'banner') return <BannerDoc />;
+        if (currentSubPage === 'spinner') return <SpinnerDoc />;
+        if (currentSubPage === 'empty-state') return <EmptyStateDoc />;
+        if (currentSubPage === 'indicator') return <IndicatorDoc />;
+        if (currentSubPage === 'rating') return <RatingDoc />;
+        if (currentSubPage === 'alert') return <AlertDoc />;
+        if (currentSubPage === 'toast' || currentSubPage === 'toaster') return <ToasterDoc />;
+        if (currentSubPage === 'progress') return <ProgressDoc />;
+        if (currentSubPage === 'skeleton') return <SkeletonDoc />;
+        if (currentSubPage === 'alert-dialog') return <AlertDialogDoc />;
+
+        // ── Overlays ──
+        if (currentSubPage === 'dialog') return <DialogDoc />;
+        if (currentSubPage === 'drawer') return <DrawerDoc />;
+        if (currentSubPage === 'popover') return <PopoverDoc />;
+        if (currentSubPage === 'tooltip') return <TooltipDoc />;
+        if (currentSubPage === 'bottom-sheet') return <BottomSheetDoc />;
+        if (currentSubPage === 'collapsible') return <CollapsibleDoc />;
+        if (currentSubPage === 'accordion') return <AccordionDoc />;
+
+        // ── Layout ──
+        if (currentSubPage === 'jumbotron') return <JumbotronDoc />;
+        if (currentSubPage === 'timeline') return <TimelineDoc />;
+        if (currentSubPage === 'chart') return <ChartDoc />;
+
+        // ── Utilities ──
+        if (currentSubPage === 'button-group') return <ButtonGroupDoc />;
+        if (currentSubPage === 'clipboard') return <ClipboardDoc />;
+        if (currentSubPage === 'speed-dial') return <SpeedDialDoc />;
+        if (currentSubPage === 'chat-bubble') return <ChatBubbleDoc />;
+        if (currentSubPage === 'device-mockup') return <DeviceMockupDoc />;
+        if (currentSubPage === 'logo') return <LogoDoc />;
+        if (currentSubPage === 'footer-links') return <FooterLinksDoc />;
+        if (currentSubPage === 'cta-banner') return <CTABannerDoc />;
+        if (currentSubPage === 'team-card') return <TeamCardDoc />;
+        if (currentSubPage === 'topic-tile') return <TopicTileDoc />;
+
         return <ComponentGallery onViewComponent={handleViewComponent} />;
 
+      // ── CHARTS ────────────────────────────────────────────────────────────
       case 'charts':
-        // Charts section routing
-        if (currentSubPage === 'overview' || currentSubPage === undefined) {
-          return <ChartsOverview />;
-        }
-        if (currentSubPage === 'phone-input') {
-          return <PhoneInputDoc />;
-        }
-        if (currentSubPage === 'area-chart') {
-          return <AreaChartDoc />;
-        }
-        if (currentSubPage === 'bar-chart') {
-          return <BarChartDoc />;
-        }
-        // For now, show ChartsOverview for all chart pages
+        if (currentSubPage === 'overview' || currentSubPage === undefined) return <ChartsOverview />;
+        if (currentSubPage === 'area-chart') return <AreaChartDoc />;
+        if (currentSubPage === 'bar-chart') return <BarChartDoc />;
+        if (currentSubPage === 'line-chart') return <LineChartDoc />;
+        if (currentSubPage === 'pie-chart') return <PieChartDoc />;
+        if (currentSubPage === 'radar-chart') return <RadarChartDoc />;
+        if (currentSubPage === 'radial-chart') return <RadialChartDoc />;
+        if (currentSubPage === 'data-table') return <DataTableDoc />;
         return <ChartsOverview />;
 
+      // ── BLOCKS ────────────────────────────────────────────────────────────
       case 'blocks':
-        // Blocks section routing
-        if (currentSubPage === 'overview' || currentSubPage === undefined) {
-          return <BlocksOverviewComplete />;
-        }
-        // For now, all block pages show Patterns until individual pages created
-        return <Patterns />;
+        if (currentSubPage === 'overview' || currentSubPage === undefined) return <BlocksOverviewComplete />;
+        if (currentSubPage === 'hero-sections') return <HeroSectionsBlock />;
+        if (currentSubPage === 'feature-grids') return <FeatureGridsBlock />;
+        if (currentSubPage === 'pricing-tables') return <PricingTablesBlock />;
+        if (currentSubPage === 'testimonials') return <TestimonialsBlock />;
+        if (currentSubPage === 'cta-sections') return <CTASectionsBlock />;
+        if (currentSubPage === 'forms') return <FormsBlock />;
+        if (currentSubPage === 'navbars') return <NavbarsBlock />;
+        if (currentSubPage === 'footers') return <FootersBlock />;
+        return <BlocksOverviewComplete />;
 
+      // ── TEMPLATES ─────────────────────────────────────────────────────────
       case 'templates':
-        // Templates section routing
-        if (currentSubPage === 'overview' || currentSubPage === undefined) {
-          return <Playground />;
-        }
-        // For now, all template pages show Playground until individual pages created
         return <Playground />;
 
+      // ── ICONS ─────────────────────────────────────────────────────────────
       case 'icons':
-        // Icons section
         return <IconDocNew />;
 
+      // ── ILLUSTRATIONS ─────────────────────────────────────────────────────
       case 'illustrations':
-        // Illustrations section
-        // Create placeholder for now
         return (
           <PageWrapper>
             <PageHeader
@@ -363,41 +383,25 @@ export default function App() {
           </PageWrapper>
         );
 
+      // ── RESOURCES ─────────────────────────────────────────────────────────
       case 'resources':
-        if (currentSubPage === 'logo-system') {
-          return <LogoSystemDoc />;
-        }
-        if (currentSubPage === 'logo-showcase') {
-          return <LogoShowcase />;
-        }
-        if (currentSubPage === 'embed-badges') {
-          return <EmbedBadgesDoc />;
-        }
-        // Default to logo showcase for resources overview
+        if (currentSubPage === 'logo-system') return <LogoSystemDoc />;
+        if (currentSubPage === 'logo-showcase') return <LogoShowcase />;
+        if (currentSubPage === 'embed-badges') return <EmbedBadgesDoc />;
         return <LogoShowcase />;
 
+      // ── STANDALONE SECTIONS ───────────────────────────────────────────────
       case 'patterns':
-        // Patterns page - show design patterns
         return <Patterns />;
-
       case 'playground':
-        // Playground page
         return <Playground />;
-
       case 'accessibility':
-        // Accessibility page
         return <Accessibility />;
-
       case 'guidelines':
-        // Guidelines page
         return <Guidelines />;
-
       case 'contribute':
-        // Contribute page
         return <Contribute />;
-
       case 'changelog':
-        // Changelog page
         return <Changelog />;
 
       default:
@@ -405,17 +409,14 @@ export default function App() {
     }
   };
 
-  // Close sidebar when clicking outside
   const handleOverlayClick = () => {
     setIsSidebarOpen(false);
   };
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--surface-1000)', position: 'relative' }}>
-      {/* Toast notifications */}
       <Toaster position="bottom-right" />
       
-      {/* Site Shell — Responsive Architecture */}
       <div style={{
         width: '100%',
         minHeight: '100vh',
@@ -424,7 +425,6 @@ export default function App() {
         flexDirection: 'column'
       }}>
         
-        {/* Header — Fixed at top, 64px height, full width */}
         <Header 
           isDarkMode={isDarkMode} 
           onToggleTheme={() => setIsDarkMode(!isDarkMode)}
@@ -432,7 +432,6 @@ export default function App() {
           showMenuButton={isMobile || isTablet}
         />
         
-        {/* Top Navigation Tabs */}
         <div style={{ 
           position: 'sticky',
           top: 'var(--header-height)',
@@ -447,7 +446,6 @@ export default function App() {
           />
         </div>
         
-        {/* Main Layout Container: Sidebar + Content */}
         <div style={{ 
           display: 'flex',
           position: 'relative',
@@ -456,13 +454,12 @@ export default function App() {
           flex: 1
         }}>
           
-          {/* Desktop Sidebar — Sticky, 280px fixed width */}
           {isDesktop && (
             <aside style={{
               position: 'sticky',
-              top: 'calc(var(--header-height) + 48px)', // Stick below header + tabs
+              top: 'calc(var(--header-height) + 48px)',
               left: 0,
-              width: 'var(--sidebar-width)', // 280px
+              width: 'var(--sidebar-width)',
               height: 'calc(100vh - var(--header-height) - 48px)',
               flexShrink: 0,
               boxSizing: 'border-box',
@@ -484,10 +481,8 @@ export default function App() {
             </aside>
           )}
 
-          {/* Mobile/Tablet Sidebar — Drawer Overlay */}
           {(isMobile || isTablet) && isSidebarOpen && (
             <>
-              {/* Overlay backdrop */}
               <div 
                 className="animate-fade-in"
                 style={{
@@ -503,7 +498,6 @@ export default function App() {
                 onClick={handleOverlayClick}
               />
               
-              {/* Sidebar drawer */}
               <div 
                 className="animate-slide-in-left"
                 style={{
@@ -531,7 +525,6 @@ export default function App() {
             </>
           )}
           
-          {/* Main Content — Fluid width, responsive padding */}
           <main 
             className={isPageTransitioning ? 'page-transition-exit-active' : 'page-transition-enter-active'}
             style={{ 
@@ -542,10 +535,10 @@ export default function App() {
               opacity: isPageTransitioning ? 0 : 1,
               transform: isPageTransitioning ? 'translateY(20px)' : 'translateY(0)',
               transition: 'opacity var(--motion-duration-normal) var(--motion-easing-emphasized), transform var(--motion-duration-normal) var(--motion-easing-emphasized)',
-              paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-content-gap-desktop)', // 40px gap on desktop
+              paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-content-gap-desktop)',
               paddingRight: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-              paddingTop: 'var(--spacing-4)', // 32px top padding
-              paddingBottom: 'var(--spacing-8)', // 64px bottom padding
+              paddingTop: 'var(--spacing-4)',
+              paddingBottom: 'var(--spacing-8)',
               overflowX: 'hidden'
             }}
           >
@@ -553,7 +546,6 @@ export default function App() {
           </main>
         </div>
 
-        {/* Footer — Full width, outside main content flow */}
         <Footer onNavigate={handleNavigate} />
       </div>
     </div>
