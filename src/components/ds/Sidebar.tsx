@@ -50,9 +50,12 @@ const navItems = [
           { id: 'input-text', label: 'Input Text', icon: FormInput },
           { id: 'checkbox', label: 'Checkbox', icon: CheckSquare },
           { id: 'radio', label: 'Radio Button', icon: Radio },
+          { id: 'radio-group', label: 'Radio Group', icon: Radio },
           { id: 'toggle', label: 'Toggle', icon: ToggleRight },
+          { id: 'switch', label: 'Switch', icon: ToggleRight },
           { id: 'slider', label: 'Slider', icon: Sliders },
           { id: 'dropdown', label: 'Dropdown', icon: ChevronDownIcon },
+          { id: 'select', label: 'Select', icon: ChevronDownIcon },
           { id: 'calendar', label: 'Calendar', icon: ChevronDownIcon },
           { id: 'textarea', label: 'Textarea', icon: FormInput },
         ]
@@ -93,6 +96,7 @@ const navItems = [
           { id: 'alert', label: 'Alert', icon: Bell },
           { id: 'alert-dialog', label: 'Alert Dialog', icon: AlertCircle },
           { id: 'badge', label: 'Badge', icon: Hash },
+          { id: 'toaster', label: 'Toaster', icon: Bell },
         ]
       },
       {
@@ -132,6 +136,7 @@ const navItems = [
         label: 'Overlay',
         icon: Square,
         items: [
+          { id: 'dialog', label: 'Dialog', icon: MessageSquare },
           { id: 'tooltip', label: 'Tooltip', icon: MessageSquare },
           { id: 'popover', label: 'Popover', icon: MessageSquare },
         ]
@@ -325,7 +330,7 @@ export function Sidebar({ currentPage, onNavigate, currentSubPage, isOpen = true
                       borderLeft: '1px solid var(--border)',
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '2px',
+                      gap: 'var(--spacing-1)',
                       boxSizing: 'border-box',
                     }}
                   >
@@ -387,8 +392,8 @@ export function Sidebar({ currentPage, onNavigate, currentSubPage, isOpen = true
                     className="animate-fade-in-up"
                     style={{ 
                       marginTop: 'var(--spacing-1)',
-                      marginLeft: 'var(--spacing-1)',
-                      paddingLeft: 'var(--spacing-2)',
+                      marginLeft: 'var(--spacing-2)',
+                      paddingLeft: 'var(--spacing-3)',
                       borderLeft: '1px solid var(--border)',
                       display: 'flex',
                       flexDirection: 'column',
@@ -459,11 +464,11 @@ export function Sidebar({ currentPage, onNavigate, currentSubPage, isOpen = true
                           {isSectionExpanded && (
                             <div
                               style={{
-                                marginTop: '4px',
+                                marginTop: 'var(--spacing-1)',
                                 paddingLeft: 'var(--spacing-2)',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '2px',
+                                gap: 'var(--spacing-1)',
                                 opacity: isSectionExpanded ? 1 : 0,
                                 transform: isSectionExpanded ? 'translateY(0)' : 'translateY(-8px)',
                                 transition: `opacity var(--motion-duration-short) var(--motion-easing-soft), transform var(--motion-duration-short) var(--motion-easing-soft)`,
@@ -546,7 +551,7 @@ export function Sidebar({ currentPage, onNavigate, currentSubPage, isOpen = true
         <p className="text-muted-foreground" style={{ fontSize: 'var(--text-xs)', margin: 0 }}>
           Version 0.1.0
         </p>
-        <p className="text-muted-foreground" style={{ fontSize: 'var(--text-xs)', marginTop: '4px', margin: 0 }}>
+        <p className="text-muted-foreground" style={{ fontSize: 'var(--text-xs)', marginTop: 'var(--spacing-1)', margin: 0 }}>
           © 2024 Wugweb Kits
         </p>
       </div>

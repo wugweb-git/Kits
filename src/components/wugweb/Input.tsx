@@ -37,9 +37,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           padding: '8px 12px',
           borderRadius: 'var(--radius-2)',
           fontFamily: 'Inter Tight, sans-serif',
-          fontSize: '16px',
+          fontSize: 'var(--text-base)',
           fontWeight: 'var(--font-weight-regular)',
           lineHeight: '1.5',
+          border: error ? '1px solid var(--destructive)' : '1px solid var(--border)',
         }}
         {...props}
       />

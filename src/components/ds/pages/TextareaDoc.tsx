@@ -1,11 +1,8 @@
 import React from 'react';
 import { Textarea } from '../../wugweb/Textarea';
 import { Label } from '../../wugweb/Label';
-import { Card, CardContent } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Check, Copy, ChevronRight, X, AlertCircle } from 'lucide-react';
-import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { getSpacing } from '../../../utils/responsive';
+import { Check, Copy, ExternalLink } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
@@ -18,8 +15,6 @@ export function TextareaDoc() {
   const [showCode, setShowCode] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
-  
-  const { isMobile, isTablet } = useBreakpoint();
 
   const handleTokenClick = (token: string) => {
     setHighlightedToken(token);
@@ -34,412 +29,218 @@ export function TextareaDoc() {
     }
   };
 
-  const generateCode = () => {
-    let code = `<Textarea\n`;
-    if (isDisabled) code += `  disabled={true}\n`;
-    if (isError) code += `  error={true}\n`;
-    code += `  value={value}\n`;
-    code += `  onChange={(e) => setValue(e.target.value)}\n`;
-    code += `/>`;
-    return code;
+  const getDynamicCode = () => {
+    return `import { Textarea } from "@/components/wugweb/Textarea";
+import { Label } from "@/components/wugweb/Label";
+
+export function TextareaDemo() {
+  const [value, setValue] = React.useState('');
+  
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+      <Label htmlFor="message">Message</Label>
+      <Textarea
+        id="message"
+        placeholder="Enter your message..."
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        ${isDisabled ? 'disabled' : ''}
+        ${isError ? 'error' : ''}
+      />
+    </div>
+  );
+}`;
   };
 
+  const headerActions = (
+    <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
+      <Button onClick={copyPageLink} variant="outline" size="sm" style={{ gap: 'var(--spacing-2)' }}>
+        {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+        {copiedLink ? 'Copied!' : 'Copy Link'}
+      </Button>
+      <Button variant="outline" size="sm" style={{ gap: 'var(--spacing-2)' }}>
+        <ExternalLink size={16} />
+        View in Figma
+      </Button>
+    </div>
+  );
+
   return (
-    <div 
-      className="min-h-screen w-full"
-      style={{ 
-        backgroundColor: 'var(--background)',
-        color: 'var(--foreground)',
-        paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingRight: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingTop: getSpacing(isMobile ? 8 : isTablet ? 10 : 12),
-        paddingBottom: getSpacing(isMobile ? 12 : isTablet ? 16 : 20),
-      }}
-    >
-      {/* Header */}
-      <div style={{ marginBottom: getSpacing(isMobile ? 8 : 12) }}>
-        <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(3) }}>
-          <span style={{ 
-            color: 'var(--muted-foreground)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
-            fontWeight: 'var(--font-weight-medium)',
-          }}>
-            Components
-          </span>
-          <ChevronRight size={16} color="var(--muted-foreground)" />
-          <span style={{ 
-            color: 'var(--foreground)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
-            fontWeight: 'var(--font-weight-medium)',
-          }}>
-            Textarea
-          </span>
-        </div>
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: isMobile ? '32px' : '48px',
-              fontWeight: 'var(--font-weight-bold)',
-              lineHeight: '1.2',
-              marginBottom: getSpacing(2),
-            }}>
-              Textarea
-            </h1>
-            <p style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '18px',
-              fontWeight: 'var(--font-weight-regular)',
-              color: 'var(--muted-foreground)',
-              lineHeight: '1.6',
-            }}>
-              A multi-line text input field for capturing longer form content like comments, messages, or descriptions.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" style={{
-              borderColor: 'var(--accent)',
-              color: 'var(--accent)',
-              backgroundColor: 'var(--accent-subtle)',
-            }}>
-              Form Control
-            </Badge>
-            <Button variant="outline" size="sm" onClick={copyPageLink}>
-              {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-              <span>{copiedLink ? 'Copied!' : 'Share'}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        badge="Form Component"
+        title="Textarea"
+        description="A multi-line text input for collecting longer-form content with auto-resize support."
+        actions={headerActions}
+      />
 
-      {/* Playground */}
-      <Card style={{ 
-        marginBottom: getSpacing(8),
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        borderRadius: 'var(--radius-3)',
-      }}>
-        <CardContent className="p-0">
-          <div style={{ 
-            padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)',
-            borderBottom: '1px solid var(--border)',
-          }}>
-            <h3 style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '20px',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: getSpacing(6),
-            }}>
-              Interactive Playground
-            </h3>
+      {/* Interactive Playground */}
+      <PageSection title="Interactive Playground" description="Customize and test the textarea component in real-time">
+        <PageCard>
+          {/* Controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-8)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--spacing-8)' }}>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-6)' }}>
+              {/* State */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                <label style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--foreground)' }}>State</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
+                  <Button
+                    variant={!isDisabled && !isError ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setIsDisabled(false);
+                      setIsError(false);
+                    }}
+                  >
+                    Default
+                  </Button>
+                  <Button
+                    variant={isDisabled ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setIsDisabled(true);
+                      setIsError(false);
+                    }}
+                  >
+                    Disabled
+                  </Button>
+                  <Button
+                    variant={isError ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setIsError(true);
+                      setIsDisabled(false);
+                    }}
+                  >
+                    Error
+                  </Button>
+                </div>
+              </div>
 
-            {/* Preview */}
-            <div style={{
-              backgroundColor: 'var(--surface-800)',
-              borderRadius: 'var(--radius-3)',
-              padding: isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)',
-              marginBottom: getSpacing(6),
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '250px',
+              {/* Character Count */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                <label style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--foreground)' }}>Character Count</label>
+                <div style={{ 
+                  padding: 'var(--spacing-3) var(--spacing-4)', 
+                  background: 'var(--muted)', 
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--muted-foreground)'
+                }}>
+                  {value.length} characters
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
+            <div style={{ 
+              padding: 'var(--spacing-12)',
+              background: 'var(--muted)',
+              borderRadius: 'var(--radius-lg)',
             }}>
-              <div style={{ width: '100%', maxWidth: '500px' }}>
-                <Label htmlFor="playground-textarea" style={{ marginBottom: 'var(--spacing-2)', display: 'block' }}>
-                  Your Message
-                </Label>
+              <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                <Label htmlFor="demo-textarea">Message</Label>
                 <Textarea
-                  id="playground-textarea"
+                  id="demo-textarea"
+                  placeholder="Enter your message..."
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
-                  error={isError}
                   disabled={isDisabled}
+                  error={isError}
+                  rows={5}
                 />
                 {isError && (
-                  <div className="flex items-center gap-2" style={{ marginTop: 'var(--spacing-2)' }}>
-                    <AlertCircle size={14} color="var(--destructive)" />
-                    <span style={{
-                      fontFamily: 'Inter Tight, sans-serif',
-                      fontSize: '14px',
-                      color: 'var(--destructive)',
-                    }}>
-                      This field is required
-                    </span>
-                  </div>
+                  <span style={{ fontSize: 'var(--text-sm)', color: 'var(--destructive)' }}>
+                    Please provide a valid message
+                  </span>
                 )}
               </div>
             </div>
 
-            {/* Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is-disabled"
-                    checked={isDisabled}
-                    onChange={(e) => setIsDisabled(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="is-disabled">Disabled</Label>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is-error"
-                    checked={isError}
-                    onChange={(e) => setIsError(e.target.checked)}
-                    style={{ width: '20px', height: '20px' }}
-                  />
-                  <Label htmlFor="is-error">Show Error State</Label>
-                </div>
-              </div>
-            </div>
+            {/* Code */}
+            {showCode && (
+              <CollapsibleCodeBlock
+                code={getDynamicCode()}
+                language="tsx"
+                showLineNumbers={true}
+              />
+            )}
           </div>
-
-          {/* Code */}
-          <div style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-            <CollapsibleCodeBlock
-              code={generateCode()}
-              language="tsx"
-              filename="Textarea.tsx"
-              showLineNumbers
-            />
-          </div>
-        </CardContent>
-      </Card>
+        </PageCard>
+      </PageSection>
 
       {/* Design Tokens */}
-      <Card style={{ 
-        marginBottom: getSpacing(8),
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        borderRadius: 'var(--radius-3)',
-      }}>
-        <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-          <h3 style={{
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: getSpacing(6),
-          }}>
-            Design Tokens
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <TokenCard
-              token="--input-background"
-              label="Background"
-              value="rgba(28, 28, 28, 1.00)"
-              isHighlighted={highlightedToken === '--input-background'}
-              onClick={() => handleTokenClick('--input-background')}
-            />
-            <TokenCard
-              token="--foreground"
-              label="Text Color"
-              value="rgba(255, 255, 255, 1.00)"
-              isHighlighted={highlightedToken === '--foreground'}
-              onClick={() => handleTokenClick('--foreground')}
-            />
-            <TokenCard
-              token="--border"
-              label="Border"
-              value="rgba(43, 43, 43, 1.00)"
-              isHighlighted={highlightedToken === '--border'}
-              onClick={() => handleTokenClick('--border')}
-            />
-            <TokenCard
-              token="--ring"
-              label="Focus Ring"
-              value="rgba(255, 190, 26, 1.00)"
-              isHighlighted={highlightedToken === '--ring'}
-              onClick={() => handleTokenClick('--ring')}
-            />
-            <TokenCard
-              token="--muted-foreground"
-              label="Placeholder"
-              value="rgba(161, 161, 161, 1.00)"
-              isHighlighted={highlightedToken === '--muted-foreground'}
-              onClick={() => handleTokenClick('--muted-foreground')}
-            />
-            <TokenCard
-              token="--destructive"
-              label="Error State"
-              value="rgba(239, 67, 67, 1.00)"
-              isHighlighted={highlightedToken === '--destructive'}
-              onClick={() => handleTokenClick('--destructive')}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <PageSection title="Design Tokens" description="CSS variables used by the Textarea component">
+        <PageGrid cols={3}>
+          <TokenCard
+            token="--input-background"
+            label="Background"
+            value="rgba(28, 28, 28, 1.00)"
+            category="color"
+            onClick={() => handleTokenClick('--input-background')}
+            isHighlighted={highlightedToken === '--input-background'}
+          />
+          <TokenCard
+            token="--border"
+            label="Border Color"
+            value="rgba(43, 43, 43, 1.00)"
+            category="color"
+            onClick={() => handleTokenClick('--border')}
+            isHighlighted={highlightedToken === '--border'}
+          />
+          <TokenCard
+            token="--destructive"
+            label="Error Color"
+            value="rgba(239, 67, 67, 1.00)"
+            category="color"
+            onClick={() => handleTokenClick('--destructive')}
+            isHighlighted={highlightedToken === '--destructive'}
+          />
+          <TokenCard
+            token="--spacing-4"
+            label="Padding"
+            value="16px"
+            category="spacing"
+            onClick={() => handleTokenClick('--spacing-4')}
+            isHighlighted={highlightedToken === '--spacing-4'}
+          />
+          <TokenCard
+            token="--radius-md"
+            label="Border Radius"
+            value="8px"
+            category="radius"
+            onClick={() => handleTokenClick('--radius-md')}
+            isHighlighted={highlightedToken === '--radius-md'}
+          />
+          <TokenCard
+            token="--text-base"
+            label="Font Size"
+            value="1rem"
+            category="typography"
+            onClick={() => handleTokenClick('--text-base')}
+            isHighlighted={highlightedToken === '--text-base'}
+          />
+        </PageGrid>
+      </PageSection>
 
       {/* Usage Guidelines */}
-      <Card style={{ 
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        borderRadius: 'var(--radius-3)',
-      }}>
-        <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-          <h3 style={{
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: getSpacing(6),
-          }}>
-            Usage Guidelines
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: 'var(--success)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <Check size={14} color="white" />
-                </div>
-                <h4 style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
-                  fontWeight: 'var(--font-weight-semibold)',
-                }}>
-                  Do
-                </h4>
-              </div>
-              <ul style={{ 
-                listStyle: 'none',
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-3)',
-              }}>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for multi-line text input like comments or messages
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Provide clear labels and helper text
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Set appropriate height based on expected content
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Show character count for length-limited fields
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: 'var(--destructive)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <X size={14} color="white" />
-                </div>
-                <h4 style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
-                  fontWeight: 'var(--font-weight-semibold)',
-                }}>
-                  Don't
-                </h4>
-              </div>
-              <ul style={{ 
-                listStyle: 'none',
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-3)',
-              }}>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for single-line input (use Input instead)
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Make the textarea too small to display content
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Disable resize without good reason
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use without visible labels or context
-                </li>
-              </ul>
-            </div>
+      <PageSection title="Usage Guidelines">
+        <PageCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+            <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', margin: 0 }}>Best Practices</h3>
+            <ul style={{ margin: 0, paddingLeft: 'var(--spacing-6)', color: 'var(--muted-foreground)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+              <li>Use textareas for multi-line input like comments, descriptions, or messages</li>
+              <li>Provide placeholder text that shows the expected format</li>
+              <li>Consider adding character count for inputs with length limits</li>
+              <li>Set appropriate rows prop for the expected content length</li>
+              <li>Enable auto-resize when content length is unpredictable</li>
+            </ul>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </PageCard>
+      </PageSection>
+    </PageWrapper>
   );
 }

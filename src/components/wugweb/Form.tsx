@@ -62,7 +62,7 @@ export function Form({
           {title && (
             <h2
               style={{
-                fontSize: '60px',
+                fontSize: 'var(--text-4xl)',
                 fontWeight: 'var(--font-weight-bold)',
                 color: getTitleColor(),
                 lineHeight: '1.2',

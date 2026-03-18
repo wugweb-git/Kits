@@ -31,7 +31,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           padding: '12px',
           borderRadius: 'var(--radius-2)',
           fontFamily: 'Inter Tight, sans-serif',
-          fontSize: '14px',
+          fontSize: 'var(--text-sm)',
           fontWeight: 'var(--font-weight-regular)',
           lineHeight: '1.6',
         }}

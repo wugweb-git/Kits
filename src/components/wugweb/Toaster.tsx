@@ -17,7 +17,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           border: '1px solid var(--border)',
           borderRadius: 'var(--radius-2)',
           fontFamily: 'Inter Tight, sans-serif',
-          fontSize: '14px',
+          fontSize: 'var(--text-sm)',
           fontWeight: 'var(--font-weight-regular)',
         },
         className: 'toast',

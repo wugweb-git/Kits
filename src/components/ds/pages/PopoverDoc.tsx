@@ -1,290 +1,139 @@
 import React from 'react';
-import { Button } from '../../ui/button';
-import { Card, CardContent } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
-import { Copy, Check, X, ChevronRight, Keyboard, ExternalLink, MoreVertical } from 'lucide-react';
-import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { spacing } from '../../../utils/responsive';
+import { Popover, PopoverTrigger, PopoverContent } from '../../ui/popover';
+import { Check, Copy, ExternalLink, Calendar, Settings } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Popover } from '../../wugweb/Popover';
+import { Button } from '../../wugweb/Button';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export function PopoverDoc() {
   const [selectedPosition, setSelectedPosition] = React.useState<'top' | 'bottom' | 'left' | 'right'>('bottom');
   const [showCode, setShowCode] = React.useState(true);
-  const [showAccessibility, setShowAccessibility] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
-  
-  const { isMobile, isTablet, breakpoint } = useBreakpoint();
 
-  const handleTokenClick = (token: string, label: string, value?: string) => {
+  const handleTokenClick = (token: string) => {
     setHighlightedToken(token);
     setTimeout(() => setHighlightedToken(null), 2000);
   };
 
   const copyPageLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
-  const jsxCode = `import { Popover } from './components/wugweb/Popover';
+  const getDynamicCode = () => {
+    return `import { Popover, PopoverTrigger, PopoverContent } from "@/components/wugweb/Popover";
+import { Button } from "@/components/wugweb/Button";
 
-<Popover
-  trigger={<button>Click me</button>}
-  position="${selectedPosition}"
->
-  <div style={{ padding: '12px' }}>
-    <h4>Popover Content</h4>
-    <p>This is additional information in a popover.</p>
-  </div>
-</Popover>
-
-// Design Tokens Used:
-// Background: var(--popover)
-// Text: var(--popover-foreground)
-// Border: var(--border)
-// Border Radius: var(--radius-md)`;
-
-  const cssCode = `.popover {
-  position: relative;
-  display: inline-block;
-}
-
-.popover-content {
-  position: absolute;
-  background: var(--popover);
-  color: var(--popover-foreground);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  z-index: 1000;
-  min-width: 200px;
-}
-
-.popover-arrow {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: var(--popover);
-  border: 1px solid var(--border);
-  transform: rotate(45deg);
+export function PopoverDemo() {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button>Open Popover</Button>
+      </PopoverTrigger>
+      <PopoverContent side="${selectedPosition}">
+        <div style={{ padding: 'var(--spacing-4)' }}>
+          <h4>Popover Title</h4>
+          <p>This is the popover content.</p>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
 }`;
+  };
 
-  const sectionGap = spacing.sectionGap[breakpoint];
+  const headerActions = (
+    <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
+      <Button onClick={copyPageLink} variant="outline" size="sm" style={{ gap: 'var(--spacing-2)' }}>
+        {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+        {copiedLink ? 'Copied!' : 'Copy Link'}
+      </Button>
+      <Button variant="outline" size="sm" style={{ gap: 'var(--spacing-2)' }}>
+        <ExternalLink size={16} />
+        View in Figma
+      </Button>
+    </div>
+  );
 
   return (
-    <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: sectionGap, position: 'relative', width: '100%', maxWidth: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      
-      {/* Premium Header */}
-      <section className="animate-fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px', width: '100%', boxSizing: 'border-box' }}>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', width: '100%', boxSizing: 'border-box' }}>
-          <span>Components</span>
-          <ChevronRight size={16} />
-          <span>Overlay</span>
-          <ChevronRight size={16} />
-          <span style={{ color: 'var(--foreground)' }}>Popover</span>
-        </nav>
+    <PageWrapper>
+      <PageHeader
+        badge="Overlay Component"
+        title="Popover"
+        description="Display rich content in a floating panel that appears on demand, triggered by user interaction."
+        actions={headerActions}
+      />
 
-        <div style={{ background: 'linear-gradient(135deg, rgba(255, 190, 26, 0.05) 0%, rgba(255, 190, 26, 0.02) 100%)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: isMobile ? '24px' : isTablet ? '32px' : '40px', position: 'relative', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, var(--accent) 0%, var(--secondary) 100%)' }} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', boxSizing: 'border-box' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', boxSizing: 'border-box' }}>
-              <h1 style={{ fontSize: isMobile ? 'var(--text-3xl)' : 'var(--text-4xl)', fontWeight: 'var(--font-weight-bold)', background: 'linear-gradient(135deg, var(--foreground) 0%, var(--muted-foreground) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', margin: 0, lineHeight: 1.2 }}>
-                Popover
-              </h1>
-              
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
-                <Badge variant="outline" style={{ background: 'var(--background)', borderColor: 'var(--accent)', color: 'var(--accent)', fontSize: 'var(--text-xs)', padding: '4px 12px', fontWeight: 'var(--font-weight-medium)' }}>Figma Import</Badge>
-                <Badge variant="outline" style={{ background: 'var(--background)', fontSize: 'var(--text-xs)', padding: '4px 12px' }}>v1.0.0</Badge>
-                <Badge variant="outline" style={{ background: 'var(--background)', fontSize: 'var(--text-xs)', padding: '4px 12px' }}>Overlay</Badge>
-              </div>
-            </div>
-
-            <p style={{ fontSize: 'var(--text-base)', color: 'var(--muted-foreground)', maxWidth: '800px', margin: 0, lineHeight: 1.6 }}>
-              A floating content panel that appears on click, providing additional context or actions. Perfect for menus, forms, and contextual information without leaving the current page.
-            </p>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '16px' : '32px', padding: isMobile ? '16px' : '20px', background: 'var(--background)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-              <div>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', marginBottom: '4px' }}>Positions</div>
-                <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)' }}>4</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', marginBottom: '4px' }}>Tokens</div>
-                <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)' }}>6</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', marginBottom: '4px' }}>WCAG</div>
-                <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)' }}>AA</div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-              <Button onClick={copyPageLink} variant="outline" size="sm" className="button-micro focus-ring-accent" style={{ gap: '8px', background: 'var(--background)', borderColor: 'var(--border)' }}>
-                {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-                {copiedLink ? 'Copied!' : 'Copy Link'}
-              </Button>
-              <Button variant="outline" size="sm" className="button-micro focus-ring-accent" style={{ gap: '8px', background: 'var(--background)', borderColor: 'var(--border)' }}>
-                <ExternalLink size={16} />
-                View in Figma
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Preview */}
-      <section className="animate-fade-in-up" style={{ animationDelay: '100ms', width: '100%', boxSizing: 'border-box' }}>
-        <Card className="card-hover-lift" style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
-          <CardContent style={{ padding: isMobile ? '24px' : '32px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              
-              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '16px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', marginBottom: '8px', color: 'var(--foreground)' }}>Position</label>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {(['top', 'bottom', 'left', 'right'] as const).map((position) => (
-                      <Button 
-                        key={position} 
-                        onClick={() => setSelectedPosition(position)} 
-                        variant={selectedPosition === position ? 'default' : 'outline'} 
-                        size="sm" 
-                        className="button-micro" 
-                        style={{ 
-                          fontSize: 'var(--text-sm)', 
-                          textTransform: 'capitalize', 
-                          background: selectedPosition === position ? 'var(--accent)' : 'var(--background)', 
-                          color: selectedPosition === position ? 'var(--accent-foreground)' : 'var(--foreground)', 
-                          borderColor: 'var(--border)' 
-                        }}
-                      >
-                        {position}
-                      </Button>
-                    ))}
-                  </div>
+      <PageSection title="Interactive Playground" description="Customize and test the popover component">
+        <PageCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-8)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--spacing-8)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-6)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                <label style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--foreground)' }}>Position</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
+                  {(['top', 'bottom', 'left', 'right'] as const).map((p) => (
+                    <Button key={p} variant={selectedPosition === p ? 'default' : 'outline'} size="sm" onClick={() => setSelectedPosition(p)} style={{ textTransform: 'capitalize' }}>{p}</Button>
+                  ))}
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div style={{ padding: isMobile ? '64px 32px' : '96px 48px', background: 'var(--muted)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
-                <Popover
-                  trigger={
-                    <Button variant="outline" style={{ gap: '8px' }}>
-                      <MoreVertical size={16} />
-                      Click for options
-                    </Button>
-                  }
-                  position={selectedPosition}
-                >
-                  <div style={{ padding: 'var(--spacing-2)', minWidth: '200px' }}>
-                    <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Actions</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <button style={{ padding: '8px 12px', textAlign: 'left', fontSize: 'var(--text-sm)', background: 'transparent', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Edit</button>
-                      <button style={{ padding: '8px 12px', textAlign: 'left', fontSize: 'var(--text-sm)', background: 'transparent', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}>Duplicate</button>
-                      <button style={{ padding: '8px 12px', textAlign: 'left', fontSize: 'var(--text-sm)', background: 'transparent', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--destructive)' }}>Delete</button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
+            <div style={{ padding: 'var(--spacing-12)', background: 'var(--muted)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" style={{ gap: 'var(--spacing-2)' }}>
+                    <Settings size={16} />
+                    Open Popover
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent side={selectedPosition} style={{ width: '300px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+                    <div>
+                      <h4 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', margin: 0, marginBottom: 'var(--spacing-2)' }}>Settings</h4>
+                      <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', margin: 0 }}>Configure your preferences</p>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+                      <Button size="sm" fullWidth>Save Changes</Button>
+                      <Button size="sm" variant="outline" fullWidth>Cancel</Button>
                     </div>
                   </div>
-                </Popover>
-              </div>
+                </PopoverContent>
+              </Popover>
             </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Design Tokens */}
-      <section className="animate-fade-in-up" style={{ animationDelay: '200ms', width: '100%', boxSizing: 'border-box' }}>
-        <div style={{ marginBottom: '16px' }}>
-          <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Design Tokens</h2>
-          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)' }}>Click on any token to highlight it in the preview above</p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '16px', width: '100%' }}>
-          <TokenCard label="Background" token="--popover" value="#1C1C1C" color="var(--popover)" onClick={() => handleTokenClick('--popover', 'Background', '#1C1C1C')} isHighlighted={highlightedToken === '--popover'} />
-          <TokenCard label="Text Color" token="--popover-foreground" value="#FFFFFF" color="var(--popover-foreground)" onClick={() => handleTokenClick('--popover-foreground', 'Text Color', '#FFFFFF')} isHighlighted={highlightedToken === '--popover-foreground'} />
-          <TokenCard label="Border" token="--border" value="#2B2B2B" color="var(--border)" onClick={() => handleTokenClick('--border', 'Border', '#2B2B2B')} isHighlighted={highlightedToken === '--border'} />
-          <TokenCard label="Border Radius" token="--radius-md" value="8px" isRadius onClick={() => handleTokenClick('--radius-md', 'Border Radius', '8px')} isHighlighted={highlightedToken === '--radius-md'} />
-        </div>
-      </section>
-
-      {/* Code Examples */}
-      {showCode && (
-        <section className="animate-fade-in-up" style={{ animationDelay: '300ms', width: '100%', boxSizing: 'border-box' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)' }}>Code Examples</h2>
-            <Button onClick={() => setShowCode(!showCode)} variant="ghost" size="sm" className="button-micro" style={{ gap: '8px' }}>
-              <X size={16} />
-              Hide
-            </Button>
+            {showCode && <CollapsibleCodeBlock code={getDynamicCode()} language="tsx" showLineNumbers={true} />}
           </div>
+        </PageCard>
+      </PageSection>
 
-          <Tabs defaultValue="jsx" style={{ width: '100%' }}>
-            <TabsList style={{ marginBottom: '16px' }}>
-              <TabsTrigger value="jsx">React + JSX</TabsTrigger>
-              <TabsTrigger value="css">CSS</TabsTrigger>
-            </TabsList>
+      <PageSection title="Design Tokens" description="CSS variables used by the Popover component">
+        <PageGrid cols={3}>
+          <TokenCard token="--popover" label="Background" value="rgba(28, 28, 28, 1.00)" category="color" onClick={() => handleTokenClick('--popover')} isHighlighted={highlightedToken === '--popover'} />
+          <TokenCard token="--border" label="Border Color" value="rgba(43, 43, 43, 1.00)" category="color" onClick={() => handleTokenClick('--border')} isHighlighted={highlightedToken === '--border'} />
+          <TokenCard token="--radius-lg" label="Border Radius" value="12px" category="radius" onClick={() => handleTokenClick('--radius-lg')} isHighlighted={highlightedToken === '--radius-lg'} />
+        </PageGrid>
+      </PageSection>
 
-            <TabsContent value="jsx">
-              <CollapsibleCodeBlock code={jsxCode} language="tsx" />
-            </TabsContent>
-
-            <TabsContent value="css">
-              <CollapsibleCodeBlock code={cssCode} language="css" />
-            </TabsContent>
-          </Tabs>
-        </section>
-      )}
-
-      {/* Accessibility */}
-      {showAccessibility && (
-        <section className="animate-fade-in-up" style={{ animationDelay: '400ms', width: '100%', boxSizing: 'border-box' }}>
-          <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', background: 'var(--card)' }}>
-            <CardContent style={{ padding: isMobile ? '24px' : '32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-                <div>
-                  <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Accessibility</h2>
-                  <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', margin: 0 }}>WCAG 2.1 Level AA compliant</p>
-                </div>
-                <Button onClick={() => setShowAccessibility(!showAccessibility)} variant="ghost" size="sm" className="button-micro" style={{ gap: '8px' }}>
-                  <X size={16} />
-                  Hide
-                </Button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', gap: '12px', padding: '16px', background: 'var(--background)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                  <Keyboard size={20} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Keyboard Navigation</div>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-                      <li><kbd style={{ padding: '2px 6px', background: 'var(--muted)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-xs)' }}>Escape</kbd> - Close popover</li>
-                      <li><kbd style={{ padding: '2px 6px', background: 'var(--muted)', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-xs)' }}>Tab</kbd> - Navigate through popover content</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '12px', padding: '16px', background: 'var(--background)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
-                  <Check size={20} style={{ color: 'var(--success)', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', marginBottom: '8px' }}>Best Practices</div>
-                    <ul style={{ margin: 0, paddingLeft: '20px', fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
-                      <li>Focus should move into the popover when it opens</li>
-                      <li>Clicking outside should close the popover</li>
-                      <li>Use appropriate ARIA labels for screen readers</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-    </div>
+      <PageSection title="Usage Guidelines">
+        <PageCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+            <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', margin: 0 }}>Best Practices</h3>
+            <ul style={{ margin: 0, paddingLeft: 'var(--spacing-6)', color: 'var(--muted-foreground)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+              <li>Use popovers for secondary content that doesn't require immediate attention</li>
+              <li>Keep popover content concise and focused on a single task</li>
+              <li>Ensure popovers can be easily dismissed</li>
+              <li>Avoid nesting popovers within other popovers</li>
+              <li>Position popovers to avoid covering important UI elements</li>
+            </ul>
+          </div>
+        </PageCard>
+      </PageSection>
+    </PageWrapper>
   );
 }

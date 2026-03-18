@@ -119,7 +119,7 @@ const DialogTitle = React.forwardRef<
     className={cn("text-[var(--foreground)]", className)}
     style={{
       fontFamily: 'Inter Tight, sans-serif',
-      fontSize: '24px',
+      fontSize: 'var(--text-xl)',
       fontWeight: 'var(--font-weight-semibold)',
       lineHeight: '1.3',
     }}
@@ -137,7 +137,7 @@ const DialogDescription = React.forwardRef<
     className={cn("text-[var(--muted-foreground)]", className)}
     style={{
       fontFamily: 'Inter Tight, sans-serif',
-      fontSize: '14px',
+      fontSize: 'var(--text-sm)',
       fontWeight: 'var(--font-weight-regular)',
       lineHeight: '1.6',
     }}

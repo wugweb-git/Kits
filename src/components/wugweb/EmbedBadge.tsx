@@ -25,21 +25,21 @@ const brandConfig = {
 
 const sizeConfig = {
   s: {
-    fontSize: '14px',
+    fontSize: 'var(--text-sm)',
     padding: '6px 12px',
     logoHeight: 16,
     iconSize: 18,
     gap: '6px',
   },
   m: {
-    fontSize: '16px',
+    fontSize: 'var(--text-base)',
     padding: '8px 16px',
     logoHeight: 20,
     iconSize: 20,
     gap: '8px',
   },
   l: {
-    fontSize: '20px',
+    fontSize: 'var(--text-lg)',
     padding: '10px 20px',
     logoHeight: 25,
     iconSize: 24,

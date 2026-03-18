@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../ui/tabs';
 import { TokenCard } from '../TokenCard';
 import { designTokens, getTokenUsage } from '../../../lib/design-tokens';
+import { PageWrapper, PageHeader } from '../PageWrapper';
 
 interface TokensProps {
   currentSubPage?: string;
@@ -74,24 +75,23 @@ export function Tokens({ currentSubPage }: TokensProps) {
     preview: (
       <div 
         className="w-16 h-16 bg-accent" 
-        style={{ borderRadius: data.value === 9999 ? '9999px' : `${data.value}px` }} 
+        style={{ borderRadius: data.value === 9999 ? 'var(--radius-full)' : `var(--radius-${name})` }} 
       />
     )
   }));
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <div>
-        <h1>Design Tokens</h1>
-        <p className="text-muted-foreground" style={{ fontSize: 'var(--text-lg)', marginTop: '16px' }}>
-          Design tokens are the visual design atoms of the design system — specifically, 
-          they are named entities that store visual design attributes. We use them in 
-          place of hard-coded values to ensure flexibility and unity across all products.
-        </p>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Design Tokens"
+        description="Design tokens are the visual design atoms of the design system — specifically, they are named entities that store visual design attributes. We use them in place of hard-coded values to ensure flexibility and unity across all products."
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full justify-start border-b border-border bg-transparent h-auto p-0" style={{ gap: '24px' }}>
+        <TabsList 
+          className="w-full justify-start border-b border-border bg-transparent h-auto p-0" 
+          style={{ gap: 'var(--spacing-6)' }}
+        >
           <TabsTrigger 
             value="colors" 
             className="data-[state=active]:border-b-2 data-[state=active]:border-accent rounded-none"
@@ -118,7 +118,7 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="colors" style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
+        <TabsContent value="colors" style={{ marginTop: 'var(--spacing-8)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-12)' }}>
           {colorSections.map(section => {
             const colorData = designTokens.color[section.key as keyof typeof designTokens.color];
             if (!colorData) return null;
@@ -132,11 +132,11 @@ export function Tokens({ currentSubPage }: TokensProps) {
 
             return (
               <div key={section.key}>
-                <h3 style={{ marginBottom: '8px' }}>{section.title}</h3>
-                <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+                <h3 style={{ marginBottom: 'var(--spacing-2)' }}>{section.title}</h3>
+                <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
                   {section.description}
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--spacing-6)' }}>
                   {colors.map((token) => (
                     <TokenCard
                       key={token.name}
@@ -161,31 +161,31 @@ export function Tokens({ currentSubPage }: TokensProps) {
           })}
         </TabsContent>
 
-        <TabsContent value="typography" style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
+        <TabsContent value="typography" style={{ marginTop: 'var(--spacing-8)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-12)' }}>
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Font Family</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Font Family</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Our typography system uses Inter Tight font family for all text.
             </p>
             <div 
               className="bg-card border border-border"
-              style={{ borderRadius: 'var(--radius-lg)', padding: '32px' }}
+              style={{ borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-8)' }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                 <div>
-                  <h2 style={{ fontFamily: 'Inter Tight, sans-serif' }}>Inter Tight</h2>
-                  <p className="text-muted-foreground" style={{ marginTop: '8px', fontSize: 'var(--text-sm)' }}>
+                  <h2>Inter Tight</h2>
+                  <p className="text-muted-foreground" style={{ marginTop: 'var(--spacing-2)', fontSize: 'var(--text-sm)' }}>
                     Primary font family for all text
                   </p>
                 </div>
-                <div style={{ marginTop: '16px' }}>
-                  <p style={{ fontFamily: 'Inter Tight, sans-serif', fontSize: '32px' }}>
+                <div style={{ marginTop: 'var(--spacing-4)' }}>
+                  <p style={{ fontSize: 'var(--text-2xl)' }}>
                     Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm
                   </p>
-                  <p style={{ fontFamily: 'Inter Tight, sans-serif', fontSize: '32px', marginTop: '8px' }}>
+                  <p style={{ fontSize: 'var(--text-2xl)', marginTop: 'var(--spacing-2)' }}>
                     Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz
                   </p>
-                  <p style={{ fontFamily: 'Inter Tight, sans-serif', fontSize: '32px', marginTop: '8px' }}>
+                  <p style={{ fontSize: 'var(--text-2xl)', marginTop: 'var(--spacing-2)' }}>
                     0 1 2 3 4 5 6 7 8 9
                   </p>
                 </div>
@@ -194,21 +194,21 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
 
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Font Sizes</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Font Sizes</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Modular scale for consistent typography hierarchy.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
               {fontSizes.map((token) => (
                 <div 
                   key={token.name}
                   className="bg-card border border-border hover:border-accent transition-colors"
-                  style={{ borderRadius: 'var(--radius-lg)', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                  style={{ borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)', flex: 1 }}>
                     <div style={{ minWidth: '120px' }}>
                       <span style={{ fontWeight: 'var(--font-weight-medium)' }}>{token.name}</span>
-                      <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)', marginTop: '4px' }}>
+                      <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)', marginTop: 'var(--spacing-1)' }}>
                         {token.value}
                       </p>
                     </div>
@@ -224,18 +224,18 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
 
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Font Weights</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Font Weights</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Weight variations for emphasis and hierarchy.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--spacing-4)' }}>
               {fontWeights.map((token) => (
                 <div 
                   key={token.name}
                   className="bg-card border border-border"
-                  style={{ borderRadius: 'var(--radius-md)', padding: '16px' }}
+                  style={{ borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)' }}
                 >
-                  <p style={{ fontWeight: parseInt(token.value), fontSize: '20px', marginBottom: '8px' }}>
+                  <p style={{ fontWeight: parseInt(token.value), fontSize: 'var(--text-lg)', marginBottom: 'var(--spacing-2)' }}>
                     {token.name}
                   </p>
                   <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
@@ -247,11 +247,11 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
 
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Line Heights</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Line Heights</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Line height values paired with font sizes.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 'var(--spacing-4)' }}>
               {lineHeights.map((token) => (
                 <TokenCard
                   key={token.name}
@@ -265,18 +265,18 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="spacing" style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
+        <TabsContent value="spacing" style={{ marginTop: 'var(--spacing-8)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-12)' }}>
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Spacing Scale</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Spacing Scale</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Base spacing values for consistent layout and rhythm.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
               {spacingTokens.map((token) => (
                 <div 
                   key={token.name}
                   className="bg-card border border-border"
-                  style={{ borderRadius: 'var(--radius-md)', padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}
+                  style={{ borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-4)' }}
                 >
                   <div style={{ minWidth: '80px' }}>
                     <span style={{ fontWeight: 'var(--font-weight-medium)' }}>{token.name}</span>
@@ -285,7 +285,7 @@ export function Tokens({ currentSubPage }: TokensProps) {
                     className="bg-accent"
                     style={{ 
                       width: token.value,
-                      height: '32px',
+                      height: 'var(--spacing-8)',
                       borderRadius: 'var(--radius-sm)'
                     }}
                   />
@@ -296,16 +296,16 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
 
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Padding Scale</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Padding Scale</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Padding values for component internal spacing.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 'var(--spacing-4)' }}>
               {paddingTokens.map((token) => (
                 <div 
                   key={token.name}
                   className="bg-card border border-border"
-                  style={{ borderRadius: 'var(--radius-md)', padding: '16px', textAlign: 'center' }}
+                  style={{ borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', textAlign: 'center' }}
                 >
                   <div 
                     className="bg-muted mx-auto mb-2"
@@ -318,7 +318,7 @@ export function Tokens({ currentSubPage }: TokensProps) {
                   >
                     <div className="bg-accent w-full h-full" style={{ borderRadius: 'var(--radius-sm)' }} />
                   </div>
-                  <p style={{ fontWeight: 'var(--font-weight-medium)', marginBottom: '4px' }}>{token.name}</p>
+                  <p style={{ fontWeight: 'var(--font-weight-medium)', marginBottom: 'var(--spacing-1)' }}>{token.name}</p>
                   <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>{token.value}</p>
                 </div>
               ))}
@@ -326,11 +326,11 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
 
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Gap Scale</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Gap Scale</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Gap values for flexbox and grid layouts.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--spacing-4)' }}>
               {gapTokens.map((token) => (
                 <TokenCard
                   key={token.name}
@@ -344,13 +344,13 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
         </TabsContent>
 
-        <TabsContent value="radius" style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <TabsContent value="radius" style={{ marginTop: 'var(--spacing-8)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-8)' }}>
           <div>
-            <h3 style={{ marginBottom: '8px' }}>Border Radius</h3>
-            <p className="text-muted-foreground" style={{ marginBottom: '24px' }}>
+            <h3 style={{ marginBottom: 'var(--spacing-2)' }}>Border Radius</h3>
+            <p className="text-muted-foreground" style={{ marginBottom: 'var(--spacing-6)' }}>
               Consistent border radius creates visual harmony across components.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--spacing-6)' }}>
               {radiusTokens.map((token) => (
                 <TokenCard
                   key={token.name}
@@ -365,6 +365,6 @@ export function Tokens({ currentSubPage }: TokensProps) {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageWrapper>
   );
 }

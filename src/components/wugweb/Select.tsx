@@ -36,7 +36,7 @@ const SelectTrigger = React.forwardRef<
       padding: '0 12px',
       borderRadius: 'var(--radius-2)',
       fontFamily: 'Inter Tight, sans-serif',
-      fontSize: '14px',
+      fontSize: 'var(--text-sm)',
       fontWeight: 'var(--font-weight-regular)',
     }}
     {...props}
@@ -141,7 +141,7 @@ const SelectLabel = React.forwardRef<
     style={{
       padding: '6px 8px',
       fontFamily: 'Inter Tight, sans-serif',
-      fontSize: '12px',
+      fontSize: 'var(--text-xs)',
       fontWeight: 'var(--font-weight-medium)',
     }}
     {...props}
@@ -170,7 +170,7 @@ const SelectItem = React.forwardRef<
       padding: '6px 32px 6px 8px',
       borderRadius: 'var(--radius-1)',
       fontFamily: 'Inter Tight, sans-serif',
-      fontSize: '14px',
+      fontSize: 'var(--text-sm)',
       fontWeight: 'var(--font-weight-regular)',
     }}
     {...props}

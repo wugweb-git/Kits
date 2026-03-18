@@ -3,7 +3,8 @@ import { Copy, Check, Code2 } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { typography } from '../../../utils/responsive';
-import { toast } from 'sonner';
+import { toast } from 'sonner@2.0.3';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 interface CodeBlockProps {
   code: string;
@@ -54,7 +55,7 @@ export function CodeBlock({ code, language = 'jsx', showCopy = true, maxHeight }
   const replaceTokensWithValues = (codeStr: string): string => {
     let result = codeStr;
     Object.entries(tokenValueMap).forEach(([token, value]) => {
-      result = result.replace(new RegExp(token.replace(/[()]/g, '\\$&'), 'g'), value);
+      result = result.replace(new RegExp(token.replace(/[()]/g, '\\\\$&'), 'g'), value);
     });
     return result;
   };
@@ -62,22 +63,8 @@ export function CodeBlock({ code, language = 'jsx', showCopy = true, maxHeight }
   const copyCode = async (type: 'tokenized' | 'values') => {
     const codeToCopy = type === 'tokenized' ? code : replaceTokensWithValues(code);
     
-    try {
-      // Try modern Clipboard API
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(codeToCopy);
-      } else {
-        // Fallback to older method
-        const textArea = document.createElement('textarea');
-        textArea.value = codeToCopy;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-      }
-      
+    const success = await copyToClipboard(codeToCopy);
+    if (success) {
       setCopiedType(type);
       setShowCopyMenu(false);
       
@@ -93,8 +80,7 @@ export function CodeBlock({ code, language = 'jsx', showCopy = true, maxHeight }
       });
       
       setTimeout(() => setCopiedType(null), 1500);
-    } catch (err) {
-      console.warn('Copy failed:', err);
+    } else {
       toast('Copy failed', {
         description: 'Unable to copy to clipboard',
         duration: 1500,

@@ -25,11 +25,12 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
     <header 
       className="animate-fade-in"
       style={{
+        fontFamily: 'Inter Tight, sans-serif',
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
-        height: 'var(--header-height)', // 64px
+        height: 'var(--header-height)',
         width: '100%',
         zIndex: 30,
         backdropFilter: 'blur(12px)',
@@ -49,7 +50,7 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
       }}
     >
       {/* Left: Logo + Hamburger */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 'var(--spacing-3)' : 'var(--spacing-4)' }}>
         {showMenuButton && (
           <button
             onClick={onToggleSidebar}
@@ -58,7 +59,7 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '8px',
+              padding: 'var(--spacing-2)',
               borderRadius: 'var(--radius-md)',
               border: 'none',
               background: 'transparent',
@@ -71,7 +72,7 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
           </button>
         )}
         
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
           <img 
             src={logo}
             alt="Wugweb Kits Logo"
@@ -91,11 +92,11 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
-            paddingLeft: '12px',
-            paddingRight: '12px',
-            paddingTop: '8px',
-            paddingBottom: '8px',
+            gap: 'var(--spacing-2)',
+            paddingLeft: 'var(--spacing-3)',
+            paddingRight: 'var(--spacing-3)',
+            paddingTop: 'var(--spacing-2)',
+            paddingBottom: 'var(--spacing-2)',
             borderRadius: 'var(--radius-md)',
             maxWidth: '400px',
             width: '100%',
@@ -115,7 +116,7 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
           <kbd 
             className="bg-background border border-border text-muted-foreground"
             style={{
-              padding: '2px 6px',
+              padding: 'var(--spacing-1) var(--spacing-2)',
               borderRadius: 'var(--radius-sm)',
               fontSize: typography.caption[breakpoint],
               fontFamily: 'Inter Tight, sans-serif'
@@ -127,14 +128,14 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
       )}
 
       {/* Right: Theme Toggle + Docs */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '4px' : '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 'var(--spacing-1)' : 'var(--spacing-2)' }}>
         <Button
           variant="ghost"
           size="sm"
           onClick={onToggleTheme}
           className="button-press hover:text-accent"
           style={{
-            padding: isMobile ? '6px' : '8px',
+            padding: isMobile ? '6px' : 'var(--spacing-2)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -150,7 +151,7 @@ export function Header({ isDarkMode, onToggleTheme, onToggleSidebar, showMenuBut
             size="sm"
             className="button-press hover:text-accent"
             style={{
-              padding: '8px',
+              padding: 'var(--spacing-2)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'

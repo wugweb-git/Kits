@@ -75,7 +75,7 @@ export function CTABanner({
             borderRadius: '12px',
             backgroundColor: 'var(--accent-foreground)',
             color: '#ffffff',
-            fontSize: '20px',
+            fontSize: 'var(--text-xl)',
             fontFamily: 'Inter Tight, sans-serif',
             fontWeight: 600,
             border: 'none',

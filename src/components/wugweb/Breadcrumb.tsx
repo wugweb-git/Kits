@@ -20,7 +20,7 @@ export interface BreadcrumbProps {
 
 const separatorMap = {
   slash: '/',
-  chevron: <ChevronRight size={14} />,
+  chevron: 'chevron',
   arrow: '→',
   dot: '•',
 };
@@ -74,6 +74,97 @@ export function Breadcrumb({
     ];
   }, [items, maxItems]);
 
+  // Build list items array
+  const listItems = displayItems.map((item, index) => {
+    const isLast = index === displayItems.length - 1;
+    const isCurrent = item.current || isLast;
+    const isEllipsis = item.label === '...';
+
+    const elements = [];
+
+    // Add the breadcrumb item
+    elements.push(
+      <li
+        key={`item-${index}`}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        {item.href && !isCurrent ? (
+          <a
+            href={item.href}
+            aria-current={isCurrent ? 'page' : undefined}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-1)',
+              color: 'var(--muted-foreground)',
+              textDecoration: 'none',
+              fontWeight: 'var(--font-weight-regular)',
+              transition: 'color var(--motion-duration-fast) var(--motion-easing-standard)',
+              cursor: isEllipsis ? 'default' : 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              if (!isEllipsis) {
+                e.currentTarget.style.color = 'var(--foreground)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--muted-foreground)';
+            }}
+          >
+            {showHomeIcon && index === 0 && item.icon ? (
+              item.icon
+            ) : null}
+            <span>{item.label}</span>
+          </a>
+        ) : (
+          <span
+            aria-current={isCurrent ? 'page' : undefined}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-1)',
+              color: isCurrent ? 'var(--foreground)' : 'var(--muted-foreground)',
+              fontWeight: isCurrent ? 'var(--font-weight-medium)' : 'var(--font-weight-regular)',
+              cursor: isEllipsis ? 'default' : 'text',
+            }}
+          >
+            {showHomeIcon && index === 0 && item.icon ? (
+              item.icon
+            ) : null}
+            <span>{item.label}</span>
+          </span>
+        )}
+      </li>
+    );
+
+    // Add separator if not last item
+    if (!isLast) {
+      elements.push(
+        <li
+          key={`sep-${index}`}
+          aria-hidden="true"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: `0 ${sizeStyles.padding}`,
+            color: 'var(--muted-foreground)',
+          }}
+        >
+          {separator === 'chevron' ? (
+            <ChevronRight size={sizeStyles.iconSize} />
+          ) : (
+            <span style={{ lineHeight: '20px' }}>{separatorMap[separator]}</span>
+          )}
+        </li>
+      );
+    }
+
+    return elements;
+  }).flat();
+
   return (
     <nav
       aria-label="Breadcrumb"
@@ -97,88 +188,7 @@ export function Breadcrumb({
           gap: 0,
         }}
       >
-        {displayItems.map((item, index) => {
-          const isLast = index === displayItems.length - 1;
-          const isCurrent = item.current || isLast;
-          const isEllipsis = item.label === '...';
-
-          return (
-            <React.Fragment key={`${item.label}-${index}`}>
-              <li
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                {item.href && !isCurrent ? (
-                  <a
-                    href={item.href}
-                    aria-current={isCurrent ? 'page' : undefined}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-1)',
-                      color: 'var(--muted-foreground)',
-                      textDecoration: 'none',
-                      fontWeight: 'var(--font-weight-regular)',
-                      transition: 'color var(--motion-duration-fast) var(--motion-easing-standard)',
-                      cursor: isEllipsis ? 'default' : 'pointer',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isEllipsis) {
-                        e.currentTarget.style.color = 'var(--foreground)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'var(--muted-foreground)';
-                    }}
-                  >
-                    {showHomeIcon && index === 0 && item.icon ? (
-                      item.icon
-                    ) : null}
-                    <span>{item.label}</span>
-                  </a>
-                ) : (
-                  <span
-                    aria-current={isCurrent ? 'page' : undefined}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-1)',
-                      color: isCurrent ? 'var(--foreground)' : 'var(--muted-foreground)',
-                      fontWeight: isCurrent ? 'var(--font-weight-medium)' : 'var(--font-weight-regular)',
-                      cursor: isEllipsis ? 'default' : 'text',
-                    }}
-                  >
-                    {showHomeIcon && index === 0 && item.icon ? (
-                      item.icon
-                    ) : null}
-                    <span>{item.label}</span>
-                  </span>
-                )}
-              </li>
-
-              {/* Separator */}
-              {!isLast && (
-                <li
-                  aria-hidden="true"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: `0 ${sizeStyles.padding}`,
-                    color: 'var(--muted-foreground)',
-                  }}
-                >
-                  {typeof separatorMap[separator] === 'string' ? (
-                    <span style={{ lineHeight: '20px' }}>{separatorMap[separator]}</span>
-                  ) : (
-                    separatorMap[separator]
-                  )}
-                </li>
-              )}
-            </React.Fragment>
-          );
-        })}
+        {listItems}
       </ol>
     </nav>
   );

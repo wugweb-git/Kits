@@ -6,6 +6,7 @@ import { cn } from "../ui/utils";
 
 function Label({
   className,
+  htmlFor,
   ...props
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   return (
@@ -22,7 +23,7 @@ function Label({
       )}
       style={{
         fontFamily: 'Inter Tight, sans-serif',
-        fontSize: '14px',
+        fontSize: 'var(--text-sm)',
         fontWeight: 'var(--font-weight-medium)',
         lineHeight: '1.5',
       }}

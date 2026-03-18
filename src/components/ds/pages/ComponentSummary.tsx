@@ -53,6 +53,8 @@ export function ComponentSummary() {
   };
 
   const completedCount = components.filter(c => c.status === 'Complete').length;
+  const inProgressCount = components.filter(c => c.status === 'In Progress').length;
+  const plannedCount = components.filter(c => c.status === 'Planned').length;
   const totalCount = components.length;
   const completionPercentage = Math.round((completedCount / totalCount) * 100);
 
@@ -74,19 +76,19 @@ export function ComponentSummary() {
           <span style={{ 
             color: 'var(--muted-foreground)',
             fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
+            fontSize: 'var(--text-sm)',
             fontWeight: 'var(--font-weight-medium)',
           }}>
-            Overview
+            Components
           </span>
           <ChevronRight size={16} color="var(--muted-foreground)" />
           <span style={{ 
             color: 'var(--foreground)',
             fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
+            fontSize: 'var(--text-sm)',
             fontWeight: 'var(--font-weight-medium)',
           }}>
-            Component Summary
+            Overview
           </span>
         </div>
         
@@ -94,22 +96,51 @@ export function ComponentSummary() {
           <div>
             <h1 style={{
               fontFamily: 'Inter Tight, sans-serif',
-              fontSize: isMobile ? '32px' : '48px',
+              fontSize: isMobile ? 'var(--text-2xl)' : 'var(--text-3xl)',
               fontWeight: 'var(--font-weight-bold)',
               lineHeight: '1.2',
               marginBottom: spacing(2),
             }}>
-              Wugweb Design System
+              Component Overview
             </h1>
             <p style={{
               fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '18px',
+              fontSize: 'var(--text-lg)',
               fontWeight: 'var(--font-weight-regular)',
               color: 'var(--muted-foreground)',
               lineHeight: '1.6',
             }}>
-              A comprehensive overview of all components, their status, and design token integration.
+              A comprehensive library of reusable components built with accessibility, customization, and best practices in mind.
             </p>
+
+            {/* Badges */}
+            <div style={{
+              display: 'flex',
+              gap: 'var(--spacing-3)',
+              flexWrap: 'wrap',
+              marginTop: 'var(--spacing-4)',
+            }}>
+              <img 
+                src="https://img.shields.io/npm/v/wugweb-kits?style=flat-square&color=0EA5E9" 
+                alt="NPM Version"
+                style={{ height: '20px' }}
+              />
+              <img 
+                src="https://img.shields.io/npm/l/wugweb-kits?style=flat-square&color=0EA5E9" 
+                alt="License"
+                style={{ height: '20px' }}
+              />
+              <img 
+                src="https://img.shields.io/badge/components-127+-0EA5E9?style=flat-square" 
+                alt="Components Count"
+                style={{ height: '20px' }}
+              />
+              <img 
+                src="https://img.shields.io/badge/TypeScript-Ready-0EA5E9?style=flat-square" 
+                alt="TypeScript"
+                style={{ height: '20px' }}
+              />
+            </div>
           </div>
           
           <div className="flex items-center gap-3">
@@ -147,7 +178,7 @@ export function ComponentSummary() {
               <div>
                 <div style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '28px',
+                  fontSize: 'var(--text-2xl)',
                   fontWeight: 'var(--font-weight-bold)',
                   color: 'var(--foreground)',
                 }}>
@@ -157,7 +188,7 @@ export function ComponentSummary() {
             </div>
             <div style={{
               fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '14px',
+              fontSize: 'var(--text-sm)',
               color: 'var(--muted-foreground)',
             }}>
               Total Components
@@ -186,7 +217,7 @@ export function ComponentSummary() {
               <div>
                 <div style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '28px',
+                  fontSize: 'var(--text-2xl)',
                   fontWeight: 'var(--font-weight-bold)',
                   color: 'var(--foreground)',
                 }}>
@@ -196,7 +227,7 @@ export function ComponentSummary() {
             </div>
             <div style={{
               fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '14px',
+              fontSize: 'var(--text-sm)',
               color: 'var(--muted-foreground)',
             }}>
               Completed
@@ -225,7 +256,7 @@ export function ComponentSummary() {
               <div>
                 <div style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '28px',
+                  fontSize: 'var(--text-2xl)',
                   fontWeight: 'var(--font-weight-bold)',
                   color: 'var(--foreground)',
                 }}>
@@ -235,7 +266,7 @@ export function ComponentSummary() {
             </div>
             <div style={{
               fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '14px',
+              fontSize: 'var(--text-sm)',
               color: 'var(--muted-foreground)',
             }}>
               Documented
@@ -264,7 +295,7 @@ export function ComponentSummary() {
               <div>
                 <div style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '28px',
+                  fontSize: 'var(--text-2xl)',
                   fontWeight: 'var(--font-weight-bold)',
                   color: 'var(--foreground)',
                 }}>
@@ -274,7 +305,7 @@ export function ComponentSummary() {
             </div>
             <div style={{
               fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '14px',
+              fontSize: 'var(--text-sm)',
               color: 'var(--muted-foreground)',
             }}>
               Token Coverage
@@ -293,11 +324,11 @@ export function ComponentSummary() {
         <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
           <h3 style={{
             fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
+            fontSize: 'var(--text-lg)',
             fontWeight: 'var(--font-weight-semibold)',
             marginBottom: spacing(6),
           }}>
-            Component Inventory
+            Component Library
           </h3>
 
           {['Core', 'Form', 'Overlay', 'Feedback'].map((category) => {
@@ -309,7 +340,7 @@ export function ComponentSummary() {
                 <div className="flex items-center gap-3" style={{ marginBottom: spacing(4) }}>
                   <h4 style={{
                     fontFamily: 'Inter Tight, sans-serif',
-                    fontSize: '16px',
+                    fontSize: 'var(--text-base)',
                     fontWeight: 'var(--font-weight-semibold)',
                     color: 'var(--foreground)',
                   }}>
@@ -346,7 +377,7 @@ export function ComponentSummary() {
                         <div>
                           <div style={{
                             fontFamily: 'Inter Tight, sans-serif',
-                            fontSize: '14px',
+                            fontSize: 'var(--text-sm)',
                             fontWeight: 'var(--font-weight-medium)',
                             color: 'var(--foreground)',
                           }}>
@@ -358,10 +389,10 @@ export function ComponentSummary() {
                                 key={token}
                                 style={{
                                   fontFamily: 'monospace',
-                                  fontSize: '11px',
+                                  fontSize: 'var(--text-xs)',
                                   color: 'var(--muted-foreground)',
                                   backgroundColor: 'var(--background)',
-                                  padding: '2px 6px',
+                                  padding: 'var(--spacing-1) var(--spacing-2)',
                                   borderRadius: 'var(--radius-1)',
                                 }}
                               >
@@ -371,7 +402,7 @@ export function ComponentSummary() {
                             {component.designTokens.length > 3 && (
                               <span style={{
                                 fontFamily: 'Inter Tight, sans-serif',
-                                fontSize: '11px',
+                                fontSize: 'var(--text-xs)',
                                 color: 'var(--muted-foreground)',
                               }}>
                                 +{component.designTokens.length - 3} more
@@ -387,7 +418,7 @@ export function ComponentSummary() {
                             borderColor: 'var(--success)',
                             color: 'var(--success)',
                             backgroundColor: 'var(--success-subtle)',
-                            fontSize: '11px',
+                            fontSize: 'var(--text-xs)',
                           }}>
                             <FileText size={12} />
                             Docs
@@ -396,7 +427,7 @@ export function ComponentSummary() {
                         <Badge variant="outline" style={{
                           borderColor: getStatusColor(component.status),
                           color: getStatusColor(component.status),
-                          fontSize: '11px',
+                          fontSize: 'var(--text-xs)',
                         }}>
                           {component.status}
                         </Badge>
@@ -419,7 +450,7 @@ export function ComponentSummary() {
         <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
           <h3 style={{
             fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
+            fontSize: 'var(--text-lg)',
             fontWeight: 'var(--font-weight-semibold)',
             marginBottom: spacing(6),
           }}>
@@ -432,24 +463,24 @@ export function ComponentSummary() {
                 <Check size={16} color="var(--success)" />
                 <h4 style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
+                  fontSize: 'var(--text-base)',
                   fontWeight: 'var(--font-weight-semibold)',
                 }}>
-                  100% CSS Variable Coverage
+                  CSS Variables First
                 </h4>
               </div>
               <p style={{
                 fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
+                fontSize: 'var(--text-sm)',
                 color: 'var(--muted-foreground)',
                 lineHeight: '1.6',
               }}>
-                All components exclusively use CSS variables from <code style={{
+                All components use CSS variables from <code style={{
                   backgroundColor: 'var(--surface-800)',
-                  padding: '2px 6px',
+                  padding: 'var(--spacing-1) var(--spacing-2)',
                   borderRadius: 'var(--radius-1)',
                   fontFamily: 'monospace',
-                  fontSize: '13px',
+                  fontSize: 'var(--text-xs)',
                 }}>/styles/global.css</code> for colors, spacing, typography, and borders.
               </p>
             </div>
@@ -459,7 +490,7 @@ export function ComponentSummary() {
                 <Check size={16} color="var(--success)" />
                 <h4 style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
+                  fontSize: 'var(--text-base)',
                   fontWeight: 'var(--font-weight-semibold)',
                 }}>
                   Inter Tight Typography
@@ -467,7 +498,7 @@ export function ComponentSummary() {
               </div>
               <p style={{
                 fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
+                fontSize: 'var(--text-sm)',
                 color: 'var(--muted-foreground)',
                 lineHeight: '1.6',
               }}>
@@ -480,7 +511,7 @@ export function ComponentSummary() {
                 <Check size={16} color="var(--success)" />
                 <h4 style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
+                  fontSize: 'var(--text-base)',
                   fontWeight: 'var(--font-weight-semibold)',
                 }}>
                   Explicit Sizing
@@ -488,7 +519,7 @@ export function ComponentSummary() {
               </div>
               <p style={{
                 fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
+                fontSize: 'var(--text-sm)',
                 color: 'var(--muted-foreground)',
                 lineHeight: '1.6',
               }}>
@@ -501,15 +532,15 @@ export function ComponentSummary() {
                 <Check size={16} color="var(--success)" />
                 <h4 style={{
                   fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
+                  fontSize: 'var(--text-base)',
                   fontWeight: 'var(--font-weight-semibold)',
                 }}>
-                  Accessibility First
+                  Accessibility by Default
                 </h4>
               </div>
               <p style={{
                 fontFamily: 'Inter Tight, sans-serif',
-                fontSize: '14px',
+                fontSize: 'var(--text-sm)',
                 color: 'var(--muted-foreground)',
                 lineHeight: '1.6',
               }}>

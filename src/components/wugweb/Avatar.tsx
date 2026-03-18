@@ -152,6 +152,12 @@ export function AvatarGroup({
   max = 5,
   className = '',
 }: AvatarGroupProps) {
+  // Safety check - ensure avatars is defined
+  if (!avatars || !Array.isArray(avatars)) {
+    console.warn('AvatarGroup: avatars prop is required and must be an array');
+    return null;
+  }
+
   const displayAvatars = avatars.slice(0, max);
   const remainingCount = Math.max(0, avatars.length - max);
   const avatarSize = sizeMap[size];

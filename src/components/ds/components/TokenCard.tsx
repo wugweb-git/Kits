@@ -2,6 +2,7 @@ import React from 'react';
 import { Copy, Check } from 'lucide-react';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { typography } from '../../../utils/responsive';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 interface TokenCardProps {
   label: string;
@@ -21,25 +22,11 @@ export function TokenCard({ label, token, value, color, isRadius, isDuration, is
   const { isMobile, breakpoint } = useBreakpoint();
 
   const copyToken = async () => {
-    try {
-      // Try modern Clipboard API
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(token);
-      } else {
-        // Fallback to older method
-        const textArea = document.createElement('textarea');
-        textArea.value = token;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-      }
+    const success = await copyToClipboard(token);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.warn('Copy failed:', err);
+    } else {
       // Still show feedback even if copy failed
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

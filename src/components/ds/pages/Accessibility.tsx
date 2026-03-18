@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Badge } from '../../ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
 import { CheckCircle2, AlertTriangle, Info } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection } from '../PageWrapper';
 
 export function Accessibility() {
   const contrastPairs = [
@@ -13,23 +14,17 @@ export function Accessibility() {
   ];
 
   return (
-    <div className="space-y-16">
-      <div>
-        <h1>Accessibility</h1>
-        <p className="text-muted-foreground mt-4" style={{ fontSize: 'var(--text-lg)' }}>
-          Wugweb Kits is built with accessibility at its core, ensuring all users can interact with your applications effectively.
-        </p>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Accessibility"
+        description="Wugweb Kits is built with accessibility at its core, ensuring all users can interact with your applications effectively."
+      />
 
       {/* WCAG Compliance */}
-      <section className="space-y-6">
-        <div>
-          <h2>WCAG Compliance</h2>
-          <p className="text-muted-foreground mt-2">
-            Our design system meets WCAG 2.1 Level AA standards across all components.
-          </p>
-        </div>
-
+      <PageSection
+        title="WCAG Compliance"
+        description="Our design system meets WCAG 2.1 Level AA standards across all components."
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -88,17 +83,13 @@ export function Accessibility() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Color Contrast */}
-      <section className="space-y-6">
-        <div>
-          <h2>Color Contrast</h2>
-          <p className="text-muted-foreground mt-2">
-            All color combinations meet or exceed minimum contrast ratios for readability.
-          </p>
-        </div>
-
+      <PageSection
+        title="Color Contrast"
+        description="All color combinations meet or exceed minimum contrast ratios for readability."
+      >
         <Alert>
           <Info className="h-4 w-4" />
           <AlertTitle>Contrast Requirements</AlertTitle>
@@ -108,11 +99,11 @@ export function Accessibility() {
           </AlertDescription>
         </Alert>
 
-        <div className="space-y-4">
+        <div className="space-y-4" style={{ marginTop: 'var(--spacing-6)' }}>
           {contrastPairs.map((pair, index) => (
             <Card key={index}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent style={{ padding: 'var(--spacing-6)' }}>
+                <div className="flex items-center justify-between" style={{ marginBottom: 'var(--spacing-4)' }}>
                   <div className="flex items-center gap-4">
                     <div className="flex">
                       <div
@@ -144,8 +135,8 @@ export function Accessibility() {
                   </Badge>
                 </div>
                 <div
-                  className="p-4"
                   style={{
+                    padding: 'var(--spacing-4)',
                     backgroundColor: pair.bg,
                     color: pair.fg,
                     borderRadius: 'var(--radius-md)',
@@ -160,17 +151,13 @@ export function Accessibility() {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       {/* Keyboard Navigation */}
-      <section className="space-y-6">
-        <div>
-          <h2>Keyboard Navigation</h2>
-          <p className="text-muted-foreground mt-2">
-            All interactive components are fully keyboard accessible.
-          </p>
-        </div>
-
+      <PageSection
+        title="Keyboard Navigation"
+        description="All interactive components are fully keyboard accessible."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -220,17 +207,13 @@ export function Accessibility() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Screen Reader Support */}
-      <section className="space-y-6">
-        <div>
-          <h2>Screen Reader Support</h2>
-          <p className="text-muted-foreground mt-2">
-            Components include proper ARIA labels and semantic HTML for assistive technologies.
-          </p>
-        </div>
-
+      <PageSection
+        title="Screen Reader Support"
+        description="Components include proper ARIA labels and semantic HTML for assistive technologies."
+      >
         <Card>
           <CardHeader>
             <CardTitle>Best Practices</CardTitle>
@@ -279,17 +262,13 @@ export function Accessibility() {
             </div>
           </CardContent>
         </Card>
-      </section>
+      </PageSection>
 
       {/* Testing Tools */}
-      <section className="space-y-6">
-        <div>
-          <h2>Testing & Validation</h2>
-          <p className="text-muted-foreground mt-2">
-            Recommended tools and practices for accessibility testing.
-          </p>
-        </div>
-
+      <PageSection
+        title="Testing & Validation"
+        description="Recommended tools and practices for accessibility testing."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -319,10 +298,10 @@ export function Accessibility() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Resources */}
-      <section>
+      <PageSection>
         <Alert>
           <Info className="h-4 w-4" />
           <AlertTitle>Additional Resources</AlertTitle>
@@ -331,7 +310,7 @@ export function Accessibility() {
             and review the WCAG 2.1 guidelines at w3.org/WAI.
           </AlertDescription>
         </Alert>
-      </section>
-    </div>
+      </PageSection>
+    </PageWrapper>
   );
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Badge } from '../../ui/badge';
 import { Plus, Wrench, AlertTriangle, Sparkles } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection } from '../PageWrapper';
 
 export function Changelog() {
   const releases = [
@@ -81,23 +82,17 @@ export function Changelog() {
   };
 
   return (
-    <div className="space-y-16">
-      <div>
-        <h1>Changelog</h1>
-        <p className="text-muted-foreground mt-4" style={{ fontSize: 'var(--text-lg)' }}>
-          Track updates, new features, and improvements to the Wugweb Kits design system.
-        </p>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Changelog"
+        description="Track updates, new features, and improvements to the Wugweb Kits design system."
+      />
 
       {/* Versioning Info */}
-      <section className="space-y-6">
-        <div>
-          <h2>Semantic Versioning</h2>
-          <p className="text-muted-foreground mt-2">
-            We follow semantic versioning (MAJOR.MINOR.PATCH) for releases.
-          </p>
-        </div>
-
+      <PageSection
+        title="Semantic Versioning"
+        description="We follow semantic versioning (MAJOR.MINOR.PATCH) for releases."
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -135,14 +130,10 @@ export function Changelog() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Release History */}
-      <section className="space-y-6">
-        <div>
-          <h2>Release History</h2>
-        </div>
-
+      <PageSection title="Release History">
         <div className="space-y-8">
           {releases.map((release) => (
             <Card key={release.version}>
@@ -174,7 +165,7 @@ export function Changelog() {
               <CardContent className="space-y-6">
                 {release.changes.map((changeGroup, index) => (
                   <div key={index}>
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-2" style={{ marginBottom: 'var(--spacing-4)' }}>
                       <div 
                         className="p-2 bg-accent/10 text-accent"
                         style={{ borderRadius: 'var(--radius-md)' }}
@@ -203,17 +194,13 @@ export function Changelog() {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       {/* Coming Soon */}
-      <section className="space-y-6">
-        <div>
-          <h2>Roadmap</h2>
-          <p className="text-muted-foreground mt-2">
-            Features and improvements planned for upcoming releases.
-          </p>
-        </div>
-
+      <PageSection
+        title="Roadmap"
+        description="Features and improvements planned for upcoming releases."
+      >
         <Card>
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -246,10 +233,10 @@ export function Changelog() {
             </ul>
           </CardContent>
         </Card>
-      </section>
+      </PageSection>
 
       {/* Stay Updated */}
-      <section>
+      <PageSection>
         <Card>
           <CardHeader>
             <CardTitle>Stay Updated</CardTitle>
@@ -271,7 +258,7 @@ export function Changelog() {
             </div>
           </CardContent>
         </Card>
-      </section>
-    </div>
+      </PageSection>
+    </PageWrapper>
   );
 }

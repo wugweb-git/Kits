@@ -1,11 +1,8 @@
 import React from 'react';
 import { Checkbox } from '../../wugweb/Checkbox';
 import { Label } from '../../wugweb/Label';
-import { Card, CardContent } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Check, Copy, ChevronRight, X } from 'lucide-react';
-import { useBreakpoint } from '../../../hooks/useMediaQuery';
-import { getSpacing } from '../../../utils/responsive';
+import { Check, Copy, ExternalLink } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../wugweb/Button';
@@ -17,8 +14,6 @@ export function CheckboxDoc() {
   const [showCode, setShowCode] = React.useState(true);
   const [copiedLink, setCopiedLink] = React.useState(false);
   const [highlightedToken, setHighlightedToken] = React.useState<string | null>(null);
-  
-  const { isMobile, isTablet } = useBreakpoint();
 
   const handleTokenClick = (token: string) => {
     setHighlightedToken(token);
@@ -26,369 +21,199 @@ export function CheckboxDoc() {
   };
 
   const copyPageLink = async () => {
-    try {
-      await copyToClipboard(window.location.href);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (err) {
+    const success = await copyToClipboard(window.location.href);
+    if (success) {
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
-  const generateCode = () => {
-    let code = `<div className="flex items-center gap-2">\n`;
-    code += `  <Checkbox\n`;
-    code += `    id="terms"\n`;
-    code += `    checked={checked}\n`;
-    code += `    onCheckedChange={setChecked}\n`;
-    if (isDisabled) code += `    disabled={true}\n`;
-    code += `  />\n`;
-    code += `  <Label htmlFor="terms">Accept terms and conditions</Label>\n`;
-    code += `</div>`;
-    return code;
+  const getDynamicCode = () => {
+    return `import { Checkbox } from "@/components/wugweb/Checkbox";
+import { Label } from "@/components/wugweb/Label";
+
+export function CheckboxDemo() {
+  const [checked, setChecked] = React.useState(false);
+  
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
+      <Checkbox
+        id="terms"
+        checked={checked}
+        onCheckedChange={setChecked}
+        ${isDisabled ? 'disabled' : ''}
+      />
+      <Label htmlFor="terms">Accept terms and conditions</Label>
+    </div>
+  );
+}`;
   };
 
+  const headerActions = (
+    <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
+      <Button onClick={copyPageLink} variant="outline" size="sm" style={{ gap: 'var(--spacing-2)' }}>
+        {copiedLink ? <Check size={16} /> : <Copy size={16} />}
+        {copiedLink ? 'Copied!' : 'Copy Link'}
+      </Button>
+      <Button variant="outline" size="sm" style={{ gap: 'var(--spacing-2)' }}>
+        <ExternalLink size={16} />
+        View in Figma
+      </Button>
+    </div>
+  );
+
   return (
-    <div 
-      className="min-h-screen w-full"
-      style={{ 
-        backgroundColor: 'var(--background)',
-        color: 'var(--foreground)',
-        paddingLeft: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingRight: isMobile ? 'var(--layout-padding-mobile)' : isTablet ? 'var(--layout-padding-tablet)' : 'var(--layout-padding-desktop-right)',
-        paddingTop: getSpacing(isMobile ? 8 : isTablet ? 10 : 12),
-        paddingBottom: getSpacing(isMobile ? 12 : isTablet ? 16 : 20),
-      }}
-    >
-      {/* Header */}
-      <div style={{ marginBottom: getSpacing(isMobile ? 8 : 12) }}>
-        <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(3) }}>
-          <span style={{ 
-            color: 'var(--muted-foreground)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
-            fontWeight: 'var(--font-weight-medium)',
-          }}>
-            Components
-          </span>
-          <ChevronRight size={16} color="var(--muted-foreground)" />
-          <span style={{ 
-            color: 'var(--foreground)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '14px',
-            fontWeight: 'var(--font-weight-medium)',
-          }}>
-            Checkbox
-          </span>
-        </div>
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: isMobile ? '32px' : '48px',
-              fontWeight: 'var(--font-weight-bold)',
-              lineHeight: '1.2',
-              marginBottom: getSpacing(2),
-            }}>
-              Checkbox
-            </h1>
-            <p style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '18px',
-              fontWeight: 'var(--font-weight-regular)',
-              color: 'var(--muted-foreground)',
-              lineHeight: '1.6',
-            }}>
-              A control that allows users to select one or more options from a set.
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" style={{
-              borderColor: 'var(--accent)',
-              color: 'var(--accent)',
-              backgroundColor: 'var(--accent-subtle)',
-            }}>
-              Form Control
-            </Badge>
-            <Button variant="outline" size="sm" onClick={copyPageLink}>
-              {copiedLink ? <Check size={16} /> : <Copy size={16} />}
-              <span>{copiedLink ? 'Copied!' : 'Share'}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        badge="Form Component"
+        title="Checkbox"
+        description="A binary input control for selecting one or multiple options, with support for indeterminate state."
+        actions={headerActions}
+      />
 
-      {/* Playground */}
-      <Card style={{ 
-        marginBottom: getSpacing(8),
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        borderRadius: 'var(--radius-3)',
-      }}>
-        <CardContent className="p-0">
-          <div style={{ 
-            padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)',
-            borderBottom: '1px solid var(--border)',
-          }}>
-            <h3 style={{
-              fontFamily: 'Inter Tight, sans-serif',
-              fontSize: '20px',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: getSpacing(6),
-            }}>
-              Interactive Playground
-            </h3>
+      {/* Interactive Playground */}
+      <PageSection title="Interactive Playground" description="Customize and test the checkbox component in real-time">
+        <PageCard>
+          {/* Controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)', marginBottom: 'var(--spacing-8)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--spacing-8)' }}>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-6)' }}>
+              {/* State */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                <label style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', color: 'var(--foreground)' }}>State</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
+                  <Button
+                    variant={!isChecked && !isDisabled ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setIsChecked(false);
+                      setIsDisabled(false);
+                    }}
+                  >
+                    Unchecked
+                  </Button>
+                  <Button
+                    variant={isChecked && !isDisabled ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => {
+                      setIsChecked(true);
+                      setIsDisabled(false);
+                    }}
+                  >
+                    Checked
+                  </Button>
+                  <Button
+                    variant={isDisabled ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setIsDisabled(!isDisabled)}
+                  >
+                    Disabled
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
 
-            {/* Preview */}
-            <div style={{
-              backgroundColor: 'var(--surface-800)',
-              borderRadius: 'var(--radius-3)',
-              padding: isMobile ? 'var(--spacing-8)' : 'var(--spacing-12)',
-              marginBottom: getSpacing(6),
+          {/* Preview */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
+            <div style={{ 
+              padding: 'var(--spacing-12)',
+              background: 'var(--muted)',
+              borderRadius: 'var(--radius-lg)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: '200px',
+              justifyContent: 'center'
             }}>
-              <div className="flex items-center gap-3">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
                 <Checkbox
-                  id="playground-checkbox"
+                  id="demo-checkbox"
                   checked={isChecked}
-                  onCheckedChange={(checked) => setIsChecked(checked as boolean)}
+                  onCheckedChange={setIsChecked}
                   disabled={isDisabled}
                 />
-                <Label htmlFor="playground-checkbox">
-                  Accept terms and conditions
-                </Label>
+                <Label htmlFor="demo-checkbox">Accept terms and conditions</Label>
               </div>
             </div>
 
-            {/* Controls */}
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id="is-disabled"
-                checked={isDisabled}
-                onChange={(e) => setIsDisabled(e.target.checked)}
-                style={{ width: '20px', height: '20px' }}
+            {/* Code */}
+            {showCode && (
+              <CollapsibleCodeBlock
+                code={getDynamicCode()}
+                language="tsx"
+                showLineNumbers={true}
               />
-              <Label htmlFor="is-disabled">Disabled</Label>
-            </div>
+            )}
           </div>
-
-          {/* Code */}
-          <div style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-            <CollapsibleCodeBlock
-              code={generateCode()}
-              language="tsx"
-              filename="Checkbox.tsx"
-              showLineNumbers
-            />
-          </div>
-        </CardContent>
-      </Card>
+        </PageCard>
+      </PageSection>
 
       {/* Design Tokens */}
-      <Card style={{ 
-        marginBottom: getSpacing(8),
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        borderRadius: 'var(--radius-3)',
-      }}>
-        <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-          <h3 style={{
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: getSpacing(6),
-          }}>
-            Design Tokens
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <TokenCard
-              token="--input-background"
-              label="Background"
-              value="rgba(28, 28, 28, 1.00)"
-              isHighlighted={highlightedToken === '--input-background'}
-              onClick={() => handleTokenClick('--input-background')}
-            />
-            <TokenCard
-              token="--primary"
-              label="Checked Background"
-              value="rgba(255, 255, 255, 1.00)"
-              isHighlighted={highlightedToken === '--primary'}
-              onClick={() => handleTokenClick('--primary')}
-            />
-            <TokenCard
-              token="--border"
-              label="Border"
-              value="rgba(43, 43, 43, 1.00)"
-              isHighlighted={highlightedToken === '--border'}
-              onClick={() => handleTokenClick('--border')}
-            />
-            <TokenCard
-              token="--ring"
-              label="Focus Ring"
-              value="rgba(255, 190, 26, 1.00)"
-              isHighlighted={highlightedToken === '--ring'}
-              onClick={() => handleTokenClick('--ring')}
-            />
-            <TokenCard
-              token="--radius-1"
-              label="Border Radius"
-              value="4px"
-              isHighlighted={highlightedToken === '--radius-1'}
-              onClick={() => handleTokenClick('--radius-1')}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <PageSection title="Design Tokens" description="CSS variables used by the Checkbox component">
+        <PageGrid cols={3}>
+          <TokenCard
+            token="--primary"
+            label="Checked Background"
+            value="rgba(255, 255, 255, 1.00)"
+            category="color"
+            onClick={() => handleTokenClick('--primary')}
+            isHighlighted={highlightedToken === '--primary'}
+          />
+          <TokenCard
+            token="--border"
+            label="Border Color"
+            value="rgba(43, 43, 43, 1.00)"
+            category="color"
+            onClick={() => handleTokenClick('--border')}
+            isHighlighted={highlightedToken === '--border'}
+          />
+          <TokenCard
+            token="--background"
+            label="Unchecked Background"
+            value="rgba(18, 18, 18, 1.00)"
+            category="color"
+            onClick={() => handleTokenClick('--background')}
+            isHighlighted={highlightedToken === '--background'}
+          />
+          <TokenCard
+            token="--radius-sm"
+            label="Border Radius"
+            value="4px"
+            category="radius"
+            onClick={() => handleTokenClick('--radius-sm')}
+            isHighlighted={highlightedToken === '--radius-sm'}
+          />
+        </PageGrid>
+      </PageSection>
 
       {/* Usage Guidelines */}
-      <Card style={{ 
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-        borderRadius: 'var(--radius-3)',
-      }}>
-        <CardContent style={{ padding: isMobile ? 'var(--spacing-6)' : 'var(--spacing-8)' }}>
-          <h3 style={{
-            fontFamily: 'Inter Tight, sans-serif',
-            fontSize: '20px',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: getSpacing(6),
-          }}>
-            Usage Guidelines
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: 'var(--success)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <Check size={14} color="white" />
-                </div>
-                <h4 style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
-                  fontWeight: 'var(--font-weight-semibold)',
-                }}>
-                  Do
-                </h4>
-              </div>
-              <ul style={{ 
-                listStyle: 'none',
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-3)',
-              }}>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use checkboxes for multiple selections
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Always pair with a clear label
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Group related checkboxes together
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2" style={{ marginBottom: getSpacing(4) }}>
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: 'var(--destructive)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <X size={14} color="white" />
-                </div>
-                <h4 style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '16px',
-                  fontWeight: 'var(--font-weight-semibold)',
-                }}>
-                  Don't
-                </h4>
-              </div>
-              <ul style={{ 
-                listStyle: 'none',
-                padding: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-3)',
-              }}>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use for mutually exclusive options (use radio instead)
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Make labels too long or complex
-                </li>
-                <li style={{
-                  fontFamily: 'Inter Tight, sans-serif',
-                  fontSize: '14px',
-                  color: 'var(--muted-foreground)',
-                  paddingLeft: 'var(--spacing-4)',
-                  position: 'relative',
-                }}>
-                  <span style={{ position: 'absolute', left: 0 }}>•</span>
-                  Use without proper spacing between options
-                </li>
-              </ul>
-            </div>
+      <PageSection title="Usage Guidelines">
+        <PageCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+            <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', margin: 0 }}>Best Practices</h3>
+            <ul style={{ margin: 0, paddingLeft: 'var(--spacing-6)', color: 'var(--muted-foreground)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+              <li>Use checkboxes for multiple-choice selections where users can select any number of options</li>
+              <li>Always provide a visible label that clearly describes what the checkbox controls</li>
+              <li>Group related checkboxes together with a fieldset</li>
+              <li>Use the indeterminate state for "select all" scenarios with nested options</li>
+            </ul>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </PageCard>
+      </PageSection>
+
+      {/* Accessibility */}
+      <PageSection title="Accessibility">
+        <PageCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+            <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', margin: 0 }}>Implementation</h3>
+            <ul style={{ margin: 0, paddingLeft: 'var(--spacing-6)', color: 'var(--muted-foreground)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+              <li><code style={{ background: 'var(--muted)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>Space</code> - Toggles the checkbox</li>
+              <li>Clicking the label also toggles the checkbox when properly associated</li>
+              <li>Use <code style={{ background: 'var(--muted)', padding: '2px 6px', borderRadius: 'var(--radius-sm)', fontSize: 'var(--text-sm)' }}>aria-checked</code> to indicate state</li>
+              <li>Ensure minimum touch target size of 44x44px</li>
+            </ul>
+          </div>
+        </PageCard>
+      </PageSection>
+    </PageWrapper>
   );
 }

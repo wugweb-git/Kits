@@ -1,95 +1,32 @@
 import React from 'react';
-import { Copy, Check, Code2, ChevronDown } from 'lucide-react';
+import { Copy, Check, Code2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { typography } from '../../../utils/responsive';
-import { toast } from 'sonner';
-import { Card, CardContent } from '../../ui/card';
+import { toast } from 'sonner@2.0.3';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 interface CollapsibleCodeBlockProps {
-  code?: string;
-  language?: 'jsx' | 'css' | 'typescript';
-  defaultCollapsed?: boolean;
-  previewHeight?: string; // Height when collapsed (e.g., '48px')
-  showViewCodeButton?: boolean;
-  title?: string;
-  isOpen?: boolean;
-  onToggle?: () => void;
-  animationDelay?: string;
-  children?: React.ReactNode;
+  code: string;
+  language?: 'jsx' | 'css' | 'typescript' | 'tsx';
+  filename?: string;
+  showLineNumbers?: boolean;
+  defaultExpanded?: boolean;
 }
 
 export function CollapsibleCodeBlock({ 
   code, 
   language = 'jsx', 
-  defaultCollapsed = false,
-  previewHeight = '0px',
-  showViewCodeButton = true,
-  title,
-  isOpen,
-  onToggle,
-  animationDelay = '0ms',
-  children
+  filename,
+  showLineNumbers = false,
+  defaultExpanded = false
 }: CollapsibleCodeBlockProps) {
-  const { isMobile, isTablet, breakpoint } = useBreakpoint();
-  
-  // Auto-collapse based on breakpoint
-  const shouldDefaultCollapse = isMobile ? true : isTablet ? true : defaultCollapsed;
-  const responsivePreviewHeight = isMobile ? '0px' : isTablet ? '48px' : previewHeight;
-  
-  const [isCollapsed, setIsCollapsed] = React.useState(shouldDefaultCollapse);
   const [copiedType, setCopiedType] = React.useState<'tokenized' | 'values' | null>(null);
   const [showCopyMenu, setShowCopyMenu] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
+  const { isMobile, breakpoint } = useBreakpoint();
 
-  // Use external control if provided, otherwise use internal state
-  const isContentOpen = isOpen !== undefined ? isOpen : !isCollapsed;
-  const handleToggle = onToggle || (() => setIsCollapsed(!isCollapsed));
-
-  // If used with title and children (section mode), render different layout
-  if (title && children) {
-    return (
-      <section 
-        className="animate-fade-in-up" 
-        style={{ animationDelay, width: '100%', boxSizing: 'border-box' }}
-      >
-        <Card style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-          <CardContent style={{ padding: isMobile ? '24px' : '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: isContentOpen ? '24px' : '0', transition: 'margin var(--motion-duration-normal) var(--motion-easing-emphasized)' }}>
-              <h2 style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-weight-bold)', margin: 0, fontFamily: 'Inter Tight, sans-serif' }}>{title}</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleToggle}
-                className="button-press"
-                style={{ fontFamily: 'Inter Tight, sans-serif' }}
-              >
-                <ChevronDown 
-                  size={20} 
-                  style={{ 
-                    transform: isContentOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
-                    transition: 'transform var(--motion-duration-normal) var(--motion-easing-emphasized)'
-                  }}
-                />
-              </Button>
-            </div>
-            
-            <div 
-              style={{ 
-                maxHeight: isContentOpen ? '5000px' : '0',
-                overflow: 'hidden',
-                transition: 'max-height var(--motion-duration-normal) var(--motion-easing-emphasized), opacity var(--motion-duration-normal) var(--motion-easing-emphasized)',
-                opacity: isContentOpen ? 1 : 0
-              }}
-            >
-              {children}
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    );
-  }
-
-  // Token to value mapping
+  // Token to value mapping (same as CodeBlock)
   const tokenValueMap: Record<string, string> = {
     'var(--background)': 'rgba(18, 18, 18, 1.00)',
     'var(--foreground)': 'rgba(255, 255, 255, 1.00)',
@@ -106,6 +43,20 @@ export function CollapsibleCodeBlock({
     'var(--radius-md)': '8px',
     'var(--radius-lg)': '12px',
     'var(--radius-full)': '9999px',
+    'var(--text-xs)': '0.75rem',
+    'var(--text-sm)': '0.875rem',
+    'var(--text-base)': '1rem',
+    'var(--text-lg)': '1.25rem',
+    'var(--text-xl)': '1.5rem',
+    'var(--text-2xl)': '2.25rem',
+    'var(--font-weight-regular)': '400',
+    'var(--font-weight-medium)': '500',
+    'var(--font-weight-semibold)': '600',
+    'var(--font-weight-bold)': '700',
+    'var(--motion-duration-fast)': '80ms',
+    'var(--motion-duration-normal)': '120ms',
+    'var(--motion-duration-slow)': '200ms',
+    'var(--motion-easing-standard)': 'cubic-bezier(0.4, 0, 0.2, 1)',
   };
 
   const replaceTokensWithValues = (codeStr: string): string => {
@@ -121,20 +72,8 @@ export function CollapsibleCodeBlock({
     
     const codeToCopy = type === 'tokenized' ? code : replaceTokensWithValues(code);
     
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(codeToCopy);
-      } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = codeToCopy;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-      }
-      
+    const success = await copyToClipboard(codeToCopy);
+    if (success) {
       setCopiedType(type);
       setShowCopyMenu(false);
       
@@ -149,8 +88,7 @@ export function CollapsibleCodeBlock({
       });
       
       setTimeout(() => setCopiedType(null), 1500);
-    } catch (err) {
-      console.warn('Copy failed:', err);
+    } else {
       toast('Copy failed', {
         description: 'Unable to copy to clipboard',
         duration: 1500,
@@ -230,33 +168,55 @@ export function CollapsibleCodeBlock({
             {language === 'jsx' ? 'React / JSX' : language === 'css' ? 'CSS' : 'TypeScript'}
           </span>
           
-          {showViewCodeButton && (
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hover:text-accent smooth-transition"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: 'var(--radius-sm)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
+          {filename && (
+            <span 
+              className="text-muted-foreground"
+              style={{ 
                 fontSize: typography.caption[breakpoint],
-                fontWeight: 'var(--font-weight-medium)'
+                fontWeight: 'var(--font-weight-medium)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
               }}
             >
-              <ChevronDown 
+              {filename}
+            </span>
+          )}
+          
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="hover:text-accent smooth-transition"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '4px 8px',
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: typography.caption[breakpoint],
+              fontWeight: 'var(--font-weight-medium)'
+            }}
+          >
+            {isExpanded ? (
+              <ChevronUp 
                 size={14} 
                 style={{ 
-                  transform: isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                  transform: 'rotate(0deg)',
                   transition: 'transform 180ms cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               />
-              {isCollapsed ? 'View code' : 'Hide code'}
-            </button>
-          )}
+            ) : (
+              <ChevronDown 
+                size={14} 
+                style={{ 
+                  transform: 'rotate(-90deg)',
+                  transition: 'transform 180ms cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              />
+            )}
+            {isExpanded ? 'Hide code' : 'View code'}
+          </button>
         </div>
         
         <div style={{ position: 'relative' }}>
@@ -358,7 +318,7 @@ export function CollapsibleCodeBlock({
       {/* Code content with smooth height transition */}
       <div 
         style={{ 
-          maxHeight: isCollapsed ? responsivePreviewHeight : '600px',
+          maxHeight: isExpanded ? '600px' : '0',
           overflow: 'hidden',
           transition: 'max-height 180ms cubic-bezier(0.4, 0, 0.2, 1)',
           position: 'relative',
@@ -395,7 +355,7 @@ export function CollapsibleCodeBlock({
         </div>
         
         {/* Gradient fade overlay when collapsed */}
-        {isCollapsed && previewHeight !== '0px' && (
+        {!isExpanded && (
           <div 
             style={{
               position: 'absolute',

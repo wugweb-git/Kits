@@ -4,27 +4,21 @@ import { Button } from '../../ui/button';
 import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
 import { Badge } from '../../ui/badge';
 import { GitBranch, GitPullRequest, FileText, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection } from '../PageWrapper';
 
 export function Contribute() {
   return (
-    <div className="space-y-16">
-      <div>
-        <h1>Contribute</h1>
-        <p className="text-muted-foreground mt-4" style={{ fontSize: 'var(--text-lg)' }}>
-          Help us improve Wugweb Kits! We welcome contributions from designers and developers 
-          to make our design system better for everyone.
-        </p>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Contribute"
+        description="Help us improve Wugweb Kits! We welcome contributions from designers and developers to make our design system better for everyone."
+      />
 
       {/* How to Contribute */}
-      <section className="space-y-6">
-        <div>
-          <h2>How to Contribute</h2>
-          <p className="text-muted-foreground mt-2">
-            There are many ways to contribute to the Wugweb Kits design system.
-          </p>
-        </div>
-
+      <PageSection
+        title="How to Contribute"
+        description="There are many ways to contribute to the Wugweb Kits design system."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
             <CardHeader>
@@ -94,17 +88,13 @@ export function Contribute() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Contribution Process */}
-      <section className="space-y-6">
-        <div>
-          <h2>Contribution Process</h2>
-          <p className="text-muted-foreground mt-2">
-            Follow these steps to contribute to the design system.
-          </p>
-        </div>
-
+      <PageSection
+        title="Contribution Process"
+        description="Follow these steps to contribute to the design system."
+      >
         <div className="space-y-4">
           {[
             {
@@ -139,7 +129,7 @@ export function Contribute() {
             },
           ].map((item) => (
             <Card key={item.step}>
-              <CardContent className="p-6">
+              <CardContent style={{ padding: 'var(--spacing-6)' }}>
                 <div className="flex gap-6">
                   <div 
                     className="flex items-center justify-center w-12 h-12 bg-accent text-accent-foreground flex-shrink-0"
@@ -151,7 +141,7 @@ export function Contribute() {
                     {item.step}
                   </div>
                   <div>
-                    <h4 className="mb-2">{item.title}</h4>
+                    <h4 style={{ marginBottom: 'var(--spacing-2)' }}>{item.title}</h4>
                     <p className="text-muted-foreground">{item.description}</p>
                   </div>
                 </div>
@@ -159,17 +149,13 @@ export function Contribute() {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       {/* Guidelines for Contributors */}
-      <section className="space-y-6">
-        <div>
-          <h2>Contribution Guidelines</h2>
-          <p className="text-muted-foreground mt-2">
-            Standards and requirements for contributions.
-          </p>
-        </div>
-
+      <PageSection
+        title="Contribution Guidelines"
+        description="Standards and requirements for contributions."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -299,17 +285,13 @@ export function Contribute() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Request Features */}
-      <section className="space-y-6">
-        <div>
-          <h2>Request New Features</h2>
-          <p className="text-muted-foreground mt-2">
-            Have an idea for a new component or token? Let us know!
-          </p>
-        </div>
-
+      <PageSection
+        title="Request New Features"
+        description="Have an idea for a new component or token? Let us know!"
+      >
         <Card>
           <CardHeader>
             <CardTitle>Feature Request Template</CardTitle>
@@ -343,17 +325,13 @@ Screenshots, mockups, or links to similar implementations`}
             </pre>
           </CardContent>
         </Card>
-      </section>
+      </PageSection>
 
       {/* Get Help */}
-      <section className="space-y-6">
-        <div>
-          <h2>Get Help</h2>
-          <p className="text-muted-foreground mt-2">
-            Need assistance with your contribution?
-          </p>
-        </div>
-
+      <PageSection
+        title="Get Help"
+        description="Need assistance with your contribution?"
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -397,7 +375,7 @@ Screenshots, mockups, or links to similar implementations`}
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       <Alert>
         <MessageSquare className="h-4 w-4" />
@@ -407,6 +385,6 @@ Screenshots, mockups, or links to similar implementations`}
           We appreciate your time and effort in improving our design system.
         </AlertDescription>
       </Alert>
-    </div>
+    </PageWrapper>
   );
 }

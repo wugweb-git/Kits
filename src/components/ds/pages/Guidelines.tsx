@@ -3,26 +3,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
 import { Badge } from '../../ui/badge';
 import { CheckCircle2, XCircle, Info, Lightbulb } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection } from '../PageWrapper';
 
 export function Guidelines() {
   return (
-    <div className="space-y-16">
-      <div>
-        <h1>Design Guidelines</h1>
-        <p className="text-muted-foreground mt-4" style={{ fontSize: 'var(--text-lg)' }}>
-          Best practices and principles for creating consistent, accessible, and delightful user experiences with Wugweb Kits.
-        </p>
-      </div>
+    <PageWrapper>
+      <PageHeader
+        title="Design Guidelines"
+        description="Best practices and principles for creating consistent, accessible, and delightful user experiences with Wugweb Kits."
+      />
 
       {/* Design Principles */}
-      <section className="space-y-6">
-        <div>
-          <h2>Design Principles</h2>
-          <p className="text-muted-foreground mt-2">
-            Core principles that guide our design decisions.
-          </p>
-        </div>
-
+      <PageSection
+        title="Design Principles"
+        description="Core principles that guide our design decisions."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -72,17 +67,13 @@ export function Guidelines() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Layout Guidelines */}
-      <section className="space-y-6">
-        <div>
-          <h2>Layout & Spacing</h2>
-          <p className="text-muted-foreground mt-2">
-            Guidelines for creating well-structured and balanced layouts.
-          </p>
-        </div>
-
+      <PageSection
+        title="Layout & Spacing"
+        description="Guidelines for creating well-structured and balanced layouts."
+      >
         <Card>
           <CardHeader>
             <CardTitle>8-Point Grid System</CardTitle>
@@ -122,7 +113,7 @@ export function Guidelines() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ marginTop: 'var(--spacing-6)' }}>
           <Card>
             <CardHeader>
               <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Container Widths</CardTitle>
@@ -171,17 +162,13 @@ export function Guidelines() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Color Usage */}
-      <section className="space-y-6">
-        <div>
-          <h2>Color Usage</h2>
-          <p className="text-muted-foreground mt-2">
-            Guidelines for applying colors consistently and effectively.
-          </p>
-        </div>
-
+      <PageSection
+        title="Color Usage"
+        description="Guidelines for applying colors consistently and effectively."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -247,17 +234,13 @@ export function Guidelines() {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </PageSection>
 
       {/* Typography */}
-      <section className="space-y-6">
-        <div>
-          <h2>Typography</h2>
-          <p className="text-muted-foreground mt-2">
-            Best practices for readable and scannable text.
-          </p>
-        </div>
-
+      <PageSection
+        title="Typography"
+        description="Best practices for readable and scannable text."
+      >
         <Card>
           <CardHeader>
             <CardTitle>Typography Guidelines</CardTitle>
@@ -286,17 +269,13 @@ export function Guidelines() {
             </div>
           </CardContent>
         </Card>
-      </section>
+      </PageSection>
 
       {/* Iconography */}
-      <section className="space-y-6">
-        <div>
-          <h2>Iconography</h2>
-          <p className="text-muted-foreground mt-2">
-            Guidelines for using icons effectively.
-          </p>
-        </div>
-
+      <PageSection
+        title="Iconography"
+        description="Guidelines for using icons effectively."
+      >
         <Card>
           <CardHeader>
             <CardTitle>Icon Best Practices</CardTitle>
@@ -345,17 +324,13 @@ export function Guidelines() {
             </div>
           </CardContent>
         </Card>
-      </section>
+      </PageSection>
 
       {/* Motion */}
-      <section className="space-y-6">
-        <div>
-          <h2>Motion & Animation</h2>
-          <p className="text-muted-foreground mt-2">
-            Guidelines for meaningful and accessible motion.
-          </p>
-        </div>
-
+      <PageSection
+        title="Motion & Animation"
+        description="Guidelines for meaningful and accessible motion."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -406,7 +381,7 @@ export function Guidelines() {
           </Card>
         </div>
 
-        <Alert>
+        <Alert style={{ marginTop: 'var(--spacing-6)' }}>
           <Info className="h-4 w-4" />
           <AlertTitle>Respect User Preferences</AlertTitle>
           <AlertDescription>
@@ -414,7 +389,7 @@ export function Guidelines() {
             should see minimal or no animations.
           </AlertDescription>
         </Alert>
-      </section>
-    </div>
+      </PageSection>
+    </PageWrapper>
   );
 }
