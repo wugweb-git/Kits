@@ -100,14 +100,30 @@ export function Card({
              
              {title && (
                <div className="flex items-center justify-between gap-[var(--spacing-4)]">
-                 <h3 className="font-['Inter_Tight'] text-lg md:text-xl font-bold leading-tight text-[var(--foreground)] m-0 truncate">
+                 <h3 
+                   className="m-0 truncate text-[var(--foreground)]"
+                   style={{ 
+                     fontFamily: 'var(--core-font-family-base)',
+                     fontSize: 'var(--ts-h4-size)', 
+                     fontWeight: 'var(--ts-h4-weight)', 
+                     lineHeight: 'var(--ts-h4-line-height)' 
+                   }}
+                 >
                    {title}
                  </h3>
                </div>
              )}
              
              {description && (
-               <p className="font-['Inter_Tight'] text-sm md:text-base font-normal leading-relaxed text-[var(--muted-foreground)] m-0 line-clamp-3">
+               <p 
+                 className="m-0 line-clamp-3 text-[var(--muted-foreground)]"
+                 style={{ 
+                   fontFamily: 'var(--core-font-family-base)',
+                   fontSize: 'var(--ts-body-md-size)', 
+                   fontWeight: 'var(--ts-body-md-weight)', 
+                   lineHeight: 'var(--ts-body-md-line-height)' 
+                 }}
+               >
                  {description}
                </p>
              )}
@@ -117,7 +133,12 @@ export function Card({
                  {tags.map((tag, i) => (
                    <span 
                      key={i}
-                     className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[var(--surface-700)] text-[var(--foreground)] border border-[var(--surface-600)]"
+                     className="inline-flex items-center px-[var(--spacing-2)] py-[var(--spacing-1)] rounded-[var(--radius-full)] bg-[var(--surface-700)] text-[var(--foreground)] border border-[var(--surface-600)]"
+                     style={{
+                       fontFamily: 'var(--core-font-family-base)',
+                       fontSize: 'var(--ts-label-sm-size)',
+                       fontWeight: 'var(--ts-label-sm-weight)',
+                     }}
                    >
                      {tag}
                    </span>

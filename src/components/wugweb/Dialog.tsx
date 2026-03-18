@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed inset-0 z-50 transition-all",
-      "bg-black/60",
+      "bg-[var(--overlay-background)]",
       "data-[state=open]:animate-in",
       "data-[state=closed]:animate-out",
       "data-[state=closed]:fade-out-0",
@@ -65,7 +65,7 @@ const DialogContent = React.forwardRef<
       {children}
       <DialogPrimitive.Close
         className={cn(
-          "absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100",
+          "absolute top-[var(--spacing-4)] right-[var(--spacing-4)] rounded-sm opacity-70 transition-opacity hover:opacity-100",
           "focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2",
           "disabled:pointer-events-none",
           "data-[state=open]:bg-[var(--accent)]",

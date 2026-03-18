@@ -50,18 +50,28 @@ export function CTABanner({
       {/* Top Section: Title */}
       <div className="w-full max-w-full md:max-w-[85%] lg:max-w-[70%] mb-8 md:mb-0 z-10">
         <h2 
-          className="font-['Inter_Tight'] font-bold leading-[1.1] tracking-tight text-[var(--accent-foreground)]"
-          style={{ fontSize: 'clamp(32px, 5vw, 60px)' }}
+          className="tracking-tight text-[var(--accent-foreground)]"
+          style={{ 
+            fontFamily: 'var(--core-font-family-base)',
+            fontWeight: 'var(--ts-display-weight)',
+            lineHeight: 'var(--ts-display-line-height)',
+            fontSize: 'var(--fluid-display, clamp(32px, 5vw, 60px))' 
+          }}
         >
           {title}
         </h2>
       </div>
 
       {/* Bottom Section: Subtitle & Button */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8 z-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-[var(--spacing-6)] md:gap-[var(--spacing-8)] z-10">
         <p 
-          className="font-['Inter_Tight'] font-medium text-[var(--accent-foreground)] max-w-[600px] leading-[1.4]"
-          style={{ fontSize: 'clamp(16px, 2vw, 20px)' }}
+          className="text-[var(--accent-foreground)] max-w-[600px]"
+          style={{ 
+            fontFamily: 'var(--core-font-family-base)',
+            fontWeight: 'var(--ts-body-lg-weight)',
+            lineHeight: 'var(--ts-body-lg-line-height)',
+            fontSize: 'var(--fluid-body-lg, clamp(16px, 2vw, 20px))' 
+          }}
         >
           {subtitle}
         </p>
@@ -72,12 +82,12 @@ export function CTABanner({
           style={{
             height: '70px',
             padding: '0 32px',
-            borderRadius: '12px',
+            borderRadius: 'var(--radius-lg)',
             backgroundColor: 'var(--accent-foreground)',
-            color: '#ffffff',
-            fontSize: 'var(--text-xl)',
-            fontFamily: 'Inter Tight, sans-serif',
-            fontWeight: 600,
+            color: 'var(--background)',
+            fontSize: 'var(--ts-h4-size)',
+            fontFamily: 'var(--core-font-family-base)',
+            fontWeight: 'var(--ts-h4-weight)',
             border: 'none',
             cursor: 'pointer'
           }}

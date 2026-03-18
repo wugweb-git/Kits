@@ -135,7 +135,7 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
           background: currentTone.background,
           border: `1px solid ${currentTone.border}`,
           borderRadius: 'var(--radius-md)',
-          fontFamily: 'Inter Tight, sans-serif',
+          fontFamily: 'var(--core-font-family-base)',
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box',

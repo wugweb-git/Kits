@@ -11,8 +11,6 @@ const buttonVariants = cva(
     'items-center',
     'justify-center',
     'box-border',
-    'font-semibold',
-    'font-["Inter_Tight"]',
     'whitespace-nowrap',
     'transition-all',
     'duration-100',
@@ -172,10 +170,10 @@ const iconSizes = {
 // Independent text styles for each size variant
 // We use inline styles here to force the text size change and bypass any CSS specificity issues or conflicts
 const textStyles = {
-  xl: { fontSize: 'var(--text-xl)', lineHeight: '30px' },
-  lg: { fontSize: 'var(--text-lg)', lineHeight: '28px' },
-  md: { fontSize: 'var(--text-base)', lineHeight: '24px' },
-  sm: { fontSize: 'var(--text-sm)', lineHeight: '20px' },
+  xl: { fontSize: 'var(--text-xl)', lineHeight: '30px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
+  lg: { fontSize: 'var(--text-lg)', lineHeight: '28px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
+  md: { fontSize: 'var(--text-base)', lineHeight: '24px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
+  sm: { fontSize: 'var(--text-sm)', lineHeight: '20px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
 };
 
 export interface ButtonProps

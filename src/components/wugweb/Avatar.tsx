@@ -119,7 +119,7 @@ export function Avatar({
 
       {status !== 'none' && (
         <div
-          className="absolute bottom-0 right-0 rounded-full border-2 border-white"
+          className="absolute bottom-0 right-0 rounded-full border-2 border-[var(--background)]"
           style={{
             width: `calc(${avatarSize} * 0.3)`,
             height: `calc(${avatarSize} * 0.3)`,

@@ -116,7 +116,7 @@ export function AlertDialog({
         {/* Dialog */}
         <div
           ref={dialogRef}
-          className={`bg-white rounded-[var(--radius-md)] max-w-[432px] w-full ${className}`}
+          className={`bg-[var(--card)] rounded-[var(--radius-md)] max-w-[432px] w-full ${className}`}
           style={{
             animation: 'slideIn var(--motion-duration-normal) var(--motion-easing-emphasized)',
             border: '1px solid var(--border)',

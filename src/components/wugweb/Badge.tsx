@@ -210,7 +210,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
           fontSize: currentSize.fontSize,
           lineHeight: currentSize.lineHeight,
           
-          fontFamily: 'Inter Tight, sans-serif',
+          fontFamily: 'var(--core-font-family-base)',
           fontWeight: 'var(--font-weight-medium)',
           
           background: currentTone.background,

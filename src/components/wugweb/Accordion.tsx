@@ -38,7 +38,7 @@ export function Accordion({
 
   return (
     <div
-      className={`bg-white border border-solid border-[var(--border)] rounded-[var(--radius-md)] overflow-hidden ${className}`}
+      className={`bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius-md)] overflow-hidden ${className}`}
       style={{
         opacity: disabled ? '0.5' : '1',
         cursor: disabled ? 'not-allowed' : 'pointer',
@@ -49,7 +49,7 @@ export function Accordion({
         disabled={disabled}
         aria-expanded={isOpen}
         aria-disabled={disabled}
-        className="w-full flex items-center justify-between p-[var(--spacing-1)] gap-[var(--spacing-1)] bg-white hover:bg-[var(--muted)] transition-colors"
+        className="w-full flex items-center justify-between p-[var(--spacing-1)] gap-[var(--spacing-1)] bg-[var(--card)] hover:bg-[var(--surface-700)] transition-colors"
         style={{
           transitionDuration: 'var(--motion-duration-fast)',
           transitionTimingFunction: 'var(--motion-easing-standard)',

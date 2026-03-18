@@ -16,7 +16,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex w-full items-center justify-between gap-2 box-border outline-none transition-all whitespace-nowrap",
+      "flex w-full items-center justify-between gap-[var(--spacing-2)] box-border outline-none transition-all whitespace-nowrap",
       "bg-[var(--input-background)]",
       "text-[var(--foreground)]",
       "border border-[var(--border)]",
@@ -156,7 +156,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center gap-2 outline-none transition-colors",
+      "relative flex w-full cursor-default select-none items-center gap-[var(--spacing-2)] outline-none transition-colors",
       "text-[var(--foreground)]",
       "focus:bg-[var(--accent)]",
       "focus:text-[var(--accent-foreground)]",
