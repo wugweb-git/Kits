@@ -180,8 +180,8 @@ export function Footer({ onNavigate }: FooterProps) {
                 fontFamily: 'Inter Tight, sans-serif'
               }}
             >
-              <span>Version 0.1.0</span>
-              <span style={{ fontSize: 'var(--text-xs)' }}>Last updated Nov 2024</span>
+              <span>Version 2.1.0</span>
+              <span style={{ fontSize: 'var(--text-xs)' }}>Updated March 2026</span>
             </div>
 
             {/* Social Links */}
@@ -206,6 +206,57 @@ export function Footer({ onNavigate }: FooterProps) {
                 aria-label="GitHub Repository"
               >
                 <Github size={18} />
+              </a>
+              <a
+                href="https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="smooth-transition hover:text-accent button-press"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border)',
+                  background: 'var(--muted)',
+                  color: 'var(--muted-foreground)',
+                  textDecoration: 'none'
+                }}
+                aria-label="Figma Kit"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 24c2.208 0 4-1.792 4-4v-4H8c-2.208 0-4 1.792-4 4s1.792 4 4 4z"/>
+                  <path d="M4 12c0-2.208 1.792-4 4-4h4v8H8c-2.208 0-4-1.792-4-4z"/>
+                  <path d="M4 4c0-2.208 1.792-4 4-4h4v8H8C5.792 8 4 6.208 4 4z"/>
+                  <path d="M12 0h4c2.208 0 4 1.792 4 4s-1.792 4-4 4h-4V0z"/>
+                  <path d="M20 12c0 2.208-1.792 4-4 4s-4-1.792-4-4 1.792-4 4-4 4 1.792 4 4z"/>
+                </svg>
+              </a>
+              <a
+                href="https://wugweb.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="smooth-transition hover:text-accent button-press"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '36px',
+                  padding: '0 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border)',
+                  background: 'var(--muted)',
+                  color: 'var(--muted-foreground)',
+                  textDecoration: 'none',
+                  fontSize: 'var(--text-xs)',
+                  fontFamily: 'Inter Tight, sans-serif',
+                  fontWeight: 'var(--font-weight-medium)',
+                }}
+                aria-label="Wugweb"
+              >
+                wugweb.com
               </a>
             </div>
           </div>

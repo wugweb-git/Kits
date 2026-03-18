@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowRight, Zap, Palette, Layers, Code, Upload, Box, CheckCircle2, Sparkles, Shield, Gauge } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { Badge } from '../../ui/badge';
+import { Button } from '../../wugweb/Button';
+import { Badge } from '../../wugweb/Badge';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 
 /**
@@ -99,8 +99,9 @@ export function Overview({ onNavigate }: OverviewProps) {
   ];
 
   const stats = [
-    { label: 'Components', value: '82+' },
-    { label: 'Design Tokens', value: '100+' },
+    { label: 'Components', value: '127+' },
+    { label: 'Design Tokens', value: '300+' },
+    { label: 'Token Layers', value: '4' },
     { label: 'Ready to Ship', value: '100%' },
   ];
 

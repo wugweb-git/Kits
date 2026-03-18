@@ -119,6 +119,11 @@ import { InstallationDoc } from './components/ds/pages/InstallationDoc';
 import { GettingStartedDoc } from './components/ds/pages/GettingStartedDoc';
 import { ThemingDoc } from './components/ds/pages/ThemingDoc';
 import { TokenArchitectureDoc } from './components/ds/pages/TokenArchitectureDoc';
+import { TokenExportDoc } from './components/ds/pages/TokenExportDoc';
+import { MCPConnectorDoc } from './components/ds/pages/MCPConnectorDoc';
+import { TokenMappingDoc } from './components/ds/pages/TokenMappingDoc';
+import { BreakpointsDoc } from './components/ds/pages/BreakpointsDoc';
+import { TypographyDoc } from './components/ds/pages/TypographyDoc';
 // ── Block sub-pages ────────────────────────────────────────────────────────────
 import { HeroSectionsBlock } from './components/ds/pages/blocks/HeroSectionsBlock';
 import { FeatureGridsBlock } from './components/ds/pages/blocks/FeatureGridsBlock';
@@ -148,19 +153,33 @@ import { DownloadsDoc } from './components/ds/pages/DownloadsDoc';
 export default function App() {
   // ── Favicon injection ────────────────────────────────────────────────────
   React.useEffect(() => {
-    // Remove any existing favicons
+    // Update title
+    document.title = 'Wugweb Kits — Design System';
+
+    // Update/add description meta
+    let descMeta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!descMeta) {
+      descMeta = document.createElement('meta');
+      descMeta.name = 'description';
+      document.head.appendChild(descMeta);
+    }
+    descMeta.content = '127+ production-ready React components with a 4-layer CSS token system. Colors, typography, spacing, motion — design-to-code ready.';
+
+    // Replace favicon with SVG logo
     const existing = document.querySelectorAll("link[rel*='icon']");
     existing.forEach(el => el.remove());
 
-    // Set Kits SVG as favicon
-    const link = document.createElement('link');
-    link.rel = 'icon';
-    link.type = 'image/svg+xml';
-    link.href = KitsLogoUrl;
-    document.head.appendChild(link);
+    const svgLink = document.createElement('link');
+    svgLink.rel = 'icon';
+    svgLink.type = 'image/svg+xml';
+    svgLink.href = KitsLogoUrl;
+    document.head.appendChild(svgLink);
 
-    // Set page title
-    document.title = 'Wugweb Kits — Design System';
+    // Apple touch icon
+    const appleLink = document.createElement('link');
+    appleLink.rel = 'apple-touch-icon';
+    appleLink.href = KitsLogoUrl;
+    document.head.appendChild(appleLink);
   }, []);
   // ────────────────────────────────────────────────────────────────────────
 
@@ -249,9 +268,14 @@ export default function App() {
         if (currentSubPage === 'theming') return <ThemingDoc />;
         if (currentSubPage === 'token-architecture') return <TokenArchitectureDoc />;
         if (currentSubPage === 'system-layers') return <SystemLayersDoc />;
-        if (currentSubPage === 'colors' || currentSubPage === 'typography' || currentSubPage === 'spacing' || currentSubPage === 'radius') {
-          return <Tokens currentSubPage={currentSubPage} />;
-        }
+        if (currentSubPage === 'token-export') return <TokenExportDoc />;
+        if (currentSubPage === 'token-mapping') return <TokenMappingDoc />;
+        if (currentSubPage === 'mcp-connector') return <MCPConnectorDoc />;
+        if (currentSubPage === 'colors') return <Tokens currentSubPage="colors" />;
+        if (currentSubPage === 'typography') return <TypographyDoc />;
+        if (currentSubPage === 'spacing') return <Tokens currentSubPage="spacing" />;
+        if (currentSubPage === 'radius') return <Tokens currentSubPage="radius" />;
+        if (currentSubPage === 'breakpoints') return <BreakpointsDoc />;
         if (currentSubPage === 'grid') return <GridDoc />;
         if (currentSubPage === 'accessibility') return <Accessibility />;
         if (currentSubPage === 'guidelines') return <Guidelines />;

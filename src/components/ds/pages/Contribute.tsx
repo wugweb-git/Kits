@@ -1,390 +1,179 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Button } from '../../ui/button';
-import { Alert, AlertDescription, AlertTitle } from '../../ui/alert';
-import { Badge } from '../../ui/badge';
-import { GitBranch, GitPullRequest, FileText, MessageSquare, CheckCircle2 } from 'lucide-react';
-import { PageWrapper, PageHeader, PageSection } from '../PageWrapper';
+import { GitBranch, GitPullRequest, FileText, MessageSquare, CheckCircle2, ExternalLink, Copy, Check, Bug, Lightbulb, BookOpen, Code } from 'lucide-react';
+import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
+import { Button } from '../../wugweb/Button';
+import { Badge } from '../../wugweb/Badge';
+
+const F = 'Inter Tight, sans-serif';
+const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+
+const LINKS = {
+  github: 'https://github.com/wugweb-git/Kits',
+  issues: 'https://github.com/wugweb-git/Kits/issues',
+  pulls: 'https://github.com/wugweb-git/Kits/pulls',
+  discussions: 'https://github.com/wugweb-git/Kits/discussions',
+  figma: 'https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits',
+  live: 'https://kits.wugweb.studio',
+  email: 'mailto:hello@wugweb.com',
+};
+
+const ways = [
+  { icon: FileText, color: 'var(--accent)', title: 'Documentation', desc: 'Fix typos, improve examples, clarify token rules, or add missing API docs. Docs are the most impactful contribution.', label: 'Open docs issue' },
+  { icon: Bug, color: 'var(--destructive)', title: 'Bug Reports', desc: 'Found a component rendering wrong? Token missing from the CSS? Open a GitHub issue with reproduction steps.', label: 'File bug report' },
+  { icon: Code, color: '#3B82F6', title: 'New Components', desc: 'Propose a component that follows the token contract. Must be variant-based, CSS-variable-only, and WCAG AA compliant.', label: 'Propose component' },
+  { icon: Lightbulb, color: '#10B981', title: 'Token Proposals', desc: 'Suggest additions to the semantic or alias layer. All token proposals require a use-case justification.', label: 'Start discussion' },
+  { icon: BookOpen, color: '#8B5CF6', title: 'Block Patterns', desc: 'New block patterns for the Blocks section. Must use existing components and CSS variables only. No hardcoded values.', label: 'Submit block' },
+  { icon: MessageSquare, color: '#F59E0B', title: 'Design Feedback', desc: 'Review component designs in Figma, flag inconsistencies, suggest improvements. Figma comments or GitHub discussions.', label: 'Open Figma' },
+];
+
+function CopyCmd({ cmd }: { cmd: string }) {
+  const [copied, setCopied] = React.useState(false);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--surface-1000)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-3) var(--spacing-4)', border: 'var(--border-default)', marginBottom: 'var(--spacing-2)' }}>
+      <code style={{ fontSize: 'var(--text-sm)', color: 'var(--accent)', fontFamily: MONO }}>{cmd}</code>
+      <button onClick={() => { navigator.clipboard.writeText(cmd).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 1600); }} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}>
+        {copied ? <Check size={12} style={{ color: 'var(--success)' }} /> : <Copy size={12} />}
+      </button>
+    </div>
+  );
+}
 
 export function Contribute() {
   return (
     <PageWrapper>
       <PageHeader
-        title="Contribute"
-        description="Help us improve Wugweb Kits! We welcome contributions from designers and developers to make our design system better for everyone."
+        badge="Contribute"
+        title="Contribute to Kits"
+        description="Wugweb Kits is built in the open. Every component, token, and doc page welcomes contributions from designers and developers."
+        actions={
+          <a href={LINKS.github} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-sm)', color: 'var(--accent)', textDecoration: 'none', fontFamily: F }}>
+            github.com/wugweb-git/Kits <ExternalLink size={14} />
+          </a>
+        }
       />
 
-      {/* How to Contribute */}
-      <PageSection
-        title="How to Contribute"
-        description="There are many ways to contribute to the Wugweb Kits design system."
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader>
-              <div 
-                className="inline-flex p-3 bg-accent/10 text-accent mb-2"
-                style={{ borderRadius: 'var(--radius-md)' }}
-              >
-                <FileText size={24} />
-              </div>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Documentation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Improve guides, fix typos, or add examples to make docs clearer.
-              </p>
-            </CardContent>
-          </Card>
+      {/* Quick links */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 'var(--spacing-3)', marginBottom: 'var(--spacing-12)' }}>
+        {[
+          { label: 'GitHub Repo', url: LINKS.github, icon: GitBranch },
+          { label: 'Open Issues', url: LINKS.issues, icon: Bug },
+          { label: 'Pull Requests', url: LINKS.pulls, icon: GitPullRequest },
+          { label: 'Discussions', url: LINKS.discussions, icon: MessageSquare },
+          { label: 'Figma Kit', url: LINKS.figma, icon: BookOpen },
+          { label: 'Live Site', url: LINKS.live, icon: ExternalLink },
+        ].map(link => {
+          const Icon = link.icon;
+          return (
+            <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)', padding: 'var(--spacing-3) var(--spacing-4)', background: 'var(--card)', border: 'var(--border-default)', borderRadius: 'var(--radius-lg)', textDecoration: 'none', color: 'var(--foreground)', transition: 'all var(--motion-duration-fast) var(--motion-easing-standard)', fontFamily: F }}>
+              <Icon size={16} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)', fontFamily: F }}>{link.label}</span>
+              <ExternalLink size={11} style={{ color: 'var(--muted-foreground)', marginLeft: 'auto' }} />
+            </a>
+          );
+        })}
+      </div>
 
-          <Card>
-            <CardHeader>
-              <div 
-                className="inline-flex p-3 bg-accent/10 text-accent mb-2"
-                style={{ borderRadius: 'var(--radius-md)' }}
-              >
-                <GitBranch size={24} />
-              </div>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Components</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Propose new components or improve existing ones.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div 
-                className="inline-flex p-3 bg-accent/10 text-accent mb-2"
-                style={{ borderRadius: 'var(--radius-md)' }}
-              >
-                <MessageSquare size={24} />
-              </div>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Feedback</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Report bugs, suggest features, or share your use cases.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div 
-                className="inline-flex p-3 bg-accent/10 text-accent mb-2"
-                style={{ borderRadius: 'var(--radius-md)' }}
-              >
-                <GitPullRequest size={24} />
-              </div>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Code Review</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Help review pull requests and provide constructive feedback.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </PageSection>
-
-      {/* Contribution Process */}
-      <PageSection
-        title="Contribution Process"
-        description="Follow these steps to contribute to the design system."
-      >
-        <div className="space-y-4">
-          {[
-            {
-              step: 1,
-              title: 'Discuss Your Idea',
-              description: 'Open an issue or discussion to share your proposal. This helps us understand your use case and provide guidance before you start working.',
-            },
-            {
-              step: 2,
-              title: 'Review Guidelines',
-              description: 'Read our design principles and technical guidelines to ensure your contribution aligns with our standards.',
-            },
-            {
-              step: 3,
-              title: 'Create Your Changes',
-              description: 'Fork the repository, create a branch, and make your changes. Follow our coding standards and design tokens.',
-            },
-            {
-              step: 4,
-              title: 'Test Thoroughly',
-              description: 'Test your changes across different browsers, screen sizes, and with assistive technologies. Ensure accessibility compliance.',
-            },
-            {
-              step: 5,
-              title: 'Submit Pull Request',
-              description: 'Create a pull request with a clear description of your changes. Include screenshots or videos for visual changes.',
-            },
-            {
-              step: 6,
-              title: 'Iterate on Feedback',
-              description: 'Work with maintainers to refine your contribution. Be open to suggestions and make requested changes promptly.',
-            },
-          ].map((item) => (
-            <Card key={item.step}>
-              <CardContent style={{ padding: 'var(--spacing-6)' }}>
-                <div className="flex gap-6">
-                  <div 
-                    className="flex items-center justify-center w-12 h-12 bg-accent text-accent-foreground flex-shrink-0"
-                    style={{ 
-                      borderRadius: 'var(--radius-full)',
-                      fontWeight: 'var(--font-weight-bold)'
-                    }}
-                  >
-                    {item.step}
-                  </div>
-                  <div>
-                    <h4 style={{ marginBottom: 'var(--spacing-2)' }}>{item.title}</h4>
-                    <p className="text-muted-foreground">{item.description}</p>
-                  </div>
+      {/* Ways to contribute */}
+      <PageSection title="Ways to Contribute">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--spacing-4)' }}>
+          {ways.map(w => {
+            const Icon = w.icon;
+            return (
+              <div key={w.title} style={{ background: 'var(--card)', border: 'var(--border-default)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-5)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 'var(--radius-md)', background: `color-mix(in srgb, ${w.color} 14%, transparent)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon size={18} style={{ color: w.color }} />
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <h3 style={{ margin: 0, fontSize: 'var(--ts-h4-size)', fontWeight: 'var(--ts-h4-weight)', color: 'var(--foreground)', fontFamily: F }}>{w.title}</h3>
+                <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', lineHeight: 1.6, fontFamily: F, flex: 1 }}>{w.desc}</p>
+                <a href={w.title === 'Design Feedback' ? LINKS.figma : LINKS.issues} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-xs)', color: w.color, textDecoration: 'none', fontFamily: F, marginTop: 'auto' }}>
+                  {w.label} <ExternalLink size={11} />
+                </a>
+              </div>
+            );
+          })}
         </div>
       </PageSection>
 
-      {/* Guidelines for Contributors */}
-      <PageSection
-        title="Contribution Guidelines"
-        description="Standards and requirements for contributions."
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Design Requirements</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Use existing design tokens (colors, spacing, typography)
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Follow 8-point grid system for spacing
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Maintain consistent visual style with existing components
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Ensure responsive design across breakpoints
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Dev setup */}
+      <PageSection title="Local Development Setup" description="Clone the repo, install dependencies, and run the dev server in 4 commands.">
+        <PageCard>
+          <div style={{ marginBottom: 'var(--spacing-4)' }}>
+            <p style={{ margin: '0 0 var(--spacing-3)', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', fontFamily: F }}>Clone & install</p>
+            <CopyCmd cmd="git clone https://github.com/wugweb-git/Kits.git" />
+            <CopyCmd cmd="cd Kits && npm install" />
+            <CopyCmd cmd="npm run dev" />
+          </div>
+          <div>
+            <p style={{ margin: '0 0 var(--spacing-3)', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', fontFamily: F }}>Token build (Style Dictionary)</p>
+            <CopyCmd cmd="npm run tokens:build" />
+            <CopyCmd cmd="npm run tokens:watch" />
+          </div>
+        </PageCard>
+      </PageSection>
 
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Code Requirements</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Write clean, readable, and well-documented code
-                </p>
+      {/* Contribution rules */}
+      <PageSection title="Contribution Rules">
+        <PageCard>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--spacing-6)' }}>
+            {[
+              {
+                heading: 'Token contract', color: 'var(--accent)',
+                rules: [
+                  'All values via CSS variables — never hex, never px directly',
+                  'Semantic tokens in components — never core tokens',
+                  'Naming: --{layer}-{category}-{name}-{scale}',
+                  'New token requires use-case in PR description',
+                ],
+              },
+              {
+                heading: 'Component standards', color: '#3B82F6',
+                rules: [
+                  'Variant-based: size (sm/md/lg) + state (default/hover/disabled)',
+                  'WCAG 2.1 AA required — include contrast check in PR',
+                  'TypeScript types required for all props',
+                  'Inter Tight — only allowed font face',
+                ],
+              },
+              {
+                heading: 'PR checklist', color: 'var(--success)',
+                rules: [
+                  'One logical change per PR',
+                  'Screenshots for visual changes',
+                  'Update CHANGELOG.md entry',
+                  'Link related GitHub issue',
+                ],
+              },
+            ].map(({ heading, color, rules }) => (
+              <div key={heading}>
+                <p style={{ margin: '0 0 var(--spacing-3)', fontSize: 'var(--text-xs)', fontWeight: 'var(--font-weight-bold)', color, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: F }}>{heading}</p>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                  {rules.map(r => (
+                    <li key={r} style={{ display: 'flex', gap: 'var(--spacing-2)', fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', fontFamily: F }}>
+                      <span style={{ color, flexShrink: 0 }}>·</span> {r}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Include proper TypeScript types
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Follow React best practices and hooks patterns
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Add comprehensive examples and usage documentation
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
+        </PageCard>
+      </PageSection>
 
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Accessibility Requirements</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Meet WCAG 2.1 Level AA standards
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Ensure keyboard navigation works properly
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Include proper ARIA labels and roles
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Test with screen readers (NVDA, JAWS, VoiceOver)
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Documentation Requirements</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Provide clear component description and use cases
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Include code examples for all variants
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Document props, types, and default values
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 size={20} className="text-accent flex-shrink-0 mt-0.5" />
-                <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                  Add accessibility notes and keyboard shortcuts
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Contact */}
+      <div style={{ background: 'var(--accent-subtle)', border: 'var(--border-accent)', borderRadius: 'var(--radius-lg)', padding: 'var(--spacing-5)', display: 'flex', gap: 'var(--spacing-5)', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <p style={{ margin: '0 0 var(--spacing-1)', fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--foreground)', fontFamily: F }}>Have a bigger idea?</p>
+          <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--muted-foreground)', fontFamily: F }}>For partnerships, sponsorships, or large contributions, reach out directly at <a href={LINKS.email} style={{ color: 'var(--accent)', textDecoration: 'none', fontFamily: F }}>hello@wugweb.com</a>.</p>
         </div>
-      </PageSection>
-
-      {/* Request Features */}
-      <PageSection
-        title="Request New Features"
-        description="Have an idea for a new component or token? Let us know!"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle>Feature Request Template</CardTitle>
-            <CardDescription>Use this template when requesting new features</CardDescription>
-          </CardHeader>
-          <CardContent 
-            className="bg-muted p-6"
-            style={{ borderRadius: 'var(--radius-md)' }}
-          >
-            <pre 
-              className="text-foreground whitespace-pre-wrap"
-              style={{ fontSize: 'var(--text-sm)' }}
-            >
-{`**Feature Description**
-Brief description of the proposed feature
-
-**Problem Statement**
-What problem does this solve?
-
-**Use Cases**
-How would this be used? Provide examples.
-
-**Design Considerations**
-Any specific design requirements or constraints?
-
-**Alternatives Considered**
-What alternatives have you explored?
-
-**Additional Context**
-Screenshots, mockups, or links to similar implementations`}
-            </pre>
-          </CardContent>
-        </Card>
-      </PageSection>
-
-      {/* Get Help */}
-      <PageSection
-        title="Get Help"
-        description="Need assistance with your contribution?"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>GitHub Discussions</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Ask questions and discuss ideas with the community
-              </p>
-              <Button variant="outline" className="w-full">
-                Open Discussion
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Issue Tracker</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Report bugs or suggest enhancements
-              </p>
-              <Button variant="outline" className="w-full">
-                Create Issue
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle style={{ fontSize: 'var(--text-lg)' }}>Team Contact</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground" style={{ fontSize: 'var(--text-sm)' }}>
-                Reach out to the core team directly
-              </p>
-              <Button variant="outline" className="w-full">
-                Contact Us
-              </Button>
-            </CardContent>
-          </Card>
+        <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
+          <a href={LINKS.discussions} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <Button variant="outline" size="sm">Start a discussion</Button>
+          </a>
+          <a href={LINKS.email} style={{ textDecoration: 'none' }}>
+            <Button variant="default" size="sm">Email us</Button>
+          </a>
         </div>
-      </PageSection>
-
-      <Alert>
-        <MessageSquare className="h-4 w-4" />
-        <AlertTitle>Thank You!</AlertTitle>
-        <AlertDescription>
-          Every contribution, no matter how small, helps make Wugweb Kits better for everyone. 
-          We appreciate your time and effort in improving our design system.
-        </AlertDescription>
-      </Alert>
+      </div>
     </PageWrapper>
   );
 }

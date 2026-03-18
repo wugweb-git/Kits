@@ -1,313 +1,178 @@
-# Wugweb Kits - Design System
+# Wugweb Kits — Design System
 
-<div align="center">
-  
-  ![Wugweb Kits](https://img.shields.io/badge/Wugweb-Design_System-FFBE1A?style=for-the-badge&logo=react&logoColor=white)
-  [![GitHub](https://img.shields.io/badge/GitHub-wugweb--git-181717?style=for-the-badge&logo=github)](https://github.com/wugweb-git/Kits)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-93.2%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-  [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+> **Live:** [kits.wugweb.studio](https://kits.wugweb.studio) · **Figma:** [wugweb-kits](https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits) · **v2.1.0**
 
-  **A comprehensive, production-ready design system with professional UI components and design tokens for building consistent web applications.**
-
-  [View Demo](https://wugweb.com) · [Documentation](https://wugweb.com) · [Report Bug](https://github.com/wugweb-git/Kits/issues) · [Request Feature](https://github.com/wugweb-git/Kits/issues)
-
-</div>
+Production-ready design system for Wugweb products and the broader dev community. 127+ React components, a strict 4-layer CSS token architecture, fluid responsive type, and a full token-to-code mapping system.
 
 ---
 
-## ✨ Features
+## What's in the box
 
-- 🎨 **100% Design Token Coverage** - All components use CSS variables for complete customization
-- 🎯 **50+ Production Components** - Comprehensive component library ready for production
-- ♿ **Accessibility First** - Built on Radix UI primitives with WCAG 2.1 compliance
-- 📱 **Fully Responsive** - Mobile, tablet, and desktop optimized
-- 🌗 **Dark Mode Ready** - Complete dark theme support out of the box
-- ⚡ **TypeScript Native** - Full type safety and IntelliSense
-- 🎭 **Inter Tight Typography** - Consistent, modern typography system
-- 🔧 **Easy Customization** - Update the entire theme by editing CSS variables
-- 📦 **Tree Shakeable** - Import only what you need
-- 🚀 **Production Ready** - Battle-tested components used in real applications
-
----
-
-## 📦 Component Library
-
-### Core Components
-- **Button** - Primary, Secondary, Outline, Ghost variants
-- **Social Button** - Icon-first authentication buttons
-- **CTA Banner** - Responsive call-to-action banners
-
-### Form Controls
-- **Input** - Text, email, password, number inputs with validation
-- **Textarea** - Multi-line text input
-- **Checkbox** - Selection checkboxes
-- **Radio Group** - Radio button groups
-- **Switch** - Toggle switches
-- **Select** - Dropdown selects with grouping
-- **Label** - Form labels
-
-### Overlays & Feedback
-- **Dialog** - Modal dialogs with animations
-- **Toast** - Toast notifications (Sonner integration)
-- **Alert** - Alert messages
-- **Alert Dialog** - Confirmation dialogs
-- **Drawer** - Slide-out drawers
-- **Popover** - Contextual popovers
-
-### Navigation
-- **Breadcrumb** - Navigation breadcrumbs
-- **Tabs** - Tabbed interfaces
-- **Pagination** - Page navigation
-- **Navigation Menu** - Complex navigation menus
-- **Sidebar** - Application sidebars
-
-### Data Display
-- **Card** - Content cards
-- **Table** - Data tables
-- **Avatar** - User avatars
-- **Badge** - Status badges
-- **Chip** - Tag chips
-- **Skeleton** - Loading skeletons
-
-### Utilities
-- **Divider** - Section dividers
-- **Tooltip** - Helpful tooltips
-- **Accordion** - Collapsible content
-- **Collapsible** - Expandable sections
-- **Progress** - Progress indicators
-- **Slider** - Range sliders
+| Layer | What |
+|---|---|
+| **127+ Components** | Buttons, inputs, charts, overlays, navigation, layout, feedback |
+| **4-Layer Tokens** | Core → Alias → Semantic → Component (W3C DTCG) |
+| **Fluid Type** | `clamp()`-based scale: Display → Caption, viewport-driven |
+| **Token Export** | `global.json`, `alias.json`, `semantic.json`, `component.json` |
+| **Token Mapping** | Figma scope → CSS property → Tailwind class → component |
+| **90+ Blocks** | Hero, Feature, Pricing, Testimonials, CTAs, Forms, Nav, Footer |
+| **6 Templates** | Dashboard, Landing Page, Marketing, Docs, Portfolio, E-commerce |
+| **MCP Connector** | Planned: push tokens to GitHub, trigger Style Dictionary builds |
 
 ---
 
-## 🚀 Quick Start
+## Token System (4 Layers)
 
-### Installation
+```
+LAYER 0 — CORE (globals.css)
+  Raw values only. #FFBE1A, 16px, 8px radius.
+  Never used directly in components.
+  ↓
+LAYER 1.5 — ALIAS (alias.json)
+  Brand bridge. Maps core → brand names.
+  Swap this file to change brand.
+  ↓
+LAYER 2 — SEMANTIC (semantic.json)
+  Intent layer. --background, --accent, --text-primary.
+  Change here → everything updates.
+  ↓
+LAYER 3 — COMPONENT (component.json)
+  Per-component overrides. --btn-height-md, --card-radius.
+  References semantic only. Never core.
+```
+
+### Rules (non-negotiable)
+- ✅ Always use `var(--token)` — never hardcode `#hex`, `px`, or `rem`
+- ✅ Components reference semantic layer only
+- ✅ Font face: **Inter Tight** only (mono for code blocks)
+- ❌ Never use Tailwind `text-2xl` or `font-bold` classes — use token vars
+- ❌ Never skip the semantic layer (core → component directly)
+
+---
+
+## Getting Started
 
 ```bash
-# Clone the repository
+# Clone
 git clone https://github.com/wugweb-git/Kits.git
-
-# Navigate to the project
 cd Kits
 
-# Install dependencies
+# Install
 npm install
 
-# Start development server
+# Dev server
 npm run dev
-```
 
-### Basic Usage
+# Token validation
+npm run validate:tokens
 
-```tsx
-import { Button, Input, Label } from '@/components/wugweb';
-
-function LoginForm() {
-  return (
-    <form>
-      <Label htmlFor="email">Email</Label>
-      <Input 
-        id="email" 
-        type="email" 
-        placeholder="you@example.com" 
-      />
-      
-      <Button variant="primary">Sign In</Button>
-    </form>
-  );
-}
+# Style Dictionary build
+npm run tokens:build
 ```
 
 ---
 
-## 🎨 Design Tokens
-
-All components strictly use CSS variables from `/styles/global.css`:
-
-### Colors
-```css
---primary: Primary actions and selections
---secondary: Secondary actions
---accent: Highlights and focus states (#FFBE1A)
---destructive: Errors and warnings
---success: Success states
---muted: Muted backgrounds
---foreground: Primary text
---background: Page background
---card: Card backgrounds
---border: Borders
---ring: Focus rings
-```
-
-### Typography
-```css
-Font Family: Inter Tight, sans-serif
-Font Weights:
-  --font-weight-regular: 400
-  --font-weight-medium: 500
-  --font-weight-semibold: 600
-  --font-weight-bold: 700
-```
-
-### Spacing
-```css
---spacing-1 through --spacing-12
---layout-padding-mobile
---layout-padding-tablet
---layout-padding-desktop-right
-```
-
-### Border Radius
-```css
---radius-1: 4px
---radius-2: 8px
---radius-3: 12px
---radius-4: 16px
---radius-5: 20px
---radius-full: 9999px
-```
-
----
-
-## 📖 Documentation
-
-Comprehensive documentation is available in the app, featuring:
-
-- **Interactive Playgrounds** - Test components in real-time
-- **Live Code Generation** - Copy-paste ready code
-- **Design Token Showcases** - Visual design token reference
-- **Usage Guidelines** - Best practices and do's/don'ts
-- **Accessibility Info** - WCAG compliance details
-
----
-
-## 🎯 Customization
-
-Update the entire design system by editing CSS variables:
-
-```css
-/* /styles/global.css */
-
-:root {
-  /* Change accent color */
-  --accent: rgba(255, 100, 100, 1.00);
-  
-  /* Update spacing scale */
-  --spacing-4: 20px;
-  
-  /* Modify border radius */
-  --radius-3: 16px;
-}
-```
-
-All components will automatically reflect your changes!
-
----
-
-## 🏗️ Project Structure
+## Folder Structure
 
 ```
-Kits/
-├── components/
-│   ├── wugweb/          # Design system components
-│   │   ├── Button.tsx
-│   │   ├── Input.tsx
-│   │   ├── Dialog.tsx
-│   │   └── ...
-│   ├── ui/              # Base UI components
-│   └── ds/              # Documentation components
+/
+├── App.tsx                    # Entry — routing, layout shell
+├── index.html                 # Full SEO metadata, OG tags, favicon
 ├── styles/
-│   ├── globals.css      # Design tokens & global styles
-│   └── animations.css   # Animation utilities
-├── hooks/               # Custom React hooks
-├── utils/               # Utility functions
-└── lib/                 # Library code
+│   ├── globals.css            # 4-layer token system (THE source of truth)
+│   └── animations.css         # Scroll reveal, page transitions
+├── components/
+│   ├── ds/                    # Documentation site shell
+│   │   ├── Header.tsx
+│   │   ├── Footer.tsx
+│   │   ├── ContextualSidebar.tsx
+│   │   ├── TopNavigation.tsx
+│   │   ├── PageWrapper.tsx
+│   │   ├── TokenCard.tsx
+│   │   └── pages/             # All doc pages (150+)
+│   │       ├── blocks/        # 8 block section pages
+│   │       └── templates/     # Dashboard, Landing, Stubs
+│   ├── wugweb/                # 127+ production components
+│   │   └── index.ts           # Single export barrel
+│   ├── ui/                    # shadcn/radix primitives (base layer)
+│   ├── motion/                # ScrollReveal, animation wrappers
+│   └── figma/                 # ImageWithFallback (protected)
+├── hooks/
+│   ├── useMediaQuery.ts       # useBreakpoint hook
+│   └── useMotion.ts           # useScrollPosition, usePrefersReducedMotion
+├── lib/
+│   ├── design-tokens.ts       # Token data for Tokens doc page
+│   └── component-registry.ts  # Component registry
+├── utils/
+│   ├── clipboard.ts
+│   ├── layout.ts
+│   └── responsive.ts
+├── imports/
+│   ├── Kits_Logo.svg          # Brand mark
+│   ├── pasted_text/           # Architecture & token reference docs
+│   └── [figma-imports]/       # Auto-generated Figma component imports
+└── contexts/
+    └── MotionContext.tsx
 ```
 
 ---
 
-## 🤝 Contributing
+## Components at a Glance
 
-We welcome contributions! Please follow these steps:
+**Form Controls** (16) · Input, SearchInput, NumberInput, PhoneInput, Textarea, Checkbox, RadioGroup, Switch, Select, NativeSelect, Combobox, Slider, Calendar, DatePicker, TimePicker, FileInput, WYSIWYG
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+**Data Display** (8) · Table, DataTable, Card, ListGroup, Badge, Chip, Avatar, Kbd
 
-### Component Checklist
-- [ ] Uses CSS variables for all colors
-- [ ] Uses CSS variables for spacing
-- [ ] Uses Inter Tight font family
-- [ ] Explicit sizing via inline styles
-- [ ] Accessibility features implemented
-- [ ] Documentation page created
-- [ ] TypeScript types included
-- [ ] Responsive design support
+**Surfaces / Actions** (10) · Button, ButtonGroup, SocialButton, CTABanner, TeamCard, TopicTile, Jumbotron, Rating, Indicator, EmptyState
 
----
+**Navigation** (9) · Header, Breadcrumb, Pagination, Tabs, NavigationMenu, SideMenu, MenuItem, MegaMenu, BottomNavigation
 
-## 📊 Statistics
+**Feedback** (8) · Alert, AlertDialog, Dialog, Toast, Banner, Spinner, Progress, Skeleton
 
-- **Total Components**: 50+
-- **Design Token Coverage**: 100%
-- **TypeScript Coverage**: 93.2%
-- **CSS Coverage**: 6.8%
-- **Accessibility**: WCAG 2.1 AA Compliant
-- **Browser Support**: Modern browsers (Chrome, Firefox, Safari, Edge)
+**Overlay** (5) · Drawer, BottomSheet, Popover, Tooltip, Collapsible
+
+**Layout** (6) · Grid, Accordion, Divider, Timeline, Stepper, Form
+
+**Charts** (6) · Area, Bar, Line, Pie, Radar, Radial
+
+**Utility** (9) · Clipboard, SpeedDial, ChatBubble, DeviceMockup, EmbedBadge, Logo, Icon, Avatar, Toaster
 
 ---
 
-## 📝 License
+## Token Export Files
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- Built with [React](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/)
-- UI primitives from [Radix UI](https://www.radix-ui.com/)
-- Icons from [Lucide Icons](https://lucide.dev/)
-- Font: [Inter Tight](https://fonts.google.com/specimen/Inter+Tight)
-- Toast notifications: [Sonner](https://sonner.emilkowal.ski/)
-- Inspired by [shadcn/ui](https://ui.shadcn.com/)
+| File | Layer | Contents |
+|---|---|---|
+| `global.json` | Core | Raw values — colors, spacing, radius, type, shadow, motion |
+| `alias.json` | Alias | Brand bridge — swap to change brand identity |
+| `semantic.json` | Semantic | Intent tokens — --background, --accent, text.primary |
+| `component.json` | Component | Per-component overrides — btn-height, card-radius |
 
 ---
 
-## 📧 Contact
+## Links
 
-- **Email**: hello@wugweb.com
-- **GitHub**: [@wugweb-git](https://github.com/wugweb-git)
-- **Website**: [wugweb.com](https://wugweb.com)
-
----
-
-## 🔖 Badges
-
-Show your support by using our badges:
-
-### Designed by Wugweb
-```html
-<a href="https://wugweb.com?utm_source=badge&utm_medium=referral&utm_campaign=designed-by" target="_blank" rel="noopener noreferrer">
-  <svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="180" height="40" rx="8" fill="#121212"/>
-    <rect x="0.5" y="0.5" width="179" height="39" rx="7.5" stroke="#2B2B2B"/>
-    <path d="M12 20L14.5 14L17 20L14.5 26L12 20Z" fill="#FFBE1A"/>
-    <path d="M17 20L19.5 14L22 20L19.5 26L17 20Z" fill="#FFBE1A" opacity="0.6"/>
-    <text x="30" y="16" font-family="Inter Tight, sans-serif" font-size="10" font-weight="500" fill="#A1A1A1">DESIGNED BY</text>
-    <text x="30" y="28" font-family="Inter Tight, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Wugweb</text>
-  </svg>
-</a>
-```
+| | |
+|---|---|
+| Live site | https://kits.wugweb.studio |
+| Figma file | https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits |
+| GitHub | https://github.com/wugweb-git/Kits |
+| Wugweb | https://wugweb.com |
+| Contact | hello@wugweb.com |
 
 ---
 
-<div align="center">
+## Wugweb Products using Kits
 
-**[⬆ Back to Top](#wugweb-kits---design-system)**
+| Product | Repo | Live |
+|---|---|---|
+| StayWeb | [wugweb-git/Staywebdev](https://github.com/wugweb-git/Staywebdev) | [stayweb.wugweb.studio](https://stayweb.wugweb.studio) |
+| DocWeb | [wugweb-git/Docweb](https://github.com/wugweb-git/Docweb) | [doc.wugweb.studio](https://doc.wugweb.studio) |
+| NookWeb | [wugweb-git/Nookweb](https://github.com/wugweb-git/Nookweb) | [nook.wugweb.studio](https://nook.wugweb.studio) |
+| ThinkWeb | [wugweb-git/thinkweb](https://github.com/wugweb-git/thinkweb) | [think.wugweb.studio](https://think.wugweb.studio) |
 
-Made with ❤️ by the Wugweb team
+---
 
-</div>
+## License
+
+MIT © 2024–2026 [Wugweb](https://wugweb.com)

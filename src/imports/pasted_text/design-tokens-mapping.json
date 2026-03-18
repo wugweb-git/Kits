@@ -1,0 +1,237 @@
+Good. This is the most important step—this is what turns your system into enforceable infra.
+
+I’ll give you:
+
+Exact Naming System (strict, scalable)
+
+Mapping Layer (Figma → Tokens → Code → Tailwind)
+
+No ambiguity. You can directly implement this.
+
+🧠 1. NAMING SYSTEM (FINAL CONTRACT)
+
+We follow a 4-part structure:
+
+[type].[category].[role].[state]
+
+Optional extensions:
+
+[type].[category].[role].[variant].[state].[scale]
+🎯 1.1 TOKEN TYPE PREFIX (MANDATORY)
+color
+spacing
+size
+radius
+text
+shadow
+border
+opacity
+motion
+z
+icon
+asset
+🎨 1.2 COLOR NAMING
+Global
+color.gray.100
+color.gray.900
+color.yellow.500
+Alias
+color.brand.primary
+color.brand.secondary
+Semantic
+color.bg.primary
+color.bg.surface
+color.text.primary
+color.text.secondary
+color.border.default
+Component
+color.button.primary.bg
+color.button.primary.text
+color.input.border.focus
+📏 1.3 SPACING / SIZE
+spacing.1 = 4px
+spacing.2 = 8px
+spacing.4 = 16px
+Usage:
+spacing.card.padding
+spacing.input.gap
+🔲 1.4 RADIUS
+radius.none = 0
+radius.sm = 6px
+radius.md = 10px
+radius.lg = 16px
+🔤 1.5 TYPOGRAPHY
+
+👉 Composite tokens
+
+text.heading.h1
+text.heading.h2
+text.body.md
+text.caption.sm
+🌫 1.6 SHADOW / ELEVATION
+shadow.xs
+shadow.sm
+shadow.md
+shadow.lg
+Semantic elevation
+elevation.1 → shadow.xs
+elevation.2 → shadow.sm
+elevation.3 → shadow.md
+🧱 1.7 BORDER
+border.default
+border.input.focus
+border.card
+🔳 1.8 OPACITY
+opacity.disabled
+opacity.overlay
+🎞 1.9 MOTION
+motion.duration.fast
+motion.duration.normal
+motion.easing.standard
+motion.easing.emphasized
+🧱 1.10 Z-INDEX
+z.base = 0
+z.dropdown = 100
+z.modal = 1000
+z.toast = 1100
+🖼 1.11 ICON / ASSET
+icon.system.add
+icon.system.edit
+icon.product.booking
+asset.image.hero
+asset.logo.primary
+⚠️ NAMING RULES (NON-NEGOTIABLE)
+
+❌ No camelCase → use dot notation
+
+❌ No random names (primaryColor, blue1)
+
+❌ No component tokens at global level
+
+✅ Always hierarchical
+
+✅ Always predictable
+
+🔌 2. MAPPING LAYER (CRITICAL)
+
+This is what connects EVERYTHING.
+
+🧠 Concept
+
+Each token must map to:
+
+Token → Figma → CSS → Tailwind → Component
+🎯 2.1 MASTER MAPPING OBJECT
+{
+  "button.primary.bg": {
+    "token": "color.brand.primary",
+    "figma": {
+      "property": "fill"
+    },
+    "css": {
+      "property": "background-color",
+      "variable": "--color-brand-primary"
+    },
+    "tailwind": "bg-brand-primary",
+    "component": "Button.Primary"
+  }
+}
+🎨 2.2 COLOR MAPPING
+{
+  "color.bg.primary": {
+    "figma": "fill",
+    "css": "background-color",
+    "tailwind": "bg-primary"
+  },
+  "color.text.primary": {
+    "figma": "text",
+    "css": "color",
+    "tailwind": "text-primary"
+  }
+}
+📏 2.3 SPACING MAPPING
+{
+  "spacing.4": {
+    "figma": "padding/gap",
+    "css": "padding",
+    "tailwind": "p-4"
+  }
+}
+🔲 2.4 RADIUS
+{
+  "radius.md": {
+    "figma": "cornerRadius",
+    "css": "border-radius",
+    "tailwind": "rounded-md"
+  }
+}
+🔤 2.5 TYPOGRAPHY
+{
+  "text.body.md": {
+    "figma": "textStyle",
+    "css": ["font-size", "line-height", "font-weight"],
+    "tailwind": "text-base"
+  }
+}
+🌫 2.6 SHADOW
+{
+  "shadow.sm": {
+    "figma": "effects",
+    "css": "box-shadow",
+    "tailwind": "shadow-sm"
+  }
+}
+🧱 2.7 BORDER
+{
+  "border.default": {
+    "figma": "stroke",
+    "css": "border",
+    "tailwind": "border"
+  }
+}
+🔳 2.8 OPACITY
+{
+  "opacity.disabled": {
+    "figma": "opacity",
+    "css": "opacity",
+    "tailwind": "opacity-40"
+  }
+}
+🎞 2.9 MOTION
+{
+  "motion.duration.fast": {
+    "css": "transition-duration",
+    "tailwind": "duration-150"
+  }
+}
+🧱 2.10 Z-INDEX
+{
+  "z.modal": {
+    "css": "z-index",
+    "tailwind": "z-50"
+  }
+}
+🧠 3. FINAL SYSTEM (PUT THIS IN YOUR REPO)
+Folder
+tokens/
+mapping/
+  token-mapping.json
+Purpose:
+
+enforce usage
+
+enable automation
+
+connect Figma ↔ code
+
+⚡ FINAL INSIGHT (IMPORTANT)
+
+Right now most systems fail because:
+
+tokens exist
+but mapping does NOT
+
+With this:
+
+tokens + naming + mapping
+= fully operational design system

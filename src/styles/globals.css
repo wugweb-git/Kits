@@ -871,3 +871,192 @@ html {
 .elevation-3 { box-shadow: var(--elevation-3); }
 .elevation-4 { box-shadow: var(--elevation-4); }
 .elevation-5 { box-shadow: var(--elevation-5); }
+
+
+/* ============================================================
+ * LAYER 1 ADDITIONS — MISSING CORE TOKENS
+ * Per token-audit-report.md:
+ *   ✅ size scale       (icon/container/touch sizes)
+ *   ✅ gradient tokens  (brand, surface, overlay)
+ *   ✅ breakpoints      (code-only reference values)
+ *   ✅ fluid type scale (clamp() — viewport-driven)
+ *   ✅ responsive space (adaptive per breakpoint)
+ * ============================================================ */
+:root {
+
+  /* ── CORE SIZE SCALE ─────────────────────────────────────── */
+  /* Used for: icon sizes, avatars, containers, fixed dimensions */
+  /* Maps to: Figma → Width/Height fixed;  Code → width/height  */
+  --core-size-4:   16px;    /* Icon XS */
+  --core-size-5:   20px;    /* Icon SM */
+  --core-size-6:   24px;    /* Icon MD — default */
+  --core-size-8:   32px;    /* Icon LG */
+  --core-size-10:  40px;    /* Button height MD */
+  --core-size-12:  48px;    /* Button height LG */
+  --core-size-14:  56px;    /* Button height XL */
+  --core-size-16:  64px;    /* Avatar XL */
+  --core-size-20:  80px;    /* Avatar 2XL */
+  --core-size-24:  96px;
+  --core-size-32:  128px;
+  --core-size-40:  160px;
+  --core-size-48:  192px;
+  --core-size-64:  256px;
+
+  /* Container max-widths */
+  --core-size-container-xs:  480px;
+  --core-size-container-sm:  640px;
+  --core-size-container-md:  768px;
+  --core-size-container-lg:  1024px;
+  --core-size-container-xl:  1280px;
+  --core-size-container-2xl: 1440px;
+
+  /* ── CORE GRADIENT PRIMITIVES ────────────────────────────── */
+  /* Figma scope: Fill (gradient). Code: background / background-image */
+  --core-gradient-brand-primary:  linear-gradient(135deg, rgba(255,190,26,1) 0%, rgba(255,226,120,1) 100%);
+  --core-gradient-brand-warm:     linear-gradient(135deg, rgba(255,190,26,1) 0%, rgba(255,165,0,1) 100%);
+  --core-gradient-brand-subtle:   linear-gradient(135deg, rgba(255,190,26,0.15) 0%, rgba(255,190,26,0.03) 100%);
+  --core-gradient-surface-dark:   linear-gradient(180deg, rgba(28,28,28,1) 0%, rgba(18,18,18,1) 100%);
+  --core-gradient-overlay-dark:   linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 100%);
+  --core-gradient-overlay-top:    linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 100%);
+  --core-gradient-radial-accent:  radial-gradient(ellipse at center, rgba(255,190,26,0.15) 0%, rgba(255,190,26,0) 70%);
+  --core-gradient-shine:          linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+
+  /* ── BREAKPOINTS (code-only — no Figma scope) ────────────── */
+  /* RULE: Reference values only. Use in @media queries.         */
+  /* NEVER use these as inline style values in components.       */
+  --breakpoint-xs:  480px;
+  --breakpoint-sm:  640px;
+  --breakpoint-md:  768px;
+  --breakpoint-lg:  1024px;
+  --breakpoint-xl:  1280px;
+  --breakpoint-2xl: 1440px;
+
+  /* ── FLUID TYPE SCALE (clamp-based, viewport-driven) ─────── */
+  /* clamp(MIN-at-320px, fluid-vw, MAX-at-1440px)               */
+  /* Use --fluid-{role} when type must scale with viewport.      */
+  /* Use --ts-{role}-size for fixed, context-specific sizes.     */
+  --fluid-display:   clamp(2.5rem,   5.5vw + 0.5rem,  5rem);
+  --fluid-h1:        clamp(2rem,     4vw + 0.5rem,     3rem);
+  --fluid-h2:        clamp(1.5rem,   2.5vw + 0.5rem,   2.25rem);
+  --fluid-h3:        clamp(1.25rem,  1.5vw + 0.5rem,   1.75rem);
+  --fluid-h4:        clamp(1.0625rem,1vw + 0.5rem,     1.375rem);
+  --fluid-body-lg:   clamp(1rem,     0.5vw + 0.875rem, 1.25rem);
+  --fluid-body-md:   clamp(0.9375rem,0.25vw + 0.875rem,1rem);
+  --fluid-body-sm:   clamp(0.8125rem,0.1vw + 0.8rem,   0.875rem);
+  --fluid-label:     clamp(0.75rem,  0.1vw + 0.73rem,  0.875rem);
+  --fluid-caption:   clamp(0.625rem, 0.05vw + 0.62rem, 0.75rem);
+
+  /* ── RESPONSIVE SPACING SCALE ────────────────────────────── */
+  /* Named by breakpoint label, not raw px.                      */
+  /* Use for section/page/layout spacing decisions.              */
+  --space-section-xs:  var(--core-spacing-8);    /* 32px — mobile */
+  --space-section-sm:  var(--core-spacing-10);   /* 40px — mobile L */
+  --space-section-md:  var(--core-spacing-12);   /* 48px — tablet */
+  --space-section-lg:  var(--core-spacing-16);   /* 64px — desktop S */
+  --space-section-xl:  var(--core-spacing-20);   /* 80px — desktop M */
+  --space-section-2xl: var(--core-spacing-24);   /* 96px — desktop L */
+
+  --space-page-xs:     var(--core-spacing-4);    /* 16px — mobile gutter */
+  --space-page-sm:     var(--core-spacing-5);    /* 20px */
+  --space-page-md:     var(--core-spacing-8);    /* 32px — tablet */
+  --space-page-lg:     var(--core-spacing-10);   /* 40px — desktop */
+  --space-page-xl:     var(--core-spacing-12);   /* 48px — large desktop */
+}
+
+/* ── SEMANTIC SIZE TOKENS ───────────────────────────────────── */
+:root {
+  /* Icon scale — maps directly to lucide-react size prop */
+  --size-icon-xs: var(--core-size-4);   /* 16px */
+  --size-icon-sm: var(--core-size-5);   /* 20px */
+  --size-icon-md: var(--core-size-6);   /* 24px — default */
+  --size-icon-lg: var(--core-size-8);   /* 32px */
+  --size-icon-xl: var(--core-size-10);  /* 40px */
+
+  /* Container max-widths */
+  --size-container-xs:  var(--core-size-container-xs);
+  --size-container-sm:  var(--core-size-container-sm);
+  --size-container-md:  var(--core-size-container-md);
+  --size-container-lg:  var(--core-size-container-lg);
+  --size-container-xl:  var(--core-size-container-xl);
+  --size-container-2xl: var(--core-size-container-2xl);
+
+  /* Touch targets (WCAG 2.5.5 — minimum 44×44px) */
+  --size-touch-min:   44px;
+  --size-touch-comfy: 48px;
+  --size-touch-large: 56px;
+
+  /* Shadow aliases (semantic names matching audit docs) */
+  --shadow-raised:  var(--core-shadow-md);
+  --shadow-overlay: var(--core-shadow-lg);
+  --shadow-float:   var(--core-shadow-xl);
+}
+
+/* ── SEMANTIC GRADIENT TOKENS ───────────────────────────────── */
+:root {
+  --gradient-brand:         var(--core-gradient-brand-primary);
+  --gradient-brand-warm:    var(--core-gradient-brand-warm);
+  --gradient-brand-subtle:  var(--core-gradient-brand-subtle);
+  --gradient-surface:       var(--core-gradient-surface-dark);
+  --gradient-overlay:       var(--core-gradient-overlay-dark);
+  --gradient-overlay-top:   var(--core-gradient-overlay-top);
+  --gradient-radial-accent: var(--core-gradient-radial-accent);
+  --gradient-shine:         var(--core-gradient-shine);
+}
+
+/* ── RESPONSIVE TYPE UTILITY CLASSES ─────────────────────────── */
+/* Apply to any element for viewport-scaled type.                 */
+/* Always Inter Tight. Uses fluid clamp() tokens.                 */
+.type-display { font-size: var(--fluid-display);  font-weight: var(--ts-display-weight); line-height: var(--core-line-height-tight);   font-family: var(--core-font-family-base); letter-spacing: var(--core-letter-spacing-tight); }
+.type-h1      { font-size: var(--fluid-h1);       font-weight: var(--ts-h1-weight);      line-height: var(--core-line-height-tight);   font-family: var(--core-font-family-base); }
+.type-h2      { font-size: var(--fluid-h2);       font-weight: var(--ts-h2-weight);      line-height: var(--core-line-height-snug);    font-family: var(--core-font-family-base); }
+.type-h3      { font-size: var(--fluid-h3);       font-weight: var(--ts-h3-weight);      line-height: var(--core-line-height-snug);    font-family: var(--core-font-family-base); }
+.type-h4      { font-size: var(--fluid-h4);       font-weight: var(--ts-h4-weight);      line-height: var(--core-line-height-normal);  font-family: var(--core-font-family-base); }
+.type-body-lg { font-size: var(--fluid-body-lg);  font-weight: var(--ts-body-lg-weight); line-height: var(--core-line-height-relaxed); font-family: var(--core-font-family-base); }
+.type-body-md { font-size: var(--fluid-body-md);  font-weight: var(--ts-body-md-weight); line-height: var(--core-line-height-normal);  font-family: var(--core-font-family-base); }
+.type-body-sm { font-size: var(--fluid-body-sm);  font-weight: var(--ts-body-sm-weight); line-height: var(--core-line-height-normal);  font-family: var(--core-font-family-base); }
+.type-label   { font-size: var(--fluid-label);    font-weight: var(--ts-label-md-weight);line-height: var(--core-line-height-normal);  font-family: var(--core-font-family-base); }
+.type-caption { font-size: var(--fluid-caption);  font-weight: var(--ts-caption-weight); line-height: var(--core-line-height-normal);  font-family: var(--core-font-family-base); }
+.type-mono    { font-family: var(--core-font-family-mono); font-size: var(--ts-code-size); }
+
+/* ── SECTION + PAGE RESPONSIVE SPACING ──────────────────────── */
+.section-spacing {
+  padding-top:    var(--space-section-xs);
+  padding-bottom: var(--space-section-xs);
+}
+@media (min-width: 640px) {
+  .section-spacing { padding-top: var(--space-section-sm); padding-bottom: var(--space-section-sm); }
+}
+@media (min-width: 768px) {
+  .section-spacing { padding-top: var(--space-section-md); padding-bottom: var(--space-section-md); }
+}
+@media (min-width: 1024px) {
+  .section-spacing { padding-top: var(--space-section-lg); padding-bottom: var(--space-section-lg); }
+}
+@media (min-width: 1280px) {
+  .section-spacing { padding-top: var(--space-section-xl); padding-bottom: var(--space-section-xl); }
+}
+
+.page-gutter {
+  padding-left:  var(--space-page-xs);
+  padding-right: var(--space-page-xs);
+}
+@media (min-width: 768px) {
+  .page-gutter { padding-left: var(--space-page-md); padding-right: var(--space-page-md); }
+}
+@media (min-width: 1024px) {
+  .page-gutter { padding-left: var(--space-page-lg); padding-right: var(--space-page-lg); }
+}
+
+/* ── GRADIENT UTILITIES ──────────────────────────────────────── */
+.gradient-brand         { background: var(--gradient-brand); }
+.gradient-brand-subtle  { background: var(--gradient-brand-subtle); }
+.gradient-surface       { background: var(--gradient-surface); }
+.gradient-overlay       { background: var(--gradient-overlay); }
+.gradient-radial-accent { background: var(--gradient-radial-accent); }
+
+/* ── SIZE / ICON UTILITIES ──────────────────────────────────── */
+.icon-xs { width: var(--size-icon-xs); height: var(--size-icon-xs); flex-shrink: 0; }
+.icon-sm { width: var(--size-icon-sm); height: var(--size-icon-sm); flex-shrink: 0; }
+.icon-md { width: var(--size-icon-md); height: var(--size-icon-md); flex-shrink: 0; }
+.icon-lg { width: var(--size-icon-lg); height: var(--size-icon-lg); flex-shrink: 0; }
+.icon-xl { width: var(--size-icon-xl); height: var(--size-icon-xl); flex-shrink: 0; }
