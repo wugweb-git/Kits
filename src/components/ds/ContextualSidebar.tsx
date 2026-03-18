@@ -230,8 +230,8 @@ export function ContextualSidebar({
       case 'templates':
         return [
           { id: 'overview', label: 'Overview', icon: Home },
-          { id: 'dashboard', label: 'Dashboard', icon: BarChart2 },
-          { id: 'landing-page', label: 'Landing Page', icon: Layout },
+          { id: 'dashboard', label: 'Dashboard', icon: BarChart2, isNew: true },
+          { id: 'landing-page', label: 'Landing Page', icon: Layout, isNew: true },
           { id: 'marketing-site', label: 'Marketing Site', icon: Zap },
           { id: 'documentation', label: 'Documentation', icon: Book },
           { id: 'portfolio', label: 'Portfolio', icon: Image },
@@ -244,7 +244,7 @@ export function ContextualSidebar({
           { id: 'logo-system', label: 'Logo System', icon: Image },
           { id: 'icons', label: 'Icons', icon: Zap },
           { id: 'illustrations', label: 'Illustrations', icon: Image },
-          { id: 'animations', label: 'Animations', icon: Zap },
+          { id: 'animations', label: 'Animations', icon: Activity },
           { id: 'brand-guidelines', label: 'Brand Guidelines', icon: BookOpen },
           { id: 'marcom', label: 'MarCom', icon: MessageSquare },
           { id: 'figma-kits', label: 'Figma Kits', icon: Package },

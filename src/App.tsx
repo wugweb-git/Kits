@@ -130,6 +130,19 @@ import { NavbarsBlock } from './components/ds/pages/blocks/NavbarsBlock';
 import { FootersBlock } from './components/ds/pages/blocks/FootersBlock';
 // ── System architecture ────────────────────────────────────────────────────────
 import { SystemLayersDoc } from './components/ds/pages/SystemLayersDoc';
+// ── Templates ─────────────────────────────────────────────────────────────────
+import { TemplatesOverview } from './components/ds/pages/TemplatesOverview';
+import { DashboardTemplate } from './components/ds/pages/templates/DashboardTemplate';
+import { LandingPageTemplate } from './components/ds/pages/templates/LandingPageTemplate';
+import { TemplateStub } from './components/ds/pages/templates/TemplateStub';
+// ── Illustrations & Animations ────────────────────────────────────────────────
+import { IllustrationsDoc } from './components/ds/pages/IllustrationsDoc';
+import { AnimationsDoc } from './components/ds/pages/AnimationsDoc';
+// ── Resources sub-pages ───────────────────────────────────────────────────────
+import { BrandGuidelinesDoc } from './components/ds/pages/BrandGuidelinesDoc';
+import { MarComDoc } from './components/ds/pages/MarComDoc';
+import { FigmaKitsDoc } from './components/ds/pages/FigmaKitsDoc';
+import { DownloadsDoc } from './components/ds/pages/DownloadsDoc';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -366,7 +379,14 @@ export default function App() {
 
       // ── TEMPLATES ─────────────────────────────────────────────────────────
       case 'templates':
-        return <Playground />;
+        if (currentSubPage === 'overview' || currentSubPage === undefined) return <TemplatesOverview onNavigate={handleNavigate} />;
+        if (currentSubPage === 'dashboard') return <DashboardTemplate />;
+        if (currentSubPage === 'landing-page') return <LandingPageTemplate />;
+        if (currentSubPage === 'marketing-site') return <TemplateStub title="Marketing Site" description="Multi-page marketing site with blog, team, and contact sections." blocks={['Navigation header', 'Hero section', 'Features grid', 'Blog listing', 'Team section', 'Contact form', 'Full footer']} onBack={() => handleNavigate('templates', 'overview')} />;
+        if (currentSubPage === 'documentation') return <TemplateStub title="Documentation Site" description="Technical docs with sidebar navigation, search, and code blocks." blocks={['Docs sidebar', 'Search modal', 'MDX content area', 'Code block', 'Prev/Next pagination', 'Table of contents', 'Breadcrumbs']} onBack={() => handleNavigate('templates', 'overview')} />;
+        if (currentSubPage === 'portfolio') return <TemplateStub title="Portfolio / Agency" description="Creative portfolio with project showcase and case studies." blocks={['Minimal hero', 'Project grid', 'Case study page', 'About section', 'Services list', 'Contact form', 'Minimal footer']} onBack={() => handleNavigate('templates', 'overview')} />;
+        if (currentSubPage === 'e-commerce') return <TemplateStub title="E-commerce Storefront" description="Product catalog, detail page, cart, and checkout flow." blocks={['Product catalog grid', 'Filter sidebar', 'Product detail page', 'Image gallery', 'Cart drawer', 'Checkout flow', 'Order confirmation']} onBack={() => handleNavigate('templates', 'overview')} />;
+        return <TemplatesOverview onNavigate={handleNavigate} />;
 
       // ── ICONS ─────────────────────────────────────────────────────────────
       case 'icons':
@@ -374,20 +394,26 @@ export default function App() {
 
       // ── ILLUSTRATIONS ─────────────────────────────────────────────────────
       case 'illustrations':
-        return (
-          <PageWrapper>
-            <PageHeader
-              title="Illustrations"
-              description="Beautiful illustrations for your design system. Coming soon."
-            />
-          </PageWrapper>
-        );
+        return <IllustrationsDoc />;
+
+      // ── ANIMATIONS ────────────────────────────────────────────────────────
+      case 'animations':
+        return <AnimationsDoc />;
 
       // ── RESOURCES ─────────────────────────────────────────────────────────
       case 'resources':
         if (currentSubPage === 'logo-system') return <LogoSystemDoc />;
         if (currentSubPage === 'logo-showcase') return <LogoShowcase />;
         if (currentSubPage === 'embed-badges') return <EmbedBadgesDoc />;
+        if (currentSubPage === 'icons') return <IconDocNew />;
+        if (currentSubPage === 'illustrations') return <IllustrationsDoc />;
+        if (currentSubPage === 'animations') return <AnimationsDoc />;
+        if (currentSubPage === 'brand-guidelines') return <BrandGuidelinesDoc />;
+        if (currentSubPage === 'marcom') return <MarComDoc />;
+        if (currentSubPage === 'figma-kits') return <FigmaKitsDoc />;
+        if (currentSubPage === 'downloads') return <DownloadsDoc />;
+        if (currentSubPage === 'contribute') return <Contribute />;
+        if (currentSubPage === 'changelog') return <Changelog />;
         return <LogoShowcase />;
 
       // ── STANDALONE SECTIONS ───────────────────────────────────────────────

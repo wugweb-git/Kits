@@ -28,6 +28,7 @@ export function TopNavigation({
     { id: 'templates', label: 'Templates' },
     { id: 'icons', label: 'Icons' },
     { id: 'illustrations', label: 'Illustrations' },
+    { id: 'animations', label: 'Animations' },
     { id: 'resources', label: 'Resources' },
   ];
 
