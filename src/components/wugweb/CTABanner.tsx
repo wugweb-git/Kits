@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../ui/utils';
 import { FileText } from 'lucide-react';
-import { cva, type VariantProps } from 'class-variance-authority@0.7.1';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 const bannerVariants = cva(
   "relative w-full overflow-hidden flex flex-col justify-between box-border",

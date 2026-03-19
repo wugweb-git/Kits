@@ -71,7 +71,7 @@ import { PageWrapper, PageHeader } from './components/ds/PageWrapper';
 import { TopNavigation } from './components/ds/TopNavigation';
 import { ContextualSidebar } from './components/ds/ContextualSidebar';
 import { useBreakpoint } from './hooks/useMediaQuery';
-import { Toaster } from 'sonner@2.0.3';
+import { Toaster } from 'sonner';
 import './styles/animations.css';
 import KitsLogoUrl from './imports/Kits_Logo.svg';
 import { siteInventory } from './generated/siteInventory';

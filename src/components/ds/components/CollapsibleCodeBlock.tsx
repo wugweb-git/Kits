@@ -3,7 +3,7 @@ import { Copy, Check, Code2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { useBreakpoint } from '../../../hooks/useMediaQuery';
 import { typography } from '../../../utils/responsive';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 interface CollapsibleCodeBlockProps {
