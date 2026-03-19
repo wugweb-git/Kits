@@ -69,11 +69,8 @@ npm install
 # Dev server
 npm run dev
 
-# Token validation
-npm run validate:tokens
-
-# Style Dictionary build
-npm run tokens:build
+# Snapshot metrics
+npm run metrics:generate
 ```
 
 ---
@@ -95,7 +92,7 @@ npm run tokens:build
 │   │   ├── TopNavigation.tsx
 │   │   ├── PageWrapper.tsx
 │   │   ├── TokenCard.tsx
-│   │   └── pages/             # All doc pages (150+)
+│   │   └── pages/             # 127 tracked doc pages
 │   │       ├── blocks/        # 8 block section pages
 │   │       └── templates/     # Dashboard, Landing, Stubs
 │   ├── wugweb/                # 81 public component modules

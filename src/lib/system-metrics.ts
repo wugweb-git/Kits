@@ -1,0 +1,8 @@
+export const systemMetrics = {
+  "generatedAt": "2026-03-19T12:48:19.234Z",
+  "systemComponents": 84,
+  "blockPages": 9,
+  "templates": 3,
+  "docsPages": 127,
+  "description": "84 system components, 9 block pages, and 3 templates backed by a 4-layer token architecture."
+} as const;
