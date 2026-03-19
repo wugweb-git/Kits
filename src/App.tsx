@@ -74,6 +74,7 @@ import { useBreakpoint } from './hooks/useMediaQuery';
 import { Toaster } from 'sonner@2.0.3';
 import './styles/animations.css';
 import KitsLogoUrl from './imports/Kits_Logo.svg';
+import { systemMetrics } from './lib/system-metrics';
 
 // ── Newly wired doc pages ─────────────────────────────────────────────────────
 // Form Controls
@@ -165,7 +166,7 @@ export default function App() {
       descMeta.name = 'description';
       document.head.appendChild(descMeta);
     }
-    descMeta.content = '127+ production-ready React components with a 4-layer CSS token system. Colors, typography, spacing, motion — design-to-code ready.';
+    descMeta.content = systemMetrics.description;
 
     // Replace favicon with SVG logo
     const existing = document.querySelectorAll("link[rel*='icon']");
