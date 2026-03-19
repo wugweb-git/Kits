@@ -1,7 +1,7 @@
 {
   "name": "Wugweb Kits — Design System",
   "short_name": "Wugweb Kits",
-  "description": "127+ production-ready React components with a 4-layer CSS token system.",
+  "description": "81 production-ready React components with a 4-layer CSS token system.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",

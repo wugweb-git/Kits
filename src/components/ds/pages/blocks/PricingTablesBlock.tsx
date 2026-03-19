@@ -3,6 +3,7 @@ import { BlockPageShell } from './BlockPageShell';
 import { Check, X } from 'lucide-react';
 import { Button } from '../../../wugweb/Button';
 import { Badge } from '../../../wugweb/Badge';
+import { siteInventory } from '../../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -17,13 +18,13 @@ const plans = [
     name: 'Pro', price: '$29', period: '/month',
     desc: 'For teams building serious products.',
     cta: 'Start free trial', featured: true,
-    features: ['127+ components', 'Unlimited projects', 'Priority support', 'CSS variables', 'Figma kit', '4-layer tokens'],
+    features: [`${siteInventory.publicComponentModuleCount} components`, 'Unlimited projects', 'Priority support', 'CSS variables', 'Figma kit', '4-layer tokens'],
   },
   {
     name: 'Enterprise', price: 'Custom', period: '',
     desc: 'For organizations at scale.',
     cta: 'Contact us', featured: false,
-    features: ['127+ components', 'Unlimited projects', 'Dedicated support', 'CSS variables', 'Figma kit', 'MCP connector'],
+    features: [`${siteInventory.publicComponentModuleCount} components`, 'Unlimited projects', 'Dedicated support', 'CSS variables', 'Figma kit', 'MCP connector'],
   },
 ];
 
@@ -80,7 +81,7 @@ const ThreeTierPricing = () => (
 
 const ComparisonTable = () => {
   const rows = [
-    ['Components', '5', '127+', '127+'],
+    ['Components', '5', String(siteInventory.publicComponentModuleCount), String(siteInventory.publicComponentModuleCount)],
     ['Projects', '1', 'Unlimited', 'Unlimited'],
     ['Token system', '✓', '✓', '✓'],
     ['Figma kit', '—', '✓', '✓'],

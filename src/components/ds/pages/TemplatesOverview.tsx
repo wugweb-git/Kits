@@ -3,6 +3,7 @@ import { Layout, BarChart2, Globe, Book, Briefcase, ShoppingBag, ArrowRight, Sta
 import { PageWrapper, PageHeader, PageSection } from '../PageWrapper';
 import { Button } from '../../wugweb/Button';
 import { Badge } from '../../wugweb/Badge';
+import { siteInventory } from '../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -182,8 +183,8 @@ export function TemplatesOverview({ onNavigate }: TemplatesOverviewProps) {
   ];
 
   const stats = [
-    { value: '6', label: 'Templates' },
-    { value: '127+', label: 'Components used' },
+    { value: String(siteInventory.templateCount), label: 'Templates' },
+    { value: String(siteInventory.publicComponentModuleCount), label: 'Public components' },
     { value: '100%', label: 'Token-driven' },
     { value: 'MIT', label: 'License' },
   ];

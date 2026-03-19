@@ -5,6 +5,7 @@ import { Button } from '../../wugweb/Button';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { siteInventory } from '../../../generated/siteInventory';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function JumbotronDoc() {
@@ -30,7 +31,7 @@ export function JumbotronDoc() {
 <Jumbotron
   title="Build faster with Wugweb Kits"
   subtitle="Design System"
-  description="127+ production-ready components built on CSS variables. Ship consistent UIs in record time."
+  description="81 production-ready components built on CSS variables. Ship consistent UIs in record time."
   size="${size}"
   centered={${centered}}
   ${showPrimary ? 'primaryAction={{ label: "Get Started", onClick: () => {} }}' : ''}
@@ -90,7 +91,7 @@ export function JumbotronDoc() {
               <Jumbotron
                 title="Build faster with Wugweb Kits"
                 subtitle="Design System"
-                description="127+ production-ready components built on CSS variables. Ship consistent UIs in record time."
+                description="81 production-ready components built on CSS variables. Ship consistent UIs in record time."
                 size={size}
                 centered={centered}
                 primaryAction={showPrimary ? { label: 'Get Started', onClick: () => {} } : undefined}

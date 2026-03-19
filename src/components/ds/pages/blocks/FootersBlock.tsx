@@ -24,7 +24,7 @@ const FullFooter = () => (
             </div>
             <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-bold)', color: 'var(--foreground)', fontFamily: F }}>Wugweb Kits</span>
           </div>
-          <p style={{ margin: '0 0 var(--spacing-5)', fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', lineHeight: 1.7, fontFamily: F, maxWidth: 200 }}>Production-ready design system. 127+ components, 4-layer tokens, Figma sync.</p>
+          <p style={{ margin: '0 0 var(--spacing-5)', fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', lineHeight: 1.7, fontFamily: F, maxWidth: 200 }}>{`Production-ready design system. ${siteInventory.publicComponentModuleCount} components, 4-layer tokens, Figma sync.`}</p>
           <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
             {[Github, Twitter, Linkedin].map((Icon, i) => (
               <a key={i} href="#" style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-sm)', border: 'var(--border-default)', color: 'var(--muted-foreground)', textDecoration: 'none', transition: 'color var(--motion-duration-fast)' }}>
