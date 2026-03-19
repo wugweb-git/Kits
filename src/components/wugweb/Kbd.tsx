@@ -26,18 +26,18 @@ export function Kbd({
   const sizeStyles = {
     s: {
       fontSize: 'var(--text-xs)',
-      padding: '2px 6px',
-      minWidth: '20px',
+      padding: 'var(--kbd-padding-y-sm) var(--kbd-padding-x-sm)',
+      minWidth: 'var(--kbd-min-width-sm)',
     },
     m: {
       fontSize: 'var(--text-sm)',
-      padding: '4px 8px',
-      minWidth: '24px',
+      padding: 'var(--kbd-padding-y-md) var(--kbd-padding-x-md)',
+      minWidth: 'var(--kbd-min-width-md)',
     },
     l: {
       fontSize: 'var(--text-base)',
-      padding: '6px 10px',
-      minWidth: '28px',
+      padding: 'var(--kbd-padding-y-lg) var(--kbd-padding-x-lg)',
+      minWidth: 'var(--kbd-min-width-lg)',
     },
   };
 
@@ -49,9 +49,9 @@ export function Kbd({
         fontWeight: 'var(--font-weight-medium)',
         color: 'var(--foreground)',
         background: 'var(--muted)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-1)',
-        boxShadow: '0 1px 0 rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05)',
+        border: 'var(--kbd-border)',
+        borderRadius: 'var(--kbd-radius)',
+        boxShadow: 'var(--kbd-shadow)',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
