@@ -14,38 +14,76 @@ import {
   Figma, Slack, Hash, Disc
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '../../ui/tabs';
-import { cn } from '../../ui/utils';
 
 // --- Internal Utilities for Documentation ---
 
 const PatternHeader = ({ title, description }: { title: string, description: string }) => (
-  <div className="mb-[var(--spacing-6)]">
-    <h2 className="text-[var(--foreground)] text-[length:var(--text-2xl)] font-bold mb-[var(--spacing-2)] tracking-tight">
+  <div style={{ marginBottom: 'var(--spacing-6)' }}>
+    <h2 style={{
+      fontFamily: 'var(--core-font-family-base)',
+      fontSize: 'var(--fluid-h2)',
+      fontWeight: 600,
+      color: 'var(--foreground)',
+      marginBottom: 'var(--spacing-2)',
+      letterSpacing: '-0.02em'
+    }}>
       {title}
     </h2>
-    <p className="text-[var(--muted-foreground)] text-[length:var(--text-base)] max-w-3xl leading-relaxed">
+    <p style={{
+      fontFamily: 'var(--core-font-family-base)',
+      fontSize: 'var(--fluid-body-lg)',
+      color: 'var(--muted-foreground)',
+      maxWidth: '48rem',
+      lineHeight: 1.6
+    }}>
       {description}
     </p>
   </div>
 );
 
 const ViewportControl = ({ isMobile, setMobile }: { isMobile: boolean, setMobile: (v: boolean) => void }) => (
-  <div className="flex bg-[var(--surface-900)] p-1 rounded-[var(--radius-md)] border border-[var(--border)]">
+  <div style={{
+    display: 'flex',
+    background: 'var(--surface-900)',
+    padding: 'var(--spacing-1)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--border)'
+  }}>
     <button
       onClick={() => setMobile(false)}
-      className={cn(
-        "px-3 py-1.5 rounded-[var(--radius-sm)] text-[length:var(--text-xs)] font-medium transition-all flex items-center gap-2",
-        !isMobile ? "bg-[var(--surface-700)] text-[var(--foreground)]" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-      )}
+      style={{
+        padding: 'var(--spacing-2) var(--spacing-3)',
+        borderRadius: 'var(--radius-sm)',
+        fontSize: 'var(--fluid-caption)',
+        fontWeight: 500,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--spacing-2)',
+        background: !isMobile ? 'var(--surface-700)' : 'transparent',
+        color: !isMobile ? 'var(--foreground)' : 'var(--muted-foreground)',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all var(--motion-duration-short) var(--motion-easing-standard)'
+      }}
     >
       Desktop
     </button>
     <button
       onClick={() => setMobile(true)}
-      className={cn(
-        "px-3 py-1.5 rounded-[var(--radius-sm)] text-[length:var(--text-xs)] font-medium transition-all flex items-center gap-2",
-        isMobile ? "bg-[var(--surface-700)] text-[var(--foreground)]" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-      )}
+      style={{
+        padding: 'var(--spacing-2) var(--spacing-3)',
+        borderRadius: 'var(--radius-sm)',
+        fontSize: 'var(--fluid-caption)',
+        fontWeight: 500,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--spacing-2)',
+        background: isMobile ? 'var(--surface-700)' : 'transparent',
+        color: isMobile ? 'var(--foreground)' : 'var(--muted-foreground)',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all var(--motion-duration-short) var(--motion-easing-standard)'
+      }}
     >
       Mobile
     </button>
@@ -60,24 +98,44 @@ const PatternViewer = ({ children }: PatternViewerProps) => {
   const [isMobile, setIsMobile] = useState(false);
 
   return (
-    <div className="border border-[var(--border)] rounded-[var(--radius-lg)] overflow-hidden bg-[var(--surface-900)] mb-[var(--spacing-10)]">
-      <div className="border-b border-[var(--border)] bg-[var(--surface-800)] px-[var(--spacing-4)] py-[var(--spacing-3)] flex justify-between items-center">
-        <div className="flex gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-[var(--border)] opacity-50" />
-          <div className="w-3 h-3 rounded-full bg-[var(--border)] opacity-50" />
-          <div className="w-3 h-3 rounded-full bg-[var(--border)] opacity-50" />
+    <div style={{
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-lg)',
+      overflow: 'hidden',
+      background: 'var(--surface-900)',
+      marginBottom: 'var(--spacing-10)'
+    }}>
+      <div style={{
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--surface-800)',
+        padding: 'var(--spacing-3) var(--spacing-4)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-full)', background: 'var(--border)', opacity: 0.5 }} />
+          <div style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-full)', background: 'var(--border)', opacity: 0.5 }} />
+          <div style={{ width: '12px', height: '12px', borderRadius: 'var(--radius-full)', background: 'var(--border)', opacity: 0.5 }} />
         </div>
         <ViewportControl isMobile={isMobile} setMobile={setIsMobile} />
       </div>
       
-      <div className="bg-[var(--muted)] p-[var(--spacing-8)] overflow-x-auto flex justify-center min-h-[400px] relative">
-        <div 
-          className="transition-all duration-500 ease-[var(--motion-easing-emphasized)] origin-top"
-          style={{ 
-            width: isMobile ? '375px' : '100%',
-            maxWidth: isMobile ? '375px' : '1000px',
-          }}
-        >
+      <div style={{
+        background: 'var(--muted)',
+        padding: 'var(--spacing-8)',
+        overflowX: 'auto',
+        display: 'flex',
+        justifyContent: 'center',
+        minHeight: '400px',
+        position: 'relative'
+      }}>
+        <div style={{
+          width: isMobile ? '375px' : '100%',
+          maxWidth: isMobile ? '375px' : '1000px',
+          transition: 'all var(--motion-duration-long) var(--motion-easing-emphasized)',
+          transformOrigin: 'top'
+        }}>
           {typeof children === 'function' ? children(isMobile) : children}
         </div>
       </div>
@@ -85,18 +143,28 @@ const PatternViewer = ({ children }: PatternViewerProps) => {
   );
 };
 
-// --- Patterns ---
-
 export function Patterns() {
   return (
-    <div className="space-y-[var(--section-spacing-desktop)] pb-[var(--section-spacing-desktop)] animate-fade-in-up">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-12)', paddingBottom: 'var(--spacing-12)' }}>
       
-      {/* Page Header */}
-      <div className="border-b border-[var(--border)] pb-[var(--spacing-6)]">
-        <h1 className="text-[length:var(--text-4xl)] font-bold text-[var(--foreground)] mb-[var(--spacing-3)] tracking-tight">
+      <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 'var(--spacing-6)' }}>
+        <h1 style={{
+          fontFamily: 'var(--core-font-family-base)',
+          fontSize: 'var(--fluid-h1)',
+          fontWeight: 700,
+          color: 'var(--foreground)',
+          marginBottom: 'var(--spacing-3)',
+          letterSpacing: '-0.02em'
+        }}>
           Pattern Composition
         </h1>
-        <p className="text-[var(--muted-foreground)] text-[length:var(--text-lg)] max-w-2xl leading-relaxed">
+        <p style={{
+          fontFamily: 'var(--core-font-family-base)',
+          fontSize: 'var(--fluid-body-lg)',
+          color: 'var(--muted-foreground)',
+          maxWidth: '42rem',
+          lineHeight: 1.6
+        }}>
           Documentation illustrating the correct composition of existing design system components. 
           These examples demonstrate best practices for layout and hierarchy using only strict system tokens and unmodified components.
         </p>
@@ -109,63 +177,132 @@ export function Patterns() {
           description="Demonstrates the standard vertical stacking of Input and Button components within a restricted-width Card. Uses standard spacing tokens to create visual rhythm between form elements."
         />
         <PatternViewer>
-          <div className="w-full max-w-[400px] mx-auto">
-            <Card variant="elevated" className="relative overflow-hidden border-[var(--border)] p-[var(--spacing-4)] md:p-[var(--spacing-6)]">
-              {/* Decorative top accent */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-[var(--surface-600)]" />
+          <div style={{ width: '100%', maxWidth: '400px', margin: '0 auto' }}>
+            <div style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              padding: 'var(--spacing-6)',
+              position: 'relative',
+              overflow: 'hidden',
+              boxShadow: 'var(--core-shadow-md)'
+            }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--surface-600)' }} />
               
-              <div className="text-center mb-[var(--spacing-6)] pt-[var(--spacing-4)]">
-                <div className="w-16 h-16 bg-[var(--surface-900)] rounded-full border border-[var(--border)] flex items-center justify-center mx-auto mb-[var(--spacing-4)] shadow-inner">
-                  <User size={32} className="text-[var(--foreground)] opacity-90" />
+              <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-6)', paddingTop: 'var(--spacing-4)' }}>
+                <div style={{
+                  width: '64px', height: '64px',
+                  background: 'var(--surface-900)',
+                  borderRadius: 'var(--radius-full)',
+                  border: '1px solid var(--border)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto var(--spacing-4)',
+                  boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+                }}>
+                  <User size={32} style={{ color: 'var(--foreground)', opacity: 0.9 }} />
                 </div>
-                <h3 className="text-[length:var(--text-2xl)] md:text-[length:var(--text-3xl)] font-bold text-[var(--foreground)] mb-[var(--spacing-2)] tracking-tight">
+                <h3 style={{
+                  fontFamily: 'var(--core-font-family-base)',
+                  fontSize: 'var(--fluid-h3)',
+                  fontWeight: 600,
+                  color: 'var(--foreground)',
+                  marginBottom: 'var(--spacing-2)'
+                }}>
                   Welcome back
                 </h3>
-                <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[var(--muted-foreground)] max-w-[80%] mx-auto">
+                <p style={{
+                  fontFamily: 'var(--core-font-family-base)',
+                  fontSize: 'var(--fluid-body-sm)',
+                  color: 'var(--muted-foreground)',
+                  maxWidth: '80%',
+                  margin: '0 auto'
+                }}>
                   Enter your credentials to access your account.
                 </p>
               </div>
 
-              <div className="space-y-[var(--spacing-5)]">
-                <div className="space-y-[var(--spacing-2)]">
-                  <Label htmlFor="auth-email" className="text-[var(--foreground)] font-medium">Email</Label>
-                  <Input 
-                    id="auth-email" 
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-5)' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                  <label style={{
+                    fontFamily: 'var(--core-font-family-base)',
+                    fontSize: 'var(--fluid-label)',
+                    fontWeight: 500,
+                    color: 'var(--foreground)'
+                  }}>
+                    Email
+                  </label>
+                  <input 
                     type="email" 
                     placeholder="name@example.com" 
-                    className="bg-[var(--surface-950)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus-visible:border-[var(--accent)] focus-visible:ring-[var(--accent)]/20 h-12 md:h-11 text-base md:text-sm"
+                    style={{
+                      background: 'var(--surface-950)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--foreground)',
+                      padding: 'var(--spacing-3) var(--spacing-4)',
+                      fontFamily: 'var(--core-font-family-base)',
+                      fontSize: 'var(--fluid-body-md)'
+                    }}
                   />
                 </div>
 
-                <div className="space-y-[var(--spacing-2)]">
-                  <Label htmlFor="auth-pass" className="text-[var(--foreground)] font-medium">Password</Label>
-                  <Input 
-                    id="auth-pass" 
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+                  <label style={{
+                    fontFamily: 'var(--core-font-family-base)',
+                    fontSize: 'var(--fluid-label)',
+                    fontWeight: 500,
+                    color: 'var(--foreground)'
+                  }}>
+                    Password
+                  </label>
+                  <input 
                     type="password" 
                     placeholder="••••••••" 
-                    className="bg-[var(--surface-950)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus-visible:border-[var(--accent)] focus-visible:ring-[var(--accent)]/20 h-12 md:h-11 text-base md:text-sm"
+                    style={{
+                      background: 'var(--surface-950)',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--foreground)',
+                      padding: 'var(--spacing-3) var(--spacing-4)',
+                      fontFamily: 'var(--core-font-family-base)',
+                      fontSize: 'var(--fluid-body-md)'
+                    }}
                   />
                 </div>
 
-                <div className="pt-[var(--spacing-2)] flex flex-col gap-[var(--spacing-4)]">
+                <div style={{ paddingTop: 'var(--spacing-2)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
                   <Button fullWidth size="md" variant="primary">
                     Sign In
                   </Button>
                   
-                  <div className="text-center">
-                    <a href="#" className="text-[length:var(--text-sm)] text-[var(--accent)] hover:text-[var(--accent)]/80 transition-colors font-medium">
+                  <div style={{ textAlign: 'center' }}>
+                    <a href="#" style={{
+                      fontFamily: 'var(--core-font-family-base)',
+                      fontSize: 'var(--fluid-body-sm)',
+                      color: 'var(--accent)',
+                      fontWeight: 500,
+                      textDecoration: 'none'
+                    }}>
                       Forgot password?
                     </a>
                   </div>
                 </div>
 
-                <div className="relative py-[var(--spacing-4)]">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-[var(--border)]"></span>
-                  </div>
-                  <div className="relative flex justify-center text-[length:var(--text-xs)] uppercase tracking-wider font-medium">
-                    <span className="bg-[var(--card)] px-3 text-[var(--muted-foreground)]">Or continue with</span>
-                  </div>
+                <div style={{ position: 'relative', padding: 'var(--spacing-4) 0', textAlign: 'center' }}>
+                  <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, borderTop: '1px solid var(--border)' }} />
+                  <span style={{
+                    position: 'relative',
+                    background: 'var(--card)',
+                    padding: '0 var(--spacing-3)',
+                    fontFamily: 'var(--core-font-family-base)',
+                    fontSize: 'var(--fluid-caption)',
+                    color: 'var(--muted-foreground)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontWeight: 500
+                  }}>
+                    Or continue with
+                  </span>
                 </div>
 
                 <SocialButton 
@@ -184,10 +321,16 @@ export function Patterns() {
                 </SocialButton>
               </div>
 
-              <div className="mt-[var(--spacing-8)] text-center text-[length:var(--text-sm)] text-[var(--muted-foreground)]">
-                Don't have an account? <a href="#" className="text-[var(--accent)] font-medium hover:underline ml-1">Sign up</a>
+              <div style={{
+                marginTop: 'var(--spacing-8)',
+                textAlign: 'center',
+                fontFamily: 'var(--core-font-family-base)',
+                fontSize: 'var(--fluid-body-sm)',
+                color: 'var(--muted-foreground)'
+              }}>
+                Don't have an account? <a href="#" style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none', marginLeft: '4px' }}>Sign up</a>
               </div>
-            </Card>
+            </div>
           </div>
         </PatternViewer>
       </section>
@@ -199,98 +342,97 @@ export function Patterns() {
           description="An example of establishing visual hierarchy using the Card component. Content is organized using standard flex layouts, with Badge components providing metadata without altering component internals."
         />
         <PatternViewer>
-          <div className="w-full max-w-[380px] mx-auto">
-            <Card variant="elevated" padding="none" className="overflow-hidden bg-[var(--surface-900)] border-[var(--border)] shadow-lg">
-              {/* Cover Image */}
-              <div className="h-32 bg-[var(--surface-950)] relative w-full border-b border-[var(--border)]">
-                 <div className="absolute inset-0 bg-gradient-to-tr from-[var(--surface-900)]/50 to-transparent" />
+          <div style={{ width: '100%', maxWidth: '380px', margin: '0 auto' }}>
+            <div style={{
+              background: 'var(--surface-900)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              boxShadow: 'var(--core-shadow-lg)'
+            }}>
+              <div style={{ height: '128px', background: 'var(--surface-950)', position: 'relative', borderBottom: '1px solid var(--border)' }}>
+                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top right, var(--surface-900), transparent)', opacity: 0.5 }} />
               </div>
               
-              <div className="px-[var(--spacing-6)] pb-[var(--spacing-6)] relative">
-                {/* Header Row: Avatar + Actions */}
-                <div className="flex justify-between items-end -mt-12 mb-[var(--spacing-3)]">
-                  {/* Avatar with Status */}
-                  <div className="relative group">
-                    <div className="w-24 h-24 rounded-[var(--radius-full)] border-[4px] border-[var(--surface-900)] bg-[var(--surface-800)] overflow-hidden shadow-sm">
+              <div style={{ padding: '0 var(--spacing-6) var(--spacing-6) var(--spacing-6)', position: 'relative' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-48px', marginBottom: 'var(--spacing-3)' }}>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{
+                      width: '96px', height: '96px',
+                      borderRadius: 'var(--radius-full)',
+                      border: '4px solid var(--surface-900)',
+                      background: 'var(--surface-800)',
+                      overflow: 'hidden',
+                      boxShadow: 'var(--core-shadow-sm)'
+                    }}>
                       <ImageWithFallback 
                         src="figma:asset/714473b3945ef2c290e1deafb7887474feaaf953.png" 
                         alt="Alex Morgan" 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>
-                    <div className="absolute bottom-1 right-1 w-5 h-5 bg-[var(--success)] border-[3px] border-[var(--surface-900)] rounded-[var(--radius-full)]"></div>
+                    <div style={{
+                      position: 'absolute', bottom: '4px', right: '4px',
+                      width: '20px', height: '20px',
+                      background: 'var(--success)',
+                      border: '3px solid var(--surface-900)',
+                      borderRadius: 'var(--radius-full)'
+                    }} />
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-[var(--spacing-2)] mb-1">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="h-9 w-9 p-0 rounded-[var(--radius-md)] border-[var(--border)] bg-transparent text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--surface-800)] hover:border-[var(--border)] transition-colors"
-                    >
+                  <div style={{ display: 'flex', gap: 'var(--spacing-2)', marginBottom: '4px' }}>
+                    <Button variant="outline" size="sm" style={{ padding: '0 8px' }}>
                        <MoreHorizontal size={18} />
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="h-9 px-4 rounded-[var(--radius-md)] border-[var(--border)] bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-800)] hover:border-[var(--border)] font-medium transition-colors"
-                    >
+                    <Button variant="outline" size="sm">
                       Follow
                     </Button>
                   </div>
                 </div>
 
-                {/* User Info */}
-                <div className="mb-[var(--spacing-5)]">
-                  <h3 className="text-[length:var(--text-2xl)] font-bold text-[var(--foreground)] mb-[var(--spacing-1)] tracking-tight">Alex Morgan</h3>
-                  <p className="text-[length:var(--text-base)] text-[var(--muted-foreground)]">Product Designer</p>
+                <div style={{ marginBottom: 'var(--spacing-5)' }}>
+                  <h3 style={{
+                    fontFamily: 'var(--core-font-family-base)',
+                    fontSize: 'var(--ts-h4-size)',
+                    fontWeight: 600,
+                    color: 'var(--foreground)',
+                    marginBottom: 'var(--spacing-1)'
+                  }}>
+                    Alex Morgan
+                  </h3>
+                  <p style={{
+                    fontFamily: 'var(--core-font-family-base)',
+                    fontSize: 'var(--fluid-body-md)',
+                    color: 'var(--muted-foreground)'
+                  }}>
+                    Product Designer
+                  </p>
                 </div>
 
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-[var(--spacing-6)]">
-                  <Badge 
-                    label="Design" 
-                    tone="neutral" 
-                    style="subtle" 
-                    size="md" 
-                    className="bg-[var(--surface-800)] text-[var(--muted-foreground)] border border-[var(--border)] hover:bg-[var(--surface-700)] transition-colors cursor-default" 
-                  />
-                  <Badge 
-                    label="New York" 
-                    tone="neutral" 
-                    style="subtle" 
-                    size="md" 
-                    className="bg-[var(--surface-800)] text-[var(--muted-foreground)] border border-[var(--border)] hover:bg-[var(--surface-700)] transition-colors cursor-default" 
-                  />
-                  <Badge 
-                    label="Pro" 
-                    tone="success" 
-                    style="subtle" 
-                    size="md" 
-                    className="bg-[var(--success)]/10 text-[var(--success)] border border-[var(--success)]/20" 
-                  />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-6)' }}>
+                  <Badge label="Design" tone="neutral" style="subtle" />
+                  <Badge label="New York" tone="neutral" style="subtle" />
+                  <Badge label="Pro" tone="success" style="subtle" />
                 </div>
 
-                {/* Divider */}
-                <div className="h-px bg-[var(--border)] mb-[var(--spacing-5)]" />
+                <div style={{ height: '1px', background: 'var(--border)', marginBottom: 'var(--spacing-5)' }} />
 
-                {/* Contact Details */}
-                <div className="space-y-[var(--spacing-3)]">
-                  <div className="flex items-center gap-[var(--spacing-3)] text-[length:var(--text-sm)] text-[var(--muted-foreground)] group cursor-pointer hover:text-[var(--foreground)] transition-colors">
-                    <span className="text-[var(--muted-foreground)] group-hover:text-[var(--foreground)] flex justify-center w-4 font-medium transition-colors">@</span> 
-                    <span>alex@example.com</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)', color: 'var(--muted-foreground)' }}>
+                    <span style={{ fontFamily: 'var(--core-font-family-base)', fontSize: 'var(--fluid-body-sm)', width: '16px', textAlign: 'center', fontWeight: 500 }}>@</span> 
+                    <span style={{ fontFamily: 'var(--core-font-family-base)', fontSize: 'var(--fluid-body-sm)' }}>alex@example.com</span>
                   </div>
-                  <div className="flex items-center gap-[var(--spacing-3)] text-[length:var(--text-sm)] text-[var(--muted-foreground)] group cursor-pointer hover:text-[var(--foreground)] transition-colors">
-                    <Globe size={16} className="text-[var(--muted-foreground)] group-hover:text-[var(--foreground)] transition-colors" /> 
-                    <span>wugweb.com</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)', color: 'var(--muted-foreground)' }}>
+                    <Globe size={16} /> 
+                    <span style={{ fontFamily: 'var(--core-font-family-base)', fontSize: 'var(--fluid-body-sm)' }}>wugweb.com</span>
                   </div>
-                  <div className="flex items-center gap-[var(--spacing-3)] text-[length:var(--text-sm)] text-[var(--muted-foreground)]">
-                    <Check size={16} className="text-[var(--muted-foreground)]" /> 
-                    <span>Joined Jan 2024</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)', color: 'var(--muted-foreground)' }}>
+                    <Check size={16} /> 
+                    <span style={{ fontFamily: 'var(--core-font-family-base)', fontSize: 'var(--fluid-body-sm)' }}>Joined Jan 2024</span>
                   </div>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         </PatternViewer>
       </section>
@@ -303,282 +445,67 @@ export function Patterns() {
         />
         <PatternViewer>
           {(isMobile: boolean) => (
-            <div className={cn(
-              "grid gap-[var(--spacing-4)]",
-              isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-            )}>
+            <div style={{
+              display: 'grid',
+              gap: 'var(--spacing-4)',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(200px, 1fr))'
+            }}>
               {[
                 { label: 'Revenue', value: '$24,500', trend: '+12%', up: true, icon: BarChart3 },
                 { label: 'Users', value: '1,234', trend: '+5%', up: true, icon: User },
                 { label: 'Bounce Rate', value: '42%', trend: '-2%', up: false, icon: ArrowUpRight },
                 { label: 'Active', value: '573', trend: '+8%', up: true, icon: Globe },
               ].map((item, i) => (
-                <Card 
-                  key={i} 
-                  variant="elevated" 
-                  padding="none"
-                  className="bg-[var(--surface-900)] border-[var(--border)] p-[var(--spacing-5)] flex flex-col justify-between group hover:border-[var(--surface-700)] transition-all duration-200"
-                >
-                  <div>
-                    <div className="flex justify-between items-start mb-[var(--spacing-2)]">
-                      <span className="text-[length:var(--text-sm)] text-[var(--muted-foreground)] font-medium tracking-wide">
+                <div key={i} style={{
+                  background: 'var(--surface-900)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: 'var(--spacing-5)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: 'var(--core-shadow-sm)'
+                }}>
+                  <div style={{ marginBottom: 'var(--spacing-3)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-2)' }}>
+                      <span style={{
+                        fontFamily: 'var(--core-font-family-base)',
+                        fontSize: 'var(--fluid-body-sm)',
+                        color: 'var(--muted-foreground)',
+                        fontWeight: 500,
+                        letterSpacing: '0.02em'
+                      }}>
                         {item.label}
                       </span>
-                      <item.icon size={16} className="text-[var(--muted-foreground)] opacity-50 group-hover:opacity-100 transition-opacity" />
+                      <item.icon size={16} style={{ color: 'var(--muted-foreground)' }} />
                     </div>
-                    <div className="text-[length:var(--text-2xl)] font-bold text-[var(--foreground)] tracking-tight mb-[var(--spacing-1)]">
+                    <div style={{
+                      fontFamily: 'var(--core-font-family-base)',
+                      fontSize: 'var(--fluid-h2)',
+                      fontWeight: 700,
+                      color: 'var(--foreground)',
+                      letterSpacing: '-0.02em'
+                    }}>
                       {item.value}
                     </div>
                   </div>
                   
-                  <div className={cn(
-                    "text-[length:var(--text-xs)] flex items-center gap-1.5 font-medium",
-                    item.up ? "text-[var(--success)]" : "text-[var(--destructive)]"
-                  )}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontFamily: 'var(--core-font-family-base)',
+                    fontSize: 'var(--fluid-caption)',
+                    fontWeight: 500,
+                    color: item.up ? 'var(--success)' : 'var(--destructive)'
+                  }}>
                     {item.up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                     <span>{item.trend}</span>
-                    <span className="text-[var(--muted-foreground)] font-normal">vs last month</span>
+                    <span style={{ color: 'var(--muted-foreground)', fontWeight: 400 }}>vs last month</span>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
-          )}
-        </PatternViewer>
-      </section>
-
-      {/* 4. Settings Layout */}
-      <section>
-        <PatternHeader 
-          title="Master-Detail Layout" 
-          description="A responsive settings layout that adapts from a sidebar configuration on desktop to a stacked layout on mobile. Uses distinct surface tones to separate navigation from content."
-        />
-        <PatternViewer>
-          {(isMobile) => (
-            <div className="w-full max-w-[900px] mx-auto">
-              <Card 
-                variant="elevated" 
-                padding="none" 
-                className={cn(
-                  "flex overflow-hidden border-[var(--border)] bg-[var(--surface-900)]",
-                  isMobile ? "flex-col" : "flex-row min-h-[500px]"
-                )}
-              >
-                {/* Sidebar Navigation */}
-                <div 
-                  className={cn(
-                    "bg-[var(--surface-950)] border-[var(--border)] transition-all flex flex-col",
-                    isMobile 
-                      ? "w-full border-b p-[var(--spacing-4)] gap-[var(--spacing-4)]" 
-                      : "w-64 border-r shrink-0 p-[var(--spacing-6)] gap-[var(--spacing-6)]"
-                  )}
-                >
-                  <div className="px-1">
-                    <h4 className="font-bold text-[length:var(--text-lg)] text-[var(--foreground)] tracking-tight">Settings</h4>
-                  </div>
-                  
-                  {isMobile ? (
-                    <Tabs defaultValue="profile" className="w-full">
-                      <TabsList className="w-full bg-[var(--surface-800)] h-10 p-1 rounded-[var(--radius-md)]">
-                        <TabsTrigger 
-                          value="profile" 
-                          className="flex-1 data-[state=active]:bg-[var(--surface-950)] data-[state=active]:text-[var(--foreground)] text-[var(--muted-foreground)] text-[length:var(--text-sm)]"
-                        >
-                          Profile
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="notifications" 
-                          className="flex-1 data-[state=active]:bg-[var(--surface-950)] data-[state=active]:text-[var(--foreground)] text-[var(--muted-foreground)] text-[length:var(--text-sm)]"
-                        >
-                          Notifications
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="security" 
-                          className="flex-1 data-[state=active]:bg-[var(--surface-950)] data-[state=active]:text-[var(--foreground)] text-[var(--muted-foreground)] text-[length:var(--text-sm)]"
-                        >
-                          Security
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  ) : (
-                    <nav className="flex flex-col gap-1 w-full">
-                      <Button 
-                        variant="ghost" 
-                        className={cn(
-                          "justify-start font-medium transition-colors w-full h-10 rounded-[var(--radius-md)]",
-                          "bg-[var(--surface-800)] text-[var(--foreground)]"
-                        )}
-                        leftIcon={<User size={18} />}
-                      >
-                        Profile
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="justify-start text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors w-full h-10 rounded-[var(--radius-md)] hover:bg-[var(--surface-800)]/50"
-                        leftIcon={<Bell size={18} />}
-                      >
-                        Notifications
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        className="justify-start text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors w-full h-10 rounded-[var(--radius-md)] hover:bg-[var(--surface-800)]/50"
-                        leftIcon={<Shield size={18} />}
-                      >
-                        Security
-                      </Button>
-                    </nav>
-                  )}
-                </div>
-
-                {/* Main Content */}
-                <div className={cn("flex-1 bg-[var(--surface-900)]", isMobile ? "p-[var(--spacing-4)]" : "p-[var(--spacing-10)]")}>
-                  <div className={cn("max-w-lg", isMobile ? "space-y-[var(--spacing-6)]" : "space-y-[var(--spacing-8)]")}>
-                    <div>
-                      <h3 className="text-[length:var(--text-2xl)] font-bold text-[var(--foreground)] mb-[var(--spacing-2)] tracking-tight">
-                        Profile Information
-                      </h3>
-                      <p className="text-[length:var(--text-base)] text-[var(--muted-foreground)]">
-                        Update your public profile details.
-                      </p>
-                    </div>
-                    
-                    <div className={cn(isMobile ? "space-y-[var(--spacing-5)]" : "space-y-[var(--spacing-6)]")}>
-                      <div className="space-y-[var(--spacing-3)]">
-                        <Label htmlFor="set-name" className="text-[var(--muted-foreground)]">Display Name</Label>
-                        <Input 
-                          id="set-name" 
-                          defaultValue="Alex Morgan" 
-                          className="bg-[var(--surface-950)] border-[var(--border)] h-12 text-[var(--foreground)] focus-visible:ring-[var(--accent)]/20"
-                        />
-                      </div>
-                      
-                      <div className="space-y-[var(--spacing-3)]">
-                        <Label htmlFor="set-bio" className="text-[var(--muted-foreground)]">Bio</Label>
-                        <Input 
-                          id="set-bio" 
-                          defaultValue="Product Designer @ Wugweb" 
-                          className="bg-[var(--surface-950)] border-[var(--border)] h-12 text-[var(--foreground)] focus-visible:ring-[var(--accent)]/20"
-                        />
-                      </div>
-
-                      <div className="pt-[var(--spacing-4)] flex flex-col items-stretch">
-                        <Button 
-                          variant="secondary" 
-                          size="lg"
-                          className="bg-[var(--surface-950)] text-[var(--foreground)] border border-[var(--border)] hover:bg-[var(--surface-800)] w-full md:w-auto transition-colors"
-                        >
-                          Save Changes
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          )}
-        </PatternViewer>
-      </section>
-
-      {/* 5. Billing Form */}
-      <section>
-        <PatternHeader 
-          title="Form Grid System" 
-          description="Complex data entry layout using responsive grid columns. Demonstrates proper alignment of Input and Label components using standard spacing tokens."
-        />
-        <PatternViewer>
-          {(isMobile) => (
-            isMobile ? (
-              <div className="w-full">
-                <Card variant="elevated">
-                  <div className="mb-[var(--spacing-5)] border-b border-[var(--border)] pb-[var(--spacing-4)]">
-                    <h3 className="text-[var(--foreground)]">Billing Details</h3>
-                    <p className="text-[length:var(--text-sm)] text-[var(--muted-foreground)]">Manage your billing address and payment method.</p>
-                  </div>
-
-                  <div className="flex flex-col gap-[var(--spacing-5)]">
-                    <div className="space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-fn-m">First Name</Label>
-                      <Input id="b-fn-m" placeholder="Jane" />
-                    </div>
-                    <div className="space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-ln-m">Last Name</Label>
-                      <Input id="b-ln-m" placeholder="Doe" />
-                    </div>
-                    
-                    <div className="space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-addr-m">Address</Label>
-                      <Input id="b-addr-m" placeholder="1234 Street Name" />
-                    </div>
-
-                    <div className="space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-city-m">City</Label>
-                      <Input id="b-city-m" placeholder="San Francisco" />
-                    </div>
-                    
-                    <div className="space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-state-m">State</Label>
-                      <Input id="b-state-m" placeholder="CA" />
-                    </div>
-                    <div className="space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-zip-m">Zip</Label>
-                      <Input id="b-zip-m" placeholder="94107" />
-                    </div>
-                  </div>
-
-                  <div className="mt-[var(--spacing-5)] flex flex-col gap-[var(--spacing-3)]">
-                    <Button variant="primary" size="lg" className="w-full justify-center">Update Billing</Button>
-                    <Button variant="ghost" size="lg" className="w-full justify-center text-[var(--muted-foreground)] hover:text-[var(--foreground)]">Cancel</Button>
-                  </div>
-                </Card>
-              </div>
-            ) : (
-              <div className="w-full max-w-[800px] mx-auto">
-                <Card variant="elevated">
-                  <div className="mb-[var(--spacing-5)] flex items-start justify-between border-b border-[var(--border)] pb-[var(--spacing-6)]">
-                    <div>
-                      <h3 className="text-[var(--foreground)]">Billing Details</h3>
-                      <p className="mt-[var(--spacing-1)] text-[length:var(--text-sm)] text-[var(--muted-foreground)]">Manage your billing address and payment method.</p>
-                    </div>
-                    <Badge label="Active Plan" style="outline" tone="info" />
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-[var(--spacing-5)]">
-                    <div className="col-span-6 space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-fn">First Name</Label>
-                      <Input id="b-fn" placeholder="Jane" />
-                    </div>
-                    <div className="col-span-6 space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-ln">Last Name</Label>
-                      <Input id="b-ln" placeholder="Doe" />
-                    </div>
-                    
-                    <div className="col-span-12 space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-addr">Address</Label>
-                      <Input id="b-addr" placeholder="1234 Street Name" />
-                    </div>
-
-                    <div className="col-span-6 space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-city">City</Label>
-                      <Input id="b-city" placeholder="San Francisco" />
-                    </div>
-                    
-                    <div className="col-span-4 space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-state">State / Province</Label>
-                      <Input id="b-state" placeholder="CA" />
-                    </div>
-                    
-                    <div className="col-span-2 space-y-[var(--spacing-2)]">
-                      <Label htmlFor="b-zip">Zip Code</Label>
-                      <Input id="b-zip" placeholder="94107" />
-                    </div>
-                  </div>
-
-                  <div className="mt-[var(--spacing-5)] flex justify-end gap-[var(--spacing-4)]">
-                    <Button variant="ghost">Cancel</Button>
-                    <Button variant="primary">Update Billing</Button>
-                  </div>
-                </Card>
-              </div>
-            )
           )}
         </PatternViewer>
       </section>

@@ -236,6 +236,7 @@ export function ContextualSidebar({
           { id: 'forms', label: 'Forms', icon: FormInput },
           { id: 'navbars', label: 'Navbars', icon: Menu },
           { id: 'footers', label: 'Footers', icon: Layout },
+          { id: 'figma-samples', label: 'Figma Block Samples', icon: Box, isNew: true },
         ];
 
       case 'templates':

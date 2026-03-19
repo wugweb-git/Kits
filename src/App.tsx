@@ -133,6 +133,8 @@ import { CTASectionsBlock } from './components/ds/pages/blocks/CTASectionsBlock'
 import { FormsBlock } from './components/ds/pages/blocks/FormsBlock';
 import { NavbarsBlock } from './components/ds/pages/blocks/NavbarsBlock';
 import { FootersBlock } from './components/ds/pages/blocks/FootersBlock';
+// ── Figma Block Samples ────────────────────────────────────────────────────────
+import { FigmaBlockSamples } from './components/ds/pages/FigmaBlockSamples';
 // ── System architecture ────────────────────────────────────────────────────────
 import { SystemLayersDoc } from './components/ds/pages/SystemLayersDoc';
 // ── Templates ─────────────────────────────────────────────────────────────────
@@ -399,6 +401,7 @@ export default function App() {
         if (currentSubPage === 'forms') return <FormsBlock />;
         if (currentSubPage === 'navbars') return <NavbarsBlock />;
         if (currentSubPage === 'footers') return <FootersBlock />;
+        if (currentSubPage === 'figma-samples') return <FigmaBlockSamples />;
         return <BlocksOverviewComplete />;
 
       // ── TEMPLATES ─────────────────────────────────────────────────────────
