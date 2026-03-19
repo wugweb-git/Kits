@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Zap, Palette, Layers, Code, Upload, Box, CheckCircle2, Sparkles, Shield, Gauge } from 'lucide-react';
 import { Button } from '../../wugweb/Button';
+import { siteInventory } from '../../../generated/siteInventory';
 import { Badge } from '../../wugweb/Badge';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 
@@ -99,7 +100,7 @@ export function Overview({ onNavigate }: OverviewProps) {
   ];
 
   const stats = [
-    { label: 'Components', value: '127+' },
+    { label: 'Components', value: String(siteInventory.publicComponentModuleCount) },
     { label: 'Design Tokens', value: '300+' },
     { label: 'Token Layers', value: '4' },
     { label: 'Ready to Ship', value: '100%' },
@@ -161,8 +162,7 @@ export function Overview({ onNavigate }: OverviewProps) {
             lineHeight: 1.6,
           }}
         >
-          A complete design system with 82+ production-ready components, comprehensive design tokens, 
-          and beautiful documentation. Everything you need to ship products faster.
+          {`A complete design system with ${siteInventory.publicComponentModuleCount} production-ready public components, comprehensive design tokens, and beautiful documentation. Everything you need to ship products faster.`}
         </p>
 
         {/* Badges/Shields */}

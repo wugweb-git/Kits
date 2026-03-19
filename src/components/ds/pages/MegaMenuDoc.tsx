@@ -5,6 +5,7 @@ import { Button } from '../../wugweb/Button';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { siteInventory } from '../../../generated/siteInventory';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function MegaMenuDoc() {
@@ -25,7 +26,7 @@ export function MegaMenuDoc() {
     {
       title: 'Design Tools',
       items: [
-        { title: 'Component Library', description: '127+ production-ready components', icon: Package },
+        { title: 'Component Library', description: `${siteInventory.publicComponentModuleCount} production-ready components`, icon: Package },
         { title: 'Design Tokens', description: 'CSS variables for consistent styling', icon: Zap },
         { title: 'Icon Library', description: '1000+ Lucide icons pre-integrated', icon: Globe },
       ],
@@ -54,7 +55,7 @@ const sections = [
   {
     title: "Design Tools",
     items: [
-      { title: "Component Library", description: "127+ components", icon: Package },
+      { title: "Component Library", description: "81 components", icon: Package },
       { title: "Design Tokens", description: "CSS variables", icon: Zap },
     ],
   },

@@ -2,6 +2,7 @@ import React from 'react';
 import { Layers, Box, Grid3x3, Monitor, GitBranch, Zap, MousePointer, Image, Layout } from 'lucide-react';
 import { Badge } from '../../wugweb/Badge';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
+import { siteInventory } from '../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -34,7 +35,7 @@ const layers = [
     color: 'var(--success)',
     title: 'Components',
     subtitle: 'Atomic level — smallest reusable UI',
-    desc: '127+ production-ready components. 100% token-driven. Variant-based. No hardcoded values.',
+    desc: `${siteInventory.publicComponentModuleCount} production-ready components. 100% token-driven. Variant-based. No hardcoded values.`,
     types: ['Button (primary, secondary, ghost)', 'Input (sm, md, lg)', 'Badge, Tag, Chip', 'Card, Dialog, Drawer', 'Navigation, Breadcrumb'],
     outputs: ['React components', 'Figma components', 'Storybook'],
     rule: 'Components ONLY consume semantic + component tokens. Never core. Never hex.',

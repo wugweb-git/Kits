@@ -4,6 +4,7 @@ import { Check, Copy, ExternalLink, HelpCircle, Settings, Star } from 'lucide-re
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
+import { siteInventory } from '../../../generated/siteInventory';
 import { Button } from '../../wugweb/Button';
 import { copyToClipboard } from '../../../utils/clipboard';
 
@@ -31,8 +32,7 @@ export function AccordionDoc() {
       title: 'What is Wugweb Kits?',
       content: (
         <p style={{ margin: 0, color: 'var(--muted-foreground)', fontSize: 'var(--text-sm)' }}>
-          Wugweb Kits is a comprehensive design system with 127+ production-ready components built
-          with React and Tailwind CSS, strictly using CSS variables for complete design token control.
+          {`Wugweb Kits is a comprehensive design system with ${siteInventory.publicComponentModuleCount} production-ready components built with React and Tailwind CSS, strictly using CSS variables for complete design token control.`}
         </p>
       ),
       icon: <HelpCircle size={16} />,
@@ -69,7 +69,7 @@ export function AccordionDemo() {
       items={[
         {
           title: "What is Wugweb Kits?",
-          content: <p>A 127+ component design system.</p>,
+          content: <p>A ${siteInventory.publicComponentModuleCount}-component design system.</p>,
           defaultOpen: true,
         },
         {

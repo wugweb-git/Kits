@@ -2,7 +2,7 @@
 
 > **Live:** [kits.wugweb.studio](https://kits.wugweb.studio) · **Figma:** [wugweb-kits](https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits) · **v2.1.0**
 
-Production-ready design system for Wugweb products and the broader dev community. 127+ React components, a strict 4-layer CSS token architecture, fluid responsive type, and a full token-to-code mapping system.
+Production-ready design system for Wugweb products and the broader dev community. 81 React components, a strict 4-layer CSS token architecture, fluid responsive type, and a full token-to-code mapping system.
 
 ---
 
@@ -10,12 +10,12 @@ Production-ready design system for Wugweb products and the broader dev community
 
 | Layer | What |
 |---|---|
-| **127+ Components** | Buttons, inputs, charts, overlays, navigation, layout, feedback |
+| **81 Components** | Buttons, inputs, charts, overlays, navigation, layout, feedback |
 | **4-Layer Tokens** | Core → Alias → Semantic → Component (W3C DTCG) |
 | **Fluid Type** | `clamp()`-based scale: Display → Caption, viewport-driven |
 | **Token Export** | `global.json`, `alias.json`, `semantic.json`, `component.json` |
 | **Token Mapping** | Figma scope → CSS property → Tailwind class → component |
-| **90+ Blocks** | Hero, Feature, Pricing, Testimonials, CTAs, Forms, Nav, Footer |
+| **459 Blocks** | Hero, Feature, Pricing, Testimonials, CTAs, Forms, Nav, Footer |
 | **6 Templates** | Dashboard, Landing Page, Marketing, Docs, Portfolio, E-commerce |
 | **MCP Connector** | Planned: push tokens to GitHub, trigger Style Dictionary builds |
 
@@ -98,7 +98,7 @@ npm run tokens:build
 │   │   └── pages/             # All doc pages (150+)
 │   │       ├── blocks/        # 8 block section pages
 │   │       └── templates/     # Dashboard, Landing, Stubs
-│   ├── wugweb/                # 127+ production components
+│   ├── wugweb/                # 81 public component modules
 │   │   └── index.ts           # Single export barrel
 │   ├── ui/                    # shadcn/radix primitives (base layer)
 │   ├── motion/                # ScrollReveal, animation wrappers

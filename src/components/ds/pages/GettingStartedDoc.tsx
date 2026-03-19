@@ -5,6 +5,7 @@ import { Badge } from '../../wugweb/Badge';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
+import { siteInventory } from '../../../generated/siteInventory';
 
 export function GettingStartedDoc() {
   const [copiedLink, setCopiedLink] = React.useState(false);
@@ -126,7 +127,7 @@ export default function MyFirstComponent() {
       <PageHeader
         badge="Getting Started"
         title="Introduction"
-        description="Wugweb Kits is a 127-component design system built around a single contract: all styling flows through CSS variables. Change a token, change everything. No exceptions."
+        description={`Wugweb Kits is a ${siteInventory.publicComponentModuleCount}-component design system built around a single contract: all styling flows through CSS variables. Change a token, change everything. No exceptions.`}
         actions={headerActions}
       />
 
@@ -180,7 +181,7 @@ export default function MyFirstComponent() {
         <PageGrid cols={3}>
           {[
             { icon: '🎨', count: '55', label: 'Color Tokens', desc: 'Light/dark surfaces, accent, semantic colors' },
-            { icon: '📦', count: '127+', label: 'Components', desc: 'Form controls, layout, navigation, feedback' },
+            { icon: '📦', count: String(siteInventory.publicComponentModuleCount), label: 'Components', desc: 'Form controls, layout, navigation, feedback' },
             { icon: '📐', count: '92', label: 'Button Variants', desc: 'Every state, size, and combination' },
             { icon: '✏️', count: '48', label: 'Typography Tokens', desc: 'Font size, weight, line height scale' },
             { icon: '📏', count: '11', label: 'Spacing Tokens', desc: '4pt grid from 4px to 48px' },

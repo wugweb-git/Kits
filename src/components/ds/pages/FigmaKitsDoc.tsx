@@ -3,19 +3,20 @@ import { ExternalLink, Check, Layers, RefreshCw, Zap, GitBranch, ArrowRight } fr
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { Button } from '../../wugweb/Button';
 import { Badge } from '../../wugweb/Badge';
+import { siteInventory } from '../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
 const kits = [
   {
     name: 'Component Kit',
-    desc: '127+ Figma components, variants, interactive states, and auto-layout — all connected to the token system.',
+    desc: `${siteInventory.publicComponentModuleCount} Figma components, variants, interactive states, and auto-layout — all connected to the token system.`,
     version: 'v2.1.0',
     pages: ['Components', 'Variants', 'States', 'Dark mode'],
     icon: Layers,
     color: 'var(--accent)',
     badge: 'Core',
-    features: ['127+ components', 'All interactive states', 'Auto-layout throughout', 'Dark theme included'],
+    features: [`${siteInventory.publicComponentModuleCount} components`, 'All interactive states', 'Auto-layout throughout', 'Dark theme included'],
   },
   {
     name: 'Tokens Kit',
@@ -29,13 +30,13 @@ const kits = [
   },
   {
     name: 'Blocks Kit',
-    desc: '90+ assembled block patterns — hero sections, navbars, forms, pricing tables, footers, and more.',
+    desc: `${siteInventory.blockTotal} assembled block patterns — hero sections, navbars, forms, pricing tables, footers, and more.`,
     version: 'v1.4.0',
     pages: ['Marketing UI', 'Application UI', 'E-commerce UI'],
     icon: RefreshCw,
     color: '#10B981',
     badge: 'Blocks',
-    features: ['90+ block patterns', 'Marketing + App UI', 'Responsive frames', 'Token-connected'],
+    features: [`${siteInventory.blockTotal} block patterns`, 'Marketing + App UI', 'Responsive frames', 'Token-connected'],
   },
   {
     name: 'Icons Kit',
