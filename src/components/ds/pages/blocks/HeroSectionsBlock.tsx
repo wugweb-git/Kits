@@ -2,6 +2,7 @@ import React from 'react';
 import { BlockPageShell } from './BlockPageShell';
 import { Button } from '../../../wugweb/Button';
 import { Badge } from '../../../wugweb/Badge';
+import { siteInventory } from '../../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -35,14 +36,14 @@ const SplitHero = () => (
         Design infrastructure for modern teams
       </h1>
       <p style={{ margin: '0 0 var(--spacing-8)', fontSize: 'var(--ts-body-md-size)', color: 'var(--muted-foreground)', lineHeight: 'var(--ts-body-md-line-height)', fontFamily: F, maxWidth: 400 }}>
-        127+ components, 4-layer token architecture, and a Figma-to-code workflow that actually scales.
+        {`${siteInventory.publicComponentModuleCount} components, 4-layer token architecture, and a Figma-to-code workflow that actually scales.`}
       </p>
       <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
         <Button variant="default">Start building</Button>
         <Button variant="ghost">Read the docs</Button>
       </div>
       <div style={{ display: 'flex', gap: 'var(--spacing-6)', marginTop: 'var(--spacing-10)' }}>
-        {[['127+', 'Components'], ['4-layer', 'Token system'], ['MIT', 'License']].map(([val, lbl]) => (
+        {[[String(siteInventory.publicComponentModuleCount), 'Components'], ['4-layer', 'Token system'], ['MIT', 'License']].map(([val, lbl]) => (
           <div key={lbl}>
             <p style={{ margin: 0, fontSize: 'var(--ts-h4-size)', fontWeight: 'var(--font-weight-bold)', color: 'var(--foreground)', fontFamily: F }}>{val}</p>
             <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', fontFamily: F }}>{lbl}</p>

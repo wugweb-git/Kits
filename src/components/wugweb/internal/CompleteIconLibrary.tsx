@@ -1,8 +1,8 @@
 import React from 'react';
-import svgPaths2sy3 from '../../imports/svg-2sy3hewp8j';
-import svgPaths1zih from '../../imports/svg-1zih1s7a43';
-import svgPaths9z8e from '../../imports/svg-9z8efy4yir';
-import svgPathsa85v from '../../imports/svg-a85vuqadrq';
+import svgPaths2sy3 from '../../../imports/svg-2sy3hewp8j';
+import svgPaths1zih from '../../../imports/svg-1zih1s7a43';
+import svgPaths9z8e from '../../../imports/svg-9z8efy4yir';
+import svgPathsa85v from '../../../imports/svg-a85vuqadrq';
 
 // Complete Icon Library extracted from Figma component set
 // All icons follow the 8-point grid system and use design tokens

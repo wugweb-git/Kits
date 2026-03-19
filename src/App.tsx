@@ -74,7 +74,7 @@ import { useBreakpoint } from './hooks/useMediaQuery';
 import { Toaster } from 'sonner@2.0.3';
 import './styles/animations.css';
 import KitsLogoUrl from './imports/Kits_Logo.svg';
-import { systemMetrics } from './lib/system-metrics';
+import { siteInventory } from './generated/siteInventory';
 
 // ── Newly wired doc pages ─────────────────────────────────────────────────────
 // Form Controls
@@ -166,7 +166,7 @@ export default function App() {
       descMeta.name = 'description';
       document.head.appendChild(descMeta);
     }
-    descMeta.content = systemMetrics.description;
+    descMeta.content = `${siteInventory.marketingCopy.componentPhrase} with a 4-layer CSS token system. Colors, typography, spacing, motion — design-to-code ready.`;
 
     // Replace favicon with SVG logo
     const existing = document.querySelectorAll("link[rel*='icon']");

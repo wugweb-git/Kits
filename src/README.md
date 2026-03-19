@@ -2,7 +2,7 @@
 
 > **Live:** [kits.wugweb.studio](https://kits.wugweb.studio) · **Figma:** [wugweb-kits](https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits) · **v2.1.0**
 
-Production-ready design system for Wugweb products and the broader dev community. The current repo snapshot includes 84 system components, 9 block pages, 3 templates, and a strict 4-layer token architecture.
+Production-ready design system for Wugweb products and the broader dev community. 81 React components, a strict 4-layer CSS token architecture, fluid responsive type, and a full token-to-code mapping system.
 
 ---
 
@@ -10,13 +10,13 @@ Production-ready design system for Wugweb products and the broader dev community
 
 | Layer | What |
 |---|---|
-| **84 System Components** | Buttons, inputs, charts, overlays, navigation, layout, feedback |
+| **81 Components** | Buttons, inputs, charts, overlays, navigation, layout, feedback |
 | **4-Layer Tokens** | Core → Alias → Semantic → Component (W3C DTCG) |
 | **Fluid Type** | `clamp()`-based scale: Display → Caption, viewport-driven |
 | **Token Export** | `global.json`, `alias.json`, `semantic.json`, `component.json` |
 | **Token Mapping** | Figma scope → CSS property → Tailwind class → component |
-| **9 Block Pages** | Hero, Feature, Pricing, Testimonials, CTAs, Forms, Nav, Footer, shell |
-| **3 Templates** | Dashboard, Landing Page, Template stub |
+| **459 Blocks** | Hero, Feature, Pricing, Testimonials, CTAs, Forms, Nav, Footer |
+| **6 Templates** | Dashboard, Landing Page, Marketing, Docs, Portfolio, E-commerce |
 | **MCP Connector** | Planned: push tokens to GitHub, trigger Style Dictionary builds |
 
 ---
@@ -47,6 +47,12 @@ LAYER 3 — COMPONENT (component.json)
 - ✅ Font face: **Inter Tight** only (mono for code blocks)
 - ❌ Never use Tailwind `text-2xl` or `font-bold` classes — use token vars
 - ❌ Never skip the semantic layer (core → component directly)
+
+### Raw visual value enforcement
+- `npm run check:raw-visual-values` enforces no raw `#hex` or `px` values in `src/components/wugweb/`, except an explicit allowlist for legacy files still being migrated.
+- The allowlist is intentionally temporary and should shrink over time; production-facing components being actively edited should be removed from it immediately.
+- DS docs are audited manually in focused cleanup passes; raw values may remain when they are the subject of the documentation itself, token reference content, chart data, or device/spec copy rather than reusable UI primitives.
+- When a raw value is still required, document the reason in the checker allowlist and keep the value out of reusable component styling whenever possible.
 
 ---
 
@@ -89,7 +95,7 @@ npm run metrics:generate
 │   │   └── pages/             # 127 tracked doc pages
 │   │       ├── blocks/        # 8 block section pages
 │   │       └── templates/     # Dashboard, Landing, Stubs
-│   ├── wugweb/                # 84 tracked system component files
+│   ├── wugweb/                # 81 public component modules
 │   │   └── index.ts           # Single export barrel
 │   ├── ui/                    # shadcn/radix primitives (base layer)
 │   ├── motion/                # ScrollReveal, animation wrappers

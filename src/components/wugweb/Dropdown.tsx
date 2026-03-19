@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDownIcon } from './CompleteIconLibrary';
+import { ChevronDownIcon } from './internal/CompleteIconLibrary';
 
 export interface DropdownOption {
   value: string;

@@ -6,6 +6,7 @@ import { Stepper } from '../../wugweb/Stepper';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
+import { siteInventory } from '../../../generated/siteInventory';
 
 const installSteps = [
   { id: 'copy', title: 'Copy components', description: 'Add wugweb components to your project' },
@@ -147,7 +148,7 @@ body {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
             <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
               {[
-                { icon: FolderOpen, label: '/components/wugweb/', desc: '127+ component files' },
+                { icon: FolderOpen, label: '/components/wugweb/', desc: `${siteInventory.publicComponentModuleCount} public component modules` },
                 { icon: Package, label: 'peer dependencies', desc: 'lucide-react, recharts' },
               ].map((item, i) => (
                 <div key={i} style={{ flex: '1 1 200px', background: 'var(--muted)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
