@@ -48,6 +48,12 @@ LAYER 3 — COMPONENT (component.json)
 - ❌ Never use Tailwind `text-2xl` or `font-bold` classes — use token vars
 - ❌ Never skip the semantic layer (core → component directly)
 
+### Raw visual value enforcement
+- `npm run check:raw-visual-values` enforces no raw `#hex` or `px` values in `src/components/wugweb/`, except an explicit allowlist for legacy files still being migrated.
+- The allowlist is intentionally temporary and should shrink over time; production-facing components being actively edited should be removed from it immediately.
+- DS docs are audited manually in focused cleanup passes; raw values may remain when they are the subject of the documentation itself, token reference content, chart data, or device/spec copy rather than reusable UI primitives.
+- When a raw value is still required, document the reason in the checker allowlist and keep the value out of reusable component styling whenever possible.
+
 ---
 
 ## Getting Started

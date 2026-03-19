@@ -40,6 +40,7 @@ export function ChatBubble({
   style = {},
 }: ChatBubbleProps) {
   const isSent = variant === 'sent';
+  const iconSize = 16;
 
   return (
     <div
@@ -58,8 +59,8 @@ export function ChatBubble({
         <div
           style={{
             flexShrink: 0,
-            width: '32px',
-            height: '32px',
+            width: 'var(--chat-bubble-avatar-size)',
+            height: 'var(--chat-bubble-avatar-size)',
             borderRadius: '50%',
             background: avatar ? `url(${avatar}) center/cover` : 'var(--accent)',
             display: 'flex',
@@ -70,7 +71,7 @@ export function ChatBubble({
             fontWeight: 'var(--font-weight-semibold)',
           }}
         >
-          {!avatar && (Icon ? <Icon size={16} /> : sender?.[0]?.toUpperCase())}
+          {!avatar && (Icon ? <Icon size={iconSize} /> : sender?.[0]?.toUpperCase())}
         </div>
       )}
 
@@ -80,7 +81,7 @@ export function ChatBubble({
           display: 'flex',
           flexDirection: 'column',
           alignItems: isSent ? 'flex-end' : 'flex-start',
-          maxWidth: '70%',
+          maxWidth: 'var(--chat-bubble-max-width)',
         }}
       >
         {/* Sender Name */}
@@ -91,7 +92,7 @@ export function ChatBubble({
               fontWeight: 'var(--font-weight-medium)',
               color: 'var(--muted-foreground)',
               marginBottom: 'var(--spacing-1)',
-              paddingLeft: 'var(--spacing-3)',
+              paddingLeft: 'var(--chat-bubble-offset-inline)',
             }}
           >
             {sender}
@@ -103,16 +104,16 @@ export function ChatBubble({
           style={{
             fontSize: 'var(--text-base)',
             fontWeight: 'var(--font-weight-regular)',
-            padding: 'var(--spacing-3) var(--spacing-4)',
+            padding: 'var(--chat-bubble-padding-block) var(--chat-bubble-padding-inline)',
             background: isSent ? 'var(--accent)' : 'var(--muted)',
             color: isSent ? 'var(--accent-foreground)' : 'var(--foreground)',
-            borderRadius: 'var(--radius-lg)',
+            borderRadius: 'var(--chat-bubble-radius)',
             ...(isSent
               ? {
-                  borderBottomRightRadius: 'var(--radius-sm)',
+                  borderBottomRightRadius: 'var(--chat-bubble-tail-radius)',
                 }
               : {
-                  borderBottomLeftRadius: 'var(--radius-sm)',
+                  borderBottomLeftRadius: 'var(--chat-bubble-tail-radius)',
                 }),
             wordWrap: 'break-word',
             overflowWrap: 'break-word',
@@ -128,8 +129,8 @@ export function ChatBubble({
               fontSize: 'var(--text-xs)',
               color: 'var(--muted-foreground)',
               marginTop: 'var(--spacing-1)',
-              paddingLeft: isSent ? 0 : 'var(--spacing-3)',
-              paddingRight: isSent ? 'var(--spacing-3)' : 0,
+              paddingLeft: isSent ? '0' : 'var(--chat-bubble-offset-inline)',
+              paddingRight: isSent ? 'var(--chat-bubble-offset-inline)' : '0',
             }}
           >
             {timestamp}

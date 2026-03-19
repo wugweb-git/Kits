@@ -52,20 +52,20 @@ export function Form({
   return (
     <form
       onSubmit={onSubmit}
-      className={`flex flex-col gap-[var(--spacing-3)] p-[var(--spacing-5)] rounded-[var(--radius-lg)] ${className}`}
+      className={`flex flex-col gap-[var(--form-gap)] p-[var(--form-padding)] rounded-[var(--form-radius)] ${className}`}
       style={{
         backgroundColor: getBackgroundColor(),
       }}
     >
       {(title || description) && (
-        <div className="flex flex-col gap-[var(--spacing-1)]">
+        <div className="flex flex-col gap-[var(--form-header-gap)]">
           {title && (
             <h2
               style={{
-                fontSize: 'var(--text-4xl)',
-                fontWeight: 'var(--font-weight-bold)',
+                fontSize: 'var(--form-title-font-size)',
+                fontWeight: 'var(--form-title-font-weight)',
                 color: getTitleColor(),
-                lineHeight: '1.2',
+                lineHeight: 'var(--form-title-line-height)',
               }}
             >
               {title}
@@ -74,8 +74,8 @@ export function Form({
           {description && (
             <p
               style={{
-                fontSize: 'var(--text-lg)',
-                fontWeight: 'var(--font-weight-regular)',
+                fontSize: 'var(--form-description-font-size)',
+                fontWeight: 'var(--form-description-font-weight)',
                 color: getTitleColor(),
               }}
             >
@@ -86,7 +86,7 @@ export function Form({
       )}
 
       <div
-        className={`flex gap-[var(--spacing-2)] ${
+        className={`flex gap-[var(--form-fields-gap)] ${
           layout === 'vertical'
             ? 'flex-col'
             : layout === 'horizontal'
@@ -139,7 +139,7 @@ export function FormField({
   className = '',
 }: FormFieldProps) {
   return (
-    <div className={`flex flex-col gap-[6px] flex-1 ${className}`}>
+    <div className={`flex flex-col gap-[var(--form-field-gap)] flex-1 ${className}`}>
       <label
         htmlFor={name}
         style={{
@@ -251,7 +251,7 @@ export function FormSubmitButton({
         return {
           backgroundColor: 'transparent',
           color: 'var(--foreground)',
-          border: '1px solid var(--border)',
+          border: 'var(--border-default)',
         };
     }
   };
@@ -260,13 +260,13 @@ export function FormSubmitButton({
     <button
       type="submit"
       disabled={disabled || loading}
-      className={`px-[var(--spacing-3)] py-[var(--spacing-2)] rounded-[var(--radius-md)] transition-all ${className}`}
+      className={`px-[var(--form-submit-padding-x)] py-[var(--form-submit-padding-y)] rounded-[var(--form-submit-radius)] transition-all ${className}`}
       style={{
         ...getVariantStyles(),
-        fontSize: 'var(--text-base)',
-        fontWeight: 'var(--font-weight-medium)',
+        fontSize: 'var(--form-submit-font-size)',
+        fontWeight: 'var(--form-submit-font-weight)',
         cursor: disabled || loading ? 'not-allowed' : 'pointer',
-        opacity: disabled || loading ? '0.6' : '1',
+        opacity: disabled || loading ? 'var(--form-submit-disabled-opacity)' : 'var(--opacity-visible)',
         transitionDuration: 'var(--motion-duration-fast)',
         transitionTimingFunction: 'var(--motion-easing-standard)',
       }}
