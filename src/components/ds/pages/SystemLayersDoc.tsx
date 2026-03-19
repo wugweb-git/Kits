@@ -2,6 +2,7 @@ import React from 'react';
 import { Layers, Box, Grid3x3, Monitor, GitBranch, Zap, MousePointer, Image, Layout } from 'lucide-react';
 import { Badge } from '../../wugweb/Badge';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
+import { siteInventory } from '../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -9,7 +10,7 @@ const layers = [
   {
     number: '01',
     icon: Layers,
-    color: '#FFBE1A',
+    color: 'var(--accent)',
     title: 'Tokens',
     subtitle: 'Foundation layer',
     desc: 'Raw values. Enable consistency across all platforms. The only source of truth.',
@@ -20,7 +21,7 @@ const layers = [
   {
     number: '02',
     icon: Box,
-    color: '#3B82F6',
+    color: 'var(--info)',
     title: 'Styles',
     subtitle: 'Figma / design layer',
     desc: 'Map tokens → usable styles in Figma. This is where Figma becomes usable. Not where logic lives.',
@@ -31,10 +32,10 @@ const layers = [
   {
     number: '03',
     icon: Box,
-    color: '#10B981',
+    color: 'var(--success)',
     title: 'Components',
     subtitle: 'Atomic level — smallest reusable UI',
-    desc: '127+ production-ready components. 100% token-driven. Variant-based. No hardcoded values.',
+    desc: `${siteInventory.publicComponentModuleCount} production-ready components. 100% token-driven. Variant-based. No hardcoded values.`,
     types: ['Button (primary, secondary, ghost)', 'Input (sm, md, lg)', 'Badge, Tag, Chip', 'Card, Dialog, Drawer', 'Navigation, Breadcrumb'],
     outputs: ['React components', 'Figma components', 'Storybook'],
     rule: 'Components ONLY consume semantic + component tokens. Never core. Never hex.',
@@ -42,7 +43,7 @@ const layers = [
   {
     number: '04',
     icon: Grid3x3,
-    color: '#8B5CF6',
+    color: 'var(--chart-4)',
     title: 'Blocks',
     subtitle: 'Composition layer — real product UI',
     desc: 'Reusable UI patterns made of components. This is where most systems are weak.',
@@ -53,7 +54,7 @@ const layers = [
   {
     number: '05',
     icon: Monitor,
-    color: '#EC4899',
+    color: 'var(--chart-5)',
     title: 'Screens',
     subtitle: 'Page layer — actual product views',
     desc: 'Actual product views assembled from blocks. Screens should NOT invent UI — only assemble blocks.',
@@ -64,7 +65,7 @@ const layers = [
   {
     number: '06',
     icon: GitBranch,
-    color: '#F59E0B',
+    color: 'var(--warning)',
     title: 'Flows',
     subtitle: 'Behavior layer — user journeys',
     desc: 'Where product thinking lives. Sequences of screens with state changes, transitions, and edge cases.',
@@ -77,7 +78,7 @@ const layers = [
 const crossLayers = [
   {
     icon: Zap,
-    color: '#FFBE1A',
+    color: 'var(--accent)',
     title: 'Motion System',
     desc: 'Cross-layer animation and transition tokens. Moods translate to motion presets, not raw tokens.',
     examples: [
@@ -89,7 +90,7 @@ const crossLayers = [
   },
   {
     icon: MousePointer,
-    color: '#3B82F6',
+    color: 'var(--info)',
     title: 'Interaction System',
     desc: 'Behavior patterns, NOT tokens. Desktop: hover, click, focus. Mobile: tap, swipe, drag.',
     examples: [
@@ -101,7 +102,7 @@ const crossLayers = [
   },
   {
     icon: Image,
-    color: '#10B981',
+    color: 'var(--success)',
     title: 'Icon System',
     desc: '16 / 20 / 24px only. Consistent stroke weight. Tokenized color via --foreground or --accent.',
     examples: [
@@ -113,7 +114,7 @@ const crossLayers = [
   },
   {
     icon: Layout,
-    color: '#8B5CF6',
+    color: 'var(--chart-4)',
     title: 'Layout System',
     desc: '12-column grid, 4pt spacing scale, responsive breakpoints. Some in tokens, some in code.',
     examples: [
@@ -150,7 +151,7 @@ export function SystemLayersDoc() {
           <div style={{ overflowX: 'auto' }}>
             <div style={{ display: 'flex', gap: 'var(--spacing-2)', alignItems: 'stretch', minWidth: 560, padding: 'var(--spacing-4) 0' }}>
               {['Tokens', 'Styles', 'Components', 'Blocks', 'Screens', 'Flows', 'Product'].map((layer, i) => {
-                const colors = ['#FFBE1A', '#3B82F6', '#10B981', '#8B5CF6', '#EC4899', '#F59E0B', '#EF4444'];
+                const colors = ['var(--accent)', 'var(--info)', 'var(--success)', 'var(--layer-color-blocks)', 'var(--layer-color-screens)', 'var(--warning)', 'var(--destructive)'];
                 return (
                   <React.Fragment key={layer}>
                     <div style={{ flex: 1, minWidth: 80, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-2)' }}>

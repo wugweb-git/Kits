@@ -61,6 +61,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "check:imports": "node scripts/check-version-suffixed-imports.mjs"
+    "check:raw-visual-values": "node scripts/check-raw-visual-values.mjs"
   }
 }

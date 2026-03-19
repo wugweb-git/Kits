@@ -73,36 +73,36 @@ const buttonVariants = cva(
         // Locked sizes: Fixed height, fixed padding, fixed radius
         // Typography is decoupled and handled by the textStyles object below via inline styles
         xl: [
-          'h-[70px]',
-          'min-h-[70px]',
-          'max-h-[70px]',
-          'px-[20px]',
-          'gap-[8px]',
-          'rounded-[12px]',
+          'h-[var(--btn-height-2xl)]',
+          'min-h-[var(--btn-height-2xl)]',
+          'max-h-[var(--btn-height-2xl)]',
+          'px-[var(--btn-padding-x-2xl)]',
+          'gap-[var(--btn-gap)]',
+          'rounded-[var(--btn-radius-lg)]',
         ],
         lg: [
-          'h-[56px]',
-          'min-h-[56px]',
-          'max-h-[56px]',
-          'px-[16px]',
-          'gap-[8px]',
-          'rounded-[10px]',
+          'h-[var(--btn-height-xl)]',
+          'min-h-[var(--btn-height-xl)]',
+          'max-h-[var(--btn-height-xl)]',
+          'px-[var(--btn-padding-x-xl)]',
+          'gap-[var(--btn-gap)]',
+          'rounded-[var(--btn-radius-md)]',
         ],
         md: [
-          'h-[48px]',
-          'min-h-[48px]',
-          'max-h-[48px]',
-          'px-[16px]',
-          'gap-[8px]',
-          'rounded-[8px]',
+          'h-[var(--btn-height-lg)]',
+          'min-h-[var(--btn-height-lg)]',
+          'max-h-[var(--btn-height-lg)]',
+          'px-[var(--btn-padding-x-lg)]',
+          'gap-[var(--btn-gap)]',
+          'rounded-[var(--btn-radius)]',
         ],
         sm: [
-          'h-[36px]',
-          'min-h-[36px]',
-          'max-h-[36px]',
-          'px-[12px]',
-          'gap-[6px]',
-          'rounded-[6px]',
+          'h-[var(--btn-height-sm)]',
+          'min-h-[var(--btn-height-sm)]',
+          'max-h-[var(--btn-height-sm)]',
+          'px-[var(--btn-padding-x-sm)]',
+          'gap-[var(--btn-gap-sm)]',
+          'rounded-[var(--btn-radius-sm)]',
         ],
       },
       // Explicit State Variant
@@ -170,10 +170,10 @@ const iconSizes = {
 // Independent text styles for each size variant
 // We use inline styles here to force the text size change and bypass any CSS specificity issues or conflicts
 const textStyles = {
-  xl: { fontSize: 'var(--text-xl)', lineHeight: '30px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
-  lg: { fontSize: 'var(--text-lg)', lineHeight: '28px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
-  md: { fontSize: 'var(--text-base)', lineHeight: '24px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
-  sm: { fontSize: 'var(--text-sm)', lineHeight: '20px', fontWeight: 'var(--font-weight-semibold)', fontFamily: 'var(--core-font-family-base)' },
+  xl: { fontSize: 'var(--btn-font-size-xl)', lineHeight: 'var(--btn-line-height-xl)', fontWeight: 'var(--btn-font-weight)', fontFamily: 'var(--core-font-family-base)' },
+  lg: { fontSize: 'var(--btn-font-size-lg)', lineHeight: 'var(--btn-line-height-lg)', fontWeight: 'var(--btn-font-weight)', fontFamily: 'var(--core-font-family-base)' },
+  md: { fontSize: 'var(--btn-font-size-md)', lineHeight: 'var(--btn-line-height-md)', fontWeight: 'var(--btn-font-weight)', fontFamily: 'var(--core-font-family-base)' },
+  sm: { fontSize: 'var(--btn-font-size-sm)', lineHeight: 'var(--btn-line-height-sm)', fontWeight: 'var(--btn-font-weight)', fontFamily: 'var(--core-font-family-base)' },
 };
 
 export interface ButtonProps

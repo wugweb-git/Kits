@@ -1,5 +1,5 @@
 import React from 'react';
-import svgPaths from '../../imports/svg-2sy3hewp8j';
+import svgPaths from '../../../imports/svg-2sy3hewp8j';
 
 // Icon components exported from Figma component set
 // All icons are 16x16 or 32x32, scalable via props

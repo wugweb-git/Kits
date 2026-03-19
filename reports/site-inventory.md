@@ -1,0 +1,98 @@
+# Site inventory
+
+- Public component modules: 81
+- Public exported symbols: 109
+- Block categories: 78
+- Total blocks: 459
+- Templates: 6
+
+## Public modules
+- Accordion
+- Alert
+- AlertDialog
+- AreaChart
+- Avatar
+- Badge
+- Banner
+- BarChart
+- BottomNavigation
+- BottomSheet
+- Breadcrumb
+- Button
+- ButtonGroup
+- CTABanner
+- Calendar
+- Card
+- Chart
+- ChatBubble
+- Checkbox
+- Chip
+- Clipboard
+- Collapsible
+- Combobox
+- DataTable
+- DatePicker
+- DeviceMockup
+- Dialog
+- Divider
+- Drawer
+- Dropdown
+- EmbedBadge
+- EmptyState
+- FileInput
+- FooterLinks
+- Form
+- Grid
+- Header
+- Indicator
+- Input
+- InputGroup
+- Jumbotron
+- Kbd
+- Label
+- LineChart
+- ListGroup
+- Logo
+- MegaMenu
+- MenuItem
+- NativeSelect
+- NavigationMenu
+- NumberInput
+- Pagination
+- PhoneInput
+- PieChart
+- Popover
+- Progress
+- RadarChart
+- RadialChart
+- RadioGroup
+- Rating
+- SearchInput
+- Select
+- SideMenu
+- Skeleton
+- Slider
+- SocialButton
+- SpeedDial
+- Spinner
+- Stepper
+- Switch
+- Table
+- Tabs
+- Tag
+- TeamCard
+- Textarea
+- TimePicker
+- Timeline
+- Toaster
+- Tooltip
+- TopicTile
+- WYSIWYG
+
+## Private top-level modules
+- None
+
+## Internal modules
+- CompleteIconLibrary
+- IconLibrary
+- Navbar

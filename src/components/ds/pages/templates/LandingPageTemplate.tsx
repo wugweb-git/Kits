@@ -2,6 +2,7 @@ import React from 'react';
 import { Check, Star, Zap, Shield, Layers, Code, ArrowRight, Menu } from 'lucide-react';
 import { PageWrapper, PageHeader } from '../../PageWrapper';
 import { Button } from '../../../wugweb/Button';
+import { siteInventory } from '../../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -15,7 +16,7 @@ function LandingPreview() {
 
   const plans = [
     { name: 'Starter', price: 'Free', cta: 'Get started', desc: 'For individuals', featured: false, features: ['5 components', '1 project', 'Community'] },
-    { name: 'Pro', price: '$29/mo', cta: 'Start trial', desc: 'For teams', featured: true, features: ['127+ components', 'Unlimited', 'Priority support'] },
+    { name: 'Pro', price: '$29/mo', cta: 'Start trial', desc: 'For teams', featured: true, features: [`${siteInventory.publicComponentModuleCount} components`, 'Unlimited', 'Priority support'] },
     { name: 'Enterprise', price: 'Custom', cta: 'Contact us', desc: 'For orgs', featured: false, features: ['Everything', 'SLA', 'Dedicated'] },
   ];
 
@@ -56,14 +57,14 @@ function LandingPreview() {
           Design system infrastructure that ships
         </h1>
         <p style={{ margin: '0 auto var(--spacing-8)', maxWidth: 480, fontSize: 'var(--ts-body-lg-size)', color: 'var(--muted-foreground)', lineHeight: 'var(--ts-body-lg-line-height)', fontFamily: F }}>
-          127+ production-ready components. 4-layer token architecture. Figma-to-code sync that actually works.
+          {`${siteInventory.publicComponentModuleCount} production-ready components. 4-layer token architecture. Figma-to-code sync that actually works.`}
         </p>
         <div style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'var(--spacing-10)' }}>
           <Button variant="default" size="lg">Get started free</Button>
           <Button variant="outline" size="lg">View components →</Button>
         </div>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--spacing-8)', flexWrap: 'wrap' }}>
-          {[['127+', 'Components'], ['4-layer', 'Token system'], ['MIT', 'License'], ['100%', 'CSS variables']].map(([v, l]) => (
+          {[[String(siteInventory.publicComponentModuleCount), 'Components'], ['4-layer', 'Token system'], ['MIT', 'License'], ['100%', 'CSS variables']].map(([v, l]) => (
             <div key={l} style={{ textAlign: 'center' }}>
               <p style={{ margin: 0, fontSize: 'var(--ts-h3-size)', fontWeight: 'var(--font-weight-bold)', color: 'var(--accent)', fontFamily: F }}>{v}</p>
               <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--muted-foreground)', fontFamily: F }}>{l}</p>

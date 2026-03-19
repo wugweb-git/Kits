@@ -3,6 +3,7 @@ import { Copy, Check, Download, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { Button } from '../../wugweb/Button';
 import { Badge } from '../../wugweb/Badge';
+import { siteInventory } from '../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';
 
@@ -21,9 +22,9 @@ function CopyButton({ text, label = 'Copy' }: { text: string; label?: string }) 
 
 const messagingCopy = [
   { label: 'Tagline', text: 'Design infrastructure for modern teams.' },
-  { label: 'One-liner', text: 'Wugweb Kits is a production-ready design system: 127+ components, 4-layer CSS token architecture, and Figma-to-code sync built for teams who ship.' },
-  { label: 'Elevator pitch', text: 'Most design systems give you components. Wugweb Kits gives you infrastructure. A 4-layer token system (Global → Alias → Semantic → Component), 127+ production-ready React components, Tokens Studio + GitHub sync, and a Figma kit that stays in sync with your code. One file change rebrands your entire product.' },
-  { label: 'Twitter bio', text: 'Production-ready design system. 127+ components · 4-layer tokens · Figma sync. MIT.' },
+  { label: 'One-liner', text: `Wugweb Kits is a production-ready design system: ${siteInventory.publicComponentModuleCount} components, 4-layer CSS token architecture, and Figma-to-code sync built for teams who ship.` },
+  { label: 'Elevator pitch', text: `Most design systems give you components. Wugweb Kits gives you infrastructure. A 4-layer token system (Global → Alias → Semantic → Component), ${siteInventory.publicComponentModuleCount} production-ready React components, Tokens Studio + GitHub sync, and a Figma kit that stays in sync with your code. One file change rebrands your entire product.` },
+  { label: 'Twitter bio', text: `Production-ready design system. ${siteInventory.publicComponentModuleCount} components · 4-layer tokens · Figma sync. MIT.` },
 ];
 
 const pressQuotes = [
@@ -37,7 +38,7 @@ const socialTemplates = [
     platform: 'Twitter / X',
     template: `🚀 Wugweb Kits v2 is here.
 
-127+ components. 4-layer token system. Figma-to-code sync.
+${siteInventory.publicComponentModuleCount} components. 4-layer token system. Figma-to-code sync.
 
 The design system that ships with you.
 
@@ -49,7 +50,7 @@ MIT licensed → kits.wugweb.io`,
 
 What makes it different: a 4-layer token architecture (Global → Alias → Semantic → Component) that lets you swap entire brands by changing one file.
 
-127+ production-ready React components, all driven by CSS variables. No hardcoded values anywhere in the codebase.
+${siteInventory.publicComponentModuleCount} production-ready React components, all driven by CSS variables. No hardcoded values anywhere in the codebase.
 
 MIT licensed. Free to start.
 
@@ -57,7 +58,7 @@ MIT licensed. Free to start.
   },
   {
     platform: 'Product Hunt tagline',
-    template: `127+ components. 4-layer tokens. Swap brands in one file.`,
+    template: `${siteInventory.publicComponentModuleCount} components. 4-layer tokens. Swap brands in one file.`,
   },
 ];
 
