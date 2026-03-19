@@ -60,8 +60,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run inventory:check && vite build",
-    "inventory:sync": "node scripts/sync-site-inventory.mjs",
-    "inventory:check": "node scripts/sync-site-inventory.mjs --check"
+    "build": "vite build",
+    "check:raw-visual-values": "node scripts/check-raw-visual-values.mjs"
   }
 }

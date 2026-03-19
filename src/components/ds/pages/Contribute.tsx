@@ -20,10 +20,10 @@ const LINKS = {
 const ways = [
   { icon: FileText, color: 'var(--accent)', title: 'Documentation', desc: 'Fix typos, improve examples, clarify token rules, or add missing API docs. Docs are the most impactful contribution.', label: 'Open docs issue' },
   { icon: Bug, color: 'var(--destructive)', title: 'Bug Reports', desc: 'Found a component rendering wrong? Token missing from the CSS? Open a GitHub issue with reproduction steps.', label: 'File bug report' },
-  { icon: Code, color: '#3B82F6', title: 'New Components', desc: 'Propose a component that follows the token contract. Must be variant-based, CSS-variable-only, and WCAG AA compliant.', label: 'Propose component' },
-  { icon: Lightbulb, color: '#10B981', title: 'Token Proposals', desc: 'Suggest additions to the semantic or alias layer. All token proposals require a use-case justification.', label: 'Start discussion' },
-  { icon: BookOpen, color: '#8B5CF6', title: 'Block Patterns', desc: 'New block patterns for the Blocks section. Must use existing components and CSS variables only. No hardcoded values.', label: 'Submit block' },
-  { icon: MessageSquare, color: '#F59E0B', title: 'Design Feedback', desc: 'Review component designs in Figma, flag inconsistencies, suggest improvements. Figma comments or GitHub discussions.', label: 'Open Figma' },
+  { icon: Code, color: 'var(--info)', title: 'New Components', desc: 'Propose a component that follows the token contract. Must be variant-based, CSS-variable-only, and WCAG AA compliant.', label: 'Propose component' },
+  { icon: Lightbulb, color: 'var(--success)', title: 'Token Proposals', desc: 'Suggest additions to the semantic or alias layer. All token proposals require a use-case justification.', label: 'Start discussion' },
+  { icon: BookOpen, color: 'var(--layer-color-blocks)', title: 'Block Patterns', desc: 'New block patterns for the Blocks section. Must use existing components and CSS variables only. No hardcoded values.', label: 'Submit block' },
+  { icon: MessageSquare, color: 'var(--warning)', title: 'Design Feedback', desc: 'Review component designs in Figma, flag inconsistencies, suggest improvements. Figma comments or GitHub discussions.', label: 'Open Figma' },
 ];
 
 function CopyCmd({ cmd }: { cmd: string }) {
@@ -126,7 +126,7 @@ export function Contribute() {
                 ],
               },
               {
-                heading: 'Component standards', color: '#3B82F6',
+                heading: 'Component standards', color: 'var(--info)',
                 rules: [
                   'Variant-based: size (sm/md/lg) + state (default/hover/disabled)',
                   'WCAG 2.1 AA required — include contrast check in PR',

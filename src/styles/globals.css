@@ -316,6 +316,8 @@
   --accent-foreground: var(--core-color-neutral-950);     /* Text ON accent bg */
   --accent-subtle:     rgba(255, 190, 26, 0.10);          /* Tinted accent bg */
   --accent-muted:      rgba(255, 190, 26, 0.20);          /* Deeper accent tint */
+  --accent-hover:      var(--core-color-brand-yellow-600); /* Accent hover state */
+  --accent-border-hover: 1px solid var(--accent-hover);    /* Accent hover border */
   --ring:             var(--core-color-brand-yellow-500); /* Focus ring */
 
   /* ── 2d. Semantic Color — Primary (UI primary action) ────── */
@@ -620,21 +622,85 @@
  * ============================================================ */
 :root {
 
+
   /* ── 3a. Button Component ────────────────────────────────── */
   --btn-height-sm:      32px;
   --btn-height-md:      40px;
   --btn-height-lg:      48px;
   --btn-height-xl:      56px;
+  --btn-height-2xl:     70px;
+  --btn-radius-sm:      6px;
   --btn-radius:         var(--radius-md);
+  --btn-radius-md:      10px;
+  --btn-radius-lg:      var(--radius-lg);
   --btn-padding-x-sm:   var(--spacing-3);
-  --btn-padding-x-md:   var(--spacing-5);
-  --btn-padding-x-lg:   var(--spacing-6);
-  --btn-padding-x-xl:   var(--spacing-8);
+  --btn-padding-x-md:   var(--spacing-4);
+  --btn-padding-x-lg:   var(--spacing-4);
+  --btn-padding-x-xl:   var(--spacing-4);
+  --btn-padding-x-2xl:  var(--spacing-5);
   --btn-font-size-sm:   var(--text-sm);
   --btn-font-size-md:   var(--text-base);
   --btn-font-size-lg:   var(--text-lg);
+  --btn-font-size-xl:   var(--text-xl);
+  --btn-line-height-sm: 1.4286;
+  --btn-line-height-md: 1.5;
+  --btn-line-height-lg: 1.4;
+  --btn-line-height-xl: 1.25;
   --btn-font-weight:    var(--font-weight-semibold);
+  --btn-gap-sm:         6px;
   --btn-gap:            var(--spacing-2);
+
+  /* ── 3a.1 Form Component ─────────────────────────────────── */
+  --form-gap:                    var(--spacing-3);
+  --form-padding:                var(--spacing-5);
+  --form-radius:                 var(--radius-lg);
+  --form-header-gap:             var(--spacing-1);
+  --form-fields-gap:             var(--spacing-2);
+  --form-field-gap:              6px;
+  --form-title-font-size:        var(--text-4xl);
+  --form-title-font-weight:      var(--font-weight-bold);
+  --form-title-line-height:      var(--core-line-height-tight);
+  --form-description-font-size:  var(--text-lg);
+  --form-description-font-weight: var(--font-weight-regular);
+  --form-submit-padding-x:       var(--spacing-3);
+  --form-submit-padding-y:       var(--spacing-2);
+  --form-submit-radius:          var(--radius-md);
+  --form-submit-font-size:       var(--text-base);
+  --form-submit-font-weight:     var(--font-weight-medium);
+  --form-submit-disabled-opacity: 0.6;
+
+  /* ── 3a.2 Chat Bubble Component ──────────────────────────── */
+  --chat-bubble-avatar-size:     var(--avatar-md);
+  --chat-bubble-icon-size:       16px;
+  --chat-bubble-max-width:       70%;
+  --chat-bubble-offset-inline:   var(--spacing-3);
+  --chat-bubble-padding-block:   var(--spacing-3);
+  --chat-bubble-padding-inline:  var(--spacing-4);
+  --chat-bubble-radius:          var(--radius-lg);
+  --chat-bubble-tail-radius:     var(--radius-sm);
+
+  /* ── 3a.3 Keyboard Key Component ─────────────────────────── */
+  --kbd-radius:          var(--radius-sm);
+  --kbd-border:          var(--border-default);
+  --kbd-shadow:          0 1px 0 rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --kbd-padding-y-sm:    2px;
+  --kbd-padding-x-sm:    6px;
+  --kbd-padding-y-md:    var(--spacing-1);
+  --kbd-padding-x-md:    var(--spacing-2);
+  --kbd-padding-y-lg:    6px;
+  --kbd-padding-x-lg:    10px;
+  --kbd-min-width-sm:    20px;
+  --kbd-min-width-md:    24px;
+  --kbd-min-width-lg:    28px;
+
+  /* ── 3a.4 Documentation / layer accents ─────────────────── */
+  --layer-color-blocks:  #8B5CF6;
+  --layer-color-screens: #EC4899;
+
+  /* Raw visual value exceptions: the static checker currently enforces
+     src/components/wugweb only, with an explicit legacy allowlist. DS docs are
+     reviewed separately because some pages intentionally display literal values
+     as content (token tables, device specs, chart data, migration examples). */
 
   /* ── 3b. Input Component ─────────────────────────────────── */
   --input-height-sm:    32px;

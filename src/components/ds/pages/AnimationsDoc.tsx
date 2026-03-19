@@ -25,10 +25,10 @@ const easingTokens = [
 ];
 
 const moodPresets = [
-  { mood: 'Fast', color: '#EF4444', duration: '80–120ms', easing: 'standard', use: 'Dashboard, data tools — speed priority' },
-  { mood: 'Calm', color: '#3B82F6', duration: '200–300ms', easing: 'emphasized', use: 'Consumer apps, reading flow' },
-  { mood: 'Premium', color: '#8B5CF6', duration: '320ms + delay', easing: 'soft', use: 'High-end product, luxury SaaS' },
-  { mood: 'Playful', color: '#F59E0B', duration: 'Spring/bounce', easing: 'emphasized', use: 'Games, creative tools, social' },
+  { mood: 'Fast', color: 'var(--destructive)', duration: '80–120ms', easing: 'standard', use: 'Dashboard, data tools — speed priority' },
+  { mood: 'Calm', color: 'var(--info)', duration: '200–300ms', easing: 'emphasized', use: 'Consumer apps, reading flow' },
+  { mood: 'Premium', color: 'var(--layer-color-blocks)', duration: '320ms + delay', easing: 'soft', use: 'High-end product, luxury SaaS' },
+  { mood: 'Playful', color: 'var(--warning)', duration: 'Spring/bounce', easing: 'emphasized', use: 'Games, creative tools, social' },
 ];
 
 /* ─── Live animation demos ────────────────────────────────────── */
@@ -54,7 +54,7 @@ function SlideDemo() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)', alignItems: 'flex-start' }}>
       <div style={{ height: 56, width: '100%', background: 'var(--card)', border: 'var(--border-default)', borderRadius: 'var(--radius-md)', overflow: 'hidden', display: 'flex', alignItems: 'center', padding: '0 var(--spacing-4)' }}>
-        <div style={{ transform: open ? 'translateX(0)' : 'translateX(-120%)', opacity: open ? 1 : 0, transition: `transform var(--motion-duration-long) var(--motion-easing-emphasized), opacity var(--motion-duration-long) var(--motion-easing-emphasized)`, background: 'var(--accent)', borderRadius: 'var(--radius-sm)', padding: '8px 16px' }}>
+        <div style={{ transform: open ? 'translateX(0)' : 'translateX(-120%)', opacity: open ? 1 : 0, transition: `transform var(--motion-duration-long) var(--motion-easing-emphasized), opacity var(--motion-duration-long) var(--motion-easing-emphasized)`, background: 'var(--accent)', borderRadius: 'var(--radius-sm)', padding: 'var(--spacing-2) var(--spacing-4)' }}>
           <span style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--accent-foreground)', fontSize: 'var(--text-sm)', fontFamily: F }}>Slide in!</span>
         </div>
       </div>
