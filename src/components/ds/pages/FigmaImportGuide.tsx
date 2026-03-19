@@ -148,6 +148,13 @@ export function FigmaImportGuide() {
                 font sizes, font weights, and spacing values. We'll map these to your design tokens.
               </AlertDescription>
             </Alert>
+
+            <Alert>
+              <AlertCircle size={20} />
+              <AlertDescription>
+                Post-process generated files before committing: replace package imports like <code>sonner@2.0.3</code> or <code>@radix-ui/react-dialog@1.1.6</code> with bare npm specifiers, then run <code>npm run check:imports</code> so Figma exports land in repo-ready form.
+              </AlertDescription>
+            </Alert>
           </div>
         </CardContent>
       </Card>

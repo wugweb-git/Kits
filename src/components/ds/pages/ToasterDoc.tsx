@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, CheckCircle, XCircle, Info } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 import { Button } from '../../wugweb/Button';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -29,7 +29,7 @@ export function ToasterDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens] : coreTokens;
 
-  const code = `import { toast } from 'sonner@2.0.3';
+  const code = `import { toast } from 'sonner';
 
 // Success toast
 toast.success('Changes saved successfully');

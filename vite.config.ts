@@ -1,72 +1,32 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
-  import { defineConfig } from 'vite';
-  import react from '@vitejs/plugin-react';
-  import tailwindcss from '@tailwindcss/vite';
-  import path from 'path';
-
-  export default defineConfig({
-    plugins: [react(), tailwindcss()],
-    resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
-      alias: {
-        'vaul@1.1.2': 'vaul',
-        'sonner@2.0.3': 'sonner',
-        'recharts@2.15.2': 'recharts',
-        'react-resizable-panels@2.1.7': 'react-resizable-panels',
-        'react-hook-form@7.55.0': 'react-hook-form',
-        'react-day-picker@8.10.1': 'react-day-picker',
-        'next-themes@0.4.6': 'next-themes',
-        'lucide-react@0.487.0': 'lucide-react',
-        'input-otp@1.4.2': 'input-otp',
-        'figma:asset/f9dc26a47e5bf70b8cc0cb58506e6e83ba15efc9.png': path.resolve(__dirname, './src/assets/f9dc26a47e5bf70b8cc0cb58506e6e83ba15efc9.png'),
-        'figma:asset/f74093c82e0ebc8a763f5aa1b28cb70db79a2621.png': path.resolve(__dirname, './src/assets/f74093c82e0ebc8a763f5aa1b28cb70db79a2621.png'),
-        'figma:asset/f6fad76de9461f90687da1e8488f3b97416f53c8.png': path.resolve(__dirname, './src/assets/f6fad76de9461f90687da1e8488f3b97416f53c8.png'),
-        'figma:asset/f696e50d914cf017f3f0dedc0a291546425bc149.png': path.resolve(__dirname, './src/assets/f696e50d914cf017f3f0dedc0a291546425bc149.png'),
-        'figma:asset/c8365a9616fc11793e9771d988053597ea692897.png': path.resolve(__dirname, './src/assets/c8365a9616fc11793e9771d988053597ea692897.png'),
-        'figma:asset/9996026088d4fa11677d60551b3a921eb29b9256.png': path.resolve(__dirname, './src/assets/9996026088d4fa11677d60551b3a921eb29b9256.png'),
-        'figma:asset/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png': path.resolve(__dirname, './src/assets/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png'),
-        'figma:asset/5bc4e618a080c6bf5bfc3a7402b6643b123885cf.png': path.resolve(__dirname, './src/assets/5bc4e618a080c6bf5bfc3a7402b6643b123885cf.png'),
-        'figma:asset/203a84312764c875d96421e89cb7a492bb418a19.png': path.resolve(__dirname, './src/assets/203a84312764c875d96421e89cb7a492bb418a19.png'),
-        'figma:asset/04477cbda1713d97acf3aace694c77ff7d2e5040.png': path.resolve(__dirname, './src/assets/04477cbda1713d97acf3aace694c77ff7d2e5040.png'),
-        'embla-carousel-react@8.6.0': 'embla-carousel-react',
-        'cmdk@1.1.1': 'cmdk',
-        'class-variance-authority@0.7.1': 'class-variance-authority',
-        '@radix-ui/react-tooltip@1.1.8': '@radix-ui/react-tooltip',
-        '@radix-ui/react-toggle@1.1.2': '@radix-ui/react-toggle',
-        '@radix-ui/react-toggle-group@1.1.2': '@radix-ui/react-toggle-group',
-        '@radix-ui/react-tabs@1.1.3': '@radix-ui/react-tabs',
-        '@radix-ui/react-switch@1.1.3': '@radix-ui/react-switch',
-        '@radix-ui/react-slot@1.1.2': '@radix-ui/react-slot',
-        '@radix-ui/react-slider@1.2.3': '@radix-ui/react-slider',
-        '@radix-ui/react-separator@1.1.2': '@radix-ui/react-separator',
-        '@radix-ui/react-select@2.1.6': '@radix-ui/react-select',
-        '@radix-ui/react-scroll-area@1.2.3': '@radix-ui/react-scroll-area',
-        '@radix-ui/react-radio-group@1.2.3': '@radix-ui/react-radio-group',
-        '@radix-ui/react-progress@1.1.2': '@radix-ui/react-progress',
-        '@radix-ui/react-popover@1.1.6': '@radix-ui/react-popover',
-        '@radix-ui/react-navigation-menu@1.2.5': '@radix-ui/react-navigation-menu',
-        '@radix-ui/react-menubar@1.1.6': '@radix-ui/react-menubar',
-        '@radix-ui/react-label@2.1.2': '@radix-ui/react-label',
-        '@radix-ui/react-hover-card@1.1.6': '@radix-ui/react-hover-card',
-        '@radix-ui/react-dropdown-menu@2.1.6': '@radix-ui/react-dropdown-menu',
-        '@radix-ui/react-dialog@1.1.6': '@radix-ui/react-dialog',
-        '@radix-ui/react-context-menu@2.2.6': '@radix-ui/react-context-menu',
-        '@radix-ui/react-collapsible@1.1.3': '@radix-ui/react-collapsible',
-        '@radix-ui/react-checkbox@1.1.4': '@radix-ui/react-checkbox',
-        '@radix-ui/react-avatar@1.1.3': '@radix-ui/react-avatar',
-        '@radix-ui/react-aspect-ratio@1.1.2': '@radix-ui/react-aspect-ratio',
-        '@radix-ui/react-alert-dialog@1.1.6': '@radix-ui/react-alert-dialog',
-        '@radix-ui/react-accordion@1.2.3': '@radix-ui/react-accordion',
-        '@jsr/supabase__supabase-js@2.49.8': '@jsr/supabase__supabase-js',
-        '@': path.resolve(__dirname, './src'),
-      },
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+    alias: {
+      'figma:asset/f9dc26a47e5bf70b8cc0cb58506e6e83ba15efc9.png': path.resolve(__dirname, './src/assets/f9dc26a47e5bf70b8cc0cb58506e6e83ba15efc9.png'),
+      'figma:asset/f74093c82e0ebc8a763f5aa1b28cb70db79a2621.png': path.resolve(__dirname, './src/assets/f74093c82e0ebc8a763f5aa1b28cb70db79a2621.png'),
+      'figma:asset/f6fad76de9461f90687da1e8488f3b97416f53c8.png': path.resolve(__dirname, './src/assets/f6fad76de9461f90687da1e8488f3b97416f53c8.png'),
+      'figma:asset/f696e50d914cf017f3f0dedc0a291546425bc149.png': path.resolve(__dirname, './src/assets/f696e50d914cf017f3f0dedc0a291546425bc149.png'),
+      'figma:asset/c8365a9616fc11793e9771d988053597ea692897.png': path.resolve(__dirname, './src/assets/c8365a9616fc11793e9771d988053597ea692897.png'),
+      'figma:asset/9996026088d4fa11677d60551b3a921eb29b9256.png': path.resolve(__dirname, './src/assets/9996026088d4fa11677d60551b3a921eb29b9256.png'),
+      'figma:asset/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png': path.resolve(__dirname, './src/assets/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png'),
+      'figma:asset/5bc4e618a080c6bf5bfc3a7402b6643b123885cf.png': path.resolve(__dirname, './src/assets/5bc4e618a080c6bf5bfc3a7402b6643b123885cf.png'),
+      'figma:asset/203a84312764c875d96421e89cb7a492bb418a19.png': path.resolve(__dirname, './src/assets/203a84312764c875d96421e89cb7a492bb418a19.png'),
+      'figma:asset/04477cbda1713d97acf3aace694c77ff7d2e5040.png': path.resolve(__dirname, './src/assets/04477cbda1713d97acf3aace694c77ff7d2e5040.png'),
+      '@': path.resolve(__dirname, './src'),
     },
-    build: {
-      target: 'esnext',
-      outDir: 'build',
-    },
-    server: {
-      port: 3000,
-      open: true,
-    },
-  });
+  },
+  build: {
+    target: 'esnext',
+    outDir: 'build',
+  },
+  server: {
+    port: 3000,
+    open: true,
+  },
+});

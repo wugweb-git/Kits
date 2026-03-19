@@ -60,6 +60,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "check:imports": "node scripts/check-version-suffixed-imports.mjs"
   }
 }
