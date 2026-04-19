@@ -4,13 +4,15 @@
 
 This repo is configured for Vite output in `build/` via `vercel.json`.
 
-- Install command: `npm ci`
+- Install command: `npm ci --no-audit --no-fund || npm install --no-audit --no-fund`
 - Build command: `npm run build`
 - Output directory: `build`
 
 ## Lockfile policy
 
 CI requires `package-lock.json` at repository root. Do not remove it.
+
+If a third-party environment reports lock drift unexpectedly, the install command falls back to `npm install` to keep deployments unblocked while lock refresh is propagated.
 
 ## Workflow SDK (Vercel Workflows)
 
