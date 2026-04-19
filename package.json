@@ -64,13 +64,14 @@
     "check:raw-visual-values": "node scripts/check-raw-visual-values.mjs",
     "ds:tokens:build": "node scripts/build-design-tokens.mjs",
     "ds:audit:structure": "node scripts/audit-design-system-structure.mjs",
-    "check:ci": "npm run check:conflicts && npm run check:coupling && npm run check:token-keys && npm run check:mapping && npm run check:taxonomy && npm run ds:audit:structure && npm run check:codeowners && npm run ds:tokens:build && npm run build",
+    "check:ci": "npm run check:conflicts && npm run check:lock-sync && npm run check:coupling && npm run check:token-keys && npm run check:mapping && npm run check:taxonomy && npm run ds:audit:structure && npm run check:codeowners && npm run ds:tokens:build && npm run build",
     "check:coupling": "node scripts/check-no-cross-tree-coupling.mjs",
     "check:token-keys": "node scripts/check-token-keys.mjs",
     "check:mapping": "node scripts/check-component-mapping.mjs",
     "check:taxonomy": "node scripts/audit-taxonomy.mjs",
     "test:visual": "node scripts/test-visual-regression.mjs",
     "check:codeowners": "node scripts/audit-codeowners.mjs",
-    "check:conflicts": "node scripts/check-no-conflict-markers.mjs"
+    "check:conflicts": "node scripts/check-no-conflict-markers.mjs",
+    "check:lock-sync": "node scripts/verify-lock-sync.mjs"
   }
 }

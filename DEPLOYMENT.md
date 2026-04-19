@@ -33,3 +33,8 @@ Checklist:
 - Ensure the GitHub account email used for commits is verified.
 - If your org requires signed commits, enable GPG/SSH signing for local commits.
 - Re-push a verified commit (or merge via GitHub UI with verified identity).
+
+
+## Lock sync guard
+
+Run `npm run check:lock-sync` before pushing. This validates that `package.json` dependency sections match `package-lock.json` root metadata to prevent recurring `npm ci` EUSAGE failures on Vercel.
