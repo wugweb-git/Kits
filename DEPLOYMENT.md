@@ -18,11 +18,9 @@ If a third-party environment reports lock drift unexpectedly, the install comman
 
 There is no separate UI toggle required for basic SDK usage in most projects.
 
-1. Install the official Workflow SDK in environments with npm registry access (`npm i workflow`).
-2. In restricted environments, use the local shim in `src/lib/workflow.ts` for development validation.
-3. Add workflow functions using the `"use workflow"` directive and deploy to monitor executions in Vercel Workflow/observability views.
-
-Example workflow function is provided in `src/workflows/handleUserSignup.ts`.
+1. This repo includes a local `workflow` compatibility package (`vendor/workflow`) so imports like `import { sleep } from "workflow"` work in all environments.
+2. Add workflow functions using the `"use workflow"` directive (example: `src/workflows/handleUserSignup.ts`).
+3. In environments with npm registry access, replace the local package with the official SDK by running `npm i workflow@latest` and committing the updated lockfile.
 
 
 ## Unverified commit deployments
