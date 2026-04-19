@@ -30,7 +30,7 @@ export function DividerDoc() {
     }
   };
 
-  const jsxCode = `import { Divider } from './components/design-system/components/Divider';
+  const jsxCode = `import { Divider } from './components/design-system/components';
 
 <Divider
   orientation="${orientation}"

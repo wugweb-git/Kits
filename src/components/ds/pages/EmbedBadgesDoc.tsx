@@ -17,7 +17,7 @@ export function EmbedBadgesDoc() {
     }
   };
 
-  const code = `import { EmbedBadge } from '@/components/design-system/components/EmbedBadge';
+  const code = `import { EmbedBadge } from '@/components/design-system/components';
 
 <EmbedBadge
   variant=\"empowered\"

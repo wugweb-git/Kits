@@ -26,7 +26,7 @@ export function RatingDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Rating } from "@/components/design-system/components/Rating";
+  const getDynamicCode = () => `import { Rating } from "@/components/design-system/components";
 
 export function RatingDemo() {
   const [rating, setRating] = React.useState(${rating});

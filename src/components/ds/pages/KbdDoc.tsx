@@ -22,7 +22,7 @@ export function KbdDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const code = `import { Kbd } from "@/components/design-system/components/Kbd";
+  const code = `import { Kbd } from "@/components/design-system/components";
 
 // Single key
 <Kbd>⌘K</Kbd>

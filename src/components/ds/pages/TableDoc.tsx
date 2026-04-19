@@ -76,7 +76,7 @@ export function TableDoc() {
     { id: 5, name: 'Evan Wright', email: 'evan@example.com', role: 'Editor', status: 'Inactive' },
   ];
 
-  const jsxCode = `import { Table } from './components/design-system/components/Table';
+  const jsxCode = `import { Table } from './components/design-system/components';
 import { Badge } from './components/ui/badge';
 
 const columns = [

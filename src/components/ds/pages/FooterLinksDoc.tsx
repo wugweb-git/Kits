@@ -36,7 +36,7 @@ export function FooterLinksDoc() {
     }
   ];
 
-  const code = `import { FooterLinks } from '@/components/design-system/components/FooterLinks';
+  const code = `import { FooterLinks } from '@/components/design-system/components';
 
 const groups = [
   {

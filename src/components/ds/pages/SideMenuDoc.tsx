@@ -24,7 +24,7 @@ export function SideMenuDoc() {
     { label: 'Settings', href: '#settings', icon: <Settings size={18} /> },
   ];
 
-  const code = `import { SideMenu } from '@/components/design-system/components/SideMenu';
+  const code = `import { SideMenu } from '@/components/design-system/components';
 import { Home, Folder, Star, Settings } from 'lucide-react';
 
 const items = [

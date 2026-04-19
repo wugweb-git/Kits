@@ -43,7 +43,7 @@ export function MenuItemDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { MenuItem } from '@/components/design-system/components/MenuItem';
+  const codeExample = `import { MenuItem } from '@/components/design-system/components';
 import { Home, Settings, LogOut } from 'lucide-react';
 
 export function MyMenu() {

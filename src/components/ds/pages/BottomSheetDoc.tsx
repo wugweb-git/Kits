@@ -30,7 +30,7 @@ export function BottomSheetDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens] : coreTokens;
 
-  const code = `import { BottomSheet } from '@/components/design-system/components/BottomSheet';
+  const code = `import { BottomSheet } from '@/components/design-system/components';
 
 <BottomSheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
   <h2>Content Title</h2>

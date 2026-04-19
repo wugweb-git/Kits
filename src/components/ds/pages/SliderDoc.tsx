@@ -27,7 +27,7 @@ export function SliderDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Slider } from "@/components/design-system/components/Slider";
+    return `import { Slider } from "@/components/design-system/components";
 
 export function SliderDemo() {
   const [value, setValue] = React.useState(${sliderValue});

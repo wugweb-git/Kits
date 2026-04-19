@@ -34,7 +34,7 @@ export function AvatarDoc() {
     if (selectedStatus !== 'none') props.push(`status="${selectedStatus}"`);
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Avatar } from "@/components/design-system/components/Avatar";
+    return `import { Avatar } from "@/components/design-system/components";
 
 export function AvatarDemo() {
   return (

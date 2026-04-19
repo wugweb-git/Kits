@@ -26,7 +26,7 @@ export function IndicatorDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Indicator } from "@/components/design-system/components/Indicator";
+  const getDynamicCode = () => `import { Indicator } from "@/components/design-system/components";
 
 // Status dot on an avatar
 <Indicator variant="${variant}" size="${size}" pulse={${pulse}} position="${position}">

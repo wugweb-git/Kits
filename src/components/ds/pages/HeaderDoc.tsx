@@ -51,8 +51,8 @@ export function HeaderDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { Header } from '@/components/design-system/components/Header';
-import { Logo } from '@/components/design-system/components/Logo';
+  const codeExample = `import { Header } from '@/components/design-system/components';
+import { Logo } from '@/components/design-system/components';
 
 const navItems = [
   { label: 'About', href: '#about' },

@@ -34,7 +34,7 @@ export function TagDoc() {
     
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Tag } from "@/components/design-system/components/Tag";
+    return `import { Tag } from "@/components/design-system/components";
 import { X } from "lucide-react";
 
 export function TagDemo() {

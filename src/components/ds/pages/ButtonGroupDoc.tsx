@@ -28,8 +28,8 @@ export function ButtonGroupDoc() {
     setFormat(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   };
 
-  const code = `import { ButtonGroup } from "@/components/design-system/components/ButtonGroup";
-import { Button } from "@/components/design-system/components/Button";
+  const code = `import { ButtonGroup } from "@/components/design-system/components";
+import { Button } from "@/components/design-system/components";
 import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 
 // Horizontal group (default)

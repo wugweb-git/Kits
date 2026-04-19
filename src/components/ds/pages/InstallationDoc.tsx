@@ -67,10 +67,10 @@ npm install clsx tailwind-merge`,
   --radius-full: 9999px;
 }`,
 
-    usage: `// Import any component directly from the wugweb directory
-import { Button } from "@/components/design-system/components/Button";
-import { Input } from "@/components/design-system/components/Input";
-import { Badge } from "@/components/design-system/components/Badge";
+    usage: `// Import components from the canonical design-system bridge
+import { Button } from "@/components/design-system/components";
+import { Input } from "@/components/design-system/components";
+import { Badge } from "@/components/design-system/components";
 
 export function MyPage() {
   return (
@@ -142,13 +142,13 @@ body {
       {/* Step 1 */}
       <PageSection
         title="Step 1 — Copy Component Files"
-        description="Wugweb ships as source files. Copy the /components/design-system/components directory into your project."
+        description="Wugweb ships as source files. Copy the design-system bridge and referenced components into your project."
       >
         <PageCard>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
             <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
               {[
-                { icon: FolderOpen, label: '/components/design-system/components/', desc: `${siteInventory.publicComponentModuleCount} public component modules` },
+                { icon: FolderOpen, label: '/components/design-system/components.ts', desc: `${siteInventory.publicComponentModuleCount} public component modules` },
                 { icon: Package, label: 'peer dependencies', desc: 'lucide-react, recharts' },
               ].map((item, i) => (
                 <div key={i} style={{ flex: '1 1 200px', background: 'var(--muted)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>

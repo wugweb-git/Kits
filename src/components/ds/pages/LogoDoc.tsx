@@ -17,7 +17,7 @@ export function LogoDoc() {
     }
   };
 
-  const code = `import { Logo } from '@/components/design-system/components/Logo';
+  const code = `import { Logo } from '@/components/design-system/components';
 
 // Default size
 <Logo />

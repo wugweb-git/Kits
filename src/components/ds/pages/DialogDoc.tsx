@@ -27,8 +27,8 @@ export function DialogDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/design-system/components/Dialog";
-import { Button } from "@/components/design-system/components/Button";
+    return `import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/design-system/components";
+import { Button } from "@/components/design-system/components";
 
 export function DialogDemo() {
   return (

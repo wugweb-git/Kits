@@ -79,10 +79,10 @@ button { background: var(--accent); }
   --accent: rgba(59, 130, 246, 1.00); /* switch to blue */
 }`;
 
-  const quickStartCode = `import { Button } from "@/components/design-system/components/Button";
-import { Input } from "@/components/design-system/components/Input";
-import { Badge } from "@/components/design-system/components/Badge";
-import { Card } from "@/components/design-system/components/Card";
+  const quickStartCode = `import { Button } from "@/components/design-system/components";
+import { Input } from "@/components/design-system/components";
+import { Badge } from "@/components/design-system/components";
+import { Card } from "@/components/design-system/components";
 
 export default function MyFirstComponent() {
   const [email, setEmail] = React.useState('');

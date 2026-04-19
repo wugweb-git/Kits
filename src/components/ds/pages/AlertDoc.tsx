@@ -30,7 +30,7 @@ export function AlertDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Alert } from "@/components/design-system/components/Alert";
+    return `import { Alert } from "@/components/design-system/components";
 import { Info } from "lucide-react";
 
 export function AlertDemo() {

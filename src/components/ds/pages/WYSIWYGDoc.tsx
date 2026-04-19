@@ -24,7 +24,7 @@ export function WYSIWYGDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { WYSIWYG } from "@/components/design-system/components/WYSIWYG";
+  const getDynamicCode = () => `import { WYSIWYG } from "@/components/design-system/components";
 
 export function WYSIWYGDemo() {
   const [content, setContent] = React.useState('');

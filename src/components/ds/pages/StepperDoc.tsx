@@ -30,7 +30,7 @@ export function StepperDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Stepper } from "@/components/design-system/components/Stepper";
+  const getDynamicCode = () => `import { Stepper } from "@/components/design-system/components";
 
 const steps = [
   { id: "account", title: "Account", description: "Create your account" },

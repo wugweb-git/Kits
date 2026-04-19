@@ -28,7 +28,7 @@ export function SearchInputDoc() {
     }
   };
 
-  const getDynamicCode = () => `import { SearchInput } from "@/components/design-system/components/SearchInput";
+  const getDynamicCode = () => `import { SearchInput } from "@/components/design-system/components";
 
 export function SearchInputDemo() {
   const [value, setValue] = React.useState('');

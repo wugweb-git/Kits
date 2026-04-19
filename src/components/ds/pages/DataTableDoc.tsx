@@ -61,7 +61,7 @@ export function DataTableDoc() {
     { key: 'joined', title: 'Joined', sortable: true },
   ];
 
-  const getDynamicCode = () => `import { DataTable } from "@/components/design-system/components/DataTable";
+  const getDynamicCode = () => `import { DataTable } from "@/components/design-system/components";
 
 const columns = [
   { key: "name", title: "Name", sortable: true },

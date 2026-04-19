@@ -34,7 +34,7 @@ export function NativeSelectDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { NativeSelect } from "@/components/design-system/components/NativeSelect";
+  const getDynamicCode = () => `import { NativeSelect } from "@/components/design-system/components";
 
 const countries = [
   { value: "us", label: "United States" },

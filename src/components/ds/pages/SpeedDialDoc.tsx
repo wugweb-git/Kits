@@ -30,7 +30,7 @@ export function SpeedDialDoc() {
     { id: 'delete', label: 'Delete', icon: Trash2, onClick: () => {} },
   ];
 
-  const getDynamicCode = () => `import { SpeedDial } from "@/components/design-system/components/SpeedDial";
+  const getDynamicCode = () => `import { SpeedDial } from "@/components/design-system/components";
 import { Edit, Share, Trash2 } from "lucide-react";
 
 const actions = [

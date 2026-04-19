@@ -17,7 +17,7 @@ export function GridDoc() {
     }
   };
 
-  const code = `import { Grid } from '@/components/design-system/components/Grid';
+  const code = `import { Grid } from '@/components/design-system/components';
 
 <Grid columns={3} gap="var(--spacing-4)">
   <div>Item 1</div>

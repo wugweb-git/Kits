@@ -23,7 +23,7 @@ export function ChatBubbleDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { ChatBubble } from "@/components/design-system/components/ChatBubble";
+  const getDynamicCode = () => `import { ChatBubble } from "@/components/design-system/components";
 
 // Received message
 <ChatBubble

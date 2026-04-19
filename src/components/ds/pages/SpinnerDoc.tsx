@@ -23,7 +23,7 @@ export function SpinnerDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Spinner } from "@/components/design-system/components/Spinner";
+  const getDynamicCode = () => `import { Spinner } from "@/components/design-system/components";
 
 // Basic spinner
 <Spinner />

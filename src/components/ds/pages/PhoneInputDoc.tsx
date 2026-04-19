@@ -18,7 +18,7 @@ export function PhoneInputDoc() {
     }
   };
 
-  const code = `import { PhoneInput } from '@/components/design-system/components/PhoneInput';
+  const code = `import { PhoneInput } from '@/components/design-system/components';
 
 <PhoneInput
   value={phone}

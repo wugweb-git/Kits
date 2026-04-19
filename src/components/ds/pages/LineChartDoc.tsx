@@ -37,7 +37,7 @@ export function LineChartDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { LineChart } from "@/components/design-system/components/LineChart";
+  const getDynamicCode = () => `import { LineChart } from "@/components/design-system/components";
 
 const data = [
   { month: "Jan", revenue: 4200, users: 1800 },

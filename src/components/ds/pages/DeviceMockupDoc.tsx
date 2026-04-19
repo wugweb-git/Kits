@@ -24,7 +24,7 @@ export function DeviceMockupDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { DeviceMockup } from "@/components/design-system/components/DeviceMockup";
+  const getDynamicCode = () => `import { DeviceMockup } from "@/components/design-system/components";
 
 <DeviceMockup
   device="${device}"

@@ -445,22 +445,22 @@ export function getCategoriesWithCounts(): Array<{ category: string; count: numb
 // Helper function to map hex color to design token
 export function mapColorToToken(hexColor: string): string {
   const colorMap: Record<string, string> = {
-    '#000000': 'Neutral 10',
-    '#ffffff': 'Neutral 1',
-    '#a3a3a3': 'Neutral 5',
-    '#1a1a1a': 'Neutral 9',
-    '#f4f4f4': 'Neutral 2',
-    '#dfdfdf': 'Neutral 3',
-    '#2b2b2b': 'Neutral 8',
-    '#7d7d7d': 'Neutral 6',
-    '#bababa': 'Neutral 4',
-    '#444444': 'Neutral 7',
-    '#ffbe1a': 'Accent main',
-    '#191919': 'Ash Black',
-    '#c9c9c9': 'logo Grey',
-    '#ebebeb': 'Grey - BG',
-    '#050505': 'Website - BG',
-    '#ef4343': 'Error 500',
+    '#000000': 'neutral-10',
+    '#ffffff': 'neutral-1',
+    '#a3a3a3': 'neutral-5',
+    '#1a1a1a': 'neutral-9',
+    '#f4f4f4': 'neutral-2',
+    '#dfdfdf': 'neutral-3',
+    '#2b2b2b': 'neutral-8',
+    '#7d7d7d': 'neutral-6',
+    '#bababa': 'neutral-4',
+    '#444444': 'neutral-7',
+    '#ffbe1a': 'accent-main',
+    '#191919': 'ash-black',
+    '#c9c9c9': 'logo-grey',
+    '#ebebeb': 'surface-muted',
+    '#050505': 'surface-base',
+    '#ef4343': 'error-500',
   };
   
   return colorMap[hexColor.toLowerCase()] || hexColor;

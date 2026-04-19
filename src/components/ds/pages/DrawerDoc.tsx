@@ -43,7 +43,7 @@ export function DrawerDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { Drawer } from '@/components/design-system/components/Drawer';
+  const codeExample = `import { Drawer } from '@/components/design-system/components';
 import { useState } from 'react';
 
 export function DrawerDemo() {

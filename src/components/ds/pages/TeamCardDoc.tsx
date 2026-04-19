@@ -17,7 +17,7 @@ export function TeamCardDoc() {
     }
   };
 
-  const code = `import { TeamCard } from '@/components/design-system/components/TeamCard';
+  const code = `import { TeamCard } from '@/components/design-system/components';
 
 <TeamCard
   name="Sarah Johnson"

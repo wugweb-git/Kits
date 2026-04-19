@@ -30,7 +30,7 @@ export function BottomNavigationDoc() {
     { id: 'profile', label: 'Profile', icon: User, onClick: () => setActiveId('profile') },
   ];
 
-  const code = `import { BottomNavigation } from "@/components/design-system/components/BottomNavigation";
+  const code = `import { BottomNavigation } from "@/components/design-system/components";
 import { Home, Search, Heart, ShoppingCart, User } from "lucide-react";
 
 const navItems = [

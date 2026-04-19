@@ -26,7 +26,7 @@ export function AreaChartDoc() {
     { name: 'Jun', value: 900 },
   ];
 
-  const code = `import { AreaChart } from '@/components/design-system/components/AreaChart';
+  const code = `import { AreaChart } from '@/components/design-system/components';
 
 const data = [
   { name: 'Jan', value: 400 },

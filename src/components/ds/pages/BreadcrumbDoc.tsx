@@ -71,7 +71,7 @@ export function BreadcrumbDoc() {
     if (showHomeIcon) props.push(`// Add icon to first item`);
     if (enableTruncation) props.push(`maxItems={3}`);
     
-    return `import { Breadcrumb } from '@/components/design-system/components/Breadcrumb';
+    return `import { Breadcrumb } from '@/components/design-system/components';
 import { Home } from 'lucide-react';
 
 const items = [

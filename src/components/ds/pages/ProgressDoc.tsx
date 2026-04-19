@@ -27,7 +27,7 @@ export function ProgressDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Progress } from "@/components/design-system/components/Progress";
+    return `import { Progress } from "@/components/design-system/components";
 
 export function ProgressDemo() {
   return <Progress value={${value}} />;

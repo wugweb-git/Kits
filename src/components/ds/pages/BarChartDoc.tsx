@@ -25,7 +25,7 @@ export function BarChartDoc() {
     { name: 'Product E', sales: 5000 },
   ];
 
-  const code = `import { BarChart } from '@/components/design-system/components/BarChart';
+  const code = `import { BarChart } from '@/components/design-system/components';
 
 const data = [
   { name: 'Product A', sales: 4000 },

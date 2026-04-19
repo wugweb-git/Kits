@@ -60,7 +60,7 @@ export function AccordionDoc() {
     },
   ];
 
-  const getDynamicCode = () => `import { Accordion, AccordionGroup } from "@/components/design-system/components/Accordion";
+  const getDynamicCode = () => `import { Accordion, AccordionGroup } from "@/components/design-system/components";
 
 export function AccordionDemo() {
   return (
@@ -85,7 +85,7 @@ export function AccordionDemo() {
   );
 }`;
 
-  const singleCode = `import { Accordion } from "@/components/design-system/components/Accordion";
+  const singleCode = `import { Accordion } from "@/components/design-system/components";
 
 <Accordion title="Accordion Title" defaultOpen>
   Content goes here inside the accordion.

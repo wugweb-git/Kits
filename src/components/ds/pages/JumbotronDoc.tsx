@@ -26,7 +26,7 @@ export function JumbotronDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Jumbotron } from "@/components/design-system/components/Jumbotron";
+  const getDynamicCode = () => `import { Jumbotron } from "@/components/design-system/components";
 
 <Jumbotron
   title="Build faster with Wugweb Kits"

@@ -25,7 +25,7 @@ export function FileInputDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { FileInput } from "@/components/design-system/components/FileInput";
+  const getDynamicCode = () => `import { FileInput } from "@/components/design-system/components";
 
 export function FileInputDemo() {
   const [file, setFile] = React.useState<File | null>(null);

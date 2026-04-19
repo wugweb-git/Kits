@@ -48,7 +48,7 @@ export function MegaMenuDoc() {
     },
   ];
 
-  const code = `import { MegaMenu } from "@/components/design-system/components/MegaMenu";
+  const code = `import { MegaMenu } from "@/components/design-system/components";
 import { Package, Zap, Code } from "lucide-react";
 
 const sections = [

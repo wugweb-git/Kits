@@ -54,7 +54,7 @@ export function RadarChartDoc() {
         { key: 'mobile', name: 'Mobile', color: 'var(--chart-3)' },
       ];
 
-  const getDynamicCode = () => `import { RadarChart } from "@/components/design-system/components/RadarChart";
+  const getDynamicCode = () => `import { RadarChart } from "@/components/design-system/components";
 
 const skillsData = [
   { skill: "Accessibility", current: 80, target: 95 },

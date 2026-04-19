@@ -27,7 +27,7 @@ export function CardDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Card } from "@/components/design-system/components/Card";
+    return `import { Card } from "@/components/design-system/components";
 
 export function CardDemo() {
   return (

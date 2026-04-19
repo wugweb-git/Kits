@@ -39,7 +39,7 @@ export function RadialChartDoc() {
 
   const currentData = dataset === 'progress' ? progressData : storageData;
 
-  const getDynamicCode = () => `import { RadialChart } from "@/components/design-system/components/RadialChart";
+  const getDynamicCode = () => `import { RadialChart } from "@/components/design-system/components";
 
 const data = [
   { name: "Components Done", value: 127, fill: "var(--chart-4)" },

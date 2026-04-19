@@ -29,8 +29,8 @@ export function RadioGroupDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { RadioGroup, RadioGroupItem } from "@/components/design-system/components/RadioGroup";
-import { Label } from "@/components/design-system/components/Label";
+    return `import { RadioGroup, RadioGroupItem } from "@/components/design-system/components";
+import { Label } from "@/components/design-system/components";
 
 export function RadioGroupDemo() {
   const [value, setValue] = React.useState("${selectedValue}");

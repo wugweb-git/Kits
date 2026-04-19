@@ -24,6 +24,18 @@ export default defineConfig({
   build: {
     target: 'esnext',
     outDir: 'build',
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+
+          if (id.includes('@radix-ui')) return 'vendor-radix';
+          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
+          if (id.includes('lucide-react')) return 'vendor-icons';
+        },
+      },
+    },
   },
   server: {
     port: 3000,

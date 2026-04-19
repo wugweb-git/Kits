@@ -35,7 +35,7 @@ export function ComboboxDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Combobox } from "@/components/design-system/components/Combobox";
+  const getDynamicCode = () => `import { Combobox } from "@/components/design-system/components";
 
 const frameworks = [
   { value: "react", label: "React" },

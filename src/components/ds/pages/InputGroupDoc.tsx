@@ -22,8 +22,8 @@ export function InputGroupDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const code = `import { InputGroup } from "@/components/design-system/components/InputGroup";
-import { Input } from "@/components/design-system/components/Input";
+  const code = `import { InputGroup } from "@/components/design-system/components";
+import { Input } from "@/components/design-system/components";
 import { Search, Mail } from "lucide-react";
 
 // Left icon

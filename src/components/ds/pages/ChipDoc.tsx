@@ -63,7 +63,7 @@ export function ChipDoc() {
     if (selectedState === 'selected') props.push(`selected`);
     if (selectedState === 'disabled') props.push(`disabled`);
     
-    return `import { Chip } from '@/components/design-system/components/Chip';
+    return `import { Chip } from '@/components/design-system/components';
 ${iconPosition !== 'none' ? 'import { Tag } from \'lucide-react\';\n' : ''}
 export function ChipDemo() {
   return (

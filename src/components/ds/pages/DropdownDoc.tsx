@@ -27,8 +27,8 @@ export function DropdownDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/design-system/components/DropdownMenu";
-import { Button } from "@/components/design-system/components/Button";
+    return `import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/design-system/components";
+import { Button } from "@/components/design-system/components";
 
 export function DropdownDemo() {
   return (

@@ -30,7 +30,7 @@ export function TimelineDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Timeline } from "@/components/design-system/components/Timeline";
+  const getDynamicCode = () => `import { Timeline } from "@/components/design-system/components";
 import { Rocket, Bug } from "lucide-react";
 
 const events = [

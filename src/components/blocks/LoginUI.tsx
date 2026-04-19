@@ -3,7 +3,7 @@ import {
   Mail, Lock, Eye, EyeOff, BedDouble, ShoppingCart,
   Users, Receipt, BarChart3, Settings,
 } from 'lucide-react';
-import { Logo } from '../wugweb/Logo';
+import { Logo } from '../design-system/components';
 
 const NAV_ITEMS = [
   { icon: BedDouble,    label: 'Rooms' },

@@ -26,7 +26,7 @@ export function BannerDoc() {
 
   const variantIcons = { info: Info, success: CheckCircle, warning: AlertTriangle, error: XCircle };
 
-  const getDynamicCode = () => `import { Banner } from "@/components/design-system/components/Banner";
+  const getDynamicCode = () => `import { Banner } from "@/components/design-system/components";
 import { Info } from "lucide-react";
 
 <Banner

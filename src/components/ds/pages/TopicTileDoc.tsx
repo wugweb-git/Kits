@@ -17,7 +17,7 @@ export function TopicTileDoc() {
     }
   };
 
-  const code = `import { TopicTile } from '@/components/design-system/components/TopicTile';
+  const code = `import { TopicTile } from '@/components/design-system/components';
 import { Code } from 'lucide-react';
 
 <TopicTile

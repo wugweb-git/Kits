@@ -27,7 +27,7 @@ export function NumberInputDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { NumberInput } from "@/components/design-system/components/NumberInput";
+  const getDynamicCode = () => `import { NumberInput } from "@/components/design-system/components";
 
 export function NumberInputDemo() {
   const [quantity, setQuantity] = React.useState(${value});

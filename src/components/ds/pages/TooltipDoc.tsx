@@ -27,7 +27,7 @@ export function TooltipDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/design-system/components/Tooltip";
+    return `import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/design-system/components";
 import { HelpCircle } from "lucide-react";
 
 export function TooltipDemo() {

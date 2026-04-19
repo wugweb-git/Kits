@@ -32,7 +32,7 @@ export function ListGroupDoc() {
     { id: '6', label: 'Settings', icon: Settings, description: 'Manage your preferences', onClick: () => {} },
   ];
 
-  const getDynamicCode = () => `import { ListGroup } from "@/components/design-system/components/ListGroup";
+  const getDynamicCode = () => `import { ListGroup } from "@/components/design-system/components";
 import { Home, User, Bell } from "lucide-react";
 
 const items = [

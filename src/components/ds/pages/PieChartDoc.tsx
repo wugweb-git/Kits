@@ -33,7 +33,7 @@ export function PieChartDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { PieChart } from "@/components/design-system/components/PieChart";
+  const getDynamicCode = () => `import { PieChart } from "@/components/design-system/components";
 
 const data = [
   { name: "Direct", value: 4200, color: "var(--chart-1)" },

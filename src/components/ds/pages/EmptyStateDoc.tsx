@@ -27,7 +27,7 @@ export function EmptyStateDoc() {
   const iconMap = { FileQuestion, Search, Package, Inbox };
   const currentIcon = iconMap[icon];
 
-  const getDynamicCode = () => `import { EmptyState } from "@/components/design-system/components/EmptyState";
+  const getDynamicCode = () => `import { EmptyState } from "@/components/design-system/components";
 import { ${icon} } from "lucide-react";
 
 <EmptyState

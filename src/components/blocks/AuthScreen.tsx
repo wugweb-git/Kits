@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Check, User } from 'lucide-react';
-import { Logo } from '../wugweb/Logo';
+import { Logo } from '../design-system/components';
 
 type Step = 'sign-in' | 'create-account' | 'verify';
 

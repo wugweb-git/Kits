@@ -17,7 +17,7 @@ export function CTABannerDoc() {
     }
   };
 
-  const code = `import { CTABanner } from '@/components/design-system/components/CTABanner';
+  const code = `import { CTABanner } from '@/components/design-system/components';
 
 <CTABanner
   title="Ready to get started?"
