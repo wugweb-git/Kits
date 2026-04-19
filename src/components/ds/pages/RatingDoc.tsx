@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Rating } from '../../design-system/components';
+import { Rating } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -26,7 +26,7 @@ export function RatingDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Rating } from "@/components/design-system/components/Rating";
+  const getDynamicCode = () => `import { Rating } from "@/components/design-system/components";
 
 export function RatingDemo() {
   const [rating, setRating] = React.useState(${rating});

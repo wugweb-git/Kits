@@ -30,8 +30,8 @@ export function InputTextDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Input } from "@/components/design-system/components/Input";
-import { Label } from "@/components/design-system/components/Label";
+    return `import { Input } from "@/components/design-system/components";
+import { Label } from "@/components/design-system/components";
 
 export function InputDemo() {
   return (

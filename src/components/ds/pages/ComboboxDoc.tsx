@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Combobox } from '../../design-system/components';
+import { Combobox } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -35,7 +35,7 @@ export function ComboboxDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Combobox } from "@/components/design-system/components/Combobox";
+  const getDynamicCode = () => `import { Combobox } from "@/components/design-system/components";
 
 const frameworks = [
   { value: "react", label: "React" },

@@ -40,7 +40,7 @@ export function NavigationMenuDoc() {
     { id: 'help', label: 'Help', icon: HelpCircle },
   ];
 
-  const getDynamicCode = () => `import { NavigationMenu } from "@/components/design-system/components/NavigationMenu";
+  const getDynamicCode = () => `import { NavigationMenu } from "@/components/design-system/components";
 import { Home, FileText, User, Package } from "lucide-react";
 
 const navItems = [

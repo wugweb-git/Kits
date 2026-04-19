@@ -30,8 +30,8 @@ export function TextareaDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Textarea } from "@/components/design-system/components/Textarea";
-import { Label } from "@/components/design-system/components/Label";
+    return `import { Textarea } from "@/components/design-system/components";
+import { Label } from "@/components/design-system/components";
 
 export function TextareaDemo() {
   const [value, setValue] = React.useState('');

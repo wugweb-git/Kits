@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { FooterLinks, FooterLinkGroup } from '../../design-system/components';
+import { FooterLinks, FooterLinkGroup } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -36,7 +36,7 @@ export function FooterLinksDoc() {
     }
   ];
 
-  const code = `import { FooterLinks } from '@/components/design-system/components/FooterLinks';
+  const code = `import { FooterLinks } from '@/components/design-system/components';
 
 const groups = [
   {

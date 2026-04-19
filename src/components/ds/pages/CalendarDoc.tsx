@@ -28,7 +28,7 @@ export function CalendarDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Calendar } from "@/components/design-system/components/Calendar";
+    return `import { Calendar } from "@/components/design-system/components";
 
 export function CalendarDemo() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());

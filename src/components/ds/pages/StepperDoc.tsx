@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Stepper } from '../../design-system/components';
+import { Stepper } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -30,7 +30,7 @@ export function StepperDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Stepper } from "@/components/design-system/components/Stepper";
+  const getDynamicCode = () => `import { Stepper } from "@/components/design-system/components";
 
 const steps = [
   { id: "account", title: "Account", description: "Create your account" },

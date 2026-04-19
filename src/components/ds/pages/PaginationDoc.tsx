@@ -44,7 +44,7 @@ export function PaginationDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { Pagination } from '@/components/design-system/components/Pagination';
+  const codeExample = `import { Pagination } from '@/components/design-system/components';
 import { useState } from 'react';
 
 export function PaginationDemo() {

@@ -29,8 +29,8 @@ export function CheckboxDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Checkbox } from "@/components/design-system/components/Checkbox";
-import { Label } from "@/components/design-system/components/Label";
+    return `import { Checkbox } from "@/components/design-system/components";
+import { Label } from "@/components/design-system/components";
 
 export function CheckboxDemo() {
   const [checked, setChecked] = React.useState(false);

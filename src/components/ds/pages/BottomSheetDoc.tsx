@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { BottomSheet } from '../../design-system/components';
+import { BottomSheet } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -30,7 +30,7 @@ export function BottomSheetDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens] : coreTokens;
 
-  const code = `import { BottomSheet } from '@/components/design-system/components/BottomSheet';
+  const code = `import { BottomSheet } from '@/components/design-system/components';
 
 <BottomSheet isOpen={isOpen} onClose={() => setIsOpen(false)}>
   <h2>Content Title</h2>

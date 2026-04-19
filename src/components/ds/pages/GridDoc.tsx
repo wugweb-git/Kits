@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { Grid } from '../../design-system/components';
+import { Grid } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -17,7 +17,7 @@ export function GridDoc() {
     }
   };
 
-  const code = `import { Grid } from '@/components/design-system/components/Grid';
+  const code = `import { Grid } from '@/components/design-system/components';
 
 <Grid columns={3} gap="var(--spacing-4)">
   <div>Item 1</div>

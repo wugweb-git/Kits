@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Kbd } from '../../design-system/components';
+import { Kbd } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -22,7 +22,7 @@ export function KbdDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const code = `import { Kbd } from "@/components/design-system/components/Kbd";
+  const code = `import { Kbd } from "@/components/design-system/components";
 
 // Single key
 <Kbd>⌘K</Kbd>

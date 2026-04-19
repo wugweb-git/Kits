@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { Logo } from '../../design-system/components';
+import { Logo } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -17,7 +17,7 @@ export function LogoDoc() {
     }
   };
 
-  const code = `import { Logo } from '@/components/design-system/components/Logo';
+  const code = `import { Logo } from '@/components/design-system/components';
 
 // Default size
 <Logo />

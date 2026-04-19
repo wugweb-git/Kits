@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, ArrowRight } from 'lucide-react';
-import { CTABanner } from '../../design-system/components';
+import { CTABanner } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -17,7 +17,7 @@ export function CTABannerDoc() {
     }
   };
 
-  const code = `import { CTABanner } from '@/components/design-system/components/CTABanner';
+  const code = `import { CTABanner } from '@/components/design-system/components';
 
 <CTABanner
   title="Ready to get started?"

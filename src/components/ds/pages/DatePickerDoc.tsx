@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { DatePicker } from '../../design-system/components';
+import { DatePicker } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -25,7 +25,7 @@ export function DatePickerDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { DatePicker } from "@/components/design-system/components/DatePicker";
+  const getDynamicCode = () => `import { DatePicker } from "@/components/design-system/components";
 
 export function DatePickerDemo() {
   const [date, setDate] = React.useState<Date | undefined>();

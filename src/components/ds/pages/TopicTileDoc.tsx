@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Code, Palette, Zap, Shield } from 'lucide-react';
-import { TopicTile } from '../../design-system/components';
+import { TopicTile } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -17,7 +17,7 @@ export function TopicTileDoc() {
     }
   };
 
-  const code = `import { TopicTile } from '@/components/design-system/components/TopicTile';
+  const code = `import { TopicTile } from '@/components/design-system/components';
 import { Code } from 'lucide-react';
 
 <TopicTile

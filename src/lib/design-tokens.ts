@@ -2,67 +2,67 @@
 export const designTokens = {
   "color": {
     "Neutral": {
-      "Neutral 10": { "value": "#000000", "type": "color" },
-      "Neutral 1": { "value": "#ffffff", "type": "color" },
-      "Neutral 5": { "value": "#a3a3a3", "type": "color" },
-      "Neutral 9": { "value": "#1a1a1a", "type": "color" },
-      "Neutral 2": { "value": "#f4f4f4", "type": "color" },
-      "Neutral 3": { "value": "#dfdfdf", "type": "color" },
-      "Neutral 8": { "value": "#2b2b2b", "type": "color" },
-      "Neutral 6": { "value": "#7d7d7d", "type": "color" },
-      "Neutral 4": { "value": "#bababa", "type": "color" },
-      "Neutral 7": { "value": "#444444", "type": "color" }
+      "neutral-10": { "value": "#000000", "type": "color" },
+      "neutral-1": { "value": "#ffffff", "type": "color" },
+      "neutral-5": { "value": "#a3a3a3", "type": "color" },
+      "neutral-9": { "value": "#1a1a1a", "type": "color" },
+      "neutral-2": { "value": "#f4f4f4", "type": "color" },
+      "neutral-3": { "value": "#dfdfdf", "type": "color" },
+      "neutral-8": { "value": "#2b2b2b", "type": "color" },
+      "neutral-6": { "value": "#7d7d7d", "type": "color" },
+      "neutral-4": { "value": "#bababa", "type": "color" },
+      "neutral-7": { "value": "#444444", "type": "color" }
     },
     "Primary": {
-      "Ash Black": { "value": "#191919", "type": "color" },
-      "Yellow Primary": { "value": "#ffbe1a", "type": "color" },
-      "logo Grey": { "value": "#c9c9c9", "type": "color" }
+      "ash-black": { "value": "#191919", "type": "color" },
+      "yellow-primary": { "value": "#ffbe1a", "type": "color" },
+      "logo-grey": { "value": "#c9c9c9", "type": "color" }
     },
     "Background": {
-      "Grey - BG": { "value": "#ebebeb", "type": "color" },
-      "Website - BG": { "value": "#050505", "type": "color" }
+      "surface-muted": { "value": "#ebebeb", "type": "color" },
+      "surface-base": { "value": "#050505", "type": "color" }
     },
     "Extras": {
-      "Blue-S": { "value": "#2368d7", "type": "color" },
-      "Aqua-S": { "value": "#09e2c0", "type": "color" },
-      "Green-S": { "value": "#3ed219", "type": "color" },
-      "Peach-S": { "value": "#e54f30", "type": "color" }
+      "blue-subtle": { "value": "#2368d7", "type": "color" },
+      "aqua-subtle": { "value": "#09e2c0", "type": "color" },
+      "green-subtle": { "value": "#3ed219", "type": "color" },
+      "peach-subtle": { "value": "#e54f30", "type": "color" }
     },
     "Error": {
-      "Error 50": { "value": "#fef1f1", "type": "color" },
-      "Error 100": { "value": "#fee1e1", "type": "color" },
-      "Error 200": { "value": "#fec8c8", "type": "color" },
-      "Error 300": { "value": "#fca6a6", "type": "color" },
-      "Error 400": { "value": "#f87272", "type": "color" },
-      "Error 500": { "value": "#ef4343", "type": "color" },
-      "Error 600": { "value": "#dc2828", "type": "color" },
-      "Error 700": { "value": "#ba1c1c", "type": "color" },
-      "Error 800": { "value": "#981b1b", "type": "color" },
-      "Error 900": { "value": "#811d1d", "type": "color" }
+      "error-50": { "value": "#fef1f1", "type": "color" },
+      "error-100": { "value": "#fee1e1", "type": "color" },
+      "error-200": { "value": "#fec8c8", "type": "color" },
+      "error-300": { "value": "#fca6a6", "type": "color" },
+      "error-400": { "value": "#f87272", "type": "color" },
+      "error-500": { "value": "#ef4343", "type": "color" },
+      "error-600": { "value": "#dc2828", "type": "color" },
+      "error-700": { "value": "#ba1c1c", "type": "color" },
+      "error-800": { "value": "#981b1b", "type": "color" },
+      "error-900": { "value": "#811d1d", "type": "color" }
     },
     "Warning": {
-      "Warning 50": { "value": "#fefce7", "type": "color" },
-      "Warning 100": { "value": "#fef9c3", "type": "color" },
-      "Warning 200": { "value": "#fef08b", "type": "color" },
-      "Warning 300": { "value": "#fddf49", "type": "color" },
-      "Warning 400": { "value": "#facc14", "type": "color" },
-      "Warning 500": { "value": "#e7b008", "type": "color" },
-      "Warning 600": { "value": "#c88a04", "type": "color" },
-      "Warning 700": { "value": "#a26107", "type": "color" },
-      "Warning 800": { "value": "#864e0e", "type": "color" },
-      "Warning 900": { "value": "#733f12", "type": "color" }
+      "warning-50": { "value": "#fefce7", "type": "color" },
+      "warning-100": { "value": "#fef9c3", "type": "color" },
+      "warning-200": { "value": "#fef08b", "type": "color" },
+      "warning-300": { "value": "#fddf49", "type": "color" },
+      "warning-400": { "value": "#facc14", "type": "color" },
+      "warning-500": { "value": "#e7b008", "type": "color" },
+      "warning-600": { "value": "#c88a04", "type": "color" },
+      "warning-700": { "value": "#a26107", "type": "color" },
+      "warning-800": { "value": "#864e0e", "type": "color" },
+      "warning-900": { "value": "#733f12", "type": "color" }
     },
     "Success": {
-      "Success 50": { "value": "#f2fdf5", "type": "color" },
-      "Success 100": { "value": "#defce9", "type": "color" },
-      "Success 200": { "value": "#bbf7d0", "type": "color" },
-      "Success 300": { "value": "#85efac", "type": "color" },
-      "Success 400": { "value": "#4ade80", "type": "color" },
-      "Success 500": { "value": "#21c45d", "type": "color" },
-      "Success 600": { "value": "#16a249", "type": "color" },
-      "Success 700": { "value": "#157f3c", "type": "color" },
-      "Success 800": { "value": "#166434", "type": "color" },
-      "Success 900": { "value": "#14522d", "type": "color" }
+      "success-50": { "value": "#f2fdf5", "type": "color" },
+      "success-100": { "value": "#defce9", "type": "color" },
+      "success-200": { "value": "#bbf7d0", "type": "color" },
+      "success-300": { "value": "#85efac", "type": "color" },
+      "success-400": { "value": "#4ade80", "type": "color" },
+      "success-500": { "value": "#21c45d", "type": "color" },
+      "success-600": { "value": "#16a249", "type": "color" },
+      "success-700": { "value": "#157f3c", "type": "color" },
+      "success-800": { "value": "#166434", "type": "color" },
+      "success-900": { "value": "#14522d", "type": "color" }
     },
     "Accent": {
       "main": { "value": "#ffbe1a", "type": "color" },
@@ -198,28 +198,28 @@ export function formatTokenName(name: string): string {
 export function getTokenUsage(category: string, name: string): string {
   const usageMap: Record<string, Record<string, string>> = {
     'Neutral': {
-      'Neutral 1': 'White - Primary text on dark backgrounds',
-      'Neutral 2': 'Light grey - Subtle backgrounds',
-      'Neutral 3': 'Grey - Secondary backgrounds and borders',
-      'Neutral 4': 'Medium grey - Disabled states',
-      'Neutral 5': 'Grey - Muted text and placeholders',
-      'Neutral 6': 'Dark grey - Secondary text',
-      'Neutral 7': 'Darker grey - Borders and dividers',
-      'Neutral 8': 'Very dark grey - Primary buttons and surfaces',
-      'Neutral 9': 'Almost black - Headings and emphasis',
-      'Neutral 10': 'Black - Maximum contrast text'
+      'neutral-1': 'White - Primary text on dark backgrounds',
+      'neutral-2': 'Light grey - Subtle backgrounds',
+      'neutral-3': 'Grey - Secondary backgrounds and borders',
+      'neutral-4': 'Medium grey - Disabled states',
+      'neutral-5': 'Grey - Muted text and placeholders',
+      'neutral-6': 'Dark grey - Secondary text',
+      'neutral-7': 'Darker grey - Borders and dividers',
+      'neutral-8': 'Very dark grey - Primary buttons and surfaces',
+      'neutral-9': 'Almost black - Headings and emphasis',
+      'neutral-10': 'Black - Maximum contrast text'
     },
     'Accent': {
       'main': 'Primary accent color - Links, focus states, highlights',
-      'Accent200': 'Darker accent variant',
-      'Accent300': 'Darker accent variant',
-      'Accent400': 'Darker accent variant',
-      'Accent500': 'Darker accent variant',
-      'Accent600': 'Darker accent variant',
-      'Accent700': 'Darker accent variant',
-      'Accent800': 'Darker accent variant',
-      'Accent900': 'Darkest accent variant',
-      'Alfa': 'Accent with alpha transparency - Subtle highlights'
+      'accent-200': 'Darker accent variant',
+      'accent-300': 'Darker accent variant',
+      'accent-400': 'Darker accent variant',
+      'accent-500': 'Darker accent variant',
+      'accent-600': 'Darker accent variant',
+      'accent-700': 'Darker accent variant',
+      'accent-800': 'Darker accent variant',
+      'accent-900': 'Darkest accent variant',
+      'accent-alpha': 'Accent with alpha transparency - Subtle highlights'
     }
   };
   

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Spinner } from '../../design-system/components';
+import { Spinner } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -23,7 +23,7 @@ export function SpinnerDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Spinner } from "@/components/design-system/components/Spinner";
+  const getDynamicCode = () => `import { Spinner } from "@/components/design-system/components";
 
 // Basic spinner
 <Spinner />

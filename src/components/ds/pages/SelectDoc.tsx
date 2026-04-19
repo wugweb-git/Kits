@@ -29,7 +29,7 @@ export function SelectDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/design-system/components/Select";
+    return `import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/design-system/components";
 
 export function SelectDemo() {
   return (

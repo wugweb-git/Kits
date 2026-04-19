@@ -24,7 +24,7 @@ export function SkeletonDoc() {
     }
   };
 
-  const jsxCode = `import { Skeleton } from './components/design-system/components/Skeleton';
+  const jsxCode = `import { Skeleton } from './components/design-system/components';
 
 // Card Skeleton Example
 <div className="flex flex-col gap-4 w-[250px]">

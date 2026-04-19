@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Home, Settings, User, LogOut } from 'lucide-react';
-import { MenuItem } from '../../design-system/components';
+import { MenuItem } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -43,7 +43,7 @@ export function MenuItemDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { MenuItem } from '@/components/design-system/components/MenuItem';
+  const codeExample = `import { MenuItem } from '@/components/design-system/components';
 import { Home, Settings, LogOut } from 'lucide-react';
 
 export function MyMenu() {

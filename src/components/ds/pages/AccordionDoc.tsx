@@ -1,5 +1,6 @@
 import React from 'react';
-import { Accordion, AccordionGroup } from '../../design-system/components';
+import { Accordion } from '../../design-system/components';
+import { AccordionGroup } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink, HelpCircle, Settings, Star } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -60,7 +61,7 @@ export function AccordionDoc() {
     },
   ];
 
-  const getDynamicCode = () => `import { Accordion, AccordionGroup } from "@/components/design-system/components/Accordion";
+  const getDynamicCode = () => `import { Accordion, AccordionGroup } from "@/components/design-system/components";
 
 export function AccordionDemo() {
   return (
@@ -85,7 +86,7 @@ export function AccordionDemo() {
   );
 }`;
 
-  const singleCode = `import { Accordion } from "@/components/design-system/components/Accordion";
+  const singleCode = `import { Accordion } from "@/components/design-system/components";
 
 <Accordion title="Accordion Title" defaultOpen>
   Content goes here inside the accordion.

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialChart, DataTable } from '../../design-system/components';
+import { AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialChart, DataTable } from '../../ui/legacy-adapters';
 import { BarChart2, TrendingUp, Activity } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 

@@ -26,3 +26,12 @@ If your exporter supports import mapping, configure it to emit bare package name
 Before removing any component source, run `node scripts/audit-component-duplicates.mjs` and review `reports/duplicate-audit.md`.
 Only exact duplicates should be deleted immediately; non-identical overlaps require migration and state-parity checks first.
 For full cross-tree parity (states, style variables, and references), run `node scripts/audit-full-system-parity.mjs` and review `reports/full-system-parity-audit.md`.
+
+
+## Design system source of truth
+
+- Tokens: `design-system/tokens/*.json`
+- Token docs: `design-system/docs/tokens.md`
+- Component docs: `design-system/docs/components.md`
+- Usage guidelines: `design-system/docs/usage-guidelines.md`
+- Canonical component bridge: `src/components/design-system/components.ts`

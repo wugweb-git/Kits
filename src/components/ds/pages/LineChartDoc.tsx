@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { LineChart } from '../../design-system/components';
+import { LineChart } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -37,7 +37,7 @@ export function LineChartDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { LineChart } from "@/components/design-system/components/LineChart";
+  const getDynamicCode = () => `import { LineChart } from "@/components/design-system/components";
 
 const data = [
   { month: "Jan", revenue: 4200, users: 1800 },

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Search, Mail, Lock, User, Globe } from 'lucide-react';
-import { InputGroup } from '../../design-system/components';
+import { InputGroup } from '../../ui/legacy-adapters';
 import { Input } from '../../design-system/components';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
@@ -22,8 +22,8 @@ export function InputGroupDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const code = `import { InputGroup } from "@/components/design-system/components/InputGroup";
-import { Input } from "@/components/design-system/components/Input";
+  const code = `import { InputGroup } from "@/components/design-system/components";
+import { Input } from "@/components/design-system/components";
 import { Search, Mail } from "lucide-react";
 
 // Left icon

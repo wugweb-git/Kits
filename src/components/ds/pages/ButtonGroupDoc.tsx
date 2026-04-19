@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, AlignLeft, AlignCenter, AlignRight, Bold, Italic, Underline } from 'lucide-react';
-import { ButtonGroup } from '../../design-system/components';
+import { ButtonGroup } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -28,8 +28,8 @@ export function ButtonGroupDoc() {
     setFormat(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f]);
   };
 
-  const code = `import { ButtonGroup } from "@/components/design-system/components/ButtonGroup";
-import { Button } from "@/components/design-system/components/Button";
+  const code = `import { ButtonGroup } from "@/components/design-system/components";
+import { Button } from "@/components/design-system/components";
 import { AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 
 // Horizontal group (default)

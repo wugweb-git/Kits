@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { TeamCard } from '../../design-system/components';
+import { TeamCard } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -17,7 +17,7 @@ export function TeamCardDoc() {
     }
   };
 
-  const code = `import { TeamCard } from '@/components/design-system/components/TeamCard';
+  const code = `import { TeamCard } from '@/components/design-system/components';
 
 <TeamCard
   name="Sarah Johnson"

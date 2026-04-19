@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Home, Folder, Star, Settings } from 'lucide-react';
-import { SideMenu, SideMenuItem } from '../../design-system/components';
+import { SideMenu, SideMenuItem } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -24,7 +24,7 @@ export function SideMenuDoc() {
     { label: 'Settings', href: '#settings', icon: <Settings size={18} /> },
   ];
 
-  const code = `import { SideMenu } from '@/components/design-system/components/SideMenu';
+  const code = `import { SideMenu } from '@/components/design-system/components';
 import { Home, Folder, Star, Settings } from 'lucide-react';
 
 const items = [

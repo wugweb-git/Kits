@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, Tag, X, Settings, Filter, ExternalLink } from 'lucide-react';
-import { Chip } from '../../design-system/components';
+import { Chip } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -63,7 +63,7 @@ export function ChipDoc() {
     if (selectedState === 'selected') props.push(`selected`);
     if (selectedState === 'disabled') props.push(`disabled`);
     
-    return `import { Chip } from '@/components/design-system/components/Chip';
+    return `import { Chip } from '@/components/design-system/components';
 ${iconPosition !== 'none' ? 'import { Tag } from \'lucide-react\';\n' : ''}
 export function ChipDemo() {
   return (

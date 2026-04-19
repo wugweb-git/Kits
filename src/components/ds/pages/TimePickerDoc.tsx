@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { TimePicker } from '../../design-system/components';
+import { TimePicker } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -25,7 +25,7 @@ export function TimePickerDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { TimePicker } from "@/components/design-system/components/TimePicker";
+  const getDynamicCode = () => `import { TimePicker } from "@/components/design-system/components";
 
 export function TimePickerDemo() {
   const [time, setTime] = React.useState("09:00");
