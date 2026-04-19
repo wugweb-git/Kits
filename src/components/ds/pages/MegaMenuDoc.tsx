@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, BarChart2, FileText, Settings, Package, Users, Zap, Code, Globe } from 'lucide-react';
-import { MegaMenu } from '../../wugweb/MegaMenu';
-import { Button } from '../../wugweb/Button';
+import { MegaMenu } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -48,7 +48,7 @@ export function MegaMenuDoc() {
     },
   ];
 
-  const code = `import { MegaMenu } from "@/components/wugweb/MegaMenu";
+  const code = `import { MegaMenu } from "@/components/design-system/components/MegaMenu";
 import { Package, Zap, Code } from "lucide-react";
 
 const sections = [

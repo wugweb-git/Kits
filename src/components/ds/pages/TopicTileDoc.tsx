@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Code, Palette, Zap, Shield } from 'lucide-react';
-import { TopicTile } from '../../wugweb/TopicTile';
-import { Button } from '../../wugweb/Button';
+import { TopicTile } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -17,7 +17,7 @@ export function TopicTileDoc() {
     }
   };
 
-  const code = `import { TopicTile } from '@/components/wugweb/TopicTile';
+  const code = `import { TopicTile } from '@/components/design-system/components/TopicTile';
 import { Code } from 'lucide-react';
 
 <TopicTile

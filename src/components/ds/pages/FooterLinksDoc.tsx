@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { FooterLinks, FooterLinkGroup } from '../../wugweb/FooterLinks';
-import { Button } from '../../wugweb/Button';
+import { FooterLinks, FooterLinkGroup } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -36,7 +36,7 @@ export function FooterLinksDoc() {
     }
   ];
 
-  const code = `import { FooterLinks } from '@/components/wugweb/FooterLinks';
+  const code = `import { FooterLinks } from '@/components/design-system/components/FooterLinks';
 
 const groups = [
   {

@@ -1,11 +1,11 @@
 import React from 'react';
-import { Accordion, AccordionGroup } from '../../wugweb/Accordion';
+import { Accordion, AccordionGroup } from '../../design-system/components';
 import { Check, Copy, ExternalLink, HelpCircle, Settings, Star } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { siteInventory } from '../../../generated/siteInventory';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function AccordionDoc() {
@@ -60,7 +60,7 @@ export function AccordionDoc() {
     },
   ];
 
-  const getDynamicCode = () => `import { Accordion, AccordionGroup } from "@/components/wugweb/Accordion";
+  const getDynamicCode = () => `import { Accordion, AccordionGroup } from "@/components/design-system/components/Accordion";
 
 export function AccordionDemo() {
   return (
@@ -85,7 +85,7 @@ export function AccordionDemo() {
   );
 }`;
 
-  const singleCode = `import { Accordion } from "@/components/wugweb/Accordion";
+  const singleCode = `import { Accordion } from "@/components/design-system/components/Accordion";
 
 <Accordion title="Accordion Title" defaultOpen>
   Content goes here inside the accordion.

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layers, Box, Grid3x3, Monitor, GitBranch, Zap, MousePointer, Image, Layout } from 'lucide-react';
-import { Badge } from '../../wugweb/Badge';
+import { Badge } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { siteInventory } from '../../../generated/siteInventory';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { WYSIWYG } from '../../wugweb/WYSIWYG';
-import { Button } from '../../wugweb/Button';
+import { WYSIWYG } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -24,7 +24,7 @@ export function WYSIWYGDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { WYSIWYG } from "@/components/wugweb/WYSIWYG";
+  const getDynamicCode = () => `import { WYSIWYG } from "@/components/design-system/components/WYSIWYG";
 
 export function WYSIWYGDemo() {
   const [content, setContent] = React.useState('');

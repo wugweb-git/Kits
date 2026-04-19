@@ -1,10 +1,10 @@
 import React from 'react';
-import { Progress } from '../../wugweb/Progress';
+import { Progress } from '../../design-system/components';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function ProgressDoc() {
@@ -27,7 +27,7 @@ export function ProgressDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Progress } from "@/components/wugweb/Progress";
+    return `import { Progress } from "@/components/design-system/components/Progress";
 
 export function ProgressDemo() {
   return <Progress value={${value}} />;

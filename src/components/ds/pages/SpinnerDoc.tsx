@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Spinner } from '../../wugweb/Spinner';
-import { Button } from '../../wugweb/Button';
+import { Spinner } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -23,7 +23,7 @@ export function SpinnerDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Spinner } from "@/components/wugweb/Spinner";
+  const getDynamicCode = () => `import { Spinner } from "@/components/design-system/components/Spinner";
 
 // Basic spinner
 <Spinner />

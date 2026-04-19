@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Edit, Share, Trash2, Download, Mail } from 'lucide-react';
-import { SpeedDial } from '../../wugweb/SpeedDial';
-import { Button } from '../../wugweb/Button';
+import { SpeedDial } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -30,7 +30,7 @@ export function SpeedDialDoc() {
     { id: 'delete', label: 'Delete', icon: Trash2, onClick: () => {} },
   ];
 
-  const getDynamicCode = () => `import { SpeedDial } from "@/components/wugweb/SpeedDial";
+  const getDynamicCode = () => `import { SpeedDial } from "@/components/design-system/components/SpeedDial";
 import { Edit, Share, Trash2 } from "lucide-react";
 
 const actions = [

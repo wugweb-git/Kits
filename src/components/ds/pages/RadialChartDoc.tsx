@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { RadialChart } from '../../wugweb/RadialChart';
-import { Button } from '../../wugweb/Button';
+import { RadialChart } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -39,7 +39,7 @@ export function RadialChartDoc() {
 
   const currentData = dataset === 'progress' ? progressData : storageData;
 
-  const getDynamicCode = () => `import { RadialChart } from "@/components/wugweb/RadialChart";
+  const getDynamicCode = () => `import { RadialChart } from "@/components/design-system/components/RadialChart";
 
 const data = [
   { name: "Components Done", value: 127, fill: "var(--chart-4)" },

@@ -4,7 +4,7 @@ import { Check, Copy, ExternalLink, Calendar, Settings } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function PopoverDoc() {
@@ -27,8 +27,8 @@ export function PopoverDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Popover, PopoverTrigger, PopoverContent } from "@/components/wugweb/Popover";
-import { Button } from "@/components/wugweb/Button";
+    return `import { Popover, PopoverTrigger, PopoverContent } from "@/components/design-system/components/Popover";
+import { Button } from "@/components/design-system/components/Button";
 
 export function PopoverDemo() {
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ChevronRight, Info, FileCode, Home, Slash, ArrowRight, Dot, Code2, ExternalLink } from 'lucide-react';
-import { Breadcrumb, BreadcrumbItem } from '../../wugweb/Breadcrumb';
-import { Button } from '../../wugweb/Button';
+import { Breadcrumb, BreadcrumbItem } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -71,7 +71,7 @@ export function BreadcrumbDoc() {
     if (showHomeIcon) props.push(`// Add icon to first item`);
     if (enableTruncation) props.push(`maxItems={3}`);
     
-    return `import { Breadcrumb } from '@/components/wugweb/Breadcrumb';
+    return `import { Breadcrumb } from '@/components/design-system/components/Breadcrumb';
 import { Home } from 'lucide-react';
 
 const items = [

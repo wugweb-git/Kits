@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Kbd } from '../../wugweb/Kbd';
-import { Button } from '../../wugweb/Button';
+import { Kbd } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -22,7 +22,7 @@ export function KbdDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const code = `import { Kbd } from "@/components/wugweb/Kbd";
+  const code = `import { Kbd } from "@/components/design-system/components/Kbd";
 
 // Single key
 <Kbd>⌘K</Kbd>

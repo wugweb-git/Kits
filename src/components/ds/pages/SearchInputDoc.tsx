@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { SearchInput } from '../../wugweb/SearchInput';
-import { Button } from '../../wugweb/Button';
+import { SearchInput } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -28,7 +28,7 @@ export function SearchInputDoc() {
     }
   };
 
-  const getDynamicCode = () => `import { SearchInput } from "@/components/wugweb/SearchInput";
+  const getDynamicCode = () => `import { SearchInput } from "@/components/design-system/components/SearchInput";
 
 export function SearchInputDemo() {
   const [value, setValue] = React.useState('');

@@ -1,8 +1,8 @@
 import React from 'react';
 import { ArrowRight, Zap, Palette, Layers, Code, Upload, Box, CheckCircle2, Sparkles, Shield, Gauge } from 'lucide-react';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { siteInventory } from '../../../generated/siteInventory';
-import { Badge } from '../../wugweb/Badge';
+import { Badge } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 
 /**

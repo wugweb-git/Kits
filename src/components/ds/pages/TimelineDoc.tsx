@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, GitCommit, Tag, Rocket, Bug, Wrench } from 'lucide-react';
-import { Timeline } from '../../wugweb/Timeline';
-import { Button } from '../../wugweb/Button';
+import { Timeline } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -30,7 +30,7 @@ export function TimelineDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Timeline } from "@/components/wugweb/Timeline";
+  const getDynamicCode = () => `import { Timeline } from "@/components/design-system/components/Timeline";
 import { Rocket, Bug } from "lucide-react";
 
 const events = [

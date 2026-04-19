@@ -1,8 +1,8 @@
 import React from 'react';
 import { Copy, Check, Download, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
-import { Button } from '../../wugweb/Button';
-import { Badge } from '../../wugweb/Badge';
+import { Button } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
 import { siteInventory } from '../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';

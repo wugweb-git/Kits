@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Jumbotron } from '../../wugweb/Jumbotron';
-import { Button } from '../../wugweb/Button';
+import { Jumbotron } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -26,7 +26,7 @@ export function JumbotronDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Jumbotron } from "@/components/wugweb/Jumbotron";
+  const getDynamicCode = () => `import { Jumbotron } from "@/components/design-system/components/Jumbotron";
 
 <Jumbotron
   title="Build faster with Wugweb Kits"

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { TeamCard } from '../../wugweb/TeamCard';
-import { Button } from '../../wugweb/Button';
+import { TeamCard } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -17,7 +17,7 @@ export function TeamCardDoc() {
     }
   };
 
-  const code = `import { TeamCard } from '@/components/wugweb/TeamCard';
+  const code = `import { TeamCard } from '@/components/design-system/components/TeamCard';
 
 <TeamCard
   name="Sarah Johnson"

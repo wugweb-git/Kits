@@ -1,8 +1,8 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { DataTable } from '../../wugweb/DataTable';
-import { Badge } from '../../wugweb/Badge';
-import { Button } from '../../wugweb/Button';
+import { DataTable } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -61,7 +61,7 @@ export function DataTableDoc() {
     { key: 'joined', title: 'Joined', sortable: true },
   ];
 
-  const getDynamicCode = () => `import { DataTable } from "@/components/wugweb/DataTable";
+  const getDynamicCode = () => `import { DataTable } from "@/components/design-system/components/DataTable";
 
 const columns = [
   { key: "name", title: "Name", sortable: true },

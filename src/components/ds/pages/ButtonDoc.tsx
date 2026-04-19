@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { Check, Copy, ExternalLink, ArrowRight, ChevronRight } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -44,7 +44,7 @@ export function ButtonDoc() {
     
     const propsString = props.length > 0 ? `\n  ${props.join('\n  ')}` : '';
     
-    return `import { Button } from "@/components/wugweb/Button";
+    return `import { Button } from "@/components/design-system/components/Button";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 export function ButtonDemo() {

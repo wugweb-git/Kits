@@ -3,8 +3,8 @@ import { Copy, Check, ExternalLink, Github, Star } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Collapsible } from '../../wugweb/Collapsible';
-import { Button } from '../../wugweb/Button';
+import { Collapsible } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function CollapsibleDoc() {
@@ -25,7 +25,7 @@ export function CollapsibleDoc() {
     }
   };
 
-  const jsxCode = `import { Collapsible } from './components/wugweb/Collapsible';
+  const jsxCode = `import { Collapsible } from './components/design-system/components/Collapsible';
 
 <Collapsible
   title="@peduarte starred 3 repositories"

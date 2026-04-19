@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, AlertTriangle } from 'lucide-react';
-import { AlertDialog } from '../../wugweb/AlertDialog';
-import { Button } from '../../wugweb/Button';
+import { AlertDialog } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -43,7 +43,7 @@ export function AlertDialogDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { AlertDialog } from '@/components/wugweb/AlertDialog';
+  const codeExample = `import { AlertDialog } from '@/components/design-system/components/AlertDialog';
 import { useState } from 'react';
 
 export function AlertDialogDemo() {

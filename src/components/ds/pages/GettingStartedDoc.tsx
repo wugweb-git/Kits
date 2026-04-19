@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ArrowRight, BookOpen, Layers, Palette, Zap, Code2, Star } from 'lucide-react';
-import { Button } from '../../wugweb/Button';
-import { Badge } from '../../wugweb/Badge';
+import { Button } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -79,10 +79,10 @@ button { background: var(--accent); }
   --accent: rgba(59, 130, 246, 1.00); /* switch to blue */
 }`;
 
-  const quickStartCode = `import { Button } from "@/components/wugweb/Button";
-import { Input } from "@/components/wugweb/Input";
-import { Badge } from "@/components/wugweb/Badge";
-import { Card } from "@/components/wugweb/Card";
+  const quickStartCode = `import { Button } from "@/components/design-system/components/Button";
+import { Input } from "@/components/design-system/components/Input";
+import { Badge } from "@/components/design-system/components/Badge";
+import { Card } from "@/components/design-system/components/Card";
 
 export default function MyFirstComponent() {
   const [email, setEmail] = React.useState('');

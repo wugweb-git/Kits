@@ -1,10 +1,10 @@
 import React from 'react';
-import { Badge } from '../../wugweb/Badge';
+import { Badge } from '../../design-system/components';
 import { Check, Copy, ExternalLink, AlertCircle, CheckCircle, Star } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function BadgeDoc() {
@@ -40,7 +40,7 @@ export function BadgeDoc() {
     
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Badge } from "@/components/wugweb/Badge";
+    return `import { Badge } from "@/components/design-system/components/Badge";
 import { Star } from "lucide-react";
 
 export function BadgeDemo() {

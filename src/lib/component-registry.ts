@@ -385,7 +385,7 @@ export const componentRegistry: Component[] = [
       'Loading state shows spinner with proper aria-busy attribute',
       'Button text should be descriptive of the action',
     ],
-    codeSnippet: `import { Button } from './components/wugweb/Button';
+    codeSnippet: `import { Button } from './components/design-system/components';
 import { ArrowRight, Trash2 } from 'lucide-react';
 
 // Primary button with icons (from Figma)

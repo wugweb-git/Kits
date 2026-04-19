@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { Clipboard } from '../../wugweb/Clipboard';
-import { Button } from '../../wugweb/Button';
+import { Clipboard } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -22,7 +22,7 @@ export function ClipboardDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Clipboard } from "@/components/wugweb/Clipboard";
+  const getDynamicCode = () => `import { Clipboard } from "@/components/design-system/components/Clipboard";
 
 // Button variant (shows copy icon button)
 <Clipboard text="npm install wugweb-kits" variant="button">
@@ -48,7 +48,7 @@ export function ClipboardDoc() {
 
   const snippets = [
     { label: 'Install command', text: 'npm install wugweb-kits', description: 'Package installation' },
-    { label: 'Import statement', text: "import { Button } from '@/components/wugweb/Button';", description: 'Component import' },
+    { label: 'Import statement', text: "import { Button } from '@/components/design-system/components/Button';", description: 'Component import' },
     { label: 'CSS variable', text: 'var(--accent)', description: 'Design token' },
     { label: 'API key', text: 'wk_live_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', description: 'API credentials' },
   ];

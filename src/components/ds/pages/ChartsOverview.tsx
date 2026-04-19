@@ -1,5 +1,5 @@
 import React from 'react';
-import { AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialChart, DataTable } from '../../wugweb';
+import { AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialChart, DataTable } from '../../design-system/components';
 import { BarChart2, TrendingUp, Activity } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 
@@ -502,7 +502,7 @@ export function ChartsOverview() {
             overflow: 'auto',
           }}
         >
-          {`import { AreaChart } from './components/wugweb';
+          {`import { AreaChart } from './components/design-system/components';
 
 const data = [
   { month: 'Jan', sales: 4000 },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BlockPageShell } from './BlockPageShell';
-import { Button } from '../../../wugweb/Button';
-import { Badge } from '../../../wugweb/Badge';
+import { Button } from '../../../design-system/components';
+import { Badge } from '../../../design-system/components';
 import { siteInventory } from '../../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';

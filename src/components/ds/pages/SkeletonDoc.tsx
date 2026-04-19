@@ -3,8 +3,8 @@ import { Copy, Check, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Skeleton } from '../../wugweb/Skeleton';
-import { Button } from '../../wugweb/Button';
+import { Skeleton } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function SkeletonDoc() {
@@ -24,7 +24,7 @@ export function SkeletonDoc() {
     }
   };
 
-  const jsxCode = `import { Skeleton } from './components/wugweb/Skeleton';
+  const jsxCode = `import { Skeleton } from './components/design-system/components/Skeleton';
 
 // Card Skeleton Example
 <div className="flex flex-col gap-4 w-[250px]">

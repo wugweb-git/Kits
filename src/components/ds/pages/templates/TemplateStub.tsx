@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, ArrowLeft } from 'lucide-react';
 import { PageWrapper, PageHeader } from '../../PageWrapper';
-import { Button } from '../../../wugweb/Button';
+import { Button } from '../../../design-system/components';
 
 const F = 'Inter Tight, sans-serif';
 

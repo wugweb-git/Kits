@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ChevronRight, ArrowRight, Database, Layers, Zap, AlertTriangle } from 'lucide-react';
-import { Button } from '../../wugweb/Button';
-import { Badge } from '../../wugweb/Badge';
+import { Button } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -152,7 +152,7 @@ module.exports = {
 };`;
 
 const usageExample = `// ✅ CORRECT — uses tokens at every layer
-import { Button } from "@/components/wugweb/Button";
+import { Button } from "@/components/design-system/components/Button";
 
 function MyCard() {
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { PhoneInput } from '../../wugweb/PhoneInput';
-import { Button } from '../../wugweb/Button';
+import { PhoneInput } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -18,7 +18,7 @@ export function PhoneInputDoc() {
     }
   };
 
-  const code = `import { PhoneInput } from '@/components/wugweb/PhoneInput';
+  const code = `import { PhoneInput } from '@/components/design-system/components/PhoneInput';
 
 <PhoneInput
   value={phone}

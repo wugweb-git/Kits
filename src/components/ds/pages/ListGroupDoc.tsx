@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Home, Settings, User, Bell, FileText, Star } from 'lucide-react';
-import { ListGroup } from '../../wugweb/ListGroup';
-import { Button } from '../../wugweb/Button';
+import { ListGroup } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -32,7 +32,7 @@ export function ListGroupDoc() {
     { id: '6', label: 'Settings', icon: Settings, description: 'Manage your preferences', onClick: () => {} },
   ];
 
-  const getDynamicCode = () => `import { ListGroup } from "@/components/wugweb/ListGroup";
+  const getDynamicCode = () => `import { ListGroup } from "@/components/design-system/components/ListGroup";
 import { Home, User, Bell } from "lucide-react";
 
 const items = [

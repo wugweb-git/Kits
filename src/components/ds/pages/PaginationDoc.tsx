@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Pagination } from '../../wugweb/Pagination';
-import { Button } from '../../wugweb/Button';
+import { Pagination } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -44,7 +44,7 @@ export function PaginationDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { Pagination } from '@/components/wugweb/Pagination';
+  const codeExample = `import { Pagination } from '@/components/design-system/components/Pagination';
 import { useState } from 'react';
 
 export function PaginationDemo() {

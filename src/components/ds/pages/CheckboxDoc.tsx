@@ -1,11 +1,11 @@
 import React from 'react';
-import { Checkbox } from '../../wugweb/Checkbox';
-import { Label } from '../../wugweb/Label';
+import { Checkbox } from '../../design-system/components';
+import { Label } from '../../design-system/components';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function CheckboxDoc() {
@@ -29,8 +29,8 @@ export function CheckboxDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Checkbox } from "@/components/wugweb/Checkbox";
-import { Label } from "@/components/wugweb/Label";
+    return `import { Checkbox } from "@/components/design-system/components/Checkbox";
+import { Label } from "@/components/design-system/components/Label";
 
 export function CheckboxDemo() {
   const [checked, setChecked] = React.useState(false);

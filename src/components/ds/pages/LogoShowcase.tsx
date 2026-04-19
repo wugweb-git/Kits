@@ -1,9 +1,9 @@
 import React from 'react';
 import { Copy, Check, Download, ExternalLink } from 'lucide-react';
-import { Logo } from '../../wugweb/Logo';
-import { Button } from '../../wugweb/Button';
-import { Badge } from '../../wugweb/Badge';
-import KitsLogoSvg from '../../../imports/Kits_Logo.svg';
+import { Logo } from '../../design-system/components';
+import { Button } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
+import KitsLogoSvg from '../../../assets/kits-logo.svg';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
@@ -184,7 +184,7 @@ export function LogoShowcase() {
   const link = document.createElement('link');
   link.rel = 'icon';
   link.type = 'image/svg+xml';
-  link.href = '/imports/Kits_Logo.svg';
+  link.href = '/assets/kits-logo.svg';
   document.head.appendChild(link);
   document.title = 'Wugweb Kits — Design System';
 }, []);`}</pre>

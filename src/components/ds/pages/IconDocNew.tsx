@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Sparkles } from 'lucide-react';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { copyToClipboard } from '../../../utils/clipboard';
 

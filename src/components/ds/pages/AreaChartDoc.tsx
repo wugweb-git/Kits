@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { AreaChart } from '../../wugweb/AreaChart';
-import { Button } from '../../wugweb/Button';
+import { AreaChart } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -26,7 +26,7 @@ export function AreaChartDoc() {
     { name: 'Jun', value: 900 },
   ];
 
-  const code = `import { AreaChart } from '@/components/wugweb/AreaChart';
+  const code = `import { AreaChart } from '@/components/design-system/components/AreaChart';
 
 const data = [
   { name: 'Jan', value: 400 },
