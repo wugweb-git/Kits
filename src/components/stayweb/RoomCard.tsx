@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, BedDouble, Wind, Tv, Wifi, Bath, Users } from 'lucide-react';
-import { Button } from '../wugweb/Button';
-import { Badge } from '../wugweb/Badge';
+import { Button } from '../design-system/components';
+import { Badge } from '../design-system/components';
 
 interface RoomCardProps {
   title: string;
