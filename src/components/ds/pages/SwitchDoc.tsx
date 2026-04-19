@@ -29,8 +29,8 @@ export function SwitchDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Switch } from "@/components/design-system/components/Switch";
-import { Label } from "@/components/design-system/components/Label";
+    return `import { Switch } from "@/components/design-system/components";
+import { Label } from "@/components/design-system/components";
 
 export function SwitchDemo() {
   const [checked, setChecked] = React.useState(${isChecked});

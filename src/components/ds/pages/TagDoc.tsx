@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag } from '../../design-system/components';
+import { Tag } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink, X } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -34,7 +34,7 @@ export function TagDoc() {
     
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Tag } from "@/components/design-system/components/Tag";
+    return `import { Tag } from "@/components/design-system/components";
 import { X } from "lucide-react";
 
 export function TagDemo() {

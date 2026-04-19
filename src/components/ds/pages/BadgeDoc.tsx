@@ -40,7 +40,7 @@ export function BadgeDoc() {
     
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Badge } from "@/components/design-system/components/Badge";
+    return `import { Badge } from "@/components/design-system/components";
 import { Star } from "lucide-react";
 
 export function BadgeDemo() {

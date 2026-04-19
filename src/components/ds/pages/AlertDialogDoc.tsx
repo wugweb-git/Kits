@@ -43,7 +43,7 @@ export function AlertDialogDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { AlertDialog } from '@/components/design-system/components/AlertDialog';
+  const codeExample = `import { AlertDialog } from '@/components/design-system/components';
 import { useState } from 'react';
 
 export function AlertDialogDemo() {

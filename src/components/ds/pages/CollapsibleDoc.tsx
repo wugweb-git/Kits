@@ -25,7 +25,7 @@ export function CollapsibleDoc() {
     }
   };
 
-  const jsxCode = `import { Collapsible } from './components/design-system/components/Collapsible';
+  const jsxCode = `import { Collapsible } from './components/design-system/components';
 
 <Collapsible
   title="@peduarte starred 3 repositories"

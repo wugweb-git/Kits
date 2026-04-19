@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { AreaChart } from '../../design-system/components';
-import { BarChart } from '../../design-system/components';
+import { AreaChart } from '../../ui/legacy-adapters';
+import { BarChart } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';

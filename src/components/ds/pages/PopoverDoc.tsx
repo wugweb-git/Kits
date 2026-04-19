@@ -27,8 +27,8 @@ export function PopoverDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Popover, PopoverTrigger, PopoverContent } from "@/components/design-system/components/Popover";
-import { Button } from "@/components/design-system/components/Button";
+    return `import { Popover, PopoverTrigger, PopoverContent } from "@/components/design-system/components";
+import { Button } from "@/components/design-system/components";
 
 export function PopoverDemo() {
   return (

@@ -3,7 +3,7 @@ import { Copy, Check, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Divider } from '../../design-system/components';
+import { Divider } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { Switch } from '../../design-system/components';
 import { Label } from '../../design-system/components';
@@ -30,7 +30,7 @@ export function DividerDoc() {
     }
   };
 
-  const jsxCode = `import { Divider } from './components/design-system/components/Divider';
+  const jsxCode = `import { Divider } from './components/design-system/components';
 
 <Divider
   orientation="${orientation}"

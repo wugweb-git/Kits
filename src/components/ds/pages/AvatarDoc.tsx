@@ -1,5 +1,6 @@
 import React from 'react';
-import { Avatar, AvatarGroup } from '../../design-system/components';
+import { Avatar } from '../../design-system/components';
+import { AvatarGroup } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -34,7 +35,7 @@ export function AvatarDoc() {
     if (selectedStatus !== 'none') props.push(`status="${selectedStatus}"`);
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Avatar } from "@/components/design-system/components/Avatar";
+    return `import { Avatar } from "@/components/design-system/components";
 
 export function AvatarDemo() {
   return (

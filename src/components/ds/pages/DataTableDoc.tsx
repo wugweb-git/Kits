@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { DataTable } from '../../design-system/components';
+import { DataTable } from '../../ui/legacy-adapters';
 import { Badge } from '../../design-system/components';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
@@ -61,7 +61,7 @@ export function DataTableDoc() {
     { key: 'joined', title: 'Joined', sortable: true },
   ];
 
-  const getDynamicCode = () => `import { DataTable } from "@/components/design-system/components/DataTable";
+  const getDynamicCode = () => `import { DataTable } from "@/components/design-system/components";
 
 const columns = [
   { key: "name", title: "Name", sortable: true },

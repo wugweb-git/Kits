@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Menu, X } from 'lucide-react';
-import { Header, HeaderNavItem } from '../../design-system/components';
-import { Logo } from '../../design-system/components';
+import { Header, HeaderNavItem } from '../../ui/legacy-adapters';
+import { Logo } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -51,8 +51,8 @@ export function HeaderDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { Header } from '@/components/design-system/components/Header';
-import { Logo } from '@/components/design-system/components/Logo';
+  const codeExample = `import { Header } from '@/components/design-system/components';
+import { Logo } from '@/components/design-system/components';
 
 const navItems = [
   { label: 'About', href: '#about' },

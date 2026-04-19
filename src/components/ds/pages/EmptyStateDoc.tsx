@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, FileQuestion, Search, Package, Users, Inbox } from 'lucide-react';
-import { EmptyState } from '../../design-system/components';
+import { EmptyState } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -27,7 +27,7 @@ export function EmptyStateDoc() {
   const iconMap = { FileQuestion, Search, Package, Inbox };
   const currentIcon = iconMap[icon];
 
-  const getDynamicCode = () => `import { EmptyState } from "@/components/design-system/components/EmptyState";
+  const getDynamicCode = () => `import { EmptyState } from "@/components/design-system/components";
 import { ${icon} } from "lucide-react";
 
 <EmptyState

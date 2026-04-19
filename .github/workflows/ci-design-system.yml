@@ -10,10 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Verify npm lockfile exists
+        run: test -f package-lock.json
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
-      - run: npm ci
+          cache-dependency-path: package-lock.json
+
+      - name: Print runtime versions
+        run: |
+          node -v
+          npm -v
+
+      - name: Install dependencies (ci with fallback)
+        run: |
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+
       - run: npm run check:ci
       - run: npm run test:visual

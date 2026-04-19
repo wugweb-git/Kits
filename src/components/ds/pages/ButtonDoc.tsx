@@ -44,7 +44,7 @@ export function ButtonDoc() {
     
     const propsString = props.length > 0 ? `\n  ${props.join('\n  ')}` : '';
     
-    return `import { Button } from "@/components/design-system/components/Button";
+    return `import { Button } from "@/components/design-system/components";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 export function ButtonDemo() {

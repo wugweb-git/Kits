@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, BarChart2, FileText, Settings, Package, Users, Zap, Code, Globe } from 'lucide-react';
-import { MegaMenu } from '../../design-system/components';
+import { MegaMenu } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -48,7 +48,7 @@ export function MegaMenuDoc() {
     },
   ];
 
-  const code = `import { MegaMenu } from "@/components/design-system/components/MegaMenu";
+  const code = `import { MegaMenu } from "@/components/design-system/components";
 import { Package, Zap, Code } from "lucide-react";
 
 const sections = [

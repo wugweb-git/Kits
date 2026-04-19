@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, GitCommit, Tag, Rocket, Bug, Wrench } from 'lucide-react';
-import { Timeline } from '../../design-system/components';
+import { Timeline } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -30,7 +30,7 @@ export function TimelineDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Timeline } from "@/components/design-system/components/Timeline";
+  const getDynamicCode = () => `import { Timeline } from "@/components/design-system/components";
 import { Rocket, Bug } from "lucide-react";
 
 const events = [

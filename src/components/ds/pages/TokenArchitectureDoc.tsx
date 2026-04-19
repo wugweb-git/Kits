@@ -152,7 +152,7 @@ module.exports = {
 };`;
 
 const usageExample = `// ✅ CORRECT — uses tokens at every layer
-import { Button } from "@/components/design-system/components/Button";
+import { Button } from "@/components/design-system/components";
 
 function MyCard() {
   return (

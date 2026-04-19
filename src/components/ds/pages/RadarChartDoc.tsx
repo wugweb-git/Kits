@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { RadarChart } from '../../design-system/components';
+import { RadarChart } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
@@ -54,7 +54,7 @@ export function RadarChartDoc() {
         { key: 'mobile', name: 'Mobile', color: 'var(--chart-3)' },
       ];
 
-  const getDynamicCode = () => `import { RadarChart } from "@/components/design-system/components/RadarChart";
+  const getDynamicCode = () => `import { RadarChart } from "@/components/design-system/components";
 
 const skillsData = [
   { skill: "Accessibility", current: 80, target: 95 },

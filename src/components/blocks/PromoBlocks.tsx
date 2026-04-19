@@ -1,5 +1,5 @@
 import React from 'react';
-import { Logo } from '../wugweb/Logo';
+import { Logo } from '../ui/legacy-adapters';
 import { Check, ArrowRight, Calendar, ExternalLink } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 

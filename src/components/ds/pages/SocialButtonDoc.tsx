@@ -26,7 +26,7 @@ export function SocialButtonDoc() {
     }
   };
 
-  const jsxCode = `import { SocialButton } from './components/design-system/components/SocialButton';
+  const jsxCode = `import { SocialButton } from './components/design-system/components';
 import { Github } from 'lucide-react';
 
 <SocialButton
