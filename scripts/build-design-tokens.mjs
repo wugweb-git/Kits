@@ -39,6 +39,10 @@ function runFallbackBuilder() {
 
 try {
   await runStyleDictionary();
-} catch {
-  runFallbackBuilder();
+} catch (error) {
+  if (error && typeof error === 'object' && 'code' in error && error.code === 'ERR_MODULE_NOT_FOUND') {
+    runFallbackBuilder();
+  } else {
+    throw error;
+  }
 }

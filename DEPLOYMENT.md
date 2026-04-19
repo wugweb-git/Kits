@@ -4,7 +4,7 @@
 
 This repo is configured for Vite output in `build/` via `vercel.json`.
 
-- Install command: `npm ci`
+- Install command: `npm install --no-audit --no-fund`
 - Build command: `npm run build`
 - Output directory: `build`
 
@@ -12,12 +12,27 @@ This repo is configured for Vite output in `build/` via `vercel.json`.
 
 CI requires `package-lock.json` at repository root. Do not remove it.
 
+Vercel is configured to use `npm install` for deployment installs so builds are not blocked by strict `npm ci` lockfile sync checks when project settings or merge timing cause drift.
+
 ## Workflow SDK (Vercel Workflows)
 
 There is no separate UI toggle required for basic SDK usage in most projects.
 
-1. Install the official Workflow SDK in environments with npm registry access (`npm i workflow`).
-2. In restricted environments, use the local shim in `src/lib/workflow.ts` for development validation.
-3. Add workflow functions using the `"use workflow"` directive and deploy to monitor executions in Vercel Workflow/observability views.
+1. This repo includes a local `workflow` compatibility package (`vendor/workflow`) so imports like `import { sleep } from "workflow"` work in all environments.
+2. Add workflow functions using the `"use workflow"` directive (example: `src/workflows/handleUserSignup.ts`).
+3. In environments with npm registry access, replace the local package with the official SDK by running `npm i workflow@latest` and committing the updated lockfile.
 
-Example workflow function is provided in `src/workflows/handleUserSignup.ts`.
+
+## Unverified commit deployments
+
+If Vercel shows **"Deployment canceled because it was created with an unverified commit"**, this is a Git identity/signature policy issue, not a Vite build config issue.
+
+Checklist:
+- Ensure the GitHub account email used for commits is verified.
+- If your org requires signed commits, enable GPG/SSH signing for local commits.
+- Re-push a verified commit (or merge via GitHub UI with verified identity).
+
+
+## Lock sync guard
+
+Run `npm run check:lock-sync` before pushing. This validates that `package.json` dependency sections match `package-lock.json` root metadata to prevent recurring `npm ci` EUSAGE failures on Vercel.

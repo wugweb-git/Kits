@@ -66,15 +66,15 @@ export const designTokens = {
     },
     "Accent": {
       "main": { "value": "#ffbe1a", "type": "color" },
-      "Accent200": { "value": "#cc9815", "type": "color" },
-      "Accent300": { "value": "#b38512", "type": "color" },
-      "Accent400": { "value": "#997210", "type": "color" },
-      "Accent500": { "value": "#805f0d", "type": "color" },
-      "Accent600": { "value": "#664c0a", "type": "color" },
-      "Accent700": { "value": "#4d3908", "type": "color" },
-      "Accent800": { "value": "#332605", "type": "color" },
-      "Accent900": { "value": "#1a1303", "type": "color" },
-      "Alfa": { "value": "#ffbe1a1a", "type": "color" }
+      "accent-200": { "value": "#cc9815", "type": "color" },
+      "accent-300": { "value": "#b38512", "type": "color" },
+      "accent-400": { "value": "#997210", "type": "color" },
+      "accent-500": { "value": "#805f0d", "type": "color" },
+      "accent-600": { "value": "#664c0a", "type": "color" },
+      "accent-700": { "value": "#4d3908", "type": "color" },
+      "accent-800": { "value": "#332605", "type": "color" },
+      "accent-900": { "value": "#1a1303", "type": "color" },
+      "accent-alpha": { "value": "#ffbe1a1a", "type": "color" }
     }
   },
   "fonts": {
