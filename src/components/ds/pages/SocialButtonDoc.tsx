@@ -3,8 +3,8 @@ import { Copy, Check, ExternalLink, Github, Mail, Facebook, Twitter, Linkedin } 
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { SocialButton } from '../../wugweb/SocialButton';
-import { Button } from '../../wugweb/Button';
+import { SocialButton } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function SocialButtonDoc() {
@@ -26,7 +26,7 @@ export function SocialButtonDoc() {
     }
   };
 
-  const jsxCode = `import { SocialButton } from './components/wugweb/SocialButton';
+  const jsxCode = `import { SocialButton } from './components/design-system/components/SocialButton';
 import { Github } from 'lucide-react';
 
 <SocialButton

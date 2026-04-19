@@ -1,7 +1,7 @@
 import React from 'react';
 import { BlockPageShell } from './BlockPageShell';
 import { Github, Twitter, Linkedin } from 'lucide-react';
-import { Button } from '../../../wugweb/Button';
+import { Button } from '../../../design-system/components';
 
 const F = 'Inter Tight, sans-serif';
 

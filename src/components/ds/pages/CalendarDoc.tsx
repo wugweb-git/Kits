@@ -1,10 +1,10 @@
 import React from 'react';
-import { Calendar } from '../../wugweb/Calendar';
+import { Calendar } from '../../design-system/components';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function CalendarDoc() {
@@ -28,7 +28,7 @@ export function CalendarDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Calendar } from "@/components/wugweb/Calendar";
+    return `import { Calendar } from "@/components/design-system/components/Calendar";
 
 export function CalendarDemo() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());

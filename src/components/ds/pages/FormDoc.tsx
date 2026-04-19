@@ -1,9 +1,9 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { Input } from '../../wugweb/Input';
-import { Textarea } from '../../wugweb/Textarea';
-import { Checkbox } from '../../wugweb/Checkbox';
-import { Button } from '../../wugweb/Button';
+import { Input } from '../../design-system/components';
+import { Textarea } from '../../design-system/components';
+import { Checkbox } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -19,7 +19,7 @@ export function FormDoc() {
     }
   };
 
-  const code = `import { Input, Textarea, Checkbox, Button } from '@/components/wugweb';
+  const code = `import { Input, Textarea, Checkbox, Button } from '@/components/design-system/components';
 
 export function MyForm() {
   return (

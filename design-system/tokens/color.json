@@ -1,0 +1,14 @@
+{
+  "color": {
+    "primary": { "value": "#ffbe1a" },
+    "secondary": { "value": "#191919" },
+    "background": { "value": "#ffffff" },
+    "surface": { "value": "#f4f4f4" },
+    "text": { "value": "#1a1a1a" },
+    "textMuted": { "value": "#7d7d7d" },
+    "border": { "value": "#dfdfdf" },
+    "success": { "value": "#16a249" },
+    "warning": { "value": "#c88a04" },
+    "error": { "value": "#dc2828" }
+  }
+}

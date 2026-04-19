@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Card } from '../../wugweb/Card';
-import { Button } from '../../wugweb/Button';
-import { Badge } from '../../wugweb/Badge';
+import { Card } from '../../design-system/components';
+import { Button } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
 import { SocialButton } from '../../ui/social-button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';

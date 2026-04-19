@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
-import { Banner } from '../../wugweb/Banner';
-import { Button } from '../../wugweb/Button';
+import { Banner } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -26,7 +26,7 @@ export function BannerDoc() {
 
   const variantIcons = { info: Info, success: CheckCircle, warning: AlertTriangle, error: XCircle };
 
-  const getDynamicCode = () => `import { Banner } from "@/components/wugweb/Banner";
+  const getDynamicCode = () => `import { Banner } from "@/components/design-system/components/Banner";
 import { Info } from "lucide-react";
 
 <Banner

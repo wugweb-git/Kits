@@ -1,2 +1,4 @@
 node_modules/
 build/
+!design-system/build/
+!design-system/build/**

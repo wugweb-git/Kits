@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { EmbedBadge } from '../../wugweb/EmbedBadge';
-import { Button } from '../../wugweb/Button';
+import { EmbedBadge } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -17,7 +17,7 @@ export function EmbedBadgesDoc() {
     }
   };
 
-  const code = `import { EmbedBadge } from '@/components/wugweb/EmbedBadge';
+  const code = `import { EmbedBadge } from '@/components/design-system/components/EmbedBadge';
 
 <EmbedBadge
   variant=\"empowered\"

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, User } from 'lucide-react';
-import { Indicator } from '../../wugweb/Indicator';
-import { Avatar } from '../../wugweb/Avatar';
-import { Button } from '../../wugweb/Button';
+import { Indicator } from '../../design-system/components';
+import { Avatar } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -26,7 +26,7 @@ export function IndicatorDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { Indicator } from "@/components/wugweb/Indicator";
+  const getDynamicCode = () => `import { Indicator } from "@/components/design-system/components/Indicator";
 
 // Status dot on an avatar
 <Indicator variant="${variant}" size="${size}" pulse={${pulse}} position="${position}">

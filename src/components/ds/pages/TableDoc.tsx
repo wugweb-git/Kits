@@ -3,8 +3,8 @@ import { Copy, Check, ExternalLink, ArrowUpDown } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Table } from '../../wugweb/Table';
-import { Button } from '../../wugweb/Button';
+import { Table } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { Badge } from '../../ui/badge';
 import { copyToClipboard } from '../../../utils/clipboard';
 
@@ -76,7 +76,7 @@ export function TableDoc() {
     { id: 5, name: 'Evan Wright', email: 'evan@example.com', role: 'Editor', status: 'Inactive' },
   ];
 
-  const jsxCode = `import { Table } from './components/wugweb/Table';
+  const jsxCode = `import { Table } from './components/design-system/components/Table';
 import { Badge } from './components/ui/badge';
 
 const columns = [

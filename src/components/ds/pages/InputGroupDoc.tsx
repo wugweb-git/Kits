@@ -1,8 +1,8 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Search, Mail, Lock, User, Globe } from 'lucide-react';
-import { InputGroup } from '../../wugweb/InputGroup';
-import { Input } from '../../wugweb/Input';
-import { Button } from '../../wugweb/Button';
+import { InputGroup } from '../../design-system/components';
+import { Input } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -22,8 +22,8 @@ export function InputGroupDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const code = `import { InputGroup } from "@/components/wugweb/InputGroup";
-import { Input } from "@/components/wugweb/Input";
+  const code = `import { InputGroup } from "@/components/design-system/components/InputGroup";
+import { Input } from "@/components/design-system/components/Input";
 import { Search, Mail } from "lucide-react";
 
 // Left icon

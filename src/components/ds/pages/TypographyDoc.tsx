@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ArrowRight } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
-import { Badge } from '../../wugweb/Badge';
+import { Badge } from '../../design-system/components';
 
 const F = 'Inter Tight, sans-serif';
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';

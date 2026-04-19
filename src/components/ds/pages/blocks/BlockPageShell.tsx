@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, Code, Eye } from 'lucide-react';
-import { Badge } from '../../../wugweb/Badge';
-import { Button } from '../../../wugweb/Button';
+import { Badge } from '../../../design-system/components';
+import { Button } from '../../../design-system/components';
 
 const F = 'Inter Tight, sans-serif';
 

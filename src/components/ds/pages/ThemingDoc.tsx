@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy } from 'lucide-react';
-import { Button } from '../../wugweb/Button';
-import { Badge } from '../../wugweb/Badge';
+import { Button } from '../../design-system/components';
+import { Badge } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';

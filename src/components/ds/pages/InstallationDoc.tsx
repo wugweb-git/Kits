@@ -1,8 +1,8 @@
 import React from 'react';
 import { Check, Copy, Terminal, Package, FolderOpen, Code2, Zap } from 'lucide-react';
-import { Button } from '../../wugweb/Button';
-import { Clipboard } from '../../wugweb/Clipboard';
-import { Stepper } from '../../wugweb/Stepper';
+import { Button } from '../../design-system/components';
+import { Clipboard } from '../../design-system/components';
+import { Stepper } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -26,7 +26,7 @@ export function InstallationDoc() {
 
   const codeSnippets = {
     npmInstall: `# Copy the wugweb components directory into your project
-cp -r /path/to/wugweb/components/wugweb ./components/wugweb`,
+cp -r /path/to/wugweb/components/design-system/components ./components/design-system/components`,
 
     peerDeps: `# Install peer dependencies
 npm install lucide-react recharts
@@ -68,9 +68,9 @@ npm install clsx tailwind-merge`,
 }`,
 
     usage: `// Import any component directly from the wugweb directory
-import { Button } from "@/components/wugweb/Button";
-import { Input } from "@/components/wugweb/Input";
-import { Badge } from "@/components/wugweb/Badge";
+import { Button } from "@/components/design-system/components/Button";
+import { Input } from "@/components/design-system/components/Input";
+import { Badge } from "@/components/design-system/components/Badge";
 
 export function MyPage() {
   return (
@@ -142,13 +142,13 @@ body {
       {/* Step 1 */}
       <PageSection
         title="Step 1 — Copy Component Files"
-        description="Wugweb ships as source files. Copy the /components/wugweb directory into your project."
+        description="Wugweb ships as source files. Copy the /components/design-system/components directory into your project."
       >
         <PageCard>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
             <div style={{ display: 'flex', gap: 'var(--spacing-3)', flexWrap: 'wrap' }}>
               {[
-                { icon: FolderOpen, label: '/components/wugweb/', desc: `${siteInventory.publicComponentModuleCount} public component modules` },
+                { icon: FolderOpen, label: '/components/design-system/components/', desc: `${siteInventory.publicComponentModuleCount} public component modules` },
                 { icon: Package, label: 'peer dependencies', desc: 'lucide-react, recharts' },
               ].map((item, i) => (
                 <div key={i} style={{ flex: '1 1 200px', background: 'var(--muted)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-4)', display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>

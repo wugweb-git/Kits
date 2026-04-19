@@ -1,11 +1,11 @@
 import React from 'react';
-import { Textarea } from '../../wugweb/Textarea';
-import { Label } from '../../wugweb/Label';
+import { Textarea } from '../../design-system/components';
+import { Label } from '../../design-system/components';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function TextareaDoc() {
@@ -30,8 +30,8 @@ export function TextareaDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Textarea } from "@/components/wugweb/Textarea";
-import { Label } from "@/components/wugweb/Label";
+    return `import { Textarea } from "@/components/design-system/components/Textarea";
+import { Label } from "@/components/design-system/components/Label";
 
 export function TextareaDemo() {
   const [value, setValue] = React.useState('');

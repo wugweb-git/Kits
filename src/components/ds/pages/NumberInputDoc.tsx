@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { NumberInput } from '../../wugweb/NumberInput';
-import { Button } from '../../wugweb/Button';
+import { NumberInput } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -27,7 +27,7 @@ export function NumberInputDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { NumberInput } from "@/components/wugweb/NumberInput";
+  const getDynamicCode = () => `import { NumberInput } from "@/components/design-system/components/NumberInput";
 
 export function NumberInputDemo() {
   const [quantity, setQuantity] = React.useState(${value});

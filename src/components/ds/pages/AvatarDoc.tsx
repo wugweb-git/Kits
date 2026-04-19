@@ -1,10 +1,10 @@
 import React from 'react';
-import { Avatar, AvatarGroup } from '../../wugweb/Avatar';
+import { Avatar, AvatarGroup } from '../../design-system/components';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 import imgAvatar from 'figma:asset/f696e50d914cf017f3f0dedc0a291546425bc149.png';
 
@@ -34,7 +34,7 @@ export function AvatarDoc() {
     if (selectedStatus !== 'none') props.push(`status="${selectedStatus}"`);
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Avatar } from "@/components/wugweb/Avatar";
+    return `import { Avatar } from "@/components/design-system/components/Avatar";
 
 export function AvatarDemo() {
   return (

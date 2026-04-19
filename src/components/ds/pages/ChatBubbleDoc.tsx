@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { ChatBubble } from '../../wugweb/ChatBubble';
-import { Button } from '../../wugweb/Button';
+import { ChatBubble } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -23,7 +23,7 @@ export function ChatBubbleDoc() {
     if (success) { setCopiedLink(true); setTimeout(() => setCopiedLink(false), 2000); }
   };
 
-  const getDynamicCode = () => `import { ChatBubble } from "@/components/wugweb/ChatBubble";
+  const getDynamicCode = () => `import { ChatBubble } from "@/components/design-system/components/ChatBubble";
 
 // Received message
 <ChatBubble

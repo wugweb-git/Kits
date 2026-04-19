@@ -1,10 +1,10 @@
 import React from 'react';
-import { Card } from '../../wugweb/Card';
+import { Card } from '../../design-system/components';
 import { Check, Copy, ExternalLink, Heart, Share2, Bookmark } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function CardDoc() {
@@ -27,7 +27,7 @@ export function CardDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Card } from "@/components/wugweb/Card";
+    return `import { Card } from "@/components/design-system/components/Card";
 
 export function CardDemo() {
   return (

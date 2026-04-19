@@ -73,7 +73,7 @@ import { ContextualSidebar } from './components/ds/ContextualSidebar';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { Toaster } from 'sonner';
 import './styles/animations.css';
-import KitsLogoUrl from './imports/Kits_Logo.svg';
+import KitsLogoUrl from './assets/kits-logo.svg';
 import { siteInventory } from './generated/siteInventory';
 
 // ── Newly wired doc pages ─────────────────────────────────────────────────────

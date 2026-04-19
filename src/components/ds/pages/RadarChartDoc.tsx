@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { RadarChart } from '../../wugweb/RadarChart';
-import { Button } from '../../wugweb/Button';
+import { RadarChart } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -54,7 +54,7 @@ export function RadarChartDoc() {
         { key: 'mobile', name: 'Mobile', color: 'var(--chart-3)' },
       ];
 
-  const getDynamicCode = () => `import { RadarChart } from "@/components/wugweb/RadarChart";
+  const getDynamicCode = () => `import { RadarChart } from "@/components/design-system/components/RadarChart";
 
 const skillsData = [
   { skill: "Accessibility", current: 80, target: 95 },

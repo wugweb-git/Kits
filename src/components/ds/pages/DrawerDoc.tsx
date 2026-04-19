@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, X } from 'lucide-react';
-import { Drawer } from '../../wugweb/Drawer';
-import { Button } from '../../wugweb/Button';
+import { Drawer } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -43,7 +43,7 @@ export function DrawerDoc() {
 
   const allTokens = showAdvancedTokens ? [...coreTokens, ...advancedTokens] : coreTokens;
 
-  const codeExample = `import { Drawer } from '@/components/wugweb/Drawer';
+  const codeExample = `import { Drawer } from '@/components/design-system/components/Drawer';
 import { useState } from 'react';
 
 export function DrawerDemo() {

@@ -4,7 +4,7 @@ import { Check, Copy, ExternalLink, Info, HelpCircle } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function TooltipDoc() {
@@ -27,7 +27,7 @@ export function TooltipDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/wugweb/Tooltip";
+    return `import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/design-system/components/Tooltip";
 import { HelpCircle } from "lucide-react";
 
 export function TooltipDemo() {

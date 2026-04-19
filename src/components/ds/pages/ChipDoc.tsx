@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, Tag, X, Settings, Filter, ExternalLink } from 'lucide-react';
-import { Chip } from '../../wugweb/Chip';
-import { Button } from '../../wugweb/Button';
+import { Chip } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -63,7 +63,7 @@ export function ChipDoc() {
     if (selectedState === 'selected') props.push(`selected`);
     if (selectedState === 'disabled') props.push(`disabled`);
     
-    return `import { Chip } from '@/components/wugweb/Chip';
+    return `import { Chip } from '@/components/design-system/components/Chip';
 ${iconPosition !== 'none' ? 'import { Tag } from \'lucide-react\';\n' : ''}
 export function ChipDemo() {
   return (

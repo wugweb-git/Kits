@@ -20,3 +20,9 @@ If code is regenerated from Figma or an export tool, normalize imports before co
 
 If your exporter supports import mapping, configure it to emit bare package names directly so this rewrite step is unnecessary for future exports.
 
+
+## Safe Consolidation Policy
+
+Before removing any component source, run `node scripts/audit-component-duplicates.mjs` and review `reports/duplicate-audit.md`.
+Only exact duplicates should be deleted immediately; non-identical overlaps require migration and state-parity checks first.
+For full cross-tree parity (states, style variables, and references), run `node scripts/audit-full-system-parity.mjs` and review `reports/full-system-parity-audit.md`.

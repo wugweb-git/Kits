@@ -1,10 +1,10 @@
 import React from 'react';
-import { Alert } from '../../wugweb/Alert';
+import { Alert } from '../../design-system/components';
 import { Check, Copy, ExternalLink, CheckCircle, AlertTriangle, AlertCircle, Info } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function AlertDoc() {
@@ -30,7 +30,7 @@ export function AlertDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Alert } from "@/components/wugweb/Alert";
+    return `import { Alert } from "@/components/design-system/components/Alert";
 import { Info } from "lucide-react";
 
 export function AlertDemo() {

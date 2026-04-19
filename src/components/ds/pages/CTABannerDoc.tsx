@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, ArrowRight } from 'lucide-react';
-import { CTABanner } from '../../wugweb/CTABanner';
-import { Button } from '../../wugweb/Button';
+import { CTABanner } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -17,7 +17,7 @@ export function CTABannerDoc() {
     }
   };
 
-  const code = `import { CTABanner } from '@/components/wugweb/CTABanner';
+  const code = `import { CTABanner } from '@/components/design-system/components/CTABanner';
 
 <CTABanner
   title="Ready to get started?"

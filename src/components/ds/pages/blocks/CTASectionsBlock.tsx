@@ -1,6 +1,6 @@
 import React from 'react';
 import { BlockPageShell } from './BlockPageShell';
-import { Button } from '../../../wugweb/Button';
+import { Button } from '../../../design-system/components';
 import { ArrowRight, Mail } from 'lucide-react';
 
 const F = 'Inter Tight, sans-serif';

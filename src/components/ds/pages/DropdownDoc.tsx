@@ -4,7 +4,7 @@ import { Check, Copy, ExternalLink, MoreVertical, Settings, User, LogOut } from 
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function DropdownDoc() {
@@ -27,8 +27,8 @@ export function DropdownDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/wugweb/DropdownMenu";
-import { Button } from "@/components/wugweb/Button";
+    return `import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/design-system/components/DropdownMenu";
+import { Button } from "@/components/design-system/components/Button";
 
 export function DropdownDemo() {
   return (

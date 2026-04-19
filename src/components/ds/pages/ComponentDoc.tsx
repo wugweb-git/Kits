@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '../../ui/card';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { Check, Copy } from 'lucide-react';
 import { copyToClipboard as safeCopy } from '../../../utils/clipboard';
 

@@ -1,11 +1,11 @@
 import React from 'react';
-import { Input } from '../../wugweb/Input';
-import { Label } from '../../wugweb/Label';
+import { Input } from '../../design-system/components';
+import { Label } from '../../design-system/components';
 import { Check, Copy, ExternalLink, Search, Mail } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function InputTextDoc() {
@@ -30,8 +30,8 @@ export function InputTextDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Input } from "@/components/wugweb/Input";
-import { Label } from "@/components/wugweb/Label";
+    return `import { Input } from "@/components/design-system/components/Input";
+import { Label } from "@/components/design-system/components/Label";
 
 export function InputDemo() {
   return (

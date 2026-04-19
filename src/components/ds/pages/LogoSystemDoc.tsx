@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink, Info } from 'lucide-react';
-import { Logo } from '../../wugweb/Logo';
-import { Button } from '../../wugweb/Button';
+import { Logo } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { copyToClipboard } from '../../../utils/clipboard';
 

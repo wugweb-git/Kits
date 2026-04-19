@@ -1,11 +1,11 @@
 import React from 'react';
-import { Switch } from '../../wugweb/Switch';
-import { Label } from '../../wugweb/Label';
+import { Switch } from '../../design-system/components';
+import { Label } from '../../design-system/components';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function SwitchDoc() {
@@ -29,8 +29,8 @@ export function SwitchDoc() {
   };
 
   const getDynamicCode = () => {
-    return `import { Switch } from "@/components/wugweb/Switch";
-import { Label } from "@/components/wugweb/Label";
+    return `import { Switch } from "@/components/design-system/components/Switch";
+import { Label } from "@/components/design-system/components/Label";
 
 export function SwitchDemo() {
   const [checked, setChecked] = React.useState(${isChecked});

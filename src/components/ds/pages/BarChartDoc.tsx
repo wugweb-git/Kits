@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { BarChart } from '../../wugweb/BarChart';
-import { Button } from '../../wugweb/Button';
+import { BarChart } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -25,7 +25,7 @@ export function BarChartDoc() {
     { name: 'Product E', sales: 5000 },
   ];
 
-  const code = `import { BarChart } from '@/components/wugweb/BarChart';
+  const code = `import { BarChart } from '@/components/design-system/components/BarChart';
 
 const data = [
   { name: 'Product A', sales: 4000 },

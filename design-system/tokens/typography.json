@@ -1,0 +1,22 @@
+{
+  "typography": {
+    "fontFamily": { "base": { "value": "Inter Tight, sans-serif" } },
+    "fontSize": {
+      "sm": { "value": "14px" },
+      "md": { "value": "16px" },
+      "lg": { "value": "18px" },
+      "xl": { "value": "20px" }
+    },
+    "fontWeight": {
+      "regular": { "value": "400" },
+      "medium": { "value": "500" },
+      "semibold": { "value": "600" }
+    },
+    "lineHeight": {
+      "sm": { "value": "21px" },
+      "md": { "value": "24px" },
+      "lg": { "value": "28px" },
+      "xl": { "value": "30px" }
+    }
+  }
+}

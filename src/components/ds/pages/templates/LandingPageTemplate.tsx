@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Star, Zap, Shield, Layers, Code, ArrowRight, Menu } from 'lucide-react';
 import { PageWrapper, PageHeader } from '../../PageWrapper';
-import { Button } from '../../../wugweb/Button';
+import { Button } from '../../../design-system/components';
 import { siteInventory } from '../../../../generated/siteInventory';
 
 const F = 'Inter Tight, sans-serif';

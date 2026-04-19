@@ -1,7 +1,7 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { Logo } from '../../wugweb/Logo';
-import { Button } from '../../wugweb/Button';
+import { Logo } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';
@@ -17,7 +17,7 @@ export function LogoDoc() {
     }
   };
 
-  const code = `import { Logo } from '@/components/wugweb/Logo';
+  const code = `import { Logo } from '@/components/design-system/components/Logo';
 
 // Default size
 <Logo />

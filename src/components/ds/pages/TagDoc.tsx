@@ -1,10 +1,10 @@
 import React from 'react';
-import { Tag } from '../../wugweb/Tag';
+import { Tag } from '../../design-system/components';
 import { Check, Copy, ExternalLink, X } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
-import { Button } from '../../wugweb/Button';
+import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
 
 export function TagDoc() {
@@ -34,7 +34,7 @@ export function TagDoc() {
     
     const propsString = props.length > 0 ? ` ${props.join(' ')}` : '';
     
-    return `import { Tag } from "@/components/wugweb/Tag";
+    return `import { Tag } from "@/components/design-system/components/Tag";
 import { X } from "lucide-react";
 
 export function TagDemo() {

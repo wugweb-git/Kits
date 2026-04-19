@@ -1,7 +1,7 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Home, Settings, User, FileText, BarChart2, Package, HelpCircle } from 'lucide-react';
-import { NavigationMenu } from '../../wugweb/NavigationMenu';
-import { Button } from '../../wugweb/Button';
+import { NavigationMenu } from '../../design-system/components';
+import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
@@ -40,7 +40,7 @@ export function NavigationMenuDoc() {
     { id: 'help', label: 'Help', icon: HelpCircle },
   ];
 
-  const getDynamicCode = () => `import { NavigationMenu } from "@/components/wugweb/NavigationMenu";
+  const getDynamicCode = () => `import { NavigationMenu } from "@/components/design-system/components/NavigationMenu";
 import { Home, FileText, User, Package } from "lucide-react";
 
 const navItems = [

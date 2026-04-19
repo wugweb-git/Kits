@@ -1,6 +1,6 @@
 import React from 'react';
 import { BlockPageShell } from './BlockPageShell';
-import { Button } from '../../../wugweb/Button';
+import { Button } from '../../../design-system/components';
 
 const F = 'Inter Tight, sans-serif';
 
