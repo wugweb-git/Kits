@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Edit, Share, Trash2, Download, Mail } from 'lucide-react';
-import { SpeedDial } from '../../design-system/components';
+import { SpeedDial } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

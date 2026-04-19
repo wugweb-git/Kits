@@ -1,5 +1,6 @@
 import React from 'react';
-import { Avatar, AvatarGroup } from '../../design-system/components';
+import { Avatar } from '../../design-system/components';
+import { AvatarGroup } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Check, Copy, Terminal, Package, FolderOpen, Code2, Zap } from 'lucide-react';
 import { Button } from '../../design-system/components';
-import { Clipboard } from '../../design-system/components';
-import { Stepper } from '../../design-system/components';
+import { Clipboard } from '../../ui/legacy-adapters';
+import { Stepper } from '../../ui/legacy-adapters';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { copyToClipboard } from '../../../utils/clipboard';

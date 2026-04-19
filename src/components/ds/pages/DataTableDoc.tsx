@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
-import { DataTable } from '../../design-system/components';
+import { DataTable } from '../../ui/legacy-adapters';
 import { Badge } from '../../design-system/components';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';

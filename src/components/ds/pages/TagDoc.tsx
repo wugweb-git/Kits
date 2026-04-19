@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag } from '../../design-system/components';
+import { Tag } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink, X } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Home, Settings, User, Bell, FileText, Star } from 'lucide-react';
-import { ListGroup } from '../../design-system/components';
+import { ListGroup } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

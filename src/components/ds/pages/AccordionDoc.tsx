@@ -1,5 +1,6 @@
 import React from 'react';
-import { Accordion, AccordionGroup } from '../../design-system/components';
+import { Accordion } from '../../design-system/components';
+import { AccordionGroup } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink, HelpCircle, Settings, Star } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

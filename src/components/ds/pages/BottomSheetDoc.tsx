@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { BottomSheet } from '../../design-system/components';
+import { BottomSheet } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

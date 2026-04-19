@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, User } from 'lucide-react';
-import { Indicator } from '../../design-system/components';
+import { Indicator } from '../../ui/legacy-adapters';
 import { Avatar } from '../../design-system/components';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';

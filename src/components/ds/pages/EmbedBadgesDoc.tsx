@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, ExternalLink } from 'lucide-react';
-import { EmbedBadge } from '../../design-system/components';
+import { EmbedBadge } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard } from '../PageWrapper';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';

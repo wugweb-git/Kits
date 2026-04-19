@@ -1,6 +1,6 @@
 import React from 'react';
 import { Copy, Check, Download, ExternalLink } from 'lucide-react';
-import { Logo } from '../../design-system/components';
+import { Logo } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { Badge } from '../../design-system/components';
 import KitsLogoSvg from '../../../assets/kits-logo.svg';

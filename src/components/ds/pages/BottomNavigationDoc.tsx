@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Home, Search, Heart, ShoppingCart, User } from 'lucide-react';
-import { BottomNavigation } from '../../design-system/components';
+import { BottomNavigation } from '../../ui/legacy-adapters';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
 import { TokenCard } from '../components/TokenCard';

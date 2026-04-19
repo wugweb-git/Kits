@@ -1,4 +1,4 @@
-import { sleep } from 'workflow';
+import { sleep } from '../lib/workflow';
 
 async function createUser(email: string) {
   return { id: `user_${email.replace(/[^a-z0-9]/gi, '').toLowerCase()}` };

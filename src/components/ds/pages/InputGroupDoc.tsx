@@ -1,6 +1,6 @@
 import React from 'react';
 import { Check, Copy, ExternalLink, Search, Mail, Lock, User, Globe } from 'lucide-react';
-import { InputGroup } from '../../design-system/components';
+import { InputGroup } from '../../ui/legacy-adapters';
 import { Input } from '../../design-system/components';
 import { Button } from '../../design-system/components';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
