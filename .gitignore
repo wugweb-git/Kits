@@ -2,3 +2,5 @@ node_modules/
 build/
 !design-system/build/
 !design-system/build/**
+.DS_Store
+Wugweb_Brand_OS_Foundation/.DS_Store
