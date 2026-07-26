@@ -29,6 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing custom components: Banner, CTABanner, ChatBubble, Clipboard, DeviceMockup, etc.
 - Screenshot-diff visual regression tooling (future work)
 
+## [1.0.1] — 2026-07-26
+
+### Added
+- Added token-based UI components: `banner`, `spinner`, `tag`, `kbd`, `logo`, `jumbotron`, `empty-state`, `list-group`, `indicator`, `timeline`, `grid`, `chat-bubble`, `side-menu`, `footer-links`, `cta-banner`, `search-input`, `number-input`, `device-mockup`, `button-group`, `accordion-group`, `avatar-group`
+- Added chart wrappers: `area-chart`, `bar-chart`, `line-chart`, `pie-chart`, `radar-chart`, `radial-chart`
+- Added Kits design system `CHANGELOG.md`
+
+### Changed
+- Updated `src/components/ui/index.ts` to export new components
+- Updated `src/components/ui/legacy-adapters.ts` to re-export from new token-based implementations
+- Added `Chart` export alias in `src/components/ui/chart.tsx`
+
 ## [1.0.0] — 2026-07-21
 
 ### Added
