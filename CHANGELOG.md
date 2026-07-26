@@ -29,6 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing custom components: Banner, CTABanner, ChatBubble, Clipboard, DeviceMockup, etc.
 - Screenshot-diff visual regression tooling (future work)
 
+## [1.0.2] — 2026-07-26
+
+### Changed
+- Removed dead `src/imports/` directory containing auto-generated Figma exports and unused SVG modules
+- Updated doc pages to fix TypeScript prop mismatches (`Patterns.tsx`, `AvatarDoc.tsx`, `TopicTileDoc.tsx`)
+- Replaced broken `ImageWithFallback` imports/usages with standard `<img>` elements
+- Fixed broken doc anchors in `TopicTileDoc.tsx` to use absolute doc paths
+- Replaced placeholder `href="#"` examples with plausible paths in `Patterns.tsx`
+
 ## [1.0.1] — 2026-07-26
 
 ### Added
