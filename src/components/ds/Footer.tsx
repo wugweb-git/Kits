@@ -1,7 +1,7 @@
 import React from 'react';
 import { Github, Mail } from 'lucide-react';
 import { useBreakpoint } from '../../hooks/useMediaQuery';
-import logo from 'figma:asset/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png';
+import logo from '../../assets/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png';
 
 interface FooterProps {
   onNavigate?: (page: string, subPage?: string) => void;

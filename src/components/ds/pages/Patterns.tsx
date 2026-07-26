@@ -366,8 +366,8 @@ export function Patterns() {
                       boxShadow: 'var(--core-shadow-sm)'
                     }}>
                       <ImageWithFallback 
-                        src="figma:asset/714473b3945ef2c290e1deafb7887474feaaf953.png" 
-                        alt="Alex Morgan" 
+                        src="https://i.pravatar.cc/150?u=alex-morgan"
+                        alt="Alex Morgan"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>

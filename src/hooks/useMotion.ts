@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 
 /**
  * Hook to detect if user prefers reduced motion
@@ -55,31 +55,27 @@ export function useScrollPosition(): number {
  */
 export function useInView(
   options: IntersectionObserverInit = { threshold: 0.1, rootMargin: '0px 0px -10% 0px' }
-): [React.RefObject<HTMLElement>, boolean] {
+): [React.RefObject<HTMLElement | null>, boolean] {
   const [isInView, setIsInView] = useState(false);
-  const [ref, setRef] = useState<React.RefObject<HTMLElement>>({ current: null });
+  const ref = useRef<HTMLElement | null>(null);
+  const hasTriggered = useRef(false);
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element || hasTriggered.current) return;
 
     const observer = new IntersectionObserver(([entry]) => {
-      // Only trigger once when entering viewport
-      if (entry.isIntersecting && !isInView) {
+      if (entry.isIntersecting && !hasTriggered.current) {
+        hasTriggered.current = true;
         setIsInView(true);
-        observer.disconnect(); // Stop observing after first trigger
+        observer.disconnect();
       }
     }, options);
 
     observer.observe(element);
 
     return () => observer.disconnect();
-  }, [ref.current, options, isInView]);
-
-  // Create ref object on mount
-  useEffect(() => {
-    setRef({ current: null } as React.RefObject<HTMLElement>);
-  }, []);
+  }, [options]);
 
   return [ref, isInView];
 }

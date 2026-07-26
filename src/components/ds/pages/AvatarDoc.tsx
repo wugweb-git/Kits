@@ -7,7 +7,7 @@ import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
-import imgAvatar from 'figma:asset/f696e50d914cf017f3f0dedc0a291546425bc149.png';
+import imgAvatar from '../../../assets/f696e50d914cf017f3f0dedc0a291546425bc149.png';
 
 export function AvatarDoc() {
   const [selectedSize, setSelectedSize] = React.useState<'xs' | 'sm' | 'md' | 'lg' | 'xl'>('md');

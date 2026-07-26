@@ -26,6 +26,84 @@ export interface MenuItem {
   badge?: string | number;
 }
 
+export interface SideMenuItemProps {
+  /** Unique identifier */
+  id: string;
+  /** Label text */
+  label: string;
+  /** Optional icon */
+  icon?: React.ReactNode;
+  /** Click handler */
+  onClick?: () => void;
+  /** Whether the item is active */
+  active?: boolean;
+  /** Badge content */
+  badge?: string | number;
+}
+
+/**
+ * A single menu item rendered as a clickable navigation button.
+ * Typically used inside a SideMenu or standalone as a navigation element.
+ */
+export function SideMenuItem({
+  id,
+  label,
+  icon,
+  onClick,
+  active = false,
+  badge,
+}: SideMenuItemProps) {
+  return (
+    <button
+      key={id}
+      onClick={onClick}
+      className="flex items-center gap-[var(--spacing-1)] w-full px-[var(--spacing-1)] py-[var(--spacing-1)] rounded-[var(--radius-md)] transition-all"
+      style={{
+        backgroundColor: active ? 'var(--accent)' : 'transparent',
+        color: active ? 'var(--accent-foreground)' : 'var(--foreground)',
+        cursor: 'pointer',
+        border: 'none',
+        textAlign: 'left',
+        fontSize: 'var(--text-sm)',
+        fontWeight: active ? 'var(--font-weight-medium)' : 'var(--font-weight-regular)',
+        transitionDuration: 'var(--motion-duration-fast)',
+        transitionTimingFunction: 'var(--motion-easing-standard)',
+      }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          e.currentTarget.style.backgroundColor = 'var(--muted)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!active) {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }
+      }}
+    >
+      {icon && (
+        <div className="flex items-center justify-center shrink-0" style={{ width: '16px', height: '16px' }}>
+          {icon}
+        </div>
+      )}
+      <span className="flex-1">{label}</span>
+      {badge && (
+        <div
+          className="flex items-center justify-center px-[6px] py-[2px] rounded-[var(--radius-full)] shrink-0"
+          style={{
+            backgroundColor: active ? 'var(--accent-foreground)' : 'var(--muted)',
+            color: active ? 'var(--accent)' : 'var(--foreground)',
+            fontSize: 'var(--text-xs)',
+            fontWeight: 'var(--font-weight-semibold)',
+            minWidth: '20px',
+          }}
+        >
+          {badge}
+        </div>
+      )}
+    </button>
+  );
+}
+
 export interface SideMenuProps {
   /** Array of menu sections */
   sections: MenuSection[];
