@@ -1,5 +1,9 @@
 # Ribbons
 
+## Operational guidance
+
+Broad rounded ribbons represent continuity, movement, and transformation. They direct the eye from origin to outcome. Avoid decorative swirls and use only when the story includes real movement or change.
+
 ## Purpose
 Define how Ribbons should be used within the Wugweb Brand OS.
 
