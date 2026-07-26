@@ -5,7 +5,6 @@ import { Badge } from '../../design-system/components';
 import { SocialButton } from '../../ui/social-button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
-import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { 
   User, Github, Twitter, 
   MoreHorizontal, BarChart3, ArrowUpRight, ArrowDownRight, Globe,
@@ -271,12 +270,12 @@ export function Patterns() {
                 </div>
 
                 <div style={{ paddingTop: 'var(--spacing-2)', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
-                  <Button fullWidth size="md" variant="primary">
+                  <Button size="default" style={{ width: '100%' }}>
                     Sign In
                   </Button>
                   
                   <div style={{ textAlign: 'center' }}>
-                    <a href="#" style={{
+                    <a href="/reset-password" style={{
                       fontFamily: 'var(--core-font-family-base)',
                       fontSize: 'var(--fluid-body-sm)',
                       color: 'var(--accent)',
@@ -328,7 +327,7 @@ export function Patterns() {
                 fontSize: 'var(--fluid-body-sm)',
                 color: 'var(--muted-foreground)'
               }}>
-                Don't have an account? <a href="#" style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none', marginLeft: '4px' }}>Sign up</a>
+                Don't have an account? <a href="/signup" style={{ color: 'var(--accent)', fontWeight: 500, textDecoration: 'none', marginLeft: '4px' }}>Sign up</a>
               </div>
             </div>
           </div>
@@ -357,20 +356,17 @@ export function Patterns() {
               <div style={{ padding: '0 var(--spacing-6) var(--spacing-6) var(--spacing-6)', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '-48px', marginBottom: 'var(--spacing-3)' }}>
                   <div style={{ position: 'relative' }}>
-                    <div style={{
-                      width: '96px', height: '96px',
-                      borderRadius: 'var(--radius-full)',
-                      border: '4px solid var(--surface-900)',
-                      background: 'var(--surface-800)',
-                      overflow: 'hidden',
-                      boxShadow: 'var(--core-shadow-sm)'
-                    }}>
-                      <ImageWithFallback 
-                        src="figma:asset/714473b3945ef2c290e1deafb7887474feaaf953.png" 
-                        alt="Alex Morgan" 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
+                    <img 
+                      src="https://i.pravatar.cc/150?u=alex-morgan"
+                      alt="Alex Morgan"
+                      style={{
+                        width: '96px', height: '96px',
+                        borderRadius: 'var(--radius-full)',
+                        border: '4px solid var(--surface-900)',
+                        background: 'var(--surface-800)',
+                        objectFit: 'cover'
+                      }}
+                    />
                     <div style={{
                       position: 'absolute', bottom: '4px', right: '4px',
                       width: '20px', height: '20px',
@@ -410,9 +406,9 @@ export function Patterns() {
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-2)', marginBottom: 'var(--spacing-6)' }}>
-                  <Badge label="Design" tone="neutral" style="subtle" />
-                  <Badge label="New York" tone="neutral" style="subtle" />
-                  <Badge label="Pro" tone="success" style="subtle" />
+                  <Badge variant="secondary">Design</Badge>
+                  <Badge variant="secondary">New York</Badge>
+                  <Badge variant="default">Pro</Badge>
                 </div>
 
                 <div style={{ height: '1px', background: 'var(--border)', marginBottom: 'var(--spacing-5)' }} />

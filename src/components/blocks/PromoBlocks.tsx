@@ -1,7 +1,6 @@
 import React from 'react';
 import { Logo } from '../ui/legacy-adapters';
 import { Check, ArrowRight, Calendar, ExternalLink } from 'lucide-react';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 // ─── Trial Promo Card — System Tokens ─────────────────────────────────────────
 export function TrialPromoCardSystem() {
@@ -20,7 +19,7 @@ export function TrialPromoCardSystem() {
       flexShrink: 0,
     }}>
       <div style={{ marginBottom: 'var(--spacing-8)' }}>
-        <Logo brand="wugweb" state="icon" size="l" />
+        <Logo alt="Wugweb" />
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
@@ -90,7 +89,7 @@ export function BlogCardSystem() {
     }}>
       {/* Image */}
       <div style={{ width: '100%', height: '220px', background: 'var(--muted)', position: 'relative', flexShrink: 0 }}>
-        <ImageWithFallback
+        <img
           src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=900&q=80"
           alt="Blog header"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}

@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { useBreakpoint } from '../../hooks/useMediaQuery';
 import { useScrollPosition, usePrefersReducedMotion } from '../../hooks/useMotion';
 import { typography } from '../../utils/responsive';
-import logo from 'figma:asset/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png';
+import logo from '../../assets/5e1c759341d10d01cfc46434d6f5695cb0c730b6.png';
 
 interface HeaderProps {
   isDarkMode: boolean;

@@ -1,0 +1,75 @@
+# Wugweb Kits Design System — CHANGELOG
+
+All notable changes to the Kits design system will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased] — 2026-07-26
+
+### Added
+- 4-layer token system (Core → Alias → Semantic → Component) in `src/styles/globals.css`
+- W3C DTCG-compliant token JSON files in `src/tokens/` (global.json, alias.json, semantic.json, component.json)
+- Style Dictionary build pipeline (`npm run tokens:build`, `npm run ds:tokens:build`)
+- Token validation scripts (`npm run validate:tokens`)
+- Design system documentation hub at `design-system/`
+- Source-of-truth docs in `design-system/docs/`
+- Component-per-folder wrappers under `src/components/ui/<Component>/index.ts`
+- Canonical bridge at `src/components/ui/index.ts`
+- Token normalization: removed space-based token keys, replaced with kebab-case
+
+### Changed
+- Migrated from raw hex/px values to token-based styling in UI components
+- Normalized all component tokens to reference semantic layer
+- Rebuilt `src/components/ui` with Radix-based primitives (accordion, alert, alert-dialog, etc.)
+
+### Pending
+- Full parity migration: 61 doc pages still import via `src/components/ui/legacy-adapters.ts`
+- Missing grouped components: AccordionGroup, AvatarGroup, AreaChart, BarChart, ButtonGroup, etc.
+- Missing custom components: Banner, CTABanner, ChatBubble, Clipboard, DeviceMockup, etc.
+- Screenshot-diff visual regression tooling (future work)
+
+## [1.0.2] — 2026-07-26
+
+### Changed
+- Removed dead `src/imports/` directory containing auto-generated Figma exports and unused SVG modules
+- Updated doc pages to fix TypeScript prop mismatches (`Patterns.tsx`, `AvatarDoc.tsx`, `TopicTileDoc.tsx`)
+- Replaced broken `ImageWithFallback` imports/usages with standard `<img>` elements
+- Fixed broken doc anchors in `TopicTileDoc.tsx` to use absolute doc paths
+- Replaced placeholder `href="#"` examples with plausible paths in `Patterns.tsx`
+
+## [1.0.1] — 2026-07-26
+
+### Added
+- Added token-based UI components: `banner`, `spinner`, `tag`, `kbd`, `logo`, `jumbotron`, `empty-state`, `list-group`, `indicator`, `timeline`, `grid`, `chat-bubble`, `side-menu`, `footer-links`, `cta-banner`, `search-input`, `number-input`, `device-mockup`, `button-group`, `accordion-group`, `avatar-group`
+- Added chart wrappers: `area-chart`, `bar-chart`, `line-chart`, `pie-chart`, `radar-chart`, `radial-chart`
+- Added Kits design system `CHANGELOG.md`
+
+### Changed
+- Updated `src/components/ui/index.ts` to export new components
+- Updated `src/components/ui/legacy-adapters.ts` to re-export from new token-based implementations
+- Added `Chart` export alias in `src/components/ui/chart.tsx`
+
+## [1.0.0] — 2026-07-21
+
+### Added
+- Initial component library with 50+ UI components
+- Base components: Button, Input, Card, Badge, Dialog, Dropdown, Tabs, etc.
+- Chart components: AreaChart, BarChart, LineChart, PieChart, RadarChart, RadialChart
+- Form components: Checkbox, RadioGroup, Switch, Slider, Select, DatePicker, etc.
+- Navigation: Header, Footer, SideMenu, MegaMenu, Breadcrumb, Pagination
+- Data display: Table, DataTable, ListGroup, Timeline, Avatar
+- Feedback: Toast, Spinner, Skeleton, Progress, Rating
+- Layout: Grid, Divider, Jumbotron
+- Utilities: Clipboard, SearchInput, Kbd, Tag, Chip, Logo
+- Block templates: Hero, Features, Pricing, Testimonials, CTA, Forms
+- Documentation site with component examples
+- Figma integration and token mapping docs
+
+### Infrastructure
+- Vite + React + TypeScript setup
+- Tailwind CSS v4 with custom @theme bridge
+- Sonner toast integration
+- Framer Motion animations
+- Supabase authentication framework
+- Recharts for data visualization

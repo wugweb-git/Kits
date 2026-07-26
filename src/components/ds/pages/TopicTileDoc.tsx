@@ -47,25 +47,25 @@ import { Code } from 'lucide-react';
             icon={<Code size={24} />}
             title="Development"
             description="Build modern web applications with the latest technologies"
-            href="#development"
+            href="/docs/components/topic-tile#development"
           />
           <TopicTile
             icon={<Palette size={24} />}
             title="Design"
             description="Create beautiful user interfaces and experiences"
-            href="#design"
+            href="/docs/components/topic-tile#design"
           />
           <TopicTile
             icon={<Zap size={24} />}
             title="Performance"
             description="Optimize your applications for speed and efficiency"
-            href="#performance"
+            href="/docs/components/topic-tile#performance"
           />
           <TopicTile
             icon={<Shield size={24} />}
             title="Security"
             description="Protect your users with best security practices"
-            href="#security"
+            href="/docs/components/topic-tile#security"
           />
         </PageGrid>
       </PageSection>

@@ -20,6 +20,15 @@ Reference → Observation → Pattern → Principle → Rule → Prompt → Artw
 - Use asymmetrical editorial balance.
 - Communicate through metaphor, not text.
 
+## Non-negotiable interpretation rules
+
+- A Wugweb asset is not one fixed look. Select the visual mode first: editorial thought leadership, campaign collage, product proof, systems/architecture, or typographic presentation.
+- Core colour roles are stable; the permitted campaign palette is broader. Do not invent a hue, but do not force every core colour into every asset.
+- A real person, object, device, or UI module is used only when it advances the metaphor. The hero object normally carries the visual weight.
+- Text inside the artwork is format-dependent. It is usually excluded from article thumbnails, but may be the primary graphic object in posters, presentations, and campaign collateral.
+
+See `02_VISUAL_SYSTEM/21_VISUAL_MODES.md`, `05_REFERENCE_LIBRARY/16_PROJECT_SOURCE_INVENTORY.md`, and `09_VALIDATION/06_SOURCE_AND_RIGHTS.md`.
+
 ## Related files
 - CURRENT_CONTEXT.md
 - TODO.md

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar } from '../../design-system/components';
+import { Avatar, AvatarImage, AvatarFallback } from '../../design-system/components';
 import { AvatarGroup } from '../../ui/legacy-adapters';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHeader, PageSection, PageCard, PageGrid } from '../PageWrapper';
@@ -7,7 +7,7 @@ import { TokenCard } from '../components/TokenCard';
 import { CollapsibleCodeBlock } from '../components/CollapsibleCodeBlock';
 import { Button } from '../../design-system/components';
 import { copyToClipboard } from '../../../utils/clipboard';
-import imgAvatar from 'figma:asset/f696e50d914cf017f3f0dedc0a291546425bc149.png';
+import imgAvatar from '../../../assets/f696e50d914cf017f3f0dedc0a291546425bc149.png';
 
 export function AvatarDoc() {
   const [selectedSize, setSelectedSize] = React.useState<'xs' | 'sm' | 'md' | 'lg' | 'xl'>('md');
@@ -95,8 +95,13 @@ export function AvatarDemo() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-6)' }}>
             <div style={{ padding: 'var(--spacing-12)', background: 'var(--muted)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px', gap: 'var(--spacing-6)', flexWrap: 'wrap' }}>
-              <Avatar size={selectedSize} status={selectedStatus} src={imgAvatar} alt="User" fallback="JD" />
-              <Avatar size={selectedSize} status={selectedStatus} fallback="AB" />
+              <Avatar>
+                <AvatarImage src={imgAvatar} alt="User" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <Avatar>
+                <AvatarFallback>AB</AvatarFallback>
+              </Avatar>
             </div>
             {showCode && <CollapsibleCodeBlock code={getDynamicCode()} language="tsx" showLineNumbers={true} />}
           </div>
@@ -106,16 +111,16 @@ export function AvatarDemo() {
       <PageSection title="Avatar Group" description="Display multiple avatars in a compact group">
         <PageCard>
           <div style={{ padding: 'var(--spacing-8)', background: 'var(--muted)', borderRadius: 'var(--radius-lg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <AvatarGroup 
-              avatars={[
-                { src: imgAvatar, alt: 'User 1', fallback: 'U1' },
-                { fallback: 'U2' },
-                { fallback: 'U3' },
-                { fallback: 'U4' },
-                { fallback: 'U5' },
-              ]}
-              max={4}
-            />
+            <AvatarGroup max={4}>
+              <Avatar>
+                <AvatarImage src={imgAvatar} alt="User 1" />
+                <AvatarFallback>U1</AvatarFallback>
+              </Avatar>
+              <Avatar><AvatarFallback>U2</AvatarFallback></Avatar>
+              <Avatar><AvatarFallback>U3</AvatarFallback></Avatar>
+              <Avatar><AvatarFallback>U4</AvatarFallback></Avatar>
+              <Avatar><AvatarFallback>U5</AvatarFallback></Avatar>
+            </AvatarGroup>
           </div>
         </PageCard>
       </PageSection>

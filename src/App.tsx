@@ -430,6 +430,7 @@ export default function App() {
 
       // ── RESOURCES ─────────────────────────────────────────────────────────
       case 'resources':
+        if (currentSubPage === 'overview' || currentSubPage === undefined) return <LogoShowcase />;
         if (currentSubPage === 'logo-system') return <LogoSystemDoc />;
         if (currentSubPage === 'logo-showcase') return <LogoShowcase />;
         if (currentSubPage === 'embed-badges') return <EmbedBadgesDoc />;

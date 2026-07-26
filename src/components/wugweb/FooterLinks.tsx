@@ -22,6 +22,62 @@ const defaultLinks: FooterLink[] = [
   { label: 'Privacy Policy', href: '#' },
 ];
 
+export interface FooterLinkGroupProps {
+  title?: string;
+  links: FooterLink[];
+  className?: string;
+}
+
+export function FooterLinkGroup({
+  title,
+  links,
+  className = '',
+}: FooterLinkGroupProps) {
+  return (
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)' }}>
+      {title && (
+        <h4 style={{
+          fontFamily: 'Inter Tight, sans-serif',
+          fontSize: 'var(--text-sm)',
+          fontWeight: 'var(--font-weight-semibold)',
+          color: 'var(--foreground)',
+          margin: 0,
+        }}>
+          {title}
+        </h4>
+      )}
+      {links.map((link, index) => (
+        <a
+          key={index}
+          href={link.href}
+          onClick={(e) => {
+            if (link.onClick) {
+              e.preventDefault();
+              link.onClick();
+            }
+          }}
+          style={{
+            fontFamily: 'Inter Tight, sans-serif',
+            fontSize: 'var(--text-sm)',
+            color: 'var(--muted-foreground)',
+            textDecoration: 'none',
+            cursor: 'pointer',
+            transition: 'color var(--motion-duration-short) var(--motion-easing-standard)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'var(--accent)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'var(--muted-foreground)';
+          }}
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export function FooterLinks({
   copyright = 'Copyright 2020-2025 © Wugweb®',
   links = defaultLinks,

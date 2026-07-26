@@ -226,6 +226,49 @@ export interface FormSubmitButtonProps {
   className?: string;
 }
 
+export interface FormSectionProps {
+  title?: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function FormSection({
+  title,
+  description,
+  children,
+  className = '',
+}: FormSectionProps) {
+  return (
+    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)' }}>
+      {(title || description) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-1)' }}>
+          {title && (
+            <h3 style={{
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--font-weight-semibold)',
+              color: 'var(--foreground)',
+              margin: 0,
+            }}>
+              {title}
+            </h3>
+          )}
+          {description && (
+            <p style={{
+              fontSize: 'var(--text-sm)',
+              color: 'var(--muted-foreground)',
+              margin: 0,
+            }}>
+              {description}
+            </p>
+          )}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
 export function FormSubmitButton({
   children,
   disabled = false,
