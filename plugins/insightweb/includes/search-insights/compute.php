@@ -1,0 +1,554 @@
+<?php
+/**
+ * Daily calculation per keyword (plan §7): 28-day Search Console figures (sums of daily rows), the previous 28 days'
+ * position, the latest live check, the owning page, priority, status and a suggested action. Results are copied onto
+ * the keyword record so the lists sort without aggregating obs. Suggestions only: nothing else on the site changes.
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+// Keyword map rule: high demand is Trends T ≥ 20, or ≥ 50 Search Console impressions in 28 days.
+// AW_SI_HIGH_TRENDS: RankWeb → Settings (settings.php).
+// AW_SI_HIGH_IMPR: RankWeb → Settings (settings.php).
+// AW_SI_QUICK_MIN: RankWeb → Settings (settings.php).
+// AW_SI_MOVERS: RankWeb → Settings (settings.php).
+
+/** Suggested actions (plan §7). Keys are stored; labels are shown. */
+function aw_si_actions(): array {
+	return array(
+		'fix-conflict'   => __( 'Fix conflict', 'insightweb' ),
+		'new-guide'      => __( 'New page: guide', 'insightweb' ),
+		'new-district'   => __( 'New page: district or state page', 'insightweb' ),
+		'new-page'       => __( 'New page', 'insightweb' ), // Before 25 Oct; the next daily calculation replaces it.
+		'guide-update'   => __( 'Update the page', 'insightweb' ),
+		'add-secondary'  => __( 'Add as secondary keyphrase', 'insightweb' ),
+		'faq-answer'     => __( 'FAQ answer', 'insightweb' ),
+		'news-explainer' => __( 'News explainer', 'insightweb' ),
+		'sourcing'       => __( 'Consider as Sourcing keyword', 'insightweb' ),
+		'page-quality'   => __( 'Check page quality', 'insightweb' ),
+	);
+}
+
+/**
+ * The keyword map's priority rule, unchanged.
+ *
+ * @param int|null   $trends   Trends index (T), or null.
+ * @param int        $impr     Search Console impressions, 28 days.
+ * @param float|null $pos      Latest position (live check or Search Console), or null.
+ * @param bool       $has_page A page owns or fits the keyword.
+ */
+function aw_si_priority( ?int $trends, int $impr, ?float $pos, bool $has_page ): string {
+	if ( null !== $pos && $pos > 0 && $pos <= 3 ) {
+		return 'P3'; // Already in the top 3.
+	}
+	$high = ( null !== $trends && $trends >= AW_SI_HIGH_TRENDS ) || $impr >= AW_SI_HIGH_IMPR;
+	if ( ! $high ) {
+		return 'P3';
+	}
+	// High demand: P1 when we rank below the top 3 but within 20 (e.g. 3.4) or a page fits, else P2 (a content gap).
+	return $has_page || ( null !== $pos && $pos > 3 && $pos <= 20 ) ? 'P1' : 'P2';
+}
+
+/**
+ * Whether a search reads as a question, so it fits an FAQ answer.
+ *
+ * @param string $label Search phrase.
+ */
+function aw_si_is_question( string $label ): bool {
+	$label = trim( $label );
+	if ( preg_match( '/^who\b.*\b(rabies|guidelines?|report|recommend\w*|vaccin\w*)\b/i', $label ) ) {
+		return false; // WHO, the World Health Organization, not "who".
+	}
+	return false !== strpos( $label, '?' ) || (bool) preg_match( '/^(how|what|why|when|where|which|who|whom|whose|can|could|is|are|was|were|does|do|did|should|will|would)\b/i', $label );
+}
+
+/**
+ * Whether a search is about news: an event, a case or a date, so it fits a news explainer.
+ *
+ * @param string $label Search phrase.
+ */
+function aw_si_is_news( string $label ): bool {
+	if ( preg_match( '/\b(news|latest|today|yesterday|case|court|verdict|judgement|judgment|ruling|ban|banned|arrest|arrested|fir|attack|attacked|mauled|killed|viral|incident|protest)\b/i', $label ) ) {
+		return true;
+	}
+	// A year alone is news, but not in the name of a law (the ABC Rules 2023, an Act or Bill of a year).
+	return (bool) preg_match( '/\b20[0-9]{2}\b/', $label ) && ! preg_match( '/\b(act|acts|rules?|bill|amendment|law|laws|guidelines?|regulations?|order)\b/i', $label );
+}
+
+/**
+ * Whether a search names a place (a district or state of India, a Directory pattern, or "near me"), so a gap fits a
+ * Directory district or state page.
+ *
+ * @param string $label Search phrase.
+ */
+function aw_si_is_place( string $label ): bool {
+	static $re = null;
+	if ( preg_match( '/\{(district|city|state)\}|\bnear me\b/i', $label ) ) {
+		return true;
+	}
+	if ( null === $re ) {
+		$names = array();
+		if ( function_exists( 'aw_lgd' ) ) {
+			$lgd = aw_lgd();
+			foreach ( array_merge( (array) $lgd['states'], (array) $lgd['districts'] ) as $p ) {
+				$n = strtolower( (string) $p->name );
+				if ( strlen( $n ) >= 4 ) { // Short names (Mau, Una …) match ordinary words too often.
+					$names[] = preg_quote( $n, '/' );
+				}
+			}
+		}
+		$re = $names ? '/\b(' . implode( '|', array_unique( $names ) ) . ')\b/i' : '';
+	}
+	return '' !== $re && (bool) preg_match( $re, $label );
+}
+
+/**
+ * Suggested page type for a content gap (plan §7): FAQ answer, news explainer, district or state page, or guide.
+ *
+ * @param string $label Search phrase.
+ */
+function aw_si_gap_action( string $label ): string {
+	if ( aw_si_is_question( $label ) ) {
+		return 'faq-answer';
+	}
+	if ( aw_si_is_news( $label ) ) {
+		return 'news-explainer';
+	}
+	return aw_si_is_place( $label ) ? 'new-district' : 'new-guide';
+}
+
+/**
+ * Pages flagged for quality in the last 28 days (plan §5.2: Clarity rage or dead clicks, quick-backs; PageSpeed).
+ * Phase 2 writes these as obs rows src clarity or psi, metric flag, value 1. Filter aw_si_quality_pages adds more.
+ * Clarity counts a page only when it was flagged on at least 3 different days (filter aw_si_quality_min_days), so one
+ * bad day no longer marks a page for 28 days; a PageSpeed flag counts at once.
+ *
+ * @return array<string, true> path => true.
+ */
+function aw_si_quality_pages(): array {
+	global $wpdb;
+	$o     = aw_si_table( 'obs' );
+	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
+	$days  = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$clarity = (array) $wpdb->get_col( $wpdb->prepare( "SELECT page FROM %i WHERE src = 'clarity' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d", $o, $since, $days ) );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$psi   = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT page FROM %i WHERE src = 'psi' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> ''", $o, $since ) );
+	$paths = array_values( array_unique( array_merge( $clarity, $psi ) ) );
+	$paths = (array) apply_filters( 'aw_si_quality_pages', $paths );
+	return array_fill_keys( array_map( 'strval', $paths ), true );
+}
+
+/**
+ * Listing names (entity records) that moved most: shown one by one in the Keywords list, the rest as one row.
+ *
+ * @return int[] Keyword record IDs.
+ */
+function aw_si_entity_movers(): array {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		return array();
+	}
+	$k = aw_si_table( 'keywords' );
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE entity = 1 AND pos28 IS NOT NULL AND pos_prev IS NOT NULL ORDER BY ABS(pos_prev - pos28) DESC, impr28 DESC, id LIMIT %d', $k, AW_SI_MOVERS ) ) );
+}
+
+/**
+ * SQL condition that keeps listing names out of a list or count, except the ones that moved most (plan §8).
+ *
+ * @param int[]|null $movers aw_si_entity_movers(), when the caller already has it.
+ */
+function aw_si_entity_sql( ?array $movers = null ): string {
+	$movers = null === $movers ? aw_si_entity_movers() : $movers;
+	return $movers ? '(entity = 0 OR id IN (' . implode( ',', array_map( 'intval', $movers ) ) . '))' : 'entity = 0';
+}
+
+/**
+ * How many keyword records a view counts, as the Keywords tab and the Priorities box count them: listing names folded
+ * (only the AW_SI_MOVERS that moved most count one by one; aw_si_entity_sql()).
+ *
+ * @param string     $view   A key of aw_si_view_sql().
+ * @param int[]|null $movers aw_si_entity_movers(), when the caller already has it.
+ */
+function aw_si_view_count( string $view, ?array $movers = null ): int {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		return 0;
+	}
+	$t   = aw_si_table( 'keywords' );
+	$sql = aw_si_view_sql( $view ) . ' AND ' . aw_si_entity_sql( $movers );
+	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions from this file (no %).
+}
+
+/**
+ * Whether position and impressions make a quick win.
+ *
+ * @param float|null $pos  Position.
+ * @param int        $impr Impressions, 28 days.
+ */
+function aw_si_quick_win( ?float $pos, int $impr ): bool {
+	return null !== $pos && $pos >= 8 && $pos <= 20 && $impr >= AW_SI_QUICK_MIN;
+}
+
+/** SQL condition of a quick win: the stored flag (keyword table version 3), else the same rule on the stored figures. */
+function aw_si_quick_sql(): string {
+	return function_exists( 'aw_kw_ready' ) && aw_kw_ready() ? 'quick_win = 1' : 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) AW_SI_QUICK_MIN;
+}
+
+/**
+ * The effective priority: the owner's override, else the calculated one.
+ *
+ * @param string $alias Table alias with its dot (e.g. "k."), or ''.
+ */
+function aw_si_eff_sql( string $alias = '' ): string {
+	return "IF({$alias}priority_override <> '', {$alias}priority_override, {$alias}priority)";
+}
+
+/**
+ * SQL condition of each keyword view (Keywords tab, Priorities box, check list, exports), so every count uses one rule.
+ *
+ * @param string $view all, p1, p2, p3, gap, conflict, quick, notranked or entity; '' for the whole map.
+ * @return string|array<string, string> The condition of $view (1=0 when unknown), or view => condition.
+ */
+function aw_si_view_sql( string $view = '' ) {
+	$eff = aw_si_eff_sql();
+	$map = array(
+		'all'       => '1=1',
+		'p1'        => "{$eff} = 'P1'",
+		'p2'        => "{$eff} = 'P2'",
+		'p3'        => "{$eff} = 'P3'",
+		'gap'       => "status = 'gap'",
+		'conflict'  => "status = 'conflict'",
+		'quick'     => aw_si_quick_sql(),
+		'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . " AND impr28 = 0 AND LOCATE('{', label) = 0", // Directory patterns are not searched; no % here, as views pass through prepare().
+		'entity'    => 'entity = 1',
+	);
+	return '' === $view ? $map : ( $map[ $view ] ?? '1=0' );
+}
+
+/**
+ * Priority, status and suggested action of one keyword (used by the daily calculation and by the dry run).
+ *
+ * @param int|null   $trends   Trends index.
+ * @param int        $impr     Search Console impressions, 28 days.
+ * @param float|null $pos28    Search Console position, 28 days.
+ * @param float|null $live     Latest live-check position.
+ * @param string[]   $owners   Paths of the pages that own the keyword.
+ * @param bool       $has_page Some page owns or carries it.
+ * @param array      $top      [path, impressions] of the page Google showed most.
+ * @param array      $ctx      label (search phrase), lang, sourcing (already a Sourcing keyword), quality (paths
+ *                             flagged for page quality, as path => true), main (the owners that are not News items
+ *                             or archives; all owners when missing), shown_minor (the shown page is a News item or
+ *                             an archive).
+ * @return array{priority: string, status: string, action: string, conflict: bool, pos: float|null, owners: string[], shown: string}
+ */
+function aw_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $live, array $owners, bool $has_page, array $top, array $ctx = array() ): array {
+	// Position: the live check, or Search Console when it has figures newer than the check (plan §7).
+	$pos   = null !== $pos28 ? $pos28 : $live;
+	$shown = (string) ( $top[0] ?? '' );
+	$main  = (array) ( $ctx['main'] ?? $owners );
+	// News items and archives share topic phrases by nature, so only other pages count as two owners. When only News
+	// items or archives own it, Google showing another News item or archive is no conflict either.
+	$conflict = count( $main ) > 1
+		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) && ( $main || empty( $ctx['shown_minor'] ) ) && ! aw_si_same_subject( $shown, $owners ) ); // the owner's own Directory type or Library item is no conflict
+	$priority = aw_si_priority( $trends, $impr, $pos, $has_page );
+	$status   = $conflict ? 'conflict' : ( $has_page ? 'has-page' : ( 'P2' === $priority ? 'gap' : '' ) );
+	$label    = (string) ( $ctx['label'] ?? '' );
+	$page     = $owners ? $owners[0] : $shown;
+	$action   = '';
+	// One action per keyword, the first that applies (plan §7).
+	if ( $conflict ) {
+		$action = 'fix-conflict';
+	} elseif ( 'P2' === $priority ) {
+		$action = aw_si_gap_action( $label ); // A content gap, with the page type that fits it.
+	} elseif ( aw_si_quick_win( $pos, $impr ) ) {
+		$action = $has_page ? 'guide-update' : 'add-secondary';
+	} elseif ( $impr > 0 && '' !== $page && isset( $ctx['quality'][ $page ] ) ) {
+		$action = 'page-quality'; // Searchers land on a page flagged by Clarity or PageSpeed.
+	} elseif ( ! $has_page && $impr >= AW_SI_QUICK_MIN && aw_si_is_question( $label ) ) {
+		$action = 'faq-answer';
+	} elseif ( ! $has_page && $impr >= AW_SI_QUICK_MIN && aw_si_is_news( $label ) ) {
+		$action = 'news-explainer';
+	} elseif ( $impr >= AW_SI_QUICK_MIN && 'en' === ( $ctx['lang'] ?? 'en' ) && empty( $ctx['sourcing'] ) && 0 === strpos( $shown, '/news/' ) && aw_si_is_news( $label ) ) {
+		$action = 'sourcing'; // Our news items already show for it: more of them would help. Never for Hindi or Hinglish.
+	}
+	return compact( 'priority', 'status', 'action', 'conflict', 'pos', 'owners', 'shown' );
+}
+
+/**
+ * Whether the shown page is the owner's own subject: a Directory place × type page whose type is the slug of an owning
+ * tag or category (/directory/maharashtra/mumbai/animal-ambulance/ for /tag/animal-ambulance/), or a Library item an
+ * owning guide lists by hand (owner, 10 Nov 2026).
+ *
+ * @param string   $shown  Path Google showed most.
+ * @param string[] $owners Owner paths.
+ */
+function aw_si_same_subject( string $shown, array $owners ): bool {
+	if ( 0 === strpos( $shown, '/library/' ) || 0 === strpos( $shown, '/legal-watch/' ) ) {
+		return aw_si_library_of_owner( (string) preg_replace( '#^/legal-watch/#', '/library/', $shown ), $owners ); // the old address redirects to /library/
+	}
+	if ( ! preg_match( '#^/directory/[^/]+/(?:[^/]+/)?([a-z0-9-]+)/$#', $shown, $m ) ) {
+		return false;
+	}
+	foreach ( $owners as $o ) {
+		if ( preg_match( '#^/(?:tag|category)/' . preg_quote( $m[1], '#' ) . '/$#', (string) $o ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Whether the shown Library item is one an owning guide lists by hand as its Library item (aw_rel_resource): the
+ * AWBI circular for the World Animal Day guide (owner, 10 Nov 2026).
+ *
+ * @param string   $shown  Library path Google showed most.
+ * @param string[] $owners Owner paths.
+ */
+function aw_si_library_of_owner( string $shown, array $owners ): bool {
+	$lib = (int) url_to_postid( home_url( $shown ) );
+	if ( ! $lib ) {
+		return false;
+	}
+	foreach ( $owners as $o ) {
+		if ( 0 !== strpos( (string) $o, '/resources/' ) ) {
+			continue;
+		}
+		$guide = (int) url_to_postid( home_url( (string) $o ) );
+		if ( $guide && in_array( $lib, array_map( 'intval', (array) get_post_meta( $guide, 'aw_rel_resource' ) ), true ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Whether a path is a News item or a term archive (tag, category, or another archive in $archives).
+ *
+ * @param string $path     Site path.
+ * @param array  $archives Term archive paths without a trailing slash, as path => true.
+ */
+function aw_si_is_minor_path( string $path, array $archives ): bool {
+	return 0 === strpos( $path, '/news/' ) || 0 === strpos( $path, '/tag/' ) || 0 === strpos( $path, '/category/' ) || isset( $archives[ untrailingslashit( $path ) ] );
+}
+
+/**
+ * What aw_si_decide() needs to know about a keyword besides its figures.
+ *
+ * @param object|array $r       Keyword record (label, lang, roles).
+ * @param array        $quality Paths flagged for page quality (aw_si_quality_pages()).
+ */
+function aw_si_ctx( $r, array $quality ): array {
+	$r = (object) $r;
+	return array(
+		'label'    => (string) $r->label,
+		'lang'     => (string) $r->lang,
+		'sourcing' => (bool) ( (int) $r->roles & AW_SI_ROLE_SOURCING ),
+		'quality'  => $quality,
+	);
+}
+
+/**
+ * Write (insert or replace) one keyword's score-store row, keyed by keyword id. The store is InsightWeb's own table
+ * (wp_aw_si_scores); the shared keyword table is not touched.
+ *
+ * @param int                  $id  Keyword id.
+ * @param array<string, mixed> $row aw_si_score_row() columns (score, the four parts, recommended, focus_health).
+ * @return void
+ */
+function aw_si_score_set( int $id, array $row ): void {
+	global $wpdb;
+	$row['kw_id']   = $id;
+	$row['updated'] = aw_si_now();
+	$wpdb->replace( aw_si_table( 'scores' ), $row ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
+/**
+ * Recalculate every keyword record, and write each keyword's score store.
+ *
+ * @return array Counts by priority and status.
+ */
+function aw_si_compute(): array {
+	global $wpdb;
+	$k   = aw_si_table( 'keywords' );
+	$o   = aw_si_table( 'obs' );
+	$p   = aw_si_table( 'kw_pages' );
+	$tz  = wp_timezone();
+	$end = ( new DateTimeImmutable( 'today', $tz ) )->modify( '-1 day' );
+	$s28 = $end->modify( '-27 days' )->format( 'Y-m-d' );
+	$s56 = $end->modify( '-55 days' )->format( 'Y-m-d' );
+	$e56 = $end->modify( '-28 days' )->format( 'Y-m-d' );
+	$e28 = $end->format( 'Y-m-d' );
+
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+	$now28 = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $o, $s28, $e28 ), OBJECT_K );
+	$prev  = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(impr) i, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'q' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id", $o, $s56, $e56 ), OBJECT_K );
+	// Every page Google showed for each query over 28 days (the page shown most, and all candidate pages for the
+	// canonical-owner pass), with clicks and the impression-weighted position.
+	$top   = $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, page, SUM(impr) i, SUM(clicks) c, SUM(pos * impr) / NULLIF(SUM(impr), 0) p FROM %i WHERE src = 'gsc' AND metric = 'qp' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY kw_id, page ORDER BY kw_id, i DESC", $o, $s28, $e28 ) );
+	$live  = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value, o.txt, o.d FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'live' AND metric = 'position' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'live' AND o.metric = 'position'", $o, $o ), OBJECT_K );
+	$trend = $wpdb->get_results( $wpdb->prepare( "SELECT o.kw_id, o.value FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'trends' AND metric = 'index' GROUP BY kw_id) l ON l.kw_id = o.kw_id AND l.d = o.d WHERE o.src = 'trends' AND o.metric = 'index'", $o, $o ), OBJECT_K );
+	$links = $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, obj_type, path, role, src FROM %i', $p ) );
+	$qw    = function_exists( 'aw_kw_ready' ) && aw_kw_ready(); // the quick_win column (keyword table version 3)
+	$rows  = $wpdb->get_results( $wpdb->prepare( 'SELECT id, label, lang, topic, roles, priority, priority_override, status, action, page, impr28, clicks28, pos28, pos_prev, live_pos, live_txt, live_date, trends' . ( $qw ? ', quick_win' : '' ) . ' FROM %i', $k ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- a fixed column name, no input
+	// Score inputs: the latest imported monthly volume per keyword, and the rising growth, for the score store.
+	$vol = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value FROM %i WHERE src = 'kp' AND metric = 'volume' ORDER BY d", $o ) ) as $v ) {
+		$vol[ (int) $v->kw_id ] = (int) $v->value; // Ordered by date: the latest wins.
+	}
+	$growth = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT kw_id, MAX(growth) g FROM %i WHERE kw_id > 0 GROUP BY kw_id', aw_si_table( 'rising' ) ) ) as $g ) {
+		$growth[ (int) $g->kw_id ] = null === $g->g ? null : (float) $g->g;
+	}
+	// phpcs:enable
+
+	// An old address counts as the page it redirects to (plan §12, phase 2), so a redirected URL is no conflict.
+	$by_page = array(); // kw_id => final path => impressions.
+	$cand    = array(); // kw_id => final path => [impr, clicks, pos*impr] for the canonical-owner pass (Part 6).
+	foreach ( (array) $top as $t ) {
+		$final                      = aw_si_final_path( (string) $t->page );
+		$kwid                       = (int) $t->kw_id;
+		$by_page[ $kwid ][ $final ] = ( $by_page[ $kwid ][ $final ] ?? 0 ) + (int) $t->i;
+		$c                          = $cand[ $kwid ][ $final ] ?? array( 0, 0, 0.0 );
+		$cand[ $kwid ][ $final ]    = array( $c[0] + (int) $t->i, $c[1] + (int) $t->c, $c[2] + ( null === $t->p ? 0.0 : (float) $t->p * (int) $t->i ) );
+	}
+	$top_page = array();
+	foreach ( $by_page as $kw => $pages ) {
+		arsort( $pages );
+		$top_page[ $kw ] = array( (string) key( $pages ), (int) current( $pages ) );
+	}
+	// Candidate pages per keyword as flat rows for aw_si_canonical_owner() (position = weighted average; type by path).
+	$cands = array();
+	foreach ( $cand as $kw => $pages ) {
+		foreach ( $pages as $path => $m ) {
+			$cands[ $kw ][] = array(
+				'path'      => (string) $path,
+				'impr'      => (int) $m[0],
+				'clicks'    => (int) $m[1],
+				'pos'       => $m[0] > 0 ? round( $m[2] / $m[0], 1 ) : null,
+				'post_type' => '',
+			);
+		}
+	}
+	$owners   = array(); // kw_id => owning paths (focus primaries and keyword-map pages).
+	$main     = array(); // kw_id => owning paths that are not News items or archives.
+	$fits     = array(); // kw_id => true when some page owns or carries it.
+	$archives = array(); // term archive paths => true.
+	foreach ( (array) $links as $l ) {
+		if ( 'term' === $l->obj_type && '' !== $l->path ) {
+			$archives[ untrailingslashit( aw_si_final_path( $l->path ) ) ] = true;
+		}
+	}
+	foreach ( (array) $links as $l ) {
+		if ( in_array( $l->role, array( 'owner', 'secondary' ), true ) ) {
+			$fits[ $l->kw_id ] = true;
+		}
+		if ( 'owner' === $l->role && 0 === strpos( $l->path, '/' ) && false === strpos( $l->path, '{' ) ) { // Real paths only: map labels and patterns are not compared.
+			$final                         = aw_si_final_path( $l->path );
+			$owners[ $l->kw_id ][ $final ] = true;
+			if ( 'term' !== $l->obj_type && ! aw_si_is_minor_path( $final, $archives ) ) {
+				$main[ $l->kw_id ][ $final ] = true;
+			}
+		}
+	}
+
+	$quality = aw_si_quality_pages();
+	$styp    = aw_si_sourcing_types(); // topic => sourcing type, from SourceWeb (empty when absent).
+	$store   = aw_si_ready();          // the score store exists (schema version 3).
+	$count   = array();
+	foreach ( (array) $rows as $r ) {
+		$id       = (int) $r->id;
+		$impr     = (int) ( $now28[ $id ]->i ?? 0 );
+		$clicks   = (int) ( $now28[ $id ]->c ?? 0 );
+		$pos28    = isset( $now28[ $id ] ) && null !== $now28[ $id ]->p ? round( (float) $now28[ $id ]->p, 1 ) : null;
+		$posprev  = isset( $prev[ $id ] ) && null !== $prev[ $id ]->p ? round( (float) $prev[ $id ]->p, 1 ) : null;
+		$lv       = $live[ $id ] ?? null;
+		$trends   = isset( $trend[ $id ] ) ? (int) $trend[ $id ]->value : null;
+		$tp       = $top_page[ $id ] ?? array( '', 0 );
+		$ctx      = aw_si_ctx( $r, $quality ) + array(
+			'main'        => array_keys( $main[ $id ] ?? array() ),
+			'shown_minor' => aw_si_is_minor_path( $tp[0], $archives ),
+		);
+		$d        = aw_si_decide( $trends, $impr, $pos28, $lv && null !== $lv->value ? (float) $lv->value : null, array_keys( $owners[ $id ] ?? array() ), ! empty( $fits[ $id ] ), $tp, $ctx );
+		$priority = $d['priority'];
+		$status   = $d['status'];
+		$action   = $d['action'];
+		$own      = $d['owners'];
+		$shown    = $d['shown'];
+		$page     = $own ? $own[0] : $shown;
+		$set      = array(
+			'priority'  => $priority,
+			'status'    => $status,
+			'action'    => $action,
+			'page'      => mb_substr( $page, 0, 255 ),
+			'impr28'    => $impr,
+			'clicks28'  => $clicks,
+			'pos28'     => $pos28,
+			'pos_prev'  => $posprev,
+			'live_pos'  => $lv && null !== $lv->value ? (float) $lv->value : null,
+			'live_txt'  => $lv ? mb_substr( (string) $lv->txt, 0, 16 ) : '',
+			'live_date' => $lv ? $lv->d : null,
+			'trends'    => $trends,
+		);
+		if ( $qw ) {
+			$set['quick_win'] = aw_si_quick_win( $d['pos'], $impr ) ? 1 : 0;
+		}
+		if ( $store ) {
+			$srow = aw_si_score_row(
+				array(
+					'impr'     => $impr,
+					'volume'   => $vol[ $id ] ?? 0,
+					'clicks'   => $clicks,
+					'pos'      => $d['pos'],
+					'growth'   => $growth[ $id ] ?? null,
+					'trends'   => $trends,
+					'has_page' => ! empty( $fits[ $id ] ),
+					'roles'    => (int) $r->roles,
+					'topic'    => (string) $r->topic,
+					'is_minor' => ! empty( $ctx['shown_minor'] ),
+				),
+				$styp
+			);
+			// Canonical owner (Part 6): the page that should own the keyword across the pages it ranks for, plus a flag.
+			$own                = aw_si_canonical_owner( $cands[ $id ] ?? array(), aw_si_query_intent( (string) $r->label ) );
+			$owner_path         = $own['owner'] ? (string) ( $own['owner']['path'] ?? '' ) : '';
+			$srow['owner_path'] = mb_substr( $owner_path, 0, 255 );
+			$srow['owner_type'] = '' !== $owner_path ? aw_si_page_class( $owner_path, '' ) : '';
+			$srow['owner_flag'] = (string) $own['flag'];
+			aw_si_score_set( $id, $srow );
+		}
+		$changed = false;
+		foreach ( $set as $col => $val ) {
+			$old = $r->$col;
+			if ( null === $val ? null !== $old : ( null === $old || (string) $old !== (string) $val ) ) {
+				// Floats come back from MySQL as strings such as "6.4": compare as numbers.
+				if ( null !== $val && null !== $old && is_numeric( $val ) && is_numeric( $old ) && abs( (float) $old - (float) $val ) < 0.05 ) {
+					continue;
+				}
+				$changed = true;
+				break;
+			}
+		}
+		if ( $changed ) {
+			$set['updated'] = aw_si_now();
+			if ( false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$count['failed'] = ( $count['failed'] ?? 0 ) + 1;
+				if ( empty( $count['errors'] ) ) {
+					$count['errors'] = array( __( 'Some keyword records could not be updated: ', 'insightweb' ) . $wpdb->last_error );
+				}
+			}
+		}
+		$eff                                 = $r->priority_override ? $r->priority_override : $priority;
+		$count[ $eff ]                       = ( $count[ $eff ] ?? 0 ) + 1;
+		$count[ $status ? $status : 'none' ] = ( $count[ $status ? $status : 'none' ] ?? 0 ) + 1;
+	}
+	if ( $store ) {
+		aw_si_push_sourcing_candidates(); // Offer the current sourcing candidates to SourceWeb (opt-in; idle if absent).
+	}
+	return $count;
+}

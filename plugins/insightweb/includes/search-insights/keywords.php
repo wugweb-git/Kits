@@ -1,0 +1,665 @@
+<?php
+/**
+ * Keyword records (plan §3): normalising and grouping, roles, the one-time seed from the keyword map and the daily role
+ * sync from Rank Math and SourceWeb. Everything here only reads Rank Math and Sourcing; it never writes to them.
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+// The role constants, AW_SI_BRAND, AW_SI_NOT_PLURAL, aw_si_roles(), aw_si_is_brand(), aw_si_norm() and aw_si_lang() moved
+// out with the keyword table (owner's decision 3, 25 Oct 2026); since 18 Nov 2026 they are in InsightWeb's
+// includes/keyword-model.php and keyword-table.php, loaded by includes/keywords.php before Search Insights itself.
+
+/** Map of norm => id for every keyword record. */
+function aw_si_kw_map(): array {
+	global $wpdb;
+	$t    = aw_si_table( 'keywords' );
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT norm, id FROM %i', $t ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return array_map( 'intval', array_column( $rows, 'id', 'norm' ) );
+}
+
+/**
+ * IDs for these keyword labels, creating the missing records and adding $role to all of them.
+ *
+ * @param string[] $labels Keyword labels as written.
+ * @param int      $role   Role bit to add.
+ * @param array    $extra  Columns to set on records created here (page_type, intent, entity …).
+ * @return array<string, int> norm => id.
+ */
+function aw_si_kw_ids( array $labels, int $role, array $extra = array() ): array {
+	global $wpdb;
+	$t    = aw_si_table( 'keywords' );
+	$map  = aw_si_kw_map();
+	$want = array();
+	$now  = aw_si_now();
+	$new  = array();
+	foreach ( $labels as $label ) {
+		$label = trim( (string) $label );
+		$norm  = aw_si_norm( $label );
+		if ( '' === $norm ) {
+			continue;
+		}
+		$want[ $norm ] = true;
+		if ( ! isset( $map[ $norm ] ) && ! isset( $new[ $norm ] ) ) {
+			$new[ $norm ] = $label;
+		}
+	}
+	foreach ( array_chunk( $new, 200, true ) as $chunk ) {
+		$args = array();
+		foreach ( $chunk as $norm => $label ) {
+			array_push( $args, (string) $norm, mb_substr( $label, 0, 255 ), aw_si_lang( $label ), $role | ( aw_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0 ), (string) ( $extra['page_type'] ?? '' ), (string) ( $extra['intent'] ?? '' ), (int) ( $extra['entity'] ?? 0 ), $now, $now );
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one placeholder group per row.
+		$wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (norm, label, lang, roles, page_type, intent, entity, created, updated) VALUES ' . implode( ', ', array_fill( 0, count( $chunk ), '(%s, %s, %s, %d, %s, %s, %d, %s, %s)' ) ), array_merge( array( $t ), $args ) ) );
+	}
+	if ( $new ) {
+		$map = aw_si_kw_map();
+		// Variants and plural forms share one record already (same norm); group_id points a new record at itself until
+		// the owner groups Hindi / Hinglish forms under an English parent.
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET group_id = id WHERE group_id = 0', $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+	$ids = array_intersect_key( $map, $want );
+	foreach ( array_chunk( array_values( $ids ), 500 ) as $chunk ) {
+		$in = implode( ',', array_map( 'intval', $chunk ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET roles = roles | %d WHERE id IN ({$in}) AND roles & %d = 0", $t, $role, $role ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+	}
+	return $ids;
+}
+
+/**
+ * Store one page link for a keyword (insert or refresh).
+ *
+ * @param int    $kw_id    Keyword record.
+ * @param string $obj_type post, term, path or label.
+ * @param int    $obj_id   Post or term ID (0 for a path or label).
+ * @param string $path     Site path, Directory pattern or page label.
+ * @param string $role     owner, secondary or live.
+ * @param string $src      Where the link comes from: seed or focus.
+ * @return bool Whether the link was written.
+ */
+function aw_si_link_page( int $kw_id, string $obj_type, int $obj_id, string $path, string $role, string $src ): bool {
+	global $wpdb;
+	return false !== $wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		aw_si_table( 'kw_pages' ),
+		array(
+			'kw_id'    => $kw_id,
+			'obj_type' => $obj_type,
+			'obj_id'   => $obj_id,
+			'path'     => mb_substr( $path, 0, 255 ),
+			'path_key' => md5( $obj_type . ':' . $obj_id . ':' . $path ),
+			'role'     => $role,
+			'src'      => $src,
+			'updated'  => aw_si_now(),
+		),
+		array( '%d', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
+	);
+}
+
+/**
+ * Store many page links at once (insert or refresh).
+ *
+ * @param array $links Each [kw_id, obj_type, obj_id, path, role, src].
+ * @param bool  $keep  Keep a link that already exists (from the keyword map) instead of replacing it: the daily focus
+ *                     rebuild must not take over a map link, or the next day's "delete the focus links" would drop it.
+ * @return bool Whether every write worked.
+ */
+function aw_si_link_pages( array $links, bool $keep = false ): bool {
+	global $wpdb;
+	$t   = aw_si_table( 'kw_pages' );
+	$now = aw_si_now();
+	$ok  = true;
+	foreach ( array_chunk( $links, 300 ) as $chunk ) {
+		$args = array();
+		foreach ( $chunk as $l ) {
+			array_push( $args, (int) $l[0], (string) $l[1], (int) $l[2], mb_substr( (string) $l[3], 0, 255 ), md5( $l[1] . ':' . $l[2] . ':' . $l[3] ), (string) $l[4], (string) $l[5], $now );
+		}
+		// $keep: INSERT … ON DUPLICATE KEY UPDATE id = id keeps the existing link; other errors still fail. Otherwise REPLACE.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one placeholder group per row.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( ( $keep ? 'INSERT' : 'REPLACE' ) . ' INTO %i (kw_id, obj_type, obj_id, path, path_key, role, src, updated) VALUES ' . implode( ', ', array_fill( 0, count( $chunk ), '(%d, %s, %d, %s, %s, %s, %s, %s)' ) ) . ( $keep ? ' ON DUPLICATE KEY UPDATE id = id' : '' ), array_merge( array( $t ), $args ) ) );
+	}
+	return $ok;
+}
+
+/**
+ * Site path of a URL ('/news/x/'), or '' for another host.
+ *
+ * @param string $url Full URL.
+ */
+function aw_si_path( string $url ): string {
+	$host = wp_parse_url( home_url(), PHP_URL_HOST );
+	$u    = wp_parse_url( $url );
+	if ( ! empty( $u['host'] ) && ! in_array( preg_replace( '/^www\./', '', (string) $u['host'] ), array( preg_replace( '/^www\./', '', (string) $host ), 'animalwrites.in' ), true ) ) {
+		return '';
+	}
+	$path = (string) ( $u['path'] ?? '/' );
+	return '' === $path ? '/' : $path;
+}
+
+/**
+ * Site path of a post or term, or '' when it has none.
+ *
+ * @param string $type post or term.
+ * @param int    $id   Post or term ID.
+ */
+function aw_si_object_path( string $type, int $id ): string {
+	$url = 'term' === $type ? get_term_link( $id ) : get_permalink( $id );
+	return is_string( $url ) ? aw_si_path( $url ) : '';
+}
+
+/**
+ * Resolve a keyword-map page to an object: a post ID, a path on the site, or a topic (category) by name.
+ *
+ * @param array  $page      Seed page: label, path, post_id.
+ * @param string $page_type Seed page type (hub, topic, guide, key-page …).
+ * @return array{0: string, 1: int, 2: string} obj_type (post, term, path, label), obj_id, path or label.
+ */
+function aw_si_resolve_page( array $page, string $page_type ): array {
+	$pid = (int) ( $page['post_id'] ?? 0 );
+	if ( $pid && get_post( $pid ) ) {
+		return array( 'post', $pid, aw_si_object_path( 'post', $pid ) );
+	}
+	$path = (string) ( $page['path'] ?? '' );
+	if ( '' !== $path && false === strpos( $path, '{' ) ) {
+		$id = url_to_postid( home_url( $path ) );
+		return $id ? array( 'post', $id, $path ) : array( 'path', 0, $path );
+	}
+	if ( '' !== $path ) {
+		return array( 'path', 0, $path ); // A Directory pattern such as /directory/{state}/.
+	}
+	$label = (string) ( $page['label'] ?? '' );
+	if ( 'topic' === $page_type ) {
+		$term = get_term_by( 'name', $label, 'category' );
+		if ( $term ) {
+			return array( 'term', (int) $term->term_id, aw_si_object_path( 'term', (int) $term->term_id ) );
+		}
+	}
+	if ( 'key-page' === $page_type ) {
+		$q = get_posts(
+			array(
+				'post_type'      => 'page',
+				'title'          => $label,
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+			)
+		);
+		if ( $q ) {
+			return array( 'post', (int) $q[0], aw_si_object_path( 'post', (int) $q[0] ) );
+		}
+	}
+	if ( 'guide' === $page_type ) {
+		$q = get_posts(
+			array(
+				'post_type'      => 'post',
+				'title'          => $label,
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+			)
+		);
+		if ( $q ) {
+			return array( 'post', (int) $q[0], aw_si_object_path( 'post', (int) $q[0] ) );
+		}
+	}
+	return array( 'label', 0, $label );
+}
+
+/**
+ * The seed file. Removed after the live seed (25 Oct 2026, 07:12); it and its build tool
+ * (tools/search-insights/build_seed.py) are in git history. Without it a fresh seed reports "seed file missing".
+ */
+function aw_si_seed_data(): array {
+	$file = (string) apply_filters( 'aw_si_seed_file', INSIGHTWEB_DIR . 'data/search-insights-seed.json' );
+	$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file.
+	return is_array( $json ) ? $json : array();
+}
+
+/**
+ * Seed the keyword table once from the keyword map (plan §2). After this the table is the source of truth; the seed
+ * never runs again unless the owner deletes the data. It is marked done only when every write succeeded, so a seed
+ * cut short or hit by a database error runs again with the next daily run (each write replaces, so a repeat is safe).
+ *
+ * @return array Counts, or an empty array when already seeded.
+ */
+function aw_si_seed(): array {
+	if ( get_option( 'aw_si_seeded' ) ) {
+		return array();
+	}
+	global $wpdb;
+	$seed = aw_si_seed_data();
+	if ( empty( $seed['map'] ) ) {
+		return array( 'error' => 'seed file missing' );
+	}
+	$k = aw_si_table( 'keywords' );
+	// One lookup for every seeded phrase (creating the records), instead of one per row.
+	$all   = array_merge( array_column( $seed['map'], 'keyword' ), array_column( (array) ( $seed['gaps'] ?? array() ), 'keyword' ), array_column( (array) ( $seed['rankings'] ?? array() ), 'keyword' ) );
+	$ids   = aw_si_kw_ids( $all, AW_SI_ROLE_TRACKED );
+	$count = array(
+		'map'      => 0,
+		'gaps'     => 0,
+		'rankings' => 0,
+		'pages'    => 0,
+		'failed'   => 0,
+	);
+	$fail  = 0; // Writes that did not succeed, and phrases that got no record: the seed then runs again next time.
+	foreach ( $seed['map'] as $row ) {
+		$id = (int) ( $ids[ aw_si_norm( $row['keyword'] ) ] ?? 0 );
+		if ( ! $id ) {
+			++$fail;
+			continue;
+		}
+		++$count['map'];
+		$set = array(
+			'page_type' => $row['page_type'],
+			'intent'    => mb_substr( (string) $row['intent'], 0, 16 ),
+			'entity'    => '{organisation name}' === $row['keyword'] ? 1 : 0,
+		);
+		if ( 'primary' === $row['kind'] && $row['priority'] ) {
+			$set['priority'] = $row['priority']; // The 21 Oct priority until aw_si_compute() recalculates it.
+		}
+		if ( 'topic' === $row['page_type'] && 0 !== strpos( (string) $row['page']['label'], '/' ) ) { // A path (/categories/) is a page, not a topic.
+			$set['topic'] = mb_substr( (string) $row['page']['label'], 0, 100 );
+		}
+		$fail                     += false === $wpdb->update( $k, $set, array( 'id' => $id ) ) ? 1 : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		list( $type, $obj, $path ) = aw_si_resolve_page( (array) $row['page'], (string) $row['page_type'] );
+		$fail                     += aw_si_link_page( $id, $type, $obj, $path, 'primary' === $row['kind'] ? 'owner' : 'secondary', 'seed' ) ? 0 : 1;
+		++$count['pages'];
+		if ( null !== $row['trends'] ) {
+			$fail += aw_si_obs_put( $id, '', 'trends', 'index', '12m', '2026-10-15', array( 'value' => (float) $row['trends'] ) ) ? 0 : 1;
+		}
+		if ( null !== $row['rank'] ) {
+			$num   = is_int( $row['rank'] ) ? (float) $row['rank'] : null;
+			$fail += aw_si_obs_put(
+				$id,
+				'',
+				'live',
+				'position',
+				'month',
+				'2026-10-22',
+				array(
+					'value' => $num,
+					'txt'   => (string) $row['rank'],
+				)
+			) ? 0 : 1;
+		}
+	}
+	foreach ( (array) ( $seed['gaps'] ?? array() ) as $g ) {
+		$id = (int) ( $ids[ aw_si_norm( $g['keyword'] ) ] ?? 0 );
+		if ( ! $id ) {
+			++$fail;
+		} else {
+			$fail += false === $wpdb->query( $wpdb->prepare( "UPDATE {$k} SET note = %s WHERE id = %d AND note = ''", mb_substr( 'Gap (15 Oct): ' . $g['gap'], 0, 255 ), $id ) ) ? 1 : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			++$count['gaps'];
+		}
+	}
+	foreach ( (array) ( $seed['rankings'] ?? array() ) as $r ) {
+		$id = (int) ( $ids[ aw_si_norm( $r['keyword'] ) ] ?? 0 );
+		if ( ! $id ) {
+			++$fail;
+			continue;
+		}
+		++$count['rankings'];
+		$fail += aw_si_obs_put(
+			$id,
+			'',
+			'live',
+			'position',
+			'month',
+			$r['date'],
+			array(
+				'value' => null === $r['position'] ? null : (float) $r['position'],
+				'txt'   => (string) $r['position_text'],
+			)
+		) ? 0 : 1;
+		if ( '' !== (string) $r['top3'] ) {
+			$fail += aw_si_obs_put( $id, '', 'live', 'top3', 'month', $r['date'], array( 'txt' => (string) $r['top3'] ) ) ? 0 : 1;
+		}
+		if ( '' !== (string) $r['paa'] ) {
+			$fail += aw_si_obs_put( $id, '', 'live', 'paa', 'month', $r['date'], array( 'txt' => (string) $r['paa'] ) ) ? 0 : 1;
+		}
+		if ( '' !== (string) $r['url'] ) {
+			$fail += aw_si_link_page( $id, 'path', 0, aw_si_path( (string) $r['url'] ), 'live', 'seed' ) ? 0 : 1;
+		}
+	}
+	$count['failed'] = $fail;
+	if ( ! $fail ) {
+		update_option( 'aw_si_seeded', time(), false ); // Only a complete seed is marked; every write replaces, so a repeat is safe.
+	}
+	return $count;
+}
+
+/**
+ * Insert or replace one observation.
+ *
+ * @param int    $kw_id  Keyword record (0 for a site total).
+ * @param string $page   Site path, or '' for keyword-level rows.
+ * @param string $src    Source, such as gsc, live or trends.
+ * @param string $metric Metric of that source.
+ * @param string $period day, month, or a rolling window such as 12m.
+ * @param string $d      Date (Y-m-d).
+ * @param array  $m      Any of clicks, impr, pos, value, txt; page_key overrides md5( $page ) (rows keyed by page and
+ *                       source, such as GA4 ai and ref rows, keep their own key).
+ * @return bool Whether the row was written.
+ */
+function aw_si_obs_put( int $kw_id, string $page, string $src, string $metric, string $period, string $d, array $m ): bool {
+	global $wpdb;
+	return false !== $wpdb->replace( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		aw_si_table( 'obs' ),
+		array(
+			'kw_id'    => $kw_id,
+			'page'     => mb_substr( $page, 0, 255 ),
+			'page_key' => isset( $m['page_key'] ) ? (string) $m['page_key'] : ( '' === $page ? '' : md5( $page ) ),
+			'src'      => $src,
+			'metric'   => $metric,
+			'period'   => $period,
+			'd'        => $d,
+			'clicks'   => $m['clicks'] ?? null,
+			'impr'     => $m['impr'] ?? null,
+			'pos'      => $m['pos'] ?? null,
+			'value'    => $m['value'] ?? null,
+			'txt'      => mb_substr( (string) ( $m['txt'] ?? '' ), 0, 255 ),
+			'fetched'  => aw_si_now(),
+		)
+	);
+}
+
+/**
+ * Replace one day's rows of a source with new ones, in one transaction (a failed write keeps the old rows). The one
+ * writer for every day-replace (Search Console, Discover and News, GA4, Clarity).
+ *
+ * @param string   $src     Source key in obs.
+ * @param string   $day     Date (Y-m-d).
+ * @param array    $rows    Each [kw_id, page, page_key, metric, value, txt]; with $shape 'gsc' each
+ *                          [kw_id, page, page_key, metric, clicks, impressions, position or null].
+ * @param string   $period  Period of the rows: day, or 28d for a 28-day window ending on $day.
+ * @param string[] $metrics Only these metrics are replaced (empty: every metric of the source, period and day).
+ * @param string   $shape   value (value / txt columns) or gsc (clicks / impr / pos columns).
+ * @return int|WP_Error Rows written.
+ */
+function aw_si_obs_replace_day( string $src, string $day, array $rows, string $period = 'day', array $metrics = array(), string $shape = 'value' ) {
+	global $wpdb;
+	$o    = aw_si_table( 'obs' );
+	$now  = aw_si_now();
+	$gsc  = 'gsc' === $shape;
+	$cols = $gsc ? 'clicks, impr, pos' : 'value, txt';
+	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per metric.
+	$ok = false !== $wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE src = %s AND period = %s AND d = %s' . ( $metrics ? ' AND metric IN (' . implode( ', ', array_fill( 0, count( $metrics ), '%s' ) ) . ')' : '' ), array_merge( array( $o, $src, $period, $day ), array_values( $metrics ) ) ) );
+	foreach ( array_chunk( array_values( $rows ), 300 ) as $chunk ) {
+		$place = array();
+		$args  = array();
+		foreach ( $chunk as $v ) {
+			array_push( $args, (int) $v[0], mb_substr( (string) $v[1], 0, 255 ), (string) $v[2], $src, (string) $v[3], $period, $day );
+			if ( $gsc ) {
+				if ( null === $v[6] ) { // no position (Discover, Google News)
+					$place[] = '(%d, %s, %s, %s, %s, %s, %s, %d, %d, NULL, %s)';
+					array_push( $args, (int) $v[4], (int) $v[5], $now );
+				} else {
+					$place[] = '(%d, %s, %s, %s, %s, %s, %s, %d, %d, %f, %s)';
+					array_push( $args, (int) $v[4], (int) $v[5], round( (float) $v[6], 2 ), $now );
+				}
+			} else {
+				$place[] = '(%d, %s, %s, %s, %s, %s, %s, %f, %s, %s)';
+				array_push( $args, (float) $v[4], mb_substr( (string) $v[5], 0, 255 ), $now );
+			}
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,PluginCheck.Security.DirectDB.UnescapedDBParameter -- one placeholder group per row and the fixed column list, built above from constant strings.
+		$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "INSERT INTO %i (kw_id, page, page_key, src, metric, period, d, {$cols}, fetched) VALUES " . implode( ', ', $place ), array_merge( array( $o ), $args ) ) );
+		if ( ! $ok ) {
+			break;
+		}
+	}
+	if ( ! $ok ) {
+		$error = $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		/* translators: 1: source, 2: date, 3: database error. */
+		return new WP_Error( 'aw_si_store', sprintf( __( '%1$s rows for %2$s could not be saved, so the earlier rows were kept: %3$s', 'insightweb' ), $src, $day, $error ) );
+	}
+	$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return count( $rows );
+}
+
+/**
+ * Primary and secondary phrases of a Rank Math focus keyword field ("primary, secondary, …").
+ *
+ * @param string $field The rank_math_focus_keyword value.
+ */
+function aw_si_focus_parts( string $field ): array {
+	$parts = array_values( array_filter( array_map( 'trim', explode( ',', $field ) ), 'strlen' ) );
+	return array( $parts[0] ?? '', array_slice( $parts, 1 ) );
+}
+
+/**
+ * Daily role sync (read-only towards Rank Math and Sourcing):
+ * - focus: Rank Math keyphrases of published items (AW_SEO_ITEM_TYPES without listings) and of terms; listings only mark
+ *   matching records as entities (their names are not added one by one: plan, fixed decisions);
+ * - sourcing: SourceWeb's Include list (aw_relevance()['strong']), when SourceWeb is active and before its phase 2
+ *   (from phase 2 the owner sets Include on the record and this leaves it alone);
+ * - brand: AW_SI_BRAND.
+ *
+ * @return array Counts.
+ */
+function aw_si_sync_roles(): array {
+	global $wpdb;
+	$k     = aw_si_table( 'keywords' );
+	$p     = aw_si_table( 'kw_pages' );
+	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_listing' ) ) ) : array( 'post', 'page' );
+	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_status = 'publish' AND p.post_type IN ({$in}) AND m.meta_value <> ''", $types ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per type.
+	$terms = $wpdb->get_results( "SELECT t.term_id AS ID, m.meta_value FROM {$wpdb->terms} t JOIN {$wpdb->termmeta} m ON m.term_id = t.term_id AND m.meta_key = 'rank_math_focus_keyword' WHERE m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+	$labels = array();
+	$links  = array(); // [label, obj_type, id, role].
+	foreach ( array(
+		'post' => $rows,
+		'term' => $terms,
+	) as $type => $list ) {
+		foreach ( (array) $list as $r ) {
+			list( $primary, $secondary ) = aw_si_focus_parts( (string) $r->meta_value );
+			if ( '' !== $primary ) {
+				$labels[] = $primary;
+				$links[]  = array( $primary, $type, (int) $r->ID, 'owner' );
+			}
+			foreach ( $secondary as $s ) {
+				$labels[] = $s;
+				$links[]  = array( $s, $type, (int) $r->ID, 'secondary' );
+			}
+		}
+	}
+	// The focus role is rebuilt from scratch each day so a keyphrase the owner removed loses it.
+	$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, AW_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ids = aw_si_kw_ids( $labels, AW_SI_ROLE_FOCUS );
+	// Load every linked post and term in a few queries before building their links.
+	_prime_post_caches( array_map( 'intval', wp_list_pluck( (array) $rows, 'ID' ) ), false, false );
+	_prime_term_caches( array_map( 'intval', wp_list_pluck( (array) $terms, 'ID' ) ), false );
+	$rows_out = array();
+	foreach ( $links as $l ) {
+		$id = $ids[ aw_si_norm( $l[0] ) ] ?? 0;
+		if ( $id ) {
+			$rows_out[] = array( $id, $l[1], $l[2], aw_si_object_path( $l[1], $l[2] ), $l[3], 'focus' );
+		}
+	}
+	// The focus links are swapped in one transaction: a failed write keeps yesterday's links (and is logged).
+	$errors = array();
+	$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ok = false !== $wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'focus'", $p ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ok = $ok && aw_si_link_pages( $rows_out, true );
+	if ( $ok ) {
+		$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	} else {
+		$errors[] = __( 'Focus keyphrase links could not be saved, so yesterday\'s were kept: ', 'insightweb' ) . $wpdb->last_error;
+		$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+
+	// Listings: mark existing records (from Search Console or the map) whose phrase is a listing's name.
+	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$read  = '' === $wpdb->last_error; // the flags are rebuilt only from a list that was read
+	$map   = aw_si_kw_map();
+	$ent   = array();
+	foreach ( (array) $names as $n ) {
+		$norm = aw_si_norm( aw_si_focus_parts( (string) $n )[0] );
+		if ( isset( $map[ $norm ] ) ) {
+			$ent[] = (int) $map[ $norm ];
+		}
+	}
+	// Rebuilt each day, so a listing that was unpublished (or renamed) stops marking its name. The seed's
+	// "{organisation name}" placeholder records keep their flag.
+	if ( $read ) {
+		$wpdb->query( 'START TRANSACTION' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$ok = false !== $wpdb->query( $wpdb->prepare( 'UPDATE %i SET entity = 0 WHERE entity = 1 AND label NOT LIKE %s', $k, '%' . $wpdb->esc_like( '{' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( array_chunk( array_unique( $ent ), 500 ) as $chunk ) {
+			$in = implode( ',', array_map( 'intval', $chunk ) );
+			$ok = $ok && false !== $wpdb->query( $wpdb->prepare( "UPDATE %i SET entity = 1 WHERE id IN ({$in})", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		}
+		if ( $ok ) {
+			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		} else {
+			$errors[] = __( 'Listing-name flags could not be saved, so the earlier flags were kept: ', 'insightweb' ) . $wpdb->last_error;
+			$wpdb->query( 'ROLLBACK' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		}
+	}
+
+	// Sourcing: read only, and only when SourceWeb is active (the section hides otherwise). From sourcing phase 2 the
+	// Include role is set on the records themselves (Sourcing → Keywords) and is never rebuilt here.
+	$sourcing = array();
+	$p2_busy = get_option( 'aw_sourcing_migrating' ) || get_option( 'aw_sourcing_phase2_record' ); // a phase 2 migration running or unfinished: leave the roles alone (Codex)
+	if ( $p2_busy ) {
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
+	} elseif ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: SourceWeb may be off while this runs
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$sourcing = function_exists( 'aw_relevance' ) ? (array) ( aw_relevance()['strong'] ?? array() ) : array();
+		if ( $sourcing ) {
+			aw_si_kw_ids( $sourcing, AW_SI_ROLE_SOURCING );
+		}
+	} else {
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
+	}
+
+	// Brand: every record whose label matches.
+	$brand = array();
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, label FROM %i', $k ) ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( aw_si_is_brand( (string) $r->label ) ) {
+			$brand[] = (int) $r->id;
+		}
+	}
+	foreach ( array_chunk( $brand, 500 ) as $chunk ) {
+		$in = implode( ',', array_map( 'intval', $chunk ) );
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET roles = roles | %d WHERE id IN ({$in})", $k, AW_SI_ROLE_BRAND ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+	}
+
+	return array(
+		'focus_posts' => count( (array) $rows ),
+		'focus_terms' => count( (array) $terms ),
+		'focus_kw'    => count( $ids ),
+		'entities'    => count( $ent ),
+		'sourcing'    => count( $sourcing ),
+		'brand'       => count( $brand ),
+		'errors'      => $errors,
+	);
+}
+
+/**
+ * Category of a post: its Rank Math primary category, else its first category other than the default one.
+ *
+ * @param int $post_id Post ID.
+ * @return string Category name, or ''.
+ */
+function aw_si_post_topic( int $post_id ): string {
+	$primary = (int) get_post_meta( $post_id, 'rank_math_primary_category', true );
+	if ( $primary ) {
+		$term = get_term( $primary, 'category' );
+		if ( $term && ! is_wp_error( $term ) ) {
+			return wp_specialchars_decode( (string) $term->name, ENT_QUOTES ); // Stored as &amp;; kept as plain text.
+		}
+	}
+	$default = (int) get_option( 'default_category' );
+	foreach ( (array) get_the_terms( $post_id, 'category' ) as $term ) {
+		if ( $term instanceof WP_Term && (int) $term->term_id !== $default ) {
+			return wp_specialchars_decode( (string) $term->name, ENT_QUOTES );
+		}
+	}
+	return '';
+}
+
+/**
+ * Topic of each keyword (plan §8, the Keywords topic filter): the site category it belongs to, from
+ * 1. a category page that owns or carries it;
+ * 2. else the category of the post that owns it, then of a post that carries it;
+ * 3. else, for a keyword with no topic yet, the category of the post Google shows most for it (up to 1,500
+ *    different pages a run; a topic found this way is kept, so later runs only look up new keywords).
+ * A keyword with none of these keeps the topic it has (the keyword map's). Writes only the keyword table.
+ *
+ * @return array{set: int, from_links: int, from_search: int} Records changed, and how many topics came from where.
+ */
+function aw_si_sync_topics(): array {
+	global $wpdb;
+	$k     = aw_si_table( 'keywords' );
+	$p     = aw_si_table( 'kw_pages' );
+	$topic = array(); // kw_id => [rank, name]; the lowest rank wins.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, obj_type, obj_id, role FROM %i WHERE role IN ('owner', 'secondary') AND obj_type IN ('post', 'term') AND obj_id > 0", $p ) );
+	$posts = array_unique( array_map( 'intval', wp_list_pluck( wp_list_filter( $links, array( 'obj_type' => 'post' ) ), 'obj_id' ) ) );
+	_prime_post_caches( $posts, true, true );
+	$names = array();
+	foreach ( $links as $l ) {
+		$rank = 'term' === $l->obj_type ? 0 : ( 'owner' === $l->role ? 1 : 2 );
+		$key  = $l->obj_type . ':' . $l->obj_id;
+		if ( ! isset( $names[ $key ] ) ) {
+			$term          = 'term' === $l->obj_type ? get_term( (int) $l->obj_id ) : null;
+			$names[ $key ] = 'term' === $l->obj_type
+				? ( $term && ! is_wp_error( $term ) && 'category' === $term->taxonomy ? wp_specialchars_decode( (string) $term->name, ENT_QUOTES ) : '' )
+				: aw_si_post_topic( (int) $l->obj_id );
+		}
+		$id = (int) $l->kw_id;
+		if ( '' !== $names[ $key ] && ( ! isset( $topic[ $id ] ) || $rank < $topic[ $id ][0] ) ) {
+			$topic[ $id ] = array( $rank, $names[ $key ] );
+		}
+	}
+	$linked = count( $topic );
+
+	// Keywords with no linked category: the post Google shows most (the page column the daily calculation fills).
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$shown = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, page FROM %i WHERE topic = '' AND page LIKE %s AND page NOT LIKE %s", $k, '/%', '%{%' ) );
+	$paths = array();
+	foreach ( $shown as $r ) {
+		if ( ! isset( $topic[ (int) $r->id ] ) ) {
+			$paths[ (string) $r->page ][] = (int) $r->id;
+		}
+	}
+	uasort( $paths, fn( $a, $b ) => count( $b ) <=> count( $a ) );
+	foreach ( array_slice( $paths, 0, 1500, true ) as $path => $ids ) {
+		$post = url_to_postid( home_url( (string) $path ) );
+		$name = $post ? aw_si_post_topic( $post ) : '';
+		if ( '' === $name ) {
+			$term = get_term_by( 'slug', basename( untrailingslashit( (string) $path ) ), 'category' );
+			$name = $term && 0 === strpos( (string) $path, '/category/' ) ? wp_specialchars_decode( (string) $term->name, ENT_QUOTES ) : '';
+		}
+		if ( '' !== $name ) {
+			foreach ( $ids as $id ) {
+				$topic[ $id ] = array( 3, $name );
+			}
+		}
+	}
+
+	$by_name = array();
+	foreach ( $topic as $id => $t ) {
+		$by_name[ mb_substr( $t[1], 0, 100 ) ][] = (int) $id;
+	}
+	// A path stored as a topic by the first seed (the /categories/ hub) is not a topic.
+	$set = (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET topic = '' WHERE topic LIKE %s", $k, '/%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	foreach ( $by_name as $name => $ids ) {
+		foreach ( array_chunk( $ids, 500 ) as $chunk ) {
+			$in   = implode( ',', array_map( 'intval', $chunk ) );
+			$set += (int) $wpdb->query( $wpdb->prepare( "UPDATE %i SET topic = %s WHERE id IN ({$in}) AND topic <> %s", $k, $name, $name ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		}
+	}
+	return array(
+		'set'         => $set,
+		'from_links'  => $linked,
+		'from_search' => count( $topic ) - $linked,
+	);
+}

@@ -1,0 +1,210 @@
+<?php
+/**
+ * Google Tag Manager. The container ID and production hosts come from the site (filters kits_gtm_id, kits_analytics_hosts).
+ *
+ * Only output on the production host, so staging traffic never reaches analytics.
+ * Skipped when Site Kit is already inserting a GTM container (avoids double counting).
+ *
+ * @package kits-core
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Consent mode v2 regions (owner, 17 Oct 2026): the EEA (EU 27 plus Iceland, Liechtenstein, Norway), the UK and
+ * Switzerland, as ISO 3166-1 alpha-2 codes. Filter kits_consent_regions to change the list.
+ *
+ * @return string[]
+ */
+function kits_consent_regions() {
+	$eea = array( 'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'IS', 'LI', 'NO' );
+	return array_values( array_unique( array_map( 'strtoupper', (array) apply_filters( 'kits_consent_regions', array_merge( $eea, array( 'GB', 'CH' ) ) ) ) ) );
+}
+
+/** IANA time zones of the consent regions (what a browser reports), for scripts that cannot ask Google for the region. */
+function kits_consent_timezones() {
+	$zones = array( 'Europe/Mariehamn', 'Arctic/Longyearbyen', 'Europe/Nicosia', 'Europe/Belfast' ); // aliases browsers may report
+	foreach ( kits_consent_regions() as $cc ) {
+		$zones = array_merge( $zones, (array) DateTimeZone::listIdentifiers( DateTimeZone::PER_COUNTRY, $cc ) );
+	}
+	return array_values( array_unique( $zones ) );
+}
+
+/**
+ * Consent mode v2 (basic), before any Google tag (GTM, AdSense, page_context push): everything denied by default in the
+ * consent regions until Google's CMP (AdSense Privacy & messaging) sends an update, granted everywhere else; ad data
+ * redacted and URL passthrough on while denied. The CMP itself is Google's, loaded by AdSense; no banner here.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( is_admin() ) {
+			return;
+		}
+		$region = wp_json_encode( kits_consent_regions() );
+		wp_print_inline_script_tag( "window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500,region:{$region}});gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('set','ads_data_redaction',true);gtag('set','url_passthrough',true);" );
+	},
+	-100
+);
+
+/** GTM container ID for this site ('' = off). */
+function kits_gtm_id() {
+	return (string) apply_filters( 'kits_gtm_id', defined( 'KITS_GTM_ID' ) ? KITS_GTM_ID : '' );
+}
+
+/** Comma-separated production hosts on which analytics may run. */
+function kits_analytics_hosts() {
+	return (string) apply_filters( 'kits_analytics_hosts', defined( 'KITS_ANALYTICS_HOSTS' ) ? KITS_ANALYTICS_HOSTS : '' );
+}
+
+/**
+ * Whether the GTM snippet should be printed on this request.
+ *
+ * @return bool
+ */
+function kits_gtm_enabled() {
+	if ( ! kits_gtm_id() || is_admin() || wp_doing_ajax() || kits_analytics_skip_user() ) {
+		return false;
+	}
+	$host  = wp_parse_url( home_url(), PHP_URL_HOST );
+	$hosts = array_map( 'trim', explode( ',', kits_analytics_hosts() ) );
+	if ( ! in_array( $host, $hosts, true ) ) {
+		return false;
+	}
+	$sitekit = get_option( 'googlesitekit_tagmanager_settings' );
+	if ( is_array( $sitekit ) && ! empty( $sitekit['containerID'] ) && ! empty( $sitekit['useSnippet'] ) ) {
+		return false;
+	}
+	return true;
+}
+
+/**
+ * Site Kit's Tag Manager container ID when Site Kit places the container ('' otherwise). Its snippet starts the
+ * container at once; it is held back (googlesitekit_tagmanager_tag_blocked) and the same container is placed by the
+ * snippet below, which starts it after the page has loaded. Same pages as Site Kit: the live (production) site only.
+ *
+ * @return string
+ */
+function kits_sitekit_gtm_id() {
+	$s = get_option( 'googlesitekit_tagmanager_settings' );
+	// Logged-in staff get no container either (kits_analytics_skip_user(), as for the site's own GTM and Clarity).
+	if ( is_admin() || kits_analytics_skip_user() || 'production' !== wp_get_environment_type() || ! is_array( $s ) || empty( $s['useSnippet'] ) || ! preg_match( '/^GTM-[A-Z0-9]+$/', (string) ( $s['containerID'] ?? '' ) ) ) {
+		return '';
+	}
+	return (string) $s['containerID'];
+}
+add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $b ) => '' !== kits_sitekit_gtm_id() ? true : $b );
+
+/** The container to place on this request: the site's own (kits_gtm_enabled) or Site Kit's; '' for none. */
+function kits_gtm_container() {
+	return kits_gtm_enabled() ? kits_gtm_id() : kits_sitekit_gtm_id();
+}
+
+add_action(
+	'wp_head',
+	function () {
+		if ( '' === kits_gtm_container() ) {
+			return;
+		}
+		$id = esc_js( kits_gtm_container() );
+		// Page speed: the container starts once the page has loaded, or at the visitor's first tap, key or scroll if that
+		// comes first, so it never holds back the first paint. gtm.start is stamped now; everything pushed to the dataLayer
+		// before the container starts (consent defaults, page_context, events) is kept and read by it.
+		echo "<!-- Google Tag Manager -->\n";
+		wp_print_inline_script_tag( "(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var done=false,ev=['pointerdown','keydown','scroll'];function go(){if(done)return;done=true;ev.forEach(function(e){w.removeEventListener(e,go,true);});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);}ev.forEach(function(e){w.addEventListener(e,go,{capture:true,passive:true});});if(d.readyState==='complete'){go();}else{w.addEventListener('load',go,{once:true});}})(window,document,'script','dataLayer','{$id}');" ); // The container id is esc_js() above; the rest is fixed text.
+		echo "<!-- End Google Tag Manager -->\n";
+	},
+	1
+);
+
+add_action(
+	'wp_body_open',
+	function () {
+		if ( '' === kits_gtm_container() ) {
+			return;
+		}
+		echo '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . esc_attr( kits_gtm_container() ) . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n";
+	}
+);
+
+/** Microsoft Clarity project ID for this site ('' = off). */
+function kits_clarity_id() {
+	return (string) apply_filters( 'kits_clarity_id', '' );
+}
+
+// Microsoft Clarity: same rules as GTM (production host only, never for logged-in staff). Outside the consent region it
+// loads at once; inside it (judged by the browser's time zone, kits_consent_timezones()) only once analytics storage is
+// granted, read from Google's consent mode (gtag consent update) or the CMP's TCF signal (purpose 1), and then it is
+// told so with clarity('consentv2'). Page speed: its script is fetched only after the visitor's first scroll, tap or key
+// press, when the browser is idle (owner, 20 Oct 2026; it took about 180 ms of main thread during page load on phones), so
+// a visit with no interaction at all is not recorded. Calls made before then (consentv2, events) queue in clarity.q and
+// are read when it starts.
+add_action(
+	'wp_head',
+	function () {
+		if ( ! kits_clarity_id() || is_admin() || wp_doing_ajax() || kits_analytics_skip_user() ) {
+			return;
+		}
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( ! in_array( $host, array_map( 'trim', explode( ',', kits_analytics_hosts() ) ), true ) ) {
+			return;
+		}
+		$id = esc_js( kits_clarity_id() );
+		$tz = wp_json_encode( kits_consent_timezones() );
+		wp_print_inline_script_tag( "(function(w,d,id,zones){var on=false;function load(g){if(!on){on=true;(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};function go(){t=l.createElement(r);t.async=1;t.src=\"https://www.clarity.ms/tag/\"+i+\"?ref=bwt\";y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);}function idle(){(\"requestIdleCallback\" in c)?requestIdleCallback(go,{timeout:2000}):setTimeout(go,1000);}var ev=[\"pointerdown\",\"keydown\",\"scroll\",\"touchstart\"],st=false;function start(){if(st)return;st=true;ev.forEach(function(e){c.removeEventListener(e,start,true);});idle();}ev.forEach(function(e){c.addEventListener(e,start,{capture:true,passive:true});});})(w,d,\"clarity\",\"script\",id);}if(g){w.clarity(\"consentv2\",{ad_Storage:g.ad_storage===\"granted\"?\"granted\":\"denied\",analytics_Storage:\"granted\"});}}var tz=\"\";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||\"\";}catch(e){}if(zones.indexOf(tz)<0){load();return;}function seen(a){if(a&&a[0]===\"consent\"&&a[1]===\"update\"&&a[2]&&a[2].analytics_storage===\"granted\"){load(a[2]);}}var dl=w.dataLayer=w.dataLayer||[];for(var i=0;i<dl.length;i++){seen(dl[i]);}var push=dl.push;dl.push=function(){for(var j=0;j<arguments.length;j++){seen(arguments[j]);}return push.apply(dl,arguments);};var n=0,t=setInterval(function(){if(typeof w.__tcfapi===\"function\"){clearInterval(t);w.__tcfapi(\"addEventListener\",2,function(tc,ok){if(ok&&tc&&(tc.eventStatus===\"tcloaded\"||tc.eventStatus===\"useractioncomplete\")&&tc.gdprApplies&&tc.purpose&&tc.purpose.consents&&tc.purpose.consents[1]){load({ad_storage:\"granted\"});}});}else if(++n>40){clearInterval(t);}},250);})(window,document,\"{$id}\",{$tz});" );
+	},
+	2
+);
+
+/**
+ * Page context for analytics (owner, 9 Oct 2026): window.kitsPage and a dataLayer "page_context" push before any tag,
+ * so GTM tags and the events in assets/js/analytics.js know the page type, section, category, place, listing type, issuer and
+ * publisher. A site fills the values with the kits_page_context filter. gtag = true while GA4 is placed directly by
+ * Site Kit (events then also go to gtag); false once GA4 runs only inside GTM.
+ */
+add_action(
+	'wp_head',
+	function () {
+		if ( is_admin() ) {
+			return;
+		}
+		$ga  = (array) get_option( 'googlesitekit_analytics-4_settings', array() );
+		$ctx = array(
+			'page_type'    => is_front_page() ? 'home' : ( is_404() ? '404' : ( is_singular() ? get_post_type() : 'list' ) ),
+			'section'      => '',
+			'category'     => '',
+			'state'        => '',
+			'district'     => '',
+			'listing_type' => '',
+			'issuer'       => '',
+			'publisher'    => '',
+		);
+		$ctx         = array_map( 'strval', (array) apply_filters( 'kits_page_context', $ctx ) );
+		$ctx['gtag'] = ! empty( $ga['useSnippet'] ) && ! get_option( 'kits_ga4_via_gtm' );
+		wp_print_inline_script_tag( 'window.kitsPage=' . wp_json_encode( $ctx ) . ';(window.dataLayer=window.dataLayer||[]).push(Object.assign({event:"page_context"},window.kitsPage));' );
+	},
+	0
+);
+
+/**
+ * Logged-in staff (anyone who can edit content) are never counted (owner, 14 Oct 2026): no GTM container for them,
+ * whether Site Kit places it or this file does. Visitors are unaffected.
+ */
+function kits_analytics_skip_user() {
+	return is_user_logged_in() && current_user_can( 'edit_posts' );
+}
+add_filter( 'googlesitekit_tagmanager_tag_blocked', fn( $blocked ) => $blocked || kits_analytics_skip_user() );
+add_filter( 'googlesitekit_analytics-4_tag_blocked', fn( $blocked ) => $blocked || kits_analytics_skip_user() || kits_ga4_in_gtm() );
+
+/**
+ * One GA4 tag (owner, 25 Oct 2026). Site Kit places its own Google tag for GA4 (GT-…) while the GTM container's Google
+ * tag also sends to the same GA4 property, so page views were counted twice. With option kits_ga4_via_gtm on, GA4 comes
+ * from the container only (it carries the page_context fields: page_type, section, category, faq_group): Site Kit's
+ * Analytics tag is held back, its setting ("Place code") and connection stay as they are, so its reports and Search
+ * Insights still read GA4. Only while a container is placed on this request, so GA4 is never left without a tag.
+ */
+function kits_ga4_in_gtm() {
+	return (bool) get_option( 'kits_ga4_via_gtm' ) && '' !== kits_gtm_container();
+}

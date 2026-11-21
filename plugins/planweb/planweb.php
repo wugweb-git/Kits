@@ -1,0 +1,85 @@
+<?php
+/**
+ * PlanWeb
+ *
+ * @package           planweb
+ * @author            Wugweb
+ * @copyright         2026 Wugweb
+ * @license           GPL-2.0-or-later
+ *
+ * @wordpress-plugin
+ * Plugin Name:       PlanWeb
+ * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it. Needs Kits Core.
+ * Version:           0.2.0
+ * Requires at least: 7.1
+ * Requires PHP:      8.0
+ * Author:            Wugweb
+ * Author URI:        https://wugweb.com/
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Update URI:        https://wugweb.com/plugins/planweb/
+ * Text Domain:       planweb
+ * Domain Path:       /languages
+ * Requires Plugins:  kits-core
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+// PlanWeb needs Kits Core (its admin shell, forms and dates). Plugins load in name order, so an active Kits Core loads after
+// this file: load it now, once (kits-core.php stops a second load). Without it, say so and do nothing else.
+if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/kits-core/kits-core.php' )
+	&& ( in_array( 'kits-core/kits-core.php', (array) get_option( 'active_plugins', array() ), true )
+		|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['kits-core/kits-core.php'] ) ) ) ) {
+	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/kits-core/kits-core.php' ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
+	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
+}
+if ( ! defined( 'KITS_CORE_LOADED' ) ) {
+	add_action(
+		'admin_notices',
+		function () {
+			if ( current_user_can( 'activate_plugins' ) ) {
+				echo '<div class="notice notice-warning"><p>' . esc_html__( 'PlanWeb needs Kits Core. Activate Kits Core and PlanWeb will start.', 'planweb' ) . '</p></div>';
+			}
+		}
+	);
+	return;
+}
+
+// Activating PlanWeb switches it on; deactivating switches it off. The hook names are fixed, not built from __FILE__:
+// Animal Writes Core loads this file first, before WordPress maps a symlinked plugin folder, so __FILE__ can give a
+// name WordPress never fires (the Deploy check's WordPress links plugins in this way).
+add_action( 'activate_planweb/planweb.php', 'planweb_activate' );
+add_action( 'deactivate_planweb/planweb.php', 'planweb_deactivate' );
+
+if ( defined( 'PLANWEB_VERSION' ) ) {
+	return; // Loaded already.
+}
+
+define( 'PLANWEB_VERSION', '0.2.0' );
+define( 'PLANWEB_FILE', __FILE__ );
+define( 'PLANWEB_DIR', plugin_dir_path( __FILE__ ) );
+define( 'PLANWEB_URL', plugin_dir_url( __FILE__ ) );
+
+require_once PLANWEB_DIR . 'includes/model.php';
+require_once PLANWEB_DIR . 'includes/ui-model.php';
+require_once PLANWEB_DIR . 'includes/switch.php';
+require_once PLANWEB_DIR . 'includes/store.php';
+require_once PLANWEB_DIR . 'includes/import.php';
+require_once PLANWEB_DIR . 'includes/admin-table.php';
+require_once PLANWEB_DIR . 'includes/admin.php';
+require_once PLANWEB_DIR . 'includes/help-tab.php';
+require_once PLANWEB_DIR . 'includes/plugin-info.php';
+require_once PLANWEB_DIR . 'includes/dashboard.php';
+require_once PLANWEB_DIR . 'includes/kits-hub.php';
+require_once PLANWEB_DIR . 'includes/planweb-dashboard.php';
+require_once PLANWEB_DIR . 'includes/planweb-rest.php';
+require_once PLANWEB_DIR . 'includes/site-schedule.php';
+require_once PLANWEB_DIR . 'includes/feed-model.php';
+require_once PLANWEB_DIR . 'includes/feed.php';
+require_once PLANWEB_DIR . 'includes/migrate.php';
+require_once PLANWEB_DIR . 'includes/team-dates.php'; // the team's Dates calendar and aw_team_dates(), the fallback while PlanWeb is off (moved from Animal Writes Core, 19 Nov 2026)
+require_once PLANWEB_DIR . 'includes/planweb-ui.php';
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once PLANWEB_DIR . 'includes/class-planweb-cli.php';
+}

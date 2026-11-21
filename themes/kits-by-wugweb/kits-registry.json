@@ -1,0 +1,2522 @@
+{
+ "version": 1,
+ "owner": "Kits",
+ "items": [
+  {
+   "name": "Button",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-btn"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus-visible",
+    "active (pressed)",
+    "disabled",
+    "loading"
+   ],
+   "tokens": [
+    "kit-btn-height",
+    "kit-btn-height-sm",
+    "kit-btn-pad",
+    "kit-btn-pad-sm",
+    "kit-btn-gap",
+    "kit-btn-ico-size",
+    "kit-btn-ico-size-only",
+    "kit-btn-press",
+    "kit-btn-nudge",
+    "kit-btn-spinner-width",
+    "kit-btn-hover-mix",
+    "kit-btn-primary-*",
+    "kit-btn-secondary-*",
+    "kit-btn-ghost-*",
+    "kit-btn-brand-*",
+    "kit-radius-pill",
+    "kit-border-control",
+    "kit-focus-width",
+    "kit-color-focus",
+    "kit-motion-fast",
+    "kit-duration-spring",
+    "kit-ease-spring",
+    "opacity-disabled"
+   ],
+   "a11y": {
+    "element": "<a> for every button; <button type=submit> for form buttons",
+    "aria": "aria-busy=\"true\" while sending; disabled buttons use the disabled attribute",
+    "keyboard": "Tab; Enter (links); Enter or Space (buttons)",
+    "focus": "--kit-focus-width ring in --kit-color-focus, --kit-focus-offset offset (:focus-visible)",
+    "target": "44px minimum (small); 48px default",
+    "motion": "colour fade, 1px press and a 3px icon nudge; none with prefers-reduced-motion",
+    "sr": "visible label; icon-only <button> carries aria-label; icon-only core block keeps its text for screen readers",
+    "contrast": [
+     "kit-btn-primary-fg",
+     "kit-btn-primary-bg"
+    ],
+    "contrast_pairs": [
+     [
+      "kit-btn-primary-fg",
+      "kit-btn-primary-bg",
+      "primary on light"
+     ],
+     [
+      "kit-btn-brand-fg",
+      "kit-btn-brand-bg",
+      "brand (and primary on dark)"
+     ],
+     [
+      "kit-btn-secondary-fg",
+      "kit-color-bg",
+      "secondary on the page"
+     ],
+     [
+      "kit-btn-secondary-fg",
+      "kit-color-raised",
+      "secondary on a card"
+     ],
+     [
+      "kit-btn-ghost-fg",
+      "kit-color-bg",
+      "ghost on the page"
+     ],
+     [
+      "kit-btn-secondary-fg-hover",
+      "kit-btn-secondary-bg-hover",
+      "secondary hover"
+     ],
+     [
+      "kit-color-on-ink",
+      "kit-color-ink",
+      "secondary and ghost on dark"
+     ],
+     [
+      "kit-color-ink",
+      "kit-color-on-ink",
+      "hover on dark (white fill)"
+     ],
+     [
+      "kit-btn-ghost-fg-hover",
+      "kit-btn-ghost-bg-hover",
+      "ghost hover"
+     ]
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "says what happens (\"Apply or sign up\", not \"Click here\")",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "spec": {
+    "doc": "docs/buttons.md",
+    "css": "kit-primitives.css section 10 (the only place button rules live)",
+    "systems": "<a|button class=\"kit-btn …\"> and the core Button block render the same",
+    "variants": {
+     "primary": {
+      "use": "the main action; one per area",
+      "kit": "kit-btn (old: kit-btn--primary, kit-btn--ink)",
+      "block": "Default (shown as Primary)",
+      "light": "ink fill, white text; hover --neutral-8",
+      "dark": "takes the brand pair (fill and hover), since ink would vanish"
+     },
+     "secondary": {
+      "use": "other actions next to a primary",
+      "kit": "kit-btn--secondary (old: kit-btn--outline)",
+      "block": "Secondary (old: Outline)",
+      "light": "soft grey fill (6% ink), 1px --kit-color-line outline, ink text; hover ink fill",
+      "dark": "soft white tint (12%), 60% white outline, white text; hover white fill, ink text"
+     },
+     "ghost": {
+      "use": "an outlined action with more weight than Secondary",
+      "kit": "kit-btn--ghost",
+      "block": "Ghost",
+      "light": "ink outline, ink text; hover ink fill, white text",
+      "dark": "white outline, white text; hover white fill, ink text"
+     },
+     "brand": {
+      "use": "brand moments: the primary shape in the brand colour",
+      "kit": "kit-btn--brand",
+      "block": "Brand (old: is-style-kits-primary)",
+      "colour": "--kit-btn-brand-bg/-fg: the site's brand (yellow, ink text), or the campaign's own colour inside a campaign palette (.aw-camp--<name> sets the pair)",
+      "light": "brand fill; hover = brand mixed with ink (--kit-btn-hover-mix)",
+      "dark": "the same"
+     }
+    },
+    "dark_surfaces": ".kit-dark, .has-secondary-background-color, .kit-site-header, .kit-site-footer, .kit-ed-hero, .kit-ed-help, .kit-ed-story, .kit-form--on-dark",
+    "states": {
+     "default": "variant colours",
+     "hover": "primary lightens; secondary fills with ink (white on dark); ghost gets a tint; brand darkens towards ink (--kit-btn-hover-mix); colours fade over --kit-motion-fast; the icon nudges (spring, --kit-duration-spring); pointer devices only",
+     "focus-visible": "--kit-focus-width ring in --kit-color-focus at --kit-focus-offset; colours unchanged; the icon nudges as on hover",
+     "active": "pressed: moves down --kit-btn-press (1px)",
+     "disabled": "disabled attribute (buttons) or aria-disabled=\"true\" (links, which then do not navigate); --opacity-disabled; no hover, no press",
+     "loading": "class is-loading or aria-busy=\"true\": spinner in place of the icon, label stays, no clicks"
+    },
+    "content": {
+     "icon + label": "the default. A function icon before the label (tel:, mailto:, WhatsApp, form submit and download automatic; or kit-btn--ico-<name>, or a .kit-ico span); otherwise → after the label, ↗ when the link leaves the site",
+     "label only": "kit-btn--label: a button with no icon (no arrow, no function icon); an explicit choice on any button",
+     "icon only": "kit-btn--icon: square (height × height); <button> needs aria-label; on the core block the button text is the accessible name and is hidden on screen"
+    },
+    "sizes": {
+     "default": "--kit-btn-height (48px), padding --kit-btn-pad, --fluid-body-md",
+     "small": "kit-btn--sm: --kit-btn-height-sm (44px), padding --kit-btn-pad-sm, --fluid-body-sm"
+    },
+    "motion": "colours fade --kit-motion-fast; icon nudge spring 3px (→), 2px diagonal (↗), leading icon 2px + scale 1.06; press 1px; spinner 700ms; prefers-reduced-motion: no transitions, no movement, spinner still at 60%",
+    "rules": [
+     "a link styled as a button is never a heading, and a heading is never styled as a button",
+     "the underlined text link (kit-ed-more) is a link, not a button: only for \"see all\" links in a section head",
+     "block styles set the variant; size and content are extra CSS classes, so a button can be e.g. small secondary icon-only"
+    ],
+    "retired": {
+     "is-style-kits-primary": "renders as Brand",
+     "is-style-kits-small": "renders as small Primary",
+     "is-style-outline": "renders as Secondary",
+     "kit-btn--ink": "= primary",
+     "kit-btn--primary": "= primary",
+     "kit-btn--outline": "= secondary"
+    },
+    "elements": "every button is a link (<a>), except form buttons (<button type=submit>: Send, Subscribe, Search), which share the same classes",
+    "forms": "form buttons use the default height (--kit-btn-height = --kit-size-control, 48px), the same as fields (--kit-field-height), so a field and its button line up"
+   }
+  },
+  {
+   "name": "Tag",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-tag",
+    "kit-tags"
+   ],
+   "states": [
+    "category (blue)",
+    "type (grey)",
+    "issuer (green)",
+    "closed (danger, opportunity past its deadline)",
+    "place (violet, pin icon)",
+    "plain",
+    "with icon",
+    "link (no underline)"
+   ],
+   "tokens": [
+    "kit-color-ink (6% tint)",
+    "radius-sm"
+   ],
+   "a11y": {
+    "element": "<span> (static label)",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-surface-soft"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Link chip",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-chip"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus",
+    "active",
+    "on ink"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a>",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "36px tall, 44px tap area with spacing",
+    "motion": "colour change only",
+    "sr": "category name as link text",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-raised"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "the category name",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Badge",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-badge",
+    "kit-badge--beta",
+    "is-style-kits-beta"
+   ],
+   "states": [
+    "verified",
+    "unconfirmed",
+    "featured",
+    "sponsored",
+    "ad",
+    "closed",
+    "new",
+    "beta (very small blue tag at the top right of a menu label: Navigation Link block style \"Beta\" = is-style-kits-beta, or the same span in a footer list)"
+   ],
+   "tokens": [
+    "kit-color-accent",
+    "kit-color-on-accent",
+    "kit-radius-pill",
+    "kit-meta-size",
+    "kit-leading-heading",
+    "s-0",
+    "s-2"
+   ],
+   "a11y": {
+    "element": "<span>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "state shown as text, not colour only; in a menu link the badge is inside the link with a screen-reader comma, so the link reads \"{label}, Beta\"",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-surface",
+     "kit-color-on-ink on kit-color-info (beta)"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Eyebrow",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-eyebrow"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> or heading text",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "carries information (section or type); never decorative"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Count",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-count"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "the number is read with its label"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Form field",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-field",
+    "kit-optional"
+   ],
+   "states": [
+    "default",
+    "optional",
+    "focus",
+    "filled",
+    "invalid",
+    "valid",
+    "disabled",
+    "read-only"
+   ],
+   "tokens": [
+    "kit-size-control",
+    "kit-border-control",
+    "kit-radius-control",
+    "kit-color-danger",
+    "kit-color-success"
+   ],
+   "a11y": {
+    "element": "<label> + <input>/<select>/<textarea>",
+    "aria": "aria-invalid on error; aria-describedby links the message; required fields marked in text",
+    "keyboard": "Tab; typing; autocomplete set per field",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "48px control height",
+    "motion": "border colour change only",
+    "sr": "label always visible; \"(optional)\" in text; messages read when shown",
+    "contrast": [
+     "kit-color-text",
+     "kit-color-raised"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Checkbox",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-checkbox",
+    "kit-check"
+   ],
+   "states": [
+    "unchecked",
+    "checked",
+    "invalid",
+    "focus"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<input type=checkbox> inside its <label>",
+    "aria": "aria-invalid on error",
+    "keyboard": "Tab; Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "whole label is the target (44px row)",
+    "motion": "none",
+    "sr": "the label text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Form",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-form",
+    "kit-captcha",
+    "kit-hp"
+   ],
+   "states": [
+    "default",
+    "sending",
+    "error summary",
+    "sent",
+    "expired page",
+    "no JavaScript"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<form> with labelled fields",
+    "aria": "role=status for the result; the error summary takes focus",
+    "keyboard": "Tab order follows the visual order; Enter sends",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "errors listed at the top and beside each field; spam check is invisible; honeypot hidden from everyone"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "One standard for every form (S5.2); behaviour in Kits Core forms.js."
+  },
+  {
+   "name": "Form status and done message",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-form-status",
+    "kit-form-done",
+    "kit-form-summary"
+   ],
+   "states": [
+    "error",
+    "success",
+    "sent"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div>",
+    "aria": "role=status aria-live=polite; tabindex=-1 so focus can move to it",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "read out when it appears"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Filter pill and group",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-filter"
+   ],
+   "states": [
+    "default",
+    "hover",
+    "focus",
+    "selected",
+    "disabled",
+    "loading"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<fieldset> + <legend>; pills are <a>",
+    "aria": "aria-current on the selected pill",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "selected shown by a tick and weight, not colour only"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "filter value as text",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Kept for small lists; hubs use the dropdown filter bar."
+  },
+  {
+   "name": "Filter bar (dropdowns, Sort, active chips)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-filterbar",
+    "kit-filters",
+    "kit-dd",
+    "kit-removable",
+    "kit-sheet-open"
+   ],
+   "states": [
+    "closed",
+    "open",
+    "chosen (count)",
+    "sheet on phones (slides up; closes on Esc, a tap on the dimmed page or a swipe down; html.kit-sheet-open keeps the page behind still)",
+    "no JavaScript (Apply button)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<form method=get>; each filter a <details>/<summary> with a <fieldset> of checkboxes; Sort a list of links",
+    "aria": "summary exposes expanded/collapsed; chosen count read as \"2 chosen\"; results status aria-live=polite",
+    "keyboard": "Enter/Space opens; arrow keys move through options; Esc closes and returns focus to the button",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px buttons and rows",
+    "motion": "chevron turn off with reduced motion",
+    "sr": "each remove chip says \"Remove Category: Birds\"",
+    "contrast": [
+     "kit-color-ink",
+     "kit-color-raised"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "Sort options are real links (crawlable)",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Collection toolbar (count, filters, sort)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-toolbar",
+    "kit-toolbar-count",
+    "kit-dd--sheet-only"
+   ],
+   "states": [
+    "count only",
+    "count and filter bar",
+    "chosen filters (chips under the row)",
+    "phone (Filters sheet, sort in the sheet)",
+    "from 768 (sort as a segment, one control height)"
+   ],
+   "tokens": [
+    "kit-toolbar-h",
+    "kit-space-collection"
+   ],
+   "a11y": {
+    "element": "<div> holding <p role=status> (the count) and the filter bar <form>",
+    "aria": "the count is a status: a new count is read out",
+    "keyboard": "Tab through the controls in reading order",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px controls (--kit-toolbar-h from 768)",
+    "motion": "none",
+    "sr": "count read before the controls"
+   },
+   "note": "kit-toolbar-count is the toolbar's own count (a flex child of the row); kit-list-count is the count on its own, outside a toolbar. kit-dd--sheet-only hides a dropdown from 768: use it only when another control in the toolbar does the same job there.",
+   "seo": {
+    "heading": "none",
+    "link": "Sort options are real links (crawlable)",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Segmented control",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-segment"
+   ],
+   "states": [
+    "default",
+    "current",
+    "focus"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav> of links",
+    "aria": "aria-label names it; aria-current on the active one",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Breadcrumb",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-crumbs",
+    "kit-breadcrumb"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav aria-label=\"Breadcrumb\"> with an <ol>",
+    "aria": "aria-current=page on the last item",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "page names",
+    "alt": "n/a",
+    "schema": "BreadcrumbList"
+   }
+  },
+  {
+   "name": "Pagination",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-pager"
+   ],
+   "states": [
+    "current",
+    "link",
+    "next",
+    "previous"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav aria-label=\"Pagination\">",
+    "aria": "aria-current=page",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "numbers and Next/Previous",
+    "alt": "n/a",
+    "schema": "none; pages 2+ canonical to themselves"
+   }
+  },
+  {
+   "name": "Disclosure (form behind a button)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-disclosure"
+   ],
+   "states": [
+    "closed",
+    "open",
+    "reopened after an error"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<details>/<summary> styled as a button",
+    "aria": "expanded state from <details>; one open at a time in a group",
+    "keyboard": "Enter/Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "button text changes to \"Close\" when open"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Steps",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-steps",
+    "kit-step",
+    "kit-steps-progress",
+    "kit-fold-group",
+    "kit-chips",
+    "kit-steps-num",
+    "kit-steps-name"
+   ],
+   "states": [
+    "step 1",
+    "step 2",
+    "no JavaScript (all steps)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<fieldset> per step with <legend> \"Step 1 of 2 …\"",
+    "aria": "focus moves to the step heading",
+    "keyboard": "Next/Back buttons; Enter sends on the last step",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Icon",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-ico"
+   ],
+   "states": [
+    "default",
+    "in button",
+    "on ink"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> CSS mask",
+    "aria": "aria-hidden=\"true\" always",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "meaning given by nearby text, never the icon alone"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Line icons (Lucide style, ISC)."
+  },
+  {
+   "name": "Link styles",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-link"
+   ],
+   "states": [
+    "internal",
+    "external (arrow)",
+    "visited",
+    "hover",
+    "focus"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a>",
+    "aria": "external links get a screen-reader note \"(external site)\"",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "link text says where it goes"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "descriptive text; external marked",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Empty state",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-empty"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div>",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "says what to do next"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Text styles (display, lead, caption, note)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-display",
+    "kit-lead",
+    "kit-caption",
+    "kit-note",
+    "kit-hero-title"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [
+    "kit-type-display",
+    "kit-type-lead",
+    "kit-type-xs",
+    "kit-weight-display",
+    "kit-leading-display",
+    "kit-tracking-display"
+   ],
+   "a11y": {
+    "element": "text elements",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text",
+    "contrast": [
+     "kit-color-muted",
+     "kit-color-bg"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Headings h1–h6",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "wp-block-heading"
+   ],
+   "states": [
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6"
+   ],
+   "tokens": [
+    "kit-h1-size",
+    "kit-h1-weight",
+    "kit-h1-leading",
+    "kit-h1-tracking",
+    "kit-h2-size",
+    "kit-h2-weight",
+    "kit-h2-leading",
+    "kit-h2-tracking",
+    "kit-h3-size",
+    "kit-h3-weight",
+    "kit-h3-leading",
+    "kit-h3-tracking",
+    "kit-h4-size",
+    "kit-h4-weight",
+    "kit-h4-leading",
+    "kit-h4-tracking",
+    "kit-h5-size",
+    "kit-h5-weight",
+    "kit-h5-leading",
+    "kit-h5-tracking",
+    "kit-h6-size",
+    "kit-h6-weight",
+    "kit-h6-leading",
+    "kit-h6-tracking"
+   ],
+   "a11y": {
+    "element": "h1–h6",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "heading level",
+    "contrast": [
+     "kit-color-muted",
+     "kit-color-bg"
+    ]
+   },
+   "seo": {
+    "heading": "one h1 per page, levels in order",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Background helpers",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-bg",
+    "kit-dark"
+   ],
+   "states": [
+    "canvas",
+    "kraft",
+    "ink"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "utility classes",
+    "aria": "on ink: focus ring turns yellow and links white",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text",
+    "contrast": [
+     "kit-color-on-ink",
+     "kit-color-ink"
+    ]
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Site header",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-site-header",
+    "kit-header",
+    "kit-menu",
+    "kit-hsearch",
+    "kit-wordmark",
+    "kit-logo"
+   ],
+   "states": [
+    "default",
+    "menu open (below 1200px)",
+    "search open"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<header> with <nav aria-label=\"Main\">; search is a <form role=search>",
+    "aria": "menu button has aria-expanded and \"Open menu\"/\"Close menu\" labels; search toggle has aria-expanded/aria-controls",
+    "keyboard": "Tab; Enter; Esc closes search",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "logo link \"Home\""
+   },
+   "seo": {
+    "heading": "none (the page H1 is in the content)",
+    "link": "section names",
+    "alt": "logo alt (site name)",
+    "schema": "WebSite (site-wide, SearchAction)"
+   }
+  },
+  {
+   "name": "Announcement bar",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-announce"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<div> above the header",
+    "aria": "none",
+    "keyboard": "Tab to its link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "one sentence and one link"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Sticky action bar",
+   "type": "component",
+   "status": "not used",
+   "classes": [
+    "kit-sticky-help"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<nav aria-label=\"Quick help\">",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "each action labelled in text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Site footer",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-site-footer",
+    "kit-footer",
+    "kit-legal",
+    "kit-social",
+    "kit-socials",
+    "kit-powered",
+    "kit-visits",
+    "kit-credit"
+   ],
+   "states": [
+    "default",
+    "link lists folded (below 768px)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<footer> with one <nav> per list, each with its own aria-label (Explore, About, Legal and trust, Helplines, Policies)",
+    "aria": "each phone fold is a <details>",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px rows on phones",
+    "motion": "none",
+    "sr": "social links labelled by network",
+    "contrast": [
+     "kit-color-on-ink",
+     "kit-color-ink"
+    ]
+   },
+   "seo": {
+    "heading": "none: column labels are paragraphs, each list a named nav",
+    "link": "page names; phone numbers as tel: links",
+    "alt": "logo alt",
+    "schema": "Organization (site-wide)"
+   }
+  },
+  {
+   "name": "Section band and hub head",
+   "type": "component",
+   "status": "live",
+   "controls": {
+    "type": "block style variation",
+    "block": "core/group",
+    "styles": [
+     "kits-section",
+     "kits-head-band"
+    ],
+    "settings": [
+     "padding",
+     "background",
+     "gap"
+    ],
+    "where": "Appearance > Editor > Styles > Blocks > Group"
+   },
+   "classes": [
+    "kit-section",
+    "kit-sec"
+   ],
+   "states": [
+    "default",
+    "with filters",
+    "with active filters",
+    "phone (no pictures)"
+   ],
+   "tokens": [
+    "kit-color-surface"
+   ],
+   "a11y": {
+    "element": "<header> holding breadcrumb, H1, intro, count and filters",
+    "aria": "pictures aria-hidden (decorative)",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "count read as text (\"22 documents\")"
+   },
+   "seo": {
+    "heading": "the page H1",
+    "link": "n/a",
+    "alt": "pictures are decorative (alt=\"\")",
+    "schema": "CollectionPage + ItemList (hubs)"
+   },
+   "note": "Fixed head height: 12rem from 640px, 15rem from 1200px."
+  },
+  {
+   "name": "Home editorial sections",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-ed",
+    "kit-hero",
+    "kit-finder"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section>s with H2 headings",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 in the hero, H2 per section",
+    "link": "descriptive",
+    "alt": "photos described or decorative",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Banner",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-banner"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<section> with heading and link",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Share",
+   "type": "component",
+   "status": "replaced",
+   "classes": [
+    "kit-share",
+    "kit-share-inline",
+    "kit-sh",
+    "kit-follow"
+   ],
+   "states": [
+    "default",
+    "copied",
+    "inline (in the text column, no rule above)",
+    "follow (Follow us under a page's share bar: our own accounts; pages only, never posts; owner 13 Nov 2026)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "buttons and links",
+    "aria": "copy result announced (role=status)",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "each button names the network or action"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Sharing is the Scriptless Social Sharing plugin, styled with Kits tokens."
+  },
+  {
+   "name": "Table",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-table"
+   ],
+   "states": [
+    "default",
+    "scrolls sideways on phones"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<table> with <th scope>",
+    "aria": "none",
+    "keyboard": "scroll container is focusable when it scrolls",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Carousel dots",
+   "type": "primitive",
+   "status": "replaced",
+   "classes": [
+    "kit-carousel"
+   ],
+   "states": [
+    "default",
+    "current"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "buttons",
+    "aria": "aria-current on the visible slide",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Ad placement (Advanced Ads)",
+   "type": "component",
+   "status": "live",
+   "classes": [],
+   "states": [
+    "Advanced Ads on: the placement's ad, labelled \"Advertisement\" (Advanced Ads → Settings → General)",
+    "Advanced Ads off: nothing (the block is not registered, so it prints no markup)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "Advanced Ads wrapper <div>; label text \"Advertisement\"",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "labelled \"Advertisement\" in text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "block": "advads/gblock"
+  },
+  {
+   "name": "Claim panel",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-claim"
+   ],
+   "states": [
+    "closed",
+    "open"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<details>",
+    "aria": "none",
+    "keyboard": "Enter/Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "More link",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-more"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<a>",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "says what it opens (\"All news\")",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Character counter",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-counter"
+   ],
+   "states": [
+    "default",
+    "near the limit"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<span> after a textarea",
+    "aria": "aria-live=polite near the limit",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Print button",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-print"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<button>",
+    "aria": "none",
+    "keyboard": "Enter/Space",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "File viewer (PDF)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-file",
+    "kit-file-actions"
+   ],
+   "states": [
+    "PDF shown in the page",
+    "browser cannot show it (fallback text inside the viewer)",
+    "actions row (download button)"
+   ],
+   "tokens": [
+    "kit-file-embed-h",
+    "kit-space-6",
+    "kit-space-4",
+    "kit-border-width",
+    "kit-color-line",
+    "kit-radius-card",
+    "kit-color-raised"
+   ],
+   "a11y": {
+    "element": "core file block markup: <div class=\"wp-block-file kit-file\"> with <object class=\"wp-block-file__embed\" aria-label> and a link button",
+    "aria": "aria-label on the <object> (document title)",
+    "keyboard": "the download link is a normal link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "the download button's own size (Kits button)",
+    "motion": "none",
+    "sr": "the object's label; fallback text when the PDF cannot show"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "download link to the PDF",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "Styles only the kit-file class, so core file blocks without it look as before."
+  },
+  {
+   "name": "States sheet",
+   "type": "tool",
+   "status": "live",
+   "classes": [
+    "kit-demo"
+   ],
+   "states": [
+    "all"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "admin-only page",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "/kits-demo/, private."
+  },
+  {
+   "name": "Layout grid",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-grid",
+    "kit-stack"
+   ],
+   "states": [
+    "4 columns (small)",
+    "8 (medium, 768)",
+    "12 (large, 1200)"
+   ],
+   "tokens": [
+    "kit-grid-columns",
+    "kit-grid-gap"
+   ],
+   "a11y": {
+    "element": "CSS grid utility",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Scroll lock (menu open)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-scroll"
+   ],
+   "states": [
+    "locked",
+    "released (scroll position restored)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on <html> while the mobile menu is open",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Static page (no scroll reveal)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-static"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on a template's <main>: its sections never fade or rise in, so they are visible without scrolling or JavaScript",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Block components (tile, promo, rows, link list, photo card)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-promo",
+    "kit-rows",
+    "kit-links",
+    "kit-photo-card"
+   ],
+   "states": [
+    "tile: default, urgent (accent icon square), hover, focus",
+    "promo: kraft, success tint",
+    "rows: default, hover",
+    "stacked on phones (kit-stack on the grid)"
+   ],
+   "tokens": [
+    "kit-color-surface",
+    "kit-color-success",
+    "kit-color-line",
+    "kit-radius-card"
+   ],
+   "a11y": {
+    "element": "core Group with a Heading link (the link covers the block); core List of links; Query Loop rows",
+    "aria": "none",
+    "keyboard": "Tab to the heading link",
+    "focus": "outline on the block (:focus-within)",
+    "target": "the whole block",
+    "motion": "arrow nudge on hover; none under reduced motion",
+    "sr": "heading text, then the line"
+   },
+   "seo": {
+    "heading": "H3",
+    "link": "one internal link per block",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Actions (three big action cards)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-actions",
+    "kit-action-card"
+   ],
+   "states": [
+    "row: one column on phones, three equal cards from 768 (kit-actions on a core Group, kit-action-card on each core Cover with kit-photo-card)",
+    "compact (in .kit-sidebar): one column, height from the text, H3-size titles",
+    "hover (pointer): card lifts, photo 1.03, shadow elevation-2; button lifts and brightens; pressed: darker",
+    "focus: the card shows the ring when its button has :focus-visible",
+    "none of the motion under prefers-reduced-motion"
+   ],
+   "tokens": [
+    "kit-photo-card-h",
+    "kit-action-scrim-mix",
+    "kit-action-btn-size",
+    "kit-space-grid",
+    "kit-space-5",
+    "kit-space-7",
+    "kit-elevation-1",
+    "kit-elevation-2",
+    "kit-motion-base",
+    "kit-motion-lift",
+    "kit-size-control",
+    "kit-color-accent",
+    "kit-color-ink"
+   ],
+   "a11y": {
+    "element": "core Group (kit-actions) with core Cover blocks (kit-photo-card kit-action-card), each with an H2, a line and one button",
+    "aria": "none",
+    "keyboard": "Tab to each button",
+    "focus": "ring on the card (:has(:focus-visible)), --kit-focus-width, --kit-focus-offset",
+    "target": "the whole card (the button's link covers it)",
+    "motion": "transform and box-shadow only; none under prefers-reduced-motion",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "an H2 per card",
+    "link": "one link per card",
+    "alt": "photos described (alt on each Cover image)",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Newsletter band (kit-nl-band)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-nl-band",
+    "kit-nl-band-inner",
+    "kit-nl-band-text",
+    "kit-nl-band-ico",
+    "kit-nl-band-head",
+    "kit-nl-band-line",
+    "kit-nl-band-art",
+    "kit-nl-band-form"
+   ],
+   "states": [
+    "band with icon, heading and line",
+    "art slot (top right from 768, drawn by the site)",
+    "sign-up form (styled by the site)",
+    "below 768: smaller heading and icon"
+   ],
+   "tokens": [
+    "kit-nl-mark",
+    "kit-color-raised",
+    "kit-color-line",
+    "kit-color-ink",
+    "kit-color-muted",
+    "kit-space-4",
+    "kit-space-5",
+    "kit-space-6",
+    "kit-space-7",
+    "kit-space-gutter",
+    "kit-width-content",
+    "kit-radius-card",
+    "kit-elevation-1",
+    "kit-border-mark",
+    "kit-type-h2",
+    "kit-type-h3"
+   ],
+   "a11y": {
+    "element": "<section aria-labelledby> with an <h2>",
+    "aria": "icon and art aria-hidden",
+    "keyboard": "the form's own fields",
+    "focus": "the form's own fields",
+    "target": "the form's own controls",
+    "motion": "none",
+    "sr": "the heading names the section"
+   },
+   "seo": {
+    "heading": "H2",
+    "link": "none",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Source line (kit-src)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-src",
+    "kit-src-icon",
+    "kit-src-name"
+   ],
+   "states": [
+    "plain (no address)",
+    "link (kit-src--link, opens the original)",
+    "icon from the site",
+    "letter icon (kit-src-icon--letter)",
+    "hover",
+    "focus-visible (ring on the chip, name underlined)"
+   ],
+   "tokens": [
+    "kit-chip-bg",
+    "kit-chip-fg",
+    "kit-chip-border",
+    "kit-chip-hover",
+    "kit-chip-border-strong",
+    "kit-meta-icon",
+    "kit-meta-icon-gap",
+    "kit-radius-mark",
+    "kit-focus-width",
+    "kit-color-focus",
+    "kit-size-target"
+   ],
+   "a11y": {
+    "element": "<p> with an <a> when linked",
+    "aria": "icon aria-hidden; the name is the text",
+    "keyboard": "Tab to the link",
+    "focus": "ring on the chip (focus-within)",
+    "target": "44px hit area (::before)",
+    "motion": "none",
+    "sr": "the publisher's name"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "nofollow, new tab",
+    "alt": "n/a (decorative icon)",
+    "schema": "publisher where the item has one"
+   }
+  },
+  {
+   "name": "Date card",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-datecard",
+    "kit-datecard-month",
+    "kit-datecard-day",
+    "kit-datecard-year",
+    "kit-datecard--nodate",
+    "kit-datecard--undated"
+   ],
+   "states": [
+    "one size everywhere: a calendar page 64px wide, 80px tall (width x 1.25): binder rings, month strip in --camp-mark (brand yellow off campaigns), day large, year small, the next page under it; 1-9 and 10-31 share the same day area (tabular figures)",
+    "past (data-state=past): muted day, round tick badge",
+    "present (data-state=present): ring and soft glow, round dot badge (pings 3 times, only without reduced motion)",
+    "ongoing (data-state=ongoing): ring and glow, round arrows badge (slow pulse, only without reduced motion)",
+    "future (data-state=future): dashed edge, tinted strip, no badge; a key future date (is-key) keeps a solid edge and the campaign motif badge",
+    "undated (kit-datecard--undated, data-state=undated, kits_datecard_word): hatched strip, a dash for the day, the word (\"No date set\") read with it; never an invented date",
+    "no day (kit-datecard--nodate): a month or year only date shows a dash for the day",
+    "every state has a screen-reader label (Completed, Current, Ongoing, Upcoming, Date not set); status is never by colour alone"
+   ],
+   "tokens": [
+    "kit-space-7",
+    "kit-space-8",
+    "kit-radius-control",
+    "kit-color-line",
+    "kit-color-ink",
+    "kit-color-muted",
+    "kit-type-h2",
+    "kit-type-xs"
+   ],
+   "source": "plugins/kits-core/includes/primitives.php kits_datecard(), kits_datecard_word(), kits_milestone_state(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "rules": {
+    "font": "Inter (the site font), lining tabular figures",
+    "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
+    "a11y": "one time element with datetime; reads as month, day, year"
+   }
+  },
+  {
+   "name": "Date line",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-dateline",
+    "kit-dateline-when",
+    "kit-dateline-what",
+    "kit-dateline-word",
+    "kit-dateline-title",
+    "kit-dateline-desc",
+    "kit-dateline-media",
+    "kit-dateline-link"
+   ],
+   "states": [
+    "the one timeline (kits_timeline): steps are li[data-state] with a date card each; present and ongoing steps carry aria-current=step",
+    "state by date in Asia/Kolkata (kits_timeline_today), with an editorial override (state field, or data-state / data-end on the li); a date range holding today is ongoing",
+    "connectors: past solid 2px in the mark; present solid 4px; ongoing 4px with a band; future dashed; undated dotted; centred on the card, never over cards or badges",
+    "phone (under 768): one column, card beside its words, a continuous vertical connector",
+    "tablet (768-1199): two per row, a connector only between the two steps of a row",
+    "desktop (1200+): one row, a connector between every step",
+    "set by the server: ol.aw-camp-dates (aw_camp_dates_timeline), step lists written as <li><strong>date or word</strong> words</li> (aw_steps_dateline), the Home hero steps and story band (home.php)"
+   ],
+   "tokens": [
+    "kit-space-7",
+    "kit-space-8",
+    "kit-radius-control",
+    "kit-color-line",
+    "kit-color-ink",
+    "kit-color-muted",
+    "kit-type-h2",
+    "kit-type-xs"
+   ],
+   "source": "plugins/kits-core/includes/primitives.php kits_timeline(); themes/kits-by-wugweb/assets/css/kit-primitives.css",
+   "rules": {
+    "font": "Inter (the site font), lining tabular figures",
+    "use": "a date that is the point of a block (timelines, deadlines, event days); dates in sentences and meta rows stay kit-date",
+    "a11y": "one time element with datetime; reads as month, day, year"
+   }
+  },
+  {
+   "name": "Meta line (date, author, reading time, place)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-meta",
+    "kit-meta-item",
+    "kit-meta-row",
+    "kit-date"
+   ],
+   "states": [
+    "date (calendar)",
+    "author (person)",
+    "time (clock)",
+    "place (pin)",
+    "meta row (several items, one line: never wraps, owner 13 Nov 2026; the date never cut, the first chip ends in an ellipsis, a chip with no room drops out whole)",
+    "single meta item",
+    "inside a sentence (keeps the sentence text)"
+   ],
+   "tokens": [
+    "kit-color-muted",
+    "kit-meta-gap",
+    "kit-meta-icon",
+    "kit-meta-icon-gap",
+    "kit-meta-row-gap",
+    "kit-meta-size",
+    "kit-meta-weight",
+    "kit-type-xs"
+   ],
+   "a11y": {
+    "element": "<span>/<time> with a decorative icon",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "icon aria-hidden; text carries the meaning"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "datePublished / author where the item has them"
+   }
+  },
+  {
+   "name": "Surfaces and overlay",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-surface",
+    "kit-overlay"
+   ],
+   "states": [
+    "page grey",
+    "section white",
+    "section darker grey",
+    "card white",
+    "image with dark overlay"
+   ],
+   "tokens": [
+    "kit-surface-page",
+    "kit-surface-section",
+    "kit-surface-section-alt",
+    "kit-surface-card",
+    "kit-overlay"
+   ],
+   "a11y": {
+    "element": "background utilities",
+    "aria": "none",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "text on overlay meets 4.5:1"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Error and empty pages (404, no results)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-error"
+   ],
+   "states": [
+    "404",
+    "search with no results"
+   ],
+   "tokens": [
+    "kit-type-display"
+   ],
+   "a11y": {
+    "element": "see states",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "H1 Page not found",
+    "link": "section names",
+    "alt": "n/a",
+    "schema": "none (404 status)"
+   }
+  },
+  {
+   "name": "List count",
+   "type": "primitive",
+   "status": "live",
+   "classes": [
+    "kit-list-count"
+   ],
+   "states": [
+    "default"
+   ],
+   "tokens": [
+    "kit-type-sm"
+   ],
+   "a11y": {
+    "element": "<p role=status>",
+    "aria": "none",
+    "keyboard": "Tab; Enter",
+    "focus": "3px ring",
+    "target": "44px",
+    "motion": "none",
+    "sr": "visible text"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-card",
+    "kit-card--block-lg",
+    "kit-card--block-md",
+    "kit-card--block-sm",
+    "kit-card--stacked-lg",
+    "kit-card--stacked-md",
+    "kit-card--stacked-sm",
+    "kit-card-media",
+    "kit-card-meta",
+    "kit-card-chips",
+    "kit-card-metarow",
+    "kit-card-title",
+    "kit-card-sum",
+    "kit-card-label",
+    "kit-card-label--icon",
+    "kit-cards",
+    "kit-story",
+    "kit-doc",
+    "kit-case",
+    "kit-res",
+    "kit-tile",
+    "kit-tiles",
+    "kit-task",
+    "kit-tasks",
+    "kit-placard",
+    "kit-img",
+    "kit-link-row"
+   ],
+   "states": [
+    "block-lg",
+    "block-md",
+    "block-sm (picture on top)",
+    "stacked-lg",
+    "stacked-md",
+    "stacked-sm (picture left or none; reference list)",
+    "hover: title underline",
+    "focus: card outline",
+    "default",
+    "hover",
+    "focus (via the title link)",
+    "no picture (placard)"
+   ],
+   "tokens": [
+    "kit-radius-card",
+    "kit-surface-card",
+    "kit-card-min",
+    "kit-card-columns",
+    "kit-card-media-ratio",
+    "kit-card-stacked-media-ratio",
+    "kit-card-featured-media-ratio",
+    "kit-card-square-media-ratio",
+    "kit-card-stacked-media-width"
+   ],
+   "style": {
+    "block": "core/group",
+    "variation": "kits-card"
+   },
+   "a11y": {
+    "element": "<li> in a list; the title is the link",
+    "aria": "pictures alt=\"\" when the title says the same",
+    "keyboard": "Tab to the title link",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "n/a",
+    "motion": "lift on hover off with reduced motion",
+    "sr": "one link per card (the title)",
+    "link": "the title link covers the card"
+   },
+   "seo": {
+    "heading": "H2 or H3 by context",
+    "link": "the item title",
+    "alt": "empty when decorative",
+    "schema": "part of the list's ItemList"
+   },
+   "note": "Several card styles share these classes; one kit-card with variants is the next step.",
+   "anatomy": "media 4:3; stacked 3:4, featured 3:2, square 1:1 (Theme Options → Cards, Editor aspect ratios) (logo whole; label top-left) > meta row (date, read time, place) > chips (source, type, category; lg 3, md 2, sm 1; one row) > title (3 lines, word-safe) > summary (block-lg/md, stacked-lg) > action",
+   "patterns": [
+    "kits-by-wugweb/card-block-lg",
+    "kits-by-wugweb/card-block-md",
+    "kits-by-wugweb/card-block-sm",
+    "kits-by-wugweb/card-stacked-lg",
+    "kits-by-wugweb/card-stacked-md",
+    "kits-by-wugweb/card-stacked-sm"
+   ]
+  },
+  {
+   "name": "Mini card",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-minicard",
+    "kit-minicard-list",
+    "kit-minicard-media",
+    "kit-minicard-media--logo",
+    "kit-minicard-logo",
+    "kit-minicard-body",
+    "kit-minicard-meta",
+    "kit-minicard-title",
+    "kit-minicard-line",
+    "kit-minicard-initials"
+   ],
+   "states": [
+    "picture (4:3, cover)",
+    "logo picture (media--logo: whole, on the raised surface)",
+    "logo box (placard shape; initials when there is no logo)",
+    "hover: title underline",
+    "focus: card outline"
+   ],
+   "tokens": [
+    "kit-space-1",
+    "kit-space-2",
+    "kit-space-4",
+    "kit-space-5",
+    "kit-space-grid",
+    "kit-border-width",
+    "kit-color-line",
+    "kit-color-raised",
+    "kit-color-muted",
+    "kit-radius-card",
+    "kit-placard-ratio",
+    "kit-type-h3",
+    "kit-type-sm",
+    "kit-weight-bold"
+   ],
+   "a11y": {
+    "element": "<li> in a <ul> (kit-minicard-list); <article class=\"kit-card kit-minicard\">",
+    "aria": "none",
+    "keyboard": "Tab to the title link",
+    "focus": "outline on the card while its title link has :focus-visible (kit-card)",
+    "target": "the whole card (the title link covers it)",
+    "motion": "none",
+    "sr": "the title link, then the meta row and the line; initials are aria-hidden"
+   },
+   "seo": {
+    "heading": "H3 card title",
+    "link": "one link per card (the title)",
+    "alt": "picture alt from the item's featured image; logo alt from the organisation",
+    "schema": "none"
+   },
+   "anatomy": "media 4:3 (or logo box) > meta row > title > one line",
+   "note": "Used with kit-card (whole-card link, title underline, focus outline). Not a kit-card--* state: no hover shadow, no three-line title clamp. One column, three from 768."
+  },
+  {
+   "name": "Preview only",
+   "type": "utility",
+   "status": "live",
+   "classes": [
+    "kits-preview",
+    "kits-preview-only"
+   ],
+   "states": [
+    "hidden (visitors)",
+    "shown (html.kits-preview from GET /wp-json/kits/v1/preview, or body.kits-preview for administrators)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on a list card or ad placeholder",
+    "aria": "none",
+    "keyboard": "n/a",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "hidden content is display:none"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "preview-only items are left out of ItemList, sitemaps and search"
+   }
+  },
+  {
+   "name": "Smooth scrolling",
+   "type": "utility",
+   "status": "live",
+   "classes": [
+    "kit-smooth"
+   ],
+   "states": [
+    "off on load (a #section link jumps at once)",
+    "on (html.kit-smooth, added by kit.js at the first pointer or key press)"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "class on the html element",
+    "aria": "none",
+    "keyboard": "n/a",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "smooth in-page scrolling only under prefers-reduced-motion: no-preference",
+    "sr": "no effect"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Core block styles (Site Editor > Styles > Blocks)",
+   "type": "primitive",
+   "status": "live",
+   "classes": [],
+   "blockStyles": {
+    "core/button": [
+     "kits-primary",
+     "kits-secondary",
+     "kits-ghost",
+     "kits-small"
+    ],
+    "core/group": [
+     "kits-card",
+     "kits-surface"
+    ],
+    "core/separator": [
+     "kits-hairline"
+    ],
+    "core/paragraph": [
+     "kits-label"
+    ]
+   },
+   "states": [
+    "default",
+    "hover (kit.css)",
+    "focus (3px ring)",
+    "on dark surfaces: Primary stays yellow, Secondary and Ghost keep their outline"
+   ],
+   "tokens": [
+    "theme.json presets: color primary/secondary/border/surface/on-ink, spacing 40/50, font-size small, border-radius card/pill"
+   ],
+   "a11y": {
+    "element": "core blocks (<a class=wp-block-button__link>, <div>, <hr>)",
+    "aria": "none",
+    "keyboard": "Tab; Enter (buttons)",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "48px (Small: 44px)",
+    "motion": "colour change only",
+    "sr": "visible label"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "says what happens",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "source": "kits_block_styles() in functions.php registers them; theme.json styles.blocks.<block>.variations holds their values"
+  },
+  {
+   "name": "Item page with sidebar",
+   "type": "layout",
+   "status": "live",
+   "classes": [
+    "kit-with-sidebar",
+    "kit-main",
+    "kit-sidebar",
+    "aw-keyfacts",
+    "aw-ad-slot",
+    "aw-ad-label",
+    "aw-ad-box"
+   ],
+   "states": [
+    "sidebar empty or only an empty/waiting/unfilled ad: one column, text centred at the reading width",
+    "sidebar with blocks or a filled ad: below the text under lg; second column at lg",
+    "sticky at lg only when shorter than the screen (.is-sticky, kit.js)"
+   ],
+   "tokens": [
+    "--kit-width-content",
+    "--kit-space-7",
+    "--kit-space-5",
+    "--kit-header-h"
+   ],
+   "a11y": {
+    "element": "div > div.kit-main + aside.kit-sidebar (template part, area sidebar)",
+    "aria": "aside landmark",
+    "keyboard": "n/a",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "complementary landmark"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "none",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Contents list",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-toc"
+   ],
+   "states": [
+    "closed (default)",
+    "open"
+   ],
+   "tokens": [
+    "--kit-color-line",
+    "--kit-radius-card",
+    "--kit-size-target"
+   ],
+   "a11y": {
+    "element": "<details> with <ol> of links",
+    "aria": "none",
+    "keyboard": "Enter/Space toggles; Tab to links",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px summary",
+    "motion": "none",
+    "sr": "summary 'Contents'"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "in-page anchors",
+    "alt": "n/a",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "FAQ accordion",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "kit-faq"
+   ],
+   "states": [
+    "closed (default after load)",
+    "open (aria-expanded true)",
+    "no JavaScript: every answer shown",
+    "focus-visible ring on the question"
+   ],
+   "tokens": [
+    "kit-type-h4",
+    "kit-type-body",
+    "kit-color-line",
+    "kit-size-target",
+    "kit-space-3",
+    "kit-space-4"
+   ],
+   "a11y": {
+    "element": "<section> with an H2; each question an <h3> holding a <button>",
+    "aria": "aria-expanded + aria-controls on the button; the answer is role=region aria-labelledby the button",
+    "keyboard": "Tab to each question; Enter or Space opens and closes",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "44px",
+    "motion": "plus sign turns; none with prefers-reduced-motion",
+    "sr": "H2 'Questions about …'; each question a button that says whether it is expanded"
+   },
+   "seo": {
+    "heading": "H2 (h4 size), H3 per question",
+    "link": "one per answer, descriptive",
+    "alt": "n/a",
+    "schema": "FAQPage parsed from this markup (site plugin)"
+   }
+  },
+  {
+   "name": "Hero (Kits block)",
+   "type": "block",
+   "status": "live",
+   "block": "kits/hero",
+   "classes": [],
+   "states": [
+    "default (ink band, content at the bottom)",
+    "background image (block support)"
+   ],
+   "tokens": [
+    "kit-hero-h",
+    "kit-space-section"
+   ],
+   "controls": {
+    "type": "Kits block with block supports",
+    "settings": [
+     "min-height",
+     "colour",
+     "background image",
+     "padding",
+     "border",
+     "radius",
+     "shadow",
+     "type"
+    ],
+    "where": "Appearance > Editor > Styles > Blocks > Hero",
+    "token": "Minimum height sets --kit-hero-h for every hero (kits-core/includes/blocks.php)"
+   },
+   "a11y": {
+    "element": "<section> holding the page H1",
+    "aria": "none",
+    "keyboard": "its links and buttons, in order",
+    "focus": "3px ring in --kit-color-focus, 2px offset (:focus-visible)",
+    "target": "its buttons, 44px",
+    "motion": "none",
+    "sr": "visible text; a background image is decorative"
+   },
+   "seo": {
+    "heading": "H1",
+    "link": "the actions",
+    "alt": "none (background image is decorative)",
+    "schema": "none"
+   }
+  },
+  {
+   "name": "Dashboard stat cards and bar chart (admin)",
+   "type": "component",
+   "status": "live",
+   "classes": [
+    "aw-dash-cards",
+    "aw-dash-card",
+    "aw-dash-label",
+    "aw-dash-value",
+    "aw-dash-delta",
+    "aw-dash-chart"
+   ],
+   "states": [
+    "delta up (▲, green)",
+    "delta down (▼, red)",
+    "same (=)",
+    "no delta"
+   ],
+   "tokens": [],
+   "a11y": {
+    "element": "<ul> of cards; <figure> with an inline <svg role=img> and a figcaption (wp-admin Dashboard only)",
+    "aria": "svg aria-label is a one-sentence summary; each bar has a <title>; the exact figures stay in a table under it",
+    "keyboard": "not interactive",
+    "focus": "n/a",
+    "target": "n/a",
+    "motion": "none",
+    "sr": "visible text; up/down said in words, not colour alone"
+   },
+   "seo": {
+    "heading": "none",
+    "link": "n/a",
+    "alt": "n/a",
+    "schema": "none"
+   },
+   "note": "kits-core/includes/dashboard-cards.php (owner, 3 Nov 2026: Dashboard widgets only; other admin screens stay core-only). WP admin colours: text #1d2327/#50575e, up #007017, down #b32d2e, bars #2271b1."
+  }
+ ],
+ "nav": [
+  {
+   "name": "Announcement bar",
+   "slug": "announcement-bar",
+   "status": "live",
+   "where": "above the header",
+   "a11y": "plain <div>; one link"
+  },
+  {
+   "name": "Utility navigation",
+   "slug": "utility-nav",
+   "status": "live",
+   "where": "header top row: search, Contact us",
+   "a11y": "search toggle aria-expanded/aria-controls; Contact link labelled"
+  },
+  {
+   "name": "Primary navigation",
+   "slug": "primary-nav",
+   "status": "live",
+   "where": "header",
+   "a11y": "<nav aria-label=\"Main\">; menu button below 1200px"
+  },
+  {
+   "name": "Mega menu",
+   "slug": "mega-menu",
+   "status": "not used",
+   "where": "",
+   "a11y": ""
+  },
+  {
+   "name": "Mobile bottom navigation",
+   "slug": "mobile-bottom-nav",
+   "status": "not used",
+   "where": "",
+   "a11y": ""
+  },
+  {
+   "name": "Sticky action bar",
+   "slug": "sticky-action-bar",
+   "status": "not used",
+   "where": "bottom of the screen on phones (Quick help)",
+   "a11y": "<nav aria-label=\"Quick help\">"
+  },
+  {
+   "name": "Breadcrumbs",
+   "slug": "breadcrumbs",
+   "status": "live",
+   "where": "top of the content",
+   "a11y": "<nav aria-label=\"Breadcrumb\">, aria-current on the page"
+  },
+  {
+   "name": "Local navigation",
+   "slug": "local-nav",
+   "status": "live",
+   "where": "in-page lists such as Browse by state",
+   "a11y": "<nav aria-labelledby> its heading"
+  },
+  {
+   "name": "Footer navigation",
+   "slug": "footer-nav",
+   "status": "live",
+   "where": "footer: Helplines, Explore, About, Categories, Policies",
+   "a11y": "one <nav> per list, each with its own aria-label"
+  },
+  {
+   "name": "Pagination",
+   "slug": "pagination",
+   "status": "live",
+   "where": "under lists",
+   "a11y": "<nav aria-label=\"Pagination\">"
+  }
+ ]
+}

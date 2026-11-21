@@ -1,0 +1,196 @@
+<?php
+/**
+ * Search Insights tables (plan §3). Built with dbDelta and a version option, like the enrichment table in SourceWeb.
+ * Deactivating or deleting the plugin keeps the tables and options; only the owner's "Delete Search Insights data"
+ * (Settings tab, nonce + typed confirmation) drops them.
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AW_SI_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
+const AW_SI_DB_OPTION  = 'aw_si_db';
+
+// aw_si_table() and aw_si_now() live with the keyword table in InsightWeb's includes/keyword-table.php (Animal Writes
+// Core's from 25 Oct, Kits Core's from 12 Nov, InsightWeb's from 18 Nov 2026).
+
+/** Create or update the tables when the version changes. Cheap when nothing changed (one option read). */
+function aw_si_install(): void {
+	if ( get_option( AW_SI_DB_OPTION ) === AW_SI_DB_VERSION ) {
+		return;
+	}
+	global $wpdb;
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	$c  = $wpdb->get_charset_collate();
+	$p  = aw_si_table( 'kw_pages' );
+	$o  = aw_si_table( 'obs' );
+	$r  = aw_si_table( 'rising' );
+	$l  = aw_si_table( 'links' );
+	$sc = aw_si_table( 'scores' );
+	// The keyword table itself: aw_kw_install() in keyword-table.php (owner's decision 3, 25 Oct 2026; InsightWeb's from 18 Nov).
+	aw_kw_install();
+	// Which page owns which keyword. path_key = md5 of the object or path, so one page holds one row per keyword and role.
+	dbDelta(
+		"CREATE TABLE {$p} (
+		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		kw_id bigint(20) unsigned NOT NULL,
+		obj_type varchar(16) NOT NULL DEFAULT '',
+		obj_id bigint(20) unsigned NOT NULL DEFAULT 0,
+		path varchar(255) NOT NULL DEFAULT '',
+		path_key char(32) NOT NULL,
+		role varchar(16) NOT NULL DEFAULT '',
+		src varchar(16) NOT NULL DEFAULT '',
+		conflict tinyint(1) NOT NULL DEFAULT 0,
+		updated datetime NOT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY kw_page_role (kw_id,path_key,role),
+		KEY obj (obj_type,obj_id),
+		KEY src (src)
+		) {$c};"
+	);
+	// Every measurement, long format. period: day (rolled up after 90 days), month (kept), or a rolling window such as
+	// 28d / 12m that is never summed (plan §3, retention). GSC rows fill clicks / impr / pos; other sources use value / txt.
+	dbDelta(
+		"CREATE TABLE {$o} (
+		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		kw_id bigint(20) unsigned NOT NULL DEFAULT 0,
+		page varchar(255) NOT NULL DEFAULT '',
+		page_key char(32) NOT NULL DEFAULT '',
+		src varchar(24) NOT NULL,
+		metric varchar(24) NOT NULL,
+		period varchar(8) NOT NULL DEFAULT 'day',
+		d date NOT NULL,
+		clicks int(11) DEFAULT NULL,
+		impr int(11) DEFAULT NULL,
+		pos float DEFAULT NULL,
+		value double DEFAULT NULL,
+		txt varchar(255) NOT NULL DEFAULT '',
+		fetched datetime NOT NULL,
+		PRIMARY KEY  (id),
+		UNIQUE KEY obs (src,metric,period,d,kw_id,page_key),
+		KEY kw_d (kw_id,d),
+		KEY period_d (period,d)
+		) {$c};"
+	);
+	// Rising terms (phase 3 fills it; created now so the schema is stable).
+	dbDelta(
+		"CREATE TABLE {$r} (
+		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		norm varchar(191) NOT NULL,
+		term varchar(255) NOT NULL DEFAULT '',
+		sources varchar(255) NOT NULL DEFAULT '',
+		growth float DEFAULT NULL,
+		first_seen date DEFAULT NULL,
+		last_seen date DEFAULT NULL,
+		kw_id bigint(20) unsigned NOT NULL DEFAULT 0,
+		page varchar(255) NOT NULL DEFAULT '',
+		action varchar(32) NOT NULL DEFAULT '',
+		status varchar(16) NOT NULL DEFAULT 'new',
+		note varchar(255) NOT NULL DEFAULT '',
+		PRIMARY KEY  (id),
+		UNIQUE KEY norm (norm),
+		KEY status (status)
+		) {$c};"
+	);
+	// Who links to us (Links tab). link_key = md5 of linking page (or domain), linked page, anchor and source, so a
+	// source seen again only moves last_seen. Spam is hidden, never deleted.
+	dbDelta(
+		"CREATE TABLE {$l} (
+		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		link_key char(32) NOT NULL,
+		domain varchar(191) NOT NULL DEFAULT '',
+		from_url varchar(500) NOT NULL DEFAULT '',
+		linked_url varchar(255) NOT NULL DEFAULT '',
+		anchor varchar(255) NOT NULL DEFAULT '',
+		links int(11) NOT NULL DEFAULT 1,
+		first_seen date DEFAULT NULL,
+		last_seen date DEFAULT NULL,
+		source varchar(100) NOT NULL DEFAULT '',
+		type varchar(16) NOT NULL DEFAULT '',
+		hidden tinyint(1) NOT NULL DEFAULT 0,
+		note varchar(255) NOT NULL DEFAULT '',
+		PRIMARY KEY  (id),
+		UNIQUE KEY link_key (link_key),
+		KEY domain (domain),
+		KEY type_hidden (type,hidden),
+		KEY last_seen (last_seen)
+		) {$c};"
+	);
+	// InsightWeb's own keyword score store (plan §7b): the daily recompute writes a score (0-100) and its parts, the
+	// recommended-use keys, the focus-keyphrase health and the canonical owner, keyed by keyword id. The Keywords tab
+	// joins it for sorting and filtering. Kept in InsightWeb's own table so the shared keyword table is unchanged.
+	dbDelta(
+		"CREATE TABLE {$sc} (
+		kw_id bigint(20) unsigned NOT NULL,
+		score tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_demand tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_opportunity tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_engagement tinyint(3) unsigned NOT NULL DEFAULT 0,
+		s_momentum tinyint(3) unsigned NOT NULL DEFAULT 0,
+		recommended varchar(191) NOT NULL DEFAULT '',
+		focus_health varchar(24) NOT NULL DEFAULT '',
+		owner_path varchar(255) NOT NULL DEFAULT '',
+		owner_type varchar(32) NOT NULL DEFAULT '',
+		owner_flag varchar(32) NOT NULL DEFAULT '',
+		updated datetime NOT NULL,
+		PRIMARY KEY  (kw_id),
+		KEY score (score),
+		KEY focus_health (focus_health),
+		KEY owner_flag (owner_flag)
+		) {$c};"
+	);
+	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
+	add_option( 'aw_si_installed', time(), '', false );
+	if ( function_exists( 'aw_si_links_seed' ) ) {
+		aw_si_links_seed(); // Once (option aw_si_links_seeded); a repeat only moves dates.
+	}
+}
+add_action( 'admin_init', 'aw_si_install', 1 ); // Also called by the cron and WP-CLI; there are no REST routes yet.
+
+/** Whether the tables exist (the install may not have run yet, e.g. on a fresh install before any admin visit). */
+function aw_si_ready(): bool {
+	return get_option( AW_SI_DB_OPTION ) === AW_SI_DB_VERSION;
+}
+
+/**
+ * Drop Search Insights' tables and options, and switch Search Insights off so the daily run does not rebuild them. The
+ * keyword table is not dropped (it is Animal Writes Core's): records the owner gave a Sourcing, Press or Tracked role
+ * stay (sourcing phase 2, plan §10), the rest are deleted.
+ * Only from the owner's typed confirmation (admin.php) or `wp aw-si delete-data --yes`. "Run the daily update" (or
+ * `wp aw-si run`) switches it on again.
+ */
+function aw_si_drop_all(): void {
+	global $wpdb;
+	foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'scores' ) as $t ) {
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', aw_si_table( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
+	}
+	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
+	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
+	$k = aw_si_table( 'keywords' );
+	$m = aw_si_table( 'kw_map' );
+	if ( aw_kw_ready() ) { // A dismissed suggestion or a migrated spelling is the owner's too.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	} else {
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+	$set = aw_si_reset_sql( AW_KW_OWNER_ROLES ); // Every Search Insights column back to a new record's (Codex, PR #75).
+	$wpdb->query( $wpdb->prepare( "UPDATE %i SET {$set}", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $set is the fixed column list of aw_si_reset_sql() (constants and integers, no %); the table is %i.
+	if ( aw_kw_ready() ) {
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE kw_id NOT IN (SELECT id FROM %i)', $m, $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_links_seeded', 'aw_si_links_seeded_20261102', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports' ) as $opt ) {
+		delete_option( $opt );
+	}
+	foreach ( array( 'aw_si_redirects', 'aw_si_redirects_rx', 'aw_si_rm_scores' ) as $tr ) {
+		delete_transient( $tr );
+	}
+	// Per-key caches (Bing keyword volumes, live-check and import results): every transient named aw_si_….
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_si_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_si_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
+	update_option( 'aw_si_off', time(), false );
+	foreach ( aw_si_cron_hooks() as $hook ) {
+		wp_clear_scheduled_hook( $hook );
+	}
+}

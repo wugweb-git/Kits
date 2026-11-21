@@ -1,0 +1,192 @@
+<?php
+/**
+ * Pages tab (plan §8): one row per page over the last 28 days. Search Console clicks, impressions and position, the
+ * keywords it owns and their conflicts, GA4 organic sessions and AI referrals, Clarity totals and the page-quality
+ * flag, the latest PageSpeed scores and the owner's Clarity note. Added through the aw_si_tabs filter.
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+add_filter(
+	'aw_si_tabs',
+	function ( $tabs ) {
+		return array( 'pages' => __( 'Pages', 'insightweb' ) ) + (array) $tabs;
+	},
+	5
+);
+
+add_filter(
+	'set_screen_option_aw_si_pages_per_page',
+	function ( $keep, $option, $value ) {
+		return max( 10, min( 500, (int) $value ) );
+	},
+	10,
+	3
+);
+
+add_action(
+	'aw_si_load_tab_pages',
+	function () {
+		add_screen_option(
+			'per_page',
+			array(
+				'label'   => __( 'Pages per page', 'insightweb' ),
+				'default' => 50,
+				'option'  => 'aw_si_pages_per_page',
+			)
+		);
+		require_once __DIR__ . '/class-aw-si-pages-table.php';
+	}
+);
+
+/**
+ * Everything the Pages tab shows, per site path, for the 28 days ending yesterday.
+ *
+ * @return array<string, array<string, mixed>> path => figures.
+ */
+function aw_si_pages_data(): array {
+	global $wpdb;
+	if ( ! aw_si_ready() ) {
+		return array();
+	}
+	$o    = aw_si_table( 'obs' );
+	$k    = aw_si_table( 'keywords' );
+	$end  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-1 day' );
+	$from = $end->modify( '-27 days' )->format( 'Y-m-d' );
+	$to   = $end->format( 'Y-m-d' );
+	$out  = array();
+	$set  = function ( string $path, string $field, $value ) use ( &$out ) {
+		if ( '' === $path ) {
+			return;
+		}
+		$out[ $path ][ $field ] = $value;
+	};
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $skip only (aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	foreach ( aw_si_page_metrics( array(), 28 ) as $page => $m ) { // the same figures as the Overview's pages
+		foreach ( $m as $field => $v ) {
+			$set( (string) $page, $field, $v );
+		}
+	}
+	// Keywords the page owns (keyword map or Rank Math focus), and how many of them are in conflict.
+	$p = aw_si_table( 'kw_pages' );
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT l.path page, COUNT(DISTINCT l.kw_id) n, COUNT(DISTINCT IF(k.status = 'conflict', k.id, NULL)) c FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.role = 'owner' AND l.path LIKE %s GROUP BY l.path", $p, $k, '/%' ) ) as $r ) {
+		$set( $r->page, 'keywords', (int) $r->n );
+		$set( $r->page, 'conflicts', (int) $r->c );
+	}
+	$skip = aw_si_ga4_skip_sql(); // Without the GA4 test-event days.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, txt, SUM(value) v FROM %i WHERE src = 'ga4' AND metric IN ('organic', 'ai') AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, metric, txt", $o, $from, $to ) ) as $r ) {
+		$r->page = aw_si_ga4_page( (string) $r->page );
+		if ( 'organic' === $r->metric ) {
+			$set( $r->page, 'organic', (int) ( $out[ $r->page ]['organic'] ?? 0 ) + (int) $r->v );
+			continue;
+		}
+		$set( $r->page, 'ai', (int) ( $out[ $r->page ]['ai'] ?? 0 ) + (int) $r->v );
+		$out[ $r->page ]['ai_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ai_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
+	}
+	// Referral and social sessions (owner, 31 Oct 2026).
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, SUM(value) v FROM %i WHERE src = 'ga4' AND metric = 'ref' AND period = 'day' AND d BETWEEN %s AND %s{$skip} GROUP BY page, txt", $o, $from, $to ) ) as $r ) {
+		$r->page = aw_si_ga4_page( (string) $r->page );
+		$set( $r->page, 'ref', (int) ( $out[ $r->page ]['ref'] ?? 0 ) + (int) $r->v );
+		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ref_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
+	}
+	// A Clarity flag counts only on enough flagged days (filter aw_si_quality_min_days, as in aw_si_quality_pages()).
+	$c_min = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, SUM(value > 0) n FROM %i WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $o, $from, $to ) ) as $r ) {
+		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) ( (int) $r->n >= $c_min ) : round( (float) $r->a, 1 ) ) );
+	}
+	// Latest PageSpeed run, latest Clarity note.
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT o.page, o.metric, o.value, o.d FROM %i o JOIN (SELECT page_key, metric, MAX(d) d FROM %i WHERE src = 'psi' AND metric IN ('score-mobile', 'score-desktop', 'flag', 'lcp-mobile', 'cls-mobile', 'field-lcp-mobile', 'field-inp-mobile', 'field-cls-mobile') GROUP BY page_key, metric) l ON l.page_key = o.page_key AND l.metric = o.metric AND l.d = o.d WHERE o.src = 'psi'", $o, $o ) ) as $r ) {
+		$set( $r->page, 'psi_' . $r->metric, (float) $r->value );
+		$set( $r->page, 'psi_d', $r->d );
+	}
+	// Bing Webmaster per page (bing.php stores Bing's weekly rows): the last 90 days.
+	$b_from = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(impr) i, SUM(clicks) c FROM %i WHERE src = 'bing' AND metric = 'p' AND page <> '' AND d >= %s GROUP BY page", $o, $b_from ) ) as $r ) {
+		$set( $r->page, 'bing_impr', (int) $r->i );
+		$set( $r->page, 'bing_clicks', (int) $r->c );
+	}
+	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT o.page, o.txt, o.d FROM %i o JOIN (SELECT page_key, MAX(d) d FROM %i WHERE src = 'clarity-note' GROUP BY page_key) l ON l.page_key = o.page_key AND l.d = o.d WHERE o.src = 'clarity-note'", $o, $o ) ) as $r ) {
+		$set( $r->page, 'note', (string) $r->txt );
+		$set( $r->page, 'note_d', $r->d );
+	}
+	// phpcs:enable
+	// Google's index state from URL Inspection (gsc-types.php), each page by its latest result. A page found not indexed
+	// is listed even without other figures, so the Not indexed view counts the same pages as the Overview's "pages we
+	// inspected" figure (12 Nov 2026: it counted only pages that had figures, 579 of 3,653). Before the Rank Math
+	// scores, so those pages get theirs too.
+	if ( function_exists( 'aw_si_index_states' ) ) {
+		foreach ( aw_si_index_states() as $path => $st ) {
+			if ( isset( $out[ $path ] ) || ( ! $st[0] && '' !== (string) $path ) ) {
+				$out[ $path ]['index']   = $st[0] ? 1 : 0;
+				$out[ $path ]['index_t'] = $st[1];
+				$out[ $path ]['index_d'] = $st[2];
+			}
+		}
+	}
+	// Rank Math SEO score of the item at that address (rankmath.php).
+	foreach ( aw_si_rankmath_scores() as $path => $score ) {
+		if ( isset( $out[ $path ] ) ) {
+			$out[ $path ]['rm_score'] = $score;
+		}
+	}
+	foreach ( $out as $path => $f ) {
+		$out[ $path ]['path']    = $path;
+		$out[ $path ]['flagged'] = ! empty( $f['c_flag'] ) || ! empty( $f['psi_flag'] );
+	}
+	return $out;
+}
+
+add_action(
+	'aw_si_tab_pages',
+	function () {
+		if ( isset( $_GET['noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+			wp_admin_notice( esc_html__( 'Clarity note saved.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+		}
+		if ( isset( $_GET['not_noted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'insightweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
+		}
+		if ( ! aw_si_clarity_on() ) {
+			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Settings → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+		}
+		$note = isset( $_GET['note'] ) ? aw_si_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
+		if ( '' !== $note ) {
+			echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_note"><input type="hidden" name="path" value="' . esc_attr( $note ) . '">';
+			wp_nonce_field( 'aw_si_note' );
+			echo '<table class="form-table" role="presentation"><tbody><tr><th scope="row"><label for="aw-si-note">';
+			/* translators: %s: page path. */
+			echo esc_html( sprintf( __( 'Clarity note for %s', 'insightweb' ), $note ) );
+			echo '</label></th><td><textarea id="aw-si-note" name="note" rows="3" class="large-text" maxlength="255"></textarea>';
+			echo '<p class="description">' . esc_html__( 'A short summary of what the recordings show (Clarity Copilot or your own), dated today. Never paste personal data.', 'insightweb' ) . '</p>';
+			submit_button( __( 'Save note', 'insightweb' ), 'primary', 'submit', false );
+			echo ' <a class="button" href="' . esc_url( aw_si_url( 'pages' ) ) . '">' . esc_html__( 'Cancel', 'insightweb' ) . '</a></td></tr></tbody></table></form>';
+		}
+		$table = new AW_SI_Pages_Table();
+		$table->prepare_items();
+		$table->views();
+		if ( 'unindexed' === ( isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
+			echo '<p class="description">' . esc_html__( 'Pages whose latest URL Inspection result is not indexed: the same rule, and the same count, as the Overview\'s "pages we inspected, latest result" figure. Pages with no search figures in 28 days are listed too. Search Console\'s own Page indexing total counts the whole site, so it differs.', 'insightweb' ) . '</p>';
+		}
+		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
+		$table->search_box( __( 'Search pages', 'insightweb' ), 'aw-si-pages' );
+		$table->display();
+		echo '</form>';
+	}
+);
+
+/**
+ * A GA4 landing path as the Pages tab keys it (12 Nov 2026): GA4 reports landing pages without the trailing slash
+ * (/campaigns/lab-animals-rules-2026), the site's addresses have one, so only / matched and every other page showed
+ * no organic, AI or referral sessions. Paths with a file extension (.pdf, .xml) stay as they are.
+ *
+ * @param string $path Stored GA4 landing path.
+ */
+function aw_si_ga4_page( string $path ): string {
+	if ( '' === $path || '/' === substr( $path, -1 ) || preg_match( '/\.[a-z0-9]{2,5}$/i', $path ) ) {
+		return $path;
+	}
+	return user_trailingslashit( $path );
+}

@@ -1,0 +1,109 @@
+<?php
+/**
+ * Issuer: who issued a Library document ("Issued by Supreme Court"). A label on the item, not a list, filter or page
+ * (S1.1, 8 Oct 2026). Stored on the item as meta aw_issuer (a slug from the issuer names below). The former list
+ * (taxonomy aw_source_type, with courts merged in) was copied into the meta once and is no longer registered; a
+ * backup of its links is in uploads/aw-private/issuers-backup-2026-10-08.json. Old /source/{slug}/ URLs 301 to the
+ * Library (places.php).
+ *
+ * @package aw-sourcing
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+if ( function_exists( 'aw_issuers' ) ) { // loaded before the dependency check, so aw-sourcing.php may reach this twice (from Core, and as an active plugin, by another path)
+	return;
+}
+
+/** Issuer names: slug => name (the former list's values). An editor can add one from the item's Issuer box. */
+function aw_issuers() {
+	$base = array(
+		'supreme-court'           => 'Supreme Court',
+		'high-court'              => 'High Court',
+		'national-green-tribunal' => 'National Green Tribunal',
+		'awbi'                    => 'Animal Welfare Board of India',
+		'central-ministry'        => 'Central Ministry',
+		'state-government'        => 'State Government',
+		'municipal-body'          => 'Municipal Body',
+		'parliament'              => 'Parliament',
+		'gazette'                 => 'Gazette of India',
+		'pib'                     => 'Press Information Bureau',
+		'report'                  => 'Report',
+		'research-journal'        => 'Research Journal',
+	);
+	return array_merge( $base, (array) get_option( 'aw_issuers_added', array() ) );
+}
+
+/**
+ * An issuer's short name for card chips (owner, 20 Oct 2026): option aw_issuer_short (slug => short), else the defaults
+ * below, else one made from the name (aw_short_name()). The full name stays on the item page.
+ */
+function aw_issuer_short( $slug ) {
+	$short = array_merge(
+		array( 'national-green-tribunal' => 'NGT', 'awbi' => 'AWBI', 'pib' => 'PIB', 'gazette' => 'Gazette', 'central-ministry' => 'Ministry', 'state-government' => 'State govt', 'municipal-body' => 'Municipal', 'research-journal' => 'Journal' ),
+		(array) get_option( 'aw_issuer_short', array() )
+	);
+	if ( isset( $short[ $slug ] ) && '' !== $short[ $slug ] ) {
+		return $short[ $slug ];
+	}
+	$name = aw_issuers()[ $slug ] ?? $slug;
+	return function_exists( 'aw_short_name' ) ? aw_short_name( $name ) : $name;
+}
+
+/** An item's issuer: object {slug, name}, or null. */
+function aw_item_issuer( $id ) {
+	$slug = (string) get_post_meta( $id, 'aw_issuer', true );
+	$all  = aw_issuers();
+	return isset( $all[ $slug ] ) ? (object) array( 'slug' => $slug, 'name' => $all[ $slug ] ) : null;
+}
+
+/** Set an item's issuer by slug or name; unknown values are refused. */
+function aw_set_issuer( $id, $value ) {
+	$value = trim( (string) $value );
+	$all   = aw_issuers();
+	$slug  = isset( $all[ sanitize_title( $value ) ] ) ? sanitize_title( $value ) : (string) array_search( strtolower( $value ), array_map( 'strtolower', $all ), true );
+	if ( '' === $slug || ! isset( $all[ $slug ] ) ) {
+		return false;
+	}
+	update_post_meta( $id, 'aw_issuer', $slug );
+	return true;
+}
+
+/* ---------- Editing ---------- */
+
+// No side box: on Library items the picker is inside the Document box (faq-data.php). Issuers stored on other types are kept and still read.
+function aw_issuer_box( $post ) {
+	wp_nonce_field( 'aw_issuer_save', 'aw_issuer_nonce' );
+	$cur = (string) get_post_meta( $post->ID, 'aw_issuer', true );
+	echo '<p><select name="aw_issuer" style="width:100%"><option value="">None</option>';
+	foreach ( aw_issuers() as $slug => $name ) {
+		echo '<option value="' . esc_attr( $slug ) . '"' . selected( $cur, $slug, false ) . '>' . esc_html( $name ) . '</option>';
+	}
+	echo '</select></p><p><label for="aw-issuer-new">Not in the list? Add it:</label><br><input type="text" id="aw-issuer-new" name="aw_issuer_new" maxlength="80" style="width:100%"></p>';
+}
+
+add_action(
+	'save_post',
+	function ( $id, $post ) {
+		if ( ! in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) || ! isset( $_POST['aw_issuer_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_issuer_nonce'] ), 'aw_issuer_save' ) || ! current_user_can( 'edit_post', $id ) ) {
+			return;
+		}
+		$new = sanitize_text_field( wp_unslash( $_POST['aw_issuer_new'] ?? '' ) );
+		if ( '' !== $new ) {
+			$added                       = (array) get_option( 'aw_issuers_added', array() );
+			$added[ sanitize_title( $new ) ] = $new;
+			update_option( 'aw_issuers_added', $added, false );
+			update_post_meta( $id, 'aw_issuer', sanitize_title( $new ) );
+			return;
+		}
+		$slug = sanitize_title( wp_unslash( $_POST['aw_issuer'] ?? '' ) );
+		'' === $slug ? delete_post_meta( $id, 'aw_issuer' ) : aw_set_issuer( $id, $slug );
+	},
+	10,
+	2
+);
+
+/* ---------- Display ---------- */
+
+// The one-time copy from the former issuer list (8 Oct 2026) ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).

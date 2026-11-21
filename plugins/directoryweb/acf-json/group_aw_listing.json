@@ -1,0 +1,131 @@
+{
+    "key": "group_aw_listing",
+    "title": "Contact",
+    "fields": [
+        {
+            "key": "field_aw_listing_email",
+            "label": "Email",
+            "name": "aw_email",
+            "aria-label": "",
+            "type": "email",
+            "instructions": "Shown as a mail link.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_aw_listing_phones",
+            "label": "Phone numbers",
+            "name": "aw_phones",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "What visitors and search engines see: each number with a Call link, and a WhatsApp link when WhatsApp is on. The first number is the Call button.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Add a number",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_aw_listing_phones_number",
+                    "label": "Number",
+                    "name": "number",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_aw_listing_phones"
+                },
+                {
+                    "key": "field_aw_listing_phones_label",
+                    "label": "Label",
+                    "name": "label",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "Helpline, Ambulance, Office",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_aw_listing_phones"
+                },
+                {
+                    "key": "field_aw_listing_phones_whatsapp",
+                    "label": "WhatsApp",
+                    "name": "whatsapp",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "Yes",
+                    "ui_off_text": "No",
+                    "parent_repeater": "field_aw_listing_phones"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "aw_listing"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "left",
+    "instruction_placement": "field",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "show_in_rest": 0,
+    "modified": 1793506771
+}

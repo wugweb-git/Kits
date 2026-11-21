@@ -1,0 +1,371 @@
+<?php
+/**
+ * Pages tab list table: views, search, sorting, pagination and a "Clarity note" row action. Read only, except the
+ * note form it opens.
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! class_exists( 'WP_List_Table' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+}
+
+/**
+ * The Pages tab list table.
+ */
+class AW_SI_Pages_Table extends WP_List_Table {
+
+	/**
+	 * All rows (path => figures), read once.
+	 *
+	 * @var array|null
+	 */
+	private $all = null;
+
+	/** One row per page. */
+	public function __construct() {
+		parent::__construct(
+			array(
+				'singular' => 'page',
+				'plural'   => 'pages',
+				'ajax'     => false,
+			)
+		);
+	}
+
+	/** Every row, cached for the screen. */
+	private function all(): array {
+		if ( null === $this->all ) {
+			$this->all = aw_si_pages_data();
+		}
+		return $this->all;
+	}
+
+	/**
+	 * Request value, sanitised as a key.
+	 *
+	 * @param string $name Request field.
+	 */
+	private function arg( string $name ): string {
+		return isset( $_REQUEST[ $name ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $name ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only filters.
+	}
+
+	/** Columns. */
+	public function get_columns() {
+		return array(
+			'path'     => __( 'Page', 'insightweb' ),
+			'impr'     => __( 'Impressions (28 days)', 'insightweb' ),
+			'clicks'   => __( 'Clicks', 'insightweb' ),
+			'pos'      => __( 'Position', 'insightweb' ),
+			'keywords' => __( 'Keywords owned', 'insightweb' ),
+			'organic'  => __( 'Organic sessions (GA4)', 'insightweb' ),
+			'ai'       => __( 'AI referrals', 'insightweb' ),
+			'ref'      => __( 'Referrals (GA4)', 'insightweb' ),
+			'clarity'  => __( 'Clarity (28 days)', 'insightweb' ),
+			'psi'      => __( 'PageSpeed (mobile / desktop)', 'insightweb' ),
+			'bing'     => __( 'Bing (90 days)', 'insightweb' ),
+			'index'    => __( 'Google index', 'insightweb' ),
+			'rm_score' => __( 'SEO score (Rank Math)', 'insightweb' ),
+			'note'     => __( 'Clarity note', 'insightweb' ),
+		);
+	}
+
+	/** Sortable columns and their first direction. */
+	protected function get_sortable_columns() {
+		return array(
+			'path'     => array( 'path', false ),
+			'impr'     => array( 'impr', true ),
+			'clicks'   => array( 'clicks', true ),
+			'pos'      => array( 'pos', false ),
+			'keywords' => array( 'keywords', true ),
+			'organic'  => array( 'organic', true ),
+			'ai'       => array( 'ai', true ),
+			'ref'      => array( 'ref', true ),
+			'clarity'  => array( 'c_sessions', true ),
+			'psi'      => array( 'psi_score-mobile', false ),
+			'bing'     => array( 'bing_impr', true ),
+			'index'    => array( 'index', false ),
+			'rm_score' => array( 'rm_score', false ),
+		);
+	}
+
+	/** The column with the row actions. */
+	protected function get_primary_column_name() {
+		return 'path';
+	}
+
+	/** Row filters of each view. */
+	private function view_tests(): array {
+		return array(
+			'all'       => '__return_true',
+			'flagged'   => fn( $r ) => ! empty( $r['flagged'] ),
+			'ai'        => fn( $r ) => ! empty( $r['ai'] ),
+			'ref'       => fn( $r ) => ! empty( $r['ref'] ),
+			'conflicts' => fn( $r ) => ! empty( $r['conflicts'] ),
+			'noted'     => fn( $r ) => ! empty( $r['note'] ),
+			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < AW_SI_RM_LOW,
+			'unindexed' => fn( $r ) => isset( $r['index'] ) && 0 === $r['index'],
+		);
+	}
+
+	/** Views with their counts. */
+	protected function get_views() {
+		$labels  = array(
+			'all'       => __( 'All', 'insightweb' ),
+			'flagged'   => __( 'Page quality flagged', 'insightweb' ),
+			'ai'        => __( 'AI referrals', 'insightweb' ),
+			'ref'       => __( 'With referrals', 'insightweb' ),
+			'conflicts' => __( 'With conflicts', 'insightweb' ),
+			'noted'     => __( 'With Clarity notes', 'insightweb' ),
+			/* translators: %d: score limit, e.g. 50. */
+			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'insightweb' ), AW_SI_RM_LOW ),
+			'unindexed' => __( 'Not indexed (URL Inspection)', 'insightweb' ),
+		);
+		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
+		$out     = array();
+		foreach ( $this->view_tests() as $key => $test ) {
+			$n           = count( array_filter( $this->all(), $test ) );
+			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'pages' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+		}
+		return $out;
+	}
+
+	/** Filter, search, sort and page the rows. */
+	public function prepare_items() {
+		$rows   = $this->all();
+		$tests  = $this->view_tests();
+		$rows   = array_filter( $rows, $tests[ $this->arg( 'view' ) ] ?? $tests['all'] );
+		$search = isset( $_REQUEST['s'] ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only search.
+		if ( '' !== $search ) {
+			$rows = array_filter( $rows, fn( $r ) => false !== stripos( $r['path'], $search ) );
+		}
+		$orderby = isset( $_REQUEST['orderby'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['orderby'] ) ) : 'impr'; // phpcs:ignore WordPress.Security.NonceVerification -- read-only sort.
+		$allowed = array_column( $this->get_sortable_columns(), 0 );
+		$orderby = in_array( $orderby, $allowed, true ) ? $orderby : 'impr';
+		$asc     = 'asc' === $this->arg( 'order' );
+		usort(
+			$rows,
+			function ( $a, $b ) use ( $orderby, $asc ) {
+				$x = $a[ $orderby ] ?? null;
+				$y = $b[ $orderby ] ?? null;
+				if ( null === $x || null === $y ) {
+					return ( null === $x ) <=> ( null === $y ); // Empty values last, either way.
+				}
+				$c = is_string( $x ) ? strcmp( $x, $y ) : $x <=> $y;
+				return $asc ? $c : -$c;
+			}
+		);
+		$per                   = $this->get_items_per_page( 'aw_si_pages_per_page', 50 );
+		$paged                 = max( 1, $this->get_pagenum() );
+		$this->items           = array_slice( $rows, ( $paged - 1 ) * $per, $per );
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'path' );
+		$this->set_pagination_args(
+			array(
+				'total_items' => count( $rows ),
+				'per_page'    => $per,
+			)
+		);
+	}
+
+	/** Message for an empty list. */
+	public function no_items() {
+		esc_html_e( 'No pages yet: they appear after the daily runs of Search Console, GA4, Clarity and PageSpeed.', 'insightweb' );
+	}
+
+	/**
+	 * Page link, flag and the note row action.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_path( $item ) {
+		$out = '<a href="' . esc_url( home_url( $item['path'] ) ) . '" target="_blank" rel="noopener"><strong>' . esc_html( $item['path'] ) . '</strong></a>';
+		if ( ! empty( $item['flagged'] ) ) {
+			$why = array();
+			if ( ! empty( $item['c_flag'] ) ) {
+				$why[] = __( 'Clarity', 'insightweb' );
+			}
+			if ( ! empty( $item['psi_flag'] ) ) {
+				$why[] = __( 'PageSpeed', 'insightweb' );
+			}
+			/* translators: %s: Clarity and/or PageSpeed. */
+			$out .= ' — <span class="post-state"><span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( __( 'Page quality (%s)', 'insightweb' ), implode( ', ', $why ) ) ) . '</span>';
+		}
+		$actions = array(
+			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), aw_si_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'insightweb' ) . '</a>',
+		);
+		return $out . $this->row_actions( $actions );
+	}
+
+	/**
+	 * Keywords owned, and conflicts.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_keywords( $item ) {
+		if ( empty( $item['keywords'] ) ) {
+			return '–';
+		}
+		$out = esc_html( number_format_i18n( (int) $item['keywords'] ) );
+		if ( ! empty( $item['conflicts'] ) ) {
+			/* translators: %s: number of conflicts. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( _n( '%s conflict', '%s conflicts', (int) $item['conflicts'], 'insightweb' ), number_format_i18n( (int) $item['conflicts'] ) ) ) . '</span>';
+		}
+		return $out;
+	}
+
+	/**
+	 * AI referrals and the source that sent most.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_ai( $item ) {
+		if ( empty( $item['ai'] ) ) {
+			return '–';
+		}
+		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ai_by'] ?? array() ) ) . '</span>';
+	}
+
+	/**
+	 * Referral and social sessions and the two sources that sent most.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_ref( $item ) {
+		if ( empty( $item['ref'] ) ) {
+			return '–';
+		}
+		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ref_by'] ?? array() ) ) . '</span>';
+	}
+
+	/**
+	 * Clarity: sessions and the shares of sessions with rage clicks, dead clicks and quick-backs.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_clarity( $item ) {
+		if ( ! isset( $item['c_sessions'] ) ) {
+			return '–';
+		}
+		/* translators: %s: sessions. */
+		$parts = array( sprintf( __( '%s sessions', 'insightweb' ), number_format_i18n( (int) $item['c_sessions'] ) ) );
+		foreach ( array(
+			'c_rage'      => __( 'rage', 'insightweb' ),
+			'c_dead'      => __( 'dead', 'insightweb' ),
+			'c_quickback' => __( 'quick-back', 'insightweb' ),
+			'c_scroll'    => __( 'scroll', 'insightweb' ),
+		) as $k => $label ) {
+			if ( isset( $item[ $k ] ) ) {
+				/* translators: 1: rage, dead, quick-back or scroll; 2: share of sessions in per cent. */
+				$parts[] = sprintf( __( '%1$s %2$s%%', 'insightweb' ), $label, number_format_i18n( (float) $item[ $k ], 1 ) );
+			}
+		}
+		return esc_html( array_shift( $parts ) ) . ( $parts ? '<br><span class="description">' . esc_html( implode( ' · ', $parts ) ) . '</span>' : '' );
+	}
+
+	/**
+	 * Latest PageSpeed scores and their date.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_psi( $item ) {
+		if ( ! isset( $item['psi_score-mobile'] ) && ! isset( $item['psi_score-desktop'] ) ) {
+			return '–';
+		}
+		$m = isset( $item['psi_score-mobile'] ) ? number_format_i18n( (float) $item['psi_score-mobile'] ) : '–';
+		$d = isset( $item['psi_score-desktop'] ) ? number_format_i18n( (float) $item['psi_score-desktop'] ) : '–';
+		$lab = array();
+		if ( isset( $item['psi_lcp-mobile'] ) ) {
+			/* translators: %s: seconds. */
+			$lab[] = sprintf( __( 'LCP %s s', 'insightweb' ), number_format_i18n( (float) $item['psi_lcp-mobile'] / 1000, 1 ) );
+		}
+		if ( isset( $item['psi_cls-mobile'] ) ) {
+			/* translators: %s: layout shift score. */
+			$lab[] = sprintf( __( 'CLS %s', 'insightweb' ), number_format_i18n( (float) $item['psi_cls-mobile'], 2 ) );
+		}
+		$field = array();
+		if ( isset( $item['psi_field-lcp-mobile'] ) ) {
+			/* translators: %s: seconds. */
+			$field[] = sprintf( __( 'LCP %s s', 'insightweb' ), number_format_i18n( (float) $item['psi_field-lcp-mobile'] / 1000, 1 ) );
+		}
+		if ( isset( $item['psi_field-inp-mobile'] ) ) {
+			/* translators: %s: milliseconds. */
+			$field[] = sprintf( __( 'INP %s ms', 'insightweb' ), number_format_i18n( (float) $item['psi_field-inp-mobile'] ) );
+		}
+		if ( isset( $item['psi_field-cls-mobile'] ) ) {
+			/* translators: %s: layout shift score. */
+			$field[] = sprintf( __( 'CLS %s', 'insightweb' ), number_format_i18n( (float) $item['psi_field-cls-mobile'], 2 ) );
+		}
+		$out = esc_html( $m . ' / ' . $d );
+		if ( $lab ) {
+			/* translators: %s: lab figures. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Mobile test: %s', 'insightweb' ), implode( ', ', $lab ) ) ) . '</span>';
+		}
+		if ( $field ) {
+			/* translators: %s: real-user figures. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'Chrome users, mobile: %s', 'insightweb' ), implode( ', ', $field ) ) ) . '</span>';
+		}
+		return $out . ( ! empty( $item['psi_d'] ) ? '<br><span class="description">' . esc_html( mysql2date( 'j M', $item['psi_d'] ) ) . '</span>' : '' );
+	}
+
+	/**
+	 * Bing impressions and clicks, 90 days.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_bing( $item ) {
+		if ( ! isset( $item['bing_impr'] ) ) {
+			return '–';
+		}
+		/* translators: 1: impressions, 2: clicks. */
+		return esc_html( sprintf( __( '%1$s impressions, %2$s clicks', 'insightweb' ), number_format_i18n( (int) $item['bing_impr'] ), number_format_i18n( (int) ( $item['bing_clicks'] ?? 0 ) ) ) );
+	}
+
+	/**
+	 * Google's index state (URL Inspection) and when it was checked.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_index( $item ) {
+		if ( ! isset( $item['index'] ) ) {
+			return esc_html__( 'Not checked yet', 'insightweb' );
+		}
+		$word = $item['index'] ? __( 'Indexed', 'insightweb' ) : __( 'Not indexed', 'insightweb' );
+		$out  = '<span class="dashicons dashicons-' . ( $item['index'] ? 'yes-alt' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $word );
+		if ( ! $item['index'] && '' !== (string) ( $item['index_t'] ?? '' ) ) {
+			$out .= '<br><span class="description">' . esc_html( (string) $item['index_t'] ) . '</span>';
+		}
+		if ( ! empty( $item['index_d'] ) ) {
+			$out .= '<br><span class="description">' . esc_html( mysql2date( 'j M', (string) $item['index_d'] ) ) . '</span>';
+		}
+		return $out;
+	}
+
+	/**
+	 * Latest Clarity note and its date.
+	 *
+	 * @param array $item Row.
+	 */
+	protected function column_note( $item ) {
+		if ( empty( $item['note'] ) ) {
+			return '–';
+		}
+		return esc_html( $item['note'] ) . '<br><span class="description">' . esc_html( mysql2date( 'j M Y', $item['note_d'] ) ) . '</span>';
+	}
+
+	/**
+	 * Numeric columns.
+	 *
+	 * @param array  $item Row.
+	 * @param string $col  Column key.
+	 */
+	protected function column_default( $item, $col ) {
+		if ( ! isset( $item[ $col ] ) || null === $item[ $col ] ) {
+			return '–';
+		}
+		return esc_html( 'pos' === $col ? number_format_i18n( (float) $item[ $col ], 1 ) : number_format_i18n( (int) $item[ $col ] ) );
+	}
+}

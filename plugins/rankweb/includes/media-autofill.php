@@ -1,0 +1,220 @@
+<?php
+/**
+ * Media Library autofill for new image uploads: fills the fields that are empty, never overwrites a value.
+ *
+ * - Name: a file or camera name (IMG_2034, DSC00012) becomes plain words, at most 100 characters, never ending in a stop word.
+ * - Alternative Text: the name, up to 160 characters.
+ * - Caption = SEO title (up to 100 characters): the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
+ * - Description = SEO description: at least 100 and up to 160 characters, written for favicons, logos, source images and any other image.
+ * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), up to 160 characters.
+ * - Focus keyphrase (kits_image_keyphrase): that page's Rank Math focus keyword (the first one).
+ * No admin screen, no options, no CSS. Moved from Animal Writes Core on 18 Nov 2026; loaded with or without Rank Math.
+ *
+ * @package aw-seo-extras
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Cut text to a maximum length at a word boundary, never ending in a stop word.
+ *
+ * @param string $text Text.
+ * @param int    $max  Maximum characters.
+ * @return string
+ */
+function rankweb_media_autofill_cut( $text, $max ) {
+	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
+	if ( mb_strlen( $text ) > $max ) {
+		$head = mb_substr( $text, 0, $max );
+		if ( ' ' !== mb_substr( $text, $max, 1 ) && false !== mb_strrpos( $head, ' ' ) ) {
+			$head = mb_substr( $head, 0, mb_strrpos( $head, ' ' ) );
+		}
+		$text = $head;
+	}
+	$stop = 'in|of|to|for|and|the|a|an|on|at|by|with|as|from|over|after|into|that|is|are|how|what|or|but';
+	do {
+		$before = $text;
+		$text   = preg_replace( '/(?:^|[\s,;:\-\x{2013}\x{2014}]+)(?:' . $stop . ')$/iu', '', $text );
+		$text   = rtrim( $text, " \t,;:-\xE2\x80\x93\xE2\x80\x94" );
+	} while ( $text !== $before );
+	return $text;
+}
+
+/**
+ * Turn a title into a readable name: file and camera names become words, entities are decoded.
+ *
+ * @param string $title Attachment title.
+ * @return string
+ */
+function rankweb_media_autofill_name( $title ) {
+	$title = trim( html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ) );
+	$looks = preg_match( '/^(IMG|DSC|PXL|photo-|image|screenshot|whatsapp)\b/i', $title )
+		|| false !== strpos( $title, '_' )
+		|| preg_match( '/^(?=.*\d)[0-9a-f\s-]+$/i', $title );
+	if ( $looks ) {
+		$title = ucfirst( trim( preg_replace( '/[\s_\-]+/', ' ', $title ) ) );
+	}
+	return rankweb_media_autofill_cut( $title, 100 );
+}
+
+/**
+ * Favicon or logo details from a name such as "Favicon: host" or "host logo".
+ *
+ * @param string $name Name.
+ * @return array|null Array with kind and host, or null.
+ */
+function rankweb_media_autofill_brand( $name ) {
+	if ( preg_match( '/^favicon:\s*(\S+)$/i', $name, $m ) ) {
+		return array( 'kind' => 'favicon', 'host' => $m[1] );
+	}
+	if ( preg_match( '/^(\S+)\s+logo$/i', $name, $m ) ) {
+		return array( 'kind' => 'logo', 'host' => $m[1] );
+	}
+	return null;
+}
+
+/**
+ * SEO title (caption) for a name.
+ *
+ * @param string $name Name.
+ * @return string
+ */
+function rankweb_media_autofill_caption( $name ) {
+	$brand = rankweb_media_autofill_brand( $name );
+	if ( $brand ) {
+		return $brand['host'] . ' ' . $brand['kind'] . ' | Animal Writes';
+	}
+	return rankweb_media_autofill_cut( $name, 100 );
+}
+
+/**
+ * SEO description, at most 160 characters.
+ *
+ * @param string $name      Name.
+ * @param bool   $is_source True when the file name ends in -source.
+ * @return string
+ */
+function rankweb_media_autofill_description( $name, $is_source ) {
+	$brand = rankweb_media_autofill_brand( $name );
+	if ( $brand ) {
+		$base = sprintf( '%1$s %2$s, shown beside news from %1$s on Animal Writes', $brand['host'], $brand['kind'] );
+		$text = $base . ", India's tracker of animal welfare news, law and help.";
+		if ( mb_strlen( $text ) > 160 ) {
+			$text = $base . '.';
+		}
+	} else {
+		$short = rankweb_media_autofill_cut( $name, 45 );
+		$text  = $is_source
+			? sprintf( 'Source image for the news item “%s”. Animal Writes, India.', $short )
+			: sprintf( "Image for “%s” on Animal Writes, India's tracker of animal welfare news, law and help.", $short );
+	}
+	if ( mb_strlen( $text ) < 100 ) {
+		$text .= ' Animal welfare news, law and help in India.'; // Reaches the 100-character minimum the Media Library SEO check expects.
+	}
+	return mb_substr( $text, 0, 160 );
+}
+
+/**
+ * Image context line from the page the file is attached to, at most 160 characters.
+ *
+ * @param int $parent_id Parent post ID.
+ * @return string Empty when there is no usable parent.
+ */
+function rankweb_media_autofill_context( $parent_id ) {
+	$parent = $parent_id ? get_post( $parent_id ) : null;
+	if ( ! $parent ) {
+		return '';
+	}
+	$type  = get_post_type_object( $parent->post_type );
+	$label = $type ? $type->labels->singular_name : $parent->post_type;
+	$text  = sprintf( 'Used on: %1$s: %2$s (ID %3$d).', $label, rankweb_media_autofill_cut( html_entity_decode( $parent->post_title, ENT_QUOTES, 'UTF-8' ), 50 ), $parent->ID );
+	return rankweb_media_autofill_cut( $text, 160 );
+}
+
+/**
+ * Fill the focus keyphrase of an image from a page's Rank Math focus keyword (the first one), only when it is empty.
+ *
+ * @param int $att_id  Attachment ID.
+ * @param int $page_id Page the image is attached to or used on.
+ */
+function rankweb_media_autofill_keyphrase( $att_id, $page_id ) {
+	if ( $page_id < 1 || '' !== trim( (string) get_post_meta( $att_id, 'kits_image_keyphrase', true ) ) ) {
+		return;
+	}
+	$kw = trim( (string) strtok( (string) get_post_meta( $page_id, 'rank_math_focus_keyword', true ), ',' ) );
+	if ( '' !== $kw ) {
+		update_post_meta( $att_id, 'kits_image_keyphrase', sanitize_text_field( $kw ) );
+	}
+}
+
+/**
+ * Fill the empty fields of a new image attachment.
+ *
+ * @param int $post_id Attachment ID.
+ */
+function rankweb_media_autofill_run( $post_id ) {
+	if ( ! function_exists( 'wp_attachment_is_image' ) || ! wp_attachment_is_image( $post_id ) ) {
+		return;
+	}
+	global $wpdb;
+	$post = get_post( $post_id );
+	$name = $post ? rankweb_media_autofill_name( $post->post_title ) : '';
+	if ( '' === $name ) {
+		return;
+	}
+	$set = array();
+	if ( $name !== $post->post_title ) {
+		$set['post_title'] = $name;
+	}
+	if ( '' === trim( $post->post_excerpt ) ) {
+		$set['post_excerpt'] = rankweb_media_autofill_caption( $name );
+	}
+	if ( '' === trim( $post->post_content ) ) {
+		$file                = (string) get_attached_file( $post_id );
+		$set['post_content'] = rankweb_media_autofill_description( $name, '-source' === substr( pathinfo( $file, PATHINFO_FILENAME ), -7 ) );
+	}
+	if ( $set ) {
+		$wpdb->update( $wpdb->posts, $set, array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+	}
+	if ( '' === trim( (string) get_post_meta( $post_id, '_wp_attachment_image_alt', true ) ) ) {
+		update_post_meta( $post_id, '_wp_attachment_image_alt', rankweb_media_autofill_cut( $name, 160 ) );
+	}
+	if ( '' === trim( (string) get_post_meta( $post_id, 'kits_image_context', true ) ) ) {
+		$context = rankweb_media_autofill_context( (int) $post->post_parent );
+		if ( '' !== $context ) {
+			update_post_meta( $post_id, 'kits_image_context', $context );
+		}
+	}
+	rankweb_media_autofill_keyphrase( $post_id, (int) $post->post_parent );
+}
+add_action( 'add_attachment', 'rankweb_media_autofill_run' );
+
+/**
+ * Fill the image context and focus keyphrase when a picture is used on a page after it was uploaded (featured image or news source image).
+ *
+ * @param int    $meta_id  Meta ID (unused).
+ * @param int    $post_id  Post the meta belongs to.
+ * @param string $meta_key Meta key.
+ * @param mixed  $value    Meta value (the attachment ID).
+ */
+function rankweb_media_autofill_used( $meta_id, $post_id, $meta_key, $value ) {
+	if ( ! in_array( $meta_key, array( '_thumbnail_id', 'aw_source_image_att' ), true ) || ! is_numeric( $value ) ) {
+		return;
+	}
+	$att = (int) $value;
+	if ( $att < 1 || 'attachment' === get_post_type( $post_id ) || ! wp_attachment_is_image( $att ) ) {
+		return;
+	}
+	if ( '' === trim( (string) get_post_meta( $att, 'kits_image_context', true ) ) ) {
+		$context = rankweb_media_autofill_context( (int) $post_id );
+		if ( '' !== $context ) {
+			update_post_meta( $att, 'kits_image_context', $context );
+		}
+	}
+	rankweb_media_autofill_keyphrase( $att, (int) $post_id );
+}
+add_action( 'added_post_meta', 'rankweb_media_autofill_used', 10, 4 );
+add_action( 'updated_post_meta', 'rankweb_media_autofill_used', 10, 4 );

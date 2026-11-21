@@ -1,0 +1,229 @@
+/**
+ * DirectoryWeb admin: the plugin's own screen layout, layered on top of Kits Core's shared admin shell (kits-shell).
+ *
+ * Layout only — widths, grid and spacing, all built from the shell's own tokens and greyscale. The shell and its
+ * theme (colours, typography, component look) are not touched; this file only arranges the plugin's screens.
+ */
+
+/* Full-width data tables: on the screens that show a DataList (Listings, Claims), let the table use the full admin
+ * content width instead of the shell's reading cap. Other screens (Dashboard, Settings) keep the comfortable width.
+ * :has() is progressive — where it is unsupported the table simply keeps the capped width, so nothing breaks. */
+.kits-shell-screen .kits-shell__body:has( .kits-shell-datalist ) {
+	max-width: none;
+}
+
+/* Dashboard "In numbers": the overview charts as a responsive card grid, each chart on its own surface for a clearer
+ * hierarchy and consistent spacing. Greyscale only, from the shell's tokens — the same card language as the tiles. */
+.directoryweb-overview {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 260px, 1fr ) );
+	gap: var( --ks-s4 );
+	margin-top: var( --ks-s2 );
+}
+
+.directoryweb-overview__chart {
+	display: flex;
+	flex-direction: column;
+	gap: var( --ks-s3 );
+	padding: var( --ks-s4 );
+	background: var( --ks-white );
+	border: 1px solid var( --ks-g2 );
+	border-radius: var( --ks-r-card );
+}
+
+/* The chart's own figure list (the readable values beside the bars): a compact inline row, not a bullet list. */
+.directoryweb-overview__figures {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --ks-s1 ) var( --ks-s4 );
+	margin: 0;
+	padding: 0;
+	font-size: 13px;
+	color: var( --ks-g7 );
+}
+
+.directoryweb-overview__figures li {
+	list-style: none;
+	margin: 0;
+}
+
+/* Keep each MiniChart a steady height so the cards line up on a row. */
+.directoryweb-overview__chart .kits-shell-chart svg {
+	height: 56px;
+}
+
+/* Listing profile (the read-only CRM-style page a listing opens into on the Listings screen): an identity header,
+ * a facts sidebar and detail cards. Layout only, from the shell's greyscale tokens — the shell theme is untouched. */
+.directoryweb-lp {
+	display: flex;
+	flex-direction: column;
+	gap: var( --ks-s4 );
+}
+
+.directoryweb-lp__head {
+	display: flex;
+	align-items: center;
+	gap: var( --ks-s4 );
+	flex-wrap: wrap;
+	padding-bottom: var( --ks-s4 );
+	border-bottom: 1px solid var( --ks-g2 );
+}
+
+.directoryweb-lp__logo img,
+.directoryweb-lp__logo-ph {
+	width: 64px;
+	height: 64px;
+	border-radius: var( --ks-r-card );
+	object-fit: cover;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var( --ks-g1 );
+	color: var( --ks-g6 );
+}
+
+.directoryweb-lp__id {
+	flex: 1 1 240px;
+	min-width: 0;
+}
+
+.directoryweb-lp__name {
+	margin: 0;
+	font-size: 20px;
+	line-height: 1.25;
+}
+
+.directoryweb-lp__sub {
+	margin-top: 2px;
+	color: var( --ks-g7 );
+	font-size: 13px;
+}
+
+.directoryweb-lp__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --ks-s1 );
+	margin-top: var( --ks-s2 );
+}
+
+.directoryweb-lp__badge {
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: var( --ks-r-pill );
+	font-size: 12px;
+	font-weight: 600;
+	background: var( --ks-g1 );
+	color: var( --ks-g7 );
+	border: 1px solid var( --ks-g2 );
+}
+
+.directoryweb-lp__badge--gov {
+	background: var( --ks-ink );
+	color: var( --ks-white );
+	border-color: var( --ks-ink );
+}
+
+.directoryweb-lp__badge--warn {
+	border-color: var( --ks-g6 );
+	color: var( --ks-ink );
+}
+
+.directoryweb-lp__actions {
+	display: flex;
+	gap: var( --ks-s2 );
+	flex-wrap: wrap;
+}
+
+.directoryweb-lp__grid {
+	display: grid;
+	grid-template-columns: minmax( 240px, 320px ) 1fr;
+	gap: var( --ks-s4 );
+	align-items: start;
+}
+
+@media ( max-width: 767px ) {
+	.directoryweb-lp__grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+.directoryweb-lp__aside,
+.directoryweb-lp__main {
+	display: flex;
+	flex-direction: column;
+	gap: var( --ks-s4 );
+	min-width: 0;
+}
+
+.directoryweb-lp__card {
+	padding: var( --ks-s4 );
+	background: var( --ks-white );
+	border: 1px solid var( --ks-g2 );
+	border-radius: var( --ks-r-card );
+}
+
+.directoryweb-lp__card-h {
+	margin: 0 0 var( --ks-s3 );
+	font-size: 14px;
+}
+
+.directoryweb-lp__facts {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var( --ks-s2 );
+}
+
+.directoryweb-lp__fact {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 2px;
+}
+
+.directoryweb-lp__fact dt {
+	font-size: 12px;
+	color: var( --ks-g7 );
+}
+
+.directoryweb-lp__fact dd {
+	margin: 0;
+	font-size: 14px;
+	word-break: break-word;
+}
+
+.directoryweb-lp__bio {
+	margin: 0;
+	white-space: pre-line;
+}
+
+.directoryweb-lp__links {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var( --ks-s2 ) var( --ks-s4 );
+}
+
+.directoryweb-lp__links li {
+	list-style: none;
+	margin: 0;
+}
+
+.directoryweb-lp__meter strong {
+	display: inline-block;
+	margin-top: var( --ks-s2 );
+	font-size: 18px;
+}
+
+.directoryweb-lp__bar {
+	height: 8px;
+	border-radius: var( --ks-r-pill );
+	background: var( --ks-g2 );
+	overflow: hidden;
+}
+
+.directoryweb-lp__bar span {
+	display: block;
+	height: 100%;
+	background: var( --ks-ink );
+}

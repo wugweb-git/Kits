@@ -1,0 +1,170 @@
+<?php
+/**
+ * Run log per source (option aw_si_runs): last good run, last error, rows written. Feeds the "last updated" notices on
+ * every tab and the Site Health test. A failed run never clears the last good data (plan §5, failure rule).
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AW_SI_RUNS = 'aw_si_runs';
+
+/**
+ * Sources and how often each should run. Later phases add theirs through the aw_si_sources filter.
+ *
+ * @return array<string, array{label: string, every: int}>
+ */
+function aw_si_sources(): array {
+	$s = array(
+		'gsc'    => array(
+			'label' => __( 'Search Console (Site Kit)', 'insightweb' ),
+			'every' => DAY_IN_SECONDS,
+		),
+		'roles'  => array(
+			'label' => __( 'Keyword roles (Rank Math, Sourcing)', 'insightweb' ),
+			'every' => DAY_IN_SECONDS,
+		),
+		'rollup' => array(
+			/* translators: %d: days. */
+			'label' => sprintf( __( 'Retention (%d-day rollup)', 'insightweb' ), aw_si_keep_days() ),
+			'every' => DAY_IN_SECONDS,
+		),
+	);
+	return (array) apply_filters( 'aw_si_sources', $s );
+}
+
+/**
+ * A service key: InsightWeb's own reader (includes/insightweb-keys.php: wp-config.php constant, then Settings → Keys,
+ * then the old Kits → Keys during the move). Kept under this name for the callers.
+ *
+ * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ */
+function aw_si_key( string $name ): string {
+	return insightweb_key( $name );
+}
+
+/** The run log: source => ok, error, info. */
+function aw_si_runs(): array {
+	$r = get_option( AW_SI_RUNS, array() );
+	return is_array( $r ) ? $r : array();
+}
+
+/**
+ * Mark a run as started. A run that started over an hour ago and never logged a result was cut short (time limit).
+ *
+ * @param string $src Source key.
+ */
+function aw_si_run_start( string $src ): void {
+	$r                    = aw_si_runs();
+	$r[ $src ]            = $r[ $src ] ?? array( 'ok' => 0 );
+	$r[ $src ]['started'] = time();
+	update_option( AW_SI_RUNS, $r, false );
+}
+
+/**
+ * Mark a run that works in steps as still going, so a queue that takes hours is not taken for a run cut short.
+ *
+ * @param string $src Source key.
+ */
+function aw_si_run_beat( string $src ): void {
+	$r = aw_si_runs();
+	if ( empty( $r[ $src ]['started'] ) ) {
+		return;
+	}
+	$r[ $src ]['beat'] = time();
+	update_option( AW_SI_RUNS, $r, false );
+}
+
+/**
+ * The problem with a source's last run in plain words, or ''.
+ *
+ * @param string $src Source key.
+ */
+function aw_si_run_problem( string $src ): string {
+	$r   = aw_si_runs()[ $src ] ?? array();
+	$err = $r['error'] ?? null;
+	$end = max( (int) ( $r['ok'] ?? 0 ), (int) ( $err['time'] ?? 0 ) );
+	$last = max( (int) ( $r['started'] ?? 0 ), (int) ( $r['beat'] ?? 0 ) ); // A run in steps (URL Inspection, PageSpeed) beats at each step.
+	if ( ! empty( $r['started'] ) && (int) $r['started'] > $end && time() - $last > HOUR_IN_SECONDS ) {
+		/* translators: %s: date and time. */
+		return sprintf( __( 'The run started on %s did not finish (probably a time limit).', 'insightweb' ), wp_date( 'j M, H:i', (int) $r['started'] ) );
+	}
+	return $err ? (string) $err['message'] : '';
+}
+
+/**
+ * Record a good run.
+ *
+ * @param string $src  Source key.
+ * @param array  $info Kept as is: rows written, days fetched, warnings.
+ */
+function aw_si_run_ok( string $src, array $info = array() ): void {
+	$r         = aw_si_runs();
+	$had       = (int) ( $r[ $src ]['rows_at'] ?? 0 );
+	$r[ $src ] = array(
+		'ok'      => time(),
+		'error'   => null,
+		'info'    => $info,
+		'started' => (int) ( $r[ $src ]['started'] ?? 0 ),
+		// When this source last stored rows (1 Nov 2026): a run that keeps "succeeding" with 0 rows is a failing source.
+		'rows_at' => ! array_key_exists( 'rows', $info ) || (int) $info['rows'] > 0 ? time() : ( $had ? $had : time() ),
+	);
+	update_option( AW_SI_RUNS, $r, false );
+}
+
+/**
+ * Record a failed run; the last good time and data stay.
+ *
+ * @param string $src     Source key.
+ * @param string $message What went wrong, in plain words.
+ */
+function aw_si_run_fail( string $src, string $message ): void {
+	$r                  = aw_si_runs();
+	$r[ $src ]          = $r[ $src ] ?? array( 'ok' => 0 );
+	$r[ $src ]['error'] = array(
+		'time'    => time(),
+		'message' => $message,
+	);
+	update_option( AW_SI_RUNS, $r, false );
+}
+
+/**
+ * True when a source's last good run is older than twice its schedule. A source that has not run yet counts as late
+ * only once twice its schedule has passed since Search Insights was installed (no warning on the day of a deploy).
+ *
+ * @param string $src Source key.
+ */
+function aw_si_stale( string $src ): bool {
+	$every = (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS );
+	$r     = aw_si_runs()[ $src ] ?? array();
+	$ok    = (int) ( $r['ok'] ?? 0 );
+	if ( (int) ( $r['started'] ?? 0 ) > $ok && time() - (int) ( $r['beat'] ?? 0 ) <= HOUR_IN_SECONDS ) {
+		return false; // A run in steps is working now (a step in the last hour): not late.
+	}
+	$since = $ok ? $ok : (int) get_option( 'aw_si_installed', time() );
+	return ( time() - $since ) > $every + DAY_IN_SECONDS; // late once a day past its schedule (12 Nov 2026; was twice the schedule)
+}
+
+/** When a source's next run is due (its last good run plus its schedule), or 0 when it has never run. */
+function aw_si_next_due( string $src ): int {
+	$ok = (int) ( aw_si_runs()[ $src ]['ok'] ?? 0 );
+	return $ok ? $ok + (int) ( aw_si_sources()[ $src ]['every'] ?? DAY_IN_SECONDS ) : 0;
+}
+
+/**
+ * Days since a source last stored rows, when its runs have stored none for 7 days or more; 0 otherwise. Sources whose
+ * runs report no row count are never counted.
+ *
+ * @param string $src Source key.
+ */
+function aw_si_rows_dry_days( string $src ): int {
+	$r = aw_si_runs()[ $src ] ?? array();
+	if ( empty( $r['ok'] ) || ! array_key_exists( 'rows', (array) ( $r['info'] ?? array() ) ) || (int) $r['info']['rows'] > 0 || empty( $r['rows_at'] ) ) {
+		return 0;
+	}
+	$days = (int) floor( ( time() - (int) $r['rows_at'] ) / DAY_IN_SECONDS );
+	return $days >= 7 ? $days : 0;
+}

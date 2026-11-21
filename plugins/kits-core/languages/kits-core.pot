@@ -1,0 +1,1296 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Kits Core 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/kits-core\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-18T12:09:46+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: kits-core\n"
+
+#. Plugin Name of the plugin
+#: kits-core.php
+msgid "Kits Core"
+msgstr ""
+
+#. Description of the plugin
+#: kits-core.php
+msgid "Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin."
+msgstr ""
+
+#. Author of the plugin
+#: kits-core.php
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the plugin
+#: kits-core.php
+msgid "https://wugweb.com"
+msgstr ""
+
+#: includes/admin-app-cards.php:62
+msgid "4:3 (standard)"
+msgstr ""
+
+#: includes/admin-app-cards.php:66
+msgid "3:4 (portrait)"
+msgstr ""
+
+#: includes/admin-app-cards.php:70
+msgid "3:2 (featured)"
+msgstr ""
+
+#: includes/admin-app-cards.php:74
+msgid "1:1 (square)"
+msgstr ""
+
+#: includes/admin-app-cards.php:79
+msgid "Card padding"
+msgstr ""
+
+#: includes/admin-app-cards.php:80
+msgid "Space inside every card, around its text (and around a stacked card’s picture)."
+msgstr ""
+
+#: includes/admin-app-cards.php:85
+msgid "Card gap"
+msgstr ""
+
+#: includes/admin-app-cards.php:86
+msgid "Space between the cards of a list."
+msgstr ""
+
+#. translators: %s: token name.
+#: includes/admin-app-cards.php:88
+#, php-format
+msgid "%s, which grows with the screen width"
+msgstr ""
+
+#: includes/admin-app-cards.php:92
+msgid "Stacked large card: padding"
+msgstr ""
+
+#: includes/admin-app-cards.php:93
+msgid "The wide card with the picture on the left (kit-card--stacked-lg)."
+msgstr ""
+
+#: includes/admin-app-cards.php:94
+msgid "the Card padding"
+msgstr ""
+
+#: includes/admin-app-cards.php:98
+msgid "Stacked large card: gap"
+msgstr ""
+
+#: includes/admin-app-cards.php:99
+msgid "Space between the picture and the text."
+msgstr ""
+
+#. translators: %s: token name.
+#: includes/admin-app-cards.php:101
+#, php-format
+msgid "%s, which grows with the screen width on some sites"
+msgstr ""
+
+#: includes/admin-app-cards.php:105
+msgid "Picture ratio: standard cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:106
+msgid "Cards with the picture above the text: archives, search, category pages, story cards, three-across rows."
+msgstr ""
+
+#: includes/admin-app-cards.php:107
+msgid "4:3"
+msgstr ""
+
+#: includes/admin-app-cards.php:111
+msgid "Picture ratio: stacked cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:112
+msgid "Cards with the picture beside the text: the News, Library and Resources lists and the Home news rows."
+msgstr ""
+
+#: includes/admin-app-cards.php:113
+msgid "3:4"
+msgstr ""
+
+#: includes/admin-app-cards.php:117
+msgid "Picture ratio: featured cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:118
+msgid "Lead and featured stories."
+msgstr ""
+
+#: includes/admin-app-cards.php:119
+msgid "3:2"
+msgstr ""
+
+#: includes/admin-app-cards.php:123
+msgid "Picture ratio: square thumbnails"
+msgstr ""
+
+#: includes/admin-app-cards.php:124
+msgid "Compact thumbnails."
+msgstr ""
+
+#: includes/admin-app-cards.php:125
+msgid "1:1"
+msgstr ""
+
+#: includes/admin-app-cards.php:140
+msgid "Side-by-side cards"
+msgstr ""
+
+#: includes/admin-app-cards.php:140
+msgid "Set by the theme’s CSS; not changed here."
+msgstr ""
+
+#: includes/admin-app-cards.php:141
+msgid "Meta row"
+msgstr ""
+
+#: includes/admin-app-cards.php:141
+msgid "The date comes first; the row is always one line (theme CSS)."
+msgstr ""
+
+#: includes/admin-app.php:58
+msgid "Content types"
+msgstr ""
+
+#: includes/admin-app.php:60
+msgid "Socials"
+msgstr ""
+
+#: includes/admin-app.php:71
+msgid "Share bar"
+msgstr ""
+
+#: includes/admin-app.php:85
+msgid "More"
+msgstr ""
+
+#: includes/admin-app.php:210
+msgid "Breakpoints"
+msgstr ""
+
+#: includes/admin-app.php:210
+msgid "phones up to 767 px, tablets 768 to 1199 px, wide screens from 1200 px (fixed in the theme)"
+msgstr ""
+
+#: includes/admin-app.php:261
+#: includes/admin-app.php:267
+#: includes/admin-app.php:270
+#: includes/help-tab.php:34
+msgid "Theme Options"
+msgstr ""
+
+#: includes/admin-app.php:262
+msgid "Kits Core needs its build (build/theme-options/ and build/shell/) to show this screen."
+msgstr ""
+
+#: includes/admin-app.php:270
+#: includes/admin-shell.php:127
+msgid "This screen needs JavaScript."
+msgstr ""
+
+#: includes/admin-app.php:270
+msgid "Export the settings"
+msgstr ""
+
+#: includes/admin-app.php:303
+msgid "Kits Theme Options"
+msgstr ""
+
+#: includes/admin-app.php:306
+msgid "The header’s switches (announcement bar, header stays at the top) are in"
+msgstr ""
+
+#: includes/admin-app.php:307
+msgid "Kits → Theme Options → Header"
+msgstr ""
+
+#: includes/admin-app.php:311
+msgid "The phone bar at the foot of phone screens is set in"
+msgstr ""
+
+#: includes/admin-app.php:312
+msgid "Kits → Theme Options → Footer"
+msgstr ""
+
+#: includes/admin-app.php:316
+msgid "Sidebar, title and breadcrumbs for each kind of page, and the share bar, are set in"
+msgstr ""
+
+#: includes/admin-app.php:317
+msgid "Kits → Theme Options → Content types"
+msgstr ""
+
+#: includes/admin-kits-frame.php:44
+msgid "Kits Core needs its build (build/shell/) to show this screen."
+msgstr ""
+
+#: includes/admin-kits-frame.php:90
+#: src/theme-options/index.js:457
+msgid "Kits"
+msgstr ""
+
+#: includes/admin-kits-frame.php:130
+#: src/shell/index.js:122
+msgid "Screens"
+msgstr ""
+
+#: includes/admin-shell.php:149
+msgid "Sign in to use this."
+msgstr ""
+
+#: includes/admin-shell.php:155
+msgid "The page has expired. Reload it and try again."
+msgstr ""
+
+#: includes/admin-shell.php:159
+msgid "You are not allowed to do this."
+msgstr ""
+
+#. translators: %s: human time difference, e.g. 3 hours.
+#: includes/attribution.php:117
+msgid "Just now"
+msgstr ""
+
+#. translators: %s: human time difference, e.g. 3 hours.
+#: includes/attribution.php:117
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#: includes/bindings.php:113
+msgid "Kits post field"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "Home"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "site status and the Kits plugins"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "header, socials, contact links and the share bar"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "Settings"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "forms, analytics and the other shared features"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "Tools"
+msgstr ""
+
+#: includes/help-tab.php:36
+msgid "export and import of the Kits settings"
+msgstr ""
+
+#: includes/help-tab.php:37
+msgid "Help"
+msgstr ""
+
+#: includes/help-tab.php:37
+msgid "the design system, the component registry and the docs"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:47
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:48
+msgid "The features every Kits site shares (forms and their spam guard, the share bar, Google Tag Manager with consent mode) and the Kits admin screens that the other Kits plugins are built on."
+msgstr ""
+
+#: includes/help-tab.php:55
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:56
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: includes/keyword-table.php:48
+msgid "Tracked"
+msgstr ""
+
+#: includes/keyword-table.php:49
+msgid "Focus keyphrase"
+msgstr ""
+
+#: includes/keyword-table.php:50
+msgid "Include"
+msgstr ""
+
+#: includes/keyword-table.php:51
+msgid "Animal"
+msgstr ""
+
+#: includes/keyword-table.php:52
+msgid "Context"
+msgstr ""
+
+#: includes/keyword-table.php:53
+msgid "Exclude"
+msgstr ""
+
+#: includes/keyword-table.php:54
+#: src/shell/list.js:400
+#: src/shell/list.js:430
+#: src/shell/list.js:434
+#: src/shell/list.js:445
+msgid "Search"
+msgstr ""
+
+#: includes/keyword-table.php:55
+msgid "Press"
+msgstr ""
+
+#: includes/keyword-table.php:56
+msgid "Category word"
+msgstr ""
+
+#: includes/keyword-table.php:57
+msgid "Brand"
+msgstr ""
+
+#: includes/keyword-table.php:58
+msgid "Searched"
+msgstr ""
+
+#: includes/landmarks.php:75
+msgid "Sidebar"
+msgstr ""
+
+#: includes/landmarks.php:76
+msgid "The column beside an item page's text (below it on phones and tablets)."
+msgstr ""
+
+#. translators: 1: post type slug, 2: address such as /events
+#: includes/presets.php:692
+#, php-format
+msgid "Type %1$s, address %2$s."
+msgstr ""
+
+#. translators: %s: post type slug
+#: includes/presets.php:694
+#, php-format
+msgid "Type %s, with no pages of its own: shown inside other pages."
+msgstr ""
+
+#. translators: 1: address such as /events/, 2: page title
+#: includes/presets.php:699
+#, php-format
+msgid "The page \"%2$s\" already has %1$s: it keeps that address, and this type gets no list page there."
+msgstr ""
+
+#: includes/presets/card.php:15
+#: includes/presets/card.php:19
+#: src/theme-options/sections/cards.js:100
+msgid "Cards"
+msgstr ""
+
+#: includes/presets/card.php:16
+msgid "Small reusable cards, such as tips and facts: a picture, one line and a link, shown inside other pages (no list page, not in search engines)."
+msgstr ""
+
+#: includes/presets/card.php:20
+msgid "Card"
+msgstr ""
+
+#: includes/presets/card.php:21
+msgid "Add card"
+msgstr ""
+
+#: includes/presets/card.php:22
+msgid "Edit card"
+msgstr ""
+
+#: includes/presets/card.php:23
+msgid "View card"
+msgstr ""
+
+#: includes/presets/card.php:24
+msgid "Search cards"
+msgstr ""
+
+#: includes/presets/card.php:25
+msgid "No cards found."
+msgstr ""
+
+#: includes/presets/card.php:26
+msgid "All cards"
+msgstr ""
+
+#: includes/presets/card.php:42
+#: includes/presets/infographic.php:36
+#: src/shell/detail.js:102
+msgid "Picture"
+msgstr ""
+
+#: includes/presets/card.php:46
+msgid "Line"
+msgstr ""
+
+#: includes/presets/card.php:50
+#: includes/presets/portfolio.php:47
+msgid "Link"
+msgstr ""
+
+#: includes/presets/case-study.php:14
+#: includes/presets/case-study.php:18
+msgid "Case studies"
+msgstr ""
+
+#: includes/presets/case-study.php:15
+msgid "Case studies: the problem, the approach, the outcome and the figures."
+msgstr ""
+
+#: includes/presets/case-study.php:19
+msgid "Case study"
+msgstr ""
+
+#: includes/presets/case-study.php:20
+msgid "Add case study"
+msgstr ""
+
+#: includes/presets/case-study.php:21
+msgid "Edit case study"
+msgstr ""
+
+#: includes/presets/case-study.php:22
+msgid "View case study"
+msgstr ""
+
+#: includes/presets/case-study.php:23
+msgid "Search case studies"
+msgstr ""
+
+#: includes/presets/case-study.php:24
+msgid "No case studies found."
+msgstr ""
+
+#: includes/presets/case-study.php:25
+msgid "All case studies"
+msgstr ""
+
+#: includes/presets/case-study.php:35
+msgid "Problem"
+msgstr ""
+
+#: includes/presets/case-study.php:39
+msgid "Approach"
+msgstr ""
+
+#: includes/presets/case-study.php:43
+msgid "Outcome"
+msgstr ""
+
+#: includes/presets/case-study.php:47
+msgid "Figures"
+msgstr ""
+
+#: includes/presets/event.php:15
+#: includes/presets/event.php:19
+msgid "Events"
+msgstr ""
+
+#: includes/presets/event.php:16
+msgid "Events: start, end, place and an online address."
+msgstr ""
+
+#: includes/presets/event.php:20
+msgid "Event"
+msgstr ""
+
+#: includes/presets/event.php:21
+msgid "Add event"
+msgstr ""
+
+#: includes/presets/event.php:22
+msgid "Edit event"
+msgstr ""
+
+#: includes/presets/event.php:23
+msgid "View event"
+msgstr ""
+
+#: includes/presets/event.php:24
+msgid "Search events"
+msgstr ""
+
+#: includes/presets/event.php:25
+msgid "No events found."
+msgstr ""
+
+#: includes/presets/event.php:26
+msgid "All events"
+msgstr ""
+
+#: includes/presets/event.php:36
+msgid "Start (YYYY-MM-DD, optional HH:MM)"
+msgstr ""
+
+#: includes/presets/event.php:40
+msgid "End (YYYY-MM-DD, optional HH:MM)"
+msgstr ""
+
+#: includes/presets/event.php:44
+msgid "Place"
+msgstr ""
+
+#: includes/presets/event.php:48
+msgid "Online address"
+msgstr ""
+
+#: includes/presets/infographic.php:15
+#: includes/presets/infographic.php:19
+msgid "Infographics"
+msgstr ""
+
+#: includes/presets/infographic.php:16
+msgid "Infographics, each with a long text description for people who cannot see the picture, its source and a link to the data."
+msgstr ""
+
+#: includes/presets/infographic.php:20
+msgid "Infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:21
+msgid "Add infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:22
+msgid "Edit infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:23
+msgid "View infographic"
+msgstr ""
+
+#: includes/presets/infographic.php:24
+msgid "Search infographics"
+msgstr ""
+
+#: includes/presets/infographic.php:25
+msgid "No infographics found."
+msgstr ""
+
+#: includes/presets/infographic.php:26
+msgid "All infographics"
+msgstr ""
+
+#: includes/presets/infographic.php:40
+msgid "Long description (text alternative)"
+msgstr ""
+
+#: includes/presets/infographic.php:44
+msgid "Source"
+msgstr ""
+
+#: includes/presets/infographic.php:48
+msgid "Data link"
+msgstr ""
+
+#: includes/presets/person.php:15
+#: includes/presets/person.php:19
+msgid "People"
+msgstr ""
+
+#: includes/presets/person.php:16
+msgid "Team members and contributors: role, photo and public profile links. No private details."
+msgstr ""
+
+#: includes/presets/person.php:20
+msgid "Person"
+msgstr ""
+
+#: includes/presets/person.php:21
+msgid "Add person"
+msgstr ""
+
+#: includes/presets/person.php:22
+msgid "Edit person"
+msgstr ""
+
+#: includes/presets/person.php:23
+msgid "View person"
+msgstr ""
+
+#: includes/presets/person.php:24
+msgid "Search people"
+msgstr ""
+
+#: includes/presets/person.php:25
+msgid "No people found."
+msgstr ""
+
+#: includes/presets/person.php:26
+msgid "All people"
+msgstr ""
+
+#: includes/presets/person.php:36
+#: includes/presets/portfolio.php:43
+#: includes/presets/testimonial.php:48
+msgid "Role"
+msgstr ""
+
+#: includes/presets/person.php:40
+msgid "Photo"
+msgstr ""
+
+#: includes/presets/person.php:44
+msgid "Public profile links (one per line)"
+msgstr ""
+
+#: includes/presets/portfolio.php:14
+#: includes/presets/portfolio.php:18
+msgid "Portfolio"
+msgstr ""
+
+#: includes/presets/portfolio.php:15
+msgid "Work the site shows: client, year, role and a link."
+msgstr ""
+
+#: includes/presets/portfolio.php:19
+msgid "Portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:20
+msgid "Add portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:21
+msgid "Edit portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:22
+msgid "View portfolio item"
+msgstr ""
+
+#: includes/presets/portfolio.php:23
+msgid "Search portfolio"
+msgstr ""
+
+#: includes/presets/portfolio.php:24
+msgid "No portfolio items found."
+msgstr ""
+
+#: includes/presets/portfolio.php:25
+msgid "All portfolio items"
+msgstr ""
+
+#: includes/presets/portfolio.php:35
+msgid "Client"
+msgstr ""
+
+#: includes/presets/portfolio.php:39
+msgid "Year"
+msgstr ""
+
+#: includes/presets/testimonial.php:16
+#: includes/presets/testimonial.php:20
+msgid "Testimonials"
+msgstr ""
+
+#: includes/presets/testimonial.php:17
+msgid "Quotes from people, each shown only after the date of their consent is filled in."
+msgstr ""
+
+#: includes/presets/testimonial.php:21
+msgid "Testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:22
+msgid "Add testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:23
+msgid "Edit testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:24
+msgid "View testimonial"
+msgstr ""
+
+#: includes/presets/testimonial.php:25
+msgid "Search testimonials"
+msgstr ""
+
+#: includes/presets/testimonial.php:26
+msgid "No testimonials found."
+msgstr ""
+
+#: includes/presets/testimonial.php:27
+msgid "All testimonials"
+msgstr ""
+
+#: includes/presets/testimonial.php:40
+msgid "Quote"
+msgstr ""
+
+#: includes/presets/testimonial.php:44
+msgid "Name"
+msgstr ""
+
+#: includes/presets/testimonial.php:52
+msgid "What it is about (product, service or event; for search engines)"
+msgstr ""
+
+#: includes/presets/testimonial.php:56
+msgid "Consent date (YYYY-MM-DD)"
+msgstr ""
+
+#: includes/primitives.php:164
+msgid "Completed"
+msgstr ""
+
+#: includes/primitives.php:165
+msgid "Current"
+msgstr ""
+
+#: includes/primitives.php:166
+msgid "Ongoing"
+msgstr ""
+
+#: includes/primitives.php:167
+msgid "Upcoming"
+msgstr ""
+
+#: includes/primitives.php:168
+msgid "Date not set"
+msgstr ""
+
+#: includes/share.php:157
+#: includes/share.php:163
+msgid "Share"
+msgstr ""
+
+#: includes/share.php:164
+#: includes/share.php:171
+msgid "Link copied"
+msgstr ""
+
+#. translators: %s: network name.
+#: includes/share.php:167
+msgid "Share by email"
+msgstr ""
+
+#. translators: %s: network name.
+#: includes/share.php:167
+#, php-format
+msgid "Share on %s"
+msgstr ""
+
+#: includes/share.php:170
+msgid "Copy link"
+msgstr ""
+
+#: includes/share.php:187
+msgid "Follow us"
+msgstr ""
+
+#. translators: %s: network name.
+#: includes/share.php:192
+#, php-format
+msgid "Follow us on %s"
+msgstr ""
+
+#: blocks/hero/index.js:9
+msgid "Page heading"
+msgstr ""
+
+#: blocks/hero/index.js:10
+msgid "One line that says what the page is for."
+msgstr ""
+
+#: src/shell/calendar.js:102
+msgid "Today"
+msgstr ""
+
+#: src/shell/calendar.js:180
+msgid "Nothing this month."
+msgstr ""
+
+#: src/shell/crumbs.js:90
+msgid "Breadcrumb"
+msgstr ""
+
+#. translators: %s: where the setting is changed ("Site Editor → Header").
+#: src/shell/crumbs.js:131
+#, js-format
+msgid "Change in %s"
+msgstr ""
+
+#: src/shell/detail.js:39
+#: src/shell/index.js:587
+msgid "Close"
+msgstr ""
+
+#. translators: 1: what the pictures are, 2: its number.
+#: src/shell/detail.js:101
+#, js-format
+msgid "%1$s, picture %2$d"
+msgstr ""
+
+#. translators: %d: pictures not shown.
+#: src/shell/detail.js:112
+#, js-format
+msgid "+%d more"
+msgstr ""
+
+#. translators: %d: media library item ID.
+#: src/shell/detail.js:189
+#, js-format
+msgid "Item %d"
+msgstr ""
+
+#: src/shell/detail.js:192
+msgid "None"
+msgstr ""
+
+#: src/shell/detail.js:203
+msgid "Change"
+msgstr ""
+
+#: src/shell/detail.js:204
+msgid "Choose from Media"
+msgstr ""
+
+#: src/shell/detail.js:224
+#: src/shell/detail.js:334
+#: src/shell/extras.js:170
+msgid "Remove"
+msgstr ""
+
+#. translators: 1: column name, 2: row number.
+#: src/shell/detail.js:298
+#: src/shell/detail.js:314
+#, js-format
+msgid "%1$s, row %2$d"
+msgstr ""
+
+#. translators: %d: row number.
+#: src/shell/detail.js:330
+#, js-format
+msgid "Remove row %d"
+msgstr ""
+
+#: src/shell/detail.js:346
+msgid "Add row"
+msgstr ""
+
+#. translators: 1: first label, 2: last label.
+#: src/shell/extras.js:54
+#, js-format
+msgid "(%1$s to %2$s)"
+msgstr ""
+
+#: src/shell/extras.js:100
+msgid "This could not be added."
+msgstr ""
+
+#: src/shell/extras.js:124
+msgid "Add"
+msgstr ""
+
+#: src/shell/extras.js:129
+msgid "Kept only as a fingerprint: once added, it is never shown again."
+msgstr ""
+
+#. translators: %d: number of entries.
+#: src/shell/extras.js:142
+#, js-format
+msgid "%d kept"
+msgstr ""
+
+#. translators: %d: entry number.
+#: src/shell/extras.js:153
+#, js-format
+msgid "Entry %d"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/shell/extras.js:200
+#, js-format
+msgid "Kept in %s: change it there"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/shell/extras.js:207
+#, js-format
+msgid "Kept in %s, which is not active."
+msgstr ""
+
+#: src/shell/extras.js:242
+msgid "Select metrics"
+msgstr ""
+
+#: src/shell/extras.js:251
+msgid "Tiles to show"
+msgstr ""
+
+#: src/shell/extras.js:286
+#: src/theme-options/index.js:477
+msgid "Save"
+msgstr ""
+
+#: src/shell/extras.js:293
+#: src/shell/inputs.js:226
+msgid "Cancel"
+msgstr ""
+
+#: src/shell/index.js:249
+msgid "Needs attention"
+msgstr ""
+
+#: src/shell/index.js:250
+msgid "Not working"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: src/shell/index.js:289
+#, js-format
+msgid "%s not active"
+msgstr ""
+
+#: src/shell/index.js:300
+msgid "Counting…"
+msgstr ""
+
+#: src/shell/index.js:453
+msgid "Changed from the default."
+msgstr ""
+
+#: src/shell/index.js:464
+msgid "Reset to default"
+msgstr ""
+
+#: src/shell/index.js:588
+msgid "Edit"
+msgstr ""
+
+#: src/shell/inputs.js:92
+msgid "None saved."
+msgstr ""
+
+#. translators: %s: last 4 characters of the saved secret.
+#: src/shell/inputs.js:97
+#, js-format
+msgid "Saved, ends in …%s. Type a new one to replace it."
+msgstr ""
+
+#: src/shell/inputs.js:103
+msgid "Saved. Type a new one to replace it."
+msgstr ""
+
+#: src/shell/inputs.js:131
+msgid "Hide"
+msgstr ""
+
+#: src/shell/inputs.js:132
+msgid "Show"
+msgstr ""
+
+#. translators: %s: the word to type.
+#: src/shell/inputs.js:200
+#, js-format
+msgid "Type %s to confirm."
+msgstr ""
+
+#: src/shell/inputs.js:223
+msgid "Confirm"
+msgstr ""
+
+#. translators: %s: action label.
+#: src/shell/list.js:57
+#, js-format
+msgid "%s (opens in a new tab)"
+msgstr ""
+
+#: src/shell/list.js:242
+msgid "View"
+msgstr ""
+
+#: src/shell/list.js:354
+msgid "Views"
+msgstr ""
+
+#: src/shell/list.js:408
+#: src/shell/parts.js:229
+msgid "Nothing here."
+msgstr ""
+
+#. translators: 1: page, 2: pages, 3: rows.
+#: src/shell/list.js:469
+#, js-format
+msgid "Page %1$d of %2$d · %3$d rows"
+msgstr ""
+
+#. translators: %d: rows.
+#: src/shell/list.js:479
+#, js-format
+msgid "%d row"
+msgid_plural "%d rows"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/shell/list.js:559
+msgid "(empty)"
+msgstr ""
+
+#: src/shell/list.js:567
+msgid "Proposed changes"
+msgstr ""
+
+#: src/shell/list.js:572
+#: src/shell/list.js:603
+msgid "Field"
+msgstr ""
+
+#: src/shell/list.js:573
+#: src/shell/list.js:607
+msgid "Now"
+msgstr ""
+
+#: src/shell/list.js:574
+#: src/shell/list.js:610
+msgid "Proposed"
+msgstr ""
+
+#: src/shell/list.js:575
+#: src/shell/list.js:613
+msgid "State"
+msgstr ""
+
+#. translators: %s: field name.
+#: src/shell/list.js:591
+#, js-format
+msgid "Apply %s"
+msgstr ""
+
+#: src/shell/list.js:617
+msgid "Applied"
+msgstr ""
+
+#: src/shell/list.js:622
+msgid "Undo"
+msgstr ""
+
+#: src/shell/list.js:635
+msgid "Waiting"
+msgstr ""
+
+#. translators: %d: number of fields ticked.
+#: src/shell/list.js:655
+#, js-format
+msgid "Reject %d ticked"
+msgid_plural "Reject %d ticked"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %d: number of fields ticked.
+#: src/shell/list.js:675
+#, js-format
+msgid "Apply %d field"
+msgid_plural "Apply %d fields"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: steps done, 2: all steps.
+#: src/shell/setup.js:54
+#, js-format
+msgid "%1$d of %2$d done"
+msgstr ""
+
+#: src/shell/setup.js:92
+msgid "(done)"
+msgstr ""
+
+#: src/shell/setup.js:112
+msgid "Back"
+msgstr ""
+
+#: src/shell/setup.js:125
+msgid "Finish"
+msgstr ""
+
+#: src/shell/setup.js:126
+msgid "Continue"
+msgstr ""
+
+#: src/shell/states.js:34
+msgid "Loading…"
+msgstr ""
+
+#: src/shell/states.js:51
+msgid "This could not be loaded."
+msgstr ""
+
+#: src/shell/states.js:60
+msgid "Try again"
+msgstr ""
+
+#: src/theme-options/index.js:60
+msgid "Header"
+msgstr ""
+
+#: src/theme-options/index.js:67
+msgid "Edit the header in the Site Editor (logo, menu, buttons, announcement text)"
+msgstr ""
+
+#: src/theme-options/index.js:73
+#: src/theme-options/index.js:92
+msgid "Edit menus"
+msgstr ""
+
+#: src/theme-options/index.js:78
+msgid "Footer"
+msgstr ""
+
+#: src/theme-options/index.js:86
+msgid "Edit the footer in the Site Editor (links, profile icons)"
+msgstr ""
+
+#: src/theme-options/index.js:97
+msgid "Layout and spacing"
+msgstr ""
+
+#: src/theme-options/index.js:106
+msgid "Widths and spacing in Styles"
+msgstr ""
+
+#: src/theme-options/index.js:110
+msgid "Each kind of page’s layout in Templates"
+msgstr ""
+
+#: src/theme-options/index.js:192
+msgid "These fields save with their own button below."
+msgstr ""
+
+#: src/theme-options/index.js:276
+msgid "Theme"
+msgstr ""
+
+#: src/theme-options/index.js:286
+msgid "the theme’s own"
+msgstr ""
+
+#: src/theme-options/index.js:397
+msgid "Saved."
+msgstr ""
+
+#: src/theme-options/index.js:403
+msgid "Not saved. Try again."
+msgstr ""
+
+#. translators: %s: error message.
+#: src/theme-options/index.js:412
+#, js-format
+msgid "Partly saved. The rest was not saved: %s"
+msgstr ""
+
+#: src/theme-options/index.js:468
+msgid "Changes not saved"
+msgstr ""
+
+#. translators: 1: site name, 2: theme name and version, 3: Kits Core version.
+#: src/theme-options/index.js:487
+#, js-format
+msgid "%1$s · %2$s · Kits Core %3$s"
+msgstr ""
+
+#: src/theme-options/index.js:494
+msgid "Sections"
+msgstr ""
+
+#. translators: %s: the theme's value.
+#: src/theme-options/sections/cards.js:40
+#, js-format
+msgid "Theme (%s)"
+msgstr ""
+
+#: src/theme-options/sections/cards.js:66
+msgid "Card values are kept in Styles, which your account cannot change."
+msgstr ""
+
+#: src/theme-options/sections/cards.js:76
+msgid "Sizes are the theme’s spacing tokens. The site keeps the theme’s values until you pick one."
+msgstr ""
+
+#: src/theme-options/sections/cards.js:82
+msgid "See the tokens"
+msgstr ""
+
+#: src/theme-options/theme-note.js:11
+msgid "Theme value"
+msgstr ""
+
+#. translators: %s: the theme's value.
+#: src/theme-options/theme-note.js:14
+#, js-format
+msgid "Theme value: %s"
+msgstr ""
+
+#: src/theme-options/theme-note.js:15
+msgid "empty"
+msgstr ""
+
+#. translators: %s: field label.
+#: src/theme-options/theme-note.js:23
+#, js-format
+msgid "Reset %s to theme"
+msgstr ""
+
+#: src/theme-options/theme-note.js:27
+msgid "Reset to theme"
+msgstr ""
+
+#: blocks/hero/block.json
+msgctxt "block title"
+msgid "Hero"
+msgstr ""
+
+#: blocks/hero/block.json
+msgctxt "block description"
+msgid "The page hero: a full-width band that holds the page's H1, one line and its actions. Its height, colours, padding, border and shadow are block supports, so they are set in Styles (Blocks > Hero) for every hero, or on one hero in the editor."
+msgstr ""
+
+#: blocks/hero/block.json
+msgctxt "block keyword"
+msgid "hero"
+msgstr ""
+
+#: blocks/hero/block.json
+msgctxt "block keyword"
+msgid "banner"
+msgstr ""
+
+#: blocks/hero/block.json
+msgctxt "block keyword"
+msgid "page head"
+msgstr ""
+
+#: blocks/hero/block.json
+msgctxt "block keyword"
+msgid "kits"
+msgstr ""

@@ -1,0 +1,670 @@
+<?php
+/**
+ * Keywords tab: the keyword records as a core list table (views, filters, search, sorting, bulk and row actions,
+ * screen options, pagination). Priority overrides are the only change it makes, and only to Search Insights' own table.
+ * Listing names (entity records) stay out of every view but Entities: the All view shows them as one combined row,
+ * and the 20 that moved most one by one (plan §8).
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! class_exists( 'WP_List_Table' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+}
+
+/**
+ * The Keywords tab list table.
+ */
+class AW_SI_Keywords_Table extends WP_List_Table {
+
+	/**
+	 * IDs of the listing names that moved most, read once per screen.
+	 *
+	 * @var int[]|null
+	 */
+	private $movers = null;
+
+	/** The listing names that moved most (aw_si_entity_movers()), cached. */
+	private function movers(): array {
+		if ( null === $this->movers ) {
+			$this->movers = aw_si_entity_movers();
+		}
+		return $this->movers;
+	}
+
+	/** Set up the list: one row per keyword record. */
+	public function __construct() {
+		parent::__construct(
+			array(
+				'singular' => 'keyword',
+				'plural'   => 'keywords',
+				'ajax'     => false,
+			)
+		);
+	}
+
+	/**
+	 * Request value, sanitised as a key.
+	 *
+	 * @param string $name Request field.
+	 */
+	private function arg( string $name ): string {
+		return isset( $_REQUEST[ $name ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $name ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only filters.
+	}
+
+	/**
+	 * Request value, sanitised as text (topic names keep their spaces and capitals).
+	 *
+	 * @param string $name Request field.
+	 */
+	private function text_arg( string $name ): string {
+		return isset( $_REQUEST[ $name ] ) ? sanitize_text_field( wp_unslash( $_REQUEST[ $name ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only filters.
+	}
+
+	/** Columns. */
+	public function get_columns() {
+		return array(
+			'cb'          => '<input type="checkbox">',
+			'label'       => __( 'Keyword', 'insightweb' ),
+			'score'       => __( 'Score', 'insightweb' ),
+			'recommended' => __( 'Recommended use', 'insightweb' ),
+			'priority'    => __( 'Priority', 'insightweb' ),
+			'status'      => __( 'Status', 'insightweb' ),
+			'topic'       => __( 'Topic', 'insightweb' ),
+			'page'        => __( 'Page', 'insightweb' ),
+			'impr28'      => __( 'Impressions (28 days)', 'insightweb' ),
+			'clicks28'    => __( 'Clicks', 'insightweb' ),
+			'pos28'       => __( 'Position', 'insightweb' ),
+			'change'      => __( 'Change', 'insightweb' ),
+			'bing'        => __( 'Bing impressions (90 days)', 'insightweb' ),
+			'live'        => __( 'Live check', 'insightweb' ),
+			'trends'      => __( 'Trends', 'insightweb' ),
+			'volume'      => __( 'Volume (imports)', 'insightweb' ),
+			'ubersuggest' => __( 'Ubersuggest', 'insightweb' ),
+			'vidiq'       => __( 'vidIQ (YouTube)', 'insightweb' ),
+			'openseo'     => __( 'OpenSEO', 'insightweb' ),
+			'openseo_pos' => __( 'OpenSEO position', 'insightweb' ),
+			'action'      => __( 'Suggested action', 'insightweb' ),
+		);
+	}
+
+	/** Sortable columns and their first direction. */
+	protected function get_sortable_columns() {
+		return array(
+			'label'    => array( 'label', false ),
+			'score'    => array( 'score', true ),
+			'priority' => array( 'priority', false ),
+			'topic'    => array( 'topic', false ),
+			'impr28'   => array( 'impr28', true ),
+			'clicks28' => array( 'clicks28', true ),
+			'pos28'    => array( 'pos28', false ),
+			'change'   => array( 'change', true ),
+			'trends'   => array( 'trends', true ),
+		);
+	}
+
+	/** The column that holds the row actions. */
+	protected function get_primary_column_name() {
+		return 'label';
+	}
+
+	/** Priority overrides: the only change this list makes, to its own table. */
+	protected function get_bulk_actions() {
+		return array(
+			'override_p1'    => __( 'Set priority P1', 'insightweb' ),
+			'override_p2'    => __( 'Set priority P2', 'insightweb' ),
+			'override_p3'    => __( 'Set priority P3', 'insightweb' ),
+			'override_clear' => __( 'Use the calculated priority', 'insightweb' ),
+		);
+	}
+
+	/** SQL condition of each view. */
+	private function view_sql(): array {
+		return aw_si_view_sql(); // One rule for every view (compute.php).
+	}
+
+	/** Labels of the views. */
+	private function view_labels(): array {
+		return array(
+			'all'       => __( 'All', 'insightweb' ),
+			'p1'        => 'P1',
+			'p2'        => 'P2',
+			'p3'        => 'P3',
+			'gap'       => __( 'Gaps', 'insightweb' ),
+			'conflict'  => __( 'Conflicts', 'insightweb' ),
+			'quick'     => __( 'Quick wins', 'insightweb' ),
+			'notranked' => __( 'Tracked, not ranking', 'insightweb' ),
+			'entity'    => __( 'Entities', 'insightweb' ),
+		);
+	}
+
+	/**
+	 * Condition that keeps listing names out of a view, except the ones that moved most.
+	 *
+	 * @param string $view View key.
+	 */
+	private function entity_sql( string $view ): string {
+		if ( 'entity' === $view ) {
+			return '1=1';
+		}
+		return aw_si_entity_sql( $this->movers() );
+	}
+
+	/** Whether the list is the plain All view: no filter, no search. The combined listing-names row shows only there. */
+	private function plain_all(): bool {
+		foreach ( array( 'role', 'page_type', 'lang', 'topic' ) as $f ) {
+			if ( '' !== $this->arg( $f ) ) {
+				return false;
+			}
+		}
+		return in_array( $this->arg( 'view' ), array( '', 'all' ), true ) && empty( $_REQUEST['s'] ); // phpcs:ignore WordPress.Security.NonceVerification -- read-only.
+	}
+
+	/** The combined row for every listing name: count and summed Search Console figures, linking to the Entities view. */
+	private function entity_row(): ?object {
+		global $wpdb;
+		$t = aw_si_table( 'keywords' );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$a = $wpdb->get_row( $wpdb->prepare( 'SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM %i WHERE entity = 1', $t ) );
+		if ( ! $a || ! (int) $a->n ) {
+			return null;
+		}
+		return (object) array(
+			'aggregate'         => (int) $a->n,
+			'id'                => 0,
+			'label'             => '',
+			'roles'             => 0,
+			'lang'              => 'en',
+			'entity'            => 1,
+			'note'              => '',
+			'topic'             => '',
+			'priority'          => '',
+			'priority_override' => '',
+			'status'            => '',
+			'page'              => '',
+			'impr28'            => (int) $a->i,
+			'clicks28'          => (int) $a->c,
+			'pos28'             => null === $a->p ? null : round( (float) $a->p, 1 ),
+			// Change: each listing name's own change, weighted by its impressions now (last period's are not kept).
+			'pos_prev'          => null === $a->p || null === $a->d ? null : round( (float) $a->p + (float) $a->d, 1 ),
+			'live_pos'          => null,
+			'live_txt'          => '',
+			'live_date'         => null,
+			'trends'            => null,
+			'action'            => '',
+		);
+	}
+
+	/** Views with their counts. */
+	protected function get_views() {
+		global $wpdb;
+		$t       = aw_si_table( 'keywords' );
+		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
+		$out     = array();
+		foreach ( $this->view_sql() as $key => $sql ) {
+			$sql        .= ' AND ' . $this->entity_sql( $key );
+			$n           = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions (no %).
+			$url         = add_query_arg( array( 'view' => $key ), aw_si_url( 'keywords' ) );
+			$out[ $key ] = '<a href="' . esc_url( $url ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $this->view_labels()[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+		}
+		return $out;
+	}
+
+	/**
+	 * Role, topic, page type and language filters above the list.
+	 *
+	 * @param string $which top or bottom.
+	 */
+	protected function extra_tablenav( $which ) {
+		if ( 'top' !== $which ) {
+			return;
+		}
+		echo '<div class="alignleft actions">';
+		$this->dropdown( 'role', __( 'All roles', 'insightweb' ), array_map( 'strval', aw_si_roles() ) );
+		global $wpdb;
+		$topics = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT topic FROM %i WHERE topic <> '' ORDER BY topic", aw_si_table( 'keywords' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$this->dropdown( 'topic', __( 'All topics', 'insightweb' ), array_combine( $topics, $topics ), true );
+		$this->dropdown(
+			'page_type',
+			__( 'All page types', 'insightweb' ),
+			array(
+				'hub'       => __( 'Hub', 'insightweb' ),
+				'directory' => __( 'Directory', 'insightweb' ),
+				'topic'     => __( 'Topic', 'insightweb' ),
+				'guide'     => __( 'Guide', 'insightweb' ),
+				'key-page'  => __( 'Key page', 'insightweb' ),
+				'new-row'   => __( 'Added 21 Oct', 'insightweb' ),
+			)
+		);
+		$this->dropdown(
+			'lang',
+			__( 'All languages', 'insightweb' ),
+			array(
+				'en'       => __( 'English', 'insightweb' ),
+				'hi'       => __( 'Hindi', 'insightweb' ),
+				'hinglish' => __( 'Hinglish', 'insightweb' ),
+			)
+		);
+		if ( aw_si_ready() ) {
+			$this->dropdown(
+				'focus_health',
+				__( 'All focus-keyphrase health', 'insightweb' ),
+				array(
+					'poor-rank' => __( 'Focus keyphrase, poor rank', 'insightweb' ),
+					'should-be' => __( 'Should be a focus keyphrase', 'insightweb' ),
+				)
+			);
+			$this->dropdown(
+				'owner_flag',
+				__( 'All page ownership', 'insightweb' ),
+				array(
+					'news-should-be-evergreen' => __( 'Owned by News, should be Resource/Library', 'insightweb' ),
+					'no-owner'                 => __( 'No canonical owner', 'insightweb' ),
+				)
+			);
+		}
+		submit_button( __( 'Filter', 'insightweb' ), '', 'filter_action', false );
+		echo '</div>';
+	}
+
+	/**
+	 * One filter dropdown.
+	 *
+	 * @param string $name    Request field.
+	 * @param string $all     Label of the empty choice.
+	 * @param array  $options value => label.
+	 * @param bool   $text    Values are text (topic names), not keys.
+	 */
+	private function dropdown( string $name, string $all, array $options, bool $text = false ): void {
+		$cur = $text ? $this->text_arg( $name ) : $this->arg( $name );
+		echo '<label class="screen-reader-text" for="aw-si-' . esc_attr( $name ) . '">' . esc_html( $all ) . '</label>';
+		echo '<select name="' . esc_attr( $name ) . '" id="aw-si-' . esc_attr( $name ) . '"><option value="">' . esc_html( $all ) . '</option>';
+		foreach ( $options as $value => $label ) {
+			echo '<option value="' . esc_attr( (string) $value ) . '"' . selected( $cur, (string) $value, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+	}
+
+	/** Query one page of keyword records for the current view, filters, search and sort. */
+	public function prepare_items() {
+		global $wpdb;
+		$t       = aw_si_table( 'keywords' );
+		$where   = array();
+		$args    = array();
+		$view    = $this->arg( 'view' );
+		$views   = $this->view_sql();
+		$where[] = $views[ $view ] ?? '1=1';
+		$where[] = $this->entity_sql( $view );
+		$role    = (int) $this->arg( 'role' );
+		if ( $role && isset( aw_si_roles()[ $role ] ) ) {
+			$where[] = 'roles & %d';
+			$args[]  = $role;
+		}
+		foreach ( array( 'page_type', 'lang' ) as $col ) {
+			if ( '' !== $this->arg( $col ) ) {
+				$where[] = "{$col} = %s";
+				$args[]  = $this->arg( $col );
+			}
+		}
+		if ( '' !== $this->text_arg( 'topic' ) ) {
+			$where[] = 'topic = %s';
+			$args[]  = $this->text_arg( 'topic' );
+		}
+		$search = isset( $_REQUEST['s'] ) ? trim( sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only search.
+		if ( '' !== $search ) {
+			$where[] = 'label LIKE %s';
+			$args[]  = '%' . $wpdb->esc_like( $search ) . '%';
+		}
+		// The score store (InsightWeb's own table, schema version 3): join it for the Score column, sorting and the
+		// focus-keyphrase-health filter. Every score column is spelled with the s. alias; the keyword columns are
+		// unique to the keyword table, so the WHERE and ORDER built below stay unqualified.
+		$sc    = aw_si_table( 'scores' );
+		$store = aw_si_ready();
+		if ( $store ) {
+			$fh = $this->arg( 'focus_health' );
+			if ( in_array( $fh, array( 'poor-rank', 'should-be' ), true ) ) {
+				$where[] = 's.focus_health = %s';
+				$args[]  = $fh;
+			}
+			$of = $this->arg( 'owner_flag' );
+			if ( in_array( $of, array( 'news-should-be-evergreen', 'no-owner' ), true ) ) {
+				$where[] = 's.owner_flag = %s';
+				$args[]  = $of;
+			}
+		}
+		$orderby = $this->arg( 'orderby' );
+		$cols    = array(
+			'label'    => 'label',
+			'priority' => aw_si_eff_sql(),
+			'topic'    => "topic = '', topic",
+			'impr28'   => 'impr28',
+			'clicks28' => 'clicks28',
+			'pos28'    => 'pos28 IS NULL, pos28',
+			'change'   => '(pos_prev - pos28)',
+			'trends'   => 'trends',
+		);
+		if ( $store ) {
+			$cols['score'] = 's.score';
+		}
+		$order = 'asc' === $this->arg( 'order' ) ? 'ASC' : 'DESC';
+		if ( ! isset( $cols[ $orderby ] ) ) {
+			$orderby = 'impr28';
+		}
+		$by = $cols[ $orderby ];
+		if ( 'pos28' === $orderby ) {
+			$by = 'pos28 IS NULL, pos28 ' . $order;
+		} elseif ( 'score' === $orderby ) {
+			$by = 's.score IS NULL, s.score ' . $order; // Unscored keywords last.
+		} else {
+			$by .= ' ' . $order;
+		}
+		$per    = $this->get_items_per_page( 'aw_si_keywords_per_page', 50 );
+		$paged  = max( 1, $this->get_pagenum() );
+		$sql    = implode( ' AND ', $where );
+		$agg    = $this->plain_all() ? $this->entity_row() : null; // Counts as the first row of page 1.
+		$shift  = $agg ? 1 : 0;
+		$from   = $store ? '%i k LEFT JOIN %i s ON s.kw_id = k.id' : '%i';
+		$select = $store ? 'k.*, s.score iw_score, s.recommended iw_recommended, s.focus_health iw_focus_health, s.owner_path iw_owner_path, s.owner_type iw_owner_type, s.owner_flag iw_owner_flag' : '*';
+		$lbl    = $store ? 'k.label' : 'label';
+		$pre    = $store ? array( $t, $sc ) : array( $t );
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,PluginCheck.Security.DirectDB.UnescapedDBParameter -- conditions and order built from fixed parts with placeholders; table names via %i.
+		$total       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$from} WHERE {$sql}", array_merge( $pre, $args ) ) );
+		$query       = "SELECT {$select} FROM {$from} WHERE {$sql} ORDER BY {$by}, {$lbl} ASC LIMIT %d OFFSET %d";
+		$this->items = $wpdb->get_results( $wpdb->prepare( $query, array_merge( $pre, $args, array( 1 === $paged ? $per - $shift : $per, max( 0, ( $paged - 1 ) * $per - $shift ) ) ) ) );
+		// phpcs:enable
+		// Monthly search volume from the latest Keyword Planner import, for the keywords on this page.
+		$page_ids = array_filter( array_map( 'intval', wp_list_pluck( (array) $this->items, 'id' ) ) );
+		if ( $page_ids ) {
+			$o  = aw_si_table( 'obs' );
+			$in = implode( ',', array_map( 'intval', $page_ids ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+			$vols = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, src, value, txt FROM %i WHERE src = 'kp' AND metric = 'volume' AND kw_id IN ({$in}) ORDER BY d", $o ) );
+			$by   = array();
+			foreach ( $vols as $v ) {
+				$by[ (int) $v->kw_id ] = $v; // Ordered by date: the latest wins.
+			}
+			// Bing: our impressions by search (bing.php, Bing's weeks and older months) and Bing's own weekly search
+			// volume for the top keywords (bing-crawl.php, the last 12 weeks), kept apart from Search Console's figures.
+			$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+			$bing  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM %i WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $o, $since ), OBJECT_K );
+			$tools = function_exists( 'aw_si_tool_figures' ) ? aw_si_tool_figures( $page_ids ) : array();
+			$oseo  = function_exists( 'aw_si_openseo_positions' ) ? aw_si_openseo_positions( $page_ids ) : array(); // Kept apart from the Live check.
+			foreach ( $this->items as $item ) {
+				$item->tools    = $tools[ (int) $item->id ] ?? array();
+				$item->oseo_pos = $oseo[ (int) $item->id ] ?? null;
+				$item->volume   = $by[ (int) $item->id ] ?? null;
+				$item->bing     = isset( $bing[ $item->id ] ) ? (int) $bing[ $item->id ]->i : null;
+				$item->bing_vol = isset( $bing[ $item->id ]->v ) ? (float) $bing[ $item->id ]->v : null;
+			}
+		}
+		if ( $agg && 1 === $paged ) {
+			array_unshift( $this->items, $agg );
+		}
+		$total                += $shift;
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'label' );
+		$this->set_pagination_args(
+			array(
+				'total_items' => $total,
+				'per_page'    => $per,
+			)
+		);
+	}
+
+	/** Message for an empty list. */
+	public function no_items() {
+		if ( ! get_option( 'aw_si_seeded' ) ) {
+			esc_html_e( 'Nothing here yet: the first daily run (07:10 IST) seeds the keyword map and reads Search Console. Settings → Run now starts it at once.', 'insightweb' );
+			return;
+		}
+		esc_html_e( 'No keywords match.', 'insightweb' );
+	}
+
+	/**
+	 * Bulk checkbox.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_cb( $item ) {
+		if ( ! empty( $item->aggregate ) ) {
+			return '';
+		}
+		return '<input type="checkbox" name="kw[]" value="' . (int) $item->id . '">';
+	}
+
+	/**
+	 * Keyword, its roles and note, and the priority row actions.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_label( $item ) {
+		if ( ! empty( $item->aggregate ) ) {
+			/* translators: %s: number of listing names. */
+			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', aw_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'insightweb' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
+			/* translators: %d: number of listing names listed one by one. */
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'insightweb' ), AW_SI_MOVERS ) ) . '</span>';
+			return $out;
+		}
+		$out   = '<strong>' . esc_html( $item->label ) . '</strong>';
+		$roles = array();
+		foreach ( aw_si_roles() as $bit => $name ) {
+			if ( (int) $item->roles & $bit ) {
+				$roles[] = $name;
+			}
+		}
+		if ( 'en' !== $item->lang ) {
+			$roles[] = 'hi' === $item->lang ? __( 'Hindi', 'insightweb' ) : __( 'Hinglish', 'insightweb' );
+		}
+		if ( (int) $item->entity ) {
+			$roles[] = in_array( (int) $item->id, $this->movers(), true ) && 'entity' !== $this->arg( 'view' ) ? __( 'Entity, top mover', 'insightweb' ) : __( 'Entity', 'insightweb' );
+		}
+		if ( $roles ) {
+			$out .= ' — <span class="post-state">' . esc_html( implode( ', ', $roles ) ) . '</span>';
+		}
+		if ( '' !== $item->note ) {
+			$out .= '<br><span class="description">' . esc_html( $item->note ) . '</span>';
+		}
+		$actions = array();
+		foreach ( array( 'P1', 'P2', 'P3' ) as $p ) {
+			if ( $p !== $item->priority_override ) {
+				/* translators: %s: priority such as P1. */
+				$actions[ 'set_' . strtolower( $p ) ] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_' . strtolower( $p ), (int) $item->id ) ) . '">' . esc_html( sprintf( __( 'Set %s', 'insightweb' ), $p ) ) . '</a>';
+			}
+		}
+		if ( '' !== $item->priority_override ) {
+			$actions['clear'] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_clear', (int) $item->id ) ) . '">' . esc_html__( 'Use calculated', 'insightweb' ) . '</a>';
+		}
+		return $out . $this->row_actions( $actions );
+	}
+
+	/**
+	 * Priority: the owner's override, or the calculated one.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_priority( $item ) {
+		if ( '' !== $item->priority_override ) {
+			/* translators: 1: owner's priority, 2: calculated priority. */
+			return esc_html( sprintf( __( '%1$s (owner; calculated %2$s)', 'insightweb' ), $item->priority_override, $item->priority ? $item->priority : '–' ) );
+		}
+		return esc_html( $item->priority ? $item->priority : '–' );
+	}
+
+	/**
+	 * Status, and "not ranking" for a tracked keyword with no impressions. A Directory pattern such as
+	 * "gaushala in {district}" is never searched as typed, so it says so instead of "not ranking".
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_status( $item ) {
+		$labels = array(
+			'has-page' => __( 'Has page', 'insightweb' ),
+			'gap'      => __( 'Gap', 'insightweb' ),
+			'conflict' => __( 'Conflict', 'insightweb' ),
+		);
+		$s      = $labels[ $item->status ] ?? '–';
+		if ( false !== strpos( $item->label, '{' ) ) {
+			$s .= ' · ' . __( 'Directory pattern, not searched', 'insightweb' );
+		} elseif ( ( (int) $item->roles & AW_SI_ROLE_TRACKED ) && 0 === (int) $item->impr28 ) {
+			$s .= ' · ' . __( 'not ranking', 'insightweb' );
+		}
+		return esc_html( $s );
+	}
+
+	/**
+	 * Owning page, or the page Google shows most.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_page( $item ) {
+		if ( '' === $item->page ) {
+			return '–';
+		}
+		if ( 0 === strpos( $item->page, '/' ) && false === strpos( $item->page, '{' ) ) {
+			return '<a href="' . esc_url( home_url( $item->page ) ) . '" target="_blank" rel="noopener">' . esc_html( $item->page ) . '</a>';
+		}
+		return esc_html( $item->page );
+	}
+
+	/**
+	 * Position change: the 28 days before against the last 28 days.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_change( $item ) {
+		if ( null === $item->pos28 || null === $item->pos_prev ) {
+			return '–';
+		}
+		$d = round( (float) $item->pos_prev - (float) $item->pos28, 1 );
+		if ( abs( $d ) < 0.1 ) {
+			return '0';
+		}
+		/* translators: %s: positions gained or lost. */
+		$text = $d > 0 ? sprintf( __( 'up %s', 'insightweb' ), number_format_i18n( $d, 1 ) ) : sprintf( __( 'down %s', 'insightweb' ), number_format_i18n( -$d, 1 ) );
+		return '<span class="dashicons dashicons-arrow-' . ( $d > 0 ? 'up' : 'down' ) . '-alt" aria-hidden="true"></span> ' . esc_html( $text );
+	}
+
+	/**
+	 * Latest live Google check.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_live( $item ) {
+		if ( '' === $item->live_txt && null === $item->live_pos ) {
+			return '–';
+		}
+		$pos = null !== $item->live_pos ? '#' . number_format_i18n( (float) $item->live_pos ) : $item->live_txt;
+		return esc_html( $pos ) . ( $item->live_date ? '<br><span class="description">' . esc_html( mysql2date( 'j M Y', $item->live_date ) ) . '</span>' : '' );
+	}
+
+	/**
+	 * Suggested action.
+	 *
+	 * @param object $item Keyword record.
+	 */
+	protected function column_action( $item ) {
+		return esc_html( aw_si_actions()[ $item->action ] ?? '' );
+	}
+
+	/**
+	 * The keyword score (0–100) from the score store, or an en dash when it has not been scored yet.
+	 *
+	 * @param object $item Keyword record (joined with the score store).
+	 */
+	protected function column_score( $item ) {
+		if ( ! empty( $item->aggregate ) || ! isset( $item->iw_score ) || null === $item->iw_score ) {
+			return '–';
+		}
+		return esc_html( number_format_i18n( (int) $item->iw_score ) );
+	}
+
+	/**
+	 * The recommended-use labels (one or more), and the focus-keyphrase-health flag when there is one.
+	 *
+	 * @param object $item Keyword record (joined with the score store).
+	 */
+	protected function column_recommended( $item ) {
+		if ( ! empty( $item->aggregate ) ) {
+			return '';
+		}
+		$labels = aw_si_use_labels();
+		$out    = array();
+		foreach ( array_filter( explode( ',', (string) ( $item->iw_recommended ?? '' ) ) ) as $key ) {
+			$out[] = esc_html( $labels[ $key ] ?? $key );
+		}
+		$html  = $out ? implode( '<br>', $out ) : '–';
+		$flags = aw_si_flag_labels();
+		$fh    = (string) ( $item->iw_focus_health ?? '' );
+		if ( '' !== $fh ) {
+			$html .= '<br><span class="post-state">' . esc_html( $flags[ $fh ] ?? $fh ) . '</span>';
+		}
+		$of = (string) ( $item->iw_owner_flag ?? '' );
+		if ( '' !== $of ) {
+			$html .= '<br><span class="post-state">' . esc_html( $flags[ $of ] ?? $of ) . '</span>';
+			$owner = (string) ( $item->iw_owner_path ?? '' );
+			if ( '' !== $owner ) {
+				/* translators: %s: the page path that should own the keyword. */
+				$html .= '<br><span class="description">' . esc_html( sprintf( __( 'Owner: %s', 'insightweb' ), $owner ) ) . '</span>';
+			}
+		}
+		return $html;
+	}
+
+	/**
+	 * Numeric columns.
+	 *
+	 * @param object $item Keyword record.
+	 * @param string $col  Column key.
+	 */
+	protected function column_default( $item, $col ) {
+		switch ( $col ) {
+			case 'impr28':
+			case 'clicks28':
+				return esc_html( number_format_i18n( (int) $item->$col ) );
+			case 'pos28':
+				return null === $item->pos28 ? '–' : esc_html( number_format_i18n( (float) $item->pos28, 1 ) );
+			case 'trends':
+				if ( null === $item->trends && aw_si_trends_failed() ) {
+					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'insightweb' ) . '">' . esc_html__( 'source failed', 'insightweb' ) . '</span>';
+				}
+				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );
+			case 'ubersuggest':
+			case 'vidiq':
+			case 'openseo':
+				$f = $item->tools[ $col ] ?? null;
+				if ( ! $f ) {
+					return '–';
+				}
+				/* translators: %s: searches a month. */
+				$line = esc_html( sprintf( __( '%s a month', 'insightweb' ), number_format_i18n( (float) $f->value ) ) );
+				return $line . ( '' !== (string) $f->txt ? '<br><span class="description">' . esc_html( (string) $f->txt ) . '</span>' : '' );
+			case 'openseo_pos':
+				$f = $item->oseo_pos ?? null;
+				if ( ! $f ) {
+					return '–';
+				}
+				$pos = null !== $f->value ? '#' . number_format_i18n( (float) $f->value ) : (string) $f->txt;
+				return esc_html( $pos ) . '<br><span class="description">' . esc_html( mysql2date( 'j M Y', $f->d ) ) . '</span>';
+			case 'bing':
+				return isset( $item->bing ) ? esc_html( number_format_i18n( (int) $item->bing ) ) : '–';
+			case 'volume':
+				$v     = $item->volume ?? null;
+				$lines = array();
+				if ( $v ) {
+					$lines[] = esc_html( ( '' !== $v->txt ? $v->txt : number_format_i18n( (float) $v->value ) ) . ' (KP)' );
+				}
+				if ( isset( $item->bing_vol ) ) {
+					/* translators: %s: searches a week. */
+					$lines[] = esc_html( sprintf( __( '%s a week (Bing)', 'insightweb' ), number_format_i18n( (int) round( $item->bing_vol ) ) ) );
+				}
+				return $lines ? implode( '<br>', $lines ) : '–';
+			case 'topic':
+				return '' === $item->topic ? '–' : esc_html( $item->topic );
+		}
+		return '';
+	}
+}

@@ -1,0 +1,351 @@
+<?php
+/**
+ * Dates (owner, 21 Oct 2026): the team's own calendar inside WordPress. Kits → Dates shows a month grid, the list of
+ * dates with their notes, and a form to add or remove one; the Dashboard shows what is next. No plugin and no public page:
+ * The Events Calendar was installed but inactive, and it would add public event pages and an /events/ archive to the
+ * sitemap. The dates live in the option aw_team_dates: a list of {date Y-m-d, title, note}.
+ *
+ * PlanWeb (owner, 11 Nov 2026): once PlanWeb is switched on (Kits → Modules), the calendar is PlanWeb → Calendar. This
+ * file then adds no menu, form or Dashboard box and writes nothing; aw_team_dates() still reads the option, which is
+ * kept unchanged as the backup of what was imported. Switched off again, Dates works as before.
+ *
+ * @package planweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+const AW_DATES_CAP = 'edit_others_posts'; // editors and administrators
+
+/** Whether the calendar has moved to PlanWeb (switched on in Kits → Modules). */
+function aw_team_dates_moved(): bool {
+	return function_exists( 'planweb_on' ) && planweb_on();
+}
+
+/** The dates that start the calendar (seeded once; docs/pending.md lists the same ones). */
+function aw_team_dates_seed() {
+	return array(
+		array( 'date' => '2026-11-05', 'title' => 'Lab rules objections close', 'note' => 'Campaign 13848. The countdown on the home page and the campaign page ends today.' ),
+		array( 'date' => '2026-11-17', 'title' => 'Directory thin-page re-check and keyword positions', 'note' => 'Scheduled tasks at 10:00 (Directory indexing against the 20 Oct baseline) and 11:00 (8 tracked keywords).' ),
+	);
+}
+
+/** All dates, oldest first. */
+function aw_team_dates() {
+	$dates = get_option( 'aw_team_dates', null );
+	if ( ! is_array( $dates ) ) {
+		if ( aw_team_dates_moved() ) {
+			return array(); // PlanWeb holds the calendar; nothing is seeded any more.
+		}
+		$dates = aw_team_dates_seed();
+		add_option( 'aw_team_dates', $dates, '', false );
+	}
+	$dates = array_values( array_filter( $dates, fn( $d ) => is_array( $d ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) ( $d['date'] ?? '' ) ) ) );
+	usort( $dates, fn( $a, $b ) => strcmp( $a['date'], $b['date'] ) );
+	return $dates;
+}
+
+/**
+ * Monthly reminder (owner, 31 Oct 2026): the Search Console Links read on the 1st. Dates are one-off entries, so the
+ * next 12 months are added once (flag aw_team_dates_links_read); each can be removed like any other date.
+ */
+function aw_team_dates_add_links_read() {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_links_read' ) ) {
+		return;
+	}
+	$title = 'Search Console Links read (Claude Code session)';
+	$all   = aw_team_dates();
+	$have  = array();
+	foreach ( $all as $d ) {
+		$have[ $d['date'] . '|' . $d['title'] ] = true;
+	}
+	$first = new DateTimeImmutable( 'first day of next month', wp_timezone() );
+	for ( $i = 0; $i < 12; $i++ ) {
+		$ymd = $first->modify( '+' . $i . ' months' )->format( 'Y-m-d' );
+		if ( ! isset( $have[ $ymd . '|' . $title ] ) ) {
+			$all[] = array( 'date' => $ymd, 'title' => $title, 'note' => 'Read Search Console → Links and add new linking pages with wp aw-si links add (they show in Plugins → InsightWeb → Search Insights → Links).' );
+		}
+	}
+	update_option( 'aw_team_dates', $all, false );
+	update_option( 'aw_team_dates_links_read', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_add_links_read' );
+
+/**
+ * The monthly Links reads already on the calendar name the screen by its menu path (owner, 11 Nov 2026: RankWeb →
+ * Search Insights → Links; they were added on 31 Oct under the old name AW SEO Plus). Once (flag
+ * aw_team_dates_links_note_1111); only those words in those entries' notes change.
+ */
+function aw_team_dates_links_note_rename() {
+	// Runs even with PlanWeb on: PlanWeb's import (admin_init 30) waits for this flag, so the renamed notes are copied.
+	if ( get_option( 'aw_team_dates_links_note_1111' ) ) {
+		return;
+	}
+	$all     = get_option( 'aw_team_dates', array() ); // As stored: aw_team_dates() filters and sorts.
+	$all     = is_array( $all ) ? $all : array();
+	$changed = false;
+	foreach ( $all as $i => $d ) {
+		if ( ! is_array( $d ) ) {
+			continue;
+		}
+		$note = (string) ( $d['note'] ?? '' );
+		if ( 'Search Console Links read (Claude Code session)' === ( $d['title'] ?? '' ) && false !== strpos( $note, 'AW SEO Plus → Search Insights → Links' ) ) {
+			$all[ $i ]['note'] = str_replace( 'AW SEO Plus → Search Insights → Links', 'Plugins → InsightWeb → Search Insights → Links', $note );
+			$changed           = true;
+		}
+	}
+	if ( $changed ) {
+		update_option( 'aw_team_dates', $all, false );
+	}
+	update_option( 'aw_team_dates_links_note_1111', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_links_note_rename' );
+
+/**
+ * Dates from the 1 Nov 2026 search analysis, added once (flag aw_team_dates_1101). A date already on the calendar under
+ * the same title is not added again; each can be removed like any other date.
+ */
+function aw_team_dates_add_1101() {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_1101' ) ) {
+		return;
+	}
+	$add  = array(
+		array( 'date' => '2026-11-05', 'title' => 'Lab rules objections close', 'note' => 'Campaign 13848. The countdown on the home page and the campaign page ends today.' ),
+		array( 'date' => '2026-11-08', 'title' => 'Diwali', 'note' => 'Firecrackers and animals: the Diwali guide is planned for before this date.' ),
+		array( 'date' => '2026-11-17', 'title' => 'Supreme Court stray-dog compliance hearing (press-reported)', 'note' => 'High Courts\' compliance reports are due before the Supreme Court. Date from press reports, not checked against the cause list. The stray dogs case explainer is planned for before this date.' ),
+		array( 'date' => '2026-11-17', 'title' => 'Rankings recheck: 19 core queries', 'note' => 'Recheck the Google India positions of the 19 core queries from the 1 Nov 2026 search analysis (2 were in the top 30 on 1 Nov).' ),
+	);
+	$all  = aw_team_dates();
+	$have = array();
+	foreach ( $all as $d ) {
+		$have[ $d['date'] . '|' . $d['title'] ] = true;
+	}
+	foreach ( $add as $d ) {
+		if ( ! isset( $have[ $d['date'] . '|' . $d['title'] ] ) ) {
+			$all[] = $d;
+		}
+	}
+	update_option( 'aw_team_dates', $all, false );
+	update_option( 'aw_team_dates_1101', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_add_1101' );
+
+/**
+ * Dates follow-up of 1 Nov 2026, once (flag aw_team_dates_1101b): the 17 Nov entry names what the 19 May 2026 judgment
+ * set (compliance reports due, not a hearing); a cause-list check on 12 Nov; the Search Insights thresholds review on
+ * 25 Nov; the stray-dog pages' 28-day checkpoint on 15 Dec. A date already on the calendar under the same title is not added again.
+ */
+function aw_team_dates_add_1101b() {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_1101b' ) ) {
+		return;
+	}
+	$all = aw_team_dates();
+	foreach ( $all as $i => $d ) {
+		if ( '2026-11-17' === $d['date'] && 'Supreme Court stray-dog compliance hearing (press-reported)' === $d['title'] ) {
+			$all[ $i ]['title'] = 'Supreme Court stray-dog case: High Court compliance reports due (19 May 2026 judgment)';
+		}
+	}
+	$add  = array(
+		array( 'date' => '2026-11-12', 'title' => 'Cause-list check, SMWP (C) 5/2025, for 17 Nov', 'note' => 'Supreme Court cause list (advance and daily lists for 17 Nov 2026) and case status, diary no. 41706/2025. Repeat on 13 and 14 Nov.' ),
+		array( 'date' => '2026-12-15', 'title' => 'Supreme Court stray dogs: 28-day checkpoint', 'note' => 'Search Insights → Pages: the campaign, the explainer and the Library judgment of 19 May 2026, impressions, clicks and position for 17 Nov–14 Dec against the 1 Nov baseline.' ),
+		array( 'date' => '2026-11-25', 'title' => 'Search Insights thresholds review (Wikipedia 2×, GDELT 3×)', 'note' => 'Review the Rising thresholds: Wikipedia pageviews at 2× the usual level, GDELT at 3× (GDELT is off while it refuses our requests).' ),
+	);
+	$have = array();
+	foreach ( $all as $d ) {
+		$have[ $d['date'] . '|' . $d['title'] ] = true;
+	}
+	foreach ( $add as $d ) {
+		if ( ! isset( $have[ $d['date'] . '|' . $d['title'] ] ) ) {
+			$all[] = $d;
+		}
+	}
+	update_option( 'aw_team_dates', $all, false );
+	update_option( 'aw_team_dates_1101b', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_add_1101b' );
+
+/**
+ * The FAQ holdout ended early (owner, 31 Oct 2026: no holdout): its 1 Dec date leaves the calendar, once (flag
+ * aw_team_dates_faq_holdout_off).
+ */
+function aw_team_dates_drop_faq_holdout() {
+	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_faq_holdout_off' ) ) {
+		return;
+	}
+	$all  = aw_team_dates();
+	$keep = array_values( array_filter( $all, fn( $d ) => 'FAQ holdout ends' !== ( $d['title'] ?? '' ) ) );
+	if ( count( $keep ) !== count( $all ) ) {
+		update_option( 'aw_team_dates', $keep, false );
+	}
+	update_option( 'aw_team_dates_faq_holdout_off', time(), false );
+}
+add_action( 'admin_init', 'aw_team_dates_drop_faq_holdout' );
+
+/** A date in the site's one format, j M Y. */
+function aw_team_date_label( $ymd ) {
+	return wp_date( 'j M Y', strtotime( $ymd . ' 12:00:00' ) );
+}
+
+/** "today", "tomorrow", "in 12 days" or "3 days ago". */
+function aw_team_date_when( $ymd ) {
+	$days = (int) round( ( strtotime( $ymd . ' 12:00:00' ) - strtotime( wp_date( 'Y-m-d' ) . ' 12:00:00' ) ) / DAY_IN_SECONDS );
+	if ( 0 === $days ) {
+		return 'today';
+	}
+	if ( 1 === $days ) {
+		return 'tomorrow';
+	}
+	return $days > 0 ? 'in ' . $days . ' days' : abs( $days ) . ( -1 === $days ? ' day ago' : ' days ago' );
+}
+
+add_action(
+	'admin_menu',
+	function () {
+		if ( aw_team_dates_moved() ) {
+			return; // PlanWeb opens admin.php?page=aw-dates as its Calendar.
+		}
+		add_submenu_page( kits_site_menu_parent(), 'Dates', 'Dates', kits_site_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
+	},
+	kits_site_menu_priority( 'aw-dates' ) // order: kits_site_screens() (admin-home.php)
+);
+
+/** Kits → Dates. */
+function aw_team_dates_screen() {
+	if ( ! current_user_can( AW_DATES_CAP ) ) {
+		wp_die( 'Not allowed.', 403 );
+	}
+	$m     = sanitize_text_field( wp_unslash( $_GET['m'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$month = preg_match( '/^\d{4}-\d{2}$/', $m ) ? $m : wp_date( 'Y-m' );
+	$first = strtotime( $month . '-01 12:00:00' );
+	$prev  = wp_date( 'Y-m', strtotime( '-1 month', $first ) );
+	$next  = wp_date( 'Y-m', strtotime( '+1 month', $first ) );
+	$dates = aw_team_dates();
+	$by    = array();
+	foreach ( $dates as $d ) {
+		$by[ $d['date'] ][] = $d;
+	}
+	$base  = admin_url( 'admin.php?page=aw-dates' );
+	$lead  = (int) wp_date( 'N', $first ) - 1; // Monday first
+	$days  = (int) wp_date( 't', $first );
+	$today = wp_date( 'Y-m-d' );
+	echo '<div class="wrap"><h1>Dates</h1>';
+	kits_site_screen_nav( 'aw-dates' );
+	echo '<p><a class="button" href="' . esc_url( add_query_arg( 'm', $prev, $base ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( add_query_arg( 'm', $next, $base ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( $base ) . '">Today</a></p>';
+	echo '<table class="widefat fixed"><thead><tr>';
+	foreach ( array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' ) as $h ) {
+		echo '<th scope="col">' . esc_html( $h ) . '</th>';
+	}
+	echo '</tr></thead><tbody><tr>';
+	for ( $i = 0; $i < $lead; $i++ ) {
+		echo '<td class="alternate"></td>'; // core's grey: a day of another month
+	}
+	for ( $day = 1; $day <= $days; $day++ ) {
+		$ymd = sprintf( '%s-%02d', $month, $day );
+		if ( 0 === ( $lead + $day - 1 ) % 7 && $day > 1 ) {
+			echo '</tr><tr>';
+		}
+		echo '<td' . ( $ymd === $today ? ' class="highlight" aria-current="date"' : '' ) . '><strong>' . (int) $day . '</strong>'; // core's highlight: today
+		foreach ( $by[ $ymd ] ?? array() as $d ) {
+			echo '<p><span class="dashicons dashicons-calendar-alt" aria-hidden="true"></span> ' . esc_html( $d['title'] ) . '</p>';
+		}
+		echo '</td>';
+	}
+	for ( $i = ( 7 - ( $lead + $days ) % 7 ) % 7; $i > 0; $i-- ) {
+		echo '<td class="alternate"></td>';
+	}
+	echo '</tr></tbody></table>';
+
+	echo '<h2>All dates</h2>';
+	$cells = array();
+	foreach ( $dates as $i => $d ) {
+		$del     = wp_nonce_url( admin_url( 'admin-post.php?action=aw_dates_delete&i=' . (int) $i . '&d=' . rawurlencode( $d['date'] ) ), 'aw_dates_delete_' . $i );
+		$cells[] = array(
+			'date'   => esc_html( aw_team_date_label( $d['date'] ) ),
+			'when'   => esc_html( aw_team_date_when( $d['date'] ) ),
+			'what'   => '<strong>' . esc_html( $d['title'] ) . '</strong>' . ( '' !== $d['note'] ? '<br><span class="description">' . esc_html( $d['note'] ) . '</span>' : '' ),
+			'remove' => '<a href="' . esc_url( $del ) . '" onclick="return confirm(\'Remove this date?\')">Remove</a>',
+		);
+	}
+	aw_core_simple_table( 'dates', array( 'date' => 'Date', 'when' => 'When', 'what' => 'What', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells, array( 'empty' => 'No dates yet.' ) );
+
+	echo '<h2>Add a date</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_dates_add">' . wp_nonce_field( 'aw_dates_add', '_wpnonce', true, false ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_nonce_field() is core's escaped field
+	echo '<p><label>Date <input type="date" name="date" required></label> <label>What <input type="text" name="title" class="regular-text" required></label></p><p><label>Note<br><textarea name="note" rows="3" class="large-text"></textarea></label></p><p><button class="button button-primary">Add</button></p></form></div>';
+}
+
+add_action(
+	'admin_post_aw_dates_add',
+	function () {
+		if ( aw_team_dates_moved() ) {
+			wp_die( 'Dates moved to Plugins → PlanWeb → Calendar; the Dates list is kept unchanged as a backup.', 403 );
+		}
+		if ( ! current_user_can( AW_DATES_CAP ) || ! check_admin_referer( 'aw_dates_add' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$date = sanitize_text_field( wp_unslash( $_POST['date'] ?? '' ) );
+		$name = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
+		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) && '' !== $name ) {
+			$all   = aw_team_dates();
+			$all[] = array( 'date' => $date, 'title' => $name, 'note' => sanitize_textarea_field( wp_unslash( $_POST['note'] ?? '' ) ) );
+			update_option( 'aw_team_dates', $all, false );
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=aw-dates&m=' . substr( $date, 0, 7 ) ) );
+		exit;
+	}
+);
+
+add_action(
+	'admin_post_aw_dates_delete',
+	function () {
+		if ( aw_team_dates_moved() ) {
+			wp_die( 'Dates moved to Plugins → PlanWeb → Calendar; the Dates list is kept unchanged as a backup.', 403 );
+		}
+		$i = intval( $_GET['i'] ?? -1 );
+		if ( ! current_user_can( AW_DATES_CAP ) || ! check_admin_referer( 'aw_dates_delete_' . $i ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$all = aw_team_dates();
+		if ( isset( $all[ $i ] ) && $all[ $i ]['date'] === sanitize_text_field( wp_unslash( $_GET['d'] ?? '' ) ) ) {
+			unset( $all[ $i ] );
+			update_option( 'aw_team_dates', array_values( $all ), false );
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=aw-dates' ) );
+		exit;
+	}
+);
+
+// Dashboard: what is next (dates of the last 3 days and the next 60, up to 6).
+add_action(
+	'wp_dashboard_setup',
+	function () {
+		if ( aw_team_dates_moved() || ! current_user_can( AW_DATES_CAP ) ) {
+			return; // With PlanWeb on, its own box (Next 7 days) replaces this one.
+		}
+		wp_add_dashboard_widget(
+			'aw_team_dates',
+			'Dates',
+			function () {
+				$from = wp_date( 'Y-m-d', time() - 3 * DAY_IN_SECONDS );
+				$to   = wp_date( 'Y-m-d', time() + 60 * DAY_IN_SECONDS );
+				$next = array_slice( array_values( array_filter( aw_team_dates(), fn( $d ) => $d['date'] >= $from && $d['date'] <= $to ) ), 0, 6 );
+				if ( ! $next ) {
+					echo '<p>Nothing in the next 60 days.</p>';
+				} else {
+					// Calendar tiles (owner, 3 Nov 2026: "simple calendar block layout"): month and day on a tile, the
+					// event and how far off it is beside it. Past dates are greyed; today's tile is filled.
+					$today = wp_date( 'Y-m-d' );
+					echo '<style>.aw-dates-list{margin:0;padding:0;list-style:none}.aw-dates-item{display:flex;gap:12px;align-items:center;margin:0 0 10px}.aw-dates-tile{flex:0 0 auto;width:48px;border:1px solid #c3c4c7;border-radius:4px;text-align:center;background:#fff;overflow:hidden}.aw-dates-mon{display:block;background:#2271b1;color:#fff;font-size:11px;font-weight:600;line-height:18px;text-transform:uppercase}.aw-dates-day{display:block;color:#1d2327;font-size:20px;font-weight:600;line-height:30px}.aw-dates-item--past .aw-dates-mon{background:#646970}.aw-dates-item--today .aw-dates-tile{border-color:#2271b1;box-shadow:0 0 0 1px #2271b1}.aw-dates-text{min-width:0;overflow-wrap:anywhere}.aw-dates-when{display:block;color:#50575e}</style>';
+					echo '<ul class="aw-dates-list">';
+					foreach ( $next as $d ) {
+						$t    = strtotime( $d['date'] . ' 12:00:00' );
+						$mod  = $d['date'] < $today ? ' aw-dates-item--past' : ( $d['date'] === $today ? ' aw-dates-item--today' : '' );
+						echo '<li class="aw-dates-item' . esc_attr( $mod ) . '"><span class="aw-dates-tile" aria-hidden="true"><span class="aw-dates-mon">' . esc_html( wp_date( 'M', $t ) ) . '</span><span class="aw-dates-day">' . esc_html( wp_date( 'j', $t ) ) . '</span></span>'
+							. '<span class="aw-dates-text"><span class="screen-reader-text">' . esc_html( aw_team_date_label( $d['date'] ) ) . ': </span><strong>' . esc_html( $d['title'] ) . '</strong><span class="aw-dates-when">' . esc_html( aw_team_date_when( $d['date'] ) ) . '</span></span></li>';
+					}
+					echo '</ul>';
+				}
+				echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-dates' ) ) . '">Open the calendar</a></p>';
+			}
+		);
+	}
+);

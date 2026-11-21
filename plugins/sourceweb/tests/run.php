@@ -1,0 +1,522 @@
+<?php
+/**
+ * Sourcing tests that need no WordPress (owner rule: no local WordPress or MySQL): the shared keyword matcher against
+ * tests/fixtures/match_cases.json (the same file as the workers' tests) and the phase 1 Sources model (sources-model.php)
+ * against the live shapes of 25 Oct 2026 (tests/fixtures/phase1_live_sample.json), and the phase 2 keyword model
+ * (InsightWeb's keyword-model.php, keywords-model.php) against the live lists and keyword records
+ * (tests/fixtures/phase2_live_sample.json), and the Sourcing menu's shape (menu-model.php, admin-menu.php). Run by the
+ * Deploy check.
+ *
+ * Usage: php plugins/aw-sourcing/tests/run.php
+ *
+ * @package aw-sourcing
+ */
+
+if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
+	define( 'ABSPATH', __DIR__ . '/' );
+}
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+// phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
+
+
+
+/**
+ * WordPress's tag stripper, for aw_si_norm() (the only WordPress function the models use).
+ *
+ * @param string $s Text.
+ */
+function wp_strip_all_tags( $s ) {
+	return trim( strip_tags( (string) preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s ) ) );
+}
+require dirname( __DIR__, 2 ) . '/insightweb/includes/keyword-model.php';
+require dirname( __DIR__ ) . '/includes/sources-model.php';
+require dirname( __DIR__ ) . '/includes/keywords-model.php';
+require dirname( __DIR__ ) . '/includes/rules-model.php';
+require dirname( __DIR__ ) . '/includes/retire-model.php';
+require dirname( __DIR__ ) . '/includes/autoresolve-model.php';
+require dirname( __DIR__ ) . '/includes/menu-model.php';
+
+$fails = 0;
+$count = 0;
+
+/**
+ * One check.
+ *
+ * @param bool   $ok   Passed.
+ * @param string $what What was checked.
+ */
+function aw_t( $ok, $what ) {
+	global $fails, $count;
+	++$count;
+	if ( ! $ok ) {
+		++$fails;
+		fwrite( STDERR, "FAIL: $what\n" );
+	}
+}
+
+$fx = __DIR__ . '/fixtures/';
+
+// ---- the shared matcher ----
+$cases = json_decode( file_get_contents( $fx . 'match_cases.json' ), true )['cases'];
+aw_t( count( $cases ) >= 30, 'match_cases.json has its cases' );
+foreach ( $cases as $c ) {
+	aw_t( aw_match_term( $c['text'], $c['term'] ) === $c['word'], 'match ' . json_encode( $c['term'] ) . ' in ' . json_encode( $c['text'] ) . ' (' . $c['note'] . ')' );
+}
+
+// ---- live shapes ----
+$live    = json_decode( file_get_contents( $fx . 'phase1_live_sample.json' ), true );
+$sources = $live['sources'];
+$pubs    = $live['publishers'];
+$log     = $live['relay_log'];
+$relay   = $live['relay_default'];
+
+// Hosts: the four site-limited Google News searches belong to their publisher (owner's decision 2).
+$hosts = array();
+foreach ( $sources as $s ) {
+	$hosts[ $s['id'] ] = aw_src_source_host( $s );
+}
+aw_t( 'livelaw.in' === $hosts['court-news-animals'], 'court-news-animals belongs to livelaw.in' );
+aw_t( 'barandbench.com' === $hosts['court-news-barandbench'], 'court-news-barandbench belongs to barandbench.com' );
+aw_t( 'scobserver.in' === $hosts['court-news-scobserver'], 'court-news-scobserver belongs to scobserver.in' );
+aw_t( 'pib.gov.in' === $hosts['pib-releases'], 'pib-releases belongs to pib.gov.in' );
+aw_t( 'news.google.com' === $hosts['gnews-animal-welfare'] && 'news.google.com' === $hosts['gnews-lab-animal-rules'], 'open-web searches belong to news.google.com' );
+aw_t( 'thehindu.com' === $hosts['the-hindu-environment'] && 'peopleforanimals.substack.com' === $hosts['pfa-substack'] && 'petaindia.com' === $hosts['peta-india'], 'RSS feeds belong to their site' );
+aw_t( 'awbi.gov.in' === $hosts['awbi-circulars'] && 'ccsea.gov.in' === $hosts['ccsea-whats-new'] && 'egazette.gov.in' === $hosts['gazette-of-india'], 'code-read sources belong to their site' );
+aw_t( '' === aw_src_search_site( 'https://news.google.com/rss/search?q=(site:livelaw.in+OR+site:barandbench.com)+dogs' ), 'a search over two sites belongs to no one site' );
+aw_t( 'feed' === aw_src_read_by( $sources[0] ) && 'code' === aw_src_read_by( array( 'kind' => 'awbi' ) ), 'read by feed or code' );
+foreach ( array( 'thehindu.com', 'livelaw.in', 'barandbench.com', 'peopleforanimals.substack.com', 'petaindia.com', 'scobserver.in', 'pib.gov.in' ) as $h ) {
+	aw_t( isset( $pubs[ $h ] ), "$h has a publisher record already (no Neutral record needs adding)" );
+}
+
+// The migration plan: 20 sources stay 20, each gets its host; relay hosts 5 before, the same reach after.
+$plan = aw_src_phase1_plan( $pubs, $sources, $relay, '2026-10-26' );
+aw_t( 20 === count( $plan['sources'] ), 'sources: 20 before, 20 after' );
+aw_t( array_column( $sources, 'id' ) === array_column( $plan['sources'], 'id' ), 'feed ids unchanged, same order' );
+$same = true;
+foreach ( $plan['sources'] as $i => $s ) {
+	$was = $s;
+	unset( $was['host'] );
+	$same = $same && $was === $sources[ $i ] && '' !== (string) $s['host'];
+}
+aw_t( $same, 'each source gains only its host' );
+aw_t( array( 'ccsea.gov.in' ) === $plan['added'], 'one relay-only record added: ccsea.gov.in' );
+aw_t( 'relay' === $plan['pubs']['ccsea.gov.in']['kind'] && 'neutral' === $plan['pubs']['ccsea.gov.in']['status'] && ! empty( $plan['pubs']['ccsea.gov.in']['relay'] ), 'the relay-only record is kind=relay, neutral, relay on' );
+aw_t( 'CCSEA – What\'s New' === $plan['pubs']['ccsea.gov.in']['name'] || '' !== $plan['pubs']['ccsea.gov.in']['name'], 'the relay-only record is named after its source' );
+sort( $plan['flagged'] );
+aw_t( array( 'awbi.gov.in', 'egazette.gov.in', 'peopleforanimals.substack.com', 'zoomtventertainment.com' ) === $plan['flagged'], 'relay switched on for 4 publishers' );
+aw_t( array( 'substack.com' => 'peopleforanimals.substack.com' ) === $plan['mapped'], 'substack.com narrowed to PFA\'s Substack (decision 8)' );
+aw_t( count( $pubs ) + 1 === count( $plan['pubs'] ), 'publishers: one record more' );
+aw_t( 5 === count( $plan['relay_after'] ), 'relay hosts: 5 before, 5 after' );
+aw_t( aw_src_host_in( 'peopleforanimals.substack.com', $plan['relay_after'] ), 'PFA Substack still relayed' );
+aw_t( ! aw_src_host_in( 'someoneelse.substack.com', $plan['relay_after'] ) && ! aw_src_host_in( 'substack.com', $plan['relay_after'] ), 'other Substack sites no longer relayed' );
+aw_t( aw_src_host_in( 'www.zoomtventertainment.com', $plan['relay_after'] ), 'Zoom TV (www.) still relayed' );
+foreach ( $plan['pubs'] as $h => $p ) {
+	if ( ! in_array( $h, array_merge( $plan['flagged'], $plan['added'] ), true ) ) {
+		aw_t( $p === $pubs[ $h ], "publisher $h untouched" );
+	}
+}
+
+// A second run changes nothing (idempotent).
+$again = aw_src_phase1_plan( $plan['pubs'], $plan['sources'], $relay, '2026-10-27' );
+aw_t( $again['pubs'] === $plan['pubs'] && $again['sources'] === $plan['sources'] && ! $again['added'] && ! $again['flagged'], 'running the migration twice changes nothing' );
+
+// Compare (verify): no differences apart from the planned ones, also with ingest writing meanwhile.
+$after = $plan['pubs'];
+++$after['livelaw.in']['count'];
+$after['livelaw.in']['last'] = '2026-10-27';
+$after['newhost.example']    = array( 'status' => 'neutral', 'name' => 'New', 'count' => 1, 'first' => '2026-10-27', 'last' => '2026-10-27' );
+$cmp                         = aw_src_phase1_compare( $pubs, $sources, $after, $plan['sources'], $relay, aw_src_relay_hosts_from_pubs( $after ), $log );
+aw_t( array() === $cmp['diffs'], 'verify: 0 differences (' . implode( '; ', $cmp['diffs'] ) . ')' );
+aw_t( in_array( 'relay-only record added for ccsea.gov.in', $cmp['planned'], true ) && in_array( 'host added to 20 sources', $cmp['planned'], true ), 'verify lists the planned changes' );
+aw_t( (bool) array_filter( $cmp['since'], fn( $x ) => str_starts_with( $x, 'newhost.example' ) ), 'verify reports hosts first seen since the backup apart' );
+$bad = $plan['pubs'];
+unset( $bad['zoomtventertainment.com']['relay'] );
+$bad['thehindu.com']['status'] = 'block';
+$cmp                           = aw_src_phase1_compare( $pubs, $sources, $bad, $plan['sources'], $relay, aw_src_relay_hosts_from_pubs( $bad ), $log );
+aw_t( 3 === count( $cmp['diffs'] ), 'verify finds a lost relay host (also in the log) and a changed status: ' . implode( '; ', $cmp['diffs'] ) );
+$lost = $plan['sources'];
+array_pop( $lost );
+aw_t( (bool) aw_src_phase1_compare( $pubs, $sources, $plan['pubs'], $lost, $relay, $plan['relay_after'], $log )['diffs'], 'verify finds a lost source' );
+
+// Rollback (undo) gives back the records as they were (and keeps what ingest added since).
+$undo = aw_src_phase1_undo( $after, $plan['sources'] );
+aw_t( $undo['sources'] === $sources, 'undo: sources as before' );
+$exp = $pubs;
+$exp['livelaw.in']      = $after['livelaw.in'];
+$exp['newhost.example'] = $after['newhost.example'];
+aw_t( $undo['pubs'] === $exp, 'undo: publishers as before, with ingest\'s changes kept' );
+aw_t( array( 'ccsea.gov.in' ) === $undo['removed'], 'undo removes the relay-only record' );
+
+// sources_v2: the v1 entries unchanged plus host, relay, read_by, check.
+$v1 = array();
+foreach ( $plan['sources'] as $s ) {
+	if ( ! empty( $s['on'] ) ) {
+		unset( $s['on'], $s['filter'] );
+		$v1[] = $s;
+	}
+}
+$v2 = aw_src_sources_v2( $v1, $plan['relay_after'] );
+aw_t( count( $v2 ) === count( $v1 ) && 19 === count( $v2 ), 'sources_v2 has the 19 sources that are on' );
+$ok = true;
+foreach ( $v2 as $i => $e ) {
+	$base = $e;
+	unset( $base['relay'], $base['read_by'], $base['check'] );
+	$ok = $ok && $base === $v1[ $i ];
+}
+aw_t( $ok, 'sources_v2 entries are the v1 entries plus relay, read_by, check' );
+$by = array_column( $v2, null, 'id' );
+aw_t( true === $by['pfa-substack']['relay'] && true === $by['ccsea-whats-new']['relay'] && true === $by['awbi-circulars']['relay'] && false === $by['peta-india']['relay'], 'sources_v2 relay switches' );
+aw_t( 'code' === $by['gazette-of-india']['read_by'] && 'feed' === $by['pib-releases']['read_by'], 'sources_v2 read_by' );
+
+// Change log: old and new only when given; the cap.
+$l = aw_src_log_push( array(), array( 'at' => 'x', 'user' => 'u', 'tab' => 'sources', 'what' => 'w' ) );
+aw_t( ! array_key_exists( 'old', $l[0] ) && ! array_key_exists( 'new', $l[0] ), 'log: no old/new keys when not given' );
+$l = aw_src_log_push( $l, array( 'at' => 'y', 'user' => 'u', 'tab' => 'sources', 'what' => 'w2' ), 'neutral', 'block' );
+aw_t( 'neutral' === $l[0]['old'] && 'block' === $l[0]['new'] && 2 === count( $l ), 'log: old and new kept, newest first' );
+$big = array_fill( 0, 1005, array( 'at' => 'z' ) );
+aw_t( 1000 === count( aw_src_log_push( $big, array( 'at' => 'n' ) ) ), 'log: 1,000 kept' );
+aw_t( 'on' === aw_src_log_value( true ) && 'a, b' === aw_src_log_value( array( 'a', 'b' ) ) && '(none)' === aw_src_log_value( '' ), 'log values in words' );
+
+// Review fixes (25 Oct): a host set by hand before the migration survives a rollback; hosts reached only through the
+// narrowed substack.com entry are a planned change, not a conflict; the relay index; the legacy list.
+$hand                                = $sources;
+$hand[2]['host']                     = 'example.org';
+$plan2                               = aw_src_phase1_plan( $pubs, $hand, $relay, '2026-10-26' );
+aw_t( ! in_array( $hand[2]['id'], $plan2['hosted'], true ) && 19 === count( $plan2['hosted'] ), 'the plan records which sources it gave a host' );
+$undo2 = aw_src_phase1_undo( $plan2['pubs'], $plan2['sources'], $plan2['hosted'] );
+aw_t( $undo2['sources'] === $hand, 'undo keeps a host set by hand before the migration' );
+$log2   = $log;
+$log2[] = array( 'at' => 1792999999, 'host' => 'someoneelse.substack.com', 'path' => '/feed', 'status' => 200, 'bytes' => 10, 'ms' => 5, 'note' => '' );
+$cmp2   = aw_src_phase1_compare( $pubs, $sources, $plan['pubs'], $plan['sources'], $relay, $plan['relay_after'], $log2 );
+aw_t( array() === $cmp2['diffs'] && (bool) array_filter( $cmp2['planned'], fn( $x ) => str_contains( $x, 'someoneelse.substack.com' ) ), 'another Substack in the log is a planned narrowing, not a conflict' );
+$idx = aw_src_relay_index( $log );
+aw_t( count( $idx ) < count( $log ) && aw_src_relay_last( $idx, 'peopleforanimals.substack.com' ) === aw_src_relay_last( $log, 'peopleforanimals.substack.com' ), 'relay index gives the same last result' );
+aw_t( $relay === aw_src_relay_legacy( array(), $relay ) && array( 'a.com' ) === aw_src_relay_legacy( array( 'relay_hosts' => array( 'a.com' ) ), $relay ), 'legacy relay list: stored, else built in' );
+
+// Last relay result: the newest row for the host or a subdomain.
+$last = aw_src_relay_last( $log, 'zoomtventertainment.com' );
+aw_t( is_array( $last ) && 'www.zoomtventertainment.com' === $last['host'], 'last relay result includes subdomains' );
+aw_t( null === aw_src_relay_last( $log, 'thehindu.com' ), 'no relay result for a host never relayed' );
+
+
+// ==== Phase 2: the keyword table ====
+
+// The one role check: Sourcing and Press roles English only; never Include with Exclude; removing always allowed.
+aw_t( array( 1, '' ) === aw_kw_roles_check( 0, AW_KW_ROLE_INCLUDE, 0, 'en' ), 'roles: Include on an English keyword' );
+aw_t( '' !== aw_kw_roles_check( 0, AW_KW_ROLE_INCLUDE, 0, 'hi' )[1] && 0 === aw_kw_roles_check( 0, AW_KW_ROLE_INCLUDE, 0, 'hi' )[0], 'roles: Include refused on a Hindi keyword' );
+aw_t( '' !== aw_kw_roles_check( 0, AW_KW_ROLE_PRESS, 0, 'hinglish' )[1], 'roles: Press refused on a Hinglish keyword' );
+aw_t( array( AW_SI_ROLE_TRACKED, '' ) === aw_kw_roles_check( AW_SI_ROLE_TRACKED, AW_SI_ROLE_TRACKED, 0, 'hi' ), 'roles: other roles still allowed on Hindi' );
+aw_t( array( 0, '' ) === aw_kw_roles_check( AW_KW_ROLE_INCLUDE, 0, AW_KW_ROLE_INCLUDE, 'hi' ), 'roles: a Sourcing role can always be removed' );
+aw_t( '' !== aw_kw_roles_check( AW_KW_ROLE_INCLUDE, AW_KW_ROLE_EXCLUDE, 0, 'en' )[1], 'roles: Include + Exclude refused' );
+aw_t( array( AW_KW_ROLE_EXCLUDE, '' ) === aw_kw_roles_check( AW_KW_ROLE_INCLUDE, AW_KW_ROLE_EXCLUDE, AW_KW_ROLE_INCLUDE, 'en' ), 'roles: Include moved to Exclude' );
+aw_t( 'gaushala' === aw_si_norm( 'Gaushalas' ) && 'dogs' === aw_si_norm( 'dogs' ) && 'gsr 864' === aw_si_norm( 'G.S.R. 864' ) && 'animalwrite' === aw_si_norm( '#animalwrites' ) && 'rabies' === aw_si_norm( 'rabies' ), 'aw_si_norm folds plurals and punctuation' );
+aw_t( 'hi' === aw_si_lang( 'पशु' ) && 'hinglish' === aw_si_lang( 'kutta bite' ) && 'en' === aw_si_lang( 'stray dog' ), 'aw_si_lang' );
+aw_t( array( 'include', 'search' ) === aw_kw_roles_to_slugs( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_SEARCH | AW_SI_ROLE_BRAND ), 'role slugs for the workers' );
+aw_t( array( 'a', 'b*' ) === aw_kw_variants_list( "a\n\n A \nb*\r\n" ), 'other spellings: one per line, no repeats' );
+
+// The migration plan on the live lists and records of 25 Oct 2026.
+$p2   = json_decode( file_get_contents( $fx . 'phase2_live_sample.json' ), true );
+$rows = array();
+foreach ( $p2['rows'] as $r ) {
+	$rows[] = $r + array( 'variants' => array(), 'src' => array(), 'categories' => array(), 'sections' => array(), 'query' => '', 'feed_id' => '', 'search_on' => 1, 'dismissed' => 0 );
+}
+$rel  = $p2['relevance'];
+$cfg  = $p2['sources_option'];
+$plan = aw_kw_phase2_plan( $rel, $cfg, $p2['dismissed'], $rows );
+$L    = $plan['lists'];
+aw_t( 26 === $L['strong']['items'] && 26 === $L['strong']['distinct'] && 26 === $L['strong']['existing'], 'Include: 26 words, all already records' );
+aw_t( 57 === $L['animal']['items'] && 45 === $L['animal']['distinct'] && 12 === count( $L['animal']['merged'] ), 'Animal: 57 words fold to 45 (12 plural pairs)' );
+aw_t( 55 === $L['context']['items'] && 54 === $L['context']['distinct'] && array( 'imports / import' ) === $L['context']['merged'], 'Context: 55 → 54 (imports / import)' );
+aw_t( 29 === $L['exclude']['items'] && 28 === $L['exclude']['distinct'] && 0 === $L['exclude']['existing'], 'Exclude: 29 → 28, none in the table yet' );
+aw_t( 11 === $L['press']['items'] && 10 === $L['press']['distinct'] && array( 'AnimalWrites / #animalwrites' ) === $L['press']['merged'], 'Press: 11 queries → 10 records' );
+aw_t( 2 === $L['lab']['items'], 'two lab words that no category had (G.S.R. 864, Palamur)' );
+aw_t( 164 === $plan['new'] && 73 === $plan['existing'], 'records: 164 new, 73 existing (' . $plan['new'] . ', ' . $plan['existing'] . ')' );
+aw_t( 115 === $plan['cat_maps'], 'category mappings: 113 + the 2 lab words (' . $plan['cat_maps'] . ')' );
+aw_t( array() === $plan['conflicts'], 'no Include + Exclude conflicts' );
+aw_t( 10 === count( $plan['hindi'] ), '10 Hindi spellings lose the Sourcing role (decision 13)' );
+aw_t( array( 'gnews-animal-welfare', 'gnews-animal-cruelty', 'gnews-lab-animal-rules', 'gnews-kw-stray-dogs' ) === array_keys( $plan['searches'] ), 'searches: the 3 open-web feeds and "stray dogs" keep their feed ids' );
+aw_t( 7 === count( $plan['checks'] ) && array( 'include' ) === $plan['checks']['livelaw-top']['roles'] && array( 'animal-experimentation' ) === $plan['checks']['peta-india']['categories'], 'keyword checks: 4 on Include, 3 on Animal Experimentation (decisions 4, 5)' );
+$hindi_ok = true;
+$kept     = true;
+foreach ( $plan['records'] as $r ) {
+	if ( 'en' !== $r['lang'] && ( $r['roles'] & AW_KW_WORKER_ROLES ) ) {
+		$hindi_ok = false;
+	}
+	if ( $r['id'] && ( ( $r['roles_was'] & ~AW_KW_WORKER_ROLES ) & ~$r['roles'] ) ) {
+		$kept = false; // a merge never removes a role (only Sourcing roles from non-English records)
+	}
+}
+aw_t( $hindi_ok, 'no record that is not English has a Sourcing or Press role' );
+aw_t( $kept, 'roles add up: no other role removed' );
+$every = true;
+foreach ( array( 'strong', 'animal', 'context', 'exclude' ) as $k ) {
+	foreach ( $rel[ $k ] as $w ) {
+		$r     = $plan['records'][ aw_si_norm( $w ) ] ?? null;
+		$every = $every && $r && in_array( mb_strtolower( $w ), array_map( 'mb_strtolower', aw_kw_spellings( $r ) ), true );
+	}
+}
+aw_t( $every, 'every original spelling is kept on its record' );
+aw_t( (bool) ( $plan['records']['stray dogs']['roles'] & AW_KW_ROLE_SEARCH ) && 'gnews-kw-stray-dogs' === $plan['records']['stray dogs']['feed_id'], '"stray dogs" is a Search keyword with its feed id' );
+aw_t( array( 'aw_press' ) === $plan['records'][ aw_si_norm( 'lab animal rules' ) ]['sections'], 'the lab search files as press' );
+aw_t( array( 'courts-judgments', 'campaigns-civic-action' ) === $plan['records']['petition']['categories'], '"petition" is mapped to 2 categories' );
+aw_t( 1 === $plan['records'][ aw_si_norm( 'yes' ) ]['dismissed'], 'dismissed suggestions are a column on the record' );
+
+// Ids as the migration gives them; the mirrors equal the old lists apart from the planned Hindi and lab changes.
+$i    = 900000;
+$recs = array();
+foreach ( $plan['records'] as $r ) {
+	$r['id'] = $r['id'] ? $r['id'] : ++$i;
+	$recs[]  = $r;
+}
+$old             = array( 'strong' => $rel['strong'], 'animal' => $rel['animal'], 'context' => $rel['context'], 'exclude' => $rel['exclude'], 'press' => $cfg['press']['queries'], 'categories' => $cfg['categories'] );
+$mir             = aw_kw_mirrors( $recs );
+$mir['categories'] = aw_kw_categories_in_order( $mir['categories'], $cfg['categories'] );
+$cmp             = aw_kw_compare_mirrors( $old, $mir, $plan['hindi'] );
+aw_t( array() === $cmp['diffs'], 'mirrors: the old lists rebuilt exactly (' . implode( '; ', $cmp['diffs'] ) . ')' );
+aw_t( 6 === count( $cmp['planned'] ), 'mirrors: 5 lists lose Hindi words, the lab category gains 2 words' );
+aw_t( $mir['press'] === $cfg['press']['queries'], 'press queries rebuilt in order' );
+aw_t( array_keys( $mir['categories'] ) === array_keys( $cfg['categories'] ), 'categories in the old order' );
+$bad   = $recs;
+$bad[] = array( 'id' => 1, 'label' => 'new word', 'roles' => AW_KW_ROLE_INCLUDE, 'src' => array(), 'categories' => array() );
+aw_t( array( 'new word' ) === array_slice( aw_kw_mirrors( $bad )['strong'], -1 ), 'a keyword given Include later joins the mirror at the end' );
+aw_t( (bool) aw_kw_compare_mirrors( $old, aw_kw_mirrors( $bad ), $plan['hindi'] )['diffs'], 'verify finds an unplanned change in a mirror' );
+
+// The workers' keywords: Sourcing and Press roles, English only; the same searches and press queries as before.
+$pay = aw_kw_payload( $recs, $cfg['sources'] );
+aw_t( 225 === count( $pay ), 'keywords for the workers: 225 (' . count( $pay ) . ')' );
+aw_t( ! array_filter( $pay, fn( $k ) => 'en' !== $k['lang'] || ! $k['roles'] ), 'only English keywords with a Sourcing or Press role' );
+$on   = array_values( array_filter( $cfg['sources'], fn( $s ) => ! empty( $s['on'] ) ) );
+$open = aw_kw_open_searches( $cfg['sources'] );
+$v1   = aw_kw_v1_searches( $on, $rel['strong'] );
+$v2   = aw_kw_v2_searches( array_values( array_filter( $on, fn( $s ) => ! isset( $open[ $s['id'] ] ) ) ), $pay );
+ksort( $v1 );
+ksort( $v2 );
+aw_t( 30 === count( $v1 ) && $v1 === $v2, 'acceptance: the same 30 Google News searches (feed id and query) from the keywords' );
+$q = array();
+foreach ( $pay as $k ) {
+	foreach ( (array) ( $k['queries'] ?? array() ) as $x ) {
+		$q[ mb_strtolower( $x ) ] = $x;
+	}
+}
+aw_t( array_values( $q ) === $cfg['press']['queries'], 'press queries from the keywords: the same 11' );
+$sd = array_values( array_filter( $pay, fn( $k ) => 'animal welfare' === $k['label'] ) )[0];
+aw_t( 'gnews-animal-welfare' === $sd['searches'][0]['feed'] && isset( $sd['searches'][0]['url'] ) && 'gnews-kw-animal-welfare' === $sd['searches'][1]['feed'], 'a former feed comes first, with its URL' );
+
+// The sources after the migration: checks stored; the policy's phase 2 blocks.
+$kwid    = array( 'gnews-animal-welfare' => 11, 'gnews-animal-cruelty' => 12, 'gnews-lab-animal-rules' => 13 );
+$srcs    = aw_kw_apply_to_sources( $cfg['sources'], $plan['checks'], $kwid );
+$blocks  = aw_kw_policy_blocks( $srcs, $recs, array( 'awbi.gov.in' ) );
+$v2ids   = array_column( $blocks['sources_v2'], null, 'id' );
+aw_t( 16 === count( $blocks['sources_v2'] ) && ! isset( $v2ids['gnews-animal-welfare'] ), 'sources_v2: the 16 feeds that are on, without the 3 that are keywords now' );
+aw_t( array( 'include' ) === $v2ids['the-hindu-environment']['check']['roles'] && array( 'animal-experimentation' ) === $v2ids['pfa-substack']['check']['categories'], 'sources_v2 carries the stored keyword checks' );
+aw_t( 'word' === $blocks['match'] && 2 === $blocks['schema']['keywords'] && 225 === count( $blocks['keywords_v2'] ), 'match "word", schema keywords 2' );
+$lab = array_values( array_filter( $blocks['keywords_v2'], fn( $k ) => 'lab animal rules' === $k['label'] ) )[0]['searches'][0];
+aw_t( 'press' === $lab['file_as'] && array( 'animal-experimentation' ) === $lab['check']['categories'], 'the lab search keeps its filing and its check' );
+
+// Running the plan again on the migrated records changes nothing (idempotent).
+$again = aw_kw_phase2_plan( $rel, $cfg, $p2['dismissed'], $recs );
+$same  = 0 === $again['new'];
+foreach ( $again['records'] as $n => $r ) {
+	$same = $same && $r['roles'] === $plan['records'][ $n ]['roles'] && $r['variants'] === $plan['records'][ $n ]['variants'] && $r['categories'] === $plan['records'][ $n ]['categories'];
+}
+aw_t( $same, 'running the migration twice changes nothing' );
+
+// The whole-word report and the * spellings (decision 6).
+$texts = array( 'Sterilisation drive for street dogs', 'Mass sterilisations planned', 'Minister and administers', 'Dogs adopted', 'Petitions filed' );
+$rep   = aw_kw_word_report( array( 'sterilis', 'minister', 'adopt', 'petition', 'पशु' ), $texts );
+aw_t( array( 2, 0, 2, true ) === $rep['sterilis'], 'sterilis: 2 → 0 whole words, 2 with *: * added' );
+aw_t( array( 1, 1, 1, false ) === $rep['minister'] || ! $rep['minister'][3], 'minister: no * when it wins nothing back' );
+aw_t( $rep['petition'][0] === $rep['petition'][1] && ! $rep['petition'][3], 'petition: plural allowed, no change' );
+aw_t( ! $rep['पशु'][3], 'Hindi words get no *' );
+$starred = aw_kw_plan_add_stars( $plan, array( 'sterilis' => array( 78, 0, 78, true ) ) );
+aw_t( in_array( 'sterilis*', $starred['records']['sterili']['variants'] ?? $starred['records'][ aw_si_norm( 'sterilis' ) ]['variants'], true ), 'the * spelling is added to the record' );
+aw_t( aw_kw_legacy_match( 'a fir filed', 'fir' ) && ! aw_kw_legacy_match( 'first', 'fir' ) && aw_kw_legacy_match( 'sterilisation', 'sterilis' ), 'today\'s category matching (short words whole, others substring)' );
+
+// Rollback order (Codex, PR #75): phase 1 waits while a phase 2 migration (complete or partial) is recorded; a phase 2
+// rollback puts the marker back to the phase before it and never raises it.
+aw_t( '' !== aw_src_rollback_refusal( 1, 1, true ), 'rollback --phase=1 refused while a partial phase 2 is recorded' );
+aw_t( '' !== aw_src_rollback_refusal( 1, 2, true ) && '' !== aw_src_rollback_refusal( 1, 2, false ), 'rollback --phase=1 refused while phase 2 is migrated' );
+aw_t( '' === aw_src_rollback_refusal( 1, 1, false ), 'rollback --phase=1 allowed with no phase 2' );
+aw_t( '' === aw_src_rollback_refusal( 2, 1, true ) && '' === aw_src_rollback_refusal( 2, 2, true ) && '' !== aw_src_rollback_refusal( 2, 1, false ), 'rollback --phase=2: a partial or complete record, else refused' );
+aw_t( 1 === aw_src_phase_after_p2_rollback( 1, 2, false ) && 1 === aw_src_phase_after_p2_rollback( 1, 1, true ) && 0 === aw_src_phase_after_p2_rollback( 1, 0, true ), 'the phase marker goes back to the phase before 2, never up' );
+
+// "Delete Search Insights data" resets Search Insights' columns on the records it keeps (Codex, PR #75), never the owner's.
+$reset = aw_si_reset_sql( AW_KW_OWNER_ROLES );
+foreach ( array( 'group_id = id', 'page_type', 'intent', 'priority_override', 'entity = 0', "note = ''", 'impr28 = 0', 'roles = roles & ' . AW_KW_OWNER_ROLES ) as $x ) {
+	aw_t( false !== strpos( $reset, $x ), "Search Insights reset sets $x" );
+}
+foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'search_on', 'dismissed', 'src_note' ) as $x ) {
+	aw_t( ! preg_match( '/(^|, )' . $x . ' =/', $reset ), "Search Insights reset keeps the owner's $x" );
+}
+
+// Spellings added on the Keywords screen are searched too (Codex, #76); a "word*" prefix is not a search.
+$kw_rec = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_INCLUDE, 'label' => 'animal cruelty', 'query' => '', 'feed_id' => '', 'src' => array( 'lists' => array( 'strong' => array( array( 0, 'animal cruelty' ) ) ), 'added' => array( 'pashu kroorta', 'cruel*' ) ) );
+$kw_q   = array_map( fn( $s ) => $s['q'] ?? '', aw_kw_searches( $kw_rec, array() ) );
+aw_t( in_array( 'animal cruelty', $kw_q, true ) && in_array( 'pashu kroorta', $kw_q, true ) && ! in_array( 'cruel*', $kw_q, true ), 'added Include spellings are searched, prefixes are not' );
+$kw_rec['src'] = array( 'lists' => array( 'strong' => array( array( 0, 'animal cruelty' ) ) ) );
+aw_t( 1 === count( aw_kw_searches( $kw_rec, array() ) ), 'migrated spellings only: the search list is unchanged' );
+
+// The old role sync pauses while a phase 2 migration runs or is unfinished (Codex, #75).
+$si_kw = (string) file_get_contents( dirname( __DIR__, 2 ) . '/insightweb/includes/search-insights/keywords.php' );
+$p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+aw_t( false !== strpos( $si_kw, "get_option( 'aw_sourcing_migrating' )" ) && false !== strpos( $si_kw, "get_option( 'aw_sourcing_phase2_record' )" ), 'role sync checks the migration flag and record' );
+aw_t( substr_count( $p2_mg, "'aw_sourcing_migrating'" ) >= 3, 'migration sets the flag and clears it when done or rolled back' );
+
+// Interrupted runs can roll back: the undo record is saved before rows change; switched-off searches stay off (Codex, #75).
+$p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
+$kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-model.php' );
+aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
+
+// A search address with an upper-case scheme is still an address (Codex, #76).
+$kw_up = array( 'search_on' => 1, 'lang' => 'en', 'roles' => AW_KW_ROLE_SEARCH, 'label' => 'x', 'query' => 'HTTPS://news.google.com/rss/search?q=x', 'feed_id' => 'gnews-x', 'src' => array() );
+$kw_us = aw_kw_searches( $kw_up, array() );
+aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// search address is a feed URL' );
+
+// ---- the SourceWeb screens (owner, 25 Oct 2026: Overview first, Plugins screen links, retired addresses gone; 11 Nov
+// 2026: one item under Plugins, the screens as tabs, the same addresses) ----
+$inc   = dirname( __DIR__ ) . '/includes/';
+$menu  = (string) file_get_contents( $inc . 'admin-menu.php' );
+aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
+aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
+aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
+aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb' . \$count, AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', \$icon, '58.3' );" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'SourceWeb: its own top-level menu (core add_menu_page, at 58.3 in the Wugweb block), with the To review count, opening the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( false === strpos( $menu, 'kits_admin_fold_menu' ) && false !== strpos( $menu, "'separator-wugweb'" ), 'the menu needs no Kits Core: no fold helper, its own separator above the block' );
+aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
+foreach ( array( 'admin-menu.php', 'review-queue.php', 'enrichment-admin.php', 'sourcing-policy.php' ) as $f ) {
+	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
+}
+aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
+// Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.
+$tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Press queries', 'categories' => 'Categories', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'relay-log' => 'Relay log', 'settings' => 'Settings', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'log' => 'Change log' );
+aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( aw_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );
+$p3 = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules', 'press' => 'Press queries', 'log' => 'Change log', 'workers' => 'Workers', 'settings' => 'Settings' );
+aw_t( array( 'sources', 'keywords', 'rules', 'press', 'workers', 'log', 'settings' ) === array_keys( aw_src_menu_order( $p3 ) ), 'phase 3: Rules after Keywords; a missing report is skipped' );
+aw_t( 'admin.php?page=aw-sourcing' === aw_src_tab_path( 'sources' ) && 'admin.php?page=aw-sourcing' === aw_src_tab_path(), 'Sources is the page\'s own address' );
+aw_t( 'admin.php?page=aw-sourcing&tab=workers' === aw_src_tab_path( 'workers' ) && 'admin.php?page=aw-sourcing&tab=relay-log' === aw_src_tab_menu_slug( 'relay-log' ), 'a tab\'s address and menu slug' );
+aw_t( AW_SRC_PAGE === aw_src_tab_menu_slug( 'sources' ), 'the Sources item is the page itself' );
+aw_t( array( 'Overview' => 'admin.php?page=aw-sourcing-menu', 'Settings' => 'admin.php?page=aw-sourcing&tab=settings' ) === aw_src_action_link_paths(), 'Plugins screen links: Overview, Settings' );
+aw_t( false !== strpos( $menu, "'plugin_action_links_' . plugin_basename(" ), 'the links are added under SourceWeb on the Plugins screen' );
+// No screen is under Settings or Inbox any more, and no old screen id is used.
+$all_inc = '';
+foreach ( glob( $inc . '*.php' ) as $f ) {
+	$all_inc .= (string) file_get_contents( $f );
+}
+aw_t( false === strpos( $all_inc, 'settings_page_aw-sourcing' ), 'no code uses the old screen id' );
+// No function is declared twice across the plugin's files (the site would stop with a fatal error on every request).
+preg_match_all( '/^function\s+([a-z0-9_]+)\s*\(/mi', $all_inc, $fn_m );
+$fn_dup = array_keys( array_filter( array_count_values( array_map( 'strtolower', $fn_m[1] ) ), fn( $c ) => $c > 1 ) );
+aw_t( array() === $fn_dup, 'every function is declared once (' . implode( ', ', $fn_dup ) . ')' );
+aw_t( false !== strpos( $menu, "\$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings' );" ) && false === strpos( $menu, 'aw_sourcing_own_settings_tab' ), 'Sourcing → Settings is a shell screen (no classic callback)' );
+// One way to draw each screen: no tab registers a classic callback, no ui=classic switch, no screen options.
+aw_t( ! preg_match( '/\$tabs\[[^\]]+\] = array\( \'[^\']+\', /', $all_inc ) && false !== strpos( (string) file_get_contents( $inc . 'rules-admin.php' ), "array( 'rules' => array( 'Rules' ) )" ), 'no tab registers a classic callback' );
+aw_t( false === strpos( $all_inc, "'classic'" ) && false === strpos( $all_inc, 'ui=classic' ) && false === strpos( $all_inc, "'ui' => 'next'" ), 'no ui=classic or ui=next switch' );
+aw_t( false === strpos( $all_inc, 'add_screen_option(' ) && false === strpos( $all_inc, 'set_screen_option_' ), 'no screen options (the shell has its own)' );
+aw_t( array() === array_filter( array( 'review', 'enrichment', 'sources', 'publishers', 'keywords', 'suggestions', 'sections', 'categories', 'ai-keys', 'simple' ), fn( $t ) => file_exists( $inc . 'class-aw-sourcing-' . $t . '-table.php' ) ) && ! file_exists( $inc . 'class-aw-workers-table.php' ), 'the classic list tables are gone' );
+aw_t( false === strpos( $all_inc, "options-general.php?page=aw-sourcing" ) && false === strpos( $all_inc, 'add_options_page' ), 'no link or page under Settings' );
+aw_t( false === strpos( $all_inc, "add_submenu_page( 'aw-inbox'" ) && false === strpos( $all_inc, 'edit.php?post_type=aw_listing&page=aw-enrich-review' ), 'nothing under Inbox or Directory' );
+// Retired addresses (owner, 25 Oct 2026): the old tab redirects and the old POST tab names are gone; the phase switch stays.
+$sites  = (string) file_get_contents( $inc . 'source-sites.php' );
+$policy = (string) file_get_contents( $inc . 'sourcing-policy.php' );
+$rules  = (string) file_get_contents( $inc . 'rules-admin.php' );
+aw_t( false === strpos( $sites, "'publishers'    => array( 'tab' => 'sources' )" ) && false === strpos( $sites, ', 301 )' ), 'no 301 map for the old Publishers, Feeds, Library, Opportunities and Relay tabs' );
+aw_t( false === strpos( $policy, "array( 'publishers' => 'sources', 'library' => 'feeds', 'opportunities' => 'feeds' )" ), 'no translation of old POST tab names' );
+aw_t( false !== strpos( $rules, 'aw_rules_live()' ) && false !== strpos( $rules, "wp_safe_redirect( aw_rules_url( \$tab, array_map( 'rawurlencode', \$q ) ) ); // 302" ), 'the phase 3 switch (old tabs to Rules, 302) stays' );
+aw_t( false !== strpos( $rules, "'admin.php' !== \$pagenow" ), 'the phase 3 switch works on the page\'s new address' );
+
+// ---- PIB release number: one release, several addresses (duplicate check) ----
+aw_t( '2320896' === aw_src_pib_prid( 'https://www.pib.gov.in/PressReleasePage.aspx?PRID=2320896' ), 'PIB PressReleasePage gives its PRID' );
+aw_t( '2320896' === aw_src_pib_prid( 'https://www.pib.gov.in/PressReleaseDetail.aspx?PRID=2320896&reg=17&lang=1' ), 'PIB PressReleaseDetail with reg and lang gives the same PRID' );
+aw_t( '2320896' === aw_src_pib_prid( 'https://pib.gov.in/PressReleaseIframePage.aspx?prid=2320896' ), 'lower-case prid on pib.gov.in' );
+aw_t( '' === aw_src_pib_prid( 'https://example.com/PressReleasePage.aspx?PRID=2320896' ), 'other hosts give no PRID' );
+aw_t( '' === aw_src_pib_prid( 'https://notpib.gov.in/x?PRID=2320896' ), 'a look-alike host gives no PRID' );
+aw_t( '' === aw_src_pib_prid( 'https://www.pib.gov.in/allRel.aspx' ), 'a PIB page without PRID gives none' );
+aw_t( '' === aw_src_pib_prid( 'https://www.pib.gov.in/x.aspx?PRID=12a' ), 'a PRID that is not a number gives none' );
+
+// ---- one page per keyphrase (aw-seo-extras keyphrase-model.php) ----
+require file_exists( dirname( __DIR__, 2 ) . '/rankweb/includes/keyphrase-model.php' ) ? dirname( __DIR__, 2 ) . '/rankweb/includes/keyphrase-model.php' : dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/keyphrase-model.php';
+aw_t( '' === aw_seo_kp_refusal( 'aw_news', array() ), 'a keyphrase nobody has is allowed' );
+aw_t( 0 === strpos( aw_seo_kp_refusal( 'aw_news', array( array( 'type' => 'post', 'id' => 7 ) ) ), 'an evergreen page owns' ), 'News never takes a phrase a guide owns' );
+aw_t( false !== strpos( aw_seo_kp_refusal( 'aw_news', array( array( 'type' => 'aw_news', 'id' => 3 ), array( 'type' => 'aw_legal', 'id' => 9 ) ) ), 'aw_legal 9' ), 'the reason names the evergreen owner before a News item' );
+aw_t( 0 === strpos( aw_seo_kp_refusal( 'post', array( array( 'type' => 'aw_news', 'id' => 3 ) ) ), 'another page owns' ), 'a guide is refused a phrase a News item has' );
+aw_t( '' === aw_seo_kp_refusal( 'post', array( array( 'type' => 'post', 'id' => 0 ) ) ), 'an owner without an ID is ignored' );
+$kp = aw_seo_kp_replay( array( array( 'type' => 'aw_news', 'id' => 1, 'date' => '2026-01-01' ), array( 'type' => 'post', 'id' => 2, 'date' => '2026-05-01' ), array( 'type' => 'aw_news', 'id' => 3, 'date' => '2026-02-01' ) ) );
+aw_t( 2 === $kp['keep']['id'] && 2 === count( $kp['refused'] ), 'the replay keeps the guide over older News items' );
+$kp = aw_seo_kp_replay( array( array( 'type' => 'aw_news', 'id' => 5, 'date' => '2026-03-01' ), array( 'type' => 'aw_news', 'id' => 4, 'date' => '2026-02-01' ) ) );
+aw_t( 4 === $kp['keep']['id'] && 5 === $kp['refused'][0]['id'], 'between News items the oldest keeps it' );
+
+require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
+require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
+require __DIR__ . '/sourceweb-tests.php'; // The new screens on the Kits shell .
+require __DIR__ . '/autoresolve-tests.php'; // The review-queue rules (14 Nov 2026)
+
+// Backup before uninstall deletes (includes/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
+require_once dirname( __DIR__ ) . '/includes/uninstall-backup.php';
+$ub_t = static function ( bool $ok, string $what ): void {
+	aw_t( $ok, $what );
+};
+$ub_h = json_decode( aw_src_backup_header( 'aw-sourcing', '1.2.3', 'https://example.org/', 1763000000, array( 'a_opt', 'b_opt' ), array( 'wp_x' ) ), true );
+$ub_t( 'header' === $ub_h['type'] && 'aw-sourcing' === $ub_h['plugin'] && '1.2.3' === $ub_h['version'] && 'https://example.org/' === $ub_h['site'], 'backup: header names the plugin, version and site' );
+$ub_t( '2025-11-13T02:13:20Z' === $ub_h['time'] && array( 'a_opt', 'b_opt' ) === $ub_h['options'] && array( 'wp_x' ) === $ub_h['tables'], 'backup: header has the time, the options and the tables' );
+$ub_l = aw_src_backup_option_line( 'a_opt', 'a:1:{s:1:"k";s:3:"é/";}', 'yes' );
+$ub_o = json_decode( $ub_l, true );
+$ub_t( "\n" === substr( $ub_l, -1 ) && 1 === substr_count( $ub_l, "\n" ), 'backup: one line per option' );
+$ub_t( 'option' === $ub_o['type'] && 'a:1:{s:1:"k";s:3:"é/";}' === $ub_o['value'] && 'yes' === $ub_o['autoload'] && ! isset( $ub_o['b64'] ), 'backup: option value kept exactly as stored' );
+$ub_o = json_decode( aw_src_backup_option_line( 'bin', "\xff\x00\xfe", 'no' ), true );
+$ub_t( array( 'value' ) === $ub_o['b64'] && "\xff\x00\xfe" === base64_decode( $ub_o['value'] ), 'backup: a value that is not UTF-8 is kept base64-encoded' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- the test reads the value back
+$ub_r = json_decode( aw_src_backup_row_line( 'wp_x', array( 'id' => '7', 'note' => null, 'blob' => "\x80" ) ), true );
+$ub_t( 'row' === $ub_r['type'] && 'wp_x' === $ub_r['table'] && '7' === $ub_r['row']['id'] && null === $ub_r['row']['note'] && array( 'blob' ) === $ub_r['b64'], 'backup: row line keeps every column, null and binary' );
+$ub_t( '{}' === substr( trim( aw_src_backup_row_line( 'wp_x', array() ) ), -3, 2 ), 'backup: an empty row is an object' );
+$ub_t( 500 === AW_SRC_BACKUP_BATCH, 'backup: tables are read 500 rows at a time' );
+$ub_calls = array();
+$ub_seen  = 0;
+$ub_fetch = static function ( int $offset, int $limit ) use ( &$ub_calls ) {
+	$ub_calls[] = array( $offset, $limit );
+	return array_fill( 0, max( 0, min( $limit, 1203 - $offset ) ), array( 'id' => '1' ) );
+};
+$ub_n     = aw_src_backup_rows(
+	$ub_fetch,
+	static function ( array $row ) use ( &$ub_seen ): bool {
+		++$ub_seen;
+		return true;
+	}
+);
+$ub_t( 1203 === $ub_n && 1203 === $ub_seen && array( array( 0, 500 ), array( 500, 500 ), array( 1000, 500 ) ) === $ub_calls, 'backup: 1203 rows in batches of 500' );
+$ub_calls = array();
+$ub_n     = aw_src_backup_rows( static fn( int $o, int $l ) => $o < 1000 ? array_fill( 0, $l, array() ) : array(), static fn( array $r ): bool => true );
+$ub_t( 1000 === $ub_n, 'backup: an exact multiple of 500 ends on the empty batch' );
+$ub_t( false === aw_src_backup_rows( static fn( int $o, int $l ) => null, static fn( array $r ): bool => true ), 'backup: a read error stops the backup' );
+$ub_w = 0;
+$ub_n = aw_src_backup_rows(
+	static fn( int $o, int $l ) => array_fill( 0, $l, array() ),
+	static function ( array $r ) use ( &$ub_w ): bool {
+		return ++$ub_w < 3;
+	}
+);
+$ub_t( false === $ub_n && 3 === $ub_w, 'backup: a write error stops the backup at once' );
+$ub_t( 1 === preg_match( '/^aw-sourcing-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', aw_src_backup_name( 'aw-sourcing', 1763000000 ) ) && 'aw-sourcing-uninstall-20251113-021320.jsonl.gz' === aw_src_backup_name( 'aw-sourcing', 1763000000 ), 'backup: file name' );
+$ub_dir = sys_get_temp_dir() . '/aw-sourcing-ub-' . getmypid();
+@mkdir( $ub_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a temporary folder for the test
+file_put_contents( $ub_dir . '/index.php', 'kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
+$ub_t( aw_src_backup_protect( $ub_dir ) && false !== strpos( (string) file_get_contents( $ub_dir . '/.htaccess' ), 'Require all denied' ) && 'kept' === file_get_contents( $ub_dir . '/index.php' ), 'backup: folder guarded by .htaccess and index.php, an existing file kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
+$ub_gz = gzopen( $ub_dir . '/t.jsonl.gz', 'wb6' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
+gzwrite( $ub_gz, aw_src_backup_header( 'aw-sourcing', '1', 's', 0, array( 'a' ), array() ) . aw_src_backup_option_line( 'a', 'v', 'yes' ) );
+gzclose( $ub_gz );
+$ub_lines = gzfile( $ub_dir . '/t.jsonl.gz' );
+$ub_t( 2 === count( $ub_lines ) && 'header' === json_decode( $ub_lines[0], true )['type'] && 'v' === json_decode( $ub_lines[1], true )['value'], 'backup: gzip JSON lines read back' );
+foreach ( array( 'index.php', '.htaccess', 't.jsonl.gz' ) as $ub_f ) {
+	unlink( $ub_dir . '/' . $ub_f ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
+}
+rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
+$ub_dir = sys_get_temp_dir() . '/aw-sourcing-ub-ro-' . getmypid();
+@mkdir( $ub_dir, 0555 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a read-only folder for the test
+$ub_t( 0 === getmyuid() || ! @aw_src_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
+rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
+
+echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
+exit( $fails ? 1 : 0 );

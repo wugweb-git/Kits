@@ -1,0 +1,380 @@
+<?php
+/**
+ * WP-CLI, one root: wp aw-si status | dry-run | run | fetch <source> [--dry] | links <seed|add> | rising [top] | crawl [--dry-run]
+ * | rollup | keyphrase-guard | delete-data --yes. The older `wp aw-si-rising` and `wp aw-si-crawl` still work (aliases).
+ *
+ * `dry-run` writes nothing: it reads the seed, Rank Math, Sourcing and one day of Search Console (through Site Kit, as
+ * the module's owner) and reports what phase 1 would store.
+ *
+ * @package insightweb
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	WP_CLI::add_command(
+		'aw-si',
+		new class() {
+
+			/**
+			 * Run log per source and table sizes.
+			 */
+			public function status() {
+				global $wpdb;
+				foreach ( aw_si_sources() as $src => $s ) {
+					$r = aw_si_runs()[ $src ] ?? array();
+					WP_CLI::log( sprintf( '%-40s ok %s%s', $s['label'], ! empty( $r['ok'] ) ? wp_date( 'Y-m-d H:i', (int) $r['ok'] ) : 'never', ! empty( $r['error'] ) ? ' | error: ' . $r['error']['message'] : '' ) );
+				}
+				if ( aw_si_ready() ) {
+					foreach ( array( 'keywords', 'kw_pages', 'obs', 'rising', 'links' ) as $t ) {
+						WP_CLI::log( sprintf( '%-10s %s rows', $t, number_format( (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', aw_si_table( $t ) ) ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+					}
+				} else {
+					WP_CLI::log( 'Tables not created yet.' );
+				}
+			}
+
+			/**
+			 * Read-only rehearsal: what phase 1 would store today. Writes nothing.
+			 *
+			 * [--day=<Y-m-d>]
+			 * : Search Console day to read. Default: 3 days ago (final figures).
+			 *
+			 * @subcommand dry-run
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function dry_run( $args, $assoc ) {
+				$day = (string) ( $assoc['day'] ?? ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-3 days' )->format( 'Y-m-d' ) );
+				$rep = aw_si_dry_report( $day );
+				if ( ! empty( $rep['error'] ) ) {
+					WP_CLI::warning( 'Search Console: ' . $rep['error'] );
+				}
+				unset( $rep['error'] );
+				foreach ( $rep as $section => $data ) {
+					WP_CLI::log( '== ' . $section );
+					WP_CLI::log( (string) wp_json_encode( $data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+				}
+				WP_CLI::success( 'Dry run done. Nothing was written.' );
+			}
+
+			/**
+			 * The daily run now: tables, seed (once), Search Console, roles, priorities.
+			 */
+			public function run() {
+				$out = aw_si_daily( true );
+				WP_CLI::log( wp_json_encode( array_diff_key( $out, array( 'gsc' => 1 ) ) ) );
+				WP_CLI::log( 'gsc: ' . wp_json_encode( array_intersect_key( (array) $out['gsc'], array_flip( array( 'rows', 'truncated', 'split', 'error' ) ) ) ) . ' days ' . implode( ', ', array_keys( (array) ( $out['gsc']['days'] ?? array() ) ) ) );
+				$this->status();
+			}
+
+			/**
+			 * One source now: ga4 (last 3 days, or --day), psi (one key page, mobile and desktop, with --dry; the
+			 * full weekly queue without it), clarity (2 of its 10 daily calls), bing (Bing Webmaster links and figures),
+			 * gsc-types (Discover and Google News, the last 3 days), inspect (today's URL Inspection queue; --dry lists
+			 * the next 20 pages), bing-crawl (crawl figures), bing-kw (search volumes) or alerts (Google Alerts feeds).
+			 *
+			 * <source>
+			 * : ga4, psi, clarity, bing, gsc-types, inspect, bing-crawl, bing-kw or alerts.
+			 *
+			 * [--day=<Y-m-d>]
+			 * : GA4 only: one day.
+			 *
+			 * [--dry]
+			 * : Fetch and report; write nothing.
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function fetch( $args, $assoc ) {
+				$dry = ! empty( $assoc['dry'] );
+				$src = (string) ( $args[0] ?? '' );
+				if ( 'ga4' === $src ) {
+					$out = aw_si_ga4_run(
+						array_filter(
+							array(
+								'dry'  => $dry,
+								'days' => isset( $assoc['day'] ) ? array( (string) $assoc['day'] ) : null,
+							)
+						)
+					);
+				} elseif ( 'psi' === $src ) {
+					$path = aw_si_psi_pages()[0] ?? '/';
+					if ( $dry ) {
+						$out = array(
+							'pages'            => aw_si_psi_pages(),
+							$path . ' mobile'  => aw_si_psi_call( $path, 'mobile' ),
+							$path . ' desktop' => aw_si_psi_call( $path, 'desktop' ),
+						);
+					} else {
+						aw_si_psi_start(); // The first calls now; WP-cron runs the rest every five minutes.
+						$out = get_option( AW_SI_PSI_QUEUE );
+					}
+				} elseif ( 'clarity' === $src ) {
+					$out = aw_si_clarity_run( array( 'dry' => $dry ) );
+				} elseif ( 'bing' === $src ) {
+					if ( ! aw_si_bing_on() ) {
+						WP_CLI::error( 'Bing Webmaster is not set up: add its API key under InsightWeb → Settings → Keys.' );
+					}
+					$out = aw_si_bing_run( array( 'dry' => $dry ) );
+				} elseif ( 'gsc-types' === $src ) {
+					$out = aw_si_gsc_types_run( $dry );
+				} elseif ( 'inspect' === $src ) {
+					if ( $dry ) {
+						$out = array( 'next' => aw_si_inspect_todo( 20 ) );
+					} else {
+						aw_si_inspect_start(); // The first pages now; WP-cron runs the rest every five minutes.
+						$out = get_option( AW_SI_INSPECT_QUEUE );
+						unset( $out['todo'] );
+					}
+				} elseif ( 'bing-crawl' === $src ) {
+					$out = aw_si_bing_crawl_run( $dry );
+				} elseif ( 'bing-kw' === $src ) {
+					$out = aw_si_bing_kw_run( $dry );
+				} elseif ( 'alerts' === $src ) {
+					$out = aw_si_alerts_run( $dry );
+				} else {
+					WP_CLI::error( 'Source must be ga4, psi, clarity, bing, gsc-types, inspect, bing-crawl, bing-kw or alerts.' );
+				}
+				foreach ( (array) $out as $k => $v ) {
+					if ( is_wp_error( $v ) ) {
+						$out[ $k ] = 'error: ' . $v->get_error_message();
+					}
+				}
+				WP_CLI::log( (string) wp_json_encode( $out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+				if ( $dry ) {
+					WP_CLI::success( 'Dry run done. Nothing was written.' );
+				}
+			}
+
+			/**
+			 * Links tab rows: `seed` adds the 25–26 Oct lists (once; --force runs it again, which only moves dates);
+			 * `add` adds one link, e.g. from the monthly Search Console Links read.
+			 *
+			 * <what>
+			 * : seed or add.
+			 *
+			 * [--from=<url>]
+			 * : add: the linking page.
+			 *
+			 * [--domain=<domain>]
+			 * : add: the linking site, when there is no page address (else taken from --from).
+			 *
+			 * [--to=<url>]
+			 * : add: our page it links to (a full URL or a site path).
+			 *
+			 * [--anchor=<text>]
+			 * : add: the anchor text.
+			 *
+			 * [--source=<text>]
+			 * : add: where the link was found. Default: "Search Console Links" (the read date is --seen).
+			 *
+			 * [--type=<type>]
+			 * : add: press, organisation, social, directory, copy or spam (spam is hidden). Default: spam for link-selling
+			 * anchors, else unsorted.
+			 *
+			 * [--seen=<Y-m-d>]
+			 * : add: the date seen. Default: today.
+			 *
+			 * [--links=<n>]
+			 * : add: how many links. Default: 1.
+			 *
+			 * [--note=<text>]
+			 * : add: a note.
+			 *
+			 * [--force]
+			 * : seed: run again.
+			 *
+			 * ## EXAMPLES
+			 *
+			 *     wp aw-si links seed
+			 *     wp aw-si links add --from=https://example.org/post/ --to=/campaigns/lab-animals-rules-2026/ --anchor="Animal Writes" --type=press
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function links( $args, $assoc ) {
+				aw_si_install();
+				$what = (string) ( $args[0] ?? '' );
+				if ( 'seed' === $what ) {
+					$out = aw_si_links_seed( ! empty( $assoc['force'] ) );
+					WP_CLI::log( $out ? (string) wp_json_encode( $out ) : 'Already seeded (add --force to run again).' );
+					return;
+				}
+				if ( 'add' !== $what ) {
+					WP_CLI::error( 'Say seed or add.' );
+				}
+				$to = (string) ( $assoc['to'] ?? '' );
+				if ( '' !== $to && 0 === strpos( $to, '/' ) ) {
+					$to = home_url( $to );
+				}
+				if ( '' === $to || ( empty( $assoc['from'] ) && empty( $assoc['domain'] ) ) ) {
+					WP_CLI::error( 'Give --to and --from (or --domain).' );
+				}
+				$type = (string) ( $assoc['type'] ?? '' );
+				if ( '' !== $type && ! isset( aw_si_link_types()[ $type ] ) ) {
+					WP_CLI::error( 'Type must be one of: ' . implode( ', ', array_keys( aw_si_link_types() ) ) . '.' );
+				}
+				$anchor = (string) ( $assoc['anchor'] ?? '' );
+				$seen   = (string) ( $assoc['seen'] ?? wp_date( 'Y-m-d' ) );
+				if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $seen ) ) {
+					WP_CLI::error( '--seen must be Y-m-d.' );
+				}
+				$n = aw_si_link_put(
+					array(
+						'from_url'   => (string) ( $assoc['from'] ?? '' ),
+						'domain'     => (string) ( $assoc['domain'] ?? '' ),
+						'linked_url' => $to,
+						'anchor'     => $anchor,
+						'links'      => (int) ( $assoc['links'] ?? 1 ),
+						'first_seen' => $seen,
+						'last_seen'  => $seen,
+						'source'     => (string) ( $assoc['source'] ?? 'Search Console Links' ), // The read date is --seen (last_seen).
+						'type'       => '' !== $type ? $type : aw_si_link_auto_type( $anchor ),
+						'note'       => (string) ( $assoc['note'] ?? '' ),
+					)
+				);
+				if ( $n < 0 ) {
+					WP_CLI::error( 'Not saved (check --from, --domain and --to).' );
+				}
+				WP_CLI::success( 1 === $n ? 'Link added.' : 'Link was there already: dates updated.' );
+			}
+
+			/**
+			 * Rising terms of the last 7 days, fastest growing first.
+			 *
+			 * [--limit=<n>]
+			 * : Terms. Default: 10.
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function rising( $args, $assoc ) {
+				WP_CLI\Utils\format_items( 'table', aw_si_rising_top( (int) ( $assoc['limit'] ?? 10 ) ), array( 'term', 'sources', 'growth', 'first_seen', 'page', 'action', 'status' ) );
+			}
+
+			/**
+			 * Crawler access from this server: every agent on every sample page.
+			 *
+			 * [--dry-run]
+			 * : Check and print only; store nothing, send no email.
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function crawl( $args, $assoc ) {
+				$run = aw_si_crawl_run( isset( $assoc['dry-run'] ) );
+				WP_CLI\Utils\format_items( 'table', $run['checks'], array( 'agent', 'kind', 'code', 'ms', 'result' ) );
+				$problems = aw_si_crawl_problems( $run );
+				WP_CLI::log( $problems ? 'Problems: ' . implode( '; ', $problems ) : 'Every agent got every page.' );
+			}
+
+			/**
+			 * The monthly snapshot to standard output: the CSV, or the rebuilt keyword map.
+			 *
+			 * <what>
+			 * : csv or map.
+			 *
+			 * ## EXAMPLES
+			 *
+			 *     wp aw-si snapshot csv > docs/seo/search-insights-2026-11.csv
+			 *     wp aw-si snapshot map > docs/seo/keyword-map.md
+			 *
+			 * @param array $args Positional arguments.
+			 */
+			public function snapshot( $args ) {
+				$what = (string) ( $args[0] ?? '' );
+				if ( ! in_array( $what, array( 'csv', 'map' ), true ) ) {
+					WP_CLI::error( 'Say csv or map.' );
+				}
+				echo 'csv' === $what ? aw_si_snapshot_csv() : aw_si_keyword_map_md(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- command-line output.
+			}
+
+			/**
+			 * The 90-day rollup now.
+			 *
+			 * [--dry]
+			 * : Count only.
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function rollup( $args, $assoc ) {
+				WP_CLI::log( wp_json_encode( aw_si_rollup( ! empty( $assoc['dry'] ) ) ) );
+			}
+
+			/**
+			 * Read-only: replays the one-page-per-keyphrase rule (focus-keywords.php) over today's conflicts. For each keyword
+			 * with status conflict, the pages that own it: the first (an evergreen page, else the oldest) keeps it and every
+			 * later one would have been refused by /aw/v1/seo-focus. Writes nothing.
+			 *
+			 * [--list]
+			 * : One line per keyword: the page kept and the pages refused.
+			 *
+			 * @subcommand keyphrase-guard
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function keyphrase_guard( $args, $assoc ) {
+				global $wpdb;
+				if ( ! aw_si_ready() || ! function_exists( 'aw_seo_kp_replay' ) ) {
+					WP_CLI::error( 'Search Insights tables or the focus-keyword module are not loaded.' );
+				}
+				$k    = aw_si_table( 'keywords' );
+				$pg   = aw_si_table( 'kw_pages' );
+				$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.impr28, l.obj_type, l.obj_id, p.post_type, p.post_date FROM %i k JOIN %i l ON l.kw_id = k.id AND l.role = 'owner' AND l.obj_type IN ('post', 'term') AND l.obj_id > 0 LEFT JOIN {$wpdb->posts} p ON l.obj_type = 'post' AND p.ID = l.obj_id WHERE k.status = 'conflict' ORDER BY k.impr28 DESC, k.id", $k, $pg ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names only.
+				$by   = array();
+				foreach ( $rows as $r ) {
+					$by[ (int) $r->id ]['label']   = (string) $r->label;
+					$by[ (int) $r->id ]['impr']    = (int) $r->impr28;
+					$by[ (int) $r->id ]['pages'][] = array(
+						'type' => 'term' === $r->obj_type ? 'term' : (string) $r->post_type,
+						'id'   => (int) $r->obj_id,
+						'date' => 'term' === $r->obj_type ? '0000' : (string) $r->post_date,
+					);
+				}
+				$all       = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'conflict'", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$prevented = 0;
+				$refused   = 0;
+				$news      = 0;
+				foreach ( $by as $kw ) {
+					if ( count( $kw['pages'] ) < 2 ) {
+						continue; // one owner: a conflict only because Google shows another page; the guard cannot prevent that
+					}
+					$r = aw_seo_kp_replay( $kw['pages'] );
+					++$prevented;
+					$refused += count( $r['refused'] );
+					$news    += count( array_filter( $r['refused'], fn( $x ) => 'aw_news' === $x['type'] ) );
+					if ( ! empty( $assoc['list'] ) ) {
+						WP_CLI::log( sprintf( '%s (%d impr): keep %s %d; refuse %s', $kw['label'], $kw['impr'], $r['keep']['type'], $r['keep']['id'], implode( ', ', array_map( fn( $x ) => $x['type'] . ' ' . $x['id'], $r['refused'] ) ) ) );
+					}
+				}
+				WP_CLI::log( sprintf( 'Conflict keywords: %d. With two or more owner pages (the guard would have prevented them): %d. Keyphrase writes it would have refused: %d (News items: %d). The other %d are conflicts because Google shows a page that does not own the keyword.', $all, $prevented, $refused, $news, $all - $prevented ) );
+				WP_CLI::success( 'Dry run. Nothing was written.' );
+			}
+
+			/**
+			 * Drop the Search Insights tables and options.
+			 *
+			 * [--yes]
+			 * : Required: confirms the deletion.
+			 *
+			 * @subcommand delete-data
+			 *
+			 * @param array $args  Positional arguments.
+			 * @param array $assoc Named arguments.
+			 */
+			public function delete_data( $args, $assoc ) {
+				if ( empty( $assoc['yes'] ) ) {
+					WP_CLI::error( 'Add --yes to delete the Search Insights data.' );
+				}
+				aw_si_drop_all();
+				WP_CLI::success( 'Search Insights data deleted.' );
+			}
+		}
+	);
+}
