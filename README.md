@@ -1,36 +1,51 @@
 
-  # wugweb kits
+# Wugweb Monorepo — Kits Theme, Companion Plugins & Design System
 
-  This is a code bundle for wugweb kits. The original project is available at https://www.figma.com/design/ttIty8LUIsRsU4AJFlX8To/wugweb-kits.
+The canonical monorepo for the Wugweb ecosystem: WordPress theme, modular companion plugins, design system tokens, shared packages, skills, agents, and release tooling.
 
-  ## Running the code
+Detailed Architecture & Delivery Specification: [`docs/architecture/monorepo-delivery-architecture.md`](docs/architecture/monorepo-delivery-architecture.md)
 
-  Run `npm i` to install the dependencies.
+---
 
-  Run `npm run dev` to start the development server.
+## 1. Monorepo Structure
 
-## Figma export post-processing
+```text
+wugweb/ (https://github.com/wugweb-git/kits)
+├── plugins/              # Independently buildable WordPress plugins (Kits Core, RankWeb, MailWeb, etc.)
+├── themes/               # Kits by Wugweb universal FSE block theme
+├── packages/             # Shared contracts, Token Foundry, and namespaced plugin shells
+├── skills/               # Reusable task skills (WordPress, Design System, Testing, etc.)
+├── agents/               # Role-specific agent instructions
+├── tools/                # Build, package, release, and Playground preview scripts
+├── docs/                 # Canonical architecture, ADRs, and product specifications
+├── marketplace/          # WordPress.org and commercial distribution assets
+└── tests/                # Shared, integration, and contract tests
+```
 
-If code is regenerated from Figma or an export tool, normalize imports before committing:
+---
 
-1. Export the components into `src/` as usual.
-2. Rewrite version-pinned package specifiers to bare npm package names, for example `sonner@2.0.3` → `sonner` and `@radix-ui/react-dialog@1.1.6` → `@radix-ui/react-dialog`.
-3. Keep Figma asset specifiers only where the repo still depends on `figma:asset/...` aliases.
-4. Run `npm run check:imports` to confirm no `@<version>` package imports remain in checked source files.
+## 2. Core Architectural Principles
 
-If your exporter supports import mapping, configure it to emit bare package names directly so this rewrite step is unnecessary for future exports.
+1. **One Monorepo ≠ One Product**: Each product retains its own independent code boundary, namespace, version, changelog, tests, and release artifact (`dist/*.zip`).
+2. **Bundled-Code Model**: Shared code is bundled into each public plugin edition at build time. Public plugins never depend at runtime on sibling plugins.
+3. **Namespaced Shell Per Plugin**: Each plugin bundles its own namespaced admin shell (`rankweb-shell`, `mailweb-shell`, etc.). No global handles.
+4. **External Services Registry**: Enforces centralized outbound network requests (`register_external_service` + `remote_request`) with mandatory `== External services ==` disclosures.
+5. **Zero Raw Values**: All styling consumes `--kit-*` design tokens compiling from `tokens.json`.
 
+---
 
-## Safe Consolidation Policy
+## 3. Legacy Code & Safe Consolidation
 
-Before removing any component source, run `node scripts/audit-component-duplicates.mjs` and review `reports/duplicate-audit.md`.
-Only exact duplicates should be deleted immediately; non-identical overlaps require migration and state-parity checks first.
-For full cross-tree parity (states, style variables, and references), run `node scripts/audit-full-system-parity.mjs` and review `reports/full-system-parity-audit.md`.
+- The original React/Vite application code and `Wugweb_Brand_OS_Foundation/` remain preserved.
+- Before removing any legacy component source, run `node scripts/audit-component-duplicates.mjs` and review `reports/duplicate-audit.md`.
+- For full cross-tree parity checks, run `node scripts/audit-full-system-parity.mjs` and review `reports/full-system-parity-audit.md`.
 
+---
 
-## Design system source of truth
+## 4. Design System Source of Truth
 
-- Tokens: `design-system/tokens/*.json`
+- Tokens: `themes/kits-by-wugweb/tokens/tokens.json` & `design-system/tokens/*.json`
+- Token Compiler: `themes/kits-by-wugweb/tools/build-tokens.py`
 - Token docs: `design-system/docs/tokens.md`
 - Component docs: `design-system/docs/components.md`
 - Usage guidelines: `design-system/docs/usage-guidelines.md`
