@@ -138,7 +138,7 @@
       "use": "brand moments: the primary shape in the brand colour",
       "kit": "kit-btn--brand",
       "block": "Brand (old: is-style-kits-primary)",
-      "colour": "--kit-btn-brand-bg/-fg: the site's brand (yellow, ink text), or the campaign's own colour inside a campaign palette (.aw-camp--<name> sets the pair)",
+      "colour": "--kit-btn-brand-bg/-fg: the site's brand (yellow, ink text), or the campaign's own colour inside a campaign palette",
       "light": "brand fill; hover = brand mixed with ink (--kit-btn-hover-mix)",
       "dark": "the same"
      }
@@ -1842,8 +1842,7 @@
     "connectors: past solid 2px in the mark; present solid 4px; ongoing 4px with a band; future dashed; undated dotted; centred on the card, never over cards or badges",
     "phone (under 768): one column, card beside its words, a continuous vertical connector",
     "tablet (768-1199): two per row, a connector only between the two steps of a row",
-    "desktop (1200+): one row, a connector between every step",
-    "set by the server: ol.aw-camp-dates (aw_camp_dates_timeline), step lists written as <li><strong>date or word</strong> words</li> (aw_steps_dateline), the Home hero steps and story band (home.php)"
+    "desktop (1200+): one row, a connector between every step"
    ],
    "tokens": [
     "kit-space-7",
@@ -2263,11 +2262,7 @@
    "classes": [
     "kit-with-sidebar",
     "kit-main",
-    "kit-sidebar",
-    "aw-keyfacts",
-    "aw-ad-slot",
-    "aw-ad-label",
-    "aw-ad-box"
+    "kit-sidebar"
    ],
    "states": [
     "sidebar empty or only an empty/waiting/unfilled ad: one column, text centred at the reading width",
@@ -2414,14 +2409,7 @@
    "name": "Dashboard stat cards and bar chart (admin)",
    "type": "component",
    "status": "live",
-   "classes": [
-    "aw-dash-cards",
-    "aw-dash-card",
-    "aw-dash-label",
-    "aw-dash-value",
-    "aw-dash-delta",
-    "aw-dash-chart"
-   ],
+   "classes": [],
    "states": [
     "delta up (▲, green)",
     "delta down (▼, red)",
