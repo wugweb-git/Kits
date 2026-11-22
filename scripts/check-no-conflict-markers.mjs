@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const root = process.cwd();
-const skipDirs = new Set(['.git', 'node_modules', 'build']);
+const skipDirs = new Set(['.git', 'node_modules', 'build', 'vendor', 'dist']);
 const conflictPattern = /^(<<<<<<<|=======|>>>>>>>)/m;
 const offenders = [];
 

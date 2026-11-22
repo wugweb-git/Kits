@@ -14,6 +14,10 @@ The foundational companion plugin owns:
 
 ## Open Tasks & Enhancements
 
+0. **Standalone Test Hardening & CI Integration (23 Nov 2026)**:
+   - ✅ Wrapped external site-layer `admin.php` require in `tests/admin-layer-tests.php` with `file_exists()` guard to ensure tests execute cleanly in decoupled monorepo environments without crashing.
+   - ✅ Integrated `plugins/kits-core/tests/*-tests.php` into `.github/workflows/ci-suite.yml` path-based PHP matrix.
+
 1. **4-Layer Theme.json Injection**:
    - Verify tenant brand tokens injected into Layer 3 (`wp_theme_json_data_theme`) so Site Editor "Reset styles" restores tenant brand defaults, not generic core defaults.
    - Cache merged theme data in transients (`kits_brand_theme_data`) with automatic invalidation on option save.

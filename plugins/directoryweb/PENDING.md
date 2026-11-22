@@ -31,6 +31,8 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
 4. **Directory Performance & Caching**:
    - ✅ Cache expensive facet aggregation counts in transients (`directoryweb_facet_districts`, `directoryweb_facet_types`, `directoryweb_facet_services`) with automatic invalidation on `aw_place_counts_reset` and listing updates.
    - ✅ Ensure zero slow MySQL queries on large directory datasets (7,700+ entries).
+   - ✅ Wrapped external site-layer `content/meta.php` require in `tests/listing-meta-tests.php` with `file_exists()` guard to ensure tests pass in decoupled monorepo environments (23 Nov 2026).
+   - ✅ Integrated DirectoryWeb test suite into `.github/workflows/ci-suite.yml` path-based PHP matrix (23 Nov 2026).
 
 5. **Phase 2 blocks (plan §1.6)** — ✅ built and loaded 22 Nov 2026:
    - ✅ `directoryweb/fields` (`includes/directoryweb-fields.php`)

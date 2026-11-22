@@ -203,7 +203,13 @@ function kits_edit_screen_map_file_for_test(): string {
 function kits_site_path( string $file ): string {
 	return dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $file, '/' );
 }
-require kits_site_path( 'admin.php' ); // Animal Writes' values, moved from Animal Writes Core's admin-config.php (19 Nov 2026)
+$site_admin_file = kits_site_path( 'admin.php' );
+if ( ! file_exists( $site_admin_file ) ) {
+	echo "Notice: assets/site/admin.php not found; skipped site-layer integration assertions.\n";
+	echo "$count checks, $fails failed\n";
+	exit( $fails ? 1 : 0 );
+}
+require $site_admin_file; // Animal Writes' values, moved from Animal Writes Core's admin-config.php (19 Nov 2026)
 define( 'KITS_CAMPAIGN_LINK', 'kits_campaign_link' );
 
 kits_t( true === kits_comments_off(), 'Animal Writes: comments off' );

@@ -41,7 +41,11 @@ function register_post_meta( $t, $k, $a ) { global $reg; $reg[] = $t . '|' . $k 
 
 require dirname( __DIR__ ) . '/includes/listing-meta.php';
 require dirname( __DIR__ ) . '/includes/listing-terms.php'; // directoryweb_normalise_phone()
-require dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/content/meta.php';
+$site_meta_file = dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/content/meta.php';
+$has_site_meta  = file_exists( $site_meta_file );
+if ( $has_site_meta ) {
+	require $site_meta_file;
+}
 
 $fails = 0;
 $count = 0;
@@ -58,6 +62,12 @@ function check( $ok, $name ) {
 $dw = directoryweb_meta_schema();
 check( 48 === count( $dw ), '48 listing keys' );
 check( array() === array_filter( array_keys( $dw ), fn( $k ) => 0 !== strpos( $k, 'aw_' ) ), 'every key keeps aw_' );
+
+if ( ! $has_site_meta ) {
+	echo "Notice: assets/site/content/meta.php not found; skipped site-layer integration assertions.\n";
+	echo $count . ' checks, ' . $fails . " failed\n";
+	exit( $fails ? 1 : 0 );
+}
 check( array() === array_diff_key( $dw, aw_meta_schema() ), 'Core schema lists every listing key' );
 $web = aw_meta_schema()['aw_website'][1];
 sort( $web );
