@@ -1,0 +1,28 @@
+{
+    "name": "wugweb/kits-php-sdk",
+    "description": "Wugweb Kits PHP SDK: Contracts, Token Engine, and External Service Registry for WordPress Block Themes and Companion Plugins",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Wugweb",
+            "homepage": "https://wugweb.com/"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5 || ^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wugweb\\Kits\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wugweb\\Kits\\Tests\\": "tests/"
+        }
+    }
+}
