@@ -1,9 +1,13 @@
-# Pending (10 Nov 2026, Harmonized 22 Nov 2026)
+# Pending (10 Nov 2026, Harmonized 23 Nov 2026)
 
 Check this list against git and the live site before acting on it. Refer to items by their bold title (owner, 24 Oct 2026). Failing AI keys are the owner's own job: never list them. This file is the list of open and finished work.
 
-## Repository & Architectural Partitioning (22 Nov 2026)
-As part of the Wugweb Monorepo and Kits Suite standardization, pending tasks are strictly partitioned to eliminate cross-domain entanglement:
+## Repository & Architectural Partitioning (Harmonized 23 Nov 2026)
+As part of the Wugweb Monorepo and Kits Suite standardization, pending tasks are strictly partitioned to eliminate cross-domain entanglement and align with the master roadmap:
+0. **Master Architecture & Consolidated Implementation Roadmap**:
+   - Master Source of Truth: [`docs/architecture/monorepo-consolidated-roadmap.md`](architecture/monorepo-consolidated-roadmap.md)
+   - Governs execution across P0 (Completed), P1 (Architecture & Decoupling), P2 (Playground & Testing), P3 (Packaging & Releases), and P4 (Marketplace Readiness).
+   - Architectural Decision: Existing `aw_*` database identifiers and schema keys are strictly preserved; no database migration.
 1. **Kits Platform & Component Roadmaps** (housed directly within each component):
    - **Theme Engine**: [`themes/kits-by-wugweb/PENDING.md`](../themes/kits-by-wugweb/PENDING.md) (Day/Night anti-FOUC, spacing normalization, block-type patterns)
    - **Kits Core**: [`plugins/kits-core/PENDING.md`](../plugins/kits-core/PENDING.md) (Brand customizer, 4-layer theme.json injection, Cloudflare Worker relay, onboarding wizard)
@@ -26,6 +30,35 @@ As part of the Wugweb Monorepo and Kits Suite standardization, pending tasks are
 Theme and WordPress items are tracked by Animal Writes WordPress. Code requests from Martech go to it.
 
 ## Open
+
+### Master Monorepo Execution Roadmap (P0 Completed, P1–P4 Phased, 23 Nov 2026)
+Master Reference: [`docs/architecture/monorepo-consolidated-roadmap.md`](architecture/monorepo-consolidated-roadmap.md).
+- ✅ **Phase P0 (CI Unblocking & Test Hardening — Completed & Verified):**
+  - Root conflict marker scanner updated to ignore `vendor/` and `dist/`; `npm run check:ci` passing 100% across all 9 quality gates.
+  - Test runners in `plugins/directoryweb/tests/listing-meta-tests.php` and `plugins/kits-core/tests/admin-layer-tests.php` hardened with `file_exists()` guards.
+  - Path-filtered multi-PHP CI/CD matrix deployed in `.github/workflows/ci-suite.yml`.
+- ⏳ **Phase P1 (Finish Core Products & Admin UX — High Priority Track):**
+  - **P1-A (Core Architecture & Shared Infrastructure):**
+    - P1.1: Integrate `packages/shared-php` (`TokenEngine`, `ExternalServiceRegistry`) into `kits-core`.
+    - P1.2: Native four-layer `theme.json` cascade via `wp_theme_json_data_theme` filter in Kits Core.
+    - P1.3: Shared Settings & Configuration Architecture (option namespaces, capability boundaries, transfer schemas).
+    - P1.4: Companion Plugin Independence & Fallback Admin Views across all six companion plugins.
+    - P1.5: Regression Test: DirectoryWeb standalone operation without SCF verified.
+  - **P1-B (DirectoryWeb Release Readiness):** Listing management/editing, 8 dynamic blocks, standalone fallback admin view, geocoding fallback.
+  - **P1-C (RankWeb Release Readiness):** Standalone Schema.org JSON-LD output, breadcrumbs block, internal link silos, Rank Math optional integration.
+  - **P1-D (SourceWeb Release Readiness):** RSS feed ingestion, reprint engine, content rules, removal of mandatory boot halts on DirectoryWeb/InsightWeb.
+  - **P1-E (InsightWeb Release Readiness):** Search Console, GA4, Clarity, PageSpeed, Bing integrations, SVG MiniCharts, fallback admin view without Kits Core.
+- ⏳ **Phase P2 (Testing & WordPress Playground — Planned):**
+  - Author universal base blueprint (`tools/playground/blueprint-base.json`) and per-plugin blueprints with fixtures.
+  - Headless Playground validation gate in GitHub Actions.
+- ⏳ **Phase P3 (Build, Packaging & Release Engineering — Planned):**
+  - Tagged release automation (`release.yml`) attaching distribution ZIPs to GitHub Releases.
+  - Standardized root script to compile companion plugin React admin SPAs (`npm run build:plugins`).
+  - Semantic version alignment across all headers and `readme.txt` files.
+- ⏳ **Phase P4 (Marketplace Readiness & Asset Creation — Planned):**
+  - Populate `marketplace/` banners and icons for WordPress.org submission.
+  - Prune unused scaffolding; maintain living documentation.
+  - *Architectural Decision:* Existing `aw_*` database keys strictly preserved (no database migration).
 
 ### DirectoryWeb: phases 1–3 wired, blocks fixed and loaded (22 Nov 2026)
 
