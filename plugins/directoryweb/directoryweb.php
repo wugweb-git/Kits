@@ -95,6 +95,12 @@ $directoryweb_includes = array(
 	'find-help',
 	'plugin-info',
 	'bootstrap',
+	'directoryweb-fields',
+	'directoryweb-status',
+	'directoryweb-people',
+	'directoryweb-featured-in',
+	'directoryweb-local-card',
+	'directoryweb-helplines',
 );
 foreach ( $directoryweb_includes as $directoryweb_include ) {
 	require_once DIRECTORYWEB_DIR . 'includes/' . $directoryweb_include . '.php';
