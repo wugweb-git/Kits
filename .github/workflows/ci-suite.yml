@@ -96,6 +96,10 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+      - name: Install SDK dependencies
+        run: |
+          cd packages/shared-php
+          composer install --no-interaction --no-audit --no-fund
       - name: Run TokenEngine & SDK Tests
         run: |
           cd packages/shared-php
