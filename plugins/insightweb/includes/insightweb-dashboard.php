@@ -85,6 +85,28 @@ function insightweb_dash_count( array $c ): array {
 	$o   = aw_si_table( 'obs' );
 	$end = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(d) FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count.
 	if ( '' === $end ) {
+		foreach ( INSIGHTWEB_DASH_RANGES as $n ) {
+			$c['ranges'][ $n ] = array(
+				'days'       => $n,
+				'from'       => function_exists( 'wp_date' ) ? wp_date( 'Y-m-d', time() - ( $n - 1 ) * DAY_IN_SECONDS ) : date( 'Y-m-d', time() - ( $n - 1 ) * 86400 ),
+				'stored'     => 0,
+				'prevStored' => 0,
+				'clicks'     => 0,
+				'impr'       => 0,
+				'pos'        => null,
+				'prevClicks' => 0,
+				'prevImpr'   => 0,
+				'prevPos'    => null,
+				'pages'      => 0,
+				'queries'    => 0,
+				'prevPages'  => 0,
+				'prevQuery'  => 0,
+				'chart'      => array(),
+				'topPages'   => array(),
+				'topQueries' => array(),
+				'empty'      => true,
+			);
+		}
 		return $c;
 	}
 	$c['end'] = $end;

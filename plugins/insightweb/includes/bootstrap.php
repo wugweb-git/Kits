@@ -26,30 +26,13 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) {
 // below: SourceWeb uses them even when Search Insights is off.
 require_once INSIGHTWEB_DIR . 'includes/keywords.php';
 
-// Kits Core and Rank Math are needed, as for RankWeb's Search Insights module
-// (owner, 11 Nov 2026: checked here, not with a Requires Plugins header).
-$aw_si_missing = array_keys(
-	array_filter(
-		array(
-			'Kits Core' => ! defined( 'KITS_CORE_LOADED' ),
-			'Rank Math' => ! ( defined( 'RANK_MATH_VERSION' ) && class_exists( '\RankMath\Helper' ) ),
-		)
-	)
-);
-if ( $aw_si_missing ) {
-	add_action(
-		'admin_notices',
-		function () use ( $aw_si_missing ) {
-			if ( current_user_can( 'activate_plugins' ) ) {
-				/* translators: %s: plugin names. */
-				wp_admin_notice( esc_html( sprintf( __( 'InsightWeb does nothing until %s is active.', 'insightweb' ), implode( ' and ', $aw_si_missing ) ) ), array( 'type' => 'warning' ) );
-			}
-		}
-	);
-	unset( $aw_si_missing );
-	return;
+// Standalone support: load fallback if Kits Core is not active.
+if ( ! defined( 'KITS_CORE_LOADED' ) ) {
+	require_once INSIGHTWEB_DIR . 'includes/standalone-fallback.php';
 }
-unset( $aw_si_missing );
+
+define( 'INSIGHTWEB_STANDALONE', ! defined( 'KITS_CORE_LOADED' ) );
+define( 'INSIGHTWEB_RANKMATH_ACTIVE', ( defined( 'RANK_MATH_VERSION' ) && class_exists( '\RankMath\Helper' ) ) );
 
 if ( ! function_exists( 'insightweb_caps_grant' ) ) { // Loaded by insightweb.php; here for RankWeb's bridge.
 	require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php';

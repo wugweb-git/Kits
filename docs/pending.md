@@ -27,6 +27,14 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Companion Plugins Release Readiness & Standalone Decoupling (23 Nov 2026)
+- ✅ **DirectoryWeb (Priority 1):** Removed hard boot halt (`! defined('KITS_CORE_LOADED')`), introduced `standalone-fallback.php` providing primitives (`kits_count`, `kits_icon`, `kits_date`, `kits_simple_table`, `kits_shell_rest_can`), implemented native fallback admin screens for Dashboard and Settings, redirect fallback for Listings, hardened REST permissions, and added `directoryweb-standalone-test.php` and `directoryweb-scf-fallback-test.php` (all 5 test suites passing with 0 failures).
+- ✅ **RankWeb (Priority 2):** Established native SEO independence, made Rank Math an optional integration rather than a boot requirement, added standalone Schema.org JSON-LD output (`aw_schema_render_standalone_json_ld`) hooked to `wp_head`, hooked canonicals to `get_canonical_url`, hooked robots directives to `wp_robots`, and added `StandaloneSchemaTest.php` (all 125 tests and 94 settings checks passing with 0 failures).
+- ✅ **SourceWeb (Priority 3):** Decoupled from mandatory DirectoryWeb and InsightWeb boot halt, guarded `aw_listing_place`, `directoryweb_listing_phones`, and `directoryweb_item_tags` against missing siblings, implemented native fallback screens in `sourceweb-ui.php`, and added `SourceWebStandaloneTest.php` (all 455 checks passing with 0 failures).
+- ✅ **InsightWeb (Priority 4):** Removed boot halt requiring Kits Core / Rank Math, added `standalone-fallback.php`, generated empty-state range tiles for fresh installs in `insightweb_dash_count()`, implemented native admin tab fallbacks in `admin.php`, and added `StandaloneInsightsTest.php` (all 118 checks passing with 0 failures).
+- ✅ **MailWeb & PlanWeb:** Removed boot halts, added `standalone-fallback.php` for REST permission fallbacks, and removed `Requires Plugins: kits-core` header.
+- ✅ **Monorepo Suite Verification:** All 14 PHP test runners across the monorepo pass cleanly (over 700 checks with 0 failures), and root `npm run check:ci` (9 gates + Vite build) passes in ~6.2s.
+
 ### DirectoryWeb: phases 1–3 wired, blocks fixed and loaded (22 Nov 2026)
 
 Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.

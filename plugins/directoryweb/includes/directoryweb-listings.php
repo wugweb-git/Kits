@@ -457,5 +457,11 @@ function directoryweb_listings_page(): void {
 	if ( directoryweb_ui_page( 'listings' ) ) {
 		return;
 	}
-	directoryweb_missing_page( __( 'Directory listings', 'directoryweb' ) );
+	if ( ! headers_sent() ) {
+		wp_safe_redirect( admin_url( 'edit.php?post_type=aw_listing' ) );
+		exit;
+	}
+	echo '<div class="wrap"><h1>' . esc_html__( 'Directory listings', 'directoryweb' ) . '</h1>';
+	echo '<p><a class="button button-primary" href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing' ) ) . '">' . esc_html__( 'Open All Listings', 'directoryweb' ) . '</a></p>';
+	echo '</div>';
 }

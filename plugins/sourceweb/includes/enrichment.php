@@ -1117,13 +1117,13 @@ function aw_enrich_rest_index( WP_REST_Request $req ) {
 	}
 	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB
 	foreach ( $ids as $id ) {
-		$pl    = aw_listing_place( (int) $id );
+		$pl    = function_exists( 'aw_listing_place' ) ? aw_listing_place( (int) $id ) : array( '', '' );
 		$out[] = array(
 			'id'        => (int) $id,
 			'name'      => html_entity_decode( get_the_title( (int) $id ), ENT_QUOTES ),
-			'district'  => (string) $pl[1],
-			'state'     => (string) $pl[0],
-			'contact'   => (bool) ( directoryweb_listing_phones( (int) $id ) || get_post_meta( $id, 'aw_email', true ) || get_post_meta( $id, 'aw_website', true ) || get_post_meta( $id, 'aw_facebook', true ) ),
+			'district'  => (string) ( $pl[1] ?? '' ),
+			'state'     => (string) ( $pl[0] ?? '' ),
+			'contact'   => (bool) ( ( function_exists( 'directoryweb_listing_phones' ) && directoryweb_listing_phones( (int) $id ) ) || get_post_meta( $id, 'aw_email', true ) || get_post_meta( $id, 'aw_website', true ) || get_post_meta( $id, 'aw_facebook', true ) ),
 			'darpan_id' => (string) get_post_meta( $id, 'aw_darpan_id', true ),
 		);
 	}
@@ -1183,7 +1183,7 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 
 /** What the worker needs to know about one listing. */
 function aw_enrich_listing_payload( $id ) {
-	list( $state, $district ) = aw_listing_place( $id );
+	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
 	$now = array();
 	foreach ( array_keys( aw_enrich_fields_all() ) as $f ) {
 		$v = aw_enrich_current( $id, $f );
@@ -1205,7 +1205,7 @@ function aw_enrich_listing_payload( $id ) {
 		'awbi_code'    => (string) get_post_meta( $id, 'aw_awbi_code', true ),
 		'awbi_address' => (string) get_post_meta( $id, 'aw_awbi_address', true ),
 		'area'         => (string) get_post_meta( $id, 'aw_area', true ),
-		'types'        => wp_list_pluck( directoryweb_listing_types( $id ), 'slug' ),
+		'types'        => function_exists( 'directoryweb_listing_types' ) ? wp_list_pluck( directoryweb_listing_types( $id ), 'slug' ) : array(),
 		'protected'    => aw_enrich_is_protected( $id ),
 		'checked'      => (string) get_post_meta( $id, 'aw_enrich_checked', true ),
 		'now'          => $now,

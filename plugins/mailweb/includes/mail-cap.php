@@ -425,17 +425,52 @@ add_action(
 		$note  = sanitize_key( $_GET['mailweb_cap'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
 		echo '<hr><h2 id="cap">' . esc_html__( 'Daily sending limit', 'mailweb' ) . '</h2>';
 		if ( 'saved' === $note ) {
-			wp_admin_notice( esc_html__( 'Saved.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				esc_html__( 'Saved.', 'mailweb' ),
+				array(
+					'type'               => 'success',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		} elseif ( 'resumed' === $note ) {
-			wp_admin_notice( esc_html__( 'Sending resumed.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				esc_html__( 'Sending resumed.', 'mailweb' ),
+				array(
+					'type'               => 'success',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		} elseif ( 'retry' === $note ) {
-			wp_admin_notice( esc_html__( 'Held emails will be tried again.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				esc_html__( 'Held emails will be tried again.', 'mailweb' ),
+				array(
+					'type'               => 'success',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		} elseif ( 'cleared' === $note ) {
-			wp_admin_notice( esc_html__( 'Held emails cleared.', 'mailweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				esc_html__( 'Held emails cleared.', 'mailweb' ),
+				array(
+					'type'               => 'success',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		} elseif ( 'flushed' === $note ) {
 			$sent_n = absint( wp_unslash( $_GET['n'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a count in the redirect after the nonced action
-			/* translators: %d: number of queued emails sent */
-			wp_admin_notice( esc_html( sprintf( _n( 'Sent %d queued email.', 'Sent %d queued emails.', $sent_n, 'mailweb' ), $sent_n ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice(
+				esc_html(
+					sprintf(
+					/* translators: %d: number of queued emails sent */
+						_n( 'Sent %d queued email.', 'Sent %d queued emails.', $sent_n, 'mailweb' ),
+						$sent_n
+					)
+				),
+				array(
+					'type'               => 'success',
+					'additional_classes' => array( 'inline' ),
+				)
+			);
 		}
 		if ( $pause ) {
 			echo '<div class="notice notice-error inline"><p><strong>' . esc_html__( 'Sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(

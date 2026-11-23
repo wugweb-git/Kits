@@ -169,6 +169,17 @@ add_filter(
 // "?press=all" lists every item on the profile: the same page, kept out of the index.
 add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification
 
+add_filter(
+	'wp_robots',
+	function ( array $robots ) {
+		if ( aw_seo_noindex_rule() || ( is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ) ) {
+			$robots['noindex'] = true;
+		}
+		return $robots;
+	},
+	20
+);
+
 // Feeds stay out of the index (owner, 25 Oct 2026): a header, as a feed has no <head>.
 add_action( 'template_redirect', fn() => is_feed() && ! headers_sent() ? header( 'X-Robots-Tag: noindex, follow' ) : null, 0 );
 

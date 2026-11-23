@@ -1,17 +1,17 @@
 <?php
 /**
  * Plugin Name: SourceWeb
- * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Needs Kits Core, DirectoryWeb and InsightWeb (the keyword table). Animal Writes Core loads it from this folder while Core is active; it can also be activated on its own.
+ * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Enhanced by Kits Core, DirectoryWeb and InsightWeb.
  * Version: 0.1.0
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
  * Author URI: https://wugweb.com
  * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI: https://wugweb.com/plugins/sourceweb/
  * Text Domain: sourceweb
  * Domain Path: /languages
- * Requires Plugins: kits-core, directoryweb, insightweb
  *
  * Moved out of Animal Writes Core and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
  * REST routes, cron hooks, admin pages and actions. Core keeps the content types and templates.
@@ -53,18 +53,10 @@ unset( $sourceweb_const, $sourceweb_main );
 require_once __DIR__ . '/includes/sourcing-basics.php';
 // The issuer label too (no dependency): the site layer's Library item box and card chips call aw_issuer_short() and aw_issuer_box().
 require_once __DIR__ . '/includes/issuers.php';
-// Without them, load nothing and say so.
-if ( ! defined( 'KITS_CORE_LOADED' ) || ! defined( 'DIRECTORYWEB_LOADED' ) || ! defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) ) {
-	add_action(
-		'admin_notices',
-		function () {
-			if ( current_user_can( 'activate_plugins' ) ) {
-				wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core, DirectoryWeb and InsightWeb. Sourcing is off until all three are active.', 'aw-sourcing' ), array( 'type' => 'error' ) );
-			}
-		}
-	);
-	return;
-}
+// Track active integrations without blocking standalone operation.
+define( 'SOURCEWEB_STANDALONE', ! defined( 'KITS_CORE_LOADED' ) );
+define( 'SOURCEWEB_DIRECTORY_ACTIVE', defined( 'DIRECTORYWEB_LOADED' ) );
+define( 'SOURCEWEB_INSIGHTS_ACTIVE', defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) );
 define( 'AW_SOURCING_LOADED', '0.1.0' );
 if ( ! defined( 'AW_SOURCING_DIR' ) ) {
 	define( 'AW_SOURCING_DIR', __DIR__ . '/' );

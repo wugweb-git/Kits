@@ -81,7 +81,11 @@ function sourceweb_post_types(): array {
  * @return WP_Term[]
  */
 function sourceweb_item_tags( $id, $slugs = null ): array {
-	return directoryweb_item_tags( $id, null === $slugs ? sourceweb_section_tags( (string) get_post_type( $id ) ) : (array) $slugs );
+	if ( function_exists( 'directoryweb_item_tags' ) ) {
+		return directoryweb_item_tags( $id, null === $slugs ? sourceweb_section_tags( (string) get_post_type( $id ) ) : (array) $slugs );
+	}
+	$terms = get_the_terms( $id, 'post_tag' );
+	return is_array( $terms ) ? $terms : array();
 }
 
 /**
@@ -96,8 +100,8 @@ function sourceweb_sanitize_meta( $value, $key ) {
 	if ( function_exists( 'aw_sanitize_meta' ) ) {
 		return aw_sanitize_meta( $value, $key );
 	}
-	if ( isset( directoryweb_meta_schema()[ $key ] ) ) {
-		return directoryweb_sanitize_meta( $value, $key );
+	if ( function_exists( 'directoryweb_meta_schema' ) && isset( directoryweb_meta_schema()[ $key ] ) ) {
+		return function_exists( 'directoryweb_sanitize_meta' ) ? directoryweb_sanitize_meta( $value, $key ) : sanitize_text_field( (string) $value );
 	}
 	if ( in_array( $key, array( 'aw_source_date', 'aw_deadline' ), true ) ) {
 		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $value ) ? (string) $value : '';

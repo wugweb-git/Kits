@@ -272,7 +272,7 @@ function aw_si_source_notices(): void {
 	wp_admin_notice( esc_html__( 'Last updated', 'insightweb' ) . ' — ' . esc_html( implode( ' · ', $parts ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 }
 
-/** The Search Insights screen, drawn by the Kits admin shell; without Kits Core or the build, a notice. */
+/** The Search Insights screen, drawn by the Kits admin shell; without Kits Core or the build, a fallback. */
 function aw_si_screen(): void {
 	if ( ! current_user_can( aw_si_cap() ) ) {
 		return;
@@ -280,8 +280,49 @@ function aw_si_screen(): void {
 	if ( function_exists( 'insightweb_ui_page' ) && insightweb_ui_page( aw_si_tab() ) ) {
 		return;
 	}
-	echo '<div class="wrap"><h1>' . esc_html__( 'Search Insights', 'insightweb' ) . '</h1>';
-	wp_admin_notice( esc_html__( 'InsightWeb needs Kits Core (active, with its build) to show this screen.', 'insightweb' ), array( 'type' => 'error' ) );
+	aw_si_screen_fallback();
+}
+
+/** Standalone native fallback screen for InsightWeb. */
+function aw_si_screen_fallback(): void {
+	$tab = aw_si_tab();
+	echo '<div class="wrap">';
+	echo '<h1>' . esc_html__( 'Search Insights', 'insightweb' ) . '</h1>';
+
+	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'InsightWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell, interactive charts, and quick-filter tabs.', 'insightweb' ) . '</p></div>';
+	} else {
+		wp_admin_notice( esc_html__( 'InsightWeb needs Kits Core (active, with its build) to show this screen.', 'insightweb' ), array( 'type' => 'error' ) );
+	}
+
+	aw_si_screen_notices();
+
+	if ( 'keywords' === $tab ) {
+		aw_si_keywords_tab();
+	} elseif ( 'settings' === $tab && function_exists( 'aw_si_settings_tab' ) ) {
+		aw_si_settings_tab();
+	} else {
+		echo '<div style="margin-top:20px; display:flex; gap:16px; flex-wrap:wrap;">';
+
+		// Keywords card
+		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Keywords', 'insightweb' ) . '</h2>';
+		$kw_count = function_exists( 'aw_si_count_keywords' ) ? aw_si_count_keywords() : 0;
+		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $kw_count ) ) . '</p>';
+		echo '<p><a href="' . esc_url( aw_si_url( 'keywords' ) ) . '" class="button button-secondary">' . esc_html__( 'View Keywords', 'insightweb' ) . '</a></p>';
+		echo '</div>';
+
+		// Sync status card
+		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Search Console', 'insightweb' ) . '</h2>';
+		$days = function_exists( 'aw_si_days_stored' ) ? aw_si_days_stored() : 0;
+		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( sprintf( __( '%d days', 'insightweb' ), $days ) ) . '</p>';
+		echo '<p><a href="' . esc_url( aw_si_url( 'settings' ) ) . '" class="button button-secondary">' . esc_html__( 'Settings & Sync', 'insightweb' ) . '</a></p>';
+		echo '</div>';
+
+		echo '</div>';
+	}
+
 	echo '</div>';
 }
 

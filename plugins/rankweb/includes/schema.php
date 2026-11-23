@@ -1678,3 +1678,52 @@ add_action(
 	},
 	91
 );
+
+if ( ! function_exists( 'aw_schema_render_standalone_json_ld' ) ) {
+	/**
+	 * Outputs Schema.org JSON-LD structured data in standalone mode when Rank Math is absent.
+	 */
+	function aw_schema_render_standalone_json_ld(): void {
+		if ( is_404() || is_admin() ) {
+			return;
+		}
+		$graph = array();
+		if ( function_exists( 'aw_publisher_schema' ) ) {
+			$pub = aw_publisher_schema();
+			if ( ! empty( $pub ) ) {
+				$graph[] = $pub;
+			}
+		}
+		if ( function_exists( 'aw_website_schema' ) ) {
+			$site = aw_website_schema();
+			if ( ! empty( $site ) ) {
+				$graph[] = $site;
+			}
+		}
+		if ( function_exists( 'aw_schema_nodes' ) ) {
+			$nodes = aw_schema_nodes();
+			foreach ( $nodes as $node ) {
+				if ( ! empty( $node ) ) {
+					$graph[] = $node;
+				}
+			}
+		}
+		if ( function_exists( 'aw_faq_schema' ) ) {
+			$faq = aw_faq_schema();
+			if ( ! empty( $faq ) ) {
+				$graph[] = $faq;
+			}
+		}
+		if ( ! empty( $graph ) ) {
+			$payload = array(
+				'@context' => 'https://schema.org',
+				'@graph'   => aw_schema_plain_values( $graph ),
+			);
+			echo "\n" . '<script type="application/ld+json">' . wp_json_encode( $payload, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG ) . '</script>' . "\n";
+		}
+	}
+}
+
+if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math() ) {
+	add_action( 'wp_head', 'aw_schema_render_standalone_json_ld', 20 );
+}

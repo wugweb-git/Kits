@@ -20,7 +20,6 @@
  * Update URI:        https://wugweb.com/plugins/planweb/
  * Text Domain:       planweb
  * Domain Path:       /languages
- * Requires Plugins:  kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,15 +34,10 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readabl
 	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
 }
 if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-	add_action(
-		'admin_notices',
-		function () {
-			if ( current_user_can( 'activate_plugins' ) ) {
-				echo '<div class="notice notice-warning"><p>' . esc_html__( 'PlanWeb needs Kits Core. Activate Kits Core and PlanWeb will start.', 'planweb' ) . '</p></div>';
-			}
-		}
-	);
-	return;
+	define( 'PLANWEB_STANDALONE', true );
+	require_once __DIR__ . '/includes/standalone-fallback.php';
+} else {
+	define( 'PLANWEB_STANDALONE', false );
 }
 
 // Activating PlanWeb switches it on; deactivating switches it off. The hook names are fixed, not built from __FILE__:

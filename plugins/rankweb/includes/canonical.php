@@ -103,3 +103,15 @@ add_filter(
 	},
 	20
 );
+
+add_filter(
+	'get_canonical_url',
+	function ( $url ) {
+		if ( is_404() || ( function_exists( 'aw_seo_typed' ) && '' !== aw_seo_typed( 'canonical_url' ) ) || ( ! aw_seo_is_list_view() && ! aw_claim_listing() ) ) {
+			return $url;
+		}
+		$ours = aw_seo_canonical();
+		return '' !== $ours ? $ours : $url;
+	},
+	20
+);

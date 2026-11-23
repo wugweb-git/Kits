@@ -186,8 +186,67 @@ function sourceweb_ui_page( string $screen ): void {
 		kits_shell_mount( 'sourceweb-app', $title );
 		return;
 	}
-	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
-	wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'aw-sourcing' ), array( 'type' => 'error' ) );
+	sourceweb_ui_fallback_page( $screen, $title );
+}
+
+/**
+ * Standalone native WordPress admin fallback page.
+ *
+ * @param string $screen The screen key.
+ * @param string $title  The screen title.
+ */
+function sourceweb_ui_fallback_page( string $screen, string $title ): void {
+	echo '<div class="wrap">';
+	echo '<h1>' . esc_html( $title ) . '</h1>';
+
+	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell and real-time feed monitors.', 'aw-sourcing' ) . '</p></div>';
+	} else {
+		wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'aw-sourcing' ), array( 'type' => 'error' ) );
+	}
+
+	if ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
+		echo '<div class="card" style="max-width:800px; padding:20px; margin-top:20px;">';
+		settings_errors( 'aw_backfill_floor' );
+		settings_errors( 'aw_src_reset' );
+		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+		settings_fields( 'aw_src_backfill' );
+		do_settings_sections( 'aw-src-backfill' );
+		submit_button( __( 'Save backfill date', 'aw-sourcing' ) );
+		echo '</form>';
+		if ( function_exists( 'sourceweb_reset_form' ) ) {
+			sourceweb_reset_form( 'backfill' );
+		}
+		echo '<hr style="margin:24px 0;">';
+		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
+		settings_fields( 'aw_src_uninstall' );
+		do_settings_sections( 'aw-src-uninstall' );
+		submit_button( __( 'Save uninstall setting', 'aw-sourcing' ) );
+		echo '</form>';
+		if ( function_exists( 'sourceweb_reset_form' ) ) {
+			sourceweb_reset_form( 'uninstall' );
+		}
+		echo '</div>';
+	} else {
+		$cfg = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array();
+		$num_sources = count( (array) ( $cfg['sources'] ?? array() ) );
+		$num_feeds   = count( (array) ( $cfg['feeds'] ?? array() ) );
+
+		echo '<div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap;">';
+		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Configured Sources', 'aw-sourcing' ) . '</h2>';
+		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $num_sources ) ) . '</p>';
+		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources' ) ) . '" class="button button-secondary">' . esc_html__( 'Manage Sources', 'aw-sourcing' ) . '</a></p>';
+		echo '</div>';
+
+		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Active Feeds', 'aw-sourcing' ) . '</h2>';
+		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $num_feeds ) ) . '</p>';
+		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) . '" class="button button-secondary">' . esc_html__( 'View Rules', 'aw-sourcing' ) . '</a></p>';
+		echo '</div>';
+		echo '</div>';
+	}
+
 	echo '</div>';
 }
 

@@ -10,7 +10,7 @@
  * @wordpress-plugin
  * Plugin Name:       DirectoryWeb
  * Plugin URI:        https://wugweb.com/plugins/directoryweb/
- * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Needs Kits Core.
+ * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Enhanced by Kits Core.
  * Version:           1.1.0
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -21,7 +21,6 @@
  * Update URI:        https://wugweb.com/plugins/directoryweb/
  * Text Domain:       directoryweb
  * Domain Path:       /languages
- * Requires Plugins:  kits-core
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,17 +42,12 @@ if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readabl
 	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/kits-core/kits-core.php' ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
 	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
 }
-// Without Kits Core, say so and do nothing else.
+// Without Kits Core, load the standalone compatibility layer.
 if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-	add_action(
-		'admin_notices',
-		function () {
-			if ( current_user_can( 'activate_plugins' ) ) {
-				echo '<div class="notice notice-warning"><p>' . esc_html__( 'DirectoryWeb needs Kits Core. Activate Kits Core and DirectoryWeb will start.', 'directoryweb' ) . '</p></div>';
-			}
-		}
-	);
-	return;
+	define( 'DIRECTORYWEB_STANDALONE', true );
+	require_once __DIR__ . '/includes/standalone-fallback.php';
+} else {
+	define( 'DIRECTORYWEB_STANDALONE', false );
 }
 
 define( 'DIRECTORYWEB_LOADED', '1.1.0' );

@@ -286,7 +286,60 @@ function directoryweb_dashboard_page(): void {
 	if ( directoryweb_ui_page( 'dashboard' ) ) {
 		return;
 	}
-	directoryweb_missing_page( __( 'DirectoryWeb', 'directoryweb' ) );
+	directoryweb_dashboard_native_page();
+}
+
+/** Standalone native Dashboard page. */
+function directoryweb_dashboard_native_page(): void {
+	$listing_counts = function_exists( 'wp_count_posts' ) ? wp_count_posts( 'aw_listing' ) : (object) array( 'publish' => 0 );
+	$published      = (int) ( $listing_counts->publish ?? 0 );
+	$drafts         = (int) ( $listing_counts->draft ?? 0 );
+	$places_count   = function_exists( 'wp_count_posts' ) ? wp_count_posts( 'aw_place' ) : (object) array( 'publish' => 0 );
+	$places         = (int) ( $places_count->publish ?? 0 );
+
+	echo '<div class="wrap">';
+	echo '<h1>' . esc_html__( 'DirectoryWeb Dashboard', 'directoryweb' ) . '</h1>';
+
+	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'DirectoryWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell, interactive charts, and quick-filter tabs.', 'directoryweb' ) . '</p></div>';
+	}
+
+	echo '<div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap;">';
+
+	// Published listings card
+	echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+	echo '<h2 style="margin-top:0;">' . esc_html__( 'Published Listings', 'directoryweb' ) . '</h2>';
+	echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $published ) ) . '</p>';
+	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing' ) ) . '" class="button button-secondary">' . esc_html__( 'View Listings', 'directoryweb' ) . '</a></p>';
+	echo '</div>';
+
+	// Draft listings card
+	echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+	echo '<h2 style="margin-top:0;">' . esc_html__( 'Draft Listings', 'directoryweb' ) . '</h2>';
+	echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $drafts ) ) . '</p>';
+	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_status=draft&post_type=aw_listing' ) ) . '" class="button button-secondary">' . esc_html__( 'View Drafts', 'directoryweb' ) . '</a></p>';
+	echo '</div>';
+
+	// Places card
+	echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+	echo '<h2 style="margin-top:0;">' . esc_html__( 'Places', 'directoryweb' ) . '</h2>';
+	echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $places ) ) . '</p>';
+	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_place' ) ) . '" class="button button-secondary">' . esc_html__( 'Manage Places', 'directoryweb' ) . '</a></p>';
+	echo '</div>';
+
+	echo '</div>';
+
+	// Quick actions box
+	echo '<div class="card" style="margin-top:20px; max-width:800px; padding:16px;">';
+	echo '<h2 style="margin-top:0;">' . esc_html__( 'Quick Actions', 'directoryweb' ) . '</h2>';
+	echo '<p>';
+	echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_listing' ) ) . '" class="button button-primary" style="margin-right:8px;">' . esc_html__( 'Add New Listing', 'directoryweb' ) . '</a> ';
+	echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_place' ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Add New Place', 'directoryweb' ) . '</a> ';
+	echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . DIRECTORYWEB_SETTINGS_PAGE ) ) . '" class="button button-secondary">' . esc_html__( 'DirectoryWeb Settings', 'directoryweb' ) . '</a>';
+	echo '</p>';
+	echo '</div>';
+
+	echo '</div>';
 }
 
 /** Settings page callback. */
@@ -297,5 +350,55 @@ function directoryweb_settings_page(): void {
 	if ( directoryweb_ui_page( 'settings' ) ) {
 		return;
 	}
-	directoryweb_missing_page( __( 'DirectoryWeb settings', 'directoryweb' ) );
+	directoryweb_settings_native_page();
+}
+
+/** Standalone native Settings page. */
+function directoryweb_settings_native_page(): void {
+	$option_name = directoryweb_forms_option();
+	$forms_map   = (array) get_option( $option_name, array() );
+
+	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && check_admin_referer( 'directoryweb_standalone_settings' ) ) {
+		if ( isset( $_POST['dw_claim_form_id'] ) ) {
+			$forms_map['claim'] = absint( $_POST['dw_claim_form_id'] );
+			update_option( $option_name, $forms_map );
+			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved successfully.', 'directoryweb' ) . '</p></div>';
+		}
+	}
+
+	$current_claim = absint( $forms_map['claim'] ?? 0 );
+	$all_forms     = function_exists( 'directoryweb_ff_forms' ) ? directoryweb_ff_forms() : array();
+
+	echo '<div class="wrap">';
+	echo '<h1>' . esc_html__( 'DirectoryWeb Settings', 'directoryweb' ) . '</h1>';
+
+	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'DirectoryWeb is running in standalone mode. Settings saved here configure the core directory behaviour.', 'directoryweb' ) . '</p></div>';
+	}
+
+	echo '<form method="post" action="">';
+	wp_nonce_field( 'directoryweb_standalone_settings' );
+
+	echo '<div class="card" style="max-width:800px; margin-top:20px; padding:20px;">';
+	echo '<h2 style="margin-top:0;">' . esc_html__( 'Listing Claims', 'directoryweb' ) . '</h2>';
+	echo '<p class="description">' . esc_html__( 'Select the Fluent Forms form used for business claim submissions.', 'directoryweb' ) . '</p>';
+
+	if ( ! empty( $all_forms ) ) {
+		echo '<table class="form-table"><tr>';
+		echo '<th scope="row"><label for="dw_claim_form_id">' . esc_html__( 'Claim Form', 'directoryweb' ) . '</label></th>';
+		echo '<td><select name="dw_claim_form_id" id="dw_claim_form_id">';
+		echo '<option value="0">' . esc_html__( '— Select Form —', 'directoryweb' ) . '</option>';
+		foreach ( $all_forms as $id => $title ) {
+			echo '<option value="' . esc_attr( (string) $id ) . '" ' . selected( $current_claim, (int) $id, false ) . '>' . esc_html( sprintf( '#%d — %s', $id, $title ) ) . '</option>';
+		}
+		echo '</select></td></tr></table>';
+	} else {
+		echo '<p>' . esc_html__( 'Fluent Forms is not active or has no forms created. Claims require Fluent Forms to accept frontend submissions.', 'directoryweb' ) . '</p>';
+	}
+
+	echo '<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="' . esc_attr__( 'Save Changes', 'directoryweb' ) . '"></p>';
+	echo '</div>';
+	echo '</form>';
+
+	echo '</div>';
 }
