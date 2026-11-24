@@ -67,6 +67,7 @@ $directoryweb_includes = array(
 	'claim-page',
 	'claims-review',
 	'claim-native', // standalone claim path: state machine, form, REST (no Fluent Forms)
+	'claim-native-mail', // notification emails for native claims (wp_mail; MailWeb can take over per message)
 	'directoryweb-shape',
 	'directoryweb-dashboard',
 	'directoryweb-rest',

@@ -44,3 +44,9 @@ Status: **open** unless marked. Nothing here is started. Each entry: current imp
 ## OD7. Commit history naming (open)
 - Now: 3 commit messages name the reference theme.
 - Recommendation: leave history alone; rewriting published history has a cost and no product effect. Clean the working tree only.
+
+## OD8. Fluent Forms claims and the claim state table (open)
+- Now: DirectoryWeb has two claim intakes. Native claims (`claim-native.php`) use the state machine; claims sent through Fluent Forms (`claims-review.php`) keep their own `aw_c_status` meta (pending, approved, rejected) and screen.
+- Alternatives: leave both (Fluent Forms claims stay as they are, native is for sites without Fluent Forms); migrate existing Fluent Forms claims onto the state table with a one-time, reversible copy; stop accepting new Fluent Forms claims.
+- Implication: a migration touches decided, stored claims on the live directory; finished decisions must not change.
+- Recommendation: leave both. Do not migrate stored claims; new sites use the native form.
