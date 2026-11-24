@@ -688,6 +688,22 @@
 	],
 	"customTemplates": [
 		{
+			"name": "blank",
+			"title": "Blank",
+			"postTypes": [
+				"page",
+				"post"
+			]
+		},
+		{
+			"name": "no-title",
+			"title": "No title",
+			"postTypes": [
+				"page",
+				"post"
+			]
+		},
+		{
 			"name": "page-wide",
 			"title": "Page — Wide",
 			"postTypes": [

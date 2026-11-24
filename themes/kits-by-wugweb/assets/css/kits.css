@@ -173,3 +173,11 @@ html[data-theme="dark"] body {
 	color: var(--wp--preset--color--foreground);
 }
 
+/* Columns block style "Reverse on mobile" (kits-reverse, inc/blocks.php). 781px is where core stacks columns, so the
+   order flips exactly while they are stacked. */
+@media (max-width: 781px) {
+	.wp-block-columns.is-style-kits-reverse:not(.is-not-stacked-on-mobile) {
+		flex-direction: column-reverse;
+	}
+}
+

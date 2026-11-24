@@ -15,6 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function kits_pattern_categories() {
 	register_block_pattern_category( 'kits-components', array( 'label' => __( 'Kits: Components', 'kits-by-wugweb' ) ) );
 	register_block_pattern_category( 'kits-lists', array( 'label' => __( 'Kits: Lists', 'kits-by-wugweb' ) ) );
+	register_block_pattern_category( 'kits-pages', array( 'label' => __( 'Kits: Pages', 'kits-by-wugweb' ) ) );
 }
 add_action( 'init', 'kits_pattern_categories' );
 
@@ -38,6 +39,10 @@ function kits_block_styles() {
 			'kits-surface'   => __( 'Surface', 'kits-by-wugweb' ),
 			'kits-section'   => __( 'Section', 'kits-by-wugweb' ),
 			'kits-head-band' => __( 'Head band', 'kits-by-wugweb' ),
+		),
+		// Columns that stack in reverse order on small screens (image after text on a phone, before it on a desktop); kits.css.
+		'core/columns'         => array(
+			'kits-reverse' => __( 'Reverse on mobile', 'kits-by-wugweb' ),
 		),
 		'core/separator'       => array(
 			'kits-hairline' => __( 'Hairline', 'kits-by-wugweb' ),
