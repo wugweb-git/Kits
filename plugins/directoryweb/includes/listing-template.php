@@ -91,8 +91,8 @@ function aw_listing_validity( $date ) {
 	}
 	$day = wp_date( 'Y-m-d', strtotime( $date . ' 12:00:00' ) );
 	return $day < wp_date( 'Y-m-d' )
-		? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Expired', 'directoryweb' ) . ' ' . kits_date( $day, null, 'aw-date' ) . '</span>'
-		: esc_html__( 'valid until', 'directoryweb' ) . ' ' . kits_date( $day, null, 'aw-date' );
+		? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Expired', 'directoryweb' ) . ' ' . directoryweb_date( $day, null, 'aw-date' ) . '</span>'
+		: esc_html__( 'valid until', 'directoryweb' ) . ' ' . directoryweb_date( $day, null, 'aw-date' );
 }
 
 /* ---------- 4–5 Logo and description ---------- */
@@ -144,7 +144,7 @@ function aw_block_listing_registrations( $a, $id ) {
 	$drop = aw_lf( $id, 'aw_awbi_dropped' );
 	$type = aw_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( __( 'AWBI number', 'directoryweb' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'directoryweb' ) . ' ' . kits_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : aw_listing_na( $id ) , aw_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
+		array( __( 'AWBI number', 'directoryweb' ), $awbi ? aw_listing_parts( array( esc_html( $awbi ), aw_listing_validity( aw_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'directoryweb' ) . ' ' . directoryweb_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : aw_listing_na( $id ) , aw_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'directoryweb' ), $type ) : __( 'Registration', 'directoryweb' ), aw_lf( $id, 'aw_registration' ) ? esc_html( aw_lf( $id, 'aw_registration' ) ) : aw_listing_na( $id ), 'file' ),
 		array( '12A', esc_html( aw_lf( $id, 'aw_reg_12a' ) ), aw_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
@@ -244,7 +244,7 @@ function aw_block_listing_services( $a, $id ) {
 	}
 	if ( '' !== $svc && '' !== $by ) { // who said so, and when
 		/* translators: %s: who stated the services. */
-		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'directoryweb' ), 'organisation' === $by ? __( 'the organisation', 'directoryweb' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . kits_date( aw_lf( $id, 'aw_services_on' ), null, 'aw-date' ) : '' ) . '</span>';
+		$svc .= '<span class="aw-facts-note">' . esc_html( sprintf( __( 'Stated by %s', 'directoryweb' ), 'organisation' === $by ? __( 'the organisation', 'directoryweb' ) : $by ) ) . ( aw_lf( $id, 'aw_services_on' ) ? ' ' . directoryweb_date( aw_lf( $id, 'aw_services_on' ), null, 'aw-date' ) : '' ) . '</span>';
 	}
 	$rows = array(
 		array( __( 'Services', 'directoryweb' ), '' !== $svc ? $svc : aw_listing_na( $id ), 'check' ),
@@ -300,7 +300,7 @@ function aw_block_listing_organisation( $a, $id ) {
 	}
 	$rows = array(
 		array( __( 'Established', 'directoryweb' ), esc_html( aw_lf( $id, 'aw_founded' ) ), 'calendar' ),
-		array( __( 'Incorporated', 'directoryweb' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? kits_date( aw_lf( $id, 'aw_reg_date' ), null, 'aw-date' ) : '', 'legal' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
+		array( __( 'Incorporated', 'directoryweb' ), aw_lf( $id, 'aw_reg_date' ) && strtotime( aw_lf( $id, 'aw_reg_date' ) ) ? directoryweb_date( aw_lf( $id, 'aw_reg_date' ), null, 'aw-date' ) : '', 'legal' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
 		array( __( 'Head of the organisation', 'directoryweb' ), esc_html( aw_lf( $id, 'aw_head' ) ), 'user' ),
 	);
 	return aw_listing_group( 'organisation', __( 'Organisation', 'directoryweb' ), aw_listing_dl( $rows ) );
@@ -336,7 +336,7 @@ function aw_block_listing_support( $a, $id ) {
 	// No money anywhere (owner, 31 Oct 2026): no Donate link and no UPI ID on listings; the stored values stay, unused.
 	foreach ( array( 'aw_volunteer_url' => array( 'name', __( 'Volunteer', 'directoryweb' ) ), 'aw_adopt_url' => array( 'home', __( 'Adopt', 'directoryweb' ) ) ) as $k => $l ) {
 		if ( aw_lf( $id, $k ) ) {
-			$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . kits_icon( $l[0] ) . esc_html( $l[1] ) . '</a>';
+			$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, $k ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="' . esc_attr( substr( $k, 3 ) ) . '">' . directoryweb_icon( $l[0] ) . esc_html( $l[1] ) . '</a>';
 		}
 	}
 	$body = '' !== $btns ? '<div class="aw-listing-actions">' . $btns . '</div>' : '';
@@ -477,7 +477,7 @@ function aw_listing_press_card( $pid ) {
 	$ext  = 'aw_press' === $type;
 	$ts   = function_exists( 'aw_item_date_ts' ) ? aw_item_date_ts( $pid ) : (int) get_post_time( 'U', true, $pid );
 	$name = defined( 'AW_FEATURED_TYPES' ) ? ( AW_FEATURED_TYPES[ $type ] ?? '' ) : '';
-	return '<li><article class="kit-card kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? kits_date( $ts, null, 'aw-date' ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
+	return '<li><article class="kit-card kit-minicard aw-more-card">' . ( function_exists( 'aw_item_card_media' ) ? aw_item_card_media( $pid ) : '' ) . '<div class="kit-minicard-body aw-more-body"><p class="kit-minicard-meta aw-more-meta kit-meta-row">' . ( $ts ? directoryweb_date( $ts, null, 'aw-date' ) : '' ) . ( '' !== $name ? '<span class="aw-more-type">' . esc_html( $name ) . '</span>' : '' ) . '</p>' // the date always first in a meta row (owner)
 		. '<h3 class="kit-minicard-title aw-more-title"><a href="' . esc_url( $url ) . '"' . ( $ext ? ' rel="noopener nofollow" target="_blank"' : '' ) . '>' . esc_html( html_entity_decode( get_the_title( $pid ), ENT_QUOTES ) ) . '</a></h3></div></article></li>';
 }
 

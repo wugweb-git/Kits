@@ -23,6 +23,10 @@ if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL' ) ) {
 	);
 }
 
+if ( ! defined( 'DIRECTORYWEB_FF_DATES' ) ) {
+	define( 'DIRECTORYWEB_FF_DATES', defined( 'KITS_FF_DATES' ) ? KITS_FF_DATES : array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' ) );
+}
+
 if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL_HOSTS' ) ) {
 	define(
 		'DIRECTORYWEB_FF_SOCIAL_HOSTS',

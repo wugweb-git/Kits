@@ -164,5 +164,28 @@ $valid_req_unauth = (object) array( 'headers' => array( 'X-WP-Nonce' => 'valid_n
 $result = $unauth_func( $valid_req_unauth );
 check( $result instanceof WP_Error && 'rest_forbidden' === $result->code, 'directoryweb_rest_can returns WP_Error for missing capability' );
 
+// No unguarded call to a Kits Core function anywhere in the plugin: each `kits_*()` call has a function_exists() for the same name in the 60 lines above it (or is the readiness check for the shell).
+$bad = array();
+foreach ( glob( dirname( __DIR__ ) . '/includes/*.php' ) as $file ) {
+	if ( 'standalone-fallback.php' === basename( $file ) ) {
+		continue;
+	}
+	$lines = file( $file );
+	foreach ( $lines as $n => $line ) {
+		$code = preg_replace( '#\s//.*$#', '', preg_replace( '#^\s*(//|\*|/\*).*$#', '', $line ) );
+		if ( ! preg_match_all( '/(?<![\w>:\'"])(kits_[a-z_0-9]+)\s*\(/', $code, $m ) ) {
+			continue;
+		}
+		$above = implode( '', array_slice( $lines, max( 0, $n - 60 ), 61 ) );
+		foreach ( $m[1] as $fn ) {
+			if ( false === strpos( $above, "function_exists( '{$fn}' )" ) && false === strpos( $above, 'directoryweb_ui_ready' ) ) {
+				$bad[] = basename( $file ) . ':' . ( $n + 1 ) . " {$fn}";
+			}
+		}
+	}
+}
+check( empty( $bad ), 'no raw Kits Core call outside the fallback file' . ( empty( $bad ) ? '' : ': ' . implode( ', ', array_slice( $bad, 0, 8 ) ) ) );
+check( defined( 'DIRECTORYWEB_FF_DATES' ) && in_array( 'l_reg_date', DIRECTORYWEB_FF_DATES, true ), 'date-field list exists without Core' );
+
 echo sprintf( "%d checks, %d failed\n", $count, $fails );
 exit( $fails > 0 ? 1 : 0 );
