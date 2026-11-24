@@ -93,5 +93,31 @@ $tenant_css = kits_brand_compile_css( $presets['tech_modern']['tokens'] );
 brand_t( false !== strpos( $tenant_css, '--kit-color-accent: #2563EB;' ), 'Tech preset compiles accent' );
 brand_t( false !== strpos( $tenant_css, '--kit-color-bg: #F8FAFC;' ), 'Tech preset compiles bg canvas' );
 
+
+// 6. Defaults come from the theme, not from literals in this plugin
+$theme_file = dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/theme.json';
+if ( is_readable( $theme_file ) ) {
+	$theme_json = json_decode( (string) file_get_contents( $theme_file ), true );
+	$theme_set  = $theme_json['settings'];
+	$resolved   = kits_brand_resolve_defaults( $theme_set );
+	brand_t( '#C6D2E0' === $resolved['accent'], 'Resolved accent default is the theme primary (#C6D2E0), not the old literal' );
+	brand_t( '#F4F4F4' === $resolved['bg'] && '#0062b8' === $resolved['accent_ink'], 'Resolved canvas and accent ink come from the theme palette' );
+	brand_t( '8px' === $resolved['radius_control'] && '12px' === $resolved['radius_card'] && '9999px' === $resolved['radius_pill'], 'Resolved radii come from the theme radius presets' );
+	brand_t( '1200px' === $resolved['width_content'] && '1200px' === $resolved['width_wide'], 'Resolved layout widths come from the theme layout' );
+	brand_t( '' === kits_brand_compile_css( array( 'accent' => '#C6D2E0' ), $resolved ), 'A value equal to the theme default emits nothing' );
+	brand_t( '' === kits_brand_compile_css( array( 'accent' => '#c6d2e0' ), $resolved ), 'Hex comparison ignores case' );
+	brand_t( false !== strpos( kits_brand_compile_css( array( 'accent' => '#FFBE1A' ), $resolved ), '--wp--preset--color--primary: #FFBE1A;' ), 'The old literal default (#FFBE1A) now emits, because it differs from the theme' );
+
+	// The palette can arrive flat or keyed by origin; both resolve the same.
+	$flat   = $theme_set;
+	$keyed  = $theme_set;
+	$keyed['color']['palette'] = array( 'theme' => $theme_set['color']['palette'] );
+	brand_t( kits_brand_resolve_defaults( $keyed )['accent'] === kits_brand_resolve_defaults( $flat )['accent'], 'Origin-keyed palette resolves like a flat one' );
+	brand_t( 'inherit' === $resolved['font_display'], 'Tokens the theme does not define keep their built-in default' );
+} else {
+	echo "skip theme-default tests: theme.json not found\n";
+}
+brand_t( '' === kits_brand_compile_css( array( 'accent' => '#FFBE1A' ), array() ), 'With no resolved defaults, compile_css falls back to the built-in defaults (previous behaviour)' );
+
 echo "\nSummary: $count checks, $fails failures.\n";
 exit( $fails > 0 ? 1 : 0 );
