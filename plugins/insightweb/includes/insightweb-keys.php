@@ -421,8 +421,10 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'insightweb_keys_save' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$keys  = (array) wp_unslash( $_POST['keys'] ?? array() );
-		$clear = (array) wp_unslash( $_POST['clear'] ?? array() );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified above via check_admin_referer.
+		$keys  = isset( $_POST['keys'] ) ? (array) map_deep( wp_unslash( $_POST['keys'] ), 'sanitize_text_field' ) : array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified above via check_admin_referer.
+		$clear = isset( $_POST['clear'] ) ? (array) map_deep( wp_unslash( $_POST['clear'] ), 'sanitize_text_field' ) : array();
 		$in    = array();
 		$known = array_keys( insightweb_key_fields() );
 		foreach ( $keys as $name => $value ) {

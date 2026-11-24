@@ -88,7 +88,7 @@ function insightweb_dash_count( array $c ): array {
 		foreach ( INSIGHTWEB_DASH_RANGES as $n ) {
 			$c['ranges'][ $n ] = array(
 				'days'       => $n,
-				'from'       => function_exists( 'wp_date' ) ? wp_date( 'Y-m-d', time() - ( $n - 1 ) * DAY_IN_SECONDS ) : date( 'Y-m-d', time() - ( $n - 1 ) * 86400 ),
+				'from'       => function_exists( 'wp_date' ) ? wp_date( 'Y-m-d', time() - ( $n - 1 ) * DAY_IN_SECONDS ) : gmdate( 'Y-m-d', time() - ( $n - 1 ) * 86400 ),
 				'stored'     => 0,
 				'prevStored' => 0,
 				'clicks'     => 0,
