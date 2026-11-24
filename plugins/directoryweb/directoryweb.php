@@ -66,6 +66,7 @@ $directoryweb_includes = array(
 	'claims',
 	'claim-page',
 	'claims-review',
+	'claim-native', // standalone claim path: state machine, form, REST (no Fluent Forms)
 	'directoryweb-shape',
 	'directoryweb-dashboard',
 	'directoryweb-rest',
@@ -92,6 +93,7 @@ $directoryweb_includes = array(
 	'directoryweb-helplines',
 	'directoryweb-find-help',
 	'directoryweb-listing-finder',
+	'directoryweb-collection-filter',
 );
 foreach ( $directoryweb_includes as $directoryweb_include ) {
 	require_once DIRECTORYWEB_DIR . 'includes/' . $directoryweb_include . '.php';

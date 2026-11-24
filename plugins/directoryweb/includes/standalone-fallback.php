@@ -223,6 +223,10 @@ if ( ! function_exists( 'directoryweb_ff_form' ) ) {
 			$forms = get_option( 'aw_ff_forms', array() );
 			$id    = absint( $forms[ $key ] ?? 0 );
 		}
+		if ( ! $id && 'claim' === $key && function_exists( 'dw_claim_native_form' ) ) {
+			$listing = $ctx['listing'] ?? 0;
+			return dw_claim_native_form( is_object( $listing ) ? (int) $listing->ID : (int) $listing ); // no Fluent Forms form: the built-in claim form
+		}
 		if ( ! $id ) {
 			return current_user_can( 'manage_options' ) ? '<p class="notice notice-warning">' . esc_html__( 'Claim form not configured. Select a form in DirectoryWeb Settings.', 'directoryweb' ) . '</p>' : '';
 		}

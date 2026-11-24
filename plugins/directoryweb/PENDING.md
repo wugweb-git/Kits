@@ -20,7 +20,7 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
 2. **Unified Search & Facet System**:
    - ~~Harmonize homepage quick-search bar with `/directory/` faceted filter query engine.~~ ✅ Done (`find-help.php`, `directory.php`).
    - ~~Support URL state persistence for active filters (city, state, emergency care, verified status).~~ ✅ Done (`directory.php`).
-   - `kits/collection-filter` block replaces `[aw_directory_filter]` once Kits Core ships it (§0.2 of the plan). The shortcode stays until then.
+   - ✅ `directoryweb/collection-filter` block (24 Nov 2026, `includes/directoryweb-collection-filter.php`) renders the same `aw_directory_filter()` as the `[aw_directory_filter]` shortcode, which stays for existing content. Standalone: needs neither Kits Core nor SCF. `type` attribute is validated against known organisation types. Covered by `tests/collection-filter-tests.php`.
 
 3. **Listing Claim Flow (`docs/cc-master-plan-19-nov.md`)**:
    - ~~Frontend claim modal with verification document/email submission.~~ ✅ Done (`claim-page.php`, `claims.php`).
@@ -51,5 +51,11 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
    - ✅ `directoryweb/v1` routes: `dashboard`, `dashboard/count`, `stats/<tile>`, `claims`, `claims/<id>`, `settings`, `settings/claim-form`, `listings` (`directoryweb-rest.php`)
    - ✅ `manage_directoryweb` capability with grant + fallback (`directoryweb-caps.php`)
    - Open: the §2.4 requests to Kits Core first; the old Claims address 301 redirect.
+
+6a. **Native claims and claim states** (24 Nov 2026, `includes/claim-native.php`, `tests/claim-native-tests.php`):
+   - ✅ Standalone claim path with no Fluent Forms: `dw_claim_native_form()` is what `directoryweb_ff_form('claim')` returns when no form is configured and Kits Core is absent (Core's `kits_ff_form` still wins when present).
+   - ✅ State machine `pending → approved | rejected | withdrawn`, `approved → revoked`, `rejected/revoked → pending`; invalid moves return HTTP 409. Approval applies ticked fields through the existing `aw_claim_apply_field()` writer (enrichment log + Undo unchanged) and marks the listing verified; revoke removes the verified mark and sets `aw_needs_reverify`.
+   - ✅ Abuse limits: nonce, honeypot, 5 sends/IP/hour, max 3 open claims per email, one open claim per email per listing. Claims are private `aw_claim` posts; only `manage_directoryweb` can decide (metabox on the claim screen, or `POST directoryweb/v1/claims/<id>/transition`).
+   - Open: the Fluent Forms review path (`claims-review.php`) does not yet use the state table (it keeps its own pending/approved/rejected meta); the new Claims shell screen is still read-only and does not list native claims; claimant and reviewer emails are not sent for native claims (MailWeb bridge not wired); no claimant withdraw UI; no proof-document upload on the native form.
 
 7. **Deploy**: parent PR to `wordpress-dev` merges through the Deploy check; ship with `tools/kits-ship.sh`.

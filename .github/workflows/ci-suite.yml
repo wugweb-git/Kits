@@ -182,6 +182,8 @@ jobs:
           php plugins/directoryweb/tests/listing-meta-tests.php
           php plugins/directoryweb/tests/org-people-tests.php
           php plugins/directoryweb/tests/directoryweb-standalone-test.php
+          php plugins/directoryweb/tests/claim-native-tests.php
+          php plugins/directoryweb/tests/collection-filter-tests.php
           php plugins/directoryweb/tests/directoryweb-scf-fallback-test.php
 
       - name: Test InsightWeb
