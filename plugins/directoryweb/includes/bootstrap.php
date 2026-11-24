@@ -14,10 +14,26 @@ if ( ! defined( 'ABSPATH' ) ) {
  * them, aw_content_type_args()), and the core category on it, as Core's loop gave it.
  */
 function directoryweb_register_listing_type(): void {
-	if ( ! function_exists( 'aw_content_type_args' ) ) {
-		return;
+	if ( function_exists( 'aw_content_type_args' ) ) {
+		$args = aw_content_type_args( 'aw_listing' );
+	} else {
+		// Standalone (no Animal Writes Core): a plain public listing type, so a fresh install can create listings.
+		// The identifier stays `aw_listing`; sites that run Core keep the arguments Core builds above.
+		$args = array(
+			'labels'       => array(
+				'name'          => __( 'Listings', 'directoryweb' ),
+				'singular_name' => __( 'Listing', 'directoryweb' ),
+			),
+			'public'       => true,
+			'show_in_rest' => true,
+			'has_archive'  => 'directory',
+			'rewrite'      => array( 'slug' => 'directory' ),
+			'menu_icon'    => 'dashicons-location',
+			'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields', 'revisions' ),
+			'taxonomies'   => array( 'category' ),
+		);
 	}
-	register_post_type( 'aw_listing', aw_content_type_args( 'aw_listing' ) );
+	register_post_type( 'aw_listing', $args );
 	register_taxonomy_for_object_type( 'category', 'aw_listing' );
 }
 /** One flush of the rewrite rules after the first deploy of a version (the Directory addresses come from this plugin now). */
