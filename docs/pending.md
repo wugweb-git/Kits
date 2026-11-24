@@ -10,8 +10,8 @@ As part of the Wugweb Monorepo and Kits Suite standardization, pending tasks are
    - **DirectoryWeb**: [`plugins/directoryweb/PENDING.md`](../plugins/directoryweb/PENDING.md) (Data model decoupling, search & facet harmonization, 3-step listing claim flow)
    - **RankWeb**: [`plugins/rankweb/PENDING.md`](../plugins/rankweb/PENDING.md) (Editor sidebar, breadcrumbs block, auto-linker, schema JSON-LD)
    - **MailWeb**: [`plugins/mailweb/PENDING.md`](../plugins/mailweb/PENDING.md) (Hostinger Mail API transport fallback, daily DNS DKIM/SPF telemetry cron, sender profiles)
-   - **SourceWeb**: [`plugins/sourceweb/PENDING.md`](../plugins/sourceweb/PENDING.md) (Content reprint engine, feed ingestion, auto-rejection rules)
-   - **InsightWeb**: [`plugins/insightweb/PENDING.md`](../plugins/insightweb/PENDING.md) (SVG MiniCharts, empty-state dashboard tiles, keyword action plan tracking)
+   - **SourceWeb**: Consolidated below in `docs/pending.md` (formerly `plugins/sourceweb/PENDING.md`)
+   - **InsightWeb**: Consolidated below in `docs/pending.md` (formerly `plugins/insightweb/PENDING.md`)
    - **PlanWeb**: [`plugins/planweb/PENDING.md`](../plugins/planweb/PENDING.md) (Editorial calendar drag-and-drop, timeline visualization)
 2. **Animal Writes Site Operations & Content Roadmap**:
    - Comprehensive detail: [`docs/animalwrites-operations-and-content-pending.md`](animalwrites-operations-and-content-pending.md)
@@ -62,6 +62,30 @@ Details: `docs/release/ci-packaging-playground-release.md`. Commit `2acac68` rep
 - ✅ **DirectoryWeb standalone listing type:** `aw_content_type_args()` exists nowhere in the monorepo, so `aw_listing` never registered standalone and the old fixture was silently skipped. Fixed with a fallback registration (`75a0a88`); CI smoke confirms the fixture is created.
 - ⏳ **GitHub prerelease:** published by `.github/workflows/release.yml` once CI is green on the release commit.
 - Still open (product work): DirectoryWeb collection/filter block and claim-state transitions; RankWeb editor sidebar, XML sitemap and Rank Math de-duplication; the shared PHP SDK adoption decision (no product consumes it yet). Theme, SourceWeb, and InsightWeb tracks completed under Antigravity workstream (SourceWeb: worker retry exponential backoff, domain trust overrides, feed tag exclusions, standalone fallback UI; InsightWeb: daily telemetry cron hook, credential connection diagnostics, structured empty states).
+
+### SourceWeb & InsightWeb (Consolidated Status & Remaining Items)
+
+All pending/roadmap tracking for **SourceWeb** (`plugins/sourceweb/`) and **InsightWeb** (`plugins/insightweb/`) is consolidated here:
+
+- **SourceWeb — Built & Operational (24 Nov 2026):**
+  - ✅ Reprint engine controls: canonical URL enforcement, author attribution cards, and keyword tagging (`attribution.php`, `relevance.php`, `keywords-model.php`).
+  - ✅ Ingestion queue & rules: auto-review/autoresolve rules, domain allow/block lists, `wp_safe_remote_get` rate limiting (`ingest.php`, `source-sites.php`, `auto-review.php`).
+  - ✅ Automated worker retry exponential backoff on rate limits / 502 / 503 timeouts (`aw_worker_retry_backoff`, `aw_worker_is_in_backoff`, `aw_worker_clear_backoff` in `workers.php` and `sourcing-lists.php`).
+  - ✅ Domain trust overrides (`aw_rules_domain_override_save`, `delete`, `aw_rules_domain_overrides`) and custom feed tag exclusions (`aw_rules_feed_excluded_tags_save`, `aw_rules_feed_excluded_tags` enforced in `aw_auto_review()`).
+  - ✅ Native WP Admin fallback screens with empty states and single-item review handler (`sourceweb-ui.php`, `review-queue.php`), decoupled from DirectoryWeb & InsightWeb (`480/480` checks passing).
+- **SourceWeb — Remaining / Deferred:**
+  - **AI Model Router (Free/Open Models Only):** Held / owner-gated; paid models remain prohibited.
+  - **Full `aw_*` DB/Route Rename:** Intentionally deferred by owner rule to preserve live data (`aw_enrich`, `aw_sources`) and external worker routes (`aw/v1/*`).
+
+- **InsightWeb — Built & Operational (24 Nov 2026):**
+  - ✅ Dashboard tiles & inline SVG MiniCharts with strict empty-state telemetry (`empty => true, is_mock: false`) across all 6 tiles (`insightweb-dashboard.php`, `insightweb-rest.php`).
+  - ✅ Monthly rankings CSV export (`aw_si_snapshot_csv`), markdown keyword map (`snapshot.php`), and Kits settings transfer (`insightweb_kits_export`).
+  - ✅ Automated daily telemetry cron hook (`INSIGHTWEB_CRON_TELEMETRY` / `insightweb_daily_telemetry_cron`) wired to `insightweb_daily_telemetry_refresh()`.
+  - ✅ Service credentials diagnostics (`insightweb_check_service_status()`), native Settings rows (`insightweb-keys.php`), `insightweb/v1/keys` REST route, and `insightweb_keys_copy()` / `wp insightweb keys copy|status`.
+  - ✅ Standalone operation without Kits Core or Rank Math (`150/150` checks passing) and `sourceweb_push_keywords` emit (`sourcing-push.php`).
+- **InsightWeb — Remaining / Deferred:**
+  - **Search Insights Integration:** Step 0–9 keyword action plan dashboard surfacing (rising queries & declining keywords) and 404/internal search query dashboard surfacing.
+  - **Retire `aw_keys` Fallback (`docs/plugins/keys-per-plugin.md` Stage 3 Step 2):** Owner-gated until live migration verification confirms all keys are in `insightweb_keys`.
   - Standalone fallback layers are always required safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
   - Fully compatible with symlinked plugins, custom directory names, Bedrock, and alternative file structures.
 - ✅ **Fix 5 (Low — Translation Domain Scoping):**
