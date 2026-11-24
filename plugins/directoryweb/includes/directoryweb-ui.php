@@ -320,12 +320,14 @@ function directoryweb_dashboard_native_page(): void {
 	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_status=draft&post_type=aw_listing' ) ) . '" class="button button-secondary">' . esc_html__( 'View Drafts', 'directoryweb' ) . '</a></p>';
 	echo '</div>';
 
-	// Places card
-	echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
-	echo '<h2 style="margin-top:0;">' . esc_html__( 'Places', 'directoryweb' ) . '</h2>';
-	echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $places ) ) . '</p>';
-	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_place' ) ) . '" class="button button-secondary">' . esc_html__( 'Manage Places', 'directoryweb' ) . '</a></p>';
-	echo '</div>';
+	// Places card: only where the place type exists (it is not registered on a standalone site), or its links lead nowhere.
+	if ( post_type_exists( 'aw_place' ) ) {
+		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Places', 'directoryweb' ) . '</h2>';
+		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $places ) ) . '</p>';
+		echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_place' ) ) . '" class="button button-secondary">' . esc_html__( 'Manage Places', 'directoryweb' ) . '</a></p>';
+		echo '</div>';
+	}
 
 	echo '</div>';
 
@@ -334,7 +336,12 @@ function directoryweb_dashboard_native_page(): void {
 	echo '<h2 style="margin-top:0;">' . esc_html__( 'Quick Actions', 'directoryweb' ) . '</h2>';
 	echo '<p>';
 	echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_listing' ) ) . '" class="button button-primary" style="margin-right:8px;">' . esc_html__( 'Add New Listing', 'directoryweb' ) . '</a> ';
-	echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_place' ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Add New Place', 'directoryweb' ) . '</a> ';
+	if ( post_type_exists( 'aw_place' ) ) {
+		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_place' ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Add New Place', 'directoryweb' ) . '</a> ';
+	}
+	if ( current_user_can( DIRECTORYWEB_CAP ) && defined( 'DW_CLAIMS_LINK' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability
+		echo '<a href="' . esc_url( admin_url( DW_CLAIMS_LINK ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Review Claims', 'directoryweb' ) . '</a> ';
+	}
 	echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . DIRECTORYWEB_SETTINGS_PAGE ) ) . '" class="button button-secondary">' . esc_html__( 'DirectoryWeb Settings', 'directoryweb' ) . '</a>';
 	echo '</p>';
 	echo '</div>';
@@ -412,5 +419,38 @@ function directoryweb_settings_native_page(): void {
 	echo '<p class="submit"><input type="submit" name="submit" id="submit" class="button button-primary" value="' . esc_attr__( 'Save Changes', 'directoryweb' ) . '"></p>';
 	echo '</div>';
 	echo '</form>';
+	directoryweb_claim_status_card();
+	echo '</div>';
+}
+
+/** Standalone Settings: a read-only card with the live state of the claim path. */
+function directoryweb_claim_status_card(): void {
+	if ( ! function_exists( 'dw_claim_diagnostics' ) ) {
+		return;
+	}
+	$d    = dw_claim_diagnostics();
+	$yes  = __( 'Yes', 'directoryweb' );
+	$no   = __( 'No', 'directoryweb' );
+	$rows = array(
+		__( 'Claim path', 'directoryweb' )         => 'built-in' === $d['mode'] ? __( 'Built-in form', 'directoryweb' ) : __( 'Fluent Forms', 'directoryweb' ),
+		__( 'Fluent Forms active', 'directoryweb' ) => $d['fluent_forms'] ? $yes : $no,
+		__( 'Claim page published', 'directoryweb' ) => $d['page_live'] ? $yes : $no,
+		__( 'Claim emails', 'directoryweb' )       => $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ),
+		__( 'New-claim emails go to', 'directoryweb' ) => $d['notify_to'] . ( '' === $d['notify_stored'] ? ' ' . __( '(site admin email)', 'directoryweb' ) : '' ),
+		/* translators: 1: open claims per email, 2: submissions per hour. */
+		__( 'Limits', 'directoryweb' )             => sprintf( __( '%1$d open claims per email; %2$d submissions per hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ),
+	);
+	foreach ( $d['counts'] as $state => $n ) {
+		/* translators: %s: claim state. */
+		$rows[ sprintf( __( 'Claims %s', 'directoryweb' ), $state ) ] = number_format_i18n( $n );
+	}
+	echo '<div class="card" id="directoryweb-claim-status" style="max-width:800px; margin-top:20px; padding:20px;">';
+	echo '<h2 style="margin-top:0;">' . esc_html__( 'Claim status', 'directoryweb' ) . '</h2>';
+	echo '<table class="widefat striped" role="presentation"><tbody>';
+	foreach ( $rows as $label => $value ) {
+		echo '<tr><th scope="row" style="width:40%">' . esc_html( $label ) . '</th><td>' . esc_html( $value ) . '</td></tr>';
+	}
+	echo '</tbody></table>';
+	echo '<p class="description">' . esc_html__( 'Read live from your settings and claims each time this page opens.', 'directoryweb' ) . '</p>';
 	echo '</div>';
 }

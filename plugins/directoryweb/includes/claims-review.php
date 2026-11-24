@@ -334,6 +334,11 @@ add_action(
 	function () {
 		global $submenu;
 		if ( ! aw_claims_in_forms() ) {
+			// No Fluent Forms menu (standalone, or with Kits Core and no forms plugin): Claims is an item of the DirectoryWeb menu.
+			// Its parent, Directory, is no longer a top-level menu, so the item registered above would be unreachable from the menu.
+			if ( current_user_can( DIRECTORYWEB_CAP ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
+				add_submenu_page( DIRECTORYWEB_PAGE, __( 'Claims', 'directoryweb' ), __( 'Claims', 'directoryweb' ), DIRECTORYWEB_CAP, DW_CLAIMS_LINK ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
+			}
 			return;
 		}
 		remove_submenu_page( 'edit.php?post_type=aw_listing', 'aw-claims' ); // the screen stays registered at its address
@@ -355,7 +360,10 @@ add_filter(
 	'parent_file',
 	function ( $parent ) {
 		global $plugin_page;
-		return 'aw-claims' === $plugin_page && aw_claims_in_forms() ? 'fluent_forms' : $parent;
+		if ( 'aw-claims' === $plugin_page ) {
+			return aw_claims_in_forms() ? 'fluent_forms' : DIRECTORYWEB_PAGE;
+		}
+		return $parent;
 	},
 	PHP_INT_MAX - 1
 );
@@ -363,7 +371,7 @@ add_filter(
 	'submenu_file',
 	function ( $file ) {
 		global $plugin_page;
-		return 'aw-claims' === $plugin_page && aw_claims_in_forms() ? DW_CLAIMS_LINK : $file;
+		return 'aw-claims' === $plugin_page ? DW_CLAIMS_LINK : $file;
 	},
 	PHP_INT_MAX - 1
 );

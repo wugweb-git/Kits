@@ -632,3 +632,46 @@ function directoryweb_ensure_claim_page(): int {
 	update_option( 'directoryweb_claim_page', (int) $id, false );
 	return (int) $id;
 }
+
+/* ---------- Diagnostics: live claim state, for the standalone Settings page and the Kits shell ---------- */
+
+/**
+ * What the claim path is doing right now, read from the live settings and data (nothing cached, nothing assumed).
+ * No claimant details: counts and configuration only.
+ *
+ * @return array{mode:string, fluent_forms:bool, page_id:int, page_live:bool, page_url:string, mail_on:bool, notify_stored:string, notify_to:string, counts:array<string,int>, total:int, max_open_per_email:int, max_sends_per_hour:int}
+ */
+function dw_claim_diagnostics(): array {
+	global $wpdb;
+	$counts = array_fill_keys( array_keys( DW_CLAIM_TRANSITIONS ), 0 );
+	$rows   = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->prepare(
+			"SELECT m.meta_value AS status, COUNT(*) AS n FROM {$wpdb->postmeta} m INNER JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = %s AND p.post_type = %s AND p.post_status <> %s GROUP BY m.meta_value",
+			'_dw_claim_status',
+			'aw_claim',
+			'trash'
+		)
+	);
+	foreach ( (array) $rows as $r ) {
+		if ( isset( $counts[ $r->status ] ) ) {
+			$counts[ $r->status ] = (int) $r->n;
+		}
+	}
+	$page_id  = (int) get_option( 'directoryweb_claim_page', 0 );
+	$page_live = $page_id && 'page' === get_post_type( $page_id ) && 'publish' === get_post_status( $page_id );
+	$stored   = (string) get_option( 'directoryweb_claim_notify_to', '' );
+	return array(
+		'mode'               => dw_claim_native_active() ? 'built-in' : 'fluent_forms',
+		'fluent_forms'       => defined( 'FLUENTFORM' ),
+		'page_id'            => $page_id,
+		'page_live'          => (bool) $page_live,
+		'page_url'           => $page_live ? (string) get_permalink( $page_id ) : '',
+		'mail_on'            => '1' === (string) get_option( 'aw_ff_send_email', '0' ),
+		'notify_stored'      => $stored,
+		'notify_to'          => '' !== $stored && is_email( $stored ) ? $stored : (string) get_option( 'admin_email' ),
+		'counts'             => $counts,
+		'total'              => array_sum( $counts ),
+		'max_open_per_email' => DW_CLAIM_MAX_OPEN_PER_EMAIL,
+		'max_sends_per_hour' => DW_CLAIM_MAX_SENDS_PER_HOUR,
+	);
+}

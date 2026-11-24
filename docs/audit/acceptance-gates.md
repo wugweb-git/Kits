@@ -30,7 +30,8 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] B Kits Core shell Claims list and detail open `#claim-dw-<id>` (24 Nov)
 - [x] B Public claim form POST in a browser: invalid shows messages and keeps what was typed; valid reaches `dw_claim=sent` (25 Nov, Playground)
 - [x] B Reject then Re-open from the claim edit screen; history logged; illegal moves 409 on REST and checked by `dw_claim_can_transition` in the decide handler (25 Nov)
-- [ ] U/H Rate limits and per-email caps exercised over HTTP
+- [x] H Rate limits and per-email caps over real HTTP (`tools/playground/http-claim-limits.py`, extracted directoryweb.zip, 17/17): valid post 302 sent; same listing refused; upper-case email counted as the same person; 4th open claim refused by the per-email cap (3); 6th attempt in an hour refused by the IP cap (5) even with a fresh email; spoofed X-Forwarded-For/Client-IP/X-Real-IP do not bypass; cap persists across requests and clears with its counter; filled honeypot stores nothing and does not use the allowance; wrong or cross-listing nonce refused. Known limitation, behaviour unchanged: the per-email cap keys on the exact address, so `name+tag@` variants are separate (25 Nov)
+- [ ] X Anonymous vs logged-in submission over HTTP: Playground answers every request as an administrator, so the `nopriv` and logged-in paths cannot be told apart; both hooks call one handler (code-reviewed, not exercised separately)
 - [x] H Subscriber, editor and anonymous get 401/403 on claim list and transition (journey, 28 checks). Browser role switching not possible: Playground treats every request as admin
 - [x] B/U Claim emails captured via `pre_wp_mail`: received (claimant), new claim with working review link (owner), decision (claimant); none on re-open (25 Nov)
 - [ ] X Claim email delivery through a real transport (classify: not testable in Playground unless an SMTP sink is reachable)
@@ -44,9 +45,10 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 
 ### Settings, diagnostics, lifecycle
 - [x] B Standalone settings save (claim emails, notify address) and persist across reload and deactivate/reactivate. With Kits Core: shell Settings not re-tested this round
-- [ ] B Diagnostics/status shows real state (claim mail on/off, forms, counts)
+- [x] B Diagnostics: `dw_claim_diagnostics()` reads live state (claim path, claim page published, email on/off, notify address or admin-email fallback, counts per state, limits). Shown on standalone Settings and as a Claims row in the Kits shell Settings payload; admin-only, no claimant details. Journey checks: counts move with new/trashed claims, email and notify follow the settings, card leaks no claimant email, subscriber gets 403 on the settings route (37 journey checks, extracted ZIP, 25 Nov)
+- [ ] X Kits shell Settings: new Claims row rendered by the React screen in a browser: not verified (Playground login would not carry over to the suite instance). Payload verified in PHP only
 - [x] B Deactivate then reactivate: claim, settings, `/claim/` page and block page intact (25 Nov)
-- [ ] B Admin navigation and onboarding without Kits Core (standalone) free of dead links
+- [x] B Admin navigation, standalone and with Kits Core (`tools/playground/admin-nav-audit.py`, HTTP, extracted ZIPs): every DirectoryWeb menu item and in-page admin link returns 200 with no fatal, notice, bounce or permission error (standalone 13 pages, with Kits Core 10 pages). Two confirmed defects fixed: Claims had no menu entry without Fluent Forms (its parent menu is hidden), and Dashboard Places links/card pointed at a post type that does not exist standalone (500). Shell screens drawn by JavaScript are not covered by this audit
 - [x] B No DirectoryWeb console errors; remaining errors are Playground environment (blocked external loads, heartbeat)
 
 ### Gate

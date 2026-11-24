@@ -789,6 +789,26 @@ function directoryweb_fact( string $label, string $value, string $where = '' ): 
 	);
 }
 
+/** The Settings row for the built-in claim path: live state, read each time. */
+function directoryweb_claim_status_service(): array {
+	$d = dw_claim_diagnostics();
+	return array(
+		'slug'    => 'claims-status',
+		'name'    => __( 'Claims', 'directoryweb' ),
+		'status'  => 'built-in' === $d['mode'] ? __( 'Built-in form', 'directoryweb' ) : __( 'Fluent Forms', 'directoryweb' ),
+		'tone'    => $d['page_live'] || 'fluent_forms' === $d['mode'] ? '' : 'warn',
+		/* translators: 1: pending claims, 2: all claims. */
+		'summary' => sprintf( __( '%1$s waiting for review, %2$s in all.', 'directoryweb' ), number_format_i18n( $d['counts']['pending'] ), number_format_i18n( $d['total'] ) ),
+		'facts'   => array(
+			directoryweb_fact( __( 'Claim page published', 'directoryweb' ), $d['page_live'] ? __( 'Yes', 'directoryweb' ) : __( 'No', 'directoryweb' ) ),
+			directoryweb_fact( __( 'Claim emails', 'directoryweb' ), $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), __( 'Set under DirectoryWeb → Settings', 'directoryweb' ) ),
+			directoryweb_fact( __( 'New-claim emails go to', 'directoryweb' ), $d['notify_to'] ),
+			/* translators: 1: open claims per email, 2: submissions per hour. */
+			directoryweb_fact( __( 'Limits', 'directoryweb' ), sprintf( __( '%1$d open per email; %2$d submissions an hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ) ),
+		),
+	);
+}
+
 /** The connected services, then the groups, with today's values. */
 function directoryweb_settings_payload(): array {
 	$num   = fn( $n ) => number_format_i18n( (int) $n );
@@ -878,6 +898,7 @@ function directoryweb_settings_payload(): array {
 				),
 			),
 		),
+		directoryweb_claim_status_service(),
 		array(
 			'slug'    => 'fluentcrm',
 			'name'    => __( 'FluentCRM', 'directoryweb' ),

@@ -72,3 +72,8 @@ Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U 
 | Claim proof upload | **Not built, deferred** | Claims work without proof. An upload needs MIME and size validation, private storage and an access check, and a security review before it ships. | Security design, then a native upload field with validation tests |
 
 None of the three blocks standalone DirectoryWeb. They stay out of "done" until built and verified.
+
+## Claim diagnostics, limits and navigation (25 Nov 2026)
+- ✅ `dw_claim_diagnostics()`: live claim state on standalone Settings and as a Claims row in the Kits shell Settings payload. Browser rendering of the shell row: **unverified (X)**.
+- ✅ Claim limits verified over HTTP (`tools/playground/http-claim-limits.py`). Known limitation, unchanged: the per-email cap matches the exact address, so plus-address variants count separately. Anonymous and logged-in submissions share one handler; Playground cannot separate them (**X**).
+- ✅ Navigation audited standalone and with Kits Core (`tools/playground/admin-nav-audit.py`). Fixed: Claims menu entry without Fluent Forms; Dashboard Places links when the place type is absent.

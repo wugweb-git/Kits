@@ -114,6 +114,42 @@ if ( $listing ) {
 	$nonce = wp_create_nonce( 'wp_rest' );
 	$blk = do_blocks( '<!-- wp:directoryweb/collection-filter /-->' );
 	$c( 'collection-filter block renders on the front end', false !== strpos( $blk, 'wp-block-directoryweb-collection-filter' ), substr( wp_strip_all_tags( $blk ), 0, 80 ) );
+	unset( $post ); // the journey's REST helper shares its name with WordPress's global $post, which trashing a post touches
+	try {
+		// Diagnostics read live state.
+		$d0 = dw_claim_diagnostics();
+		$c( 'diagnostics: the revoked claim is counted, nothing pending', 1 === $d0['counts']['revoked'] && 0 === $d0['counts']['pending'] && 1 === $d0['total'], wp_json_encode( $d0['counts'] ) );
+		$cid2 = dw_claim_create( $lid, array( 'name' => 'Ravi', 'email' => 'ravi@example.org', 'role' => 'staff', 'l_area' => 'Koramangala' ) );
+		$d1 = dw_claim_diagnostics();
+		$c( 'diagnostics: a new claim moves the pending count', ! is_wp_error( $cid2 ) && 1 === $d1['counts']['pending'] && 2 === $d1['total'] );
+		update_option( 'aw_ff_send_email', '0' );
+		$off = dw_claim_diagnostics()['mail_on'];
+		update_option( 'aw_ff_send_email', '1' );
+		$c( 'diagnostics: claim email state follows the setting', false === $off && true === dw_claim_diagnostics()['mail_on'] );
+		update_option( 'directoryweb_claim_notify_to', 'desk@example.org' );
+		$d2 = dw_claim_diagnostics();
+		update_option( 'directoryweb_claim_notify_to', '' );
+		$d3 = dw_claim_diagnostics();
+		$c( 'diagnostics: notify address is the stored one, else the site admin email', 'desk@example.org' === $d2['notify_to'] && get_option( 'admin_email' ) === $d3['notify_to'] && '' === $d3['notify_stored'] );
+		wp_trash_post( $cid2 );
+		$c( 'diagnostics: a trashed claim is not counted', 0 === dw_claim_diagnostics()['counts']['pending'] );
+		wp_untrash_post( $cid2 );
+		ob_start(); directoryweb_claim_status_card(); $card = ob_get_clean();
+		$c( 'standalone Settings card shows the status and no claimant details', false !== strpos( $card, 'Claim status' ) && false !== strpos( $card, 'Built-in form' ) && false === strpos( $card, 'asha@example.org' ) && false === strpos( $card, 'ravi@example.org' ) );
+		$svc = array_column( directoryweb_settings_payload()['services'], null, 'slug' );
+		$c( 'Kits shell Settings payload carries the claims status row', isset( $svc['claims-status'] ) && ! empty( $svc['claims-status']['facts'] ) );
+		$sreq = new WP_REST_Request( 'GET', '/directoryweb/v1/settings' );
+		$sreq->set_header( 'X-WP-Nonce', $nonce );
+		$c( 'admin can read the settings route', 200 === rest_do_request( $sreq )->get_status() );
+		$uid = wp_insert_user( array( 'user_login' => 'dw_sub2', 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
+		wp_set_current_user( $uid );
+		$sreq2 = new WP_REST_Request( 'GET', '/directoryweb/v1/settings' );
+		$sreq2->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$c( 'subscriber cannot read the settings route', in_array( rest_do_request( $sreq2 )->get_status(), array( 401, 403 ), true ) );
+		wp_set_current_user( 1 );
+	} catch ( Throwable $e ) {
+		$c( 'diagnostics block ran without a fatal', false, $e->getMessage() . ' @' . basename( $e->getFile() ) . ':' . $e->getLine() );
+	}
 }
 """,
     },
