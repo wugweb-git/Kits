@@ -10,5 +10,5 @@ return array(
 		'wp-element',
 		'wp-i18n'
 	),
-	'version' => '6efb150cb379809afe06'
+	'version' => '948e6baaf5348f8bf329'
 );

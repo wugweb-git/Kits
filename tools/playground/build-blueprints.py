@@ -91,6 +91,8 @@ if ( $listing ) {
 	$c( 'illegal transition returns 409', 409 === $bad->get_status(), (string) $bad->get_status() );
 	$ok = $post( 'approved' );
 	$c( 'approve via REST', 200 === $ok->get_status(), (string) $ok->get_status() );
+	ob_start(); dw_claim_metabox( get_post( $cid ) ); $box = ob_get_clean();
+	$c( 'claim review box renders after approval (no fatal, shows state and applied phone)', false !== strpos( $box, 'approved' ) && false !== strpos( $box, '98765' ), substr( wp_strip_all_tags( $box ), 0, 120 ) );
 	$c( 'approval verifies listing and applies area', (bool) get_post_meta( $lid, 'aw_verified', true ) && 'Indiranagar' === get_post_meta( $lid, 'aw_area', true ) );
 	$rv = $post( 'revoked' );
 	$c( 'revoke via REST removes verified mark', 200 === $rv->get_status() && ! get_post_meta( $lid, 'aw_verified', true ) );

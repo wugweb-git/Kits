@@ -27,8 +27,16 @@ function is_wp_error( $x ) { return $x instanceof WP_Error; }
 $GLOBALS['posts'] = array();
 $GLOBALS['meta']  = array();
 $GLOBALS['next']  = 100;
-function add_action( ...$a ) {}
-function do_action( ...$a ) {}
+$GLOBALS['hooks'] = array();
+function add_action( $tag, $fn, $prio = 10, $args = 1 ) { $GLOBALS['hooks'][ $tag ][] = array( $fn, $args ); }
+function do_action( $tag, ...$a ) { foreach ( $GLOBALS['hooks'][ $tag ] ?? array() as $h ) { $h[0]( ...array_slice( $a, 0, $h[1] ) ); } }
+function apply_filters( $tag, $v ) { return $v; }
+$GLOBALS['opts'] = array( 'admin_email' => 'owner@example.org', 'aw_ff_send_email' => '1' );
+function get_option( $k, $d = false ) { return $GLOBALS['opts'][ $k ] ?? $d; }
+$GLOBALS['mails'] = array();
+function wp_mail( $to, $subject, $body ) { $GLOBALS['mails'][] = compact( 'to', 'subject', 'body' ); return true; }
+function wp_strip_all_tags( $s ) { return strip_tags( (string) $s ); }
+function get_edit_post_link( $id, $c = '' ) { return "https://example.test/wp-admin/post.php?post=$id&action=edit"; }
 function add_meta_box( ...$a ) {}
 function sanitize_text_field( $s ) { return trim( strip_tags( (string) $s ) ); }
 function sanitize_textarea_field( $s ) { return trim( strip_tags( (string) $s ) ); }
@@ -122,6 +130,25 @@ foreach ( array( 'b', 'c', 'd', 'e' ) as $i => $x ) {
 	$res = dw_claim_create( 10 + $i, array_merge( $good, array( 'email' => 'many@example.org' ) ) );
 }
 check( is_wp_error( $res ) && 'dw_claim_limit' === $res->code, 'one email cannot hold more than ' . DW_CLAIM_MAX_OPEN_PER_EMAIL . ' open claims' );
+
+echo "Emails\n";
+$m = $GLOBALS['mails'];
+check( count( $m ) >= 2 && 'asha@example.org' === $m[0]['to'] && 'owner@example.org' === $m[1]['to'], 'claim creation emails claimant and site owner' );
+$GLOBALS['mails'] = array();
+$GLOBALS['posts'][30] = array( 'type' => 'aw_listing', 'status' => 'publish', 'title' => "Evil\r\nBcc: x@y.z" );
+$eid = dw_claim_create( 30, array_merge( $good, array( 'email' => 'eve@example.org' ) ) );
+check( false === strpbrk( $GLOBALS['mails'][0]['subject'], "\r\n" ), 'subject is header-safe (no CR/LF)' );
+$GLOBALS['mails'] = array();
+dw_claim_transition( $eid, 'approved', 7 );
+check( 1 === count( $GLOBALS['mails'] ) && 'eve@example.org' === $GLOBALS['mails'][0]['to'] && false !== strpos( $GLOBALS['mails'][0]['body'], 'approved' ), 'approval emails the claimant' );
+$GLOBALS['mails'] = array();
+dw_claim_transition( $eid, 'revoked', 7 );
+dw_claim_transition( $eid, 'pending', 7 );
+check( 1 === count( $GLOBALS['mails'] ), 're-opening a claim sends no email (revoke did)' );
+$GLOBALS['mails'] = array(); $GLOBALS['opts']['aw_ff_send_email'] = '0';
+$GLOBALS['posts'][31] = array( 'type' => 'aw_listing', 'status' => 'publish', 'title' => 'Quiet' );
+dw_claim_create( 31, array_merge( $good, array( 'email' => 'quiet@example.org' ) ) );
+check( 0 === count( $GLOBALS['mails'] ), 'no email while "Emails from forms and claims" is off' );
 
 echo "\n$pass passed, $fail failed\n";
 exit( $fail ? 1 : 0 );

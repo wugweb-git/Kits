@@ -119,7 +119,7 @@ function aw_claim_now( $lid, $key, $public = true ) {
 	}
 	switch ( $def[1] ) {
 		case 'phones':
-			return implode( "\n", array_map( fn( $r ) => kits_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), directoryweb_listing_phones( $lid ) ) );
+			return implode( "\n", array_map( fn( $r ) => directoryweb_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), directoryweb_listing_phones( $lid ) ) );
 		case 'hours':
 			return aw_claim_hours_text( $lid );
 		case 'services':
@@ -158,7 +158,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				$row = directoryweb_listing_phones( $lid )[ (int) $m[1] - 1 ] ?? null;
 				if ( $row ) {
 					$part                        = $m[2] ?? '';
-					$ten                         = kits_ff_phone10( $row['number'] ); // the 10 digits after the +91 in front of the box
+					$ten                         = directoryweb_ff_phone10( $row['number'] ); // the 10 digits after the +91 in front of the box
 					$data['attributes']['value'] = '_wa' === $part ? ( $row['whatsapp'] ? array( '1' ) : array() ) : ( '_label' === $part ? $row['label'] : ( '' !== $ten ? $ten : $row['number'] ) );
 				}
 				return $data;
@@ -169,8 +169,8 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 			}
 			if ( isset( DW_CLAIM_L[ $field ] ) ) {
 				$now = aw_claim_now( $lid, $field, true );
-				if ( isset( KITS_FF_SOCIAL[ $field ] ) && '' !== kits_ff_social_user( $field, $now ) ) {
-					$now = kits_ff_social_user( $field, $now ); // the username after the link shown in front of the box
+				if ( isset( KITS_FF_SOCIAL[ $field ] ) && '' !== directoryweb_ff_social_user( $field, $now ) ) {
+					$now = directoryweb_ff_social_user( $field, $now ); // the username after the link shown in front of the box
 				} elseif ( in_array( $field, KITS_FF_DATES, true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $now ) ) {
 					$now = wp_date( 'j M Y', strtotime( $now . ' 12:00:00' ) ); // the site's date format
 				}
@@ -231,14 +231,14 @@ function aw_claim_entry( $entry_id ) {
 			if ( 'phones' === $key ) {
 				$lines = array();
 				for ( $i = 1; $i <= 3; $i++ ) {
-					$num = kits_ff_phone_store( $s( "l_phone{$i}" ) );
+					$num = directoryweb_ff_phone_store( $s( "l_phone{$i}" ) );
 					if ( '' !== $num ) {
 						$lab     = $s( "l_phone{$i}_label" );
 						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'kits_ff_ticked' ) && kits_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
 					}
 				}
 				foreach ( array_slice( $lid ? directoryweb_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
-					$lines[] = kits_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
+					$lines[] = directoryweb_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' );
 				}
 				$propose['phones'] = implode( "\n", $lines );
 				continue;
@@ -291,9 +291,9 @@ function aw_claim_changes( $c ) {
 	$out = array();
 	foreach ( $c['propose'] as $key => $new ) {
 		$now   = aw_claim_now( $c['listing'], $key, false );
-		if ( isset( KITS_FF_SOCIAL[ $key ] ) && '' !== kits_ff_social_user( $key, $now ) && '' !== kits_ff_social_user( $key, $new ) ) {
-			$now = kits_ff_social_user( $key, $now ); // the link and its username are the same thing
-			$new = kits_ff_social_user( $key, $new );
+		if ( isset( KITS_FF_SOCIAL[ $key ] ) && '' !== directoryweb_ff_social_user( $key, $now ) && '' !== directoryweb_ff_social_user( $key, $new ) ) {
+			$now = directoryweb_ff_social_user( $key, $now ); // the link and its username are the same thing
+			$new = directoryweb_ff_social_user( $key, $new );
 		}
 		$loose = 'l_email' === $key || 0 === strpos( DW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', DW_CLAIM_L[ $key ][1] );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
@@ -511,7 +511,7 @@ function aw_claim_clean( $meta_key, $v ) {
 				return (string) esc_url_raw( preg_match( '#^https?://#i', $v ) ? $v : 'https://' . $v ); // a link the username box cannot hold (a YouTube channel, a LinkedIn /in/ profile)
 			}
 			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], KITS_FF_SOCIAL ), true );
-			$user  = '' !== $field ? kits_ff_social_user( $field, $v ) : '';
+			$user  = '' !== $field ? directoryweb_ff_social_user( $field, $v ) : '';
 			return '' !== $user ? sprintf( KITS_FF_SOCIAL[ $field ][1], rawurlencode( $user ) ) : '';
 		case 'aw_founded':
 			return preg_match( '/^(18|19|20)\d{2}$/', $v ) ? $v : '';
@@ -649,9 +649,12 @@ add_action(
 		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! check_admin_referer( 'aw_claim_ff_decide_' . $id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
-		$c = aw_claim_entry( $id );
-		if ( ! $c || ! $c['listing'] || 'pending' !== (string) ( $c['review']['status'] ?? 'pending' ) ) {
-			wp_die( 'This claim was already decided, or its listing is missing.', 400 );
+		$c    = aw_claim_entry( $id );
+		$want = isset( $_POST['do_approve'] ) ? 'approved' : 'rejected';
+		// The state table (claim-native.php) decides whether this move is allowed; a form claim only moves out of 'pending' here.
+		$can = $c && $c['listing'] && ( function_exists( 'dw_claim_can_transition' ) ? dw_claim_can_transition( (string) ( $c['review']['status'] ?? 'pending' ), $want ) : 'pending' === (string) ( $c['review']['status'] ?? 'pending' ) );
+		if ( ! $can ) {
+			wp_die( 'This claim was already decided, or its listing is missing.', 409 );
 		}
 		$lid    = $c['listing'];
 		$review = array( 'by' => get_current_user_id(), 'at' => current_time( 'mysql' ) );

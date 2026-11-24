@@ -197,6 +197,7 @@ jobs:
         run: |
           php plugins/rankweb/tests/run.php
           php plugins/rankweb/tests/phpunit-lite.php
+          node plugins/rankweb/tests/sidebar-score.test.js
 
       - name: Test MailWeb
         if: ${{ needs.changes.outputs.mailweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}

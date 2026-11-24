@@ -369,9 +369,38 @@ add_action( 'admin_post_dw_claim_submit', 'dw_claim_handle_submit' );
 
 add_action(
 	'add_meta_boxes_aw_claim',
-	function () {
-		add_meta_box( 'dw_claim_native', __( 'Claim review', 'directoryweb' ), 'dw_claim_metabox', 'aw_claim', 'normal', 'high' );
-	}
+	function ( $post ) {
+		if ( '' !== (string) get_post_meta( $post->ID, '_dw_claim_status', true ) ) {
+			remove_meta_box( 'aw_claim_review', 'aw_claim', 'normal' ); // the old-form box reads aw_c_* meta a native claim does not have
+			add_meta_box( 'dw_claim_native', __( 'Claim review', 'directoryweb' ), 'dw_claim_metabox', 'aw_claim', 'normal', 'high' );
+		}
+	},
+	20
+);
+
+add_action(
+	'manage_aw_claim_posts_custom_column',
+	function ( $col, $id ) {
+		$c = dw_claim_get( (int) $id );
+		if ( ! $c ) {
+			return;
+		}
+		if ( 'aw_status' === $col ) {
+			echo esc_html( ucfirst( $c['status'] ) );
+		} elseif ( 'aw_changes' === $col ) {
+			echo esc_html( $c['propose'] ? implode( ', ', array_keys( $c['propose'] ) ) : __( 'Notes only', 'directoryweb' ) );
+		}
+	},
+	11,
+	2
+);
+
+/** Button words for each move. */
+const DW_CLAIM_MOVE_LABELS = array(
+	'approved' => 'Approve',
+	'rejected' => 'Reject',
+	'revoked'  => 'Revoke approval',
+	'pending'  => 'Re-open',
 );
 
 /** The claim review box: who, what they propose against what the listing says now, state, history, and the moves allowed. */
@@ -386,7 +415,7 @@ function dw_claim_metabox( $post ): void {
 	echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Field', 'directoryweb' ) . '</th><th>' . esc_html__( 'Now', 'directoryweb' ) . '</th><th>' . esc_html__( 'Proposed', 'directoryweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $c['propose'] as $f => $v ) {
 		$now = isset( DW_CLAIM_NATIVE_MAP[ $f ] ) ? aw_claim_now( $c['listing'], DW_CLAIM_NATIVE_MAP[ $f ], false ) : '';
-		echo '<tr><td>' . esc_html( $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
+		echo '<tr><td>' . esc_html( isset( DW_CLAIM_NATIVE_MAP[ $f ] ) && isset( DW_CLAIM_L[ DW_CLAIM_NATIVE_MAP[ $f ] ] ) ? DW_CLAIM_L[ DW_CLAIM_NATIVE_MAP[ $f ] ][0] : $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 	$moves = DW_CLAIM_TRANSITIONS[ $c['status'] ] ?? array();
@@ -395,7 +424,7 @@ function dw_claim_metabox( $post ): void {
 			continue; // the claimant withdraws; a reviewer approves or rejects
 		}
 		$url = wp_nonce_url( admin_url( 'admin-post.php?action=dw_claim_decide&claim=' . (int) $c['id'] . '&to=' . $m ), 'dw_claim_decide_' . $c['id'] . '_' . $m );
-		echo '<a class="button' . ( 'approved' === $m ? ' button-primary' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( ucfirst( $m ) ) . '</a> ';
+		echo '<a class="button' . ( 'approved' === $m ? ' button-primary' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( DW_CLAIM_MOVE_LABELS[ $m ] ?? ucfirst( $m ) ) . '</a> ';
 	}
 	if ( $c['history'] ) {
 		echo '<h4>' . esc_html__( 'History', 'directoryweb' ) . '</h4><ul>';
@@ -453,4 +482,83 @@ add_action(
 			)
 		);
 	}
+);
+
+/* ---------- Emails (plain text, through wp_mail) ---------- */
+
+/**
+ * Whether claim emails go out: the site's "Emails from forms and claims" switch (option aw_ff_send_email, off by
+ * default), so a native claim obeys the same setting as the Fluent Forms claims. wp_mail() is used, so MailWeb (or
+ * any SMTP plugin) carries the message when it is active; nothing here depends on MailWeb.
+ *
+ * @return bool
+ */
+function dw_claim_mail_on(): bool {
+	return (bool) apply_filters( 'directoryweb_claim_mail_enabled', '1' === (string) get_option( 'aw_ff_send_email', '0' ) );
+}
+
+/**
+ * Send one claim email. A header-safe subject, plain-text body, no tracking.
+ *
+ * @param string $to      Recipient.
+ * @param string $subject Subject.
+ * @param string $body    Body.
+ * @return bool
+ */
+function dw_claim_mail( string $to, string $subject, string $body ): bool {
+	if ( ! dw_claim_mail_on() || ! is_email( $to ) ) {
+		return false;
+	}
+	$subject = trim( preg_replace( '/[\r\n]+/', ' ', wp_strip_all_tags( $subject ) ) );
+	return (bool) wp_mail( $to, $subject, $body );
+}
+
+add_action(
+	'directoryweb_claim_created',
+	function ( $id, $listing ) {
+		$c = dw_claim_get( (int) $id );
+		if ( ! $c ) {
+			return;
+		}
+		$name  = (string) ( $c['person']['name'] ?? '' );
+		$title = html_entity_decode( get_the_title( (int) $listing ), ENT_QUOTES, 'UTF-8' );
+		dw_claim_mail(
+			(string) ( $c['person']['email'] ?? '' ),
+			sprintf( 'We received your claim for %s', $title ),
+			sprintf( "Hello %s,\n\nWe received your claim for \"%s\". Our team will review it and write to you with the result. Nothing on the listing changes until then.\n", $name, $title )
+		);
+		dw_claim_mail(
+			(string) apply_filters( 'directoryweb_claim_notify_to', get_option( 'admin_email' ) ),
+			sprintf( 'New listing claim: %s', $title ),
+			sprintf( "%s (%s) claimed \"%s\".\n\nReview it: %s\n", $name, (string) ( $c['person']['email'] ?? '' ), $title, (string) get_edit_post_link( (int) $id, 'raw' ) )
+		);
+	},
+	10,
+	2
+);
+
+add_action(
+	'directoryweb_claim_transitioned',
+	function ( $id, $from, $to ) {
+		$words = array(
+			'approved' => 'was approved. The changes you asked for are now on the listing and it is marked verified.',
+			'rejected' => 'was not approved. Reply to this email if you think this is a mistake.',
+			'revoked'  => 'is no longer approved. The listing is marked for re-verification.',
+		);
+		if ( ! isset( $words[ $to ] ) ) {
+			return; // re-opening a claim is internal: the claimant is not told
+		}
+		$c = dw_claim_get( (int) $id );
+		if ( ! $c ) {
+			return;
+		}
+		$title = html_entity_decode( get_the_title( (int) $c['listing'] ), ENT_QUOTES, 'UTF-8' );
+		dw_claim_mail(
+			(string) ( $c['person']['email'] ?? '' ),
+			sprintf( 'Your claim for %s', $title ),
+			sprintf( "Hello %s,\n\nYour claim for \"%s\" %s\n", (string) ( $c['person']['name'] ?? '' ), $title, $words[ $to ] )
+		);
+	},
+	10,
+	3
 );

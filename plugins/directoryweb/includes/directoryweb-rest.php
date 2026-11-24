@@ -555,7 +555,8 @@ function directoryweb_claim_row( array $r ): array {
 	$u  = $by ? get_userdata( $by ) : null;
 	return array(
 		'id'         => $r['id'],
-		'entry'      => (int) $r['entry'],
+		'entry'      => ! empty( $r['native'] ) ? (string) $r['id'] : (int) $r['entry'], // native claims are 'dw-<id>': their post ids would collide with form entry ids
+		'native'     => ! empty( $r['native'] ),
 		'ref'        => (string) ( $r['ref'] ?? '' ),
 		'old'        => (bool) $r['old'],
 		'title'      => '' !== $r['listing_title'] ? $r['listing_title'] : __( '(no listing)', 'directoryweb' ),

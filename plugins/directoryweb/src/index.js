@@ -308,11 +308,15 @@ const START = {
 /**
  * The open claim from the address (#claim-12).
  *
- * @return {number} Entry ID or 0.
+ * @return {number|string} Entry ID, 'dw-<id>' for a native claim, or 0.
  */
 function hashClaim() {
-	const m = window.location.hash.match( /^#claim-(\d+)$/ );
-	return m ? Number( m[ 1 ] ) : 0;
+	const m = window.location.hash.match( /^#claim-(dw-\d+|\d+)$/ );
+	if ( ! m ) {
+		return 0;
+	}
+	// Native claims are 'dw-<id>' (a string); form entries stay numbers.
+	return m[ 1 ].startsWith( 'dw-' ) ? m[ 1 ] : Number( m[ 1 ] );
 }
 
 /**
@@ -635,7 +639,7 @@ function Claims() {
 	const sortKey = 'listing' === q.sort ? 'title' : 'sent';
 	return (
 		<>
-			{ open > 0 && <Claim id={ open } onClose={ () => show( 0 ) } /> }
+			{ open && <Claim id={ open } onClose={ () => show( 0 ) } /> }
 			<SectionCard
 				id="directoryweb-claims"
 				title={ __( 'Claims', 'directoryweb' ) }
