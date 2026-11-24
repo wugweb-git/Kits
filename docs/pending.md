@@ -153,7 +153,7 @@ Checked on `wordpress-dev` at `7e98b691`, plus this session's changes.
   - Added Export / Import JSON functionality for zero-downtime replication across tenant WordPress instances.
   - Dual CSS bridge injection into frontend `<head>` and block editor canvas `.editor-styles-wrapper` with automated LiteSpeed cache purge on save.
   - Comprehensive unit test suite `plugins/kits-core/tests/brand-customizer-tests.php` passing all 22 tests cleanly without WordPress dependencies.
-  - Detailed tenant onboarding guide written to `docs/multi-tenant-setup-guide.md`.
+  - Detailed tenant onboarding guide written to `docs/architecture/multi-tenant-setup-guide.md` (rewritten 25 Nov 2026 to match the code).
 
 ### UI & Plugin Code Reset to Last Claude Push (completed 21 Nov 2026, commit `4151ad25` / PR #170)
 - **UI and plugin code reset to the last Claude push (`4151ad25` / PR #170):**

@@ -1,108 +1,67 @@
-# Multi-Tenant Setup & Brand Customization Guide (1 Default + 3 Tenants)
+# Multi-tenant setup and brand customisation
 
-**Site Architecture:** Kits by Wugweb Universal Block Theme & Companion Plugins  
-**Target Matrix:** 1 Default Instance (Animal Writes / Neutral Kits) + 3 Tenant WordPress Deployments  
-**Repository:** [https://github.com/wugweb-git/kits](https://github.com/wugweb-git/kits) (Branch: `kits-suite`)  
-**Status:** Live & Documented (November 2026)
+**Status (25 Nov 2026):** describes what the code does today and what is decided but not yet built. Every statement is labelled **Implemented**, **Decided, not built** or **Open**. Evidence and the full audit are in `docs/audit/`.
 
----
+## 1. Model
 
-## 1. Architectural Strategy: Single Codebase, Zero-Touch Multi-Tenancy
+- **Per installation.** Each independent WordPress installation has its own brand configuration, stored in that site's database. On Multisite each site keeps its own (the option is per site; a Multisite run has not been done yet, so this is expected rather than verified).
+- **No network or SaaS-managed branding** in this phase. The design must stay extensible so it can be added later without a redesign (**Decided**).
+- **The theme owns no tenant branding and does not need Kits Core.** Kits by Wugweb works on its own; Kits Core adds the tenant layer (**Decided**).
 
-In multi-tenant WordPress configurations, branching the theme or creating heavy child themes produces significant maintenance overhead and divergence. Kits by Wugweb eliminates this by decoupling **Structure & Layout** from **Brand Tokens & Assets**:
+## 2. Layers
 
-```
-+---------------------------------------------------------------------------------+
-|                               Block Theme Architecture                          |
-|  - HTML Block Templates (index.html, single.html, archive.html, etc.)           |
-|  - HTML Block Parts (header.html, footer.html, sidebar.html)                    |
-|  - Block Patterns (heroes, card grids, FAQs, search, CTAs)                      |
-+---------------------------------------------------------------------------------+
-                                      |
-         +----------------------------+----------------------------+
-         |                                                         |
-         v                                                         v
-+-----------------------------------+     +---------------------------------------+
-|   WordPress Style Variations      |     |  Kits Brand Customizer (wp_options)   |
-|   (Appearance > Editor > Styles)  |     |  (admin.php?page=kits-brand)          |
-|   - Default (Neutral)             |     |  - 1-Click Tenant Presets             |
-|   - Animal Writes                 |     |  - Custom CSS Variable Overrides      |
-|   - Slate                         |     |  - Live Editor & Frontend Injection   |
-|   - Forest                        |     |  - JSON Export / Import Portability   |
-+-----------------------------------+     +---------------------------------------+
-```
+Intended order, lowest to highest (**Decided**):
 
----
+1. WordPress and Kits defaults.
+2. Kits theme `theme.json`.
+3. Kits Core tenant brand values, merged through `wp_theme_json_data_theme`.
+4. User customisations made in the native Site Editor (Styles).
 
-## 2. Supported Tenant Profiles (1 Default + 3 Tenants)
+| Layer | Status |
+|---|---|
+| 1, 2, 4 | **Implemented** (WordPress core and the theme) |
+| 3 | **Decided, not built.** Kits Core has no `wp_theme_json_data_theme` filter. Today the Brand Customizer prints CSS custom properties in `wp_head` (priority 100) and in the block editor, outside `theme.json`. That CSS wins over the user's Site Editor changes and "Reset styles" does not restore it |
 
-| Setting | Default (Animal Writes / Neutral) | Tenant 1: Modern Tech & SaaS | Tenant 2: Editorial & Publication | Tenant 3: Eco & Community Wellness |
-| :--- | :--- | :--- | :--- | :--- |
-| **Accent (`--kit-color-accent`)** | `#FFBE1A` (Gold) | `#2563EB` (Electric Blue) | `#C2410C` (Terracotta) | `#059669` (Forest Emerald) |
-| **Accent Contrast (`--kit-color-accent-ink`)**| `#0062b8` | `#1D4ED8` | `#7C2D12` | `#065F46` |
-| **Canvas Background (`--kit-color-bg`)** | `#F4F4F4` | `#F8FAFC` (Slate Canvas) | `#FDFBF7` (Cream Canvas) | `#F4FBF7` (Mint Canvas) |
-| **Surface Raised (`--kit-color-raised`)** | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
-| **Headings & Ink (`--kit-color-ink`)** | `#191919` | `#0F172A` | `#1C1917` | `#064E3B` |
-| **Body Text (`--kit-color-text`)** | `#2E2E2E` | `#334155` | `#44403C` | `#1E3A2F` |
-| **Display Font Stack** | System Sans / Inter | `'Inter', system-ui, sans-serif` | `'Georgia', serif` | `'Plus Jakarta Sans', sans-serif` |
-| **Control Radius (`--kit-radius-control`)** | `8px` | `6px` | `2px` (Sharp) | `9999px` (Pill) |
-| **Card Radius (`--kit-radius-card`)** | `12px` | `10px` | `4px` | `16px` (Soft Organic) |
-| **Max Wide Grid Width** | `1200px` | `1280px` | `1160px` | `1200px` |
-| **Section Spacing** | `48px` | `56px` | `64px` | `48px` |
+Findings that shape the build (WordPress 7.1.5 probe, `docs/audit/wp-api-probe.md`): list presets such as the colour palette are replaced as a whole, so the filter must merge by slug and return the full list; resolved theme data is cached, so Core must clean the cache when tenant values change and when it is activated or deactivated; with the filter in place, a Site Editor change wins and "Reset styles" returns to the tenant baseline.
 
----
+## 3. Style variations and colour sets (**Implemented**)
 
-## 3. How to Set Up a New Tenant Install (Minimal Setup)
+Theme variations: **Dark**, **Forest**, **Slate** (`styles/*.json`). Block colour set: **Ink** (`styles/colours/ink.json`), a style for Group and Post Content blocks, not a site variation. Slate matches the default palette except two slots. A tenant's brand values sit below any variation the user picks.
 
-To install Kits on a new WordPress site (e.g. Tenant 1, 2, or 3):
+## 4. Tenant presets in Kits Core (**Implemented**, values from `brand-customizer-model.php`)
 
-### Step 1: Install Theme
-1. Clone or copy `themes/kits-by-wugweb` from the Kits monorepo into the tenant's `wp-content/themes/kits-by-wugweb`.
-2. Activate the theme under **Appearance → Themes**.
+| Token | Default | Modern Tech & SaaS | Editorial & Publication | Eco & Community |
+|---|---|---|---|---|
+| Accent | `#FFBE1A` | `#2563EB` | `#C2410C` | `#059669` |
+| Accent contrast | `#0062b8` | `#1D4ED8` | `#7C2D12` | `#065F46` |
+| Canvas | `#F4F4F4` | `#F8FAFC` | `#FDFBF7` | `#F4FBF7` |
+| Ink | `#191919` | `#0F172A` | `#1C1917` | `#064E3B` |
+| Body text | `#2E2E2E` | `#334155` | `#44403C` | `#1E3A2F` |
+| Control / card radius | 8px / 12px | 6px / 10px | 2px / 4px | 9999px / 16px |
+| Wide width | 1200px | 1280px | 1160px | 1200px |
+| Section spacing | 48px | 56px | 64px | 48px |
 
-### Step 2: Install Companion Plugins
-From `plugins/` in the Kits monorepo, install and activate the required suite:
-- `kits-core` (Mandatory: provides the Brand Customizer, Block Bindings engine, form security, and tokens bridge)
-- `directoryweb` (Optional: if the tenant runs directories or organization profiles)
-- `rankweb` (Optional: SEO, schema, and sitemaps)
-- `mailweb` (Optional: newsletters and email subscriptions)
-- `sourceweb` (Optional: content attribution and sourcing)
-- `insightweb` (Optional: cookieless analytics and search telemetry)
-- `planweb` (Optional: editorial scheduling)
+Known problems (see the audit):
+- **Open:** the Default accent `#FFBE1A` does not match the theme's own `primary` (`#C6D2E0`). Because the compiler skips values equal to its default, the screen shows gold while the site renders the theme colour. The canonical accent is an owner decision (`docs/audit/owner-decisions.md`, OD1).
+- The three tenant profiles are hard-coded in the plugin; they should become data supplied through a filter (**Decided, not built**).
+- Editorial and Eco presets name fonts (Georgia, Plus Jakarta Sans) that the theme does not bundle; only Inter is bundled.
+- There is no contrast check on tenant colours, and the theme's dark mode does not follow tenant colours (a dark-mode rule is proposed in `wp-api-probe.md`, awaiting confirmation).
 
-### Step 3: Brand the Tenant in 1 Click
-1. In wp-admin, navigate to **Appearance → Brand Tokens** (or **Kits → Brand Customizer**).
-2. Click **Apply Preset** under the desired tenant profile (e.g., *Tenant 1: Modern Tech & SaaS*), or fine-tune individual colors and corner radii.
-3. Click **Save Brand Tokens**.
-4. The system:
-   - Compiles the CSS custom properties `:root { ... }`.
-   - Bridges values directly into WordPress Gutenberg block presets (`--wp--preset--color--primary`, etc.).
-   - Injects the styles in `wp_head` for the public site and `.editor-styles-wrapper` for the Site Editor.
-   - Automatically purges LiteSpeed / page cache.
+## 5. Setting up a new site
 
----
+1. Install and activate the theme (**Appearance, Themes**). It is fully usable at this point.
+2. Optionally install and activate Kits Core to get the Brand Customizer (**Kits, Brand Customizer**, also under **Appearance, Brand Tokens**). Companion plugins (DirectoryWeb, RankWeb, MailWeb, SourceWeb, InsightWeb, PlanWeb) are independent and optional.
+3. Apply a preset or set individual colours, radii and widths, then save. **Implemented behaviour today:** the values are written to one option (`kits_brand_tokens`), compiled to CSS custom properties, printed in `wp_head` and the block editor, and a LiteSpeed purge action is fired. **Decided:** the same values will feed Layer 3 instead.
+4. Refine in the Site Editor (**Appearance, Editor, Styles**). Those changes are the user's and stay authoritative until reset.
 
-## 4. Replicating Settings Across Sites (Export / Import)
+## 6. Reset (**Decided, not built**)
 
-Under the **Tenant Token Backup & Migration** card on the Brand Customizer screen:
-1. Copy the JSON block from the source site (e.g., Default or Staging).
-2. On the target tenant site, paste the JSON into the **Import Configuration** box.
-3. Click **Import & Apply Configuration**.
+Reset must restore the tenant's brand preset and must not delete the tenant configuration. Today the Brand Customizer's Reset deletes the option. A separate, confirmed "clear brand" action is proposed for removing it.
 
----
+## 7. Moving settings between sites (**Implemented**)
 
-## 5. Shortcodes vs. Native Block Replacements
+The Brand Customizer exports and imports its tokens as JSON. Import sanitises each token. `kits_brand_tokens` is **not yet** part of Kits Core's settings transfer, uninstall list or uninstall backup (**Open**, tracked as G21).
 
-When designing block templates for tenants, follow these mapped Gutenberg block conventions:
+## 8. Shortcodes and native blocks
 
-| Old / Monolithic Pattern | Native Gutenberg Replacement | Plugin Owner |
-| :--- | :--- | :--- |
-| `[aw_newsletter]` | `<!-- wp:mailweb/newsletter {"layout":"card"} /-->` | **MailWeb** |
-| `[aw_find_help]` | `<!-- wp:directoryweb/search {"compact":true} /-->` | **DirectoryWeb** |
-| `[aw_org_people]` | `<!-- wp:directoryweb/people /-->` | **DirectoryWeb** |
-| `[aw_countdown]` | `<!-- wp:kits-core/countdown /-->` | **Kits Core** |
-| `[aw_category_hub]` | `<!-- wp:kits-core/category-hub /-->` | **Kits Core** |
-| `[aw_source_row]` | `<!-- wp:sourceweb/attribution /-->` | **SourceWeb** |
-| Dynamic PHP Post Meta | Native Paragraph / Heading with Block Bindings `source:"kits/post-field"` | **Kits Core** |
-
-*Note: Monolithic dynamic blocks (`animal-writes/*`) and shortcodes remain fully registered in `hub-blocks.php` and plugin controllers as backwards-compatible fallbacks, ensuring zero breakage for existing content.*
+Keep new content on native blocks and Block Bindings (`kits/post-field`). Kits Core currently registers one block, `kits/hero`. Blocks named in older documents (`kits-core/countdown`, `kits-core/category-hub`, `mailweb/newsletter`, `directoryweb/search`, `directoryweb/people`, `sourceweb/attribution`) have **not** been verified in this repository and should not be relied on until each plugin documents them.

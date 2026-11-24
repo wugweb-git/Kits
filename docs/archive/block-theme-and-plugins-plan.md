@@ -1,3 +1,7 @@
+> **ARCHIVED, 25 Nov 2026. Historical record, not a specification.**
+> This plan was written from an audit of one tenant's live site (listing counts, deployed commits, `assets/site/` templates and `animal-writes/*` blocks). Those facts are time-bound and tenant-specific, and the product does not use any tenant as its architectural reference. Several things it proposes were never built in this repository: the `kits/countdown`, `directoryweb/team` and `mailweb/newsletter` conversions, and the `kits-core/category-hub` block (only `kits/hero` and the `kits/post-field` binding source exist in Kits Core).
+> Principles that remain valid and are carried by current documents: no shortcodes in templates, Block Bindings instead of monolithic dynamic blocks, no hard dependency on third-party blocks in the theme, and no tenant terms in the distributed theme. Current status lives in `docs/audit/` and `docs/theme/`.
+
 # Block Theme & Companion Plugins Master Architecture Plan
 
 **Product:** Kits by Wugweb (FSE Block Theme) & Wugweb Suite (Modular Plugins)  

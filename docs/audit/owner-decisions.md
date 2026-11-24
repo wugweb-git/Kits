@@ -32,7 +32,8 @@ Status: **open** unless marked. Nothing here is started. Each entry: current imp
 - Recommendation: move to `docs/archive/` as "not planned" and remove from PENDING unless a date exists.
 
 ## OD5. Duplicate documents (open)
-- Now: two byte-identical pairs: `monorepo-delivery-architecture.md` and `wugweb-monorepo-delivery-architecture.md`; `theme/kits-theme-admin-ui-spec.md` and `design-system/admin-ui-spec.md`.
+- Done 25 Nov 2026 at the owner's instruction: `wugweb-monorepo-delivery-architecture.md` (byte-identical copy) deleted; `monorepo-delivery-architecture.md` stays. `block-theme-and-plugins-plan.md` archived under `docs/archive/` with a banner. Still open: the pair `theme/kits-theme-admin-ui-spec.md` and `design-system/admin-ui-spec.md`.
+- Was: two byte-identical pairs: `monorepo-delivery-architecture.md` and `wugweb-monorepo-delivery-architecture.md`; `theme/kits-theme-admin-ui-spec.md` and `design-system/admin-ui-spec.md`.
 - Recommendation: keep one of each, replace the other with a one-line pointer for a release, then archive. Archive the Animal Writes-authored documents under `docs/archive/` with a banner. No deletions.
 
 ## OD6. Update URI (open)
