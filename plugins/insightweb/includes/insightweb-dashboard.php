@@ -105,6 +105,8 @@ function insightweb_dash_count( array $c ): array {
 				'topPages'   => array(),
 				'topQueries' => array(),
 				'empty'      => true,
+				'is_mock'    => false,
+				'message'    => function_exists( '__' ) ? __( 'Awaiting first Search Console sync', 'insightweb' ) : 'Awaiting first Search Console sync',
 			);
 		}
 		return $c;
