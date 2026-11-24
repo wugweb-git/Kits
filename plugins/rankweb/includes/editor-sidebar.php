@@ -17,12 +17,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Post types the sidebar and its meta are registered for. Default post, page and aw_press; filterable.
+ *
+ * @return string[]
+ */
+function rankweb_sidebar_post_types(): array {
+	return array_values( array_filter( array_map( 'sanitize_key', (array) apply_filters( 'rankweb_sidebar_post_types', array( 'post', 'page', 'aw_press' ) ) ) ) );
+}
+
+/**
  * Register post meta fields for block editor.
  */
 add_action(
 	'init',
 	function () {
-		$screens = array( 'post', 'page', 'aw_press' );
+		$screens = rankweb_sidebar_post_types();
 		foreach ( $screens as $type ) {
 			register_post_meta(
 				$type,
@@ -66,7 +75,7 @@ add_action(
 	'enqueue_block_editor_assets',
 	function () {
 		$screen = get_current_screen();
-		if ( ! $screen || ! in_array( $screen->post_type, array( 'post', 'page', 'aw_press' ), true ) ) {
+		if ( ! $screen || ! in_array( $screen->post_type, rankweb_sidebar_post_types(), true ) ) {
 			return;
 		}
 

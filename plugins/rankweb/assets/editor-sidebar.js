@@ -8,7 +8,16 @@
 	const { PanelBody, TextControl, SelectControl, ButtonGroup, Button } = wp.components;
 	const { useSelect, useDispatch } = wp.data;
 	const { useState, useEffect, createElement: el, Fragment } = wp.element;
-	const { __ } = wp.i18n;
+	const { __, sprintf } = wp.i18n;
+	// The site's own host, for internal/external link counts and the SERP preview; no site name is hard-coded.
+	const siteHost = ( function() {
+		try {
+			return new URL( ( window.rankwebEditorData && window.rankwebEditorData.siteUrl ) || window.location.origin ).hostname.replace( /^www\./, '' );
+		} catch ( e ) {
+			return window.location.hostname.replace( /^www\./, '' );
+		}
+	}() );
+	const escapeRe = ( v ) => v.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 
 	function calculateSeoScore( title, content, keyword ) {
 		let score = 10;
@@ -54,8 +63,8 @@
 		else if ( okLength ) score += 10;
 
 		// 4. Keyword in Subheadings (+15)
-		const hasHeadings = /<h[2-4][^>]*>.*?<\/h[2-4]>/i.test( content );
-		const kwInHeadings = hasHeadings && /<h[2-4][^>]*>.*?(?=.*?)/i.test( content ) && lcContent.includes( kw );
+		const headingTexts = ( content.match( /<h[2-4][^>]*>[\s\S]*?<\/h[2-4]>/gi ) || [] ).map( ( h ) => h.replace( /<[^>]*>/g, ' ' ).toLowerCase() );
+		const kwInHeadings = headingTexts.some( ( h ) => h.includes( kw ) );
 		checks.push({
 			text: kwInHeadings ? __( 'Focus Keyword found in H2/H3 subheadings', 'rankweb' ) : __( 'Use Focus Keyword in at least one subheading', 'rankweb' ),
 			pass: kwInHeadings
@@ -63,7 +72,8 @@
 		if ( kwInHeadings ) score += 15;
 
 		// 5. Internal Links (+10)
-		const internalLinkCount = ( content.match( /href=[\"'][^\"']*(?:animalwrites\.in|\/)[^\"']*[\"']/gi ) || [] ).length;
+		const hostRe = escapeRe( siteHost );
+		const internalLinkCount = ( content.match( new RegExp( 'href=[\"\']((?:https?:)?\\/\\/(?:www\\.)?' + hostRe + '|\\/(?!\\/))[^\"\']*[\"\']', 'gi' ) ) || [] ).length;
 		const hasInternal = internalLinkCount >= 2;
 		checks.push({
 			text: hasInternal ? sprintf( __( '%d internal links found', 'rankweb' ), internalLinkCount ) : __( 'Add at least 2 internal links to related content', 'rankweb' ),
@@ -72,7 +82,7 @@
 		if ( hasInternal ) score += 10;
 
 		// 6. External Links (+10)
-		const externalLinkCount = ( content.match( /href=[\"']https?:\/\/(?!animalwrites\.in)[^\"']+[\"']/gi ) || [] ).length;
+		const externalLinkCount = ( content.match( new RegExp( 'href=[\"\']https?:\\/\\/(?!(?:www\\.)?' + hostRe + ')[^\"\']+[\"\']', 'gi' ) ) || [] ).length;
 		const hasExternal = externalLinkCount >= 1;
 		checks.push({
 			text: hasExternal ? sprintf( __( '%d authoritative external links found', 'rankweb' ), externalLinkCount ) : __( 'Add at least 1 external link to an authority source', 'rankweb' ),
@@ -85,6 +95,8 @@
 			checks: checks
 		};
 	}
+
+	wp.rankweb = Object.assign( wp.rankweb || {}, { calculateSeoScore: calculateSeoScore } ); // read by tests/sidebar-score.test.js
 
 	function RankWebSidebar() {
 		const meta = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {} );
@@ -104,7 +116,7 @@
 		if ( score >= 80 ) scoreClass = 'rankweb-score-pill--good';
 		else if ( score >= 50 ) scoreClass = 'rankweb-score-pill--ok';
 
-		const displayUrl = ( window.rankwebEditorData ? window.rankwebEditorData.siteUrl : 'https://animalwrites.in' ) + '/' + ( slug || 'sample-post' ) + '/';
+		const displayUrl = ( window.rankwebEditorData ? window.rankwebEditorData.siteUrl : window.location.origin ) + '/' + ( slug || 'sample-post' ) + '/';
 		const displayDesc = excerpt ? excerpt.substring( 0, 155 ) : ( content ? content.replace( /<[^>]*>?/gm, ' ' ).substring( 0, 155 ) + '...' : __( 'Add an excerpt or introduction to provide an effective meta description snippet.', 'rankweb' ) );
 
 		return el(
@@ -143,6 +155,7 @@
 						{
 							label: __( 'Structured Data Schema Type', 'rankweb' ),
 							value: schemaType,
+							help: __( 'Saved with the post. It does not change the structured data on the page yet.', 'rankweb' ),
 							options: [
 								{ label: 'Article', value: 'Article' },
 								{ label: 'NewsArticle', value: 'NewsArticle' },
