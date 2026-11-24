@@ -173,14 +173,6 @@ html[data-theme="dark"] body {
 	color: var(--wp--preset--color--foreground);
 }
 
-/* Colour set "Ink" in dark mode: the secondary preset inverts to a light panel, but the set's link colour is the (light)
-   brand tone, which measured 1.41:1 on it. Links take the set's own text colour and stay underlined, so they read on the
-   panel in both modes. */
-html[data-theme="dark"] .is-style-kits-colours-ink a:not(.wp-element-button) {
-	color: var(--wp--preset--color--on-ink);
-	text-decoration: underline;
-}
-
 /* List block style "Plain (no bullets)" (kits-plain): the list keeps its list semantics, only the markers and the indent go. */
 .wp-block-list.is-style-kits-plain {
 	list-style: none;

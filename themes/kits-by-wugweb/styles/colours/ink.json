@@ -20,12 +20,18 @@
 			},
 			"link": {
 				"color": {
-					"text": "var(--wp--preset--color--primary)"
+					"text": "var(--wp--preset--color--on-ink)"
 				},
 				":hover": {
 					"color": {
 						"text": "var(--wp--preset--color--on-ink)"
+					},
+					"typography": {
+						"textDecoration": "none"
 					}
+				},
+				"typography": {
+					"textDecoration": "underline"
 				}
 			}
 		}

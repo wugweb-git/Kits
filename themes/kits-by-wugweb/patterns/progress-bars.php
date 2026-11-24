@@ -14,9 +14,9 @@
 <p><?php esc_html_e( 'Label one, 90%', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"backgroundColor":"surface","layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group has-surface-background-color has-background"><!-- wp:group {"backgroundColor":"primary","style":{"dimensions":{"minHeight":"var:preset|spacing|20"},"layout":{"selfStretch":"fixed","flexSize":"90%"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group has-primary-background-color has-background" style="min-height:var(--wp--preset--spacing--20)"></div>
+<!-- wp:group {"backgroundColor":"border","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group has-border-background-color has-background"><!-- wp:group {"backgroundColor":"secondary","style":{"dimensions":{"minHeight":"var:preset|spacing|20"},"layout":{"selfStretch":"fixed","flexSize":"90%"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group has-secondary-background-color has-background" style="min-height:var(--wp--preset--spacing--20)"></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
@@ -24,9 +24,9 @@
 <p><?php esc_html_e( 'Label two, 75%', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"backgroundColor":"surface","layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group has-surface-background-color has-background"><!-- wp:group {"backgroundColor":"primary","style":{"dimensions":{"minHeight":"var:preset|spacing|20"},"layout":{"selfStretch":"fixed","flexSize":"75%"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group has-primary-background-color has-background" style="min-height:var(--wp--preset--spacing--20)"></div>
+<!-- wp:group {"backgroundColor":"border","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group has-border-background-color has-background"><!-- wp:group {"backgroundColor":"secondary","style":{"dimensions":{"minHeight":"var:preset|spacing|20"},"layout":{"selfStretch":"fixed","flexSize":"75%"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group has-secondary-background-color has-background" style="min-height:var(--wp--preset--spacing--20)"></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
 
@@ -34,9 +34,9 @@
 <p><?php esc_html_e( 'Label three, 60%', 'kits-by-wugweb' ); ?></p>
 <!-- /wp:paragraph -->
 
-<!-- wp:group {"backgroundColor":"surface","layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group has-surface-background-color has-background"><!-- wp:group {"backgroundColor":"primary","style":{"dimensions":{"minHeight":"var:preset|spacing|20"},"layout":{"selfStretch":"fixed","flexSize":"60%"}},"layout":{"type":"default"}} -->
-<div class="wp-block-group has-primary-background-color has-background" style="min-height:var(--wp--preset--spacing--20)"></div>
+<!-- wp:group {"backgroundColor":"border","layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group has-border-background-color has-background"><!-- wp:group {"backgroundColor":"secondary","style":{"dimensions":{"minHeight":"var:preset|spacing|20"},"layout":{"selfStretch":"fixed","flexSize":"60%"}},"layout":{"type":"default"}} -->
+<div class="wp-block-group has-secondary-background-color has-background" style="min-height:var(--wp--preset--spacing--20)"></div>
 <!-- /wp:group --></div>
 <!-- /wp:group --></div>
 <!-- /wp:group -->
