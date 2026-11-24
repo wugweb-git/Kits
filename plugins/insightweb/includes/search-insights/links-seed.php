@@ -128,6 +128,10 @@ function aw_si_links_seed( bool $force = false ): array {
 	if ( ! $force && get_option( 'aw_si_off' ) ) {
 		return array();
 	}
+	$host = preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+	if ( ! $force && 'animalwrites.in' !== $host && ! apply_filters( 'insightweb_enable_tenant_links_seed', false ) ) {
+		return array();
+	}
 	$count = array();
 	foreach ( aw_si_links_seed_batches() as $option => $rows ) {
 		if ( ! $force && get_option( $option ) ) {

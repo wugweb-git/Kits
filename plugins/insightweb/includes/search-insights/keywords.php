@@ -132,7 +132,8 @@ function aw_si_link_pages( array $links, bool $keep = false ): bool {
 function aw_si_path( string $url ): string {
 	$host = wp_parse_url( home_url(), PHP_URL_HOST );
 	$u    = wp_parse_url( $url );
-	if ( ! empty( $u['host'] ) && ! in_array( preg_replace( '/^www\./', '', (string) $u['host'] ), array( preg_replace( '/^www\./', '', (string) $host ), 'animalwrites.in' ), true ) ) {
+	$owned = (array) apply_filters( 'insightweb_owned_hosts', array( preg_replace( '/^www\./', '', (string) $host ) ) );
+	if ( ! empty( $u['host'] ) && ! in_array( preg_replace( '/^www\./', '', (string) $u['host'] ), $owned, true ) ) {
 		return '';
 	}
 	$path = (string) ( $u['path'] ?? '/' );
