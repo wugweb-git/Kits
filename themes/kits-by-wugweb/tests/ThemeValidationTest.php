@@ -337,6 +337,7 @@ echo "\n5. Validating Dynamic Breadcrumbs Pattern Resolution...\n";
 
 it('Breadcrumbs pattern outputs rankweb/breadcrumbs when RankWeb block function exists', function () use ($theme_dir) {
     $cmd = 'php -r \'
+        define("ABSPATH", "/"); function esc_html($s) { return htmlspecialchars((string) $s); } function esc_url($s) { return (string) $s; }
         function rankweb_breadcrumbs_block() { return "OK"; }
         ob_start();
         include "' . $theme_dir . '/patterns/breadcrumbs.php";
@@ -354,10 +355,11 @@ it('Breadcrumbs pattern outputs rankweb/breadcrumbs when RankWeb block function 
 
 it('Breadcrumbs pattern outputs dynamic accessible fallback when RankWeb is inactive', function () use ($theme_dir) {
     $cmd = 'php -r \'
+        define("ABSPATH", "/"); function esc_html($s) { return htmlspecialchars((string) $s); } function esc_url($s) { return (string) $s; }
         ob_start();
         include "' . $theme_dir . '/patterns/breadcrumbs.php";
         $out = ob_get_clean();
-        if (strpos($out, "kit-crumbs") === false || strpos($out, "<ol>") === false || strpos($out, "Home") === false) {
+        if (strpos($out, "kit-crumbs") === false || strpos($out, "<!-- wp:list {") === false || strpos($out, "<!-- wp:list-item -->") === false || strpos($out, "Home") === false) {
             exit(1);
         }
         if (strpos($out, "/category/") !== false || strpos($out, "Current Page") !== false) {
@@ -371,6 +373,219 @@ it('Breadcrumbs pattern outputs dynamic accessible fallback when RankWeb is inac
     }
     if ($code !== 0) {
         throw new \RuntimeException("Breadcrumbs pattern fallback output is invalid or incomplete");
+    }
+});
+
+it('Breadcrumbs fallback is Gutenberg-valid: balanced blocks, and every ol/li sits inside a list/list-item block', function () use ($theme_dir) {
+    $out = shell_exec('php -r \'define("ABSPATH", "/"); function esc_html($s) { return htmlspecialchars((string) $s); } function esc_url($s) { return (string) $s; } include "' . $theme_dir . '/patterns/breadcrumbs.php";\'');
+    if (!is_string($out) || strpos($out, 'kit-crumbs') === false) {
+        throw new \RuntimeException('Breadcrumbs fallback produced no markup');
+    }
+    $tmp = tempnam(sys_get_temp_dir(), 'crumb_');
+    file_put_contents($tmp, $out);
+    try {
+        validate_block_markup($tmp);
+    } finally {
+        unlink($tmp);
+    }
+    // Raw HTML inside a block is the cause of the editor's "invalid content" state: lists must be list blocks.
+    preg_match_all('/<!-- wp:list \{[^}]*\} -->\s*<ol class="wp-block-list">/', $out, $lists);
+    if (count($lists[0]) !== substr_count($out, '<ol')) {
+        throw new \RuntimeException('Found an <ol> that is not a core/list block');
+    }
+    if (substr_count($out, '<!-- wp:list-item -->') !== substr_count($out, '<li>')) {
+        throw new \RuntimeException('Found an <li> that is not a core/list-item block');
+    }
+});
+
+it('Breadcrumbs pattern is registered with the pattern categories the theme registers', function () use ($theme_dir) {
+    $src = file_get_contents($theme_dir . '/patterns/breadcrumbs.php');
+    if (!preg_match('/\*\s*Slug:\s*kits-by-wugweb\/breadcrumbs\b/', $src)) {
+        throw new \RuntimeException('breadcrumbs slug is wrong');
+    }
+    if (!preg_match('/\*\s*Categories:\s*kits-components\b/', $src)) {
+        throw new \RuntimeException('breadcrumbs is not in kits-components');
+    }
+    if (strpos(file_get_contents($theme_dir . '/inc/blocks.php'), "'kits-components'") === false) {
+        throw new \RuntimeException("kits-components is not registered in inc/blocks.php");
+    }
+});
+
+it('Every template-part area theme.json declares is registered: the sidebar area exists once with Kits Core and once without', function () use ($theme_dir) {
+    $data  = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    $areas = array_unique(array_column($data['templateParts'], 'area'));
+    $core  = ['header', 'footer', 'uncategorized', 'navigation-overlay'];
+    $script = <<<'PHP'
+define("ABSPATH", "/");
+$GLOBALS["f"] = [];
+function add_filter($t, $cb, $p = 10, $n = 1) { $GLOBALS["f"][$t][$p][] = $cb; }
+function add_action($t, $cb, $p = 10, $n = 1) { add_filter($t, $cb, $p, $n); }
+function __($s, $d = "") { return $s; }
+function apply($tag, $v) { ksort($GLOBALS["f"][$tag]); foreach ($GLOBALS["f"][$tag] as $cbs) { foreach ($cbs as $cb) { $v = $cb($v); } } return $v; }
+include $argv[1];
+$count = function ($areas) { return count(array_filter($areas, fn($a) => ($a["area"] ?? "") === "sidebar")); };
+$without = apply("default_wp_template_part_areas", []);
+// Kits Core's registration (plugins/kits-core/includes/landmarks.php): priority 10, appends unconditionally.
+add_filter("default_wp_template_part_areas", function ($a) { $a[] = ["area" => "sidebar", "label" => "Sidebar"]; return $a; });
+$with = apply("default_wp_template_part_areas", []);
+echo json_encode(["without" => $count($without), "with" => $count($with)]);
+PHP;
+    $tmp = tempnam(sys_get_temp_dir(), 'area_');
+    file_put_contents($tmp, '<?php ' . $script);
+    $out = json_decode((string) shell_exec('php ' . escapeshellarg($tmp) . ' ' . escapeshellarg($theme_dir . '/inc/blocks.php')), true);
+    unlink($tmp);
+    if (($out['without'] ?? null) !== 1) {
+        throw new \RuntimeException('Without Kits Core the theme must register the sidebar area exactly once, got ' . var_export($out['without'] ?? null, true));
+    }
+    if (($out['with'] ?? null) !== 1) {
+        throw new \RuntimeException('With Kits Core the sidebar area must not be registered twice, got ' . var_export($out['with'] ?? null, true));
+    }
+    foreach ($areas as $area) {
+        if (!in_array($area, $core, true) && $area !== 'sidebar') {
+            throw new \RuntimeException("theme.json declares template-part area '$area', which WordPress does not know and the theme does not register");
+        }
+    }
+});
+
+it('Every block style the theme registers has CSS or theme.json styling behind it, and is namespaced kits-*', function () use ($theme_dir) {
+    $php   = file_get_contents($theme_dir . '/inc/blocks.php');
+    $css   = file_get_contents($theme_dir . '/assets/css/kits.css') . file_get_contents($theme_dir . '/assets/css/kit.css');
+    $theme = file_get_contents($theme_dir . '/theme.json');
+    // Styles with their behaviour in the stylesheet (the rest are theme.json styles.blocks variations).
+    $css_backed = ['kits-reverse' => '.is-style-kits-reverse', 'kits-plain' => '.is-style-kits-plain', 'kits-outline' => '.is-style-kits-outline', 'kits-sources' => '.is-style-kits-sources'];
+    foreach ($css_backed as $name => $selector) {
+        if (strpos($php, "'$name'") === false) {
+            throw new \RuntimeException("block style $name is not registered in inc/blocks.php");
+        }
+        if (strpos($css, $selector) === false) {
+            throw new \RuntimeException("block style $name has no CSS ($selector)");
+        }
+    }
+    preg_match_all("/'(kits-[a-z-]+)'\s*=>\s*__\(/", $php, $m);
+    foreach ($m[1] as $name) {
+        if (!isset($css_backed[$name]) && strpos($theme, '"' . $name . '"') === false && strpos($css, 'is-style-' . $name) === false && strpos($php, 'is-style-' . $name) === false) {
+            throw new \RuntimeException("block style $name is registered but has no styling");
+        }
+    }
+});
+
+it('theme.json block styling for code, preformatted, quote and pullquote uses tokens only (no raw colours, fonts or Frost values)', function () use ($theme_dir) {
+    $data = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    foreach (['core/code', 'core/preformatted', 'core/quote', 'core/pullquote'] as $block) {
+        if (empty($data['styles']['blocks'][$block])) {
+            throw new \RuntimeException("styles.blocks.$block is missing");
+        }
+        $json = json_encode($data['styles']['blocks'][$block]);
+        if (preg_match('/#[0-9a-fA-F]{3,8}\b|rgba?\(|\b\d+px\b/', $json)) {
+            throw new \RuntimeException("$block has a raw colour or px value: use a preset or a token");
+        }
+    }
+    $slugs = array_column($data['settings']['typography']['fontFamilies'], 'slug');
+    if (!in_array('mono', $slugs, true)) {
+        throw new \RuntimeException('the mono font-family preset that code and preformatted use is missing');
+    }
+});
+
+it('No Frost palette, font or brand values anywhere in the theme source', function () use ($theme_dir) {
+    $needles = ['#0000ff', '#000099', '#cc0000', '#7a0000', 'Outfit', 'frostwp', 'wpengine', 'frost/'];
+    $files   = array_merge(
+        glob($theme_dir . '/*.{php,json,css,txt}', GLOB_BRACE),
+        glob($theme_dir . '/{inc,patterns,templates,parts,styles,styles/colours}/*.{php,html,json}', GLOB_BRACE),
+        glob($theme_dir . '/assets/css/{kits,kit,kit-tokens,kit-primitives}.css', GLOB_BRACE)
+    );
+    foreach ($files as $f) {
+        $src = strtolower(file_get_contents($f));
+        foreach ($needles as $n) {
+            if (strpos($src, strtolower($n)) !== false) {
+                throw new \RuntimeException(basename($f) . " contains '$n'");
+            }
+        }
+    }
+});
+
+it('Every translatable string in theme PHP uses the kits-by-wugweb text domain', function () use ($theme_dir) {
+    $files = array_merge(glob($theme_dir . '/functions.php'), glob($theme_dir . '/inc/*.php'), glob($theme_dir . '/patterns/*.php'));
+    foreach ($files as $f) {
+        preg_match_all('/\b(?:__|_e|_x|_n|esc_html__|esc_html_e|esc_attr__|esc_attr_e)\s*\(\s*(?:\'(?:[^\'\\\\]|\\\\.)*\'|"(?:[^"\\\\]|\\\\.)*")[^;]*?,\s*\'([a-z0-9-]+)\'\s*\)/', file_get_contents($f), $m);
+        foreach ($m[1] as $domain) {
+            if ($domain !== 'kits-by-wugweb') {
+                throw new \RuntimeException(basename($f) . " uses text domain '$domain'");
+            }
+        }
+    }
+    $pot = file_get_contents($theme_dir . '/languages/kits-by-wugweb.pot');
+    if (strpos($pot, '"X-Domain: kits-by-wugweb\n"') === false) {
+        throw new \RuntimeException('POT X-Domain is not kits-by-wugweb');
+    }
+    foreach (['Reverse on mobile', 'Plain (no bullets)', 'Footer: minimal', 'Progress bars', 'Kits: Pages'] as $s) {
+        if (strpos($pot, 'msgid "' . $s . '"') === false) {
+            throw new \RuntimeException("POT is stale: it lacks \"$s\" (regenerate with wp i18n make-pot)");
+        }
+    }
+});
+
+it('Every pattern is in a kits-* category, or is a header/footer template-part variant, or is hidden from the inserter', function () use ($theme_dir) {
+    foreach (glob($theme_dir . '/patterns/*.php') as $f) {
+        $src = file_get_contents($f);
+        preg_match('/\*\s*Categories:\s*(.+)/', $src, $cat);
+        $variant = preg_match('/\*\s*Block Types:\s*core\/template-part\/(header|footer)\b/', $src);
+        $hidden  = preg_match('/\*\s*Inserter:\s*no\b/', $src);
+        if (strpos($cat[1] ?? '', 'kits-') === false && !$variant && !$hidden) {
+            throw new \RuntimeException(basename($f) . ' is in no kits-* category and is neither a template-part variant nor hidden');
+        }
+        foreach (array_map('trim', explode(',', $cat[1] ?? '')) as $c) {
+            if (strpos($c, 'kits-') === 0 && !in_array($c, ['kits-components', 'kits-lists', 'kits-pages'], true)) {
+                throw new \RuntimeException(basename($f) . " uses the unregistered category $c");
+            }
+        }
+    }
+});
+
+it('Every template-part slug a template calls exists in parts/ and is declared in theme.json', function () use ($theme_dir) {
+    $data     = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    $declared = array_column($data['templateParts'], 'name');
+    foreach (glob($theme_dir . '/templates/*.html') as $f) {
+        preg_match_all('/<!-- wp:template-part \{"slug":"([^"]+)"/', file_get_contents($f), $m);
+        foreach ($m[1] as $slug) {
+            if (!file_exists($theme_dir . "/parts/$slug.html")) {
+                throw new \RuntimeException(basename($f) . " calls part $slug, which has no file");
+            }
+            if (!in_array($slug, $declared, true)) {
+                throw new \RuntimeException("$slug is not declared in theme.json templateParts");
+            }
+        }
+    }
+});
+
+it('The testimonials image slot and the card grid pagination are present, and no pattern forces a fixed height', function () use ($theme_dir) {
+    if (strpos(file_get_contents($theme_dir . '/patterns/testimonials.php'), 'wp:image') === false) {
+        throw new \RuntimeException('testimonials has no image slot');
+    }
+    if (strpos(file_get_contents($theme_dir . '/patterns/card-grid.php'), 'wp:query-pagination') === false) {
+        throw new \RuntimeException('card-grid has no pagination');
+    }
+    foreach (glob($theme_dir . '/patterns/*.php') as $f) {
+        if (preg_match('/(?<!min-)height:\s*\d+(px|rem|em|vh)/', file_get_contents($f)) && basename($f) !== 'banner.php') {
+            throw new \RuntimeException(basename($f) . ' sets a fixed height');
+        }
+    }
+});
+
+it('Standalone Frost-derived content patterns do not open on a heading deeper than h2 (no skipped level under the page h1)', function () use ($theme_dir) {
+    // Existing Kits card, query and band patterns use h3 by design (they sit under a heading the editor already wrote).
+    $standalone = ['boxes-two', 'boxes-three', 'product-box', 'pricing-two', 'pricing-three', 'pricing-four', 'team', 'hero-centered', 'hero-split', 'cta', 'testimonials', 'author-box', 'portfolio', 'progress-bars', 'page-home', 'page-about', 'page-pricing', 'page-link', '404'];
+    foreach ($standalone as $slug) {
+        $src = file_get_contents($theme_dir . "/patterns/$slug.php");
+        if (preg_match('/<h([1-6])\b/', $src, $m) && (int) $m[1] > 2) {
+            throw new \RuntimeException("$slug opens on an h{$m[1]}: it skips a level when placed under the page title");
+        }
+    }
+});
+
+it('Ink colour set keeps its links readable in dark mode (the panel inverts, so the link takes the set text colour)', function () use ($theme_dir) {
+    $css = file_get_contents($theme_dir . '/assets/css/kits.css');
+    if (!preg_match('/data-theme="dark"\]\s+\.is-style-kits-colours-ink a[^{]*\{[^}]*on-ink/s', $css)) {
+        throw new \RuntimeException('no dark-mode link rule for the Ink colour set');
     }
 });
 
