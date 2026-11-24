@@ -88,21 +88,14 @@ if ( function_exists( 'is_front_page' ) && ( is_front_page() || is_home() ) ) {
 }
 ?>
 <!-- wp:group {"tagName":"nav","ariaLabel":"Breadcrumb","className":"kit-crumbs","layout":{"type":"flex","flexWrap":"wrap"}} -->
-<nav class="wp-block-group kit-crumbs" aria-label="Breadcrumb">
-	<ol>
-	<?php
-	$count = count( $trail );
-	foreach ( $trail as $idx => $item ) :
-		$is_last = ( $idx === $count - 1 );
-		?>
-		<li>
-			<?php if ( ! empty( $item['url'] ) && ! $is_last ) : ?>
-				<a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['name'] ); ?></a>
-			<?php else : ?>
-				<span <?php echo $is_last ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $item['name'] ); ?></span>
-			<?php endif; ?>
-		</li>
-	<?php endforeach; ?>
-	</ol>
-</nav>
+<nav class="wp-block-group kit-crumbs" aria-label="Breadcrumb"><!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list"><?php
+$count = count( $trail );
+foreach ( $trail as $idx => $item ) :
+	$is_last = ( $idx === $count - 1 );
+	?><!-- wp:list-item -->
+<li><?php if ( ! empty( $item['url'] ) && ! $is_last ) : ?><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['name'] ); ?></a><?php else : ?><span<?php echo $is_last ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $item['name'] ); ?></span><?php endif; ?></li>
+<!-- /wp:list-item -->
+<?php endforeach; ?></ol>
+<!-- /wp:list --></nav>
 <!-- /wp:group -->

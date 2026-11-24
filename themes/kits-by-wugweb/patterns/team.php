@@ -15,8 +15,8 @@
 <figure class="wp-block-image size-large"><img alt=""/></figure>
 <!-- /wp:image -->
 
-<!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><?php esc_html_e( 'Name', 'kits-by-wugweb' ); ?></h3>
+<!-- wp:heading -->
+<h2 class="wp-block-heading"><?php esc_html_e( 'Name', 'kits-by-wugweb' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"className":"is-style-kits-label"} -->

@@ -12,8 +12,8 @@
 <!-- wp:columns {"align":"wide"} -->
 <div class="wp-block-columns alignwide"><?php for ( $i = 0; $i < 3; $i++ ) : ?><!-- wp:column -->
 <div class="wp-block-column"><!-- wp:group {"className":"is-style-kits-card","layout":{"type":"default"}} -->
-<div class="wp-block-group is-style-kits-card"><!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading"><?php esc_html_e( 'Plan name', 'kits-by-wugweb' ); ?></h3>
+<div class="wp-block-group is-style-kits-card"><!-- wp:heading -->
+<h2 class="wp-block-heading"><?php esc_html_e( 'Plan name', 'kits-by-wugweb' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph {"fontSize":"large"} -->
