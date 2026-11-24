@@ -1,7 +1,7 @@
 # SourceWeb on the Kits plugin standard (plan, 11 Nov 2026)
 
-**Status:** plan only, waiting on the owner. No code until the owner approves it.
-**Decision (owner, 11 Nov 2026):** SourceWeb (`plugins/aw-sourcing`) moves onto the shared Kits Core admin shell (Dashboard, one working list, Settings) and meets the Kits plugin standard (header, readme, translations, tests). The data stays as it is: options, the `aw_enrich` table, the `aw/v1` routes the workers use and every `aw_` name. The aw→kits rename is deferred. The workers repo is out of scope.
+**Status (Updated 24 Nov 2026):** Implemented, decoupled, and standalone verified in `plugins/sourceweb/`. Standalone plugin operational with publisher host registry, keyword relevance scoring, external services disclosure gate, review queues, summary rules, worker retry exponential backoff (`aw_worker_retry_backoff`), domain trust overrides, feed tag exclusions, and native fallback admin UI (`sourceweb-ui.php`). All 480 test checks passing (455 in `run.php`, 25 in `SourceWebStandaloneTest.php`).
+**Decision (owner, 11 Nov 2026):** SourceWeb moves onto the shared Kits Core admin shell (Dashboard, one working list, Settings) with native standalone fallback and meets the Kits plugin standard (header, readme, translations, tests). The data stays as it is: options, the `aw_enrich` table, the `aw/v1` routes the workers use and every `aw_` name. The aw→kits rename is deferred. The workers repo is out of scope.
 **Checked against:** `origin/wordpress-dev` at `c37d3b7c`. Every file:line below was read on that commit.
 **Paths:** `sw/` is `plugins/aw-sourcing/includes/`, `core/` is `plugins/animal-writes-core/includes/`, `kc/` is `plugins/kits-core/includes/`.
 
