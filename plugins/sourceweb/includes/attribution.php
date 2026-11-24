@@ -117,7 +117,7 @@ function sourceweb_rel_time_html( $id ) {
 	$diff = time() - $ts;
 	if ( $diff < 7 * DAY_IN_SECONDS && $diff >= 0 && ! is_front_page() ) { // the home page shows the date, like its Library cards (owner, 18 Oct 2026)
 		/* translators: %s: human time difference, e.g. 3 hours. */
-		$label = $diff < MINUTE_IN_SECONDS * 2 ? __( 'Just now', 'aw-sourcing' ) : sprintf( __( '%s ago', 'aw-sourcing' ), human_time_diff( $ts, time() ) );
+		$label = $diff < MINUTE_IN_SECONDS * 2 ? __( 'Just now', 'sourceweb' ) : sprintf( __( '%s ago', 'sourceweb' ), human_time_diff( $ts, time() ) );
 	} else {
 		$label = wp_date( (string) get_option( 'date_format' ), $ts ); // the site's one date format, with the year
 	}

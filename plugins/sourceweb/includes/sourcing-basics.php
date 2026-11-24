@@ -31,6 +31,9 @@ if ( ! function_exists( 'aw_host' ) ) {
 	 */
 	function aw_host( $url ) {
 		$h = strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) );
+		if ( '' === $h && preg_match( '#^([a-z0-9-]+\.)+[a-z]{2,}(/|$)#i', (string) $url ) ) {
+			$h = strtolower( (string) wp_parse_url( 'https://' . (string) $url, PHP_URL_HOST ) );
+		}
 		return preg_replace( '/^www\./', '', $h );
 	}
 }

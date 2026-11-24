@@ -777,3 +777,141 @@ function aw_rules_phase3_undo( array $sources_opt, $summary_opt, array $added ) 
 		'kept'    => $kept,
 	);
 }
+
+/* ---------- Domain Trust Overrides & Feed Filtering ---------- */
+
+/** Domain trust override choices. */
+const AW_DOMAIN_TRUST_STATUSES = array(
+	'allow'   => 'Allow (Auto-approve if checks pass)',
+	'neutral' => 'Require Review (Hold in Review Queue)',
+	'block'   => 'Discard (Block and Reject)',
+);
+
+/**
+ * Return all domain trust overrides (keyed by host).
+ *
+ * @return array<string, array>
+ */
+function aw_rules_domain_overrides() {
+	if ( ! function_exists( 'aw_publishers' ) ) {
+		return array();
+	}
+	$all = aw_publishers();
+	$out = array();
+	foreach ( $all as $host => $data ) {
+		$st = (string) ( $data['status'] ?? 'neutral' );
+		if ( in_array( $st, array( 'allow', 'block' ), true ) || ! empty( $data['manual_override'] ) ) {
+			$out[ $host ] = array(
+				'host'   => $host,
+				'name'   => (string) ( $data['name'] ?? $host ),
+				'status' => $st,
+				'last'   => (string) ( $data['last'] ?? '' ),
+			);
+		}
+	}
+	return $out;
+}
+
+/**
+ * Save a domain trust override.
+ *
+ * @param string $host   Domain host.
+ * @param string $status 'allow', 'neutral', or 'block'.
+ * @param string $name   Optional display name.
+ * @return bool
+ */
+function aw_rules_domain_override_save( $host, $status, $name = '' ) {
+	$host = function_exists( 'aw_host' ) ? aw_host( $host ) : strtolower( trim( (string) $host ) );
+	if ( '' === $host || ! in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
+		return false;
+	}
+	$pubs = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+	$prev = $pubs[ $host ] ?? array();
+	$pubs[ $host ] = array_merge(
+		array(
+			'name'            => '' !== $name ? $name : $host,
+			'count'           => 0,
+			'first'           => function_exists( 'current_time' ) ? current_time( 'Y-m-d' ) : gmdate( 'Y-m-d' ),
+			'last'            => '',
+		),
+		$prev,
+		array(
+			'status'          => $status,
+			'manual_override' => true,
+		)
+	);
+	if ( '' !== $name ) {
+		$pubs[ $host ]['name'] = $name;
+	}
+	if ( function_exists( 'update_option' ) ) {
+		update_option( defined( 'AW_PUB_OPTION' ) ? AW_PUB_OPTION : 'aw_publishers', $pubs, false );
+	}
+	if ( function_exists( 'aw_src_log' ) ) {
+		aw_src_log( 'publishers', "$host domain override → $status", $prev['status'] ?? 'neutral', $status );
+	}
+	return true;
+}
+
+/**
+ * Delete a domain trust override.
+ *
+ * @param string $host Domain host.
+ * @return bool
+ */
+function aw_rules_domain_override_delete( $host ) {
+	$host = function_exists( 'aw_host' ) ? aw_host( $host ) : strtolower( trim( (string) $host ) );
+	$pubs = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+	if ( ! isset( $pubs[ $host ] ) ) {
+		return false;
+	}
+	unset( $pubs[ $host ]['manual_override'] );
+	$pubs[ $host ]['status'] = 'neutral';
+	if ( function_exists( 'update_option' ) ) {
+		update_option( defined( 'AW_PUB_OPTION' ) ? AW_PUB_OPTION : 'aw_publishers', $pubs, false );
+	}
+	if ( function_exists( 'aw_src_log' ) ) {
+		aw_src_log( 'publishers', "$host domain override reset to neutral", '', 'neutral' );
+	}
+	return true;
+}
+
+/**
+ * Return excluded tag or category filters for feeds.
+ *
+ * @param string $section Optional section (post type).
+ * @return string[]
+ */
+function aw_rules_feed_excluded_tags( $section = '' ) {
+	$cfg = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : ( function_exists( 'get_option' ) ? (array) get_option( 'aw_sources', array() ) : array() );
+	if ( '' !== $section && isset( $cfg['sections'][ $section ]['excluded_tags'] ) ) {
+		return array_values( (array) $cfg['sections'][ $section ]['excluded_tags'] );
+	}
+	return array_values( (array) ( $cfg['excluded_tags'] ?? array() ) );
+}
+
+/**
+ * Save excluded tag or category filters for feeds.
+ *
+ * @param array  $tags    Array of tag slugs.
+ * @param string $section Optional section.
+ * @return bool
+ */
+function aw_rules_feed_excluded_tags_save( array $tags, $section = '' ) {
+	$cfg   = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : ( function_exists( 'get_option' ) ? (array) get_option( 'aw_sources', array() ) : array() );
+	$slugs = array_values( array_unique( array_filter( array_map( 'sanitize_title', $tags ) ) ) );
+	if ( '' !== $section ) {
+		if ( ! isset( $cfg['sections'][ $section ] ) ) {
+			$cfg['sections'][ $section ] = array();
+		}
+		$cfg['sections'][ $section ]['excluded_tags'] = $slugs;
+	} else {
+		$cfg['excluded_tags'] = $slugs;
+	}
+	if ( function_exists( 'update_option' ) ) {
+		update_option( 'aw_sources', $cfg, false );
+	}
+	if ( function_exists( 'aw_src_log' ) ) {
+		aw_src_log( 'rules', 'Excluded feed tags updated: ' . implode( ', ', $slugs ) );
+	}
+	return true;
+}

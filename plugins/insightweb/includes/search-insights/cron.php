@@ -10,8 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CRON_DAILY  = 'aw_si_daily';
-const AW_SI_CRON_ROLLUP = 'aw_si_rollup';
+const AW_SI_CRON_DAILY          = 'aw_si_daily';
+const AW_SI_CRON_ROLLUP         = 'aw_si_rollup';
+const INSIGHTWEB_CRON_TELEMETRY = 'insightweb_daily_telemetry_cron';
 
 /**
  * The daily run: tables, the one-time seed, Search Console, roles, then the calculation. Skipped while the owner has
@@ -69,6 +70,21 @@ function aw_si_daily( bool $by_hand = false ): array {
 }
 add_action( AW_SI_CRON_DAILY, fn() => aw_si_daily() );
 
+/**
+ * Execute daily telemetry refresh: Search Console sync and metric compute.
+ */
+function insightweb_daily_telemetry_refresh(): array {
+	if ( get_option( 'aw_si_off' ) ) {
+		return array( 'off' => true );
+	}
+	$res = aw_si_daily();
+	if ( function_exists( 'insightweb_dash_request' ) ) {
+		insightweb_dash_request();
+	}
+	return $res;
+}
+add_action( INSIGHTWEB_CRON_TELEMETRY, 'insightweb_daily_telemetry_refresh' );
+
 /** The nightly rollup, with its result in the run log. */
 function aw_si_rollup_cron(): void {
 	if ( ! aw_si_ready() ) {
@@ -101,5 +117,13 @@ add_action(
 		if ( ! wp_next_scheduled( AW_SI_CRON_ROLLUP ) ) {
 			wp_schedule_event( ( new DateTimeImmutable( 'today 23:30', $tz ) )->getTimestamp(), 'daily', AW_SI_CRON_ROLLUP );
 		}
+		if ( ! wp_next_scheduled( INSIGHTWEB_CRON_TELEMETRY ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:10', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_CRON_TELEMETRY );
+		}
 	}
+);
+
+add_filter(
+	'aw_si_cron_hooks',
+	fn( $hooks ) => array_merge( (array) $hooks, array( INSIGHTWEB_CRON_TELEMETRY ) )
 );

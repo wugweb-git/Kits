@@ -228,7 +228,7 @@ function aw_enrich_current( $lid, $field ) {
 	}
 	switch ( $def[1] ) {
 		case 'phones':
-			$rows = directoryweb_listing_phones( $lid );
+			$rows = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $lid ) : array();
 			if ( 'whatsapp' === $field ) {
 				return implode( ', ', wp_list_pluck( array_filter( $rows, fn( $r ) => $r['whatsapp'] ), 'number' ) );
 			}
@@ -237,9 +237,9 @@ function aw_enrich_current( $lid, $field ) {
 			}
 			return implode( ', ', wp_list_pluck( $rows, 'number' ) );
 		case 'hours':
-			return directoryweb_listing_hours( $lid );
+			return function_exists( 'directoryweb_listing_hours' ) ? directoryweb_listing_hours( $lid ) : '';
 		case 'services':
-			return wp_list_pluck( directoryweb_item_tags( $lid, directoryweb_service_slugs() ), 'slug' );
+			return ( function_exists( 'directoryweb_item_tags' ) && function_exists( 'directoryweb_service_slugs' ) ) ? wp_list_pluck( directoryweb_item_tags( $lid, directoryweb_service_slugs() ), 'slug' ) : array();
 		case 'excerpt':
 			return (string) get_post_field( 'post_excerpt', $lid );
 		case 'logo':
@@ -291,9 +291,9 @@ function aw_enrich_snapshot( $lid, $field ) {
 		case 'content':
 			return (string) get_post_field( 'post_content', $lid );
 		case 'phones':
-			return array( 'rows' => directoryweb_listing_phones( $lid ), 'unv' => aw_unverified_list( $lid ) );
+			return array( 'rows' => function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $lid ) : array(), 'unv' => aw_unverified_list( $lid ) );
 		case 'hours':
-			return directoryweb_listing_hours( $lid );
+			return function_exists( 'directoryweb_listing_hours' ) ? directoryweb_listing_hours( $lid ) : array();
 		case 'services':
 			return aw_enrich_current( $lid, $field );
 		case 'excerpt':
@@ -326,16 +326,22 @@ function aw_enrich_restore( $lid, $field, $snap ) {
 			break;
 		case 'phones':
 			$rows = isset( $snap['rows'] ) ? (array) $snap['rows'] : (array) $snap; // older rows kept the list alone
-			directoryweb_set_listing_list( $lid, 'aw_phones', $rows );
+			if ( function_exists( 'directoryweb_set_listing_list' ) ) {
+				directoryweb_set_listing_list( $lid, 'aw_phones', $rows );
+			}
 			if ( isset( $snap['unv'] ) ) {
 				$snap['unv'] ? update_post_meta( $lid, 'aw_unverified', array_values( (array) $snap['unv'] ) ) : delete_post_meta( $lid, 'aw_unverified' );
 			}
 			break;
 		case 'hours':
-			directoryweb_set_listing_list( $lid, 'aw_opening_hours', (array) $snap );
+			if ( function_exists( 'directoryweb_set_listing_list' ) ) {
+				directoryweb_set_listing_list( $lid, 'aw_opening_hours', (array) $snap );
+			}
 			break;
 		case 'services':
-			directoryweb_set_item_tags( $lid, (array) $snap, directoryweb_service_slugs() );
+			if ( function_exists( 'directoryweb_set_item_tags' ) && function_exists( 'directoryweb_service_slugs' ) ) {
+				directoryweb_set_item_tags( $lid, (array) $snap, directoryweb_service_slugs() );
+			}
 			break;
 		case 'excerpt':
 			wp_update_post( array( 'ID' => $lid, 'post_excerpt' => (string) $snap ) );
@@ -383,7 +389,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 	switch ( $def[1] ) {
 		case 'phones':
 			$num  = trim( sanitize_text_field( (string) $value ) );
-			$rows = directoryweb_listing_phones( $lid );
+			$rows = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $lid ) : array();
 			$norm = fn( $n ) => substr( preg_replace( '/\D+/', '', $n ), -10 );
 			$hit  = null;
 			foreach ( $rows as $i => $r ) {
@@ -404,7 +410,9 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 			} elseif ( 'emergency' === $field && '' === $rows[ $hit ]['label'] ) {
 				$rows[ $hit ]['label'] = 'Emergency';
 			}
-			directoryweb_set_listing_list( $lid, 'aw_phones', $rows );
+			if ( function_exists( 'directoryweb_set_listing_list' ) ) {
+				directoryweb_set_listing_list( $lid, 'aw_phones', $rows );
+			}
 			break;
 		case 'hours':
 			$rows = array();
@@ -416,14 +424,18 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 			if ( ! $rows ) {
 				return false;
 			}
-			directoryweb_set_listing_list( $lid, 'aw_opening_hours', $rows );
+			if ( function_exists( 'directoryweb_set_listing_list' ) ) {
+				directoryweb_set_listing_list( $lid, 'aw_opening_hours', $rows );
+			}
 			break;
 		case 'services':
 			$slugs = aw_enrich_services_norm( $value )[0];
 			if ( ! $slugs ) {
 				return false;
 			}
-			directoryweb_set_item_tags( $lid, $slugs, directoryweb_service_slugs() );
+			if ( function_exists( 'directoryweb_set_item_tags' ) && function_exists( 'directoryweb_service_slugs' ) ) {
+				directoryweb_set_item_tags( $lid, $slugs, directoryweb_service_slugs() );
+			}
 			update_post_meta( $lid, 'aw_services_source', 'the organisation\'s own pages' );
 			update_post_meta( $lid, 'aw_services_on', wp_date( 'Y-m-d' ) );
 			break;
@@ -670,7 +682,7 @@ function aw_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
 		$conf,
 		$protected,
 		fn() => aw_enrich_is_empty( $lid, $field ),
-		fn() => (bool) directoryweb_listing_phones( $lid ),
+		fn() => (bool) ( function_exists( 'directoryweb_listing_phones' ) && directoryweb_listing_phones( $lid ) ),
 		fn() => isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ),
 		fn() => aw_enrich_place_fills( $lid, $value )
 	);
@@ -685,7 +697,7 @@ function aw_enrich_never_publish( $value ) {
 	array_walk_recursive(
 		$vals,
 		function ( $v ) use ( &$blocked ) {
-			$blocked = $blocked || ( is_scalar( $v ) && directoryweb_phone_never_publish( $v ) );
+			$blocked = $blocked || ( is_scalar( $v ) && function_exists( 'directoryweb_phone_never_publish' ) && directoryweb_phone_never_publish( $v ) );
 		}
 	);
 	return $blocked;
@@ -958,7 +970,7 @@ const AW_ENRICH_SERVICE_MAP = array(
  * @return array{0: string[], 1: string}
  */
 function aw_enrich_services_norm( $value ) {
-	$known  = directoryweb_service_slugs();
+	$known  = function_exists( 'directoryweb_service_slugs' ) ? directoryweb_service_slugs() : array();
 	$out    = array();
 	$mapped = array();
 	$drop   = array();
@@ -1003,7 +1015,7 @@ function aw_enrich_union( $lid, $field, $value ) {
 	$out  = aw_enrich_list_items( aw_enrich_current( $lid, $field ) );
 	$seen = array_map( 'strtolower', $out );
 	foreach ( aw_enrich_list_items( $value ) as $item ) {
-		if ( 'services' === $field && ! in_array( sanitize_title( $item ), directoryweb_service_slugs(), true ) ) {
+		if ( 'services' === $field && ( ! function_exists( 'directoryweb_service_slugs' ) || ! in_array( sanitize_title( $item ), directoryweb_service_slugs(), true ) ) ) {
 			continue; // Only known services are stored (aw_enrich_write), so an unknown one adds nothing.
 		}
 		if ( ! in_array( strtolower( $item ), $seen, true ) ) {

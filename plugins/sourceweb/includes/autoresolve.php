@@ -261,7 +261,7 @@ function aw_ar_rule_save( array $in, $original = '' ) {
 	$action = (string) ( $in['action'] ?? '' );
 	$conds  = aw_ar_conditions();
 	if ( ! isset( AW_AR_FIELDS[ $field ] ) || ! isset( $conds[ $cond ] ) || ! in_array( $field, $conds[ $cond ]['fields'], true ) || ! isset( AW_AR_ACTIONS[ $action ] ) ) {
-		return array( 'error', __( 'Choose a field, a condition that fits it, and what to do.', 'aw-sourcing' ) );
+		return array( 'error', __( 'Choose a field, a condition that fits it, and what to do.', 'sourceweb' ) );
 	}
 	$row  = array( 'id' => '', 'field' => $field, 'cond' => $cond, 'action' => $action, 'on' => ! empty( $in['on'] ) );
 	$rows = aw_ar_rules();
@@ -271,13 +271,13 @@ function aw_ar_rule_save( array $in, $original = '' ) {
 			if ( $r['id'] === $original ) {
 				$row['id'] = $original;
 				if ( $r === $row ) {
-					return array( 'none', __( 'Nothing changed.', 'aw-sourcing' ) );
+					return array( 'none', __( 'Nothing changed.', 'sourceweb' ) );
 				}
 				$rows[ $i ] = $row;
 			}
 		}
 		aw_ar_rules_store( $rows, 'Review-queue rule ' . $original . ' edited' );
-		return array( 'edited', __( 'Rule saved.', 'aw-sourcing' ) );
+		return array( 'edited', __( 'Rule saved.', 'sourceweb' ) );
 	}
 	$base = $field . '-' . $cond;
 	$id   = $base;
@@ -294,7 +294,7 @@ function aw_ar_rule_save( array $in, $original = '' ) {
 	}
 	array_splice( $rows, $at, 0, array( $row ) );
 	aw_ar_rules_store( $rows, 'Review-queue rule ' . $id . ' added' );
-	return array( 'added', __( 'Rule added.', 'aw-sourcing' ) );
+	return array( 'added', __( 'Rule added.', 'sourceweb' ) );
 }
 
 /**
@@ -307,10 +307,10 @@ function aw_ar_rule_delete( $id ) {
 	$rows = aw_ar_rules();
 	$keep = array_values( array_filter( $rows, fn( $r ) => $r['id'] !== $id ) );
 	if ( count( $keep ) === count( $rows ) ) {
-		return array( 'none', __( 'No such rule.', 'aw-sourcing' ) );
+		return array( 'none', __( 'No such rule.', 'sourceweb' ) );
 	}
 	aw_ar_rules_store( $keep, 'Review-queue rule ' . $id . ' deleted' );
-	return array( 'deleted', __( 'Rule deleted.', 'aw-sourcing' ) );
+	return array( 'deleted', __( 'Rule deleted.', 'sourceweb' ) );
 }
 
 /**
@@ -324,7 +324,7 @@ function aw_ar_rule_move( $id, $dir ) {
 	$rows = aw_ar_rules();
 	$pos  = array_search( $id, wp_list_pluck( $rows, 'id' ), true );
 	if ( false === $pos ) {
-		return array( 'none', __( 'No such rule.', 'aw-sourcing' ) );
+		return array( 'none', __( 'No such rule.', 'sourceweb' ) );
 	}
 	$step = 'up' === $dir ? -1 : 1;
 	for ( $j = $pos + $step; isset( $rows[ $j ] ); $j += $step ) {
@@ -333,10 +333,10 @@ function aw_ar_rule_move( $id, $dir ) {
 			$rows[ $pos ] = $rows[ $j ];
 			$rows[ $j ]   = $tmp;
 			aw_ar_rules_store( $rows, 'Review-queue rule ' . $id . ' moved ' . ( 'up' === $dir ? 'earlier' : 'later' ) );
-			return array( 'moved', __( 'Rule moved.', 'aw-sourcing' ) );
+			return array( 'moved', __( 'Rule moved.', 'sourceweb' ) );
 		}
 	}
-	return array( 'none', __( 'It is already there.', 'aw-sourcing' ) );
+	return array( 'none', __( 'It is already there.', 'sourceweb' ) );
 }
 
 /** The built-in rules again (the edits are dropped; the log keeps them). */
@@ -344,7 +344,7 @@ function aw_ar_rules_reset() {
 	$old = aw_ar_rules();
 	delete_option( AW_AR_RULES_OPTION );
 	aw_src_log( 'enrich', 'Review-queue rules reset to the built-in ones', $old, aw_ar_default_rules() );
-	return array( 'reset', __( 'The built-in rules are back.', 'aw-sourcing' ) );
+	return array( 'reset', __( 'The built-in rules are back.', 'sourceweb' ) );
 }
 
 /**
@@ -441,11 +441,11 @@ add_action(
 					$res = aw_rules_field_reset( sanitize_key( (string) $q['field'] ) );
 					$txt = array(
 						/* translators: %s: field name. */
-						'field_reset' => __( 'Field rule %s is the built-in rule again.', 'aw-sourcing' ),
+						'field_reset' => __( 'Field rule %s is the built-in rule again.', 'sourceweb' ),
 						/* translators: %s: field name. */
-						'none'        => __( 'Nothing to put back for %s: it already uses the built-in rule.', 'aw-sourcing' ),
+						'none'        => __( 'Nothing to put back for %s: it already uses the built-in rule.', 'sourceweb' ),
 						/* translators: %s: field name. */
-						'nosuch'      => __( 'No such field: %s.', 'aw-sourcing' ),
+						'nosuch'      => __( 'No such field: %s.', 'sourceweb' ),
 					);
 					return aw_ar_answer( array( 'nosuch' === $res[0] ? 'error' : $res[0], sprintf( $txt[ $res[0] ], $res[1] ) ) );
 				},
@@ -463,7 +463,7 @@ add_action(
 					$on = ! empty( $q->get_json_params()['on'] );
 					update_option( 'aw_enrich_autoresolve', $on ? '1' : '0', false );
 					aw_src_log( 'enrich', 'Review-queue rules switched ' . ( $on ? 'on' : 'off' ), $on ? '0' : '1', $on ? '1' : '0' );
-					return aw_ar_answer( array( 'switched', $on ? __( 'The rules decide waiting values again.', 'aw-sourcing' ) : __( 'The rules are off: every value waits for a person.', 'aw-sourcing' ) ) );
+					return aw_ar_answer( array( 'switched', $on ? __( 'The rules decide waiting values again.', 'sourceweb' ) : __( 'The rules are off: every value waits for a person.', 'sourceweb' ) ) );
 				},
 			)
 		);
@@ -486,7 +486,7 @@ function aw_ar_value_edit( $id, $value ) {
 	global $wpdb;
 	$r = aw_enrich_row( (int) $id );
 	if ( ! $r || 'pending' !== $r['status'] || ! is_string( $r['value'] ) || in_array( $r['field'], AW_AR_NOT_EDITABLE, true ) ) {
-		return array( 'error', __( 'Only a waiting text value can be edited.', 'aw-sourcing' ) );
+		return array( 'error', __( 'Only a waiting text value can be edited.', 'sourceweb' ) );
 	}
 	$f   = (string) $r['field'];
 	$new = trim( (string) $value );
@@ -500,14 +500,14 @@ function aw_ar_value_edit( $id, $value ) {
 		$new = sanitize_text_field( $new );
 	}
 	if ( '' === $new ) {
-		return array( 'error', __( 'The value is empty or not valid for this field.', 'aw-sourcing' ) );
+		return array( 'error', __( 'The value is empty or not valid for this field.', 'sourceweb' ) );
 	}
 	if ( $new === $r['value'] ) {
-		return array( 'none', __( 'Nothing changed.', 'aw-sourcing' ) );
+		return array( 'none', __( 'Nothing changed.', 'sourceweb' ) );
 	}
 	$wpdb->update( aw_enrich_table(), array( 'value' => wp_json_encode( $new ), 'note' => substr( trim( (string) $r['note'] . ' Edited by a person.' ), 0, 190 ) ), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	aw_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $f . ', listing ' . (int) $r['listing_id'] . ') edited', $r['value'], $new );
-	return array( 'edited', __( 'Value saved. Apply it when it is right.', 'aw-sourcing' ) );
+	return array( 'edited', __( 'Value saved. Apply it when it is right.', 'sourceweb' ) );
 }
 
 /**
@@ -520,11 +520,11 @@ function aw_ar_value_delete( $id ) {
 	global $wpdb;
 	$r = aw_enrich_row( (int) $id );
 	if ( ! $r || 'pending' !== $r['status'] ) {
-		return array( 'error', __( 'Only a waiting value can be deleted.', 'aw-sourcing' ) );
+		return array( 'error', __( 'Only a waiting value can be deleted.', 'sourceweb' ) );
 	}
 	$wpdb->delete( aw_enrich_table(), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	aw_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $r['field'] . ', listing ' . (int) $r['listing_id'] . ') deleted', $r['value'], '' );
-	return array( 'deleted', __( 'Value deleted.', 'aw-sourcing' ) );
+	return array( 'deleted', __( 'Value deleted.', 'sourceweb' ) );
 }
 
 add_action(

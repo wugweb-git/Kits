@@ -255,20 +255,91 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 /**
+ * Diagnostic check for an external service connection status.
+ *
+ * @param string $name Service constant name (e.g. AW_CLARITY_TOKEN, AW_BING_WEBMASTER_KEY, AW_PSI_KEY).
+ * @return array{status: string, label: string, detail: string}
+ */
+function insightweb_check_service_status( string $name ): array {
+	$val = insightweb_key( $name );
+	if ( '' === $val ) {
+		return array(
+			'status' => 'not_configured',
+			'label'  => __( 'Not Configured', 'insightweb' ),
+			'detail' => __( 'No API credential configured.', 'insightweb' ),
+		);
+	}
+
+	$src_map = array(
+		'AW_CLARITY_TOKEN'      => 'clarity',
+		'AW_BING_WEBMASTER_KEY' => 'bing',
+		'AW_PSI_KEY'            => 'psi',
+	);
+
+	if ( isset( $src_map[ $name ] ) ) {
+		$src = $src_map[ $name ];
+		if ( function_exists( 'aw_si_rising_blocked' ) && aw_si_rising_blocked( $src ) ) {
+			return array(
+				'status' => 'quota_exceeded',
+				'label'  => __( 'Quota Exceeded', 'insightweb' ),
+				'detail' => __( 'Upstream service reported rate limit or quota exceeded (HTTP 429).', 'insightweb' ),
+			);
+		}
+		if ( function_exists( 'aw_si_run_problem' ) ) {
+			$err = aw_si_run_problem( $src );
+			if ( $err ) {
+				if ( preg_match( '/(401|403|unauthorized|forbidden|invalid key|bad token)/i', $err ) ) {
+					return array(
+						'status' => 'invalid_key',
+						'label'  => __( 'Invalid Key', 'insightweb' ),
+						'detail' => $err,
+					);
+				}
+				if ( preg_match( '/(429|quota|rate limit)/i', $err ) ) {
+					return array(
+						'status' => 'quota_exceeded',
+						'label'  => __( 'Quota Exceeded', 'insightweb' ),
+						'detail' => $err,
+					);
+				}
+			}
+		}
+	} elseif ( 0 === strpos( $name, 'AW_GOOGLE_ALERTS_FEED_' ) ) {
+		if ( ! filter_var( $val, FILTER_VALIDATE_URL ) || false === strpos( $val, 'google.com/alerts/feeds' ) ) {
+			return array(
+				'status' => 'invalid_key',
+				'label'  => __( 'Invalid URL', 'insightweb' ),
+				'detail' => __( 'Expected a valid Google Alerts RSS feed URL.', 'insightweb' ),
+			);
+		}
+	}
+
+	return array(
+		'status' => 'connected',
+		'label'  => __( 'Connected', 'insightweb' ),
+		'detail' => __( 'Credential configured and active.', 'insightweb' ),
+	);
+}
+
+/**
  * The Keys section's data: per key its label, help and where it is set. Never a value.
  *
- * @return array{keys: array<int, array{name: string, label: string, help: string, where: string, state: string}>}
+ * @return array{keys: array<int, array{name: string, label: string, help: string, where: string, state: string, status: string, statusLabel: string, statusDetail: string}>}
  */
 function insightweb_keys_payload(): array {
 	$out = array();
 	foreach ( insightweb_key_fields() as $name => $f ) {
-		$where = insightweb_key_where( $name );
-		$out[] = array(
-			'name'  => $name,
-			'label' => $f[0],
-			'help'  => $f[1],
-			'where' => $where,
-			'state' => insightweb_key_where_label( $where ),
+		$where  = insightweb_key_where( $name );
+		$status = insightweb_check_service_status( $name );
+		$out[]  = array(
+			'name'         => $name,
+			'label'        => $f[0],
+			'help'         => $f[1],
+			'where'        => $where,
+			'state'        => insightweb_key_where_label( $where ),
+			'status'       => $status['status'],
+			'statusLabel'  => $status['label'],
+			'statusDetail' => $status['detail'],
 		);
 	}
 	return array( 'keys' => $out );
@@ -341,5 +412,87 @@ add_action(
 				),
 			)
 		);
+	}
+);
+
+add_action(
+	'admin_post_insightweb_save_keys',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'insightweb_keys_save' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified above via check_admin_referer.
+		$keys  = isset( $_POST['keys'] ) ? (array) map_deep( wp_unslash( $_POST['keys'] ), 'sanitize_text_field' ) : array();
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified above via check_admin_referer.
+		$clear = isset( $_POST['clear'] ) ? (array) map_deep( wp_unslash( $_POST['clear'] ), 'sanitize_text_field' ) : array();
+		$in    = array();
+		$known = array_keys( insightweb_key_fields() );
+		foreach ( $keys as $name => $value ) {
+			if ( in_array( (string) $name, $known, true ) && is_string( $value ) && 'config' !== insightweb_key_where( (string) $name ) ) {
+				$in[ (string) $name ] = $value;
+			}
+		}
+		$in['__clear'] = array_values( array_intersect( array_map( 'strval', $clear ), $known ) );
+		update_option( INSIGHTWEB_KEYS_OPTION, $in, false );
+		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ?? '' ) ), '' );
+		wp_safe_redirect( add_query_arg( 'saved', 'keys', '' !== $from ? $from : admin_url( 'admin.php?page=aw-search-insights&tab=settings' ) ) );
+		exit;
+	}
+);
+
+add_action(
+	'aw_si_settings_rows',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		echo '<tr><th scope="row"><label>' . esc_html__( 'Service Credentials', 'insightweb' ) . '</label></th><td>';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+		wp_nonce_field( 'insightweb_keys_save' );
+		echo '<input type="hidden" name="action" value="insightweb_save_keys">';
+		echo '<table class="widefat striped" style="max-width:800px; margin-bottom:12px;">';
+		echo '<thead><tr>';
+		echo '<th>' . esc_html__( 'Service', 'insightweb' ) . '</th>';
+		echo '<th>' . esc_html__( 'Status', 'insightweb' ) . '</th>';
+		echo '<th>' . esc_html__( 'Source', 'insightweb' ) . '</th>';
+		echo '<th>' . esc_html__( 'New Key / Token', 'insightweb' ) . '</th>';
+		echo '<th>' . esc_html__( 'Clear', 'insightweb' ) . '</th>';
+		echo '</tr></thead><tbody>';
+
+		$status_colors = array(
+			'connected'      => array( '#007017', '#e7f7ed' ),
+			'invalid_key'    => array( '#d63638', '#fcf0f1' ),
+			'quota_exceeded' => array( '#dba617', '#fef7e0' ),
+			'not_configured' => array( '#50575e', '#f0f0f1' ),
+		);
+
+		foreach ( insightweb_key_fields() as $name => $f ) {
+			$where  = insightweb_key_where( $name );
+			$diag   = insightweb_check_service_status( $name );
+			$colors = $status_colors[ $diag['status'] ] ?? $status_colors['not_configured'];
+
+			echo '<tr>';
+			echo '<td><strong>' . esc_html( $f[0] ) . '</strong><br><small class="description">' . esc_html( $name ) . '</small></td>';
+			echo '<td><span style="display:inline-block; padding:3px 8px; border-radius:4px; font-weight:600; font-size:12px; color:' . esc_attr( $colors[0] ) . '; background:' . esc_attr( $colors[1] ) . ';">' . esc_html( $diag['label'] ) . '</span></td>';
+			echo '<td>' . ( '' !== $where ? esc_html( ucfirst( $where ) ) : '–' ) . '</td>';
+			echo '<td>';
+			if ( 'config' === $where ) {
+				echo '<small><em>' . esc_html__( 'Defined in wp-config.php', 'insightweb' ) . '</em></small>';
+			} else {
+				echo '<input type="password" name="keys[' . esc_attr( $name ) . ']" class="regular-text code" style="width:100%;" placeholder="' . ( '' !== $where ? '•••••••• (saved)' : esc_attr__( 'Paste key...', 'insightweb' ) ) . '" autocomplete="new-password">';
+			}
+			echo '</td>';
+			echo '<td style="text-align:center;">';
+			if ( 'config' !== $where && '' !== $where ) {
+				echo '<input type="checkbox" name="clear[]" value="' . esc_attr( $name ) . '" title="' . esc_attr__( 'Remove saved key', 'insightweb' ) . '">';
+			} else {
+				echo '–';
+			}
+			echo '</td>';
+			echo '</tr>';
+		}
+		echo '</tbody></table>';
+		submit_button( __( 'Save Credentials', 'insightweb' ), 'primary', 'submit', false );
+		echo '</form></td></tr>';
 	}
 );

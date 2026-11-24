@@ -38,7 +38,7 @@ function sourceweb_rest_can( string $cap ): callable {
 	}
 	return function ( $request = null ) use ( $cap ) {
 		if ( ! is_user_logged_in() ) {
-			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'aw-sourcing' ), array( 'status' => 401 ) );
+			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'sourceweb' ), array( 'status' => 401 ) );
 		}
 		$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
 		if ( ! $app ) {
@@ -49,10 +49,10 @@ function sourceweb_rest_can( string $cap ): callable {
 				$nonce = (string) ( $request->headers['X-WP-Nonce'] ?? '' );
 			}
 			if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'aw-sourcing' ), array( 'status' => 403 ) );
+				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'sourceweb' ), array( 'status' => 403 ) );
 			}
 		}
-		return current_user_can( $cap ) ? true : new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'aw-sourcing' ), array( 'status' => 403 ) );
+		return current_user_can( $cap ) ? true : new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'sourceweb' ), array( 'status' => 403 ) );
 	};
 }
 
@@ -233,13 +233,13 @@ function sourceweb_dashboard_payload(): array {
 	$old     = (int) ( $r['oldest'] ?? 0 );
 	$tiles[] = array(
 		'key'    => 'review',
-		'label'  => __( 'Waiting for review', 'aw-sourcing' ),
+		'label'  => __( 'Waiting for review', 'sourceweb' ),
 		'value'  => $num( $r['total'] ?? 0 ),
 		'raw'    => (int) ( $r['total'] ?? 0 ),
 		'sub'    => $old
 			/* translators: 1: date, 2: type with the most items. */
-			? sprintf( __( 'Oldest since %1$s; most are %2$s', 'aw-sourcing' ), wp_date( 'j M', $old ), $types[ $top ] ?? $top )
-			: __( 'Nothing is waiting', 'aw-sourcing' ),
+			? sprintf( __( 'Oldest since %1$s; most are %2$s', 'sourceweb' ), wp_date( 'j M', $old ), $types[ $top ] ?? $top )
+			: __( 'Nothing is waiting', 'sourceweb' ),
 		'href'   => sourceweb_ui_url( 'review' ),
 		'tone'   => $old && time() - $old > 7 * DAY_IN_SECONDS ? 'warn' : '',
 		'metric' => 'review',
@@ -248,11 +248,11 @@ function sourceweb_dashboard_payload(): array {
 	$e       = (array) ( $c['enrich'] ?? array() );
 	$tiles[] = array(
 		'key'    => 'enrich',
-		'label'  => __( 'Enrichment queue', 'aw-sourcing' ),
+		'label'  => __( 'Enrichment queue', 'sourceweb' ),
 		'value'  => $num( $e['pending'] ?? 0 ),
 		'raw'    => (int) ( $e['pending'] ?? 0 ),
 		/* translators: 1: listings, 2: values applied, 3: of them automatically. */
-		'sub'    => sprintf( __( 'Proposals for %1$s listings; %2$s applied in 7 days (%3$s automatically)', 'aw-sourcing' ), $num( $e['listings'] ?? 0 ), $num( $e['applied7'] ?? 0 ), $num( $e['auto7'] ?? 0 ) ),
+		'sub'    => sprintf( __( 'Proposals for %1$s listings; %2$s applied in 7 days (%3$s automatically)', 'sourceweb' ), $num( $e['listings'] ?? 0 ), $num( $e['applied7'] ?? 0 ), $num( $e['auto7'] ?? 0 ) ),
 		'href'   => sourceweb_ui_url( 'enrichment' ),
 		'tone'   => '',
 		'metric' => 'enrich',
@@ -260,16 +260,16 @@ function sourceweb_dashboard_payload(): array {
 
 	$i = (array) ( $c['intake'] ?? array() );
 	if ( empty( $i['last_run'] ) ) {
-		$iv = __( 'No report yet', 'aw-sourcing' );
-		$is = __( 'The workers have not reported a run', 'aw-sourcing' );
+		$iv = __( 'No report yet', 'sourceweb' );
+		$is = __( 'The workers have not reported a run', 'sourceweb' );
 	} else {
-		$iv = ! empty( $i['ok'] ) ? __( 'On time', 'aw-sourcing' ) : __( 'Late', 'aw-sourcing' );
+		$iv = ! empty( $i['ok'] ) ? __( 'On time', 'sourceweb' ) : __( 'Late', 'sourceweb' );
 		/* translators: 1: date and time, 2: new items, 3: published, 4: sources failed. */
-		$is = sprintf( __( 'Last run %1$s: %2$s new, %3$s published, %4$s sources failed', 'aw-sourcing' ), $day( $i['last_run'] ), $num( $i['new'] ?? 0 ), $num( $i['published'] ?? 0 ), $num( $i['failed'] ?? 0 ) );
+		$is = sprintf( __( 'Last run %1$s: %2$s new, %3$s published, %4$s sources failed', 'sourceweb' ), $day( $i['last_run'] ), $num( $i['new'] ?? 0 ), $num( $i['published'] ?? 0 ), $num( $i['failed'] ?? 0 ) );
 	}
 	$tiles[] = array(
 		'key'   => 'intake',
-		'label' => __( 'Last run', 'aw-sourcing' ),
+		'label' => __( 'Last run', 'sourceweb' ),
 		'value' => $counting ? '' : $iv,
 		'sub'   => $is,
 		'href'  => current_user_can( 'view_site_health_checks' ) ? admin_url( 'site-health.php' ) : '',
@@ -281,11 +281,11 @@ function sourceweb_dashboard_payload(): array {
 
 	$tiles[] = array(
 		'key'    => 'rejected',
-		'label'  => __( 'Refused today', 'aw-sourcing' ),
+		'label'  => __( 'Refused today', 'sourceweb' ),
 		'value'  => $num( $i['rejected_today'] ?? 0 ),
 		'raw'    => (int) ( $i['rejected_today'] ?? 0 ),
 		/* translators: %s: number of items. */
-		'sub'    => sprintf( __( '%s in the Rejected log; never created', 'aw-sourcing' ), $num( $i['rejected_all'] ?? 0 ) ),
+		'sub'    => sprintf( __( '%s in the Rejected log; never created', 'sourceweb' ), $num( $i['rejected_all'] ?? 0 ) ),
 		'href'   => sourceweb_admin_url( 'rejected' ),
 		'tone'   => '',
 		'metric' => 'rejected',
@@ -294,11 +294,11 @@ function sourceweb_dashboard_payload(): array {
 	$s       = (array) ( $c['sources'] ?? array() );
 	$tiles[] = array(
 		'key'    => 'sources',
-		'label'  => __( 'Sources allowed', 'aw-sourcing' ),
+		'label'  => __( 'Sources allowed', 'sourceweb' ),
 		'value'  => $num( $s['allow'] ?? 0 ),
 		'raw'    => (int) ( $s['allow'] ?? 0 ),
 		/* translators: 1: neutral, 2: blocked, 3: feeds. */
-		'sub'    => sprintf( __( '%1$s neutral, %2$s blocked; %3$s feeds', 'aw-sourcing' ), $num( $s['neutral'] ?? 0 ), $num( $s['block'] ?? 0 ), $num( $s['feeds'] ?? 0 ) ) . ' · ' . ( ! empty( $s['live'] ) ? __( 'Workers use these lists', 'aw-sourcing' ) : __( 'Workers use sources.yaml', 'aw-sourcing' ) ),
+		'sub'    => sprintf( __( '%1$s neutral, %2$s blocked; %3$s feeds', 'sourceweb' ), $num( $s['neutral'] ?? 0 ), $num( $s['block'] ?? 0 ), $num( $s['feeds'] ?? 0 ) ) . ' · ' . ( ! empty( $s['live'] ) ? __( 'Workers use these lists', 'sourceweb' ) : __( 'Workers use sources.yaml', 'sourceweb' ) ),
 		'href'   => sourceweb_admin_url(),
 		'tone'   => '',
 		'metric' => 'sources',
@@ -310,11 +310,11 @@ function sourceweb_dashboard_payload(): array {
 			$p       = (array) ( $w['problems'] ?? array() );
 			$tiles[] = array(
 				'key'    => 'workers',
-				'label'  => __( 'Workers on time', 'aw-sourcing' ),
+				'label'  => __( 'Workers on time', 'sourceweb' ),
 				/* translators: 1: on time, 2: workflows. */
-				'value'  => $counting ? '' : sprintf( __( '%1$s of %2$s', 'aw-sourcing' ), $num( (int) ( $w['total'] ?? 0 ) - count( $p ) ), $num( $w['total'] ?? 0 ) ),
+				'value'  => $counting ? '' : sprintf( __( '%1$s of %2$s', 'sourceweb' ), $num( (int) ( $w['total'] ?? 0 ) - count( $p ) ), $num( $w['total'] ?? 0 ) ),
 				'raw'    => (int) ( $w['total'] ?? 0 ) - count( $p ),
-				'sub'    => $p ? implode( ' ', array_slice( $p, 0, 2 ) ) : __( 'Every workflow that reports is on time', 'aw-sourcing' ),
+				'sub'    => $p ? implode( ' ', array_slice( $p, 0, 2 ) ) : __( 'Every workflow that reports is on time', 'sourceweb' ),
 				'href'   => sourceweb_admin_url( 'workers' ),
 				'tone'   => $p ? 'warn' : '',
 				'metric' => 'workers',
@@ -323,12 +323,12 @@ function sourceweb_dashboard_payload(): array {
 		$a       = (array) ( $c['ai'] ?? array() );
 		$tiles[] = array(
 			'key'   => 'ai',
-			'label' => __( 'AI keys that work', 'aw-sourcing' ),
+			'label' => __( 'AI keys that work', 'sourceweb' ),
 			'value' => $num( $a['works'] ?? 0 ),
 			'sub'   => empty( $a['saved'] )
-				? __( 'No keys saved on the AI models screen yet', 'aw-sourcing' )
+				? __( 'No keys saved on the AI models screen yet', 'sourceweb' )
 				/* translators: 1: waiting, 2: refused. */
-				: sprintf( __( '%1$s waiting or not checked, %2$s refused or out of credit', 'aw-sourcing' ), $num( $a['wait'] ?? 0 ), $num( $a['bad'] ?? 0 ) ),
+				: sprintf( __( '%1$s waiting or not checked, %2$s refused or out of credit', 'sourceweb' ), $num( $a['wait'] ?? 0 ), $num( $a['bad'] ?? 0 ) ),
 			'href'  => sourceweb_admin_url( 'ai' ),
 			'tone'  => ! empty( $a['saved'] ) && empty( $a['works'] ) ? 'warn' : '',
 		);
@@ -337,12 +337,12 @@ function sourceweb_dashboard_payload(): array {
 		$live    = (float) ( $g['live'] ?? 0 );
 		$tiles[] = array(
 			'key'   => 'google',
-			'label' => __( 'Google Maps spend', 'aw-sourcing' ),
+			'label' => __( 'Google Maps spend', 'sourceweb' ),
 			'value' => '$' . number_format_i18n( $live, 2 ),
 			'sub'   => empty( $g['key'] )
-				? __( 'No key set: the live block is hidden', 'aw-sourcing' )
+				? __( 'No key set: the live block is hidden', 'sourceweb' )
 				/* translators: 1: monthly cap, 2: the worker's spend. */
-				: sprintf( __( 'This month, of a $%1$s cap; the worker spent $%2$s', 'aw-sourcing' ), $num( $cap ), number_format_i18n( (float) ( $g['worker'] ?? 0 ), 2 ) ),
+				: sprintf( __( 'This month, of a $%1$s cap; the worker spent $%2$s', 'sourceweb' ), $num( $cap ), number_format_i18n( (float) ( $g['worker'] ?? 0 ), 2 ) ),
 			'href'  => sourceweb_ui_url( 'settings' ) . '#services',
 			'tone'  => $cap > 0 && $live >= 0.8 * $cap ? 'warn' : '',
 		);
@@ -367,10 +367,10 @@ function sourceweb_dashboard_payload(): array {
 				'id'     => (string) $run['file'],
 				'title'  => (string) $run['name'],
 				'last'   => $run['last'] ? $day( $run['last'] ) : '—',
-				'result' => '' === $run['result'] ? __( 'No report yet', 'aw-sourcing' ) : ucfirst( (string) $run['result'] ),
+				'result' => '' === $run['result'] ? __( 'No report yet', 'sourceweb' ) : ucfirst( (string) $run['result'] ),
 				'ok'     => 'success' === $run['result'],
 				/* translators: %s: the workflow it runs after. */
-				'next'   => $run['next'] ? $day( $run['next'] ) : ( '' !== $run['after'] ? sprintf( __( 'After "%s"', 'aw-sourcing' ), $run['after'] ) : __( 'By hand', 'aw-sourcing' ) ),
+				'next'   => $run['next'] ? $day( $run['next'] ) : ( '' !== $run['after'] ? sprintf( __( 'After "%s"', 'sourceweb' ), $run['after'] ) : __( 'By hand', 'sourceweb' ) ),
 			);
 		}
 	}
@@ -378,9 +378,9 @@ function sourceweb_dashboard_payload(): array {
 	if ( $admin ) {
 		foreach (
 			array(
-				'rejected'  => array( __( 'Rejected', 'aw-sourcing' ), __( 'Items the relevance check refused (never created), with the reason.', 'aw-sourcing' ) ),
-				'relay-log' => array( __( 'Relay log', 'aw-sourcing' ), __( 'Requests the workers made through this site (the last 200).', 'aw-sourcing' ) ),
-				'log'       => array( __( 'Change log', 'aw-sourcing' ), __( 'Who changed what on these screens and when.', 'aw-sourcing' ) ),
+				'rejected'  => array( __( 'Rejected', 'sourceweb' ), __( 'Items the relevance check refused (never created), with the reason.', 'sourceweb' ) ),
+				'relay-log' => array( __( 'Relay log', 'sourceweb' ), __( 'Requests the workers made through this site (the last 200).', 'sourceweb' ) ),
+				'log'       => array( __( 'Change log', 'sourceweb' ), __( 'Who changed what on these screens and when.', 'sourceweb' ) ),
 			) as $tab => $t
 		) {
 			$reports[] = array(
@@ -402,10 +402,10 @@ function sourceweb_dashboard_payload(): array {
 		'runs'     => $runs,
 		'reports'  => $reports,
 		'commands' => array(
-			array( 'wp aw-sourcing backup|migrate|verify|rollback', __( 'The sourcing restructure phases (--phase=n), with --dry-run.', 'aw-sourcing' ) ),
-			array( 'wp aw-sourcing import-dr', __( 'Domain Rating values for the Sources list.', 'aw-sourcing' ) ),
-			array( 'wp aw news-titles', __( 'Apply corrected News or Press titles from a CSV file.', 'aw-sourcing' ) ),
-			array( 'wp aw workers-tick', __( 'The workers check, every 15 minutes from the server cron.', 'aw-sourcing' ) ),
+			array( 'wp aw-sourcing backup|migrate|verify|rollback', __( 'The sourcing restructure phases (--phase=n), with --dry-run.', 'sourceweb' ) ),
+			array( 'wp aw-sourcing import-dr', __( 'Domain Rating values for the Sources list.', 'sourceweb' ) ),
+			array( 'wp aw news-titles', __( 'Apply corrected News or Press titles from a CSV file.', 'sourceweb' ) ),
+			array( 'wp aw workers-tick', __( 'The workers check, every 15 minutes from the server cron.', 'sourceweb' ) ),
 		),
 	);
 }
@@ -437,7 +437,7 @@ function sourceweb_review_row( WP_Post $p ): array {
 	$title = html_entity_decode( get_the_title( $p ), ENT_QUOTES, 'UTF-8' );
 	return array(
 		'id'        => (int) $p->ID,
-		'title'     => '' !== $title ? $title : __( '(no title)', 'aw-sourcing' ),
+		'title'     => '' !== $title ? $title : __( '(no title)', 'sourceweb' ),
 		'type'      => $p->post_type,
 		'typeLabel' => AW_REVIEW_TYPES[ $p->post_type ] ?? $p->post_type,
 		'date'      => (string) $p->post_date,
@@ -477,9 +477,9 @@ function sourceweb_rest_review_decide( WP_REST_Request $request ) {
 			'done'    => $n,
 			'message' => 'publish' === $action
 				/* translators: %d: number of items. */
-				? sprintf( _n( '%d item published.', '%d items published.', $n, 'aw-sourcing' ), $n )
+				? sprintf( _n( '%d item published.', '%d items published.', $n, 'sourceweb' ), $n )
 				/* translators: %d: number of items. */
-				: sprintf( _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n, 'aw-sourcing' ), $n ),
+				: sprintf( _n( '%d item moved to Drafts.', '%d items moved to Drafts.', $n, 'sourceweb' ), $n ),
 		)
 	);
 }
@@ -496,7 +496,7 @@ function sourceweb_rest_review_publish_all( WP_REST_Request $request ) {
 		return new WP_Error(
 			'sourceweb_count_changed',
 			/* translators: %d: number of items. */
-			sprintf( __( 'The list changed: %d items wait now. Nothing was published; check the list and try again.', 'aw-sourcing' ), count( $items ) ),
+			sprintf( __( 'The list changed: %d items wait now. Nothing was published; check the list and try again.', 'sourceweb' ), count( $items ) ),
 			array( 'status' => 409 )
 		);
 	}
@@ -505,7 +505,7 @@ function sourceweb_rest_review_publish_all( WP_REST_Request $request ) {
 		array(
 			'done'    => $n,
 			/* translators: %d: number of items. */
-			'message' => sprintf( _n( '%d item published.', '%d items published.', $n, 'aw-sourcing' ), $n ),
+			'message' => sprintf( _n( '%d item published.', '%d items published.', $n, 'sourceweb' ), $n ),
 		)
 	);
 }
@@ -531,7 +531,7 @@ function sourceweb_enrich_text( string $field, $v ): string {
 	if ( in_array( $field, array( 'logo', 'photos' ), true ) ) {
 		$n = count( array_filter( (array) $v, fn( $x ) => is_string( $x ) && '' !== $x ) );
 		/* translators: %d: number of pictures. */
-		return $n ? sprintf( _n( '%d picture', '%d pictures', $n, 'aw-sourcing' ), $n ) : '';
+		return $n ? sprintf( _n( '%d picture', '%d pictures', $n, 'sourceweb' ), $n ) : '';
 	}
 	if ( is_array( $v ) ) {
 		return implode( ', ', array_map( fn( $x ) => is_scalar( $x ) ? (string) $x : (string) wp_json_encode( $x ), $v ) );
@@ -761,36 +761,36 @@ function sourceweb_enrich_filters( array $q ): array {
 		$states[ (string) $s->code ] = (string) $s->name;
 	}
 	$out = array(
-		array( 'source', __( 'Source', 'aw-sourcing' ), $list( array_map( fn( $s ) => $s[0], aw_enrich_sources() ), __( 'All sources', 'aw-sourcing' ) ) ),
+		array( 'source', __( 'Source', 'sourceweb' ), $list( array_map( fn( $s ) => $s[0], aw_enrich_sources() ), __( 'All sources', 'sourceweb' ) ) ),
 		array(
 			'confidence',
-			__( 'Confidence', 'aw-sourcing' ),
+			__( 'Confidence', 'sourceweb' ),
 			$list(
 				array(
-					'high'   => __( 'High', 'aw-sourcing' ),
-					'medium' => __( 'Medium', 'aw-sourcing' ),
-					'low'    => __( 'Low', 'aw-sourcing' ),
+					'high'   => __( 'High', 'sourceweb' ),
+					'medium' => __( 'Medium', 'sourceweb' ),
+					'low'    => __( 'Low', 'sourceweb' ),
 				),
-				__( 'Any confidence', 'aw-sourcing' )
+				__( 'Any confidence', 'sourceweb' )
 			),
 		),
-		array( 'field', __( 'Field', 'aw-sourcing' ), $list( array_map( fn( $f ) => $f[0], aw_enrich_fields_all() ), __( 'All fields', 'aw-sourcing' ) ) ),
+		array( 'field', __( 'Field', 'sourceweb' ), $list( array_map( fn( $f ) => $f[0], aw_enrich_fields_all() ), __( 'All fields', 'sourceweb' ) ) ),
 		array(
 			'flag',
-			__( 'Flag', 'aw-sourcing' ),
+			__( 'Flag', 'sourceweb' ),
 			$list(
 				array(
-					'invite_claim'    => __( 'Invite to claim', 'aw-sourcing' ),
-					'reported_closed' => __( 'Reported closed', 'aw-sourcing' ),
-					'duplicate'       => __( 'Possible duplicate', 'aw-sourcing' ),
-					'identity'        => __( 'Identity unresolved', 'aw-sourcing' ),
+					'invite_claim'    => __( 'Invite to claim', 'sourceweb' ),
+					'reported_closed' => __( 'Reported closed', 'sourceweb' ),
+					'duplicate'       => __( 'Possible duplicate', 'sourceweb' ),
+					'identity'        => __( 'Identity unresolved', 'sourceweb' ),
 				),
-				__( 'Any flag', 'aw-sourcing' )
+				__( 'Any flag', 'sourceweb' )
 			),
 		),
 	);
 	if ( $states ) {
-		$out[] = array( 'state', __( 'State', 'aw-sourcing' ), $list( $states, __( 'All states', 'aw-sourcing' ) ) );
+		$out[] = array( 'state', __( 'State', 'sourceweb' ), $list( $states, __( 'All states', 'sourceweb' ) ) );
 	}
 	return array_map(
 		fn( $f ) => array(
@@ -830,7 +830,7 @@ function sourceweb_enrich_search( string $where, array $args, WP_REST_Request $r
 function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 	global $wpdb;
 	if ( ! get_option( 'aw_enrich_db' ) ) {
-		return new WP_Error( 'sourceweb_no_table', __( 'No proposals are stored yet.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'sourceweb_no_table', __( 'No proposals are stored yet.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$do       = (string) $request['do'];
 	$ids      = array_filter( array_map( 'absint', (array) $request['ids'] ) );
@@ -864,7 +864,7 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 		array(
 			'done'    => $done,
 			/* translators: %d: number of values. */
-			'message' => sprintf( _n( '%d updated.', '%d updated.', $done, 'aw-sourcing' ), $done ),
+			'message' => sprintf( _n( '%d updated.', '%d updated.', $done, 'sourceweb' ), $done ),
 		)
 	);
 }
@@ -905,14 +905,14 @@ function sourceweb_services(): array {
 	$prob  = function_exists( 'aw_workers_problems' ) ? count( (array) aw_workers_problems() ) : 0;
 	$out[] = array(
 		'slug'    => 'github',
-		'name'    => __( 'Workers (GitHub Actions)', 'aw-sourcing' ),
-		'status'  => $tok ? __( 'Run now token set', 'aw-sourcing' ) : __( 'Run now token not set', 'aw-sourcing' ),
+		'name'    => __( 'Workers (GitHub Actions)', 'sourceweb' ),
+		'status'  => $tok ? __( 'Run now token set', 'sourceweb' ) : __( 'Run now token not set', 'sourceweb' ),
 		'tone'    => $tok ? ( $prob ? 'warn' : '' ) : 'warn',
 		/* translators: 1: workflows, 2: late or failed. */
-		'summary' => sprintf( __( '%1$d workflows; %2$d late or failed. The token is kept in wp-config.php.', 'aw-sourcing' ), defined( 'AW_WORKERS' ) ? count( AW_WORKERS ) : 0, $prob ),
+		'summary' => sprintf( __( '%1$d workflows; %2$d late or failed. The token is kept in wp-config.php.', 'sourceweb' ), defined( 'AW_WORKERS' ) ? count( AW_WORKERS ) : 0, $prob ),
 		'links'   => array(
 			array(
-				'label' => __( 'Workers', 'aw-sourcing' ),
+				'label' => __( 'Workers', 'sourceweb' ),
 				'url'   => admin_url( aw_src_tab_path( 'workers' ) ),
 			),
 		),
@@ -921,11 +921,11 @@ function sourceweb_services(): array {
 	$cap   = (int) $now['enrichment']['live_cap'];
 	$out[] = array(
 		'slug'    => 'google_places',
-		'name'    => __( 'Google Maps (Places)', 'aw-sourcing' ),
-		'status'  => ( $key ? __( 'Key set', 'aw-sourcing' ) : __( 'Key not set', 'aw-sourcing' ) ) . ' · ' . ( $on['google_places'] ? __( 'On', 'aw-sourcing' ) : __( 'Off', 'aw-sourcing' ) ),
+		'name'    => __( 'Google Maps (Places)', 'sourceweb' ),
+		'status'  => ( $key ? __( 'Key set', 'sourceweb' ) : __( 'Key not set', 'sourceweb' ) ) . ' · ' . ( $on['google_places'] ? __( 'On', 'sourceweb' ) : __( 'Off', 'sourceweb' ) ),
 		'tone'    => $key ? '' : 'warn',
 		/* translators: 1: spent live this month, 2: monthly cap, 3: the worker's spend. */
-		'summary' => sprintf( __( 'This month: $%1$s live of a $%2$d cap; the worker spent $%3$s.', 'aw-sourcing' ), number_format_i18n( aw_enrich_spent( 'live' ), 2 ), $cap, number_format_i18n( aw_enrich_spent( 'worker' ), 2 ) ),
+		'summary' => sprintf( __( 'This month: $%1$s live of a $%2$d cap; the worker spent $%3$s.', 'sourceweb' ), number_format_i18n( aw_enrich_spent( 'live' ), 2 ), $cap, number_format_i18n( aw_enrich_spent( 'worker' ), 2 ) ),
 		'source'  => 'google_places',
 		'on'      => (bool) $on['google_places'],
 		'help'    => aw_enrich_sources()['google_places'][3],
@@ -939,25 +939,25 @@ function sourceweb_services(): array {
 		$out[] = array(
 			'slug'    => $k,
 			'name'    => (string) $s[0],
-			'status'  => $on[ $k ] ? __( 'On', 'aw-sourcing' ) : __( 'Off', 'aw-sourcing' ),
+			'status'  => $on[ $k ] ? __( 'On', 'sourceweb' ) : __( 'Off', 'sourceweb' ),
 			'tone'    => '',
 			'summary' => (string) $s[3],
 			'source'  => $k,
 			'on'      => (bool) $on[ $k ],
-			'help'    => __( 'Used by the enrichment worker from its next run.', 'aw-sourcing' ),
+			'help'    => __( 'Used by the enrichment worker from its next run.', 'sourceweb' ),
 		);
 	}
 	$ai    = aw_sourcing_ai_counts();
 	$out[] = array(
 		'slug'    => 'ai',
-		'name'    => __( 'AI providers', 'aw-sourcing' ),
+		'name'    => __( 'AI providers', 'sourceweb' ),
 		/* translators: %d: keys that work. */
-		'status'  => $ai['saved'] ? sprintf( _n( '%d key works', '%d keys work', $ai['works'], 'aw-sourcing' ), $ai['works'] ) : __( 'No keys', 'aw-sourcing' ),
+		'status'  => $ai['saved'] ? sprintf( _n( '%d key works', '%d keys work', $ai['works'], 'sourceweb' ), $ai['works'] ) : __( 'No keys', 'sourceweb' ),
 		'tone'    => $ai['saved'] && ! $ai['works'] ? 'warn' : '',
-		'summary' => $ai['providers'] ? implode( ', ', $ai['providers'] ) : __( 'Free models only. Keys are set on the AI models screen.', 'aw-sourcing' ),
+		'summary' => $ai['providers'] ? implode( ', ', $ai['providers'] ) : __( 'Free models only. Keys are set on the AI models screen.', 'sourceweb' ),
 		'links'   => array(
 			array(
-				'label' => __( 'AI models', 'aw-sourcing' ),
+				'label' => __( 'AI models', 'sourceweb' ),
 				'url'   => admin_url( aw_src_tab_path( 'ai' ) ),
 			),
 		),
@@ -971,15 +971,15 @@ function sourceweb_services(): array {
 	}
 	$out[] = array(
 		'slug'    => 'relay',
-		'name'    => __( 'Relay', 'aw-sourcing' ),
+		'name'    => __( 'Relay', 'sourceweb' ),
 		/* translators: %d: hosts. */
-		'status'  => sprintf( _n( '%d host allowed', '%d hosts allowed', $relay, 'aw-sourcing' ), $relay ),
+		'status'  => sprintf( _n( '%d host allowed', '%d hosts allowed', $relay, 'sourceweb' ), $relay ),
 		'tone'    => '',
 		/* translators: %d: requests logged. */
-		'summary' => sprintf( __( 'For publishers that refuse GitHub; %d requests in the log.', 'aw-sourcing' ), count( (array) get_option( 'aw_relay_log', array() ) ) ),
+		'summary' => sprintf( __( 'For publishers that refuse GitHub; %d requests in the log.', 'sourceweb' ), count( (array) get_option( 'aw_relay_log', array() ) ) ),
 		'links'   => array(
 			array(
-				'label' => __( 'Relay log', 'aw-sourcing' ),
+				'label' => __( 'Relay log', 'sourceweb' ),
 				'url'   => admin_url( aw_src_tab_path( 'relay-log' ) ),
 			),
 		),
@@ -993,14 +993,14 @@ function sourceweb_settings_payload(): array {
 	$groups = array(
 		array(
 			'slug'        => 'workers',
-			'label'       => __( 'Workers', 'aw-sourcing' ),
-			'description' => __( 'What the workers read at the start of every run.', 'aw-sourcing' ),
+			'label'       => __( 'Workers', 'sourceweb' ),
+			'description' => __( 'What the workers read at the start of every run.', 'sourceweb' ),
 			'fields'      => array(
 				array(
 					'key'   => 'live',
 					'type'  => 'switch',
-					'label' => __( 'Workers use these lists', 'aw-sourcing' ),
-					'help'  => __( 'Off: the workers use sources.yaml in the workers repository. On: they read the lists on these screens, and Sources sync copies them into sources.yaml.', 'aw-sourcing' ),
+					'label' => __( 'Workers use these lists', 'sourceweb' ),
+					'help'  => __( 'Off: the workers use sources.yaml in the workers repository. On: they read the lists on these screens, and Sources sync copies them into sources.yaml.', 'sourceweb' ),
 					'value' => $now['workers']['live'],
 				),
 			),
@@ -1008,14 +1008,14 @@ function sourceweb_settings_payload(): array {
 		array(
 			'slug'        => 'enrichment',
 			'reset'       => true,
-			'label'       => __( 'Directory enrichment', 'aw-sourcing' ),
-			'description' => __( 'The live Google block on listing pages. Each source is switched on or off on its row under Connected services.', 'aw-sourcing' ),
+			'label'       => __( 'Directory enrichment', 'sourceweb' ),
+			'description' => __( 'The live Google block on listing pages. Each source is switched on or off on its row under Connected services.', 'sourceweb' ),
 			'fields'      => array(
 				array(
 					'key'     => 'live_cap',
 					'type'    => 'number',
-					'label'   => __( 'Live block: monthly cap (USD)', 'aw-sourcing' ),
-					'help'    => __( 'The live Google rating and hours stop for the month when this is spent. The worker has its own cap on GitHub.', 'aw-sourcing' ),
+					'label'   => __( 'Live block: monthly cap (USD)', 'sourceweb' ),
+					'help'    => __( 'The live Google rating and hours stop for the month when this is spent. The worker has its own cap on GitHub.', 'sourceweb' ),
 					'value'   => $now['enrichment']['live_cap'],
 					'default' => 20,
 				),
@@ -1026,21 +1026,21 @@ function sourceweb_settings_payload(): array {
 		$groups[] = array(
 			'slug'        => 'social',
 			'reset'       => true,
-			'label'       => __( 'Social posts', 'aw-sourcing' ),
-			'description' => __( 'Other people’s public posts about a campaign or an item. Every one waits in To review; nothing is published on its own. The block on pages needs the owner’s yes to its design first.', 'aw-sourcing' ),
+			'label'       => __( 'Social posts', 'sourceweb' ),
+			'description' => __( 'Other people’s public posts about a campaign or an item. Every one waits in To review; nothing is published on its own. The block on pages needs the owner’s yes to its design first.', 'sourceweb' ),
 			'fields'      => array(
 				array(
 					'key'   => 'aw_social_on',
 					'type'  => 'switch',
-					'label' => __( 'Social posts type', 'aw-sourcing' ),
-					'help'  => __( 'The Social posts list, its intake and the hashtag box on each campaign. Off: hidden; saved records are kept.', 'aw-sourcing' ),
+					'label' => __( 'Social posts type', 'sourceweb' ),
+					'help'  => __( 'The Social posts list, its intake and the hashtag box on each campaign. Off: hidden; saved records are kept.', 'sourceweb' ),
 					'value' => $now['social']['aw_social_on'],
 				),
 				array(
 					'key'   => 'aw_social_show',
 					'type'  => 'switch',
-					'label' => __( 'Show on pages', 'aw-sourcing' ),
-					'help'  => __( 'Approved social posts on the pages they are linked to. Needs the type on.', 'aw-sourcing' ),
+					'label' => __( 'Show on pages', 'sourceweb' ),
+					'help'  => __( 'Approved social posts on the pages they are linked to. Needs the type on.', 'sourceweb' ),
 					'value' => $now['social']['aw_social_show'],
 				),
 			),
@@ -1049,11 +1049,11 @@ function sourceweb_settings_payload(): array {
 	$elsewhere = array();
 	foreach (
 		array(
-			''         => __( 'Sources', 'aw-sourcing' ),
-			'keywords' => __( 'Keywords', 'aw-sourcing' ),
-			'rules'    => __( 'Rules', 'aw-sourcing' ),
-			'ai'       => __( 'AI models', 'aw-sourcing' ),
-			'workers'  => __( 'Workers', 'aw-sourcing' ),
+			''         => __( 'Sources', 'sourceweb' ),
+			'keywords' => __( 'Keywords', 'sourceweb' ),
+			'rules'    => __( 'Rules', 'sourceweb' ),
+			'ai'       => __( 'AI models', 'sourceweb' ),
+			'workers'  => __( 'Workers', 'sourceweb' ),
 		) as $tab => $label
 	) {
 		$elsewhere[] = array(
@@ -1095,12 +1095,12 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 	$group = (string) $request['group'];
 	$now   = sourceweb_settings_now();
 	if ( ! isset( $now[ $group ] ) ) {
-		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'aw-sourcing' ), array( 'status' => 400 ) );
+		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
 	if ( $request['reset'] ) {
 		$defaults = sourceweb_settings_defaults();
 		if ( ! isset( $defaults[ $group ] ) ) {
-			return new WP_Error( 'rest_invalid_param', __( 'This section has no reset.', 'aw-sourcing' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_invalid_param', __( 'This section has no reset.', 'sourceweb' ), array( 'status' => 400 ) );
 		}
 		$request['values'] = $defaults[ $group ]; // "Reset this section": the defaults, saved as any other change
 	}
@@ -1132,9 +1132,9 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 		}
 	}
 	if ( $request['reset'] ) {
-		$message = __( 'Defaults restored.', 'aw-sourcing' );
+		$message = __( 'Defaults restored.', 'sourceweb' );
 	} else {
-		$message = $changed ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' );
+		$message = $changed ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' );
 	}
 	return rest_ensure_response(
 		array(
@@ -1161,7 +1161,7 @@ function sourceweb_rest_google_key( WP_REST_Request $request ) {
 		array(
 			'saved'    => ! empty( $saved ),
 			'set'      => '' !== (string) get_option( 'aw_enrich_google_key', '' ),
-			'message'  => ! empty( $saved ) ? __( 'Key saved.', 'aw-sourcing' ) : __( 'Nothing changed: the saved key is kept.', 'aw-sourcing' ),
+			'message'  => ! empty( $saved ) ? __( 'Key saved.', 'sourceweb' ) : __( 'Nothing changed: the saved key is kept.', 'sourceweb' ),
 			'settings' => sourceweb_settings_payload(),
 		)
 	);

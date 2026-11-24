@@ -244,3 +244,42 @@ add_action(
 		}
 	}
 );
+
+/* ---------- Domain Trust & Feed Filter Admin Actions ---------- */
+
+add_action(
+	'admin_post_aw_domain_override',
+	function () {
+		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_rules_domain_override' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$del = ! empty( $_POST['aw_delete'] );
+		$host = sanitize_text_field( wp_unslash( $_POST['host'] ?? '' ) );
+		if ( $del ) {
+			aw_rules_domain_override_delete( $host );
+		} else {
+			$status = sanitize_key( wp_unslash( $_POST['status'] ?? 'neutral' ) );
+			$name   = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
+			aw_rules_domain_override_save( $host, $status, $name );
+		}
+		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ?? '' ) ), '' );
+		wp_safe_redirect( add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) );
+		exit;
+	}
+);
+
+add_action(
+	'admin_post_aw_feed_filter',
+	function () {
+		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_rules_feed_filter' ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		$raw_tags = sanitize_textarea_field( wp_unslash( $_POST['excluded_tags'] ?? '' ) );
+		$tags     = preg_split( '/[\r\n,]+/', $raw_tags, -1, PREG_SPLIT_NO_EMPTY );
+		$section  = sanitize_key( wp_unslash( $_POST['section'] ?? '' ) );
+		aw_rules_feed_excluded_tags_save( (array) $tags, $section );
+		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ?? '' ) ), '' );
+		wp_safe_redirect( add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) );
+		exit;
+	}
+);
