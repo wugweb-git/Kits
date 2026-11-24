@@ -718,6 +718,43 @@ it('Page text, headings, muted text and links read at 4.5:1 or better on the can
     }
 });
 
+
+it('Components that sit on the Ink panel take their tints from the ink and on-ink tokens, not fixed neutrals (the Dark variation flips ink to a light panel)', function () use ($theme_dir) {
+    foreach (['kit.css', 'kit.min.css'] as $file) {
+        $css = file_get_contents($theme_dir . '/assets/css/' . $file);
+        foreach (['.kit-ed-act', '.kit-ed-act:not(:first-child):hover', '.kit-ed-help-note'] as $selector) {
+            if (!preg_match('/(?:^|[}\n])\s*' . preg_quote($selector, '/') . '\s*\{([^}]*)\}/', $css, $m)) {
+                throw new \RuntimeException("$file: rule $selector not found");
+            }
+            if (preg_match('/--neutral-\d/', $m[1])) {
+                throw new \RuntimeException("$file: $selector uses a fixed neutral ({$m[1]}); on the flipped Ink panel its text (on-ink) is unreadable. Mix --kit-color-ink with --kit-color-on-ink instead");
+            }
+        }
+    }
+});
+
+
+it('Every kit-ico--* icon the theme uses has a mask (--i) defined in kit.css and kit.min.css, so no icon renders as a solid square', function () use ($theme_dir) {
+    $used = [];
+    foreach (array_merge(glob($theme_dir . '/patterns/*.php'), glob($theme_dir . '/parts/*.html'), glob($theme_dir . '/templates/*.html'), glob($theme_dir . '/inc/*.php'), glob($theme_dir . '/assets/js/*.js')) as $f) {
+        if (preg_match_all('/kit-ico--([a-z0-9-]+)/', file_get_contents($f), $m)) {
+            $used = array_merge($used, $m[1]);
+        }
+    }
+    foreach (['kit.css', 'kit.min.css'] as $file) {
+        $css = file_get_contents($theme_dir . '/assets/css/' . $file);
+        $missing = [];
+        foreach (array_unique($used) as $name) {
+            if (!preg_match('/\.kit-ico--' . preg_quote($name, '/') . '[^{}]*\{[^}]*--i\s*:/', $css)) {
+                $missing[] = $name;
+            }
+        }
+        if ($missing) {
+            throw new \RuntimeException("$file has no mask for: " . implode(', ', $missing));
+        }
+    }
+});
+
 // 6. Summary
 echo "\n===================================================\n";
 echo "Theme Validation: $checks checks, $failures failed.\n";
