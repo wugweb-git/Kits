@@ -146,6 +146,7 @@ function is_archive() { return false; }
 function is_search() { return false; }
 function is_home() { return false; }
 function is_front_page() { return true; }
+function get_pagenum_link( \$n = 1 ) { return "https://example.com/" . ( \$n > 1 ? "page/" . \$n . "/" : "" ); }
 function is_page( \$page = '' ) { return true; }
 function is_single( \$post = '' ) { return false; }
 function is_attachment() { return false; }
@@ -447,6 +448,7 @@ add_action( 'wp_head', 'wp_robots', 1 );
 
 // Core rel_canonical hook stub for standalone canonical tag
 function rel_canonical() {
+	if ( ! is_singular() ) { return; } // core prints on singular pages only; RankWeb covers listings
 	echo "<link rel=\"canonical\" href=\"https://example.com/sample\" />\\n";
 }
 add_action( 'wp_head', 'rel_canonical', 10 );

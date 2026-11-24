@@ -138,6 +138,10 @@ $c( 'description printed once and from the post', 1 === $cnt( $h, '/<meta name="
 $c( 'Open Graph and Twitter tags printed once each', 1 === $cnt( $h, '/property="og:title"/' ) && 1 === $cnt( $h, '/name="twitter:card"/' ) && 1 === $cnt( $h, '/property="og:url"/' ), $cnt( $h, '/property="og:title"/' ) . '/' . $cnt( $h, '/name="twitter:card"/' ) . '/' . $cnt( $h, '/property="og:url"/' ) . ' ' . substr( preg_replace( '/\s+/', ' ', $h ), 0, 300 ) );
 $c( 'canonical printed once', 1 === $cnt( $h, '/rel="canonical"/' ) );
 $c( 'JSON-LD printed once with an Article node', 1 === $cnt( $h, '/application\/ld\+json/' ) && false !== strpos( $h, '"@type":"Article"' ) );
+$lst = function ( $args ) { global $wp_query; query_posts( $args ); ob_start(); do_action( 'wp_head' ); return ob_get_clean(); };
+$lh = $lst( array( 'paged' => 1 ) );
+$c( 'blog listing prints one canonical', 1 === $cnt( $lh, '/rel="canonical"/' ) );
+$c( 'search results print no canonical', 0 === $cnt( $lst( array( 's' => 'dog' ) ), '/rel="canonical"/' ) );
 update_post_meta( $pid, '_rankweb_schema_type', 'BlogPosting' );
 $c( 'sidebar schema type reaches the JSON-LD', false !== strpos( $view(), '"@type":"BlogPosting"' ) );
 update_post_meta( $pid, '_rankweb_schema_type', 'Event' );

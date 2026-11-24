@@ -234,6 +234,35 @@ add_action(
 	1
 );
 
+/**
+ * Canonical for listings (home, archives, paginated pages). Core prints one only on singular pages.
+ * Search results and 404s get none. Each page of a series points at itself.
+ */
+function rankweb_listing_canonical(): string {
+	if ( is_singular() || is_search() || is_404() || is_feed() || is_admin() ) {
+		return '';
+	}
+	$paged = max( 1, (int) get_query_var( 'paged' ) );
+	$url   = get_pagenum_link( $paged );
+	if ( ! $url ) {
+		return '';
+	}
+	return get_option( 'permalink_structure' ) ? strtok( $url, '?' ) : $url;
+}
+add_action(
+	'wp_head',
+	function () {
+		if ( ! rankweb_prints_head() ) {
+			return;
+		}
+		$url = rankweb_listing_canonical();
+		if ( '' !== $url ) {
+			echo '<link rel="canonical" href="' . esc_url( $url ) . '" />' . "\n";
+		}
+	},
+	1
+);
+
 /* ---------- robots: noindex by rule, through core's wp_robots (one robots tag) ---------- */
 
 /** Whether the viewed page should stay out of search results, by a post's own setting or a rule of the page kind. */

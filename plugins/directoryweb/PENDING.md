@@ -62,3 +62,13 @@ Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U 
    - Open: Fluent Forms claims use the state table only to refuse illegal moves (they cannot revoke or re-open; no state hooks because form-entry ids collide with post ids; **X**: needs Fluent Forms to test); claimant withdraw UI; proof-document upload; per-claim email templates and translations.
 
 7. **Deploy**: parent PR to `wordpress-dev` merges through the Deploy check; ship with `tools/kits-ship.sh`.
+
+## Remaining requirements, classified (25 Nov 2026)
+
+| Requirement | Status | Why | What unblocks it |
+|---|---|---|---|
+| CRM events (claim submitted / approved / rejected) | **Not built, deferred** | No event hook exists in code. The CRM is FluentCRM, so the contract belongs with the shared connector work, which is deferred. | Shared connector decision; then fire `do_action` events from the state machine |
+| Default preset (`directoryweb-default`) | **Not built, deferred** | No preset object exists in code. Presets live in Kits Core, which stays optional, so DirectoryWeb must work without one. | Kits Core preset format and the theme work |
+| Claim proof upload | **Not built, deferred** | Claims work without proof. An upload needs MIME and size validation, private storage and an access check, and a security review before it ships. | Security design, then a native upload field with validation tests |
+
+None of the three blocks standalone DirectoryWeb. They stay out of "done" until built and verified.

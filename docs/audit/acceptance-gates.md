@@ -14,9 +14,9 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] 1. DirectoryWeb browser gaps: public claim form POST, mail capture, permissions, invalid transitions, standalone, settings, deactivate/reactivate
 - [x] 2. DirectoryWeb: collection-filter block in the Gutenberg editor and on the front end
 - [ ] 3. DirectoryWeb docs: audit, update, delete stale; PENDING, matrix, Notion
-- [x] 4. RankWeb standalone core: sitemap, robots (canonical on singular; archives open)
+- [x] 4. RankWeb standalone core: sitemap, robots (canonical on singular and listings)
 - [x] 5. RankWeb schema: real PHP consumer for `_rankweb_schema_type`; generic post/page schema not tied to `aw_*` types
-- [x] 6. RankWeb coexistence (stub; real Rank Math partly) and AW references removed from generic output
+- [x] 6. RankWeb coexistence (stub and real Rank Math) and AW references removed from generic output
 - [x] 7. RankWeb sidebar and admin screens in the browser; settings persistence; diagnostics
 - [ ] 8. RankWeb docs: audit, update, delete stale; PENDING, matrix, Notion
 - [ ] 9. Reconcile with latest `kits-suite`, inspect diff, final CI, ZIP verification, review request
@@ -60,7 +60,7 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 
 ### Standalone output (no Rank Math, no Kits Core)
 - [x] U/B XML sitemap standalone = WordPress's own (`/wp-sitemap.xml`, `lastmod`, types and taxonomies); noindex pages excluded (B: a noindex post disappeared from `wp-sitemap-posts-post-1.xml`); robots.txt carries the `Sitemap:` line and no longer advertises an empty News sitemap (25 Nov)
-- [ ] U/B Canonical URL: singular verified once per page (core `rel_canonical`, B). **Archives, paginated and search: not printed standalone (open)**
+- [x] U/B Canonical URL: singular once per page (core `rel_canonical`); home, archives and paginated pages print one self-referencing canonical from RankWeb (journey, B); search results and 404 print none (25 Nov)
 - [x] U/B Meta robots: per-post noindex through core `wp_robots` (one tag, B) and search results noindex. Archives/404 rules beyond core: open
 - [x] U/B Title from WordPress core (one `<title>`, B); meta description: own field, then excerpt, then content; tagline never copied into posts (B, U)
 - [x] U/B Open Graph and Twitter tags once each (B, H)
@@ -69,7 +69,9 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] U Schema for `aw_*` types unchanged (`phpunit-lite` 133 tests, `run.php` 94); generic content has its own path
 
 ### Coexistence
-- [~] B Rank Math stub: one of each tag. Real Rank Math installed: RankWeb added no duplicate, but Rank Math printed no tags in Playground (unconfigured), so "Rank Math prints once" is stub-only. **X open**
+- [x] B Real Rank Math 1.0.282 (WP 7.1, PHP 8.2, Playground) with RankWeb active: title, description, canonical, robots, og:title, twitter:card and JSON-LD each exactly once, all printed by Rank Math (comment markers, `rank-math-schema` class); RankWeb prints none. Rank Math's front end only runs once registration is skipped or connected (`rank_math_registration_skip`), the state after the wizard's Skip. Stub also passes (25 Nov)
+- [x] B Real Yoast SEO with RankWeb active: each head tag once, Yoast's schema graph the only JSON-LD (25 Nov)
+- [ ] X SEOPress and AIOSEO: detection by constant only; SEOPress front end not confirmed in Playground, AIOSEO untested. Compatibility documented as unverified
 - [x] B With Rank Math inactive: title, description, canonical, robots, og:title, twitter:card, JSON-LD all exactly 1 (25 Nov)
 - [x] B Tag-level counter (`__count`) used in both modes in the browser; the same counts asserted in the headless journey (H)
 - [~] U Detected by constant; RankWeb leaves the head and shows a notice and an Overview line. **Real Yoast/SEOPress/AIOSEO not installed: X open**
@@ -100,3 +102,8 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [ ] Kits Core + theme + DirectoryWeb + RankWeb coexistence in Playground (`suite.json`), browser-checked
 - [ ] CI green on the final branch state
 - [ ] Review requested; merge only after approval
+
+### Classified, not built (25 Nov)
+- [ ] DirectoryWeb CRM events: deferred (no hook in code; waits on the shared connector decision)
+- [ ] DirectoryWeb default preset: deferred (no preset object; waits on Kits Core preset format)
+- [ ] DirectoryWeb claim proof upload: deferred (needs validation, private storage and a security review)
