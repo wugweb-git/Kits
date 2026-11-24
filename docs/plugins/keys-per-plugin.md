@@ -1,5 +1,7 @@
 # Service keys: one place per plugin (18 Nov 2026)
 
+**Status (Updated 24 Nov 2026):** Stage 2 (`insightweb_keys`, `insightweb/v1/keys`, `insightweb_check_service_status()`, and native Settings rows in `plugins/insightweb/includes/insightweb-keys.php`) and Stage 3 Step 1 (`insightweb_keys_copy()` and `wp insightweb keys copy|status`) are **implemented and tested**. Stage 3 Step 2 (removing the `aw_keys` read fallback and deleting `aw_keys` on live) remains **owner-gated**.
+
 Owner rule, 18 Nov 2026: every Wugweb Kits plugin that is sold or listed on WordPress.org keeps its own service keys in
 its own settings, as Yoast, Rank Math and Site Kit do. A `wp-config.php` constant of the same name wins. The shared
 vault (Kits → Keys: Animal Writes Core `includes/keys.php`, option `aw_keys`, reader `aw_key()`, page
