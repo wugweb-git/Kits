@@ -316,6 +316,7 @@ function aw_si_screen_fallback(): void {
 		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
 		echo '<h2 style="margin-top:0;">' . esc_html__( 'Search Console', 'insightweb' ) . '</h2>';
 		$days = function_exists( 'aw_si_days_stored' ) ? aw_si_days_stored() : 0;
+		/* translators: %d: number of days stored. */
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( sprintf( __( '%d days', 'insightweb' ), $days ) ) . '</p>';
 		echo '<p><a href="' . esc_url( aw_si_url( 'settings' ) ) . '" class="button button-secondary">' . esc_html__( 'Settings & Sync', 'insightweb' ) . '</a></p>';
 		echo '</div>';

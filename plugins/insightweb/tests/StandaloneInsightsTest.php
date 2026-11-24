@@ -146,6 +146,119 @@ check( 0 === $r7['clicks'], 'Range 7 clicks is 0' );
 check( 0 === $r7['impr'], 'Range 7 impr is 0' );
 check( null === $r7['pos'], 'Range 7 pos is null' );
 check( true === $r7['empty'], 'Range 7 is marked empty' );
+check( false === $r7['is_mock'], 'Range 7 is strictly not mock data' );
+check( false !== strpos( $r7['message'], 'Search Console' ), 'Range 7 has awaiting sync message' );
+
+// 3. Verify shaped tiles empty state and mock prevention.
+if ( ! function_exists( 'number_format_i18n' ) ) {
+	function number_format_i18n( $n, $d = 0 ) {
+		return number_format( (float) $n, $d );
+	}
+}
+if ( ! function_exists( 'wp_date' ) ) {
+	function wp_date( $fmt, $ts ) {
+		return date( $fmt, $ts );
+	}
+}
+if ( ! function_exists( 'home_url' ) ) {
+	function home_url( $path = '' ) {
+		return 'https://example.com' . $path;
+	}
+}
+
+require_once dirname( __DIR__ ) . '/includes/insightweb-rest.php';
+$shaped = insightweb_dash_shape( $r7, array() );
+check( true === $shaped['empty'], 'Shaped dashboard is marked empty' );
+check( false === $shaped['is_mock'], 'Shaped dashboard is not mock' );
+check( 6 === count( $shaped['tiles'] ), 'All 6 tiles are shaped' );
+foreach ( $shaped['tiles'] as $tile ) {
+	check( true === $tile['empty'], "Tile {$tile['key']} is marked empty" );
+	check( false === $tile['is_mock'], "Tile {$tile['key']} is strictly not mock" );
+	check( false !== strpos( $tile['message'], 'Search Console' ), "Tile {$tile['key']} has awaiting sync message" );
+}
+
+// 4. Verify Credential Connection Diagnostics.
+$GLOBALS['test_options'] = array();
+if ( ! function_exists( 'get_option' ) ) {
+	function get_option( $k, $default = false ) {
+		return $GLOBALS['test_options'][ $k ] ?? $default;
+	}
+}
+if ( ! function_exists( 'update_option' ) ) {
+	function update_option( $k, $v, $autoload = null ) {
+		$GLOBALS['test_options'][ $k ] = $v;
+		return true;
+	}
+}
+if ( ! function_exists( 'register_setting' ) ) {
+	function register_setting() {}
+}
+
+require_once dirname( __DIR__ ) . '/includes/insightweb-keys.php';
+
+// Not configured status
+$stat_empty = insightweb_check_service_status( 'AW_CLARITY_TOKEN' );
+check( 'not_configured' === $stat_empty['status'], 'Unset key returns not_configured' );
+
+// Connected status when key is provided
+$GLOBALS['test_options'][ INSIGHTWEB_KEYS_OPTION ] = array(
+	'AW_CLARITY_TOKEN'        => 'clarity-test-token-12345',
+	'AW_GOOGLE_ALERTS_FEED_1' => 'https://www.google.com/alerts/feeds/12345/67890',
+	'AW_GOOGLE_ALERTS_FEED_2' => 'invalid-feed-url',
+);
+$stat_clarity = insightweb_check_service_status( 'AW_CLARITY_TOKEN' );
+check( 'connected' === $stat_clarity['status'], 'Configured key returns connected' );
+
+$stat_feed_ok = insightweb_check_service_status( 'AW_GOOGLE_ALERTS_FEED_1' );
+check( 'connected' === $stat_feed_ok['status'], 'Valid alerts feed URL returns connected' );
+
+$stat_feed_bad = insightweb_check_service_status( 'AW_GOOGLE_ALERTS_FEED_2' );
+check( 'invalid_key' === $stat_feed_bad['status'], 'Invalid alerts feed URL returns invalid_key' );
+
+// 5. Verify Telemetry Cron hook definition.
+if ( ! function_exists( 'wp_timezone' ) ) {
+	function wp_timezone() {
+		return new DateTimeZone( 'UTC' );
+	}
+}
+if ( ! function_exists( 'wp_next_scheduled' ) ) {
+	function wp_next_scheduled() {
+		return false;
+	}
+}
+if ( ! function_exists( 'wp_schedule_event' ) ) {
+	function wp_schedule_event() {
+		return true;
+	}
+}
+if ( ! function_exists( 'aw_si_install' ) ) {
+	function aw_si_install() {}
+}
+if ( ! function_exists( 'aw_si_run_start' ) ) {
+	function aw_si_run_start() {}
+}
+if ( ! function_exists( 'aw_si_seed' ) ) {
+	function aw_si_seed() { return array(); }
+}
+if ( ! function_exists( 'aw_si_gsc_run' ) ) {
+	function aw_si_gsc_run() { return array(); }
+}
+if ( ! function_exists( 'aw_si_sync_roles' ) ) {
+	function aw_si_sync_roles() { return array(); }
+}
+if ( ! function_exists( 'aw_si_compute' ) ) {
+	function aw_si_compute() { return array(); }
+}
+if ( ! function_exists( 'aw_si_sync_topics' ) ) {
+	function aw_si_sync_topics() { return array(); }
+}
+if ( ! function_exists( 'aw_si_run_ok' ) ) {
+	function aw_si_run_ok() {}
+}
+
+require_once dirname( __DIR__ ) . '/includes/search-insights/cron.php';
+check( defined( 'INSIGHTWEB_CRON_TELEMETRY' ) && 'insightweb_daily_telemetry_cron' === INSIGHTWEB_CRON_TELEMETRY, 'INSIGHTWEB_CRON_TELEMETRY constant is defined' );
+check( function_exists( 'insightweb_daily_telemetry_refresh' ), 'insightweb_daily_telemetry_refresh function exists' );
 
 echo sprintf( "%d checks, %d failed\n", $count, $fails );
 exit( $fails > 0 ? 1 : 0 );

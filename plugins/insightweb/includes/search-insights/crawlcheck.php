@@ -45,7 +45,7 @@ function aw_si_crawl_agents(): array {
 			'ClaudeBot'       => 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; ClaudeBot/1.0; +claudebot@anthropic.com)',
 			'Google-Extended' => 'Mozilla/5.0 (compatible; Google-Extended)',
 			'Applebot'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15 (Applebot/0.1; +http://www.apple.com/go/applebot)',
-			'Generic crawler' => 'Mozilla/5.0 (compatible; SiteAuditBot/1.0; +https://animalwrites.in/)', // An SEO tool's kind of crawler (the 26 Oct block), not a named bot.
+			'Generic crawler' => 'Mozilla/5.0 (compatible; SiteAuditBot/1.0; +' . home_url( '/' ) . ')', // An SEO tool's kind of crawler, not a named bot.
 		)
 	);
 }
@@ -322,8 +322,10 @@ function aw_si_crawl_alert(): void {
 	if ( get_option( 'aw_si_crawl_mailed' ) === $key ) {
 		return; // The same problems were already emailed.
 	}
-	$body = "Some search or AI crawlers could not read animalwrites.in pages:\n\n- " . implode( "\n- ", $all ) . "\n\nSite Health: " . admin_url( 'site-health.php' ) . "\nSearch Insights: " . aw_si_url() . "\n";
-	if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: crawler access problem — ' . $all[0], $body ) ) {
+	$site_host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	$site_name = (string) get_bloginfo( 'name' );
+	$body      = "Some search or AI crawlers could not read {$site_host} pages:\n\n- " . implode( "\n- ", $all ) . "\n\nSite Health: " . admin_url( 'site-health.php' ) . "\nSearch Insights: " . aw_si_url() . "\n";
+	if ( wp_mail( get_option( 'admin_email' ), $site_name . ': crawler access problem — ' . $all[0], $body ) ) {
 		update_option( 'aw_si_crawl_mailed', $key, false );
 	}
 }

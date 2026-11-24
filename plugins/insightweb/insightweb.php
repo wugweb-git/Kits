@@ -22,7 +22,6 @@
  * Author URI:        https://wugweb.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://wugweb.com/plugins/insightweb/
  * Text Domain:       insightweb
  * Domain Path:       /languages
  */
