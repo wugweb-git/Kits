@@ -27,6 +27,11 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 
 ## Open
 
+### Kits Core: Form Engine Polish & Multi-Step Validation (Forwarded from Tenant Roadmap, 24 Nov 2026)
+- **Upload Limits & Granular File Diagnostics (B2):** Raise file upload limits from 2 MB to 8 MB (`kits_ff_upload()` in `plugins/kits-core/includes/forms/fluentforms.php`), replacing generic error messages with specific diagnostics (file size vs unsupported formats like HEIC), displaying selected file name, size indicator, and a Remove button.
+- **Multi-Step Validation Error Summary Banner (B3):** In `plugins/kits-core/assets/js/forms.js`, when step validation fails on a previous step, display a top-level error summary banner on the active step with direct links that jump to and focus the invalid fields.
+- **About Field Prefill Sanitization (B1):** Ensure `kits_ff_form()` textarea value population strips raw HTML tags, decodes entities, and converts date markup (`<span class="kit-date">`) into plain text before rendering.
+
 ### Companion Plugins Release Readiness & Standalone Decoupling (23 Nov 2026)
 - ✅ **DirectoryWeb (Priority 1):** Removed hard boot halt (`! defined('KITS_CORE_LOADED')`), introduced `standalone-fallback.php` providing primitives (`kits_count`, `kits_icon`, `kits_date`, `kits_simple_table`, `kits_shell_rest_can`), implemented native fallback admin screens for Dashboard and Settings, redirect fallback for Listings, hardened REST permissions, and added `directoryweb-standalone-test.php` and `directoryweb-scf-fallback-test.php` (all 5 test suites passing with 0 failures).
 - ✅ **RankWeb (Priority 2):** Established native SEO independence, made Rank Math an optional integration rather than a boot requirement, added standalone Schema.org JSON-LD output (`aw_schema_render_standalone_json_ld`) hooked to `wp_head`, hooked canonicals to `get_canonical_url`, hooked robots directives to `wp_robots`, and added `StandaloneSchemaTest.php` (all 125 tests and 94 settings checks passing with 0 failures).
