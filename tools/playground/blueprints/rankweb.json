@@ -1,9 +1,9 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "/wp-admin/admin.php?page=rankweb-settings",
+  "landingPage": "/wp-admin/admin.php?page=aw-seo-plus",
   "preferredVersions": {
     "php": "8.2",
-    "wp": "6.7"
+    "wp": "7.1"
   },
   "features": {
     "networking": true
@@ -18,14 +18,17 @@
       "step": "setSiteOptions",
       "options": {
         "blogname": "RankWeb Playground",
-        "blogdescription": "Standalone SEO metadata, Schema.org, canonicals & sitemaps"
+        "blogdescription": "Native SEO controls, internal linking and schema"
       }
     },
     {
       "step": "installPlugin",
-      "pluginZipFile": {
+      "pluginData": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/AnimalWrites/Kits/kits-suite/dist/rankweb.zip"
+        "url": "https://github.com/wugweb-git/Kits/releases/download/kits-suite-2026.11.24-pre.1/rankweb.zip"
+      },
+      "options": {
+        "activate": false
       }
     },
     {
@@ -34,7 +37,11 @@
     },
     {
       "step": "runPHP",
-      "code": "<?php\nupdate_option('aw_seo_title_template', '%title% | %sitename%');\nupdate_option('aw_seo_default_description', 'High performance native SEO metadata without external dependencies.');\n"
+      "code": "<?php\nrequire '/wordpress/wp-load.php';\nwp_insert_post( array( 'post_title' => 'RankWeb sample post', 'post_content' => '<!-- wp:paragraph --><p>Sample content for SEO checks.</p><!-- /wp:paragraph -->', 'post_status' => 'publish', 'post_type' => 'post' ) );\n"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire '/wordpress/wp-load.php';\nwp_set_current_user( 1 );\ndo_action( 'admin_menu' );\nglobal $submenu;\n$r = array( 'blueprint' => \"rankweb\", 'wp' => get_bloginfo( 'version' ), 'php' => PHP_VERSION, 'checks' => array(), 'info' => array() );\n$c = function ( $n, $ok, $d = '' ) use ( &$r ) { $r['checks'][] = array( 'name' => $n, 'ok' => (bool) $ok, 'detail' => (string) $d ); };\n$plugins = array( \"rankweb/rankweb.php\" );\nforeach ( $plugins as $p ) { $c( 'plugin active: ' . $p, is_plugin_active( $p ) ); }\n$c( 'Kits Core NOT active (standalone)', ! is_plugin_active( 'kits-core/kits-core.php' ) && ! defined( 'KITS_CORE_DIR' ) );\nforeach ( array( \"aw-seo-plus\" ) as $m ) { $c( 'admin menu registered: ' . $m, isset( $submenu[ $m ] ) ); }\nforeach ( array( \"rankweb/v1\" ) as $ns ) { $c( 'REST namespace: ' . $ns, in_array( $ns, rest_get_server()->get_namespaces(), true ) ); }\nob_start(); do_action( 'wp_head' ); $head = ob_get_clean();\n$bad = preg_match( '/(Fatal error|Warning|Notice|Deprecated):\\s.{0,300}? in \\/\\S+ on line \\d+/s', $head, $mm ) ? $mm[0] : '';\n$c( 'frontend wp_head renders without PHP notices', '' === $bad, $bad );\n$c( 'content filter renders blocks', false !== strpos( apply_filters( 'the_content', \"<!-- wp:paragraph -->\\n<p>smoke</p>\\n<!-- /wp:paragraph -->\" ), 'smoke' ) );\n$c( 'no Rank Math / Yoast required', ! defined( 'RANK_MATH_VERSION' ) && ! defined( 'WPSEO_VERSION' ) );\n$r['info']['head_has_canonical'] = false !== strpos( $head, 'rel=\"canonical\"' );\nif ( is_dir( '/results' ) ) { file_put_contents( '/results/' . \"rankweb\" . '.json', wp_json_encode( $r ) ); }\nforeach ( $r['checks'] as $x ) { if ( ! $x['ok'] ) { throw new Exception( 'Smoke check failed: ' . $x['name'] . ' ' . $x['detail'] ); } }\n"
     }
   ]
 }

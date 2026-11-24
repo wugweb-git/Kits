@@ -1,9 +1,9 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "/wp-admin/admin.php?page=insightweb",
+  "landingPage": "/wp-admin/admin.php?page=aw-search-insights",
   "preferredVersions": {
     "php": "8.2",
-    "wp": "6.7"
+    "wp": "7.1"
   },
   "features": {
     "networking": true
@@ -18,19 +18,26 @@
       "step": "setSiteOptions",
       "options": {
         "blogname": "InsightWeb Playground",
-        "blogdescription": "Telemetry dashboards, Search Console ingestion & keyword analytics"
+        "blogdescription": "Search insights with honest empty states"
       }
     },
     {
       "step": "installPlugin",
-      "pluginZipFile": {
+      "pluginData": {
         "resource": "url",
-        "url": "https://raw.githubusercontent.com/AnimalWrites/Kits/kits-suite/dist/insightweb.zip"
+        "url": "https://github.com/wugweb-git/Kits/releases/download/kits-suite-2026.11.24-pre.1/insightweb.zip"
+      },
+      "options": {
+        "activate": false
       }
     },
     {
       "step": "activatePlugin",
       "pluginPath": "insightweb/insightweb.php"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire '/wordpress/wp-load.php';\nwp_set_current_user( 1 );\ndo_action( 'admin_menu' );\nglobal $submenu;\n$r = array( 'blueprint' => \"insightweb\", 'wp' => get_bloginfo( 'version' ), 'php' => PHP_VERSION, 'checks' => array(), 'info' => array() );\n$c = function ( $n, $ok, $d = '' ) use ( &$r ) { $r['checks'][] = array( 'name' => $n, 'ok' => (bool) $ok, 'detail' => (string) $d ); };\n$plugins = array( \"insightweb/insightweb.php\" );\nforeach ( $plugins as $p ) { $c( 'plugin active: ' . $p, is_plugin_active( $p ) ); }\n$c( 'Kits Core NOT active (standalone)', ! is_plugin_active( 'kits-core/kits-core.php' ) && ! defined( 'KITS_CORE_DIR' ) );\nforeach ( array( \"aw-search-insights\" ) as $m ) { $c( 'admin menu registered: ' . $m, isset( $submenu[ $m ] ) ); }\nforeach ( array( \"insightweb/v1\" ) as $ns ) { $c( 'REST namespace: ' . $ns, in_array( $ns, rest_get_server()->get_namespaces(), true ) ); }\nob_start(); do_action( 'wp_head' ); $head = ob_get_clean();\n$bad = preg_match( '/(Fatal error|Warning|Notice|Deprecated):\\s.{0,300}? in \\/\\S+ on line \\d+/s', $head, $mm ) ? $mm[0] : '';\n$c( 'frontend wp_head renders without PHP notices', '' === $bad, $bad );\n$c( 'content filter renders blocks', false !== strpos( apply_filters( 'the_content', \"<!-- wp:paragraph -->\\n<p>smoke</p>\\n<!-- /wp:paragraph -->\" ), 'smoke' ) );\n$req = new WP_REST_Request( 'GET', '/insightweb/v1/dashboard' );\n$req->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );\n$res = rest_do_request( $req );\n$c( 'dashboard REST answers 200 with no connection', 200 === $res->get_status(), (string) $res->get_status() );\n$body = wp_json_encode( $res->get_data() );\n$r['info']['dashboard_payload_bytes'] = strlen( (string) $body );\n$c( 'no demo or mock telemetry in payload', ! preg_match( '/\"(demo|mock|sample|fake)\"\\s*:\\s*true/i', (string) $body ) );\nif ( is_dir( '/results' ) ) { file_put_contents( '/results/' . \"insightweb\" . '.json', wp_json_encode( $r ) ); }\nforeach ( $r['checks'] as $x ) { if ( ! $x['ok'] ) { throw new Exception( 'Smoke check failed: ' . $x['name'] . ' ' . $x['detail'] ); } }\n"
     }
   ]
 }

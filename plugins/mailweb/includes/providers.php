@@ -53,6 +53,10 @@ final class Mailweb_Hostinger_Provider implements Mailweb_Provider {
 	 * Returns whether the Hostinger Mail API PHP SDK is loaded.
 	 */
 	public static function has_sdk(): bool {
+		// The SDK needs PHP 8.2+; older hosts use the REST transport.
+		if ( PHP_VERSION_ID < 80200 ) {
+			return false;
+		}
 		if ( ! class_exists( 'Hostinger\\Configuration' ) && defined( 'MAILWEB_DIR' ) && is_readable( MAILWEB_DIR . 'vendor/autoload.php' ) ) {
 			require_once MAILWEB_DIR . 'vendor/autoload.php';
 		}

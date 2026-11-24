@@ -26,6 +26,7 @@ jobs:
       planweb: ${{ steps.filter.outputs.planweb }}
       sourceweb: ${{ steps.filter.outputs.sourceweb }}
       packaging: ${{ steps.filter.outputs.packaging }}
+      playground: ${{ steps.filter.outputs.playground }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -61,6 +62,8 @@ jobs:
               - 'plugins/sourceweb/**'
               - 'plugins/directoryweb/**'
               - 'plugins/insightweb/**'
+            playground:
+              - 'tools/playground/**'
             packaging:
               - 'tools/build/**'
               - 'tools/package/**'
@@ -70,7 +73,7 @@ jobs:
   ci-design-system:
     name: Root & Design System Gates
     needs: changes
-    if: ${{ needs.changes.outputs.root_ds == 'true' || github.event_name == 'push' }}
+    if: ${{ needs.changes.outputs.root_ds == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -79,14 +82,14 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm ci --no-audit --no-fund
+      - run: npm ci
       - run: npm run check:ci
       - run: npm run test:visual
 
   ci-shared-php:
     name: Shared PHP SDK (${{ matrix.php }})
     needs: changes
-    if: ${{ needs.changes.outputs.shared_php == 'true' || github.event_name == 'push' }}
+    if: ${{ needs.changes.outputs.shared_php == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -96,10 +99,12 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-      - name: Install SDK dependencies
-        run: |
-          cd packages/shared-php
-          composer install --no-interaction --no-audit --no-fund
+      - name: Validate composer.json and composer.lock are in sync
+        working-directory: packages/shared-php
+        run: composer validate --no-check-publish
+      - name: Install SDK dependencies (locked)
+        working-directory: packages/shared-php
+        run: composer install --no-interaction --no-progress --prefer-dist
       - name: Run TokenEngine & SDK Tests
         run: |
           cd packages/shared-php
@@ -108,7 +113,7 @@ jobs:
   ci-theme:
     name: Kits Block Theme Validation
     needs: changes
-    if: ${{ needs.changes.outputs.theme == 'true' || github.event_name == 'push' }}
+    if: ${{ needs.changes.outputs.theme == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -119,6 +124,30 @@ jobs:
         run: |
           python3 -c "import json; json.load(open('themes/kits-by-wugweb/theme.json'))"
           python3 themes/kits-by-wugweb/tools/build-tokens.py --help
+
+  ci-blueprints:
+    name: Playground Blueprints (schema + generator)
+    needs: changes
+    if: ${{ needs.changes.outputs.packaging == 'true' || needs.changes.outputs.playground == 'true' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/playground/package-lock.json
+      - name: Blueprints are in sync with their generator
+        run: python3 tools/playground/build-blueprints.py --check
+      - name: Install blueprint tooling (locked)
+        working-directory: tools/playground
+        run: npm ci
+      - name: Validate every blueprint against the official Playground schema
+        working-directory: tools/playground
+        run: node validate-schema.mjs
 
   ci-plugins:
     name: Companion Plugins Test Suite
@@ -139,7 +168,7 @@ jobs:
           php tests/remediation-verification-test.php
 
       - name: Test Kits Core
-        if: ${{ needs.changes.outputs.kits_core == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.kits_core == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           for f in plugins/kits-core/tests/*-tests.php; do
             echo "Running $f"
@@ -147,57 +176,101 @@ jobs:
           done
 
       - name: Test DirectoryWeb
-        if: ${{ needs.changes.outputs.directoryweb == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.directoryweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/directoryweb/tests/directoryweb-tests.php
           php plugins/directoryweb/tests/listing-meta-tests.php
           php plugins/directoryweb/tests/org-people-tests.php
           php plugins/directoryweb/tests/directoryweb-standalone-test.php
+          php plugins/directoryweb/tests/directoryweb-scf-fallback-test.php
 
       - name: Test InsightWeb
-        if: ${{ needs.changes.outputs.insightweb == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.insightweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/insightweb/tests/run.php
           php plugins/insightweb/tests/StandaloneInsightsTest.php
 
       - name: Test RankWeb
-        if: ${{ needs.changes.outputs.rankweb == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.rankweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/rankweb/tests/run.php
           php plugins/rankweb/tests/phpunit-lite.php
 
       - name: Test MailWeb
-        if: ${{ needs.changes.outputs.mailweb == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.mailweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/mailweb/tests/run.php
 
       - name: Test PlanWeb
-        if: ${{ needs.changes.outputs.planweb == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.planweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/planweb/tests/run.php
 
       - name: Test SourceWeb
-        if: ${{ needs.changes.outputs.sourceweb == 'true' || github.event_name == 'push' }}
+        if: ${{ needs.changes.outputs.sourceweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/sourceweb/tests/run.php
           php plugins/sourceweb/tests/SourceWebStandaloneTest.php
 
   package-dist:
     name: Package Distribution Artifacts
-    needs: [changes, ci-design-system, ci-shared-php, ci-theme, ci-plugins]
-    if: ${{ always() && (needs.changes.outputs.packaging == 'true' || github.event_name == 'push') && !contains(needs.*.result, 'failure') }}
+    # Every mandatory gate must have run and passed: no always(), so a failed, cancelled or skipped
+    # dependency skips this job instead of letting packages through.
+    needs: [changes, ci-design-system, ci-shared-php, ci-theme, ci-blueprints, ci-plugins]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.packaging == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
       - name: Build Distribution Packages
-        run: |
-          python3 tools/build/build-dist.py --target all --track commercial --out dist
+        run: python3 tools/build/build-dist.py --target all --track commercial --out dist
+      - name: Verify packages, write checksums and release manifest
+        run: python3 tools/build/verify-dist.py --dist dist --commit "${{ github.sha }}"
       - name: Upload Dist Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: kits-suite-packages
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+            dist/release-manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
+  playground-smoke:
+    name: Playground runtime smoke (WP 7.1, PHP 8.2)
+    needs: [package-dist]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tools/playground/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: kits-suite-packages
+          path: dist
+      - name: Install Playground CLI (locked)
+        working-directory: tools/playground
+        run: npm ci
+      - name: Run every blueprint headlessly against the built ZIPs
+        working-directory: tools/playground
+        run: python3 smoke.py --dist ../../dist --cli "npx --no-install wp-playground-cli"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playground-results
+          path: dist/playground-results
           retention-days: 14

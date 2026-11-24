@@ -1,0 +1,16 @@
+{
+  "name": "kits-playground-tools",
+  "private": true,
+  "description": "Blueprint validation and headless smoke tests for the Kits Suite WordPress Playground blueprints.",
+  "type": "module",
+  "scripts": {
+    "generate": "python3 build-blueprints.py",
+    "check": "python3 build-blueprints.py --check",
+    "validate": "node validate-schema.mjs",
+    "smoke": "python3 smoke.py --dist ../../dist --cli \"npx --no-install wp-playground-cli\""
+  },
+  "devDependencies": {
+    "@wp-playground/cli": "1.0.0",
+    "ajv": "^8.17.1"
+  }
+}

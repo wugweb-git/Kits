@@ -21,7 +21,11 @@
 	"config": {
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true
-		}
+		},
+		"platform": {
+			"php": "8.2.0"
+		},
+		"platform-check": false
 	},
 	"scripts": {
 		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor .",

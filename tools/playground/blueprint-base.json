@@ -3,10 +3,7 @@
   "landingPage": "/wp-admin/",
   "preferredVersions": {
     "php": "8.2",
-    "wp": "6.7"
-  },
-  "phpExtensionHeaders": {
-    "disable-xdebug": "true"
+    "wp": "7.1"
   },
   "features": {
     "networking": true
@@ -21,9 +18,12 @@
       "step": "setSiteOptions",
       "options": {
         "blogname": "Kits Suite Playground",
-        "blogdescription": "Disposable preview environment for Kits Suite",
-        "posts_per_page": "10"
+        "blogdescription": "Disposable preview environment for Kits Suite"
       }
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nrequire '/wordpress/wp-load.php';\nwp_set_current_user( 1 );\ndo_action( 'admin_menu' );\nglobal $submenu;\n$r = array( 'blueprint' => \"base\", 'wp' => get_bloginfo( 'version' ), 'php' => PHP_VERSION, 'checks' => array(), 'info' => array() );\n$c = function ( $n, $ok, $d = '' ) use ( &$r ) { $r['checks'][] = array( 'name' => $n, 'ok' => (bool) $ok, 'detail' => (string) $d ); };\n$plugins = array(  );\nforeach ( $plugins as $p ) { $c( 'plugin active: ' . $p, is_plugin_active( $p ) ); }\n$c( 'Kits Core NOT active (standalone)', ! is_plugin_active( 'kits-core/kits-core.php' ) && ! defined( 'KITS_CORE_DIR' ) );\nforeach ( array(  ) as $m ) { $c( 'admin menu registered: ' . $m, isset( $submenu[ $m ] ) ); }\nforeach ( array(  ) as $ns ) { $c( 'REST namespace: ' . $ns, in_array( $ns, rest_get_server()->get_namespaces(), true ) ); }\nob_start(); do_action( 'wp_head' ); $head = ob_get_clean();\n$bad = preg_match( '/(Fatal error|Warning|Notice|Deprecated):\\s.{0,300}? in \\/\\S+ on line \\d+/s', $head, $mm ) ? $mm[0] : '';\n$c( 'frontend wp_head renders without PHP notices', '' === $bad, $bad );\n$c( 'content filter renders blocks', false !== strpos( apply_filters( 'the_content', \"<!-- wp:paragraph -->\\n<p>smoke</p>\\n<!-- /wp:paragraph -->\" ), 'smoke' ) );\n\nif ( is_dir( '/results' ) ) { file_put_contents( '/results/' . \"base\" . '.json', wp_json_encode( $r ) ); }\nforeach ( $r['checks'] as $x ) { if ( ! $x['ok'] ) { throw new Exception( 'Smoke check failed: ' . $x['name'] . ' ' . $x['detail'] ); } }\n"
     }
   ]
 }

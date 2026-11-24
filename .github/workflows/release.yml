@@ -1,0 +1,98 @@
+name: Kits Suite Release
+
+# Manual, commit-pinned release. Builds the eight products from the checked-out commit, refuses to run unless
+# the commit's "Kits Suite CI/CD" run succeeded, verifies the packages, and publishes a GitHub release with
+# all eight ZIPs, SHA256SUMS and release-manifest.json. Product versions are read from product headers.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (must match RELEASE_TAG in tools/playground/build-blueprints.py for blueprint URLs)'
+        required: true
+        default: 'kits-suite-2026.11.24-pre.1'
+      prerelease:
+        description: 'Publish as a prerelease'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Working tree is clean and the tag matches the blueprints
+        run: |
+          test -z "$(git status --porcelain)"
+          grep -q "RELEASE_TAG = \"${{ inputs.tag }}\"" tools/playground/build-blueprints.py
+          python3 tools/playground/build-blueprints.py --check
+
+      - name: Require a successful CI run for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion=$(gh api "repos/${{ github.repository }}/actions/workflows/ci-suite.yml/runs?head_sha=${{ github.sha }}&status=completed" \
+            --jq '[.workflow_runs[] | select(.event=="push")] | sort_by(.created_at) | last | .conclusion')
+          echo "CI conclusion for ${{ github.sha }}: ${conclusion}"
+          test "${conclusion}" = "success"
+
+      - name: Build and verify packages
+        run: |
+          python3 tools/build/build-dist.py --target all --track commercial --out dist
+          python3 tools/build/verify-dist.py --dist dist --commit "${{ github.sha }}"
+
+      - name: Write release notes
+        run: |
+          python3 - <<'PY'
+          import json
+          m = json.load(open('dist/release-manifest.json'))
+          rows = "\n".join(f"| {p['product']} | {p['version']} | `{p['artifact']}` | {p['size_bytes']} | `{p['sha256']}` |" for p in m['products'])
+          open('dist/NOTES.md', 'w').write(f"""Kits Suite prerelease built from commit `{m['source_commit']}`.
+
+          | Product | Version | Artifact | Bytes | SHA-256 |
+          |---|---|---|---|---|
+          {rows}
+
+          ## Install
+          Upload each ZIP in Plugins > Add New > Upload Plugin (the theme in Appearance > Themes > Add New). Each product
+          activates on its own; Kits Core is optional. Try them in WordPress Playground with the blueprints in `tools/playground/`.
+
+          ## Known limitations
+          - Prerelease: product versions are unchanged product headers, not a stable release.
+          - MailWeb bundles the Hostinger Mail API SDK, which needs PHP 8.2+; on PHP 8.0/8.1 MailWeb uses its built-in REST transport.
+          - Requires WordPress 7.1+ and PHP 8.0+.
+          """.replace('\n          ', '\n'))
+          PY
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
+          gh release create "${{ inputs.tag }}" ${flags} --target "${{ github.sha }}" \
+            --title "Kits Suite ${{ inputs.tag }}" --notes-file dist/NOTES.md \
+            dist/*.zip dist/SHA256SUMS dist/release-manifest.json
+
+      - name: Verify every release asset downloads and matches its checksum
+        run: |
+          mkdir -p verify && cd verify
+          base="https://github.com/${{ github.repository }}/releases/download/${{ inputs.tag }}"
+          while read -r sum file; do
+            curl -fsSL --retry 3 -o "$file" "$base/$file"
+            echo "$sum  $file" | sha256sum -c -
+          done < ../dist/SHA256SUMS
+          curl -fsSL --retry 3 -o release-manifest.json "$base/release-manifest.json"
+          curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"

@@ -46,8 +46,10 @@ define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );
 define( 'MAILWEB_API_HOST', 'https://api.mail.hostinger.com' );
 
-// Hostinger Mail API PHP SDK (hostinger/mail-api-php-sdk) autoload if installed via composer.
-if ( is_readable( MAILWEB_DIR . 'vendor/autoload.php' ) ) {
+// Hostinger Mail API PHP SDK (hostinger/mail-api-php-sdk) autoload if bundled. The SDK needs PHP 8.2+;
+// MailWeb itself runs on PHP 8.0+, so older hosts use the built-in REST transport and never load vendor/.
+define( 'MAILWEB_SDK_MIN_PHP_ID', 80200 );
+if ( PHP_VERSION_ID >= MAILWEB_SDK_MIN_PHP_ID && is_readable( MAILWEB_DIR . 'vendor/autoload.php' ) ) {
 	require_once MAILWEB_DIR . 'vendor/autoload.php';
 }
 

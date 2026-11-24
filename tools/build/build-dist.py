@@ -25,6 +25,7 @@ import hashlib
 import pathlib
 import re
 import shutil
+import subprocess
 import sys
 import zipfile
 
@@ -67,6 +68,7 @@ EXCLUDE = [
     "composer.json",
     "composer.lock",
     "package.json",
+    "PENDING.md",
     "package-lock.json",
     "pnpm-lock.yaml",
     "tsconfig.json",
@@ -88,8 +90,29 @@ EXCLUDE = [
     ".pytest_cache/*",
 ]
 
-# Targets that bundle production vendor dependencies (e.g. MailWeb SDK)
+# Targets that bundle production Composer dependencies (MailWeb: hostinger/mail-api-php-sdk).
+# vendor/ is gitignored, so it is never read from the source tree: it is resolved from
+# composer.json + composer.lock with `composer install --no-dev` at build time, so a clean
+# CI checkout produces the same package as a developer machine.
 VENDOR_BUNDLED_TARGETS = {"mailweb"}
+
+# Extra files/dirs pruned from bundled vendor/ (development and documentation only).
+VENDOR_PRUNE = [
+    ".git*",
+    ".github",
+    "tests",
+    "test",
+    "docs",
+    "doc",
+    "examples",
+    "phpunit.xml*",
+    "*.md",
+    "composer.json",
+    "composer.lock",
+    ".editorconfig",
+    ".php-cs-fixer*",
+    "Makefile",
+]
 
 SRC_EXCLUDE = [
     "admin-app/src",
@@ -124,6 +147,63 @@ def set_theme_update_uri(style_css: pathlib.Path, uri: str | None) -> None:
     style_css.write_text(text, encoding="utf-8")
 
 
+def install_production_vendor(src: pathlib.Path, stage: pathlib.Path) -> int:
+    """Resolve production Composer dependencies for a target and copy vendor/ into the stage."""
+    manifest = src / "composer.json"
+    lock = src / "composer.lock"
+    if not manifest.is_file() or not lock.is_file():
+        sys.exit(f"{src.name}: composer.json and composer.lock are required to bundle vendor/")
+    work = stage.parent / f".composer_{src.name}"
+    if work.exists():
+        shutil.rmtree(work)
+    work.mkdir(parents=True)
+    shutil.copy2(manifest, work / "composer.json")
+    shutil.copy2(lock, work / "composer.lock")
+    # --no-scripts/--no-plugins: nothing from a dependency runs at package time.
+    cmd = [
+        "composer", "install", "--no-dev", "--no-interaction", "--no-progress",
+        "--prefer-dist", "--optimize-autoloader", "--no-scripts", "--no-plugins",
+    ]
+    res = subprocess.run(cmd, cwd=work, capture_output=True, text=True)
+    if res.returncode != 0:
+        sys.exit(f"composer install failed for {src.name}:\n{res.stdout}\n{res.stderr}")
+    vendor = work / "vendor"
+    if not (vendor / "autoload.php").is_file():
+        sys.exit(f"{src.name}: vendor/autoload.php missing after composer install")
+    copied = 0
+    for path in sorted(vendor.rglob("*")):
+        rel = path.relative_to(vendor).as_posix()
+        if excluded_vendor(rel):
+            continue
+        dest = stage / "vendor" / rel
+        if path.is_dir():
+            dest.mkdir(parents=True, exist_ok=True)
+        else:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, dest)
+            copied += 1
+    shutil.rmtree(work)
+    return copied
+
+
+# Dev-only trees inside specific packages (not loaded by the autoloader at runtime).
+VENDOR_PRUNE_PATHS = ["phpstan/phpdoc-parser/tools"]
+
+
+def excluded_vendor(rel_path: str) -> bool:
+    parts = pathlib.PurePosixPath(rel_path).parts
+    if any(rel_path == pp or rel_path.startswith(pp + "/") for pp in VENDOR_PRUNE_PATHS):
+        return True
+    # Never prune Composer's own runtime files.
+    if parts and parts[0] == "composer":
+        return False
+    for part in parts:
+        for pat in VENDOR_PRUNE:
+            if fnmatch.fnmatch(part.lower(), pat.lower()):
+                return True
+    return False
+
+
 def sha256_file(path: pathlib.Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -148,9 +228,9 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
     if track != "wporg":
         patterns.extend(SRC_EXCLUDE)
 
-    # Exclude vendor directory for targets that do not bundle production vendor dependencies
-    if target not in VENDOR_BUNDLED_TARGETS:
-        patterns.extend(["vendor", "vendor/*"])
+    # The source tree's vendor/ is never copied (it may hold dev dependencies, and is gitignored);
+    # bundled targets get a fresh `composer install --no-dev` below.
+    patterns.extend(["vendor", "vendor/*"])
 
     count = 0
     for path in sorted(src.rglob("*")):
@@ -164,6 +244,9 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(path, dest)
             count += 1
+
+    if target in VENDOR_BUNDLED_TARGETS:
+        count += install_production_vendor(src, stage)
 
     if target == "theme":
         set_theme_update_uri(stage / "style.css", spec["update_uri"] if track == "commercial" else None)
