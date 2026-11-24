@@ -129,7 +129,51 @@ wp_insert_post( array( 'post_title' => 'RankWeb sample post', 'post_content' => 
 """,
         "extra": r"""
 $c( 'no Rank Math / Yoast required', ! defined( 'RANK_MATH_VERSION' ) && ! defined( 'WPSEO_VERSION' ) );
+$c( 'RankWeb owns the head with no other SEO plugin', 'none' === rankweb_seo_owner() && rankweb_prints_head() );
+$pid = wp_insert_post( array( 'post_title' => 'Journey post', 'post_content' => '<!-- wp:paragraph --><p>A short page about dog care in monsoon season, with water, shade and rest for street dogs.</p><!-- /wp:paragraph -->', 'post_status' => 'publish', 'post_type' => 'post' ) );
+$cnt = function ( $h, $re ) { return preg_match_all( $re, $h ); };
+$view = function () use ( $pid ) { global $wp_query; query_posts( array( 'p' => $pid ) ); ob_start(); do_action( 'wp_head' ); return ob_get_clean(); };
+$h = $view();
+$c( 'description printed once and from the post', 1 === $cnt( $h, '/<meta name="description"/' ) && false !== strpos( $h, 'dog care in monsoon' ) );
+$c( 'Open Graph and Twitter tags printed once each', 1 === $cnt( $h, '/property="og:title"/' ) && 1 === $cnt( $h, '/name="twitter:card"/' ) && 1 === $cnt( $h, '/property="og:url"/' ), $cnt( $h, '/property="og:title"/' ) . '/' . $cnt( $h, '/name="twitter:card"/' ) . '/' . $cnt( $h, '/property="og:url"/' ) . ' ' . substr( preg_replace( '/\s+/', ' ', $h ), 0, 300 ) );
+$c( 'canonical printed once', 1 === $cnt( $h, '/rel="canonical"/' ) );
+$c( 'JSON-LD printed once with an Article node', 1 === $cnt( $h, '/application\/ld\+json/' ) && false !== strpos( $h, '"@type":"Article"' ) );
+update_post_meta( $pid, '_rankweb_schema_type', 'BlogPosting' );
+$c( 'sidebar schema type reaches the JSON-LD', false !== strpos( $view(), '"@type":"BlogPosting"' ) );
+update_post_meta( $pid, '_rankweb_schema_type', 'Event' );
+$c( 'a type PHP cannot write is not printed', false === strpos( $view(), '"@type":"Event"' ) );
+update_post_meta( $pid, '_rankweb_description', 'A hand-written description.' );
+$c( 'own description wins', false !== strpos( $view(), 'content="A hand-written description."' ) );
+update_post_meta( $pid, '_rankweb_noindex', '1' );
+$robots = ''; ob_start(); wp_robots(); $robots = ob_get_clean();
+query_posts( array( 'p' => $pid ) );
+ob_start(); wp_robots(); $robots = ob_get_clean();
+$c( 'noindex setting adds noindex through core wp_robots', false !== strpos( $robots, 'noindex' ), $robots );
+$sm = wp_sitemaps_get_server()->registry->get_provider( 'posts' ) ? 1 : 0;
+$args = apply_filters( 'wp_sitemaps_posts_query_args', array(), 'post' );
+$c( 'noindex items are excluded from the sitemap query', ! empty( $args['meta_query'] ) );
+foreach ( array( 'dashboard', 'modules', 'settings', 'insights' ) as $scr ) { // the FAQ screen needs a real admin screen (get_current_screen): checked in the browser
+	ob_start();
+	try { rankweb_ui_page( $scr ); } catch ( Throwable $e ) { echo 'Fatal error: ' . $e->getMessage() . ' at ' . basename( $e->getFile() ) . ':' . $e->getLine(); }
+	$out = ob_get_clean();
+	$c( 'admin screen renders without Kits Core: ' . $scr, '' !== trim( $out ) && false === strpos( $out, 'needs Kits Core' ) && false === strpos( $out, 'Fatal error' ), substr( wp_strip_all_tags( $out ), 0, 80 ) );
+}
+aw_seo_settings_save( 'schema', array( 'AW_SITE_ALT_NAMES' => "Journey Site\nJS" ) );
+$c( 'settings save and persist', array( 'Journey Site', 'JS' ) === ( aw_seo_saved()['schema']['AW_SITE_ALT_NAMES'] ?? null ) );
+$on = array(); foreach ( aw_seo_modules() as $k => $m ) { if ( ! empty( $m['switch'] ) && 'llms' !== $k ) { $on[ $k ] = true; } }
+aw_seo_settings_save( 'modules', array(), false, $on );
+$c( 'switching a module off takes its files out', ! aw_seo_module_on( 'llms' ) && in_array( 'llms', aw_seo_files_off(), true ) );
+$pub = rankweb_aw_leak_probe();
+$c( 'no Animal Writes site values in a generic site graph', '' === $pub, $pub );
 $r['info']['head_has_canonical'] = false !== strpos( $head, 'rel="canonical"' );
+function rankweb_aw_leak_probe() {
+	query_posts( array( 'p' => get_posts( array( 'numberposts' => 1, 'fields' => 'ids' ) )[0] ) );
+	ob_start(); do_action( 'wp_head' ); $h = ob_get_clean();
+	foreach ( array( 'animalwrites.in', 'AnimalWrites', 'Animal Writes', 'animal_writes_' ) as $needle ) {
+		if ( false !== stripos( $h, $needle ) ) { return $needle; }
+	}
+	return '';
+}
 """,
     },
     "sourceweb": {

@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb PRO, phase C: video detection, VideoObject schema and the video sitemap (docs/rankweb-pro-audit.md, C).
+ * RankWeb PRO, phase C: video detection, VideoObject schema and the video sitemap (docs/org/rankweb-org-plan.md (Appendix B), C).
  *
  * Rank Math keeps video SEO for Pro. RankWeb does it with no paid API:
  * - On save, an item of a video post type is scanned (AW_Video, class-aw-video.php) for YouTube and Vimeo videos in its

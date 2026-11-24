@@ -58,7 +58,8 @@ function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 	if ( '' === $kw || $n < 2 || $n > 4 || mb_strlen( $kw ) > 60 ) {
 		return '';
 	}
-	if ( false !== strpos( $kw, 'animal writes' ) && false === mb_stripos( $title, 'animal writes' ) && false === mb_stripos( $title, 'animalwrites' ) ) {
+	$brand = mb_strtolower( rankweb_site_name() ); // a keyword that names the site must be in the title
+	if ( '' !== $brand && false !== strpos( $kw, $brand ) && false === mb_stripos( $title, $brand ) && false === mb_stripos( $title, str_replace( ' ', '', $brand ) ) ) {
 		return '';
 	}
 	if ( preg_match( '/^(?:' . AW_SEO_DANGLING . ')$/iu', (string) end( $parts ) ) ) {

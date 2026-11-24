@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb Dashboard counts (docs/rankweb-plan.md §2): built by the hourly job rankweb_health_build, never while a
+ * RankWeb Dashboard counts (docs/org/rankweb-org-plan.md §2): built by the hourly job rankweb_health_build, never while a
  * screen loads. The job keeps the newest counts in the transient rankweb_health and one row a day in the option
  * rankweb_health_log (not autoloaded, 120 days), so the Dashboard's time range can show the change.
  *

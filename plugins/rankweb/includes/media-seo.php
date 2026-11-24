@@ -1,7 +1,7 @@
 <?php
 /**
  * RankWeb PRO, phase E: Image SEO — find and replace across media alt/title/caption, and fill missing captions
- * (docs/rankweb-pro-audit.md, E). Rank Math keeps Image SEO for Pro.
+ * (docs/org/rankweb-org-plan.md (Appendix B), E). Rank Math keeps Image SEO for Pro.
  *
  * Screen: RankWeb → Images. Two tools, each with a dry run that writes nothing:
  * - Find and replace in the alt text, title and caption of attachments (plain text or a regular expression, optionally

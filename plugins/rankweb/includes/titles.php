@@ -76,7 +76,7 @@ function aw_seo_item_title_rules( $post ) {
 		return '';
 	}
 	if ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
-		return 'Animal Writes – Animal welfare news, law and help in India';
+		return trim( rankweb_site_name() . ( '' !== trim( (string) get_bloginfo( 'description' ) ) ? ' – ' . trim( (string) get_bloginfo( 'description' ) ) : '' ) );
 	}
 	if ( in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) ) {
 		return aw_seo_resource_title( $post ); // Library and Resources (helpers.php)
@@ -93,7 +93,7 @@ function aw_seo_item_title_rules( $post ) {
 		return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; the role and organisation are never cut (owner, 15 Oct 2026)
 	}
 	if ( 'page' === $post->post_type && 'about' === $post->post_name && ! $post->post_parent ) {
-		return 'About Animal Writes';
+		return 'About ' . rankweb_site_name();
 	}
 	return aw_seo_branded( rankweb_plain_text( wptexturize( $post->post_title ) ) ); // as WordPress's own document title
 }
@@ -119,6 +119,9 @@ function aw_seo_item_description( $post ) {
 	} elseif ( 'aw_legal' === $post->post_type && mb_strlen( rankweb_plain_text( $desc ) ) < 60 ) { // a one-line note: the intro says more
 		$better = aw_seo_intro( $post );
 		$desc   = mb_strlen( rankweb_plain_text( $better ) ) >= 60 ? $better : $desc;
+	}
+	if ( '' === trim( (string) $desc ) ) {
+		$desc = trim( wp_strip_all_tags( strip_shortcodes( excerpt_remove_blocks( (string) $post->post_content ) ) ) ); // a short page still says what it says
 	}
 	if ( '' === trim( (string) $desc ) ) {
 		$desc = get_bloginfo( 'description' );
@@ -598,7 +601,7 @@ add_filter(
 			return $desc;
 		}
 		$name = rankweb_plain_text( get_the_title( $id ) );
-		return aw_seo_cut( 'Claim ' . $name . ' in the Animal Writes Directory: send changes to its phone, WhatsApp, email, website, area, services or logo for review.', 160 );
+		return aw_seo_cut( 'Claim ' . $name . ' in the ' . rankweb_site_name() . ' Directory: send changes to its phone, WhatsApp, email, website, area, services or logo for review.', 160 );
 	},
 	30
 );
@@ -607,7 +610,7 @@ add_filter(
 	'rank_math/frontend/title',
 	function ( $title ) {
 		$id = function_exists( 'aw_claim_listing' ) ? aw_claim_listing() : 0;
-		return $id ? 'Claim ' . html_entity_decode( get_the_title( $id ), ENT_QUOTES ) . ' – Animal Writes' : $title;
+		return $id ? 'Claim ' . html_entity_decode( get_the_title( $id ), ENT_QUOTES ) . ' – ' . rankweb_site_name() : $title;
 	},
 	30
 );
@@ -652,28 +655,4 @@ foreach ( array( 'rank_math/frontend/title', 'rank_math/frontend/description' ) 
 	add_filter( $aw_hook, fn( $text ) => function_exists( 'aw_heading_dates' ) ? aw_heading_dates( $text ) : $text, 20 );
 }
 
-/* ---------- Standalone meta description rendering (when Rank Math is inactive) ---------- */
-
-if ( ! function_exists( 'aw_rankweb_render_standalone_meta_description' ) ) {
-	/**
-	 * Render standalone meta description tag in wp_head when Rank Math is inactive.
-	 */
-	function aw_rankweb_render_standalone_meta_description(): void {
-		if ( is_404() || is_admin() ) {
-			return;
-		}
-		if ( function_exists( 'aw_seo_extras_rank_math' ) && aw_seo_extras_rank_math() ) {
-			return;
-		}
-		if ( function_exists( 'aw_seo_description' ) ) {
-			$desc = aw_seo_description();
-			if ( '' !== $desc ) {
-				echo '<meta name="description" content="' . esc_attr( rankweb_plain_text( $desc ) ) . '" />' . "\n";
-			}
-		}
-	}
-}
-
-if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math() ) {
-	add_action( 'wp_head', 'aw_rankweb_render_standalone_meta_description', 1 );
-}
+/* The standalone meta description is printed by standalone-seo.php (rankweb_print_head_tags), once, for every kind of page. */

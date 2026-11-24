@@ -5,7 +5,7 @@
 ( function( wp ) {
 	const { registerPlugin } = wp.plugins;
 	const { PluginSidebar, PluginSidebarMoreMenuItem } = wp.editPost;
-	const { PanelBody, TextControl, SelectControl, ButtonGroup, Button } = wp.components;
+	const { PanelBody, TextControl, TextareaControl, ToggleControl, SelectControl, ButtonGroup, Button } = wp.components;
 	const { useSelect, useDispatch } = wp.data;
 	const { useState, useEffect, createElement: el, Fragment } = wp.element;
 	const { __, sprintf } = wp.i18n;
@@ -108,7 +108,8 @@
 
 		const [ previewMode, setPreviewMode ] = useState( 'desktop' );
 		const keyword = meta.rank_math_focus_keyword || '';
-		const schemaType = meta._rankweb_schema_type || 'Article';
+		const schemaType = meta._rankweb_schema_type || ( ( window.rankwebEditorData && window.rankwebEditorData.postType ) === 'page' ? 'WebPage' : 'Article' );
+		const schemaTypes = ( window.rankwebEditorData && window.rankwebEditorData.schemaTypes ) || [ 'Article', 'BlogPosting', 'NewsArticle', 'WebPage' ];
 
 		const { score, checks } = calculateSeoScore( title, content, keyword );
 
@@ -155,16 +156,32 @@
 						{
 							label: __( 'Structured Data Schema Type', 'rankweb' ),
 							value: schemaType,
-							help: __( 'Saved with the post. It does not change the structured data on the page yet.', 'rankweb' ),
-							options: [
-								{ label: 'Article', value: 'Article' },
-								{ label: 'NewsArticle', value: 'NewsArticle' },
-								{ label: 'Event', value: 'Event' },
-								{ label: 'FAQPage', value: 'FAQPage' },
-								{ label: 'Organization', value: 'Organization' }
-							],
+							help: __( 'Printed in the page\'s structured data (JSON-LD) when RankWeb writes the page head.', 'rankweb' ),
+							options: schemaTypes.map( function( t ) { return { label: t, value: t }; } ),
 							onChange: function( nextValue ) {
 								editPost( { meta: Object.assign( {}, meta, { _rankweb_schema_type: nextValue } ) } );
+							}
+						}
+					),
+					el(
+						TextareaControl,
+						{
+							label: __( 'Meta description', 'rankweb' ),
+							value: meta._rankweb_description || '',
+							help: __( 'Shown in search results. Empty: the excerpt, or the start of the page.', 'rankweb' ),
+							onChange: function( nextValue ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_description: nextValue } ) } );
+							}
+						}
+					),
+					el(
+						ToggleControl,
+						{
+							label: __( 'Keep out of search results', 'rankweb' ),
+							checked: '1' === meta._rankweb_noindex,
+							help: __( 'Adds noindex and leaves the page out of the sitemap.', 'rankweb' ),
+							onChange: function( on ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_noindex: on ? '1' : '' } ) } );
 							}
 						}
 					),

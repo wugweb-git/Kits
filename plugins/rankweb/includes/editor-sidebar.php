@@ -57,11 +57,33 @@ add_action(
 				$type,
 				'_rankweb_schema_type',
 				array(
-					'show_in_rest'  => true,
-					'single'        => true,
-					'type'          => 'string',
-					'default'       => 'Article',
-					'auth_callback' => fn() => current_user_can( 'edit_posts' ),
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => fn( $v ) => function_exists( 'rankweb_schema_types' ) && in_array( $v, rankweb_schema_types(), true ) ? $v : '',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+				)
+			);
+			register_post_meta(
+				$type,
+				'_rankweb_description',
+				array(
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_textarea_field',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+				)
+			);
+			register_post_meta(
+				$type,
+				'_rankweb_noindex',
+				array(
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => fn( $v ) => '1' === (string) $v ? '1' : '',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
 				)
 			);
 		}
@@ -106,6 +128,7 @@ add_action(
 				'postType'   => $screen->post_type,
 				'postId'     => get_the_ID(),
 				'pluginName' => 'RankWeb SEO',
+				'schemaTypes' => function_exists( 'rankweb_schema_types' ) ? rankweb_schema_types() : array( 'Article' ),
 			)
 		);
 	}

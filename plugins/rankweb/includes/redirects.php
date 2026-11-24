@@ -152,8 +152,8 @@ function aw_redirect_add( $old_url, $target ) {
 	}
 }
 
-// A link written as "https:/animalwrites.in/…" (one slash) or "animalwrites.in/…" without a scheme is read as a path on
-// this site: /https:/animalwrites.in/news/ (79 hits in the 404 Monitor, no referer; audit 12 Nov 2026). It goes to
+// A link written as "https:/example.com/…" (one slash) or "example.com/…" without a scheme (this site's own host) is read as a path on
+// this site: /https:/example.com/news/ (79 hits in the 404 Monitor, no referer; audit 12 Nov 2026). It goes to
 // the page it meant. The site's own templates and stored content have no such link; the hits come from outside.
 add_action(
 	'parse_request',
@@ -162,10 +162,11 @@ add_action(
 			return;
 		}
 		$uri = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?animalwrites\.in(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
+		$host = preg_quote( preg_replace( '/^www\./i', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) ), '#' ); // this site's own host
+		if ( '' === $host || ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?' . $host . '(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
 			return;
 		}
-		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'Animal Writes' );
+		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'RankWeb' );
 		exit;
 	},
 	0
@@ -185,18 +186,18 @@ add_action(
 		}
 		$num = preg_replace( '/\D+/', '', $m[1] );
 		if ( '1962' === $num ) {
-			wp_safe_redirect( home_url( '/resources/1962-helpline-mobile-veterinary-units/' ), 301, 'Animal Writes' );
+			wp_safe_redirect( home_url( '/resources/1962-helpline-mobile-veterinary-units/' ), 301, 'RankWeb' );
 			exit;
 		}
 		if ( '112' === $num ) {
-			wp_safe_redirect( home_url( '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ), 301, 'Animal Writes' );
+			wp_safe_redirect( home_url( '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ), 301, 'RankWeb' );
 			exit;
 		}
 		if ( '01292555700' === $num || '1292555700' === $num ) {
-			wp_safe_redirect( home_url( '/resources/animal-cruelty-law-india/' ), 301, 'Animal Writes' );
+			wp_safe_redirect( home_url( '/resources/animal-cruelty-law-india/' ), 301, 'RankWeb' );
 			exit;
 		}
-		wp_safe_redirect( home_url( '/directory/' ), 301, 'Animal Writes' );
+		wp_safe_redirect( home_url( '/directory/' ), 301, 'RankWeb' );
 		exit;
 	},
 	0
@@ -211,7 +212,7 @@ add_action(
 	function () {
 		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( preg_match( '#^/wp-(?:includes|content)/.*/@wordpress/interactivity(?:\.js)?$#', $path ) ) {
-			wp_safe_redirect( includes_url( 'js/dist/script-modules/interactivity/index.min.js' ), 301, 'Animal Writes' );
+			wp_safe_redirect( includes_url( 'js/dist/script-modules/interactivity/index.min.js' ), 301, 'RankWeb' );
 			exit;
 		}
 	},
@@ -254,7 +255,7 @@ add_action(
 		}
 		$lower = preg_replace_callback( '/(%[0-9A-Fa-f]{2})|([^%]+)/', fn( $m ) => '' !== $m[1] ? $m[1] : strtolower( $m[2] ), $path );
 		$query = (string) wp_parse_url( $uri, PHP_URL_QUERY );
-		wp_safe_redirect( home_url( $lower ) . ( '' !== $query ? '?' . $query : '' ), 301, 'Animal Writes' );
+		wp_safe_redirect( home_url( $lower ) . ( '' !== $query ? '?' . $query : '' ), 301, 'RankWeb' );
 		exit;
 	},
 	0
@@ -277,7 +278,7 @@ add_action(
 	'template_redirect',
 	function () {
 		if ( isset( $_GET['author'] ) && is_author() ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( home_url( '/about/' ), 301, 'Animal Writes' );
+			wp_safe_redirect( home_url( '/about/' ), 301, 'RankWeb' );
 			exit;
 		}
 	},
@@ -289,7 +290,7 @@ add_action(
 	'template_redirect',
 	function () {
 		if ( is_front_page() && 'page' === get_option( 'show_on_front' ) && max( (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) ) > 1 ) {
-			wp_safe_redirect( home_url( '/' ), 301, 'Animal Writes' );
+			wp_safe_redirect( home_url( '/' ), 301, 'RankWeb' );
 			exit;
 		}
 	},

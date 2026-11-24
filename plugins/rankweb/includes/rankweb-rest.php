@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb's routes for its screens (docs/rankweb-plan.md §2–§4), under rankweb/v1:
+ * RankWeb's routes for its screens (docs/org/rankweb-org-plan.md §2–§4), under rankweb/v1:
  *
  *   GET  dashboard           manage_categories  the tiles, from the background counts (rankweb-dashboard.php)
  *   POST dashboard/count     manage_categories  ask for a count now (one background event)

@@ -82,6 +82,28 @@ function sanitize_text_field( $str ) {
 	return $str;
 }
 
+// settings.php reads site defaults and the site name through standalone-seo.php's seam (generic here: no filter runs).
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( $tag, $value ) { // phpcs:ignore
+		return $value;
+	}
+}
+foreach ( array( 'add_filter', 'add_action' ) as $rankweb_hook_fn ) {
+	if ( ! function_exists( $rankweb_hook_fn ) ) {
+		eval( 'function ' . $rankweb_hook_fn . '() { return true; }' ); // phpcs:ignore
+	}
+}
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	function get_bloginfo( $what = '' ) { // phpcs:ignore
+		return 'name' === $what ? 'Test Site' : '';
+	}
+}
+if ( ! function_exists( 'wp_specialchars_decode' ) ) {
+	function wp_specialchars_decode( $s, $q = 0 ) { // phpcs:ignore
+		return $s;
+	}
+}
+require dirname( __DIR__ ) . '/includes/standalone-seo.php';
 require dirname( __DIR__ ) . '/includes/settings.php';
 
 $fails = 0;

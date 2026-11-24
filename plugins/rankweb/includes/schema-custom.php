@@ -1,7 +1,7 @@
 <?php
 /**
  * RankWeb PRO, phase D: custom JSON-LD, Speakable, about and mentions, and "import schema from a URL"
- * (docs/rankweb-pro-audit.md, D). Rank Math keeps a custom-schema builder for Pro; this is RankWeb's version.
+ * (docs/org/rankweb-org-plan.md (Appendix B), D). Rank Math keeps a custom-schema builder for Pro; this is RankWeb's version.
  *
  * On an item of a schema post type, a "Custom schema" box (a classic meta box; the block editor hides it) holds:
  * - a JSON-LD block: one object, a list of objects, or a { "@graph": [ … ] }. AW_Schema (class-aw-schema.php) checks it

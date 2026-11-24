@@ -84,7 +84,7 @@ function rankweb_media_autofill_brand( $name ) {
 function rankweb_media_autofill_caption( $name ) {
 	$brand = rankweb_media_autofill_brand( $name );
 	if ( $brand ) {
-		return $brand['host'] . ' ' . $brand['kind'] . ' | Animal Writes';
+		return $brand['host'] . ' ' . $brand['kind'] . ' | ' . rankweb_site_name();
 	}
 	return rankweb_media_autofill_cut( $name, 100 );
 }
@@ -99,19 +99,19 @@ function rankweb_media_autofill_caption( $name ) {
 function rankweb_media_autofill_description( $name, $is_source ) {
 	$brand = rankweb_media_autofill_brand( $name );
 	if ( $brand ) {
-		$base = sprintf( '%1$s %2$s, shown beside news from %1$s on Animal Writes', $brand['host'], $brand['kind'] );
-		$text = $base . ", India's tracker of animal welfare news, law and help.";
+		$base = sprintf( '%1$s %2$s, shown beside news from %1$s on %3$s', $brand['host'], $brand['kind'], rankweb_site_name() );
+		$text = $base . ( '' !== trim( (string) get_bloginfo( 'description' ) ) ? ', ' . lcfirst( trim( (string) get_bloginfo( 'description' ) ) ) . '.' : '.' );
 		if ( mb_strlen( $text ) > 160 ) {
 			$text = $base . '.';
 		}
 	} else {
 		$short = rankweb_media_autofill_cut( $name, 45 );
 		$text  = $is_source
-			? sprintf( 'Source image for the news item “%s”. Animal Writes, India.', $short )
-			: sprintf( "Image for “%s” on Animal Writes, India's tracker of animal welfare news, law and help.", $short );
+			? sprintf( 'Source image for the news item “%1$s”. %2$s.', $short, rankweb_site_name() )
+			: sprintf( 'Image for “%1$s” on %2$s.', $short, rankweb_site_name() );
 	}
 	if ( mb_strlen( $text ) < 100 ) {
-		$text .= ' Animal welfare news, law and help in India.'; // Reaches the 100-character minimum the Media Library SEO check expects.
+		$text .= ' ' . trim( (string) get_bloginfo( 'description' ) ); // Reaches the 100-character minimum the Media Library SEO check expects, in the site's own words.
 	}
 	return mb_substr( $text, 0, 160 );
 }
