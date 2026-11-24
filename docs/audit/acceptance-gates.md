@@ -50,9 +50,9 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] B No DirectoryWeb console errors; remaining errors are Playground environment (blocked external loads, heartbeat)
 
 ### Gate
-- [ ] U Full suites pass on PHP 8.0, 8.1, 8.2, 8.3
-- [ ] H All blueprints pass; DirectoryWeb journey extended
-- [ ] Distribution ZIP extracted, activated standalone, no monorepo reference
+- [x] U Full suites pass on PHP 8.0, 8.1, 8.2, 8.3 (CI run 45478006598, PHP 8.0-8.3 jobs, dcfa016)
+- [x] H All blueprints pass; DirectoryWeb journey extended (8 blueprints against extracted ZIPs, local run on dcfa016; DirectoryWeb 28 checks)
+- [x] Distribution ZIP extracted, activated standalone, no monorepo reference (smoke mounts only the extracted ZIP; standalone matrix 6/6; dcfa016)
 - [ ] CI green on the final commit
 - [ ] Docs updated; stale docs removed; `docs/pending.md`, `plugins/directoryweb/PENDING.md`, master matrix and Notion current
 
@@ -89,9 +89,9 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] B Settings intact; tags absent while deactivated, back after (25 Nov)
 
 ### Gate
-- [ ] U Full suites pass on PHP 8.0, 8.1, 8.2, 8.3 (`phpunit-lite`, `run.php`, `sidebar-score.test.js`, new tests)
-- [ ] H All blueprints pass; RankWeb checks extended (sitemap, canonical, robots, schema)
-- [ ] Distribution ZIP verified
+- [x] U Full suites pass on PHP 8.0, 8.1, 8.2, 8.3 (`phpunit-lite`, `run.php`, `sidebar-score.test.js`, new tests) (CI run 45478006598, PHP 8.0-8.3 jobs, dcfa016)
+- [x] H All blueprints pass; RankWeb checks extended (sitemap, canonical, robots, schema) (RankWeb journey 26 checks against the extracted ZIP, dcfa016)
+- [x] Distribution ZIP verified (checksums OK for all 8 ZIPs; verify-dist passes; dcfa016)
 - [ ] CI green on the final commit
 - [ ] Docs updated; stale docs removed; `docs/pending.md`, `plugins/rankweb/PENDING.md`, master matrix and Notion current
 
