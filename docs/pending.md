@@ -73,9 +73,11 @@ All pending/roadmap tracking for **SourceWeb** (`plugins/sourceweb/`) and **Insi
   - ✅ Automated worker retry exponential backoff on rate limits / 502 / 503 timeouts (`aw_worker_retry_backoff`, `aw_worker_is_in_backoff`, `aw_worker_clear_backoff` in `workers.php` and `sourcing-lists.php`).
   - ✅ Domain trust overrides (`aw_rules_domain_override_save`, `delete`, `aw_rules_domain_overrides`) and custom feed tag exclusions (`aw_rules_feed_excluded_tags_save`, `aw_rules_feed_excluded_tags` enforced in `aw_auto_review()`).
   - ✅ Native WP Admin fallback screens with empty states and single-item review handler (`sourceweb-ui.php`, `review-queue.php`), decoupled from DirectoryWeb & InsightWeb (`480/480` checks passing).
+  - ✅ WordPress.org Plugin Check (`0` errors), `readme.txt` (`== External services ==`, `== Installation ==`, `== FAQ ==`), `sourceweb` text domain alignment, and standalone User-Agent strings (`a7231c2`, `e666d7b`).
 - **SourceWeb — Remaining / Deferred:**
   - **AI Model Router (Free/Open Models Only):** Held / owner-gated; paid models remain prohibited.
   - **Full `aw_*` DB/Route Rename:** Intentionally deferred by owner rule to preserve live data (`aw_enrich`, `aw_sources`) and external worker routes (`aw/v1/*`).
+  - **Credential-Gated Live APIs:** Live RSS/Atom feed fetching, AI provider calls, Google Places live block, Openverse, and DOI remain credential/network-gated.
 
 - **InsightWeb — Built & Operational (24 Nov 2026):**
   - ✅ Dashboard tiles & inline SVG MiniCharts with strict empty-state telemetry (`empty => true, is_mock: false`) across all 6 tiles (`insightweb-dashboard.php`, `insightweb-rest.php`).
@@ -83,13 +85,15 @@ All pending/roadmap tracking for **SourceWeb** (`plugins/sourceweb/`) and **Insi
   - ✅ Automated daily telemetry cron hook (`INSIGHTWEB_CRON_TELEMETRY` / `insightweb_daily_telemetry_cron`) wired to `insightweb_daily_telemetry_refresh()`.
   - ✅ Service credentials diagnostics (`insightweb_check_service_status()`), native Settings rows (`insightweb-keys.php`), `insightweb/v1/keys` REST route, and `insightweb_keys_copy()` / `wp insightweb keys copy|status`.
   - ✅ Standalone operation without Kits Core or Rank Math (`150/150` checks passing) and `sourceweb_push_keywords` emit (`sourcing-push.php`).
+  - ✅ WordPress.org Plugin Check (`0` errors), `readme.txt` (`== External services ==`), tenant host leak removals (`crawlcheck.php`, `keywords.php`, `links-seed.php`), and `$_POST` sanitization (`8369632`, `c0c5e5a`).
 - **InsightWeb — Remaining / Deferred:**
   - **Search Insights Integration:** Step 0–9 keyword action plan dashboard surfacing (rising queries & declining keywords) and 404/internal search query dashboard surfacing.
   - **Retire `aw_keys` Fallback (`docs/plugins/keys-per-plugin.md` Stage 3 Step 2):** Owner-gated until live migration verification confirms all keys are in `insightweb_keys`.
+  - **Credential-Gated Live APIs:** Search Console & GA4 (Site Kit OAuth), Clarity, Bing Webmaster, PageSpeed Insights, and Google Alerts RSS remain credential-gated.
   - Standalone fallback layers are always required safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
   - Fully compatible with symlinked plugins, custom directory names, Bedrock, and alternative file structures.
 - ✅ **Fix 5 (Low — Translation Domain Scoping):**
-  - Standardized REST error strings to use their respective plugin text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'aw-sourcing'`).
+  - Standardized REST error strings to use their respective plugin text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'sourceweb'`).
 - ✅ **Comprehensive Verification Executed & Green:**
   - `tests/remediation-verification-test.php`: 27/27 test suites passing (both load orders, 6 together, 6 standalone, all REST auth variants, RankWeb with/without Rank Math).
   - `tests/standalone-matrix-test.php`: 6/6 plugins verified independent in isolated clean-room subprocesses.
