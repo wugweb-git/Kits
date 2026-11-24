@@ -88,7 +88,7 @@ All pending/roadmap tracking for **SourceWeb** (`plugins/sourceweb/`) and **Insi
   - ✅ WordPress.org Plugin Check (`0` errors), `readme.txt` (`== External services ==`), tenant host leak removals (`crawlcheck.php`, `keywords.php`, `links-seed.php`), and `$_POST` sanitization (`8369632`, `c0c5e5a`).
 - **InsightWeb — Remaining / Deferred:**
   - **Search Insights Integration:** Step 0–9 keyword action plan dashboard surfacing (rising queries & declining keywords) and 404/internal search query dashboard surfacing.
-  - **Retire `aw_keys` Fallback (`docs/plugins/keys-per-plugin.md` Stage 3 Step 2):** Owner-gated until live migration verification confirms all keys are in `insightweb_keys`.
+  - **Retire `aw_keys` Fallback (`docs/plugins/keys-per-plugin.md` Stage 3 Step 2):** ✅ `aw_keys` read fallback removed from `insightweb-keys.php` (`e620a38`); server-side `wp option delete aw_keys` on live DB remains a deploy-time op if still present.
   - **Credential-Gated Live APIs:** Search Console & GA4 (Site Kit OAuth), Clarity, Bing Webmaster, PageSpeed Insights, and Google Alerts RSS remain credential-gated.
   - Standalone fallback layers are always required safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
   - Fully compatible with symlinked plugins, custom directory names, Bedrock, and alternative file structures.
