@@ -120,10 +120,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
       - name: Validate theme.json and Token Compiler
         run: |
           python3 -c "import json; json.load(open('themes/kits-by-wugweb/theme.json'))"
           python3 themes/kits-by-wugweb/tools/build-tokens.py --help
+      - name: Theme validation suite (patterns, contrast, tokens, packaging rules)
+        run: php themes/kits-by-wugweb/tests/ThemeValidationTest.php
 
   ci-blueprints:
     name: Playground Blueprints (schema + generator)
