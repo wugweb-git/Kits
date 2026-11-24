@@ -30,10 +30,10 @@ function aw_src_help_tab( $screen ) {
 		return;
 	}
 	$screens = array(
-		__( 'Overview', 'aw-sourcing' ) => __( 'what came in, what waits and what the workers did', 'aw-sourcing' ),
-		__( 'To review, Enrichment review', 'aw-sourcing' ) => __( 'approve or reject what the workers found', 'aw-sourcing' ),
-		__( 'Sources, Keywords, Rules', 'aw-sourcing' ) => __( 'what is fetched and what is kept', 'aw-sourcing' ),
-		__( 'AI models', 'aw-sourcing' ) => __( 'which free models do which job, with daily caps', 'aw-sourcing' ),
+		__( 'Overview', 'sourceweb' ) => __( 'what came in, what waits and what the workers did', 'sourceweb' ),
+		__( 'To review, Enrichment review', 'sourceweb' ) => __( 'approve or reject what the workers found', 'sourceweb' ),
+		__( 'Sources, Keywords, Rules', 'sourceweb' ) => __( 'what is fetched and what is kept', 'sourceweb' ),
+		__( 'AI models', 'sourceweb' ) => __( 'which free models do which job, with daily caps', 'sourceweb' ),
 	);
 	$list = '';
 	foreach ( $screens as $label => $what ) {
@@ -43,8 +43,8 @@ function aw_src_help_tab( $screen ) {
 		array(
 			'id'       => 'aw_src-about',
 			/* translators: %s: plugin name. */
-			'title'    => sprintf( __( 'About %s', 'aw-sourcing' ), 'SourceWeb' ),
-			'content'  => '<p>' . esc_html__( 'What the news workers fetch and how it arrives: sources and feeds, keywords, rules, the review queues and the worker endpoints.', 'aw-sourcing' ) . '</p><ul>' . $list . '</ul>',
+			'title'    => sprintf( __( 'About %s', 'sourceweb' ), 'SourceWeb' ),
+			'content'  => '<p>' . esc_html__( 'What the news workers fetch and how it arrives: sources and feeds, keywords, rules, the review queues and the worker endpoints.', 'sourceweb' ) . '</p><ul>' . $list . '</ul>',
 			'priority' => 5,
 		)
 	);
@@ -52,7 +52,7 @@ function aw_src_help_tab( $screen ) {
 	$data      = function_exists( 'get_file_data' ) ? get_file_data( $main_file, array( 'Version' => 'Version' ) ) : array();
 	$screen->set_help_sidebar(
 		'<p><strong>SourceWeb</strong>' . ( empty( $data['Version'] ) ? '' : ' ' . esc_html( $data['Version'] ) ) . '</p>'
-		. '<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Plugins', 'aw-sourcing' ) . '</a></p>'
-		. '<p><a href="https://wugweb.com" target="_blank" rel="noopener noreferrer">Wugweb<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'aw-sourcing' ) . '</span></a></p>'
+		. '<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Plugins', 'sourceweb' ) . '</a></p>'
+		. '<p><a href="https://wugweb.com" target="_blank" rel="noopener noreferrer">Wugweb<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'sourceweb' ) . '</span></a></p>'
 	);
 }

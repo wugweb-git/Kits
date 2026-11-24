@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const SOURCEWEB_CC0_UA             = 'AnimalWrites/1.0 (+https://animalwrites.in; admin@wugweb.com) image finder';
+const SOURCEWEB_CC0_UA             = 'SourceWeb/0.1.0 (+https://wugweb.com/plugins/sourceweb/) image finder';
 const SOURCEWEB_CC0_BATCH          = 30;
 const SOURCEWEB_CC0_BUDGET         = 150; // seconds per run
 const SOURCEWEB_CC0_DAILY_REQUESTS = 300;
@@ -203,7 +203,7 @@ function sourceweb_cc0_check_source( $post_id ) {
 		array(
 			'timeout'             => 10,
 			'redirection'         => 5,
-			'user-agent'          => 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)',
+			'user-agent'          => 'Mozilla/5.0 (compatible; SourceWebImageCheck/1.0; +https://wugweb.com/plugins/sourceweb/)',
 			'limit_response_size' => 262144,
 			'headers'             => array( 'Accept' => 'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8' ),
 		)
@@ -440,7 +440,7 @@ function sourceweb_source_pdf_cover( $post_id ) {
  * @return string|WP_Error Temporary file path.
  */
 function sourceweb_source_download( $url, $timeout = 30, $max = 15 * MB_IN_BYTES, $headers = array(), $user_agent = '' ) {
-	$r = wp_safe_remote_get( $url, array( 'timeout' => (int) $timeout, 'redirection' => 5, 'user-agent' => '' !== $user_agent ? $user_agent : 'Mozilla/5.0 (compatible; AnimalWritesImageCheck/1.0; +https://animalwrites.in)', 'headers' => (array) $headers, 'limit_response_size' => (int) $max ) );
+	$r = wp_safe_remote_get( $url, array( 'timeout' => (int) $timeout, 'redirection' => 5, 'user-agent' => '' !== $user_agent ? $user_agent : 'Mozilla/5.0 (compatible; SourceWebImageCheck/1.0; +https://wugweb.com/plugins/sourceweb/)', 'headers' => (array) $headers, 'limit_response_size' => (int) $max ) );
 	if ( is_wp_error( $r ) ) {
 		return $r;
 	}

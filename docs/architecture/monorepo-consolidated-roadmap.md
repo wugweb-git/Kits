@@ -341,39 +341,39 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 
 ---
 
-#### Track P1-D: SourceWeb Release Readiness (Step 4)
-1. **Existing Functionality Verified:** Content reprint engine (`ingest.php`), RSS/Atom feed management, keyword relevance scoring (`relevance.php`), publisher trust rules, auto-resolve engine (`autoresolve.php`), workers endpoint (`workers.php`). Unit tests passing 455 checks in `run.php` and 7 checks in `SourceWebStandaloneTest.php` (462 total).
-2. **Decoupling Changes Drafted in Working Tree (Awaiting Authorization):**
-   - Removed multi-plugin boot halt in `sourceweb.php:57` requiring Kits Core, DirectoryWeb, and InsightWeb.
-   - Guarded `aw_listing_place`, `directoryweb_listing_phones`, and `directoryweb_item_tags` against missing siblings in `includes/content-helpers.php` and `includes/enrichment.php`.
-   - Added native WP Admin fallback screens in `includes/sourceweb-ui.php`.
-   - Authored `tests/SourceWebStandaloneTest.php`.
-3. **Outstanding Implementation Tasks:**
-   - [ ] Implement automated retry logic with exponential backoff for worker rate limits (GDELT 502/503 timeouts).
-   - [ ] Build UI panel for manual publisher rule overrides and custom feed filters.
+#### Track P1-D: SourceWeb Release Readiness (Step 4) — COMPLETED
+1. **Existing Functionality Verified:** Content reprint engine (`ingest.php`), RSS/Atom feed management, keyword relevance scoring (`relevance.php`), publisher trust rules, auto-resolve engine (`autoresolve.php`), workers endpoint (`workers.php`). Unit tests passing 455 checks in `run.php` and 25 checks in `SourceWebStandaloneTest.php` (480 total).
+2. **Decoupling Changes Verified & Integrated:**
+   - Removed multi-plugin boot halt in `sourceweb.php` requiring Kits Core, DirectoryWeb, and InsightWeb.
+   - Decoupled DirectoryWeb across `ingest.php`, `enrichment.php` (16 call sites), and `enrichment-cleanup.php`. Guarded `aw_listing_place`, `directoryweb_listing_phones`, and `directoryweb_item_tags` against missing siblings.
+   - Added native WP Admin fallback screens in `includes/sourceweb-ui.php` with empty states and proper action hooks.
+   - Authored and verified `tests/SourceWebStandaloneTest.php`.
+3. **Outstanding Implementation Tasks — Completed:**
+   - [x] Implement automated retry logic with exponential backoff for worker rate limits (GDELT 502/503 timeouts): `aw_worker_retry_backoff()`, `aw_worker_is_in_backoff()`, `aw_worker_clear_backoff()`, and feed retry equivalents in `workers.php` and `sourcing-lists.php`.
+   - [x] Build UI panel for manual publisher rule overrides and custom feed filters: domain trust overrides (`aw_rules_domain_override_save`, `delete`, `aw_rules_domain_overrides`), feed excluded tags (`aw_rules_feed_excluded_tags_save`, `aw_rules_feed_excluded_tags`), and enforcement in `aw_auto_review()`.
 4. **Release-Readiness Acceptance Criteria:**
-   - Activates and ingests RSS feeds cleanly on a standalone WordPress site.
-   - Content reprint engine and relevance rules execute without DirectoryWeb or InsightWeb.
-   - Directory enrichment automatically enables when DirectoryWeb is active.
+   - [x] Activates and ingests RSS feeds cleanly on a standalone WordPress site.
+   - [x] Content reprint engine and relevance rules execute without DirectoryWeb or InsightWeb.
+   - [x] Directory enrichment automatically enables when DirectoryWeb is active.
 
 ---
 
-#### Track P1-E: InsightWeb Release Readiness (Step 5)
-1. **Existing Functionality Verified:** Search Console ingestion (`search-insights/`), GA4, Clarity, PageSpeed, Bing API integrations, keyword demand/opportunity scoring, SVG MiniCharts renderer, Ahrefs backlink import, standalone backup engine. Unit tests passing 107 checks in `run.php` and 11 checks in `StandaloneInsightsTest.php` (118 total).
-2. **Decoupling Changes Drafted in Working Tree (Awaiting Authorization):**
+#### Track P1-E: InsightWeb Release Readiness (Step 5) — COMPLETED
+1. **Existing Functionality Verified:** Search Console ingestion (`search-insights/`), GA4, Clarity, PageSpeed, Bing API integrations, keyword demand/opportunity scoring, SVG MiniCharts renderer, Ahrefs backlink import, standalone backup engine. Unit tests passing 107 checks in `run.php` and 43 checks in `StandaloneInsightsTest.php` (150 total).
+2. **Decoupling Changes Verified & Integrated:**
    - Removed boot halts requiring Kits Core or Rank Math in `includes/bootstrap.php`.
    - Added bundled `includes/standalone-fallback.php` for REST permission fallbacks.
    - Added structured empty-state dashboard range tiles (`empty: true, is_mock: false`) in `includes/insightweb-dashboard.php`.
    - Added native WP Admin tab fallback in `includes/search-insights/admin.php`.
-   - Authored `tests/StandaloneInsightsTest.php`.
-3. **Outstanding Implementation Tasks:**
-   - [ ] Implement automated daily Search Console data refresh cron.
-   - [ ] Finalize live Search Console OAuth credential connection settings UI.
+   - Authored and verified `tests/StandaloneInsightsTest.php`.
+3. **Outstanding Implementation Tasks — Completed:**
+   - [x] Implement automated daily Search Console data refresh cron: registered and scheduled daily telemetry cron hook `INSIGHTWEB_CRON_TELEMETRY` (`insightweb_daily_telemetry_cron`) wired to `insightweb_daily_telemetry_refresh()`.
+   - [x] Finalize live Search Console OAuth and Service Credential connection settings UI: native Service Credentials status rows with health diagnostics (`insightweb_check_service_status()`) and secure key management in `insightweb-keys.php`.
 4. **Release-Readiness Acceptance Criteria:**
-   - Activates and displays telemetry dashboards without Kits Core installed.
-   - Fresh installs display structured empty-state tiles without mock telemetry.
-   - Keyword opportunity scoring calculates correctly from imported Search Console data.
-   - SVG MiniCharts render without client-side JavaScript library dependencies.
+   - [x] Activates and displays telemetry dashboards without Kits Core installed.
+   - [x] Fresh installs display structured empty-state tiles without mock telemetry.
+   - [x] Keyword opportunity scoring calculates correctly from imported Search Console data.
+   - [x] SVG MiniCharts render without client-side JavaScript library dependencies.
 
 ---
 

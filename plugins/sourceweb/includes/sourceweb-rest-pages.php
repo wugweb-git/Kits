@@ -411,7 +411,7 @@ function sourceweb_worker_row( array $r ): array {
 		$keys = 'All keys';
 	} else {
 		/* translators: %d: number of keys. */
-		$keys = sprintf( _n( '%d key attached', '%d keys attached', $own, 'aw-sourcing' ), $own ) . ( $all ? ' (+ ' . $all . ' for all workers)' : '' );
+		$keys = sprintf( _n( '%d key attached', '%d keys attached', $own, 'sourceweb' ), $own ) . ( $all ? ' (+ ' . $all . ' for all workers)' : '' );
 	}
 	$note = '';
 	if ( 'planned' === $r['status'] ) {
@@ -513,7 +513,7 @@ function sourceweb_rest_worker( WP_REST_Request $request ) {
 	$new = 'new' === $id;
 	$w   = $new ? null : aw_worker( $id );
 	if ( ! $new && ! $w ) {
-		return new WP_Error( 'sourceweb_no_worker', __( 'No such worker.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'sourceweb_no_worker', __( 'No such worker.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$keys = array();
 	foreach ( aw_ai_rows() as $r ) {
@@ -521,7 +521,7 @@ function sourceweb_rest_worker( WP_REST_Request $request ) {
 		$keys[] = array(
 			'id'    => aw_ai_key_id( (string) $r['key'] ),
 			'short' => aw_ai_key_short( $r ),
-			'scope' => $ws ? sprintf( /* translators: %d: number of workers. */ _n( 'for %d worker', 'for %d workers', count( $ws ), 'aw-sourcing' ), count( $ws ) ) : __( 'all workers', 'aw-sourcing' ),
+			'scope' => $ws ? sprintf( /* translators: %d: number of workers. */ _n( 'for %d worker', 'for %d workers', count( $ws ), 'sourceweb' ), count( $ws ) ) : __( 'all workers', 'sourceweb' ),
 			'on'    => ! $ws || ( ! $new && in_array( $id, $ws, true ) ),
 		);
 	}
@@ -558,7 +558,7 @@ function sourceweb_rest_worker( WP_REST_Request $request ) {
 function sourceweb_rest_worker_runs( WP_REST_Request $request ) {
 	$w = aw_worker( (string) $request['id'] );
 	if ( ! $w ) {
-		return new WP_Error( 'sourceweb_no_worker', __( 'No such worker.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'sourceweb_no_worker', __( 'No such worker.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$runs = (array) get_option( aw_workers_option( $w['file'] ), array() );
 	krsort( $runs, SORT_NUMERIC );
@@ -628,7 +628,7 @@ function sourceweb_rest_worker_save( WP_REST_Request $request ) {
 	$out = sprintf( $msg[ $res['done'] ], $res['name'] );
 	if ( $res['skip'] ) {
 		/* translators: %d: number of keys. */
-		$out .= ' ' . sprintf( _n( '%d key was left ticked: it is for this worker only, and a key needs at least one worker. Remove it on AI models instead.', '%d keys were left ticked: each is for this worker only, and a key needs at least one worker. Remove them on AI models instead.', $res['skip'], 'aw-sourcing' ), $res['skip'] );
+		$out .= ' ' . sprintf( _n( '%d key was left ticked: it is for this worker only, and a key needs at least one worker. Remove it on AI models instead.', '%d keys were left ticked: each is for this worker only, and a key needs at least one worker. Remove them on AI models instead.', $res['skip'], 'sourceweb' ), $res['skip'] );
 	}
 	return rest_ensure_response( $res + array( 'message' => $out ) );
 }
@@ -658,7 +658,7 @@ function sourceweb_rest_worker_delete( WP_REST_Request $request ) {
 function sourceweb_rest_worker_run( WP_REST_Request $request ) {
 	$w = aw_worker( (string) $request['id'] );
 	if ( ! $w || ! aw_workers_can_run( $w ) ) {
-		return new WP_Error( 'sourceweb_no_run', __( 'Run now is not available for this worker.', 'aw-sourcing' ), array( 'status' => 400 ) );
+		return new WP_Error( 'sourceweb_no_run', __( 'Run now is not available for this worker.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
 	$res = aw_workers_run_now( $w['file'] );
 	if ( true !== $res ) {
@@ -722,7 +722,7 @@ function sourceweb_source_row( array $r, bool $si ): array {
 		'dr'         => $r['dr'],
 		'drAt'       => $r['dr_at'],
 		'feeds'      => $r['feeds'],
-		'feedsText'  => $r['feeds'] ? sprintf( /* translators: 1: feeds, 2: feeds that are on. */ _n( '%1$s feed (%2$s on)', '%1$s feeds (%2$s on)', $r['feeds'], 'aw-sourcing' ), $n( $r['feeds'] ), $n( $r['feeds_on'] ) ) . ( $r['code_n'] ? ', ' . $n( $r['code_n'] ) . ' read by code' : '' ) : '',
+		'feedsText'  => $r['feeds'] ? sprintf( /* translators: 1: feeds, 2: feeds that are on. */ _n( '%1$s feed (%2$s on)', '%1$s feeds (%2$s on)', $r['feeds'], 'sourceweb' ), $n( $r['feeds'] ), $n( $r['feeds_on'] ) ) . ( $r['code_n'] ? ', ' . $n( $r['code_n'] ) . ' read by code' : '' ) : '',
 		'relay'      => (bool) $r['relay'],
 		'relayOwn'   => (bool) $r['relay_own'],
 		'relayLast'  => $last ? (string) $last['status'] . ' · ' . wp_date( 'j M Y, g:i a', (int) $last['at'] ) : '',
@@ -802,14 +802,14 @@ function sourceweb_rest_sources_decide( WP_REST_Request $request ) {
 	$action = (string) $request['action'];
 	$phase  = aw_sourcing_phase();
 	if ( ( in_array( $action, array( 'press_add', 'press_remove' ), true ) && $phase >= 2 ) || ( in_array( $action, array( 'relay_on', 'relay_off' ), true ) && $phase < 1 ) ) {
-		return new WP_Error( 'sourceweb_not_now', __( 'That action is not available at this phase.', 'aw-sourcing' ), array( 'status' => 400 ) );
+		return new WP_Error( 'sourceweb_not_now', __( 'That action is not available at this phase.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
 	$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', array_map( 'sanitize_text_field', (array) $request['hosts'] ) ) ) );
 	if ( ! $hosts ) {
 		return rest_ensure_response(
 			array(
 				'changed' => false,
-				'message' => __( 'Nothing changed.', 'aw-sourcing' ),
+				'message' => __( 'Nothing changed.', 'sourceweb' ),
 			)
 		);
 	}
@@ -823,7 +823,7 @@ function sourceweb_rest_sources_decide( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'changed' => $changed,
-			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }
@@ -850,7 +850,7 @@ function sourceweb_rest_sources_short( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'changed' => $pubs !== $before,
-			'message' => $pubs !== $before ? __( 'Short names saved.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $pubs !== $before ? __( 'Short names saved.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }
@@ -868,7 +868,7 @@ function sourceweb_rest_source( WP_REST_Request $request ) {
 	$press = ! $new && in_array( $host, aw_sourcing_press_hosts(), true );
 	$feeds = $new ? array() : ( aw_sourcing_feeds_by_host()[ $host ] ?? array() );
 	if ( ! $new && null === $rec && ! $press && ! $feeds ) {
-		return new WP_Error( 'sourceweb_no_source', __( 'No such source.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'sourceweb_no_source', __( 'No such source.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$pub     = null !== $rec && empty( $rec['kind'] );
 	$options = array(
@@ -939,7 +939,7 @@ function sourceweb_rest_source_save( WP_REST_Request $request ) {
 		array(
 			'changed' => $changed,
 			'host'    => aw_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) ),
-			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }
@@ -1024,7 +1024,7 @@ function sourceweb_rest_feeds_decide( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'changed' => $changed,
-			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }
@@ -1033,7 +1033,7 @@ function sourceweb_rest_feeds_decide( WP_REST_Request $request ) {
 
 /** Keywords is on the keyword table (phase 2 and later); before that the routes refuse. */
 function sourceweb_keywords_ready() {
-	return aw_sourcing_kw_on() ? true : new WP_Error( 'aw_kw_not_ready', __( 'The keyword table is not ready yet.', 'aw-sourcing' ), array( 'status' => 409 ) );
+	return aw_sourcing_kw_on() ? true : new WP_Error( 'aw_kw_not_ready', __( 'The keyword table is not ready yet.', 'sourceweb' ), array( 'status' => 409 ) );
 }
 
 /** Category slug => name. */
@@ -1115,7 +1115,7 @@ function sourceweb_rest_keywords( WP_REST_Request $request ) {
 	}
 	usort( $recs, fn( $a, $b ) => strcasecmp( $a['label'], $b['label'] ) );
 	$rows  = array_map( fn( $r ) => sourceweb_keyword_row( $r, $cats ) + array( '_r' => $r ), $recs );
-	$views = array( '' => array( __( 'All', 'aw-sourcing' ), fn( $x ) => aw_sourcing_kw_in_view( $x['_r'], '' ) ) );
+	$views = array( '' => array( __( 'All', 'sourceweb' ), fn( $x ) => aw_sourcing_kw_in_view( $x['_r'], '' ) ) );
 	foreach ( aw_sourcing_kw_views() as $k => $v ) {
 		$views[ $k ] = array( $v[0], fn( $x ) => aw_sourcing_kw_in_view( $x['_r'], $k ) );
 	}
@@ -1215,7 +1215,7 @@ function sourceweb_rest_keyword( WP_REST_Request $request ) {
 	}
 	$r = aw_kw_get( $id );
 	if ( ! $r ) {
-		return new WP_Error( 'rest_not_found', __( 'No such keyword.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such keyword.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$other    = array_values( array_filter( array_map( fn( $b, $l ) => ( $r['roles'] & $b ) && ! isset( aw_sourcing_kw_roles()[ $b ] ) ? $l : '', array_keys( aw_si_roles() ), aw_si_roles() ) ) );
 	$searches = aw_kw_searches( $r, array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' ) );
@@ -1226,14 +1226,14 @@ function sourceweb_rest_keyword( WP_REST_Request $request ) {
 			'norm'       => (string) $r['norm'],
 			'variants'   => implode( "\n", $r['variants'] ),
 			'roles'      => array_values( array_filter( array_keys( aw_sourcing_kw_roles() ), fn( $b ) => (bool) ( $r['roles'] & $b ) ) ),
-			'otherRoles' => $other ? implode( ', ', $other ) : __( 'none', 'aw-sourcing' ),
+			'otherRoles' => $other ? implode( ', ', $other ) : __( 'none', 'sourceweb' ),
 			'cats'       => array_values( (array) $r['categories'] ),
 			'sections'   => array_values( (array) $r['sections'] ),
 			'lang'       => (string) $r['lang'],
 			'search_on'  => (bool) $r['search_on'],
-			'searches'   => $searches ? implode( ', ', array_map( fn( $x ) => $x['feed'], $searches ) ) : __( 'none', 'aw-sourcing' ),
+			'searches'   => $searches ? implode( ', ', array_map( fn( $x ) => $x['feed'], $searches ) ) : __( 'none', 'sourceweb' ),
 			'query'      => (string) $r['query'],
-			'feedId'     => '' !== (string) $r['feed_id'] ? (string) $r['feed_id'] : __( '(made from the query)', 'aw-sourcing' ),
+			'feedId'     => '' !== (string) $r['feed_id'] ? (string) $r['feed_id'] : __( '(made from the query)', 'sourceweb' ),
 			'choices'    => $choices,
 		)
 	);
@@ -1261,7 +1261,7 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 	$lang = (string) $request['lang'];
 	if ( ! $id ) {
 		if ( ! $set['roles'] ) {
-			return new WP_Error( 'aw_kw_roles', __( 'Choose at least one role.', 'aw-sourcing' ), array( 'status' => 400 ) );
+			return new WP_Error( 'aw_kw_roles', __( 'Choose at least one role.', 'sourceweb' ), array( 'status' => 400 ) );
 		}
 		$label = sanitize_text_field( (string) $request['label'] );
 		$r     = aw_sourcing_kw_add( $label, $set + array( 'lang' => $lang ) );
@@ -1273,12 +1273,12 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 			array(
 				'done'    => 'added',
 				'id'      => (int) $r,
-				'message' => __( 'Keyword saved. The workers use it from their next run.', 'aw-sourcing' ),
+				'message' => __( 'Keyword saved. The workers use it from their next run.', 'sourceweb' ),
 			)
 		);
 	}
 	if ( ! aw_kw_get( $id ) ) {
-		return new WP_Error( 'rest_not_found', __( 'No such keyword.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such keyword.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$delete = (bool) $request['delete'];
 	if ( $delete ) {
@@ -1296,9 +1296,9 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 	}
 	$done = ! $r ? 'none' : ( $delete ? 'deleted' : 'saved' );
 	$msg  = array(
-		'none'    => __( 'Nothing changed.', 'aw-sourcing' ),
-		'saved'   => __( 'Keyword updated. The workers use it from their next run.', 'aw-sourcing' ),
-		'deleted' => __( 'Keyword deleted from sourcing (its Sourcing and Press roles were removed; Search Insights keeps the record).', 'aw-sourcing' ),
+		'none'    => __( 'Nothing changed.', 'sourceweb' ),
+		'saved'   => __( 'Keyword updated. The workers use it from their next run.', 'sourceweb' ),
+		'deleted' => __( 'Keyword deleted from sourcing (its Sourcing and Press roles were removed; Search Insights keeps the record).', 'sourceweb' ),
 	);
 	return rest_ensure_response(
 		array(
@@ -1324,7 +1324,7 @@ function sourceweb_rest_keywords_decide( WP_REST_Request $request ) {
 		array(
 			'changed' => $n,
 			'errors'  => $errs,
-			'message' => $n ? __( 'Keywords changed. The workers use them from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $n ? __( 'Keywords changed. The workers use them from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }
@@ -1337,7 +1337,7 @@ function sourceweb_rest_keywords_decide( WP_REST_Request $request ) {
 function sourceweb_rest_keywords_test( WP_REST_Request $request ) {
 	$text = sanitize_text_field( (string) $request['text'] );
 	if ( '' === $text ) {
-		return new WP_Error( 'rest_invalid_param', __( 'Paste a headline.', 'aw-sourcing' ), array( 'status' => 400 ) );
+		return new WP_Error( 'rest_invalid_param', __( 'Paste a headline.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
 	$v = aw_relevance_verdict( $text );
 	return rest_ensure_response(
@@ -1390,7 +1390,7 @@ function sourceweb_rest_keywords_settings( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'saved'    => $after !== $before,
-			'message'  => $after !== $before ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message'  => $after !== $before ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 			'settings' => $after,
 		)
 	);
@@ -1450,8 +1450,8 @@ function sourceweb_rest_suggestions( WP_REST_Request $request ) {
 		$request->get_params(),
 		array(
 			'views' => array(
-				''          => array( __( 'Suggested', 'aw-sourcing' ), fn( $r ) => ! $r['dismissed'] ),
-				'dismissed' => array( __( 'Dismissed', 'aw-sourcing' ), fn( $r ) => $r['dismissed'] ),
+				''          => array( __( 'Suggested', 'sourceweb' ), fn( $r ) => ! $r['dismissed'] ),
+				'dismissed' => array( __( 'Dismissed', 'sourceweb' ), fn( $r ) => $r['dismissed'] ),
 			),
 			'text'  => fn( $r ) => $r['id'] . ' ' . $r['topic'],
 			'sort'  => array(
@@ -1484,7 +1484,7 @@ function sourceweb_rest_suggestions_decide( WP_REST_Request $request ) {
 		array(
 			'changed' => $n,
 			/* translators: %d: number of searches. */
-			'message' => $n ? sprintf( _n( '%d search changed.', '%d searches changed.', $n, 'aw-sourcing' ), $n ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $n ? sprintf( _n( '%d search changed.', '%d searches changed.', $n, 'sourceweb' ), $n ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }
@@ -1500,7 +1500,7 @@ function sourceweb_rest_suggestions_autoapprove( WP_REST_Request $request ) {
 		return $ready;
 	}
 	if ( ! function_exists( 'aw_sourcing_push_autoapprove_save' ) ) {
-		return new WP_Error( 'aw_push_not_ready', __( 'Pushed keywords are not set up yet.', 'aw-sourcing' ), array( 'status' => 409 ) );
+		return new WP_Error( 'aw_push_not_ready', __( 'Pushed keywords are not set up yet.', 'sourceweb' ), array( 'status' => 409 ) );
 	}
 	$saved = aw_sourcing_push_autoapprove_save(
 		array(
@@ -1514,7 +1514,7 @@ function sourceweb_rest_suggestions_autoapprove( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'autoapprove' => $saved,
-			'message'     => __( 'Auto-approve rules saved.', 'aw-sourcing' ),
+			'message'     => __( 'Auto-approve rules saved.', 'sourceweb' ),
 		)
 	);
 }
@@ -1523,7 +1523,7 @@ function sourceweb_rest_suggestions_autoapprove( WP_REST_Request $request ) {
 
 /** Rules is one tab from the phase 3 migration; before it the routes refuse. */
 function sourceweb_rules_ready() {
-	return aw_rules_live() ? true : new WP_Error( 'aw_rules_not_ready', __( 'Rules is not set up yet (the phase 3 migration).', 'aw-sourcing' ), array( 'status' => 409 ) );
+	return aw_rules_live() ? true : new WP_Error( 'aw_rules_not_ready', __( 'Rules is not set up yet (the phase 3 migration).', 'sourceweb' ), array( 'status' => 409 ) );
 }
 
 /**
@@ -1553,11 +1553,11 @@ function sourceweb_rest_rules_sections() {
 	$secs  = (array) ( aw_sources_config()['sections'] ?? array() );
 	$sums  = aw_rules_summary_by_type();
 	$what  = array(
-		'news'        => __( 'News items', 'aw-sourcing' ),
-		'legal'       => __( 'Library items', 'aw-sourcing' ),
-		'research'    => __( 'Research', 'aw-sourcing' ),
-		'opportunity' => __( 'Opportunities', 'aw-sourcing' ),
-		'press'       => __( 'Press coverage', 'aw-sourcing' ),
+		'news'        => __( 'News items', 'sourceweb' ),
+		'legal'       => __( 'Library items', 'sourceweb' ),
+		'research'    => __( 'Research', 'sourceweb' ),
+		'opportunity' => __( 'Opportunities', 'sourceweb' ),
+		'press'       => __( 'Press coverage', 'sourceweb' ),
 	);
 	$rows  = array();
 	foreach ( aw_rules_sections() as $type => $def ) {
@@ -1568,7 +1568,7 @@ function sourceweb_rest_rules_sections() {
 			'id'         => $type,
 			'title'      => $def['label'],
 			'stored'     => array_key_exists( $type, $secs ),
-			'categories' => $cats ? implode( ', ', sourceweb_rules_names( $cats, 'category' ) ) : __( 'Every category', 'aw-sourcing' ),
+			'categories' => $cats ? implode( ', ', sourceweb_rules_names( $cats, 'category' ) ) : __( 'Every category', 'sourceweb' ),
 			'tags'       => $tags ? implode( ', ', sourceweb_rules_names( $tags, 'post_tag' ) ) : '—',
 			'tagCount'   => count( $tags ),
 			'worker'     => '' === $def['worker_type'] ? '—' : ( $what[ $def['worker_type'] ] ?? $def['worker_type'] ),
@@ -1597,7 +1597,7 @@ function sourceweb_rest_rules_sections() {
 			'hold'     => array_values( array_map( 'strval', (array) ( $r['hold'] ?? array() ) ) ),
 			'unless'   => implode( ', ', (array) ( $r['unless'] ?? array() ) ),
 			'reason'   => (string) ( $r['hold_reason'] ?? '' ),
-			'sections' => $in ? implode( ', ', $in ) : __( 'No section allows this tag yet', 'aw-sourcing' ),
+			'sections' => $in ? implode( ', ', $in ) : __( 'No section allows this tag yet', 'sourceweb' ),
 		);
 	}
 	return rest_ensure_response(
@@ -1651,7 +1651,7 @@ function sourceweb_rest_rules_section( WP_REST_Request $request ) {
 	$type  = sanitize_key( (string) $request['type'] );
 	$types = aw_rules_section_labels();
 	if ( ! isset( $types[ $type ] ) ) {
-		return new WP_Error( 'rest_not_found', __( 'No such section.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such section.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$sec                 = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
 	$cat                 = array_values( array_map( 'strval', (array) ( $sec['categories'] ?? array() ) ) );
@@ -1688,7 +1688,7 @@ function sourceweb_rest_rules_section_save( WP_REST_Request $request ) {
 	}
 	$type = sanitize_key( (string) $request['type'] );
 	if ( ! isset( aw_rules_sections()[ $type ] ) ) {
-		return new WP_Error( 'rest_not_found', __( 'No such section.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such section.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$ids  = function ( array $slugs, string $tax ) {
 		$out = array();
@@ -1717,7 +1717,7 @@ function sourceweb_rest_rules_section_save( WP_REST_Request $request ) {
 		array(
 			'done'    => $done,
 			/* translators: %s: section. */
-			'message' => 'saved' === $done ? sprintf( __( 'Saved the %s section. The workers use this from their next run.', 'aw-sourcing' ), $label ) : sprintf( __( 'Nothing changed for %s.', 'aw-sourcing' ), $label ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment -- the comment above covers both
+			'message' => 'saved' === $done ? sprintf( __( 'Saved the %s section. The workers use this from their next run.', 'sourceweb' ), $label ) : sprintf( __( 'Nothing changed for %s.', 'sourceweb' ), $label ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment -- the comment above covers both
 		)
 	);
 }
@@ -1735,7 +1735,7 @@ function sourceweb_rest_rules_tag( WP_REST_Request $request ) {
 	$slug  = sanitize_title( (string) $request['tag'] );
 	$rules = aw_rules_tag_rules();
 	if ( '' !== $slug && ! isset( $rules[ $slug ] ) ) {
-		return new WP_Error( 'rest_not_found', __( 'No such tag rule.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such tag rule.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$r     = '' === $slug ? array() : (array) $rules[ $slug ];
 	$lines = fn( $k ) => implode( "\n", array_map( 'strval', (array) ( $r[ $k ] ?? array() ) ) );
@@ -1762,24 +1762,24 @@ function sourceweb_rest_rules_tag( WP_REST_Request $request ) {
 function sourceweb_rules_message( string $done, string $for ): array {
 	$msg = array(
 		/* translators: %s: tag. */
-		'tag_added'   => array( 'success', __( 'Tag rule %s added. The workers use it from their next run.', 'aw-sourcing' ) ),
+		'tag_added'   => array( 'success', __( 'Tag rule %s added. The workers use it from their next run.', 'sourceweb' ) ),
 		/* translators: %s: tag. */
-		'tag_saved'   => array( 'success', __( 'Tag rule %s saved. The workers use it from their next run.', 'aw-sourcing' ) ),
+		'tag_saved'   => array( 'success', __( 'Tag rule %s saved. The workers use it from their next run.', 'sourceweb' ) ),
 		/* translators: %s: tag. */
-		'tag_deleted' => array( 'success', __( 'Tag rule %s deleted.', 'aw-sourcing' ) ),
+		'tag_deleted' => array( 'success', __( 'Tag rule %s deleted.', 'sourceweb' ) ),
 		/* translators: %s: tag. */
-		'tag_exists'  => array( 'error', __( 'A tag rule for %s exists already: edit it instead.', 'aw-sourcing' ) ),
-		'tag_empty'   => array( 'error', __( 'Choose a tag and give at least one phrase.', 'aw-sourcing' ) ),
+		'tag_exists'  => array( 'error', __( 'A tag rule for %s exists already: edit it instead.', 'sourceweb' ) ),
+		'tag_empty'   => array( 'error', __( 'Choose a tag and give at least one phrase.', 'sourceweb' ) ),
 		/* translators: %s: the patterns. */
-		'tag_badre'   => array( 'error', __( 'Not saved: a hold pattern is not a valid regular expression (%s).', 'aw-sourcing' ) ),
+		'tag_badre'   => array( 'error', __( 'Not saved: a hold pattern is not a valid regular expression (%s).', 'sourceweb' ) ),
 		/* translators: %s: field. */
-		'field_saved' => array( 'success', __( 'Field rule %s saved. The enrichment worker uses it from its next run.', 'aw-sourcing' ) ),
+		'field_saved' => array( 'success', __( 'Field rule %s saved. The enrichment worker uses it from its next run.', 'sourceweb' ) ),
 		/* translators: %s: the order. */
-		'order_saved' => array( 'success', __( 'Trust order saved: %s.', 'aw-sourcing' ) ),
+		'order_saved' => array( 'success', __( 'Trust order saved: %s.', 'sourceweb' ) ),
 		/* translators: %s: what it is about. */
-		'none'        => array( 'info', __( 'Nothing changed for %s.', 'aw-sourcing' ) ),
+		'none'        => array( 'info', __( 'Nothing changed for %s.', 'sourceweb' ) ),
 		/* translators: %s: field. */
-		'nosuch'      => array( 'error', __( 'No such field: %s.', 'aw-sourcing' ) ),
+		'nosuch'      => array( 'error', __( 'No such field: %s.', 'sourceweb' ) ),
 	);
 	$m = $msg[ $done ] ?? array( 'info', '%s' );
 	return array( $m[0], sprintf( $m[1], $for ) );
@@ -1862,7 +1862,7 @@ function sourceweb_rest_rules_enrich() {
 			'id'       => $k,
 			'set'      => ! empty( $row['set'] ),
 			'title'    => $row['label'],
-			'note'     => $row['set'] || isset( aw_enrich_fields()[ $k ] ) ? '' : __( 'Added in the listing field group: off until its rule is set.', 'aw-sourcing' ),
+			'note'     => $row['set'] || isset( aw_enrich_fields()[ $k ] ) ? '' : __( 'Added in the listing field group: off until its rule is set.', 'sourceweb' ),
 			'group'    => $row['group'],
 			'store'    => $row['store'] . ( $row['acf'] ? '' : ' (kept by code)' ),
 			'on'       => '' !== $why ? 'Off: ' . $why : ( $r['on'] ? 'On' : 'Off' ),
@@ -1912,7 +1912,7 @@ function sourceweb_rest_rules_field( WP_REST_Request $request ) {
 	$field = sanitize_key( (string) $request['field'] );
 	$rows  = aw_rules_field_rows();
 	if ( ! isset( $rows[ $field ] ) ) {
-		return new WP_Error( 'rest_not_found', __( 'No such field.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such field.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$row     = $rows[ $field ];
 	$sources = array();
@@ -1980,7 +1980,7 @@ function sourceweb_rest_rules_field_save( WP_REST_Request $request ) {
 	);
 	$res = aw_rules_field_save( sanitize_key( (string) $request['field'] ), $in );
 	if ( 'nosuch' === $res[0] ) {
-		return new WP_Error( 'rest_not_found', __( 'No such field.', 'aw-sourcing' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_not_found', __( 'No such field.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	return sourceweb_rules_answer( $res );
 }
@@ -1989,25 +1989,25 @@ function sourceweb_rest_rules_field_save( WP_REST_Request $request ) {
 function sourceweb_summary_fields(): array {
 	return array(
 		'numbers' => array(
-			'lead_max_words'        => __( 'Lead sentence, about this many words or fewer', 'aw-sourcing' ),
-			'max_quotes'            => __( 'Direct quotes per summary, at most', 'aw-sourcing' ),
-			'max_quote_words'       => __( 'Words in a quote, at most', 'aw-sourcing' ),
-			'max_copied_run'        => __( 'Words copied in a row outside a quote, at most', 'aw-sourcing' ),
-			'description_max_chars' => __( 'Search description, characters', 'aw-sourcing' ),
+			'lead_max_words'        => __( 'Lead sentence, about this many words or fewer', 'sourceweb' ),
+			'max_quotes'            => __( 'Direct quotes per summary, at most', 'sourceweb' ),
+			'max_quote_words'       => __( 'Words in a quote, at most', 'sourceweb' ),
+			'max_copied_run'        => __( 'Words copied in a row outside a quote, at most', 'sourceweb' ),
+			'description_max_chars' => __( 'Search description, characters', 'sourceweb' ),
 		),
 		'lists'   => array(
-			'general'        => array( __( 'Rules', 'aw-sourcing' ), __( 'One rule per line. The facts-only, date, length, plain-text, no-AI-marker, English-only and searched-words rules are here.', 'aw-sourcing' ) ),
-			'stock_phrases'  => array( __( 'Banned stock and praise wording', 'aw-sourcing' ), __( 'One per line. A summary using any of them is written again.', 'aw-sourcing' ) ),
-			'ai_markers'     => array( __( 'AI markers', 'aw-sourcing' ), __( 'One per line. A summary containing any of them is written again.', 'aw-sourcing' ) ),
-			'searched_terms' => array( __( 'Searched words', 'aw-sourcing' ), __( 'One group per line, words separated by |. When the source names one, the summary keeps one of the group.', 'aw-sourcing' ) ),
-			'entities'       => array( __( 'Linkable entities: names', 'aw-sourcing' ), __( "One entity per line: the site's name first, then other spellings, separated by |. A summary using another spelling is written again.", 'aw-sourcing' ) ),
+			'general'        => array( __( 'Rules', 'sourceweb' ), __( 'One rule per line. The facts-only, date, length, plain-text, no-AI-marker, English-only and searched-words rules are here.', 'sourceweb' ) ),
+			'stock_phrases'  => array( __( 'Banned stock and praise wording', 'sourceweb' ), __( 'One per line. A summary using any of them is written again.', 'sourceweb' ) ),
+			'ai_markers'     => array( __( 'AI markers', 'sourceweb' ), __( 'One per line. A summary containing any of them is written again.', 'sourceweb' ) ),
+			'searched_terms' => array( __( 'Searched words', 'sourceweb' ), __( 'One group per line, words separated by |. When the source names one, the summary keeps one of the group.', 'sourceweb' ) ),
+			'entities'       => array( __( 'Linkable entities: names', 'sourceweb' ), __( "One entity per line: the site's name first, then other spellings, separated by |. A summary using another spelling is written again.", 'sourceweb' ) ),
 		),
 		'texts'   => array(
-			'description'   => __( 'Search description and summary', 'aw-sourcing' ),
-			'card'          => __( 'Card excerpt', 'aw-sourcing' ),
-			'merge'         => __( 'Same-story merges', 'aw-sourcing' ),
-			'fallback'      => __( 'Short fallback', 'aw-sourcing' ),
-			'entities_note' => __( 'Linkable entities: how summaries name things', 'aw-sourcing' ),
+			'description'   => __( 'Search description and summary', 'sourceweb' ),
+			'card'          => __( 'Card excerpt', 'sourceweb' ),
+			'merge'         => __( 'Same-story merges', 'sourceweb' ),
+			'fallback'      => __( 'Short fallback', 'sourceweb' ),
+			'entities_note' => __( 'Linkable entities: how summaries name things', 'sourceweb' ),
 		),
 	);
 }
@@ -2106,7 +2106,7 @@ function sourceweb_rest_rules_summary_save( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'saved'   => $saved,
-			'message' => $saved ? __( 'Saved. The workers use this from their next run.', 'aw-sourcing' ) : __( 'Nothing changed.', 'aw-sourcing' ),
+			'message' => $saved ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
 }

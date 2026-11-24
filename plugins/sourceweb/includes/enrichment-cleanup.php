@@ -140,11 +140,12 @@ function aw_enrich_merge( $from, $into, $rid ) {
 	);
 
 	// Phones: every number the kept listing does not have; a second number is kept beside the first, both unverified.
-	foreach ( directoryweb_listing_phones( $from ) as $row ) {
+	$from_phones = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $from ) : array();
+	foreach ( $from_phones as $row ) {
 		if ( aw_enrich_has_value( $into, 'phone', $row['number'] ) ) {
 			continue;
 		}
-		$mode = directoryweb_listing_phones( $into ) ? 'both' : 'apply';
+		$mode = ( function_exists( 'directoryweb_listing_phones' ) && directoryweb_listing_phones( $into ) ) ? 'both' : 'apply';
 		$snap = aw_enrich_snapshot( $into, 'phone' );
 		if ( aw_enrich_write( $into, $row['whatsapp'] ? 'whatsapp' : ( 'Emergency' === $row['label'] ? 'emergency' : 'phone' ), $row['number'], $mode ) ) {
 			$log( 'phone', $row['number'], $snap, $mode );
@@ -312,7 +313,7 @@ function aw_enrich_rest_cleanup( WP_REST_Request $req ) {
 			'address'        => $m( $id, 'aw_address' ),
 			'import_address' => $m( $id, 'aw_import_address' ),
 			'awbi_address'   => $m( $id, 'aw_awbi_address' ),
-			'phones'         => wp_list_pluck( directoryweb_listing_phones( $id ), 'number' ),
+			'phones'         => function_exists( 'directoryweb_listing_phones' ) ? wp_list_pluck( directoryweb_listing_phones( $id ), 'number' ) : array(),
 			'email'          => $m( $id, 'aw_email' ),
 			'email_alt'      => $m( $id, 'aw_email_alt' ),
 			'website'        => $m( $id, 'aw_website' ),

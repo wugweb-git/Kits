@@ -163,8 +163,8 @@ and its Settings the backfill date, both as page parts (`sourceweb_extra_parts()
 
 ## SourceWeb
 
-- `plugins/aw-sourcing/includes/sourceweb-ui.php`: the trial switch (`sourceweb_ui_wanted()`), the enqueue and the
-  mount (`sourceweb-app`). Four screens, each with `&ui=next` on today's address:
+- `plugins/sourceweb/includes/sourceweb-ui.php`: the trial switch (`sourceweb_ui_wanted()`), the enqueue and the
+  mount (`sourceweb-app`), plus native WP Admin fallback screens when Kits Core is absent. Four screens, each with `&ui=next` on today's address:
   - Overview (`aw-sourcing-menu`): Dashboard (`edit_others_posts`).
   - To review (`aw-review`): list with type views, source and reason filters, search, Publish/Reject per row and for
     the ticked rows, Publish all (`edit_others_posts`).

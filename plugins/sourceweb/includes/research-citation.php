@@ -84,7 +84,7 @@ function sourceweb_research_citation_fetch( $id ) {
 			'timeout'     => 20,
 			'redirection' => 5,
 			'headers'     => array( 'Accept' => 'application/vnd.citationstyles.csl+json' ),
-			'user-agent'  => 'AnimalWrites/1.0 (+https://animalwrites.in; contact@animalwrites.in)',
+			'user-agent'  => 'SourceWeb/0.1.0 (+https://wugweb.com/plugins/sourceweb/)',
 		)
 	);
 	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
