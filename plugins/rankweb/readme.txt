@@ -1,6 +1,6 @@
 === RankWeb ===
 Contributors: wugweb
-Tags: seo, rank math, faq, schema, breadcrumbs
+Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
@@ -8,11 +8,15 @@ Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-SEO extras that run alongside Rank Math (free): FAQs, canonicals, breadcrumbs, internal links, schema, video and bulk tools.
+SEO for WordPress: meta description, Open Graph, structured data and a sitemap on their own, or extras beside Rank Math. FAQs, breadcrumbs, internal links, schema, video and bulk tools.
 
 == Description ==
 
-RankWeb works next to Rank Math (free) and does nothing unless Rank Math is active. It is part of the Wugweb "Kits" suite: it reads Rank Math's own fields and tables and adds what Rank Math keeps for its Premium plan. Where a feature belongs to another suite plugin, RankWeb hands it over — search analytics and Google data live in InsightWeb, not here.
+RankWeb works on its own, and it works beside Rank Math (free). It is part of the Wugweb "Kits" suite and needs no other Kits plugin.
+
+**On its own** (no other SEO plugin): RankWeb prints the page's meta description, Open Graph and Twitter tags and structured data (JSON-LD), adds noindex through WordPress's own robots tag, and leaves pages marked "Keep out of search results" out of WordPress's sitemap. The title, the canonical address and the sitemap itself come from WordPress. A block editor sidebar sets a page's description, its schema type (Article, BlogPosting, NewsArticle or WebPage) and noindex.
+
+**Beside Rank Math:** Rank Math prints the page head and RankWeb prints none of it again; it adds what Rank Math keeps for its Premium plan. **Beside Yoast SEO, SEOPress or All in One SEO:** RankWeb leaves the page head to them and says so on its screens; its own tools keep working.
 
 * FAQ system: an FAQ box on every public post type and taxonomy, questions filled in automatically and kept once edited, an accordion and FAQPage structured data.
 * Canonical addresses Rank Math cannot work out: hub pages, directory places and filtered or sorted lists.
@@ -24,7 +28,7 @@ RankWeb works next to Rank Math (free) and does nothing unless Rank Math is acti
 * Video SEO: YouTube and Vimeo detection from content, a VideoObject in the schema, and a video sitemap.
 * Custom schema: a per-item JSON-LD box, Speakable, about and mentions, import from a URL, and a Rich Results Test link.
 * Bulk work: SEO columns and filters on the list screens, Quick Edit and Bulk Edit, and a CSV export and import of the SEO fields. Image find-and-replace across alt, title and caption, and fill missing captions.
-* Redirect tools: CSV export and import of Rank Math's redirect list, a 404-log export, and an Apache .htaccess block.
+* Redirect tools: CSV export and import of Rank Math's redirect list, a 404-log export, and an Apache .htaccess block (these need Rank Math's Redirections).
 * Agent tools: RankWeb's work as WordPress abilities (the Abilities API) for AI agents through the MCP adapter; reads by default, writes opt-in.
 * A password-protected item is kept out of search.
 * llms.txt, Open Graph details, share images and a watchdog for the sitemap.
@@ -32,19 +36,23 @@ RankWeb works next to Rank Math (free) and does nothing unless Rank Math is acti
 
 == Installation ==
 
-1. Install and activate Rank Math SEO (free) first. RankWeb requires it and will not activate without it.
-2. Upload the plugin to wp-content/plugins, or install the zip from Plugins → Add New.
-3. Activate RankWeb. Its settings are under the RankWeb menu; each module has an on/off switch on the RankWeb dashboard.
+1. Upload the plugin to wp-content/plugins, or install the zip from Plugins → Add New.
+2. Activate RankWeb. Its Overview, Modules and Settings are under the RankWeb menu; the Overview shows who prints the page head and the state of your sitemap and robots.txt.
+3. Optional: Rank Math (free) for redirects and its own head output, or Kits Core for the Kits admin look. Neither is needed.
 
 == Frequently Asked Questions ==
 
 = Does RankWeb replace Rank Math? =
 
-No. It runs alongside Rank Math (free) and only adds what Rank Math does not do or keeps for its Premium plan. Rank Math stays installed and active.
+No. With Rank Math active, RankWeb adds only what Rank Math does not do or keeps for its Premium plan, and prints none of the page head again. Without it, RankWeb prints the page head itself.
 
 = Does it work without Rank Math? =
 
-No. RankWeb depends on Rank Math and does nothing while Rank Math is inactive.
+Yes. Meta description, Open Graph, Twitter tags, structured data, noindex and the sitemap exclusion work without it. Redirect tools need Rank Math's Redirections.
+
+= Which SEO plugin prints my page head? =
+
+RankWeb → Overview says: RankWeb, Rank Math, or another plugin (Yoast SEO, SEOPress, All in One SEO).
 
 = Does it send my data anywhere? =
 
@@ -65,6 +73,14 @@ RankWeb's link audit and content analysis fetch URLs on your own site only.
 Deleting the plugin deletes no data: settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was.
 
 == Changelog ==
+
+= Unreleased =
+* Works without Rank Math: meta description, Open Graph and Twitter tags, structured data for posts and pages, noindex, and sitemap exclusion of noindex pages.
+* The block editor sidebar now changes what is printed: meta description, noindex and a schema type RankWeb can write (Article, BlogPosting, NewsArticle, WebPage).
+* Overview, Modules, Settings, FAQ and Insights screens work without Kits Core.
+* Another SEO plugin (Yoast SEO, SEOPress, All in One SEO) is detected and RankWeb leaves the page head to it.
+* No site-specific values: the site's own name, language and profiles are used. Animal Writes values load only when Animal Writes Core is active.
+* Fixed: the site tagline was copied into the description of every short post.
 
 = 2.1.0 =
 * Internal links: link audit (orphans, click depth, broken links, redirects, nofollow, canonical elsewhere, too many links), anchor-type mix with per-target warnings and keyword rotation, and silos (virtual and circle modes).

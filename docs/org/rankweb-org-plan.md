@@ -1,6 +1,8 @@
 # RankWeb on the Kits plugin standard (plan)
 
-**Status (Updated 22 Nov 2026):** Shipped and live on production (`origin/wordpress` at `d51da157`). Standalone plugin operational in `plugins/rankweb/`. Admin UI phase completed (Dashboard with MiniCharts, internal links DataList, Images, SEO CSV, Redirect tools, Silos, and Editor Sidebar). Standalone test harness passing 94/94 checks.
+**Status (25 Nov 2026):** built on `feat/directoryweb-completion`; **not deployed, no stable release**. Earlier text here said "shipped and live on production": that was not verified and is removed. This is the one RankWeb plan; it holds the internal-links plan (Appendix A), the Rank Math Pro audit (Appendix B), the public WordPress.org scope (Appendix C) and the shared-shell admin decision (Appendix D). The former `rankweb-plan.md`, `rankweb-internal-links.md` and `rankweb-pro-audit.md` were duplicates of this file and are deleted.
+- **Standalone (new, 25 Nov):** RankWeb runs with no Rank Math, no Kits Core and no DirectoryWeb: it prints the meta description, Open Graph, Twitter tags, structured data (with `_rankweb_schema_type` honoured), noindex and sitemap exclusion itself, detects Rank Math and other SEO plugins so nothing prints twice, and its admin screens work without Kits Core. Site-specific values moved to `includes/animal-writes-compat.php`. See `plugins/rankweb/PENDING.md`.
+- **Open:** redirects need Rank Math's list; archive canonical standalone; Animal Writes hub copy still in `titles.php`/`programmatic.php`; the ranking formula is undefined (owner); real Yoast/SEOPress/AIOSEO coexistence untested.
 11 November 2026. Owner's request of 11 Nov: bring the three existing plugins onto the shared Kits Core admin shell.
 
 **What RankWeb is after the split.** Everything Rank Math doesn't do or keeps for Premium (owner, 11 Nov; §0). It acts on the site and measures nothing: title and description rules, schema, FAQ, canonicals, breadcrumbs, sitemap additions, noindex rules, redirects, Open Graph, llms.txt and Markdown for agents. Search Insights leaves for InsightWeb (`docs/insightweb-plan.md`, phase 1 on branch `claude/insightweb-phase1`). RankWeb keeps `aw/v1/seo-items`, `aw/v1/seo-focus`, `aw/v1/seo-score-items`, `aw/v1/seo-scores` and the one-page-per-keyphrase rule.
@@ -704,7 +706,7 @@ every output escaped, every string in the aw-seo-extras text domain.
   Dashboard now, re-create RankWeb tables, delete internal links data, rebuild the FAQ index, export and import RankWeb
   settings (JSON). Rank Math's own tools stay on Rank Math → Status & Tools.
 - **B. Internal links phases 2 to 4.** Link audit (report, orphans, broken, redirects, nofollow, canonical elsewhere,
-  click depth), anchor mix, silos (as planned in `docs/rankweb-internal-links.md`), plus the external broken-link check.
+  click depth), anchor mix, silos (as planned in Appendix A), plus the external broken-link check.
   **Built 16–17 Nov 2026** on branches `claude/rankweb-link-audit`, `claude/rankweb-anchor-mix`, `claude/rankweb-silos`
   (stacked, in that order), not live yet.
 - **C. Sitemaps and video.** Google News sitemap, video detection and VideoObject, video sitemap, noindex on protected
@@ -894,3 +896,86 @@ The owner chose the **full feature set** for v1 (17 Nov) — all seven areas, as
 plugin is already functional and complete. A focused internal-linking-only first release was the alternative, not taken.
 Sequence the build so a reviewer can still follow it: port the shared core first, then one module area per phase (R3),
 each tested and PHPCS-clean, even though all ship in v1.
+
+---
+
+## Appendix D — Admin UI: a shared shell bundled into each plugin (decided 17 Nov 2026)
+
+The suite's admin shell lives in Kits Core today: Kits Core registers the `kits-shell` script/style handle and every suite
+plugin's admin app lists `kits-shell` as a dependency (externalised `@kits/shell` in each `webpack.config.js`;
+`build/index.asset.php` carries the handle). A public plugin cannot depend on that — the handle only exists when Kits
+Core is active, and `.org` forbids a shared runtime handed out by a separate, unpublished plugin.
+
+**Solution (the Fluent model — how Fluent Forms / FluentCRM share one framework):** extract the shell into a single
+**shared UI package** that is **bundled into each plugin**, never required at runtime. One codebase, several consumers,
+each injecting its own config.
+
+**Reuse the current shell as-is and keep it the same (owner, 17 Nov).** Do NOT redesign or rebuild the UI. Lift the
+existing Kits shell code unchanged into the package; keep its look, components and behaviour identical, so the suite,
+the theme and the public plugins all run the same shell. The only changes are the minimum needed to make it portable:
+
+- Bundle it in each plugin; GPL (source shipped, not minified-only). Nothing is removed from the shell — the
+  Kits-specific pieces (branding, the `kits/v1` endpoints, cross-plugin navigation) are turned into **config injected
+  via `wp_localize_script`** rather than hardcoded, so the same code renders Kits chrome in the suite and the plugin's
+  own chrome on `.org`. No visual or behavioural divergence.
+- Each plugin bundles it under its **own namespaced handle** (`rankweb-shell`, `planweb-shell`, …), never a global
+  `kits-shell` — otherwise two active suite plugins would collide on one handle and WordPress would keep whichever
+  loaded first (version clash). Same code, different handle.
+- So two shared packages back the public plugins: **`rankweb-core`** (the nine pure PHP classes) and the **shell UI
+  package**. RankWeb's build session extracts the shell package from the Kits shell as the template; the other plugins
+  reuse it.
+
+**Sequencing (important):** build the shell package greenfield for the public plugins first and prove it there. Do **not**
+refactor the live Kits Core / theme Theme-Options UI onto it in the same step. Migrating Kits Core (and therefore the
+theme's Theme Options admin) to consume the same package is a deliberate **later follow-up**, tested on its own, so the
+running site's admin is never disturbed mid-flight. End state: one shell package used by both the private suite/theme
+(via Kits Core, Kits-branded) and the public plugins (bundled, de-branded).
+
+## 5. WordPress.org compliance checklist (from the wp-org-submission skill)
+
+- [ ] Slug free and permanent; name rules met; main file = slug.
+- [ ] One 4+ char prefix everywhere; no `aw_`/`rankweb_`/`kits_`.
+- [ ] `readme.txt` passes the validator: Stable tag, Tested up to a real release, short description ≤150, Installation,
+      FAQ, Screenshots, Changelog, and **External services** (YouTube/Vimeo oEmbed, the Rich Results Test link,
+      import-from-URL) with Terms + Privacy URLs. (RankWeb's readme already drafts these — port and re-brand.)
+- [ ] Remove the `Update URI` header (that header is for self-hosted plugins; a .org plugin must not set it).
+- [ ] GPL-compatible; source in the zip; no CDN/remote asset loading; no minified-only code.
+- [ ] No trialware, no persistent admin nags, no undisclosed tracking. (RankWeb has none — the agent "writes" switch and
+      the .htaccess switch are feature toggles, not Pro gates.)
+- [ ] Assets in SVN `/assets/`: `icon-128x128.png`, `icon-256x256.png`, `icon.svg`, `banner-772x250.png`,
+      `banner-1544x500.png`, `screenshot-1.png`… (RankWeb has icon + banner already; screenshots are new work).
+- [ ] WordPress.org Contributors username (owner to provide).
+- [ ] Plugin Check clean on a clean WP install; PHPCS (security + WordPress-Extra) clean.
+
+## 6. Phased plan (each phase stops and reports)
+
+- **R0 — decisions (owner).** Name/slug, prefix, shared-core vs fork, v1 feature set. Nothing builds until these are set.
+- **R1 — skeleton.** New plugin folder, header (no Update URI, `Requires Plugins`), one prefix, text domain, the module
+  framework and a standalone Settings screen with an empty generic tab set. Activates on a clean WP next to Rank Math.
+- **R2 — port the pure core.** Bring in the nine classes (shared package or re-prefixed copy) and their tests; green.
+- **R3 — port the generic modules.** Internal links (or the chosen v1 set), then video, schema, bulk, media, redirects,
+  agent — each wired to the generic post-type setting, each phase tested and PHPCS-clean.
+- **R4 — readme, assets, External services, screenshots.** Draft from RankWeb's, re-branded; generate screenshots.
+- **R5 — compliance pass.** Run `wp-org-submission` + Plugin Check + PHPCS; fix. Build the clean zip (`.distignore`).
+- **R6 — submit.** Slug check, submit at the add form, answer the reviewer; on approval, set up SVN deploy.
+
+**Effort:** R1–R3 are mostly mechanical given the generic code already exists and is tested — on the order of a few
+focused sessions. R4–R6 are gated by human review latency (days to weeks) and by the owner providing the wporg account
+and screenshots. The real cost is the one-time **re-prefix + standalone Settings UI**, not the features.
+
+## 7. Risks and non-goals
+
+- **Review latency / slug burn:** a rejected slug is lost for three months; get the name and readme right before
+  submitting.
+- **"for Rank Math" naming** can still draw questions; a standalone brand is safer.
+- **Shared-core drift** if we fork instead of packaging.
+- **Non-goal:** this does not change RankWeb. Do not strip RankWeb's site modules; the public plugin is a new codebase.
+- **Non-goal:** no Google-data features (those are InsightWeb) and no paid-API features in the free public plugin.
+
+## 8. Recommendation
+
+The owner chose the **full feature set** for v1 (17 Nov) — all seven areas, as a **shared-core** package — since the
+plugin is already functional and complete. A focused internal-linking-only first release was the alternative, not taken.
+Sequence the build so a reviewer can still follow it: port the shared core first, then one module area per phase (R3),
+each tested and PHPCS-clean, even though all ship in v1.
+

@@ -33,17 +33,21 @@ Owners: **CC** = Claude Code, **AG** = Antigravity (reports only; not edited by 
 | Standalone without SCF/Kits Core | Implemented, not functionally verified | `directoryweb-standalone-test` 16, `directoryweb-scf-fallback-test` 10; real-WP activation | Field editing without SCF | P2 | Listing editable standalone |
 | Security | Partially implemented | Nonce enforced on REST; capability `manage_directoryweb`; claim abuse limits | Nonce-less admin-post path review, upload validation for proofs | P1 | Security checklist |
 
-### RankWeb (CC, priority 2)
+### RankWeb (CC, priority 2) — updated 25 Nov 2026
 
 | Requirement | Status | Evidence | Missing work | Pri | Acceptance |
 |---|---|---|---|---|---|
-| Titles, canonical, robots, OG, JSON-LD | Implemented, not functionally verified | `titles.php`, `canonical.php`, `robots.php`, `schema.php`; `phpunit-lite` 125 tests / 307 assertions; `tests/run.php` 94 | Canonical/robots only via `rank_math/*` filters: no standalone output | P2 | Output correct with and without Rank Math |
-| Editor sidebar | Partially implemented | Fixed (24-25 Nov): `sprintf` now imported (it was used without import; static reading), site host no longer hard-coded `animalwrites.in`, heading check requires the keyword inside H2-H4 text, post types filterable (`rankweb_sidebar_post_types`); `tests/sidebar-score.test.js` 10/10 in CI. **Not fixed:** `_rankweb_schema_type` still has no PHP consumer (UI now says so); `_rankweb_score` unread; no browser check of the editor | Wire schema type to output (generic post/page only), browser check in Gutenberg | P1 | Sidebar works in the editor; schema type reaches output |
-| Native XML sitemap | Not implemented | `sitemap.php` only extends Rank Math's provider (directory/filtered/news) | Standalone `wp-sitemap`-based or own sitemap when Rank Math off | P1 | `/wp-sitemap.xml` or own index valid without Rank Math |
-| Rank Math coexistence / de-duplication | Partially implemented | Mode switch `!aw_seo_extras_rank_math()`; description and JSON-LD standalone renderers only | Titles/canonical/robots/OG standalone; no Yoast/other-SEO detection | P1 | No duplicate tags with Rank Math on or off |
-| Ranking/score logic | Superseded / undefined | No "function + existence + consumption" formula exists in repo or docs. Only (a) sidebar score in `calculateSeoScore` and (b) InsightWeb keyword score in `docs/plugins/insightweb-plan.md:245` (0.35 Demand + 0.30 Opportunity + 0.20 Momentum + 0.15 Engagement) | Original intent is unrecorded: needs the owner's definition; do not invent a formula | Blocked | Written definition from owner |
-| Cron (health, sitemap, fill, link audit, video) | Implemented, not functionally verified | 8 WP-cron events (`rankweb.php`, `sitemap.php`) | Admin status for last run/failure | P3 | Status visible |
-| Standalone | Partially implemented | `RANKWEB_STANDALONE` constant set, read nowhere else; readme says it will not activate without Rank Math | Reconcile readme and code; define standalone scope | P1 | Activates and works with no SEO plugin |
+| Standalone page head: description, Open Graph, Twitter, noindex | **Browser-verified** | `includes/standalone-seo.php`; `StandaloneSeoTest` (8); journey 24 checks; one of each tag with no SEO plugin | Archives/paginated canonical; robots rules beyond search | P2 | Done for posts/pages |
+| Sidebar controls reach the output | **Browser-verified** | Description, noindex and schema type set in Gutenberg, saved, then seen in the front-end head, JSON-LD and sitemap | Score is a heuristic (unit-tested only) | P1 | Done |
+| `_rankweb_schema_type` consumer | **Verified complete** | `rankweb_post_schema_type`, `rankweb_apply_schema_type`; selector limited to Article, BlogPosting, NewsArticle, WebPage; BlogPosting reached JSON-LD (B, H, U) | Event/FAQPage/Organization types are not offered (not built) | P1 | Done |
+| Generic post/page schema not tied to `aw_*` | Verified complete | `rankweb_generic_schema_nodes` (WebPage + BreadcrumbList); the `aw_*` builders are unchanged (133 + 94 tests) | | P1 | Done |
+| XML sitemap standalone | Verified complete (WordPress core's) | `/wp-sitemap.xml`; noindex pages excluded (B); robots.txt `Sitemap:` line; empty News sitemap no longer advertised | Native sitemap with images/video: not built | P1 | Done |
+| Rank Math coexistence | Partially verified | Stub (B): each tag once in both modes. Real Rank Math installed: RankWeb added nothing duplicate, but Rank Math printed no tags unconfigured | **X:** real Rank Math configured; real Yoast, SEOPress, AIOSEO | P1 | One of each tag with each real plugin |
+| Admin without Kits Core | **Browser-verified** | Overview, Modules, Settings (all tabs), FAQ, Insights render natively; settings save, persist and survive deactivate/reactivate; module switch saved (`rankweb-native-admin.php`) | Redirects needs Rank Math Redirections; native redirect list not built | P1 | Redirects standalone |
+| Diagnostics | Browser-verified | Overview: head owner, search visibility, permalinks, sitemap, robots.txt, noindex count | Canonical and last-cron status | P3 | |
+| Hard-coded Animal Writes values | Mostly removed | Generic site graph/head has none (H probe); values live in `animal-writes-compat.php` | AW copy in `titles.php`/`programmatic.php`/hub titles/FAQ wording (only with AW hubs) | P2 | grep clean outside compat |
+| Ranking/score logic | Superseded / undefined | No "function + existence + consumption" formula in repo or docs; only the sidebar score and InsightWeb's keyword score | Owner's definition required; **not invented** | Blocked | Written definition |
+| Cron (health, sitemap, fill, link audit, video) | Implemented, not functionally verified | 8 WP-cron events | Admin status for last run/failure | P3 | Status visible |
 
 ### MailWeb (CC, priority 4)
 

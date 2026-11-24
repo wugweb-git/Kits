@@ -5,6 +5,8 @@ session note). Evidence classes are kept apart: **U** unit/integration (PHP/JS),
 (`tools/playground/smoke.py`), **B** browser (real admin/front end in Playground), **X** external integration (real
 credentials/transport). A ZIP that builds, a plugin that activates, or a green smoke test is not completion.
 
+`[x]` done with evidence, `[~]` partly, `[ ]` not done.
+
 Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merged; PR #11 is a draft.
 
 ## First execution steps (in order)
@@ -12,10 +14,10 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] 1. DirectoryWeb browser gaps: public claim form POST, mail capture, permissions, invalid transitions, standalone, settings, deactivate/reactivate
 - [x] 2. DirectoryWeb: collection-filter block in the Gutenberg editor and on the front end
 - [ ] 3. DirectoryWeb docs: audit, update, delete stale; PENDING, matrix, Notion
-- [ ] 4. RankWeb standalone core: XML sitemap, canonical, robots (no Rank Math)
-- [ ] 5. RankWeb schema: real PHP consumer for `_rankweb_schema_type`; generic post/page schema not tied to `aw_*` types
-- [ ] 6. RankWeb coexistence: Rank Math active vs inactive, no duplicate output; remove `animalwrites.in` references
-- [ ] 7. RankWeb sidebar and admin screens in the browser; settings persistence; diagnostics
+- [x] 4. RankWeb standalone core: sitemap, robots (canonical on singular; archives open)
+- [x] 5. RankWeb schema: real PHP consumer for `_rankweb_schema_type`; generic post/page schema not tied to `aw_*` types
+- [x] 6. RankWeb coexistence (stub; real Rank Math partly) and AW references removed from generic output
+- [x] 7. RankWeb sidebar and admin screens in the browser; settings persistence; diagnostics
 - [ ] 8. RankWeb docs: audit, update, delete stale; PENDING, matrix, Notion
 - [ ] 9. Reconcile with latest `kits-suite`, inspect diff, final CI, ZIP verification, review request
 
@@ -57,32 +59,32 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 ## RankWeb
 
 ### Standalone output (no Rank Math, no Kits Core)
-- [ ] U/B XML sitemap index and per-type sitemaps (posts, pages, public CPTs, taxonomies), `lastmod`, `noindex` exclusion, robots.txt `Sitemap:` line
-- [ ] U/B Canonical URL on singular, archives, paginated and search views
-- [ ] U/B Meta robots (noindex/nofollow, archives, search, 404) and robots.txt rules
-- [ ] U/B Title and meta description templates
-- [ ] U/B Open Graph / Twitter tags
-- [ ] U/B JSON-LD for generic `post`/`page` (Article, WebPage, BreadcrumbList, Organization/WebSite)
-- [ ] U `_rankweb_schema_type` read by PHP and changes the JSON-LD `@type` (Article / NewsArticle / BlogPosting); selector only offers types PHP can emit
-- [ ] U Schema for `aw_*` types stays as it is and is not required for generic content
+- [x] U/B XML sitemap standalone = WordPress's own (`/wp-sitemap.xml`, `lastmod`, types and taxonomies); noindex pages excluded (B: a noindex post disappeared from `wp-sitemap-posts-post-1.xml`); robots.txt carries the `Sitemap:` line and no longer advertises an empty News sitemap (25 Nov)
+- [ ] U/B Canonical URL: singular verified once per page (core `rel_canonical`, B). **Archives, paginated and search: not printed standalone (open)**
+- [x] U/B Meta robots: per-post noindex through core `wp_robots` (one tag, B) and search results noindex. Archives/404 rules beyond core: open
+- [x] U/B Title from WordPress core (one `<title>`, B); meta description: own field, then excerpt, then content; tagline never copied into posts (B, U)
+- [x] U/B Open Graph and Twitter tags once each (B, H)
+- [x] U/B JSON-LD: Organization, WebSite, Article/BlogPosting node for posts, WebPage + BreadcrumbList for pages (B, H)
+- [x] U/B/H `_rankweb_schema_type` read by PHP; BlogPosting chosen in the sidebar reached the JSON-LD; selector offers only Article, BlogPosting, NewsArticle, WebPage; `Event` is ignored (StandaloneSeoTest, journey)
+- [x] U Schema for `aw_*` types unchanged (`phpunit-lite` 133 tests, `run.php` 94); generic content has its own path
 
 ### Coexistence
-- [ ] B With Rank Math active: RankWeb adds nothing Rank Math already prints (title, description, canonical, robots, OG, JSON-LD, sitemap)
-- [ ] B With Rank Math inactive: RankWeb prints each tag exactly once
-- [ ] U Tag-level duplicate detector (counts `<title>`, canonical, robots, description, OG, JSON-LD) used in both modes
-- [ ] Other SEO plugin detected (Yoast, SEOPress, AIOSEO): RankWeb stays quiet or warns
+- [~] B Rank Math stub: one of each tag. Real Rank Math installed: RankWeb added no duplicate, but Rank Math printed no tags in Playground (unconfigured), so "Rank Math prints once" is stub-only. **X open**
+- [x] B With Rank Math inactive: title, description, canonical, robots, og:title, twitter:card, JSON-LD all exactly 1 (25 Nov)
+- [x] B Tag-level counter (`__count`) used in both modes in the browser; the same counts asserted in the headless journey (H)
+- [~] U Detected by constant; RankWeb leaves the head and shows a notice and an Overview line. **Real Yoast/SEOPress/AIOSEO not installed: X open**
 
 ### Editor and admin
-- [ ] B Gutenberg sidebar opens, keyword field, score, SERP preview, schema type persist on save
-- [ ] B No JavaScript errors in the editor
-- [ ] B All RankWeb admin screens load (Overview, Insights, Modules, FAQ, Settings, CSV, Images, Redirects, Internal links)
-- [ ] B Settings persist; modules on/off take effect
-- [ ] B Diagnostics page reports real sitemap/robots/canonical status
+- [x] B Gutenberg sidebar opens from the pinned button, score 15/100 on short content, description, noindex and schema type persist on save and change the front end (25 Nov)
+- [x] B No RankWeb console errors in the editor (remaining console errors are Playground environment)
+- [x] B All nine screens load without PHP errors; the five that said "needs Kits Core" now render natively. Redirects needs Rank Math Redirections (open)
+- [x] B/H Settings save and persist across reload and deactivate/reactivate; module switch saved (18 to 17) and `aw_seo_files_off()` includes the module (H)
+- [x] B Overview lists real state: head owner, search visibility, permalinks, sitemap URL, robots.txt, noindex count. Canonical status not listed
 
 ### Independence and hard-coded references
-- [ ] U No `animalwrites.in` or other site-specific host in shipped code, except explicit, documented `aw_*` compatibility
-- [ ] H/B Activates and works with neither Rank Math nor Kits Core nor DirectoryWeb
-- [ ] B Deactivate then reactivate: settings and post meta intact
+- [x] U/H No Animal Writes value in a generic site's head or graph (H probe); values moved to `animal-writes-compat.php`. Remaining AW copy only runs with AW hubs (listed in PENDING)
+- [x] H/B Journey activates with none of them and passes 24 checks; browser admin and front end verified
+- [x] B Settings intact; tags absent while deactivated, back after (25 Nov)
 
 ### Gate
 - [ ] U Full suites pass on PHP 8.0, 8.1, 8.2, 8.3 (`phpunit-lite`, `run.php`, `sidebar-score.test.js`, new tests)
