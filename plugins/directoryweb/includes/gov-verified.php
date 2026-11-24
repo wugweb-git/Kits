@@ -142,7 +142,7 @@ function aw_gov_verified_count() {
 	if ( false === $n ) {
 		global $wpdb;
 		$n = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT p.ID) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_gov_verified_on' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$n -= count( array_filter( function_exists( 'kits_preview_only_ids' ) ? (array) kits_preview_only_ids() : array(), fn( $p ) => 'aw_listing' === get_post_type( $p ) && 'publish' === get_post_status( $p ) && '' !== (string) get_post_meta( $p, 'aw_gov_verified_on', true ) ) ); // as for Claimed: preview-only listings do not count
+		$n -= count( array_filter( function_exists( 'directoryweb_preview_only_ids' ) ? (array) directoryweb_preview_only_ids() : array(), fn( $p ) => 'aw_listing' === get_post_type( $p ) && 'publish' === get_post_status( $p ) && '' !== (string) get_post_meta( $p, 'aw_gov_verified_on', true ) ) ); // as for Claimed: preview-only listings do not count
 		set_transient( 'aw_gov_verified_count', $n, HOUR_IN_SECONDS );
 	}
 	return (int) $n;
@@ -150,7 +150,7 @@ function aw_gov_verified_count() {
 
 /** The Verified mark beside a listing's name: the green tick. */
 function aw_gov_verified_mark() {
-	return ' <span class="aw-gov-mark" title="Verified: registration details from government documents">' . kits_icon( 'check' ) . '<span class="screen-reader-text">Verified: registration details from government documents</span></span>';
+	return ' <span class="aw-gov-mark" title="Verified: registration details from government documents">' . directoryweb_icon( 'check' ) . '<span class="screen-reader-text">Verified: registration details from government documents</span></span>';
 }
 
 /** "Verified on {date}" for the profile's meta row, or ''. */
@@ -160,7 +160,7 @@ function aw_gov_verified_line( $id ) {
 		return '';
 	}
 	/* translators: %s: date. */
-	return '<span class="kit-badge kit-badge--verified aw-item-gov">' . kits_icon( 'check' ) . esc_html( sprintf( __( 'Verified on %s', 'directoryweb' ), wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) . '</span>';
+	return '<span class="kit-badge kit-badge--verified aw-item-gov">' . directoryweb_icon( 'check' ) . esc_html( sprintf( __( 'Verified on %s', 'directoryweb' ), wp_date( 'j M Y', strtotime( $on . ' 12:00:00' ) ) ) ) . '</span>';
 }
 
 // The tick beside the name on cards (after the Claimed mark when both apply); not on the profile's own title.

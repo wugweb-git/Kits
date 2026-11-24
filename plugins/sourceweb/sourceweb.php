@@ -36,27 +36,44 @@ if ( ! defined( 'AW_SOURCING_DIR' ) ) {
 if ( ! defined( 'AW_SOURCING_FILE' ) ) {
 	define( 'AW_SOURCING_FILE', SOURCEWEB_FILE );
 }
-// SourceWeb needs Kits Core (the admin shell and site parts), DirectoryWeb (the listings and places it fills) and
-// InsightWeb (the keyword table, includes/keywords.php there). Plugins load in name order, so active ones load after
-// this file: load them now, once, as Animal Writes Core does (each stops a second load). Animal Writes Core loads Kits
-// Core and DirectoryWeb before this file, so while Core is active those lines change nothing.
-foreach ( array( 'KITS_CORE_LOADED' => 'kits-core/kits-core.php', 'DIRECTORYWEB_LOADED' => 'directoryweb/directoryweb.php', 'INSIGHTWEB_FILE' => 'insightweb/insightweb.php' ) as $sourceweb_const => $sourceweb_main ) {
-	if ( ! defined( $sourceweb_const ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/' . $sourceweb_main )
-		&& ( in_array( $sourceweb_main, (array) get_option( 'active_plugins', array() ), true )
-			|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )[ $sourceweb_main ] ) ) ) ) {
-		wp_register_plugin_realpath( WP_PLUGIN_DIR . '/' . $sourceweb_main ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
-		require_once WP_PLUGIN_DIR . '/' . $sourceweb_main;
-	}
+// Track active integrations without blocking standalone operation.
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! defined( 'SOURCEWEB_STANDALONE' ) ) {
+			define( 'SOURCEWEB_STANDALONE', ! defined( 'KITS_CORE_LOADED' ) );
+		}
+		if ( ! defined( 'SOURCEWEB_DIRECTORY_ACTIVE' ) ) {
+			define( 'SOURCEWEB_DIRECTORY_ACTIVE', defined( 'DIRECTORYWEB_LOADED' ) );
+		}
+		if ( ! defined( 'SOURCEWEB_INSIGHTS_ACTIVE' ) ) {
+			define( 'SOURCEWEB_INSIGHTS_ACTIVE', defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) );
+		}
+	},
+	1
+);
+
+if ( ! defined( 'MB_IN_BYTES' ) ) {
+	define( 'MB_IN_BYTES', 1048576 );
 }
-unset( $sourceweb_const, $sourceweb_main );
+
+// Keyword role bitmasks used by Sourcing (shared with InsightWeb when active).
+if ( ! defined( 'AW_KW_ROLE_INCLUDE' ) ) {
+	define( 'AW_KW_ROLE_INCLUDE', 1 );
+	define( 'AW_KW_ROLE_ANIMAL', 32 );
+	define( 'AW_KW_ROLE_CONTEXT', 64 );
+	define( 'AW_KW_ROLE_EXCLUDE', 128 );
+	define( 'AW_KW_ROLE_SEARCH', 256 );
+	define( 'AW_KW_ROLE_PRESS', 512 );
+	define( 'AW_KW_ROLE_CATEGORY', 1024 );
+	define( 'AW_KW_SOURCING_ROLES', AW_KW_ROLE_INCLUDE | AW_KW_ROLE_ANIMAL | AW_KW_ROLE_CONTEXT | AW_KW_ROLE_EXCLUDE | AW_KW_ROLE_SEARCH | AW_KW_ROLE_CATEGORY );
+	define( 'AW_KW_WORKER_ROLES', AW_KW_SOURCING_ROLES | AW_KW_ROLE_PRESS );
+}
+
 // The host and publisher helpers first, before the check: the site layer and other plugins call aw_host() and aw_publishers().
 require_once __DIR__ . '/includes/sourcing-basics.php';
 // The issuer label too (no dependency): the site layer's Library item box and card chips call aw_issuer_short() and aw_issuer_box().
 require_once __DIR__ . '/includes/issuers.php';
-// Track active integrations without blocking standalone operation.
-define( 'SOURCEWEB_STANDALONE', ! defined( 'KITS_CORE_LOADED' ) );
-define( 'SOURCEWEB_DIRECTORY_ACTIVE', defined( 'DIRECTORYWEB_LOADED' ) );
-define( 'SOURCEWEB_INSIGHTS_ACTIVE', defined( 'INSIGHTWEB_KEYWORDS_LOADED' ) );
 define( 'AW_SOURCING_LOADED', '0.1.0' );
 if ( ! defined( 'AW_SOURCING_DIR' ) ) {
 	define( 'AW_SOURCING_DIR', __DIR__ . '/' );

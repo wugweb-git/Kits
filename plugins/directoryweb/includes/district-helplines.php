@@ -151,7 +151,7 @@ function aw_district_helplines_html( $d ) {
 	foreach ( aw_district_official_numbers( $d->code ) as $o ) {
 		$src  = esc_html( (string) ( $o['source'] ?? '' ) );
 		$src  = ! empty( $o['url'] ) ? '<a href="' . esc_url( $o['url'] ) . '" rel="nofollow noopener" target="_blank">' . $src . '</a>' : $src;
-		$src .= ! empty( $o['checked'] ) ? ', checked ' . kits_date( $o['checked'], null, 'aw-date' ) : '';
+		$src .= ! empty( $o['checked'] ) ? ', checked ' . directoryweb_date( $o['checked'], null, 'aw-date' ) : '';
 		$own .= aw_helpline_card( (string) $o['name'], (string) $o['number'], (string) ( $o['line'] ?? '' ), $src );
 	}
 	foreach ( aw_district_helpline_listings( $d->code ) as $r ) {

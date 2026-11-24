@@ -38,8 +38,10 @@ function kits_preview_mark() {
 add_action( 'admin_init', fn() => current_user_can( 'manage_options' ) ? kits_preview_mark() : null );
 
 /** Items only previewers see (post IDs). */
-function kits_preview_only_ids() {
-	return array_values( array_filter( array_map( 'intval', (array) apply_filters( 'kits_preview_only_ids', array() ) ) ) );
+if ( ! function_exists( 'kits_preview_only_ids' ) ) {
+	function kits_preview_only_ids() {
+		return array_values( array_filter( array_map( 'intval', (array) apply_filters( 'kits_preview_only_ids', array() ) ) ) );
+	}
 }
 
 /** The preview IP list (one per line in Kits → Settings → Preview access). */

@@ -61,6 +61,16 @@ if ( ! function_exists( 'delete_transient' ) ) {
 if ( ! function_exists( 'set_transient' ) ) {
 	function set_transient() {}
 }
+if ( ! function_exists( 'wp_verify_nonce' ) ) {
+	function wp_verify_nonce( $nonce, $action = -1 ) {
+		return 'valid_nonce' === $nonce && 'wp_rest' === $action;
+	}
+}
+if ( ! function_exists( 'rest_get_authenticated_app_password' ) ) {
+	function rest_get_authenticated_app_password() {
+		return $GLOBALS['mock_app_password'] ?? null;
+	}
+}
 
 // Load standalone fallback and dashboard.
 require_once dirname( __DIR__ ) . '/includes/standalone-fallback.php';
@@ -78,15 +88,33 @@ function check( $ok, $name ) {
 	}
 }
 
-// 1. Verify kits_shell_rest_can fallback.
-check( function_exists( 'kits_shell_rest_can' ), 'kits_shell_rest_can is defined' );
-$cb = kits_shell_rest_can( 'manage_insightweb' );
-check( is_callable( $cb ), 'kits_shell_rest_can returns callable' );
-check( true === $cb( new stdClass() ), 'kits_shell_rest_can passes for authorized user' );
+// 1. Verify insightweb_rest_can fallback.
+check( function_exists( 'insightweb_rest_can' ), 'insightweb_rest_can is defined' );
+$cb = insightweb_rest_can( 'manage_insightweb' );
+check( is_callable( $cb ), 'insightweb_rest_can returns callable' );
 
-$unauth_cb = kits_shell_rest_can( 'super_admin_only' );
-$result = $unauth_cb( new stdClass() );
-check( $result instanceof WP_Error && 'rest_forbidden' === $result->code, 'kits_shell_rest_can denies unauthorized' );
+// Missing nonce returns rest_cookie_invalid_nonce for cookie auth.
+$missing_res = $cb( new stdClass() );
+check( $missing_res instanceof WP_Error && 'rest_cookie_invalid_nonce' === $missing_res->code, 'missing nonce returns rest_cookie_invalid_nonce' );
+
+// Invalid nonce returns rest_cookie_invalid_nonce.
+$bad_req = (object) array( 'headers' => array( 'X-WP-Nonce' => 'bad' ) );
+$bad_res = $cb( $bad_req );
+check( $bad_res instanceof WP_Error && 'rest_cookie_invalid_nonce' === $bad_res->code, 'invalid nonce returns rest_cookie_invalid_nonce' );
+
+// Valid nonce passes.
+$valid_req = (object) array( 'headers' => array( 'X-WP-Nonce' => 'valid_nonce' ) );
+check( true === $cb( $valid_req ), 'valid nonce passes insightweb_rest_can' );
+
+// Application password passes without nonce.
+$GLOBALS['mock_app_password'] = (object) array( 'uuid' => 'test-app' );
+check( true === $cb( new stdClass() ), 'application password passes without nonce' );
+$GLOBALS['mock_app_password'] = null;
+
+// Missing capability returns rest_forbidden.
+$unauth_cb = insightweb_rest_can( 'super_admin_only' );
+$result = $unauth_cb( $valid_req );
+check( $result instanceof WP_Error && 'rest_forbidden' === $result->code, 'insightweb_rest_can denies unauthorized' );
 
 // 2. Verify empty-state dashboard tiles for fresh installs (prior to Search Console sync).
 // Mock wpdb to simulate empty table.

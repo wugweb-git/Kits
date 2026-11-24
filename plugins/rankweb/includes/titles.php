@@ -651,3 +651,29 @@ add_action(
 foreach ( array( 'rank_math/frontend/title', 'rank_math/frontend/description' ) as $aw_hook ) {
 	add_filter( $aw_hook, fn( $text ) => function_exists( 'aw_heading_dates' ) ? aw_heading_dates( $text ) : $text, 20 );
 }
+
+/* ---------- Standalone meta description rendering (when Rank Math is inactive) ---------- */
+
+if ( ! function_exists( 'aw_rankweb_render_standalone_meta_description' ) ) {
+	/**
+	 * Render standalone meta description tag in wp_head when Rank Math is inactive.
+	 */
+	function aw_rankweb_render_standalone_meta_description(): void {
+		if ( is_404() || is_admin() ) {
+			return;
+		}
+		if ( function_exists( 'aw_seo_extras_rank_math' ) && aw_seo_extras_rank_math() ) {
+			return;
+		}
+		if ( function_exists( 'aw_seo_description' ) ) {
+			$desc = aw_seo_description();
+			if ( '' !== $desc ) {
+				echo '<meta name="description" content="' . esc_attr( rankweb_plain_text( $desc ) ) . '" />' . "\n";
+			}
+		}
+	}
+}
+
+if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math() ) {
+	add_action( 'wp_head', 'aw_rankweb_render_standalone_meta_description', 1 );
+}

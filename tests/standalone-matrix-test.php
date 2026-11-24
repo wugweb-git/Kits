@@ -22,12 +22,10 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/directoryweb/directoryweb.php',
 		'check' => function () {
 			return defined( 'DIRECTORYWEB_LOADED' )
-				&& defined( 'DIRECTORYWEB_STANDALONE' )
-				&& DIRECTORYWEB_STANDALONE === true
-				&& function_exists( 'kits_count' )
-				&& function_exists( 'kits_icon' )
-				&& function_exists( 'kits_date' )
-				&& function_exists( 'kits_simple_table' )
+				&& function_exists( 'directoryweb_count' )
+				&& function_exists( 'directoryweb_icon' )
+				&& function_exists( 'directoryweb_date' )
+				&& function_exists( 'directoryweb_simple_table' )
 				&& function_exists( 'directoryweb_rest_can' )
 				&& function_exists( 'directoryweb_scf_active' )
 				&& false === directoryweb_scf_active();
@@ -39,10 +37,9 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/rankweb/rankweb.php',
 		'check' => function () {
 			return defined( 'RANKWEB_DIR' )
-				&& defined( 'RANKWEB_STANDALONE' )
-				&& RANKWEB_STANDALONE === true
 				&& function_exists( 'aw_seo_canonical' )
 				&& function_exists( 'aw_schema_render_standalone_json_ld' )
+				&& function_exists( 'aw_rankweb_render_standalone_meta_description' )
 				&& class_exists( 'AW_Schema' );
 		},
 		'test'  => dirname( __DIR__ ) . '/plugins/rankweb/tests/phpunit-lite.php',
@@ -52,11 +49,8 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/sourceweb/sourceweb.php',
 		'check' => function () {
 			return defined( 'AW_SOURCING_LOADED' )
-				&& defined( 'SOURCEWEB_STANDALONE' )
-				&& SOURCEWEB_STANDALONE === true
-				&& defined( 'SOURCEWEB_DIRECTORY_ACTIVE' )
-				&& SOURCEWEB_DIRECTORY_ACTIVE === false
 				&& function_exists( 'aw_host' )
+				&& function_exists( 'sourceweb_rest_can' )
 				&& function_exists( 'sourceweb_item_tags' )
 				&& function_exists( 'sourceweb_sanitize_meta' );
 		},
@@ -67,7 +61,7 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/insightweb/insightweb.php',
 		'check' => function () {
 			return defined( 'INSIGHTWEB_VERSION' )
-				&& function_exists( 'kits_shell_rest_can' )
+				&& function_exists( 'insightweb_rest_can' )
 				&& function_exists( 'insightweb_dash_count' )
 				&& function_exists( 'aw_si_keywords_active' );
 		},
@@ -78,9 +72,7 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/mailweb/mailweb.php',
 		'check' => function () {
 			return defined( 'MAILWEB_VERSION' )
-				&& defined( 'MAILWEB_STANDALONE' )
-				&& MAILWEB_STANDALONE === true
-				&& function_exists( 'kits_shell_rest_can' )
+				&& function_exists( 'mailweb_rest_can' )
 				&& class_exists( 'Hostinger\Configuration' );
 		},
 		'test'  => dirname( __DIR__ ) . '/plugins/mailweb/tests/run.php',
@@ -90,9 +82,7 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/planweb/planweb.php',
 		'check' => function () {
 			return defined( 'PLANWEB_VERSION' )
-				&& defined( 'PLANWEB_STANDALONE' )
-				&& PLANWEB_STANDALONE === true
-				&& function_exists( 'kits_shell_rest_can' );
+				&& function_exists( 'planweb_rest_can' );
 		},
 		'test'  => dirname( __DIR__ ) . '/plugins/planweb/tests/run.php',
 	),

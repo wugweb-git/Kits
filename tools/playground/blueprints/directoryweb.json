@@ -1,0 +1,40 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/edit.php?post_type=aw_listing",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.7"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "DirectoryWeb Playground",
+        "blogdescription": "Standalone directory and place listings engine"
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/AnimalWrites/Kits/kits-suite/dist/directoryweb.zip"
+      }
+    },
+    {
+      "step": "activatePlugin",
+      "pluginPath": "directoryweb/directoryweb.php"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nif (post_type_exists('aw_listing')) {\n  $post_id = wp_insert_post([\n    'post_title' => 'Sample Community Veterinary Clinic',\n    'post_content' => 'Full-service veterinary and animal emergency care.',\n    'post_status' => 'publish',\n    'post_type' => 'aw_listing',\n  ]);\n  if ($post_id && !is_wp_error($post_id)) {\n    update_post_meta($post_id, 'aw_verified', '1');\n    update_post_meta($post_id, 'aw_district', 'North Sector');\n  }\n}"
+    }
+  ]
+}

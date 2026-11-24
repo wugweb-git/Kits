@@ -33,22 +33,17 @@ if ( defined( 'DIRECTORYWEB_LOADED' ) ) {
 	return; // Loaded already (active on its own and also loaded by Animal Writes Core).
 }
 
-// DirectoryWeb needs Kits Core (its admin shell, list table, icons and dates). Plugins load in name order, so an active
-// Kits Core loads after this file: load it now, once, as Animal Writes Core does (kits-core.php stops a second load).
-// Animal Writes Core loads Kits Core before this file, so while Core is active this changes nothing.
-if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/kits-core/kits-core.php' )
-	&& ( in_array( 'kits-core/kits-core.php', (array) get_option( 'active_plugins', array() ), true )
-		|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['kits-core/kits-core.php'] ) ) ) ) {
-	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/kits-core/kits-core.php' ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
-	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
-}
-// Without Kits Core, load the standalone compatibility layer.
-if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-	define( 'DIRECTORYWEB_STANDALONE', true );
-	require_once __DIR__ . '/includes/standalone-fallback.php';
-} else {
-	define( 'DIRECTORYWEB_STANDALONE', false );
-}
+require_once __DIR__ . '/includes/standalone-fallback.php';
+
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! defined( 'DIRECTORYWEB_STANDALONE' ) ) {
+			define( 'DIRECTORYWEB_STANDALONE', ! defined( 'KITS_CORE_LOADED' ) );
+		}
+	},
+	1
+);
 
 define( 'DIRECTORYWEB_LOADED', '1.1.0' );
 define( 'DIRECTORYWEB_VERSION', '1.1.0' );

@@ -55,9 +55,9 @@
 | **MailWeb** | `plugins/mailweb/` | 3.3.0 | **Verified Operational** (Standalone Capable) | Hostinger Mail API SDK (`v1.18.7`), SMTP port 465 SSL fallback, daily DKIM/SPF DNS telemetry cron, decoupled boot. All 57 checks pass cleanly. |
 | **PlanWeb** | `plugins/planweb/` | 0.2.0 | **Verified Operational** (Standalone Capable) | Editorial calendar, publication scheduling, campaign timeline tracking, REST endpoints, decoupled boot. All 123 checks pass cleanly. |
 | **Shared PHP SDK** | `packages/shared-php/` | 0.1.0 | **Verified Operational** (Unlinked) | Standalone PHP SDK providing `TokenEngine`, `ExternalServiceRegistry`, `NonceGuard`, `Sanitizer`. `tests/TokenEngineTest.php` passes 5/5 test suites. |
-| **Packaging Tools** | `tools/build/build-dist.py` | — | **Verified Operational** | Builds 8 clean distribution packages into `dist/*.zip` with SHA-256 integrity reporting and proper test/vendor exclusion. |
-| **CI / Quality Gates** | `.github/workflows/ci-suite.yml` | — | **Verified Operational** | Path-filtered workflow with multi-PHP matrix (8.0–8.3), root node check suite (`check:ci` passing all 9 gates in ~6.2s), and distribution artifact upload. |
-| **WordPress Playground**| `tools/playground/` | — | **Planned (P2 Track)** | Folder contains only `.gitkeep`. Blueprints planned for base and companion plugins. |
+| **Packaging Tools** | `tools/build/build-dist.py` | — | **Verified Operational** | Builds 8 clean distribution packages into `dist/*.zip` with SHA-256 integrity reporting, MailWeb vendor SDK inclusion, and proper test/dev exclusion. |
+| **CI / Quality Gates** | `.github/workflows/ci-suite.yml` | — | **Verified Operational** | Path-filtered workflow with multi-PHP matrix (8.0–8.3), root node check suite (`check:ci`), standalone matrix tests, remediation verification suite, and release packaging gates. |
+| **WordPress Playground**| `tools/playground/` | — | **Verified Operational** | Declarative blueprints targeting WP 6.7 and PHP 8.2 (`blueprint-base.json` + 6 companion plugin blueprints in `blueprints/`). |
 
 ---
 
@@ -378,8 +378,8 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 ---
 
 ### Phase P2: Testing, GitHub Workflows & WordPress Playground
-- [ ] **Task P2.1: Author Universal Playground Base Blueprint** (`tools/playground/blueprint-base.json`).
-- [ ] **Task P2.2: Author Companion Plugin Blueprints & Fixtures** (Individual blueprints for DirectoryWeb, MailWeb, RankWeb, SourceWeb, InsightWeb, PlanWeb).
+- [x] **Task P2.1: Author Universal Playground Base Blueprint** (`tools/playground/blueprint-base.json`). Configured with WP 6.7, PHP 8.2, networking enabled, and admin login.
+- [x] **Task P2.2: Author Companion Plugin Blueprints & Fixtures** (Individual blueprints authored in `tools/playground/blueprints/` for DirectoryWeb, MailWeb, RankWeb, SourceWeb, InsightWeb, PlanWeb).
 - [ ] **Task P2.3: Headless Playground CI Gate** in `.github/workflows/ci-suite.yml` using `@wp-playground/cli`.
 
 ---

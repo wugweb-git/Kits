@@ -27,32 +27,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const DIRECTORYWEB_REST = 'directoryweb/v1';
 
-/**
- * The permission check for a route (delegated to Kits Core when present, or native WP check).
- *
- * @param string $cap Capability.
- * @return callable
- */
-function directoryweb_rest_can( string $cap ): callable {
-	if ( function_exists( 'kits_shell_rest_can' ) ) {
-		return kits_shell_rest_can( $cap );
-	}
-	return function ( $request ) use ( $cap ) {
-		if ( ! is_user_logged_in() ) {
-			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'directoryweb' ), array( 'status' => 401 ) );
+if ( ! function_exists( 'directoryweb_rest_can' ) ) {
+	/**
+	 * The permission check for a route (delegated to Kits Core when present, or native WP check).
+	 *
+	 * @param string $cap Capability.
+	 * @return callable
+	 */
+	function directoryweb_rest_can( string $cap ): callable {
+		if ( function_exists( 'kits_shell_rest_can' ) ) {
+			return kits_shell_rest_can( $cap );
 		}
-		$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
-		if ( ! $app && $request instanceof WP_REST_Request ) {
-			$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
-			if ( $nonce && ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'directoryweb' ), array( 'status' => 403 ) );
+		return function ( $request ) use ( $cap ) {
+			if ( ! is_user_logged_in() ) {
+				return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'directoryweb' ), array( 'status' => 401 ) );
 			}
-		}
-		if ( ! current_user_can( $cap ) ) {
-			return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'directoryweb' ), array( 'status' => 403 ) );
-		}
-		return true;
-	};
+			$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
+			if ( ! $app ) {
+				$nonce = '';
+				if ( $request instanceof WP_REST_Request ) {
+					$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
+				} elseif ( is_object( $request ) && isset( $request->headers ) && is_array( $request->headers ) ) {
+					$nonce = (string) ( $request->headers['X-WP-Nonce'] ?? '' );
+				}
+				if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+					return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'directoryweb' ), array( 'status' => 403 ) );
+				}
+			}
+			if ( ! current_user_can( $cap ) ) {
+				return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'directoryweb' ), array( 'status' => 403 ) );
+			}
+			return true;
+		};
+	}
 }
 
 add_action(

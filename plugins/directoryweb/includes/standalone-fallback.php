@@ -1,7 +1,7 @@
 <?php
 /**
  * Standalone compatibility layer for DirectoryWeb when Kits Core is inactive.
- * Provides fallback implementations for essential UI primitives, formats, and REST permissions.
+ * Provides plugin-specific fallback implementations for UI primitives, formats, and REST permissions.
  *
  * @package directoryweb
  */
@@ -10,9 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! defined( 'KITS_FF_SOCIAL' ) ) {
+if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL' ) ) {
 	define(
-		'KITS_FF_SOCIAL',
+		'DIRECTORYWEB_FF_SOCIAL',
 		array(
 			'l_instagram' => array( 'aw_instagram', 'https://www.instagram.com/%s/' ),
 			'l_facebook'  => array( 'aw_facebook', 'https://www.facebook.com/%s' ),
@@ -23,9 +23,9 @@ if ( ! defined( 'KITS_FF_SOCIAL' ) ) {
 	);
 }
 
-if ( ! defined( 'KITS_FF_SOCIAL_HOSTS' ) ) {
+if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL_HOSTS' ) ) {
 	define(
-		'KITS_FF_SOCIAL_HOSTS',
+		'DIRECTORYWEB_FF_SOCIAL_HOSTS',
 		array(
 			'l_instagram' => array( 'instagram\.com', '' ),
 			'l_facebook'  => array( '(?:facebook|fb)\.com', '' ),
@@ -36,19 +36,22 @@ if ( ! defined( 'KITS_FF_SOCIAL_HOSTS' ) ) {
 	);
 }
 
-if ( ! function_exists( 'kits_count' ) ) {
+if ( ! function_exists( 'directoryweb_count' ) ) {
 	/**
 	 * Formats a count badge.
 	 *
 	 * @param int|float|string $n Count.
 	 * @return string
 	 */
-	function kits_count( $n ) {
+	function directoryweb_count( $n ) {
+		if ( function_exists( 'kits_count' ) ) {
+			return kits_count( $n );
+		}
 		return '<span class="kit-count">' . esc_html( number_format_i18n( (int) $n ) ) . '</span>';
 	}
 }
 
-if ( ! function_exists( 'kits_icon' ) ) {
+if ( ! function_exists( 'directoryweb_icon' ) ) {
 	/**
 	 * Renders an icon span.
 	 *
@@ -56,12 +59,15 @@ if ( ! function_exists( 'kits_icon' ) ) {
 	 * @param string $class Additional CSS classes.
 	 * @return string
 	 */
-	function kits_icon( $name, $class = '' ) {
+	function directoryweb_icon( $name, $class = '' ) {
+		if ( function_exists( 'kits_icon' ) ) {
+			return kits_icon( $name, $class );
+		}
 		return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
 	}
 }
 
-if ( ! function_exists( 'kits_date' ) ) {
+if ( ! function_exists( 'directoryweb_date' ) ) {
 	/**
 	 * Formats a date with standard calendar markup.
 	 *
@@ -70,18 +76,21 @@ if ( ! function_exists( 'kits_date' ) ) {
 	 * @param string      $class CSS class.
 	 * @return string
 	 */
-	function kits_date( $when, $fmt = null, $class = '' ) {
+	function directoryweb_date( $when, $fmt = null, $class = '' ) {
+		if ( function_exists( 'kits_date' ) ) {
+			return kits_date( $when, $fmt, $class );
+		}
 		$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when;
 		$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
 		if ( ! $ts ) {
 			return '';
 		}
 		$fmt = null === $fmt ? (string) get_option( 'date_format', 'Y-m-d' ) : (string) $fmt;
-		return '<span class="kit-date' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
+		return '<span class="kit-date' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '">' . directoryweb_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
 	}
 }
 
-if ( ! function_exists( 'kits_simple_table' ) ) {
+if ( ! function_exists( 'directoryweb_simple_table' ) ) {
 	/**
 	 * Fallback table renderer when Kits_Simple_Table is absent.
 	 *
@@ -90,7 +99,11 @@ if ( ! function_exists( 'kits_simple_table' ) ) {
 	 * @param array  $rows   Data rows (array of key => html).
 	 * @param array  $opts   Options (empty, caption, etc.).
 	 */
-	function kits_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
+	function directoryweb_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
+		if ( function_exists( 'kits_simple_table' ) ) {
+			kits_simple_table( $plural, $cols, $rows, $opts );
+			return;
+		}
 		echo '<table class="widefat striped ' . esc_attr( $plural ) . '">';
 		if ( ! empty( $opts['caption'] ) ) {
 			echo '<caption class="screen-reader-text">' . esc_html( $opts['caption'] ) . '</caption>';
@@ -117,52 +130,30 @@ if ( ! function_exists( 'kits_simple_table' ) ) {
 	}
 }
 
-if ( ! function_exists( 'kits_shell_rest_can' ) ) {
+if ( ! function_exists( 'directoryweb_use_component_style' ) ) {
 	/**
-	 * Fallback REST permission callback.
-	 *
-	 * @param string $cap Capability.
-	 * @return callable
-	 */
-	function kits_shell_rest_can( string $cap ): callable {
-		return function ( $request ) use ( $cap ) {
-			if ( ! is_user_logged_in() ) {
-				return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'directoryweb' ), array( 'status' => 401 ) );
-			}
-			$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
-			if ( ! $app && $request instanceof WP_REST_Request ) {
-				$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
-				if ( $nonce && ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-					return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'directoryweb' ), array( 'status' => 403 ) );
-				}
-			}
-			if ( ! current_user_can( $cap ) ) {
-				return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'directoryweb' ), array( 'status' => 403 ) );
-			}
-			return true;
-		};
-	}
-}
-
-if ( ! function_exists( 'kits_use_component_style' ) ) {
-	/**
-	 * Fallback no-op for component style registration when theme/core is absent.
+	 * Fallback for component style registration.
 	 *
 	 * @param string $handle Style handle.
 	 */
-	function kits_use_component_style( string $handle ): void {
-		// No-op in standalone mode.
+	function directoryweb_use_component_style( string $handle ): void {
+		if ( function_exists( 'kits_use_component_style' ) ) {
+			kits_use_component_style( $handle );
+		}
 	}
 }
 
-if ( ! function_exists( 'kits_ff_phone10' ) ) {
+if ( ! function_exists( 'directoryweb_ff_phone10' ) ) {
 	/**
 	 * Extracts 10 digits from an Indian phone number string.
 	 *
 	 * @param mixed $v Value.
 	 * @return string
 	 */
-	function kits_ff_phone10( $v ) {
+	function directoryweb_ff_phone10( $v ) {
+		if ( function_exists( 'kits_ff_phone10' ) ) {
+			return kits_ff_phone10( $v );
+		}
 		$d = preg_replace( '/\D+/', '', (string) $v );
 		if ( 12 === strlen( $d ) && 0 === strpos( $d, '91' ) ) {
 			$d = substr( $d, 2 );
@@ -173,20 +164,23 @@ if ( ! function_exists( 'kits_ff_phone10' ) ) {
 	}
 }
 
-if ( ! function_exists( 'kits_ff_phone_store' ) ) {
+if ( ! function_exists( 'directoryweb_ff_phone_store' ) ) {
 	/**
 	 * Normalizes a phone number for storage: "+91 98765 43210".
 	 *
 	 * @param mixed $v Value.
 	 * @return string
 	 */
-	function kits_ff_phone_store( $v ) {
-		$d = kits_ff_phone10( $v );
+	function directoryweb_ff_phone_store( $v ) {
+		if ( function_exists( 'kits_ff_phone_store' ) ) {
+			return kits_ff_phone_store( $v );
+		}
+		$d = directoryweb_ff_phone10( $v );
 		return '' !== $d ? '+91 ' . substr( $d, 0, 5 ) . ' ' . substr( $d, 5 ) : trim( (string) $v );
 	}
 }
 
-if ( ! function_exists( 'kits_ff_social_user' ) ) {
+if ( ! function_exists( 'directoryweb_ff_social_user' ) ) {
 	/**
 	 * Extracts a social platform username.
 	 *
@@ -194,10 +188,13 @@ if ( ! function_exists( 'kits_ff_social_user' ) ) {
 	 * @param mixed  $v     Value.
 	 * @return string
 	 */
-	function kits_ff_social_user( $field, $v ) {
+	function directoryweb_ff_social_user( $field, $v ) {
+		if ( function_exists( 'kits_ff_social_user' ) ) {
+			return kits_ff_social_user( $field, $v );
+		}
 		$v = trim( (string) $v );
 		if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) {
-			$hosts = defined( 'KITS_FF_SOCIAL_HOSTS' ) ? KITS_FF_SOCIAL_HOSTS : array();
+			$hosts = defined( 'KITS_FF_SOCIAL_HOSTS' ) ? KITS_FF_SOCIAL_HOSTS : ( defined( 'DIRECTORYWEB_FF_SOCIAL_HOSTS' ) ? DIRECTORYWEB_FF_SOCIAL_HOSTS : array() );
 			$h     = $hosts[ $field ] ?? null;
 			if ( ! $h || ! preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . $h[0] . '/' . preg_quote( $h[1], '#' ) . '([A-Za-z0-9._-]{1,100})/?(?:[?\#].*)?$#i', $v, $m ) ) {
 				return '';
@@ -209,7 +206,7 @@ if ( ! function_exists( 'kits_ff_social_user' ) ) {
 	}
 }
 
-if ( ! function_exists( 'kits_ff_form' ) ) {
+if ( ! function_exists( 'directoryweb_ff_form' ) ) {
 	/**
 	 * Renders a Fluent Forms form.
 	 *
@@ -217,7 +214,10 @@ if ( ! function_exists( 'kits_ff_form' ) ) {
 	 * @param array  $ctx Context.
 	 * @return string
 	 */
-	function kits_ff_form( $key, $ctx = array() ) {
+	function directoryweb_ff_form( $key, $ctx = array() ) {
+		if ( function_exists( 'kits_ff_form' ) ) {
+			return kits_ff_form( $key, $ctx );
+		}
 		$id = function_exists( 'kits_ff_id' ) ? (int) kits_ff_id( $key ) : 0;
 		if ( ! $id ) {
 			$forms = get_option( 'aw_ff_forms', array() );
@@ -230,13 +230,16 @@ if ( ! function_exists( 'kits_ff_form' ) ) {
 	}
 }
 
-if ( ! function_exists( 'kits_private_dir' ) ) {
+if ( ! function_exists( 'directoryweb_private_dir' ) ) {
 	/**
 	 * Returns the private upload directory path.
 	 *
 	 * @return string
 	 */
-	function kits_private_dir() {
+	function directoryweb_private_dir(): string {
+		if ( function_exists( 'kits_private_dir' ) ) {
+			return kits_private_dir();
+		}
 		$upload = wp_upload_dir();
 		$dir    = $upload['basedir'] . '/kits-private';
 		if ( ! is_dir( $dir ) ) {
@@ -246,24 +249,66 @@ if ( ! function_exists( 'kits_private_dir' ) ) {
 	}
 }
 
-if ( ! function_exists( 'kits_preview_only_ids' ) ) {
+if ( ! function_exists( 'directoryweb_preview_only_ids' ) ) {
 	/**
 	 * Preview IDs fallback.
 	 *
 	 * @return array
 	 */
-	function kits_preview_only_ids() {
+	function directoryweb_preview_only_ids(): array {
+		if ( function_exists( 'kits_preview_only_ids' ) ) {
+			return kits_preview_only_ids();
+		}
 		return array();
 	}
 }
 
-if ( ! function_exists( 'kits_scf_active' ) ) {
+if ( ! function_exists( 'directoryweb_scf_active' ) ) {
 	/**
 	 * Checks if SCF or ACF is active.
 	 *
 	 * @return bool
 	 */
-	function kits_scf_active() {
+	function directoryweb_scf_active(): bool {
+		if ( function_exists( 'kits_scf_active' ) ) {
+			return (bool) kits_scf_active();
+		}
 		return function_exists( 'acf_add_local_field_group' );
+	}
+}
+
+if ( ! function_exists( 'directoryweb_rest_can' ) ) {
+	/**
+	 * Permission callback for DirectoryWeb REST routes.
+	 * Delegates to Kits Core when present, or native WP check.
+	 *
+	 * @param string $cap Capability.
+	 * @return callable
+	 */
+	function directoryweb_rest_can( string $cap ): callable {
+		if ( function_exists( 'kits_shell_rest_can' ) ) {
+			return kits_shell_rest_can( $cap );
+		}
+		return function ( $request ) use ( $cap ) {
+			if ( ! is_user_logged_in() ) {
+				return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'directoryweb' ), array( 'status' => 401 ) );
+			}
+			$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
+			if ( ! $app ) {
+				$nonce = '';
+				if ( $request instanceof WP_REST_Request ) {
+					$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
+				} elseif ( is_object( $request ) && isset( $request->headers ) && is_array( $request->headers ) ) {
+					$nonce = (string) ( $request->headers['X-WP-Nonce'] ?? '' );
+				}
+				if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+					return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'directoryweb' ), array( 'status' => 403 ) );
+				}
+			}
+			if ( ! current_user_can( $cap ) ) {
+				return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'directoryweb' ), array( 'status' => 403 ) );
+			}
+			return true;
+		};
 	}
 }

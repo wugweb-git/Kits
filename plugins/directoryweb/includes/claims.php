@@ -37,6 +37,10 @@ const DW_CLAIM_FIELDS = array(
 	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (DIRECTORYWEB_SERVICES); saved as service tags
 );
 
+if ( ! defined( 'MB_IN_BYTES' ) ) {
+	define( 'MB_IN_BYTES', 1048576 );
+}
+
 const DW_CLAIM_LOGO_BYTES = 8 * MB_IN_BYTES; // owner plan 19 Nov 2026 (B2): was 2 MB; the server still resizes to 800 px
 
 /**
@@ -92,7 +96,7 @@ function aw_claim_current( $lid, $key ) {
 
 /** The claim form for a listing: the Fluent Forms form. */
 function aw_claim_form( $listing ) {
-	return kits_ff_form( 'claim', array( 'listing' => $listing ) );
+	return directoryweb_ff_form( 'claim', array( 'listing' => $listing ) );
 }
 
 /**
@@ -133,12 +137,12 @@ function aw_claim_logo_ok( $logo ) {
 function aw_claim_logo_store( $tmp, $name = '' ) {
 	wp_raise_memory_limit( 'image' ); // an 8 MB photo needs more than the 40 MB front-end limit to resize
 	$editor = wp_get_image_editor( $tmp );
-	if ( is_wp_error( $editor ) || ! function_exists( 'kits_private_dir' ) ) { // never saved outside the private folder (Kits Core's)
+	if ( is_wp_error( $editor ) || ! function_exists( 'directoryweb_private_dir' ) ) { // never saved outside the private folder
 		return '';
 	}
 	$editor->resize( 800, 800, false );
 	$name  = $name ? $name : wp_generate_password( 20, false ) . '.png';
-	$saved = $editor->save( kits_private_dir() . '/' . $name, 'image/png' );
+	$saved = $editor->save( directoryweb_private_dir() . '/' . $name, 'image/png' );
 	return is_wp_error( $saved ) ? '' : $name;
 }
 
@@ -197,7 +201,7 @@ function aw_claim_review_box( $post ) {
 	if ( get_post_meta( $post->ID, 'aw_c_feature', true ) ) { // asked before featured listings were dropped (owner, 24 Oct 2026)
 		$cells[] = array( 'field' => 'Featured', 'now' => 'Asked to be featured; featured listings are no longer offered, so tell them when you reply.' );
 	}
-	kits_simple_table( 'claim-fields', array( 'field' => 'Field', 'now' => 'Now', 'proposed' => 'Proposed' ), $cells, array( 'empty' => 'No changes proposed.' ) );
+	directoryweb_simple_table( 'claim-fields', array( 'field' => 'Field', 'now' => 'Now', 'proposed' => 'Proposed' ), $cells, array( 'empty' => 'No changes proposed.' ) );
 	$notes = (string) get_post_meta( $post->ID, 'aw_c_notes', true );
 	if ( $notes ) {
 		echo '<p><strong>Notes:</strong><br>' . nl2br( esc_html( $notes ) ) . '</p>';
@@ -219,7 +223,7 @@ add_action(
 		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ?? '' ) ), 'aw_claim_logo' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
-		$path = function_exists( 'kits_private_dir' ) ? kits_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) ) : '';
+		$path = function_exists( 'directoryweb_private_dir' ) ? directoryweb_private_dir() . '/' . basename( (string) get_post_meta( $id, 'aw_c_logo', true ) ) : '';
 		if ( ! is_file( $path ) ) {
 			wp_die( 'Not found.', 404 );
 		}
@@ -258,7 +262,7 @@ add_action(
 				}
 			}
 			$logo = (string) get_post_meta( $id, 'aw_c_logo', true );
-			$path = $logo && function_exists( 'kits_private_dir' ) ? kits_private_dir() . '/' . basename( $logo ) : ''; // without the private folder the logo is not brought in
+			$path = $logo && function_exists( 'directoryweb_private_dir' ) ? directoryweb_private_dir() . '/' . basename( $logo ) : ''; // without the private folder the logo is not brought in
 			if ( $path && is_file( $path ) ) {
 				require_once ABSPATH . 'wp-admin/includes/media.php';
 				require_once ABSPATH . 'wp-admin/includes/file.php';

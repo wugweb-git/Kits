@@ -41,20 +41,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function kits_tag( $text, $variant = '' ) {
-	return '<span class="kit-tag' . ( $variant ? ' kit-tag--' . esc_attr( $variant ) : '' ) . '">' . esc_html( $text ) . '</span>';
+if ( ! function_exists( 'kits_tag' ) ) {
+	function kits_tag( $text, $variant = '' ) {
+		return '<span class="kit-tag' . ( $variant ? ' kit-tag--' . esc_attr( $variant ) : '' ) . '">' . esc_html( $text ) . '</span>';
+	}
 }
 
-function kits_chip( $text, $url, $variant = '' ) {
-	return '<a class="kit-chip' . ( $variant ? ' kit-chip--' . esc_attr( $variant ) : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
+if ( ! function_exists( 'kits_chip' ) ) {
+	function kits_chip( $text, $url, $variant = '' ) {
+		return '<a class="kit-chip' . ( $variant ? ' kit-chip--' . esc_attr( $variant ) : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
+	}
 }
 
-function kits_badge( $text, $variant ) {
-	return '<span class="kit-badge kit-badge--' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</span>';
+if ( ! function_exists( 'kits_badge' ) ) {
+	function kits_badge( $text, $variant ) {
+		return '<span class="kit-badge kit-badge--' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</span>';
+	}
 }
 
-function kits_eyebrow( $text ) {
-	return '<span class="kit-eyebrow">' . esc_html( $text ) . '</span>';
+if ( ! function_exists( 'kits_eyebrow' ) ) {
+	function kits_eyebrow( $text ) {
+		return '<span class="kit-eyebrow">' . esc_html( $text ) . '</span>';
+	}
 }
 
 /**
@@ -279,8 +287,10 @@ function kits_timeline( array $items, array $args = array() ) {
 	return '<' . $tag . ' class="' . esc_attr( $cls ) . '" style="--dl-n:' . count( $items ) . '">' . $out . '</' . $tag . '>';
 }
 
-function kits_count( $n ) {
-	return '<span class="kit-count">' . esc_html( number_format_i18n( (int) $n ) ) . '</span>';
+if ( ! function_exists( 'kits_count' ) ) {
+	function kits_count( $n ) {
+		return '<span class="kit-count">' . esc_html( number_format_i18n( (int) $n ) ) . '</span>';
+	}
 }
 
 /**
@@ -291,8 +301,10 @@ function kits_count( $n ) {
  * @param string $class Optional extra classes.
  * @return string
  */
-function kits_icon( $name, $class = '' ) {
-	return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
+if ( ! function_exists( 'kits_icon' ) ) {
+	function kits_icon( $name, $class = '' ) {
+		return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
+	}
 }
 
 /**
@@ -305,14 +317,16 @@ function kits_icon( $name, $class = '' ) {
  * @param string     $class Optional extra classes on the wrapper.
  * @return string '' when the date cannot be read.
  */
-function kits_date( $when, $fmt = null, $class = '' ) {
-	$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when;
-	$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
-	if ( ! $ts ) {
-		return '';
+if ( ! function_exists( 'kits_date' ) ) {
+	function kits_date( $when, $fmt = null, $class = '' ) {
+		$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when;
+		$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
+		if ( ! $ts ) {
+			return '';
+		}
+		$fmt = null === $fmt ? (string) get_option( 'date_format' ) : (string) $fmt;
+		return '<span class="kit-date' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
 	}
-	$fmt = null === $fmt ? (string) get_option( 'date_format' ) : (string) $fmt;
-	return '<span class="kit-date' . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '">' . kits_icon( 'calendar' ) . '<time datetime="' . esc_attr( wp_date( 'Y-m-d', $ts ) ) . '">' . esc_html( wp_date( $fmt, $ts ) ) . '</time></span>';
 }
 
 /**

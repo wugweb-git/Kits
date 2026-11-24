@@ -33,11 +33,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'rest_api_init',
 	function () {
-		if ( ! function_exists( 'kits_shell_rest_can' ) ) {
-			return; // the screens need Kits Core's shell; without it they show a notice.
+		if ( ! function_exists( 'mailweb_rest_can' ) && ! function_exists( 'kits_shell_rest_can' ) ) {
+			return; // the screens need Kits Core's shell or standalone fallback; without it they show a notice.
 		}
-		$cap   = kits_shell_rest_can( MAILWEB_CAP );
-		$admin = kits_shell_rest_can( 'manage_options' );
+		$can   = function_exists( 'mailweb_rest_can' ) ? 'mailweb_rest_can' : 'kits_shell_rest_can';
+		$cap   = $can( MAILWEB_CAP );
+		$admin = $can( 'manage_options' );
 		$route = function ( string $path, string $method, callable $perm, callable $cb, array $args = array() ) {
 			register_rest_route(
 				MAILWEB_REST,

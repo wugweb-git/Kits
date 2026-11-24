@@ -48,6 +48,25 @@ Following a comprehensive read-only audit of commits `6a32c29` and `48ffa0b`, a 
   - Standalone meta description is automatically suppressed when Rank Math is active (`aw_seo_extras_rank_math()`), ensuring exactly one meta description, canonical, robots directive, and schema graph in both standalone and integrated environments.
 - ✅ **Fix 4 (Medium — Decoupled Boot Architecture & Symlink Safety):**
   - Removed hardcoded eager `require_once WP_PLUGIN_DIR . '/...'` loading blocks across `directoryweb.php`, `mailweb.php`, `planweb.php`, and `sourceweb.php`.
+- ✅ **Fix 5 (Low — Translation Domain Scoping):**
+  - Standardized REST error strings to use plugin-specific text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'aw-sourcing'`).
+
+### Packaging, CI Hardening & WordPress Playground Blueprints (24 Nov 2026)
+- ✅ **Distribution Packaging Hardening (`tools/build/build-dist.py`):**
+  - Whitelisted production vendor SDK bundling for MailWeb (`VENDOR_BUNDLED_TARGETS = {"mailweb"}`) while excluding vendor directories for all non-SDK targets.
+  - Corrected `excluded()` logic so top-level plugin `src/` unbuilt assets are stripped while preserving nested vendor source code (e.g. `mailweb/vendor/hostinger/mail-api-php-sdk/src/`).
+  - Extracted MailWeb package verified in isolated PHP subprocess: `Hostinger\Configuration` class loads without errors.
+- ✅ **CI Suite Hardening (`.github/workflows/ci-suite.yml`):**
+  - Expanded companion plugins PHP test matrix to include `8.0` (`['8.0', '8.1', '8.2', '8.3']`), honoring the `Requires PHP: 8.0` plugin contract.
+  - Integrated `tests/standalone-matrix-test.php`, `tests/remediation-verification-test.php`, and individual standalone tests into CI steps.
+  - Made distribution packaging gate depend on all quality gates (`ci-design-system`, `ci-shared-php`, `ci-theme`, `ci-plugins`).
+  - Enforced deterministic `npm ci --no-audit --no-fund` in root design system gate.
+  - Removed redundant obsolete workflow `.github/workflows/ci-design-system.yml`.
+- ✅ **WordPress Playground Blueprints (`tools/playground/`):**
+  - Authored universal base blueprint `tools/playground/blueprint-base.json` targeting WP 6.7 and PHP 8.2.
+  - Authored 6 individual companion plugin blueprints with fixtures: `directoryweb.json`, `rankweb.json`, `sourceweb.json`, `insightweb.json`, `mailweb.json`, `planweb.json`.
+  - Authored `tools/playground/README.md` with CLI and browser usage instructions.
+  - Validated syntax across all JSON blueprint specifications.
   - Standalone fallback layers are always required safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
   - Fully compatible with symlinked plugins, custom directory names, Bedrock, and alternative file structures.
 - ✅ **Fix 5 (Low — Translation Domain Scoping):**

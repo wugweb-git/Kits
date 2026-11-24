@@ -207,7 +207,7 @@ add_action(
 		}
 		add_submenu_page( kits_site_menu_parent(), 'Dates', 'Dates', kits_site_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
 	},
-	kits_site_menu_priority( 'aw-dates' ) // order: kits_site_screens() (admin-home.php)
+	function_exists( 'kits_site_menu_priority' ) ? kits_site_menu_priority( 'aw-dates' ) : 21 // order: kits_site_screens() (admin-home.php)
 );
 
 /** Kits → Dates. */

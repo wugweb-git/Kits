@@ -15,15 +15,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'rest_api_init',
 	function () {
-		if ( ! function_exists( 'kits_shell_rest_can' ) ) {
+		if ( ! function_exists( 'insightweb_rest_can' ) && ! function_exists( 'kits_shell_rest_can' ) ) {
 			return;
 		}
+		$can = function_exists( 'insightweb_rest_can' ) ? 'insightweb_rest_can' : 'kits_shell_rest_can';
 		register_rest_route(
 			INSIGHTWEB_REST,
 			'/dashboard/box',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => kits_shell_rest_can( aw_si_cap() ),
+				'permission_callback' => $can( aw_si_cap() ),
 				'callback'            => 'insightweb_rest_box',
 				'args'                => array(
 					'key' => array(

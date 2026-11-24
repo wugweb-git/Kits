@@ -233,7 +233,7 @@ function aw_place_intros_list(): void {
 		);
 	}
 	echo '<h2>' . esc_html__( 'Intros on the site', 'directoryweb' ) . '</h2>';
-	kits_simple_table(
+	directoryweb_simple_table(
 		'aw-place-intros',
 		array(
 			'place'   => __( 'Place', 'directoryweb' ),

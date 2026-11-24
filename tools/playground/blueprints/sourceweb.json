@@ -1,0 +1,36 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/admin.php?page=sourceweb",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.7"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "SourceWeb Playground",
+        "blogdescription": "Automated content syndication, feed ingestion & reprint rules"
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/AnimalWrites/Kits/kits-suite/dist/sourceweb.zip"
+      }
+    },
+    {
+      "step": "activatePlugin",
+      "pluginPath": "sourceweb/sourceweb.php"
+    }
+  ]
+}

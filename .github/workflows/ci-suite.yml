@@ -79,7 +79,7 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: package-lock.json
-      - run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - run: npm run check:ci
       - run: npm run test:visual
 
@@ -126,12 +126,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ['8.1', '8.2', '8.3']
+        php: ['8.0', '8.1', '8.2', '8.3']
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+
+      - name: Matrix & Remediation Verification Suite
+        run: |
+          php tests/standalone-matrix-test.php
+          php tests/remediation-verification-test.php
 
       - name: Test Kits Core
         if: ${{ needs.changes.outputs.kits_core == 'true' || github.event_name == 'push' }}
@@ -147,16 +152,19 @@ jobs:
           php plugins/directoryweb/tests/directoryweb-tests.php
           php plugins/directoryweb/tests/listing-meta-tests.php
           php plugins/directoryweb/tests/org-people-tests.php
+          php plugins/directoryweb/tests/directoryweb-standalone-test.php
 
       - name: Test InsightWeb
         if: ${{ needs.changes.outputs.insightweb == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/insightweb/tests/run.php
+          php plugins/insightweb/tests/StandaloneInsightsTest.php
 
       - name: Test RankWeb
         if: ${{ needs.changes.outputs.rankweb == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/rankweb/tests/run.php
+          php plugins/rankweb/tests/phpunit-lite.php
 
       - name: Test MailWeb
         if: ${{ needs.changes.outputs.mailweb == 'true' || github.event_name == 'push' }}
@@ -172,10 +180,11 @@ jobs:
         if: ${{ needs.changes.outputs.sourceweb == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/sourceweb/tests/run.php
+          php plugins/sourceweb/tests/SourceWebStandaloneTest.php
 
   package-dist:
     name: Package Distribution Artifacts
-    needs: [changes, ci-theme, ci-plugins]
+    needs: [changes, ci-design-system, ci-shared-php, ci-theme, ci-plugins]
     if: ${{ always() && (needs.changes.outputs.packaging == 'true' || github.event_name == 'push') && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-latest
     steps:

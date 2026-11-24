@@ -305,22 +305,23 @@ function insightweb_rest_save_keys( WP_REST_Request $request ): WP_REST_Response
 add_action(
 	'rest_api_init',
 	function () {
-		if ( ! function_exists( 'kits_shell_rest_can' ) || ! defined( 'INSIGHTWEB_REST' ) ) {
+		if ( ( ! function_exists( 'insightweb_rest_can' ) && ! function_exists( 'kits_shell_rest_can' ) ) || ! defined( 'INSIGHTWEB_REST' ) ) {
 			return;
 		}
-		// Administrators only, with the wp_rest nonce (kits_shell_rest_can), as Kits → Keys was.
+		$can = function_exists( 'insightweb_rest_can' ) ? 'insightweb_rest_can' : 'kits_shell_rest_can';
+		// Administrators only, with the wp_rest nonce (insightweb_rest_can), as Kits → Keys was.
 		register_rest_route(
 			INSIGHTWEB_REST,
 			'/keys',
 			array(
 				array(
 					'methods'             => 'GET',
-					'permission_callback' => kits_shell_rest_can( 'manage_options' ),
+					'permission_callback' => $can( 'manage_options' ),
 					'callback'            => fn() => rest_ensure_response( insightweb_keys_payload() ),
 				),
 				array(
 					'methods'             => 'POST',
-					'permission_callback' => kits_shell_rest_can( 'manage_options' ),
+					'permission_callback' => $can( 'manage_options' ),
 					'args'                => array(
 						'keys'  => array(
 							'type'                 => 'object',

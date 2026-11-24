@@ -26,20 +26,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// MailWeb needs Kits Core (its admin shell, forms and dates). Plugins load in name order, so an active Kits Core loads after
-// this file: load it now, once (kits-core.php stops a second load). Without it, say so and do nothing else.
-if ( ! defined( 'KITS_CORE_LOADED' ) && defined( 'WP_PLUGIN_DIR' ) && is_readable( WP_PLUGIN_DIR . '/kits-core/kits-core.php' )
-	&& ( in_array( 'kits-core/kits-core.php', (array) get_option( 'active_plugins', array() ), true )
-		|| ( is_multisite() && isset( ( (array) get_site_option( 'active_sitewide_plugins', array() ) )['kits-core/kits-core.php'] ) ) ) ) {
-	wp_register_plugin_realpath( WP_PLUGIN_DIR . '/kits-core/kits-core.php' ); // as WordPress does before it loads a plugin: a linked folder keeps its plugins address
-	require_once WP_PLUGIN_DIR . '/kits-core/kits-core.php';
-}
-if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-	define( 'MAILWEB_STANDALONE', true );
-	require_once __DIR__ . '/includes/standalone-fallback.php';
-} else {
-	define( 'MAILWEB_STANDALONE', false );
-}
+// Standalone compatibility layer: provides fallback implementations when Kits Core is inactive.
+require_once __DIR__ . '/includes/standalone-fallback.php';
+
+// Track standalone mode dynamically on plugins_loaded so boot order between plugins does not matter.
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! defined( 'MAILWEB_STANDALONE' ) ) {
+			define( 'MAILWEB_STANDALONE', ! defined( 'KITS_CORE_LOADED' ) );
+		}
+	},
+	1
+);
 
 define( 'MAILWEB_VERSION', '3.3.0' );
 define( 'MAILWEB_FILE', __FILE__ );

@@ -18,12 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param array  $rows   Rows of escaped HTML cells, column => HTML (_sort: column => raw value; _after: a row printed under it).
  * @param array  $opts   per_page, total (rows are already that page), primary, fixed, empty, foot, sortable, caption.
  */
-function kits_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
-	if ( ! class_exists( 'WP_List_Table' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+if ( ! function_exists( 'kits_simple_table' ) ) {
+	function kits_simple_table( $plural, array $cols, array $rows, array $opts = array() ) {
+		if ( ! class_exists( 'WP_List_Table' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+		}
+		require_once __DIR__ . '/class-kits-simple-table.php';
+		$t = new Kits_Simple_Table( $plural, $cols, $rows, $opts );
+		$t->prepare_items();
+		$t->display();
 	}
-	require_once __DIR__ . '/class-kits-simple-table.php';
-	$t = new Kits_Simple_Table( $plural, $cols, $rows, $opts );
-	$t->prepare_items();
-	$t->display();
 }

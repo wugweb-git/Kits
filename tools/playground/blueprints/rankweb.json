@@ -1,0 +1,40 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/admin.php?page=rankweb-settings",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.7"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "RankWeb Playground",
+        "blogdescription": "Standalone SEO metadata, Schema.org, canonicals & sitemaps"
+      }
+    },
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "url",
+        "url": "https://raw.githubusercontent.com/AnimalWrites/Kits/kits-suite/dist/rankweb.zip"
+      }
+    },
+    {
+      "step": "activatePlugin",
+      "pluginPath": "rankweb/rankweb.php"
+    },
+    {
+      "step": "runPHP",
+      "code": "<?php\nupdate_option('aw_seo_title_template', '%title% | %sitename%');\nupdate_option('aw_seo_default_description', 'High performance native SEO metadata without external dependencies.');\n"
+    }
+  ]
+}

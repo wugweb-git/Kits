@@ -1,0 +1,29 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.7"
+  },
+  "phpExtensionHeaders": {
+    "disable-xdebug": "true"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "setSiteOptions",
+      "options": {
+        "blogname": "Kits Suite Playground",
+        "blogdescription": "Disposable preview environment for Kits Suite",
+        "posts_per_page": "10"
+      }
+    }
+  ]
+}

@@ -21,8 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return bool
  */
-function kits_scf_active() {
-	return function_exists( 'acf_add_local_field_group' );
+if ( ! function_exists( 'kits_scf_active' ) ) {
+	function kits_scf_active() {
+		return function_exists( 'acf_add_local_field_group' );
+	}
 }
 
 /**

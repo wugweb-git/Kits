@@ -89,6 +89,16 @@ if ( ! function_exists( 'esc_attr__' ) ) {
 		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
 	}
 }
+if ( ! function_exists( 'wp_verify_nonce' ) ) {
+	function wp_verify_nonce( $nonce, $action = -1 ) {
+		return 'valid_nonce' === $nonce && 'wp_rest' === $action;
+	}
+}
+if ( ! function_exists( 'rest_get_authenticated_app_password' ) ) {
+	function rest_get_authenticated_app_password() {
+		return $GLOBALS['mock_app_password'] ?? null;
+	}
+}
 
 // Load the standalone compatibility layer.
 require dirname( __DIR__ ) . '/includes/standalone-fallback.php';
@@ -106,33 +116,53 @@ function check( $ok, $name ) {
 }
 
 // 1. Check primitives.
-check( strpos( kits_count( 42 ), '42' ) !== false, 'kits_count returns formatted count' );
-check( strpos( kits_icon( 'map-pin' ), 'kit-ico--map-pin' ) !== false, 'kits_icon renders span' );
-check( strpos( kits_date( '2026-11-23', 'Y-m-d' ), '2026-11-23' ) !== false, 'kits_date formats date time tag' );
+check( strpos( directoryweb_count( 42 ), '42' ) !== false, 'directoryweb_count returns formatted count' );
+check( strpos( directoryweb_icon( 'map-pin' ), 'kit-ico--map-pin' ) !== false, 'directoryweb_icon renders span' );
+check( strpos( directoryweb_date( '2026-11-23', 'Y-m-d' ), '2026-11-23' ) !== false, 'directoryweb_date formats date time tag' );
 
 // 2. Check table renderer fallback.
 ob_start();
-kits_simple_table( 'test-table', array( 'name' => 'Name', 'val' => 'Value' ), array( array( 'name' => 'Item 1', 'val' => '100' ) ) );
+directoryweb_simple_table( 'test-table', array( 'name' => 'Name', 'val' => 'Value' ), array( array( 'name' => 'Item 1', 'val' => '100' ) ) );
 $table_html = ob_get_clean();
-check( strpos( $table_html, 'test-table' ) !== false, 'kits_simple_table renders table' );
-check( strpos( $table_html, 'Item 1' ) !== false, 'kits_simple_table renders row data' );
+check( strpos( $table_html, 'test-table' ) !== false, 'directoryweb_simple_table renders table' );
+check( strpos( $table_html, 'Item 1' ) !== false, 'directoryweb_simple_table renders row data' );
 
 // 3. Check phone normalisation.
-check( '9876543210' === kits_ff_phone10( '+91 98765 43210' ), 'kits_ff_phone10 extracts 10 digits' );
-check( '+91 98765 43210' === kits_ff_phone_store( '9876543210' ), 'kits_ff_phone_store formats +91 number' );
+check( '9876543210' === directoryweb_ff_phone10( '+91 98765 43210' ), 'directoryweb_ff_phone10 extracts 10 digits' );
+check( '+91 98765 43210' === directoryweb_ff_phone_store( '9876543210' ), 'directoryweb_ff_phone_store formats +91 number' );
 
 // 4. Check social username parsing.
-check( 'myorg' === kits_ff_social_user( 'l_instagram', 'https://instagram.com/myorg' ), 'kits_ff_social_user parses Instagram URL' );
-check( 'myorg' === kits_ff_social_user( 'l_x', '@myorg' ), 'kits_ff_social_user parses handle' );
+check( 'myorg' === directoryweb_ff_social_user( 'l_instagram', 'https://instagram.com/myorg' ), 'directoryweb_ff_social_user parses Instagram URL' );
+check( 'myorg' === directoryweb_ff_social_user( 'l_x', '@myorg' ), 'directoryweb_ff_social_user parses handle' );
 
 // 5. Check REST permission callback.
-$can_func = kits_shell_rest_can( 'manage_directoryweb' );
-check( is_callable( $can_func ), 'kits_shell_rest_can returns callable' );
-check( true === $can_func( new stdClass() ), 'kits_shell_rest_can passes for authorized user' );
+check( function_exists( 'directoryweb_rest_can' ), 'directoryweb_rest_can is defined' );
+$can_func = directoryweb_rest_can( 'manage_directoryweb' );
+check( is_callable( $can_func ), 'directoryweb_rest_can returns callable' );
 
-$unauth_func = kits_shell_rest_can( 'super_admin_only' );
-$result = $unauth_func( new stdClass() );
-check( $result instanceof WP_Error && 'rest_forbidden' === $result->code, 'kits_shell_rest_can returns WP_Error for missing capability' );
+// Missing nonce returns 403 rest_cookie_invalid_nonce for cookie auth.
+$missing_nonce_res = $can_func( new stdClass() );
+check( $missing_nonce_res instanceof WP_Error && 'rest_cookie_invalid_nonce' === $missing_nonce_res->code, 'missing nonce returns rest_cookie_invalid_nonce' );
+
+// Invalid nonce returns 403 rest_cookie_invalid_nonce.
+$bad_req = (object) array( 'headers' => array( 'X-WP-Nonce' => 'bad_token' ) );
+$bad_nonce_res = $can_func( $bad_req );
+check( $bad_nonce_res instanceof WP_Error && 'rest_cookie_invalid_nonce' === $bad_nonce_res->code, 'invalid nonce returns rest_cookie_invalid_nonce' );
+
+// Valid nonce succeeds.
+$valid_req = (object) array( 'headers' => array( 'X-WP-Nonce' => 'valid_nonce' ) );
+check( true === $can_func( $valid_req ), 'valid nonce passes directoryweb_rest_can' );
+
+// Application password succeeds without cookie nonce.
+$GLOBALS['mock_app_password'] = (object) array( 'uuid' => 'test-app' );
+check( true === $can_func( new stdClass() ), 'application password passes without nonce' );
+$GLOBALS['mock_app_password'] = null;
+
+// Missing capability returns rest_forbidden.
+$unauth_func = directoryweb_rest_can( 'super_admin_only' );
+$valid_req_unauth = (object) array( 'headers' => array( 'X-WP-Nonce' => 'valid_nonce' ) );
+$result = $unauth_func( $valid_req_unauth );
+check( $result instanceof WP_Error && 'rest_forbidden' === $result->code, 'directoryweb_rest_can returns WP_Error for missing capability' );
 
 echo sprintf( "%d checks, %d failed\n", $count, $fails );
 exit( $fails > 0 ? 1 : 0 );

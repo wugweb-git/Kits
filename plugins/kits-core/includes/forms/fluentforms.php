@@ -85,20 +85,24 @@ const KITS_FF_SOCIAL = array(
 const KITS_FF_DATES = array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
 
 /** An Indian number's 10 digits ('' when it is not one): +91, 91 or 0 before it, spaces and dashes allowed. */
-function kits_ff_phone10( $v ) {
-	$d = preg_replace( '/\D+/', '', (string) $v );
-	if ( 12 === strlen( $d ) && 0 === strpos( $d, '91' ) ) {
-		$d = substr( $d, 2 );
-	} elseif ( 11 === strlen( $d ) && '0' === $d[0] ) {
-		$d = substr( $d, 1 );
+if ( ! function_exists( 'kits_ff_phone10' ) ) {
+	function kits_ff_phone10( $v ) {
+		$d = preg_replace( '/\D+/', '', (string) $v );
+		if ( 12 === strlen( $d ) && 0 === strpos( $d, '91' ) ) {
+			$d = substr( $d, 2 );
+		} elseif ( 11 === strlen( $d ) && '0' === $d[0] ) {
+			$d = substr( $d, 1 );
+		}
+		return preg_match( '/^[1-9]\d{9}$/', $d ) ? $d : '';
 	}
-	return preg_match( '/^[1-9]\d{9}$/', $d ) ? $d : '';
 }
 
 /** A number as the site saves it: "+91 98765 43210"; anything else unchanged. */
-function kits_ff_phone_store( $v ) {
-	$d = kits_ff_phone10( $v );
-	return '' !== $d ? '+91 ' . substr( $d, 0, 5 ) . ' ' . substr( $d, 5 ) : trim( (string) $v );
+if ( ! function_exists( 'kits_ff_phone_store' ) ) {
+	function kits_ff_phone_store( $v ) {
+		$d = kits_ff_phone10( $v );
+		return '' !== $d ? '+91 ' . substr( $d, 0, 5 ) . ' ' . substr( $d, 5 ) : trim( (string) $v );
+	}
 }
 
 /** Each social field's own hosts and the path before the username in its links. */
@@ -111,17 +115,19 @@ const KITS_FF_SOCIAL_HOSTS = array(
 );
 
 /** A social link or "@name" as the username alone ('' when it is not a username or a link of that field's platform). */
-function kits_ff_social_user( $field, $v ) {
-	$v = trim( (string) $v );
-	if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) { // a link: only this platform's, in its username form
-		$h = KITS_FF_SOCIAL_HOSTS[ $field ] ?? null;
-		if ( ! $h || ! preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . $h[0] . '/' . preg_quote( $h[1], '#' ) . '([A-Za-z0-9._-]{1,100})/?(?:[?\#].*)?$#i', $v, $m ) ) {
-			return '';
+if ( ! function_exists( 'kits_ff_social_user' ) ) {
+	function kits_ff_social_user( $field, $v ) {
+		$v = trim( (string) $v );
+		if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) { // a link: only this platform's, in its username form
+			$h = KITS_FF_SOCIAL_HOSTS[ $field ] ?? null;
+			if ( ! $h || ! preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . $h[0] . '/' . preg_quote( $h[1], '#' ) . '([A-Za-z0-9._-]{1,100})/?(?:[?\#].*)?$#i', $v, $m ) ) {
+				return '';
+			}
+			$v = $m[1];
 		}
-		$v = $m[1];
+		$v = ltrim( $v, '@' );
+		return preg_match( '/^[A-Za-z0-9._-]{1,100}$/', $v ) ? $v : '';
 	}
-	$v = ltrim( $v, '@' );
-	return preg_match( '/^[A-Za-z0-9._-]{1,100}$/', $v ) ? $v : '';
 }
 
 /** A date typed as "8 Oct 2026" (or 2026-10-08) as Y-m-d; '' when it cannot be read. */
@@ -249,27 +255,29 @@ function kits_ff_ctx( $k = null ) {
  * @param array  $ctx What the form is shown for: listing, item, reason, source, vol_contact.
  * @return string
  */
-function kits_ff_form( $key, $ctx = array() ) {
-	$id = kits_ff_id( $key );
-	if ( ! $id ) {
-		return kits_ff_missing( KITS_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
+if ( ! function_exists( 'kits_ff_form' ) ) {
+	function kits_ff_form( $key, $ctx = array() ) {
+		$id = kits_ff_id( $key );
+		if ( ! $id ) {
+			return kits_ff_missing( KITS_FF_FORMS[ $key ]['title'] ?? $key, 'wp aw ff-form ' . $key . ' <form ID>' );
+		}
+		kits_ff_style( 'aw-forms' ); // the kit-form aw-form-ff wrapper
+		if ( 'volunteer' === $key ) {
+			kits_ff_style( 'aw-volunteer' ); // aw-volunteer-form, aw-vol-roles, aw-vol-role
+		}
+		$GLOBALS['kits_ff_ctx'] = (array) $ctx + array( 'key' => $key );
+		$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
+		$GLOBALS['kits_ff_ctx'] = array();
+		$attrs                = '';
+		if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
+			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
+		}
+		$listing = $ctx['listing'] ?? null;
+		if ( $listing ) {
+			$attrs .= ' data-key="' . esc_attr( (string) $listing->ID ) . '"';
+		}
+		return '<div class="kit-form aw-form-ff aw-' . esc_attr( str_replace( '_', '-', $key ) ) . '-form" data-kit-form="' . esc_attr( $key ) . '"' . $attrs . '>' . $form . '</div>';
 	}
-	kits_ff_style( 'aw-forms' ); // the kit-form aw-form-ff wrapper
-	if ( 'volunteer' === $key ) {
-		kits_ff_style( 'aw-volunteer' ); // aw-volunteer-form, aw-vol-roles, aw-vol-role
-	}
-	$GLOBALS['kits_ff_ctx'] = (array) $ctx + array( 'key' => $key );
-	$form                 = do_shortcode( '[fluentform id="' . $id . '"]' );
-	$GLOBALS['kits_ff_ctx'] = array();
-	$attrs                = '';
-	if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor
-		$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
-	}
-	$listing = $ctx['listing'] ?? null;
-	if ( $listing ) {
-		$attrs .= ' data-key="' . esc_attr( (string) $listing->ID ) . '"';
-	}
-	return '<div class="kit-form aw-form-ff aw-' . esc_attr( str_replace( '_', '-', $key ) ) . '-form" data-kit-form="' . esc_attr( $key ) . '"' . $attrs . '>' . $form . '</div>';
 }
 
 /** A form that cannot show (Fluent Forms off, or its ID not set): nothing for visitors, a note for administrators. */

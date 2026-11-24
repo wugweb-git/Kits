@@ -51,7 +51,7 @@ function aw_listing_dl( $rows, $class = '' ) {
 	$out = '';
 	foreach ( $rows as $r ) {
 		if ( '' !== trim( (string) $r[1] ) ) {
-			$ico  = empty( $r[2] ) ? '' : ( 0 === strpos( $r[2], '<' ) ? '<span class="aw-facts-ico">' . $r[2] . '</span>' : kits_icon( $r[2] ) );
+			$ico  = empty( $r[2] ) ? '' : ( 0 === strpos( $r[2], '<' ) ? '<span class="aw-facts-ico">' . $r[2] . '</span>' : directoryweb_icon( $r[2] ) );
 			$out .= '<div class="aw-facts-row"><dt>' . $ico . esc_html( $r[0] ) . '</dt><dd>' . $r[1] . '</dd></div>';
 		}
 	}
@@ -168,20 +168,20 @@ function aw_block_listing_contact( $a, $id ) {
 	$btns   = '';
 	if ( '' !== $first && '' !== directoryweb_tel_url( $first ) ) {
 		/* translators: %s: phone number. */
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( directoryweb_tel_url( $first ) ) . '" data-act="phone">' . kits_icon( 'phone' ) . esc_html( sprintf( __( 'Call %s', 'directoryweb' ), $first ) ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $first ) : '' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( directoryweb_tel_url( $first ) ) . '" data-act="phone">' . directoryweb_icon( 'phone' ) . esc_html( sprintf( __( 'Call %s', 'directoryweb' ), $first ) ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $first ) : '' ) . '</a>';
 	}
 	if ( '' !== $wa && strlen( directoryweb_normalise_phone( $wa ) ) > 5 ) {
-		$btns .= '<a class="kit-btn" href="' . esc_url( 'https://wa.me/' . directoryweb_normalise_phone( $wa ) ) . '" rel="noopener" data-act="whatsapp">' . kits_icon( 'brand-whatsapp' ) . esc_html__( 'WhatsApp', 'directoryweb' ) . '</a>';
+		$btns .= '<a class="kit-btn" href="' . esc_url( 'https://wa.me/' . directoryweb_normalise_phone( $wa ) ) . '" rel="noopener" data-act="whatsapp">' . directoryweb_icon( 'brand-whatsapp' ) . esc_html__( 'WhatsApp', 'directoryweb' ) . '</a>';
 	}
 	if ( aw_lf( $id, 'aw_email' ) ) {
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email' ) ) . '" data-act="email">' . kits_icon( 'mail' ) . esc_html__( 'Email', 'directoryweb' ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_email' ) ) : '' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( 'mailto:' . aw_lf( $id, 'aw_email' ) ) . '" data-act="email">' . directoryweb_icon( 'mail' ) . esc_html__( 'Email', 'directoryweb' ) . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_email' ) ) : '' ) . '</a>';
 	}
 	if ( aw_lf( $id, 'aw_website' ) ) {
-		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . kits_icon( 'world' ) . esc_html__( 'Website', 'directoryweb' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'directoryweb' ) . '</span>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_website' ) ) : '' ) . '</a>';
+		$btns .= '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_website' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="website">' . directoryweb_icon( 'world' ) . esc_html__( 'Website', 'directoryweb' ) . ' <span aria-hidden="true">↗</span><span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'directoryweb' ) . '</span>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, aw_lf( $id, 'aw_website' ) ) : '' ) . '</a>';
 	}
 	$btns .= aw_lf( $id, 'aw_maps_url' )
-		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</a>'
-		: '<span class="kit-btn kit-btn--secondary" aria-disabled="true" data-act="maps_url">' . kits_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</span>'; // no map link yet: greyed out (field note)
+		? '<a class="kit-btn kit-btn--secondary" href="' . esc_url( aw_lf( $id, 'aw_maps_url' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank" data-act="maps_url">' . directoryweb_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</a>'
+		: '<span class="kit-btn kit-btn--secondary" aria-disabled="true" data-act="maps_url">' . directoryweb_icon( 'map-pin' ) . esc_html__( 'Directions', 'directoryweb' ) . '</span>'; // no map link yet: greyed out (field note)
 	$more = array();
 	foreach ( array( array( '' === $first, __( 'Phone', 'directoryweb' ), 'phone', 'phone' ), array( ! aw_lf( $id, 'aw_email' ), __( 'Email', 'directoryweb' ), 'mail', 'email' ), array( ! aw_lf( $id, 'aw_website' ), __( 'Website', 'directoryweb' ), 'world', '' ) ) as $na ) {
 		if ( $na[0] ) { // a missing way to reach them is said, never hidden
@@ -194,7 +194,7 @@ function aw_block_listing_contact( $a, $id ) {
 			continue;
 		}
 		$num    = '<a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>' . ( function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $p['number'] ) : '' );
-		$waa    = $p['whatsapp'] && strlen( directoryweb_normalise_phone( $p['number'] ) ) > 5 ? ' <a class="aw-listing-wa" href="' . esc_url( 'https://wa.me/' . directoryweb_normalise_phone( $p['number'] ) ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . kits_icon( 'brand-whatsapp' ) . '</a>' : '';
+		$waa    = $p['whatsapp'] && strlen( directoryweb_normalise_phone( $p['number'] ) ) > 5 ? ' <a class="aw-listing-wa" href="' . esc_url( 'https://wa.me/' . directoryweb_normalise_phone( $p['number'] ) ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . directoryweb_icon( 'brand-whatsapp' ) . '</a>' : '';
 		$more[] = array( '' !== $p['label'] ? $p['label'] : __( 'Phone', 'directoryweb' ), $num . $waa, $p['whatsapp'] ? 'brand-whatsapp' : 'phone' );
 	}
 	// A second email or website found by the enrichment worker is kept beside the first, both marked unverified.
@@ -447,8 +447,8 @@ function aw_block_listing_activity( $a, $id ) {
 	if ( aw_lf( $id, 'aw_g_rating' ) ) {
 		$on     = aw_listing_figures_on( $id, 'google' );
 		$parts  = aw_listing_parts( array( '<span aria-hidden="true">★</span> ' . esc_html( aw_lf( $id, 'aw_g_rating' ) ) . '<span class="screen-reader-text"> ' . esc_html__( 'out of 5', 'directoryweb' ) . '</span>', aw_lf( $id, 'aw_g_reviews' ) ? esc_html( sprintf( /* translators: %s: number. */ _n( '%s review', '%s reviews', (int) aw_lf( $id, 'aw_g_reviews' ), 'directoryweb' ), number_format_i18n( (int) aw_lf( $id, 'aw_g_reviews' ) ) ) ) : '' ) );
-		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . kits_icon( 'map-pin' ) . esc_html__( 'Google', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
-			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . kits_date( $on, null, 'aw-date' ) . '</p>' : '' )
+		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . directoryweb_icon( 'map-pin' ) . esc_html__( 'Google', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
+			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . directoryweb_date( $on, null, 'aw-date' ) . '</p>' : '' )
 			. ( aw_lf( $id, 'aw_g_profile' ) ? '<a class="aw-activity-link" href="' . esc_url( aw_lf( $id, 'aw_g_profile' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank">' . esc_html__( 'View on Google', 'directoryweb' ) . ' <span aria-hidden="true">↗</span></a>' : '' ) . '</div>';
 	}
 	if ( aw_lf( $id, 'aw_ig_followers' ) || aw_lf( $id, 'aw_ig_posts' ) || aw_lf( $id, 'aw_last_post' ) ) {
@@ -457,11 +457,11 @@ function aw_block_listing_activity( $a, $id ) {
 			array(
 				aw_lf( $id, 'aw_ig_followers' ) ? esc_html( sprintf( /* translators: %s: number. */ __( '%s followers', 'directoryweb' ), number_format_i18n( (int) aw_lf( $id, 'aw_ig_followers' ) ) ) ) : '',
 				aw_lf( $id, 'aw_ig_posts' ) ? esc_html( sprintf( /* translators: %s: number. */ __( '%s posts', 'directoryweb' ), number_format_i18n( (int) aw_lf( $id, 'aw_ig_posts' ) ) ) ) : '',
-				aw_lf( $id, 'aw_last_post' ) ? esc_html__( 'last post', 'directoryweb' ) . ' ' . kits_date( aw_lf( $id, 'aw_last_post' ), null, 'aw-date' ) : '',
+				aw_lf( $id, 'aw_last_post' ) ? esc_html__( 'last post', 'directoryweb' ) . ' ' . directoryweb_date( aw_lf( $id, 'aw_last_post' ), null, 'aw-date' ) : '',
 			)
 		);
-		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . kits_icon( 'instagram' ) . esc_html__( 'Instagram', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
-			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . kits_date( $on, null, 'aw-date' ) . '</p>' : '' )
+		$boxes .= '<div class="aw-activity-box"><p class="aw-activity-name">' . directoryweb_icon( 'instagram' ) . esc_html__( 'Instagram', 'directoryweb' ) . '</p><p class="aw-activity-figures">' . $parts . '</p>'
+			. ( $on ? '<p class="aw-activity-on">' . esc_html__( 'as on', 'directoryweb' ) . ' ' . directoryweb_date( $on, null, 'aw-date' ) . '</p>' : '' )
 			. ( aw_lf( $id, 'aw_instagram' ) ? '<a class="aw-activity-link" href="' . esc_url( aw_lf( $id, 'aw_instagram' ) ) . '" rel="' . esc_attr( $rel ) . '" target="_blank">' . esc_html__( 'View on Instagram', 'directoryweb' ) . ' <span aria-hidden="true">↗</span></a>' : '' ) . '</div>';
 	}
 	return aw_listing_group( 'activity', __( 'Activity', 'directoryweb' ), '' !== $boxes ? '<div class="aw-activity">' . $boxes . '</div>' : '' );

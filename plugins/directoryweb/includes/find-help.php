@@ -337,12 +337,12 @@ function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
 	if ( ! $places ) {
 		return '<p class="aw-findhelp-line"><strong>' . esc_html__( 'Find help near you', 'directoryweb' ) . '</strong>'
 			. '<a href="' . esc_url( home_url( '/directory/' ) ) . '">' . esc_html__( 'All states and districts', 'directoryweb' ) . '</a>'
-			. '<a href="' . esc_url( home_url( '/directory/#near-me' ) ) . '">' . kits_icon( 'map-pin' ) . esc_html__( 'Near me', 'directoryweb' ) . '</a></p>';
+			. '<a href="' . esc_url( home_url( '/directory/#near-me' ) ) . '">' . directoryweb_icon( 'map-pin' ) . esc_html__( 'Near me', 'directoryweb' ) . '</a></p>';
 	}
 	$items = '';
 	foreach ( $places as list( $p, $n ) ) {
 		$label  = 'district' === $p->kind || ! $all_of ? aw_findhelp_place_name( $p ) : sprintf( /* translators: %s: state. */ __( 'All of %s', 'directoryweb' ), $p->name );
-		$items .= '<li><a href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span>' . esc_html( $label ) . '</span>' . kits_count( $n ) . '</a></li>';
+		$items .= '<li><a href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span>' . esc_html( $label ) . '</span>' . directoryweb_count( $n ) . '</a></li>';
 	}
 	return '<nav class="aw-browse-states aw-findhelp" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="' . esc_attr( $head ) . '" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Find help near you', 'directoryweb' ) . '</h2>'
 		. '<p class="aw-findhelp-lede">' . esc_html__( 'Animal welfare organisations, Gaushalas and government vets, with their contact details.', 'directoryweb' ) . '</p>'

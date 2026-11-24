@@ -74,8 +74,6 @@ EXCLUDE = [
     "webpack.config.*",
     "node_modules",
     "node_modules/*",
-    "vendor",
-    "vendor/*",
     "tests",
     "tests/*",
     "*_test.go",
@@ -90,6 +88,9 @@ EXCLUDE = [
     ".pytest_cache/*",
 ]
 
+# Targets that bundle production vendor dependencies (e.g. MailWeb SDK)
+VENDOR_BUNDLED_TARGETS = {"mailweb"}
+
 SRC_EXCLUDE = [
     "admin-app/src",
     "admin-app/src/*",
@@ -97,10 +98,17 @@ SRC_EXCLUDE = [
 
 
 def excluded(rel_path: str, patterns: list[str]) -> bool:
+    posix_path = pathlib.PurePosixPath(rel_path)
+    # Check top-level src exclusion specifically:
+    # If the file/folder starts with "src", it is top-level uncompiled JS/CSS.
+    # But do NOT exclude "src" when nested inside vendor/ (e.g. vendor/.../src).
+    if posix_path.parts and posix_path.parts[0] == "src":
+        return True
+
     for pat in patterns:
         if fnmatch.fnmatch(rel_path, pat):
             return True
-        for part in pathlib.PurePosixPath(rel_path).parts:
+        for part in posix_path.parts:
             if fnmatch.fnmatch(part, pat):
                 return True
     return False
@@ -136,7 +144,13 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
         shutil.rmtree(stage)
     stage.mkdir(parents=True)
 
-    patterns = EXCLUDE if track == "wporg" else EXCLUDE + SRC_EXCLUDE
+    patterns = list(EXCLUDE)
+    if track != "wporg":
+        patterns.extend(SRC_EXCLUDE)
+
+    # Exclude vendor directory for targets that do not bundle production vendor dependencies
+    if target not in VENDOR_BUNDLED_TARGETS:
+        patterns.extend(["vendor", "vendor/*"])
 
     count = 0
     for path in sorted(src.rglob("*")):

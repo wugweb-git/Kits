@@ -26,16 +26,17 @@ const INSIGHTWEB_REST = 'insightweb/v1';
 add_action(
 	'rest_api_init',
 	function () {
-		if ( ! function_exists( 'kits_shell_rest_can' ) ) {
+		if ( ! function_exists( 'insightweb_rest_can' ) && ! function_exists( 'kits_shell_rest_can' ) ) {
 			return;
 		}
+		$can = function_exists( 'insightweb_rest_can' ) ? 'insightweb_rest_can' : 'kits_shell_rest_can';
 		$cap = aw_si_cap();
 		register_rest_route(
 			INSIGHTWEB_REST,
 			'/dashboard',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => kits_shell_rest_can( $cap ),
+				'permission_callback' => $can( $cap ),
 				'callback'            => fn() => rest_ensure_response( insightweb_dashboard_payload() ),
 			)
 		);
@@ -44,7 +45,7 @@ add_action(
 			'/dashboard/count',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => kits_shell_rest_can( $cap ),
+				'permission_callback' => $can( $cap ),
 				'callback'            => fn() => rest_ensure_response( array( 'waiting' => insightweb_dash_request() ) ),
 			)
 		);
@@ -53,7 +54,7 @@ add_action(
 			'/settings',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => kits_shell_rest_can( $cap ),
+				'permission_callback' => $can( $cap ),
 				'callback'            => fn() => rest_ensure_response( insightweb_settings_payload( current_user_can( 'manage_options' ) ) ),
 			)
 		);
@@ -62,7 +63,7 @@ add_action(
 			'/settings/numbers',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => kits_shell_rest_can( 'manage_options' ),
+				'permission_callback' => $can( 'manage_options' ),
 				'args'                => array(
 					'fields'      => array(
 						'type'                 => 'object',
@@ -85,7 +86,7 @@ add_action(
 			'/settings/rising',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => kits_shell_rest_can( $cap ),
+				'permission_callback' => $can( $cap ),
 				'args'                => array(
 					'gdelt' => array( 'type' => 'boolean' ),
 					'seeds' => array( 'type' => 'string' ),
@@ -102,7 +103,7 @@ add_action(
 			'/services',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => kits_shell_rest_can( $cap ),
+				'permission_callback' => $can( $cap ),
 				'callback'            => fn() => rest_ensure_response( array( 'services' => insightweb_services() ) ),
 			)
 		);
