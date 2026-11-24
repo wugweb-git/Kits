@@ -5,10 +5,8 @@
  *
  * A key's value, first found wins:
  *   1. a wp-config.php constant of the same name (not empty);
- *   2. InsightWeb's own option insightweb_keys (name => value, not autoloaded), set on Settings → Keys;
- *   3. the old shared option aw_keys (the Kits → Keys vault, whose screen and code left Animal Writes Core on 19 Nov
- *      2026), read directly, so the live keys keep working until the copy has run (insightweb_keys_copy(), by itself
- *      or `wp insightweb keys copy`) and the owner deletes the option.
+ *   2. InsightWeb's own option insightweb_keys (name => value, not autoloaded), set on Settings → Keys.
+ *   (Stage 3 Step 2: the legacy aw_keys read fallback was removed; insightweb_keys_copy() remains available for one-time migration.)
  * A value is never printed, logged, exported or sent over REST: the screen only says whether a key is set and where.
  * Administrators only (manage_options), as on Kits → Keys.
  *
@@ -67,7 +65,7 @@ function insightweb_key_saved( string $option, string $name ): string {
 }
 
 /**
- * Where a key is set and its value: ['config' | 'insightweb' | 'old' | '', value], first found wins.
+ * Where a key is set and its value: ['config' | 'insightweb' | '', value], first found wins.
  *
  * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
  * @return array{0: string, 1: string}
@@ -76,7 +74,6 @@ function insightweb_key_found( string $name ): array {
 	$sources = array(
 		'config'     => fn() => insightweb_key_constant( $name ),
 		'insightweb' => fn() => insightweb_key_saved( INSIGHTWEB_KEYS_OPTION, $name ),
-		'old'        => fn() => insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name ),
 	);
 	foreach ( $sources as $where => $read ) {
 		$v = $read();
@@ -114,7 +111,6 @@ function insightweb_key( string $name ): string {
 function insightweb_key_where_label( string $where ): string {
 	return array(
 		'config' => __( 'Set in wp-config.php, which wins: change it there.', 'insightweb' ),
-		'old'    => __( 'Saved under Kits → Keys (the old place) and still used until it is copied here. Type one here to replace it.', 'insightweb' ),
 	)[ $where ] ?? '';
 }
 
