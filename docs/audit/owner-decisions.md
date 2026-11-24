@@ -50,3 +50,9 @@ Status: **open** unless marked. Nothing here is started. Each entry: current imp
 - Alternatives: leave both (Fluent Forms claims stay as they are, native is for sites without Fluent Forms); migrate existing Fluent Forms claims onto the state table with a one-time, reversible copy; stop accepting new Fluent Forms claims.
 - Implication: a migration touches decided, stored claims on the live directory; finished decisions must not change.
 - Recommendation: leave both. Do not migrate stored claims; new sites use the native form.
+
+## OD9. Animal Writes defaults inside RankWeb (open)
+- Now: three tenant-specific values are baked into the plugin and apply to every site that installs it: the schema contact email falls back to `contact@animalwrites.in` (`schema.php:287`), the WebSite alternate names default to "AnimalWrites", "Animal Writes India" and "animalwrites.in" (`settings.php:221`), and `parse_request` redirects any request path that looks like `/https:/animalwrites.in/...` (`redirects.php:155`). The language file's plugin description also names the domain.
+- Alternatives: (a) neutral defaults (empty email, site name and host as alternate names, no host redirect) and move the three behaviours to the Animal Writes site layer through filters; (b) keep as is for the commercial build and strip for the WordPress.org build; (c) leave.
+- Implication: (a) changes the live Animal Writes output until its site layer carries the filters, so it must be deployed together with that change. A customer's schema currently names another organisation's email.
+- Recommendation: (a), in one change with the site-layer filters, after the owner confirms the Animal Writes values to keep.

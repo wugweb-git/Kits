@@ -117,3 +117,74 @@
 	background: #fee2e2;
 	color: #b91c1c;
 }
+
+.rankweb-count {
+	color: #475569;
+}
+
+.rankweb-count--over {
+	color: #b91c1c;
+	font-weight: 600;
+}
+
+.rankweb-serp-preview--mobile {
+	max-width: 300px;
+}
+
+.rankweb-social-preview {
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	overflow: hidden;
+	background: #ffffff;
+}
+
+.rankweb-social-preview__image {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1.91 / 1;
+	object-fit: cover;
+	background: #f1f5f9;
+}
+
+.rankweb-social-preview__image--empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 12px;
+	box-sizing: border-box;
+	font-size: 12px;
+	color: #475569;
+	text-align: center;
+}
+
+.rankweb-social-preview__body {
+	padding: 10px 12px;
+}
+
+.rankweb-social-preview__host {
+	font-size: 11px;
+	color: #475569;
+	letter-spacing: 0.02em;
+}
+
+.rankweb-social-preview__title {
+	font-size: 14px;
+	font-weight: 600;
+	color: #0f172a;
+	margin: 2px 0;
+}
+
+.rankweb-social-preview__desc {
+	font-size: 12px;
+	color: #334155;
+}
+
+.rankweb-mode {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 10px;
+}
+
+.rankweb-sidebar-content .components-base-control__help {
+	margin-bottom: 12px;
+}
