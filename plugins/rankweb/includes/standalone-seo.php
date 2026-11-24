@@ -71,7 +71,7 @@ function rankweb_language(): string {
 
 /** The site's name (the site's own; a filter lets a site brand it differently). */
 function rankweb_site_name(): string {
-	return (string) apply_filters( 'rankweb_site_name', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) );
+	return (string) apply_filters( 'rankweb_site_name', html_entity_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES, 'UTF-8' ) );
 }
 
 /**
@@ -228,7 +228,6 @@ add_action(
 	'wp_head',
 	function () {
 		if ( rankweb_prints_head() ) {
-			remove_action( 'wp_head', 'aw_rankweb_render_standalone_meta_description', 1 ); // one description tag, this one
 			rankweb_print_head_tags();
 		}
 	},

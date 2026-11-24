@@ -96,6 +96,10 @@ function do_shortcode( \$content, \$ignore_html = false ) { return \$content; }
 function is_multisite() { return false; }
 function is_admin() { return false; }
 function is_404() { return false; }
+function is_feed() { return false; }
+function wp_get_document_title() { return 'Example Site'; }
+function get_locale() { return 'en_US'; }
+function user_trailingslashit( \$s ) { return rtrim( \$s, '/' ) . '/'; }
 function wp_date( \$fmt, \$ts = null ) { return date( \$fmt, \$ts ?: time() ); }
 function number_format_i18n( \$n ) { return number_format( (float) \$n ); }
 function esc_html( \$t ) { return htmlspecialchars( (string) \$t, ENT_QUOTES, 'UTF-8' ); }
@@ -141,7 +145,7 @@ function is_date() { return false; }
 function is_archive() { return false; }
 function is_search() { return false; }
 function is_home() { return false; }
-function is_front_page() { return false; }
+function is_front_page() { return true; }
 function is_page( \$page = '' ) { return true; }
 function is_single( \$post = '' ) { return false; }
 function is_attachment() { return false; }
