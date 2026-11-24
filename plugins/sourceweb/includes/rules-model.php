@@ -831,7 +831,7 @@ function aw_rules_domain_override_save( $host, $status, $name = '' ) {
 		array(
 			'name'            => '' !== $name ? $name : $host,
 			'count'           => 0,
-			'first'           => function_exists( 'current_time' ) ? current_time( 'Y-m-d' ) : date( 'Y-m-d' ),
+			'first'           => function_exists( 'current_time' ) ? current_time( 'Y-m-d' ) : gmdate( 'Y-m-d' ),
 			'last'            => '',
 		),
 		$prev,

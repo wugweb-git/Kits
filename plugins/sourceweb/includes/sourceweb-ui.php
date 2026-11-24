@@ -110,18 +110,18 @@ add_action(
 		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 		// The header's tabs in menu order.
 		$order = array(
-			'dashboard'  => __( 'Dashboard', 'aw-sourcing' ),
-			'review'     => __( 'To review', 'aw-sourcing' ),
-			'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
-			'sources'    => __( 'Sources', 'aw-sourcing' ),
-			'keywords'   => __( 'Keywords', 'aw-sourcing' ),
-			'rules'      => __( 'Rules', 'aw-sourcing' ),
-			'ai'         => __( 'AI models', 'aw-sourcing' ),
-			'workers'    => __( 'Workers', 'aw-sourcing' ),
-			'rejected'   => __( 'Rejected', 'aw-sourcing' ),
-			'relay-log'  => __( 'Relay log', 'aw-sourcing' ),
-			'log'        => __( 'Change log', 'aw-sourcing' ),
-			'settings'   => __( 'Settings', 'aw-sourcing' ),
+			'dashboard'  => __( 'Dashboard', 'sourceweb' ),
+			'review'     => __( 'To review', 'sourceweb' ),
+			'enrichment' => __( 'Enrichment review', 'sourceweb' ),
+			'sources'    => __( 'Sources', 'sourceweb' ),
+			'keywords'   => __( 'Keywords', 'sourceweb' ),
+			'rules'      => __( 'Rules', 'sourceweb' ),
+			'ai'         => __( 'AI models', 'sourceweb' ),
+			'workers'    => __( 'Workers', 'sourceweb' ),
+			'rejected'   => __( 'Rejected', 'sourceweb' ),
+			'relay-log'  => __( 'Relay log', 'sourceweb' ),
+			'log'        => __( 'Change log', 'sourceweb' ),
+			'settings'   => __( 'Settings', 'sourceweb' ),
 		);
 		$caps  = sourceweb_ui_caps();
 		$tabs  = array();
@@ -168,18 +168,18 @@ add_action(
  */
 function sourceweb_ui_page( string $screen ): void {
 	$titles = array(
-		'dashboard'  => __( 'SourceWeb', 'aw-sourcing' ),
-		'review'     => __( 'To review', 'aw-sourcing' ),
-		'enrichment' => __( 'Enrichment review', 'aw-sourcing' ),
-		'sources'    => __( 'Sources', 'aw-sourcing' ),
-		'keywords'   => __( 'Keywords', 'aw-sourcing' ),
-		'rules'      => __( 'Rules', 'aw-sourcing' ),
-		'ai'         => __( 'AI models', 'aw-sourcing' ),
-		'workers'    => __( 'Workers', 'aw-sourcing' ),
-		'rejected'   => __( 'Rejected', 'aw-sourcing' ),
-		'relay-log'  => __( 'Relay log', 'aw-sourcing' ),
-		'log'        => __( 'Change log', 'aw-sourcing' ),
-		'settings'   => __( 'SourceWeb settings', 'aw-sourcing' ),
+		'dashboard'  => __( 'SourceWeb', 'sourceweb' ),
+		'review'     => __( 'To review', 'sourceweb' ),
+		'enrichment' => __( 'Enrichment review', 'sourceweb' ),
+		'sources'    => __( 'Sources', 'sourceweb' ),
+		'keywords'   => __( 'Keywords', 'sourceweb' ),
+		'rules'      => __( 'Rules', 'sourceweb' ),
+		'ai'         => __( 'AI models', 'sourceweb' ),
+		'workers'    => __( 'Workers', 'sourceweb' ),
+		'rejected'   => __( 'Rejected', 'sourceweb' ),
+		'relay-log'  => __( 'Relay log', 'sourceweb' ),
+		'log'        => __( 'Change log', 'sourceweb' ),
+		'settings'   => __( 'SourceWeb settings', 'sourceweb' ),
 	);
 	$title = $titles[ $screen ] ?? $titles['dashboard'];
 	if ( sourceweb_ui_wanted() === $screen && sourceweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
@@ -200,9 +200,9 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 	echo '<h1>' . esc_html( $title ) . '</h1>';
 
 	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell and real-time feed monitors.', 'aw-sourcing' ) . '</p></div>';
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell and real-time feed monitors.', 'sourceweb' ) . '</p></div>';
 	} else {
-		wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'aw-sourcing' ), array( 'type' => 'error' ) );
+		wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'sourceweb' ), array( 'type' => 'error' ) );
 	}
 
 	if ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
@@ -212,7 +212,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 		settings_fields( 'aw_src_backfill' );
 		do_settings_sections( 'aw-src-backfill' );
-		submit_button( __( 'Save backfill date', 'aw-sourcing' ) );
+		submit_button( __( 'Save backfill date', 'sourceweb' ) );
 		echo '</form>';
 		if ( function_exists( 'sourceweb_reset_form' ) ) {
 			sourceweb_reset_form( 'backfill' );
@@ -221,7 +221,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 		settings_fields( 'aw_src_uninstall' );
 		do_settings_sections( 'aw-src-uninstall' );
-		submit_button( __( 'Save uninstall setting', 'aw-sourcing' ) );
+		submit_button( __( 'Save uninstall setting', 'sourceweb' ) );
 		echo '</form>';
 		if ( function_exists( 'sourceweb_reset_form' ) ) {
 			sourceweb_reset_form( 'uninstall' );
@@ -231,18 +231,19 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 		$items = function_exists( 'aw_review_items' ) ? aw_review_items() : array();
 		if ( empty( $items ) ) {
 			echo '<div class="notice notice-info inline" style="margin:20px 0; padding:12px 16px;">';
-			echo '<p><strong>' . esc_html__( 'Review queue is clear.', 'aw-sourcing' ) . '</strong> ' . esc_html__( 'There are currently no pending or held items waiting for editorial review.', 'aw-sourcing' ) . '</p>';
+			echo '<p><strong>' . esc_html__( 'Review queue is clear.', 'sourceweb' ) . '</strong> ' . esc_html__( 'There are currently no pending or held items waiting for editorial review.', 'sourceweb' ) . '</p>';
 			echo '</div>';
 		} else {
-			echo '<p style="margin:16px 0;">' . sprintf( esc_html__( '%d items waiting for review.', 'aw-sourcing' ), count( $items ) ) . '</p>';
+			/* translators: %d: number of items waiting for review. */
+			echo '<p style="margin:16px 0;">' . sprintf( esc_html__( '%d items waiting for review.', 'sourceweb' ), count( $items ) ) . '</p>';
 			echo '<table class="widefat striped" style="margin-top:10px;">';
 			echo '<thead><tr>';
-			echo '<th>' . esc_html__( 'Title', 'aw-sourcing' ) . '</th>';
-			echo '<th>' . esc_html__( 'Type', 'aw-sourcing' ) . '</th>';
-			echo '<th>' . esc_html__( 'Source', 'aw-sourcing' ) . '</th>';
-			echo '<th>' . esc_html__( 'Date', 'aw-sourcing' ) . '</th>';
-			echo '<th>' . esc_html__( 'Hold Reason', 'aw-sourcing' ) . '</th>';
-			echo '<th>' . esc_html__( 'Actions', 'aw-sourcing' ) . '</th>';
+			echo '<th>' . esc_html__( 'Title', 'sourceweb' ) . '</th>';
+			echo '<th>' . esc_html__( 'Type', 'sourceweb' ) . '</th>';
+			echo '<th>' . esc_html__( 'Source', 'sourceweb' ) . '</th>';
+			echo '<th>' . esc_html__( 'Date', 'sourceweb' ) . '</th>';
+			echo '<th>' . esc_html__( 'Hold Reason', 'sourceweb' ) . '</th>';
+			echo '<th>' . esc_html__( 'Actions', 'sourceweb' ) . '</th>';
 			echo '</tr></thead><tbody>';
 			foreach ( $items as $p ) {
 				$url    = get_post_meta( $p->ID, 'aw_source_url', true );
@@ -252,12 +253,12 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 				echo '<tr>';
 				echo '<td><strong><a href="' . esc_url( get_edit_post_link( $p->ID ) ) . '">' . esc_html( $p->post_title ? $p->post_title : '(no title)' ) . '</a></strong></td>';
 				echo '<td>' . esc_html( $p->post_type ) . '</td>';
-				echo '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( function_exists( 'aw_host' ) ? aw_host( $url ) : parse_url( $url, PHP_URL_HOST ) ) . '</a>' : '–' ) . '</td>';
+				echo '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( function_exists( 'aw_host' ) ? aw_host( $url ) : wp_parse_url( $url, PHP_URL_HOST ) ) . '</a>' : '–' ) . '</td>';
 				echo '<td>' . esc_html( substr( $p->post_date, 0, 16 ) ) . '</td>';
 				echo '<td>' . esc_html( $reason ? $reason : 'Pending' ) . '</td>';
 				echo '<td>';
-				echo '<a href="' . esc_url( $pub_url ) . '" class="button button-small button-primary">' . esc_html__( 'Approve', 'aw-sourcing' ) . '</a> ';
-				echo '<a href="' . esc_url( $rej_url ) . '" class="button button-small">' . esc_html__( 'Reject', 'aw-sourcing' ) . '</a>';
+				echo '<a href="' . esc_url( $pub_url ) . '" class="button button-small button-primary">' . esc_html__( 'Approve', 'sourceweb' ) . '</a> ';
+				echo '<a href="' . esc_url( $rej_url ) . '" class="button button-small">' . esc_html__( 'Reject', 'sourceweb' ) . '</a>';
 				echo '</td>';
 				echo '</tr>';
 			}
@@ -271,31 +272,31 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 
 		// Column 1: Domain Trust Overrides
 		echo '<div class="card" style="flex:1; min-width:320px; padding:20px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Domain Trust Overrides', 'aw-sourcing' ) . '</h2>';
-		echo '<p class="description">' . esc_html__( 'Configure domain-level trust rules to auto-approve, hold for review, or discard incoming content from specific publishers.', 'aw-sourcing' ) . '</p>';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Domain Trust Overrides', 'sourceweb' ) . '</h2>';
+		echo '<p class="description">' . esc_html__( 'Configure domain-level trust rules to auto-approve, hold for review, or discard incoming content from specific publishers.', 'sourceweb' ) . '</p>';
 
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
 		wp_nonce_field( 'aw_rules_domain_override' );
 		echo '<input type="hidden" name="action" value="aw_domain_override">';
 		echo '<table class="form-table" style="margin-top:0;">';
-		echo '<tr><th scope="row"><label for="override_host">' . esc_html__( 'Domain Host', 'aw-sourcing' ) . '</label></th>';
+		echo '<tr><th scope="row"><label for="override_host">' . esc_html__( 'Domain Host', 'sourceweb' ) . '</label></th>';
 		echo '<td><input type="text" id="override_host" name="host" class="regular-text" placeholder="example.com" required></td></tr>';
-		echo '<tr><th scope="row"><label for="override_status">' . esc_html__( 'Trust Policy', 'aw-sourcing' ) . '</label></th>';
+		echo '<tr><th scope="row"><label for="override_status">' . esc_html__( 'Trust Policy', 'sourceweb' ) . '</label></th>';
 		echo '<td><select id="override_status" name="status">';
-		echo '<option value="allow">' . esc_html__( 'Allow (Auto-approve if checks pass)', 'aw-sourcing' ) . '</option>';
-		echo '<option value="neutral">' . esc_html__( 'Require Review (Hold in Review Queue)', 'aw-sourcing' ) . '</option>';
-		echo '<option value="block">' . esc_html__( 'Discard (Block and Reject)', 'aw-sourcing' ) . '</option>';
+		echo '<option value="allow">' . esc_html__( 'Allow (Auto-approve if checks pass)', 'sourceweb' ) . '</option>';
+		echo '<option value="neutral">' . esc_html__( 'Require Review (Hold in Review Queue)', 'sourceweb' ) . '</option>';
+		echo '<option value="block">' . esc_html__( 'Discard (Block and Reject)', 'sourceweb' ) . '</option>';
 		echo '</select></td></tr>';
-		echo '<tr><th scope="row"><label for="override_name">' . esc_html__( 'Publisher Name', 'aw-sourcing' ) . '</label></th>';
+		echo '<tr><th scope="row"><label for="override_name">' . esc_html__( 'Publisher Name', 'sourceweb' ) . '</label></th>';
 		echo '<td><input type="text" id="override_name" name="name" class="regular-text" placeholder="Optional label"></td></tr>';
 		echo '</table>';
-		submit_button( __( 'Save Domain Override', 'aw-sourcing' ), 'secondary', 'submit', false );
+		submit_button( __( 'Save Domain Override', 'sourceweb' ), 'secondary', 'submit', false );
 		echo '</form>';
 
 		if ( ! empty( $overrides ) ) {
 			echo '<hr style="margin:20px 0;">';
 			echo '<table class="widefat striped">';
-			echo '<thead><tr><th>' . esc_html__( 'Domain', 'aw-sourcing' ) . '</th><th>' . esc_html__( 'Policy', 'aw-sourcing' ) . '</th><th>' . esc_html__( 'Action', 'aw-sourcing' ) . '</th></tr></thead><tbody>';
+			echo '<thead><tr><th>' . esc_html__( 'Domain', 'sourceweb' ) . '</th><th>' . esc_html__( 'Policy', 'sourceweb' ) . '</th><th>' . esc_html__( 'Action', 'sourceweb' ) . '</th></tr></thead><tbody>';
 			foreach ( $overrides as $h => $ov ) {
 				echo '<tr>';
 				echo '<td><strong>' . esc_html( $h ) . '</strong>' . ( ! empty( $ov['name'] ) && $ov['name'] !== $h ? ' (' . esc_html( $ov['name'] ) . ')' : '' ) . '</td>';
@@ -306,7 +307,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 				echo '<input type="hidden" name="action" value="aw_domain_override">';
 				echo '<input type="hidden" name="aw_delete" value="1">';
 				echo '<input type="hidden" name="host" value="' . esc_attr( $h ) . '">';
-				echo '<button type="submit" class="button button-small button-link-delete">' . esc_html__( 'Reset', 'aw-sourcing' ) . '</button>';
+				echo '<button type="submit" class="button button-small button-link-delete">' . esc_html__( 'Reset', 'sourceweb' ) . '</button>';
 				echo '</form>';
 				echo '</td>';
 				echo '</tr>';
@@ -317,15 +318,15 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 
 		// Column 2: Excluded Category & Tag Filters
 		echo '<div class="card" style="flex:1; min-width:320px; padding:20px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Feed Category & Tag Filters', 'aw-sourcing' ) . '</h2>';
-		echo '<p class="description">' . esc_html__( 'Specify category or topic tag slugs to exclude from feed ingestion. Matching feed stories will be automatically flagged or held.', 'aw-sourcing' ) . '</p>';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Feed Category & Tag Filters', 'sourceweb' ) . '</h2>';
+		echo '<p class="description">' . esc_html__( 'Specify category or topic tag slugs to exclude from feed ingestion. Matching feed stories will be automatically flagged or held.', 'sourceweb' ) . '</p>';
 
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
 		wp_nonce_field( 'aw_rules_feed_filter' );
 		echo '<input type="hidden" name="action" value="aw_feed_filter">';
 		echo '<p><textarea name="excluded_tags" rows="6" class="large-text code" placeholder="politics, gossip, sports">' . esc_textarea( implode( "\n", $excluded ) ) . '</textarea></p>';
-		echo '<p class="description">' . esc_html__( 'Enter tag or category slugs, one per line or separated by commas.', 'aw-sourcing' ) . '</p>';
-		submit_button( __( 'Save Feed Filters', 'aw-sourcing' ), 'secondary', 'submit', false );
+		echo '<p class="description">' . esc_html__( 'Enter tag or category slugs, one per line or separated by commas.', 'sourceweb' ) . '</p>';
+		submit_button( __( 'Save Feed Filters', 'sourceweb' ), 'secondary', 'submit', false );
 		echo '</form>';
 		echo '</div>';
 
@@ -338,21 +339,21 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 
 		echo '<div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap;">';
 		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Configured Sources', 'aw-sourcing' ) . '</h2>';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Configured Sources', 'sourceweb' ) . '</h2>';
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $num_sources ) ) . '</p>';
-		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources' ) ) . '" class="button button-secondary">' . esc_html__( 'Manage Sources', 'aw-sourcing' ) . '</a></p>';
+		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=sources' ) ) . '" class="button button-secondary">' . esc_html__( 'Manage Sources', 'sourceweb' ) . '</a></p>';
 		echo '</div>';
 
 		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Active Feeds', 'aw-sourcing' ) . '</h2>';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Active Feeds', 'sourceweb' ) . '</h2>';
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $num_feeds ) ) . '</p>';
-		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) . '" class="button button-secondary">' . esc_html__( 'View Rules', 'aw-sourcing' ) . '</a></p>';
+		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) . '" class="button button-secondary">' . esc_html__( 'View Rules', 'sourceweb' ) . '</a></p>';
 		echo '</div>';
 
 		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'To Review', 'aw-sourcing' ) . '</h2>';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'To Review', 'sourceweb' ) . '</h2>';
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $review_count ) ) . '</p>';
-		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-review' ) ) . '" class="button button-secondary">' . esc_html__( 'Review Queue', 'aw-sourcing' ) . '</a></p>';
+		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-review' ) ) . '" class="button button-secondary">' . esc_html__( 'Review Queue', 'sourceweb' ) . '</a></p>';
 		echo '</div>';
 
 		echo '</div>';
@@ -361,7 +362,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 			$workers = aw_sourcing_dash_workers();
 			if ( ! empty( $workers ) ) {
 				echo '<div class="card" style="margin-top:20px; padding:16px;">';
-				echo '<h2 style="margin-top:0;">' . esc_html__( 'Worker Status', 'aw-sourcing' ) . '</h2>';
+				echo '<h2 style="margin-top:0;">' . esc_html__( 'Worker Status', 'sourceweb' ) . '</h2>';
 				echo '<table class="widefat striped"><thead><tr><th>Worker</th><th>Last Run</th><th>Status</th></tr></thead><tbody>';
 				foreach ( $workers as $w ) {
 					echo '<tr>';

@@ -218,7 +218,7 @@ add_action(
 	function () {
 		if ( isset( $_GET['aw_published'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$n = (int) $_GET['aw_published']; // phpcs:ignore WordPress.Security.NonceVerification
-			wp_admin_notice( esc_html( sprintf( /* translators: %d: number of items. */ _n( '%d item published.', '%d items published.', $n, 'aw-sourcing' ), $n ) ), array( 'type' => 'success', 'dismissible' => true ) );
+			wp_admin_notice( esc_html( sprintf( /* translators: %d: number of items. */ _n( '%d item published.', '%d items published.', $n, 'sourceweb' ), $n ) ), array( 'type' => 'success', 'dismissible' => true ) );
 		}
 	}
 );

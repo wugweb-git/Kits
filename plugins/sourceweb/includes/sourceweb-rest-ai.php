@@ -338,10 +338,10 @@ function sourceweb_rest_ai_keys_add( WP_REST_Request $request ) {
 	}
 	$n = count( $res['added'] );
 	/* translators: %d: number of keys. */
-	$msg = sprintf( _n( '%d key added.', '%d keys added.', $n, 'aw-sourcing' ), $n );
+	$msg = sprintf( _n( '%d key added.', '%d keys added.', $n, 'sourceweb' ), $n );
 	if ( $res['dupes'] ) {
 		/* translators: %d: number of keys. */
-		$msg .= ' ' . sprintf( _n( '%d was already saved and was skipped.', '%d were already saved and were skipped.', $res['dupes'], 'aw-sourcing' ), $res['dupes'] );
+		$msg .= ' ' . sprintf( _n( '%d was already saved and was skipped.', '%d were already saved and were skipped.', $res['dupes'], 'sourceweb' ), $res['dupes'] );
 	}
 	return rest_ensure_response(
 		array(
@@ -384,20 +384,20 @@ function sourceweb_rest_ai_keys_decide( WP_REST_Request $request ) {
 	$n   = $res['n'];
 	$msg = array(
 		/* translators: %d: number of keys. */
-		'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in the Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in the Change log.', $n, 'aw-sourcing' ),
+		'remove'  => _n( '%d key removed. The news workers stop using it from their next run; it is noted in the Change log.', '%d keys removed. The news workers stop using them from their next run; they are noted in the Change log.', $n, 'sourceweb' ),
 		/* translators: %d: number of keys. */
-		'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n, 'aw-sourcing' ),
+		'recheck' => _n( '%d key is being checked again in the background: reload in a few minutes.', '%d keys are being checked again in the background: reload in a few minutes.', $n, 'sourceweb' ),
 		'up'      => 'Moved up. The workers try the keys from the top down.',
 		'down'    => 'Moved down. The workers try the keys from the top down.',
 		/* translators: %d: number of keys. */
-		'attach'  => _n( '%d key attached. A key that was for every worker is now for the workers it is attached to only.', '%d keys attached. A key that was for every worker is now for the workers it is attached to only.', $n, 'aw-sourcing' ),
+		'attach'  => _n( '%d key attached. A key that was for every worker is now for the workers it is attached to only.', '%d keys attached. A key that was for every worker is now for the workers it is attached to only.', $n, 'sourceweb' ),
 		/* translators: %d: number of keys. */
-		'detach'  => _n( '%d key detached. A key that was for every worker is now for every other worker (not for workers added later).', '%d keys detached. A key that was for every worker is now for every other worker (not for workers added later).', $n, 'aw-sourcing' ),
+		'detach'  => _n( '%d key detached. A key that was for every worker is now for every other worker (not for workers added later).', '%d keys detached. A key that was for every worker is now for every other worker (not for workers added later).', $n, 'sourceweb' ),
 	);
 	$out = $n ? sprintf( $msg[ $res['op'] ], $n ) : 'Nothing changed.';
 	if ( $res['skip'] ) {
 		/* translators: %d: number of keys. */
-		$out .= ' ' . sprintf( _n( '%d key was not detached: it is for that worker only, and a key needs at least one worker. Remove the key instead.', '%d keys were not detached: each is for that worker only, and a key needs at least one worker. Remove them instead.', $res['skip'], 'aw-sourcing' ), $res['skip'] );
+		$out .= ' ' . sprintf( _n( '%d key was not detached: it is for that worker only, and a key needs at least one worker. Remove the key instead.', '%d keys were not detached: each is for that worker only, and a key needs at least one worker. Remove them instead.', $res['skip'], 'sourceweb' ), $res['skip'] );
 	}
 	return rest_ensure_response(
 		array(
