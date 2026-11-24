@@ -224,4 +224,30 @@ add_filter(
 	2
 );
 
+/**
+ * Injects the accessible theme toggle into the primary header navigation container dynamically.
+ * Survives Site Editor customization without requiring a raw HTML block in template parts.
+ */
+add_filter(
+	'render_block_core/navigation',
+	function ( $html, $block ) {
+		// Only attach to main header navigation
+		if ( 'Main' !== ( $block['attrs']['ariaLabel'] ?? '' ) ) {
+			return $html;
+		}
+		// If already present or disabled via filter, do not inject
+		if ( false !== strpos( $html, 'data-kit-theme-toggle' ) || ! apply_filters( 'kits_header_theme_toggle_enabled', true ) ) {
+			return $html;
+		}
+		$toggle = sprintf(
+			'<button type="button" class="kit-theme-toggle" data-kit-theme-toggle aria-label="%s" aria-pressed="false"><span class="kit-ico kit-ico--theme" aria-hidden="true">◐</span></button>',
+			esc_attr__( 'Toggle dark/light theme', 'kits-by-wugweb' )
+		);
+		// Append toggle inside the navigation wrapper
+		return preg_replace( '#(</nav>|</ul>\s*</div>\s*</nav>)#s', $toggle . '$1', $html, 1 ) ?: $html . $toggle;
+	},
+	10,
+	2
+);
+
 // The six card states are pattern files (patterns/card-{state}.php, Kits: Lists), since 18 Nov 2026.

@@ -1,7 +1,9 @@
 # Kits by Wugweb Theme: Pending & Roadmap
 
 ## Active Scope & Responsibilities
+
 The declarative FSE block theme owns:
+
 - `theme.json` semantic tokens, typography scales, layout definitions, and color palette.
 - Templates (`templates/`) and template parts (`parts/`).
 - Native block patterns (`patterns/`).

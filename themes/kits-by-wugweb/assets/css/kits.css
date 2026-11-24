@@ -97,3 +97,79 @@ a.kit-social-name { min-height: var(--kit-size-target); text-decoration: none; }
    No fluid sizes, so the size changes only at a breakpoint. */
 .kit-card :is(h3, h4).kit-card-title.kit-card-title, .kit-card :is(h3, h4).kit-card-title.kit-card-title a { font-size: var(--kit-type-card-title) !important; line-height: var(--kit-h3-leading) !important; }
 .kit-card .kit-card-metarow.kit-card-metarow, .kit-card .kit-card-metarow.kit-card-metarow * { font-size: var(--kit-meta-size) !important; }
+
+.kit-theme-toggle {
+	background: none;
+	border: none;
+	color: inherit;
+	cursor: pointer;
+	padding: 4px 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: var(--kit-size-target, 36px);
+	min-width: var(--kit-size-target, 36px);
+	font-size: 16px;
+	border-radius: var(--kit-radius-hair, 4px);
+	transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.kit-theme-toggle:hover {
+	opacity: 0.85;
+}
+.kit-theme-toggle:focus-visible {
+	outline: 2px solid var(--wp--preset--color--focus, currentColor);
+	outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------------------
+   Dark Mode Runtime Token Inversion (data-theme="dark")
+   Synchronized with styles/dark.json to invert semantic palette tokens.
+   ------------------------------------------------------------------------- */
+html[data-theme="dark"],
+:root[data-theme="dark"] {
+	/* Core WordPress preset color mappings */
+	--wp--preset--color--primary: #79B8FF;
+	--wp--preset--color--primary-dark: #2188FF;
+	--wp--preset--color--secondary: #F0F6FC;
+	--wp--preset--color--foreground: #C9D1D9;
+	--wp--preset--color--text-muted: #8B949E;
+	--wp--preset--color--border: #30363D;
+	--wp--preset--color--canvas: #0D1117;
+	--wp--preset--color--surface: #161B22;
+	--wp--preset--color--background: #21262D;
+	--wp--preset--color--on-ink: #0D1117;
+	--wp--preset--color--focus: #58A6FF;
+	--wp--preset--color--error: #F85149;
+	--wp--preset--color--success: #3FB950;
+	--wp--preset--color--warning: #D29922;
+
+	/* Semantic Kits theme tokens */
+	--kit-color-bg: #0D1117;
+	--kit-color-canvas: #0D1117;
+	--kit-color-surface: #161B22;
+	--kit-color-surface-soft: #1C2D42;
+	--kit-color-raised: #21262D;
+	--kit-color-ink: #F0F6FC;
+	--kit-color-text: #C9D1D9;
+	--kit-color-muted: #8B949E;
+	--kit-color-line: #30363D;
+	--kit-color-accent: #79B8FF;
+	--kit-color-accent-ink: #2188FF;
+	--kit-color-on-accent: #0D1117;
+	--kit-color-on-ink: #0D1117;
+	--kit-color-focus: #58A6FF;
+	--kit-color-danger: #F85149;
+	--kit-color-success: #3FB950;
+	--kit-color-warning: #D29922;
+	--kit-color-link: #79B8FF;
+
+	/* Inverted root body styles */
+	background-color: var(--wp--preset--color--canvas) !important;
+	color: var(--wp--preset--color--foreground) !important;
+}
+
+html[data-theme="dark"] body {
+	background-color: var(--wp--preset--color--canvas);
+	color: var(--wp--preset--color--foreground);
+}
+

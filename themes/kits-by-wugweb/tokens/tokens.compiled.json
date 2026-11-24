@@ -46,9 +46,9 @@
       "lg": "var(--neutral-2)"
     },
     "color-accent": {
-      "sm": "var(--color-yellow)",
-      "md": "var(--color-yellow)",
-      "lg": "var(--color-yellow)"
+      "sm": "#C6D2E0",
+      "md": "#C6D2E0",
+      "lg": "#C6D2E0"
     },
     "color-accent-ink": {
       "sm": "#0062b8",

@@ -8,6 +8,8 @@
  * 3. Template parts structure and areas.
  * 4. Block patterns syntax, headers (Title, Slug, Categories), and block markup.
  * 5. Asset dependencies and CSS entrypoints.
+ * 6. Dark mode runtime CSS variable mapping and toggle functionality.
+ * 7. Dynamic Breadcrumbs resolution (with and without RankWeb).
  *
  * Usage:
  *   php themes/kits-by-wugweb/tests/ThemeValidationTest.php
@@ -59,6 +61,22 @@ it('theme.json exists, parses cleanly and has required FSE root keys', function 
     if (empty($data['settings']['layout']['contentSize']) || empty($data['settings']['layout']['wideSize'])) {
         throw new \RuntimeException("Layout contentSize or wideSize missing");
     }
+    // Verify layout contentSize is 1200px
+    if ($data['settings']['layout']['contentSize'] !== '1200px') {
+        throw new \RuntimeException("Expected contentSize 1200px, got: " . $data['settings']['layout']['contentSize']);
+    }
+    // Verify primary accent color is #C6D2E0 (Slate neutral)
+    $palette = $data['settings']['color']['palette'] ?? [];
+    $primary = null;
+    foreach ($palette as $p) {
+        if ($p['slug'] === 'primary') {
+            $primary = $p['color'];
+            break;
+        }
+    }
+    if ($primary !== '#C6D2E0') {
+        throw new \RuntimeException("Expected primary color #C6D2E0, got: $primary");
+    }
 });
 
 it('All style variations in styles/ parse cleanly as version 3 theme.json', function () use ($theme_dir) {
@@ -88,7 +106,6 @@ echo "\n2. Validating FSE Templates and Parts...\n";
 
 function validate_block_markup(string $file_path): void {
     $content = file_get_contents($file_path);
-    // Find all block comments: <!-- wp:name {json} -->, <!-- wp:name -->, <!-- /wp:name -->, <!-- wp:name /-->
     $pattern = '/<!--\s+(\/)?wp:([a-z0-9\/-]+)\s*(\{.*?\})?\s*(\/)?-->/s';
     preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
 
@@ -151,10 +168,10 @@ it('All 4 template parts have balanced block comments and valid JSON attrs', fun
 // 3. Block Patterns Validation
 echo "\n3. Validating Block Patterns...\n";
 
-it('All 18 block patterns have required headers and valid block markup', function () use ($theme_dir) {
+it('All block patterns have required headers and valid block markup', function () use ($theme_dir) {
     $patterns = glob($theme_dir . '/patterns/*.php');
-    if (count($patterns) < 18) {
-        throw new \RuntimeException("Expected at least 18 patterns, found " . count($patterns));
+    if (count($patterns) < 19) {
+        throw new \RuntimeException("Expected at least 19 patterns, found " . count($patterns));
     }
     foreach ($patterns as $pattern_file) {
         $content = file_get_contents($pattern_file);
@@ -167,12 +184,10 @@ it('All 18 block patterns have required headers and valid block markup', functio
         if (!preg_match('/\*\s*Categories:\s*(.+)/', $content, $m_cat) || empty(trim($m_cat[1]))) {
             throw new \RuntimeException("Missing or empty Categories in $pattern_file");
         }
-        // Extract block markup after PHP header closing
         $parts = explode('?>', $content, 2);
         if (isset($parts[1])) {
             $markup = trim($parts[1]);
             if (!empty($markup)) {
-                // Temporary file to run validator on pure block markup
                 $tmp = tempnam(sys_get_temp_dir(), 'pat_');
                 file_put_contents($tmp, $markup);
                 try {
@@ -185,8 +200,8 @@ it('All 18 block patterns have required headers and valid block markup', functio
     }
 });
 
-// 4. CSS Assets and Tooling
-echo "\n4. Validating CSS Assets and Token Engine...\n";
+// 4. CSS Assets and Token Engine
+echo "\n4. Validating CSS Assets and Dark Mode Inversion...\n";
 
 it('All referenced theme CSS assets exist and are non-empty', function () use ($theme_dir) {
     $css_files = [
@@ -205,6 +220,26 @@ it('All referenced theme CSS assets exist and are non-empty', function () use ($
     }
 });
 
+it('kits.css contains [data-theme="dark"] variable mappings matching styles/dark.json', function () use ($theme_dir) {
+    $css = file_get_contents($theme_dir . '/assets/css/kits.css');
+    if (strpos($css, '[data-theme="dark"]') === false) {
+        throw new \RuntimeException('Missing [data-theme="dark"] selector in kits.css');
+    }
+    $required_vars = [
+        '--wp--preset--color--canvas: #0D1117',
+        '--wp--preset--color--surface: #161B22',
+        '--wp--preset--color--foreground: #C9D1D9',
+        '--wp--preset--color--primary: #79B8FF',
+        '--kit-color-bg: #0D1117',
+        '--kit-color-text: #C9D1D9',
+    ];
+    foreach ($required_vars as $v) {
+        if (strpos($css, $v) === false) {
+            throw new \RuntimeException("Missing dark mode token mapping in kits.css: $v");
+        }
+    }
+});
+
 it('Inter Latin WOFF2 font file exists locally', function () use ($theme_dir) {
     $font = $theme_dir . '/assets/fonts/inter/inter-latin.woff2';
     if (!file_exists($font) || filesize($font) === 0) {
@@ -212,7 +247,49 @@ it('Inter Latin WOFF2 font file exists locally', function () use ($theme_dir) {
     }
 });
 
-// 5. Summary
+// 5. Dynamic Breadcrumbs Evaluation
+echo "\n5. Validating Dynamic Breadcrumbs Pattern Resolution...\n";
+
+it('Breadcrumbs pattern outputs rankweb/breadcrumbs when RankWeb block function exists', function () use ($theme_dir) {
+    $cmd = 'php -r \'
+        function rankweb_breadcrumbs_block() { return "OK"; }
+        ob_start();
+        include "' . $theme_dir . '/patterns/breadcrumbs.php";
+        $out = ob_get_clean();
+        if (strpos($out, "wp:rankweb/breadcrumbs") === false) {
+            exit(1);
+        }
+        exit(0);
+    \'';
+    exec($cmd, $out, $code);
+    if ($code !== 0) {
+        throw new \RuntimeException("Breadcrumbs pattern failed to output wp:rankweb/breadcrumbs when RankWeb is active");
+    }
+});
+
+it('Breadcrumbs pattern outputs dynamic accessible fallback when RankWeb is inactive', function () use ($theme_dir) {
+    $cmd = 'php -r \'
+        ob_start();
+        include "' . $theme_dir . '/patterns/breadcrumbs.php";
+        $out = ob_get_clean();
+        if (strpos($out, "kit-crumbs") === false || strpos($out, "<ol>") === false || strpos($out, "Home") === false) {
+            exit(1);
+        }
+        if (strpos($out, "/category/") !== false || strpos($out, "Current Page") !== false) {
+            exit(2);
+        }
+        exit(0);
+    \'';
+    exec($cmd, $out, $code);
+    if ($code === 2) {
+        throw new \RuntimeException("Breadcrumbs pattern still outputs static dummy /category/ or Current Page strings");
+    }
+    if ($code !== 0) {
+        throw new \RuntimeException("Breadcrumbs pattern fallback output is invalid or incomplete");
+    }
+});
+
+// 6. Summary
 echo "\n===================================================\n";
 echo "Theme Validation: $checks checks, $failures failed.\n";
 if ($failures > 0) {

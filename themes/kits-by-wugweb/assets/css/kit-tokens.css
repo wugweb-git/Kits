@@ -29,7 +29,7 @@
   --kit-color-text: var(--wp--preset--color--foreground, #2E2E2E);
   --kit-color-muted: var(--wp--preset--color--text-muted, #636363);
   --kit-color-line: var(--wp--preset--color--border, #DFDFDF);
-  --kit-color-accent: var(--wp--preset--color--primary, #FFBE1A);
+  --kit-color-accent: var(--wp--preset--color--primary, #C6D2E0);
   --kit-color-accent-ink: var(--wp--preset--color--primary-dark, #0062b8);
   --kit-color-on-accent: var(--color-ash);
   --kit-color-on-ink: var(--wp--preset--color--on-ink, #FFFFFF);

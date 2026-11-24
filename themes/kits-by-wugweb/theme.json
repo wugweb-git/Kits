@@ -5,7 +5,7 @@
 		"appearanceTools": true,
 		"useRootPaddingAwareAlignments": true,
 		"layout": {
-			"contentSize": "840px",
+			"contentSize": "1200px",
 			"wideSize": "1200px"
 		},
 		"color": {
@@ -16,7 +16,7 @@
 				{
 					"slug": "primary",
 					"name": "Accent",
-					"color": "#FFBE1A"
+					"color": "#C6D2E0"
 				},
 				{
 					"slug": "primary-dark",
