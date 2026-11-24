@@ -49,7 +49,7 @@ Following a comprehensive read-only audit of commits `6a32c29` and `48ffa0b`, a 
 - ✅ **Fix 4 (Medium — Decoupled Boot Architecture & Symlink Safety):**
   - Removed hardcoded eager `require_once WP_PLUGIN_DIR . '/...'` loading blocks across `directoryweb.php`, `mailweb.php`, `planweb.php`, and `sourceweb.php`.
 - ✅ **Fix 5 (Low — Translation Domain Scoping):**
-  - Standardized REST error strings to use plugin-specific text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'aw-sourcing'`).
+  - Standardized REST error strings to use plugin-specific text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'sourceweb'`).
 
 ### Infrastructure: CI, packaging, Playground, release (24 Nov 2026, evidence-based)
 Details: `docs/release/ci-packaging-playground-release.md`. Commit `2acac68` reported these as done, but its CI run (45425360668) failed and packaging was skipped; the items below are what remote CI verified.

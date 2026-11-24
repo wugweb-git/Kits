@@ -38,7 +38,7 @@
    - **Strict Nonce Enforcement:** Mandatory valid `wp_rest` nonce verification enforced for cookie sessions across all companion REST endpoints (`directoryweb_rest_can`, `insightweb_rest_can`, `mailweb_rest_can`, `planweb_rest_can`, `sourceweb_rest_can`). Missing or invalid nonces strictly return 403 `rest_cookie_invalid_nonce`. Application Password authentication (`rest_get_authenticated_app_password()`) is preserved and passes without cookie nonces. Zero test bypasses in production code.
    - **RankWeb Standalone Output:** Hooked `aw_rankweb_render_standalone_meta_description()` to `wp_head` (priority 1) when Rank Math is inactive. Suppressed automatically when Rank Math is active (`aw_seo_extras_rank_math()`), ensuring exactly one meta description, canonical, robots directive, and schema graph in both standalone and integrated environments.
    - **Decoupled Boot Architecture:** Hardcoded eager `require_once WP_PLUGIN_DIR . '/...'` loading blocks removed from all companion entrypoints (`directoryweb.php`, `mailweb.php`, `planweb.php`, `sourceweb.php`). Standalone compatibility layers are always loaded safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
-   - **Translation Domain Scoping:** Standardized REST error strings to use plugin-specific text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'aw-sourcing'`).
+   - **Translation Domain Scoping:** Standardized REST error strings to use plugin-specific text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'sourceweb'`).
 
 ---
 
