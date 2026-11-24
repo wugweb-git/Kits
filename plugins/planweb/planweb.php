@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       PlanWeb
- * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it. Needs Kits Core.
+ * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it.
  * Version:           0.2.0
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -17,7 +17,6 @@
  * Author URI:        https://wugweb.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://wugweb.com/plugins/planweb/
  * Text Domain:       planweb
  * Domain Path:       /languages
  */

@@ -1,5 +1,7 @@
 # PlanWeb: the team's calendar as its own Kits plugin (plan)
 
+**Status (Updated 25 Nov 2026):** Implemented at `0.2.0`, standalone verified, and WP.org Plugin Check (`0` errors) verified. *(Historical 11 Nov plan preserved below for reference; see `docs/org/planweb-org-plan.md` for current WP.org status.)*
+
 Owner, 11 Nov 2026: Dates moves into its own Kits plugin, **PlanWeb**, which holds the team's schedule and the content
 and marketing calendar, and runs a scheduler for internal jobs and reminders. **This is step 1, a plan only. No code
 until the owner says yes.**
