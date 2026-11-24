@@ -36,7 +36,7 @@ function get_option( $k, $d = false ) { return $GLOBALS['opts'][ $k ] ?? $d; }
 $GLOBALS['mails'] = array();
 function wp_mail( $to, $subject, $body ) { $GLOBALS['mails'][] = compact( 'to', 'subject', 'body' ); return true; }
 function wp_strip_all_tags( $s ) { return strip_tags( (string) $s ); }
-function get_edit_post_link( $id, $c = '' ) { return "https://example.test/wp-admin/post.php?post=$id&action=edit"; }
+function admin_url( $p = "" ) { return "https://example.test/wp-admin/" . $p; }
 function add_meta_box( ...$a ) {}
 function sanitize_text_field( $s ) { return trim( strip_tags( (string) $s ) ); }
 function sanitize_textarea_field( $s ) { return trim( strip_tags( (string) $s ) ); }
@@ -133,6 +133,7 @@ check( is_wp_error( $res ) && 'dw_claim_limit' === $res->code, 'one email cannot
 
 echo "Emails\n";
 $m = $GLOBALS['mails'];
+check( 1 === preg_match( '#Review it: https://example.test/wp-admin/post.php\?post=\d+&action=edit#', $m[1]['body'] ), 'owner email carries a working review link' );
 check( count( $m ) >= 2 && 'asha@example.org' === $m[0]['to'] && 'owner@example.org' === $m[1]['to'], 'claim creation emails claimant and site owner' );
 $GLOBALS['mails'] = array();
 $GLOBALS['posts'][30] = array( 'type' => 'aw_listing', 'status' => 'publish', 'title' => "Evil\r\nBcc: x@y.z" );

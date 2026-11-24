@@ -60,6 +60,9 @@ function directoryweb_activate(): void {
 		aw_register_meta();
 	}
 	directoryweb_caps_grant();
+	if ( function_exists( 'directoryweb_ensure_claim_page' ) ) {
+		directoryweb_ensure_claim_page(); // the /claim/ page the claim links point to
+	}
 	flush_rewrite_rules();
 	update_option( 'directoryweb_rewrite_ver', DIRECTORYWEB_VERSION, false );
 }

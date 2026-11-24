@@ -287,6 +287,24 @@ function dw_claim_transition( int $id, string $to, int $by, string $note = '', ?
 /* ---------- Front-end form ---------- */
 
 /**
+ * Whether the claim form on the site is the built-in one: no Kits Core form and no Fluent Forms form chosen for "claim".
+ * The three-step stepper belongs to the Fluent Forms form; the built-in form is one step and has no stepper.
+ *
+ * @return bool
+ */
+function dw_claim_native_active(): bool {
+	if ( function_exists( 'kits_ff_form' ) ) {
+		return false;
+	}
+	$id = function_exists( 'kits_ff_id' ) ? (int) kits_ff_id( 'claim' ) : 0;
+	if ( ! $id ) {
+		$forms = get_option( 'aw_ff_forms', array() );
+		$id    = absint( is_array( $forms ) ? ( $forms['claim'] ?? 0 ) : 0 );
+	}
+	return 0 === $id;
+}
+
+/**
  * The native claim form for a listing (shown by directoryweb_ff_form() when no Fluent Forms form is set up).
  *
  * @param int $listing Listing ID.
@@ -304,37 +322,43 @@ function dw_claim_native_form( int $listing ): string {
 	if ( 'error' === $sent && isset( $_GET['msg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$err = '<p class="aw-claim-error" role="alert">' . esc_html( sanitize_text_field( rawurldecode( wp_unslash( $_GET['msg'] ) ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
-	$out  = '<form class="aw-claim-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">' . $err;
+	$out  = '<style>.aw-claim-form label{display:block;margin:.6em 0}.aw-claim-form input[type=text],.aw-claim-form input[type=email],.aw-claim-form input[type=tel],.aw-claim-form input[type=url],.aw-claim-form select,.aw-claim-form textarea{display:block;width:100%;max-width:34em;box-sizing:border-box}.aw-claim-form fieldset{margin:1em 0;padding:.6em 1em}.aw-claim-svc{display:inline-block;margin-right:1em}.aw-claim-error{color:#b32d2e}</style>';
+	$out .= '<form class="aw-claim-form" method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">' . $err;
 	$out .= '<input type="hidden" name="action" value="dw_claim_submit"><input type="hidden" name="listing" value="' . (int) $listing . '">';
 	$out .= wp_nonce_field( 'dw_claim_submit_' . $listing, '_dw_nonce', true, false );
 	$out .= '<p class="aw-hp" style="position:absolute;left:-9999px" aria-hidden="true"><label>Leave empty <input type="text" name="dw_website_hp" tabindex="-1" autocomplete="off"></label></p>';
-	$field = static function ( $name, $label, $type = 'text', $req = false ) {
-		return '<p><label>' . esc_html( $label ) . '<input type="' . esc_attr( $type ) . '" name="' . esc_attr( $name ) . '"' . ( $req ? ' required' : '' ) . '></label></p>';
+	$old   = array();
+	if ( 'error' === $sent && isset( $_GET['dwt'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		$old = (array) get_transient( 'dw_claim_old_' . sanitize_key( wp_unslash( $_GET['dwt'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	}
+	$val   = static fn( $k ) => (string) ( is_array( $old[ $k ] ?? '' ) ? '' : ( $old[ $k ] ?? '' ) );
+	$field = static function ( $name, $label, $type = 'text', $req = false ) use ( $val ) {
+		return '<p><label>' . esc_html( $label ) . '<input type="' . esc_attr( $type ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $val( $name ) ) . '"' . ( $req ? ' required' : '' ) . '></label></p>';
 	};
 	$out .= $field( 'name', __( 'Your name', 'directoryweb' ), 'text', true ) . $field( 'email', __( 'Your email', 'directoryweb' ), 'email', true ) . $field( 'phone', __( 'Your phone (optional)', 'directoryweb' ), 'tel' );
 	$out .= '<p><label>' . esc_html__( 'Your connection to this organisation', 'directoryweb' ) . '<select name="role" required>';
 	foreach ( DW_CLAIM_ROLES as $k => $label ) {
-		$out .= '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
+		$out .= '<option value="' . esc_attr( $k ) . '"' . selected( $val( 'role' ), $k, false ) . '>' . esc_html( $label ) . '</option>';
 	}
 	$out .= '</select></label></p>';
 	$out .= '<fieldset><legend>' . esc_html__( 'What should the listing say?', 'directoryweb' ) . '</legend>';
 	$out .= $field( 'l_phone', __( 'Phone', 'directoryweb' ), 'tel' ) . $field( 'l_email', __( 'Public email', 'directoryweb' ), 'email' ) . $field( 'l_website', __( 'Website', 'directoryweb' ), 'url' ) . $field( 'l_area', __( 'Area or locality', 'directoryweb' ) );
-	$out .= '<p><label>' . esc_html__( 'About', 'directoryweb' ) . '<textarea name="l_about" rows="4" maxlength="2000"></textarea></label></p>';
+	$out .= '<p><label>' . esc_html__( 'About', 'directoryweb' ) . '<textarea name="l_about" rows="4" maxlength="2000">' . esc_textarea( $val( 'l_about' ) ) . '</textarea></label></p>';
 	foreach ( DIRECTORYWEB_SERVICES as $slug => $label ) {
-		$out .= '<label class="aw-claim-svc"><input type="checkbox" name="l_services[]" value="' . esc_attr( $slug ) . '"> ' . esc_html( is_array( $label ) ? ( $label[0] ?? $slug ) : $label ) . '</label> ';
+		$out .= '<label class="aw-claim-svc"><input type="checkbox" name="l_services[]" value="' . esc_attr( $slug ) . '"' . checked( in_array( $slug, (array) ( $old['l_services'] ?? array() ), true ), true, false ) . '> ' . esc_html( is_array( $label ) ? ( $label[0] ?? $slug ) : $label ) . '</label> ';
 	}
 	$out .= '</fieldset>';
-	$out .= '<p><label><input type="checkbox" name="show" value="1"> ' . esc_html__( 'Show my name on the listing', 'directoryweb' ) . '</label></p>';
-	$out .= '<p><label>' . esc_html__( 'Anything else we should know', 'directoryweb' ) . '<textarea name="notes" rows="3" maxlength="1000"></textarea></label></p>';
+	$out .= '<p><label><input type="checkbox" name="show" value="1"' . checked( '1', $val( 'show' ), false ) . '> ' . esc_html__( 'Show my name on the listing', 'directoryweb' ) . '</label></p>';
+	$out .= '<p><label>' . esc_html__( 'Anything else we should know', 'directoryweb' ) . '<textarea name="notes" rows="3" maxlength="1000">' . esc_textarea( $val( 'notes' ) ) . '</textarea></label></p>';
 	$out .= '<p><button type="submit">' . esc_html__( 'Send claim', 'directoryweb' ) . '</button></p></form>';
 	return $out;
 }
 
 /** Where to send the claimant back to, with a result flag. */
-function dw_claim_back( int $listing, string $flag, string $msg = '' ): void {
+function dw_claim_back( int $listing, string $flag, string $msg = '', string $token = '' ): void {
 	$ref = wp_get_referer();
 	$url = $ref ? $ref : ( $listing ? get_permalink( $listing ) : home_url( '/' ) );
-	$url = add_query_arg( array_filter( array( 'dw_claim' => $flag, 'msg' => '' !== $msg ? rawurlencode( $msg ) : '' ) ), remove_query_arg( array( 'dw_claim', 'msg' ), $url ) );
+	$url = add_query_arg( array_filter( array( 'dw_claim' => $flag, 'msg' => '' !== $msg ? rawurlencode( $msg ) : '', 'dwt' => $token ) ), remove_query_arg( array( 'dw_claim', 'msg', 'dwt' ), $url ) );
 	wp_safe_redirect( $url . '#claim' );
 	exit;
 }
@@ -357,8 +381,19 @@ function dw_claim_handle_submit(): void {
 	set_transient( $key, $n + 1, HOUR_IN_SECONDS );
 	$res = dw_claim_create( $listing, wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- dw_claim_validate() sanitises every field
 	if ( is_wp_error( $res ) ) {
-		$errs = (array) ( $res->get_error_data()['errors'] ?? array() );
-		dw_claim_back( $listing, 'error', $errs ? implode( ' ', $errs ) : $res->get_error_message() );
+		$errs  = (array) ( $res->get_error_data()['errors'] ?? array() );
+		$keep  = array();
+		foreach ( array( 'name', 'email', 'phone', 'role', 'l_phone', 'l_email', 'l_website', 'l_area' ) as $k ) {
+			$keep[ $k ] = sanitize_text_field( wp_unslash( $_POST[ $k ] ?? '' ) );
+		}
+		foreach ( array( 'l_about', 'notes' ) as $k ) {
+			$keep[ $k ] = sanitize_textarea_field( wp_unslash( $_POST[ $k ] ?? '' ) );
+		}
+		$keep['show']       = ! empty( $_POST['show'] ) ? '1' : '';
+		$keep['l_services'] = array_map( 'sanitize_key', (array) wp_unslash( $_POST['l_services'] ?? array() ) );
+		$token = strtolower( wp_generate_password( 12, false ) );
+		set_transient( 'dw_claim_old_' . $token, $keep, 10 * MINUTE_IN_SECONDS ); // so the form comes back filled in
+		dw_claim_back( $listing, 'error', $errs ? implode( ' ', $errs ) : $res->get_error_message(), $token );
 	}
 	dw_claim_back( $listing, 'sent' );
 }
@@ -528,9 +563,9 @@ add_action(
 			sprintf( "Hello %s,\n\nWe received your claim for \"%s\". Our team will review it and write to you with the result. Nothing on the listing changes until then.\n", $name, $title )
 		);
 		dw_claim_mail(
-			(string) apply_filters( 'directoryweb_claim_notify_to', get_option( 'admin_email' ) ),
+			(string) apply_filters( 'directoryweb_claim_notify_to', (string) ( get_option( 'directoryweb_claim_notify_to', '' ) ?: get_option( 'admin_email' ) ) ),
 			sprintf( 'New listing claim: %s', $title ),
-			sprintf( "%s (%s) claimed \"%s\".\n\nReview it: %s\n", $name, (string) ( $c['person']['email'] ?? '' ), $title, (string) get_edit_post_link( (int) $id, 'raw' ) )
+			sprintf( "%s (%s) claimed \"%s\".\n\nReview it: %s\n", $name, (string) ( $c['person']['email'] ?? '' ), $title, admin_url( 'post.php?post=' . (int) $id . '&action=edit' ) )
 		);
 	},
 	10,
@@ -562,3 +597,38 @@ add_action(
 	10,
 	3
 );
+
+/* ---------- The /claim/ page (so "Claim this listing" links work on a standalone site) ---------- */
+
+/**
+ * The page the "Claim this listing" links point to (/claim/). Created once on activation, with the [aw_claim_page]
+ * shortcode, unless a page with the slug "claim" already exists (an existing page is never touched). Idempotent.
+ *
+ * @return int Page ID, 0 when it could not be made.
+ */
+function directoryweb_ensure_claim_page(): int {
+	$saved = (int) get_option( 'directoryweb_claim_page', 0 );
+	if ( $saved && 'page' === get_post_type( $saved ) && 'trash' !== get_post_status( $saved ) ) {
+		return $saved;
+	}
+	$have = get_page_by_path( 'claim' );
+	if ( $have ) {
+		update_option( 'directoryweb_claim_page', (int) $have->ID, false );
+		return (int) $have->ID;
+	}
+	$id = wp_insert_post(
+		array(
+			'post_type'    => 'page',
+			'post_status'  => 'publish',
+			'post_name'    => 'claim',
+			'post_title'   => __( 'Claim a listing', 'directoryweb' ),
+			'post_content' => "<!-- wp:shortcode -->\n[aw_claim_page]\n<!-- /wp:shortcode -->",
+		),
+		true
+	);
+	if ( is_wp_error( $id ) || ! $id ) {
+		return 0;
+	}
+	update_option( 'directoryweb_claim_page', (int) $id, false );
+	return (int) $id;
+}

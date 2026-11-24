@@ -287,7 +287,7 @@ add_shortcode(
 		if ( $listing ) {
 			return '<div class="aw-form-page aw-claim-page" id="claim">'
 				. directoryweb_claim_listing_summary( $listing )
-				. directoryweb_claim_stepper( 1 )
+				. ( function_exists( 'dw_claim_native_active' ) && dw_claim_native_active() ? '' : directoryweb_claim_stepper( 1 ) )
 				. aw_claim_form( $listing )
 				. '</div>';
 		}

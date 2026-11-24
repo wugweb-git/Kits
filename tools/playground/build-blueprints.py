@@ -100,7 +100,18 @@ if ( $listing ) {
 	$nonce = '';
 	$anon = $post( 'pending' );
 	$c( 'anonymous cannot transition claims', in_array( $anon->get_status(), array( 401, 403 ), true ), (string) $anon->get_status() );
+	foreach ( array( 'subscriber', 'editor' ) as $role ) {
+		$uid = wp_insert_user( array( 'user_login' => 'dw_' . $role, 'user_pass' => wp_generate_password(), 'role' => $role ) );
+		wp_set_current_user( $uid );
+		$nonce = wp_create_nonce( 'wp_rest' );
+		$lst = $get( '/directoryweb/v1/claims', array( 'status' => 'all' ) );
+		$c( $role . ' cannot list claims', in_array( $lst->get_status(), array( 401, 403 ), true ), (string) $lst->get_status() );
+		$tr = $post( 'approved' );
+		$c( $role . ' cannot transition claims', in_array( $tr->get_status(), array( 401, 403 ), true ), (string) $tr->get_status() );
+		$c( $role . ' lacks manage_directoryweb', ! current_user_can( 'manage_directoryweb' ) );
+	}
 	wp_set_current_user( 1 );
+	$nonce = wp_create_nonce( 'wp_rest' );
 	$blk = do_blocks( '<!-- wp:directoryweb/collection-filter /-->' );
 	$c( 'collection-filter block renders on the front end', false !== strpos( $blk, 'wp-block-directoryweb-collection-filter' ), substr( wp_strip_all_tags( $blk ), 0, 80 ) );
 }
