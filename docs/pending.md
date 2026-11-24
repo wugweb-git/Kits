@@ -32,6 +32,33 @@ Theme and WordPress items are tracked by Animal Writes WordPress. Code requests 
 - **Multi-Step Validation Error Summary Banner (B3):** In `plugins/kits-core/assets/js/forms.js`, when step validation fails on a previous step, display a top-level error summary banner on the active step with direct links that jump to and focus the invalid fields.
 - **About Field Prefill Sanitization (B1):** Ensure `kits_ff_form()` textarea value population strips raw HTML tags, decodes entities, and converts date markup (`<span class="kit-date">`) into plain text before rendering.
 
+### Remediation of Audit Findings from Commits `6a32c29` & `48ffa0b` (24 Nov 2026)
+Following a comprehensive read-only audit of commits `6a32c29` and `48ffa0b`, a focused 5-point architectural remediation was executed across Kits Core and all six companion plugins:
+- ✅ **Fix 1 (Critical — Function Collisions & Canonical Ownership):**
+  - **Kits Core:** Established canonical ownership of all `kits_*` primitives and helpers (`kits_tag`, `kits_chip`, `kits_badge`, `kits_eyebrow`, `kits_count`, `kits_icon`, `kits_date`, `kits_simple_table`, `kits_shell_rest_can`, `kits_preview_only_ids`, `kits_private_dir`, `kits_scf_active`, `kits_ff_*`), wrapping each declaration in `if ( ! function_exists(...) )` to prevent fatal redeclarations.
+  - **Companion Plugins:** Removed all duplicate global declarations (`kits_*`, `kits_shell_rest_can`) from standalone fallbacks across `directoryweb`, `insightweb`, `mailweb`, `planweb`, and `sourceweb`. Introduced plugin-prefixed standalone fallbacks (`directoryweb_*`, `insightweb_*`, `mailweb_*`, `planweb_*`, `sourceweb_*`) that delegate to Kits Core's canonical helpers when present or provide self-contained fallbacks when running standalone.
+  - **Verification:** Both load orders (Order A: Kits Core first; Order B: Companion plugin first) verified in clean isolated PHP subprocesses across all 6 companion plugins with 0 fatal errors.
+- ✅ **Fix 2 (High — REST Security & Nonce Verification):**
+  - Enforced mandatory `wp_rest` nonce verification for cookie-authenticated sessions across `directoryweb_rest_can`, `insightweb_rest_can`, `mailweb_rest_can`, `planweb_rest_can`, and `sourceweb_rest_can`.
+  - Requests with missing or invalid nonces strictly fail with 403 `rest_cookie_invalid_nonce`.
+  - Legitimate Application Password requests (`rest_get_authenticated_app_password()`) are preserved and authorized without cookie nonces.
+  - Zero test bypasses or production security loopholes introduced.
+- ✅ **Fix 3 (Medium — RankWeb Standalone Meta Description):**
+  - Implemented `aw_rankweb_render_standalone_meta_description()` hooked to `wp_head` (priority 1) when Rank Math is inactive.
+  - Standalone meta description is automatically suppressed when Rank Math is active (`aw_seo_extras_rank_math()`), ensuring exactly one meta description, canonical, robots directive, and schema graph in both standalone and integrated environments.
+- ✅ **Fix 4 (Medium — Decoupled Boot Architecture & Symlink Safety):**
+  - Removed hardcoded eager `require_once WP_PLUGIN_DIR . '/...'` loading blocks across `directoryweb.php`, `mailweb.php`, `planweb.php`, and `sourceweb.php`.
+  - Standalone fallback layers are always required safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
+  - Fully compatible with symlinked plugins, custom directory names, Bedrock, and alternative file structures.
+- ✅ **Fix 5 (Low — Translation Domain Scoping):**
+  - Standardized REST error strings to use their respective plugin text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'aw-sourcing'`).
+- ✅ **Comprehensive Verification Executed & Green:**
+  - `tests/remediation-verification-test.php`: 27/27 test suites passing (both load orders, 6 together, 6 standalone, all REST auth variants, RankWeb with/without Rank Math).
+  - `tests/standalone-matrix-test.php`: 6/6 plugins verified independent in isolated clean-room subprocesses.
+  - All individual plugin test suites passing (over 700 checks with 0 failures).
+  - Monorepo CI gates: `npm run check:ci` passing all 9 gates and Vite build in 6.75s.
+  - All changes kept strictly uncommitted and unpushed in working tree.
+
 ### Companion Plugins Release Readiness & Standalone Decoupling (23 Nov 2026)
 - ✅ **DirectoryWeb (Priority 1):** Removed hard boot halt (`! defined('KITS_CORE_LOADED')`), introduced `standalone-fallback.php` providing primitives (`kits_count`, `kits_icon`, `kits_date`, `kits_simple_table`, `kits_shell_rest_can`), implemented native fallback admin screens for Dashboard and Settings, redirect fallback for Listings, hardened REST permissions, and added `directoryweb-standalone-test.php` and `directoryweb-scf-fallback-test.php` (all 5 test suites passing with 0 failures).
 - ✅ **RankWeb (Priority 2):** Established native SEO independence, made Rank Math an optional integration rather than a boot requirement, added standalone Schema.org JSON-LD output (`aw_schema_render_standalone_json_ld`) hooked to `wp_head`, hooked canonicals to `get_canonical_url`, hooked robots directives to `wp_robots`, and added `StandaloneSchemaTest.php` (all 125 tests and 94 settings checks passing with 0 failures).
