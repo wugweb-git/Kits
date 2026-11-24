@@ -53,7 +53,8 @@ function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
 			}
 		}
 	}
-	return $cache[ $tag ][ $lid ] = $out;
+	$cache[ $tag ][ $lid ] = $out;
+	return $out;
 }
 
 /**

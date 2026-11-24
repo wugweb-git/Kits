@@ -137,7 +137,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_claim_el,
 		function ( $data, $form ) {
-			if ( ! aw_claim_ff_id() || (int) $form->id !== aw_claim_ff_id() || ! function_exists( 'aw_ff_phone10' ) ) { // the Fluent Forms helpers are Animal Writes Core's
+			if ( ! aw_claim_ff_id() || aw_claim_ff_id() !== (int) $form->id || ! function_exists( 'aw_ff_phone10' ) ) { // the Fluent Forms helpers are Animal Writes Core's
 				return $data;
 			}
 			$listing = function_exists( 'directoryweb_form_page_listing' ) ? directoryweb_form_page_listing() : null;
@@ -295,7 +295,7 @@ function aw_claim_changes( $c ) {
 			$now = directoryweb_ff_social_user( $key, $now ); // the link and its username are the same thing
 			$new = directoryweb_ff_social_user( $key, $new );
 		}
-		$loose = 'l_email' === $key || 0 === strpos( DW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', DW_CLAIM_L[ $key ][1] );
+		$loose = 'l_email' === $key || ( 0 === strpos( DW_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', DW_CLAIM_L[ $key ][1] ) );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
 			$out[ $key ] = array( DW_CLAIM_L[ $key ][0], $now, $new );
 		}

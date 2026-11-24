@@ -526,7 +526,7 @@ function aw_listing_campaigns( $id, $max = 3 ) {
 	$base  = array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 30, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' );
 	$roles = array();
 	foreach ( get_posts( $base + array( 'meta_query' => array( 'relation' => 'OR', array( 'key' => 'aw_organisation', 'value' => (string) $id ), array( 'key' => 'aw_organiser', 'value' => (string) $id ) ) ) ) as $c ) { // phpcs:ignore WordPress.DB.SlowDBQuery
-		if ( (int) $id === aw_campaign_organiser( $c ) ) { // an older aw_organiser row counts only while aw_organisation is empty
+		if ( aw_campaign_organiser( $c ) === (int) $id ) { // an older aw_organiser row counts only while aw_organisation is empty
 			$roles[ $c ] = __( 'Organiser', 'directoryweb' );
 		}
 	}

@@ -433,7 +433,7 @@ function aw_featured_subject_schema( $lid ) {
 	foreach ( aw_featured_items( $lid, 20 ) as $i ) {
 		$url = aw_featured_url( $i );
 		if ( $url ) {
-			$out[] = array_filter( array( '@type' => $types[ get_post_type( $i ) ], 'name' => html_entity_decode( get_the_title( $i ), ENT_QUOTES ), 'url' => $url, 'datePublished' => (string) get_post_meta( $i, 'aw_source_date', true ) ?: get_the_date( 'Y-m-d', $i ) ) );
+			$out[] = array_filter( array( '@type' => $types[ get_post_type( $i ) ], 'name' => html_entity_decode( get_the_title( $i ), ENT_QUOTES ), 'url' => $url, 'datePublished' => '' !== (string) get_post_meta( $i, 'aw_source_date', true ) ? (string) get_post_meta( $i, 'aw_source_date', true ) : get_the_date( 'Y-m-d', $i ) ) );
 		}
 	}
 	return $out;

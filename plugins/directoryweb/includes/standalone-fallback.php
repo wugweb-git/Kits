@@ -114,7 +114,7 @@ if ( ! function_exists( 'directoryweb_simple_table' ) ) {
 		}
 		echo '<thead><tr>';
 		foreach ( $cols as $key => $label ) {
-			echo '<th scope="col" class="manage-column column-' . esc_attr( $key ) . '">' . $label . '</th>';
+			echo '<th scope="col" class="manage-column column-' . esc_attr( $key ) . '">' . $label . '</th>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- callers pass HTML labels (as Kits_Simple_Table does)
 		}
 		echo '</tr></thead><tbody>';
 		if ( empty( $rows ) ) {
@@ -125,7 +125,7 @@ if ( ! function_exists( 'directoryweb_simple_table' ) ) {
 				echo '<tr>';
 				foreach ( $cols as $key => $label ) {
 					$val = $row[ $key ] ?? '';
-					echo '<td>' . $val . '</td>';
+					echo '<td>' . $val . '</td>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- cells are HTML the caller already escaped
 				}
 				echo '</tr>';
 			}
