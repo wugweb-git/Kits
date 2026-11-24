@@ -281,7 +281,9 @@ function mailweb_fcrm_claim_note( $c, $entry, $data, $form, $ref ) {
  */
 function mailweb_fcrm_contact_for( $email, $name, $tags, $source ) {
 	$email = strtolower( trim( (string) $email ) );
-	if ( ! mailweb_fcrm_on() || ! is_email( $email ) || mailweb_fcrm_blocked( $email ) || str_ends_with( $email, '@animalwrites.in' ) || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
+	$site_host = preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+	$own_email = '' !== $site_host && str_ends_with( $email, '@' . $site_host );
+	if ( ! mailweb_fcrm_on() || ! is_email( $email ) || mailweb_fcrm_blocked( $email ) || $own_email || preg_match( '/^(mailer-daemon|postmaster|no-?reply)@/i', $email ) ) {
 		return null;
 	}
 	if ( function_exists( 'mailweb_crm_upsert' ) ) {
@@ -309,9 +311,9 @@ function mailweb_fcrm_contact_for( $email, $name, $tags, $source ) {
 	return $c ? $c : null;
 }
 
-/** Reply-To for an email to a person: always support@, the address for all mail with people (owner, 31 Oct 2026). */
+/** Reply-To for an email to a person. */
 function mailweb_fcrm_reply_to( $email = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- kept for callers
-	return 'support@animalwrites.in';
+	return (string) apply_filters( 'mailweb_fcrm_reply_to', get_option( 'admin_email' ) );
 }
 
 /* ---------- FluentCRM Pro's one-off email (profile → Emails → Send Email; not in FluentCRM free) ---------- */

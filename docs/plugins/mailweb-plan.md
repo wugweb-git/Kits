@@ -1,6 +1,6 @@
 # MailWeb on the Kits plugin standard (plan)
 
-Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is approved. Checked against `origin/wordpress-dev` at c37d3b7c on 11 Nov 2026; every file:line below is from that commit.
+**Status (Updated 25 Nov 2026):** Implemented at `3.3.0`, standalone verified, and WP.org Plugin Check (`0` errors) verified. *(Historical 11 Nov plan preserved below for reference; see `docs/org/mailweb-org-plan.md` for current WP.org status.)*
 
 ## Fixed for this plan (owner)
 

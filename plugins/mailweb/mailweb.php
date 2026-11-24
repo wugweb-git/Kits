@@ -17,7 +17,6 @@
  * Author URI:        https://wugweb.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://wugweb.com/plugins/mailweb/
  * Text Domain:       mailweb
  * Domain Path:       /languages
  */

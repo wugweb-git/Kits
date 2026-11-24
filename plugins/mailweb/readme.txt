@@ -71,6 +71,14 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 
 Nothing is deleted. Settings and earlier data stay in place.
 
+== External services ==
+
+MailWeb connects to external services only when configured by the site administrator:
+
+* **Hostinger Mail API (`https://api.mail.hostinger.com`):** When a Hostinger Mail API token is configured, reads mailbox folders/messages and sends replies/outbound mail through your Hostinger mailboxes. Terms & Privacy: [https://www.hostinger.com/privacy-policy](https://www.hostinger.com/privacy-policy).
+* **Configured SMTP Server:** When SMTP credentials are configured under **Mail → Settings → Site sending**, delivers site emails via that SMTP host.
+* **FluentCRM (local WordPress plugin, optional):** When FluentCRM is active and enabled in settings, logs transactional contact notes locally in WordPress.
+
 == Changelog ==
 
 = 3.3.0 =
