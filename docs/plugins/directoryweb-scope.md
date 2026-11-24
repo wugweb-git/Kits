@@ -1,5 +1,25 @@
 # DirectoryWeb: a generic directory engine, and the last Directory code leaving Animal Writes Core (scope, 18 Nov 2026)
 
+> **Implementation status (25 Nov 2026).** This is the scope as written on 18 Nov; below is where each section stands on `feat/directoryweb-completion`. Nothing is deployed to a live site.
+>
+> | Section | Status |
+> |---|---|
+> | 1 Inventory, 1.3 already in DirectoryWeb | Done for the data model, listing meta, data sources, re-verify job. 1.4 calls into Core: `kits_ff_*` calls replaced by `directoryweb_ff_*` wrappers in the claim code; remaining Core calls are optional integrations |
+> | 2 Dependency map | Holds. Kits Core, SCF, Fluent Forms, FluentCRM, MailWeb are all optional; standalone suites pass (`directoryweb-standalone-test` 16, `scf-fallback` 10) |
+> | 3 Engine and presets | **Not built as specified**: no `directoryweb-default` preset object exists in code; types and settings are still the Animal Writes defaults held in constants and options. Open |
+> | 4 Taxonomies | Done for tags/categories on the listing type; rename of `aw_*` deferred by decision |
+> | 5.1 Forms contract | **Done natively**: `directoryweb_ff_form('claim')` returns the built-in claim form when no form is configured; Fluent Forms still honoured. 5.2 enrichment: SourceWeb engine unchanged. 5.3 CRM events: not built (no event hook exists) |
+> | 6 SCF | Optional; fallback fields when SCF is absent |
+> | 7 Front end | Blocks done (nine registered, including `collection-filter`); shortcodes kept |
+> | 8, 9 WP-native, fresh site | Verified in Playground: activates and runs with no Kits Core, no Animal Writes Core, no Fluent Forms |
+> | 10 Use cases | Not a build item |
+> | 11 File by file | Superseded by the plugin tree |
+> | 12 DB safety | No schema change; native claims are an `aw_claim` post type with meta; no custom tables |
+> | 13 Staged plan | Stages 1-2 done; stage 3 (listing post type arguments) and Core retirement belong to Animal Writes and stay open |
+> | 14, 15 Risks, owner questions | Open questions in §15 are unanswered |
+>
+> Open work and evidence: `plugins/directoryweb/PENDING.md`, `docs/audit/acceptance-gates.md`.
+
 **Goal.** Retire the `animal-writes-core` tenant plugin piece by piece. This document covers the Directory piece:
 - what of the Directory is still in Core, what it depends on and what depends on it;
 - how DirectoryWeb (`plugins/directoryweb`, text domain `directoryweb`) becomes a **generic directory engine** that

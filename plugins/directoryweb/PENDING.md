@@ -1,6 +1,6 @@
 # DirectoryWeb: Pending & Roadmap
 
-Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
+Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U unit, H headless Playground, B browser, X external. See `docs/audit/acceptance-gates.md` and `docs/audit/master-matrix.md`.
 
 ## Active Scope & Responsibilities
 - Custom Post Type `aw_listing` (or configurable tenant listing post type).
@@ -25,7 +25,7 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
 3. **Listing Claim Flow (`docs/cc-master-plan-19-nov.md`)**:
    - ~~Frontend claim modal with verification document/email submission.~~ ✅ Done (`claim-page.php`, `claims.php`).
    - ~~Admin review queue under `DirectoryWeb > Claims` with Approve/Reject actions.~~ ✅ Done (`claims-review.php`); the new shell screen stays read-only by owner decision (11 Nov 2026).
-   - ~~Automated notification emails via `MailWeb`.~~ ✅ Done (MailWeb bridge).
+   - Notification emails: native claims send plain `wp_mail` (claimant on receipt and on every decision, site owner on new claim); gated by the *Claim emails* setting. B: captured with `pre_wp_mail`. **X open:** delivery through a real transport (SMTP/MailWeb) is not testable in Playground.
    - ~~Verified badge assignment upon approval.~~ ✅ Done (`gov-verified.php`, `claim-page.php`).
 
 4. **Directory Performance & Caching**:
@@ -52,10 +52,13 @@ Status as of 22 Nov 2026 (checked on `wordpress-dev` at `7e98b691`).
    - ✅ `manage_directoryweb` capability with grant + fallback (`directoryweb-caps.php`)
    - Open: the §2.4 requests to Kits Core first; the old Claims address 301 redirect.
 
-6a. **Native claims and claim states** (24 Nov 2026, `includes/claim-native.php`, `tests/claim-native-tests.php`):
-   - ✅ Standalone claim path with no Fluent Forms: `dw_claim_native_form()` is what `directoryweb_ff_form('claim')` returns when no form is configured and Kits Core is absent (Core's `kits_ff_form` still wins when present).
-   - ✅ State machine `pending → approved | rejected | withdrawn`, `approved → revoked`, `rejected/revoked → pending`; invalid moves return HTTP 409. Approval applies ticked fields through the existing `aw_claim_apply_field()` writer (enrichment log + Undo unchanged) and marks the listing verified; revoke removes the verified mark and sets `aw_needs_reverify`.
-   - ✅ Abuse limits: nonce, honeypot, 5 sends/IP/hour, max 3 open claims per email, one open claim per email per listing. Claims are private `aw_claim` posts; only `manage_directoryweb` can decide (metabox on the claim screen, or `POST directoryweb/v1/claims/<id>/transition`).
-   - Open: the Fluent Forms review path (`claims-review.php`) does not yet use the state table (it keeps its own pending/approved/rejected meta); the new Claims shell screen is still read-only and does not list native claims; claimant and reviewer emails are not sent for native claims (MailWeb bridge not wired); no claimant withdraw UI; no proof-document upload on the native form.
+6a. **Native claims and claim states** (`includes/claim-native.php`, `tests/claim-native-tests.php` 35 checks):
+   - ✅ Standalone claim path with no Fluent Forms; creates the `/claim/` page on activation; the refused form comes back filled in. Core's `kits_ff_form` and a configured Fluent Forms form still win when present.
+   - ✅ State machine `pending → approved | rejected | withdrawn`, `approved → revoked`, `rejected/revoked → pending`; illegal moves are HTTP 409 (REST and the decide handler). Approval applies the ticked fields through `aw_claim_apply_field()` and marks the listing verified; revoke removes the mark and sets `aw_needs_reverify`.
+   - ✅ Abuse limits: nonce, honeypot, 5 sends/IP/hour, 3 open claims per email, 1 per email per listing.
+   - ✅ Decide on the claim edit screen (Approve, Reject, Revoke, Re-open) or `POST directoryweb/v1/claims/<id>/transition`; only `manage_directoryweb`. H: subscriber, editor and anonymous are refused.
+   - ✅ The Kits Core shell Claims list and detail show native claims as `DW-<id>` (`#claim-dw-<id>`); the shell stays read-only by owner decision.
+   - ✅ Settings (standalone): claim emails on/off, notify address, Fluent Forms form selector only when Fluent Forms is present.
+   - Open: Fluent Forms claims use the state table only to refuse illegal moves (they cannot revoke or re-open; no state hooks because form-entry ids collide with post ids; **X**: needs Fluent Forms to test); claimant withdraw UI; proof-document upload; per-claim email templates and translations.
 
 7. **Deploy**: parent PR to `wordpress-dev` merges through the Deploy check; ship with `tools/kits-ship.sh`.
