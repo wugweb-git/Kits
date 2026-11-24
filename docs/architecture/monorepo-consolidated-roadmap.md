@@ -57,7 +57,7 @@
 | **Shared PHP SDK** | `packages/shared-php/` | 0.1.0 | **Verified Operational** (Unlinked) | Standalone PHP SDK providing `TokenEngine`, `ExternalServiceRegistry`, `NonceGuard`, `Sanitizer`. `tests/TokenEngineTest.php` passes 5/5 test suites. |
 | **Packaging Tools** | `tools/build/build-dist.py` | — | **Verified Operational** | Builds 8 clean distribution packages into `dist/*.zip` with SHA-256 integrity reporting, MailWeb vendor SDK inclusion, and proper test/dev exclusion. |
 | **CI / Quality Gates** | `.github/workflows/ci-suite.yml` | — | **Verified Operational** | Path-filtered workflow with multi-PHP matrix (8.0–8.3), root node check suite (`check:ci`), standalone matrix tests, remediation verification suite, and release packaging gates. |
-| **WordPress Playground**| `tools/playground/` | — | **Verified Operational** | Declarative blueprints targeting WP 6.7 and PHP 8.2 (`blueprint-base.json` + 6 companion plugin blueprints in `blueprints/`). |
+| **WordPress Playground**| `tools/playground/` | — | **Verified Operational** (remote CI) | Generated blueprints (`build-blueprints.py`): base + 6 standalone product blueprints + full suite, WP 7.1 / PHP 8.2, release-asset URLs, schema-validated and run headlessly in CI (`playground-smoke`).
 
 ---
 
@@ -378,9 +378,9 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 ---
 
 ### Phase P2: Testing, GitHub Workflows & WordPress Playground
-- [x] **Task P2.1: Author Universal Playground Base Blueprint** (`tools/playground/blueprint-base.json`). Configured with WP 6.7, PHP 8.2, networking enabled, and admin login.
+- [x] **Task P2.1: Author Universal Playground Base Blueprint** (`tools/playground/blueprint-base.json`). Now WP 7.1 (all products require 7.1), PHP 8.2, networking enabled, admin login, smoke assertion.
 - [x] **Task P2.2: Author Companion Plugin Blueprints & Fixtures** (Individual blueprints authored in `tools/playground/blueprints/` for DirectoryWeb, MailWeb, RankWeb, SourceWeb, InsightWeb, PlanWeb).
-- [ ] **Task P2.3: Headless Playground CI Gate** in `.github/workflows/ci-suite.yml` using `@wp-playground/cli`.
+- [x] **Task P2.3: Headless Playground CI Gate** in `.github/workflows/ci-suite.yml` (`ci-blueprints` schema gate + `playground-smoke` with `@wp-playground/cli` 3.1.66). Evidence: run 45436429713 (green). Manual only: browser CORS check of release assets and credentialed scenarios.
 
 ---
 
