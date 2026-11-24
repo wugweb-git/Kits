@@ -10,6 +10,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Early Day/Night Anti-FOUC script.
+ * Runs at wp_head priority 1 to apply data-theme before the DOM paints, preventing flash of unstyled content.
+ */
+function kits_anti_fouc_script() {
+	?>
+	<script>
+	(function() {
+		try {
+			var stored = localStorage.getItem('kit-theme');
+			var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+			var theme = stored ? stored : (prefersDark ? 'dark' : 'light');
+			document.documentElement.setAttribute('data-theme', theme);
+		} catch (e) {}
+	})();
+	</script>
+	<?php
+}
+add_action( 'wp_head', 'kits_anti_fouc_script', 1 );
+
+/**
  * Editor styles. A block theme gets editor-styles, responsive-embeds and post-thumbnails from core on its own.
  */
 function kits_setup() {

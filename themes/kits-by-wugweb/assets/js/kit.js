@@ -357,3 +357,19 @@
 	var w = window.innerWidth, timer;
 	window.addEventListener('resize', function () { if (window.innerWidth === w) return; w = window.innerWidth; clearTimeout(timer); timer = setTimeout(run, 150); });
 })();
+
+/* Day/Night Theme Toggle button interaction.
+ * Toggles data-theme attribute on <html> between "dark" and "light", persisting to localStorage. */
+(function () {
+	document.addEventListener('click', function (e) {
+		var btn = e.target.closest && e.target.closest('[data-kit-theme-toggle]');
+		if (!btn) return;
+		var cur = document.documentElement.getAttribute('data-theme') || 'light';
+		var next = cur === 'dark' ? 'light' : 'dark';
+		document.documentElement.setAttribute('data-theme', next);
+		try {
+			localStorage.setItem('kit-theme', next);
+		} catch (err) {}
+		btn.setAttribute('aria-pressed', next === 'dark' ? 'true' : 'false');
+	});
+})();

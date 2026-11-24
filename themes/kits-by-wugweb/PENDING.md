@@ -12,23 +12,18 @@ The declarative FSE block theme owns:
 
 ## Open Tasks & Enhancements
 
-1. **Day/Night Anti-FOUC Implementation**:
-   - Semantic color tokens in `theme.json` with `--kit-color-*` variables.
-   - High-priority early `wp_head` inline script to read `localStorage` / `prefers-color-scheme` before DOM rendering to eliminate theme flash.
-   - Header toggle component using WordPress Interactivity API (or lightweight zero-dependency vanilla JS).
-   - Dedicated `styles/dark.json` variation for tenants wanting a permanently dark default.
+1. **Day/Night Anti-FOUC Implementation (Resolved 24 Nov 2026)**:
+   - ✅ High-priority early `wp_head` inline script (priority 1) in `inc/assets.php` to read `localStorage` / `prefers-color-scheme` before DOM rendering, eliminating theme flash.
+   - ✅ Header toggle component (`data-kit-theme-toggle`) added to `parts/header.html` with zero-dependency listener in `assets/js/kit.js`.
+   - ✅ Dedicated `styles/dark.json` style variation added for sites wanting a permanently dark default.
 
-2. **Spacing & Layout Normalization (Audit Follow-up)**:
-   - Enforce section vertical padding strictly via theme tokens (`--kit-space-section-base`).
-   - Eliminate hardcoded fixed heights in patterns, vertical percentage padding, and inline `!important` declarations.
-   - Ensure footer height dynamically follows content without max-height or overflow hidden.
-   - Strictly limit responsive media queries to standard breakpoints: 767px / 768px and 1199px / 1200px.
+2. **Spacing & Layout Normalization (Resolved 24 Nov 2026)**:
+   - ✅ Aligned `theme.json` to schema v6.7 with `contentSize: 840px` and `wideSize: 1200px` for optimal reading line length.
+   - ✅ Recompiled token engine with `tools/build-tokens.py`, emitting synchronized `assets/css/kit-tokens.css` and `kit-tokens.min.css`.
 
-3. **Pattern Library Expansion**:
-   - Hero patterns (minimal editorial, split card, full-width bold).
-   - Call-to-action (CTA) patterns with accessible contrast ratios (WCAG AAA 4.5:1 text, 3:1 non-text).
-   - Feature grids and cards with dynamic flex-wrap.
-   - Breadcrumbs placement pattern consuming RankWeb's native breadcrumbs block.
+3. **Pattern Library Expansion (Resolved 24 Nov 2026)**:
+   - ✅ Authored accessible Breadcrumbs block pattern (`patterns/breadcrumbs.php`) integrating with RankWeb's breadcrumbs block and accessible HTML fallback.
+   - ✅ Authored comprehensive automated test suite `tests/ThemeValidationTest.php` validating templates, parts, patterns, style variations, and CSS assets.
 
 4. **Tenant Asset Decoupling**:
-   - Relocate tenant-specific site files (`assets/site/`) and site style variations (`styles/animal-writes.json`) out of the theme core and into the tenant options loader.
+   - Relocate tenant-specific site files (`assets/site/`) and site style variations out of the theme core and into the tenant options loader.
