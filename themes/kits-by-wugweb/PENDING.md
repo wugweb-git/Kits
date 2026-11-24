@@ -29,8 +29,9 @@ The declarative FSE block theme owns:
 
 3b. **Frost pattern library (Resolved 25 Nov 2026)**: templates `blank`, `no-title`; 27 new patterns (footer variants, boxes, CTA inline, product box, team, portfolio, progress bars, pricing x3, posts, posts list, 404, comments, author box, testimonials, hero centred, four sample pages); `hero-split`, `cta`, `card-grid`, `testimonials` adapted; block styles Reverse on mobile, Plain (no bullets), Outline; `theme.json` styling for code, preformatted, quote, pullquote; breadcrumbs fallback made valid; `sidebar` template-part area registered once, with or without Kits Core; POT regenerated.
    - Catalogue of all 50 Frost files, what was built, adapted or excluded and why: `docs/theme/frost-pattern-integration.md`.
-   - Validation evidence (WordPress Playground, with and without Kits Core): same document, and the test suite in `tests/ThemeValidationTest.php` (28 checks).
-   - Open, genuinely: Safari and Firefox not run; no real assistive technology run; the Site Editor Replace dialog for header and footer variants was not click-driven (the replacement itself was verified through the editor store).
+   - Validation evidence (WordPress Playground, with and without Kits Core): same document, and the test suite in `tests/ThemeValidationTest.php` (29 checks).
+   - Verified since: Firefox 160 and WebKit 26.6 run; header/footer variants click-driven through the Site Editor's Design panel (Replace does not list patterns in WP 7.1.5); progress-bar and Ink contrast fixed with tests.
+   - Open, genuinely: no real screen reader run; Safari proper not run (WebKit stand-in); Dark/Forest/Slate not visually rendered through the Site Editor (contrast computed from palettes).
    - Content width stays `1200px` for both `contentSize` and `wideSize` (an earlier note said 840px).
 
 4. **Tenant Asset Decoupling**:

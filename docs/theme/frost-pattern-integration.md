@@ -100,13 +100,14 @@ The three new block styles carry behaviour, not design values, so their CSS is i
 - **Notification bar is Kits Core's**, not the theme's (ownership boundary).
 - **Sidebar template-part area.** `theme.json` declares a `sidebar` area. WordPress knows only header, footer, uncategorized and navigation-overlay, and Kits Core registers `sidebar` itself (`plugins/kits-core/includes/landmarks.php`, priority 10). The theme adds the same area in `inc/blocks.php` at priority 20 and only when it is missing, so without Core there is no PHP Notice and with Core there is exactly one area. The theme does not depend on Core.
 - **Breadcrumbs.** The fallback (RankWeb inactive) now builds a native ordered list (`core/list`, `core/list-item`) inside the Group, so it is valid in the editor; the RankWeb branch is unchanged.
-- **Dark-mode Ink fix.** The Ink colour set turns into a light panel in dark mode, but its links stayed light (1.41:1). In dark mode links in an Ink group now use the set's own text colour and stay underlined.
+- **Ink colour-set links.** Links in the Ink set were 1.91:1 against the panel under the Dark palette and 1.41:1 in dark mode. The fix now lives in `styles/colours/ink.json` (link colour is the set's own `on-ink`, underlined, same on hover), so it follows every palette and variation; the earlier CSS-only dark-mode rule was removed. A test checks link, heading and text against the Ink panel in the base, Dark, Forest and Slate palettes.
+- **Progress bars.** Track and fill were 1.39:1. The track is now `border` and the fill `secondary` (13.19:1, light). A test requires at least 3:1 (WCAG 1.4.11). The bar has no `role="progressbar"`: the value is in the label text ("Label, 90%"), so it is not conveyed by the bar alone.
 
 ## 5. Header and footer variants
 
-The Site Editor lists a pattern as a replacement for a template part when it has `Block Types: core/template-part/header` or `.../footer`. Registered Kits variants: header-default; footer-default, footer-minimal, footer-columns, footer-social, footer-stacked.
+A pattern with `Block Types: core/template-part/header` or `.../footer` is offered as a variant of that part. In WordPress 7.1.5 this is in the block's Settings tab, **Design** panel, not in the **Replace** menu: Replace lists only other template-part entities of the same area, never patterns. Registered Kits variants: header-default; footer-default, footer-minimal, footer-columns, footer-social, footer-stacked.
 
-Checked in WordPress Playground: the footer part's editor offers all five Kits footers (and core's own); replacing the footer with `footer-minimal` through the editor's block store, saving, and loading the front end renders the minimal footer (`wp_template_part` saved as `custom`, no invalid blocks). The click through the Site Editor's Replace dialog itself was not driven.
+Checked in WordPress Playground with real clicks in the Site Editor: selecting the footer part, opening Settings, Design, the panel lists the five Kits footers (columns, default, minimal, links and social, stacked) plus core's; choosing one replaces the part, Save writes a `wp_template_part` as `custom` that holds the pattern reference, the front end renders it, reload shows 0 invalid blocks. The header part offers header-default and core's headers the same way. The Replace menu was opened too and confirmed to list no patterns.
 
 ## 6. Validation (25 Nov 2026)
 
@@ -125,20 +126,21 @@ WordPress Playground CLI, WordPress 7.1.5, PHP 8.3, `WP_DEBUG` and `WP_DEBUG_LOG
 | Widths | No horizontal scroll at 375, 600, 768, 1000, 1200 | No horizontal scroll at the same widths |
 | Reverse on mobile | `column-reverse` at 375; `row` at 1024 | Not repeated |
 | Plain, Outline, Code, Preformatted, Quote, Pullquote | Computed styles checked: list markers none; outline border and icon follow the text colour; code and quote use border, radius, mono font | Not repeated |
-| Contrast (measured, WCAG ratio) | Light: code text 12.35, cite 5.46, quote 12.35. Dark: code 11.21, cite 6.15, quote 12.26. Ink set: light text 17.58, link 11.47; dark link 17.39 after the fix (1.41 before) | Not repeated |
+| Contrast (measured, WCAG ratio) | Light: code text 12.35, cite 5.46, quote 12.35. Dark: code 11.21, cite 6.15, quote 12.26. Ink set: text 17.58, link 17.58 light and 17.39 dark (1.41 before). Progress bar 13.19 (1.39 before). Palettes Default/Dark/Forest/Slate computed from the JSON: code 12.35/11.21, cite 5.46/6.15, quote 12.35/12.26, progress 13.19/11.21, Ink text 17.58/17.39 | Final run: progress 13.19, Ink link 17.58/17.39 |
 | Heading hierarchy | No skipped level across the 47 patterns on one page (after changing card headings in boxes, product box, pricing and team from h3 to h2) | Same |
 | Names and alt | No unnamed link or button, no image without `alt`; one input without a label is WordPress's own admin-bar search | Not repeated |
-| Header and footer variants | Footer part offers the five Kits footers; replaced with `footer-minimal`, saved as `custom`, renders on the front end | Not repeated |
-| Theme tests | `php tests/ThemeValidationTest.php`: 28 checks, 0 failed | |
+| Header and footer variants | Design panel clicked through; `footer-minimal` saved as `custom`, renders, 0 invalid on reload | Not repeated |
+| Cross-browser | Chromium 153, WebKit 26.6 (Safari engine) and Firefox 160: no horizontal overflow at 375, 768, 1200; Plain, Outline, Reverse, code and quote computed styles identical; keyboard focus walk shows an indicator on every stop | Not repeated |
+| Theme tests | `php tests/ThemeValidationTest.php`: 29 checks, 0 failed | |
 | ZIP | 106 files, 47 patterns; no `assets/site/`, no `tests/`, no `PENDING.md`, no `phpcs.xml.dist`; `tools/build/verify-dist.py` lists `kits-by-wugweb` and `kits-core` correctly | |
 
-Style variations Dark, Forest and Slate were checked in the earlier validation run and not repeated for the later changes, which touch no variation file.
+Style variations Dark, Forest and Slate: contrast was computed from their palette files against the final patterns (above). A full visual render through the Site Editor's Browse styles was not obtained (the test harness for switching variations was unreliable), so that remains unverified visually.
 
 ## 7. Known limitations
 
-- Safari and Firefox were not available; only Chromium (the app's browser) was used.
-- No real assistive technology was used. Progress bars have the value in text, not an ARIA progressbar role.
+- Safari itself was not run: WebKit 26.6 from Playwright stands in for its engine. Firefox 160 and Chromium 153 were run.
+- No real screen reader (VoiceOver, NVDA) was used. Keyboard-only walks and accessible names were checked by script.
 - Playground is not a production host: caching, object cache and real mail were not exercised.
-- The editor console in the last runs showed only connection-refused and 502 entries from restarting the test server, one `beforeunload` message, and one 404 that was not traced; every request in the final editor load returned 200.
-- Not driven: the Site Editor Replace dialog (clicks); Safari; Firefox; real assistive technology; the style variations after the last changes.
+- Earlier console noise (connection refused, 502 from restarting the test server, `beforeunload`) did not reproduce. The single unexplained 404 could not be reproduced either; the final runs, with WP_DEBUG on, show only the intentional 404 of the not-found test URL and no `debug.log`.
+- Not driven: real assistive technology; Safari proper; a visual render of Dark, Forest and Slate through the Site Editor; Kits Core alongside a different theme.
 - The theme ZIP ships `tokens/` and `tools/build-tokens.py` (so a child theme can rebuild tokens, as `readme.txt` describes). That is an existing distribution choice, not part of this work.

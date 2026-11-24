@@ -582,10 +582,75 @@ it('Standalone Frost-derived content patterns do not open on a heading deeper th
     }
 });
 
-it('Ink colour set keeps its links readable in dark mode (the panel inverts, so the link takes the set text colour)', function () use ($theme_dir) {
-    $css = file_get_contents($theme_dir . '/assets/css/kits.css');
-    if (!preg_match('/data-theme="dark"\]\s+\.is-style-kits-colours-ink a[^{]*\{[^}]*on-ink/s', $css)) {
-        throw new \RuntimeException('no dark-mode link rule for the Ink colour set');
+it('Ink colour set: link, heading and text colours read on the Ink panel in every palette (base, Dark, Forest, Slate), links underlined', function () use ($theme_dir) {
+    $ink  = json_decode(file_get_contents($theme_dir . '/styles/colours/ink.json'), true);
+    $base = [];
+    foreach (json_decode(file_get_contents($theme_dir . '/theme.json'), true)['settings']['color']['palette'] as $c) {
+        $base[$c['slug']] = $c['color'];
+    }
+    $lum = function ($hex) {
+        $hex = ltrim($hex, '#');
+        $v   = array_map(fn($i) => hexdec(substr($hex, $i, 2)) / 255, [0, 2, 4]);
+        $v   = array_map(fn($x) => $x <= 0.03928 ? $x / 12.92 : pow(($x + 0.055) / 1.055, 2.4), $v);
+        return 0.2126 * $v[0] + 0.7152 * $v[1] + 0.0722 * $v[2];
+    };
+    $ratio = fn($a, $b) => (max($lum($a), $lum($b)) + 0.05) / (min($lum($a), $lum($b)) + 0.05);
+    $slug  = fn($v) => preg_match('/--color--([a-z-]+)\)/', $v, $m) ? $m[1] : null;
+    $bg    = $slug($ink['styles']['color']['background']);
+    $uses  = [
+        'text'    => $slug($ink['styles']['color']['text']),
+        'heading' => $slug($ink['styles']['elements']['heading']['color']['text']),
+        'link'    => $slug($ink['styles']['elements']['link']['color']['text']),
+    ];
+    if (($ink['styles']['elements']['link']['typography']['textDecoration'] ?? '') !== 'underline') {
+        throw new \RuntimeException('Ink links must be underlined (colour alone is not enough)');
+    }
+    foreach (['base' => $base] + array_combine(['dark', 'forest', 'slate'], array_map(function ($f) use ($base, $theme_dir) {
+        $p = $base;
+        foreach ((json_decode(file_get_contents($theme_dir . "/styles/$f.json"), true)['settings']['color']['palette'] ?? []) as $c) {
+            $p[$c['slug']] = $c['color'];
+        }
+        return $p;
+    }, ['dark', 'forest', 'slate'])) as $name => $pal) {
+        foreach ($uses as $role => $s) {
+            $r = $ratio($pal[$s], $pal[$bg]);
+            if ($r < 4.5) {
+                throw new \RuntimeException(sprintf('Ink %s (%s) on %s is %s:1 in the %s palette, below 4.5:1', $role, $s, $bg, round($r, 2), $name));
+            }
+        }
+    }
+});
+
+it('Progress bars: fill against track meets 3:1 (WCAG non-text contrast), using palette tokens, and the value is in text', function () use ($theme_dir) {
+    $src  = file_get_contents($theme_dir . '/patterns/progress-bars.php');
+    $data = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    $pal  = [];
+    foreach ($data['settings']['color']['palette'] as $c) {
+        $pal[$c['slug']] = $c['color'];
+    }
+    $lum = function ($hex) {
+        $hex = ltrim($hex, '#');
+        $v   = array_map(fn($i) => hexdec(substr($hex, $i, 2)) / 255, [0, 2, 4]);
+        $v   = array_map(fn($x) => $x <= 0.03928 ? $x / 12.92 : pow(($x + 0.055) / 1.055, 2.4), $v);
+        return 0.2126 * $v[0] + 0.7152 * $v[1] + 0.0722 * $v[2];
+    };
+    preg_match_all('/"backgroundColor":"([a-z-]+)"/', $src, $m);
+    $slugs = array_values(array_unique($m[1]));
+    if (count($slugs) !== 2) {
+        throw new \RuntimeException('expected exactly a track and a fill colour, found: ' . implode(',', $slugs));
+    }
+    foreach ($slugs as $slug) {
+        if (!isset($pal[$slug])) {
+            throw new \RuntimeException("$slug is not a palette token");
+        }
+    }
+    [$a, $b] = [$lum($pal[$slugs[0]]), $lum($pal[$slugs[1]])];
+    $ratio = (max($a, $b) + 0.05) / (min($a, $b) + 0.05);
+    if ($ratio < 3.0) {
+        throw new \RuntimeException(sprintf('progress bar fill and track are %s:1, below 3:1', round($ratio, 2)));
+    }
+    if (!preg_match('/\d+%/', $src) || strpos($src, 'role="progressbar"') !== false) {
+        throw new \RuntimeException('the value must be written in text, and no ARIA role may be faked on an empty block');
     }
 });
 
