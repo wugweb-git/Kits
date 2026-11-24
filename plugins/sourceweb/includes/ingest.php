@@ -352,7 +352,16 @@ function aw_ingest( WP_REST_Request $req ) {
 			}
 		}
 		// Phone and WhatsApp go into the Phone numbers list (one row, marked WhatsApp, when they are the same number).
-		directoryweb_listing_put_phone( $post_id, (string) ( $l['phone'] ?? '' ), (string) ( $l['whatsapp'] ?? '' ) );
+		if ( function_exists( 'directoryweb_listing_put_phone' ) ) {
+			directoryweb_listing_put_phone( $post_id, (string) ( $l['phone'] ?? '' ), (string) ( $l['whatsapp'] ?? '' ) );
+		} else {
+			if ( ! empty( $l['phone'] ) ) {
+				update_post_meta( $post_id, 'aw_phone', sanitize_text_field( (string) $l['phone'] ) );
+			}
+			if ( ! empty( $l['whatsapp'] ) ) {
+				update_post_meta( $post_id, 'aw_whatsapp', sanitize_text_field( (string) $l['whatsapp'] ) );
+			}
+		}
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 	}
 
@@ -594,4 +603,61 @@ function aw_link_opportunity_org( $post_id ) {
 	if ( 1 === count( $ids ) ) {
 		add_post_meta( $post_id, 'aw_organisation', (int) $ids[0] );
 	}
+}
+
+/**
+ * Record a retry backoff interval for an upstream feed/source endpoint.
+ *
+ * @param string $feed_url  Feed URL or endpoint host.
+ * @param int    $http_code HTTP status or error code (e.g. 429, 502, 503).
+ * @return array
+ */
+function aw_feed_retry_backoff( $feed_url, $http_code = 0 ) {
+	$key   = 'aw_f_backoff_' . substr( md5( (string) $feed_url ), 0, 16 );
+	$state = get_transient( $key );
+	if ( ! is_array( $state ) ) {
+		$state = array( 'attempts' => 0, 'until' => 0, 'code' => 0 );
+	}
+	$steps    = array( 60, 300, 900, 3600 );
+	$attempts = (int) ( $state['attempts'] ?? 0 ) + 1;
+	$idx      = min( $attempts - 1, count( $steps ) - 1 );
+	$delay    = $steps[ $idx ];
+	$until    = time() + $delay;
+	$new_state = array(
+		'feed'     => $feed_url,
+		'attempts' => $attempts,
+		'until'    => $until,
+		'delay'    => $delay,
+		'code'     => (int) $http_code,
+	);
+	set_transient( $key, $new_state, max( $delay * 2, 7200 ) );
+	return $new_state;
+}
+
+/**
+ * Check if a feed URL is currently inside a retry backoff window.
+ *
+ * @param string   $feed_url Feed URL.
+ * @param int|null $now      Current timestamp.
+ * @return bool
+ */
+function aw_feed_is_in_backoff( $feed_url, $now = null ) {
+	$key   = 'aw_f_backoff_' . substr( md5( (string) $feed_url ), 0, 16 );
+	$state = get_transient( $key );
+	if ( ! is_array( $state ) || empty( $state['until'] ) ) {
+		return false;
+	}
+	$now = null === $now ? time() : (int) $now;
+	return $now < (int) $state['until'];
+}
+
+/**
+ * Clear a feed's backoff state upon successful ingestion.
+ *
+ * @param string $feed_url Feed URL.
+ * @return bool
+ */
+function aw_feed_clear_backoff( $feed_url ) {
+	$key = 'aw_f_backoff_' . substr( md5( (string) $feed_url ), 0, 16 );
+	return delete_transient( $key );
 }

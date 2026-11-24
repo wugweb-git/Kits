@@ -27,6 +27,65 @@ const AW_TICK_SKIP = array( 'wp-cron.yml', 'keepalive.yml' );
 /** Longest look back for a missed slot (the server cron was down): one day. */
 const AW_TICK_LOOKBACK_MIN = 1440;
 
+/** Exponential retry backoff intervals in seconds: 1m, 5m, 15m, 60m. */
+const AW_WORKER_BACKOFF_STEPS = array( 60, 300, 900, 3600 );
+
+/**
+ * Record a retry backoff interval for a worker after an upstream refusal or error.
+ *
+ * @param string $worker_id Worker file name or ID.
+ * @param int    $http_code HTTP status or error code.
+ * @return array Updated backoff record.
+ */
+function aw_worker_retry_backoff( $worker_id, $http_code = 0 ) {
+	$key   = 'aw_w_backoff_' . substr( md5( (string) $worker_id ), 0, 16 );
+	$state = get_transient( $key );
+	if ( ! is_array( $state ) ) {
+		$state = array( 'attempts' => 0, 'until' => 0, 'code' => 0 );
+	}
+	$attempts = (int) ( $state['attempts'] ?? 0 ) + 1;
+	$idx      = min( $attempts - 1, count( AW_WORKER_BACKOFF_STEPS ) - 1 );
+	$delay    = AW_WORKER_BACKOFF_STEPS[ $idx ];
+	$until    = time() + $delay;
+	$new_state = array(
+		'worker'   => $worker_id,
+		'attempts' => $attempts,
+		'until'    => $until,
+		'delay'    => $delay,
+		'code'     => (int) $http_code,
+	);
+	set_transient( $key, $new_state, max( $delay * 2, 7200 ) );
+	return $new_state;
+}
+
+/**
+ * Check if a worker is currently inside a retry backoff window.
+ *
+ * @param string   $worker_id Worker identifier.
+ * @param int|null $now       Current timestamp (or null for time()).
+ * @return bool
+ */
+function aw_worker_is_in_backoff( $worker_id, $now = null ) {
+	$key   = 'aw_w_backoff_' . substr( md5( (string) $worker_id ), 0, 16 );
+	$state = get_transient( $key );
+	if ( ! is_array( $state ) || empty( $state['until'] ) ) {
+		return false;
+	}
+	$now = null === $now ? time() : (int) $now;
+	return $now < (int) $state['until'];
+}
+
+/**
+ * Clear a worker's backoff state upon successful dispatch.
+ *
+ * @param string $worker_id Worker identifier.
+ * @return bool
+ */
+function aw_worker_clear_backoff( $worker_id ) {
+	$key = 'aw_w_backoff_' . substr( md5( (string) $worker_id ), 0, 16 );
+	return delete_transient( $key );
+}
+
 /**
  * True when one cron field matches a value: *, n, a-b, a-b/n, * /n and lists of these.
  *
@@ -112,6 +171,10 @@ function aw_workers_tick( $now, $dispatch = null ) {
 		if ( in_array( $file, AW_TICK_SKIP, true ) ) {
 			continue;
 		}
+		if ( aw_worker_is_in_backoff( $file, $now ) ) {
+			$lines[] = sprintf( '%s %s: skipped (worker is in retry backoff window)', gmdate( 'Y-m-d H:i', $now ), $file );
+			continue;
+		}
 		foreach ( (array) ( $w['crons'] ?? array() ) as $cron ) {
 			$key = $file . '|' . $cron;
 			// Slots since this cron's last start, else since the last tick; the very first tick looks back 20 minutes only,
@@ -121,9 +184,16 @@ function aw_workers_tick( $now, $dispatch = null ) {
 			if ( ! $slot ) {
 				continue;
 			}
-			$res           = call_user_func( $dispatch, $file, array( 'scheduled_cron' => $cron ) );
-			$state[ $key ] = true === $res ? $slot : $slot - 60; // refused: the same slot is tried again at the next tick
-			$lines[]         = sprintf( '%s %s (%s, slot %s UTC): %s', gmdate( 'Y-m-d H:i', $now ), $file, $cron, gmdate( 'H:i', $slot ), true === $res ? 'started' : 'NOT started: ' . ( is_wp_error( $res ) ? $res->get_error_message() : 'unknown' ) );
+			$res = call_user_func( $dispatch, $file, array( 'scheduled_cron' => $cron ) );
+			if ( true === $res ) {
+				aw_worker_clear_backoff( $file );
+				$state[ $key ] = $slot;
+			} else {
+				$code = is_wp_error( $res ) ? (int) $res->get_error_data() : 500;
+				aw_worker_retry_backoff( $file, $code );
+				$state[ $key ] = $slot - 60; // refused: the same slot is tried again after backoff expires
+			}
+			$lines[] = sprintf( '%s %s (%s, slot %s UTC): %s', gmdate( 'Y-m-d H:i', $now ), $file, $cron, gmdate( 'H:i', $slot ), true === $res ? 'started' : 'NOT started: ' . ( is_wp_error( $res ) ? $res->get_error_message() : 'unknown' ) );
 		}
 	}
 	$state['_last'] = $now;

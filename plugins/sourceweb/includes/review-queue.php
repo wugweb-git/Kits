@@ -200,6 +200,20 @@ add_action(
 	}
 );
 add_action(
+	'admin_post_aw_review_item',
+	function () {
+		$id     = absint( $_GET['item_id'] ?? 0 );
+		$action = sanitize_key( $_GET['review_action'] ?? '' );
+		if ( ! $id || ! in_array( $action, array( 'publish', 'reject' ), true ) || ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_review_' . $id ) ) {
+			wp_die( 'Not allowed.', 403 );
+		}
+		aw_review_apply( array( $id ), $action );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aw-review' );
+		wp_safe_redirect( add_query_arg( 'aw_reviewed', 1, $back ) );
+		exit;
+	}
+);
+add_action(
 	'admin_notices',
 	function () {
 		if ( isset( $_GET['aw_published'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification

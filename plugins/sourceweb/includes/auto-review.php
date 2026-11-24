@@ -137,6 +137,17 @@ function aw_review_reason( $id ) {
 			return 'publisher not on the allow list (' . $host . ')';
 		}
 	}
+	// 0a. Excluded category or feed tag check.
+	if ( function_exists( 'aw_rules_feed_excluded_tags' ) ) {
+		$excluded = aw_rules_feed_excluded_tags( $type );
+		if ( $excluded ) {
+			$item_terms = wp_get_object_terms( $id, array( 'category', 'post_tag' ), array( 'fields' => 'slugs' ) );
+			$matching   = is_array( $item_terms ) ? array_intersect( $item_terms, $excluded ) : array();
+			if ( $matching ) {
+				return 'excluded feed tag or category: ' . implode( ', ', $matching );
+			}
+		}
+	}
 	// 0b. At least one category: the AI check's category when the workers sent none.
 	if ( ! wp_get_object_terms( $id, 'category', array( 'fields' => 'ids' ) ) ) {
 		$term = $ai && ! empty( $ai['category'] ) ? get_term_by( 'slug', sanitize_title( $ai['category'] ), 'category' ) : null;

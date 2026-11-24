@@ -227,10 +227,114 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 			sourceweb_reset_form( 'uninstall' );
 		}
 		echo '</div>';
+	} elseif ( 'review' === $screen ) {
+		$items = function_exists( 'aw_review_items' ) ? aw_review_items() : array();
+		if ( empty( $items ) ) {
+			echo '<div class="notice notice-info inline" style="margin:20px 0; padding:12px 16px;">';
+			echo '<p><strong>' . esc_html__( 'Review queue is clear.', 'aw-sourcing' ) . '</strong> ' . esc_html__( 'There are currently no pending or held items waiting for editorial review.', 'aw-sourcing' ) . '</p>';
+			echo '</div>';
+		} else {
+			echo '<p style="margin:16px 0;">' . sprintf( esc_html__( '%d items waiting for review.', 'aw-sourcing' ), count( $items ) ) . '</p>';
+			echo '<table class="widefat striped" style="margin-top:10px;">';
+			echo '<thead><tr>';
+			echo '<th>' . esc_html__( 'Title', 'aw-sourcing' ) . '</th>';
+			echo '<th>' . esc_html__( 'Type', 'aw-sourcing' ) . '</th>';
+			echo '<th>' . esc_html__( 'Source', 'aw-sourcing' ) . '</th>';
+			echo '<th>' . esc_html__( 'Date', 'aw-sourcing' ) . '</th>';
+			echo '<th>' . esc_html__( 'Hold Reason', 'aw-sourcing' ) . '</th>';
+			echo '<th>' . esc_html__( 'Actions', 'aw-sourcing' ) . '</th>';
+			echo '</tr></thead><tbody>';
+			foreach ( $items as $p ) {
+				$url    = get_post_meta( $p->ID, 'aw_source_url', true );
+				$reason = get_post_meta( $p->ID, 'aw_review', true );
+				$pub_url = wp_nonce_url( admin_url( 'admin-post.php?action=aw_review_item&item_id=' . $p->ID . '&review_action=publish' ), 'aw_review_' . $p->ID );
+				$rej_url = wp_nonce_url( admin_url( 'admin-post.php?action=aw_review_item&item_id=' . $p->ID . '&review_action=reject' ), 'aw_review_' . $p->ID );
+				echo '<tr>';
+				echo '<td><strong><a href="' . esc_url( get_edit_post_link( $p->ID ) ) . '">' . esc_html( $p->post_title ? $p->post_title : '(no title)' ) . '</a></strong></td>';
+				echo '<td>' . esc_html( $p->post_type ) . '</td>';
+				echo '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( function_exists( 'aw_host' ) ? aw_host( $url ) : parse_url( $url, PHP_URL_HOST ) ) . '</a>' : '–' ) . '</td>';
+				echo '<td>' . esc_html( substr( $p->post_date, 0, 16 ) ) . '</td>';
+				echo '<td>' . esc_html( $reason ? $reason : 'Pending' ) . '</td>';
+				echo '<td>';
+				echo '<a href="' . esc_url( $pub_url ) . '" class="button button-small button-primary">' . esc_html__( 'Approve', 'aw-sourcing' ) . '</a> ';
+				echo '<a href="' . esc_url( $rej_url ) . '" class="button button-small">' . esc_html__( 'Reject', 'aw-sourcing' ) . '</a>';
+				echo '</td>';
+				echo '</tr>';
+			}
+			echo '</tbody></table>';
+		}
+	} elseif ( 'rules' === $screen && current_user_can( 'manage_options' ) ) {
+		$overrides = function_exists( 'aw_rules_domain_overrides' ) ? aw_rules_domain_overrides() : array();
+		$excluded  = function_exists( 'aw_rules_feed_excluded_tags' ) ? aw_rules_feed_excluded_tags() : array();
+
+		echo '<div style="display:flex; gap:24px; margin-top:20px; flex-wrap:wrap;">';
+
+		// Column 1: Domain Trust Overrides
+		echo '<div class="card" style="flex:1; min-width:320px; padding:20px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Domain Trust Overrides', 'aw-sourcing' ) . '</h2>';
+		echo '<p class="description">' . esc_html__( 'Configure domain-level trust rules to auto-approve, hold for review, or discard incoming content from specific publishers.', 'aw-sourcing' ) . '</p>';
+
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
+		wp_nonce_field( 'aw_rules_domain_override' );
+		echo '<input type="hidden" name="action" value="aw_domain_override">';
+		echo '<table class="form-table" style="margin-top:0;">';
+		echo '<tr><th scope="row"><label for="override_host">' . esc_html__( 'Domain Host', 'aw-sourcing' ) . '</label></th>';
+		echo '<td><input type="text" id="override_host" name="host" class="regular-text" placeholder="example.com" required></td></tr>';
+		echo '<tr><th scope="row"><label for="override_status">' . esc_html__( 'Trust Policy', 'aw-sourcing' ) . '</label></th>';
+		echo '<td><select id="override_status" name="status">';
+		echo '<option value="allow">' . esc_html__( 'Allow (Auto-approve if checks pass)', 'aw-sourcing' ) . '</option>';
+		echo '<option value="neutral">' . esc_html__( 'Require Review (Hold in Review Queue)', 'aw-sourcing' ) . '</option>';
+		echo '<option value="block">' . esc_html__( 'Discard (Block and Reject)', 'aw-sourcing' ) . '</option>';
+		echo '</select></td></tr>';
+		echo '<tr><th scope="row"><label for="override_name">' . esc_html__( 'Publisher Name', 'aw-sourcing' ) . '</label></th>';
+		echo '<td><input type="text" id="override_name" name="name" class="regular-text" placeholder="Optional label"></td></tr>';
+		echo '</table>';
+		submit_button( __( 'Save Domain Override', 'aw-sourcing' ), 'secondary', 'submit', false );
+		echo '</form>';
+
+		if ( ! empty( $overrides ) ) {
+			echo '<hr style="margin:20px 0;">';
+			echo '<table class="widefat striped">';
+			echo '<thead><tr><th>' . esc_html__( 'Domain', 'aw-sourcing' ) . '</th><th>' . esc_html__( 'Policy', 'aw-sourcing' ) . '</th><th>' . esc_html__( 'Action', 'aw-sourcing' ) . '</th></tr></thead><tbody>';
+			foreach ( $overrides as $h => $ov ) {
+				echo '<tr>';
+				echo '<td><strong>' . esc_html( $h ) . '</strong>' . ( ! empty( $ov['name'] ) && $ov['name'] !== $h ? ' (' . esc_html( $ov['name'] ) . ')' : '' ) . '</td>';
+				echo '<td><span class="badge">' . esc_html( ucfirst( $ov['status'] ) ) . '</span></td>';
+				echo '<td>';
+				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline;">';
+				wp_nonce_field( 'aw_rules_domain_override' );
+				echo '<input type="hidden" name="action" value="aw_domain_override">';
+				echo '<input type="hidden" name="aw_delete" value="1">';
+				echo '<input type="hidden" name="host" value="' . esc_attr( $h ) . '">';
+				echo '<button type="submit" class="button button-small button-link-delete">' . esc_html__( 'Reset', 'aw-sourcing' ) . '</button>';
+				echo '</form>';
+				echo '</td>';
+				echo '</tr>';
+			}
+			echo '</tbody></table>';
+		}
+		echo '</div>';
+
+		// Column 2: Excluded Category & Tag Filters
+		echo '<div class="card" style="flex:1; min-width:320px; padding:20px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'Feed Category & Tag Filters', 'aw-sourcing' ) . '</h2>';
+		echo '<p class="description">' . esc_html__( 'Specify category or topic tag slugs to exclude from feed ingestion. Matching feed stories will be automatically flagged or held.', 'aw-sourcing' ) . '</p>';
+
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
+		wp_nonce_field( 'aw_rules_feed_filter' );
+		echo '<input type="hidden" name="action" value="aw_feed_filter">';
+		echo '<p><textarea name="excluded_tags" rows="6" class="large-text code" placeholder="politics, gossip, sports">' . esc_textarea( implode( "\n", $excluded ) ) . '</textarea></p>';
+		echo '<p class="description">' . esc_html__( 'Enter tag or category slugs, one per line or separated by commas.', 'aw-sourcing' ) . '</p>';
+		submit_button( __( 'Save Feed Filters', 'aw-sourcing' ), 'secondary', 'submit', false );
+		echo '</form>';
+		echo '</div>';
+
+		echo '</div>';
 	} else {
 		$cfg = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array();
 		$num_sources = count( (array) ( $cfg['sources'] ?? array() ) );
 		$num_feeds   = count( (array) ( $cfg['feeds'] ?? array() ) );
+		$review_count = function_exists( 'aw_review_count' ) ? aw_review_count() : 0;
 
 		echo '<div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap;">';
 		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
@@ -244,7 +348,31 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $num_feeds ) ) . '</p>';
 		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) . '" class="button button-secondary">' . esc_html__( 'View Rules', 'aw-sourcing' ) . '</a></p>';
 		echo '</div>';
+
+		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
+		echo '<h2 style="margin-top:0;">' . esc_html__( 'To Review', 'aw-sourcing' ) . '</h2>';
+		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $review_count ) ) . '</p>';
+		echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-review' ) ) . '" class="button button-secondary">' . esc_html__( 'Review Queue', 'aw-sourcing' ) . '</a></p>';
 		echo '</div>';
+
+		echo '</div>';
+
+		if ( function_exists( 'aw_sourcing_dash_workers' ) ) {
+			$workers = aw_sourcing_dash_workers();
+			if ( ! empty( $workers ) ) {
+				echo '<div class="card" style="margin-top:20px; padding:16px;">';
+				echo '<h2 style="margin-top:0;">' . esc_html__( 'Worker Status', 'aw-sourcing' ) . '</h2>';
+				echo '<table class="widefat striped"><thead><tr><th>Worker</th><th>Last Run</th><th>Status</th></tr></thead><tbody>';
+				foreach ( $workers as $w ) {
+					echo '<tr>';
+					echo '<td>' . esc_html( $w['name'] ) . '</td>';
+					echo '<td>' . esc_html( $w['last'] ? wp_date( 'j M, g:i a', $w['last'] ) : 'never' ) . '</td>';
+					echo '<td>' . esc_html( ucfirst( $w['status'] ) ) . '</td>';
+					echo '</tr>';
+				}
+				echo '</tbody></table></div>';
+			}
+		}
 	}
 
 	echo '</div>';
