@@ -654,6 +654,70 @@ it('Progress bars: fill against track meets 3:1 (WCAG non-text contrast), using 
     }
 });
 
+
+it('Page background follows the canvas preset: the body rule resolves to --wp--preset--color--canvas, so Global Styles and style variations control it', function () use ($theme_dir) {
+    $tokens = file_get_contents($theme_dir . '/assets/css/kit-tokens.css');
+    $kit    = file_get_contents($theme_dir . '/assets/css/kit.css');
+    if (!preg_match('/\bbody\s*\{\s*background:\s*var\((--kit-[a-z-]+)\)\s*;?\s*\}/', $kit, $m)) {
+        return; // no theme rule sets the page background: Global Styles owns it
+    }
+    $name = $m[1];
+    for ($i = 0; $i < 8; $i++) {
+        if (!preg_match('/' . preg_quote($name, '/') . ':\s*([^;]+);/', $tokens, $d)) {
+            throw new \RuntimeException("$name is not defined in kit-tokens.css");
+        }
+        if (!preg_match('/var\((--[a-z0-9-]+)/', $d[1], $v)) {
+            throw new \RuntimeException("$name resolves to a fixed value ({$d[1]}), not the canvas preset");
+        }
+        if ($v[1] === '--wp--preset--color--canvas') {
+            return;
+        }
+        if (strpos($v[1], '--neutral-') === 0) {
+            throw new \RuntimeException("The page background resolves to {$v[1]}, a fixed neutral: the Dark variation and any Site Editor canvas change cannot reach the body");
+        }
+        $name = $v[1];
+    }
+    throw new \RuntimeException('The page background never reaches the canvas preset');
+});
+
+it('Page text, headings, muted text and links read at 4.5:1 or better on the canvas in every palette (base, Dark, Forest, Slate)', function () use ($theme_dir) {
+    $base_json = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    $palette   = [];
+    foreach ($base_json['settings']['color']['palette'] as $c) {
+        $palette[$c['slug']] = $c['color'];
+    }
+    $lum = function ($hex) {
+        $hex = ltrim($hex, '#');
+        $v   = array_map(fn($i) => hexdec(substr($hex, $i, 2)) / 255, [0, 2, 4]);
+        $v   = array_map(fn($x) => $x <= 0.03928 ? $x / 12.92 : pow(($x + 0.055) / 1.055, 2.4), $v);
+        return 0.2126 * $v[0] + 0.7152 * $v[1] + 0.0722 * $v[2];
+    };
+    $ratio = fn($a, $b) => (max($lum($a), $lum($b)) + 0.05) / (min($lum($a), $lum($b)) + 0.05);
+    $slug  = fn($v) => is_string($v) && preg_match('/--color--([a-z-]+)\)/', $v, $m) ? $m[1] : null;
+    $sets  = ['base' => $base_json];
+    foreach (['dark', 'forest', 'slate'] as $f) {
+        $sets[$f] = json_decode(file_get_contents($theme_dir . "/styles/$f.json"), true);
+    }
+    foreach ($sets as $name => $json) {
+        $pal = $palette;
+        foreach (($json['settings']['color']['palette'] ?? []) as $c) {
+            $pal[$c['slug']] = $c['color'];
+        }
+        $st      = $json['styles'] ?? [];
+        $bgslug  = $slug($st['color']['background'] ?? null) ?? $slug($base_json['styles']['color']['background']);
+        $txtslug = $slug($st['color']['text'] ?? null) ?? $slug($base_json['styles']['color']['text']);
+        $headsl  = $slug($st['elements']['heading']['color']['text'] ?? null) ?? $slug($base_json['styles']['elements']['heading']['color']['text']);
+        $linksl  = $slug($st['elements']['link']['color']['text'] ?? null) ?? $txtslug; // base links inherit the text colour
+        $roles   = ['text' => $txtslug, 'heading' => $headsl, 'link' => $linksl, 'muted text' => 'text-muted'];
+        foreach ($roles as $role => $s) {
+            $r = $ratio($pal[$s], $pal[$bgslug]);
+            if ($r < 4.5) {
+                throw new \RuntimeException(sprintf('%s (%s %s) on the page background (%s %s) is %s:1 in the %s palette, below 4.5:1', $role, $s, $pal[$s], $bgslug, $pal[$bgslug], round($r, 2), $name));
+            }
+        }
+    }
+});
+
 // 6. Summary
 echo "\n===================================================\n";
 echo "Theme Validation: $checks checks, $failures failed.\n";
