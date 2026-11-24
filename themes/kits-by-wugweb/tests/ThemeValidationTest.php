@@ -145,13 +145,98 @@ function validate_block_markup(string $file_path): void {
     }
 }
 
-it('All 8 HTML templates have balanced block comments and valid JSON attrs', function () use ($theme_dir) {
+it('All 10 HTML templates have balanced block comments and valid JSON attrs', function () use ($theme_dir) {
     $templates = glob($theme_dir . '/templates/*.html');
-    if (count($templates) < 8) {
-        throw new \RuntimeException("Expected at least 8 templates, found " . count($templates));
+    if (count($templates) < 10) {
+        throw new \RuntimeException("Expected at least 10 templates, found " . count($templates));
     }
     foreach ($templates as $tmpl) {
         validate_block_markup($tmpl);
+    }
+});
+
+it('blank and no-title templates exist and are declared as custom templates in theme.json', function () use ($theme_dir) {
+    $data     = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    $declared = array_column($data['customTemplates'] ?? [], 'name');
+    foreach (['blank', 'no-title', 'page-wide'] as $name) {
+        if (!file_exists($theme_dir . "/templates/$name.html")) {
+            throw new \RuntimeException("templates/$name.html is missing");
+        }
+        if (!in_array($name, $declared, true)) {
+            throw new \RuntimeException("$name is not in theme.json customTemplates");
+        }
+    }
+    if (strpos(file_get_contents($theme_dir . '/templates/blank.html'), 'template-part') !== false) {
+        throw new \RuntimeException('templates/blank.html must not include the header or footer');
+    }
+});
+
+it('Every wp:pattern slug that a template, part or pattern calls is a pattern file in this theme', function () use ($theme_dir) {
+    $slugs = [];
+    foreach (glob($theme_dir . '/patterns/*.php') as $f) {
+        if (preg_match('/\*\s*Slug:\s*(\S+)/', file_get_contents($f), $m)) {
+            $slugs[] = $m[1];
+        }
+    }
+    $files = array_merge(glob($theme_dir . '/templates/*.html'), glob($theme_dir . '/parts/*.html'), glob($theme_dir . '/patterns/*.php'));
+    foreach ($files as $f) {
+        preg_match_all('/<!-- wp:pattern \{"slug":"([^"]+)"/', file_get_contents($f), $m);
+        foreach ($m[1] as $slug) {
+            if (!in_array($slug, $slugs, true)) {
+                throw new \RuntimeException(basename($f) . " calls pattern $slug, which has no file");
+            }
+        }
+    }
+});
+
+it('Header and footer variant patterns bound to template parts match the default parts', function () use ($theme_dir) {
+    foreach (['header', 'footer'] as $area) {
+        $pattern = file_get_contents($theme_dir . "/patterns/$area-default.php");
+        if (!preg_match('/\*\s*Block Types:\s*core\/template-part\/' . $area . '\b/', $pattern)) {
+            throw new \RuntimeException("patterns/$area-default.php is not bound to the $area template part");
+        }
+        $body = substr($pattern, strpos($pattern, '?>') + 3);
+        if ($body !== file_get_contents($theme_dir . "/parts/$area.html")) {
+            throw new \RuntimeException("patterns/$area-default.php drifted from parts/$area.html: change both");
+        }
+    }
+});
+
+it('Footer variants are bound to the footer template part; 404 and comments are hidden from the inserter', function () use ($theme_dir) {
+    foreach (['footer-minimal', 'footer-columns', 'footer-stacked', 'footer-social'] as $name) {
+        if (!preg_match('/\*\s*Block Types:\s*core\/template-part\/footer\b/', file_get_contents($theme_dir . "/patterns/$name.php"))) {
+            throw new \RuntimeException("patterns/$name.php is not bound to the footer template part");
+        }
+    }
+    foreach (['404', 'comments'] as $name) {
+        if (!preg_match('/\*\s*Inserter:\s*no\b/', file_get_contents($theme_dir . "/patterns/$name.php"))) {
+            throw new \RuntimeException("patterns/$name.php must have Inserter: no");
+        }
+    }
+});
+
+it('The Frost-derived patterns use core blocks only (no Custom HTML) and no raw colours', function () use ($theme_dir) {
+    $names = ['footer-minimal', 'footer-columns', 'footer-stacked', 'footer-social', 'hero-centered', 'author-box', 'testimonials',
+        'boxes-two', 'boxes-three', 'cta-inline', 'product-box', 'team', 'portfolio', 'progress-bars',
+        'pricing-two', 'pricing-three', 'pricing-four', 'posts', 'posts-list', '404', 'comments',
+        'page-home', 'page-about', 'page-pricing', 'page-link'];
+    foreach ($names as $name) {
+        $src = file_get_contents($theme_dir . "/patterns/$name.php");
+        if (strpos($src, 'wp:html') !== false) {
+            throw new \RuntimeException("patterns/$name.php embeds Custom HTML");
+        }
+        if (preg_match('/#[0-9a-fA-F]{3,8}\b|rgba?\(/', $src)) {
+            throw new \RuntimeException("patterns/$name.php has a raw colour: use a palette preset");
+        }
+    }
+});
+
+it('Block style Reverse on mobile is registered and its CSS is in kits.css', function () use ($theme_dir) {
+    if (strpos(file_get_contents($theme_dir . '/inc/blocks.php'), "'kits-reverse'") === false) {
+        throw new \RuntimeException('kits-reverse is not registered in inc/blocks.php');
+    }
+    if (strpos(file_get_contents($theme_dir . '/assets/css/kits.css'), '.is-style-kits-reverse') === false) {
+        throw new \RuntimeException('kits.css has no .is-style-kits-reverse rule');
     }
 });
 
@@ -170,8 +255,8 @@ echo "\n3. Validating Block Patterns...\n";
 
 it('All block patterns have required headers and valid block markup', function () use ($theme_dir) {
     $patterns = glob($theme_dir . '/patterns/*.php');
-    if (count($patterns) < 19) {
-        throw new \RuntimeException("Expected at least 19 patterns, found " . count($patterns));
+    if (count($patterns) < 47) {
+        throw new \RuntimeException("Expected at least 47 patterns, found " . count($patterns));
     }
     foreach ($patterns as $pattern_file) {
         $content = file_get_contents($pattern_file);
