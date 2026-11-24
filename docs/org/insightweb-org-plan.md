@@ -1,6 +1,6 @@
 # InsightWeb: Search Insights out of RankWeb (plan)
 
-**Status (Updated 22 Nov 2026):** Phase 1 shipped and live on production (`origin/wordpress` at `d51da157`). Standalone plugin operational in `plugins/insightweb/` with Search Console, GA4, Clarity, PageSpeed, Bing, keywords, Rising, and SVG MiniCharts telemetry.
+**Status (Updated 24 Nov 2026):** Implemented, decoupled, and standalone verified in `plugins/insightweb/`. Standalone plugin operational with Search Console, GA4, Clarity, PageSpeed, Bing, keywords, Rising, SVG MiniCharts telemetry, scheduled daily telemetry cron hook (`insightweb_daily_telemetry_cron`), credential connection diagnostics (`insightweb_check_service_status`), and strict empty-state telemetry across all dashboard tiles. All 150 test checks passing (107 in `run.php`, 43 in `StandaloneInsightsTest.php`).
 Owner's decision of 11 Nov ("9. Decision log": "Search Insights leaves RankWeb; plugin names"). Built on `docs/seo/search-insights-plan.md`, the Search Insights entries in `docs/pending.md`, `docs/plugin-map.md`.
 
 ## The split in one line
