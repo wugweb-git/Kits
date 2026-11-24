@@ -68,6 +68,38 @@ $c( 'claims post type registered', post_type_exists( 'aw_claim' ) );
 $listing = post_type_exists( 'aw_listing' );
 $c( 'listing post type registered (aw_listing)', $listing, $listing ? '' : 'aw_listing is not registered without an external aw_content_type_args()' );
 if ( $listing ) { $c( 'listing fixture created', 1 === (int) wp_count_posts( 'aw_listing' )->publish ); }
+$c( 'block registered: directoryweb/collection-filter', WP_Block_Type_Registry::get_instance()->is_registered( 'directoryweb/collection-filter' ) );
+if ( $listing ) {
+	// Claim journey, no Fluent Forms and no Kits Core: submit, list, approve, verify, revoke.
+	$lid = (int) get_posts( array( 'post_type' => 'aw_listing', 'fields' => 'ids', 'posts_per_page' => 1 ) )[0];
+	update_post_meta( $lid, 'aw_verified', false );
+	$form = directoryweb_ff_form( 'claim', array( 'listing' => $lid ) );
+	$c( 'native claim form renders', false !== strpos( $form, 'dw_claim_submit' ) && false !== strpos( $form, '_dw_nonce' ) );
+	$bad = dw_claim_create( $lid, array( 'name' => '', 'email' => 'x' ) );
+	$c( 'invalid claim refused with field errors', is_wp_error( $bad ) && ! empty( $bad->get_error_data()['errors'] ) );
+	$cid = dw_claim_create( $lid, array( 'name' => 'Asha', 'email' => 'asha@example.org', 'role' => 'founder', 'l_phone' => '+91 98765 43210', 'l_area' => 'Indiranagar' ) );
+	$c( 'claim created pending', ! is_wp_error( $cid ) && 'pending' === dw_claim_get( $cid )['status'] );
+	$get = function ( $path, $q = array() ) { $req = new WP_REST_Request( 'GET', $path ); foreach ( $q as $k => $v ) { $req->set_param( $k, $v ); } return rest_do_request( $req ); };
+	$list = $get( '/directoryweb/v1/claims', array( 'status' => 'all' ) )->get_data();
+	$ids = is_array( $list ) ? wp_list_pluck( (array) ( $list['rows'] ?? array() ), 'id' ) : array();
+	$c( 'native claim appears in the Claims list', in_array( 'dw-' . $cid, $ids, true ), wp_json_encode( $ids ) );
+	$det = $get( '/directoryweb/v1/claims/dw-' . $cid );
+	$c( 'claim detail endpoint returns the claim', 200 === $det->get_status() && 'pending' === ( $det->get_data()['status'] ?? '' ) );
+	$post = function ( $to ) use ( $cid ) { $req = new WP_REST_Request( 'POST', '/directoryweb/v1/claims/' . $cid . '/transition' ); $req->set_param( 'to', $to ); return rest_do_request( $req ); };
+	$bad = $post( 'revoked' );
+	$c( 'illegal transition returns 409', 409 === $bad->get_status(), (string) $bad->get_status() );
+	$ok = $post( 'approved' );
+	$c( 'approve via REST', 200 === $ok->get_status(), (string) $ok->get_status() );
+	$c( 'approval verifies listing and applies area', (bool) get_post_meta( $lid, 'aw_verified', true ) && 'Indiranagar' === get_post_meta( $lid, 'aw_area', true ) );
+	$rv = $post( 'revoked' );
+	$c( 'revoke via REST removes verified mark', 200 === $rv->get_status() && ! get_post_meta( $lid, 'aw_verified', true ) );
+	wp_set_current_user( 0 );
+	$anon = $post( 'pending' );
+	$c( 'anonymous cannot transition claims', in_array( $anon->get_status(), array( 401, 403 ), true ), (string) $anon->get_status() );
+	wp_set_current_user( 1 );
+	$blk = do_blocks( '<!-- wp:directoryweb/collection-filter /-->' );
+	$c( 'collection-filter block renders on the front end', false !== strpos( $blk, 'wp-block-directoryweb-collection-filter' ), substr( wp_strip_all_tags( $blk ), 0, 80 ) );
+}
 """,
     },
     "rankweb": {

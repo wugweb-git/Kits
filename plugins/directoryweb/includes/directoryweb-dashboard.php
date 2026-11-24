@@ -311,7 +311,7 @@ function directoryweb_claim_light_rows(): array {
  */
 function directoryweb_claim_rows_forget( $meta_id, $post_id, $meta_key ): void {
 	unset( $meta_id );
-	if ( 0 === strpos( (string) $meta_key, 'aw_c_' ) && 'aw_claim' === get_post_type( (int) $post_id ) ) {
+	if ( ( 0 === strpos( (string) $meta_key, 'aw_c_' ) || 0 === strpos( (string) $meta_key, '_dw_claim_' ) ) && 'aw_claim' === get_post_type( (int) $post_id ) ) {
 		delete_transient( DIRECTORYWEB_CLAIM_ROWS );
 	}
 }
@@ -409,6 +409,35 @@ function directoryweb_claim_light_rows_read(): array {
 		);
 		update_meta_cache( 'post', $ids );
 		foreach ( $ids as $id ) {
+			$native = (string) get_post_meta( $id, '_dw_claim_status', true );
+			if ( '' !== $native ) { // a native claim (claim-native.php): its own row, not an old-form one
+				$np     = (array) json_decode( (string) get_post_meta( $id, '_dw_claim_person', true ), true );
+				$review = array();
+				foreach ( array_reverse( (array) json_decode( (string) get_post_meta( $id, '_dw_claim_history', true ), true ) ) as $h ) {
+					if ( ! empty( $h['by'] ) ) {
+						$review = array( 'by' => (int) $h['by'], 'at' => (string) $h['at'] );
+						break;
+					}
+				}
+				$out[] = array(
+					'id'      => 'dw-' . (int) $id,
+					'entry'   => (int) $id,
+					'ref'     => 'DW-' . (int) $id,
+					'old'     => false,
+					'native'  => true,
+					'state'   => $native, // the real state; 'status' below is the list bucket (withdrawn and revoked sit under Rejected)
+					'status'  => in_array( $native, array( 'approved', 'pending' ), true ) ? $native : 'rejected',
+					'sent'    => (string) get_post_field( 'post_date', $id ),
+					'listing' => (int) get_post_meta( $id, '_dw_claim_listing', true ),
+					'name'    => (string) ( $np['name'] ?? '' ),
+					'role'    => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ $np['role'] ?? '' ] ?? '' ) : '',
+					'email'   => (string) ( $np['email'] ?? '' ),
+					'phone'   => (string) ( $np['phone'] ?? '' ),
+					'has'     => array( 'logo' => false, 'photos' => false, 'proof' => false ),
+					'review'  => $review,
+				);
+				continue;
+			}
 			$role  = (string) get_post_meta( $id, 'aw_c_role', true );
 			$out[] = array(
 				'id'      => 'old-' . (int) $id,

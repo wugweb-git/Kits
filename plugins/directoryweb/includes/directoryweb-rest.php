@@ -150,7 +150,7 @@ add_action(
 		);
 		register_rest_route(
 			DIRECTORYWEB_REST,
-			'/claims/(?P<id>\d+)',
+			'/claims/(?P<id>(?:dw-)?\d+)',
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => $claims,
@@ -528,6 +528,8 @@ function directoryweb_status_text( string $status ): string {
 		'pending'  => __( 'Waiting', 'directoryweb' ),
 		'approved' => __( 'Approved', 'directoryweb' ),
 		'rejected' => __( 'Rejected', 'directoryweb' ),
+		'withdrawn' => __( 'Withdrawn', 'directoryweb' ),
+		'revoked'  => __( 'Revoked', 'directoryweb' ),
 	)[ $status ] ?? $status;
 }
 
@@ -538,7 +540,10 @@ function directoryweb_status_text( string $status ): string {
  */
 function directoryweb_claim_row( array $r ): array {
 	$changes = null;
-	if ( $r['old'] ) {
+	if ( ! empty( $r['native'] ) ) {
+		$nc      = function_exists( 'dw_claim_get' ) ? dw_claim_get( (int) $r['entry'] ) : null;
+		$changes = $nc ? count( $nc['propose'] ) : null;
+	} elseif ( $r['old'] ) {
 		$changes = count( (array) get_post_meta( $r['entry'], 'aw_c_proposed', true ) ) + ( $r['has']['logo'] ? 1 : 0 );
 	} elseif ( function_exists( 'aw_claim_entry' ) ) {
 		$c = aw_claim_entry( $r['entry'] );
@@ -564,7 +569,7 @@ function directoryweb_claim_row( array $r ): array {
 		'phone'      => (string) $r['phone'],
 		'changes'    => $changes,
 		'status'     => $r['status'],
-		'statusText' => directoryweb_status_text( $r['status'] ),
+		'statusText' => directoryweb_status_text( ! empty( $r['native'] ) ? (string) $r['state'] : $r['status'] ),
 		'sent'       => (string) $r['sent'],
 		'sentText'   => mysql2date( 'j M Y', (string) $r['sent'] ),
 		'decidedBy'  => $u ? (string) $u->display_name : '',
@@ -741,7 +746,12 @@ function directoryweb_claim_detail( int $id ): ?array {
  * @param WP_REST_Request $request Request.
  */
 function directoryweb_rest_claim( WP_REST_Request $request ) {
-	$d = directoryweb_claim_detail( (int) $request['id'] );
+	$raw = (string) $request['id'];
+	if ( 0 === strpos( $raw, 'dw-' ) ) { // native claims have their own id space ('dw-<post id>'), so they never collide with form entry ids
+		$n = function_exists( 'dw_claim_get' ) ? dw_claim_get( (int) substr( $raw, 3 ) ) : null;
+		return $n ? rest_ensure_response( directoryweb_native_claim_detail( $n ) ) : new WP_Error( 'rest_not_found', __( 'No such claim.', 'directoryweb' ), array( 'status' => 404 ) );
+	}
+	$d = directoryweb_claim_detail( (int) $raw );
 	if ( ! $d ) {
 		return new WP_Error( 'rest_not_found', __( 'No such claim.', 'directoryweb' ), array( 'status' => 404 ) );
 	}
@@ -1031,5 +1041,64 @@ function directoryweb_rest_save_claim_form( WP_REST_Request $request ) {
 			'message'  => $saved ? __( 'Saved.', 'directoryweb' ) : __( 'Nothing changed.', 'directoryweb' ),
 			'settings' => directoryweb_settings_payload(),
 		)
+	);
+}
+
+
+/**
+ * A native claim (claim-native.php) in the shape the Claims screen reads.
+ *
+ * @param array $n dw_claim_get().
+ */
+function directoryweb_native_claim_detail( array $n ): array {
+	$lid    = (int) $n['listing'];
+	$fields = array();
+	foreach ( $n['propose'] as $key => $val ) {
+		$map      = defined( 'DW_CLAIM_NATIVE_MAP' ) && isset( DW_CLAIM_NATIVE_MAP[ $key ] ) ? DW_CLAIM_NATIVE_MAP[ $key ] : '';
+		$fields[] = array(
+			'key'      => (string) $key,
+			'label'    => '' !== $map ? directoryweb_field_label( $map ) : (string) $key,
+			'current'  => '' !== $map && $lid ? (string) aw_claim_now( $lid, $map, false ) : '',
+			'proposed' => (string) $val,
+			'applied'  => 'approved' === $n['status'] && in_array( $key, (array) json_decode( (string) get_post_meta( $n['id'], '_dw_claim_applied', true ), true ), true ),
+		);
+	}
+	$last = array();
+	foreach ( array_reverse( (array) $n['history'] ) as $h ) {
+		if ( ! empty( $h['by'] ) ) {
+			$last = $h;
+			break;
+		}
+	}
+	$u = ! empty( $last['by'] ) ? get_userdata( (int) $last['by'] ) : null;
+	return array(
+		'id'         => (int) $n['id'],
+		'ref'        => 'DW-' . (int) $n['id'],
+		'status'     => 'approved' === $n['status'] || 'pending' === $n['status'] ? $n['status'] : 'rejected',
+		'state'      => $n['status'],
+		'statusText' => directoryweb_status_text( (string) $n['status'] ),
+		'pending'    => 'pending' === $n['status'] && $lid > 0,
+		'native'     => true,
+		'moves'      => array_values( array_diff( DW_CLAIM_TRANSITIONS[ $n['status'] ] ?? array(), array( 'withdrawn' ) ) ),
+		'transition' => rest_url( 'directoryweb/v1/claims/' . (int) $n['id'] . '/transition' ),
+		'title'      => $lid ? html_entity_decode( get_the_title( $lid ), ENT_QUOTES, 'UTF-8' ) : __( '(no listing)', 'directoryweb' ),
+		'listingUrl' => $lid ? (string) get_edit_post_link( $lid, 'raw' ) : '',
+		'viewUrl'    => $lid ? (string) get_permalink( $lid ) : '',
+		'oldScreen'  => (string) get_edit_post_link( (int) $n['id'], 'raw' ),
+		'who'        => array(
+			array( __( 'From', 'directoryweb' ), (string) ( $n['person']['name'] ?? '' ) ),
+			array( __( 'Email', 'directoryweb' ), (string) ( $n['person']['email'] ?? '' ) ),
+			array( __( 'Phone', 'directoryweb' ), (string) ( $n['person']['phone'] ?? '' ) ),
+			array( __( 'Anything else', 'directoryweb' ), (string) ( $n['person']['notes'] ?? '' ) ),
+			array( __( 'Decided', 'directoryweb' ), $u ? $u->display_name . ', ' . mysql2date( 'j M Y', (string) $last['at'] ) : '' ),
+		),
+		'proofUrl'   => '',
+		'logoUrl'    => '',
+		'logoNowUrl' => '',
+		'photoUrls'  => array(),
+		'fields'     => $fields,
+		'undone'     => array(),
+		'notes'      => array(),
+		'history'    => (array) $n['history'],
 	);
 }

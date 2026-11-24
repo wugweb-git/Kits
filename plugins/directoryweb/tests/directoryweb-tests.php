@@ -161,6 +161,13 @@ check( false === strpos( $rest, '/decide' ) && false === strpos( $rest, '/undo' 
 check( false === strpos( $rest, 'aw_claim_ff_decide' ) && false === strpos( $rest, 'aw_claim_apply_field' ) && false === strpos( $rest, 'aw_enrich_undo(' ), 'no claim or listing write' );
 check( 2 === preg_match_all( "/'methods'\s*=>\s*'POST'/", $rest ), 'POST only for dashboard/count and settings/claim-form' );
 
+// Native claims (claim-native.php) share the screen: their own id space, and every state has a label.
+check( false !== strpos( $rest, "'withdrawn' => __( 'Withdrawn'" ) && false !== strpos( $rest, "'revoked'  => __( 'Revoked'" ) && false !== strpos( $rest, "'pending'  => __( 'Waiting'" ), 'native-only states have labels; existing labels unchanged' );
+check( false !== strpos( $rest, "'/claims/(?P<id>(?:dw-)?\\d+)'" ), 'claim detail route accepts dw-<id> and a plain entry id' );
+$dash = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-dashboard.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
+check( false !== strpos( $dash, "'_dw_claim_'" ), 'claim list cache is dropped when a native claim changes' );
+check( false !== strpos( $dash, "'id'      => 'dw-' ." ), 'native claim rows use the dw- id space, so they never collide with form entry ids' );
+
 // The claim form: an unchanged Save writes nothing; a change keeps the other forms.
 $ids = array(
 	'claim'   => 6,
