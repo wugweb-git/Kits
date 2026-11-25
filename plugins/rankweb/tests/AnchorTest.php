@@ -2,10 +2,10 @@
 /**
  * PHPUnit tests for the anchor type sorter and the anchor mix (includes/class-aw-anchor.php). No WordPress.
  *
- * With PHPUnit:    phpunit plugins/aw-seo-extras/tests/AnchorTest.php
- * Without PHPUnit: php plugins/aw-seo-extras/tests/phpunit-lite.php (the Deploy check runs this)
+ * With PHPUnit:    phpunit plugins/rankweb/tests/AnchorTest.php
+ * Without PHPUnit: php plugins/rankweb/tests/phpunit-lite.php (the Deploy check runs this)
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.Files.FileName, WordPress.NamingConventions.ValidFunctionName, Squiz.Commenting.FunctionComment.Missing -- PHPUnit naming.

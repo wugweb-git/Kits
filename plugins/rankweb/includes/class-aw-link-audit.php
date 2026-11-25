@@ -13,7 +13,7 @@
  *   point to an address on the "do not link" list (thank-you and download pages), or leave a silo for another silo's
  *   supporting item.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

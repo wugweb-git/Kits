@@ -7,9 +7,9 @@
  * each must answer 200. If either fails, rewrite rules are flushed once
  * and both are checked again. If they still fail, the admin email gets a message and the dashboard shows a notice.
  * One email per 12 hours for the same failing addresses; a newly failing address is emailed at once.
- * The event is scheduled from admin; while this module is switched off it is unscheduled (aw-seo-extras.php).
+ * The event is scheduled from admin; while this module is switched off it is unscheduled (rankweb.php).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

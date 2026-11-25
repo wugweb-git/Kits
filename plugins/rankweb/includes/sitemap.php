@@ -14,7 +14,7 @@
  * Items kept out of the index by a rule of their state are left out of every sitemap by robots.php, whether this
  * module is on or not.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

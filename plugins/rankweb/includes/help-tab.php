@@ -3,7 +3,7 @@
  * RankWeb: an "About RankWeb" Help tab and a sidebar on RankWeb's own screens (WP_Screen::add_help_tab), on every screen,
  * on the Kits shell or not. Screens that have their own help keep it; this tab sits beside it.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -47,7 +47,7 @@ function rankweb_seo_help_tab( $screen ) {
 			'priority' => 5,
 		)
 	);
-	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
+	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'rankweb.php' );
 	$data      = function_exists( 'get_file_data' ) ? get_file_data( $main_file, array( 'Version' => 'Version' ) ) : array();
 	$screen->set_help_sidebar(
 		'<p><strong>RankWeb</strong>' . ( empty( $data['Version'] ) ? '' : ' ' . esc_html( $data['Version'] ) ) . '</p>'

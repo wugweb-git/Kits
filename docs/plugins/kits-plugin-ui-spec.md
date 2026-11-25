@@ -155,7 +155,7 @@ and its Settings the backfill date, both as page parts (`sourceweb_extra_parts()
 - Kits → Tools export carries `aw_seo_settings`, `aw_faq_off_types` and `aw_seo_keep_listings`
   (`kits_settings_transfer_options`).
 - Proof:
-  - `plugins/aw-seo-extras/tests/run.php` runs without WordPress in the Deploy check.
+  - `plugins/rankweb/tests/run.php` runs without WordPress in the Deploy check.
   - `tools/ci/smoke.sh` checks:
     - both screens return 200 for an administrator;
     - the current screens are still the default;

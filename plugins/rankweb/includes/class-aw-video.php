@@ -8,7 +8,7 @@
  * then fetches each one's title, thumbnail and (Vimeo) duration and upload date from the provider's public oEmbed
  * endpoint, and this class turns the stored data into a schema.org VideoObject.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

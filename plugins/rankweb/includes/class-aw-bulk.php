@@ -7,7 +7,7 @@
  * The CSV columns (in this order): id, title, description, focus_keyword, link_keywords, canonical. focus_keyword is a
  * comma list (Rank Math's own form); link_keywords is a pipe (|) list, so a keyword may contain a comma.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

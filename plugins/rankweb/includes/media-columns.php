@@ -13,7 +13,7 @@
  * Moved from Animal Writes Core on 18 Nov 2026; loaded with or without Rank Math. Column keys (aw_file, aw_slug …) are
  * unchanged, so each user's hidden columns stay as they were.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -22,7 +22,7 @@
  *   elsewhere. og:locale en_IN.
  * - A missing page (404) shares no image, not even the site default.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

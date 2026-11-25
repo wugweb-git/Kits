@@ -17,7 +17,7 @@
  *
  * Screen: RankWeb → Internal links → Silos (manage_options to change; manage_rankweb to see). REST: GET rankweb/v1/links/silos.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

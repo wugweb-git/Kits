@@ -2,11 +2,11 @@
 /**
  * PHPUnit tests for the auto-linker (includes/class-aw-linker.php): sample HTML in, expected HTML out. No WordPress.
  *
- * With PHPUnit:    phpunit plugins/aw-seo-extras/tests/LinkerTest.php
- * Without PHPUnit: php plugins/aw-seo-extras/tests/phpunit-lite.php (the Deploy check runs this; it loads a small
+ * With PHPUnit:    phpunit plugins/rankweb/tests/LinkerTest.php
+ * Without PHPUnit: php plugins/rankweb/tests/phpunit-lite.php (the Deploy check runs this; it loads a small
  *                  stand-in for PHPUnit\Framework\TestCase and runs every test* method here).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.Files.FileName, WordPress.NamingConventions.ValidFunctionName, Squiz.Commenting.FunctionComment.Missing -- PHPUnit naming.

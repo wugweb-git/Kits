@@ -8,7 +8,7 @@
  * so it runs in slices of at most 20 seconds per job and keeps its place in the option rankweb_health_schema; the tile
  * shows the last full pass. Everything else is one query or a stored result.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

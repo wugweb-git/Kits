@@ -11,7 +11,7 @@
  * Module "media" (RankWeb → Settings → Modules). No scheduled job. Each run is capped (AW_MEDIA_BATCH) so one screen
  * load never walks the whole library.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

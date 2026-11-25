@@ -9,7 +9,7 @@
  * When Kits Core or a build file is missing, the screen is drawn as a plain WordPress page (rankweb-native-admin.php). The front end (titles,
  * schema, sitemap and the rest) never needs Kits Core.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -94,7 +94,7 @@ add_action(
 		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( RANKWEB_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : RANKWEB_CAP ) ) {
 			return;
 		}
-		$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
+		$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'rankweb.php' );
 		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 		$tabs = array(
 			array(

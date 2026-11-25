@@ -5,9 +5,9 @@
  *   GET modules  manage_rankweb  each module: label, what it does, switchable, on, its Settings group, its next job run
  *
  * The switch saves through POST settings/modules (rankweb-rest.php, manage_options), which keeps every other switch as
- * it is. A module switched off is not loaded on the next request and its scheduled job is taken off (aw-seo-extras.php).
+ * it is. A module switched off is not loaded on the next request and its scheduled job is taken off (rankweb.php).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +29,7 @@ add_action(
 	}
 );
 
-/** The scheduled job of each module that has one (the same hooks aw-seo-extras.php takes off a module switched off). */
+/** The scheduled job of each module that has one (the same hooks rankweb.php takes off a module switched off). */
 function rankweb_module_jobs(): array {
 	return array(
 		'titles'         => 'aw_seo_fill_daily',

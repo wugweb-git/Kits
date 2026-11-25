@@ -11,7 +11,7 @@
 
 - `plugins/*/includes/legacy-aliases.php`: thin `aw_*` functions (24 in DirectoryWeb, 9 in RankWeb) and `AW_SEO_EXTRAS_DIR`, kept only because Kits Core, MailWeb, SourceWeb and InsightWeb still call them. Nothing inside DirectoryWeb or RankWeb calls them. Delete an alias when its last caller is updated.
 - Hooks other plugins listen to or fire: `aw_scf_groups`, `aw_daily`, `aw_claim_before_apply`, `aw_breadcrumb_label`.
-- RankWeb's text domain and slug `aw-seo-extras` (renaming changes translation loading and the WordPress.org slug), CSS classes and WP-CLI commands (`aw-`).
+- RankWeb's CSS classes and WP-CLI commands (`aw-`). RankWeb's own text domain, slug and main file are `rankweb`.
 - File names such as `class-aw-*.php` in RankWeb.
 
 ## 2. Rule for stored data (now): preserve, do not migrate

@@ -46,18 +46,18 @@ The four lines ship in the commit that removes Search Insights (phase 2, 2.0.0).
 
 "SI" marks what leaves with Search Insights (InsightWeb phase 1). Lands: **D** = Dashboard tile or section, **F** = FAQ working list, **S** = a Settings group, **Same** = stays as it is (front end, edit screens, CLI, cron), **Gone** = removed only because its job moves into the shell (old screen behind a redirect).
 
-### 1.1 Plugin file and loader (`aw-seo-extras.php`)
+### 1.1 Plugin file and loader (`rankweb.php`)
 
 | Item | Where | Lands |
 |---|---|---|
-| Header: plain `/** … */` block, no `@wordpress-plugin`, `Version: 1.9.3`, `Text Domain: aw-seo-extras`, `Update URI`, Description "SEO rules, FAQ, schema and Search Insights for Kits sites." | `:2-16` | Phase 1 makes it a PHPDoc header with `@wordpress-plugin`, `@package`, `@author`, `@copyright`, `@license`, `License URI`; Description becomes "Everything Rank Math doesn't do or keeps for Premium, for Kits sites." in the SI commit (2.0.0, §0) |
+| Header: plain `/** … */` block, no `@wordpress-plugin`, `Version: 1.9.3`, `Text Domain: rankweb`, `Update URI`, Description "SEO rules, FAQ, schema and Search Insights for Kits sites." | `:2-16` | Phase 1 makes it a PHPDoc header with `@wordpress-plugin`, `@package`, `@author`, `@copyright`, `@license`, `License URI`; Description becomes "Everything Rank Math doesn't do or keeps for Premium, for Kits sites." in the SI commit (2.0.0, §0) |
 | No version constant; Kits status row reads the header with `get_file_data()` | `includes/kits-hub.php:43` | New `RANKWEB_VERSION`, equal to the header; status row reads it |
 | `AW_SEO_EXTRAS_DIR` | `:21` | Same |
 | `aw_seo_extras_rank_math()`: Rank Math active check; without it a notice and nothing loads | `:26-44` | Same; also feeds the Rank Math service row (§4.3) |
 | Loader: `settings.php` first, then 20 files minus switched-off modules (`aw_seo_files_off()`) | `:45-51` | Same; `'search-insights'` leaves the list (SI) |
 | Switched-off module's cron cleared (`health`, `sitemap`), admin and cron requests only | `:52-74` | Same |
 | Deactivation: clears `aw_si_cron_hooks()` (SI) and `aw_seo_fill_daily`, `aw_seo_endpoints_watchdog`, `aw_seo_sitemap_daily` | `:79-90` | SI part removed in the SI commit (RankWeb must never clear InsightWeb's jobs); the three SEO jobs stay |
-| No `readme.txt`, no `languages/`, no `composer.json`, no `uninstall.php`, no tests | — | Phase 1 adds `readme.txt`, `languages/aw-seo-extras.pot`, `composer.json` (lint, make-pot), `tests/run.php`. No `uninstall.php`: deleting the plugin keeps its data (owner rule 5) |
+| No `readme.txt`, no `languages/`, no `composer.json`, no `uninstall.php`, no tests | — | Phase 1 adds `readme.txt`, `languages/rankweb.pot`, `composer.json` (lint, make-pot), `tests/run.php`. No `uninstall.php`: deleting the plugin keeps its data (owner rule 5) |
 
 ### 1.2 Admin screens
 
@@ -72,7 +72,7 @@ The four lines ship in the commit that removes Search Insights (phase 2, 2.0.0).
 | Search Insights | `aw-search-insights`, `includes/search-insights/admin.php` | `aw_si_cap()` | — | SI |
 | Old link `aw-seo-settings&tab=search-insights` → Search Insights → Settings | `includes/settings.php:486-489` | — | — | Kept, as InsightWeb §1.10 says |
 | Settings autoload fix-up | `includes/settings.php:482-484` | — | — | Same |
-| Admin notice: "RankWeb works without Rank Math; this row shows whether Rank Math is active." | `aw-seo-extras.php:35-41` | `activate_plugins` | — | Same (all admin screens, it is a blocker); also **D** Rank Math tile |
+| Admin notice: "RankWeb works without Rank Math; this row shows whether Rank Math is active." | `rankweb.php:35-41` | `activate_plugins` | — | Same (all admin screens, it is a blocker); also **D** Rank Math tile |
 | Admin notice: "Sitemap or llms.txt is not answering." | `includes/health.php:92-104` | `manage_options` | — | Same (all admin screens: it means search engines lose the sitemap); also **D** tile |
 | Kits → Plugins row, Kits → Welcome status row | `includes/kits-hub.php:15-56` (`kits_plugin_screens`, `kits_status_rows`) | `manage_categories` | Name, link to Overview, description, "Active, 1.9.3" or "Does nothing until Rank Math…" | Same filters; description becomes "What Rank Math doesn't do or keeps for Premium." in the SI commit (§0); icon added (§7) |
 | CI baseline lines | `tools/ci/settings_parts_baseline.txt:29-33` | — | — | Updated in the phase that changes each screen; line 33 leaves (SI) |
@@ -318,10 +318,10 @@ RankWeb registers only; if the shell lacks any of these, Kits Core builds it onc
 | PHPDoc header with `@wordpress-plugin` | Plain block, no marker | Phase 1, MailWeb's form (`plugins/mailweb/mailweb.php:2-20`) |
 | Version constant = header | No constant | Phase 1: `RANKWEB_VERSION`; header, constant, `readme.txt` Stable tag, `.pot` Project-Id-Version always equal. 1.9.4 in phase 1; **2.0.0 in the commit that removes Search Insights** (InsightWeb phase 1); 2.1.0 REST layer; 2.2.0 shell screens |
 | `readme.txt` with Stable tag and changelog | None | Phase 1, MailWeb's layout (`plugins/mailweb/readme.txt`): Requires, Tested up to, Requires PHP 8.0, Stable tag, Description (what RankWeb adds to Rank Math), Changelog from 1.9.3, Upgrade Notice |
-| `languages/aw-seo-extras.pot` | None | Phase 1: `wp i18n make-pot . languages/aw-seo-extras.pot --domain=aw-seo-extras --exclude=includes/search-insights,tests` (composer script `make-pot`, as MailWeb). Text domain stays `aw-seo-extras` (it is the header's). Shell scripts: `wp_set_script_translations()` per script, same domain, `make-json` in the build. Many admin strings are plain literals today (`includes/overview.php`, `includes/settings.php`): they become translatable as each screen moves to the shell, not in a separate sweep |
+| `languages/rankweb.pot` | None | Phase 1: `wp i18n make-pot . languages/rankweb.pot --domain=rankweb --exclude=includes/search-insights,tests` (composer script `make-pot`, as MailWeb). Text domain stays `rankweb` (it is the header's). Shell scripts: `wp_set_script_translations()` per script, same domain, `make-json` in the build. Many admin strings are plain literals today (`includes/overview.php`, `includes/settings.php`): they become translatable as each screen moves to the shell, not in a separate sweep |
 | Capability + nonce on every route | `aw/v1/*`: `aw_seo_api_allowed()`; admin-post forms: `current_user_can` + `check_admin_referer`; FAQ bulk: `check_admin_referer( 'bulk-aw-faq-items' )` + per-item `aw_faq_can_edit()` | Every `rankweb/v1/*` route has a `permission_callback` with the capability in §2–§4, never `__return_true`; cookie calls carry `wp_rest` through `api-fetch`; writes re-check per item; args have a schema (type, enum, minimum) |
 | PHPCS | Security ruleset, new findings only, changed files (`tools/ci/phpcs_delta.py`) | Same, on every changed file; plus `composer lint` (WordPress standard) run on the branch and reported, not gating |
-| PHPUnit / Plugin Check | Not in the Deploy check | **Prove with pure-PHP tests plus `tools/ci/smoke.sh`** (no local WordPress, owner rule): `plugins/aw-seo-extras/tests/run.php` (no WordPress, like `plugins/aw-sourcing/tests/run.php`) for `aw_seo_field_text()` ↔ `aw_seo_field_value()` round trip of every default, the diff-only save keeping foreign keys, the tab and old-link mapping, `aw_seo_kp_refusal()`; a Deploy check step runs it. `smoke.sh` (already boots WordPress with Rank Math 1.0.280 and RankWeb) gains: every `rankweb/v1/*` route answers 401 without a login and 200 for `ci`; the three screens load without PHP notices; old `&tab=` addresses redirect. **Plugin Check:** a report-only step in `smoke.sh` (`wp plugin install plugin-check` + `wp plugin check aw-seo-extras --format=json`) in phase 1, gating from phase 4 once its first report is clean or each item is answered |
+| PHPUnit / Plugin Check | Not in the Deploy check | **Prove with pure-PHP tests plus `tools/ci/smoke.sh`** (no local WordPress, owner rule): `plugins/rankweb/tests/run.php` (no WordPress, like `plugins/aw-sourcing/tests/run.php`) for `aw_seo_field_text()` ↔ `aw_seo_field_value()` round trip of every default, the diff-only save keeping foreign keys, the tab and old-link mapping, `aw_seo_kp_refusal()`; a Deploy check step runs it. `smoke.sh` (already boots WordPress with Rank Math 1.0.280 and RankWeb) gains: every `rankweb/v1/*` route answers 401 without a login and 200 for `ci`; the three screens load without PHP notices; old `&tab=` addresses redirect. **Plugin Check:** a report-only step in `smoke.sh` (`wp plugin install plugin-check` + `wp plugin check rankweb --format=json`) in phase 1, gating from phase 4 once its first report is clean or each item is answered |
 | Code review, wp-plugin-audit | — | Every phase: the code-review skill and wp-plugin-audit (dimensions A–D) on the branch; Codex comments answered |
 | JS build | — | Phase 4: `@wordpress/scripts`, one entry per screen (`dashboard`, `faq`, `settings`), WordPress packages as externals, `.asset.php` for deps and version, `build/` committed (Hostinger pulls the repo, no build on the server), `wp-scripts lint-js` in the Deploy check, each script within the shell's budget (`admin-ui-spec.md` E6: 60 KB own code) |
 | Front-end output | — | Every phase: render compare (§8 proof A) |
@@ -332,7 +332,7 @@ Already sound and kept (checked, not bugs): the settings save (`manage_options` 
 
 ## 7. Icon
 
-The source is `docs/brand/plugin-icons/rankweb.svg` (bars with a yellow dot), with PNGs at 128 and 256. RankWeb already carries its copies in `plugins/aw-seo-extras/assets/`: `icon.svg`, `icon-256x256.png` and `icon-128x128.png`. They are used in:
+The source is `docs/brand/plugin-icons/rankweb.svg` (bars with a yellow dot), with PNGs at 128 and 256. RankWeb already carries its copies in `plugins/rankweb/assets/`: `icon.svg`, `icon-256x256.png` and `icon-128x128.png`. They are used in:
 
 1. **Kits → Plugins row:** `kits_plugin_screens` gains an icon (Kits Core request 10; today the row is `[name, address, capability, what it is]`, `includes/kits-hub.php:33`).
 2. **App header** of the three RankWeb screens (shell header slot).
@@ -697,7 +697,7 @@ built in InsightWeb · **Free** = Rank Math Free already does it · **Not needed
 
 Every phase works on its own, each module has its switch on RankWeb → Settings → Modules, and each phase stops for the
 owner's check. Settings need manage_options, item fields edit_posts, nonces on every form, every input sanitised,
-every output escaped, every string in the aw-seo-extras text domain.
+every output escaped, every string in the rankweb text domain.
 
 - **A. Overview, switches, setup wizard, tools.** The Overview already lists every module (`overview.php`: what it does,
   where it is set up, its status); its switches are on Settings → Modules. The Overview gets one card per module with
@@ -762,7 +762,7 @@ _Folded in 17 Nov 2026 from the former `docs/rankweb-org-rebrand.md`. The public
 # RankWeb → a public WordPress.org plugin: rebrand and generalise (scope, 17 Nov 2026)
 
 Scope only. Nothing here is built. It plans extracting a **generic, reusable, WordPress.org-listable** plugin from
-RankWeb (`plugins/aw-seo-extras`). RankWeb is generic and standalone; Animal Writes values live in `animal-writes-compat.php`, loaded only when Animal Writes Core is active; the public
+RankWeb (`plugins/rankweb`). RankWeb is generic and standalone; Animal Writes values live in `animal-writes-compat.php`, loaded only when Animal Writes Core is active; the public
 plugin is a **separate codebase** that reuses RankWeb's generic parts.
 
 ## 1. Why this is feasible

@@ -2,10 +2,10 @@
 /**
  * PHPUnit tests for video detection and the VideoObject node (includes/class-aw-video.php). No WordPress.
  *
- * With PHPUnit:    phpunit plugins/aw-seo-extras/tests/VideoTest.php
- * Without PHPUnit: php plugins/aw-seo-extras/tests/phpunit-lite.php (the Deploy check runs this)
+ * With PHPUnit:    phpunit plugins/rankweb/tests/VideoTest.php
+ * Without PHPUnit: php plugins/rankweb/tests/phpunit-lite.php (the Deploy check runs this)
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.Files.FileName, WordPress.NamingConventions.ValidFunctionName, Squiz.Commenting.FunctionComment.Missing -- PHPUnit naming.

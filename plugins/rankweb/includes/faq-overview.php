@@ -9,7 +9,7 @@
  * rankweb_faq_index() walks every item with the box once an hour (transient aw_faq_index): items of a type with automatic
  * questions all, other items only when their box holds questions.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -23,7 +23,7 @@
  * - Every picture in these nodes is a share-safe address (rankweb_seo_share_safe_url(): never AVIF or WebP, like og:image),
  *   in its own shape (og:image is the 1080x1080 share square).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

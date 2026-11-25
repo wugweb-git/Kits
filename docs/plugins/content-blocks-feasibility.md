@@ -308,7 +308,7 @@ not before the owner's word.
 ## 13. Schema per type (contract only; RankWeb owns the output)
 
 Kits Core emits **no JSON-LD**. A preset carries a `schema` key; RankWeb reads it through one filter and puts the
-node into Rank Math's single graph (as it does today, `aw-seo-extras/includes/schema.php`), so there is never a
+node into Rank Math's single graph (as it does today, `rankweb/includes/schema.php`), so there is never a
 second JSON-LD block.
 
 Contract (proposed, for the RankWeb track to accept or change):
@@ -436,7 +436,7 @@ generalised with zero visual change (the campaign rows are campaign-scoped and s
 `animal-writes/item-share` (`item-head.php:405`; `single.html`, `single-aw_listing.html`),
 `animal-writes/term-share` (`term-page.php:54`; `category.html`, `tag.html`), and the campaign share box
 (`aw_camp_share_box` `:854` [admin], `aw_camp_share_meta` `:1568`). Share pictures (1080x1080) are RankWeb's
-(`aw-seo-extras` helpers.php, opengraph.php).
+(`rankweb` helpers.php, opengraph.php).
 
 **Plan:** one `kits/share` block (block.json, apiVersion 3) with a `context` attribute — `page` / `item` / `term`
 — and **Follow us for page shares only** (owner). Share = the page only; the native share sheet on phones
@@ -632,7 +632,7 @@ functions, from `wordpress-dev` at `302f431b`.
 | Plugin | Calls | Functions | Main ones | Switch to |
 |---|---|---|---|---|
 | DirectoryWeb | 188 | 57 | `aw_i` 22, `aw_use_component_style` 14, `aw_item_editor_preview` 13, `aw_listing_type_slugs` 12, `aw_date` 11, `aw_listing_phones` 10, `aw_ff_*` 16, `aw_binding_value` 1, `aw_scf_active` 1, the `aw_scf_groups` filter | `kits_icon` / `kits_date` / `kits_scf_*` / `kits_post_fields`. The listing helpers (`aw_listing_*`, phones, hours, services) become DirectoryWeb's own code; the form helpers (`aw_ff_*`) go to Kits Core forms |
-| RankWeb (`aw-seo-extras`) | 173 | 44 | `aw_seo_plain` 76, `aw_hub_*` 30, `aw_retention_state` 6, `aw_text` 5, `aw_research_study_title` 4, `aw_category_image_id` 2 | RankWeb's own text helper; hub, retention, issuer and category-image readers come from Kits Core (presets, term image); listing readers come from DirectoryWeb |
+| RankWeb (`rankweb`) | 173 | 44 | `aw_seo_plain` 76, `aw_hub_*` 30, `aw_retention_state` 6, `aw_text` 5, `aw_research_study_title` 4, `aw_category_image_id` 2 | RankWeb's own text helper; hub, retention, issuer and category-image readers come from Kits Core (presets, term image); listing readers come from DirectoryWeb |
 | SourceWeb (`aw-sourcing`) | 79 | 33 | `aw_listing_phones` 8, `aw_post_types` 6, `aw_service_slugs` 6, `aw_sanitize_meta` 5, `aw_date` 4 + `aw_i` 3 (switched in this PR), tags/issuer/campaign-link setters, research and press ingest; `AW_CORE_DIR` in `aw-sourcing.php` and `relay.php` | Kits Core presets (type list, meta sanitising, tags, campaign links); DirectoryWeb (listing writes); ingest and research code moves into SourceWeb |
 | InsightWeb | 7 | 7 | `aw_error_count_*` 6, `aw_key` 1 | InsightWeb owns the error count; `aw_key` follows the keys plan (each plugin keeps its own keys) |
 | PlanWeb | 2 | 2 | `aw_core_reset_sections`, `aw_social_on` | Kits Core |

@@ -18,7 +18,7 @@
  *
  * Module "schema-plus" (RankWeb → Settings → Modules). No scheduled job.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

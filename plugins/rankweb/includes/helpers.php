@@ -2,7 +2,7 @@
 /**
  * Shared helpers: text cutting, page numbers, a page's own intro, the site's naming rules, and share images.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

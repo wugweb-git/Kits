@@ -18,7 +18,7 @@
  *   GET  links/summary  manage_rankweb  the counts and the state of the audit
  *   POST links/audit    manage_options  start an audit now
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

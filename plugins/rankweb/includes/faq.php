@@ -28,7 +28,7 @@
  *
  * WP-CLI: wp aw-faq report | check | import <file> | convert-guides | undo-guide. docs/faq.md (not in this repo) describes it all.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -707,7 +707,7 @@ function rankweb_faq_parse( $html ) {
 
 /**
  * The page's FAQPage node, parsed from the rendered accordion (null without one). Put in the page's @graph by
- * aw-seo-extras/schema.php.
+ * rankweb/includes/schema.php.
  *
  * @return array|null
  */

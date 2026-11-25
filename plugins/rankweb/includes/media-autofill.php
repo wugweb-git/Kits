@@ -10,7 +10,7 @@
  * - Focus keyphrase (kits_image_keyphrase): that page's Rank Math focus keyword (the first one).
  * No admin screen, no options, no CSS. Moved from Animal Writes Core on 18 Nov 2026; loaded with or without Rank Math.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

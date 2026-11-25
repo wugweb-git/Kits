@@ -16,7 +16,7 @@
  * Module "redirect-tools" (RankWeb → Settings → Modules). No scheduled job. Categories are not built: Rank Math's list
  * has no category field, and the owner's rule keeps redirects in that one list (noted in docs/org/rankweb-org-plan.md (Appendix B)).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

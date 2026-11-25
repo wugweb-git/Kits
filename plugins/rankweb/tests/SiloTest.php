@@ -2,10 +2,10 @@
 /**
  * PHPUnit tests for the silo rules (includes/class-aw-silo.php). No WordPress.
  *
- * With PHPUnit:    phpunit plugins/aw-seo-extras/tests/SiloTest.php
- * Without PHPUnit: php plugins/aw-seo-extras/tests/phpunit-lite.php (the Deploy check runs this)
+ * With PHPUnit:    phpunit plugins/rankweb/tests/SiloTest.php
+ * Without PHPUnit: php plugins/rankweb/tests/phpunit-lite.php (the Deploy check runs this)
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.Files.FileName, WordPress.NamingConventions.ValidFunctionName, Squiz.Commenting.FunctionComment.Missing -- PHPUnit naming.

@@ -17,7 +17,7 @@
  * Password request has no nonce and is checked by capability only. Signed out: 401. Signed in without the right: 403.
  * The aw/v1 routes the workers use are not touched.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

@@ -7,7 +7,7 @@
  * CSV columns (in order): source, target, code, comparison. code is 301, 302, 307, 308, 410 or 451; comparison is
  * exact or regex. A 410 or 451 ("gone") needs no target.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

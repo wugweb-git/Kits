@@ -37,7 +37,7 @@
  * listing carries the type rankweb_listing_schema() chose for that organisation: NGO, VeterinaryCare, AnimalShelter or
  * GovernmentOffice, several at once when the listing is several (one entry with @type as a list, as Rank Math allows).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

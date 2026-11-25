@@ -2,7 +2,7 @@
 /**
  * Breadcrumbs block (rankweb/breadcrumbs): the page's trail, once per page (rankweb_breadcrumbs_block()).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

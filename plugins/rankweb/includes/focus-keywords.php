@@ -22,7 +22,7 @@
  *
  * Allowed for administrators and the ingest user (the same rule as /aw/v1/ai-keys).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

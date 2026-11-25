@@ -3,10 +3,10 @@
  * PHPUnit tests for custom JSON-LD parsing and the small builders (includes/class-aw-schema.php). No WordPress.
  * dataset_template() is left out: it uses wp_json_encode and is a fixed string.
  *
- * With PHPUnit:    phpunit plugins/aw-seo-extras/tests/SchemaTest.php
- * Without PHPUnit: php plugins/aw-seo-extras/tests/phpunit-lite.php (the Deploy check runs this)
+ * With PHPUnit:    phpunit plugins/rankweb/tests/SchemaTest.php
+ * Without PHPUnit: php plugins/rankweb/tests/phpunit-lite.php (the Deploy check runs this)
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.Files.FileName, WordPress.NamingConventions.ValidFunctionName, Squiz.Commenting.FunctionComment.Missing -- PHPUnit naming.

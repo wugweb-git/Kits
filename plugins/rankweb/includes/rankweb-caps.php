@@ -11,7 +11,7 @@
  *
  * Self-contained: no other plugin's function or capability helper is used.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,7 +45,7 @@ function rankweb_caps_grant(): void {
 	update_option( 'rankweb_caps', RANKWEB_CAP_VERSION, true );
 }
 
-register_activation_hook( dirname( __DIR__ ) . '/aw-seo-extras.php', 'rankweb_caps_grant' );
+register_activation_hook( dirname( __DIR__ ) . '/rankweb.php', 'rankweb_caps_grant' );
 
 // Upgrade check: once per RANKWEB_CAP_VERSION, on an admin request.
 add_action(

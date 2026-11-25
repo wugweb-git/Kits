@@ -18,7 +18,7 @@ Checked 18 Nov 2026 on `wordpress-dev` (19494848) and, read only, on live. Live 
 ### Who registers keys on the vault, and who reads them
 
 Only **InsightWeb** (Search Insights) uses the vault. No other plugin adds an `aw_keys` entry or calls `aw_key()`:
-RankWeb (`aw-seo-extras`), SourceWeb (`aw-sourcing`), DirectoryWeb, MailWeb, PlanWeb and Kits Core have none.
+RankWeb (`rankweb`), SourceWeb (`aw-sourcing`), DirectoryWeb, MailWeb, PlanWeb and Kits Core have none.
 
 Before this change (`wordpress-dev` 19494848):
 

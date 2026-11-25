@@ -22,7 +22,7 @@
  *   followed (Google's guidance on internal search result pages).
  * - Any other single filter keeps the earlier rule (indexed, canonical with the filter).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

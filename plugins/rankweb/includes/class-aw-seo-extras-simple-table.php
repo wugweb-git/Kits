@@ -7,7 +7,7 @@
  * The same pattern as the other Wugweb plugins' *_simple_table() helpers, each plugin with its own copy and prefix.
  * Loaded by rankweb_seo_extras_simple_table() (admin-table.php) only when a screen renders one.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

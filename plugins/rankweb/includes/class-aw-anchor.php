@@ -13,7 +13,7 @@
  *   partial    contains a word of one of the target's keywords (3 letters or more)
  *   other      anything else
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

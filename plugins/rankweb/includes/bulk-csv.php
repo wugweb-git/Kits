@@ -8,7 +8,7 @@
  * present but blank clears that field. Import has a dry run (the default) that reports what would change without
  * writing, and lists the rows it could not use and why.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

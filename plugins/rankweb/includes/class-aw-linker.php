@@ -12,7 +12,7 @@
  * Never linked inside: h1-h6, a, code, pre, script, style, button, figcaption, and also textarea, svg, noscript,
  * template, select and option (their text is not running prose).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

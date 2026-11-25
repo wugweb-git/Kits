@@ -17,7 +17,7 @@
  *
  * An item's label is the "Breadcrumb Title" typed in Rank Math (Advanced tab), when there is one.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

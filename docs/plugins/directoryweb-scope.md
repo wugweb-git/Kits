@@ -30,7 +30,7 @@
 on this branch where marked "(branch)". Paths:
 - `core/` = `plugins/animal-writes-core/includes/`
 - `dw/` = `plugins/directoryweb/includes/`
-- `rw/` = `plugins/aw-seo-extras/includes/` (RankWeb)
+- `rw/` = `plugins/rankweb/includes/` (RankWeb)
 - `sw/` = `plugins/aw-sourcing/includes/` (SourceWeb)
 
 **Principles (owner rules).**

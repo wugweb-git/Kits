@@ -12,7 +12,7 @@
  * - A Directory section from live counts (how the pages are arranged, and every state with listings), in place of
  *   a sample of single listings.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
