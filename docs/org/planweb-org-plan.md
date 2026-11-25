@@ -1,6 +1,8 @@
 # PlanWeb: the team's calendar as its own Kits plugin (plan)
 
 **Status (Updated 25 Nov 2026):** Shipped at `0.2.0`, standalone verified, and **WP.org Plugin Check (`0` errors)** verified (`Update URI` removed, standalone description updated, zero outbound HTTP, `== External Services ==` present). `planweb_entry` store, standalone Calendar + Kits Core shell SPA, read-only iCalendar feed, and unified site schedule active. *(Deferred enhancements in `plugins/planweb/PENDING.md`: drag-and-drop calendar, timeline visualization, author/category/tag filters.)*
+
+**Checked against the code, 25 Nov 2026.** Done in `plugins/planweb`: `Update URI` removed, readme External Services, the `planweb_site_skip_types` filter, standalone Calendar and shell screens. **Not in this repo:** the listable fork `plugins/planweb-org/`, the bundled `planweb-shell` (`packages/planweb-shell` is empty) and `.distignore`; the text below about them describes a side branch. **Still open:** stripping the `aw_team_dates` import (`import.php`, `migrate.php`, `team-dates.php`), drag-and-drop and filters (`plugins/planweb/PENDING.md`), screenshots, Plugin Check on a clean WP, submission.
 Owner, 11 Nov 2026: Dates moves into its own Kits plugin, **PlanWeb**, which holds the team's schedule and the content
 and marketing calendar.
 
