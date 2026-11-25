@@ -211,10 +211,13 @@ function directoryweb_listing_details_box( $post ) {
 	echo '</div><p><button type="button" class="button" id="aw-gallery-pick">' . esc_html__( 'Choose photos', 'directoryweb' ) . '</button> <button type="button" class="button-link" id="aw-gallery-clear">' . esc_html__( 'Remove all', 'directoryweb' ) . '</button></p></div></section>';
 
 	echo '</div></div>'; // .directoryweb-profile__grid, .directoryweb-profile
-	echo "<script>(function(){var f,inp=document.getElementById('aw_gallery'),prev=document.getElementById('aw-gallery-prev');"
+	$aw_gallery_js = "(function(){var f,inp=document.getElementById('aw_gallery'),prev=document.getElementById('aw-gallery-prev');"
 		. "document.getElementById('aw-gallery-pick').addEventListener('click',function(){f=f||wp.media({title:'Photos (up to 6)',multiple:true,library:{type:'image'}});"
 		. "f.off('select').on('select',function(){var s=f.state().get('selection').toArray().slice(0,6);inp.value=s.map(function(a){return a.id}).join(',');prev.innerHTML='';s.forEach(function(a){var i=document.createElement('img');i.src=(a.attributes.sizes&&a.attributes.sizes.thumbnail?a.attributes.sizes.thumbnail.url:a.attributes.url);i.width=80;i.height=80;i.style.objectFit='cover';prev.appendChild(i);});});f.open();});"
-		. "document.getElementById('aw-gallery-clear').addEventListener('click',function(){inp.value='';prev.innerHTML='';});})();</script>";
+		. "document.getElementById('aw-gallery-clear').addEventListener('click',function(){inp.value='';prev.innerHTML='';});})();";
+	wp_register_script( 'directoryweb-gallery', false, array( 'jquery' ), false, true );
+	wp_enqueue_script( 'directoryweb-gallery' );
+	wp_add_inline_script( 'directoryweb-gallery', $aw_gallery_js );
 }
 
 add_action(
