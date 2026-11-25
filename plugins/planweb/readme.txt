@@ -1,5 +1,6 @@
 === PlanWeb ===
 Contributors: wugweb
+Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
@@ -21,6 +22,10 @@ PlanWeb keeps the team's dates and plans: content, social, email, campaign and r
 * A read-only calendar feed (iCalendar) for Google Calendar, Apple Calendar or Outlook, at `/wp-json/planweb/v1/calendar.ics?key=…`. The key is made in PlanWeb → Settings → Calendar feed; there are filters by type (`type=marketing`) and status (`status=open`). The feed holds date, time, title, type, channels, status and link, never the note.
 
 On a site with the earlier Dates list (option `aw_team_dates`), switching PlanWeb on copies every date once and leaves the list unchanged. `wp planweb verify` compares the two one for one.
+
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/planweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
 
 == Installation ==
 

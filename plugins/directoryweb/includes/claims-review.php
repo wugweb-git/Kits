@@ -506,7 +506,7 @@ function directoryweb_claim_review_screen( $entry_id ) {
 		echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . nl2br( esc_html( '' !== (string) $v ? (string) $v : '—' ) ) . '</td></tr>';
 	}
 	$proofs = $c['proofs'] ? $c['proofs'] : ( '' !== $c['proof'] ? array( $c['proof'] ) : array() );
-	echo '<tr><th scope="row">Proof</th><td>' . ( $proofs ? implode( '<br>', array_map( fn( $u, $i ) => '<a href="' . esc_url( $u ) . '" target="_blank" rel="noopener">Open document ' . ( $i + 1 ) . '</a>', $proofs, array_keys( $proofs ) ) ) : '—' ) . '</td></tr>';
+	echo '<tr><th scope="row">Proof</th><td>' . wp_kses( $proofs ? implode( '<br>', array_map( fn( $u, $i ) => '<a href="' . esc_url( $u ) . '" target="_blank" rel="noopener">Open document ' . ( $i + 1 ) . '</a>', $proofs, array_keys( $proofs ) ) ) : '—', array( 'a' => array( 'href' => true, 'target' => true, 'rel' => true ), 'br' => array() ) ) . '</td></tr>';
 	if ( $c['problems'] ) {
 		echo '<tr><th scope="row">Files not accepted</th><td>' . implode( '<br>', array_map( 'esc_html', $c['problems'] ) ) . '</td></tr>';
 	}

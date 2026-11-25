@@ -75,15 +75,17 @@ function rankweb_render_reprint_box( $post ) {
 
 	echo '</div>';
 	echo '</div>';
+	ob_start();
 	?>
-	<script>
 	jQuery(document).ready(function($){
 		$('input[name="rankweb_is_reprint"]').on('change', function(){
 			$('#rankweb_reprint_fields').toggle($(this).is(':checked'));
 		});
 	});
-	</script>
 	<?php
+	wp_register_script( 'rankweb-reprint', false, array( 'jquery' ), RANKWEB_VERSION, true );
+	wp_enqueue_script( 'rankweb-reprint' );
+	wp_add_inline_script( 'rankweb-reprint', (string) ob_get_clean() );
 }
 
 /**

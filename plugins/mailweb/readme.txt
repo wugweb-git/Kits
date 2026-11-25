@@ -49,6 +49,10 @@ Administrators and editors. Every action checks a nonce and the user's capabilit
 
 The Mail API token, webhook secrets and SMTP password can be set in `wp-config.php` (`MAILWEB_API_TOKEN`, `MAILWEB_SECRET_<MAILBOX>`, `MAILWEB_SMTP_PASSWORD`). Values saved on the settings screen are stored encrypted with a key made from the site's salts; if the salts change, enter them again.
 
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/mailweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
+
 == Installation ==
 
 1. Upload the `mailweb` folder to `/wp-content/plugins/` and activate MailWeb.
@@ -84,6 +88,16 @@ MailWeb connects to external services only when configured by the site administr
 
 = 3.3.0 =
 Adds Site Health email sending check, per-user pause notice dismissal, email logging & resend, fallback SMTP configuration, failure alert webhooks, and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`).
+
+== Bundled libraries ==
+
+MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (GPL-compatible). Their licence texts are in each package folder.
+
+* Hostinger Mail API PHP SDK (`hostinger/mail-api-php-sdk`) and, for it: Guzzle (`guzzlehttp/guzzle`, `guzzlehttp/promises`, `guzzlehttp/psr7`), PSR interfaces (`psr/container`, `psr/http-client`, `psr/http-factory`, `psr/http-message`), `ralouphie/getallheaders`.
+* Symfony components used by the SDK: `serializer`, `property-access`, `property-info`, `type-info`, `string`, `deprecation-contracts`, and the `polyfill-ctype`, `polyfill-intl-grapheme`, `polyfill-intl-normalizer`, `polyfill-mbstring` and `polyfill-php80` packages.
+* Type and docblock helpers: `phpdocumentor/reflection-common`, `reflection-docblock` and `type-resolver`, `phpstan/phpdoc-parser`, `doctrine/deprecations`, `webmozart/assert`.
+
+Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
 

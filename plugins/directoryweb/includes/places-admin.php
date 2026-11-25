@@ -139,11 +139,11 @@ add_action(
 );
 
 add_action(
-	'admin_footer-post.php',
+	'admin_print_footer_scripts-post.php',
 	'directoryweb_place_box_js'
 );
 add_action(
-	'admin_footer-post-new.php',
+	'admin_print_footer_scripts-post-new.php',
 	'directoryweb_place_box_js'
 );
 
@@ -152,8 +152,8 @@ function directoryweb_place_box_js() {
 	if ( ! in_array( get_post_type(), AW_PLACE_EDIT_TYPES, true ) ) {
 		return;
 	}
+	ob_start();
 	?>
-<script>
 (function () {
 	var st = document.getElementById('aw-state'), di = document.getElementById('aw-district');
 	if (!st || !di) { return; }
@@ -179,6 +179,8 @@ function directoryweb_place_box_js() {
 	go.addEventListener('click', look);
 	pin.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); look(); } });
 })();
-</script>
 	<?php
+	wp_register_script( 'directoryweb-place-box', false, array(), DIRECTORYWEB_VERSION, true );
+	wp_enqueue_script( 'directoryweb-place-box' );
+	wp_add_inline_script( 'directoryweb-place-box', (string) ob_get_clean() );
 }

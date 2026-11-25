@@ -22,6 +22,10 @@ SourceWeb decides what comes into your site and lets your editorial team review 
 
 SourceWeb operates standalone with no mandatory plugin dependencies, and optionally integrates with Kits Core, DirectoryWeb, and InsightWeb when active.
 
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/sourceweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
+
 == Installation ==
 
 1. Upload the `sourceweb` folder to `/wp-content/plugins/`, or install the `sourceweb.zip` package via **Plugins → Add New → Upload Plugin**.

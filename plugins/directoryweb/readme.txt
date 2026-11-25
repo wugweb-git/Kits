@@ -8,7 +8,7 @@ Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A directory of organisations in WordPress: listings with their places and types, a map and Near me, claims from the organisations themselves, and "Find help near you".
+A directory of organisations in WordPress: listings, places, a map, Near me, claims from the organisations and "Find help near you".
 
 == Description ==
 
@@ -42,6 +42,10 @@ DirectoryWeb adds a directory of listings, places and claims to a WordPress site
 * Kits Core (optional: gives the admin the Kits shell, list tables, icons and dates; DirectoryWeb runs without it).
 * RankWeb and SourceWeb (optional companions: RankWeb reads the Directory for titles, schema and the sitemap; SourceWeb adds listings and keeps the change log).
 
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/directoryweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
+
 == Installation ==
 
 1. Activate DirectoryWeb under Plugins. It creates a Claim page and owns the Directory's rewrite rules and capability.
@@ -69,6 +73,13 @@ Test it: open `https://your-site/wp-content/uploads/directoryweb-private/index.p
 = Which form plugins work for claims? =
 
 With no form plugin the plugin shows its own claim form, which also accepts the proof, logo and photos. If Fluent Forms is active and you choose a claim form, that form is used. Fluent Forms' free version has no file-upload field, so uploads with Fluent Forms need its Pro upload field; this plugin copies the files that field saves into its own protected folder. That Pro path has not been tested with the real Pro uploader.
+
+== External services ==
+
+DirectoryWeb calls two outside services, only for the tasks below. Nothing is sent when you do not use these features.
+
+* **Postal PIN code lookup (`https://api.postalpincode.in/`):** when a visitor or an editor enters a 6-digit Indian PIN code to find a district. The PIN code they typed is sent; the answer is kept for a while in a WordPress transient. Service site: [https://www.postalpincode.in/](https://www.postalpincode.in/)
+* **OpenStreetMap Nominatim (`https://nominatim.openstreetmap.org/`):** when a listing with an address is saved or its address changes, a background task about a minute later (and the geocode tool) looks up the listing's map position. The address, PIN code or place names are sent, with your site address in the User-Agent header. A contact email is sent only if your site adds one through the `directoryweb_geocode_contact` filter. Usage policy: [https://operations.osmfoundation.org/policies/nominatim/](https://operations.osmfoundation.org/policies/nominatim/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
 
 == Changelog ==
 

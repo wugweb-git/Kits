@@ -64,8 +64,14 @@ function sourceweb_enrich_profile_extras( $id ) {
 	$out = '';
 	if ( $m( 'aw_place_id' ) && sourceweb_glive_ready() ) {
 		$api  = esc_url( rest_url( 'aw/v1/listing-live?id=' . (int) $id ) );
-		$out .= '<div class="aw-glive-slot" data-src="' . $api . '"></div>'
-			. '<script>(function(){var s=document.currentScript.previousElementSibling;if(!s||!window.fetch)return;fetch(s.dataset.src).then(function(r){return r.json()}).then(function(d){if(d&&d.html){s.insertAdjacentHTML("afterend",d.html);}s.remove();}).catch(function(){s.remove();});})();</script>';
+		$out .= '<div class="aw-glive-slot" data-src="' . $api . '"></div>';
+		static $queued = false;
+		if ( ! $queued ) {
+			$queued = true;
+			wp_register_script( 'sourceweb-glive', false, array(), SOURCEWEB_VERSION, true );
+			wp_enqueue_script( 'sourceweb-glive' );
+			wp_add_inline_script( 'sourceweb-glive', '(function(){if(!window.fetch)return;document.querySelectorAll(".aw-glive-slot").forEach(function(s){fetch(s.dataset.src).then(function(r){return r.json()}).then(function(d){if(d&&d.html){s.insertAdjacentHTML("afterend",d.html);}s.remove();}).catch(function(){s.remove();});});})();' );
+		}
 	}
 	$sig = array();
 	if ( $m( 'aw_ig_followers' ) || $m( 'aw_last_post' ) ) {

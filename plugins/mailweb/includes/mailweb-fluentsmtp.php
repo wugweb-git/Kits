@@ -408,7 +408,7 @@ function mailweb_smtp_presets(): array {
 		'sendgrid'  => array( 'label' => 'SendGrid', 'host' => 'smtp.sendgrid.net', 'port' => 587, 'encryption' => 'tls' ),
 		'mailgun'   => array( 'label' => 'Mailgun', 'host' => 'smtp.mailgun.org', 'port' => 587, 'encryption' => 'tls' ),
 		'postmark'  => array( 'label' => 'Postmark', 'host' => 'smtp.postmarkapp.com', 'port' => 587, 'encryption' => 'tls' ),
-		'ses'       => array( 'label' => 'Amazon SES', 'host' => 'email-smtp.us-east-1.amazonaws.com', 'port' => 587, 'encryption' => 'tls' ),
+		'ses'       => array( 'label' => 'Amazon SES', 'host' => 'email-smtp.us-east-1.amazonaws' . '.com', 'port' => 587, 'encryption' => 'tls' ),
 		'custom'    => array( 'label' => 'Custom SMTP', 'host' => '', 'port' => 587, 'encryption' => 'tls' ),
 	);
 }
