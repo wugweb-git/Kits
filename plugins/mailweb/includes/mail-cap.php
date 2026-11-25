@@ -596,11 +596,8 @@ add_action(
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		$id     = $screen ? (string) $screen->id : '';
 		$always = in_array( $id, array( 'dashboard', 'toplevel_page_mailweb' ), true ) || str_ends_with( $id, '_page_mailweb-settings' ) || (bool) apply_filters( 'mailweb_pause_notice_always', false, $id );
-		if ( ! $always ) {
-			if ( get_transient( 'mailweb_pause_seen' ) ) {
-				return;
-			}
-			set_transient( 'mailweb_pause_seen', 1, DAY_IN_SECONDS );
+		if ( ! $always && function_exists( 'mailweb_is_pause_dismissed_for_user' ) && mailweb_is_pause_dismissed_for_user( $pause ) ) {
+			return;
 		}
 		wp_admin_notice(
 			'<strong>' . esc_html__( 'Email sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(

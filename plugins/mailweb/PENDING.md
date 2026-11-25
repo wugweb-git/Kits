@@ -20,6 +20,12 @@ The email and delivery management plugin owns:
    - ✅ Real-time DKIM (`hostingermail1._domainkey`) and SPF DNS verification card.
    - ✅ Background cron (`mailweb_daily_dns_check`) checking DKIM records every 24 hours, alerting administrators if DNS verification fails.
 
+3. **FluentSMTP-Parity Enhancements & Plan Completion (25 Nov 2026)**:
+   - ✅ Site Health direct test (`mailweb_email_sending`), per-user `mailweb_pause_dismissed` meta + REST route.
+   - ✅ Email logging + queue resend (`mailweb-fluentsmtp.php`, `GET /mailweb/v1/logs`, `POST /mailweb/v1/queue/resend`).
+   - ✅ Fallback SMTP connection (`mailweb_smtp_fallback`, encrypted password, `/mailweb/v1/services/smtp-fallback`).
+   - ✅ Throttled failure alert webhooks (`/mailweb/v1/services/alerts`) and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`).
+
 ---
 
 ## Open Tasks & Enhancements

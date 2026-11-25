@@ -99,6 +99,7 @@ require_once MAILWEB_DIR . 'includes/home.php';
 require_once MAILWEB_DIR . 'includes/mailweb-ui.php'; // the screens on the Kits shell.
 require_once MAILWEB_DIR . 'includes/mailweb-rest.php';
 require_once MAILWEB_DIR . 'includes/mailweb-dashboard.php';
+require_once MAILWEB_DIR . 'includes/mailweb-fluentsmtp.php';
 require_once MAILWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 
 // Deactivation stops MailWeb's scheduled jobs; settings, the queue and the mailboxes are left as they are.
