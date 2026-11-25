@@ -250,6 +250,11 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
 
     if target == "theme":
         set_theme_update_uri(stage / "style.css", spec["update_uri"] if track == "commercial" else None)
+    elif track == "wporg":
+        # WordPress.org updates plugins itself: an Update URI header (an updater of our own) is not allowed there.
+        main = stage / f"{slug}.php"
+        if main.exists():
+            main.write_text(re.sub(r"^[ \t]*\*?[ \t]*Update URI:.*\n", "", main.read_text(encoding="utf-8"), flags=re.MULTILINE), encoding="utf-8")
 
     zip_name = f"{slug}-{track}.zip" if target == "theme" and track != "commercial" else f"{slug}.zip"
     zip_path = out_dir / zip_name
