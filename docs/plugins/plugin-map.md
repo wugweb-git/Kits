@@ -392,9 +392,9 @@ Plan: `docs/seo/search-insights-plan.md`. RankWeb → Search Insights (`admin.ph
 | `media-columns.php` | Media Library list columns (31 Oct 2026; 1 Nov: File column without the file-name line, SEO column removed): Slug, SEO title (caption), SEO description, Focus keyphrase (`kits_image_keyphrase`), Image context, "Uploaded to" lists every other use as extra rows (featured image, source image, document preview, logos, social image, category or tag photo, site icon, the source a favicon belongs to) and Optimisation (size, format, no resized copies); Author removed. Read only, core list-table columns. Moved from Animal Writes Core, 18 Nov 2026. |
 | `media-autofill.php` | New image uploads (1 Nov 2026): on `add_attachment`, fills only the empty fields and never overwrites. Name (file and camera names become words, 100 max), Alternative Text (160 max), Caption = SEO title (100 max), Description = SEO description (100 to 160; favicon, logo, source image and general wording) Image context (`kits_image_context`: the page it is attached to or used on; 160 max) and Focus keyphrase (`kits_image_keyphrase`: that page's first Rank Math focus keyword, when empty). No screen, no options. Moved from Animal Writes Core, 18 Nov 2026. |
 
-## Every plugin on live (`wp plugin list`, 24 Oct 2026)
+## Every plugin on live (`wp plugin list`, 24 Oct 2026; status column updated from the admin IA check of 12 Nov 2026)
 
-Kits Core and SourceWeb are not in the list: animal-writes-core loads them from their folders. Check again with `wp plugin list` before relying on this table.
+**Status (25 Nov 2026):** Not re-run on live. `animal-writes-core` was retired on 19 Nov 2026 (commit `69832857`): Kits Core, DirectoryWeb, RankWeb, MailWeb, SourceWeb, InsightWeb and PlanWeb are now separate plugins, and the first row below is history. Run `wp plugin list` on the live site before relying on this table.
 
 | Plugin (folder) | What it does here | Status |
 |---|---|---|
