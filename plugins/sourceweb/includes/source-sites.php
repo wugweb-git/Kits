@@ -7,15 +7,15 @@
  * - Items: fetched in 30 days and published (all time), from one query over the sourced types' aw_source_url meta,
  *   kept for an hour in a transient.
  * - Search value: Search Console impressions and clicks over 28 days and 3 months (90 days) of the host's published
- *   items' pages (aw_si_page_metrics, from aw-seo-extras), in the same transient; none when Search Console has not
+ *   items' pages (insightweb_si_page_metrics, from aw-seo-extras), in the same transient; none when Search Console has not
  *   run within 28 days or Search Insights is off (the rule of the Sourcing keywords table).
  * - SEO: each site's own home page title and description, read in the background only (WP-Cron, hourly, 15 hosts a
  *   run, never on page load) into the option aw_source_site_meta (autoload off).
  * - Domain Rating: publisher record keys dr and dr_at, set by `wp aw-sourcing import-dr <file.json>` (values from
  *   Ahrefs' free Domain Rating lookup, run by Claude).
  *
- * Status changes, short names and press sites save through the shared functions (aw_sourcing_sources_apply(),
- * aw_sourcing_source_save()), logged in the Change log as before (tab publishers; press-site changes as tab press).
+ * Status changes, short names and press sites save through the shared functions (sourceweb_sourcing_sources_apply(),
+ * sourceweb_sourcing_source_save()), logged in the Change log as before (tab publishers; press-site changes as tab press).
  *
  * @package aw-sourcing
  */
@@ -31,11 +31,11 @@ const AW_SOURCING_SITE_META = 'aw_source_site_meta';
 const AW_SOURCING_SITE_META_CRON = 'aw_sourcing_site_meta';
 
 /**
- * The sourcing restructure phase migrated on this site (option aw_sourcing_phase, set by `wp aw-sourcing migrate`,
+ * The sourcing restructure phase migrated on this site (option sourceweb_sourcing_phase, set by `wp aw-sourcing migrate`,
  * put back by `wp aw-sourcing rollback`): 0 before phase 1. Phase 1 makes the relay switches the allow list and adds
  * sources_v2 to the policy.
  */
-function aw_sourcing_phase() {
+function sourceweb_sourcing_phase() {
 	return (int) get_option( 'aw_sourcing_phase', 0 );
 }
 
@@ -44,31 +44,31 @@ function aw_sourcing_phase() {
  *
  * @return array<string, array[]>
  */
-function aw_sourcing_feeds_by_host() {
+function sourceweb_sourcing_feeds_by_host() {
 	$out = array();
-	foreach ( (array) ( aw_sources_config()['sources'] ?? array() ) as $s ) {
+	foreach ( (array) ( sourceweb_sources_config()['sources'] ?? array() ) as $s ) {
 		if ( is_array( $s ) ) {
-			$out[ aw_src_source_host( $s ) ][] = $s;
+			$out[ sourceweb_src_source_host( $s ) ][] = $s;
 		}
 	}
 	return $out;
 }
 
-/** A host typed or posted (with or without https://, www.) as aw_host() keeps it, or ''. */
-function aw_sourcing_norm_host( $in ) {
+/** A host typed or posted (with or without https://, www.) as sourceweb_host() keeps it, or ''. */
+function sourceweb_sourcing_norm_host( $in ) {
 	$in = trim( (string) $in );
 	if ( '' === $in ) {
 		return '';
 	}
-	$h = aw_host( 'https://' . preg_replace( '#^[a-z]+://#i', '', $in ) );
+	$h = sourceweb_host( 'https://' . preg_replace( '#^[a-z]+://#i', '', $in ) );
 	return preg_match( '/^[a-z0-9.-]+\.[a-z0-9-]+$/', $h ) ? $h : '';
 }
 
 /** The press-coverage sites (aw_sources press sites) as hosts, once each. */
-function aw_sourcing_press_hosts() {
+function sourceweb_sourcing_press_hosts() {
 	$out = array();
-	foreach ( (array) ( aw_sources_config()['press']['sites'] ?? array() ) as $s ) {
-		$h = aw_sourcing_norm_host( $s );
+	foreach ( (array) ( sourceweb_sources_config()['press']['sites'] ?? array() ) as $s ) {
+		$h = sourceweb_sourcing_norm_host( $s );
 		if ( '' !== $h ) {
 			$out[ $h ] = true;
 		}
@@ -83,19 +83,19 @@ function aw_sourcing_press_hosts() {
  * @param string[] $remove Hosts to stop searching.
  * @return bool Something changed.
  */
-function aw_sourcing_press_change( array $add, array $remove ) {
-	if ( aw_sourcing_phase() >= 2 ) { // press sites were dropped with Brave in phase 2 (owner's decision 7)
+function sourceweb_sourcing_press_change( array $add, array $remove ) {
+	if ( sourceweb_sourcing_phase() >= 2 ) { // press sites were dropped with Brave in phase 2 (owner's decision 7)
 		return false;
 	}
-	$c     = aw_sources_config();
+	$c     = sourceweb_sources_config();
 	$old   = array_values( (array) ( $c['press']['sites'] ?? array() ) );
 	$sites = array();
 	foreach ( $old as $s ) { // a site removed by its host, however it was written
-		if ( ! in_array( aw_sourcing_norm_host( $s ), $remove, true ) ) {
+		if ( ! in_array( sourceweb_sourcing_norm_host( $s ), $remove, true ) ) {
 			$sites[] = $s;
 		}
 	}
-	$have = array_map( 'aw_sourcing_norm_host', $sites );
+	$have = array_map( 'sourceweb_sourcing_norm_host', $sites );
 	foreach ( $add as $h ) {
 		if ( '' !== $h && ! in_array( $h, $have, true ) ) {
 			$sites[] = $h;
@@ -106,8 +106,8 @@ function aw_sourcing_press_change( array $add, array $remove ) {
 		return false;
 	}
 	$c['press']['sites'] = $sites;
-	update_option( 'aw_sources', $c, false ); // no _aw_tab: aw_sources_sanitize() lets it through as it is
-	aw_src_log( 'press', aw_src_diff( 'Sites', $old, $sites ) );
+	update_option( 'aw_sources', $c, false ); // no _aw_tab: sourceweb_sources_sanitize() lets it through as it is
+	sourceweb_src_log( 'press', sourceweb_src_diff( 'Sites', $old, $sites ) );
 	return true;
 }
 
@@ -116,7 +116,7 @@ function aw_sourcing_press_change( array $add, array $remove ) {
  *
  * @return array{si: bool, stale: bool, hosts: array<string, array{f30: int, pub: int, impr: int, clicks: int, impr3: int, clicks3: int}>}
  */
-function aw_sourcing_host_stats() {
+function sourceweb_sourcing_host_stats() {
 	$hit = get_transient( 'aw_sourcing_host_stats' );
 	if ( is_array( $hit ) ) {
 		return $hit;
@@ -140,7 +140,7 @@ function aw_sourcing_host_stats() {
 			)
 		);
 		foreach ( (array) $rows as $r ) {
-			$h = aw_host( (string) $r->url );
+			$h = sourceweb_host( (string) $r->url );
 			if ( '' === $h ) {
 				continue;
 			}
@@ -153,19 +153,19 @@ function aw_sourcing_host_stats() {
 		}
 	}
 	// Search Console figures count only when it last ran within the 28-day window (as the Sourcing keywords table).
-	$ok    = function_exists( 'aw_si_runs' ) ? (int) ( aw_si_runs()['gsc']['ok'] ?? 0 ) : 0;
-	$si    = function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() && function_exists( 'aw_si_page_metrics' ) && $ok > time() - 28 * DAY_IN_SECONDS;
+	$ok    = function_exists( 'insightweb_si_runs' ) ? (int) ( insightweb_si_runs()['gsc']['ok'] ?? 0 ) : 0;
+	$si    = function_exists( 'sourceweb_sourcing_si_available' ) && sourceweb_sourcing_si_available() && function_exists( 'insightweb_si_page_metrics' ) && $ok > time() - 28 * DAY_IN_SECONDS;
 	$stale = $ok && ! $si;
 	if ( $si && $pub ) {
 		_prime_post_caches( array_keys( $pub ), false, false ); // one query for every item, not one per permalink
 		$paths = array();
 		foreach ( $pub as $id => $h ) {
 			$url          = (string) get_permalink( $id );
-			$paths[ $id ] = function_exists( 'aw_si_path' ) ? aw_si_path( $url ) : (string) wp_parse_url( $url, PHP_URL_PATH );
+			$paths[ $id ] = function_exists( 'insightweb_si_path' ) ? insightweb_si_path( $url ) : (string) wp_parse_url( $url, PHP_URL_PATH );
 		}
 		$list = array_values( array_filter( array_unique( $paths ) ) );
-		$m28  = aw_si_page_metrics( $list, 28 );
-		$m90  = aw_si_page_metrics( $list, 90 ); // daily rows are kept 90 days
+		$m28  = insightweb_si_page_metrics( $list, 28 );
+		$m90  = insightweb_si_page_metrics( $list, 90 ); // daily rows are kept 90 days
 		foreach ( $pub as $id => $h ) {
 			$p                       = $paths[ $id ];
 			$hosts[ $h ]['impr']    += (int) ( $m28[ $p ]['impr'] ?? 0 );
@@ -189,7 +189,7 @@ add_action(
 		}
 	}
 );
-add_action( AW_SOURCING_SITE_META_CRON, 'aw_sourcing_site_meta_run' );
+add_action( AW_SOURCING_SITE_META_CRON, 'sourceweb_sourcing_site_meta_run' );
 
 /**
  * Title and description from a page's HTML: <title> and <meta name="description">, og:title / og:description when
@@ -199,7 +199,7 @@ add_action( AW_SOURCING_SITE_META_CRON, 'aw_sourcing_site_meta_run' );
  * @param string $html Page HTML (the start of it is enough).
  * @return array{title: string, desc: string, icon: string}
  */
-function aw_sourcing_parse_site_meta( $html ) {
+function sourceweb_sourcing_parse_site_meta( $html ) {
 	$html = (string) $html;
 	if ( ! wp_check_invalid_utf8( $html ) && function_exists( 'mb_convert_encoding' ) ) {
 		$html = (string) mb_convert_encoding( $html, 'UTF-8', 'ISO-8859-1' ); // an old site in Latin-1
@@ -267,16 +267,16 @@ function aw_sourcing_parse_site_meta( $html ) {
  *
  * @param int $limit Hosts per run.
  */
-function aw_sourcing_site_meta_run( $limit = 15 ) {
+function sourceweb_sourcing_site_meta_run( $limit = 15 ) {
 	$meta  = get_option( AW_SOURCING_SITE_META, array() );
 	$meta  = is_array( $meta ) ? $meta : array();
 	$want  = array();
-	foreach ( aw_publishers() as $h => $p ) {
+	foreach ( sourceweb_publishers() as $h => $p ) {
 		if ( empty( $p['kind'] ) ) {
 			$want[ $h ] = (int) ( $p['count'] ?? 0 ) > 0;
 		}
 	}
-	foreach ( aw_sourcing_press_hosts() as $h ) {
+	foreach ( sourceweb_sourcing_press_hosts() as $h ) {
 		$want[ $h ] = true;
 	}
 	$fresh = gmdate( 'Y-m-d H:i', time() - 30 * DAY_IN_SECONDS );
@@ -302,7 +302,7 @@ function aw_sourcing_site_meta_run( $limit = 15 ) {
 			} else {
 				$rec['code'] = (string) (int) wp_remote_retrieve_response_code( $r );
 				if ( (int) $rec['code'] >= 200 && (int) $rec['code'] < 300 ) {
-					$rec = array_merge( $rec, aw_sourcing_parse_site_meta( wp_remote_retrieve_body( $r ) ) );
+					$rec = array_merge( $rec, sourceweb_sourcing_parse_site_meta( wp_remote_retrieve_body( $r ) ) );
 				}
 			}
 		}
@@ -343,13 +343,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			$dry     = ! empty( $assoc['dry-run'] );
 			$today   = current_time( 'Y-m-d' );
-			$pubs    = aw_publishers();
+			$pubs    = sourceweb_publishers();
 			$set     = array();
 			$same    = 0;
 			$unknown = array();
 			$bad     = array();
 			foreach ( $in as $raw => $v ) {
-				$h = aw_sourcing_norm_host( $raw );
+				$h = sourceweb_sourcing_norm_host( $raw );
 				if ( ! is_numeric( $v ) || (float) $v < 0 || (float) $v > 100 ) {
 					$bad[] = (string) $raw;
 					continue;
@@ -367,15 +367,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::log( ( $dry ? 'would set ' : 'set ' ) . $h . ': ' . ( isset( $pubs[ $h ]['dr'] ) ? (int) $pubs[ $h ]['dr'] . ' → ' : '' ) . $dr );
 			}
 			if ( $set && ! $dry ) {
-				$pubs = aw_publishers(); // read again just before the write: the ingest gate updates the same option
+				$pubs = sourceweb_publishers(); // read again just before the write: the ingest gate updates the same option
 				foreach ( $set as $h => $dr ) {
 					if ( isset( $pubs[ $h ] ) ) {
 						$pubs[ $h ]['dr']    = $dr;
 						$pubs[ $h ]['dr_at'] = $today;
 					}
 				}
-				update_option( AW_PUB_OPTION, $pubs, false );
-				aw_src_log( 'publishers', 'Domain Rating imported for ' . count( $set ) . ' publishers (WP-CLI)' );
+				update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
+				sourceweb_src_log( 'publishers', 'Domain Rating imported for ' . count( $set ) . ' publishers (WP-CLI)' );
 			}
 			foreach ( $unknown as $h ) {
 				WP_CLI::log( 'skip ' . $h . ': not a publisher' );
@@ -391,7 +391,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 /* ---------- The Sources tab ---------- */
 
 /** The Sources tab's screen: list (''), feeds (all feeds), or an edit form (edit=host, feed=id). */
-function aw_sourcing_sources_screen() {
+function sourceweb_sourcing_sources_screen() {
 	// phpcs:disable WordPress.Security.NonceVerification -- which screen to show, nothing saved.
 	if ( '' !== sanitize_text_field( wp_unslash( $_GET['edit'] ?? '' ) ) ) {
 		return 'edit';
@@ -413,9 +413,9 @@ add_action(
 			return;
 		}
 		$screen = get_current_screen();
-		$view   = aw_sourcing_sources_screen();
+		$view   = sourceweb_sourcing_sources_screen();
 		$relay  = '<p><strong>Relay</strong> ("Fetch through this site"): some publishers refuse GitHub\'s servers but answer this site. When one of them answers the workers with 403, the workers ask this site to fetch the feed or page for them. The switch is on the source; its subdomains are included. Plugins → SourceWeb → Relay log lists every such request (the last 200), and the list shows each source\'s last result.</p>'
-			. ( aw_sourcing_phase() < 1 ? '<p>Until the phase 1 migration (<code>wp aw-sourcing migrate --phase=1</code>) the relay list is the list of before: ' . esc_html( implode( ', ', aw_relay_hosts_legacy() ) ) . '.</p>' : '' );
+			. ( sourceweb_sourcing_phase() < 1 ? '<p>Until the phase 1 migration (<code>wp aw-sourcing migrate --phase=1</code>) the relay list is the list of before: ' . esc_html( implode( ', ', sourceweb_relay_hosts_legacy() ) ) . '.</p>' : '' );
 		$screen->add_help_tab(
 			array(
 				'id'      => 'aw-sources-overview',
@@ -460,18 +460,18 @@ add_action(
  *
  * @return array{rows: array, si: bool, stale: bool}
  */
-function aw_sourcing_source_rows() {
+function sourceweb_sourcing_source_rows() {
 	$all = array();
-	$stats       = aw_sourcing_host_stats();
+	$stats       = sourceweb_sourcing_host_stats();
 	$si          = ! empty( $stats['si'] );
 	$stale       = ! empty( $stats['stale'] );
 	$meta        = get_option( AW_SOURCING_SITE_META, array() );
 	$meta        = is_array( $meta ) ? $meta : array();
-	$press       = array_flip( aw_sourcing_press_hosts() );
-	$pubs        = aw_publishers();
-	$feeds       = aw_sourcing_feeds_by_host();
-	$relay       = aw_relay_hosts();
-	$log         = aw_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ); // newest row per host named
+	$press       = array_flip( sourceweb_sourcing_press_hosts() );
+	$pubs        = sourceweb_publishers();
+	$feeds       = sourceweb_sourcing_feeds_by_host();
+	$relay       = sourceweb_relay_hosts();
+	$log         = sourceweb_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ); // newest row per host named
 	// A host kept only for its icon (kind=directory-source) is not listed; a relay-only one (kind=relay) is.
 	$hosts = array_keys( array_filter( $pubs, fn( $p ) => empty( $p['kind'] ) || 'relay' === $p['kind'] ) );
 	foreach ( array_unique( array_merge( $hosts, array_keys( $press ), array_keys( $feeds ) ) ) as $h ) {
@@ -483,18 +483,18 @@ function aw_sourcing_source_rows() {
 		$s   = $stats['hosts'][ $h ] ?? array();
 		$m   = $meta[ $h ] ?? array();
 		$fl  = $feeds[ $h ] ?? array();
-		$rel = aw_src_host_in( $h, $relay );
+		$rel = sourceweb_src_host_in( $h, $relay );
 		$all[ $h ] = array(
 			'host'    => $h,
 			'pub'     => $pub,
 			'kind'    => $pub ? 'publisher' : ( 'relay' === ( $p['kind'] ?? '' ) ? 'relay' : ( $fl ? 'feeds' : 'press' ) ),
 			'feeds'   => count( $fl ),
 			'feeds_on' => count( array_filter( $fl, fn( $x ) => ! empty( $x['on'] ) ) ),
-			'code_n'  => count( array_filter( $fl, fn( $x ) => 'code' === aw_src_read_by( $x ) ) ), // sources read by code ('code' is the SEO HTTP status below)
+			'code_n'  => count( array_filter( $fl, fn( $x ) => 'code' === sourceweb_src_read_by( $x ) ) ), // sources read by code ('code' is the SEO HTTP status below)
 			'fnames'  => implode( ' ', array_map( fn( $x ) => (string) ( $x['name'] ?? '' ), $fl ) ),
 			'relay'   => $rel,
 			'relay_own' => ! empty( $p['relay'] ),
-			'relay_last' => aw_src_relay_last( $log, $h ),
+			'relay_last' => sourceweb_src_relay_last( $log, $h ),
 			'count'   => (int) ( $p['count'] ?? 0 ),
 			'press'   => isset( $press[ $h ] ),
 			'name'    => $pub || 'relay' === ( $p['kind'] ?? '' ) ? (string) ( $p['name'] ?? '' ) : '',
@@ -530,21 +530,21 @@ function aw_sourcing_source_rows() {
  * @param array $in { host, status, name, short, press, relay_shown, relay }.
  * @return array{0: bool, 1: string} changed, error code ('' when none).
  */
-function aw_sourcing_source_save( array $in ) {
-	$host   = aw_sourcing_norm_host( sanitize_text_field( (string) ( $in['host'] ?? '' ) ) );
+function sourceweb_sourcing_source_save( array $in ) {
+	$host   = sourceweb_sourcing_norm_host( sanitize_text_field( (string) ( $in['host'] ?? '' ) ) );
 	$status = sanitize_key( (string) ( $in['status'] ?? '' ) );
 	$name   = sanitize_text_field( (string) ( $in['name'] ?? '' ) );
 	$short  = mb_substr( sanitize_text_field( (string) ( $in['short'] ?? '' ) ), 0, 24 );
 	$press  = ! empty( $in['press'] );
-	$shown  = ! empty( $in['relay_shown'] ) && aw_sourcing_phase() >= 1; // the relay switch was on the form
+	$shown  = ! empty( $in['relay_shown'] ) && sourceweb_sourcing_phase() >= 1; // the relay switch was on the form
 	$relay  = ! empty( $in['relay'] );
 	if ( '' === $host ) {
 		return array( false, 'host' );
 	}
-	$pubs    = aw_publishers(); // read just before the write: the ingest gate updates the same option
+	$pubs    = sourceweb_publishers(); // read just before the write: the ingest gate updates the same option
 	$is_pub  = isset( $pubs[ $host ] ) && empty( $pubs[ $host ]['kind'] );
-	$was     = in_array( $host, aw_sourcing_press_hosts(), true );
-	$feeds   = ! empty( aw_sourcing_feeds_by_host()[ $host ] );
+	$was     = in_array( $host, sourceweb_sourcing_press_hosts(), true );
+	$feeds   = ! empty( sourceweb_sourcing_feeds_by_host()[ $host ] );
 	$changed = false;
 	if ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 		$before = $pubs[ $host ] ?? null;
@@ -552,20 +552,20 @@ function aw_sourcing_source_save( array $in ) {
 		$rec = null === $before ? array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '', 'status' => $status ) : array_merge( $before, array( 'status' => $status ) );
 		if ( 'relay' === ( $rec['kind'] ?? '' ) ) { // a relay-only site becomes a publisher
 			unset( $rec['kind'] );
-			aw_src_log( 'publishers', 'added ' . $host . ' as ' . $status . ' (was relay only)', 'relay only', $status );
+			sourceweb_src_log( 'publishers', 'added ' . $host . ' as ' . $status . ' (was relay only)', 'relay only', $status );
 		} elseif ( null === $before ) {
-			aw_src_log( 'publishers', 'added ' . $host . ' as ' . $status, '', $status );
+			sourceweb_src_log( 'publishers', 'added ' . $host . ' as ' . $status, '', $status );
 		} elseif ( (string) ( $before['status'] ?? 'neutral' ) !== $status ) {
-			aw_src_log( 'publishers', $host . ' → ' . $status, (string) ( $before['status'] ?? 'neutral' ), $status );
+			sourceweb_src_log( 'publishers', $host . ' → ' . $status, (string) ( $before['status'] ?? 'neutral' ), $status );
 		}
 		if ( (string) $rec['name'] !== $name ) {
 			if ( null !== $before ) {
-				aw_src_log( 'publishers', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) $rec['name'], $name );
+				sourceweb_src_log( 'publishers', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) $rec['name'], $name );
 			}
 			$rec['name'] = $name;
 		}
 		if ( (string) ( $rec['short'] ?? '' ) !== $short && ( '' !== $short || isset( $rec['short'] ) ) ) {
-			aw_src_log( 'publishers', $host . ' short name → ' . ( '' === $short ? '(none)' : $short ), (string) ( $rec['short'] ?? '' ), $short );
+			sourceweb_src_log( 'publishers', $host . ' short name → ' . ( '' === $short ? '(none)' : $short ), (string) ( $rec['short'] ?? '' ), $short );
 			$rec['short'] = $short;
 		}
 		if ( $shown && $relay !== ! empty( $rec['relay'] ) ) {
@@ -574,11 +574,11 @@ function aw_sourcing_source_save( array $in ) {
 			} else {
 				unset( $rec['relay'] ); // no relay key rather than false: an unchanged record keeps its shape
 			}
-			aw_src_log( 'relay', $host . ': fetch through this site', $relay ? 'off' : 'on', $relay ? 'on' : 'off' );
+			sourceweb_src_log( 'relay', $host . ': fetch through this site', $relay ? 'off' : 'on', $relay ? 'on' : 'off' );
 		}
 		if ( $rec !== $before ) {
 			$pubs[ $host ] = $rec;
-			update_option( AW_PUB_OPTION, $pubs, false );
+			update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 			$changed = true;
 		}
 	} elseif ( 'none' !== $status || $is_pub ) {
@@ -590,19 +590,19 @@ function aw_sourcing_source_save( array $in ) {
 			return array( false, 'nothing' ); // not a publisher, not searched for coverage, no feeds, not relayed: nothing to keep
 		}
 		if ( $shown && $relay !== $is_relay ) {
-			$pubs = aw_relay_switch( $pubs, array( $host ), $relay );
-			update_option( AW_PUB_OPTION, $pubs, false );
+			$pubs = sourceweb_relay_switch( $pubs, array( $host ), $relay );
+			update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 			$changed = true;
 		}
 		if ( $existed && isset( $pubs[ $host ] ) && (string) ( $pubs[ $host ]['name'] ?? '' ) !== $name ) { // its name, as the form showed it
-			aw_src_log( 'relay', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) ( $pubs[ $host ]['name'] ?? '' ), $name );
+			sourceweb_src_log( 'relay', $host . ' name → ' . ( '' === $name ? '(none)' : $name ), (string) ( $pubs[ $host ]['name'] ?? '' ), $name );
 			$pubs[ $host ]['name'] = $name;
-			update_option( AW_PUB_OPTION, $pubs, false );
+			update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 			$changed = true;
 		}
 	}
 	if ( $press !== $was ) {
-		$changed = aw_sourcing_press_change( $press ? array( $host ) : array(), $press ? array() : array( $host ) ) || $changed;
+		$changed = sourceweb_sourcing_press_change( $press ? array( $host ) : array(), $press ? array() : array( $host ) ) || $changed;
 	}
 	return array( $changed, '' );
 }
@@ -611,20 +611,20 @@ function aw_sourcing_source_save( array $in ) {
  * Delete a source (Sources list row action): a publisher record with no items, no feeds and no press search, or a
  * relay-only record with no feeds. Logged with the record as it was.
  *
- * @param array  $pubs aw_publishers (read just before).
+ * @param array  $pubs sourceweb_publishers (read just before).
  * @param string $host Host.
  * @return array The records.
  */
-function aw_sourcing_source_delete( array $pubs, $host ) {
-	$host  = aw_sourcing_norm_host( $host );
-	$stats = aw_sourcing_host_stats()['hosts'][ $host ] ?? array();
+function sourceweb_sourcing_source_delete( array $pubs, $host ) {
+	$host  = sourceweb_sourcing_norm_host( $host );
+	$stats = sourceweb_sourcing_host_stats()['hosts'][ $host ] ?? array();
 	$rec   = $pubs[ $host ] ?? null;
-	if ( null === $rec || ! empty( aw_sourcing_feeds_by_host()[ $host ] ) || in_array( $host, aw_sourcing_press_hosts(), true )
+	if ( null === $rec || ! empty( sourceweb_sourcing_feeds_by_host()[ $host ] ) || in_array( $host, sourceweb_sourcing_press_hosts(), true )
 		|| (int) ( $rec['count'] ?? 0 ) > 0 || (int) ( $stats['f30'] ?? 0 ) > 0 || (int) ( $stats['pub'] ?? 0 ) > 0
 		|| ! in_array( (string) ( $rec['kind'] ?? '' ), array( '', 'relay' ), true ) ) {
 		return $pubs; // only a source with nothing attached is deleted
 	}
 	unset( $pubs[ $host ] );
-	aw_src_log( 'publishers', 'deleted ' . $host, $rec, '' );
+	sourceweb_src_log( 'publishers', 'deleted ' . $host, $rec, '' );
 	return $pubs;
 }

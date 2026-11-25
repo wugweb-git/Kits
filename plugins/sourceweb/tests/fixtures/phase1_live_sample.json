@@ -1,5 +1,5 @@
 {
- "about": "Live shapes on 25 Oct 2026 (read-only wp option get): aw_sources.sources (all 20), aw_publishers (the hosts the sources and the relay touch, plus an icon-only and a blocked record), aw_relay_log (all rows). Used by tests/run.php.",
+ "about": "Live shapes on 25 Oct 2026 (read-only wp option get): aw_sources.sources (all 20), sourceweb_publishers (the hosts the sources and the relay touch, plus an icon-only and a blocked record), sourceweb_relay_log (all rows). Used by tests/run.php.",
  "sources": [
   {
    "id": "gnews-animal-welfare",

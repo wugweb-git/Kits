@@ -3,7 +3,7 @@
  * Tools → Search Insights → SourceWeb keywords: the keyword results report, a core list table, sortable and read-only
  * (owner, 24 Oct 2026; rebuilt as a report on the live keyword list, 17 Nov 2026).
  *
- * One row per keyword RECORD from the live keyword table (aw_sourcing_kw_report): its real roles, whether its Google
+ * One row per keyword RECORD from the live keyword table (sourceweb_sourcing_kw_report): its real roles, whether its Google
  * News search is on, the keyword's own Search Console impressions, the items each brought in over 30 days (News and
  * Library apart) and those published items' pages' Search Console figures. Deduped by record, with no invented roles.
  * Loaded only when the tab is shown.
@@ -16,9 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The keyword results report: per keyword, its roles, search on/off, items fetched and published, and Search Console. */
-class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
+class SourceWeb_Sourcing_SI_Keywords_Table extends WP_List_Table {
 
-	/** @var array From aw_sourcing_kw_report(): {records: bool, rows: array[]}. */
+	/** @var array From sourceweb_sourcing_kw_report(): {records: bool, rows: array[]}. */
 	private $report;
 
 	/** @var array path => figures over 28 days, from Search Insights (empty when it has none yet). */
@@ -31,7 +31,7 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	private $has_roles = false;
 
 	/**
-	 * @param array $report aw_sourcing_kw_report() result.
+	 * @param array $report sourceweb_sourcing_kw_report() result.
 	 */
 	public function __construct( array $report ) {
 		parent::__construct( array( 'singular' => 'keyword', 'plural' => 'keywords', 'ajax' => false ) );
@@ -95,8 +95,8 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	/** The site path Search Insights keys a page by. */
 	private function path( $id ) {
 		$url = (string) get_permalink( $id );
-		if ( function_exists( 'aw_si_path' ) ) {
-			return aw_si_path( $url );
+		if ( function_exists( 'insightweb_si_path' ) ) {
+			return insightweb_si_path( $url );
 		}
 		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
 		return '' === $path ? '/' : $path;
@@ -112,17 +112,17 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 		$ids   = array_values( array_unique( array_map( 'intval', $ids ) ) );
 		$paths = array();
 		// Page data only counts when Search Console last ran within the 28-day window; an older run means the window is empty.
-		$ok             = function_exists( 'aw_si_runs' ) ? (int) ( aw_si_runs()['gsc']['ok'] ?? 0 ) : 0;
-		$this->has_data = function_exists( 'aw_sourcing_si_available' ) && aw_sourcing_si_available() && $ok > time() - 28 * DAY_IN_SECONDS;
+		$ok             = function_exists( 'insightweb_si_runs' ) ? (int) ( insightweb_si_runs()['gsc']['ok'] ?? 0 ) : 0;
+		$this->has_data = function_exists( 'sourceweb_sourcing_si_available' ) && sourceweb_sourcing_si_available() && $ok > time() - 28 * DAY_IN_SECONDS;
 		$this->stale    = $ok && ! $this->has_data;
-		if ( $ids && $this->has_data && function_exists( 'aw_si_page_metrics' ) ) {
+		if ( $ids && $this->has_data && function_exists( 'insightweb_si_page_metrics' ) ) {
 			_prime_post_caches( $ids, false, false ); // one query for every item, not one per permalink
 			foreach ( $ids as $id ) {
 				$paths[ $id ] = $this->path( $id );
 			}
 			$list         = array_values( array_filter( array_unique( $paths ) ) );
-			$this->pages  = aw_si_page_metrics( $list, 28 );
-			$this->pages3 = aw_si_page_metrics( $list, 90 );
+			$this->pages  = insightweb_si_page_metrics( $list, 28 );
+			$this->pages3 = insightweb_si_page_metrics( $list, 90 );
 		}
 		$items = array();
 		foreach ( $rows as $r ) {
@@ -198,11 +198,11 @@ class AW_Sourcing_SI_Keywords_Table extends WP_List_Table {
 	 * @param array $item Row.
 	 */
 	protected function column_roles( $item ) {
-		if ( ! function_exists( 'aw_sourcing_kw_roles' ) ) {
+		if ( ! function_exists( 'sourceweb_sourcing_kw_roles' ) ) {
 			return '—';
 		}
 		$names = array();
-		foreach ( aw_sourcing_kw_roles() as $bit => $label ) {
+		foreach ( sourceweb_sourcing_kw_roles() as $bit => $label ) {
 			if ( (int) $item['roles'] & $bit ) {
 				$names[] = $label;
 			}

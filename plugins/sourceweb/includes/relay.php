@@ -23,27 +23,27 @@ const AW_RELAY_DEFAULT   = array( 'substack.com', 'zoomtventertainment.com', 'aw
 
 /**
  * Allowed hosts (a host or any of its subdomains): once phase 1 is migrated, the hosts whose relay switch is on
- * (aw_publishers[host].relay); before that, and after a rollback, the list of before (aw_relay_hosts_legacy).
+ * (sourceweb_publishers[host].relay); before that, and after a rollback, the list of before (sourceweb_relay_hosts_legacy).
  */
-function aw_relay_hosts() {
-	if ( aw_sourcing_phase() >= 1 ) {
-		return aw_src_relay_hosts_from_pubs( function_exists( 'aw_publishers' ) ? aw_publishers() : array() );
+function sourceweb_relay_hosts() {
+	if ( sourceweb_sourcing_phase() >= 1 ) {
+		return sourceweb_src_relay_hosts_from_pubs( function_exists( 'sourceweb_publishers' ) ? sourceweb_publishers() : array() );
 	}
-	return aw_relay_hosts_legacy();
+	return sourceweb_relay_hosts_legacy();
 }
 
 /** The allow list of before phase 1: aw_sources.relay_hosts when it was saved, else the built-in list. */
-function aw_relay_hosts_legacy() {
-	return aw_src_relay_legacy( function_exists( 'aw_sources_config' ) ? aw_sources_config() : array(), AW_RELAY_DEFAULT );
+function sourceweb_relay_hosts_legacy() {
+	return sourceweb_src_relay_legacy( function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array(), AW_RELAY_DEFAULT );
 }
 
 /** True when the host is on the allow list. */
-function aw_relay_host_allowed( $host ) {
-	return aw_src_host_in( (string) $host, aw_relay_hosts() );
+function sourceweb_relay_host_allowed( $host ) {
+	return sourceweb_src_host_in( (string) $host, sourceweb_relay_hosts() );
 }
 
 /** This site's own addresses (never fetched through the relay). */
-function aw_relay_own_ips() {
+function sourceweb_relay_own_ips() {
 	$own = array_filter( array( (string) ( $_SERVER['SERVER_ADDR'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	$own = array_merge( $own, (array) gethostbynamel( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) );
 	return array_values( array_unique( array_filter( $own ) ) );
@@ -55,7 +55,7 @@ function aw_relay_own_ips() {
  * @param string $host Host name.
  * @return string|WP_Error
  */
-function aw_relay_resolve( $host ) {
+function sourceweb_relay_resolve( $host ) {
 	$host = strtolower( $host );
 	if ( $host === strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) || filter_var( $host, FILTER_VALIDATE_IP ) ) {
 		return new WP_Error( 'aw_relay_host', 'host refused: ' . $host, array( 'status' => 403 ) );
@@ -68,7 +68,7 @@ function aw_relay_resolve( $host ) {
 	if ( ! $ips ) {
 		return new WP_Error( 'aw_relay_dns', 'host does not resolve: ' . $host, array( 'status' => 502 ) );
 	}
-	$own = aw_relay_own_ips();
+	$own = sourceweb_relay_own_ips();
 	foreach ( $ips as $ip ) {
 		if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) || in_array( $ip, $own, true ) ) {
 			return new WP_Error( 'aw_relay_ip', 'address refused for ' . $host . ': ' . $ip, array( 'status' => 403 ) );
@@ -82,9 +82,9 @@ function aw_relay_resolve( $host ) {
  * WordPress's CA bundle plus the intermediates some government sites do not send (data/certs: eGazette's Let's Encrypt
  * YR1/YR2 and Root YR, AWBI's eMudhra chain), the same as the workers use. Cached in the temp folder by content.
  */
-function aw_relay_ca_bundle() {
+function sourceweb_relay_ca_bundle() {
 	$text = (string) file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-	foreach ( (array) glob( AW_SOURCING_DIR . 'data/certs/*.pem' ) as $pem ) {
+	foreach ( (array) glob( SOURCEWEB_SOURCING_DIR . 'data/certs/*.pem' ) as $pem ) {
 		$text .= "\n" . file_get_contents( $pem ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	}
 	$path = trailingslashit( get_temp_dir() ) . 'aw-relay-ca-' . substr( md5( $text ), 0, 12 ) . '.pem';
@@ -95,7 +95,7 @@ function aw_relay_ca_bundle() {
 }
 
 /** Append to the relay log (last 200). */
-function aw_relay_log( $row ) {
+function sourceweb_relay_log( $row ) {
 	$log   = (array) get_option( 'aw_relay_log', array() );
 	$log[] = $row;
 	update_option( 'aw_relay_log', array_slice( $log, -200 ), false );
@@ -107,11 +107,11 @@ function aw_relay_log( $row ) {
  * @param string $url URL.
  * @return array|WP_Error {status, final_url, content_type, body}
  */
-function aw_relay_fetch( $url ) {
+function sourceweb_relay_fetch( $url ) {
 	$start = microtime( true );
 	$first = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
 	$done  = function ( $res, $note = '' ) use ( $url, $first, $start ) {
-		aw_relay_log(
+		sourceweb_relay_log(
 			array(
 				'at'     => time(),
 				'host'   => $first,
@@ -124,7 +124,7 @@ function aw_relay_fetch( $url ) {
 		);
 		return $res;
 	};
-	if ( ! aw_relay_host_allowed( $first ) ) {
+	if ( ! sourceweb_relay_host_allowed( $first ) ) {
 		return $done( new WP_Error( 'aw_relay_not_allowed', 'host not on the relay list: ' . $first, array( 'status' => 403 ) ) );
 	}
 	$key = 'aw_relay_rl_' . md5( $first );
@@ -140,10 +140,10 @@ function aw_relay_fetch( $url ) {
 		if ( ! in_array( $parts['scheme'] ?? '', array( 'http', 'https' ), true ) || ! $host ) {
 			return $done( new WP_Error( 'aw_relay_url', 'only http and https addresses', array( 'status' => 400 ) ) );
 		}
-		if ( ! aw_relay_host_allowed( $host ) ) {
+		if ( ! sourceweb_relay_host_allowed( $host ) ) {
 			return $done( new WP_Error( 'aw_relay_not_allowed', 'redirect to a host not on the relay list: ' . $host, array( 'status' => 403 ) ) );
 		}
-		$ip = aw_relay_resolve( $host );
+		$ip = sourceweb_relay_resolve( $host );
 		if ( is_wp_error( $ip ) ) {
 			return $done( $ip );
 		}
@@ -161,7 +161,7 @@ function aw_relay_fetch( $url ) {
 				'user-agent'          => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36',
 				'headers'             => array( 'Accept' => 'text/html,application/xhtml+xml,application/xml,application/rss+xml;q=0.9,*/*;q=0.8' ),
 				'reject_unsafe_urls'  => true,
-				'sslcertificates'     => aw_relay_ca_bundle(),
+				'sslcertificates'     => sourceweb_relay_ca_bundle(),
 			)
 		);
 		remove_action( 'http_api_curl', $pin );
@@ -199,7 +199,7 @@ add_action(
 				'permission_callback' => fn() => current_user_can( 'edit_posts' ) && did_action( 'application_password_did_authenticate' ),
 				'args'                => array( 'url' => array( 'required' => true, 'type' => 'string' ) ),
 				'callback'            => function ( WP_REST_Request $req ) {
-					$res = aw_relay_fetch( esc_url_raw( (string) $req->get_param( 'url' ), array( 'http', 'https' ) ) );
+					$res = sourceweb_relay_fetch( esc_url_raw( (string) $req->get_param( 'url' ), array( 'http', 'https' ) ) );
 					if ( is_wp_error( $res ) ) {
 						return $res;
 					}
@@ -215,7 +215,7 @@ add_action(
 add_filter(
 	'kits_sourcing_policy',
 	function ( $data ) {
-		$data['relay_hosts'] = aw_relay_hosts();
+		$data['relay_hosts'] = sourceweb_relay_hosts();
 		return $data;
 	}
 );
@@ -231,7 +231,7 @@ add_filter(
 
 /*
  * The old Relay form posted to options.php (aw_sources[_aw_tab] = relay). A copy still open in another browser tab must
- * not replace the option: aw_sources_sanitize() hands such a post here, and it changes nothing (as for the old
+ * not replace the option: sourceweb_sources_sanitize() hands such a post here, and it changes nothing (as for the old
  * Categories and Sections forms, sourcing-terms-admin.php).
  */
 add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
@@ -241,7 +241,7 @@ add_filter( 'aw_sources_save_relay', fn( $c ) => $c );
  *
  * @return array[] { at, when, host, path, status, ok, bytes, size, ms, note }
  */
-function aw_relay_log_rows(): array {
+function sourceweb_relay_log_rows(): array {
 	$rows = array();
 	foreach ( array_slice( array_reverse( (array) get_option( 'aw_relay_log', array() ) ), 0, 200 ) as $r ) {
 		$rows[] = array(
@@ -264,21 +264,21 @@ function aw_relay_log_rows(): array {
  * Turn the relay switch on or off for hosts (Sources list and edit form). On for a host without a record adds one
  * with kind=relay (not a publisher); off removes such a record again. Each change is logged with old → new.
  *
- * @param array    $pubs  aw_publishers (read just before).
+ * @param array    $pubs  sourceweb_publishers (read just before).
  * @param string[] $hosts Hosts.
  * @param bool     $on    On or off.
  * @return array The records.
  */
-function aw_relay_switch( array $pubs, array $hosts, $on ) {
+function sourceweb_relay_switch( array $pubs, array $hosts, $on ) {
 	$names = array();
-	foreach ( (array) ( aw_sources_config()['sources'] ?? array() ) as $s ) {
+	foreach ( (array) ( sourceweb_sources_config()['sources'] ?? array() ) as $s ) {
 		if ( is_array( $s ) ) {
-			$names[ aw_src_source_host( $s ) ] = $names[ aw_src_source_host( $s ) ] ?? (string) ( $s['name'] ?? '' );
+			$names[ sourceweb_src_source_host( $s ) ] = $names[ sourceweb_src_source_host( $s ) ] ?? (string) ( $s['name'] ?? '' );
 		}
 	}
 	$log = array();
 	foreach ( $hosts as $h ) {
-		$h = aw_sourcing_norm_host( $h );
+		$h = sourceweb_sourcing_norm_host( $h );
 		if ( '' === $h ) {
 			continue;
 		}
@@ -301,9 +301,9 @@ function aw_relay_switch( array $pubs, array $hosts, $on ) {
 			}
 		}
 	}
-	aw_src_log_many( $log );
-	if ( $log && function_exists( 'aw_sources_sync_soon' ) ) {
-		aw_sources_sync_soon(); // the relay allow list and sources_v2 are copied into the workers' sources.yaml (aw_publishers is not hooked: ingest writes it all the time)
+	sourceweb_src_log_many( $log );
+	if ( $log && function_exists( 'sourceweb_sources_sync_soon' ) ) {
+		sourceweb_sources_sync_soon(); // the relay allow list and sources_v2 are copied into the workers' sources.yaml (sourceweb_publishers is not hooked: ingest writes it all the time)
 	}
 	return $pubs;
 }

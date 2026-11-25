@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** True when $after differs from $before in letter case only. */
-function aw_news_title_case_only( $before, $after ) {
+function sourceweb_news_title_case_only( $before, $after ) {
 	return '' !== $after && mb_strlen( $before ) === mb_strlen( $after ) && mb_strtolower( $before ) === mb_strtolower( $after );
 }
 
@@ -35,7 +35,7 @@ function aw_news_title_case_only( $before, $after ) {
  * @param string $publisher Publisher or source name.
  * @return string
  */
-function aw_news_title_tail( $title, $publisher = '' ) {
+function sourceweb_news_title_tail( $title, $publisher = '' ) {
 	$t   = trim( (string) $title );
 	$key = static fn( $s ) => preg_replace( '/[^a-z0-9]/', '', preg_replace( '/^the(?=.{4})/', '', strtolower( (string) $s ) ) );
 	$pub = $key( $publisher );
@@ -84,7 +84,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$after = $strip; // the owner approved removing the lead-in
 				} elseif ( $after === $before ) {
 					$why = 'no change';
-				} elseif ( ! aw_news_title_case_only( $before, $after ) ) {
+				} elseif ( ! sourceweb_news_title_case_only( $before, $after ) ) {
 					$why = 'more than letter case';
 				}
 				if ( $why ) {

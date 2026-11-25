@@ -274,15 +274,15 @@ function insightweb_check_service_status( string $name ): array {
 
 	if ( isset( $src_map[ $name ] ) ) {
 		$src = $src_map[ $name ];
-		if ( function_exists( 'aw_si_rising_blocked' ) && aw_si_rising_blocked( $src ) ) {
+		if ( function_exists( 'insightweb_si_rising_blocked' ) && insightweb_si_rising_blocked( $src ) ) {
 			return array(
 				'status' => 'quota_exceeded',
 				'label'  => __( 'Quota Exceeded', 'insightweb' ),
 				'detail' => __( 'Upstream service reported rate limit or quota exceeded (HTTP 429).', 'insightweb' ),
 			);
 		}
-		if ( function_exists( 'aw_si_run_problem' ) ) {
-			$err = aw_si_run_problem( $src );
+		if ( function_exists( 'insightweb_si_run_problem' ) ) {
+			$err = insightweb_si_run_problem( $src );
 			if ( $err ) {
 				if ( preg_match( '/(401|403|unauthorized|forbidden|invalid key|bad token)/i', $err ) ) {
 					return array(

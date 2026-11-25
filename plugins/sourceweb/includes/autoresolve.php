@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/autoresolve-model.php';
 
 /** Whether queued values are decided by the rules. */
-function aw_ar_on() {
+function sourceweb_ar_on() {
 	return (bool) apply_filters( 'aw_enrich_autoresolve', '0' !== (string) get_option( 'aw_enrich_autoresolve', '1' ) );
 }
 
@@ -32,7 +32,7 @@ function aw_ar_on() {
  * @param array $sources Row sources.
  * @return array{own_site: bool, site_stem: string, site_host: string}
  */
-function aw_ar_context( $lid, $sources ) {
+function sourceweb_ar_context( $lid, $sources ) {
 	$own = false;
 	foreach ( (array) $sources as $s ) {
 		if ( is_array( $s ) && ( 'website' === ( $s['key'] ?? '' ) || false !== stripos( (string) ( $s['name'] ?? '' ), 'own website' ) ) ) {
@@ -51,7 +51,7 @@ function aw_ar_context( $lid, $sources ) {
  * @param string $number Number.
  * @return bool
  */
-function aw_ar_phone_elsewhere( $lid, $number ) {
+function sourceweb_ar_phone_elsewhere( $lid, $number ) {
 	global $wpdb;
 	$last = substr( preg_replace( '/\D+/', '', (string) $number ), -10 );
 	if ( strlen( $last ) < 10 ) {
@@ -69,8 +69,8 @@ function aw_ar_phone_elsewhere( $lid, $number ) {
  * @param bool $apply Write the decision (false: only say what it would be).
  * @return array{act: string, why: string}|null null when the row is not waiting.
  */
-function aw_ar_row( $id, $apply = true ) {
-	$r = aw_enrich_row( (int) $id );
+function sourceweb_ar_row( $id, $apply = true ) {
+	$r = sourceweb_enrich_row( (int) $id );
 	if ( ! $r || 'pending' !== $r['status'] || ! is_string( $r['value'] ) ) {
 		return null;
 	}
@@ -78,20 +78,20 @@ function aw_ar_row( $id, $apply = true ) {
 	if ( 0 === strpos( (string) $r['note'], 'From an imported list' ) ) {
 		return array( 'act' => 'leave', 'why' => 'an imported list is always checked by a person' );
 	}
-	if ( aw_enrich_is_protected( $lid ) ) {
+	if ( sourceweb_enrich_is_protected( $lid ) ) {
 		return array( 'act' => 'leave', 'why' => 'a claimed or verified listing is never changed automatically' );
 	}
-	if ( 'phone' === $r['field'] && aw_ar_phone_elsewhere( $lid, $r['value'] ) ) {
+	if ( 'phone' === $r['field'] && sourceweb_ar_phone_elsewhere( $lid, $r['value'] ) ) {
 		return array( 'act' => 'leave', 'why' => 'the number is on another listing (a name clash?)' );
 	}
-	$d = aw_ar_decide( $r['field'], (string) aw_enrich_current( $lid, $r['field'] ), $r['value'], (string) $r['confidence'], aw_ar_context( $lid, $r['sources'] ), aw_ar_rules() );
+	$d = sourceweb_ar_decide( $r['field'], (string) sourceweb_enrich_current( $lid, $r['field'] ), $r['value'], (string) $r['confidence'], sourceweb_ar_context( $lid, $r['sources'] ), sourceweb_ar_rules() );
 	if ( ! $apply || 'leave' === $d['act'] ) {
 		return $d;
 	}
 	if ( 'reject' === $d['act'] ) {
-		aw_enrich_set_status( (int) $id, 'rejected', 'Auto: ' . $d['why'] );
-	} elseif ( aw_enrich_approve( (int) $id ) ) {
-		aw_enrich_set_status( (int) $id, 'approved', 'Auto: ' . $d['why'] );
+		sourceweb_enrich_set_status( (int) $id, 'rejected', 'Auto: ' . $d['why'] );
+	} elseif ( sourceweb_enrich_approve( (int) $id ) ) {
+		sourceweb_enrich_set_status( (int) $id, 'approved', 'Auto: ' . $d['why'] );
 	} else {
 		return array( 'act' => 'leave', 'why' => 'could not be written' );
 	}
@@ -102,8 +102,8 @@ function aw_ar_row( $id, $apply = true ) {
 add_filter(
 	'aw_enrich_queued_decision',
 	function ( $act, $id ) {
-		if ( $id && aw_ar_on() ) {
-			$d = aw_ar_row( (int) $id );
+		if ( $id && sourceweb_ar_on() ) {
+			$d = sourceweb_ar_row( (int) $id );
 			return $d ? $d['act'] : '';
 		}
 		return $act;
@@ -118,22 +118,22 @@ add_filter(
  * @param int $lid Listing.
  * @return bool Whether the PIN field was filled.
  */
-function aw_ar_fill_pin( $lid ) {
+function sourceweb_ar_fill_pin( $lid ) {
 	static $busy = false;
 	$lid = (int) $lid;
-	if ( $busy || 'aw_listing' !== get_post_type( $lid ) || aw_enrich_is_protected( $lid ) || '' !== trim( (string) get_post_meta( $lid, 'aw_pincode', true ) ) ) {
+	if ( $busy || 'aw_listing' !== get_post_type( $lid ) || sourceweb_enrich_is_protected( $lid ) || '' !== trim( (string) get_post_meta( $lid, 'aw_pincode', true ) ) ) {
 		return false;
 	}
-	$pin = aw_ar_pin( (string) get_post_meta( $lid, 'aw_address', true ) );
+	$pin = sourceweb_ar_pin( (string) get_post_meta( $lid, 'aw_address', true ) );
 	if ( '' === $pin ) {
 		return false;
 	}
 	$src  = array( array( 'key' => 'listing', 'name' => 'The listing\'s own address', 'url' => '', 'fetched_at' => wp_date( 'Y-m-d' ) ) );
 	$busy = true; // writing the PIN calls aw_enrich_changed again
-	$ok   = aw_enrich_write( $lid, 'pincode', $pin, 'apply', $src );
+	$ok   = sourceweb_enrich_write( $lid, 'pincode', $pin, 'apply', $src );
 	$busy = false;
 	if ( $ok ) {
-		aw_enrich_add_row( $lid, 'pincode', $pin, '', $src, 'high', 'auto-applied', 'autoresolve', 'From the listing\'s own address' );
+		sourceweb_enrich_add_row( $lid, 'pincode', $pin, '', $src, 'high', 'auto-applied', 'autoresolve', 'From the listing\'s own address' );
 	}
 	return (bool) $ok;
 }
@@ -142,8 +142,8 @@ function aw_ar_fill_pin( $lid ) {
 add_action(
 	'aw_enrich_changed',
 	function ( $lid ) {
-		if ( aw_ar_on() ) {
-			aw_ar_fill_pin( (int) $lid );
+		if ( sourceweb_ar_on() ) {
+			sourceweb_ar_fill_pin( (int) $lid );
 		}
 	}
 );
@@ -154,16 +154,16 @@ add_action(
  * @param WP_REST_Request $req dry (default true), limit (default 300, at most 1000).
  * @return WP_REST_Response
  */
-function aw_ar_rest_sweep( WP_REST_Request $req ) {
+function sourceweb_ar_rest_sweep( WP_REST_Request $req ) {
 	global $wpdb;
 	$dry   = ! ( false === $req->get_param( 'dry' ) || 'false' === $req->get_param( 'dry' ) || '0' === (string) $req->get_param( 'dry' ) );
 	$limit = max( 1, min( 1000, (int) ( $req->get_param( 'limit' ) ? $req->get_param( 'limit' ) : 300 ) ) );
-	$t     = aw_enrich_table();
+	$t     = sourceweb_enrich_table();
 	$ids   = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE status = 'pending' AND field NOT IN ( 'closed', 'merge_into', 'place' ) ORDER BY id ASC LIMIT %d", $t, $limit ) ) ); // phpcs:ignore WordPress.DB
 	$count = array();
 	$seen  = array();
 	foreach ( $ids as $id ) {
-		$d = aw_ar_row( $id, ! $dry );
+		$d = sourceweb_ar_row( $id, ! $dry );
 		if ( ! $d ) {
 			continue;
 		}
@@ -175,7 +175,7 @@ function aw_ar_rest_sweep( WP_REST_Request $req ) {
 	$pins = 0;
 	if ( ! $dry ) {
 		foreach ( (array) $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_address' LEFT JOIN {$wpdb->postmeta} c ON c.post_id = p.ID AND c.meta_key = 'aw_pincode' WHERE p.post_type = 'aw_listing' AND p.post_status IN ( 'publish', 'pending' ) AND ( c.meta_value IS NULL OR c.meta_value = '' ) AND a.meta_value REGEXP '[1-9][0-9]{2} ?[0-9]{3}' LIMIT 500" ) as $lid ) { // phpcs:ignore WordPress.DB
-			$pins += aw_ar_fill_pin( (int) $lid ) ? 1 : 0;
+			$pins += sourceweb_ar_fill_pin( (int) $lid ) ? 1 : 0;
 		}
 	}
 	ksort( $count );
@@ -201,7 +201,7 @@ add_action(
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => fn() => current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' ),
-				'callback'            => 'aw_ar_rest_sweep',
+				'callback'            => 'sourceweb_ar_rest_sweep',
 				'args'                => array(
 					'dry'   => array( 'required' => false ),
 					'limit' => array( 'type' => 'integer', 'required' => false ),
@@ -221,12 +221,12 @@ const AW_AR_RULES_OPTION = 'aw_enrich_autoresolve_rules';
  *
  * @return array[] each array{id, field, cond, action, on}
  */
-function aw_ar_rules() {
+function sourceweb_ar_rules() {
 	$saved = get_option( AW_AR_RULES_OPTION );
 	if ( ! is_array( $saved ) ) {
-		return aw_ar_default_rules();
+		return sourceweb_ar_default_rules();
 	}
-	$conds = aw_ar_conditions();
+	$conds = sourceweb_ar_conditions();
 	$out   = array();
 	foreach ( $saved as $r ) {
 		if ( is_array( $r ) && isset( $r['id'], AW_AR_FIELDS[ $r['field'] ?? '' ], AW_AR_ACTIONS[ $r['action'] ?? '' ], $conds[ $r['cond'] ?? '' ] ) && in_array( $r['field'], $conds[ $r['cond'] ]['fields'], true ) ) {
@@ -242,10 +242,10 @@ function aw_ar_rules() {
  * @param array[] $rows What to store.
  * @param string  $what What changed, in words.
  */
-function aw_ar_rules_store( array $rows, $what ) {
-	$old = aw_ar_rules();
+function sourceweb_ar_rules_store( array $rows, $what ) {
+	$old = sourceweb_ar_rules();
 	update_option( AW_AR_RULES_OPTION, array_values( $rows ), false );
-	aw_src_log( 'enrich', $what, $old, array_values( $rows ) );
+	sourceweb_src_log( 'enrich', $what, $old, array_values( $rows ) );
 }
 
 /**
@@ -255,16 +255,16 @@ function aw_ar_rules_store( array $rows, $what ) {
  * @param string $original The id being edited, '' to add.
  * @return array{0: string, 1: string} done (added | edited | none | error) and a message.
  */
-function aw_ar_rule_save( array $in, $original = '' ) {
+function sourceweb_ar_rule_save( array $in, $original = '' ) {
 	$field  = (string) ( $in['field'] ?? '' );
 	$cond   = (string) ( $in['cond'] ?? '' );
 	$action = (string) ( $in['action'] ?? '' );
-	$conds  = aw_ar_conditions();
+	$conds  = sourceweb_ar_conditions();
 	if ( ! isset( AW_AR_FIELDS[ $field ] ) || ! isset( $conds[ $cond ] ) || ! in_array( $field, $conds[ $cond ]['fields'], true ) || ! isset( AW_AR_ACTIONS[ $action ] ) ) {
 		return array( 'error', __( 'Choose a field, a condition that fits it, and what to do.', 'sourceweb' ) );
 	}
 	$row  = array( 'id' => '', 'field' => $field, 'cond' => $cond, 'action' => $action, 'on' => ! empty( $in['on'] ) );
-	$rows = aw_ar_rules();
+	$rows = sourceweb_ar_rules();
 	$ids  = wp_list_pluck( $rows, 'id' );
 	if ( '' !== $original && in_array( $original, $ids, true ) ) {
 		foreach ( $rows as $i => $r ) {
@@ -276,7 +276,7 @@ function aw_ar_rule_save( array $in, $original = '' ) {
 				$rows[ $i ] = $row;
 			}
 		}
-		aw_ar_rules_store( $rows, 'Review-queue rule ' . $original . ' edited' );
+		sourceweb_ar_rules_store( $rows, 'Review-queue rule ' . $original . ' edited' );
 		return array( 'edited', __( 'Rule saved.', 'sourceweb' ) );
 	}
 	$base = $field . '-' . $cond;
@@ -293,7 +293,7 @@ function aw_ar_rule_save( array $in, $original = '' ) {
 		}
 	}
 	array_splice( $rows, $at, 0, array( $row ) );
-	aw_ar_rules_store( $rows, 'Review-queue rule ' . $id . ' added' );
+	sourceweb_ar_rules_store( $rows, 'Review-queue rule ' . $id . ' added' );
 	return array( 'added', __( 'Rule added.', 'sourceweb' ) );
 }
 
@@ -303,13 +303,13 @@ function aw_ar_rule_save( array $in, $original = '' ) {
  * @param string $id Rule id.
  * @return array{0: string, 1: string}
  */
-function aw_ar_rule_delete( $id ) {
-	$rows = aw_ar_rules();
+function sourceweb_ar_rule_delete( $id ) {
+	$rows = sourceweb_ar_rules();
 	$keep = array_values( array_filter( $rows, fn( $r ) => $r['id'] !== $id ) );
 	if ( count( $keep ) === count( $rows ) ) {
 		return array( 'none', __( 'No such rule.', 'sourceweb' ) );
 	}
-	aw_ar_rules_store( $keep, 'Review-queue rule ' . $id . ' deleted' );
+	sourceweb_ar_rules_store( $keep, 'Review-queue rule ' . $id . ' deleted' );
 	return array( 'deleted', __( 'Rule deleted.', 'sourceweb' ) );
 }
 
@@ -320,8 +320,8 @@ function aw_ar_rule_delete( $id ) {
  * @param string $dir up | down.
  * @return array{0: string, 1: string}
  */
-function aw_ar_rule_move( $id, $dir ) {
-	$rows = aw_ar_rules();
+function sourceweb_ar_rule_move( $id, $dir ) {
+	$rows = sourceweb_ar_rules();
 	$pos  = array_search( $id, wp_list_pluck( $rows, 'id' ), true );
 	if ( false === $pos ) {
 		return array( 'none', __( 'No such rule.', 'sourceweb' ) );
@@ -332,7 +332,7 @@ function aw_ar_rule_move( $id, $dir ) {
 			$tmp          = $rows[ $pos ];
 			$rows[ $pos ] = $rows[ $j ];
 			$rows[ $j ]   = $tmp;
-			aw_ar_rules_store( $rows, 'Review-queue rule ' . $id . ' moved ' . ( 'up' === $dir ? 'earlier' : 'later' ) );
+			sourceweb_ar_rules_store( $rows, 'Review-queue rule ' . $id . ' moved ' . ( 'up' === $dir ? 'earlier' : 'later' ) );
 			return array( 'moved', __( 'Rule moved.', 'sourceweb' ) );
 		}
 	}
@@ -340,10 +340,10 @@ function aw_ar_rule_move( $id, $dir ) {
 }
 
 /** The built-in rules again (the edits are dropped; the log keeps them). */
-function aw_ar_rules_reset() {
-	$old = aw_ar_rules();
+function sourceweb_ar_rules_reset() {
+	$old = sourceweb_ar_rules();
 	delete_option( AW_AR_RULES_OPTION );
-	aw_src_log( 'enrich', 'Review-queue rules reset to the built-in ones', $old, aw_ar_default_rules() );
+	sourceweb_src_log( 'enrich', 'Review-queue rules reset to the built-in ones', $old, sourceweb_ar_default_rules() );
 	return array( 'reset', __( 'The built-in rules are back.', 'sourceweb' ) );
 }
 
@@ -353,8 +353,8 @@ function aw_ar_rules_reset() {
  * @param array $r Row.
  * @return array
  */
-function aw_ar_rule_view( array $r ) {
-	$conds = aw_ar_conditions();
+function sourceweb_ar_rule_view( array $r ) {
+	$conds = sourceweb_ar_conditions();
 	return array(
 		'id'           => $r['id'],
 		'field'        => $r['field'],
@@ -373,7 +373,7 @@ function aw_ar_rule_view( array $r ) {
  * @param array{0: string, 1: string} $res done and message.
  * @return WP_REST_Response|WP_Error
  */
-function aw_ar_answer( array $res ) {
+function sourceweb_ar_answer( array $res ) {
 	if ( 'error' === $res[0] ) {
 		return new WP_Error( 'aw_ar_error', $res[1], array( 'status' => 400 ) );
 	}
@@ -383,19 +383,19 @@ function aw_ar_answer( array $res ) {
 add_action(
 	'rest_api_init',
 	function () {
-		$cap  = fn() => current_user_can( defined( 'AW_SRC_CAP' ) ? AW_SRC_CAP : 'manage_options' );
+		$cap  = fn() => current_user_can( defined( 'SOURCEWEB_SRC_CAP' ) ? SOURCEWEB_SRC_CAP : 'manage_options' );
 		$id   = array( 'type' => 'string', 'required' => true );
 		$read = function ( WP_REST_Request $req ) {
-			$rows = aw_ar_rules();
+			$rows = sourceweb_ar_rules();
 			$cur  = (string) $req->get_param( 'id' );
 			$one  = null;
 			foreach ( $rows as $r ) {
 				if ( $r['id'] === $cur ) {
-					$one = aw_ar_rule_view( $r );
+					$one = sourceweb_ar_rule_view( $r );
 				}
 			}
 			$conds = array();
-			foreach ( aw_ar_conditions() as $k => $c ) {
+			foreach ( sourceweb_ar_conditions() as $k => $c ) {
 				$conds[] = array( 'value' => $k, 'label' => $c['label'], 'fields' => $c['fields'] );
 			}
 			$fields  = array();
@@ -408,9 +408,9 @@ add_action(
 			}
 			return rest_ensure_response(
 				array(
-					'on'         => aw_ar_on(),
+					'on'         => sourceweb_ar_on(),
 					'stored'     => is_array( get_option( AW_AR_RULES_OPTION ) ),
-					'rows'       => array_map( 'aw_ar_rule_view', $rows ),
+					'rows'       => array_map( 'sourceweb_ar_rule_view', $rows ),
 					'one'        => $one,
 					'fields'     => $fields,
 					'conditions' => $conds,
@@ -425,12 +425,12 @@ add_action(
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => $cap,
-				'callback'            => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_rule_save( (array) $q->get_json_params(), (string) $q->get_param( 'original' ) ) ),
+				'callback'            => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_rule_save( (array) $q->get_json_params(), (string) $q->get_param( 'original' ) ) ),
 				'args'                => array( 'original' => array( 'type' => 'string', 'default' => '' ) ),
 			)
 		);
-		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_rule_delete( (string) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );
-		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/move', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_rule_move( (string) $q['id'], 'up' === $q['dir'] ? 'up' : 'down' ) ), 'args' => array( 'id' => $id, 'dir' => array( 'type' => 'string', 'default' => 'down' ) ) ) );
+		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_rule_delete( (string) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );
+		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/move', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_rule_move( (string) $q['id'], 'up' === $q['dir'] ? 'up' : 'down' ) ), 'args' => array( 'id' => $id, 'dir' => array( 'type' => 'string', 'default' => 'down' ) ) ) );
 		register_rest_route(
 			'sourceweb/v1',
 			'/rules/field/reset',
@@ -438,7 +438,7 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => $cap,
 				'callback'            => function ( WP_REST_Request $q ) {
-					$res = aw_rules_field_reset( sanitize_key( (string) $q['field'] ) );
+					$res = sourceweb_rules_field_reset( sanitize_key( (string) $q['field'] ) );
 					$txt = array(
 						/* translators: %s: field name. */
 						'field_reset' => __( 'Field rule %s is the built-in rule again.', 'sourceweb' ),
@@ -447,12 +447,12 @@ add_action(
 						/* translators: %s: field name. */
 						'nosuch'      => __( 'No such field: %s.', 'sourceweb' ),
 					);
-					return aw_ar_answer( array( 'nosuch' === $res[0] ? 'error' : $res[0], sprintf( $txt[ $res[0] ], $res[1] ) ) );
+					return sourceweb_ar_answer( array( 'nosuch' === $res[0] ? 'error' : $res[0], sprintf( $txt[ $res[0] ], $res[1] ) ) );
 				},
 				'args'                => array( 'field' => $id ),
 			)
 		);
-		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/reset', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn() => aw_ar_answer( aw_ar_rules_reset() ) ) );
+		register_rest_route( 'sourceweb/v1', '/rules/autoresolve/reset', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn() => sourceweb_ar_answer( sourceweb_ar_rules_reset() ) ) );
 		register_rest_route(
 			'sourceweb/v1',
 			'/rules/autoresolve/switch',
@@ -462,8 +462,8 @@ add_action(
 				'callback'            => function ( WP_REST_Request $q ) {
 					$on = ! empty( $q->get_json_params()['on'] );
 					update_option( 'aw_enrich_autoresolve', $on ? '1' : '0', false );
-					aw_src_log( 'enrich', 'Review-queue rules switched ' . ( $on ? 'on' : 'off' ), $on ? '0' : '1', $on ? '1' : '0' );
-					return aw_ar_answer( array( 'switched', $on ? __( 'The rules decide waiting values again.', 'sourceweb' ) : __( 'The rules are off: every value waits for a person.', 'sourceweb' ) ) );
+					sourceweb_src_log( 'enrich', 'Review-queue rules switched ' . ( $on ? 'on' : 'off' ), $on ? '0' : '1', $on ? '1' : '0' );
+					return sourceweb_ar_answer( array( 'switched', $on ? __( 'The rules decide waiting values again.', 'sourceweb' ) : __( 'The rules are off: every value waits for a person.', 'sourceweb' ) ) );
 				},
 			)
 		);
@@ -482,9 +482,9 @@ const AW_AR_NOT_EDITABLE = array( 'logo', 'photos', 'hours', 'services', 'place'
  * @param string $value New text.
  * @return array{0: string, 1: string} edited, none or error, and a message.
  */
-function aw_ar_value_edit( $id, $value ) {
+function sourceweb_ar_value_edit( $id, $value ) {
 	global $wpdb;
-	$r = aw_enrich_row( (int) $id );
+	$r = sourceweb_enrich_row( (int) $id );
 	if ( ! $r || 'pending' !== $r['status'] || ! is_string( $r['value'] ) || in_array( $r['field'], AW_AR_NOT_EDITABLE, true ) ) {
 		return array( 'error', __( 'Only a waiting text value can be edited.', 'sourceweb' ) );
 	}
@@ -505,8 +505,8 @@ function aw_ar_value_edit( $id, $value ) {
 	if ( $new === $r['value'] ) {
 		return array( 'none', __( 'Nothing changed.', 'sourceweb' ) );
 	}
-	$wpdb->update( aw_enrich_table(), array( 'value' => wp_json_encode( $new ), 'note' => substr( trim( (string) $r['note'] . ' Edited by a person.' ), 0, 190 ) ), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	aw_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $f . ', listing ' . (int) $r['listing_id'] . ') edited', $r['value'], $new );
+	$wpdb->update( sourceweb_enrich_table(), array( 'value' => wp_json_encode( $new ), 'note' => substr( trim( (string) $r['note'] . ' Edited by a person.' ), 0, 190 ) ), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	sourceweb_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $f . ', listing ' . (int) $r['listing_id'] . ') edited', $r['value'], $new );
 	return array( 'edited', __( 'Value saved. Apply it when it is right.', 'sourceweb' ) );
 }
 
@@ -516,14 +516,14 @@ function aw_ar_value_edit( $id, $value ) {
  * @param int $id Row ID.
  * @return array{0: string, 1: string} deleted or error, and a message.
  */
-function aw_ar_value_delete( $id ) {
+function sourceweb_ar_value_delete( $id ) {
 	global $wpdb;
-	$r = aw_enrich_row( (int) $id );
+	$r = sourceweb_enrich_row( (int) $id );
 	if ( ! $r || 'pending' !== $r['status'] ) {
 		return array( 'error', __( 'Only a waiting value can be deleted.', 'sourceweb' ) );
 	}
-	$wpdb->delete( aw_enrich_table(), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	aw_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $r['field'] . ', listing ' . (int) $r['listing_id'] . ') deleted', $r['value'], '' );
+	$wpdb->delete( sourceweb_enrich_table(), array( 'id' => (int) $id, 'status' => 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	sourceweb_src_log( 'enrich', 'Waiting value ' . (int) $id . ' (' . $r['field'] . ', listing ' . (int) $r['listing_id'] . ') deleted', $r['value'], '' );
 	return array( 'deleted', __( 'Value deleted.', 'sourceweb' ) );
 }
 
@@ -532,7 +532,7 @@ add_action(
 	function () {
 		$cap = fn() => current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' );
 		$id  = array( 'type' => 'integer', 'required' => true );
-		register_rest_route( 'sourceweb/v1', '/enrichment/edit', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_value_edit( (int) $q['id'], (string) $q->get_param( 'value' ) ) ), 'args' => array( 'id' => $id ) ) );
-		register_rest_route( 'sourceweb/v1', '/enrichment/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => aw_ar_answer( aw_ar_value_delete( (int) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );
+		register_rest_route( 'sourceweb/v1', '/enrichment/edit', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_value_edit( (int) $q['id'], (string) $q->get_param( 'value' ) ) ), 'args' => array( 'id' => $id ) ) );
+		register_rest_route( 'sourceweb/v1', '/enrichment/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_value_delete( (int) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );
 	}
 );

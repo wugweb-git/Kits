@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return int
  */
-function aw_si_sourcing_push_min(): int {
+function insightweb_si_sourcing_push_min(): int {
 	$min = defined( 'AW_SI_SOURCING_PUSH_MIN' ) ? (int) AW_SI_SOURCING_PUSH_MIN : 70;
 	/**
 	 * Filter the minimum score to push a keyword to SourceWeb.
@@ -39,7 +39,7 @@ function aw_si_sourcing_push_min(): int {
  * @param array{score?: int, recommended?: string, impr?: int, clicks?: int, pos?: float|null, topic?: string, roles?: int} $r Candidate facts.
  * @return array<string, mixed>
  */
-function aw_si_push_context( array $r ): array {
+function insightweb_si_push_context( array $r ): array {
 	$roles = (int) ( $r['roles'] ?? 0 );
 	$focus = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
 	$pos   = isset( $r['pos'] ) && null !== $r['pos'] ? (float) $r['pos'] : null;
@@ -70,21 +70,21 @@ function aw_si_push_context( array $r ): array {
  *
  * @return int
  */
-function aw_si_push_sourcing_candidates(): int {
+function insightweb_si_push_sourcing_candidates(): int {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_si_ready() ) {
 		return 0;
 	}
-	$min   = aw_si_sourcing_push_min();
+	$min   = insightweb_si_sourcing_push_min();
 	$focus = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
-	$k     = aw_si_table( 'keywords' );
-	$s     = aw_si_table( 'scores' );
+	$k     = insightweb_si_table( 'keywords' );
+	$s     = insightweb_si_table( 'scores' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names via %i; fixed conditions with placeholders.
 	$rows = $wpdb->get_results( $wpdb->prepare( 'SELECT k.label, k.topic, k.roles, k.impr28, k.clicks28, k.pos28, k.live_pos, s.score, s.recommended FROM %i k JOIN %i s ON s.kw_id = k.id WHERE s.score >= %d AND ( s.recommended LIKE %s OR ( k.roles & %d AND k.pos28 BETWEEN 4 AND 20 ) )', $k, $s, $min, '%sourcing:%', $focus ) );
 	$n    = 0;
 	foreach ( (array) $rows as $r ) {
 		$pos     = null !== $r->pos28 ? (float) $r->pos28 : ( null !== $r->live_pos ? (float) $r->live_pos : null );
-		$context = aw_si_push_context(
+		$context = insightweb_si_push_context(
 			array(
 				'score'       => (int) $r->score,
 				'recommended' => (string) $r->recommended,

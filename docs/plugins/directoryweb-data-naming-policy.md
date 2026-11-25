@@ -14,6 +14,15 @@
 - RankWeb's CSS classes and WP-CLI commands (`aw-`). RankWeb's own text domain, slug and main file are `rankweb`.
 - File names such as `class-aw-*.php` in RankWeb.
 
+## 1b. InsightWeb and SourceWeb (26 Nov 2026)
+
+Same rule as above, for the same reason (WordPress.org wants a project prefix of four or more characters):
+
+- Code names: every `aw_si_*` function is now `insightweb_si_*` (390 functions), every `aw_*` function in SourceWeb is `sourceweb_*` (about 500), classes are `InsightWeb_*` / `SourceWeb_*`, constants `INSIGHTWEB_*` / `SOURCEWEB_*`.
+- Stored names unchanged: options, post and term meta, transients, cron events and hook names (`aw_si_daily`, `aw_workers_watchdog`, ...), capabilities, nonce actions, and the `aw/v1` REST routes. Nothing to migrate.
+- Earlier function names that other plugins still call (Kits Core, RankWeb, DirectoryWeb) live in each plugin's `includes/legacy-aliases.php` (7 in InsightWeb, 16 in SourceWeb). Guard tests `plugins/{insightweb,sourceweb}/tests/no-aw-functions-test.php` fail if any other `aw_` function or `AW_` class comes back.
+- Still short-prefixed by decision: DirectoryWeb's `dw_*` functions (rename pending) and the stored names above.
+
 ## 2. Rule for stored data (now): preserve, do not migrate
 
 These keep their names in 1.x, so no existing site loses or has to move data:

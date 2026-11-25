@@ -11,7 +11,7 @@
  * Transients are not kept (caches). The folder gets an index.php and an .htaccess "Require all denied".
  *
  * The file is written as <name>.part and renamed when complete. If anything fails (folder, gzopen, a read or a write),
- * the part file is removed, one line goes to error_log() and aw_src_uninstall_backup() returns false: uninstall.php
+ * the part file is removed, one line goes to error_log() and sourceweb_src_uninstall_backup() returns false: uninstall.php
  * then deletes nothing.
  *
  * Only uninstall.php and the tests load this file. Kept identical, apart from names, in each Wugweb plugin.
@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! defined( 'AW_SRC_BACKUP_BATCH' ) ) {
-	define( 'AW_SRC_BACKUP_BATCH', 500 );
+if ( ! defined( 'SOURCEWEB_SRC_BACKUP_BATCH' ) ) {
+	define( 'SOURCEWEB_SRC_BACKUP_BATCH', 500 );
 }
 
 /**
@@ -35,7 +35,7 @@ if ( ! defined( 'AW_SRC_BACKUP_BATCH' ) ) {
  *
  * @param array $data The line's fields.
  */
-function aw_src_backup_json( array $data ): string {
+function sourceweb_src_backup_json( array $data ): string {
 	$json = json_encode( $data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 	return is_string( $json ) ? $json . "\n" : '';
 }
@@ -45,7 +45,7 @@ function aw_src_backup_json( array $data ): string {
  *
  * @param mixed $value A stored value.
  */
-function aw_src_backup_cell( $value ): array {
+function sourceweb_src_backup_cell( $value ): array {
 	if ( is_string( $value ) && 1 !== preg_match( '//u', $value ) ) {
 		return array( base64_encode( $value ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- binary-safe copy of a stored value
 	}
@@ -62,8 +62,8 @@ function aw_src_backup_cell( $value ): array {
  * @param array  $options Option names in the file.
  * @param array  $tables  Table names in the file.
  */
-function aw_src_backup_header( string $plugin, string $version, string $site, int $time, array $options, array $tables ): string {
-	return aw_src_backup_json(
+function sourceweb_src_backup_header( string $plugin, string $version, string $site, int $time, array $options, array $tables ): string {
+	return sourceweb_src_backup_json(
 		array(
 			'type'    => 'header',
 			'format'  => 1,
@@ -84,8 +84,8 @@ function aw_src_backup_header( string $plugin, string $version, string $site, in
  * @param string|null $value    Raw option_value.
  * @param string      $autoload Autoload column.
  */
-function aw_src_backup_option_line( string $name, $value, string $autoload ): string {
-	list( $value, $b64 ) = aw_src_backup_cell( $value );
+function sourceweb_src_backup_option_line( string $name, $value, string $autoload ): string {
+	list( $value, $b64 ) = sourceweb_src_backup_cell( $value );
 	$line                = array(
 		'type'     => 'option',
 		'name'     => $name,
@@ -95,7 +95,7 @@ function aw_src_backup_option_line( string $name, $value, string $autoload ): st
 	if ( $b64 ) {
 		$line['b64'] = array( 'value' );
 	}
-	return aw_src_backup_json( $line );
+	return sourceweb_src_backup_json( $line );
 }
 
 /**
@@ -104,10 +104,10 @@ function aw_src_backup_option_line( string $name, $value, string $autoload ): st
  * @param string $table Table name.
  * @param array  $row   Column => raw value.
  */
-function aw_src_backup_row_line( string $table, array $row ): string {
+function sourceweb_src_backup_row_line( string $table, array $row ): string {
 	$b64 = array();
 	foreach ( $row as $col => $value ) {
-		list( $row[ $col ], $was ) = aw_src_backup_cell( $value );
+		list( $row[ $col ], $was ) = sourceweb_src_backup_cell( $value );
 		if ( $was ) {
 			$b64[] = (string) $col;
 		}
@@ -120,7 +120,7 @@ function aw_src_backup_row_line( string $table, array $row ): string {
 	if ( $b64 ) {
 		$line['b64'] = $b64;
 	}
-	return aw_src_backup_json( $line );
+	return sourceweb_src_backup_json( $line );
 }
 
 /**
@@ -132,7 +132,7 @@ function aw_src_backup_row_line( string $table, array $row ): string {
  * @param int      $batch Rows per batch.
  * @return int|false Rows written, or false on a read or write error.
  */
-function aw_src_backup_rows( callable $fetch, callable $write, int $batch = AW_SRC_BACKUP_BATCH ) {
+function sourceweb_src_backup_rows( callable $fetch, callable $write, int $batch = SOURCEWEB_SRC_BACKUP_BATCH ) {
 	$batch  = max( 1, $batch );
 	$offset = 0;
 	$done   = 0;
@@ -157,7 +157,7 @@ function aw_src_backup_rows( callable $fetch, callable $write, int $batch = AW_S
  *
  * @param string $dir The backup folder.
  */
-function aw_src_backup_protect( string $dir ): bool {
+function sourceweb_src_backup_protect( string $dir ): bool {
 	$files = array(
 		'index.php' => "<?php\n// Silence is golden.\n",
 		'.htaccess' => "Require all denied\n<IfModule !mod_authz_core.c>\n\tDeny from all\n</IfModule>\n",
@@ -177,7 +177,7 @@ function aw_src_backup_protect( string $dir ): bool {
  * @param string $plugin Plugin slug.
  * @param int    $time   Unix time.
  */
-function aw_src_backup_name( string $plugin, int $time ): string {
+function sourceweb_src_backup_name( string $plugin, int $time ): string {
 	return $plugin . '-uninstall-' . gmdate( 'Ymd-His', $time ) . '.jsonl.gz';
 }
 
@@ -191,7 +191,7 @@ function aw_src_backup_name( string $plugin, int $time ): string {
  * @param array  $tables   Tables to be dropped, with the site prefix.
  * @return bool True when the whole backup is on disk; false means: delete nothing.
  */
-function aw_src_uninstall_backup( string $plugin, string $main, array $names, array $prefixes, array $tables ): bool {
+function sourceweb_src_uninstall_backup( string $plugin, string $main, array $names, array $prefixes, array $tables ): bool {
 	global $wpdb;
 	$fail = static function ( string $why ) use ( $plugin ): bool {
 		error_log( $plugin . ' uninstall: backup not written (' . $why . '); nothing deleted.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- the one line the owner asked for
@@ -206,7 +206,7 @@ function aw_src_uninstall_backup( string $plugin, string $main, array $names, ar
 	if ( ! wp_mkdir_p( $dir ) || ! is_writable( $dir ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- see the file comment
 		return $fail( 'folder not writable: ' . $dir );
 	}
-	if ( ! aw_src_backup_protect( $dir ) ) {
+	if ( ! sourceweb_src_backup_protect( $dir ) ) {
 		return $fail( 'could not protect ' . $dir );
 	}
 
@@ -245,7 +245,7 @@ function aw_src_uninstall_backup( string $plugin, string $main, array $names, ar
 	}
 
 	$time = time();
-	$file = $dir . '/' . aw_src_backup_name( $plugin, $time );
+	$file = $dir . '/' . sourceweb_src_backup_name( $plugin, $time );
 	$part = $file . '.part';
 	if ( file_exists( $file ) || file_exists( $part ) ) {
 		return $fail( 'file already there: ' . $file );
@@ -267,11 +267,11 @@ function aw_src_uninstall_backup( string $plugin, string $main, array $names, ar
 
 	$data    = get_file_data( $main, array( 'Version' => 'Version' ) );
 	$version = (string) ( $data['Version'] ?? '' );
-	if ( ! $put( aw_src_backup_header( $plugin, $version, (string) home_url( '/' ), $time, array_keys( $opts ), array_keys( $have ) ) ) ) {
+	if ( ! $put( sourceweb_src_backup_header( $plugin, $version, (string) home_url( '/' ), $time, array_keys( $opts ), array_keys( $have ) ) ) ) {
 		return $abort( 'write failed' );
 	}
 	foreach ( $opts as $name => $row ) {
-		if ( ! $put( aw_src_backup_option_line( (string) $name, $row['option_value'], (string) $row['autoload'] ) ) ) {
+		if ( ! $put( sourceweb_src_backup_option_line( (string) $name, $row['option_value'], (string) $row['autoload'] ) ) ) {
 			return $abort( 'write failed' );
 		}
 	}
@@ -285,8 +285,8 @@ function aw_src_uninstall_backup( string $plugin, string $main, array $names, ar
 			}
 			return '' === $wpdb->last_error && is_array( $rows ) ? $rows : null;
 		};
-		$write = static fn( array $row ): bool => $put( aw_src_backup_row_line( $table, $row ) );
-		if ( false === aw_src_backup_rows( $fetch, $write ) ) {
+		$write = static fn( array $row ): bool => $put( sourceweb_src_backup_row_line( $table, $row ) );
+		if ( false === sourceweb_src_backup_rows( $fetch, $write ) ) {
 			return $abort( 'table ' . $table . ' could not be copied' );
 		}
 	}

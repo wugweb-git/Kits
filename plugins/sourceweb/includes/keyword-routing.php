@@ -7,7 +7,7 @@
  * - recommended_type → Section (post type): news → aw_news, library → aw_legal, campaign → aw_campaign.
  * - topic → Category: the category whose slug or name matches the topic (if any), which adds the Category-word role.
  * - Role: Include (keeps the item and, in English, runs its own Google News search); search on.
- * - Two auto-approve rules, BOTH OFF by default (option aw_sourcing_push_autoapprove), the owner toggles them:
+ * - Two auto-approve rules, BOTH OFF by default (option sourceweb_sourcing_push_autoapprove), the owner toggles them:
  *     • score ≥ N and recommended_type in a chosen set;
  *     • proven focus keyphrases (the site already ranks) with rank ≤ N.
  *   Off, every candidate waits for a person in Keywords → Suggestions (the default: never auto-insert).
@@ -29,7 +29,7 @@ const AW_SOURCING_PUSH_SECTION = array(
 );
 
 /** The auto-approve settings, both rules off by default. */
-function aw_sourcing_push_autoapprove() {
+function sourceweb_sourcing_push_autoapprove() {
 	$o = (array) get_option( AW_SOURCING_PUSH_AUTOAPPROVE, array() );
 	return array(
 		'on_score'    => ! empty( $o['on_score'] ),
@@ -46,8 +46,8 @@ function aw_sourcing_push_autoapprove() {
  * @param array $in Posted settings.
  * @return array The stored settings.
  */
-function aw_sourcing_push_autoapprove_save( array $in ) {
-	$old = aw_sourcing_push_autoapprove();
+function sourceweb_sourcing_push_autoapprove_save( array $in ) {
+	$old = sourceweb_sourcing_push_autoapprove();
 	$new = array(
 		'on_score'    => ! empty( $in['on_score'] ),
 		'min_score'   => max( 0, (int) ( $in['min_score'] ?? $old['min_score'] ) ),
@@ -57,7 +57,7 @@ function aw_sourcing_push_autoapprove_save( array $in ) {
 	);
 	if ( $new !== $old ) {
 		update_option( AW_SOURCING_PUSH_AUTOAPPROVE, $new, false );
-		aw_src_log( 'keywords', 'Pushed-keyword auto-approve: ' . ( $new['on_score'] ? 'score ≥ ' . $new['min_score'] . ' (' . ( $new['types'] ? implode( ', ', $new['types'] ) : 'any type' ) . ')' : 'score rule off' ) . '; ' . ( $new['on_proven'] ? 'proven rank ≤ ' . $new['proven_rank'] : 'proven rule off' ) );
+		sourceweb_src_log( 'keywords', 'Pushed-keyword auto-approve: ' . ( $new['on_score'] ? 'score ≥ ' . $new['min_score'] . ' (' . ( $new['types'] ? implode( ', ', $new['types'] ) : 'any type' ) . ')' : 'score rule off' ) . '; ' . ( $new['on_proven'] ? 'proven rank ≤ ' . $new['proven_rank'] : 'proven rule off' ) );
 	}
 	return $new;
 }
@@ -68,8 +68,8 @@ function aw_sourcing_push_autoapprove_save( array $in ) {
  * @param array $cand A pushed candidate (recommended_type, topic, ...).
  * @return array{roles:int, sections:string[], categories:string[], search_on:int}
  */
-function aw_sourcing_push_routing( array $cand ) {
-	$roles    = defined( 'AW_KW_ROLE_INCLUDE' ) ? AW_KW_ROLE_INCLUDE : 1;
+function sourceweb_sourcing_push_routing( array $cand ) {
+	$roles    = defined( 'SOURCEWEB_KW_ROLE_INCLUDE' ) ? SOURCEWEB_KW_ROLE_INCLUDE : 1;
 	$sections = array();
 	$type     = (string) ( $cand['recommended_type'] ?? '' );
 	if ( isset( AW_SOURCING_PUSH_SECTION[ $type ] ) && post_type_exists( AW_SOURCING_PUSH_SECTION[ $type ] ) ) {
@@ -84,7 +84,7 @@ function aw_sourcing_push_routing( array $cand ) {
 		}
 		if ( $term instanceof WP_Term ) {
 			$categories[] = $term->slug;
-			$roles       |= ( defined( 'AW_KW_ROLE_CATEGORY' ) ? AW_KW_ROLE_CATEGORY : 1024 );
+			$roles       |= ( defined( 'SOURCEWEB_KW_ROLE_CATEGORY' ) ? SOURCEWEB_KW_ROLE_CATEGORY : 1024 );
 		}
 	}
 	return array(
@@ -103,18 +103,18 @@ function aw_sourcing_push_routing( array $cand ) {
  * @param string $how  'owner' (a person approved) or 'auto' (an auto-approve rule).
  * @return bool|WP_Error Whether a keyword was added or changed.
  */
-function aw_sourcing_push_route( $q, $how = 'owner' ) {
-	if ( ! function_exists( 'aw_sourcing_kw_add' ) || ! function_exists( 'aw_si_norm' ) ) {
+function sourceweb_sourcing_push_route( $q, $how = 'owner' ) {
+	if ( ! function_exists( 'sourceweb_sourcing_kw_add' ) || ! function_exists( 'insightweb_si_norm' ) ) {
 		return new WP_Error( 'aw_push_not_ready', 'Keywords are not set up yet.' );
 	}
-	$norm  = aw_si_norm( (string) $q );
-	$store = aw_sourcing_pushed_raw();
+	$norm  = insightweb_si_norm( (string) $q );
+	$store = sourceweb_sourcing_pushed_raw();
 	$cand  = $store[ $norm ] ?? null;
 	if ( ! is_array( $cand ) ) {
 		return new WP_Error( 'aw_push_missing', 'No such pushed keyword.' );
 	}
-	$route = aw_sourcing_push_routing( $cand );
-	$r     = aw_sourcing_kw_add(
+	$route = sourceweb_sourcing_push_routing( $cand );
+	$r     = sourceweb_sourcing_kw_add(
 		(string) $cand['q'],
 		array(
 			'roles'     => $route['roles'],
@@ -128,8 +128,8 @@ function aw_sourcing_push_route( $q, $how = 'owner' ) {
 	}
 	$where = $route['sections'] ? implode( ', ', $route['sections'] ) : 'no section';
 	$cats  = $route['categories'] ? ', category ' . implode( ', ', $route['categories'] ) : '';
-	aw_src_log( 'keywords', $cand['q'] . ': approved from Search Insights (' . ( 'auto' === $how ? 'auto-approved' : 'owner' ) . '), routed to ' . $where . $cats, '', 'Include' );
-	aw_sourcing_pushed_forget( $norm );
+	sourceweb_src_log( 'keywords', $cand['q'] . ': approved from Search Insights (' . ( 'auto' === $how ? 'auto-approved' : 'owner' ) . '), routed to ' . $where . $cats, '', 'Include' );
+	sourceweb_sourcing_pushed_forget( $norm );
 	return true;
 }
 
@@ -137,10 +137,10 @@ function aw_sourcing_push_route( $q, $how = 'owner' ) {
  * Whether a candidate qualifies for an auto-approve rule ('' when it does not).
  *
  * @param array $cand     A pushed candidate.
- * @param array $settings aw_sourcing_push_autoapprove().
+ * @param array $settings sourceweb_sourcing_push_autoapprove().
  * @return string Why it qualifies ('' = not).
  */
-function aw_sourcing_push_autoapprove_match( array $cand, array $settings ) {
+function sourceweb_sourcing_push_autoapprove_match( array $cand, array $settings ) {
 	if ( $settings['on_proven'] && ! empty( $cand['focus_keyphrase'] ) && (int) ( $cand['rank'] ?? 0 ) >= 1 && (int) $cand['rank'] <= $settings['proven_rank'] ) {
 		return 'proven';
 	}
@@ -158,17 +158,17 @@ function aw_sourcing_push_autoapprove_match( array $cand, array $settings ) {
  *
  * @return int How many were auto-routed.
  */
-function aw_sourcing_push_autoroute() {
-	$settings = aw_sourcing_push_autoapprove();
+function sourceweb_sourcing_push_autoroute() {
+	$settings = sourceweb_sourcing_push_autoapprove();
 	if ( ! $settings['on_score'] && ! $settings['on_proven'] ) {
 		return 0; // the default: never auto-insert
 	}
 	$n = 0;
-	foreach ( aw_sourcing_pushed_raw() as $cand ) {
-		if ( ! is_array( $cand ) || '' === aw_sourcing_push_autoapprove_match( $cand, $settings ) ) {
+	foreach ( sourceweb_sourcing_pushed_raw() as $cand ) {
+		if ( ! is_array( $cand ) || '' === sourceweb_sourcing_push_autoapprove_match( $cand, $settings ) ) {
 			continue;
 		}
-		$r = aw_sourcing_push_route( (string) $cand['q'], 'auto' );
+		$r = sourceweb_sourcing_push_route( (string) $cand['q'], 'auto' );
 		if ( true === $r ) {
 			++$n;
 		}
@@ -176,4 +176,4 @@ function aw_sourcing_push_autoroute() {
 	return $n;
 }
 // Right after a push lands, auto-route the ones an owner rule allows (off by default).
-add_action( 'sourceweb_push_keywords', fn() => aw_sourcing_push_autoroute(), 20, 0 );
+add_action( 'sourceweb_push_keywords', fn() => sourceweb_sourcing_push_autoroute(), 20, 0 );

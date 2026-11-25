@@ -23,12 +23,12 @@ const AW_GLIVE_COST = 0.025;
 add_filter(
 	'aw_listing_sources',
 	function ( $out, $id ) {
-		if ( ! function_exists( 'aw_enrich_listing_source_keys' ) ) {
+		if ( ! function_exists( 'sourceweb_enrich_listing_source_keys' ) ) {
 			return $out;
 		}
 		$have = wp_list_pluck( $out, 0 );
-		$regs = aw_enrich_sources();
-		foreach ( aw_enrich_listing_source_keys( $id ) as $key => $src ) {
+		$regs = sourceweb_enrich_sources();
+		foreach ( sourceweb_enrich_listing_source_keys( $id ) as $key => $src ) {
 			$on = ! empty( $src['fetched_at'] ) ? wp_date( 'Y-m-d', strtotime( $src['fetched_at'] ) ) : '';
 			if ( 'google_places' === $key ) {
 				if ( ! in_array( 'gmaps', $have, true ) ) {
@@ -59,10 +59,10 @@ add_filter(
 /* ---------- Extras under the details ---------- */
 
 /** Live Google block slot, activity signals and news mentions. */
-function aw_enrich_profile_extras( $id ) {
+function sourceweb_enrich_profile_extras( $id ) {
 	$m   = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	$out = '';
-	if ( $m( 'aw_place_id' ) && aw_glive_ready() ) {
+	if ( $m( 'aw_place_id' ) && sourceweb_glive_ready() ) {
 		$api  = esc_url( rest_url( 'aw/v1/listing-live?id=' . (int) $id ) );
 		$out .= '<div class="aw-glive-slot" data-src="' . $api . '"></div>'
 			. '<script>(function(){var s=document.currentScript.previousElementSibling;if(!s||!window.fetch)return;fetch(s.dataset.src).then(function(r){return r.json()}).then(function(d){if(d&&d.html){s.insertAdjacentHTML("afterend",d.html);}s.remove();}).catch(function(){s.remove();});})();</script>';
@@ -78,7 +78,7 @@ function aw_enrich_profile_extras( $id ) {
 		}
 		$sig[] = '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . kits_icon( 'instagram' ) . '</span>On Instagram</dt><dd>' . esc_html( implode( ' · ', $bits ) ) . ( $m( 'aw_last_post' ) ? ( $bits ? ' · ' : '' ) . 'latest post ' . kits_date( $m( 'aw_last_post' ) ) : '' ) . '</dd></div>';
 	}
-	$news = aw_enrich_news_mentions( $id );
+	$news = sourceweb_enrich_news_mentions( $id );
 	if ( $news ) {
 		$li = '';
 		foreach ( $news as $nid ) {
@@ -93,7 +93,7 @@ function aw_enrich_profile_extras( $id ) {
 }
 
 /** Up to three News items that name the organisation (exact name, names of 2+ words and 10+ letters only), cached a day. */
-function aw_enrich_news_mentions( $id ) {
+function sourceweb_enrich_news_mentions( $id ) {
 	$name = trim( html_entity_decode( get_the_title( $id ), ENT_QUOTES ) );
 	if ( str_word_count( $name ) < 2 || strlen( $name ) < 10 ) {
 		return array();
@@ -110,9 +110,9 @@ function aw_enrich_news_mentions( $id ) {
 /* ---------- Live Google block ---------- */
 
 /** A key is saved and this month's cap leaves room for one more request. */
-function aw_glive_ready() {
+function sourceweb_glive_ready() {
 	$cap = (float) get_option( 'aw_enrich_live_cap', '20' );
-	return '' !== (string) get_option( 'aw_enrich_google_key', '' ) && aw_enrich_spent( 'live' ) + AW_GLIVE_COST <= $cap && ! empty( aw_enrich_sources_on()['google_places'] );
+	return '' !== (string) get_option( 'aw_enrich_google_key', '' ) && sourceweb_enrich_spent( 'live' ) + AW_GLIVE_COST <= $cap && ! empty( sourceweb_enrich_sources_on()['google_places'] );
 }
 
 add_action(
@@ -129,8 +129,8 @@ add_action(
 					if ( 'aw_listing' !== get_post_type( $id ) || 'publish' !== get_post_status( $id ) ) {
 						return array( 'html' => '' );
 					}
-					$data = aw_glive_data( (string) get_post_meta( $id, 'aw_place_id', true ) );
-					return array( 'html' => $data ? aw_glive_html( $data ) : '' );
+					$data = sourceweb_glive_data( (string) get_post_meta( $id, 'aw_place_id', true ) );
+					return array( 'html' => $data ? sourceweb_glive_html( $data ) : '' );
 				},
 			)
 		);
@@ -138,7 +138,7 @@ add_action(
 );
 
 /** Place details for the live block: from the 24-hour cache, else Google (not for crawlers, not past the cap). */
-function aw_glive_data( $place_id ) {
+function sourceweb_glive_data( $place_id ) {
 	if ( ! preg_match( '/^[A-Za-z0-9_-]{10,}$/', $place_id ) ) {
 		return null;
 	}
@@ -148,7 +148,7 @@ function aw_glive_data( $place_id ) {
 		return $cached ? $cached : null;
 	}
 	$ua = (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	if ( '' === $ua || preg_match( '/bot|crawl|spider|slurp|preview|fetch|headless|lighthouse/i', $ua ) || ! aw_glive_ready() ) {
+	if ( '' === $ua || preg_match( '/bot|crawl|spider|slurp|preview|fetch|headless|lighthouse/i', $ua ) || ! sourceweb_glive_ready() ) {
 		return null;
 	}
 	$resp = wp_remote_get(
@@ -161,7 +161,7 @@ function aw_glive_data( $place_id ) {
 			),
 		)
 	);
-	aw_enrich_spend( AW_GLIVE_COST, 'live' );
+	sourceweb_enrich_spend( AW_GLIVE_COST, 'live' );
 	if ( is_wp_error( $resp ) || 200 !== wp_remote_retrieve_response_code( $resp ) ) {
 		set_transient( $key, array(), HOUR_IN_SECONDS ); // a failure is not retried for an hour
 		return null;
@@ -187,7 +187,7 @@ function aw_glive_data( $place_id ) {
 }
 
 /** The live block. */
-function aw_glive_html( $d ) {
+function sourceweb_glive_html( $d ) {
 	$rows = array();
 	if ( null !== $d['rating'] && $d['count'] ) {
 		$rows[] = array( 'star', 'Rating', esc_html( number_format_i18n( $d['rating'], 1 ) . ' out of 5 (' . number_format_i18n( $d['count'] ) . ' reviews)' ) );

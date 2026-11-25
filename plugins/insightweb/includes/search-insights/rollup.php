@@ -6,7 +6,7 @@
  *
  * Only period = day rows are rolled up, so sums never add overlapping windows: clicks and impressions are summed,
  * position is the mean weighted by impressions, and value is summed for counts or kept as the month's last value for
- * indexes (aw_si_metric_kind). A month rolled up over several runs is merged into the same monthly row.
+ * indexes (insightweb_si_metric_kind). A month rolled up over several runs is merged into the same monthly row.
  *
  * @package insightweb
  */
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $src    Source.
  * @param string $metric Metric.
  */
-function aw_si_metric_kind( string $src, string $metric ): string {
+function insightweb_si_metric_kind( string $src, string $metric ): string {
 	$last = (array) apply_filters( 'aw_si_last_value_metrics', array( 'trends:index', 'live:position', 'psi:score', 'clarity:scroll', 'bing:in-index' ) );
 	return in_array( $src . ':' . $metric, $last, true ) ? 'last' : 'sum';
 }
@@ -35,18 +35,18 @@ function aw_si_metric_kind( string $src, string $metric ): string {
  * @param int  $limit Daily rows per run.
  * @return array Counts: daily rows rolled up, monthly rows written; or error when nothing was changed.
  */
-function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
+function insightweb_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 	global $wpdb;
-	$o      = aw_si_table( 'obs' );
+	$o      = insightweb_si_table( 'obs' );
 	$today  = new DateTimeImmutable( 'today', wp_timezone() );
-	$cutoff = $today->modify( '-' . aw_si_keep_days() . ' days' )->format( 'Y-m-d' );
+	$cutoff = $today->modify( '-' . insightweb_si_keep_days() . ' days' )->format( 'Y-m-d' );
 	// Clarity's daily rows stay at least AW_SI_CLARITY_KEEP days (its 28-day views), whatever the setting says.
-	$c_keep = max( aw_si_keep_days(), defined( 'AW_SI_CLARITY_KEEP' ) ? (int) AW_SI_CLARITY_KEEP : 35 );
+	$c_keep = max( insightweb_si_keep_days(), defined( 'AW_SI_CLARITY_KEEP' ) ? (int) AW_SI_CLARITY_KEEP : 35 );
 	$c_cut  = $today->modify( '-' . $c_keep . ' days' )->format( 'Y-m-d' );
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM %i WHERE ( period = 'day' OR ( period = 'week' AND src = 'bing' AND metric <> 'kw-volume' ) ) AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $o, $cutoff, $c_cut, $limit ) );
 	if ( ! $dry ) {
-		aw_si_trends_prune(); // every run, also when no daily rows are due
+		insightweb_si_trends_prune(); // every run, also when no daily rows are due
 	}
 	if ( $dry || ! $rows ) {
 		return array(
@@ -79,7 +79,7 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 			$g['posw']  += (float) $r->pos * (int) $r->impr;
 		}
 		if ( null !== $r->value ) {
-			if ( 'last' === aw_si_metric_kind( $r->src, $r->metric ) ) {
+			if ( 'last' === insightweb_si_metric_kind( $r->src, $r->metric ) ) {
 				if ( $r->d >= $g['last_d'] ) {
 					$g['value']  = (float) $r->value;
 					$g['last_d'] = $r->d;
@@ -114,13 +114,13 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 				$clicks = (int) $clicks + (int) $old->clicks;
 				$posw  += (float) $old->pos * (int) $old->impr;
 			}
-			if ( null !== $old->value && 'sum' === aw_si_metric_kind( $g['src'], $g['metric'] ) ) {
+			if ( null !== $old->value && 'sum' === insightweb_si_metric_kind( $g['src'], $g['metric'] ) ) {
 				$value = (float) $value + (float) $old->value;
 			} elseif ( null === $value ) {
 				$value = null === $old->value ? null : (float) $old->value;
 			}
 		}
-		$ok = aw_si_obs_put(
+		$ok = insightweb_si_obs_put(
 			$g['kw_id'],
 			$g['page'],
 			$g['src'],
@@ -160,9 +160,9 @@ function aw_si_rollup( bool $dry = false, int $limit = 50000 ): array {
  * Trends 12-month indexes older than 13 months go, except each keyword's latest (the one priority reads): one row a
  * worker run or paste would otherwise stay for ever.
  */
-function aw_si_trends_prune(): int {
+function insightweb_si_trends_prune(): int {
 	global $wpdb;
-	$o   = aw_si_table( 'obs' );
+	$o   = insightweb_si_table( 'obs' );
 	$cut = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-13 months' )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return (int) $wpdb->query( $wpdb->prepare( "DELETE o FROM %i o JOIN (SELECT kw_id, MAX(d) d FROM %i WHERE src = 'trends' AND metric = 'index' AND period = '12m' GROUP BY kw_id) l ON l.kw_id = o.kw_id WHERE o.src = 'trends' AND o.metric = 'index' AND o.period = '12m' AND o.d < l.d AND o.d < %s", $o, $o, $cut ) );

@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $url       Source URL.
  * @return int Post ID or 0.
  */
-function aw_find_by_source( $post_type, $url ) {
+function sourceweb_find_by_source( $post_type, $url ) {
 	if ( ! $url ) {
 		return 0;
 	}
@@ -52,7 +52,7 @@ function aw_find_by_source( $post_type, $url ) {
 		return (int) $ids[0];
 	}
 	// PIB: the same release under another address (PressReleasePage / PressReleaseDetail, reg and lang) is a duplicate.
-	$prid = function_exists( 'aw_src_pib_prid' ) ? aw_src_pib_prid( $url ) : '';
+	$prid = function_exists( 'sourceweb_src_pib_prid' ) ? sourceweb_src_pib_prid( $url ) : '';
 	if ( '' === $prid || 'aw_listing' === $post_type ) {
 		return 0;
 	}
@@ -79,7 +79,7 @@ function aw_find_by_source( $post_type, $url ) {
  * @param string $taxonomy Taxonomy.
  * @param array  $ignored  Collects unknown values, keyed by taxonomy.
  */
-function aw_assign_existing_terms( $post_id, array $values, $taxonomy, array &$ignored ) {
+function sourceweb_assign_existing_terms( $post_id, array $values, $taxonomy, array &$ignored ) {
 	$ids = array();
 	foreach ( $values as $value ) {
 		$value = sanitize_text_field( (string) $value );
@@ -108,7 +108,7 @@ function aw_assign_existing_terms( $post_id, array $values, $taxonomy, array &$i
  * @param string $number Notification number.
  * @return int
  */
-function aw_legal_by_number( $number ) {
+function sourceweb_legal_by_number( $number ) {
 	global $wpdb;
 	$key = strtoupper( preg_replace( '/[^0-9A-Z]/i', '', (string) $number ) );
 	if ( ! preg_match( '/\d/', $key ) || ! preg_match( '/(\d+)/', $key, $d ) ) {
@@ -129,7 +129,7 @@ function aw_legal_by_number( $number ) {
  * @param WP_REST_Request $req Request.
  * @return WP_REST_Response|WP_Error
  */
-function aw_ingest( WP_REST_Request $req ) {
+function sourceweb_ingest( WP_REST_Request $req ) {
 	if ( 'press' === $req->get_param( 'type' ) && function_exists( 'aw_press_ingest' ) ) {
 		return aw_press_ingest( $req ); // coverage of Animal Writes found by the press-discovery worker: drafts to review
 	}
@@ -162,7 +162,7 @@ function aw_ingest( WP_REST_Request $req ) {
 		return new WP_Error( 'aw_no_source', 'source_url is required for cards', array( 'status' => 400 ) );
 	}
 
-	$existing = aw_find_by_source( $type, $source_url );
+	$existing = sourceweb_find_by_source( $type, $source_url );
 	if ( $existing ) {
 		return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
 	}
@@ -170,22 +170,22 @@ function aw_ingest( WP_REST_Request $req ) {
 	// (owner, 16 Oct 2026: the draft lab animal rules came in twice, from the Gazette and from CCSEA).
 	$number = sanitize_text_field( (string) $req->get_param( 'legal_number' ) );
 	if ( 'aw_legal' === $type && '' !== $number ) {
-		$held = aw_legal_by_number( $number );
+		$held = sourceweb_legal_by_number( $number );
 		if ( $held ) {
 			return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $held ), 200 );
 		}
 	}
 	// Same story: the same normalised title dated within a day either side, drafts included (relevance.php).
-	if ( 'aw_listing' !== $type && function_exists( 'aw_find_by_title' ) ) {
-		$existing = aw_find_by_title( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), $title, (string) $req->get_param( 'source_date' ) );
+	if ( 'aw_listing' !== $type && function_exists( 'sourceweb_find_by_title' ) ) {
+		$existing = sourceweb_find_by_title( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), $title, (string) $req->get_param( 'source_date' ) );
 		if ( $existing ) {
 			return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
 		}
 	}
 
 	// Sourcing policy (News → Sourcing): blocked publishers and, when switched on, the keyword filter.
-	if ( function_exists( 'aw_sourcing_gate' ) && function_exists( 'kits_sourced_types' ) && in_array( $type, kits_sourced_types(), true ) ) {
-		$verdict = aw_sourcing_gate( $source_url, (string) $req->get_param( 'source_name' ), (string) $req->get_param( 'feed' ), $title . ' ' . $summary );
+	if ( function_exists( 'sourceweb_sourcing_gate' ) && function_exists( 'kits_sourced_types' ) && in_array( $type, kits_sourced_types(), true ) ) {
+		$verdict = sourceweb_sourcing_gate( $source_url, (string) $req->get_param( 'source_name' ), (string) $req->get_param( 'feed' ), $title . ' ' . $summary );
 		if ( $verdict ) {
 			return new WP_REST_Response( array( 'status' => $verdict ), 200 );
 		}
@@ -193,15 +193,15 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	// Not News (owner, 20 Oct 2026): archive or tag pages, and job vacancies from sources that are not opportunity
 	// sources, are never created; they go to the Rejected log (relevance.php).
-	if ( 'aw_listing' !== $type && function_exists( 'aw_not_news_reason' ) ) {
-		$why = aw_not_news_reason( $title, $source_url, $type );
+	if ( 'aw_listing' !== $type && function_exists( 'sourceweb_not_news_reason' ) ) {
+		$why = sourceweb_not_news_reason( $title, $source_url, $type );
 		if ( $why ) {
-			aw_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ), (string) $req->get_param( 'feed' ) );
+			sourceweb_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ), (string) $req->get_param( 'feed' ) );
 			return new WP_REST_Response( array( 'status' => 'filtered', 'reason' => $why ), 200 );
 		}
 	}
-	if ( 'aw_news' === $type && function_exists( 'aw_news_title_tail' ) ) {
-		$title = aw_news_title_tail( $title, (string) $req->get_param( 'source_name' ) ); // no "| India News", "- Blog" tail
+	if ( 'aw_news' === $type && function_exists( 'sourceweb_news_title_tail' ) ) {
+		$title = sourceweb_news_title_tail( $title, (string) $req->get_param( 'source_name' ) ); // no "| India News", "- Blog" tail
 	}
 
 	// Backfill (owner, 9 Oct 2026): older items for review only — never before the floor, never published or merged here.
@@ -240,8 +240,8 @@ function aw_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_feed', $feed );
 	}
 	update_post_meta( $post_id, 'aw_ingested_at', time() );
-	if ( function_exists( 'aw_relevance_store' ) ) {
-		aw_relevance_store( $post_id, $req->get_param( 'relevance' ) ); // the workers' relevance verdict
+	if ( function_exists( 'sourceweb_relevance_store' ) ) {
+		sourceweb_relevance_store( $post_id, $req->get_param( 'relevance' ) ); // the workers' relevance verdict
 	}
 	if ( $legal_flag ) {
 		update_post_meta( $post_id, 'aw_legal_review_flag', 1 );
@@ -251,7 +251,7 @@ function aw_ingest( WP_REST_Request $req ) {
 	// 24 Oct 2026): without one the paper's raw title would be published as the headline, so a person picks one.
 	$is_research = 'research' === $req->get_param( 'type' );
 	$raw_title   = $is_research && ( '' === trim( (string) $req->get_param( 'slug' ) ) || '' === trim( (string) $req->get_param( 'seo_title' ) )
-		|| aw_exists_norm_title( $title ) === aw_exists_norm_title( (string) $req->get_param( 'study_title' ) ) );
+		|| sourceweb_exists_norm_title( $title ) === sourceweb_exists_norm_title( (string) $req->get_param( 'study_title' ) ) );
 	if ( $raw_title ) {
 		$hold = trim( $hold . '; no headline (the paper\'s own title would be published as the headline)', '; ' );
 	}
@@ -289,11 +289,11 @@ function aw_ingest( WP_REST_Request $req ) {
 		$ignored[] = 'category: ' . $bad;
 	}
 	if ( array_intersect( $cats, $allowed ) ) {
-		aw_assign_existing_terms( $post_id, array_values( array_intersect( $cats, $allowed ) ), 'category', $ignored );
+		sourceweb_assign_existing_terms( $post_id, array_values( array_intersect( $cats, $allowed ) ), 'category', $ignored );
 	}
 	$tags = array_filter( (array) $req->get_param( 'tags' ), 'is_scalar' );
 	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
-		if ( ! function_exists( 'aw_set_issuer' ) || ! aw_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php, Core)
+		if ( ! function_exists( 'sourceweb_set_issuer' ) || ! sourceweb_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php, Core)
 			$ignored[] = 'issuer: ' . sanitize_text_field( (string) $req->get_param( 'source_type' ) );
 		}
 	}
@@ -310,8 +310,8 @@ function aw_ingest( WP_REST_Request $req ) {
 			$tags[] = $kind;
 		}
 		// A court is an issuer (8 Oct 2026): Supreme Court, High Court, National Green Tribunal.
-		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) && function_exists( 'aw_set_issuer' ) ) {
-			aw_set_issuer( $post_id, (string) $req->get_param( 'court' ) );
+		if ( $req->get_param( 'court' ) && ! $req->get_param( 'source_type' ) && function_exists( 'sourceweb_set_issuer' ) ) {
+			sourceweb_set_issuer( $post_id, (string) $req->get_param( 'court' ) );
 		}
 	}
 	// Place: names are matched to the LGD file (places.php); an unknown name is ignored, never added.
@@ -326,7 +326,7 @@ function aw_ingest( WP_REST_Request $req ) {
 
 	if ( 'aw_opportunity' === $type ) {
 		update_post_meta( $post_id, 'aw_org_name', sanitize_text_field( (string) $req->get_param( 'org_name' ) ) );
-		aw_link_opportunity_org( $post_id );
+		sourceweb_link_opportunity_org( $post_id );
 		update_post_meta( $post_id, 'aw_apply_url', $source_url );
 		$deadline = sourceweb_sanitize_meta( (string) $req->get_param( 'deadline' ), 'aw_deadline' );
 		if ( $deadline ) {
@@ -387,7 +387,7 @@ function aw_ingest( WP_REST_Request $req ) {
 		$ignored[] = 'tag: ' . $bad;
 	}
 	if ( array_intersect( $tags, $allowed ) ) {
-		aw_assign_existing_terms( $post_id, array_values( array_intersect( $tags, $allowed ) ), 'post_tag', $ignored );
+		sourceweb_assign_existing_terms( $post_id, array_values( array_intersect( $tags, $allowed ) ), 'post_tag', $ignored );
 	}
 	if ( 'research' === $req->get_param( 'type' ) ) { // always, whatever the section's allowed tags: aw/v1/exists finds papers by it
 		wp_set_object_terms( $post_id, 'research', 'post_tag', true );
@@ -441,7 +441,7 @@ function aw_ingest( WP_REST_Request $req ) {
 		delete_post_meta( $post_id, 'aw_review' );
 		$review = '';
 	} else {
-		$review = function_exists( 'aw_auto_review' ) ? aw_auto_review( $post_id ) : '';
+		$review = function_exists( 'sourceweb_auto_review' ) ? sourceweb_auto_review( $post_id ) : '';
 		if ( '' === $review && '' !== $hold && 'publish' !== get_post_status( $post_id ) ) {
 			// Auto-review skips some types (research is a post): the hold is still the reason a person sees in To review.
 			$review = 'held: ' . $hold;
@@ -470,7 +470,7 @@ add_action(
 			'/ingest',
 			array(
 				'methods'             => 'POST',
-				'callback'            => 'aw_ingest',
+				'callback'            => 'sourceweb_ingest',
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
 				},
@@ -488,7 +488,7 @@ add_action(
  * also returns "studies": [{id, title, first_author, year, url}] for the same items, so the worker can spot the same study
  * under another DOI or URL (preprint and journal versions) before any AI step.
  */
-function aw_exists_norm_url( $url ) {
+function sourceweb_exists_norm_url( $url ) {
 	// Scheme, www. and host ignore case; the path and query keep theirs (two papers can differ only by case there).
 	$u = preg_replace( '~#.*$~', '', trim( (string) $url ) );
 	if ( preg_match( '~^(?:https?://)?(?:www\.)?([^/?]+)(.*)$~i', $u, $m ) ) {
@@ -497,22 +497,22 @@ function aw_exists_norm_url( $url ) {
 	return rtrim( $u, '/' );
 }
 
-function aw_exists_norm_doi( $doi ) {
+function sourceweb_exists_norm_doi( $doi ) {
 	$d = strtolower( trim( rawurldecode( (string) $doi ) ) );
 	return rtrim( preg_replace( '~^(https?://(dx\.)?doi\.org/|doi:)~', '', $d ), '/' );
 }
 
 /** The DOI of a doi.org link, normalised ('' when the URL is not one); the same pattern as sourceweb_research_doi(). */
-function aw_exists_doi_of( $url ) {
-	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $url, $m ) ? aw_exists_norm_doi( $m[1] ) : '';
+function sourceweb_exists_doi_of( $url ) {
+	return preg_match( '~^https?://(?:dx\.)?doi\.org/(10\.[^\s?#]+)~i', (string) $url, $m ) ? sourceweb_exists_norm_doi( $m[1] ) : '';
 }
 
 /** A title compared for "is this the paper's own title": letters and digits only, lower case. */
-function aw_exists_norm_title( $t ) {
+function sourceweb_exists_norm_title( $t ) {
 	return trim( preg_replace( '~[^a-z0-9]+~', ' ', strtolower( html_entity_decode( (string) $t, ENT_QUOTES ) ) ) );
 }
 
-function aw_exists( WP_REST_Request $req ) {
+function sourceweb_exists( WP_REST_Request $req ) {
 	global $wpdb;
 	$list = fn( $v ) => array_slice( array_values( array_filter( array_map( 'strval', array_filter( (array) $v, 'is_scalar' ) ) ) ), 0, 500 );
 	$dois = $list( $req->get_param( 'dois' ) );
@@ -530,22 +530,22 @@ function aw_exists( WP_REST_Request $req ) {
 	$have_doi = array();
 	$have_url = array();
 	foreach ( $held as $src ) {
-		$doi = aw_exists_doi_of( $src );
+		$doi = sourceweb_exists_doi_of( $src );
 		if ( '' !== $doi ) {
 			$have_doi[ $doi ] = true;
 		}
-		$have_url[ aw_exists_norm_url( $src ) ] = true;
+		$have_url[ sourceweb_exists_norm_url( $src ) ] = true;
 	}
-	$found_dois = array_values( array_filter( $dois, fn( $d ) => isset( $have_doi[ aw_exists_norm_doi( $d ) ] ) ) );
+	$found_dois = array_values( array_filter( $dois, fn( $d ) => isset( $have_doi[ sourceweb_exists_norm_doi( $d ) ] ) ) );
 	$found_urls = array_values(
 		array_filter(
 			$urls,
 			function ( $u ) use ( $have_url, $have_doi ) {
-				$doi = aw_exists_doi_of( $u );
+				$doi = sourceweb_exists_doi_of( $u );
 				if ( '' !== $doi && isset( $have_doi[ $doi ] ) ) {
 					return true; // a doi.org link: its DOI decides
 				}
-				return isset( $have_url[ aw_exists_norm_url( $u ) ] );
+				return isset( $have_url[ sourceweb_exists_norm_url( $u ) ] );
 			}
 		)
 	);
@@ -578,7 +578,7 @@ add_action(
 			'/exists',
 			array(
 				'methods'             => 'POST',
-				'callback'            => 'aw_exists',
+				'callback'            => 'sourceweb_exists',
 				'permission_callback' => function () {
 					// Reviewers only, like To review: the index lists draft and pending research (the workers' login is an Editor).
 					return current_user_can( 'edit_others_posts' );
@@ -594,7 +594,7 @@ add_action(
  *
  * @param int $post_id Opportunity.
  */
-function aw_link_opportunity_org( $post_id ) {
+function sourceweb_link_opportunity_org( $post_id ) {
 	$name = trim( (string) get_post_meta( $post_id, 'aw_org_name', true ) );
 	if ( '' === $name || get_post_meta( $post_id, 'aw_organisation', true ) ) {
 		return;
@@ -612,7 +612,7 @@ function aw_link_opportunity_org( $post_id ) {
  * @param int    $http_code HTTP status or error code (e.g. 429, 502, 503).
  * @return array
  */
-function aw_feed_retry_backoff( $feed_url, $http_code = 0 ) {
+function sourceweb_feed_retry_backoff( $feed_url, $http_code = 0 ) {
 	$key   = 'aw_f_backoff_' . substr( md5( (string) $feed_url ), 0, 16 );
 	$state = get_transient( $key );
 	if ( ! is_array( $state ) ) {
@@ -641,7 +641,7 @@ function aw_feed_retry_backoff( $feed_url, $http_code = 0 ) {
  * @param int|null $now      Current timestamp.
  * @return bool
  */
-function aw_feed_is_in_backoff( $feed_url, $now = null ) {
+function sourceweb_feed_is_in_backoff( $feed_url, $now = null ) {
 	$key   = 'aw_f_backoff_' . substr( md5( (string) $feed_url ), 0, 16 );
 	$state = get_transient( $key );
 	if ( ! is_array( $state ) || empty( $state['until'] ) ) {
@@ -657,7 +657,7 @@ function aw_feed_is_in_backoff( $feed_url, $now = null ) {
  * @param string $feed_url Feed URL.
  * @return bool
  */
-function aw_feed_clear_backoff( $feed_url ) {
+function sourceweb_feed_clear_backoff( $feed_url ) {
 	$key = 'aw_f_backoff_' . substr( md5( (string) $feed_url ), 0, 16 );
 	return delete_transient( $key );
 }

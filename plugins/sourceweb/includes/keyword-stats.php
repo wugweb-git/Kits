@@ -6,7 +6,7 @@
  *   searches in AW_SOURCING_EXTRA_SEARCHES. Since 24 Oct 2026 an item keeps the feed that brought it in (aw_feed) and
  *   when it arrived (aw_ingested_at); older items are counted by an Include word in their title or summary and shown
  *   as estimated.
- * - aw_sourcing_keyword_stats(): per search, items fetched (every status: held, merged and backfilled too) and
+ * - sourceweb_sourcing_keyword_stats(): per search, items fetched (every status: held, merged and backfilled too) and
  *   published, News and Library apart. Offered to aw-seo-extras through the filter aw_sourcing_keyword_items, which
  *   shows them in Tools → Search Insights with Search Console figures.
  * - aw-seo-extras is optional: without it nothing here is shown and sourcing works as before.
@@ -22,36 +22,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SOURCING_EXTRA_SEARCHES = array( 'stray dogs' );
 
 /** A search's feed id, as the workers make it. */
-function aw_sourcing_feed_id( $term ) {
+function sourceweb_sourcing_feed_id( $term ) {
 	return 'gnews-kw-' . trim( (string) preg_replace( '/[^a-z0-9]+/', '-', strtolower( (string) $term ) ), '-' );
 }
 
 /** The Google News searches the workers make per run: the English Include words and the fixed ones, once each. */
-function aw_sourcing_searches() {
+function sourceweb_sourcing_searches() {
 	$out = array();
-	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: every keyword's searches (feed ids kept)
-		$by = array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' );
-		foreach ( aw_sourcing_kw_worker_rows() as $r ) {
-			foreach ( aw_kw_searches( $r, $by ) as $x ) {
+	if ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) { // phase 2: every keyword's searches (feed ids kept)
+		$by = array_column( array_filter( (array) sourceweb_sources_config()['sources'], 'is_array' ), null, 'id' );
+		foreach ( sourceweb_sourcing_kw_worker_rows() as $r ) {
+			foreach ( sourceweb_kw_searches( $r, $by ) as $x ) {
 				$out[ $x['feed'] ] = $out[ $x['feed'] ] ?? (string) ( $x['q'] ?? $r['label'] );
 			}
 		}
 		return $out;
 	}
-	foreach ( array_merge( (array) ( aw_relevance()['strong'] ?? array() ), AW_SOURCING_EXTRA_SEARCHES ) as $t ) {
+	foreach ( array_merge( (array) ( sourceweb_relevance()['strong'] ?? array() ), AW_SOURCING_EXTRA_SEARCHES ) as $t ) {
 		$t = trim( (string) $t );
 		if ( '' !== $t && preg_match( '/^[\x20-\x7e]+$/', $t ) ) {
-			$out[ aw_sourcing_feed_id( $t ) ] = $out[ aw_sourcing_feed_id( $t ) ] ?? $t;
+			$out[ sourceweb_sourcing_feed_id( $t ) ] = $out[ sourceweb_sourcing_feed_id( $t ) ] ?? $t;
 		}
 	}
 	return $out; // feed id => term
 }
 
 /** The keyword behind a feed id ('' when the feed is not a keyword search). A word since removed is named from the id. */
-function aw_sourcing_feed_keyword( $feed ) {
+function sourceweb_sourcing_feed_keyword( $feed ) {
 	static $s = null; // once per request (the stats call this for every item)
 	$feed     = (string) $feed;
-	$s        = null === $s ? aw_sourcing_searches() : $s;
+	$s        = null === $s ? sourceweb_sourcing_searches() : $s;
 	if ( isset( $s[ $feed ] ) ) {
 		return $s[ $feed ];
 	}
@@ -67,7 +67,7 @@ function aw_sourcing_feed_keyword( $feed ) {
  * @param int $days Days back.
  * @return array{since:int, rows:array<string, array{term:string, listed:bool, fixed:bool, news:array{fetched:int[], published:int[]}, legal:array{fetched:int[], published:int[]}, estimated:int}>}
  */
-function aw_sourcing_keyword_stats( $days = 30 ) {
+function sourceweb_sourcing_keyword_stats( $days = 30 ) {
 	$days = max( 1, (int) $days );
 	$key  = 'aw_sourcing_kw_stats_' . $days;
 	$hit  = get_transient( $key );
@@ -76,12 +76,12 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 	}
 	global $wpdb;
 	$since    = time() - $days * DAY_IN_SECONDS;
-	$searches = aw_sourcing_searches();
-	$include  = array_map( 'strval', (array) ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists()['strong'] : ( aw_relevance()['strong'] ?? array() ) ) ); // the table from phase 2 (the old list is archived in phase 4)
+	$searches = sourceweb_sourcing_searches();
+	$include  = array_map( 'strval', (array) ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ? sourceweb_sourcing_kw_lists()['strong'] : ( sourceweb_relevance()['strong'] ?? array() ) ) ); // the table from phase 2 (the old list is archived in phase 4)
 	$rows     = array();
 	$row      = function ( $feed, $term ) use ( &$rows, $include ) {
 		if ( ! isset( $rows[ $feed ] ) ) {
-			$fixed          = ! ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) && in_array( $term, AW_SOURCING_EXTRA_SEARCHES, true ) && ! in_array( $term, $include, true );
+			$fixed          = ! ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) && in_array( $term, AW_SOURCING_EXTRA_SEARCHES, true ) && ! in_array( $term, $include, true );
 			$rows[ $feed ] = array(
 				'term'      => $term,
 				'listed'    => in_array( mb_strtolower( $term ), array_map( 'mb_strtolower', $include ), true ),
@@ -116,7 +116,7 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 		$pub  = 'publish' === $it->post_status;
 		$hits = array();
 		if ( null !== $it->ingested ) { // since 24 Oct 2026: exactly the search that brought it in, if any
-			$kw = aw_sourcing_feed_keyword( (string) $it->feed );
+			$kw = sourceweb_sourcing_feed_keyword( (string) $it->feed );
 			if ( '' !== $kw ) {
 				$hits[] = $row( (string) $it->feed, $kw );
 			}
@@ -124,7 +124,7 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 		} else { // older: every search word in its title or summary
 			$hay = mb_strtolower( $it->post_title . ' ' . wp_strip_all_tags( (string) $it->post_excerpt ) );
 			foreach ( $searches as $feed => $term ) {
-				if ( aw_has_term( $hay, $term ) ) {
+				if ( sourceweb_has_term( $hay, $term ) ) {
 					$hits[] = $feed;
 				}
 			}
@@ -145,20 +145,20 @@ function aw_sourcing_keyword_stats( $days = 30 ) {
 }
 
 // For aw-seo-extras (Tools → Search Insights): null there means SourceWeb is off.
-add_filter( 'aw_sourcing_keyword_items', fn( $v, $days = 30 ) => aw_sourcing_keyword_stats( $days ), 10, 2 );
+add_filter( 'aw_sourcing_keyword_items', fn( $v, $days = 30 ) => sourceweb_sourcing_keyword_stats( $days ), 10, 2 );
 
 /**
  * The keyword results report (owner, 17 Nov 2026): one row per keyword RECORD (not per feed), from the LIVE keyword
  * table once phase 2 is migrated — its real roles, whether its Google News search is on, and the keyword's own Search
  * Console impressions — with the items each brought in over $days days. Deduped by the record (so "animal welfare" and
  * "AWBI"/"awbi" are one row each), with no invented roles. Before phase 2 it falls back to one row per Google News
- * search from aw_sourcing_keyword_stats(), with no roles.
+ * search from sourceweb_sourcing_keyword_stats(), with no roles.
  *
  * @param int $days Days back for the item counts.
  * @return array{records: bool, rows: array<int, array{label:string, roles:int, lang:string, is_search:bool, search_on:bool, dismissed:bool, estimated:bool, news_f:int, legal_f:int, news_p:int, legal_p:int, kw_impr:?int, pub_ids:int[]}>}
  */
-function aw_sourcing_kw_report( $days = 30 ) {
-	$stats = (array) ( aw_sourcing_keyword_stats( $days )['rows'] ?? array() );
+function sourceweb_sourcing_kw_report( $days = 30 ) {
+	$stats = (array) ( sourceweb_sourcing_keyword_stats( $days )['rows'] ?? array() );
 	$feed  = array(); // feed id => split counts and the published item ids
 	foreach ( $stats as $id => $st ) {
 		$feed[ $id ] = array(
@@ -170,9 +170,9 @@ function aw_sourcing_kw_report( $days = 30 ) {
 		);
 	}
 	$rows = array();
-	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() && function_exists( 'aw_sourcing_kw_records' ) ) {
-		$en_roles = defined( 'AW_KW_ROLE_INCLUDE' ) ? ( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_SEARCH ) : 0;
-		foreach ( aw_sourcing_kw_records() as $r ) {
+	if ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() && function_exists( 'sourceweb_sourcing_kw_records' ) ) {
+		$en_roles = defined( 'SOURCEWEB_KW_ROLE_INCLUDE' ) ? ( SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_SEARCH ) : 0;
+		foreach ( sourceweb_sourcing_kw_records() as $r ) {
 			$roles = (int) $r['roles'];
 			$lang  = (string) ( $r['lang'] ?? 'en' );
 			$nf    = array();

@@ -51,7 +51,7 @@ function sourceweb_why_key( string $why ): string {
 }
 
 /**
- * One page of To review, from every waiting item (newest first, as aw_review_items() gives them).
+ * One page of To review, from every waiting item (newest first, as sourceweb_review_items() gives them).
  *
  * @param array $items  [ { id, title, type, typeLabel, date, host, why, excerpt, url } ].
  * @param array $q      { type, search, source, why, orderby: date|title|type, order: asc|desc, page }.
@@ -263,7 +263,7 @@ function sourceweb_changed( array $now, array $sent ): array {
 /**
  * The enrichment sources' switches after a Save, or null when nothing changed (nothing is written then).
  *
- * @param array $on   Source => on now (aw_enrich_sources_on()).
+ * @param array $on   Source => on now (sourceweb_enrich_sources_on()).
  * @param array $sent Source => on, as sent (others keep theirs).
  * @return array|null Source => on, every source, in the order of $on.
  */

@@ -56,15 +56,15 @@ function sourceweb_ui_caps(): array {
 		'dashboard'  => AW_REVIEW_CAP,
 		'review'     => AW_REVIEW_CAP,
 		'enrichment' => AW_ENRICH_CAP,
-		'sources'    => AW_SRC_CAP,
-		'keywords'   => AW_SRC_CAP,
-		'rules'      => AW_SRC_CAP,
-		'ai'         => AW_SRC_CAP,
-		'workers'    => AW_SRC_CAP,
-		'rejected'   => AW_SRC_CAP,
-		'relay-log'  => AW_SRC_CAP,
-		'log'        => AW_SRC_CAP,
-		'settings'   => AW_SRC_CAP,
+		'sources'    => SOURCEWEB_SRC_CAP,
+		'keywords'   => SOURCEWEB_SRC_CAP,
+		'rules'      => SOURCEWEB_SRC_CAP,
+		'ai'         => SOURCEWEB_SRC_CAP,
+		'workers'    => SOURCEWEB_SRC_CAP,
+		'rejected'   => SOURCEWEB_SRC_CAP,
+		'relay-log'  => SOURCEWEB_SRC_CAP,
+		'log'        => SOURCEWEB_SRC_CAP,
+		'settings'   => SOURCEWEB_SRC_CAP,
 	);
 }
 
@@ -106,7 +106,7 @@ add_action(
 		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! current_user_can( sourceweb_ui_caps()[ $screen ] ) ) {
 			return;
 		}
-		$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
+		$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( SOURCEWEB_SOURCING_DIR . 'sourceweb.php' ) ? SOURCEWEB_SOURCING_DIR . 'sourceweb.php' : SOURCEWEB_SOURCING_DIR . 'aw-sourcing.php' );
 		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 		// The header's tabs in menu order.
 		$order = array(
@@ -140,7 +140,7 @@ add_action(
 			array(
 				'handle'      => 'sourceweb-admin',
 				'src'         => plugins_url( 'build/index.js', $main_file ),
-				'asset'       => AW_SOURCING_DIR . 'build/index.asset.php',
+				'asset'       => SOURCEWEB_SOURCING_DIR . 'build/index.asset.php',
 				'object'      => 'sourcewebApp',
 				'text_domain' => 'sourceweb',
 				'data'        => array(
@@ -150,7 +150,7 @@ add_action(
 					'icon'    => plugins_url( 'assets/icon.svg', $main_file ),
 					'tabs'    => $tabs,
 					'rest'    => SOURCEWEB_REST,
-					'isAdmin' => current_user_can( AW_SRC_CAP ),
+					'isAdmin' => current_user_can( SOURCEWEB_SRC_CAP ),
 					'feed'    => 'sources' === $screen ? sourceweb_feed_parts() : array(),
 					'extra'   => sourceweb_extra_parts( $screen ),
 				),
@@ -228,7 +228,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 		}
 		echo '</div>';
 	} elseif ( 'review' === $screen ) {
-		$items = function_exists( 'aw_review_items' ) ? aw_review_items() : array();
+		$items = function_exists( 'sourceweb_review_items' ) ? sourceweb_review_items() : array();
 		if ( empty( $items ) ) {
 			echo '<div class="notice notice-info inline" style="margin:20px 0; padding:12px 16px;">';
 			echo '<p><strong>' . esc_html__( 'Review queue is clear.', 'sourceweb' ) . '</strong> ' . esc_html__( 'There are currently no pending or held items waiting for editorial review.', 'sourceweb' ) . '</p>';
@@ -253,7 +253,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 				echo '<tr>';
 				echo '<td><strong><a href="' . esc_url( get_edit_post_link( $p->ID ) ) . '">' . esc_html( $p->post_title ? $p->post_title : '(no title)' ) . '</a></strong></td>';
 				echo '<td>' . esc_html( $p->post_type ) . '</td>';
-				echo '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( function_exists( 'aw_host' ) ? aw_host( $url ) : wp_parse_url( $url, PHP_URL_HOST ) ) . '</a>' : '–' ) . '</td>';
+				echo '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( function_exists( 'sourceweb_host' ) ? sourceweb_host( $url ) : wp_parse_url( $url, PHP_URL_HOST ) ) . '</a>' : '–' ) . '</td>';
 				echo '<td>' . esc_html( substr( $p->post_date, 0, 16 ) ) . '</td>';
 				echo '<td>' . esc_html( $reason ? $reason : 'Pending' ) . '</td>';
 				echo '<td>';
@@ -265,8 +265,8 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 			echo '</tbody></table>';
 		}
 	} elseif ( 'rules' === $screen && current_user_can( 'manage_options' ) ) {
-		$overrides = function_exists( 'aw_rules_domain_overrides' ) ? aw_rules_domain_overrides() : array();
-		$excluded  = function_exists( 'aw_rules_feed_excluded_tags' ) ? aw_rules_feed_excluded_tags() : array();
+		$overrides = function_exists( 'sourceweb_rules_domain_overrides' ) ? sourceweb_rules_domain_overrides() : array();
+		$excluded  = function_exists( 'sourceweb_rules_feed_excluded_tags' ) ? sourceweb_rules_feed_excluded_tags() : array();
 
 		echo '<div style="display:flex; gap:24px; margin-top:20px; flex-wrap:wrap;">';
 
@@ -335,7 +335,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 		$cfg = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array();
 		$num_sources = count( (array) ( $cfg['sources'] ?? array() ) );
 		$num_feeds   = count( (array) ( $cfg['feeds'] ?? array() ) );
-		$review_count = function_exists( 'aw_review_count' ) ? aw_review_count() : 0;
+		$review_count = function_exists( 'sourceweb_review_count' ) ? sourceweb_review_count() : 0;
 
 		echo '<div style="display:flex; gap:16px; margin-top:20px; flex-wrap:wrap;">';
 		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
@@ -358,8 +358,8 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 
 		echo '</div>';
 
-		if ( function_exists( 'aw_sourcing_dash_workers' ) ) {
-			$workers = aw_sourcing_dash_workers();
+		if ( function_exists( 'sourceweb_sourcing_dash_workers' ) ) {
+			$workers = sourceweb_sourcing_dash_workers();
 			if ( ! empty( $workers ) ) {
 				echo '<div class="card" style="margin-top:20px; padding:16px;">';
 				echo '<h2 style="margin-top:0;">' . esc_html__( 'Worker Status', 'sourceweb' ) . '</h2>';
@@ -414,7 +414,7 @@ function sourceweb_extra_parts( string $screen ): array {
 }
 
 /**
- * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: aw_sources_edit_form()'s output, so Add Feed and Update post to the same admin-post handler (kits_sourcing_save_feeds),
+ * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: sourceweb_sources_edit_form()'s output, so Add Feed and Update post to the same admin-post handler (kits_sourcing_save_feeds),
  * with its nonce, and come back to the screen the form was opened from. Empty without a feed in the address.
  *
  * @return array[]
@@ -422,11 +422,11 @@ function sourceweb_extra_parts( string $screen ): array {
 function sourceweb_feed_parts(): array {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which feed to show; nothing is saved here
 	$feed = sanitize_key( wp_unslash( $_GET['feed'] ?? '' ) );
-	if ( '' === $feed || ! function_exists( 'aw_sources_edit_form' ) || ! function_exists( 'kits_shell_html_parts' ) || ! current_user_can( AW_SRC_CAP ) ) {
+	if ( '' === $feed || ! function_exists( 'sourceweb_sources_edit_form' ) || ! function_exists( 'kits_shell_html_parts' ) || ! current_user_can( SOURCEWEB_SRC_CAP ) ) {
 		return array();
 	}
 	ob_start();
-	aw_sources_edit_form( $feed, sanitize_key( wp_unslash( $_GET['type'] ?? '' ) ), aw_sourcing_norm_host( sanitize_text_field( wp_unslash( $_GET['host'] ?? '' ) ) ) );
+	sourceweb_sources_edit_form( $feed, sanitize_key( wp_unslash( $_GET['type'] ?? '' ) ), sourceweb_sourcing_norm_host( sanitize_text_field( wp_unslash( $_GET['host'] ?? '' ) ) ) );
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	$html = (string) ob_get_clean();
 	$html = (string) preg_replace( '#\s*<a [^>]*class="button">Cancel</a>#', '', $html ); // the screen's own Back button does this
@@ -518,12 +518,12 @@ add_action(
 			$now     = get_option( $name, $default );
 			if ( is_bool( $default ) ? (bool) $now !== $default : (string) $now !== (string) $default ) {
 				update_option( $name, $default );
-				aw_src_log( 'settings', $name . ': default restored' );
+				sourceweb_src_log( 'settings', $name . ': default restored' );
 			}
 		}
 		add_settings_error( 'aw_src_reset', 'aw_src_reset', 'Defaults restored.', 'success' );
 		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
-		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( aw_src_tab_path( AW_SRC_SETTINGS_TAB ) ) ) . '#backfill' );
+		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( sourceweb_src_tab_path( AW_SRC_SETTINGS_TAB ) ) ) . '#backfill' );
 		exit;
 	}
 );

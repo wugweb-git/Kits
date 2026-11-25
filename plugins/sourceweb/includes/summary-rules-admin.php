@@ -2,7 +2,7 @@
 /**
  * Summary rules for the workers: GET aw/v1/summary-rules, and the option's save check (the Rules screen saves them
  * through sourceweb/v1).
- * The rules themselves (option aw_summary_rules) and the site's own use of them stay in core (summary-rules.php).
+ * The rules themselves (option sourceweb_summary_rules) and the site's own use of them stay in core (summary-rules.php).
  *
  * @package aw-sourcing
  */
@@ -20,7 +20,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
-				'callback'            => fn() => new WP_REST_Response( aw_summary_rules_payload() ),
+				'callback'            => fn() => new WP_REST_Response( sourceweb_summary_rules_payload() ),
 			)
 		);
 	}
@@ -32,21 +32,21 @@ add_action(
  *
  * @return array
  */
-function aw_summary_rules_payload() {
-	$out = aw_summary_rules();
-	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
-		$out['by_type'] = aw_rules_summary_by_type();
+function sourceweb_summary_rules_payload() {
+	$out = sourceweb_summary_rules();
+	if ( function_exists( 'sourceweb_rules_live' ) && sourceweb_rules_live() ) {
+		$out['by_type'] = sourceweb_rules_summary_by_type();
 	}
 	return $out;
 }
 
 /** Published summaries below their section's minimum (counted once an hour): section => [below, total]. */
-function aw_summary_below_counts() {
+function sourceweb_summary_below_counts() {
 	$c = get_transient( 'aw_summary_below' );
 	if ( is_array( $c ) ) {
 		return $c;
 	}
-	$rules = aw_summary_rules();
+	$rules = sourceweb_summary_rules();
 	$c     = array();
 	$sets  = array(
 		'news'     => array( 'post_type' => 'aw_news' ),
@@ -58,7 +58,7 @@ function aw_summary_below_counts() {
 		$min  = (int) $rules['sections'][ $name ]['min_words'];
 		$below = 0;
 		foreach ( $ids as $id ) {
-			$below += aw_summary_words( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $id, 'raw' ) ) ) ) < $min ? 1 : 0;
+			$below += sourceweb_summary_words( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $id, 'raw' ) ) ) ) < $min ? 1 : 0;
 		}
 		$c[ $name ] = array( $below, count( $ids ) );
 	}
@@ -68,7 +68,7 @@ function aw_summary_below_counts() {
 
 add_action(
 	'admin_init',
-	fn() => register_setting( 'aw_sourcing_summary', AW_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_summary_rules_sanitize', 'show_in_rest' => false ) )
+	fn() => register_setting( 'aw_sourcing_summary', AW_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'sourceweb_summary_rules_sanitize', 'show_in_rest' => false ) )
 );
 
 /**
@@ -77,22 +77,22 @@ add_action(
  * @param mixed $in Posted rules with _aw_tab, or the option as the site saves it.
  * @return mixed
  */
-function aw_summary_rules_sanitize( $in ) {
-	if ( ! aw_sourcing_settings_tab( $in, 'summary' ) ) {
+function sourceweb_summary_rules_sanitize( $in ) {
+	if ( ! sourceweb_sourcing_settings_tab( $in, 'summary' ) ) {
 		return $in;
 	}
-	$old = aw_summary_rules();
+	$old = sourceweb_summary_rules();
 	delete_transient( 'aw_summary_below' );
-	aw_sourcing_settings_saved();
+	sourceweb_sourcing_settings_saved();
 	if ( ! empty( $in['_reset'] ) ) {
-		aw_src_log( 'summary', 'summary rules back to the defaults' );
-		return array(); // no saved rules: the defaults apply (aw_summary_rules)
+		sourceweb_src_log( 'summary', 'summary rules back to the defaults' );
+		return array(); // no saved rules: the defaults apply (sourceweb_summary_rules)
 	}
 	$new     = array( 'sections' => array() );
 	$list    = fn( $v ) => array_values( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( (string) $v ) ) ) ) );
-	$by_type = function_exists( 'aw_rules_live' ) && aw_rules_live();
-	$types   = $by_type ? aw_rules_section_labels() : array();
-	$old_bt  = $by_type ? aw_rules_summary_by_type() : array();
+	$by_type = function_exists( 'sourceweb_rules_live' ) && sourceweb_rules_live();
+	$types   = $by_type ? sourceweb_rules_section_labels() : array();
+	$old_bt  = $by_type ? sourceweb_rules_summary_by_type() : array();
 	foreach ( (array) ( $in['sections'] ?? array() ) as $name => $sec ) {
 		$name = sanitize_key( $name );
 		if ( $by_type ) { // phase 3: by post type; the old sections keep their old name as alias
@@ -143,16 +143,16 @@ function aw_summary_rules_sanitize( $in ) {
 			$new[ $f ] = trim( sanitize_textarea_field( $in[ $f ] ) );
 		}
 	}
-	// What changed, read through aw_summary_rules() as the site will (the defaults fill what is empty).
+	// What changed, read through sourceweb_summary_rules() as the site will (the defaults fill what is empty).
 	add_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek = fn() => $new );
-	$now = aw_summary_rules();
+	$now = sourceweb_summary_rules();
 	remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
 	$what = array();
 	$log  = array(); // each change with its value before and after (phase 3)
 	if ( $by_type ) {
 		$saved_new = $new;
 		add_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek = fn() => $saved_new );
-		$now_bt = aw_rules_summary_by_type();
+		$now_bt = sourceweb_rules_summary_by_type();
 		remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
 		foreach ( $now_bt as $pt => $sec ) {
 			$was = $old_bt[ $pt ] ?? array();
@@ -181,7 +181,7 @@ function aw_summary_rules_sanitize( $in ) {
 		}
 	}
 	foreach ( array( 'general', 'stock_phrases', 'ai_markers', 'searched_terms', 'entities' ) as $f ) {
-		$d = aw_src_diff( str_replace( '_', ' ', ucfirst( $f ) ), (array) $old[ $f ], (array) $now[ $f ] );
+		$d = sourceweb_src_diff( str_replace( '_', ' ', ucfirst( $f ) ), (array) $old[ $f ], (array) $now[ $f ] );
 		if ( $d ) {
 			$what[] = $d;
 			$log[]  = array( 'summary', $d, array_values( array_diff( (array) $old[ $f ], (array) $now[ $f ] ) ), array_values( array_diff( (array) $now[ $f ], (array) $old[ $f ] ) ) );
@@ -194,9 +194,9 @@ function aw_summary_rules_sanitize( $in ) {
 		}
 	}
 	if ( $by_type && $log ) {
-		aw_src_log_many( $log ); // phase 3: each change with its value before and after
+		sourceweb_src_log_many( $log ); // phase 3: each change with its value before and after
 	} elseif ( $what ) { // a save with no change writes nothing, not even a log entry (round-trip rule)
-		aw_src_log( 'summary', implode( ' · ', $what ) );
+		sourceweb_src_log( 'summary', implode( ' · ', $what ) );
 	}
 	return $what ? $new : get_option( AW_SUMMARY_RULES_OPTION ); // no change: the stored rules stay exactly as they are
 }

@@ -5,10 +5,10 @@
  *   GET  dashboard              manage_sourceweb   the tiles, from the background counts (sourceweb-dashboard.php)
  *   POST dashboard/count        manage_sourceweb   ask for a count now (one background event)
  *   GET  review                 manage_sourceweb   one page of To review (type, search, source, why, orderby, order, page)
- *   POST review/decide          manage_sourceweb   publish or reject items (aw_review_apply())
+ *   POST review/decide          manage_sourceweb   publish or reject items (sourceweb_review_apply())
  *   POST review/publish-all     manage_sourceweb   publish every item of a view; the count sent must match
  *   GET  enrichment             manage_sourceweb   one page of Listing details, one row per listing
- *   POST enrichment/decide      manage_sourceweb   approve, reject or undo rows (aw_enrich_approve/reject/undo())
+ *   POST enrichment/decide      manage_sourceweb   approve, reject or undo rows (sourceweb_enrich_approve/reject/undo())
  *   GET  settings               manage_options     the connected services and the groups, with today's values
  *   POST settings/<group>       manage_options     save one group: only the values that changed are written;
  *                                                  reset: true restores the group's defaults (enrichment, social)
@@ -159,10 +159,10 @@ add_action(
 					'search'     => $text,
 				),
 			),
-			'/settings'            => array( 'GET', AW_SRC_CAP, fn() => rest_ensure_response( sourceweb_settings_payload() ), array() ),
+			'/settings'            => array( 'GET', SOURCEWEB_SRC_CAP, fn() => rest_ensure_response( sourceweb_settings_payload() ), array() ),
 			'/settings/google-key' => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_google_key',
 				array(
 					'key' => $text,
@@ -170,7 +170,7 @@ add_action(
 			),
 			'/settings/(?P<group>workers|enrichment|social)' => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_save_group',
 				array(
 					'values' => array(
@@ -208,7 +208,7 @@ add_action(
  * @param array  $args More query arguments.
  */
 function sourceweb_admin_url( string $tab = '', array $args = array() ): string {
-	return current_user_can( AW_SRC_CAP ) ? admin_url( aw_src_tab_path( $tab, $args ) ) : '';
+	return current_user_can( SOURCEWEB_SRC_CAP ) ? admin_url( sourceweb_src_tab_path( $tab, $args ) ) : '';
 }
 
 /**
@@ -222,7 +222,7 @@ function sourceweb_dashboard_payload(): array {
 		sourceweb_dashboard_request(); // The first view after a deploy: count in the background.
 		$c = array();
 	}
-	$admin = current_user_can( AW_SRC_CAP );
+	$admin = current_user_can( SOURCEWEB_SRC_CAP );
 	$num   = fn( $n ) => number_format_i18n( (int) $n );
 	$day   = fn( $t ) => $t ? wp_date( 'j M, g:i a', (int) $t ) : '';
 	$tiles = array();
@@ -447,7 +447,7 @@ function sourceweb_review_row( WP_Post $p ): array {
 		'why'       => sourceweb_why_text( (string) get_post_meta( $p->ID, 'aw_review', true ), $p->post_status ),
 		'excerpt'   => wp_trim_words( wp_strip_all_tags( $p->post_excerpt ? $p->post_excerpt : $p->post_content ), 24 ),
 		'editUrl'   => (string) get_edit_post_link( $p->ID, 'raw' ),
-		// A social post needs its staff summary before it goes live (aw_review_apply() skips it).
+		// A social post needs its staff summary before it goes live (sourceweb_review_apply() skips it).
 		'noPublish' => 'aw_social' === $p->post_type && '' === trim( (string) get_post_meta( $p->ID, 'aw_social_summary', true ) ),
 	);
 }
@@ -458,7 +458,7 @@ function sourceweb_review_row( WP_Post $p ): array {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_review( WP_REST_Request $request ) {
-	$items = array_map( 'sourceweb_review_row', aw_review_items() );
+	$items = array_map( 'sourceweb_review_row', sourceweb_review_items() );
 	$out   = sourceweb_review_list( $items, $request->get_params(), AW_REVIEW_TYPES );
 	return rest_ensure_response( $out );
 }
@@ -471,7 +471,7 @@ function sourceweb_rest_review( WP_REST_Request $request ) {
 function sourceweb_rest_review_decide( WP_REST_Request $request ) {
 	$action = (string) $request['action'];
 	$ids    = array_filter( array_map( 'absint', (array) $request['ids'] ) );
-	$n      = $ids ? aw_review_apply( $ids, $action ) : 0;
+	$n      = $ids ? sourceweb_review_apply( $ids, $action ) : 0;
 	return rest_ensure_response(
 		array(
 			'done'    => $n,
@@ -491,7 +491,7 @@ function sourceweb_rest_review_decide( WP_REST_Request $request ) {
  */
 function sourceweb_rest_review_publish_all( WP_REST_Request $request ) {
 	$type  = sanitize_key( (string) $request['type'] );
-	$items = aw_review_items( isset( AW_REVIEW_TYPES[ $type ] ) ? $type : '' );
+	$items = sourceweb_review_items( isset( AW_REVIEW_TYPES[ $type ] ) ? $type : '' );
 	if ( count( $items ) !== (int) $request['count'] ) {
 		return new WP_Error(
 			'sourceweb_count_changed',
@@ -500,7 +500,7 @@ function sourceweb_rest_review_publish_all( WP_REST_Request $request ) {
 			array( 'status' => 409 )
 		);
 	}
-	$n = aw_review_apply( wp_list_pluck( $items, 'ID' ), 'publish' );
+	$n = sourceweb_review_apply( wp_list_pluck( $items, 'ID' ), 'publish' );
 	return rest_ensure_response(
 		array(
 			'done'    => $n,
@@ -520,7 +520,7 @@ function sourceweb_rest_review_publish_all( WP_REST_Request $request ) {
  */
 function sourceweb_enrich_text( string $field, $v ): string {
 	if ( 'place' === $field ) {
-		return '' !== $v && array() !== $v && function_exists( 'aw_enrich_place_label' ) ? (string) aw_enrich_place_label( $v ) : '';
+		return '' !== $v && array() !== $v && function_exists( 'sourceweb_enrich_place_label' ) ? (string) sourceweb_enrich_place_label( $v ) : '';
 	}
 	if ( 'merge_into' === $field ) {
 		return is_array( $v ) || ! (int) $v ? '' : '#' . (int) $v . ' ' . html_entity_decode( get_the_title( (int) $v ), ENT_QUOTES, 'UTF-8' );
@@ -580,7 +580,7 @@ function sourceweb_enrich_links( array $sources ): array {
 function sourceweb_enrich_before( array $r ) {
 	$lid = (int) $r['listing_id'];
 	if ( 'pending' === $r['status'] ) {
-		return aw_enrich_current( $lid, $r['field'] );
+		return sourceweb_enrich_current( $lid, $r['field'] );
 	}
 	$cur = $r['old_value'];
 	if ( 'logo' === $r['field'] ) {
@@ -596,7 +596,7 @@ function sourceweb_enrich_before( array $r ) {
 }
 
 /**
- * The filter parts of a request, as aw_enrich_where() reads them.
+ * The filter parts of a request, as sourceweb_enrich_where() reads them.
  *
  * @param WP_REST_Request $request Request.
  * @param string          $status  Status view.
@@ -632,16 +632,16 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 		'status'   => $q['status'],
 		'views'    => array(),
 		'filters'  => $filters,
-		'progress' => function_exists( 'aw_enrich_progress' ) ? aw_enrich_progress() : array(),
+		'progress' => function_exists( 'sourceweb_enrich_progress' ) ? sourceweb_enrich_progress() : array(),
 	);
 	if ( ! get_option( 'aw_enrich_db' ) ) {
 		return rest_ensure_response( $empty ); // No proposal has been stored yet.
 	}
-	$t                    = aw_enrich_table();
-	list( $where, $args ) = aw_enrich_where( $q );
+	$t                    = sourceweb_enrich_table();
+	list( $where, $args ) = sourceweb_enrich_where( $q );
 	list( $where, $args ) = sourceweb_enrich_search( $where, $args, $request );
 
-	// phpcs:disable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (%i); $where/$vwhere are aw_enrich_where() clauses whose every value is a placeholder
+	// phpcs:disable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (%i); $where/$vwhere are sourceweb_enrich_where() clauses whose every value is a placeholder
 	$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT e.listing_id ) FROM %i e WHERE {$where}", array_merge( array( $t ), $args ) ) );
 	$per   = SOURCEWEB_ENRICH_PER_PAGE;
 	$pages = max( 1, (int) ceil( $total / $per ) );
@@ -652,7 +652,7 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 	$vq    = $q;
 	unset( $vq['status'] );
 	$vq['status']           = 'all';
-	list( $vwhere, $vargs ) = aw_enrich_where( $vq );
+	list( $vwhere, $vargs ) = sourceweb_enrich_where( $vq );
 	list( $vwhere, $vargs ) = sourceweb_enrich_search( $vwhere, $vargs, $request ); // view counts follow the search box
 	$by = array();
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT e.status, COUNT(*) AS n FROM %i e WHERE {$vwhere} GROUP BY e.status", array_merge( array( $t ), $vargs ) ) ) as $v ) {
@@ -674,10 +674,10 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 		);
 	}
 
-	$labels = aw_enrich_fields_all() + ( function_exists( 'aw_enrich_claim_fields' ) ? aw_enrich_claim_fields() : array() );
+	$labels = sourceweb_enrich_fields_all() + ( function_exists( 'sourceweb_enrich_claim_fields' ) ? sourceweb_enrich_claim_fields() : array() );
 	$fields = array();
 	foreach ( (array) $rows as $r ) {
-		$r            = aw_enrich_decode( $r );
+		$r            = sourceweb_enrich_decode( $r );
 		$f            = sourceweb_enrich_field(
 			array(
 				'id'         => (int) $r['id'],
@@ -705,14 +705,14 @@ function sourceweb_rest_enrichment( WP_REST_Request $request ) {
 	}
 	$out = array();
 	foreach ( sourceweb_enrich_group( $lids, $fields ) as $lid => $g ) {
-		$flags = aw_enrich_flags( $lid );
+		$flags = sourceweb_enrich_flags( $lid );
 		$conf  = array_values( array_unique( array_filter( wp_list_pluck( array_merge( $g['fields'], $g['others'] ), 'confidence' ) ) ) );
 		$out[] = array(
 			'id'         => $lid,
 			'title'      => html_entity_decode( get_the_title( $lid ), ENT_QUOTES, 'UTF-8' ),
 			'editUrl'    => (string) get_edit_post_link( $lid, 'raw' ),
 			'viewUrl'    => (string) get_permalink( $lid ),
-			'flags'      => array_values( array_map( 'aw_enrich_flag_label', array_keys( $flags ) ) ),
+			'flags'      => array_values( array_map( 'sourceweb_enrich_flag_label', array_keys( $flags ) ) ),
 			'waiting'    => $g['waiting'],
 			'applied'    => $g['applied'],
 			'confidence' => $conf,
@@ -761,7 +761,7 @@ function sourceweb_enrich_filters( array $q ): array {
 		$states[ (string) $s->code ] = (string) $s->name;
 	}
 	$out = array(
-		array( 'source', __( 'Source', 'sourceweb' ), $list( array_map( fn( $s ) => $s[0], aw_enrich_sources() ), __( 'All sources', 'sourceweb' ) ) ),
+		array( 'source', __( 'Source', 'sourceweb' ), $list( array_map( fn( $s ) => $s[0], sourceweb_enrich_sources() ), __( 'All sources', 'sourceweb' ) ) ),
 		array(
 			'confidence',
 			__( 'Confidence', 'sourceweb' ),
@@ -774,7 +774,7 @@ function sourceweb_enrich_filters( array $q ): array {
 				__( 'Any confidence', 'sourceweb' )
 			),
 		),
-		array( 'field', __( 'Field', 'sourceweb' ), $list( array_map( fn( $f ) => $f[0], aw_enrich_fields_all() ), __( 'All fields', 'sourceweb' ) ) ),
+		array( 'field', __( 'Field', 'sourceweb' ), $list( array_map( fn( $f ) => $f[0], sourceweb_enrich_fields_all() ), __( 'All fields', 'sourceweb' ) ) ),
 		array(
 			'flag',
 			__( 'Flag', 'sourceweb' ),
@@ -835,12 +835,12 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 	$do       = (string) $request['do'];
 	$ids      = array_filter( array_map( 'absint', (array) $request['ids'] ) );
 	$listings = array_filter( array_map( 'absint', (array) $request['listings'] ) );
-	$t        = aw_enrich_table();
-	// phpcs:disable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (%i); $where is an aw_enrich_where() clause whose every value is a placeholder
+	$t        = sourceweb_enrich_table();
+	// phpcs:disable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the plugin's own table (%i); $where is an sourceweb_enrich_where() clause whose every value is a placeholder
 	if ( 'approve_high' === $do ) {
 		$q                    = sourceweb_enrich_query( $request, 'pending' );
 		$q['confidence']      = 'high';
-		list( $where, $args ) = aw_enrich_where( $q );
+		list( $where, $args ) = sourceweb_enrich_where( $q );
 		list( $where, $args ) = sourceweb_enrich_search( $where, $args, $request );
 		$ids                  = array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT e.id FROM %i e WHERE {$where} AND e.field <> 'merge_into'", array_merge( array( $t ), $args ) ) ) );
 		$do                   = 'approve';
@@ -852,9 +852,9 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 	}
 	// phpcs:enable WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$fn   = array(
-		'approve' => 'aw_enrich_approve',
-		'reject'  => 'aw_enrich_reject',
-		'undo'    => 'aw_enrich_undo',
+		'approve' => 'sourceweb_enrich_approve',
+		'reject'  => 'sourceweb_enrich_reject',
+		'undo'    => 'sourceweb_enrich_undo',
 	)[ $do ] ?? '';
 	$done = 0;
 	foreach ( $ids as $id ) {
@@ -871,7 +871,7 @@ function sourceweb_rest_enrichment_decide( WP_REST_Request $request ) {
 
 /* ---------- Settings ---------- */
 
-/** "Workers use these lists", as stored (aw_sources_config() would seed the option on a first read). */
+/** "Workers use these lists", as stored (sourceweb_sources_config() would seed the option on a first read). */
 function sourceweb_live_now(): bool {
 	$c = get_option( 'aw_sources' );
 	return is_array( $c ) && ! empty( $c['live'] );
@@ -885,7 +885,7 @@ function sourceweb_live_now(): bool {
 function sourceweb_settings_now(): array {
 	$out = array(
 		'workers'    => array( 'live' => sourceweb_live_now() ),
-		'enrichment' => array_map( 'boolval', aw_enrich_sources_on() ) + array( 'live_cap' => (int) get_option( 'aw_enrich_live_cap', '20' ) ),
+		'enrichment' => array_map( 'boolval', sourceweb_enrich_sources_on() ) + array( 'live_cap' => (int) get_option( 'aw_enrich_live_cap', '20' ) ),
 	);
 	if ( function_exists( 'aw_social_on' ) ) {
 		$out['social'] = array(
@@ -899,10 +899,10 @@ function sourceweb_settings_now(): array {
 /** Connected services: each enrichment source and API, its status, and what can be set on its row. */
 function sourceweb_services(): array {
 	$now   = sourceweb_settings_now();
-	$on    = aw_enrich_sources_on();
+	$on    = sourceweb_enrich_sources_on();
 	$out   = array();
 	$tok   = defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN;
-	$prob  = function_exists( 'aw_workers_problems' ) ? count( (array) aw_workers_problems() ) : 0;
+	$prob  = function_exists( 'sourceweb_workers_problems' ) ? count( (array) sourceweb_workers_problems() ) : 0;
 	$out[] = array(
 		'slug'    => 'github',
 		'name'    => __( 'Workers (GitHub Actions)', 'sourceweb' ),
@@ -913,7 +913,7 @@ function sourceweb_services(): array {
 		'links'   => array(
 			array(
 				'label' => __( 'Workers', 'sourceweb' ),
-				'url'   => admin_url( aw_src_tab_path( 'workers' ) ),
+				'url'   => admin_url( sourceweb_src_tab_path( 'workers' ) ),
 			),
 		),
 	);
@@ -925,14 +925,14 @@ function sourceweb_services(): array {
 		'status'  => ( $key ? __( 'Key set', 'sourceweb' ) : __( 'Key not set', 'sourceweb' ) ) . ' · ' . ( $on['google_places'] ? __( 'On', 'sourceweb' ) : __( 'Off', 'sourceweb' ) ),
 		'tone'    => $key ? '' : 'warn',
 		/* translators: 1: spent live this month, 2: monthly cap, 3: the worker's spend. */
-		'summary' => sprintf( __( 'This month: $%1$s live of a $%2$d cap; the worker spent $%3$s.', 'sourceweb' ), number_format_i18n( aw_enrich_spent( 'live' ), 2 ), $cap, number_format_i18n( aw_enrich_spent( 'worker' ), 2 ) ),
+		'summary' => sprintf( __( 'This month: $%1$s live of a $%2$d cap; the worker spent $%3$s.', 'sourceweb' ), number_format_i18n( sourceweb_enrich_spent( 'live' ), 2 ), $cap, number_format_i18n( sourceweb_enrich_spent( 'worker' ), 2 ) ),
 		'source'  => 'google_places',
 		'on'      => (bool) $on['google_places'],
-		'help'    => aw_enrich_sources()['google_places'][3],
+		'help'    => sourceweb_enrich_sources()['google_places'][3],
 		'key'     => array( 'set' => $key ),
 		'cap'     => $cap,
 	);
-	foreach ( aw_enrich_sources() as $k => $s ) {
+	foreach ( sourceweb_enrich_sources() as $k => $s ) {
 		if ( 'google_places' === $k ) {
 			continue;
 		}
@@ -947,7 +947,7 @@ function sourceweb_services(): array {
 			'help'    => __( 'Used by the enrichment worker from its next run.', 'sourceweb' ),
 		);
 	}
-	$ai    = aw_sourcing_ai_counts();
+	$ai    = sourceweb_sourcing_ai_counts();
 	$out[] = array(
 		'slug'    => 'ai',
 		'name'    => __( 'AI providers', 'sourceweb' ),
@@ -958,16 +958,16 @@ function sourceweb_services(): array {
 		'links'   => array(
 			array(
 				'label' => __( 'AI models', 'sourceweb' ),
-				'url'   => admin_url( aw_src_tab_path( 'ai' ) ),
+				'url'   => admin_url( sourceweb_src_tab_path( 'ai' ) ),
 			),
 		),
 	);
-	// As aw_relay_hosts(), but from the options as stored: aw_sources_config() would seed aw_sources on a read.
+	// As sourceweb_relay_hosts(), but from the options as stored: sourceweb_sources_config() would seed aw_sources on a read.
 	$stored = get_option( 'aw_sources' );
-	if ( function_exists( 'aw_sourcing_phase' ) && aw_sourcing_phase() >= 1 ) {
-		$relay = count( (array) aw_src_relay_hosts_from_pubs( function_exists( 'aw_publishers' ) ? aw_publishers() : array() ) );
+	if ( function_exists( 'sourceweb_sourcing_phase' ) && sourceweb_sourcing_phase() >= 1 ) {
+		$relay = count( (array) sourceweb_src_relay_hosts_from_pubs( function_exists( 'sourceweb_publishers' ) ? sourceweb_publishers() : array() ) );
 	} else {
-		$relay = count( (array) aw_src_relay_legacy( is_array( $stored ) ? $stored : array(), AW_RELAY_DEFAULT ) );
+		$relay = count( (array) sourceweb_src_relay_legacy( is_array( $stored ) ? $stored : array(), AW_RELAY_DEFAULT ) );
 	}
 	$out[] = array(
 		'slug'    => 'relay',
@@ -980,7 +980,7 @@ function sourceweb_services(): array {
 		'links'   => array(
 			array(
 				'label' => __( 'Relay log', 'sourceweb' ),
-				'url'   => admin_url( aw_src_tab_path( 'relay-log' ) ),
+				'url'   => admin_url( sourceweb_src_tab_path( 'relay-log' ) ),
 			),
 		),
 	);
@@ -1058,7 +1058,7 @@ function sourceweb_settings_payload(): array {
 	) {
 		$elsewhere[] = array(
 			'label' => $label,
-			'url'   => admin_url( aw_src_tab_path( $tab ) ),
+			'url'   => admin_url( sourceweb_src_tab_path( $tab ) ),
 		);
 	}
 	return array(
@@ -1106,29 +1106,29 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 	}
 	$changed = sourceweb_changed( $now[ $group ], (array) $request['values'] );
 	if ( 'workers' === $group && isset( $changed['live'] ) ) {
-		aw_sources_live_save( $changed['live'] );
+		sourceweb_sources_live_save( $changed['live'] );
 	}
 	if ( 'enrichment' === $group ) {
 		$cap = $changed['live_cap'] ?? null;
 		unset( $changed['live_cap'] );
-		$next = sourceweb_enrich_sources_next( aw_enrich_sources_on(), $changed );
+		$next = sourceweb_enrich_sources_next( sourceweb_enrich_sources_on(), $changed );
 		if ( null !== $next ) {
 			if ( ! function_exists( 'add_settings_error' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/template.php'; // The sanitize callback adds the "Saved" notice.
 			}
-			update_option( 'aw_enrich_sources', aw_enrich_sources_sanitize( $next + array( '_aw_tab' => 'enrich' ) ) );
+			update_option( 'aw_enrich_sources', sourceweb_enrich_sources_sanitize( $next + array( '_aw_tab' => 'enrich' ) ) );
 		}
 		if ( null !== $cap ) {
 			$cap = (string) max( 0, (int) $cap );
 			update_option( 'aw_enrich_live_cap', $cap );
-			aw_src_log( 'enrich', 'Live block monthly cap: $' . $cap );
+			sourceweb_src_log( 'enrich', 'Live block monthly cap: $' . $cap );
 			$changed['live_cap'] = $cap;
 		}
 	}
 	if ( 'social' === $group ) {
 		foreach ( $changed as $k => $v ) {
 			update_option( $k, $v ? '1' : '' ); // As the Kits → Modules setting's own clean-up stores it.
-			aw_src_log( 'settings', ( 'aw_social_on' === $k ? 'Social posts type' : 'Social posts shown on pages' ) . ': ' . ( $v ? 'on' : 'off' ) );
+			sourceweb_src_log( 'settings', ( 'aw_social_on' === $k ? 'Social posts type' : 'Social posts shown on pages' ) . ': ' . ( $v ? 'on' : 'off' ) );
 		}
 	}
 	if ( $request['reset'] ) {
@@ -1153,8 +1153,8 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 function sourceweb_rest_google_key( WP_REST_Request $request ) {
 	$key = trim( sanitize_text_field( (string) $request['key'] ) );
 	if ( '' !== $key && (string) get_option( 'aw_enrich_google_key', '' ) !== $key ) {
-		update_option( 'aw_enrich_google_key', aw_enrich_google_key_sanitize( $key ) );
-		aw_src_log( 'enrich', 'Directory enrichment saved (new Google key)' );
+		update_option( 'aw_enrich_google_key', sourceweb_enrich_google_key_sanitize( $key ) );
+		sourceweb_src_log( 'enrich', 'Directory enrichment saved (new Google key)' );
 		$saved = true;
 	}
 	return rest_ensure_response(

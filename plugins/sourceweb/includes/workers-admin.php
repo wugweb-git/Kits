@@ -13,12 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Run now is offered: a registry workflow that needs no input, and the dispatch token is set. */
-function aw_workers_can_run( array $w ) {
+function sourceweb_workers_can_run( array $w ) {
 	return ! $w['planned'] && empty( $w['registry']['needs_input'] ) && defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN;
 }
 
 /** "Late after 12 h", "Late after 9 days", "Never late (no alert)" or '' (by hand). */
-function aw_workers_late_words( array $w ) {
+function sourceweb_workers_late_words( array $w ) {
 	$h = $w['late_after_h'];
 	if ( empty( $h ) ) {
 		$r = (array) ( $w['registry'] ?? array() );
@@ -33,17 +33,17 @@ function aw_workers_late_words( array $w ) {
  *
  * @return array[]
  */
-function aw_workers_status_rows() {
+function sourceweb_workers_status_rows() {
 	$kinds = array();
 	$notes = array();
-	foreach ( aw_workers_problems() as $k => $msg ) {
+	foreach ( sourceweb_workers_problems() as $k => $msg ) {
 		list( $file, $kind )              = explode( ':', $k, 2 );
-		$kinds[ aw_worker_id( $file ) ][] = $kind;
-		$notes[ aw_worker_id( $file ) ][] = $msg;
+		$kinds[ sourceweb_worker_id( $file ) ][] = $kind;
+		$notes[ sourceweb_worker_id( $file ) ][] = $msg;
 	}
 	$out = array();
-	foreach ( aw_workers_all() as $id => $w ) {
-		$last = aw_workers_last( $w['file'] );
+	foreach ( sourceweb_workers_all() as $id => $w ) {
+		$last = sourceweb_workers_last( $w['file'] );
 		$k    = $kinds[ $id ] ?? array();
 		if ( $w['planned'] && ! $last ) {
 			$status = 'planned';
@@ -58,7 +58,7 @@ function aw_workers_status_rows() {
 			'last'   => $last,
 			'status' => $status,
 			'note'   => implode( ' ', $notes[ $id ] ?? array() ),
-			'keys'   => aw_worker_key_count( $id ),
+			'keys'   => sourceweb_worker_key_count( $id ),
 		);
 	}
 	return $out;
@@ -71,14 +71,14 @@ function aw_workers_status_rows() {
  * @param string[] $ticked Key ids.
  * @return array
  */
-function aw_workers_apply_keys( $id, array $ticked ) {
-	$rows = aw_ai_rows_fresh();
+function sourceweb_workers_apply_keys( $id, array $ticked ) {
+	$rows = sourceweb_ai_rows_fresh();
 	$did  = array();
 	$skip = 0;
-	$ids  = array_keys( aw_workers_all() );
+	$ids  = array_keys( sourceweb_workers_all() );
 	foreach ( $rows as $i => $r ) {
-		$ws = aw_ai_row_workers( $r );
-		$on = in_array( aw_ai_key_id( $r['key'] ), $ticked, true );
+		$ws = sourceweb_ai_row_workers( $r );
+		$on = in_array( sourceweb_ai_key_id( $r['key'] ), $ticked, true );
 		if ( ! $ws ) {
 			if ( $on ) {
 				continue;
@@ -94,7 +94,7 @@ function aw_workers_apply_keys( $id, array $ticked ) {
 			continue;
 		}
 		$rows[ $i ]['workers'] = $new;
-		$did[]                 = aw_ai_key_short( $r ) . ( $on ? ' attached' : ' detached' );
+		$did[]                 = sourceweb_ai_key_short( $r ) . ( $on ? ' attached' : ' detached' );
 	}
 	if ( $did ) {
 		update_option( 'aw_ai_models', $rows, false );
@@ -110,10 +110,10 @@ function aw_workers_apply_keys( $id, array $ticked ) {
  *                  keys: ticked key ids, or null when the keys were not shown }.
  * @return array|WP_Error { done: added|saved|same, id, name, skip } or an error coded id, clash, name or missing.
  */
-function aw_worker_save( array $in ) {
+function sourceweb_worker_save( array $in ) {
 	$edit  = sanitize_key( (string) ( $in['edit'] ?? '' ) );
 	$new   = 'new' === $edit;
-	$all   = aw_workers_all();
+	$all   = sourceweb_workers_all();
 	$id    = $new ? sanitize_key( (string) ( $in['id'] ?? '' ) ) : $edit;
 	$name  = mb_substr( sanitize_text_field( (string) ( $in['name'] ?? '' ) ), 0, 120 );
 	$what  = mb_substr( sanitize_textarea_field( (string) ( $in['what'] ?? '' ) ), 0, 500 );
@@ -135,7 +135,7 @@ function aw_worker_save( array $in ) {
 	$err     = '';
 	if ( $new && ( '' === $id || 'new' === $id ) ) {
 		$err = 'id';
-	} elseif ( $new && ( isset( $all[ $id ] ) || isset( aw_workers_meta()[ $id ] ) ) ) {
+	} elseif ( $new && ( isset( $all[ $id ] ) || isset( sourceweb_workers_meta()[ $id ] ) ) ) {
 		$err = 'clash';
 	} elseif ( $planned && '' === $name ) {
 		$err = 'name';
@@ -160,7 +160,7 @@ function aw_worker_save( array $in ) {
 	$log = array();
 	// A new group: added to the list with a generic icon.
 	if ( '' !== $label ) {
-		$groups = aw_worker_groups();
+		$groups = sourceweb_worker_group_defs();
 		$slug   = sanitize_title( $label );
 		if ( '' !== $slug && ! isset( $groups[ $slug ] ) ) {
 			$extra          = (array) get_option( 'aw_workers_groups', array() );
@@ -170,8 +170,8 @@ function aw_worker_save( array $in ) {
 		}
 		$group = '' !== $slug ? $slug : $group;
 	}
-	$group = isset( aw_worker_groups()[ $group ] ) ? $group : ( $w['group'] ?? 'one-off' );
-	$meta  = aw_workers_meta();
+	$group = isset( sourceweb_worker_group_defs()[ $group ] ) ? $group : ( $w['group'] ?? 'one-off' );
+	$meta  = sourceweb_workers_meta();
 	$was   = $meta;
 	$m     = (array) ( $meta[ $id ] ?? array() );
 	if ( $planned ) {
@@ -208,7 +208,7 @@ function aw_worker_save( array $in ) {
 		} else {
 			$m['late_after_h'] = $late;
 		}
-		// The group it has with no override (aw_workers_all()): kept only when it differs.
+		// The group it has with no override (sourceweb_workers_all()): kept only when it differs.
 		$def = AW_WORKER_DEFAULT_GROUP[ $id ] ?? ( ! empty( $reg['crons'] ) || ! empty( $reg['after'] ) ? 'maintenance' : 'one-off' );
 		if ( $def === $group ) {
 			unset( $m['group'] );
@@ -224,11 +224,11 @@ function aw_worker_save( array $in ) {
 	if ( $meta !== $was ) { // a Save with no change writes nothing
 		update_option( 'aw_workers_meta', $meta, false );
 	}
-	$after = aw_workers_all()[ $id ];
+	$after = sourceweb_workers_all()[ $id ];
 	if ( $new ) {
-		$log[] = 'added planned worker ' . $id . ' "' . $name . '" (' . ( aw_worker_groups()[ $group ][0] ?? $group ) . ( '' !== $sched ? ', wanted: ' . $sched : '' ) . ')';
+		$log[] = 'added planned worker ' . $id . ' "' . $name . '" (' . ( sourceweb_worker_group_defs()[ $group ][0] ?? $group ) . ( '' !== $sched ? ', wanted: ' . $sched : '' ) . ')';
 	} else {
-		$groups = aw_worker_groups();
+		$groups = sourceweb_worker_group_defs();
 		foreach ( array( 'name', 'what', 'group', 'late_after_h', 'schedule' ) as $k ) {
 			$a = $w[ $k ];
 			$b = $after[ $k ];
@@ -241,13 +241,13 @@ function aw_worker_save( array $in ) {
 	$skip = 0;
 	$did  = array();
 	if ( null !== ( $in['keys'] ?? null ) ) {
-		list( $did, $skip ) = aw_workers_apply_keys( $id, array_map( 'sanitize_key', (array) $in['keys'] ) );
+		list( $did, $skip ) = sourceweb_workers_apply_keys( $id, array_map( 'sanitize_key', (array) $in['keys'] ) );
 		if ( $did ) {
-			aw_src_log( 'ai', 'worker ' . $id . ': key ' . implode( ', ', $did ) );
+			sourceweb_src_log( 'ai', 'worker ' . $id . ': key ' . implode( ', ', $did ) );
 		}
 	}
 	if ( $log ) {
-		aw_src_log( 'workers', 'Worker ' . $id . ': ' . implode( '; ', $log ) );
+		sourceweb_src_log( 'workers', 'Worker ' . $id . ': ' . implode( '; ', $log ) );
 	}
 	return array(
 		'done' => $new ? 'added' : ( $log || $did ? 'saved' : 'same' ),
@@ -263,32 +263,32 @@ function aw_worker_save( array $in ) {
  * @param string $id Worker ID.
  * @return array|WP_Error { name, freed: keys now for every worker (…abcd (Provider)) }.
  */
-function aw_worker_delete( $id ) {
-	$w = aw_worker( $id );
+function sourceweb_worker_delete( $id ) {
+	$w = sourceweb_worker( $id );
 	if ( ! $w || ! $w['planned'] ) {
 		return new WP_Error( 'not_planned', 'Only a planned worker can be deleted.', array( 'status' => 400 ) );
 	}
 	$id   = $w['id'];
-	$meta = aw_workers_meta();
+	$meta = sourceweb_workers_meta();
 	unset( $meta[ $id ] );
 	update_option( 'aw_workers_meta', $meta, false );
-	$rows  = aw_ai_rows_fresh();
+	$rows  = sourceweb_ai_rows_fresh();
 	$freed = array();
 	$moved = false;
 	foreach ( $rows as $i => $r ) {
-		$ws = aw_ai_row_workers( $r );
+		$ws = sourceweb_ai_row_workers( $r );
 		if ( in_array( $id, $ws, true ) ) {
 			$moved                 = true;
 			$rows[ $i ]['workers'] = array_values( array_diff( $ws, array( $id ) ) );
 			if ( ! $rows[ $i ]['workers'] ) {
-				$freed[] = aw_ai_key_short( $r );
+				$freed[] = sourceweb_ai_key_short( $r );
 			}
 		}
 	}
 	if ( $moved ) {
 		update_option( 'aw_ai_models', $rows, false );
 	}
-	aw_src_log( 'workers', 'deleted planned worker ' . $id . ' "' . $w['name'] . '"' . ( $freed ? '; key ' . implode( ', ', $freed ) . ' now for all workers' : '' ) );
+	sourceweb_src_log( 'workers', 'deleted planned worker ' . $id . ' "' . $w['name'] . '"' . ( $freed ? '; key ' . implode( ', ', $freed ) . ' now for all workers' : '' ) );
 	return array(
 		'name'  => $w['name'],
 		'freed' => $freed,

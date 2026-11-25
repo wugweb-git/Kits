@@ -89,7 +89,7 @@ add_filter(
 		$bundle = trailingslashit( get_temp_dir() ) . 'aw-ca-bundle-egazette.pem';
 		if ( ! file_exists( $bundle ) || filesize( $bundle ) < 1024 ) { // a bundle left empty or cut short by an earlier failed write is made again
 			$core  = file_get_contents( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-			$extra = file_get_contents( AW_SOURCING_DIR . 'assets/certs/lets-encrypt-yr2-root-yr.pem' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			$extra = file_get_contents( SOURCEWEB_SOURCING_DIR . 'assets/certs/lets-encrypt-yr2-root-yr.pem' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 			if ( ! $core || ! $extra ) {
 				return $args;
 			}

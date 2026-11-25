@@ -42,7 +42,7 @@ const AW_ENRICH_REFRESH_DAYS = 90;
  * The sources: key => [name, host for the icon, on by default, what it gives].
  * A new source is one module in the worker and one row here.
  */
-function aw_enrich_sources() {
+function sourceweb_enrich_sources() {
 	return array(
 		'claim'         => array( 'The organisation (claim)', '', true, 'Values the organisation sent with the claim or update form (highest trust)' ),
 		'website'       => array( 'The organisation\'s website', '', true, 'Home, contact, about, donate, volunteer and adopt pages (up to 8)' ),
@@ -58,10 +58,10 @@ function aw_enrich_sources() {
 }
 
 /** Switched-on sources (Sourcing → Directory enrichment). */
-function aw_enrich_sources_on() {
+function sourceweb_enrich_sources_on() {
 	$saved = get_option( 'aw_enrich_sources' );
 	$out   = array();
-	foreach ( aw_enrich_sources() as $k => $s ) {
+	foreach ( sourceweb_enrich_sources() as $k => $s ) {
 		$out[ $k ] = is_array( $saved ) && array_key_exists( $k, $saved ) ? (bool) $saved[ $k ] : $s[2];
 	}
 	return $out;
@@ -72,7 +72,7 @@ function aw_enrich_sources_on() {
  * phones (the Phone numbers list), hours (Opening hours by day), services (service tags), excerpt (the short bio),
  * logo (featured image), photos (aw_gallery, sideloaded).
  */
-function aw_enrich_fields() {
+function sourceweb_enrich_fields() {
 	return array(
 		'phone'          => array( 'Phone', 'phones', 'Contact' ),
 		'whatsapp'       => array( 'WhatsApp', 'phones', 'Contact' ),
@@ -120,19 +120,19 @@ function aw_enrich_fields() {
 }
 
 /** The table. */
-function aw_enrich_table() {
+function sourceweb_enrich_table() {
 	global $wpdb;
 	return $wpdb->prefix . 'aw_enrich';
 }
 
 /** Create or update the table (once per version). */
-function aw_enrich_install() {
+function sourceweb_enrich_install() {
 	if ( get_option( 'aw_enrich_db' ) === AW_ENRICH_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	$t = aw_enrich_table();
+	$t = sourceweb_enrich_table();
 	dbDelta(
 		"CREATE TABLE {$t} (
 		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -155,8 +155,8 @@ function aw_enrich_install() {
 	);
 	update_option( 'aw_enrich_db', AW_ENRICH_DB_VERSION, false );
 }
-add_action( 'admin_init', 'aw_enrich_install' );
-add_action( 'rest_api_init', 'aw_enrich_install', 1 );
+add_action( 'admin_init', 'sourceweb_enrich_install' );
+add_action( 'rest_api_init', 'sourceweb_enrich_install', 1 );
 
 /** New fields on listings (registered like the others in meta.php: shown in REST, edited by editors). */
 add_action(
@@ -184,7 +184,7 @@ add_action(
 					'description'       => $desc,
 					'single'            => true,
 					'show_in_rest'      => true,
-					'sanitize_callback' => fn( $v ) => aw_enrich_sanitize( $key, $v ),
+					'sanitize_callback' => fn( $v ) => sourceweb_enrich_sanitize( $key, $v ),
 					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
 				)
 			);
@@ -193,7 +193,7 @@ add_action(
 );
 
 /** Clean one value for its meta key. */
-function aw_enrich_sanitize( $key, $v ) {
+function sourceweb_enrich_sanitize( $key, $v ) {
 	if ( in_array( $key, array( 'aw_adopt_url', 'aw_linkedin' ), true ) ) {
 		return esc_url_raw( (string) $v );
 	}
@@ -221,8 +221,8 @@ function aw_enrich_sanitize( $key, $v ) {
  * @param string $field Field key.
  * @return mixed
  */
-function aw_enrich_current( $lid, $field ) {
-	$def = aw_enrich_fields_all()[ $field ] ?? null;
+function sourceweb_enrich_current( $lid, $field ) {
+	$def = sourceweb_enrich_fields_all()[ $field ] ?? null;
 	if ( ! $def ) {
 		return '';
 	}
@@ -248,7 +248,7 @@ function aw_enrich_current( $lid, $field ) {
 		case 'photos':
 			return array_values( array_filter( array_map( fn( $p ) => (string) wp_get_attachment_url( (int) $p ), array_filter( explode( ',', (string) get_post_meta( $lid, 'aw_gallery', true ) ) ) ) ) );
 		case 'place':
-			return aw_enrich_place_current( $lid );
+			return sourceweb_enrich_place_current( $lid );
 		case 'merge':
 			return (int) get_post_meta( $lid, 'aw_merged_into', true ) ? (int) get_post_meta( $lid, 'aw_merged_into', true ) : '';
 		default:
@@ -258,10 +258,10 @@ function aw_enrich_current( $lid, $field ) {
 
 /**
  * Fields only an approved claim writes (animal-writes-core claims-review.php, owner 31 Oct 2026): field => [label, store,
- * group]. Kept out of aw_enrich_fields_all() so the workers are never asked for them; used for the change log's
+ * group]. Kept out of sourceweb_enrich_fields_all() so the workers are never asked for them; used for the change log's
  * snapshot, Undo and labels.
  */
-function aw_enrich_claim_fields() {
+function sourceweb_enrich_claim_fields() {
 	return array(
 		'area'            => array( 'Area or landmark', 'aw_area', 'Location' ),
 		'about'           => array( 'About', 'content', 'Identity' ),
@@ -278,13 +278,13 @@ function aw_enrich_claim_fields() {
 }
 
 /** A field's definition for the change log: the enrichment fields, then the claim-only fields. */
-function aw_enrich_field_def( $field ) {
-	return aw_enrich_fields_all()[ $field ] ?? ( aw_enrich_claim_fields()[ $field ] ?? array( '', '' ) );
+function sourceweb_enrich_field_def( $field ) {
+	return sourceweb_enrich_fields_all()[ $field ] ?? ( sourceweb_enrich_claim_fields()[ $field ] ?? array( '', '' ) );
 }
 
 /** Raw state of the store a field lives in, for undo. */
-function aw_enrich_snapshot( $lid, $field ) {
-	$def = aw_enrich_field_def( $field );
+function sourceweb_enrich_snapshot( $lid, $field ) {
+	$def = sourceweb_enrich_field_def( $field );
 	switch ( $def[1] ) {
 		case '':
 			return ''; // an unknown field: nothing to keep
@@ -295,7 +295,7 @@ function aw_enrich_snapshot( $lid, $field ) {
 		case 'hours':
 			return function_exists( 'directoryweb_listing_hours' ) ? directoryweb_listing_hours( $lid ) : array();
 		case 'services':
-			return aw_enrich_current( $lid, $field );
+			return sourceweb_enrich_current( $lid, $field );
 		case 'excerpt':
 			return (string) get_post_field( 'post_excerpt', $lid );
 		case 'logo':
@@ -316,8 +316,8 @@ function aw_enrich_snapshot( $lid, $field ) {
 }
 
 /** Put a snapshot back (undo). */
-function aw_enrich_restore( $lid, $field, $snap ) {
-	$def = aw_enrich_field_def( $field );
+function sourceweb_enrich_restore( $lid, $field, $snap ) {
+	$def = sourceweb_enrich_field_def( $field );
 	switch ( $def[1] ) {
 		case '':
 			return; // an unknown field: nothing to put back
@@ -353,10 +353,10 @@ function aw_enrich_restore( $lid, $field, $snap ) {
 			'' === (string) $snap ? delete_post_meta( $lid, 'aw_gallery' ) : update_post_meta( $lid, 'aw_gallery', (string) $snap );
 			break;
 		case 'place':
-			aw_enrich_place_restore( $lid, (array) $snap );
+			sourceweb_enrich_place_restore( $lid, (array) $snap );
 			break;
 		case 'merge':
-			break; // a merge is undone by aw_enrich_unmerge()
+			break; // a merge is undone by sourceweb_enrich_unmerge()
 		default:
 			if ( is_array( $snap ) && isset( $snap['v'] ) ) { // a field that can hold a second value
 				'' === $snap['v'] ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $snap['v'] );
@@ -366,7 +366,7 @@ function aw_enrich_restore( $lid, $field, $snap ) {
 			}
 			'' === (string) $snap ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $snap );
 	}
-	aw_enrich_after_change( $lid );
+	sourceweb_enrich_after_change( $lid );
 }
 
 /**
@@ -375,17 +375,17 @@ function aw_enrich_restore( $lid, $field, $snap ) {
  * @param int    $lid   Listing ID.
  * @param string $field Field key.
  * @param mixed  $value   Value (string; list for hours, services, photos).
- * @param string $mode    apply or both (aw_enrich_mode()).
+ * @param string $mode    apply or both (sourceweb_enrich_mode()).
  * @param array  $sources The row's sources: a picture is fetched with the page it was found on as the Referer.
  * @return bool
  */
-function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = array() ) {
-	$def = aw_enrich_fields_all()[ $field ] ?? null;
+function sourceweb_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = array() ) {
+	$def = sourceweb_enrich_fields_all()[ $field ] ?? null;
 	if ( ! $def ) {
 		return false;
 	}
 	$name = get_the_title( $lid );
-	$page = aw_enrich_source_page( $sources );
+	$page = sourceweb_enrich_source_page( $sources );
 	switch ( $def[1] ) {
 		case 'phones':
 			$num  = trim( sanitize_text_field( (string) $value ) );
@@ -429,7 +429,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 			}
 			break;
 		case 'services':
-			$slugs = aw_enrich_services_norm( $value )[0];
+			$slugs = sourceweb_enrich_services_norm( $value )[0];
 			if ( ! $slugs ) {
 				return false;
 			}
@@ -443,7 +443,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 			wp_update_post( array( 'ID' => $lid, 'post_excerpt' => sanitize_textarea_field( (string) $value ) ) );
 			break;
 		case 'logo':
-			$att = aw_enrich_sideload( (string) $value, $lid, $name . ' logo', $page );
+			$att = sourceweb_enrich_sideload( (string) $value, $lid, $name . ' logo', $page );
 			if ( ! $att ) {
 				return false;
 			}
@@ -452,7 +452,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 		case 'photos':
 			$ids = array();
 			foreach ( array_slice( (array) $value, 0, 6 ) as $url ) {
-				$att = aw_enrich_sideload( (string) $url, $lid, $name, $page );
+				$att = sourceweb_enrich_sideload( (string) $url, $lid, $name, $page );
 				if ( $att ) {
 					$ids[] = $att;
 				}
@@ -463,16 +463,16 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 			update_post_meta( $lid, 'aw_gallery', implode( ',', $ids ) );
 			break;
 		case 'place':
-			if ( ! aw_enrich_place_write( $lid, $value ) ) {
+			if ( ! sourceweb_enrich_place_write( $lid, $value ) ) {
 				return false;
 			}
 			break;
 		case 'merge':
-			return false; // never written as a value: an approved merge runs aw_enrich_merge()
+			return false; // never written as a value: an approved merge runs sourceweb_enrich_merge()
 		default:
 			$v = isset( $def[3] ) // a listing field from the field group (phase 3): cleaned by its ACF type
-				? aw_enrich_acf_value( $def[3], is_array( $value ) ? implode( ', ', $value ) : (string) $value )
-				: aw_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
+				? sourceweb_enrich_acf_value( $def[3], is_array( $value ) ? implode( ', ', $value ) : (string) $value )
+				: sourceweb_enrich_sanitize( $def[1], is_array( $value ) ? implode( ', ', $value ) : (string) $value );
 			if ( '' === $v ) {
 				return false;
 			}
@@ -484,7 +484,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
 			}
 			update_post_meta( $lid, $def[1], $v );
 	}
-	aw_enrich_after_change( $lid );
+	sourceweb_enrich_after_change( $lid );
 	return true;
 }
 
@@ -495,7 +495,7 @@ function aw_enrich_write( $lid, $field, $value, $mode = 'apply', $sources = arra
  * @param array $sources Row sources ({key, name, url, fetched_at} each).
  * @return string
  */
-function aw_enrich_source_page( $sources ) {
+function sourceweb_enrich_source_page( $sources ) {
 	foreach ( (array) $sources as $s ) {
 		if ( ! is_array( $s ) ) {
 			continue;
@@ -512,13 +512,13 @@ function aw_enrich_source_page( $sources ) {
  * Download a picture as a browser opening it from the page it is on would (owner, 25 Oct 2026): a normal browser
  * User-Agent and that page as the Referer, because some sites (smptindia.org, swordodisha, vardodisha) refuse other
  * requests with 403. Nothing else is changed: the same download as before (sourceweb_source_download: wp_safe_remote_get,
- * redirects, 20 s, 15 MB), then the type and size checks in aw_enrich_sideload. Returns a temporary file or WP_Error.
+ * redirects, 20 s, 15 MB), then the type and size checks in sourceweb_enrich_sideload. Returns a temporary file or WP_Error.
  *
  * @param string $url     Picture address.
  * @param string $referer Page the picture was found on ('' for none).
  * @return string|WP_Error
  */
-function aw_enrich_download( $url, $referer = '' ) {
+function sourceweb_enrich_download( $url, $referer = '' ) {
 	$headers = array( 'Accept' => 'image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8,*/*;q=0.5' );
 	if ( '' !== $referer ) {
 		$headers['Referer'] = $referer;
@@ -535,14 +535,14 @@ function aw_enrich_download( $url, $referer = '' ) {
  * @param string $referer Page the picture was found on (sent as the Referer).
  * @return int Attachment ID, or 0.
  */
-function aw_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
+function sourceweb_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
 	if ( ! preg_match( '#^https?://#i', $url ) ) { // http too: the picture is copied into Media, never linked
 		return 0;
 	}
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	require_once ABSPATH . 'wp-admin/includes/media.php';
-	$tmp = aw_enrich_download( $url, $referer ); // core download_url() fails fatally on a doubled content-type
+	$tmp = sourceweb_enrich_download( $url, $referer ); // core download_url() fails fatally on a doubled content-type
 	if ( is_wp_error( $tmp ) ) {
 		return 0;
 	}
@@ -574,14 +574,14 @@ function aw_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
 }
 
 /** After a listing changes: its page cache. */
-function aw_enrich_after_change( $lid ) {
+function sourceweb_enrich_after_change( $lid ) {
 	clean_post_cache( $lid );
 	do_action( 'litespeed_purge_post', $lid );
 	do_action( 'aw_enrich_changed', $lid ); // autoresolve.php: a PIN in the address fills an empty PIN field
 }
 
 /** Values compared loosely: phones by the last 10 digits, links without scheme / www / slash, text lower-case. */
-function aw_enrich_norm( $field, $v ) {
+function sourceweb_enrich_norm( $field, $v ) {
 	if ( is_array( $v ) ) {
 		$v = wp_json_encode( $v );
 	}
@@ -596,15 +596,15 @@ function aw_enrich_norm( $field, $v ) {
 }
 
 /** Whether a listing already holds this value (for phones: any of its numbers). */
-function aw_enrich_has_value( $lid, $field, $value ) {
+function sourceweb_enrich_has_value( $lid, $field, $value ) {
 	if ( 'place' === $field ) {
-		return aw_enrich_place_held( $lid, $value );
+		return sourceweb_enrich_place_held( $lid, $value );
 	}
-	$now = aw_enrich_current( $lid, $field );
+	$now = sourceweb_enrich_current( $lid, $field );
 	if ( in_array( $field, array( 'phone', 'whatsapp', 'emergency' ), true ) ) {
-		$want = aw_enrich_norm( $field, $value );
+		$want = sourceweb_enrich_norm( $field, $value );
 		foreach ( explode( ',', (string) $now ) as $n ) {
-			if ( '' !== $want && aw_enrich_norm( $field, $n ) === $want ) {
+			if ( '' !== $want && sourceweb_enrich_norm( $field, $n ) === $want ) {
 				return true;
 			}
 		}
@@ -617,13 +617,13 @@ function aw_enrich_has_value( $lid, $field, $value ) {
 		return ! empty( $now ); // never replaced automatically; a reviewer decides
 	}
 	if ( 'hours' === $field ) {
-		return wp_json_encode( aw_enrich_hours_key( (array) $now ) ) === wp_json_encode( aw_enrich_hours_key( (array) $value ) );
+		return wp_json_encode( sourceweb_enrich_hours_key( (array) $now ) ) === wp_json_encode( sourceweb_enrich_hours_key( (array) $value ) );
 	}
-	return aw_enrich_norm( $field, $now ) === aw_enrich_norm( $field, $value );
+	return sourceweb_enrich_norm( $field, $now ) === sourceweb_enrich_norm( $field, $value );
 }
 
 /** Hours rows reduced to day => "open-close" for comparing. */
-function aw_enrich_hours_key( $rows ) {
+function sourceweb_enrich_hours_key( $rows ) {
 	$out = array();
 	foreach ( $rows as $r ) {
 		$out[ $r['day'] ?? '' ] = ! empty( $r['closed'] ) ? 'closed' : ( $r['open'] ?? '' ) . '-' . ( $r['close'] ?? '' );
@@ -633,19 +633,19 @@ function aw_enrich_hours_key( $rows ) {
 }
 
 /** Whether a field is empty on the listing. */
-function aw_enrich_is_empty( $lid, $field ) {
+function sourceweb_enrich_is_empty( $lid, $field ) {
 	if ( 'place' === $field ) {
 		return ! aw_item_codes( $lid )[1]; // a state without a district is a place still to fill
 	}
 	if ( in_array( $field, array( 'whatsapp', 'emergency' ), true ) ) {
 		return true; // adding a marked number never removes one
 	}
-	$now = aw_enrich_current( $lid, $field );
+	$now = sourceweb_enrich_current( $lid, $field );
 	return is_array( $now ) ? ! $now : '' === trim( (string) $now );
 }
 
 /** Claimed (an approved claim) or verified listings are never changed by the worker. */
-function aw_enrich_is_protected( $lid ) {
+function sourceweb_enrich_is_protected( $lid ) {
 	if ( get_post_meta( $lid, 'aw_verified', true ) ) {
 		return true;
 	}
@@ -661,7 +661,7 @@ function aw_enrich_is_protected( $lid ) {
  * @param string $field Field key.
  * @return string
  */
-function aw_enrich_both_note( $field ) {
+function sourceweb_enrich_both_note( $field ) {
 	return in_array( $field, AW_ENRICH_LIST_FIELDS, true ) ? 'Added to what was there; nothing removed' : 'Kept next to the value already there; both shown as unverified';
 }
 
@@ -675,23 +675,23 @@ const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website
  * follows the field's apply rule (Rules → Directory enrichment → Field rules, phase 3; seeded from the rules that were
  * written here: closed and merge_into always to review, a merge being the owner's decision, 25 Oct 2026).
  */
-function aw_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
-	return aw_enrich_mode_decide(
+function sourceweb_enrich_mode( $lid, $field, $conf, $protected, $value = null ) {
+	return sourceweb_enrich_mode_decide(
 		$field,
-		(string) aw_enrich_field_rule( $field )['apply'],
+		(string) sourceweb_enrich_field_rule( $field )['apply'],
 		$conf,
 		$protected,
-		fn() => aw_enrich_is_empty( $lid, $field ),
+		fn() => sourceweb_enrich_is_empty( $lid, $field ),
 		fn() => (bool) ( function_exists( 'directoryweb_listing_phones' ) && directoryweb_listing_phones( $lid ) ),
 		fn() => isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ),
-		fn() => aw_enrich_place_fills( $lid, $value )
+		fn() => sourceweb_enrich_place_fills( $lid, $value )
 	);
 }
 
 /* ---------- Rows ---------- */
 
 /** Whether a value holds a number on the never-publish list (DirectoryWeb's), at any depth. */
-function aw_enrich_never_publish( $value ) {
+function sourceweb_enrich_never_publish( $value ) {
 	$blocked = false;
 	$vals    = (array) $value;
 	array_walk_recursive(
@@ -704,13 +704,13 @@ function aw_enrich_never_publish( $value ) {
 }
 
 /** Add a row. */
-function aw_enrich_add_row( $lid, $field, $value, $old, $sources, $confidence, $status, $run = '', $note = '' ) {
+function sourceweb_enrich_add_row( $lid, $field, $value, $old, $sources, $confidence, $status, $run = '', $note = '' ) {
 	global $wpdb;
-	if ( aw_enrich_never_publish( $value ) ) {
+	if ( sourceweb_enrich_never_publish( $value ) ) {
 		return 0; // On the never-publish list: not proposed, not queued.
 	}
 	$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		aw_enrich_table(),
+		sourceweb_enrich_table(),
 		array(
 			'listing_id' => $lid,
 			'field'      => $field,
@@ -732,26 +732,26 @@ function aw_enrich_add_row( $lid, $field, $value, $old, $sources, $confidence, $
 /**
  * The note on a value that could not be written (25 Oct 2026): a picture that could not be copied from its source, or
  * a value the field cannot use. Such a row has status 'failed': it is logged, nothing to review, and it never stops the
- * same value being proposed again (only a person's rejection does, see aw_enrich_rest_results()).
+ * same value being proposed again (only a person's rejection does, see sourceweb_enrich_rest_results()).
  *
  * @param string $field Field key.
  * @param bool   $auto  True for an automatic apply, false for a reviewer's Approve.
  * @return string
  */
-function aw_enrich_fail_note( $field, $auto ) {
+function sourceweb_enrich_fail_note( $field, $auto ) {
 	$why = in_array( $field, array( 'logo', 'photos' ), true ) ? 'the picture could not be copied from its source' : 'the value could not be used for this field';
 	return 'Could not be applied ' . ( $auto ? 'automatically' : 'on approval' ) . ': ' . $why;
 }
 
 /** One row, decoded. */
-function aw_enrich_row( $id ) {
+function sourceweb_enrich_row( $id ) {
 	global $wpdb;
-	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', aw_enrich_table(), $id ), ARRAY_A ); // phpcs:ignore WordPress.DB
-	return $r ? aw_enrich_decode( $r ) : null;
+	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', sourceweb_enrich_table(), $id ), ARRAY_A ); // phpcs:ignore WordPress.DB
+	return $r ? sourceweb_enrich_decode( $r ) : null;
 }
 
 /** JSON columns to values. */
-function aw_enrich_decode( $r ) {
+function sourceweb_enrich_decode( $r ) {
 	foreach ( array( 'value', 'old_value', 'sources' ) as $k ) {
 		$r[ $k ] = json_decode( (string) $r[ $k ], true );
 	}
@@ -759,51 +759,51 @@ function aw_enrich_decode( $r ) {
 }
 
 /** Set a row's status. */
-function aw_enrich_set_status( $id, $status, $note = null ) {
+function sourceweb_enrich_set_status( $id, $status, $note = null ) {
 	global $wpdb;
 	$data = array( 'status' => $status, 'decided_at' => current_time( 'mysql' ), 'decided_by' => get_current_user_id() );
 	if ( null !== $note ) {
 		$data['note'] = substr( (string) $note, 0, 190 );
 	}
-	$wpdb->update( aw_enrich_table(), $data, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$wpdb->update( sourceweb_enrich_table(), $data, array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 /**
  * Approve a pending row: write it (old value kept for undo). The "Reported closed" row: approving keeps the listing out
  * of search with its note; rejecting clears both.
  */
-function aw_enrich_approve( $id ) {
-	$r = aw_enrich_row( $id );
+function sourceweb_enrich_approve( $id ) {
+	$r = sourceweb_enrich_row( $id );
 	if ( ! $r || 'pending' !== $r['status'] ) {
 		return false;
 	}
 	$lid = (int) $r['listing_id'];
 	if ( 'closed' === $r['field'] ) {
 		update_post_meta( $lid, 'aw_reported_closed', wp_date( 'Y-m-d' ) );
-		aw_enrich_set_status( $id, 'approved' );
-		aw_enrich_after_change( $lid );
+		sourceweb_enrich_set_status( $id, 'approved' );
+		sourceweb_enrich_after_change( $lid );
 		return true;
 	}
 	if ( 'merge_into' === $r['field'] ) {
-		$done = aw_enrich_merge( $lid, (int) $r['value'], $id );
+		$done = sourceweb_enrich_merge( $lid, (int) $r['value'], $id );
 		if ( is_string( $done ) ) {
-			aw_enrich_set_status( $id, 'rejected', 'Not merged: ' . $done );
+			sourceweb_enrich_set_status( $id, 'rejected', 'Not merged: ' . $done );
 			return false;
 		}
 		global $wpdb;
-		$wpdb->update( aw_enrich_table(), array( 'old_value' => wp_json_encode( $done ) ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		aw_enrich_set_status( $id, 'approved' );
+		$wpdb->update( sourceweb_enrich_table(), array( 'old_value' => wp_json_encode( $done ) ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		sourceweb_enrich_set_status( $id, 'approved' );
 		return true;
 	}
-	$snap = aw_enrich_snapshot( $lid, $r['field'] );
-	if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], 'apply', (array) $r['sources'] ) ) {
-		aw_enrich_set_status( $id, 'failed', aw_enrich_fail_note( $r['field'], false ) );
+	$snap = sourceweb_enrich_snapshot( $lid, $r['field'] );
+	if ( ! sourceweb_enrich_write( $lid, $r['field'], $r['value'], 'apply', (array) $r['sources'] ) ) {
+		sourceweb_enrich_set_status( $id, 'failed', sourceweb_enrich_fail_note( $r['field'], false ) );
 		return false;
 	}
 	global $wpdb;
-	$wpdb->update( aw_enrich_table(), array( 'old_value' => wp_json_encode( $snap ) ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	aw_enrich_set_status( $id, 'approved' );
-	aw_enrich_supersede( $lid, $r['field'], $id );
+	$wpdb->update( sourceweb_enrich_table(), array( 'old_value' => wp_json_encode( $snap ) ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	sourceweb_enrich_set_status( $id, 'approved' );
+	sourceweb_enrich_supersede( $lid, $r['field'], $id );
 	if ( is_scalar( $r['value'] ) ) {
 		aw_unverified_remove( $lid, $r['value'] ); // a person confirmed this value
 	}
@@ -814,15 +814,15 @@ function aw_enrich_approve( $id ) {
  * Reject a row: a person says no to this value for this listing and field, for good. A waiting row is turned down. An
  * applied row (auto-applied or approved) is undone first, so the value before it comes back; an undone row already has
  * its old value back. The row becomes 'rejected', and a later check never proposes or applies the same value for the
- * same listing and field again (aw_enrich_rest_results()). An applied "Reported closed" row is not rejected (it follows
+ * same listing and field again (sourceweb_enrich_rest_results()). An applied "Reported closed" row is not rejected (it follows
  * Google on every check; Undo it instead), and an applied row that a newer applied value already replaced is only
  * marked rejected, so the newer value stays.
  *
  * @param int $id Row ID.
  * @return bool False when the row is missing, already settled another way, or could not be undone.
  */
-function aw_enrich_reject( $id ) {
-	$r = aw_enrich_row( $id );
+function sourceweb_enrich_reject( $id ) {
+	$r = sourceweb_enrich_row( $id );
 	if ( ! $r || ! in_array( $r['status'], array( 'pending', 'auto-applied', 'approved', 'undone' ), true ) ) {
 		return false;
 	}
@@ -834,44 +834,44 @@ function aw_enrich_reject( $id ) {
 		global $wpdb;
 		// A newer applied value for the same field has already replaced this one: undoing this row would put back what
 		// was there before it, over the newer value. Then the row is only marked rejected.
-		$newer = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND id > %d AND status IN ('auto-applied','approved') LIMIT 1", aw_enrich_table(), (int) $r['listing_id'], $r['field'], (int) $id ) ); // phpcs:ignore WordPress.DB
-		if ( ! $newer && ! aw_enrich_undo( $id ) ) {
+		$newer = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND id > %d AND status IN ('auto-applied','approved') LIMIT 1", sourceweb_enrich_table(), (int) $r['listing_id'], $r['field'], (int) $id ) ); // phpcs:ignore WordPress.DB
+		if ( ! $newer && ! sourceweb_enrich_undo( $id ) ) {
 			return false;
 		}
 	}
 	if ( 'pending' === $was && 'closed' === $r['field'] ) {
 		delete_post_meta( (int) $r['listing_id'], 'aw_reported_closed' );
-		aw_enrich_flag( (int) $r['listing_id'], 'reported_closed', false );
+		sourceweb_enrich_flag( (int) $r['listing_id'], 'reported_closed', false );
 	}
 	// A row that had been applied keeps its note after a marker; the marker also keeps it clear of the "Could not be
 	// applied" notes that the recheck does not count as a no.
 	$note = 'pending' === $was ? null : trim( 'Rejected after it was applied. ' . (string) $r['note'] );
-	aw_enrich_set_status( $id, 'rejected', $note );
+	sourceweb_enrich_set_status( $id, 'rejected', $note );
 	return true;
 }
 
 /** Undo an applied row: the value before it goes back. */
-function aw_enrich_undo( $id ) {
-	$r = aw_enrich_row( $id );
+function sourceweb_enrich_undo( $id ) {
+	$r = sourceweb_enrich_row( $id );
 	if ( ! $r || ! in_array( $r['status'], array( 'auto-applied', 'approved' ), true ) ) {
 		return false;
 	}
 	if ( 'closed' === $r['field'] ) {
 		delete_post_meta( (int) $r['listing_id'], 'aw_reported_closed' );
-		aw_enrich_flag( (int) $r['listing_id'], 'reported_closed', false );
+		sourceweb_enrich_flag( (int) $r['listing_id'], 'reported_closed', false );
 	} elseif ( 'merge_into' === $r['field'] ) {
-		aw_enrich_unmerge( (int) $r['listing_id'], (array) $r['old_value'] );
+		sourceweb_enrich_unmerge( (int) $r['listing_id'], (array) $r['old_value'] );
 	} else {
-		aw_enrich_restore( (int) $r['listing_id'], $r['field'], $r['old_value'] );
+		sourceweb_enrich_restore( (int) $r['listing_id'], $r['field'], $r['old_value'] );
 	}
-	aw_enrich_set_status( $id, 'undone' );
+	sourceweb_enrich_set_status( $id, 'undone' );
 	return true;
 }
 
 /** Older pending rows for the same field are settled by a newer decision. */
-function aw_enrich_supersede( $lid, $field, $except ) {
+function sourceweb_enrich_supersede( $lid, $field, $except ) {
 	global $wpdb;
-	$wpdb->query( $wpdb->prepare( "UPDATE %i SET status = 'superseded' WHERE listing_id = %d AND field = %s AND status = 'pending' AND id <> %d", aw_enrich_table(), $lid, $field, $except ) ); // phpcs:ignore WordPress.DB
+	$wpdb->query( $wpdb->prepare( "UPDATE %i SET status = 'superseded' WHERE listing_id = %d AND field = %s AND status = 'pending' AND id <> %d", sourceweb_enrich_table(), $lid, $field, $except ) ); // phpcs:ignore WordPress.DB
 }
 
 /**
@@ -879,13 +879,13 @@ function aw_enrich_supersede( $lid, $field, $except ) {
  *
  * @return array{sources: array, confidence: string, at: string, status: string}|null
  */
-function aw_enrich_provenance( $lid, $field ) {
+function sourceweb_enrich_provenance( $lid, $field ) {
 	static $cache = array();
 	if ( ! isset( $cache[ $lid ] ) ) {
 		global $wpdb;
 		$cache[ $lid ] = array();
 		if ( get_option( 'aw_enrich_db' ) ) {
-			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT field, sources, confidence, status, created FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved') ORDER BY id ASC", aw_enrich_table(), $lid ), ARRAY_A ); // phpcs:ignore WordPress.DB
+			$rows = $wpdb->get_results( $wpdb->prepare( "SELECT field, sources, confidence, status, created FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved') ORDER BY id ASC", sourceweb_enrich_table(), $lid ), ARRAY_A ); // phpcs:ignore WordPress.DB
 			foreach ( $rows as $r ) {
 				$cache[ $lid ][ $r['field'] ] = array( 'sources' => (array) json_decode( $r['sources'], true ), 'confidence' => $r['confidence'], 'at' => $r['created'], 'status' => $r['status'] );
 			}
@@ -895,13 +895,13 @@ function aw_enrich_provenance( $lid, $field ) {
 }
 
 /** Every source key behind a listing's applied values. */
-function aw_enrich_listing_source_keys( $lid ) {
+function sourceweb_enrich_listing_source_keys( $lid ) {
 	global $wpdb;
 	if ( ! get_option( 'aw_enrich_db' ) ) {
 		return array();
 	}
 	$keys = array();
-	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT sources FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", aw_enrich_table(), $lid ) ) as $s ) { // phpcs:ignore WordPress.DB
+	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT sources FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", sourceweb_enrich_table(), $lid ) ) as $s ) { // phpcs:ignore WordPress.DB
 		foreach ( (array) json_decode( $s, true ) as $src ) {
 			$k = (string) ( $src['key'] ?? '' );
 			if ( $k && ! isset( $keys[ $k ] ) ) {
@@ -912,15 +912,15 @@ function aw_enrich_listing_source_keys( $lid ) {
 	return $keys;
 }
 
-/** Listing flags (Invite to claim, Reported closed, Possible duplicate): aw_enrich_flags = [flag => detail]. */
-function aw_enrich_flags( $lid ) {
+/** Listing flags (Invite to claim, Reported closed, Possible duplicate): sourceweb_enrich_flags = [flag => detail]. */
+function sourceweb_enrich_flags( $lid ) {
 	$f = get_post_meta( $lid, 'aw_enrich_flags', true );
 	return is_array( $f ) ? array_filter( $f ) : array();
 }
 
 /** Set or clear one flag. */
-function aw_enrich_flag( $lid, $flag, $detail ) {
-	$f = aw_enrich_flags( $lid );
+function sourceweb_enrich_flag( $lid, $flag, $detail ) {
+	$f = sourceweb_enrich_flags( $lid );
 	if ( false === $detail || null === $detail || array() === $detail ) {
 		unset( $f[ $flag ] );
 	} else {
@@ -935,8 +935,8 @@ function aw_enrich_flag( $lid, $flag, $detail ) {
  * @param int $lid Listing ID.
  * @return bool
  */
-function aw_enrich_identity_unresolved( $lid ) {
-	return ! empty( aw_enrich_flags( $lid )['identity'] );
+function sourceweb_enrich_identity_unresolved( $lid ) {
+	return ! empty( sourceweb_enrich_flags( $lid )['identity'] );
 }
 
 /** List fields: a proposal adds to what is there and never drops a value. */
@@ -948,7 +948,7 @@ const AW_ENRICH_LIST_FIELDS = array( 'services', 'animals', 'areas_served' );
  * @param mixed $v Value.
  * @return array
  */
-function aw_enrich_list_items( $v ) {
+function sourceweb_enrich_list_items( $v ) {
 	$items = is_array( $v ) ? $v : explode( ',', (string) $v );
 	return array_values( array_filter( array_map( fn( $s ) => trim( (string) $s ), $items ), 'strlen' ) );
 }
@@ -969,12 +969,12 @@ const AW_ENRICH_SERVICE_MAP = array(
  * @param mixed $value Proposed services (list or comma-separated text).
  * @return array{0: string[], 1: string}
  */
-function aw_enrich_services_norm( $value ) {
+function sourceweb_enrich_services_norm( $value ) {
 	$known  = function_exists( 'directoryweb_service_slugs' ) ? directoryweb_service_slugs() : array();
 	$out    = array();
 	$mapped = array();
 	$drop   = array();
-	foreach ( aw_enrich_list_items( $value ) as $item ) {
+	foreach ( sourceweb_enrich_list_items( $value ) as $item ) {
 		$slug = sanitize_title( $item );
 		if ( isset( AW_ENRICH_SERVICE_MAP[ $slug ] ) && in_array( AW_ENRICH_SERVICE_MAP[ $slug ], $known, true ) ) {
 			$mapped[] = $slug . ' as ' . AW_ENRICH_SERVICE_MAP[ $slug ];
@@ -1008,15 +1008,15 @@ function aw_enrich_services_norm( $value ) {
  * @param mixed  $value Proposed value.
  * @return mixed
  */
-function aw_enrich_union( $lid, $field, $value ) {
-	if ( ! in_array( $field, AW_ENRICH_LIST_FIELDS, true ) || aw_enrich_is_empty( $lid, $field ) ) {
+function sourceweb_enrich_union( $lid, $field, $value ) {
+	if ( ! in_array( $field, AW_ENRICH_LIST_FIELDS, true ) || sourceweb_enrich_is_empty( $lid, $field ) ) {
 		return $value;
 	}
-	$out  = aw_enrich_list_items( aw_enrich_current( $lid, $field ) );
+	$out  = sourceweb_enrich_list_items( sourceweb_enrich_current( $lid, $field ) );
 	$seen = array_map( 'strtolower', $out );
-	foreach ( aw_enrich_list_items( $value ) as $item ) {
+	foreach ( sourceweb_enrich_list_items( $value ) as $item ) {
 		if ( 'services' === $field && ( ! function_exists( 'directoryweb_service_slugs' ) || ! in_array( sanitize_title( $item ), directoryweb_service_slugs(), true ) ) ) {
-			continue; // Only known services are stored (aw_enrich_write), so an unknown one adds nothing.
+			continue; // Only known services are stored (sourceweb_enrich_write), so an unknown one adds nothing.
 		}
 		if ( ! in_array( strtolower( $item ), $seen, true ) ) {
 			$out[]  = $item;
@@ -1032,7 +1032,7 @@ function aw_enrich_union( $lid, $field, $value ) {
 add_action(
 	'aw_claim_before_apply',
 	function ( $lid, $proposed, $claim_id ) {
-		aw_enrich_install();
+		sourceweb_enrich_install();
 		$map = array( 'aw_phone' => 'phone', 'aw_whatsapp' => 'whatsapp', 'aw_email' => 'email', 'aw_website' => 'website', 'aw_services' => 'services' );
 		delete_post_meta( $lid, 'aw_unverified' ); // the organisation has spoken: nothing on the listing is "unverified" any more
 		delete_post_meta( $lid, 'aw_email_alt' );
@@ -1042,7 +1042,7 @@ add_action(
 			if ( isset( $map[ $k ] ) && '' !== (string) $v ) {
 				$field = $map[ $k ];
 				$val   = 'services' === $field ? explode( ',', (string) $v ) : $v;
-				aw_enrich_add_row( $lid, $field, $val, aw_enrich_snapshot( $lid, $field ), $src, 'high', 'approved', 'claim-' . $claim_id );
+				sourceweb_enrich_add_row( $lid, $field, $val, sourceweb_enrich_snapshot( $lid, $field ), $src, 'high', 'approved', 'claim-' . $claim_id );
 			}
 		}
 	},
@@ -1053,14 +1053,14 @@ add_action(
 /* ---------- Spend (Google Places) ---------- */
 
 /** Google spend this month (USD): the worker's calls plus the live block's. */
-function aw_enrich_spent( $which = 'all' ) {
+function sourceweb_enrich_spent( $which = 'all' ) {
 	$l = (array) get_option( 'aw_enrich_ledger', array() );
 	$m = (array) ( $l[ wp_date( 'Y-m' ) ] ?? array() );
 	return 'all' === $which ? (float) array_sum( $m ) : (float) ( $m[ $which ] ?? 0 );
 }
 
 /** Add to this month's spend. */
-function aw_enrich_spend( $usd, $which = 'worker' ) {
+function sourceweb_enrich_spend( $usd, $which = 'worker' ) {
 	$l   = (array) get_option( 'aw_enrich_ledger', array() );
 	$key = wp_date( 'Y-m' );
 	$l[ $key ][ $which ] = round( (float) ( $l[ $key ][ $which ] ?? 0 ) + (float) $usd, 4 );
@@ -1074,26 +1074,26 @@ add_action(
 	'rest_api_init',
 	function () {
 		$can = fn() => current_user_can( 'edit_others_posts' );
-		register_rest_route( 'aw/v1', '/enrich/config', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_config' ) );
-		register_rest_route( 'aw/v1', '/enrich/queue', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_queue' ) );
-		register_rest_route( 'aw/v1', '/enrich/results', array( 'methods' => 'POST', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_results' ) );
-		register_rest_route( 'aw/v1', '/enrich/index', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_index' ) );
-		register_rest_route( 'aw/v1', '/enrich/cleanup', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'aw_enrich_rest_cleanup' ) );
+		register_rest_route( 'aw/v1', '/enrich/config', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'sourceweb_enrich_rest_config' ) );
+		register_rest_route( 'aw/v1', '/enrich/queue', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'sourceweb_enrich_rest_queue' ) );
+		register_rest_route( 'aw/v1', '/enrich/results', array( 'methods' => 'POST', 'permission_callback' => $can, 'callback' => 'sourceweb_enrich_rest_results' ) );
+		register_rest_route( 'aw/v1', '/enrich/index', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'sourceweb_enrich_rest_index' ) );
+		register_rest_route( 'aw/v1', '/enrich/cleanup', array( 'methods' => 'GET', 'permission_callback' => $can, 'callback' => 'sourceweb_enrich_rest_cleanup' ) );
 	}
 );
 
 /** GET enrich/config. From phase 3 also the Directory schema, the trust order and the field rules (rules.php). */
-function aw_enrich_rest_config() {
+function sourceweb_enrich_rest_config() {
 	$out = array(
-		'sources'      => aw_enrich_sources_on(),
-		'google_spent' => aw_enrich_spent( 'worker' ),
-		'fields'       => array_keys( aw_enrich_fields_all() ),
+		'sources'      => sourceweb_enrich_sources_on(),
+		'google_spent' => sourceweb_enrich_spent( 'worker' ),
+		'fields'       => array_keys( sourceweb_enrich_fields_all() ),
 		'services'     => DIRECTORYWEB_SERVICES,
-		'counts'       => aw_enrich_progress(),
+		'counts'       => sourceweb_enrich_progress(),
 	);
-	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
-		$rules              = aw_enrich_field_rules();
-		$out['schema']      = aw_enrich_schema();
+	if ( function_exists( 'sourceweb_rules_live' ) && sourceweb_rules_live() ) {
+		$rules              = sourceweb_enrich_field_rules();
+		$out['schema']      = sourceweb_enrich_schema();
 		$out['priority']    = $rules['priority'];
 		$out['field_rules'] = (object) $rules['fields'];
 	}
@@ -1101,11 +1101,11 @@ function aw_enrich_rest_config() {
 }
 
 /** How far the worker has got: listings checked / total, and pending reviews. */
-function aw_enrich_progress() {
+function sourceweb_enrich_progress() {
 	global $wpdb;
 	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB
 	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
-	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", aw_enrich_table() ) ) : 0; // phpcs:ignore WordPress.DB
+	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", sourceweb_enrich_table() ) ) : 0; // phpcs:ignore WordPress.DB
 	return array( 'total' => $total, 'checked' => $checked, 'pending' => $pending );
 }
 
@@ -1113,7 +1113,7 @@ function aw_enrich_progress() {
  * GET enrich/index?state=Haryana&page=1: the published listings of one state (id, name, district, whether they have any
  * contact), for matching an outside list (NGO Darpan CSV) to listings. 1,000 a page.
  */
-function aw_enrich_rest_index( WP_REST_Request $req ) {
+function sourceweb_enrich_rest_index( WP_REST_Request $req ) {
 	global $wpdb;
 	$want = strtolower( trim( (string) $req['state'] ) );
 	$page = max( 1, (int) ( $req['page'] ?? 1 ) );
@@ -1147,7 +1147,7 @@ function aw_enrich_rest_index( WP_REST_Request $req ) {
  * since; never checked AWBI listings with no phone, email or website; every other never-checked listing; then those
  * last checked more than 90 days ago.
  */
-function aw_enrich_rest_queue( WP_REST_Request $req ) {
+function sourceweb_enrich_rest_queue( WP_REST_Request $req ) {
 	global $wpdb;
 	$limit = max( 1, min( 200, (int) ( $req['limit'] ?? 50 ) ) );
 	$ids   = array_filter( array_map( 'absint', explode( ',', (string) ( $req['ids'] ?? '' ) ) ) );
@@ -1187,18 +1187,18 @@ function aw_enrich_rest_queue( WP_REST_Request $req ) {
 	$items = array();
 	foreach ( array_slice( $ids, 0, $limit ) as $id ) {
 		if ( 'aw_listing' === get_post_type( $id ) ) {
-			$items[] = aw_enrich_listing_payload( $id );
+			$items[] = sourceweb_enrich_listing_payload( $id );
 		}
 	}
-	return array( 'items' => $items, 'progress' => aw_enrich_progress(), 'google_spent' => aw_enrich_spent( 'worker' ) );
+	return array( 'items' => $items, 'progress' => sourceweb_enrich_progress(), 'google_spent' => sourceweb_enrich_spent( 'worker' ) );
 }
 
 /** What the worker needs to know about one listing. */
-function aw_enrich_listing_payload( $id ) {
+function sourceweb_enrich_listing_payload( $id ) {
 	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
 	$now = array();
-	foreach ( array_keys( aw_enrich_fields_all() ) as $f ) {
-		$v = aw_enrich_current( $id, $f );
+	foreach ( array_keys( sourceweb_enrich_fields_all() ) as $f ) {
+		$v = sourceweb_enrich_current( $id, $f );
 		if ( ( is_array( $v ) && $v ) || ( ! is_array( $v ) && '' !== trim( (string) $v ) ) ) {
 			$now[ $f ] = $v;
 		}
@@ -1218,7 +1218,7 @@ function aw_enrich_listing_payload( $id ) {
 		'awbi_address' => (string) get_post_meta( $id, 'aw_awbi_address', true ),
 		'area'         => (string) get_post_meta( $id, 'aw_area', true ),
 		'types'        => function_exists( 'directoryweb_listing_types' ) ? wp_list_pluck( directoryweb_listing_types( $id ), 'slug' ) : array(),
-		'protected'    => aw_enrich_is_protected( $id ),
+		'protected'    => sourceweb_enrich_is_protected( $id ),
 		'checked'      => (string) get_post_meta( $id, 'aw_enrich_checked', true ),
 		'now'          => $now,
 		'claim'        => $claim,
@@ -1229,21 +1229,21 @@ function aw_enrich_listing_payload( $id ) {
  * POST enrich/results: {listing_id, run, google_cost, sources_used: [keys], proposals: [{field, value, confidence,
  * sources: [{key, name, url, fetched_at}]}], flags: {invite_claim: [fields], reported_closed: {url, at}}}.
  */
-function aw_enrich_rest_results( WP_REST_Request $req ) {
-	aw_enrich_install();
+function sourceweb_enrich_rest_results( WP_REST_Request $req ) {
+	sourceweb_enrich_install();
 	$b   = (array) $req->get_json_params();
 	$lid = (int) ( $b['listing_id'] ?? 0 );
 	if ( 'aw_listing' !== get_post_type( $lid ) ) {
 		return new WP_Error( 'aw_enrich', 'Not a listing', array( 'status' => 400 ) );
 	}
 	$run       = sanitize_text_field( (string) ( $b['run'] ?? '' ) );
-	$protected = aw_enrich_is_protected( $lid );
-	$fields    = aw_enrich_fields_all(); // with the listing fields whose field rule is on (phase 3)
+	$protected = sourceweb_enrich_is_protected( $lid );
+	$fields    = sourceweb_enrich_fields_all(); // with the listing fields whose field rule is on (phase 3)
 	$out       = array( 'applied' => array(), 'queued' => array(), 'skipped' => array(), 'failed' => array() ); // skipped: nothing to do (already held, not usable); failed: a write that did not work, logged as a 'failed' row
 	if ( ! empty( $b['google_cost'] ) ) {
-		aw_enrich_spend( (float) $b['google_cost'], 'worker' );
+		sourceweb_enrich_spend( (float) $b['google_cost'], 'worker' );
 	}
-	if ( aw_enrich_identity_unresolved( $lid ) ) { // Which organisation this is is not known: nothing is proposed.
+	if ( sourceweb_enrich_identity_unresolved( $lid ) ) { // Which organisation this is is not known: nothing is proposed.
 		$out['skipped'] = array_values( array_filter( array_map( fn( $p ) => sanitize_key( (string) ( $p['field'] ?? '' ) ), (array) ( $b['proposals'] ?? array() ) ) ) );
 		return $out + array(
 			'protected'           => $protected,
@@ -1267,13 +1267,13 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$rule = aw_enrich_field_rule( $field ); // Rules → Directory enrichment: a field switched off, or sources not allowed to fill it
+		$rule = sourceweb_enrich_field_rule( $field ); // Rules → Directory enrichment: a field switched off, or sources not allowed to fill it
 		if ( empty( $rule['on'] ) ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
 		if ( $rule['sources'] ) { // a source not allowed is never credited; nothing left from an allowed one: skipped
-			$srcs = aw_enrich_allowed_sources( $srcs, $rule['sources'] );
+			$srcs = sourceweb_enrich_allowed_sources( $srcs, $rule['sources'] );
 			if ( ! $srcs ) {
 				$out['skipped'][] = $field;
 				continue;
@@ -1283,53 +1283,53 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field; // Google alone never stores a fact
 			continue;
 		}
-		if ( aw_enrich_never_publish( $value ) ) {
+		if ( sourceweb_enrich_never_publish( $value ) ) {
 			$out['skipped'][] = $field; // on the never-publish list (privacy takedown)
 			continue;
 		}
 		$svc_note = '';
 		if ( 'services' === $field ) { // the site's own service slugs; what was mapped or dropped goes into the row's note
-			list( $value, $svc_note ) = aw_enrich_services_norm( $value );
+			list( $value, $svc_note ) = sourceweb_enrich_services_norm( $value );
 			if ( ! $value ) {
 				$out['skipped'][] = $field;
 				continue;
 			}
 		}
-		$value = aw_enrich_union( $lid, $field, $value ); // List fields: what is there plus what was found.
-		if ( aw_enrich_has_value( $lid, $field, $value ) ) {
+		$value = sourceweb_enrich_union( $lid, $field, $value ); // List fields: what is there plus what was found.
+		if ( sourceweb_enrich_has_value( $lid, $field, $value ) ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
 		global $wpdb;
 		// Already waiting, or a person said no (Reject, also on a value that had been applied or undone: see
-		// aw_enrich_reject()). A failed write is not a no (status 'failed'; rows from before 25 Oct 2026
+		// sourceweb_enrich_reject()). A failed write is not a no (status 'failed'; rows from before 25 Oct 2026
 		// were 'rejected' with a "Could not be applied" / "could not be copied" note), so that value may come back.
-		$same = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND value = %s AND ( status = 'pending' OR ( status = 'rejected' AND note NOT LIKE %s AND note NOT LIKE %s ) ) LIMIT 1", aw_enrich_table(), $lid, $field, wp_json_encode( $value ), $wpdb->esc_like( 'Could not be applied' ) . '%', '%' . $wpdb->esc_like( 'could not be copied' ) . '%' ) ); // phpcs:ignore WordPress.DB
+		$same = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND value = %s AND ( status = 'pending' OR ( status = 'rejected' AND note NOT LIKE %s AND note NOT LIKE %s ) ) LIMIT 1", sourceweb_enrich_table(), $lid, $field, wp_json_encode( $value ), $wpdb->esc_like( 'Could not be applied' ) . '%', '%' . $wpdb->esc_like( 'could not be copied' ) . '%' ) ); // phpcs:ignore WordPress.DB
 		if ( $same ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$mode = ! empty( $b['force_review'] ) ? 'queue' : aw_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list (Darpan CSV) always goes to review
+		$mode = ! empty( $b['force_review'] ) ? 'queue' : sourceweb_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list (Darpan CSV) always goes to review
 		if ( 'queue' !== $mode ) {
-			$snap = aw_enrich_snapshot( $lid, $field );
-			if ( aw_enrich_write( $lid, $field, $value, $mode, $srcs ) ) {
-				$rid = aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, trim( $svc_note . ( 'both' === $mode ? '. ' . aw_enrich_both_note( $field ) : '' ), '. ' ) );
-				aw_enrich_supersede( $lid, $field, $rid );
+			$snap = sourceweb_enrich_snapshot( $lid, $field );
+			if ( sourceweb_enrich_write( $lid, $field, $value, $mode, $srcs ) ) {
+				$rid = sourceweb_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'auto-applied', $run, trim( $svc_note . ( 'both' === $mode ? '. ' . sourceweb_enrich_both_note( $field ) : '' ), '. ' ) );
+				sourceweb_enrich_supersede( $lid, $field, $rid );
 				$out['applied'][] = $field;
 				continue;
 			}
-			$prev = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND status = 'failed' AND value = %s ORDER BY id DESC LIMIT 1", aw_enrich_table(), $lid, $field, wp_json_encode( $value ) ) ); // phpcs:ignore WordPress.DB
+			$prev = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = %s AND status = 'failed' AND value = %s ORDER BY id DESC LIMIT 1", sourceweb_enrich_table(), $lid, $field, wp_json_encode( $value ) ) ); // phpcs:ignore WordPress.DB
 			if ( $prev ) { // the same value failed before: one row, dated by its latest attempt
-				$wpdb->update( aw_enrich_table(), array( 'run' => substr( $run, 0, 40 ), 'decided_at' => current_time( 'mysql' ) ), array( 'id' => (int) $prev ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+				$wpdb->update( sourceweb_enrich_table(), array( 'run' => substr( $run, 0, 40 ), 'decided_at' => current_time( 'mysql' ) ), array( 'id' => (int) $prev ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			} else {
-				aw_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'failed', $run, aw_enrich_fail_note( $field, true ) );
+				sourceweb_enrich_add_row( $lid, $field, $value, $snap, $srcs, $conf, 'failed', $run, sourceweb_enrich_fail_note( $field, true ) );
 			}
 			$out['failed'][] = $field;
 			continue;
 		}
 		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
 		$note = null !== $note ? $note : ( ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) ) );
-		$rid = aw_enrich_add_row( $lid, $field, $value, aw_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
+		$rid = sourceweb_enrich_add_row( $lid, $field, $value, sourceweb_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
 		$dec = apply_filters( 'aw_enrich_queued_decision', '', (int) $rid, $lid, $field ); // autoresolve.php decides the obvious ones at once: approve | reject | ''
 		if ( 'approve' === $dec ) {
 			$out['applied'][] = $field;
@@ -1344,20 +1344,20 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
 		return $out + array( 'protected' => $protected );
 	}
 	$flags = (array) ( $b['flags'] ?? array() );
-	aw_enrich_flag( $lid, 'invite_claim', array_values( array_intersect( array_map( 'sanitize_key', (array) ( $flags['invite_claim'] ?? array() ) ), array_keys( $fields ) ) ) );
+	sourceweb_enrich_flag( $lid, 'invite_claim', array_values( array_intersect( array_map( 'sanitize_key', (array) ( $flags['invite_claim'] ?? array() ) ), array_keys( $fields ) ) ) );
 	if ( ! empty( $flags['reported_closed'] ) ) {
 		$rc  = (array) $flags['reported_closed'];
 		$src = array( array( 'key' => 'google_places', 'name' => 'Google Maps', 'url' => esc_url_raw( (string) ( $rc['url'] ?? '' ) ), 'fetched_at' => sanitize_text_field( (string) ( $rc['at'] ?? '' ) ) ) );
 		update_post_meta( $lid, 'aw_reported_closed', wp_date( 'Y-m-d' ) ); // the listing stays in search and shows the "Reported closed" note (owner, 21 Oct 2026)
-		aw_enrich_flag( $lid, 'reported_closed', wp_date( 'Y-m-d' ) );
+		sourceweb_enrich_flag( $lid, 'reported_closed', wp_date( 'Y-m-d' ) );
 		global $wpdb;
-		if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = 'closed' AND status IN ('auto-applied','approved')", aw_enrich_table(), $lid ) ) ) { // phpcs:ignore WordPress.DB
-			aw_enrich_add_row( $lid, 'closed', 'Google Maps shows this place as permanently closed', '', $src, 'medium', 'auto-applied', $run, 'Shown on the listing as "Reported closed"; nothing to review' );
+		if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT id FROM %i WHERE listing_id = %d AND field = 'closed' AND status IN ('auto-applied','approved')", sourceweb_enrich_table(), $lid ) ) ) { // phpcs:ignore WordPress.DB
+			sourceweb_enrich_add_row( $lid, 'closed', 'Google Maps shows this place as permanently closed', '', $src, 'medium', 'auto-applied', $run, 'Shown on the listing as "Reported closed"; nothing to review' );
 			$out['applied'][] = 'closed';
 		}
-		aw_enrich_after_change( $lid );
+		sourceweb_enrich_after_change( $lid );
 	}
-	aw_enrich_duplicates( $lid );
+	sourceweb_enrich_duplicates( $lid );
 	$used = array_values( array_unique( array_map( 'sanitize_key', (array) ( $b['sources_used'] ?? array() ) ) ) );
 	update_post_meta( $lid, 'aw_enrich_checked', wp_date( 'Y-m-d H:i:s' ) );
 	update_post_meta( $lid, 'aw_enrich_tried', $used );
@@ -1377,72 +1377,72 @@ function aw_enrich_rest_results( WP_REST_Request $req ) {
  * @param int $lid Listing ID.
  * @return string
  */
-function aw_enrich_last_applied( $lid ) {
+function sourceweb_enrich_last_applied( $lid ) {
 	if ( ! get_option( 'aw_enrich_db' ) ) {
 		return '';
 	}
 	global $wpdb;
-	return (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX( COALESCE( decided_at, created ) ) FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", aw_enrich_table(), $lid ) ); // phpcs:ignore WordPress.DB
+	return (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX( COALESCE( decided_at, created ) ) FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", sourceweb_enrich_table(), $lid ) ); // phpcs:ignore WordPress.DB
 }
 
 /** Another listing with the same place ID or Darpan ID (stored or waiting in the queue): flag both, never merge. */
-function aw_enrich_duplicates( $lid ) {
+function sourceweb_enrich_duplicates( $lid ) {
 	global $wpdb;
 	$dups = array();
 	foreach ( array( 'place_id' => 'aw_place_id', 'darpan_id' => 'aw_darpan_id' ) as $field => $key ) {
 		$vals = array_filter( array( (string) get_post_meta( $lid, $key, true ) ) );
-		foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT value FROM %i WHERE listing_id = %d AND field = %s AND status = 'pending'", aw_enrich_table(), $lid, $field ) ) as $v ) { // phpcs:ignore WordPress.DB
+		foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT value FROM %i WHERE listing_id = %d AND field = %s AND status = 'pending'", sourceweb_enrich_table(), $lid, $field ) ) as $v ) { // phpcs:ignore WordPress.DB
 			$vals[] = (string) json_decode( $v, true );
 		}
 		foreach ( array_unique( array_filter( $vals ) ) as $v ) {
 			$other = array_merge(
 				$wpdb->get_col( $wpdb->prepare( "SELECT m.post_id FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = 'aw_listing' AND p.post_status <> 'trash' WHERE m.meta_key = %s AND m.meta_value = %s AND m.post_id <> %d", $key, $v, $lid ) ), // phpcs:ignore WordPress.DB
-				$wpdb->get_col( $wpdb->prepare( "SELECT listing_id FROM %i WHERE field = %s AND value = %s AND status = 'pending' AND listing_id <> %d", aw_enrich_table(), $field, wp_json_encode( $v ), $lid ) ) // phpcs:ignore WordPress.DB
+				$wpdb->get_col( $wpdb->prepare( "SELECT listing_id FROM %i WHERE field = %s AND value = %s AND status = 'pending' AND listing_id <> %d", sourceweb_enrich_table(), $field, wp_json_encode( $v ), $lid ) ) // phpcs:ignore WordPress.DB
 			);
 			foreach ( array_unique( array_map( 'intval', $other ) ) as $o ) {
 				$dups[ $o ] = $field;
-				$theirs     = (array) ( aw_enrich_flags( $o )['duplicate'] ?? array() );
+				$theirs     = (array) ( sourceweb_enrich_flags( $o )['duplicate'] ?? array() );
 				$theirs[ $lid ] = $field;
-				aw_enrich_flag( $o, 'duplicate', $theirs );
+				sourceweb_enrich_flag( $o, 'duplicate', $theirs );
 			}
 		}
 	}
-	aw_enrich_flag( $lid, 'duplicate', $dups );
+	sourceweb_enrich_flag( $lid, 'duplicate', $dups );
 }
 
 
 /**
  * Apply the owner's rule (21 Oct 2026) to proposals already waiting: a sourced value fills an empty field; a second
  * phone, email or website is kept next to the first, both unverified. Rows of claimed or verified listings and low
- * confidence rows stay for review. wp eval 'echo aw_enrich_policy_pass();'
+ * confidence rows stay for review. wp eval 'echo sourceweb_enrich_policy_pass();'
  *
  * A server tool, run by hand with wp eval: no code calls it, on purpose (audit, 25 Oct 2026). Keep it.
  *
  * @return string What was done.
  */
-function aw_enrich_policy_pass() {
+function sourceweb_enrich_policy_pass() {
 	global $wpdb;
-	$t = aw_enrich_table();
+	$t = sourceweb_enrich_table();
 	$n = array( 'apply' => 0, 'both' => 0, 'queue' => 0, 'skip' => 0 );
 	foreach ( $wpdb->get_results( $wpdb->prepare( "SELECT id FROM %i WHERE status = 'pending' AND field <> 'closed' ORDER BY id ASC", $t ), ARRAY_A ) as $x ) { // phpcs:ignore WordPress.DB
-		$r = aw_enrich_row( (int) $x['id'] );
+		$r = sourceweb_enrich_row( (int) $x['id'] );
 		if ( ! $r || 'pending' !== $r['status'] ) {
 			continue;
 		}
 		$lid = (int) $r['listing_id'];
-		if ( aw_enrich_identity_unresolved( $lid ) ) {
+		if ( sourceweb_enrich_identity_unresolved( $lid ) ) {
 			++$n['queue'];
 			continue;
 		}
 		// The field rule as it is now (Codex, #77): a field switched off, or a row with no allowed source left, waits for
 		// a reviewer instead of being applied; an allowed row is written with its allowed sources only.
-		$rule = aw_enrich_field_rule( $r['field'] );
+		$rule = sourceweb_enrich_field_rule( $r['field'] );
 		if ( empty( $rule['on'] ) ) {
 			++$n['queue'];
 			continue;
 		}
 		if ( $rule['sources'] ) {
-			$r['sources'] = aw_enrich_allowed_sources( (array) $r['sources'], $rule['sources'] );
+			$r['sources'] = sourceweb_enrich_allowed_sources( (array) $r['sources'], $rule['sources'] );
 			if ( ! $r['sources'] ) {
 				++$n['queue'];
 				continue;
@@ -1450,31 +1450,31 @@ function aw_enrich_policy_pass() {
 		}
 		$svc_note = '';
 		if ( 'services' === $r['field'] ) {
-			list( $r['value'], $svc_note ) = aw_enrich_services_norm( $r['value'] );
+			list( $r['value'], $svc_note ) = sourceweb_enrich_services_norm( $r['value'] );
 			if ( ! $r['value'] ) { // none of the words is a service on the site: nothing to apply
-				aw_enrich_set_status( (int) $r['id'], 'superseded', 'Nothing to apply. ' . $svc_note );
+				sourceweb_enrich_set_status( (int) $r['id'], 'superseded', 'Nothing to apply. ' . $svc_note );
 				$n['skip']++;
 				continue;
 			}
 		}
-		$r['value'] = aw_enrich_union( $lid, $r['field'], $r['value'] );
-		if ( aw_enrich_has_value( $lid, $r['field'], $r['value'] ) ) {
-			aw_enrich_set_status( (int) $r['id'], 'superseded', 'Already on the listing' );
+		$r['value'] = sourceweb_enrich_union( $lid, $r['field'], $r['value'] );
+		if ( sourceweb_enrich_has_value( $lid, $r['field'], $r['value'] ) ) {
+			sourceweb_enrich_set_status( (int) $r['id'], 'superseded', 'Already on the listing' );
 			$n['skip']++;
 			continue;
 		}
-		$mode = aw_enrich_mode( $lid, $r['field'], $r['confidence'], aw_enrich_is_protected( $lid ), $r['value'] );
+		$mode = sourceweb_enrich_mode( $lid, $r['field'], $r['confidence'], sourceweb_enrich_is_protected( $lid ), $r['value'] );
 		if ( 'queue' === $mode ) {
 			$n['queue']++;
 			continue;
 		}
-		$snap = aw_enrich_snapshot( $lid, $r['field'] );
-		if ( ! aw_enrich_write( $lid, $r['field'], $r['value'], $mode, (array) $r['sources'] ) ) {
+		$snap = sourceweb_enrich_snapshot( $lid, $r['field'] );
+		if ( ! sourceweb_enrich_write( $lid, $r['field'], $r['value'], $mode, (array) $r['sources'] ) ) {
 			$n['queue']++;
 			continue;
 		}
-		$wpdb->update( $t, array( 'value' => wp_json_encode( $r['value'] ), 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => substr( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . ( 'both' === $mode ? aw_enrich_both_note( $r['field'] ) : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), 0, 190 ) ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
-		aw_enrich_supersede( $lid, $r['field'], (int) $r['id'] );
+		$wpdb->update( $t, array( 'value' => wp_json_encode( $r['value'] ), 'old_value' => wp_json_encode( $snap ), 'status' => 'auto-applied', 'decided_at' => current_time( 'mysql' ), 'note' => substr( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . ( 'both' === $mode ? sourceweb_enrich_both_note( $r['field'] ) : 'Sourced value for an empty field (owner rule, 21 Oct 2026)' ), 0, 190 ) ), array( 'id' => (int) $r['id'] ) ); // phpcs:ignore WordPress.DB
+		sourceweb_enrich_supersede( $lid, $r['field'], (int) $r['id'] );
 		$n[ $mode ]++;
 	}
 	return wp_json_encode( $n );

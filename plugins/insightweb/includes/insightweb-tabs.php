@@ -17,12 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The tabs this file draws: every Search Insights tab but Overview (the Dashboard) and Settings. */
 function insightweb_tab_keys(): array {
-	return array_merge( array( 'keywords' ), array_keys( aw_si_extra_tabs() ) );
+	return array_merge( array( 'keywords' ), array_keys( insightweb_si_extra_tabs() ) );
 }
 
 /** Each tab's label: key => label. */
 function insightweb_tab_labels(): array {
-	return array( 'keywords' => __( 'Keywords', 'insightweb' ) ) + aw_si_extra_tabs();
+	return array( 'keywords' => __( 'Keywords', 'insightweb' ) ) + insightweb_si_extra_tabs();
 }
 
 /**
@@ -38,7 +38,7 @@ function insightweb_tab_parts( string $tab ): array {
 	}
 	ob_start();
 	if ( 'keywords' === $tab ) {
-		aw_si_keywords_tab();
+		insightweb_si_keywords_tab();
 	} else {
 		do_action( 'aw_si_tab_' . $tab );
 	}
@@ -57,7 +57,7 @@ function insightweb_overview_parts(): array {
 		return array();
 	}
 	ob_start();
-	aw_si_screen_notices();
+	insightweb_si_screen_notices();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }
 
@@ -72,7 +72,7 @@ function insightweb_settings_more_parts(): array {
 		return array();
 	}
 	ob_start();
-	aw_si_action_notices();
-	aw_si_settings_tab();
+	insightweb_si_action_notices();
+	insightweb_si_settings_tab();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }

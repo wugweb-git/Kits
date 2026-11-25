@@ -14,7 +14,7 @@
  *   rebuilt exactly as they were (read-only mirrors until phase 4).
  * and a map table, wp_aw_si_kw_map: (kw_id, kind, value), kind "category" (a category slug) or "section" (a post type).
  * Version 3 (1 Nov 2026) adds quick_win: 1 when Search Insights' daily calculation finds the keyword at position 8–20
- * with enough impressions (aw_si_quick_win), so the Quick wins view, the weekly read and exports count the same rows.
+ * with enough impressions (insightweb_si_quick_win), so the Quick wins view, the weekly read and exports count the same rows.
  *
  * @package insightweb
  */
@@ -31,28 +31,28 @@ const AW_KW_DB_OPTION  = 'aw_kw_db';
  *
  * @param string $name keywords, kw_map, kw_pages, obs or rising.
  */
-function aw_si_table( string $name ): string {
+function insightweb_si_table( string $name ): string {
 	global $wpdb;
 	return $wpdb->prefix . 'aw_si_' . $name;
 }
 
 /** Current time in MySQL format, site time zone (IST). */
-function aw_si_now(): string {
+function insightweb_si_now(): string {
 	return current_time( 'mysql' );
 }
 
 /** Role bits with their labels (Search Insights' filters and AW Sourcing's Keywords screen). */
-function aw_si_roles(): array {
+function insightweb_si_roles(): array {
 	return array(
 		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'insightweb' ),
 		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'insightweb' ),
 		AW_SI_ROLE_SOURCING => __( 'Include', 'insightweb' ),
-		AW_KW_ROLE_ANIMAL   => __( 'Animal', 'insightweb' ),
-		AW_KW_ROLE_CONTEXT  => __( 'Context', 'insightweb' ),
-		AW_KW_ROLE_EXCLUDE  => __( 'Exclude', 'insightweb' ),
-		AW_KW_ROLE_SEARCH   => __( 'Search', 'insightweb' ),
-		AW_KW_ROLE_PRESS    => __( 'Press', 'insightweb' ),
-		AW_KW_ROLE_CATEGORY => __( 'Category word', 'insightweb' ),
+		SOURCEWEB_KW_ROLE_ANIMAL   => __( 'Animal', 'insightweb' ),
+		SOURCEWEB_KW_ROLE_CONTEXT  => __( 'Context', 'insightweb' ),
+		SOURCEWEB_KW_ROLE_EXCLUDE  => __( 'Exclude', 'insightweb' ),
+		SOURCEWEB_KW_ROLE_SEARCH   => __( 'Search', 'insightweb' ),
+		SOURCEWEB_KW_ROLE_PRESS    => __( 'Press', 'insightweb' ),
+		SOURCEWEB_KW_ROLE_CATEGORY => __( 'Category word', 'insightweb' ),
 		AW_SI_ROLE_BRAND    => __( 'Brand', 'insightweb' ),
 		AW_SI_ROLE_SEARCHED => __( 'Searched', 'insightweb' ),
 	);
@@ -62,15 +62,15 @@ function aw_si_roles(): array {
  * Create or update the keyword table and its map table when the version changes. Cheap when nothing changed (one
  * autoloaded option read). dbDelta adds the version 2 columns to the table Search Insights created; nothing is dropped.
  */
-function aw_kw_install(): void {
+function insightweb_kw_install(): void {
 	if ( get_option( AW_KW_DB_OPTION ) === AW_KW_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	$c = $wpdb->get_charset_collate();
-	$k = aw_si_table( 'keywords' );
-	$m = aw_si_table( 'kw_map' );
+	$k = insightweb_si_table( 'keywords' );
+	$m = insightweb_si_table( 'kw_map' );
 	// One record per normalised keyword. The 28-day figures and the latest live check are copied here by Search
 	// Insights' daily calculation so its Keywords list sorts and filters without aggregating on every view.
 	dbDelta(
@@ -129,10 +129,10 @@ function aw_kw_install(): void {
 	);
 	update_option( AW_KW_DB_OPTION, AW_KW_DB_VERSION, true ); // Autoloaded: checked on every admin request.
 }
-add_action( 'admin_init', 'aw_kw_install', 1 ); // Also called by WP-CLI (wp aw-sourcing migrate) and Search Insights.
+add_action( 'admin_init', 'insightweb_kw_install', 1 ); // Also called by WP-CLI (wp aw-sourcing migrate) and Search Insights.
 
 /** Whether the table is at the current version (the install may not have run yet). */
-function aw_kw_ready(): bool {
+function insightweb_kw_ready(): bool {
 	return get_option( AW_KW_DB_OPTION ) === AW_KW_DB_VERSION;
 }
 
@@ -142,13 +142,13 @@ function aw_kw_ready(): bool {
  * @param object|array $r Row.
  * @return array
  */
-function aw_kw_decode( $r ) {
+function insightweb_kw_decode( $r ) {
 	$r              = (array) $r;
 	$r['id']        = (int) ( $r['id'] ?? 0 );
 	$r['roles']     = (int) ( $r['roles'] ?? 0 );
 	$r['search_on'] = (int) ( $r['search_on'] ?? 1 );
 	$r['dismissed'] = (int) ( $r['dismissed'] ?? 0 );
-	$r['variants']  = aw_kw_variants_list( (string) ( $r['variants'] ?? '' ) );
+	$r['variants']  = insightweb_kw_variants_list( (string) ( $r['variants'] ?? '' ) );
 	$src            = json_decode( (string) ( $r['src_note'] ?? '' ), true );
 	$r['src']       = is_array( $src ) ? $src : array();
 	return $r;
@@ -161,30 +161,30 @@ function aw_kw_decode( $r ) {
  * @param bool $en_only Only lang = en.
  * @return array[] id => record.
  */
-function aw_kw_rows( $mask = AW_KW_OWNER_ROLES, $en_only = false ) {
+function insightweb_kw_rows( $mask = AW_KW_OWNER_ROLES, $en_only = false ) {
 	global $wpdb;
-	$k    = aw_si_table( 'keywords' );
+	$k    = insightweb_si_table( 'keywords' );
 	$args = $mask ? array( $k, (int) $mask ) : array( $k );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- fixed SQL; placeholders match $args.
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE 1=1' . ( $mask ? ' AND roles & %d' : '' ) . ( $en_only ? " AND lang = 'en'" : '' ) . ' ORDER BY id', $args ), ARRAY_A );
-	return aw_kw_attach_maps( $rows );
+	return insightweb_kw_attach_maps( $rows );
 }
 
 /**
- * Rows decoded (aw_kw_decode) and given their category and section maps, by id.
+ * Rows decoded (insightweb_kw_decode) and given their category and section maps, by id.
  *
  * @param array $rows Rows as read.
  * @return array[] id => record.
  */
-function aw_kw_attach_maps( array $rows ) {
+function insightweb_kw_attach_maps( array $rows ) {
 	$out = array();
 	foreach ( $rows as $r ) {
-		$r               = aw_kw_decode( $r );
+		$r               = insightweb_kw_decode( $r );
 		$r['categories'] = array();
 		$r['sections']   = array();
 		$out[ $r['id'] ] = $r;
 	}
-	foreach ( aw_kw_maps( array_keys( $out ) ) as $m ) {
+	foreach ( insightweb_kw_maps( array_keys( $out ) ) as $m ) {
 		if ( isset( $out[ $m['kw_id'] ] ) ) {
 			$out[ $m['kw_id'] ][ 'category' === $m['kind'] ? 'categories' : 'sections' ][] = $m['value'];
 		}
@@ -198,26 +198,26 @@ function aw_kw_attach_maps( array $rows ) {
  * @param int $id Record id.
  * @return array|null
  */
-function aw_kw_get( $id ) {
+function insightweb_kw_get( $id ) {
 	global $wpdb;
-	$k = aw_si_table( 'keywords' );
+	$k = insightweb_si_table( 'keywords' );
 	$r = $wpdb->get_row( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE id = %d', $k, (int) $id ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $r ) {
 		return null;
 	}
-	$out = aw_kw_attach_maps( array( $r ) );
+	$out = insightweb_kw_attach_maps( array( $r ) );
 	return reset( $out );
 }
 
 /**
  * The id of the record with this normal form, or 0.
  *
- * @param string $norm aw_si_norm() form.
+ * @param string $norm insightweb_si_norm() form.
  * @return int
  */
-function aw_kw_id_by_norm( $norm ) {
+function insightweb_kw_id_by_norm( $norm ) {
 	global $wpdb;
-	$k = aw_si_table( 'keywords' );
+	$k = insightweb_si_table( 'keywords' );
 	return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i WHERE norm = %s', $k, (string) $norm ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
@@ -227,13 +227,13 @@ function aw_kw_id_by_norm( $norm ) {
  * @param int[] $ids Record ids.
  * @return array[] kw_id, kind, value.
  */
-function aw_kw_maps( array $ids ) {
+function insightweb_kw_maps( array $ids ) {
 	global $wpdb;
 	$ids = array_values( array_filter( array_map( 'intval', $ids ) ) );
-	if ( ! $ids || ! aw_kw_ready() ) {
+	if ( ! $ids || ! insightweb_kw_ready() ) {
 		return array();
 	}
-	$m   = aw_si_table( 'kw_map' );
+	$m   = insightweb_si_table( 'kw_map' );
 	$out = array();
 	foreach ( array_chunk( $ids, 500 ) as $chunk ) {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %d per id.
@@ -246,29 +246,29 @@ function aw_kw_maps( array $ids ) {
 }
 
 /**
- * Create a record (or return the one with the same normal form). Roles go through aw_kw_set_roles() afterwards.
+ * Create a record (or return the one with the same normal form). Roles go through insightweb_kw_set_roles() afterwards.
  *
  * @param string $label  Phrase as written.
  * @param array  $fields Other columns to set on a new record (variants as a list, query, feed_id, search_on, src_note).
  * @return int Record id (0 when the phrase is empty or the insert failed).
  */
-function aw_kw_create( $label, array $fields = array() ) {
+function insightweb_kw_create( $label, array $fields = array() ) {
 	global $wpdb;
 	$label = trim( (string) $label );
-	$norm  = aw_si_norm( $label );
+	$norm  = insightweb_si_norm( $label );
 	if ( '' === $norm ) {
 		return 0;
 	}
-	$id = aw_kw_id_by_norm( $norm );
+	$id = insightweb_kw_id_by_norm( $norm );
 	if ( $id ) {
 		return $id;
 	}
-	$now = aw_si_now();
+	$now = insightweb_si_now();
 	$row = array(
 		'norm'    => $norm,
 		'label'   => mb_substr( $label, 0, 255 ),
-		'lang'    => isset( $fields['lang'] ) ? (string) $fields['lang'] : aw_si_lang( $label ),
-		'roles'   => aw_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0,
+		'lang'    => isset( $fields['lang'] ) ? (string) $fields['lang'] : insightweb_si_lang( $label ),
+		'roles'   => insightweb_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0,
 		'created' => $now,
 		'updated' => $now,
 	);
@@ -283,66 +283,66 @@ function aw_kw_create( $label, array $fields = array() ) {
 		}
 	}
 	if ( isset( $fields['variants'] ) ) {
-		$row['variants'] = implode( "\n", aw_kw_variants_list( $fields['variants'] ) );
+		$row['variants'] = implode( "\n", insightweb_kw_variants_list( $fields['variants'] ) );
 	}
-	if ( false === $wpdb->insert( aw_si_table( 'keywords' ), $row ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	if ( false === $wpdb->insert( insightweb_si_table( 'keywords' ), $row ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		return 0;
 	}
 	$id = (int) $wpdb->insert_id;
-	$wpdb->update( aw_si_table( 'keywords' ), array( 'group_id' => $id ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a new record is its own group, as Search Insights does.
+	$wpdb->update( insightweb_si_table( 'keywords' ), array( 'group_id' => $id ), array( 'id' => $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a new record is its own group, as Search Insights does.
 	return $id;
 }
 
 /**
  * Set roles on a record: the one role setter (owner, 25 Oct 2026). Refuses Sourcing and Press roles on a record that is
- * not English, and Include with Exclude (aw_kw_roles_check()).
+ * not English, and Include with Exclude (insightweb_kw_roles_check()).
  *
  * @param int $id     Record id.
  * @param int $add    Bits to add.
  * @param int $remove Bits to remove.
  * @return int|WP_Error The new roles, or why nothing changed.
  */
-function aw_kw_set_roles( $id, $add, $remove = 0 ) {
+function insightweb_kw_set_roles( $id, $add, $remove = 0 ) {
 	global $wpdb;
-	$k   = aw_si_table( 'keywords' );
+	$k   = insightweb_si_table( 'keywords' );
 	$row = $wpdb->get_row( $wpdb->prepare( 'SELECT roles, lang FROM %i WHERE id = %d', $k, (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $row ) {
 		return new WP_Error( 'aw_kw_missing', 'No such keyword.' );
 	}
-	list( $new, $why ) = aw_kw_roles_check( (int) $row->roles, (int) $add, (int) $remove, (string) $row->lang );
+	list( $new, $why ) = insightweb_kw_roles_check( (int) $row->roles, (int) $add, (int) $remove, (string) $row->lang );
 	if ( '' !== $why ) {
 		return new WP_Error( 'aw_kw_refused', $why );
 	}
 	if ( $new !== (int) $row->roles ) {
-		$wpdb->update( $k, array( 'roles' => $new, 'updated' => aw_si_now() ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update( $k, array( 'roles' => $new, 'updated' => insightweb_si_now() ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		do_action( 'aw_kw_saved', (int) $id );
 	}
 	return $new;
 }
 
 /**
- * Update a record's own columns (not roles: aw_kw_set_roles()). A language change that would leave Sourcing or Press
+ * Update a record's own columns (not roles: insightweb_kw_set_roles()). A language change that would leave Sourcing or Press
  * roles on a record that is not English is refused.
  *
  * @param int   $id     Record id.
  * @param array $fields Any of label, lang, variants (list or lines), query, feed_id, search_on, dismissed, src_note.
  * @return bool|WP_Error Whether anything was written.
  */
-function aw_kw_update( $id, array $fields ) {
+function insightweb_kw_update( $id, array $fields ) {
 	global $wpdb;
-	$cur = aw_kw_get( $id );
+	$cur = insightweb_kw_get( $id );
 	if ( ! $cur ) {
 		return new WP_Error( 'aw_kw_missing', 'No such keyword.' );
 	}
 	$set = array();
 	if ( isset( $fields['lang'] ) && in_array( $fields['lang'], array( 'en', 'hi', 'hinglish' ), true ) && $fields['lang'] !== $cur['lang'] ) {
-		if ( 'en' !== $fields['lang'] && ( $cur['roles'] & AW_KW_WORKER_ROLES ) ) {
+		if ( 'en' !== $fields['lang'] && ( $cur['roles'] & SOURCEWEB_KW_WORKER_ROLES ) ) {
 			return new WP_Error( 'aw_kw_refused', 'Remove its Sourcing and Press roles first: they are for English keywords only.' );
 		}
 		$set['lang'] = $fields['lang'];
 	}
 	if ( isset( $fields['variants'] ) ) {
-		$v = implode( "\n", aw_kw_variants_list( $fields['variants'] ) );
+		$v = implode( "\n", insightweb_kw_variants_list( $fields['variants'] ) );
 		if ( $v !== implode( "\n", $cur['variants'] ) ) {
 			$set['variants'] = $v;
 		}
@@ -361,8 +361,8 @@ function aw_kw_update( $id, array $fields ) {
 		return false;
 	}
 	$changed        = array_keys( $set );
-	$set['updated'] = aw_si_now();
-	$wpdb->update( aw_si_table( 'keywords' ), $set, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$set['updated'] = insightweb_si_now();
+	$wpdb->update( insightweb_si_table( 'keywords' ), $set, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	do_action( 'aw_kw_saved', (int) $id, $changed );
 	return true;
 }
@@ -375,12 +375,12 @@ function aw_kw_update( $id, array $fields ) {
  * @param string[] $values Category slugs or post types.
  * @return bool Whether anything changed.
  */
-function aw_kw_map_set( $id, $kind, array $values ) {
+function insightweb_kw_map_set( $id, $kind, array $values ) {
 	global $wpdb;
-	$m      = aw_si_table( 'kw_map' );
+	$m      = insightweb_si_table( 'kw_map' );
 	$values = array_values( array_unique( array_filter( array_map( 'strval', $values ), 'strlen' ) ) );
 	$now    = array();
-	foreach ( aw_kw_maps( array( $id ) ) as $r ) {
+	foreach ( insightweb_kw_maps( array( $id ) ) as $r ) {
 		if ( $r['kind'] === $kind ) {
 			$now[] = $r['value'];
 		}

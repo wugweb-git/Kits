@@ -39,7 +39,7 @@ const AW_SRC_SETTINGS_TAB = 'settings';
  * @param array $tabs Tab => label, in the order they were registered.
  * @return array Tab => label.
  */
-function aw_src_menu_order( array $tabs ): array {
+function sourceweb_src_menu_order( array $tabs ): array {
 	$settings = array();
 	$reports  = array();
 	foreach ( $tabs as $k => $label ) {
@@ -65,7 +65,7 @@ function aw_src_menu_order( array $tabs ): array {
  * @param array  $args More query arguments (already encoded).
  * @return string
  */
-function aw_src_tab_path( string $tab = '', array $args = array() ): string {
+function sourceweb_src_tab_path( string $tab = '', array $args = array() ): string {
 	$q = array( 'page' => AW_SRC_PAGE );
 	if ( '' !== $tab && 'sources' !== $tab ) {
 		$q['tab'] = $tab;
@@ -74,19 +74,19 @@ function aw_src_tab_path( string $tab = '', array $args = array() ): string {
 }
 
 /** The menu item a tab belongs to: the page's own slug for Sources, the tab's address for the others. */
-function aw_src_tab_menu_slug( string $tab ): string {
-	return '' === $tab || 'sources' === $tab ? AW_SRC_PAGE : aw_src_tab_path( $tab );
+function sourceweb_src_tab_menu_slug( string $tab ): string {
+	return '' === $tab || 'sources' === $tab ? AW_SRC_PAGE : sourceweb_src_tab_path( $tab );
 }
 
 /** The Overview's address relative to wp-admin. */
-function aw_src_overview_path(): string {
+function sourceweb_src_overview_path(): string {
 	return 'admin.php?page=' . AW_SRC_MENU;
 }
 
 /** The Plugins screen's links under the plugin's name, label => address relative to wp-admin. */
-function aw_src_action_link_paths(): array {
+function sourceweb_src_action_link_paths(): array {
 	return array(
-		'Overview' => aw_src_overview_path(),
-		'Settings' => aw_src_tab_path( AW_SRC_SETTINGS_TAB ),
+		'Overview' => sourceweb_src_overview_path(),
+		'Settings' => sourceweb_src_tab_path( AW_SRC_SETTINGS_TAB ),
 	);
 }
