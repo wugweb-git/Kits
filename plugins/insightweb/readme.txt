@@ -32,6 +32,10 @@ InsightWeb measures how your site performs in search. It reads telemetry data an
 
 Clarity, Bing Webmaster, PageSpeed, and Google Alerts keys are configured under **InsightWeb → Settings → Keys**, or as `wp-config.php` constants (which take precedence). Key values are never echoed back in HTML.
 
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/insightweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
+
 == Installation ==
 
 1. Upload the `insightweb` folder to `/wp-content/plugins/`, or install the `insightweb.zip` package via **Plugins → Add New → Upload Plugin**.
