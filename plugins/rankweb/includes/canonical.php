@@ -9,7 +9,7 @@
  *   24 Oct 2026; it was one indexed page per listing).
  * A canonical typed in Rank Math always wins. Items keep Rank Math's own canonical.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

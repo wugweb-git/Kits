@@ -15,7 +15,7 @@
  *
  * Module "video" (RankWeb → Settings → Modules). Daily backfill job rankweb_video_sync. With no video post types, nothing runs.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

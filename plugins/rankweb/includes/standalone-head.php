@@ -4,7 +4,7 @@
  * sidebar, and rankweb_share_tags(), the Open Graph and Twitter tags as HTML. With Rank Math active none of this runs:
  * Rank Math prints its own, and opengraph.php adjusts them.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

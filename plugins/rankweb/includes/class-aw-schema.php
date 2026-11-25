@@ -4,7 +4,7 @@
  * schema-custom.php stores an editor's JSON-LD and the speakable, about and mentions fields, and this class turns them
  * into nodes for Rank Math's graph; it also reads the JSON-LD out of a fetched page for "import from a URL".
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

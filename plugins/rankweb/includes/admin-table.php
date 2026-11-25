@@ -3,7 +3,7 @@
  * rankweb_seo_extras_simple_table(): the plugin's plain admin tables as a core list table (admin UI is
  * core WordPress only). The class loads only when a screen draws one.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

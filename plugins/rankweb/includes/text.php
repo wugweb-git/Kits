@@ -2,7 +2,7 @@
 /**
  * Plain-text helpers every RankWeb file uses, loaded first and always (not a module).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

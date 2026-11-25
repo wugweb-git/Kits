@@ -4,7 +4,7 @@
  * programmatic titles defines these functions before RankWeb loads; see sites/ in the source repository). Defined only
  * when nobody else did, and they answer "nothing to add", so a plain site gets WordPress's own titles.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

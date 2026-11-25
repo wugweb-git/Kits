@@ -10,7 +10,7 @@
  * Every number and name comes from the published listings and items; nothing is written by hand. The owner's intro
  * lines are not changed, and the thin-page and noindex rules (robots.php) are unchanged.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

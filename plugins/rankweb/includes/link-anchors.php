@@ -14,7 +14,7 @@
  *   page already cached keeps its links until it is built again.
  * - REST: GET rankweb/v1/links/anchors (warn, page, per_page), manage_rankweb.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

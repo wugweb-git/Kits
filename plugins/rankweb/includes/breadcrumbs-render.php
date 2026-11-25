@@ -19,7 +19,7 @@
  * (the two block filters at the end, for pages whose template has neither). The rankweb_breadcrumbs* functions are the
  * earlier names, kept for any caller outside this plugin.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

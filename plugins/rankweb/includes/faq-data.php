@@ -17,7 +17,7 @@
  * plugin drops those questions instead of stopping the page. The answer builders use faq.php's sentence helpers
  * (rankweb_faq_a, rankweb_faq_plain, rankweb_faq_and, rankweb_faq_lc). docs/faq.md (not in this repo) describes the questions.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -152,7 +152,7 @@ add_filter(
 			$ctx['full']   = rankweb_faq_is_topic_name( $ctx['entity'] ) ? '' : rankweb_faq_doc_name( $obj->ID ); // the full official title, once, in the first answer; a release or circular named by its topic keeps the topic (its title is a headline)
 			$ctx['about']  = $ctx['url'] . ( in_array( $kind, array( 'act', 'rule', 'notification' ), true ) ? '#legislation' : ( 'template' === $kind ? '#document' : '#article' ) );
 			$ctx['subject'] = $ctx['entity'];
-			$ctx['head']    = function_exists( 'rankweb_faq_heading' ) ? rankweb_faq_heading( $ctx['entity'] ) : 'FAQs'; // the site's FAQ head style (aw-seo-extras)
+			$ctx['head']    = function_exists( 'rankweb_faq_heading' ) ? rankweb_faq_heading( $ctx['entity'] ) : 'FAQs'; // the site's FAQ head style (RankWeb)
 		} elseif ( $obj instanceof WP_Post && 'post' === $obj->post_type && rankweb_faq_data_ready( 'post' ) && '' === rankweb_faq_plain( (string) get_post_meta( $obj->ID, 'rankweb_faq_subject', true ) ) && rankweb_faq_is_study( $obj->ID ) ) {
 			$study = rankweb_faq_study_subject( $obj->ID ); // a research summary's heading names the study its questions name
 			if ( '' !== $study ) {

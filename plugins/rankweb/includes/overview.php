@@ -8,7 +8,7 @@
  * it is set up (here or in Rank Math) and its status from the checks that already run; the status helpers below feed it.
  * The edit-screen boxes and WP-CLI commands are on the Modules page too ('Where things are', rankweb-rest.php).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -45,7 +45,7 @@ add_action(
 );
 
 // Plugins screen: Overview and FAQ under the plugin's name (Search Insights is under InsightWeb's).
-$rankweb_main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
+$rankweb_main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'rankweb.php' );
 add_filter(
 	'plugin_action_links_' . plugin_basename( $rankweb_main_file ),
 	function ( $links ) {

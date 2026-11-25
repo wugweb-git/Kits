@@ -7,7 +7,7 @@
  *   virtual  each supporting item links to the hub and to the other supporting items; the hub links to its supporting items.
  *   circle   each item links to the next one and back to the hub (the last one only back to the hub); the hub links to the first.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

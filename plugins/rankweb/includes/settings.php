@@ -6,12 +6,12 @@
  * Each setting is one of the plugin's former constants; its default is the value the code had, so nothing changes
  * until a setting is saved. The constants are defined here from option aw_seo_settings ({module: {CONST: value, on}}).
  * Foundation modules (General, Titles, Canonicals, Robots, Filtered lists, Schema) are always on: the others call them.
- * A module switched off is not loaded (aw-seo-extras.php). The Settings screen is on the Kits shell (rankweb-ui.php);
+ * A module switched off is not loaded (rankweb.php). The Settings screen is on the Kits shell (rankweb-ui.php);
  * it reads and saves through the rankweb/v1 settings routes (rankweb-rest.php), which call rankweb_seo_settings_save().
  * Every option that screen saves is registered with register_setting() (rankweb_seo_registered_settings()), so each
  * update_option() runs its sanitize callback, whoever writes it, and /wp/v2/settings shows it to administrators.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -306,7 +306,7 @@ function rankweb_seo_module_on( string $key ): bool {
 	return ! isset( $saved[ $key ]['on'] ) || ! empty( $saved[ $key ]['on'] );
 }
 
-/** Files a switched-off module would load: aw-seo-extras.php skips them. */
+/** Files a switched-off module would load: rankweb.php skips them. */
 function rankweb_seo_files_off(): array {
 	$off = array();
 	foreach ( rankweb_seo_modules() as $key => $mod ) {

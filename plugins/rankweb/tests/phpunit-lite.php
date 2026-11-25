@@ -2,11 +2,11 @@
 /**
  * Runs RankWeb's PHPUnit test classes without PHPUnit (the Deploy check has PHP but no Composer packages; owner rule:
  * no local WordPress). A small stand-in for PHPUnit\Framework\TestCase with the assertions the tests use; with real
- * PHPUnit installed, `phpunit plugins/aw-seo-extras/tests/` runs the same files.
+ * PHPUnit installed, `phpunit plugins/rankweb/tests/` runs the same files.
  *
- * Usage: php plugins/aw-seo-extras/tests/phpunit-lite.php
+ * Usage: php plugins/rankweb/tests/phpunit-lite.php
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable -- a command-line test runner.

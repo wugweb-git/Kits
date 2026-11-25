@@ -21,7 +21,7 @@
  * Scores, the daily workers) read each item once, so they use a cached copy when there is one but store none (plugin
  * audit 10: about 900 cached copies, 12 MB, sat in wp_options).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -155,7 +155,7 @@ add_action(
 		wp_enqueue_script( 'aw-seo-analysis' );
 		wp_add_inline_script(
 			'aw-seo-analysis',
-			'(function(){var html=' . wp_json_encode( $html ) . ';wp.hooks.addFilter("rank_math_content","aw-seo-extras/rendered",function(){return html;},20);'
+			'(function(){var html=' . wp_json_encode( $html ) . ';wp.hooks.addFilter("rank_math_content","rankweb/rendered",function(){return html;},20);'
 			. 'var n=0,t=setInterval(function(){if(window.rankMathEditor&&rankMathEditor.refresh){rankMathEditor.refresh("content");clearInterval(t);}else if(++n>40){clearInterval(t);}},250);})();'
 		);
 	}

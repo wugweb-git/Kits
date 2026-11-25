@@ -5,7 +5,7 @@
  * 5.8+) and plugins_api. It reports the installed version, so WordPress never offers an update from here; nothing is
  * downloaded and no other site is asked.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -99,7 +99,7 @@ function rankweb_seo_plugin_details( $result, $action, $args ) {
 	$art    = rankweb_seo_plugin_art();
 	return (object) array(
 		'name'          => 'RankWeb',
-		'slug'          => 'aw-seo-extras',
+		'slug'          => 'rankweb',
 		'version'       => (string) $head['Version'],
 		'author'        => '<a href="https://wugweb.com">Wugweb</a>',
 		'homepage'      => 'https://wugweb.com',

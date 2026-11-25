@@ -4,7 +4,7 @@
  * agent-tools.php registers these with the WordPress Abilities API (6.9+) and the callbacks read and write through the
  * existing RankWeb functions; this class only names the abilities and tidies their input.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

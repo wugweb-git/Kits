@@ -33,7 +33,7 @@
  * longer while a visitor's page is built: plugin audit 13) and is marked as automatic (_aw_seo_auto), so it is never
  * mistaken for a typed one.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

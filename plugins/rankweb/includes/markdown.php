@@ -15,7 +15,7 @@
  * - Password-protected pages, previews and logged-in requests are never converted.
  * - Off with the "Markdown for agents" switch in RankWeb → Settings.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

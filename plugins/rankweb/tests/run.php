@@ -13,9 +13,9 @@
  * 6. The register_setting() sanitize callback returns stored values unchanged.
  * 7. Reset this section: Modules and a field group go back to their registered defaults.
  *
- * Usage: php plugins/aw-seo-extras/tests/run.php
+ * Usage: php plugins/rankweb/tests/run.php
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
@@ -279,8 +279,8 @@ require_once dirname( __DIR__ ) . '/includes/uninstall-backup.php';
 $ub_t = static function ( bool $ok, string $what ): void {
 	rw_check( $ok, $what );
 };
-$ub_h = json_decode( rankweb_seo_backup_header( 'aw-seo-extras', '1.2.3', 'https://example.org/', 1763000000, array( 'a_opt', 'b_opt' ), array( 'wp_x' ) ), true );
-$ub_t( 'header' === $ub_h['type'] && 'aw-seo-extras' === $ub_h['plugin'] && '1.2.3' === $ub_h['version'] && 'https://example.org/' === $ub_h['site'], 'backup: header names the plugin, version and site' );
+$ub_h = json_decode( rankweb_seo_backup_header( 'rankweb', '1.2.3', 'https://example.org/', 1763000000, array( 'a_opt', 'b_opt' ), array( 'wp_x' ) ), true );
+$ub_t( 'header' === $ub_h['type'] && 'rankweb' === $ub_h['plugin'] && '1.2.3' === $ub_h['version'] && 'https://example.org/' === $ub_h['site'], 'backup: header names the plugin, version and site' );
 $ub_t( '2025-11-13T02:13:20Z' === $ub_h['time'] && array( 'a_opt', 'b_opt' ) === $ub_h['options'] && array( 'wp_x' ) === $ub_h['tables'], 'backup: header has the time, the options and the tables' );
 $ub_l = rankweb_seo_backup_option_line( 'a_opt', 'a:1:{s:1:"k";s:3:"é/";}', 'yes' );
 $ub_o = json_decode( $ub_l, true );
@@ -318,13 +318,13 @@ $ub_n = rankweb_seo_backup_rows(
 	}
 );
 $ub_t( false === $ub_n && 3 === $ub_w, 'backup: a write error stops the backup at once' );
-$ub_t( 1 === preg_match( '/^aw-seo-extras-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', rankweb_seo_backup_name( 'aw-seo-extras', 1763000000 ) ) && 'aw-seo-extras-uninstall-20251113-021320.jsonl.gz' === rankweb_seo_backup_name( 'aw-seo-extras', 1763000000 ), 'backup: file name' );
-$ub_dir = sys_get_temp_dir() . '/aw-seo-extras-ub-' . getmypid();
+$ub_t( 1 === preg_match( '/^rankweb-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', rankweb_seo_backup_name( 'rankweb', 1763000000 ) ) && 'rankweb-uninstall-20251113-021320.jsonl.gz' === rankweb_seo_backup_name( 'rankweb', 1763000000 ), 'backup: file name' );
+$ub_dir = sys_get_temp_dir() . '/rankweb-ub-' . getmypid();
 @mkdir( $ub_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a temporary folder for the test
 file_put_contents( $ub_dir . '/index.php', 'kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
 $ub_t( rankweb_seo_backup_protect( $ub_dir ) && false !== strpos( (string) file_get_contents( $ub_dir . '/.htaccess' ), 'Require all denied' ) && 'kept' === file_get_contents( $ub_dir . '/index.php' ), 'backup: folder guarded by .htaccess and index.php, an existing file kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
 $ub_gz = gzopen( $ub_dir . '/t.jsonl.gz', 'wb6' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
-gzwrite( $ub_gz, rankweb_seo_backup_header( 'aw-seo-extras', '1', 's', 0, array( 'a' ), array() ) . rankweb_seo_backup_option_line( 'a', 'v', 'yes' ) );
+gzwrite( $ub_gz, rankweb_seo_backup_header( 'rankweb', '1', 's', 0, array( 'a' ), array() ) . rankweb_seo_backup_option_line( 'a', 'v', 'yes' ) );
 gzclose( $ub_gz );
 $ub_lines = gzfile( $ub_dir . '/t.jsonl.gz' );
 $ub_t( 2 === count( $ub_lines ) && 'header' === json_decode( $ub_lines[0], true )['type'] && 'v' === json_decode( $ub_lines[1], true )['value'], 'backup: gzip JSON lines read back' );
@@ -332,7 +332,7 @@ foreach ( array( 'index.php', '.htaccess', 't.jsonl.gz' ) as $ub_f ) {
 	unlink( $ub_dir . '/' . $ub_f ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
 }
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
-$ub_dir = sys_get_temp_dir() . '/aw-seo-extras-ub-ro-' . getmypid();
+$ub_dir = sys_get_temp_dir() . '/rankweb-ub-ro-' . getmypid();
 @mkdir( $ub_dir, 0555 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a read-only folder for the test
 $ub_t( 0 === getmyuid() || ! @rankweb_seo_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder

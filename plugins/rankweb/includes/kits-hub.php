@@ -4,7 +4,7 @@
  * Core's filter kits_status_rows. Only when Kits Core is loaded; without it nothing here runs and
  * the plugin's own menu works as before. Loaded whether or not Rank Math is active, so the row can say it is missing.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +29,7 @@ add_action(
  * @param array $rows Rows: [label, HTML value].
  */
 function rankweb_seo_extras_kits_status_row( $rows ) {
-	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
+	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'rankweb.php' );
 	$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 	/* translators: %s: plugin version. */
 	$text = sprintf( __( 'Active, %s', 'rankweb' ), $head['Version'] );

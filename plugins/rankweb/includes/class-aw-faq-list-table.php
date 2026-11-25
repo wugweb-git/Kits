@@ -4,7 +4,7 @@
  * "Waiting for approval" (items with draft questions; bulk Approve). Search by name, sort by name, type or questions
  * shown, filter by type. Loaded by rankweb_faq_admin_body() only.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

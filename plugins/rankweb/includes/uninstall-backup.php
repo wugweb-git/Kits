@@ -2,7 +2,7 @@
 /**
  * The backup uninstall.php writes before it deletes anything (owner, 13 Nov 2026: "Delete data on uninstall - backup").
  *
- * One gzip-compressed JSON-lines file, wp-content/uploads/wugweb-backups/aw-seo-extras-uninstall-<YYYYmmdd-His>.jsonl.gz
+ * One gzip-compressed JSON-lines file, wp-content/uploads/wugweb-backups/rankweb-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (UTC time):
  *   line 1        {"type":"header","format":1,"plugin":…,"version":…,"site":…,"time":…,"options":[names],"tables":[names]}
  *   then          {"type":"option","name":…,"value":<option_value exactly as stored>,"autoload":…} per option
@@ -16,7 +16,7 @@
  *
  * Only uninstall.php and the tests load this file. Kept identical, apart from names, in each Wugweb plugin.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.WP.AlternativeFunctions -- uninstall runs without WP_Filesystem credentials; plain file and gzip functions write the backup.

@@ -18,7 +18,7 @@
  * WordPress's own behaviour is left alone: a missing address is handled by core, including its guess of the item a
  * slug most likely meant. No site-specific addresses, paths or pages are assumed here.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

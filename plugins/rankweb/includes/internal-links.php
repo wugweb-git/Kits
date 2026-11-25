@@ -19,7 +19,7 @@
  * Rank Math's link counter (wp_rank_math_internal_links) stays Rank Math's: it is read, never written.
  * With no linked post types (the default), no link is added.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

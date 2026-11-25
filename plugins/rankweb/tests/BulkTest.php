@@ -2,10 +2,10 @@
 /**
  * PHPUnit tests for the CSV format and find-and-replace (includes/class-aw-bulk.php). No WordPress.
  *
- * With PHPUnit:    phpunit plugins/aw-seo-extras/tests/BulkTest.php
- * Without PHPUnit: php plugins/aw-seo-extras/tests/phpunit-lite.php (the Deploy check runs this)
+ * With PHPUnit:    phpunit plugins/rankweb/tests/BulkTest.php
+ * Without PHPUnit: php plugins/rankweb/tests/phpunit-lite.php (the Deploy check runs this)
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 // phpcs:disable WordPress.Files.FileName, WordPress.NamingConventions.ValidFunctionName, Squiz.Commenting.FunctionComment.Missing -- PHPUnit naming.

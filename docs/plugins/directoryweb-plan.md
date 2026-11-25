@@ -29,7 +29,7 @@
 - **IW:** InsightWeb.
 - **Kits:** Kits Core or the Kits theme.
 
-**Paths:** `core/` is `plugins/animal-writes-core/includes/`, `sw/` is `plugins/aw-sourcing/includes/`, `rw/` is `plugins/aw-seo-extras/includes/`.
+**Paths:** `core/` is `plugins/animal-writes-core/includes/`, `sw/` is `plugins/aw-sourcing/includes/`, `rw/` is `plugins/rankweb/includes/`.
 
 **Size:** the 17 Directory files in Core come to 5,515 lines of PHP. With them go 8 SCF groups, `lgd.json` (76 KB), `district-centroids.json` (18 KB), 2 stylesheets (27 KB), 2 scripts and 1 template.
 
@@ -101,7 +101,7 @@ These files stay in Core; only their Directory parts move.
 - **Schema** (`rw/schema.php`): `aw_listing_schema()` `:53` (NGO / VeterinaryCare / AnimalShelter / GovernmentOffice), output `:1065`; place pages as CollectionPage + ItemList `:1222`. RankWeb keeps owning the graph. DirectoryWeb emits no JSON-LD.
 - **No-contact noindex** (`rw/robots.php`): `aw_listing_unreachable()` `:74` means contact score 0 and no social profile. The exemption list is option `aw_seo_keep_listings`, the daily score fill is `:104`, and the rule is applied on `rank_math/frontend/robots` `:140`. The thin type-page threshold `AW_THIN_DISTRICT_TYPE` (default 1) and `AW_DIRECTORY_KEEP_INDEXED` are in `aw_seo_settings` (`rw/settings.php:155-156`).
 - **What changes:**
-  - RankWeb today calls about 40 Directory functions directly: `aw_listing_*`, `aw_place_*`, `aw_directory_*`, `aw_current_place`, `aw_contact_score` and others (`grep -rn "aw_listing_\|aw_place_\|aw_directory_\|aw_current_place" plugins/aw-seo-extras/includes/`). They keep their names: only new code gets new names. RankWeb's calls work unchanged because Core requires DirectoryWeb.
+  - RankWeb today calls about 40 Directory functions directly: `aw_listing_*`, `aw_place_*`, `aw_directory_*`, `aw_current_place`, `aw_contact_score` and others (`grep -rn "aw_listing_\|aw_place_\|aw_directory_\|aw_current_place" plugins/rankweb/includes/`). They keep their names: only new code gets new names. RankWeb's calls work unchanged because Core requires DirectoryWeb.
   - The reverse calls become filters, so DirectoryWeb names no other plugin. `directory.php:228-245` calls `aw_seo_dir_h1()` / `aw_seo_place_has_helpline()`; that becomes `directoryweb_place_h1` and `directoryweb_place_has_helpline`, which RankWeb answers. `places.php:435` calls `aw_rank_math_redirect()` inside WP-CLI; that becomes `directoryweb_redirect_add`.
   - The indexing rule stays RankWeb's. DirectoryWeb asks through `directoryweb_listing_indexable` (RankWeb answers with `aw_listing_unreachable`), so the Dashboard tile and RankWeb never disagree.
 

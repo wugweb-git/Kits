@@ -7,7 +7,7 @@
  * Search Insights) is refused. The reason names that page, so the worker can log it. When several pages have it, the
  * reason names an evergreen page (a Resource, Library item, campaign, page, listing or term) before a News item.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

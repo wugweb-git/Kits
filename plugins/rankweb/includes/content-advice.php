@@ -11,7 +11,7 @@
  * - the automatic FAQ questions it has (faq.php).
  * Read only: nothing here writes to the item (the panel's Link keywords save through internal-links.php). Route: GET /wp-json/aw/v1/content-advice?id=N (edit_post on N).
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

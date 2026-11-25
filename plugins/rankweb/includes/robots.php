@@ -20,7 +20,7 @@
  *   Stories type are left out by Rank Math itself; fixed exclusions are Rank Math settings (Sitemap → Exclude posts:
  *   the search page). Claim forms (/claim/, page 12587) are noindex, follow and out of every sitemap.
  *
- * @package aw-seo-extras
+ * @package rankweb
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
