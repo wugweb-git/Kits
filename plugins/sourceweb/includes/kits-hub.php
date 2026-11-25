@@ -17,8 +17,8 @@ add_action(
 		if ( ! function_exists( 'kits_admin_tabs' ) ) {
 			return;
 		}
-		add_filter( 'kits_status_rows', 'aw_sourcing_kits_status_row' );
-		add_filter( 'kits_settings_transfer_options', 'aw_sourcing_kits_export' );
+		add_filter( 'kits_status_rows', 'sourceweb_sourcing_kits_status_row' );
+		add_filter( 'kits_settings_transfer_options', 'sourceweb_sourcing_kits_export' );
 	},
 	20
 );
@@ -29,7 +29,7 @@ add_action(
  *
  * @param string[] $names Option names.
  */
-function aw_sourcing_kits_export( $names ) {
+function sourceweb_sourcing_kits_export( $names ) {
 	return array_values( array_unique( array_merge( (array) $names, array( 'aw_sources', 'aw_enrich_sources', 'aw_enrich_live_cap', 'aw_social_on', 'aw_social_show' ) ) ) );
 }
 
@@ -38,12 +38,12 @@ function aw_sourcing_kits_export( $names ) {
  *
  * @param array $rows Rows: [label, HTML value].
  */
-function aw_sourcing_kits_status_row( $rows ) {
-	$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
-	$own       = function_exists( 'is_plugin_active' ) && ( is_plugin_active( plugin_basename( $main_file ) ) || is_plugin_active( plugin_basename( AW_SOURCING_DIR . 'aw-sourcing.php' ) ) ); // network-active too.
-	$text = 'Active, ' . AW_SOURCING_LOADED . ( $own ? '' : ' (loaded by Animal Writes Core)' );
-	if ( function_exists( 'aw_review_count' ) ) {
-		$text .= '; ' . (int) aw_review_count() . ' to review';
+function sourceweb_sourcing_kits_status_row( $rows ) {
+	$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( SOURCEWEB_SOURCING_DIR . 'sourceweb.php' ) ? SOURCEWEB_SOURCING_DIR . 'sourceweb.php' : SOURCEWEB_SOURCING_DIR . 'aw-sourcing.php' );
+	$own       = function_exists( 'is_plugin_active' ) && ( is_plugin_active( plugin_basename( $main_file ) ) || is_plugin_active( plugin_basename( SOURCEWEB_SOURCING_DIR . 'aw-sourcing.php' ) ) ); // network-active too.
+	$text = 'Active, ' . SOURCEWEB_SOURCING_LOADED . ( $own ? '' : ' (loaded by Animal Writes Core)' );
+	if ( function_exists( 'sourceweb_review_count' ) ) {
+		$text .= '; ' . (int) sourceweb_review_count() . ' to review';
 	}
 	$rows[] = array( 'SourceWeb', esc_html( $text ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SRC_MENU ) ) . '">' . esc_html( 'Overview' ) . '</a>' );
 	return $rows;

@@ -8,13 +8,13 @@
  *     wp aw-sourcing verify --phase=3
  *     wp aw-sourcing rollback --phase=3 [--restore-all]
  *
- * The migration (rules-model.php aw_rules_phase3_plan):
+ * The migration (rules-model.php sourceweb_rules_phase3_plan):
  * - Section rules: every section (the site's content types, rules.php) gets a rule; the 6 there are kept as they are,
  *   aw_press is added empty (every category). Tag rules (aw_sources['topic_tags']) are unchanged.
  * - Summary rules: the sections are keyed by post type (news → aw_news, library → aw_legal, research → post), each with
  *   its old name as alias; every value is kept, the 15 global keys too.
- * - Field rules: option aw_enrich_field_rules seeded from the workers' constants (42 fields, trust order of 8).
- * It needs phase 2 migrated first (aw_sourcing_phase = 2); a dry run works at any phase.
+ * - Field rules: option sourceweb_enrich_field_rules seeded from the workers' constants (42 fields, trust order of 8).
+ * It needs phase 2 migrated first (sourceweb_sourcing_phase = 2); a dry run works at any phase.
  *
  * Rollback undoes it on the current options (section rules the migration added and nobody filled, summary keys back to
  * their old names, field rules off) and keeps what it takes away in option aw_sourcing_phase3_rolled_back; with
@@ -36,7 +36,7 @@ const AW_SOURCING_BACKUP_OPTIONS_3 = array( 'aw_sources', 'aw_summary_rules', 'a
 
 add_filter( 'aw_sourcing_cli_phases', fn( $p ) => array_values( array_unique( array_merge( (array) $p, array( 3 ) ) ) ) );
 add_filter( 'aw_sourcing_cli_backup_options', fn( $o, $phase ) => 3 === (int) $phase ? AW_SOURCING_BACKUP_OPTIONS_3 : $o, 10, 2 );
-add_filter( 'aw_sourcing_cli_counts', fn( $line, $phase, $opts ) => 3 === (int) $phase ? aw_sourcing_cli_counts3( (array) $opts ) : $line, 10, 3 );
+add_filter( 'aw_sourcing_cli_counts', fn( $line, $phase, $opts ) => 3 === (int) $phase ? sourceweb_sourcing_cli_counts3( (array) $opts ) : $line, 10, 3 );
 
 /**
  * One line of counts for a phase 3 backup or for the options now.
@@ -44,7 +44,7 @@ add_filter( 'aw_sourcing_cli_counts', fn( $line, $phase, $opts ) => 3 === (int) 
  * @param array $opts Option name => value.
  * @return string
  */
-function aw_sourcing_cli_counts3( array $opts ) {
+function sourceweb_sourcing_cli_counts3( array $opts ) {
 	$c  = (array) ( $opts['aw_sources'] ?? array() );
 	$s  = $opts['aw_summary_rules'] ?? null;
 	$fr = $opts['aw_enrich_field_rules'] ?? null;
@@ -63,7 +63,7 @@ function aw_sourcing_cli_counts3( array $opts ) {
 }
 
 /** The options a phase 3 backup holds, as they are now. */
-function aw_sourcing_cli_now3() {
+function sourceweb_sourcing_cli_now3() {
 	$now = array();
 	foreach ( AW_SOURCING_BACKUP_OPTIONS_3 as $k ) {
 		$now[ $k ] = get_option( $k, null );
@@ -72,23 +72,23 @@ function aw_sourcing_cli_now3() {
 }
 
 /**
- * The summary rules in force (aw_summary_rules()) if the option held $opt.
+ * The summary rules in force (sourceweb_summary_rules()) if the option held $opt.
  *
- * @param array|false|null $opt A value of aw_summary_rules.
+ * @param array|false|null $opt A value of sourceweb_summary_rules.
  * @return array
  */
-function aw_sourcing_cli_summary_with( $opt ) {
+function sourceweb_sourcing_cli_summary_with( $opt ) {
 	$peek = fn() => is_array( $opt ) ? $opt : false;
 	add_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
-	$out  = aw_summary_rules();
+	$out  = sourceweb_summary_rules();
 	remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
 	return $out;
 }
 
 /** What the Directory schema holds, in a few lines. */
-function aw_sourcing_cli_schema_lines() {
-	$schema = aw_enrich_schema();
-	$rows   = aw_enrich_field_rule_rows( $schema, aw_enrich_fields(), aw_enrich_field_rules_seed( array_keys( aw_enrich_fields() ) )['fields'] );
+function sourceweb_sourcing_cli_schema_lines() {
+	$schema = sourceweb_enrich_schema();
+	$rows   = sourceweb_enrich_field_rule_rows( $schema, sourceweb_enrich_fields(), sourceweb_enrich_field_rules_seed( array_keys( sourceweb_enrich_fields() ) )['fields'] );
 	$mapped = array_filter( $schema['fields'], fn( $f ) => ! empty( $f['enrich'] ) );
 	$only   = array_filter( $rows, fn( $r ) => 'Listing field' === $r['group'] );
 	return array(
@@ -100,11 +100,11 @@ function aw_sourcing_cli_schema_lines() {
 add_action(
 	'aw_sourcing_cli_migrate_3',
 	function ( $assoc, $dry ) {
-		if ( aw_sourcing_phase() >= 3 ) {
-			WP_CLI::error( 'Phase 3 is already migrated (aw_sourcing_phase = ' . aw_sourcing_phase() . '). wp aw-sourcing verify --phase=3 checks it.' );
+		if ( sourceweb_sourcing_phase() >= 3 ) {
+			WP_CLI::error( 'Phase 3 is already migrated (sourceweb_sourcing_phase = ' . sourceweb_sourcing_phase() . '). wp aw-sourcing verify --phase=3 checks it.' );
 		}
-		if ( 2 !== aw_sourcing_phase() ) {
-			$msg = 'Phase 3 runs after phase 2 (aw_sourcing_phase = ' . aw_sourcing_phase() . '): migrate phase 2 first.';
+		if ( 2 !== sourceweb_sourcing_phase() ) {
+			$msg = 'Phase 3 runs after phase 2 (sourceweb_sourcing_phase = ' . sourceweb_sourcing_phase() . '): migrate phase 2 first.';
 			if ( ! $dry ) {
 				WP_CLI::error( $msg );
 			}
@@ -112,15 +112,15 @@ add_action(
 		}
 		$bk = '';
 		if ( ! $dry ) {
-			list( $bk ) = aw_sourcing_cli_backup( 3, (string) get_option( 'aw_backup_latest_3', '' ) ); // refuses without a backup
+			list( $bk ) = sourceweb_sourcing_cli_backup( 3, (string) get_option( 'aw_backup_latest_3', '' ) ); // refuses without a backup
 			WP_CLI::log( "Backup: $bk" );
 		}
-		$types  = array_keys( aw_rules_sections( true ) );
-		$fields = array_keys( aw_enrich_fields() );
+		$types  = array_keys( sourceweb_rules_sections( true ) );
+		$fields = array_keys( sourceweb_enrich_fields() );
 		$c      = (array) get_option( 'aw_sources', array() );
 		$sum    = get_option( AW_SUMMARY_RULES_OPTION );
 		$fr     = get_option( AW_ENRICH_RULES_OPTION );
-		$plan   = aw_rules_phase3_plan( $c, $sum, $fr, $types, $fields );
+		$plan   = sourceweb_rules_phase3_plan( $c, $sum, $fr, $types, $fields );
 
 		WP_CLI::log( 'Sections (the site\'s content types): ' . implode( ', ', $types ) );
 		$before = (array) ( $c['sections'] ?? array() );
@@ -142,15 +142,15 @@ add_action(
 		} else {
 			WP_CLI::log( 'Summary rules: none saved (the defaults apply); nothing to rekey.' );
 		}
-		$labels = aw_rules_section_labels( true );
-		$inh    = array_keys( array_filter( aw_rules_summary_resolve( aw_sourcing_cli_summary_with( $plan['summary'] )['sections'], is_array( $plan['summary'] ) ? (array) ( $plan['summary']['sections'] ?? array() ) : array(), $labels ), fn( $r ) => '' !== (string) ( $r['inherit'] ?? '' ) ) );
+		$labels = sourceweb_rules_section_labels( true );
+		$inh    = array_keys( array_filter( sourceweb_rules_summary_resolve( sourceweb_sourcing_cli_summary_with( $plan['summary'] )['sections'], is_array( $plan['summary'] ) ? (array) ( $plan['summary']['sections'] ?? array() ) : array(), $labels ), fn( $r ) => '' !== (string) ( $r['inherit'] ?? '' ) ) );
 		WP_CLI::log( 'Sections that inherit the News summary rule: ' . ( $inh ? implode( ', ', $inh ) : '(none)' ) );
 		WP_CLI::log( $plan['seeded'] ? sprintf( 'Field rules: seeded, %d fields and a trust order of %d sources (%s), equal to the workers\' constants.', count( $plan['field_rules']['fields'] ), count( $plan['field_rules']['priority'] ), implode( ' > ', $plan['field_rules']['priority'] ) ) : 'Field rules: already stored, kept as they are.' );
-		foreach ( aw_sourcing_cli_schema_lines() as $line ) {
+		foreach ( sourceweb_sourcing_cli_schema_lines() as $line ) {
 			WP_CLI::log( $line );
 		}
-		$v1_before = aw_sourcing_cli_summary_with( $sum )['sections'];
-		$v1_after  = aw_sourcing_cli_summary_with( $plan['summary'] )['sections'];
+		$v1_before = sourceweb_sourcing_cli_summary_with( $sum )['sections'];
+		$v1_after  = sourceweb_sourcing_cli_summary_with( $plan['summary'] )['sections'];
 		$conflicts = $v1_before === $v1_after ? array() : array( 'the summary rules read by their old names would change' );
 		foreach ( $conflicts as $d ) {
 			WP_CLI::warning( 'conflict: ' . $d );
@@ -163,7 +163,7 @@ add_action(
 			WP_CLI::error( 'Not migrated: resolve the conflicts above first.' );
 		}
 		// Read-modify-write right before saving: the plan applied to the options as they are now.
-		$now = aw_rules_phase3_plan( (array) get_option( 'aw_sources', array() ), get_option( AW_SUMMARY_RULES_OPTION ), get_option( AW_ENRICH_RULES_OPTION ), $types, $fields );
+		$now = sourceweb_rules_phase3_plan( (array) get_option( 'aw_sources', array() ), get_option( AW_SUMMARY_RULES_OPTION ), get_option( AW_ENRICH_RULES_OPTION ), $types, $fields );
 		update_option( 'aw_sources', $now['sources'], false );
 		if ( is_array( $now['summary'] ) ) {
 			update_option( AW_SUMMARY_RULES_OPTION, $now['summary'] );
@@ -183,7 +183,7 @@ add_action(
 			false
 		);
 		update_option( 'aw_sourcing_phase', 3, false );
-		aw_src_log_many(
+		sourceweb_src_log_many(
 			array(
 				array( 'sections', sprintf( 'Phase 3 migrated (WP-CLI): section rules %d → %d (added %s, empty: every category); tag rules %d unchanged', count( $before ), count( $now['sources']['sections'] ), $now['added'] ? implode( ', ', $now['added'] ) : 'none', count( $tags ) ), array_keys( $before ), array_keys( $now['sources']['sections'] ) ),
 				array( 'summary', 'Phase 3 migrated (WP-CLI): summary rules keyed by post type, every value kept', array_keys( $now['rekeyed'] ), array_values( $now['rekeyed'] ) ),
@@ -199,30 +199,30 @@ add_action(
 add_action(
 	'aw_sourcing_cli_verify_3',
 	function () {
-		list( $bk, $old ) = aw_sourcing_cli_backup( 3 );
-		$now              = aw_sourcing_cli_now3();
+		list( $bk, $old ) = sourceweb_sourcing_cli_backup( 3 );
+		$now              = sourceweb_sourcing_cli_now3();
 		WP_CLI::log( "Backup: $bk" );
-		WP_CLI::log( 'Backup: ' . aw_sourcing_cli_counts3( $old ) );
-		WP_CLI::log( 'Now:    ' . aw_sourcing_cli_counts3( $now ) );
-		if ( aw_sourcing_phase() < 3 ) {
-			WP_CLI::error( 'Phase 3 is not migrated (aw_sourcing_phase = ' . aw_sourcing_phase() . ').' );
+		WP_CLI::log( 'Backup: ' . sourceweb_sourcing_cli_counts3( $old ) );
+		WP_CLI::log( 'Now:    ' . sourceweb_sourcing_cli_counts3( $now ) );
+		if ( sourceweb_sourcing_phase() < 3 ) {
+			WP_CLI::error( 'Phase 3 is not migrated (sourceweb_sourcing_phase = ' . sourceweb_sourcing_phase() . ').' );
 		}
-		$types  = array_keys( aw_rules_sections() );
-		$fields = array_keys( aw_enrich_fields() );
-		$cmp    = aw_rules_phase3_compare( (array) $old['aw_sources'], $old['aw_summary_rules'] ?? false, (array) $now['aw_sources'], $now['aw_summary_rules'] ?? false, $now['aw_enrich_field_rules'] ?? false, $types, $fields );
+		$types  = array_keys( sourceweb_rules_sections() );
+		$fields = array_keys( sourceweb_enrich_fields() );
+		$cmp    = sourceweb_rules_phase3_compare( (array) $old['aw_sources'], $old['aw_summary_rules'] ?? false, (array) $now['aw_sources'], $now['aw_summary_rules'] ?? false, $now['aw_enrich_field_rules'] ?? false, $types, $fields );
 		// The rules every reader of before sees: the summary rules by their old names, exactly as before.
-		if ( aw_sourcing_cli_summary_with( $old['aw_summary_rules'] ?? false ) === aw_summary_rules() ) {
+		if ( sourceweb_sourcing_cli_summary_with( $old['aw_summary_rules'] ?? false ) === sourceweb_summary_rules() ) {
 			$cmp['planned'][] = 'GET summary-rules: the v1 rules (news, library, research and the global keys) identical to before';
 		} else {
 			$cmp['diffs'][] = 'GET summary-rules: the v1 rules differ from before';
 		}
-		$by = aw_summary_rules_payload()['by_type'] ?? array();
+		$by = sourceweb_summary_rules_payload()['by_type'] ?? array();
 		if ( array_keys( $by ) === $types ) {
 			$cmp['planned'][] = 'GET summary-rules: by_type for ' . count( $by ) . ' sections (' . count( array_filter( $by, fn( $r ) => '' !== (string) ( $r['inherit'] ?? '' ) ) ) . ' inherit News)';
 		} else {
 			$cmp['diffs'][] = 'GET summary-rules: by_type does not list every section';
 		}
-		$cfg = aw_enrich_rest_config();
+		$cfg = sourceweb_enrich_rest_config();
 		if ( isset( $cfg['field_rules'], $cfg['schema'], $cfg['priority'] ) ) {
 			$cmp['planned'][] = 'GET enrich/config: schema (' . count( $cfg['schema']['fields'] ) . ' listing fields), priority and field_rules (' . count( (array) $cfg['field_rules'] ) . ')';
 		} else {
@@ -261,9 +261,9 @@ add_action(
 add_action(
 	'aw_sourcing_cli_rollback_3',
 	function ( $assoc ) {
-		list( $bk, $old ) = aw_sourcing_cli_backup( 3 );
+		list( $bk, $old ) = sourceweb_sourcing_cli_backup( 3 );
 		$all              = ! empty( $assoc['restore-all'] );
-		WP_CLI::confirm( 'Roll phase 3 back ' . ( $all ? "to backup $bk exactly (aw_sources, aw_summary_rules and aw_enrich_field_rules as backed up)" : '(undo the migration on the current options)' ) . '?', $assoc );
+		WP_CLI::confirm( 'Roll phase 3 back ' . ( $all ? "to backup $bk exactly (aw_sources, sourceweb_summary_rules and sourceweb_enrich_field_rules as backed up)" : '(undo the migration on the current options)' ) . '?', $assoc );
 		$c   = (array) get_option( 'aw_sources', array() );
 		$sum = get_option( AW_SUMMARY_RULES_OPTION );
 		$fr  = get_option( AW_ENRICH_RULES_OPTION );
@@ -288,10 +288,10 @@ add_action(
 					update_option( $k, $old[ $k ], AW_SUMMARY_RULES_OPTION === $k ? null : false );
 				}
 			}
-			$what = "restored aw_sources, aw_summary_rules and aw_enrich_field_rules from $bk";
+			$what = "restored aw_sources, sourceweb_summary_rules and sourceweb_enrich_field_rules from $bk";
 		} else {
 			$rec  = (array) get_option( 'aw_sourcing_phase3_record', array() );
-			$undo = aw_rules_phase3_undo( $c, $sum, (array) ( $rec['added'] ?? array() ) );
+			$undo = sourceweb_rules_phase3_undo( $c, $sum, (array) ( $rec['added'] ?? array() ) );
 			update_option( 'aw_sources', $undo['sources'], false );
 			if ( is_array( $undo['summary'] ) ) {
 				update_option( AW_SUMMARY_RULES_OPTION, $undo['summary'] );
@@ -306,7 +306,7 @@ add_action(
 		}
 		delete_option( 'aw_sourcing_phase3_record' );
 		delete_option( 'aw_backup_latest_3' ); // a new migration starts from a new backup (the backups themselves stay)
-		aw_src_log( 'sections', "Phase 3 rolled back (WP-CLI): $what", 'phase 3', 'phase ' . aw_sourcing_phase() );
+		sourceweb_src_log( 'sections', "Phase 3 rolled back (WP-CLI): $what", 'phase 3', 'phase ' . sourceweb_sourcing_phase() );
 		WP_CLI::success( "Rolled back: $what. The backup stays ($bk)." );
 	}
 );

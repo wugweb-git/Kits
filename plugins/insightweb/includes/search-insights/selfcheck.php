@@ -31,7 +31,7 @@ const AW_SI_CHK_AI    = 'aw_si_srv_ai';
  * @param string $part  speed or ai.
  * @param array  $value What to keep.
  */
-function aw_si_chk_put( string $part, array $value ): void {
+function insightweb_si_chk_put( string $part, array $value ): void {
 	$all = get_option( 'aw_si_srv_checks', array() );
 	$all = is_array( $all ) ? $all : array();
 	$ymd = wp_date( 'Ymd' );
@@ -43,7 +43,7 @@ function aw_si_chk_put( string $part, array $value ): void {
 }
 
 /** The daily step: the checks, each in its own run a few minutes apart. */
-function aw_si_chk_daily(): void {
+function insightweb_si_chk_daily(): void {
 	if ( ! wp_next_scheduled( AW_SI_CHK_AI ) ) {
 		wp_schedule_single_event( time() + 60, AW_SI_CHK_AI );
 	}
@@ -56,18 +56,18 @@ function aw_si_chk_daily(): void {
 		}
 	}
 }
-add_action( AW_SI_CRON_DAILY, 'aw_si_chk_daily', 22 );
+add_action( AW_SI_CRON_DAILY, 'insightweb_si_chk_daily', 22 );
 add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_CHK_SPEED, AW_SI_CHK_AI ) ) );
 
 add_action(
 	AW_SI_CHK_SPEED,
 	function ( $strategy ) {
 		$strategy = 'desktop' === $strategy ? 'desktop' : 'mobile';
-		if ( ! function_exists( 'aw_si_psi_call' ) ) {
+		if ( ! function_exists( 'insightweb_si_psi_call' ) ) {
 			return;
 		}
-		$fig = aw_si_psi_call( '/', $strategy );
-		aw_si_chk_put( 'speed', array( $strategy => is_wp_error( $fig ) ? null : (int) $fig['score'] ) );
+		$fig = insightweb_si_psi_call( '/', $strategy );
+		insightweb_si_chk_put( 'speed', array( $strategy => is_wp_error( $fig ) ? null : (int) $fig['score'] ) );
 	}
 );
 
@@ -79,7 +79,7 @@ add_action(
  * @param bool   $fresh  Add a query string.
  * @return array{code:int,type:string,body:string}
  */
-function aw_si_chk_fetch( string $path, array $headers = array(), bool $fresh = false ): array {
+function insightweb_si_chk_fetch( string $path, array $headers = array(), bool $fresh = false ): array {
 	$url = home_url( $path );
 	$url = $fresh ? add_query_arg( 'aw_check', time(), $url ) : $url;
 	$r   = wp_remote_get(
@@ -102,7 +102,7 @@ function aw_si_chk_fetch( string $path, array $headers = array(), bool $fresh = 
  * @param string $txt robots.txt.
  * @param string $bot Crawler name.
  */
-function aw_si_chk_robots_blocks( string $txt, string $bot ): bool {
+function insightweb_si_chk_robots_blocks( string $txt, string $bot ): bool {
 	$groups = array();
 	$agents = array();
 	$rules  = false;
@@ -137,14 +137,14 @@ function aw_si_chk_robots_blocks( string $txt, string $bot ): bool {
 add_action(
 	AW_SI_CHK_AI,
 	function () {
-		$robots = aw_si_chk_fetch( '/robots.txt' );
-		$home   = aw_si_chk_fetch( '/', array(), true );
-		$md     = aw_si_chk_fetch( '/', array( 'Accept' => 'text/markdown' ), true );
-		$llms   = aw_si_chk_fetch( '/llms.txt' );
+		$robots = insightweb_si_chk_fetch( '/robots.txt' );
+		$home   = insightweb_si_chk_fetch( '/', array(), true );
+		$md     = insightweb_si_chk_fetch( '/', array( 'Accept' => 'text/markdown' ), true );
+		$llms   = insightweb_si_chk_fetch( '/llms.txt' );
 
 		$blocked = array();
 		foreach ( array( 'GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended' ) as $bot ) {
-			if ( 200 !== $robots['code'] || aw_si_chk_robots_blocks( $robots['body'], $bot ) ) {
+			if ( 200 !== $robots['code'] || insightweb_si_chk_robots_blocks( $robots['body'], $bot ) ) {
 				$blocked[] = $bot;
 			}
 		}
@@ -184,7 +184,7 @@ add_action(
 			'organization'   => $org,
 			'llms'           => 200 === $llms['code'] && '' !== trim( $llms['body'] ) && 0 === stripos( $llms['type'], 'text/' ),
 		);
-		aw_si_chk_put(
+		insightweb_si_chk_put(
 			'ai',
 			array(
 				'items'   => $items,
@@ -196,7 +196,7 @@ add_action(
 );
 
 /** Item labels. */
-function aw_si_chk_labels(): array {
+function insightweb_si_chk_labels(): array {
 	return array(
 		'content_signal' => __( 'robots.txt has a Content-Signal line', 'insightweb' ),
 		'ai_allowed'     => __( 'robots.txt lets the AI crawlers in', 'insightweb' ),
@@ -208,7 +208,7 @@ function aw_si_chk_labels(): array {
 }
 
 /** The checks section of the Server tab: the last 7 days, and the newest AI check item by item. */
-function aw_si_chk_section(): void {
+function insightweb_si_chk_section(): void {
 	$all = get_option( 'aw_si_srv_checks', array() );
 	$all = is_array( $all ) ? $all : array();
 	krsort( $all );
@@ -236,7 +236,7 @@ function aw_si_chk_section(): void {
 			),
 		);
 	}
-	aw_si_simple_table(
+	insightweb_si_simple_table(
 		'speed-checks',
 		array(
 			'day'     => esc_html__( 'Day', 'insightweb' ),
@@ -263,7 +263,7 @@ function aw_si_chk_section(): void {
 	}
 	if ( $last ) {
 		echo '<ul>';
-		foreach ( aw_si_chk_labels() as $k => $label ) {
+		foreach ( insightweb_si_chk_labels() as $k => $label ) {
 			$pass = ! empty( $last['items'][ $k ] );
 			$more = 'ai_allowed' === $k && ! empty( $last['blocked'] ) ? ' (' . implode( ', ', (array) $last['blocked'] ) . ')' : '';
 			echo '<li>' . esc_html( ( $pass ? __( 'Pass', 'insightweb' ) : __( 'Fail', 'insightweb' ) ) . ': ' . $label . $more ) . '</li>';

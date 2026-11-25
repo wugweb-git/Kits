@@ -14,8 +14,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SI_SLUG = 'aw-search-insights';
 
-/** InsightWeb's own capability, manage_insightweb (insightweb-caps.php); whoever had manage_options (or AW_SRC_CAP) still has it. */
-function aw_si_cap(): string {
+/** InsightWeb's own capability, manage_insightweb (insightweb-caps.php); whoever had manage_options (or SOURCEWEB_SRC_CAP) still has it. */
+function insightweb_si_cap(): string {
 	return INSIGHTWEB_CAP;
 }
 
@@ -24,7 +24,7 @@ function aw_si_cap(): string {
  *
  * @param string $tab overview, keywords or settings.
  */
-function aw_si_url( string $tab = 'overview' ): string {
+function insightweb_si_url( string $tab = 'overview' ): string {
 	return add_query_arg(
 		array(
 			'page' => AW_SI_SLUG,
@@ -39,8 +39,8 @@ function aw_si_url( string $tab = 'overview' ): string {
  *
  * @param string $tab The tab.
  */
-function aw_si_return_url( string $tab = 'overview' ): string {
-	return aw_si_url( $tab );
+function insightweb_si_return_url( string $tab = 'overview' ): string {
+	return insightweb_si_url( $tab );
 }
 
 /**
@@ -49,14 +49,14 @@ function aw_si_return_url( string $tab = 'overview' ): string {
  * @param string $action override_p1 … override_clear.
  * @param int    $id     Keyword record.
  */
-function aw_si_kw_action_url( string $action, int $id ): string {
+function insightweb_si_kw_action_url( string $action, int $id ): string {
 	return wp_nonce_url(
 		add_query_arg(
 			array(
 				'aw_si_kw' => $action,
 				'kw[]'     => $id,
 			),
-			aw_si_url( 'keywords' )
+			insightweb_si_url( 'keywords' )
 		),
 		'bulk-keywords'
 	);
@@ -66,7 +66,7 @@ function aw_si_kw_action_url( string $action, int $id ): string {
  * Tabs other plugins add with the aw_si_tabs filter (key => label), e.g. SourceWeb's per-keyword view. Each renders
  * on the action aw_si_tab_{key}; the action aw_si_load_tab_{key} runs before output (screen options, redirects).
  */
-function aw_si_extra_tabs(): array {
+function insightweb_si_extra_tabs(): array {
 	$out = array();
 	foreach ( (array) apply_filters( 'aw_si_tabs', array() ) as $key => $label ) {
 		$key = sanitize_key( (string) $key );
@@ -78,9 +78,9 @@ function aw_si_extra_tabs(): array {
 }
 
 /** The current tab. */
-function aw_si_tab(): string {
+function insightweb_si_tab(): string {
 	$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'overview'; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
-	return in_array( $tab, array_merge( array( 'overview', 'keywords', 'settings' ), array_keys( aw_si_extra_tabs() ) ), true ) ? $tab : 'overview';
+	return in_array( $tab, array_merge( array( 'overview', 'keywords', 'settings' ), array_keys( insightweb_si_extra_tabs() ) ), true ) ? $tab : 'overview';
 }
 
 add_action(
@@ -94,14 +94,14 @@ add_action(
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__, 2 ) . '/assets/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-chart-area'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', aw_si_cap(), AW_SI_SLUG, 'aw_si_screen', $icon, '58.5' );
+		add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', insightweb_si_cap(), AW_SI_SLUG, 'insightweb_si_screen', $icon, '58.5' );
 		$GLOBALS['admin_page_hooks'][ AW_SI_SLUG ] = 'insightweb'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (insightweb_page_…), whatever the title.
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		$hook = add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), aw_si_cap(), AW_SI_SLUG, 'aw_si_screen' );
+		$hook = add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), insightweb_si_cap(), AW_SI_SLUG, 'insightweb_si_screen' );
 		if ( $hook ) {
-			add_action( 'load-' . $hook, 'aw_si_load' );
+			add_action( 'load-' . $hook, 'insightweb_si_load' );
 		}
 	},
 	100
@@ -117,10 +117,10 @@ add_filter(
 );
 
 /** Before output: screen options, the tab's load hook and priority overrides (then redirect). */
-function aw_si_load(): void {
-	aw_si_install();
-	$tab = aw_si_tab();
-	if ( isset( aw_si_extra_tabs()[ $tab ] ) ) {
+function insightweb_si_load(): void {
+	insightweb_si_install();
+	$tab = insightweb_si_tab();
+	if ( isset( insightweb_si_extra_tabs()[ $tab ] ) ) {
 		do_action( 'aw_si_load_tab_' . $tab );
 	}
 	if ( 'keywords' === $tab ) {
@@ -132,7 +132,7 @@ function aw_si_load(): void {
 				'option'  => 'aw_si_keywords_per_page',
 			)
 		);
-		aw_si_handle_overrides();
+		insightweb_si_handle_overrides();
 	}
 }
 
@@ -142,33 +142,33 @@ function aw_si_load(): void {
  *
  * @return array[]
  */
-function aw_si_overview_boxes(): array {
+function insightweb_si_overview_boxes(): array {
 	// A setup step first, only while it is not done (12 Nov 2026: the Google Alerts feeds were never set).
-	$setup = function_exists( 'aw_si_alerts_feeds' ) && ! aw_si_alerts_feeds() ? array( 'setup' => array( __( 'Setup step', 'insightweb' ), 'aw_si_box_setup' ) ) : array();
+	$setup = function_exists( 'insightweb_si_alerts_feeds' ) && ! insightweb_si_alerts_feeds() ? array( 'setup' => array( __( 'Setup step', 'insightweb' ), 'insightweb_si_box_setup' ) ) : array();
 	return $setup + array(
-		'priorities'  => array( __( 'Priorities', 'insightweb' ), 'aw_si_box_priorities' ),
+		'priorities'  => array( __( 'Priorities', 'insightweb' ), 'insightweb_si_box_priorities' ),
 		/* translators: %d: minimum impressions. */
-		'quick'       => array( sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'insightweb' ), AW_SI_QUICK_MIN ), 'aw_si_box_quick' ),
-		'rising-week' => array( __( 'Rising this week', 'insightweb' ), 'aw_si_box_rising_week' ),
-		'movers'      => array( __( 'Movers (28 days against the 28 before)', 'insightweb' ), 'aw_si_box_movers' ),
-		'brand'       => array( __( 'Brand', 'insightweb' ), 'aw_si_box_brand' ),
-		'ai'          => array( __( 'AI referrals (GA4, 28 days)', 'insightweb' ), 'aw_si_box_ai' ),
-		'referrers'   => array( __( 'Top referrers (GA4)', 'insightweb' ), 'aw_si_box_referrers' ),
-		'campaigns'   => array( __( 'Campaigns by source (GA4, 28 days)', 'insightweb' ), 'aw_si_box_campaigns' ),
-		'nf'          => array( __( 'Not found (404s, GA4, 28 days)', 'insightweb' ), 'aw_si_box_nf' ),
-		'index'       => array( __( 'Index status (Search Console totals, and the pages we inspected)', 'insightweb' ), 'aw_si_box_index' ),
-		'request'     => array( __( 'Request indexing (10 a day)', 'insightweb' ), 'aw_si_box_request' ),
-		'gsc-types'   => array( __( 'Discover and Google News (Search Console, 28 days)', 'insightweb' ), 'aw_si_box_gsc_types' ),
-		'clarity'     => array( __( 'Clarity (28 days)', 'insightweb' ), 'aw_si_box_clarity' ),
-		'site-search' => array( __( 'Searches on our site (28 days, minimum)', 'insightweb' ), 'aw_si_box_site_search' ),
-		'gaps'        => array( __( 'Content gaps (keyword map gaps and P2)', 'insightweb' ), 'aw_si_box_gaps' ),
-		'crawl'       => array( __( 'Crawler access (weekly)', 'insightweb' ), 'aw_si_box_crawl' ),
-		'bing-crawl'  => array( __( 'Bing crawl (12 weeks)', 'insightweb' ), 'aw_si_box_bing_crawl' ),
+		'quick'       => array( sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'insightweb' ), AW_SI_QUICK_MIN ), 'insightweb_si_box_quick' ),
+		'rising-week' => array( __( 'Rising this week', 'insightweb' ), 'insightweb_si_box_rising_week' ),
+		'movers'      => array( __( 'Movers (28 days against the 28 before)', 'insightweb' ), 'insightweb_si_box_movers' ),
+		'brand'       => array( __( 'Brand', 'insightweb' ), 'insightweb_si_box_brand' ),
+		'ai'          => array( __( 'AI referrals (GA4, 28 days)', 'insightweb' ), 'insightweb_si_box_ai' ),
+		'referrers'   => array( __( 'Top referrers (GA4)', 'insightweb' ), 'insightweb_si_box_referrers' ),
+		'campaigns'   => array( __( 'Campaigns by source (GA4, 28 days)', 'insightweb' ), 'insightweb_si_box_campaigns' ),
+		'nf'          => array( __( 'Not found (404s, GA4, 28 days)', 'insightweb' ), 'insightweb_si_box_nf' ),
+		'index'       => array( __( 'Index status (Search Console totals, and the pages we inspected)', 'insightweb' ), 'insightweb_si_box_index' ),
+		'request'     => array( __( 'Request indexing (10 a day)', 'insightweb' ), 'insightweb_si_box_request' ),
+		'gsc-types'   => array( __( 'Discover and Google News (Search Console, 28 days)', 'insightweb' ), 'insightweb_si_box_gsc_types' ),
+		'clarity'     => array( __( 'Clarity (28 days)', 'insightweb' ), 'insightweb_si_box_clarity' ),
+		'site-search' => array( __( 'Searches on our site (28 days, minimum)', 'insightweb' ), 'insightweb_si_box_site_search' ),
+		'gaps'        => array( __( 'Content gaps (keyword map gaps and P2)', 'insightweb' ), 'insightweb_si_box_gaps' ),
+		'crawl'       => array( __( 'Crawler access (weekly)', 'insightweb' ), 'insightweb_si_box_crawl' ),
+		'bing-crawl'  => array( __( 'Bing crawl (12 weeks)', 'insightweb' ), 'insightweb_si_box_bing_crawl' ),
 	);
 }
 
 /** Bulk and row priority overrides. The only write this screen makes, and only to Search Insights' own table. */
-function aw_si_handle_overrides(): void {
+function insightweb_si_handle_overrides(): void {
 	$action = '';
 	foreach ( array( 'aw_si_kw', 'action', 'action2' ) as $field ) {
 		$v = isset( $_REQUEST[ $field ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $field ] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- checked below before any change.
@@ -181,12 +181,12 @@ function aw_si_handle_overrides(): void {
 		return;
 	}
 	check_admin_referer( 'bulk-keywords' );
-	if ( ! current_user_can( aw_si_cap() ) ) {
+	if ( ! current_user_can( insightweb_si_cap() ) ) {
 		wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 	}
 	$ids = array_filter( array_map( 'intval', (array) wp_unslash( $_REQUEST['kw'] ?? array() ) ) );
 	if ( ! $ids ) {
-		wp_safe_redirect( add_query_arg( 'none', 1, aw_si_return_url( 'keywords' ) ) );
+		wp_safe_redirect( add_query_arg( 'none', 1, insightweb_si_return_url( 'keywords' ) ) );
 		exit;
 	}
 	$set = array(
@@ -197,32 +197,32 @@ function aw_si_handle_overrides(): void {
 	);
 	if ( $ids && isset( $set[ $action ] ) ) {
 		global $wpdb;
-		$t  = aw_si_table( 'keywords' );
+		$t  = insightweb_si_table( 'keywords' );
 		$in = implode( ',', array_map( 'intval', $ids ) );
 		$wpdb->query( $wpdb->prepare( "UPDATE %i SET priority_override = %s WHERE id IN ({$in})", $t, $set[ $action ] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
-	$back = remove_query_arg( array( 'aw_si_kw', 'kw', '_wpnonce', '_wp_http_referer', 'action', 'action2' ), wp_get_referer() ? wp_get_referer() : aw_si_url( 'keywords' ) );
+	$back = remove_query_arg( array( 'aw_si_kw', 'kw', '_wpnonce', '_wp_http_referer', 'action', 'action2' ), wp_get_referer() ? wp_get_referer() : insightweb_si_url( 'keywords' ) );
 	wp_safe_redirect( add_query_arg( 'updated', count( $ids ), $back ) );
 	exit;
 }
 
 /** Notices per source: an info line with every source's last update, then a warning or error per problem. */
-function aw_si_source_notices(): void {
+function insightweb_si_source_notices(): void {
 	$off = (int) get_option( 'aw_si_off' );
 	if ( $off ) {
 		/* translators: %s: date and time. */
 		wp_admin_notice( esc_html( sprintf( __( 'Search Insights is off: its data was deleted on %s and nothing runs on schedule. Settings → Run the daily update starts it again.', 'insightweb' ), wp_date( 'j M Y, H:i', $off ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		return;
 	}
-	$runs  = aw_si_runs();
+	$runs  = insightweb_si_runs();
 	$parts = array();
-	foreach ( aw_si_sources() as $src => $s ) {
+	foreach ( insightweb_si_sources() as $src => $s ) {
 		$r   = $runs[ $src ] ?? array();
 		$ok  = (int) ( $r['ok'] ?? 0 );
-		$err = aw_si_run_problem( $src );
+		$err = insightweb_si_run_problem( $src );
 		/* translators: 1: source, 2: date and time. */
 		$parts[] = $ok ? sprintf( __( '%1$s: %2$s', 'insightweb' ), $s['label'], wp_date( 'j M, H:i', $ok ) ) : sprintf( __( '%s: not run yet', 'insightweb' ), $s['label'] );
-		if ( $err && aw_si_rising_blocked( $src ) ) {
+		if ( $err && insightweb_si_rising_blocked( $src ) ) {
 			$paste = in_array( $src, array( 'rising_trends_interest', 'rising_trends_related' ), true ) ? ' ' . __( 'Paste the figures on the Rising tab.', 'insightweb' ) : '';
 			$msg   = $ok
 				/* translators: 1: source, 2: date and time. */
@@ -241,7 +241,7 @@ function aw_si_source_notices(): void {
 				/* translators: 1: source, 2: date and time. */
 				: __( '%1$s ran on %2$s and kept nothing: the source answered, and no term passed the filters (the Rising tab shows what was dropped and why).', 'insightweb' );
 			wp_admin_notice( esc_html( sprintf( $msg, $s['label'], wp_date( 'j M, H:i', $ok ) ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
-		} elseif ( $ok && aw_si_stale( $src ) ) {
+		} elseif ( $ok && insightweb_si_stale( $src ) ) {
 			/* translators: %s: source. */
 			wp_admin_notice( '<span class="dashicons dashicons-clock" aria-hidden="true"></span> ' . esc_html( sprintf( __( '%s has not updated on schedule.', 'insightweb' ), $s['label'] ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
@@ -266,26 +266,26 @@ function aw_si_source_notices(): void {
 			wp_admin_notice( esc_html( sprintf( __( 'GA4 returned its row maximum for the 28-day %s report, so the rarest rows of that window may be missing.', 'insightweb' ), implode( ', ', array_keys( $cut ) ) ) ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 	}
-	if ( function_exists( 'aw_si_gdelt_on' ) && ! aw_si_gdelt_on() ) {
+	if ( function_exists( 'insightweb_si_gdelt_on' ) && ! insightweb_si_gdelt_on() ) {
 		wp_admin_notice( esc_html__( 'News (GDELT) is switched off (Settings): GDELT refuses our requests (HTTP 429), so Rising uses the other sources.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 	}
 	wp_admin_notice( esc_html__( 'Last updated', 'insightweb' ) . ' — ' . esc_html( implode( ' · ', $parts ) ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 }
 
 /** The Search Insights screen, drawn by the Kits admin shell; without Kits Core or the build, a fallback. */
-function aw_si_screen(): void {
-	if ( ! current_user_can( aw_si_cap() ) ) {
+function insightweb_si_screen(): void {
+	if ( ! current_user_can( insightweb_si_cap() ) ) {
 		return;
 	}
-	if ( function_exists( 'insightweb_ui_page' ) && insightweb_ui_page( aw_si_tab() ) ) {
+	if ( function_exists( 'insightweb_ui_page' ) && insightweb_ui_page( insightweb_si_tab() ) ) {
 		return;
 	}
-	aw_si_screen_fallback();
+	insightweb_si_screen_fallback();
 }
 
 /** Standalone native fallback screen for InsightWeb. */
-function aw_si_screen_fallback(): void {
-	$tab = aw_si_tab();
+function insightweb_si_screen_fallback(): void {
+	$tab = insightweb_si_tab();
 	echo '<div class="wrap">';
 	echo '<h1>' . esc_html__( 'Search Insights', 'insightweb' ) . '</h1>';
 
@@ -295,12 +295,12 @@ function aw_si_screen_fallback(): void {
 		wp_admin_notice( esc_html__( 'InsightWeb needs Kits Core (active, with its build) to show this screen.', 'insightweb' ), array( 'type' => 'error' ) );
 	}
 
-	aw_si_screen_notices();
+	insightweb_si_screen_notices();
 
 	if ( 'keywords' === $tab ) {
-		aw_si_keywords_tab();
-	} elseif ( 'settings' === $tab && function_exists( 'aw_si_settings_tab' ) ) {
-		aw_si_settings_tab();
+		insightweb_si_keywords_tab();
+	} elseif ( 'settings' === $tab && function_exists( 'insightweb_si_settings_tab' ) ) {
+		insightweb_si_settings_tab();
 	} else {
 		echo '<div style="margin-top:20px; display:flex; gap:16px; flex-wrap:wrap;">';
 
@@ -309,7 +309,7 @@ function aw_si_screen_fallback(): void {
 		echo '<h2 style="margin-top:0;">' . esc_html__( 'Keywords', 'insightweb' ) . '</h2>';
 		$kw_count = function_exists( 'aw_si_count_keywords' ) ? aw_si_count_keywords() : 0;
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $kw_count ) ) . '</p>';
-		echo '<p><a href="' . esc_url( aw_si_url( 'keywords' ) ) . '" class="button button-secondary">' . esc_html__( 'View Keywords', 'insightweb' ) . '</a></p>';
+		echo '<p><a href="' . esc_url( insightweb_si_url( 'keywords' ) ) . '" class="button button-secondary">' . esc_html__( 'View Keywords', 'insightweb' ) . '</a></p>';
 		echo '</div>';
 
 		// Sync status card
@@ -318,7 +318,7 @@ function aw_si_screen_fallback(): void {
 		$days = function_exists( 'aw_si_days_stored' ) ? aw_si_days_stored() : 0;
 		/* translators: %d: number of days stored. */
 		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( sprintf( __( '%d days', 'insightweb' ), $days ) ) . '</p>';
-		echo '<p><a href="' . esc_url( aw_si_url( 'settings' ) ) . '" class="button button-secondary">' . esc_html__( 'Settings & Sync', 'insightweb' ) . '</a></p>';
+		echo '<p><a href="' . esc_url( insightweb_si_url( 'settings' ) ) . '" class="button button-secondary">' . esc_html__( 'Settings & Sync', 'insightweb' ) . '</a></p>';
 		echo '</div>';
 
 		echo '</div>';
@@ -328,13 +328,13 @@ function aw_si_screen_fallback(): void {
 }
 
 /** The notices above every tab: each source's state, then the result of the last action. */
-function aw_si_screen_notices(): void {
-	aw_si_source_notices();
-	aw_si_action_notices();
+function insightweb_si_screen_notices(): void {
+	insightweb_si_source_notices();
+	insightweb_si_action_notices();
 }
 
 /** The result of the last action (a priority saved, a run finished). */
-function aw_si_action_notices(): void {
+function insightweb_si_action_notices(): void {
 	if ( isset( $_GET['updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		wp_admin_notice( esc_html__( 'Priority saved.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 	}
@@ -347,8 +347,8 @@ function aw_si_action_notices(): void {
 }
 
 /** The Keywords tab: views, search and the list (bulk and row priority overrides). */
-function aw_si_keywords_tab(): void {
-	$table = new AW_SI_Keywords_Table();
+function insightweb_si_keywords_tab(): void {
+	$table = new InsightWeb_SI_Keywords_Table();
 	$table->prepare_items();
 	$table->views();
 	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="keywords">';
@@ -368,10 +368,10 @@ function aw_si_keywords_tab(): void {
  * @param string $order Fixed order from this file.
  * @param int    $limit Rows.
  */
-function aw_si_rows( string $where, string $order, int $limit = 10 ): array {
+function insightweb_si_rows( string $where, string $order, int $limit = 10 ): array {
 	global $wpdb;
-	$t = aw_si_table( 'keywords' );
-	if ( ! aw_si_ready() ) {
+	$t = insightweb_si_table( 'keywords' );
+	if ( ! insightweb_si_ready() ) {
 		return array();
 	}
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM %i WHERE {$where} ORDER BY {$order} LIMIT %d", $t, $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions and order from this file.
@@ -383,7 +383,7 @@ function aw_si_rows( string $where, string $order, int $limit = 10 ): array {
  * @param array $rows Keyword records.
  * @param array $cols column => label.
  */
-function aw_si_mini_table( array $rows, array $cols ): void {
+function insightweb_si_mini_table( array $rows, array $cols ): void {
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
@@ -400,7 +400,7 @@ function aw_si_mini_table( array $rows, array $cols ): void {
 			if ( 'page' === $c && '' !== $v && 0 === strpos( $v, '/' ) && false === strpos( $v, '{' ) ) {
 				echo '<td><a href="' . esc_url( home_url( $v ) ) . '" target="_blank" rel="noopener">' . esc_html( $v ) . '</a></td>';
 			} elseif ( 'action' === $c ) {
-				echo '<td>' . esc_html( aw_si_actions()[ $v ] ?? '' ) . '</td>';
+				echo '<td>' . esc_html( insightweb_si_actions()[ $v ] ?? '' ) . '</td>';
 			} elseif ( is_numeric( $v ) ) {
 				echo '<td>' . esc_html( number_format_i18n( (float) $v, floor( (float) $v ) === (float) $v ? 0 : 1 ) ) . '</td>';
 			} else {
@@ -413,10 +413,10 @@ function aw_si_mini_table( array $rows, array $cols ): void {
 }
 
 /** Overview box: what is not set up yet (the Google Alerts feeds), and where to set it. */
-function aw_si_box_setup(): void {
+function insightweb_si_box_setup(): void {
 	echo '<p>' . esc_html__( 'Google Alerts feeds are not set, so mentions of Animal Writes on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Settings → Keys. This box goes once a feed is set.', 'insightweb' ) . '</p>';
 	if ( current_user_can( 'manage_options' ) ) {
-		echo '<p><a class="button" href="' . esc_url( aw_si_url( 'settings' ) . '#keys' ) . '">' . esc_html__( 'Settings → Keys', 'insightweb' ) . '</a></p>';
+		echo '<p><a class="button" href="' . esc_url( insightweb_si_url( 'settings' ) . '#keys' ) . '">' . esc_html__( 'Settings → Keys', 'insightweb' ) . '</a></p>';
 	}
 }
 
@@ -428,7 +428,7 @@ function aw_si_box_setup(): void {
  * @param array  $info The run's info.
  * @return string[]
  */
-function aw_si_run_detail( string $src, array $info ): array {
+function insightweb_si_run_detail( string $src, array $info ): array {
 	$n   = fn( $k ) => number_format_i18n( (int) ( $info[ $k ] ?? 0 ) );
 	$det = array();
 	if ( ! empty( $info['up_to'] ) ) {
@@ -449,14 +449,14 @@ function aw_si_run_detail( string $src, array $info ): array {
 			/* translators: 1–4: keywords at P1, P2, P3, P4. */
 			$det[] = sprintf( __( 'priorities worked out over every record: P1 %1$s, P2 %2$s, P3 %3$s, P4 %4$s', 'insightweb' ), number_format_i18n( (int) ( $info['prio']['P1'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P2'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P3'] ?? 0 ) ), number_format_i18n( (int) ( $info['prio']['P4'] ?? 0 ) ) );
 			// The Keywords tab and the Priorities box fold listing names (12 Nov 2026: P1 224 here, 203 there).
-			$movers = aw_si_entity_movers();
+			$movers = insightweb_si_entity_movers();
 			/* translators: 1–3: keywords at P1, P2, P3 with listing names folded, 4: listing names counted one by one. */
-			$det[] = sprintf( __( 'with listing names folded as on the Keywords tab: P1 %1$s, P2 %2$s, P3 %3$s (only the %4$s listing names that moved most count one by one)', 'insightweb' ), number_format_i18n( aw_si_view_count( 'p1', $movers ) ), number_format_i18n( aw_si_view_count( 'p2', $movers ) ), number_format_i18n( aw_si_view_count( 'p3', $movers ) ), number_format_i18n( count( $movers ) ) );
+			$det[] = sprintf( __( 'with listing names folded as on the Keywords tab: P1 %1$s, P2 %2$s, P3 %3$s (only the %4$s listing names that moved most count one by one)', 'insightweb' ), number_format_i18n( insightweb_si_view_count( 'p1', $movers ) ), number_format_i18n( insightweb_si_view_count( 'p2', $movers ) ), number_format_i18n( insightweb_si_view_count( 'p3', $movers ) ), number_format_i18n( count( $movers ) ) );
 		}
 	}
 	if ( 'rollup' === $src && isset( $info['daily'] ) ) {
 		/* translators: 1: daily rows, 2: days, 3: monthly rows. */
-		$det[] = sprintf( __( '%1$s daily rows older than %2$d days rolled into %3$s monthly rows', 'insightweb' ), $n( 'daily' ), aw_si_keep_days(), $n( 'monthly' ) );
+		$det[] = sprintf( __( '%1$s daily rows older than %2$d days rolled into %3$s monthly rows', 'insightweb' ), $n( 'daily' ), insightweb_si_keep_days(), $n( 'monthly' ) );
 		if ( ! empty( $info['cutoff'] ) ) {
 			/* translators: %s: date. */
 			$det[] = sprintf( __( 'daily rows kept from %s', 'insightweb' ), mysql2date( 'j M Y', (string) $info['cutoff'] ) );
@@ -491,9 +491,9 @@ function aw_si_run_detail( string $src, array $info ): array {
 	if ( 'inspect' === $src && isset( $info['indexed'] ) ) {
 		/* translators: %s: pages indexed. */
 		$det[] = sprintf( __( '%s indexed', 'insightweb' ), $n( 'indexed' ) );
-		$eta   = function_exists( 'aw_si_inspect_info_eta' ) ? aw_si_inspect_info_eta( $info ) : '';
+		$eta   = function_exists( 'insightweb_si_inspect_info_eta' ) ? insightweb_si_inspect_info_eta( $info ) : '';
 		if ( '' !== $eta ) {
-			$det[] = $eta; // why pages were not reached is the first warning (aw_si_inspect_info())
+			$det[] = $eta; // why pages were not reached is the first warning (insightweb_si_inspect_info())
 		}
 	}
 	if ( ! empty( $info['pasted'] ) ) {
@@ -513,8 +513,8 @@ function aw_si_run_detail( string $src, array $info ): array {
 }
 
 /** Overview box: counts per priority and view, linked to the Keywords tab. */
-function aw_si_box_priorities(): void {
-	if ( ! aw_si_ready() ) {
+function insightweb_si_box_priorities(): void {
+	if ( ! insightweb_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
@@ -526,13 +526,13 @@ function aw_si_box_priorities(): void {
 		'notranked' => __( 'Tracked, not ranking', 'insightweb' ),
 		'all'       => __( 'All keywords', 'insightweb' ),
 	);
-	$movers = aw_si_entity_movers(); // Listing names count as in the Keywords views: the ones that moved most, not all.
+	$movers = insightweb_si_entity_movers(); // Listing names count as in the Keywords views: the ones that moved most, not all.
 	echo '<ul>';
 	foreach ( $labels as $view => $label ) {
-		echo '<li><a href="' . esc_url( add_query_arg( 'view', $view, aw_si_url( 'keywords' ) ) ) . '">' . esc_html( $label ) . '</a>: ' . esc_html( number_format_i18n( aw_si_view_count( $view, $movers ) ) ) . '</li>';
+		echo '<li><a href="' . esc_url( add_query_arg( 'view', $view, insightweb_si_url( 'keywords' ) ) ) . '">' . esc_html( $label ) . '</a>: ' . esc_html( number_format_i18n( insightweb_si_view_count( $view, $movers ) ) ) . '</li>';
 	}
 	echo '</ul>';
-	$all = aw_si_prio_all_line();
+	$all = insightweb_si_prio_all_line();
 	if ( '' !== $all ) {
 		echo '<p class="description">' . esc_html( $all ) . '</p>';
 	}
@@ -543,8 +543,8 @@ function aw_si_box_priorities(): void {
  * against 203): the daily calculation counts every keyword record, the views fold listing names into one row and
  * count only the AW_SI_MOVERS that moved most. Empty when no calculation is logged.
  */
-function aw_si_prio_all_line(): string {
-	$prio = (array) ( aw_si_runs()['roles']['info']['prio'] ?? array() );
+function insightweb_si_prio_all_line(): string {
+	$prio = (array) ( insightweb_si_runs()['roles']['info']['prio'] ?? array() );
 	if ( ! $prio ) {
 		return '';
 	}
@@ -553,9 +553,9 @@ function aw_si_prio_all_line(): string {
 }
 
 /** Overview box: quick wins. */
-function aw_si_box_quick(): void {
-	aw_si_mini_table(
-		aw_si_rows( aw_si_view_sql( 'quick' ) . ' AND ' . aw_si_entity_sql(), 'impr28 DESC' ), // The same rows as the Quick wins view.
+function insightweb_si_box_quick(): void {
+	insightweb_si_mini_table(
+		insightweb_si_rows( insightweb_si_view_sql( 'quick' ) . ' AND ' . insightweb_si_entity_sql(), 'impr28 DESC' ), // The same rows as the Quick wins view.
 		array(
 			'pos28'  => __( 'Position', 'insightweb' ),
 			'impr28' => __( 'Impressions', 'insightweb' ),
@@ -566,9 +566,9 @@ function aw_si_box_quick(): void {
 }
 
 /** Overview box: biggest position changes. */
-function aw_si_box_movers(): void {
-	aw_si_mini_table(
-		aw_si_rows( 'pos28 IS NOT NULL AND pos_prev IS NOT NULL AND impr28 >= 20', 'ABS(pos_prev - pos28) DESC' ),
+function insightweb_si_box_movers(): void {
+	insightweb_si_mini_table(
+		insightweb_si_rows( 'pos28 IS NOT NULL AND pos_prev IS NOT NULL AND impr28 >= 20', 'ABS(pos_prev - pos28) DESC' ),
 		array(
 			'pos_prev' => __( 'Before', 'insightweb' ),
 			'pos28'    => __( 'Now', 'insightweb' ),
@@ -579,9 +579,9 @@ function aw_si_box_movers(): void {
 }
 
 /** Overview box: brand searches. */
-function aw_si_box_brand(): void {
-	aw_si_mini_table(
-		aw_si_rows( 'roles & ' . (int) AW_SI_ROLE_BRAND, 'impr28 DESC' ),
+function insightweb_si_box_brand(): void {
+	insightweb_si_mini_table(
+		insightweb_si_rows( 'roles & ' . (int) AW_SI_ROLE_BRAND, 'impr28 DESC' ),
 		array(
 			'pos28'    => __( 'Position', 'insightweb' ),
 			'impr28'   => __( 'Impressions', 'insightweb' ),
@@ -591,9 +591,9 @@ function aw_si_box_brand(): void {
 	);
 	// Sitelinks: brand searches where the live check found two or more of our links in the top 20.
 	global $wpdb;
-	$o     = aw_si_table( 'obs' );
-	$k     = aw_si_table( 'keywords' );
-	$links = aw_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM %i WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", $o, $k, AW_SI_ROLE_BRAND, $o ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$o     = insightweb_si_table( 'obs' );
+	$k     = insightweb_si_table( 'keywords' );
+	$links = insightweb_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM %i WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", $o, $k, AW_SI_ROLE_BRAND, $o ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( $links ) {
 		$parts = array();
 		foreach ( $links as $l ) {
@@ -607,16 +607,16 @@ function aw_si_box_brand(): void {
 }
 
 /** Overview box: sessions from AI assistants, by source and by landing page. */
-function aw_si_box_ai(): void {
+function insightweb_si_box_ai(): void {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	$o     = aw_si_table( 'obs' );
+	$o     = insightweb_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
-	$skip  = aw_si_ga4_skip_sql(); // The GA4 test day is left out here too, as in the other GA4 boxes.
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed dates only ($skip: aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	$skip  = insightweb_si_ga4_skip_sql(); // The GA4 test day is left out here too, as in the other GA4 boxes.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed dates only ($skip: insightweb_si_ga4_skip_sql(), esc_sql'd constant dates).
 	$by_src  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(value) n FROM %i WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY txt ORDER BY n DESC", $o, $since ) );
 	$by_page = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, SUM(value) n FROM %i WHERE src = 'ga4' AND metric = 'ai' AND period = 'day' AND d >= %s{$skip} GROUP BY page ORDER BY n DESC LIMIT 10", $o, $since ) );
 	// phpcs:enable
@@ -624,11 +624,11 @@ function aw_si_box_ai(): void {
 		echo '<p>' . esc_html__( 'No AI referrals recorded yet (GA4 runs daily at 07:20 IST).', 'insightweb' ) . '</p>';
 		return;
 	}
-	$by_src = aw_si_ref_merge( $by_src, array( 'n' ) ); // One row per site: "ig" and l.instagram.com are both Instagram.
+	$by_src = insightweb_si_ref_merge( $by_src, array( 'n' ) ); // One row per site: "ig" and l.instagram.com are both Instagram.
 	usort( $by_src, fn( $a, $b ) => (float) $b->n <=> (float) $a->n );
 	$parts = array();
 	foreach ( $by_src as $r ) {
-		$parts[] = aw_si_ref_html( (string) $r->txt ) . ': ' . esc_html( number_format_i18n( (int) $r->n ) );
+		$parts[] = insightweb_si_ref_html( (string) $r->txt ) . ': ' . esc_html( number_format_i18n( (int) $r->n ) );
 	}
 	echo '<p>' . implode( ' · ', $parts ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Landing page', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Sessions', 'insightweb' ) . '</th></tr></thead><tbody>';
@@ -639,29 +639,29 @@ function aw_si_box_ai(): void {
 }
 
 /** Overview box: every referring site and social source, 28 days and 3 months (owner, 31 Oct 2026). */
-function aw_si_box_referrers(): void {
+function insightweb_si_box_referrers(): void {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	$o     = aw_si_table( 'obs' );
+	$o     = insightweb_si_table( 'obs' );
 	$today = new DateTimeImmutable( 'today', wp_timezone() );
 	$d28   = $today->modify( '-28 days' )->format( 'Y-m-d' );
-	$keep  = aw_si_keep_days();
+	$keep  = insightweb_si_keep_days();
 	$d90   = $today->modify( "-{$keep} days" )->format( 'Y-m-d' ); // Daily rows are kept this long.
-	$skip  = aw_si_ga4_skip_sql();
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed dates only ($skip: aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	$skip  = insightweb_si_ga4_skip_sql();
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed dates only ($skip: insightweb_si_ga4_skip_sql(), esc_sql'd constant dates).
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'ref' AND d >= %s, value, 0)) s28, SUM(IF(metric = 'ref_eng' AND d >= %s, value, 0)) e28, SUM(IF(metric = 'ref_key' AND d >= %s, value, 0)) k28, SUM(IF(metric = 'ref', value, 0)) s90, MIN(d) since FROM %i WHERE src = 'ga4' AND metric IN ('ref', 'ref_eng', 'ref_key') AND period = 'day' AND d >= %s{$skip} GROUP BY txt", $d28, $d28, $d28, $o, $d90 ) );
 	// One row per site ("ig" and l.instagram.com are both Instagram), then the top 20.
-	$rows = aw_si_ref_merge( $rows, array( 's28', 'e28', 'k28', 's90' ) );
+	$rows = insightweb_si_ref_merge( $rows, array( 's28', 'e28', 'k28', 's90' ) );
 	usort( $rows, fn( $a, $b ) => array( (float) $b->s28, (float) $b->s90 ) <=> array( (float) $a->s28, (float) $a->s90 ) );
 	$rows = array_slice( $rows, 0, 20 );
 	// Objections sent and confirmed per site, from the 28-day campaign rows (every campaign), merged the same way.
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$obj = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, SUM(IF(metric = 'camp_sent', value, 0)) sent, SUM(IF(metric = 'camp_conf', value, 0)) conf FROM %i WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_sent', 'camp_conf') GROUP BY txt", $o ) );
 	$objs = array();
-	foreach ( aw_si_ref_merge( $obj, array( 'sent', 'conf' ) ) as $m ) {
+	foreach ( insightweb_si_ref_merge( $obj, array( 'sent', 'conf' ) ) as $m ) {
 		$objs[ strtolower( (string) $m->label ) ] = $m;
 	}
 	if ( ! $rows ) {
@@ -670,8 +670,8 @@ function aw_si_box_referrers(): void {
 		$since = min( wp_list_pluck( $rows, 'since' ) );
 		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Sessions (28 days)', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Engaged', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'All key events', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Objections sent', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Confirmed', 'insightweb' ) . '</th><th scope="col">' . esc_html( sprintf( /* translators: %d: days. */ __( 'Sessions (%d days)', 'insightweb' ), $keep ) ) . '</th></tr></thead><tbody>';
 		foreach ( $rows as $r ) {
-			$m = $objs[ strtolower( aw_si_referrer_label( (string) $r->txt ) ) ] ?? null;
-			echo '<tr><td>' . aw_si_ref_html( (string) $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( $m ? number_format_i18n( (int) $m->sent ) : '–' ) . '</td><td>' . esc_html( $m ? number_format_i18n( (int) $m->conf ) : '–' ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- aw_si_ref_html() escapes.
+			$m = $objs[ strtolower( insightweb_si_referrer_label( (string) $r->txt ) ) ] ?? null;
+			echo '<tr><td>' . insightweb_si_ref_html( (string) $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->e28 ) ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->k28 ) ) . '</td><td>' . esc_html( $m ? number_format_i18n( (int) $m->sent ) : '–' ) . '</td><td>' . esc_html( $m ? number_format_i18n( (int) $m->conf ) : '–' ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->s90 ) ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- insightweb_si_ref_html() escapes.
 		}
 		echo '</tbody></table>';
 		/* translators: %s: first date with referral figures. */
@@ -688,11 +688,11 @@ function aw_si_box_referrers(): void {
  * @param string $path  Site path.
  * @param array  $slugs Published campaign slug => title.
  */
-function aw_si_campaign_of( string $path, array $slugs ): string {
+function insightweb_si_campaign_of( string $path, array $slugs ): string {
 	static $seen = array();
 	if ( ! isset( $seen[ $path ] ) ) {
 		$seen[ $path ] = '';
-		foreach ( array( $path, aw_si_final_path( $path ) ) as $p ) {
+		foreach ( array( $path, insightweb_si_final_path( $path ) ) as $p ) {
 			if ( preg_match( '#^/campaigns/([^/]+)#', $p, $m ) && isset( $slugs[ $m[1] ] ) ) {
 				$seen[ $path ] = $m[1];
 				break;
@@ -711,15 +711,15 @@ function aw_si_campaign_of( string $path, array $slugs ): string {
  * @param array    $slugs Campaign slug => title.
  * @param callable $rate  fn( sent, conf ): string.
  */
-function aw_si_box_campaigns_rates( array $camp, array $slugs, callable $rate ): void {
+function insightweb_si_box_campaigns_rates( array $camp, array $slugs, callable $rate ): void {
 	$by = array();
 	foreach ( $camp as $r ) {
-		$slug = aw_si_campaign_of( (string) $r->page, $slugs );
+		$slug = insightweb_si_campaign_of( (string) $r->page, $slugs );
 		if ( '' !== $slug && in_array( $r->metric, array( 'camp_sent', 'camp_conf' ), true ) ) {
 			$by[ $slug ][ (string) $r->txt ][ $r->metric ] = ( $by[ $slug ][ (string) $r->txt ][ $r->metric ] ?? 0 ) + (float) $r->value;
 		}
 	}
-	$days = (array) ( aw_si_runs()['ga4']['info']['camp']['days'] ?? array() );
+	$days = (array) ( insightweb_si_runs()['ga4']['info']['camp']['days'] ?? array() );
 	$num  = fn( $v ) => number_format_i18n( (int) round( (float) $v ) );
 	foreach ( $by as $slug => $srcs ) {
 		uasort( $srcs, fn( $a, $b ) => ( $b['camp_sent'] ?? 0 ) <=> ( $a['camp_sent'] ?? 0 ) );
@@ -736,7 +736,7 @@ function aw_si_box_campaigns_rates( array $camp, array $slugs, callable $rate ):
 		echo '</tbody></table>';
 		$daily = array();
 		foreach ( $days as $path => $rows ) {
-			if ( aw_si_campaign_of( (string) $path, $slugs ) !== $slug ) {
+			if ( insightweb_si_campaign_of( (string) $path, $slugs ) !== $slug ) {
 				continue;
 			}
 			foreach ( (array) $rows as $d => $m ) {
@@ -768,9 +768,9 @@ function aw_si_box_campaigns_rates( array $camp, array $slugs, callable $rate ):
  * and key events come from the daily referral rows (ref, ref_key); viewed sessions, objections sent and confirmed from
  * the 28-day campaign rows (camp_view, camp_sent, camp_conf).
  */
-function aw_si_box_campaigns(): void {
+function insightweb_si_box_campaigns(): void {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
@@ -790,17 +790,17 @@ function aw_si_box_campaigns(): void {
 		echo '<p>' . esc_html__( 'No published campaigns.', 'insightweb' ) . '</p>';
 		return;
 	}
-	$o    = aw_si_table( 'obs' );
-	$skip = aw_si_ga4_skip_sql();
-	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions only ($skip: aw_si_ga4_skip_sql(), esc_sql'd constant dates).
+	$o    = insightweb_si_table( 'obs' );
+	$skip = insightweb_si_ga4_skip_sql();
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions only ($skip: insightweb_si_ga4_skip_sql(), esc_sql'd constant dates).
 	$camp = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, metric, value, d FROM %i WHERE src = 'ga4' AND period = '28d' AND metric IN ('camp_view', 'camp_sent', 'camp_conf')", $o ) );
 	// The same 28 days as the campaign rows (to yesterday until they arrive).
 	$end   = $camp ? (string) $camp[0]->d : ( new DateTimeImmutable( 'yesterday', wp_timezone() ) )->format( 'Y-m-d' );
 	$start = ( new DateTimeImmutable( $end, wp_timezone() ) )->modify( '-27 days' )->format( 'Y-m-d' );
 	$ref   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, txt, metric, SUM(value) value, MIN(d) since FROM %i WHERE src = 'ga4' AND period = 'day' AND metric IN ('ref', 'ref_key') AND d >= %s AND d <= %s{$skip} GROUP BY page, txt, metric", $o, $start, $end ) );
 	// phpcs:enable
-	$x      = array_map( 'strtolower', aw_si_x_sources() );
-	$social = array_map( 'strtolower', aw_si_social_sources() );
+	$x      = array_map( 'strtolower', insightweb_si_x_sources() );
+	$social = array_map( 'strtolower', insightweb_si_social_sources() );
 	$cols   = array(
 		'ref'       => 'landed',
 		'ref_key'   => 'key',
@@ -811,7 +811,7 @@ function aw_si_box_campaigns(): void {
 	$t      = array();
 	$since  = '';
 	foreach ( array_merge( $ref, $camp ) as $r ) {
-		$slug = aw_si_campaign_of( (string) $r->page, $slugs );
+		$slug = insightweb_si_campaign_of( (string) $r->page, $slugs );
 		if ( '' === $slug ) {
 			continue;
 		}
@@ -854,7 +854,7 @@ function aw_si_box_campaigns(): void {
 		}
 	}
 	echo '</tbody></table>';
-	aw_si_box_campaigns_rates( $camp, $slugs, $rate );
+	insightweb_si_box_campaigns_rates( $camp, $slugs, $rate );
 	$from = $since && $since > $start ? $since : $start;
 	/* translators: 1: first day, 2: last day. */
 	echo '<p class="description">' . esc_html( sprintf( __( '%1$s to %2$s. X: t.co, x.com and twitter.com. All social includes X.', 'insightweb' ), wp_date( get_option( 'date_format' ), strtotime( $from ) ), wp_date( get_option( 'date_format' ), strtotime( $end ) ) ) ) . '</p>';
@@ -871,7 +871,7 @@ function aw_si_box_campaigns(): void {
  *
  * @param string $path Site path.
  */
-function aw_si_path_loads( string $path ): bool {
+function insightweb_si_path_loads( string $path ): bool {
 	if ( '' === $path || '/' !== $path[0] || preg_match( '/[^\x21-\x7e]|%[0-9a-f]{2}/i', $path ) ) {
 		return false; // Spaces, invisible characters and encoded fragments (%23) never match a page.
 	}
@@ -880,27 +880,27 @@ function aw_si_path_loads( string $path ): bool {
 }
 
 /** Overview box: the 20 paths with the most 404_view events in the stored 28-day window, and where each goes now. */
-function aw_si_box_nf(): void {
+function insightweb_si_box_nf(): void {
 	global $wpdb;
-	if ( ! aw_si_ready() ) {
+	if ( ! insightweb_si_ready() ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
-	$o = aw_si_table( 'obs' );
+	$o = insightweb_si_table( 'obs' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT txt, value, d FROM %i WHERE src = 'ga4' AND metric = 'nf' AND period = '28d' ORDER BY value DESC, txt LIMIT 22", $o ) );
-	$rows = array_slice( array_values( array_filter( $rows, fn( $r ) => ! aw_si_nf_is_test( (string) $r->txt ) ) ), 0, 20 ); // test addresses stored before 12 Nov
+	$rows = array_slice( array_values( array_filter( $rows, fn( $r ) => ! insightweb_si_nf_is_test( (string) $r->txt ) ) ), 0, 20 ); // test addresses stored before 12 Nov
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'No 404s recorded yet (GA4 runs daily at 07:20 IST).', 'insightweb' ) . '</p>';
 		return;
 	}
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Path', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Views', 'insightweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'insightweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $rows as $r ) {
-		$to = aw_si_final_path( (string) $r->txt );
+		$to = insightweb_si_final_path( (string) $r->txt );
 		if ( untrailingslashit( $to ) !== untrailingslashit( (string) $r->txt ) ) {
 			/* translators: %s: path the redirect ends at. */
 			$status = sprintf( esc_html__( 'Redirects to %s', 'insightweb' ), '<a href="' . esc_url( home_url( $to ) ) . '" target="_blank" rel="noopener">' . esc_html( $to ) . '</a>' );
-		} elseif ( aw_si_path_loads( (string) $r->txt ) ) {
+		} elseif ( insightweb_si_path_loads( (string) $r->txt ) ) {
 			$status = esc_html__( 'Loads now (the 404s were earlier)', 'insightweb' );
 		} else {
 			$status = esc_html__( 'Still 404', 'insightweb' );
@@ -908,15 +908,15 @@ function aw_si_box_nf(): void {
 		echo '<tr><td>' . esc_html( $r->txt ) . '</td><td>' . esc_html( number_format_i18n( (int) $r->value ) ) . '</td><td>' . $status . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above.
 	}
 	echo '</tbody></table>';
-	$info = aw_si_runs()['ga4']['info']['nf'] ?? array();
+	$info = insightweb_si_runs()['ga4']['info']['nf'] ?? array();
 	$dim  = 'pagePath' === ( $info['dim'] ?? '' ) ? __( 'page path (some events in the window were sent before the "path" dimension was registered; on a 404 page it is the same address)', 'insightweb' ) : __( 'the event\'s path parameter', 'insightweb' );
 	/* translators: 1: last day of the window, 2: what the path comes from. */
 	echo '<p class="description">' . esc_html( sprintf( __( '404_view events in the 28 days to %1$s, by %2$s. 22 Oct 2026 (GA4 test events) and the test addresses /no-such-page/ and /no-such-page-xyz/ are left out. Status follows Rank Math redirects (exact and regex) and old slugs; "Loads now" means the address opens a published page today (the 404s came before it existed or during an update); "Still 404" means neither, not that the address was checked again.', 'insightweb' ), wp_date( get_option( 'date_format' ), strtotime( (string) $rows[0]->d ) ), $dim ) ) . '</p>';
 }
 
 /** Overview box: content gaps (the keyword map's demand gaps and every P2 keyword), with the suggested page type. */
-function aw_si_box_gaps(): void {
-	$gaps = aw_si_searches_gaps();
+function insightweb_si_box_gaps(): void {
+	$gaps = insightweb_si_searches_gaps();
 	if ( ! $gaps ) {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
@@ -929,8 +929,8 @@ function aw_si_box_gaps(): void {
 }
 
 /** Overview box: what people search on the site (WordPress search, Directory, GA4 site search), counts only. */
-function aw_si_box_site_search(): void {
-	$rows = aw_si_site_searches( 28, 15 );
+function insightweb_si_box_site_search(): void {
+	$rows = insightweb_si_site_searches( 28, 15 );
 	if ( ! $rows ) {
 		echo '<p>' . esc_html__( 'Nothing yet: searches are counted from today.', 'insightweb' ) . '</p>';
 		return;
@@ -954,7 +954,7 @@ function aw_si_box_site_search(): void {
  *
  * @param mixed $v Per cent.
  */
-function aw_si_clarity_pct( $v ): string {
+function insightweb_si_clarity_pct( $v ): string {
 	return is_numeric( $v ) ? number_format_i18n( (float) $v, 1 ) . '%' : '–';
 }
 
@@ -963,7 +963,7 @@ function aw_si_clarity_pct( $v ): string {
  *
  * @param mixed $v Seconds.
  */
-function aw_si_clarity_secs( $v ): string {
+function insightweb_si_clarity_secs( $v ): string {
 	/* translators: %s: seconds. */
 	return is_numeric( $v ) ? sprintf( __( '%s s', 'insightweb' ), number_format_i18n( round( (float) $v ) ) ) : '–';
 }
@@ -973,7 +973,7 @@ function aw_si_clarity_secs( $v ): string {
  *
  * @param mixed $v Pages per session.
  */
-function aw_si_clarity_num( $v ): string {
+function insightweb_si_clarity_num( $v ): string {
 	return is_numeric( $v ) ? number_format_i18n( (float) $v, 1 ) : '–';
 }
 
@@ -982,7 +982,7 @@ function aw_si_clarity_num( $v ): string {
  *
  * @param mixed $devices device => sessions.
  */
-function aw_si_clarity_devices_txt( $devices ): string {
+function insightweb_si_clarity_devices_txt( $devices ): string {
 	$by = array_change_key_case( (array) $devices, CASE_LOWER );
 	$n  = array();
 	foreach ( array( 'mobile', 'pc', 'tablet' ) as $d ) {
@@ -992,33 +992,33 @@ function aw_si_clarity_devices_txt( $devices ): string {
 }
 
 /** The line shown when Clarity has nothing to show: no token, or no data yet. */
-function aw_si_clarity_empty_line(): string {
-	if ( ! function_exists( 'aw_si_clarity_on' ) || ! aw_si_clarity_on() ) {
+function insightweb_si_clarity_empty_line(): string {
+	if ( ! function_exists( 'insightweb_si_clarity_on' ) || ! insightweb_si_clarity_on() ) {
 		return __( 'No Clarity token: add it under Settings → Keys.', 'insightweb' );
 	}
 	return __( 'No Clarity data yet; it imports daily at 06:30.', 'insightweb' );
 }
 
 /** Overview box: Clarity totals for 28 days (clarity.php), linked to the Clarity tab. */
-function aw_si_box_clarity(): void {
-	$s = function_exists( 'aw_si_clarity_summary' ) && function_exists( 'aw_si_clarity_on' ) && aw_si_clarity_on() ? (array) aw_si_clarity_summary( 28 ) : array();
+function insightweb_si_box_clarity(): void {
+	$s = function_exists( 'insightweb_si_clarity_summary' ) && function_exists( 'insightweb_si_clarity_on' ) && insightweb_si_clarity_on() ? (array) insightweb_si_clarity_summary( 28 ) : array();
 	if ( empty( $s['days'] ) ) {
-		echo '<p>' . esc_html( aw_si_clarity_empty_line() ) . '</p>';
+		echo '<p>' . esc_html( insightweb_si_clarity_empty_line() ) . '</p>';
 		return;
 	}
-	$flagged = '<a href="' . esc_url( add_query_arg( 'view', 'flagged', aw_si_url( 'clarity' ) ) ) . '">' . esc_html( number_format_i18n( (int) ( $s['flagged'] ?? 0 ) ) ) . '</a>';
+	$flagged = '<a href="' . esc_url( add_query_arg( 'view', 'flagged', insightweb_si_url( 'clarity' ) ) ) . '">' . esc_html( number_format_i18n( (int) ( $s['flagged'] ?? 0 ) ) ) . '</a>';
 	$rows    = array(
 		__( 'Sessions', 'insightweb' )                      => esc_html( number_format_i18n( (int) ( $s['sessions'] ?? 0 ) ) ),
-		__( 'Pages per session', 'insightweb' )             => esc_html( aw_si_clarity_num( $s['pps'] ?? null ) ),
-		__( 'Scroll depth', 'insightweb' )                  => esc_html( aw_si_clarity_pct( $s['scroll'] ?? null ) ),
-		__( 'Active time', 'insightweb' )                   => esc_html( aw_si_clarity_secs( $s['active'] ?? null ) ),
-		__( 'Dead clicks', 'insightweb' )                   => esc_html( aw_si_clarity_pct( $s['dead'] ?? null ) ),
-		__( 'Rage clicks', 'insightweb' )                   => esc_html( aw_si_clarity_pct( $s['rage'] ?? null ) ),
-		__( 'Quick backs', 'insightweb' )                   => esc_html( aw_si_clarity_pct( $s['quickback'] ?? null ) ),
-		__( 'Excessive scrolling', 'insightweb' )           => esc_html( aw_si_clarity_pct( $s['xscroll'] ?? null ) ),
-		__( 'Script errors', 'insightweb' )                 => esc_html( aw_si_clarity_pct( $s['jserror'] ?? null ) ),
+		__( 'Pages per session', 'insightweb' )             => esc_html( insightweb_si_clarity_num( $s['pps'] ?? null ) ),
+		__( 'Scroll depth', 'insightweb' )                  => esc_html( insightweb_si_clarity_pct( $s['scroll'] ?? null ) ),
+		__( 'Active time', 'insightweb' )                   => esc_html( insightweb_si_clarity_secs( $s['active'] ?? null ) ),
+		__( 'Dead clicks', 'insightweb' )                   => esc_html( insightweb_si_clarity_pct( $s['dead'] ?? null ) ),
+		__( 'Rage clicks', 'insightweb' )                   => esc_html( insightweb_si_clarity_pct( $s['rage'] ?? null ) ),
+		__( 'Quick backs', 'insightweb' )                   => esc_html( insightweb_si_clarity_pct( $s['quickback'] ?? null ) ),
+		__( 'Excessive scrolling', 'insightweb' )           => esc_html( insightweb_si_clarity_pct( $s['xscroll'] ?? null ) ),
+		__( 'Script errors', 'insightweb' )                 => esc_html( insightweb_si_clarity_pct( $s['jserror'] ?? null ) ),
 		__( 'Pages flagged (3+ days)', 'insightweb' )       => $flagged,
-		__( 'Mobile / PC / Tablet sessions', 'insightweb' ) => esc_html( aw_si_clarity_devices_txt( $s['devices'] ?? array() ) ),
+		__( 'Mobile / PC / Tablet sessions', 'insightweb' ) => esc_html( insightweb_si_clarity_devices_txt( $s['devices'] ?? array() ) ),
 	);
 	echo '<table class="widefat striped"><tbody>';
 	foreach ( $rows as $label => $value ) {
@@ -1033,7 +1033,7 @@ function aw_si_box_clarity(): void {
 		$line .= ' · ' . sprintf( __( 'last day %s', 'insightweb' ), mysql2date( 'j M Y', (string) $s['last'] ) );
 	}
 	echo '<p class="description">' . esc_html( $line ) . '</p>';
-	echo '<p><a class="button" href="' . esc_url( aw_si_url( 'clarity' ) ) . '">' . esc_html__( 'Clarity', 'insightweb' ) . '</a></p>';
+	echo '<p><a class="button" href="' . esc_url( insightweb_si_url( 'clarity' ) ) . '">' . esc_html__( 'Clarity', 'insightweb' ) . '</a></p>';
 }
 
 // Clarity tab: after Pages when Pages is there, else at the end.
@@ -1083,10 +1083,10 @@ add_action(
 add_action(
 	'aw_si_tab_clarity',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! class_exists( 'AW_SI_Clarity_Table' ) ) {
+		if ( ! current_user_can( insightweb_si_cap() ) || ! class_exists( 'InsightWeb_SI_Clarity_Table' ) ) {
 			return;
 		}
-		$table = new AW_SI_Clarity_Table();
+		$table = new InsightWeb_SI_Clarity_Table();
 		$table->prepare_items();
 		$table->views();
 		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="clarity">';
@@ -1104,11 +1104,11 @@ add_action(
  * Settings tab rows: schedule, seed, run now, imports, delete data (the keys have their own section, insightweb-keys.php). The Settings screen saves the numbers
  * itself and draws these rows from this output (insightweb_settings_more_parts()).
  */
-function aw_si_settings_tab(): void {
+function insightweb_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
 	do_action( 'aw_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'insightweb' ) . '</th><td><p>' . esc_html( sprintf( /* translators: 1: days of daily figures stored, 2: the same. */ __( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users\' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen.', 'insightweb' ), aw_si_keep_days(), aw_si_keep_days() ) ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'insightweb' ) . '</th><td><p>' . esc_html( sprintf( /* translators: 1: days of daily figures stored, 2: the same. */ __( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users\' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen.', 'insightweb' ), insightweb_si_keep_days(), insightweb_si_keep_days() ) ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keyword map seed', 'insightweb' ) . '</th><td><p>';
 	echo $seeded
 		/* translators: %s: date. */
@@ -1127,7 +1127,7 @@ function aw_si_settings_tab(): void {
 			'button' => '<button type="submit" name="what" value="daily" class="button button-primary">' . esc_html__( 'Run daily update', 'insightweb' ) . '</button>',
 		),
 		array(
-			'title'  => sprintf( /* translators: %d: days. */ __( '%d-Day Rollup', 'insightweb' ), aw_si_keep_days() ),
+			'title'  => sprintf( /* translators: %d: days. */ __( '%d-Day Rollup', 'insightweb' ), insightweb_si_keep_days() ),
 			'desc'   => __( 'Rolls up older daily figures into monthly totals.', 'insightweb' ),
 			'status' => __( 'Daily at 23:30 IST', 'insightweb' ),
 			'icon'   => '📊',
@@ -1148,7 +1148,7 @@ function aw_si_settings_tab(): void {
 			'button' => '<button type="submit" name="what" value="psi" class="button button-secondary">' . esc_html__( 'Start PageSpeed', 'insightweb' ) . '</button>',
 		),
 	);
-	if ( aw_si_bing_on() ) {
+	if ( insightweb_si_bing_on() ) {
 		$action_rows[] = array(
 			'title'  => __( 'Bing Webmaster Tools', 'insightweb' ),
 			'desc'   => __( 'Crawl figures, backlink discovery and search metrics from Bing.', 'insightweb' ),
@@ -1156,7 +1156,7 @@ function aw_si_settings_tab(): void {
 			'icon'   => '🔍',
 			'button' => '<button type="submit" name="what" value="bing" class="button button-secondary">' . esc_html__( 'Run Bing', 'insightweb' ) . '</button>',
 		);
-		if ( function_exists( 'aw_si_bing_kw_run' ) ) {
+		if ( function_exists( 'insightweb_si_bing_kw_run' ) ) {
 			$action_rows[] = array(
 				'title'  => __( 'Bing Search Volumes', 'insightweb' ),
 				'desc'   => __( 'Monthly keyword volume estimates for top tracked search terms.', 'insightweb' ),
@@ -1166,7 +1166,7 @@ function aw_si_settings_tab(): void {
 			);
 		}
 	}
-	if ( aw_si_clarity_on() ) {
+	if ( insightweb_si_clarity_on() ) {
 		$action_rows[] = array(
 			'title'  => __( 'Microsoft Clarity', 'insightweb' ),
 			'desc'   => __( 'Session replays and click engagement telemetry (uses 2 of 10 daily API calls).', 'insightweb' ),
@@ -1200,26 +1200,26 @@ function aw_si_settings_tab(): void {
 add_action(
 	'admin_post_aw_si_run',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_run' ) ) {
+		if ( ! current_user_can( insightweb_si_cap() ) || ! check_admin_referer( 'aw_si_run' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$what = isset( $_POST['what'] ) ? sanitize_key( wp_unslash( $_POST['what'] ) ) : '';
 		if ( 'rollup' === $what ) {
-			aw_si_rollup_cron();
+			insightweb_si_rollup_cron();
 		} elseif ( 'ga4' === $what ) {
-			aw_si_ga4_run();
+			insightweb_si_ga4_run();
 		} elseif ( 'psi' === $what ) {
-			aw_si_psi_start(); // The first calls now; the rest every five minutes.
+			insightweb_si_psi_start(); // The first calls now; the rest every five minutes.
 		} elseif ( 'clarity' === $what ) {
-			aw_si_clarity_run();
+			insightweb_si_clarity_run();
 		} elseif ( 'bing' === $what ) {
-			aw_si_bing_run();
-		} elseif ( 'bing_kw' === $what && function_exists( 'aw_si_bing_kw_run' ) ) {
-			aw_si_bing_kw_run(); // Monthly job; by hand before its first scheduled run (12 Nov 2026).
+			insightweb_si_bing_run();
+		} elseif ( 'bing_kw' === $what && function_exists( 'insightweb_si_bing_kw_run' ) ) {
+			insightweb_si_bing_kw_run(); // Monthly job; by hand before its first scheduled run (12 Nov 2026).
 		} else {
-			aw_si_daily( true );
+			insightweb_si_daily( true );
 		}
-		wp_safe_redirect( add_query_arg( 'ran', 1, aw_si_return_url( 'settings' ) ) );
+		wp_safe_redirect( add_query_arg( 'ran', 1, insightweb_si_return_url( 'settings' ) ) );
 		exit;
 	}
 );
@@ -1227,7 +1227,7 @@ add_action(
 add_action(
 	'admin_post_aw_si_delete',
 	function () {
-		if ( ! current_user_can( aw_si_cap() ) || ! check_admin_referer( 'aw_si_delete' ) ) {
+		if ( ! current_user_can( insightweb_si_cap() ) || ! check_admin_referer( 'aw_si_delete' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
 		}
 		$confirm = isset( $_POST['confirm'] ) ? sanitize_text_field( wp_unslash( $_POST['confirm'] ) ) : '';
@@ -1241,8 +1241,8 @@ add_action(
 				)
 			);
 		}
-		aw_si_drop_all();
-		wp_safe_redirect( aw_si_return_url( 'settings' ) );
+		insightweb_si_drop_all();
+		wp_safe_redirect( insightweb_si_return_url( 'settings' ) );
 		exit;
 	}
 );

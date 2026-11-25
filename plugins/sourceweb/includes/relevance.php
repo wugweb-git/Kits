@@ -10,7 +10,7 @@
  * - GET  aw/v1/relevance-items     Existing News, Library, Resources, Opportunities and Press items, any status but
  *                                  trash; paginated (page, per_page ≤ 200, missing=1 for items without a verdict).
  * - POST aw/v1/relevance-verdicts  {verdicts: [{id, relevant, category, india, issuer, reason, model, at}]} → meta
- *                                  aw_relevance (JSON). Never changes an item's status.
+ *                                  sourceweb_relevance (JSON). Never changes an item's status.
  * - POST aw/v1/relevance-rejected  {title, source_url, reason, type, feed, model}, or {entries: [...]} for a run's
  *                                  rejections in one request → the Rejected log: option
  *                                  aw_relevance_rejected, newest first, last 500, one entry per URL. Shown under
@@ -31,12 +31,12 @@ const AW_RELEVANCE_LOG     = 'aw_relevance_rejected';
 const AW_RELEVANCE_LOG_MAX = 500;
 
 /**
- * A verdict as stored on an item (meta aw_relevance): JSON {relevant, category, india, issuer, reason, model, at}.
+ * A verdict as stored on an item (meta sourceweb_relevance): JSON {relevant, category, india, issuer, reason, model, at}.
  *
  * @param array $v Verdict as received.
  * @return string JSON.
  */
-function aw_relevance_clean( array $v ) {
+function sourceweb_relevance_clean( array $v ) {
 	return wp_json_encode(
 		array(
 			'relevant' => ! empty( $v['relevant'] ) && 'no' !== $v['relevant'],
@@ -51,9 +51,9 @@ function aw_relevance_clean( array $v ) {
 }
 
 /** Store the gate's verdict on a new item (ingest and press ingest). */
-function aw_relevance_store( $post_id, $verdict ) {
+function sourceweb_relevance_store( $post_id, $verdict ) {
 	if ( is_array( $verdict ) && $verdict ) {
-		update_post_meta( $post_id, 'aw_relevance', wp_slash( aw_relevance_clean( $verdict ) ) );
+		update_post_meta( $post_id, 'aw_relevance', wp_slash( sourceweb_relevance_clean( $verdict ) ) );
 	}
 }
 
@@ -61,7 +61,7 @@ function aw_relevance_store( $post_id, $verdict ) {
  * Title for duplicate checks (same rule as the workers' norm_title): lower case, letters and digits only, a trailing
  * " - Publisher" or leading "Section | " removed.
  */
-function aw_norm_title( $title ) {
+function sourceweb_norm_title( $title ) {
 	$t = function_exists( 'mb_strtolower' ) ? mb_strtolower( (string) $title ) : strtolower( (string) $title );
 	$t = preg_replace( '/\s+[-–—|]\s+[^-–—|]{2,40}$/u', '', $t );
 	$t = preg_replace( '/^[^|]{2,30}\|\s+/u', '', $t );
@@ -78,8 +78,8 @@ function aw_norm_title( $title ) {
  * @param string   $date_key Meta holding the item's own date.
  * @return int Post ID or 0.
  */
-function aw_find_by_title( array $types, $title, $day, $date_key = 'aw_source_date' ) {
-	$key = aw_norm_title( $title );
+function sourceweb_find_by_title( array $types, $title, $day, $date_key = 'aw_source_date' ) {
+	$key = sourceweb_norm_title( $title );
 	$day = substr( (string) $day, 0, 10 );
 	if ( '' === $key || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ) {
 		return 0;
@@ -97,7 +97,7 @@ function aw_find_by_title( array $types, $title, $day, $date_key = 'aw_source_da
 		)
 	);
 	foreach ( $ids as $id ) {
-		if ( aw_norm_title( get_post_field( 'post_title', $id ) ) === $key ) {
+		if ( sourceweb_norm_title( get_post_field( 'post_title', $id ) ) === $key ) {
 			return (int) $id;
 		}
 	}
@@ -105,7 +105,7 @@ function aw_find_by_title( array $types, $title, $day, $date_key = 'aw_source_da
 }
 
 /** Categories: slug => name. */
-function aw_relevance_categories() {
+function sourceweb_relevance_categories() {
 	$out = array();
 	foreach ( get_terms( array( 'taxonomy' => 'category', 'hide_empty' => false ) ) as $t ) {
 		$out[ $t->slug ] = html_entity_decode( $t->name );
@@ -114,7 +114,7 @@ function aw_relevance_categories() {
 }
 
 /** Each section's allowed categories and tags (Sourcing → Sections): type => {categories, tags} as slug => name. */
-function aw_relevance_sections() {
+function sourceweb_relevance_sections() {
 	$out   = array();
 	$names = function ( $tax, $slugs ) {
 		$o = array();
@@ -130,7 +130,7 @@ function aw_relevance_sections() {
 }
 
 /** Directory organisations (animal-welfare organisations, ABC centres, wildlife rescue): published names. */
-function aw_relevance_directory() {
+function sourceweb_relevance_directory() {
 	global $wpdb;
 	return $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		"SELECT DISTINCT p.post_title FROM {$wpdb->posts} p
@@ -142,11 +142,11 @@ function aw_relevance_directory() {
 }
 
 /** One item for the classifier. */
-function aw_relevance_row( WP_Post $p ) {
+function sourceweb_relevance_row( WP_Post $p ) {
 	$id      = $p->ID;
 	$press   = 'aw_press' === $p->post_type;
 	$text    = $p->post_excerpt ? $p->post_excerpt : wp_trim_words( wp_strip_all_tags( strip_shortcodes( $p->post_content ) ), 150 );
-	$issuer  = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	$issuer  = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 	$verdict = (string) get_post_meta( $id, 'aw_relevance', true );
 	$rtypes  = 'post' === $p->post_type ? wp_list_pluck( sourceweb_item_tags( $id, sourceweb_section_tags( 'post' ) ), 'slug' ) : array();
 	$row     = array(
@@ -167,7 +167,7 @@ function aw_relevance_row( WP_Post $p ) {
 }
 
 /** Titles of News published or waiting from the last 4 days: the workers ask the AI whether a new item is one of these stories. */
-function aw_relevance_recent_titles(): array {
+function sourceweb_relevance_recent_titles(): array {
 	$ids = get_posts(
 		array(
 			'post_type'      => array( 'aw_news', 'aw_legal' ), // court reports in the Library repeat each other too (owner, 14 Oct 2026)
@@ -182,7 +182,7 @@ function aw_relevance_recent_titles(): array {
 }
 
 /** The same stories with their IDs, so the workers can add a later report's facts to the first one (same-story.php). */
-function aw_relevance_recent_items(): array {
+function sourceweb_relevance_recent_items(): array {
 	$ids = get_posts(
 		array(
 			'post_type'      => array( 'aw_news', 'aw_legal' ),
@@ -206,7 +206,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => $can,
-				'callback'            => fn() => new WP_REST_Response( array( 'categories' => aw_relevance_categories(), 'sections' => aw_relevance_sections(), 'directory' => aw_relevance_directory(), 'recent' => aw_relevance_recent_titles(), 'recent_items' => aw_relevance_recent_items() ) ),
+				'callback'            => fn() => new WP_REST_Response( array( 'categories' => sourceweb_relevance_categories(), 'sections' => sourceweb_relevance_sections(), 'directory' => sourceweb_relevance_directory(), 'recent' => sourceweb_relevance_recent_titles(), 'recent_items' => sourceweb_relevance_recent_items() ) ),
 			)
 		);
 		register_rest_route(
@@ -232,7 +232,7 @@ add_action(
 						array(
 							'total' => (int) $q->found_posts,
 							'pages' => (int) $q->max_num_pages,
-							'items' => array_map( 'aw_relevance_row', $q->posts ),
+							'items' => array_map( 'sourceweb_relevance_row', $q->posts ),
 						)
 					);
 				},
@@ -251,7 +251,7 @@ add_action(
 						if ( ! is_array( $v ) || ! $id || ! in_array( get_post_type( $id ), AW_RELEVANCE_TYPES, true ) ) {
 							continue;
 						}
-						update_post_meta( $id, 'aw_relevance', wp_slash( aw_relevance_clean( $v ) ) ); // meta only: status untouched
+						update_post_meta( $id, 'aw_relevance', wp_slash( sourceweb_relevance_clean( $v ) ) ); // meta only: status untouched
 						++$n;
 					}
 					return new WP_REST_Response( array( 'stored' => $n ) );
@@ -313,7 +313,7 @@ add_action(
 							'reason' => sanitize_text_field( (string) ( $e['reason'] ?? '' ) ),
 							'type'   => sanitize_key( (string) ( $e['type'] ?? '' ) ),
 							'feed'   => sanitize_text_field( (string) ( $e['feed'] ?? '' ) ),
-							'kw'     => function_exists( 'aw_sourcing_feed_keyword' ) ? aw_sourcing_feed_keyword( (string) ( $e['feed'] ?? '' ) ) : '',
+							'kw'     => function_exists( 'sourceweb_sourcing_feed_keyword' ) ? sourceweb_sourcing_feed_keyword( (string) ( $e['feed'] ?? '' ) ) : '',
 							'model'  => sanitize_text_field( (string) ( $e['model'] ?? '' ) ),
 							'at'     => current_time( 'Y-m-d H:i' ),
 						);
@@ -339,7 +339,7 @@ add_action(
  * @param string $type  Post type it would become.
  * @return string
  */
-function aw_not_news_reason( $title, $url, $type ) {
+function sourceweb_not_news_reason( $title, $url, $type ) {
 	$title = (string) $title;
 	$path  = (string) wp_parse_url( (string) $url, PHP_URL_PATH ) . '/';
 	$host  = strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) );
@@ -357,7 +357,7 @@ function aw_not_news_reason( $title, $url, $type ) {
 }
 
 /** Add one entry to the Rejected log (Sourcing → Rejected), as the relevance-rejected endpoint does. */
-function aw_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
+function sourceweb_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
 	$url = esc_url_raw( (string) $url );
 	$log = array_values( array_filter( (array) get_option( AW_RELEVANCE_LOG, array() ), fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
 	array_unshift(
@@ -368,7 +368,7 @@ function aw_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
 			'reason' => sanitize_text_field( (string) $reason ),
 			'type'   => sanitize_key( (string) $type ),
 			'feed'   => sanitize_text_field( (string) $feed ),
-			'kw'     => function_exists( 'aw_sourcing_feed_keyword' ) ? aw_sourcing_feed_keyword( (string) $feed ) : '',
+			'kw'     => function_exists( 'sourceweb_sourcing_feed_keyword' ) ? sourceweb_sourcing_feed_keyword( (string) $feed ) : '',
 			'model'  => 'site rule',
 			'at'     => current_time( 'Y-m-d H:i' ),
 		)
@@ -377,7 +377,7 @@ function aw_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
 }
 
 /** Stored verdict says "not relevant". */
-function aw_relevance_failed( $post_id ) {
+function sourceweb_relevance_failed( $post_id ) {
 	$v = (string) get_post_meta( $post_id, 'aw_relevance', true );
 	if ( '' === $v ) {
 		return false;
@@ -404,8 +404,8 @@ add_filter(
  *
  * @return array[] { url, host, title, type, found, reason, at, problem }
  */
-function aw_relevance_rejected_rows(): array {
-	$pubs = aw_publishers();
+function sourceweb_relevance_rejected_rows(): array {
+	$pubs = sourceweb_publishers();
 	$rows = array();
 	foreach ( (array) get_option( AW_RELEVANCE_LOG, array() ) as $e ) {
 		$url    = (string) ( $e['url'] ?? '' );
@@ -419,7 +419,7 @@ function aw_relevance_rejected_rows(): array {
 			'found'   => '' !== (string) ( $e['kw'] ?? '' ) ? 'Keyword: ' . $e['kw'] : (string) ( $e['feed'] ?? '' ),
 			'reason'  => (string) ( $e['reason'] ?? '' ),
 			'at'      => (string) ( $e['at'] ?? '' ),
-			'problem' => 'allow' === ( $pubs[ aw_host( $url ) ]['status'] ?? '' ) ? 'From an allowed publisher (' . aw_host( $url ) . '): check whether it should have been kept.' : '',
+			'problem' => 'allow' === ( $pubs[ sourceweb_host( $url ) ]['status'] ?? '' ) ? 'From an allowed publisher (' . sourceweb_host( $url ) . '): check whether it should have been kept.' : '',
 		);
 	}
 	return $rows;
@@ -440,7 +440,7 @@ add_action(
 /*
  * Ingestion heartbeat and watchdog (owner, 12 Oct 2026; no new News 10-12 Oct went unnoticed).
  * - Every worker run reports what it did: items created and published, sources tried and failed (POST ingest-heartbeat).
- * - An hourly check on the site itself (event aw_ingest_watchdog, and after every heartbeat) emails the owner and shows
+ * - An hourly check on the site itself (event sourceweb_ingest_watchdog, and after every heartbeat) emails the owner and shows
  *   a dashboard notice when: no News has been published for 12 hours; no worker run has reported for 8 hours (Actions
  *   stopped, a run crashed or timed out, login refused); or half the sources failed in the last run.
  * One email per 12 hours for the same problems; a new kind of problem is emailed at once.
@@ -452,7 +452,7 @@ add_action(
  * items are asked for the time they were last saved (owner, 21 Oct 2026; the notice and the e-mail said "no News for
  * 16 hours" while the workers were publishing).
  */
-function aw_newest_published_news() {
+function sourceweb_newest_published_news() {
 	global $wpdb;
 	// Straight from the table: the News lists' pre_get_posts (display.php) re-sorts every front-end aw_news query by
 	// source date, so get_posts() returned yesterday-dated items added last night after older ones, and the watchdog
@@ -471,11 +471,11 @@ function aw_newest_published_news() {
  * @param int|null $now Unix time (tests).
  * @return array<string,string>
  */
-function aw_ingest_problems( $now = null ) {
+function sourceweb_ingest_problems( $now = null ) {
 	$now  = $now ? $now : time();
 	$hb   = (array) get_option( 'aw_ingest_heartbeat', array() );
 	$out  = array();
-	$news = aw_newest_published_news();
+	$news = sourceweb_newest_published_news();
 	if ( $news && $now - $news >= 12 * HOUR_IN_SECONDS ) {
 		$out['quiet'] = sprintf( 'No News has been published for %d hours (last: %s).', floor( ( $now - $news ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $news ) );
 	}
@@ -497,9 +497,9 @@ function aw_ingest_problems( $now = null ) {
 }
 
 /** Email the owner about ingestion problems (hourly event, and after every heartbeat). */
-function aw_ingest_watchdog() {
+function sourceweb_ingest_watchdog() {
 	update_option( 'aw_ingest_watchdog_at', time(), true );
-	$problems = aw_ingest_problems();
+	$problems = sourceweb_ingest_problems();
 	update_option( 'aw_ingest_watchdog_last', array( 'at' => time(), 'problems' => $problems ), false );
 	if ( ! $problems ) {
 		delete_transient( 'aw_ingest_alert_mailed' );
@@ -516,7 +516,7 @@ function aw_ingest_watchdog() {
 		set_transient( 'aw_ingest_alert_mailed', $kinds, 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'aw_ingest_watchdog', 'aw_ingest_watchdog' );
+add_action( 'aw_ingest_watchdog', 'sourceweb_ingest_watchdog' );
 // The check must not depend on what it watches (cron, GitHub): any request that reaches PHP also runs it when the last
 // one is an hour old, or 10 minutes old while scheduled tasks look stopped (two autoloaded option reads otherwise).
 add_action(
@@ -526,7 +526,7 @@ add_action(
 		$cron  = function_exists( 'kits_cron_last' ) ? kits_cron_last() : 0;
 		$stale = $cron && time() - $cron >= SOURCEWEB_CRON_STALE;
 		if ( ( $age >= HOUR_IN_SECONDS || ( $stale && $age >= 10 * MINUTE_IN_SECONDS ) ) && ! wp_installing() ) {
-			aw_ingest_watchdog();
+			sourceweb_ingest_watchdog();
 		}
 	}
 );
@@ -568,8 +568,8 @@ add_action(
 						$hb['last_new'] = $now;
 					}
 					update_option( 'aw_ingest_heartbeat', $hb, false );
-					aw_ingest_watchdog();
-					return new WP_REST_Response( array( 'problems' => array_keys( aw_ingest_problems( $now ) ) ) );
+					sourceweb_ingest_watchdog();
+					return new WP_REST_Response( array( 'problems' => array_keys( sourceweb_ingest_problems( $now ) ) ) );
 				},
 			)
 		);
@@ -581,7 +581,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$problems = aw_ingest_problems();
+		$problems = sourceweb_ingest_problems();
 		if ( ! $problems ) {
 			return;
 		}

@@ -10,7 +10,7 @@
  *   already matches, as the keyword check matches a headline.
  * - Shown on the Keywords screen's Suggestions view (Kits shell; GET and POST sourceweb/v1/keywords/suggestions):
  *   Add to Include, Add to Exclude, Add as a search, Dismiss, Show again.
- * - Dismissed searches: option aw_sourcing_dismissed (not autoloaded).
+ * - Dismissed searches: option sourceweb_sourcing_dismissed (not autoloaded).
  *
  * @package aw-sourcing
  */
@@ -22,22 +22,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SOURCING_DISMISSED = 'aw_sourcing_dismissed';
 
 /** Lowercase, single-spaced. */
-function aw_sourcing_suggest_norm( $s ) {
+function sourceweb_sourcing_suggest_norm( $s ) {
 	return trim( (string) preg_replace( '/\s+/u', ' ', mb_strtolower( (string) $s ) ) );
 }
 
 /** Dismissed searches (from phase 2: the records marked dismissed). */
-function aw_sourcing_dismissed() {
-	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
+function sourceweb_sourcing_dismissed() {
+	if ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) {
 		global $wpdb;
-		$k = aw_si_table( 'keywords' );
-		return array_map( 'aw_sourcing_suggest_norm', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT label FROM %i WHERE dismissed = 1', $k ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$k = insightweb_si_table( 'keywords' );
+		return array_map( 'sourceweb_sourcing_suggest_norm', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT label FROM %i WHERE dismissed = 1', $k ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	return array_values( array_filter( (array) get_option( AW_SOURCING_DISMISSED, array() ), 'is_string' ) );
 }
 
 /** Every suggestion row carries these fields; the ones InsightWeb pushes default empty for Search Console demand rows. */
-function aw_sourcing_suggest_extra_defaults() {
+function sourceweb_sourcing_suggest_extra_defaults() {
 	return array(
 		'score'            => 0,
 		'recommended_type' => '',
@@ -56,28 +56,28 @@ function aw_sourcing_suggest_extra_defaults() {
  * @return array|null Rows (q, impr, clicks, pos, rising, dismissed, score, recommended_type, topic, focus_keyphrase,
  *                    rank, source, pushed), or null when neither Search Insights nor a push gives any data.
  */
-function aw_sourcing_suggestions() {
+function sourceweb_sourcing_suggestions() {
 	$terms  = apply_filters( 'aw_search_demand_terms', null );
-	$pushed = function_exists( 'aw_sourcing_pushed_suggestions' ) ? aw_sourcing_pushed_suggestions() : array();
+	$pushed = function_exists( 'sourceweb_sourcing_pushed_suggestions' ) ? sourceweb_sourcing_pushed_suggestions() : array();
 	if ( ! is_array( $terms ) && ! $pushed ) {
 		return null;
 	}
-	$rel       = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists() : aw_relevance();
+	$rel       = function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ? sourceweb_sourcing_kw_lists() : sourceweb_relevance();
 	$words     = array_merge( (array) ( $rel['strong'] ?? array() ), (array) ( $rel['exclude'] ?? array() ), (array) ( $rel['search'] ?? array() ) ); // a Search keyword covers it too (phase 2)
-	$dismissed = array_flip( aw_sourcing_dismissed() );
-	$dis_norm  = array_flip( array_map( 'aw_si_norm', array_keys( $dismissed ) ) );
+	$dismissed = array_flip( sourceweb_sourcing_dismissed() );
+	$dis_norm  = array_flip( array_map( 'insightweb_si_norm', array_keys( $dismissed ) ) );
 	$covered   = function ( $q ) use ( $words ) {
 		foreach ( $words as $w ) {
-			if ( aw_has_term( $q, $w ) ) {
+			if ( sourceweb_has_term( $q, $w ) ) {
 				return true;
 			}
 		}
 		return false;
 	};
-	$is_dismissed = fn( $q ) => isset( $dismissed[ $q ] ) || ( function_exists( 'aw_si_norm' ) && isset( $dis_norm[ aw_si_norm( $q ) ] ) );
+	$is_dismissed = fn( $q ) => isset( $dismissed[ $q ] ) || ( function_exists( 'insightweb_si_norm' ) && isset( $dis_norm[ insightweb_si_norm( $q ) ] ) );
 	$out          = array();
 	foreach ( (array) $terms as $t ) {
-		$q = aw_sourcing_suggest_norm( $t['q'] ?? '' );
+		$q = sourceweb_sourcing_suggest_norm( $t['q'] ?? '' );
 		if ( '' === $q || ! empty( $t['brand'] ) || ! preg_match( '/^[\x20-\x7e]+$/', $q ) ) {
 			continue;
 		}
@@ -94,13 +94,13 @@ function aw_sourcing_suggestions() {
 			'pos'       => (float) ( $t['pos'] ?? 0 ),
 			'rising'    => ! empty( $t['rising'] ),
 			'dismissed' => $is_dismissed( $q ),
-		) + aw_sourcing_suggest_extra_defaults();
+		) + sourceweb_sourcing_suggest_extra_defaults();
 	}
 	// InsightWeb's pushed candidates: shown whatever their impressions (InsightWeb has already scored them), but still
 	// only when no Include/Exclude/Search keyword already covers them. A candidate also seen in Search Console demand
 	// keeps that row and gains the pushed fields (Score, recommended type, topic, proven).
 	foreach ( $pushed as $p ) {
-		$q = aw_sourcing_suggest_norm( $p['q'] );
+		$q = sourceweb_sourcing_suggest_norm( $p['q'] );
 		if ( '' === $q || ! preg_match( '/^[\x20-\x7e]+$/', $q ) || $covered( $q ) ) {
 			continue;
 		}
@@ -130,58 +130,58 @@ function aw_sourcing_suggestions() {
 }
 
 /** Do one action on some searches; returns how many changed. */
-function aw_sourcing_suggest_apply( $op, array $qs ) {
-	$qs = array_values( array_unique( array_filter( array_map( 'aw_sourcing_suggest_norm', $qs ) ) ) );
+function sourceweb_sourcing_suggest_apply( $op, array $qs ) {
+	$qs = array_values( array_unique( array_filter( array_map( 'sourceweb_sourcing_suggest_norm', $qs ) ) ) );
 	if ( ! $qs ) {
 		return 0;
 	}
-	if ( 'route' === $op && function_exists( 'aw_sourcing_push_route' ) ) { // approve a pushed candidate and auto-route it (Section, Role, Category)
+	if ( 'route' === $op && function_exists( 'sourceweb_sourcing_push_route' ) ) { // approve a pushed candidate and auto-route it (Section, Role, Category)
 		$n = 0;
 		foreach ( $qs as $q ) {
-			if ( true === aw_sourcing_push_route( $q, 'owner' ) ) {
+			if ( true === sourceweb_sourcing_push_route( $q, 'owner' ) ) {
 				++$n;
 			}
 		}
 		return $n;
 	}
-	if ( function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) { // phase 2: roles and the dismissed flag on the record
+	if ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) { // phase 2: roles and the dismissed flag on the record
 		$n = 0;
 		foreach ( $qs as $q ) {
 			if ( in_array( $op, array( 'include', 'exclude', 'search' ), true ) ) {
-				$bit = array( 'include' => AW_KW_ROLE_INCLUDE, 'exclude' => AW_KW_ROLE_EXCLUDE, 'search' => AW_KW_ROLE_SEARCH )[ $op ];
-				$id  = aw_kw_id_by_norm( aw_si_norm( $q ) );
-				$was = $id ? (int) aw_kw_get( $id )['roles'] : 0;
-				$r   = aw_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => AW_KW_ROLE_EXCLUDE === $bit ? array() : array( 'aw_news' ) ) );
+				$bit = array( 'include' => SOURCEWEB_KW_ROLE_INCLUDE, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH )[ $op ];
+				$id  = insightweb_kw_id_by_norm( insightweb_si_norm( $q ) );
+				$was = $id ? (int) insightweb_kw_get( $id )['roles'] : 0;
+				$r   = sourceweb_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => SOURCEWEB_KW_ROLE_EXCLUDE === $bit ? array() : array( 'aw_news' ) ) );
 				if ( ! is_wp_error( $r ) && ! ( $was & $bit ) ) {
 					++$n;
-					aw_src_log( 'keywords', $q . ': ' . ucfirst( $op ) . ' (suggested by Search Insights)', '', ucfirst( $op ) );
+					sourceweb_src_log( 'keywords', $q . ': ' . ucfirst( $op ) . ' (suggested by Search Insights)', '', ucfirst( $op ) );
 				}
 				continue;
 			}
-			$id = aw_kw_id_by_norm( aw_si_norm( $q ) );
-			$id = $id ? $id : aw_kw_create( $q );
+			$id = insightweb_kw_id_by_norm( insightweb_si_norm( $q ) );
+			$id = $id ? $id : insightweb_kw_create( $q );
 			$on = 'dismiss' === $op ? 1 : 0;
-			if ( $id && true === aw_kw_update( $id, array( 'dismissed' => $on ) ) ) {
+			if ( $id && true === insightweb_kw_update( $id, array( 'dismissed' => $on ) ) ) {
 				++$n;
-				aw_src_log( 'keywords', $q . ': suggestion ' . ( $on ? 'dismissed' : 'shown again' ), (bool) ! $on, (bool) $on );
+				sourceweb_src_log( 'keywords', $q . ': suggestion ' . ( $on ? 'dismissed' : 'shown again' ), (bool) ! $on, (bool) $on );
 			}
 		}
 		return $n;
 	}
 	if ( 'include' === $op || 'exclude' === $op ) {
-		$rel   = aw_relevance();
+		$rel   = sourceweb_relevance();
 		$list  = 'include' === $op ? 'strong' : 'exclude';
-		$have  = array_map( 'aw_sourcing_suggest_norm', (array) ( $rel[ $list ] ?? array() ) );
+		$have  = array_map( 'sourceweb_sourcing_suggest_norm', (array) ( $rel[ $list ] ?? array() ) );
 		$added = array_values( array_diff( $qs, $have ) );
 		if ( $added ) {
 			$rel[ $list ] = array_merge( (array) ( $rel[ $list ] ?? array() ), $added );
-			update_option( AW_REL_OPTION, $rel, false );
-			aw_src_log( 'keywords', ( 'include' === $op ? 'Include' : 'Exclude' ) . ': added ' . implode( ', ', $added ) . ' (suggested by Search Insights)' );
+			update_option( SOURCEWEB_REL_OPTION, $rel, false );
+			sourceweb_src_log( 'keywords', ( 'include' === $op ? 'Include' : 'Exclude' ) . ': added ' . implode( ', ', $added ) . ' (suggested by Search Insights)' );
 			delete_transient( 'aw_sourcing_kw_stats_30' );
 		}
 		return count( $added );
 	}
-	$d   = aw_sourcing_dismissed();
+	$d   = sourceweb_sourcing_dismissed();
 	$new = 'dismiss' === $op ? array_values( array_unique( array_merge( $d, $qs ) ) ) : array_values( array_diff( $d, $qs ) );
 	update_option( AW_SOURCING_DISMISSED, $new, false );
 	return abs( count( $new ) - count( $d ) );

@@ -1,20 +1,20 @@
 <?php
 /**
  * Sourcing → Keywords on the keyword table (sourcing restructure phase 2, owner 25 Oct 2026). Active once
- * phase 2 is migrated (aw_sourcing_phase() >= 2).
+ * phase 2 is migrated (sourceweb_sourcing_phase() >= 2).
  *
  * - The screen is the Kits shell's (sourceweb-ui.php; its routes in sourceweb-rest-pages.php): the records with a
  *   Sourcing or Press role, views by role, the Press view with its settings, Category words, Hindi (no Sourcing role),
  *   Suggestions from Search Insights, and each keyword's edit form. This file has their saves and help tabs.
- * - Every add, edit and delete goes through Core's one role setter (aw_kw_set_roles: English only, never Include with
+ * - Every add, edit and delete goes through Core's one role setter (insightweb_kw_set_roles: English only, never Include with
  *   Exclude) and is logged in the Change log with old → new.
- * - The mirrors: after any keyword change the old lists (aw_relevance strong / animal / context / exclude,
+ * - The mirrors: after any keyword change the old lists (sourceweb_relevance strong / animal / context / exclude,
  *   aw_sources.press.queries and .categories, and the old copy of each search that was a feed) are rebuilt from the
  *   table, once per request, so old readers and old workers see the same words until phase 4. Writing them starts
  *   Sources sync, as any list save does. From phase 4 (owner, 25 Oct 2026) the old lists are archived and no longer
  *   rebuilt; only each open-web search's entry in aw_sources.sources still follows its keyword (the Feeds list shows it,
  *   and the keyword's search takes its settings from it).
- * - The site's checks read the table: the gate's keyword check and "Test a headline" (aw_sourcing_kw_lists()).
+ * - The site's checks read the table: the gate's keyword check and "Test a headline" (sourceweb_sourcing_kw_lists()).
  * - The old Categories tab opens Posts → Categories (with a Keywords column); the old Press queries tab opens Keywords →
  *   Press.
  *
@@ -26,33 +26,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Phase 2 is migrated: the keyword table is the lists' home. */
-function aw_sourcing_kw_on() {
-	return function_exists( 'aw_kw_ready' ) && aw_sourcing_phase() >= 2 && aw_kw_ready();
+function sourceweb_sourcing_kw_on() {
+	return function_exists( 'insightweb_kw_ready' ) && sourceweb_sourcing_phase() >= 2 && insightweb_kw_ready();
 }
 
 /** The worker roles on this screen: bit => label (the old list names in brackets where they differ). */
-function aw_sourcing_kw_roles() {
+function sourceweb_sourcing_kw_roles() {
 	return array(
-		AW_KW_ROLE_INCLUDE  => 'Include',
-		AW_KW_ROLE_ANIMAL   => 'Animal',
-		AW_KW_ROLE_CONTEXT  => 'Context',
-		AW_KW_ROLE_EXCLUDE  => 'Exclude',
-		AW_KW_ROLE_SEARCH   => 'Search',
-		AW_KW_ROLE_PRESS    => 'Press',
-		AW_KW_ROLE_CATEGORY => 'Category word',
+		SOURCEWEB_KW_ROLE_INCLUDE  => 'Include',
+		SOURCEWEB_KW_ROLE_ANIMAL   => 'Animal',
+		SOURCEWEB_KW_ROLE_CONTEXT  => 'Context',
+		SOURCEWEB_KW_ROLE_EXCLUDE  => 'Exclude',
+		SOURCEWEB_KW_ROLE_SEARCH   => 'Search',
+		SOURCEWEB_KW_ROLE_PRESS    => 'Press',
+		SOURCEWEB_KW_ROLE_CATEGORY => 'Category word',
 	);
 }
 
 /** What each role does, for the form and the help tab. */
-function aw_sourcing_kw_role_help() {
+function sourceweb_sourcing_kw_role_help() {
 	return array(
-		AW_KW_ROLE_INCLUDE  => 'Keeps an item on its own. An English one is also a Google News search every run (unless its search is off).',
-		AW_KW_ROLE_ANIMAL   => 'Keeps an item together with a Context word.',
-		AW_KW_ROLE_CONTEXT  => 'Keeps an item together with an Animal word.',
-		AW_KW_ROLE_EXCLUDE  => 'Drops an item, whatever else it has (always, also with the relevance filter off).',
-		AW_KW_ROLE_SEARCH   => 'Its own Google News search every run (its query, or the keyword itself).',
-		AW_KW_ROLE_PRESS    => 'A weekly press-discovery query (coverage of Animal Writes): Google News and Google Search.',
-		AW_KW_ROLE_CATEGORY => 'Files an item into the categories it is mapped to when the keyword is in its title or summary.',
+		SOURCEWEB_KW_ROLE_INCLUDE  => 'Keeps an item on its own. An English one is also a Google News search every run (unless its search is off).',
+		SOURCEWEB_KW_ROLE_ANIMAL   => 'Keeps an item together with a Context word.',
+		SOURCEWEB_KW_ROLE_CONTEXT  => 'Keeps an item together with an Animal word.',
+		SOURCEWEB_KW_ROLE_EXCLUDE  => 'Drops an item, whatever else it has (always, also with the relevance filter off).',
+		SOURCEWEB_KW_ROLE_SEARCH   => 'Its own Google News search every run (its query, or the keyword itself).',
+		SOURCEWEB_KW_ROLE_PRESS    => 'A weekly press-discovery query (coverage of Animal Writes): Google News and Google Search.',
+		SOURCEWEB_KW_ROLE_CATEGORY => 'Files an item into the categories it is mapped to when the keyword is in its title or summary.',
 	);
 }
 
@@ -61,10 +61,10 @@ function aw_sourcing_kw_role_help() {
  *
  * @return array[]
  */
-function aw_sourcing_kw_worker_rows() {
+function sourceweb_sourcing_kw_worker_rows() {
 	$rows = wp_cache_get( 'worker_rows', 'aw_kw' );
 	if ( ! is_array( $rows ) ) {
-		$rows = aw_kw_rows( AW_KW_WORKER_ROLES, true );
+		$rows = insightweb_kw_rows( SOURCEWEB_KW_WORKER_ROLES, true );
 		wp_cache_set( 'worker_rows', $rows, 'aw_kw', HOUR_IN_SECONDS );
 	}
 	return $rows;
@@ -75,17 +75,17 @@ function aw_sourcing_kw_worker_rows() {
  *
  * @return array{strong: string[], animal: string[], context: string[], exclude: string[]}
  */
-function aw_sourcing_kw_lists() {
+function sourceweb_sourcing_kw_lists() {
 	$out = wp_cache_get( 'lists', 'aw_kw' );
 	if ( is_array( $out ) ) {
 		return $out;
 	}
 	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array(), 'search' => array() );
-	$map = array( 'strong' => AW_KW_ROLE_INCLUDE, 'animal' => AW_KW_ROLE_ANIMAL, 'context' => AW_KW_ROLE_CONTEXT, 'exclude' => AW_KW_ROLE_EXCLUDE, 'search' => AW_KW_ROLE_SEARCH );
-	foreach ( aw_sourcing_kw_worker_rows() as $r ) {
+	$map = array( 'strong' => SOURCEWEB_KW_ROLE_INCLUDE, 'animal' => SOURCEWEB_KW_ROLE_ANIMAL, 'context' => SOURCEWEB_KW_ROLE_CONTEXT, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH );
+	foreach ( sourceweb_sourcing_kw_worker_rows() as $r ) {
 		foreach ( $map as $k => $bit ) {
 			if ( $r['roles'] & $bit ) {
-				$out[ $k ] = array_merge( $out[ $k ], aw_kw_spellings( $r ) );
+				$out[ $k ] = array_merge( $out[ $k ], insightweb_kw_spellings( $r ) );
 			}
 		}
 	}
@@ -104,11 +104,11 @@ add_action(
 		wp_cache_delete( 'worker_rows', 'aw_kw' );
 		wp_cache_delete( 'lists', 'aw_kw' );
 		delete_transient( 'aw_sourcing_kw_stats_30' );
-		if ( aw_sourcing_kw_on() && ! has_action( 'shutdown', 'aw_sourcing_kw_write_mirrors' ) ) {
-			add_action( 'shutdown', 'aw_sourcing_kw_write_mirrors', 1 ); // once per request, after every change
+		if ( sourceweb_sourcing_kw_on() && ! has_action( 'shutdown', 'sourceweb_sourcing_kw_write_mirrors' ) ) {
+			add_action( 'shutdown', 'sourceweb_sourcing_kw_write_mirrors', 1 ); // once per request, after every change
 		}
-		if ( aw_sourcing_kw_on() && function_exists( 'aw_sources_sync_soon' ) ) {
-			aw_sources_sync_soon(); // sources.yaml gets the keywords too (a spelling change leaves the old lists as they are)
+		if ( sourceweb_sourcing_kw_on() && function_exists( 'sourceweb_sources_sync_soon' ) ) {
+			sourceweb_sources_sync_soon(); // sources.yaml gets the keywords too (a spelling change leaves the old lists as they are)
 		}
 	},
 	10,
@@ -120,23 +120,23 @@ add_action(
  *
  * @return string[] Options written.
  */
-function aw_sourcing_kw_write_mirrors() {
-	if ( ! aw_sourcing_kw_on() ) {
+function sourceweb_sourcing_kw_write_mirrors() {
+	if ( ! sourceweb_sourcing_kw_on() ) {
 		return array();
 	}
 	wp_cache_delete( 'worker_rows', 'aw_kw' );
-	$rows = aw_kw_rows( AW_KW_WORKER_ROLES );
-	$m    = aw_kw_mirrors( $rows );
+	$rows = insightweb_kw_rows( SOURCEWEB_KW_WORKER_ROLES );
+	$m    = sourceweb_kw_mirrors( $rows );
 	$done = array();
-	$old  = aw_sourcing_phase() < 4; // phase 4: the old lists are archived and no longer rebuilt (nor changed)
-	$rel  = aw_relevance();
+	$old  = sourceweb_sourcing_phase() < 4; // phase 4: the old lists are archived and no longer rebuilt (nor changed)
+	$rel  = sourceweb_relevance();
 	$new  = $rel;
 	foreach ( $old ? array( 'strong', 'animal', 'context', 'exclude' ) : array() as $k ) {
 		$new[ $k ] = $m[ $k ];
 	}
 	if ( $new !== $rel ) {
-		update_option( AW_REL_OPTION, $new, false );
-		$done[] = AW_REL_OPTION;
+		update_option( SOURCEWEB_REL_OPTION, $new, false );
+		$done[] = SOURCEWEB_REL_OPTION;
 	}
 	$c   = (array) get_option( 'aw_sources', array() );
 	$cfg = $c;
@@ -144,15 +144,15 @@ function aw_sourcing_kw_write_mirrors() {
 		$cfg['press']['queries'] = $m['press'];
 	}
 	if ( $old ) {
-		$cfg['categories'] = aw_kw_categories_in_order( $m['categories'], (array) ( $c['categories'] ?? array() ) );
+		$cfg['categories'] = sourceweb_kw_categories_in_order( $m['categories'], (array) ( $c['categories'] ?? array() ) );
 	}
 	foreach ( (array) ( $cfg['sources'] ?? array() ) as $i => $s ) { // an open-web search that is a keyword: its old copy follows it
 		$id = (int) ( is_array( $s ) ? ( $s['keyword_id'] ?? 0 ) : 0 );
 		if ( ! $id ) {
 			continue;
 		}
-		$r  = $rows[ $id ] ?? aw_kw_get( $id );
-		$on = $r && ( $r['roles'] & AW_KW_ROLE_SEARCH ) && $r['search_on'] && 'en' === $r['lang'];
+		$r  = $rows[ $id ] ?? insightweb_kw_get( $id );
+		$on = $r && ( $r['roles'] & SOURCEWEB_KW_ROLE_SEARCH ) && $r['search_on'] && 'en' === $r['lang'];
 		if ( $on && preg_match( '#^https?://#i', (string) $r['query'] ) ) {
 			$cfg['sources'][ $i ]['url'] = (string) $r['query'];
 		}
@@ -168,9 +168,9 @@ function aw_sourcing_kw_write_mirrors() {
 /* ---------- Saving ---------- */
 
 /** The sections a keyword can file into: the sections' post types plus Press. */
-function aw_sourcing_kw_sections() {
+function sourceweb_sourcing_kw_sections() {
 	$out = array();
-	foreach ( array_keys( (array) ( aw_sources_config()['sections'] ?? array() ) ) as $t ) {
+	foreach ( array_keys( (array) ( sourceweb_sources_config()['sections'] ?? array() ) ) as $t ) {
 		$o           = get_post_type_object( $t );
 		$out[ $t ] = $o ? $o->labels->name : $t;
 	}
@@ -185,10 +185,10 @@ function aw_sourcing_kw_sections() {
  * @param array $in Posted values (bits).
  * @return int
  */
-function aw_sourcing_kw_bits( array $in ) {
+function sourceweb_sourcing_kw_bits( array $in ) {
 	$bits = 0;
 	foreach ( array_map( 'absint', $in ) as $b ) {
-		if ( isset( aw_sourcing_kw_roles()[ $b ] ) ) {
+		if ( isset( sourceweb_sourcing_kw_roles()[ $b ] ) ) {
 			$bits |= $b;
 		}
 	}
@@ -201,8 +201,8 @@ function aw_sourcing_kw_bits( array $in ) {
  * @param int $bits Roles.
  * @return string[]
  */
-function aw_sourcing_kw_role_names( $bits ) {
-	return array_values( array_filter( array_map( fn( $b, $l ) => ( $bits & $b ) ? $l : '', array_keys( aw_sourcing_kw_roles() ), aw_sourcing_kw_roles() ) ) );
+function sourceweb_sourcing_kw_role_names( $bits ) {
+	return array_values( array_filter( array_map( fn( $b, $l ) => ( $bits & $b ) ? $l : '', array_keys( sourceweb_sourcing_kw_roles() ), sourceweb_sourcing_kw_roles() ) ) );
 }
 
 /**
@@ -212,37 +212,37 @@ function aw_sourcing_kw_role_names( $bits ) {
  * @param array $set Any of roles (bits, the worker roles wanted), variants, categories, sections, lang, search_on, query.
  * @return bool|WP_Error Whether anything changed.
  */
-function aw_sourcing_kw_apply( $id, array $set ) {
-	$old = aw_kw_get( $id );
+function sourceweb_sourcing_kw_apply( $id, array $set ) {
+	$old = insightweb_kw_get( $id );
 	if ( ! $old ) {
 		return new WP_Error( 'aw_kw_missing', 'No such keyword.' );
 	}
 	$name = $old['label'];
 	$log  = array();
 	$fail = function ( $err ) use ( &$log ) { // what was written before the refusal is still logged
-		aw_src_log_many( $log );
+		sourceweb_src_log_many( $log );
 		return $err;
 	};
 	if ( isset( $set['lang'] ) && $set['lang'] !== $old['lang'] && 'en' === $set['lang'] ) { // to English first, so roles can follow
-		$r = aw_kw_update( $id, array( 'lang' => 'en' ) );
+		$r = insightweb_kw_update( $id, array( 'lang' => 'en' ) );
 		if ( is_wp_error( $r ) ) {
 			return $fail( $r );
 		}
 		$log[] = array( 'keywords', "$name: language", $old['lang'], 'en' );
 	}
 	if ( isset( $set['roles'] ) ) {
-		$want = (int) $set['roles'] & AW_KW_WORKER_ROLES;
-		$has  = $old['roles'] & AW_KW_WORKER_ROLES;
+		$want = (int) $set['roles'] & SOURCEWEB_KW_WORKER_ROLES;
+		$has  = $old['roles'] & SOURCEWEB_KW_WORKER_ROLES;
 		if ( $want !== $has ) {
-			$r = aw_kw_set_roles( $id, $want & ~$has, $has & ~$want );
+			$r = insightweb_kw_set_roles( $id, $want & ~$has, $has & ~$want );
 			if ( is_wp_error( $r ) ) {
 				return $fail( $r );
 			}
-			$log[] = array( 'keywords', "$name: roles", aw_sourcing_kw_role_names( $has ), aw_sourcing_kw_role_names( $want ) );
+			$log[] = array( 'keywords', "$name: roles", sourceweb_sourcing_kw_role_names( $has ), sourceweb_sourcing_kw_role_names( $want ) );
 		}
 	}
 	if ( isset( $set['lang'] ) && $set['lang'] !== $old['lang'] && 'en' !== $set['lang'] ) { // away from English: after the roles went
-		$r = aw_kw_update( $id, array( 'lang' => $set['lang'] ) );
+		$r = insightweb_kw_update( $id, array( 'lang' => $set['lang'] ) );
 		if ( is_wp_error( $r ) ) {
 			return $fail( $r );
 		}
@@ -255,7 +255,7 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 		}
 	}
 	if ( isset( $fields['variants'] ) ) { // spellings the owner adds after the migration are searched too (Include); the migrated ones keep the old search list
-		$new_v  = aw_kw_variants_list( $fields['variants'] );
+		$new_v  = insightweb_kw_variants_list( $fields['variants'] );
 		$src    = is_array( $old['src'] ?? null ) ? (array) $old['src'] : array();
 		$added  = array_values( array_intersect( array_unique( array_merge( (array) ( $src['added'] ?? array() ), array_diff( $new_v, $old['variants'] ) ) ), $new_v ) );
 		if ( $added !== array_values( (array) ( $src['added'] ?? array() ) ) ) {
@@ -263,9 +263,9 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 			$fields['src_note'] = wp_json_encode( $src );
 		}
 	}
-	if ( $fields && true === aw_kw_update( $id, $fields ) ) {
-		if ( isset( $fields['variants'] ) && aw_kw_variants_list( $fields['variants'] ) !== $old['variants'] ) {
-			$log[] = array( 'keywords', "$name: other spellings", $old['variants'], aw_kw_variants_list( $fields['variants'] ) );
+	if ( $fields && true === insightweb_kw_update( $id, $fields ) ) {
+		if ( isset( $fields['variants'] ) && insightweb_kw_variants_list( $fields['variants'] ) !== $old['variants'] ) {
+			$log[] = array( 'keywords', "$name: other spellings", $old['variants'], insightweb_kw_variants_list( $fields['variants'] ) );
 		}
 		if ( isset( $fields['search_on'] ) && (int) $fields['search_on'] !== (int) $old['search_on'] ) {
 			$log[] = array( 'keywords', "$name: Google News search", (bool) $old['search_on'], (bool) $fields['search_on'] );
@@ -275,11 +275,11 @@ function aw_sourcing_kw_apply( $id, array $set ) {
 		}
 	}
 	foreach ( array( 'categories' => 'category', 'sections' => 'section' ) as $key => $kind ) {
-		if ( isset( $set[ $key ] ) && aw_kw_map_set( $id, $kind, (array) $set[ $key ] ) ) {
+		if ( isset( $set[ $key ] ) && insightweb_kw_map_set( $id, $kind, (array) $set[ $key ] ) ) {
 			$log[] = array( 'keywords', "$name: $key", $old[ $key ], array_values( (array) $set[ $key ] ) );
 		}
 	}
-	aw_src_log_many( $log );
+	sourceweb_src_log_many( $log );
 	return (bool) $log;
 }
 
@@ -287,48 +287,48 @@ function aw_sourcing_kw_apply( $id, array $set ) {
  * Add a keyword (or add roles to the record it folds into).
  *
  * @param string $label Keyword as written.
- * @param array  $set   As aw_sourcing_kw_apply(); roles are added to the ones the record has.
+ * @param array  $set   As sourceweb_sourcing_kw_apply(); roles are added to the ones the record has.
  * @return int|WP_Error Record id.
  */
-function aw_sourcing_kw_add( $label, array $set ) {
+function sourceweb_sourcing_kw_add( $label, array $set ) {
 	$label = trim( (string) preg_replace( '/\s+/u', ' ', (string) $label ) );
-	if ( '' === aw_si_norm( $label ) ) {
+	if ( '' === insightweb_si_norm( $label ) ) {
 		return new WP_Error( 'aw_kw_empty', 'Type a keyword.' );
 	}
-	$was  = aw_kw_id_by_norm( aw_si_norm( $label ) );
+	$was  = insightweb_kw_id_by_norm( insightweb_si_norm( $label ) );
 	$lang = isset( $set['lang'] ) && in_array( $set['lang'], array( 'en', 'hi', 'hinglish' ), true ) ? $set['lang'] : null;
 	unset( $set['lang'] ); // a new record's language; an existing record keeps its own (changed on its edit screen)
-	$id = aw_kw_create( $label, null === $lang ? array() : array( 'lang' => $lang ) );
+	$id = insightweb_kw_create( $label, null === $lang ? array() : array( 'lang' => $lang ) );
 	if ( ! $id ) {
 		return new WP_Error( 'aw_kw_failed', 'The keyword could not be saved.' );
 	}
-	$cur = aw_kw_get( $id );
+	$cur = insightweb_kw_get( $id );
 	if ( ! $was ) {
-		aw_src_log( 'keywords', 'added keyword ' . $label, '', $label );
+		sourceweb_src_log( 'keywords', 'added keyword ' . $label, '', $label );
 	}
-	$set['roles'] = ( (int) ( $set['roles'] ?? 0 ) | ( $cur['roles'] & AW_KW_WORKER_ROLES ) );
+	$set['roles'] = ( (int) ( $set['roles'] ?? 0 ) | ( $cur['roles'] & SOURCEWEB_KW_WORKER_ROLES ) );
 	foreach ( array( 'categories', 'sections' ) as $k ) {
 		if ( isset( $set[ $k ] ) ) {
 			$set[ $k ] = array_values( array_unique( array_merge( $cur[ $k ], (array) $set[ $k ] ) ) );
 		}
 	}
 	if ( isset( $set['variants'] ) ) {
-		$set['variants'] = array_merge( $cur['variants'], aw_kw_variants_list( $set['variants'] ) );
+		$set['variants'] = array_merge( $cur['variants'], insightweb_kw_variants_list( $set['variants'] ) );
 	}
-	$r = aw_sourcing_kw_apply( $id, $set );
+	$r = sourceweb_sourcing_kw_apply( $id, $set );
 	return is_wp_error( $r ) ? $r : $id;
 }
 
 /** The Keywords list's views: slug => [label, role bit (0: the Hindi view)]. */
-function aw_sourcing_kw_views() {
+function sourceweb_sourcing_kw_views() {
 	return array(
-		'include'  => array( 'Include', AW_KW_ROLE_INCLUDE ),
-		'animal'   => array( 'Animal', AW_KW_ROLE_ANIMAL ),
-		'context'  => array( 'Context', AW_KW_ROLE_CONTEXT ),
-		'exclude'  => array( 'Exclude', AW_KW_ROLE_EXCLUDE ),
-		'search'   => array( 'Search', AW_KW_ROLE_SEARCH ),
-		'press'    => array( 'Press', AW_KW_ROLE_PRESS ),
-		'category' => array( 'Category words', AW_KW_ROLE_CATEGORY ),
+		'include'  => array( 'Include', SOURCEWEB_KW_ROLE_INCLUDE ),
+		'animal'   => array( 'Animal', SOURCEWEB_KW_ROLE_ANIMAL ),
+		'context'  => array( 'Context', SOURCEWEB_KW_ROLE_CONTEXT ),
+		'exclude'  => array( 'Exclude', SOURCEWEB_KW_ROLE_EXCLUDE ),
+		'search'   => array( 'Search', SOURCEWEB_KW_ROLE_SEARCH ),
+		'press'    => array( 'Press', SOURCEWEB_KW_ROLE_PRESS ),
+		'category' => array( 'Category words', SOURCEWEB_KW_ROLE_CATEGORY ),
 		'hindi'    => array( 'Hindi (no Sourcing role)', 0 ),
 	);
 }
@@ -339,15 +339,15 @@ function aw_sourcing_kw_views() {
  * @param array  $r Record.
  * @param string $v View.
  */
-function aw_sourcing_kw_in_view( array $r, $v ) {
+function sourceweb_sourcing_kw_in_view( array $r, $v ) {
 	if ( 'hindi' === $v ) {
 		return 'en' !== $r['lang'];
 	}
 	if ( 'en' !== $r['lang'] ) {
 		return false;
 	}
-	$views = aw_sourcing_kw_views();
-	return '' === $v ? (bool) ( $r['roles'] & AW_KW_WORKER_ROLES ) : (bool) ( $r['roles'] & ( $views[ $v ][1] ?? 0 ) );
+	$views = sourceweb_sourcing_kw_views();
+	return '' === $v ? (bool) ( $r['roles'] & SOURCEWEB_KW_WORKER_ROLES ) : (bool) ( $r['roles'] & ( $views[ $v ][1] ?? 0 ) );
 }
 
 /**
@@ -356,21 +356,21 @@ function aw_sourcing_kw_in_view( array $r, $v ) {
  *
  * @return array[] id => record, plus searches and items [fetched, published].
  */
-function aw_sourcing_kw_records() {
+function sourceweb_sourcing_kw_records() {
 	global $wpdb;
-	$k         = aw_si_table( 'keywords' );
+	$k         = insightweb_si_table( 'keywords' );
 	$hindi_ids = (array) $wpdb->get_col( $wpdb->prepare( "SELECT id FROM %i WHERE lang <> 'en' AND src_note IS NOT NULL AND src_note <> ''", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the Hindi words the lists had
-	$all       = aw_kw_rows( AW_KW_WORKER_ROLES );
-	foreach ( aw_kw_attach_maps( $hindi_ids ? (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE id IN (' . implode( ',', array_map( 'intval', $hindi_ids ) ) . ')', $k ), ARRAY_A ) : array() ) as $id => $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name and integers only.
+	$all       = insightweb_kw_rows( SOURCEWEB_KW_WORKER_ROLES );
+	foreach ( insightweb_kw_attach_maps( $hindi_ids ? (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, norm, label, lang, roles, variants, query, feed_id, search_on, dismissed, src_note, impr28 FROM %i WHERE id IN (' . implode( ',', array_map( 'intval', $hindi_ids ) ) . ')', $k ), ARRAY_A ) : array() ) as $id => $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared -- table name and integers only.
 		$all[ $id ] = $r;
 	}
 	$stats = array();
-	foreach ( (array) ( aw_sourcing_keyword_stats( 30 )['rows'] ?? array() ) as $feed => $st ) {
+	foreach ( (array) ( sourceweb_sourcing_keyword_stats( 30 )['rows'] ?? array() ) as $feed => $st ) {
 		$stats[ $feed ] = array( count( $st['news']['fetched'] ) + count( $st['legal']['fetched'] ), count( $st['news']['published'] ) + count( $st['legal']['published'] ) );
 	}
-	$by_id = array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' );
+	$by_id = array_column( array_filter( (array) sourceweb_sources_config()['sources'], 'is_array' ), null, 'id' );
 	foreach ( $all as $id => $r ) {
-		$r['searches'] = aw_kw_searches( $r, $by_id );
+		$r['searches'] = sourceweb_kw_searches( $r, $by_id );
 		$r['items']    = array( 0, 0 );
 		foreach ( $r['searches'] as $x ) {
 			$r['items'][0] += $stats[ $x['feed'] ][0] ?? 0;
@@ -389,30 +389,30 @@ function aw_sourcing_kw_records() {
  * @param int[]  $ids Record ids.
  * @return array{0: int, 1: string[]} How many changed, and the refusals.
  */
-function aw_sourcing_kw_bulk( $op, array $ids ) {
+function sourceweb_sourcing_kw_bulk( $op, array $ids ) {
 	$n    = 0;
 	$errs = array();
 	foreach ( array_filter( array_map( 'absint', $ids ) ) as $one ) {
-		$cur = aw_kw_get( $one );
+		$cur = insightweb_kw_get( $one );
 		if ( ! $cur ) {
 			continue;
 		}
 		$set = null;
 		if ( 'delete' === $op ) {
 			$set = array( 'roles' => 0 );
-		} elseif ( preg_match( '/^(add|remove)_(\d+)$/', $op, $m ) && isset( aw_sourcing_kw_roles()[ (int) $m[2] ] ) ) {
-			$has = $cur['roles'] & AW_KW_WORKER_ROLES;
+		} elseif ( preg_match( '/^(add|remove)_(\d+)$/', $op, $m ) && isset( sourceweb_sourcing_kw_roles()[ (int) $m[2] ] ) ) {
+			$has = $cur['roles'] & SOURCEWEB_KW_WORKER_ROLES;
 			$set = array( 'roles' => 'add' === $m[1] ? $has | (int) $m[2] : $has & ~(int) $m[2] );
 		} elseif ( preg_match( '/^cat_([a-z0-9_-]+)$/', $op, $m ) && get_term_by( 'slug', $m[1], 'category' ) ) {
 			$set = array(
 				'categories' => array_values( array_unique( array_merge( $cur['categories'], array( $m[1] ) ) ) ),
-				'roles'      => ( $cur['roles'] & AW_KW_WORKER_ROLES ) | AW_KW_ROLE_CATEGORY,
+				'roles'      => ( $cur['roles'] & SOURCEWEB_KW_WORKER_ROLES ) | SOURCEWEB_KW_ROLE_CATEGORY,
 			);
 		}
 		if ( null === $set ) {
 			continue;
 		}
-		$r = aw_sourcing_kw_apply( $one, $set );
+		$r = sourceweb_sourcing_kw_apply( $one, $set );
 		if ( is_wp_error( $r ) ) {
 			$errs[] = $cur['label'] . ': ' . $r->get_error_message();
 		} elseif ( $r ) {
@@ -429,7 +429,7 @@ add_action(
 	function () {
 		// phpcs:disable WordPress.Security.NonceVerification -- which screen is shown, nothing saved.
 		$tab = sanitize_key( $_GET['tab'] ?? '' );
-		if ( ! aw_sourcing_kw_on() ) {
+		if ( ! sourceweb_sourcing_kw_on() ) {
 			return;
 		}
 		if ( 'categories' === $tab ) { // categories are WordPress's own; their keywords show in the Keywords column there
@@ -446,8 +446,8 @@ add_action(
 		// phpcs:enable WordPress.Security.NonceVerification
 		$screen = get_current_screen();
 		$roles  = '';
-		foreach ( aw_sourcing_kw_roles() as $bit => $l ) {
-			$roles .= '<li><strong>' . esc_html( $l ) . '</strong>: ' . esc_html( aw_sourcing_kw_role_help()[ $bit ] ) . '</li>';
+		foreach ( sourceweb_sourcing_kw_roles() as $bit => $l ) {
+			$roles .= '<li><strong>' . esc_html( $l ) . '</strong>: ' . esc_html( sourceweb_sourcing_kw_role_help()[ $bit ] ) . '</li>';
 		}
 		$screen->add_help_tab(
 			array(
@@ -489,7 +489,7 @@ add_action(
 add_filter(
 	'manage_edit-category_columns',
 	function ( $cols ) {
-		if ( aw_sourcing_kw_on() && current_user_can( AW_SRC_CAP ) ) {
+		if ( sourceweb_sourcing_kw_on() && current_user_can( SOURCEWEB_SRC_CAP ) ) {
 			$cols['aw_keywords'] = 'Keywords';
 		}
 		return $cols;
@@ -498,14 +498,14 @@ add_filter(
 add_filter(
 	'manage_category_custom_column',
 	function ( $out, $col, $term_id ) {
-		if ( 'aw_keywords' !== $col || ! aw_sourcing_kw_on() ) {
+		if ( 'aw_keywords' !== $col || ! sourceweb_sourcing_kw_on() ) {
 			return $out;
 		}
 		static $counts = null;
 		if ( null === $counts ) {
 			$counts = array();
-			foreach ( aw_sourcing_kw_worker_rows() as $r ) {
-				if ( $r['roles'] & AW_KW_ROLE_CATEGORY ) {
+			foreach ( sourceweb_sourcing_kw_worker_rows() as $r ) {
+				if ( $r['roles'] & SOURCEWEB_KW_ROLE_CATEGORY ) {
 					foreach ( $r['categories'] as $slug ) {
 						$counts[ $slug ] = ( $counts[ $slug ] ?? 0 ) + 1;
 					}
@@ -531,7 +531,7 @@ add_filter(
  * @param array $in Posted part.
  * @return array
  */
-function aw_sourcing_kw_save_press( $c, $in ) {
+function sourceweb_sourcing_kw_save_press( $c, $in ) {
 	$old  = (array) ( $c['press'] ?? array() );
 	$new  = $old;
 	$d    = sanitize_text_field( (string) ( $in['date_floor'] ?? '' ) );
@@ -552,7 +552,7 @@ function aw_sourcing_kw_save_press( $c, $in ) {
 	if ( ! $log ) {
 		return $c;
 	}
-	aw_src_log_many( $log );
+	sourceweb_src_log_many( $log );
 	$c['press'] = $new;
 	return $c;
 }

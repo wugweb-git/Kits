@@ -7,7 +7,7 @@
  *   load. It takes the icon the home page declares (<link rel="icon">, kept by that check), else /favicon.ico.
  * - PNG, ICO, JPEG, GIF or WebP up to 100 KB that PHP reads as an image; never SVG (it can carry script).
  * - Stored as an attachment titled "Source icon: host" (file source-icon-host), Media group "Source icon".
- * - Only hosts with no publisher icon (aw_favicon_url(), attribution.php) are fetched. A host that has an icon is not fetched again; one with none is tried again after 7 days. Nothing is deleted.
+ * - Only hosts with no publisher icon (sourceweb_favicon_url(), attribution.php) are fetched. A host that has an icon is not fetched again; one with none is tried again after 7 days. Nothing is deleted.
  * - Option aw_source_icons (autoload off): host => { id, at, src, miss, v }.
  *
  * @package aw-sourcing
@@ -20,16 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Option: host => [ id, at, src, miss ]. */
 const AW_SRC_ICONS = 'aw_source_icons';
 
-add_action( AW_SOURCING_SITE_META_CRON, 'aw_src_icons_run', 20 );
+add_action( AW_SOURCING_SITE_META_CRON, 'sourceweb_src_icons_run', 20 );
 
 /**
- * The icon's address in the media library for a host, or ''. The publisher's icon that attribution.php keeps (aw_favicon_url(),
+ * The icon's address in the media library for a host, or ''. The publisher's icon that attribution.php keeps (sourceweb_favicon_url(),
  * the one the News cards show) comes first; this store only fills the hosts that has none.
  *
- * @param string $host Host as aw_host() keeps it.
+ * @param string $host Host as sourceweb_host() keeps it.
  */
-function aw_src_icon_url( $host ) {
-	$kits = function_exists( 'aw_favicon_url' ) ? (string) aw_favicon_url( (string) $host ) : '';
+function sourceweb_src_icon_url( $host ) {
+	$kits = function_exists( 'sourceweb_favicon_url' ) ? (string) sourceweb_favicon_url( (string) $host ) : '';
 	if ( '' !== $kits ) {
 		return $kits;
 	}
@@ -52,7 +52,7 @@ function aw_src_icon_url( $host ) {
  * @param string $href As the page wrote it.
  * @param string $host The site's host.
  */
-function aw_src_icon_abs( $href, $host ) {
+function sourceweb_src_icon_abs( $href, $host ) {
 	$href = trim( (string) $href );
 	if ( '' === $href ) {
 		return '';
@@ -72,7 +72,7 @@ function aw_src_icon_abs( $href, $host ) {
  * @param string $host The source's host (names the file and title).
  * @return int|string Attachment ID, or why not.
  */
-function aw_src_icon_fetch( $url, $host ) {
+function sourceweb_src_icon_fetch( $url, $host ) {
 	$r = wp_safe_remote_get(
 		$url,
 		array(
@@ -147,19 +147,19 @@ function aw_src_icon_fetch( $url, $host ) {
  *
  * @param int $limit Hosts per run.
  */
-function aw_src_icons_run( $limit = 10 ) {
+function sourceweb_src_icons_run( $limit = 10 ) {
 	$icons = get_option( AW_SRC_ICONS, array() );
 	$icons = is_array( $icons ) ? $icons : array();
 	$meta  = get_option( AW_SOURCING_SITE_META, array() );
 	$meta  = is_array( $meta ) ? $meta : array();
 	$want  = array();
-	$pubs  = aw_publishers();
+	$pubs  = sourceweb_publishers();
 	foreach ( $pubs as $h => $p ) {
 		if ( empty( $p['kind'] ) ) {
 			$want[ $h ] = (int) ( $p['count'] ?? 0 ) > 0;
 		}
 	}
-	foreach ( aw_sourcing_press_hosts() as $h ) {
+	foreach ( sourceweb_sourcing_press_hosts() as $h ) {
 		$want[ $h ] = true;
 	}
 	foreach ( array_keys( $want ) as $h ) {
@@ -175,10 +175,10 @@ function aw_src_icons_run( $limit = 10 ) {
 	$v1 = fn( $h ) => isset( $icons[ $h ] ) && (int) ( $icons[ $h ]['v'] ?? 1 ) < 2; // a miss from before ICO files were accepted: first
 	usort( $todo, fn( $a, $b ) => ( (int) $v1( $b ) <=> (int) $v1( $a ) ) ?: ( (int) $want[ $b ] <=> (int) $want[ $a ] ) ?: strcmp( (string) ( $icons[ $a ]['at'] ?? '' ), (string) ( $icons[ $b ]['at'] ?? '' ) ) ?: strcmp( $a, $b ) );
 	foreach ( array_slice( $todo, 0, max( 1, (int) $limit ) ) as $h ) {
-		$tries = array_unique( array_filter( array( aw_src_icon_abs( (string) ( $meta[ $h ]['icon'] ?? '' ), $h ), 'https://' . $h . '/favicon.ico' ) ) );
+		$tries = array_unique( array_filter( array( sourceweb_src_icon_abs( (string) ( $meta[ $h ]['icon'] ?? '' ), $h ), 'https://' . $h . '/favicon.ico' ) ) );
 		$rec   = array( 'id' => 0, 'at' => gmdate( 'Y-m-d H:i' ), 'src' => '', 'miss' => '', 'v' => 2 ); // v2: ICO files accepted (a v1 miss is tried again at once)
 		foreach ( $tries as $url ) {
-			$got = aw_src_icon_fetch( $url, $h );
+			$got = sourceweb_src_icon_fetch( $url, $h );
 			if ( is_int( $got ) ) {
 				$rec['id']   = $got;
 				$rec['src']  = $url;

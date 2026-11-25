@@ -6,10 +6,10 @@
  * - Every feed and code-read source belongs to a publisher host (aw_sources.sources[].host). A Google News search
  *   limited to one site (site:livelaw.in ...) belongs to that site (owner's decision 2); an open-web search to
  *   news.google.com.
- * - The relay switch lives on the publisher record (aw_publishers[host].relay). A host that is not a publisher but must
+ * - The relay switch lives on the publisher record (sourceweb_publishers[host].relay). A host that is not a publisher but must
  *   be relayed (ccsea.gov.in) gets a record with kind=relay, as icon-only hosts have kind=directory-source.
- * - The relay allow list is built from the switches (aw_src_relay_hosts_from_pubs), once phase 1 is migrated.
- * - The keyword matcher (aw_match_term) is the workers' aw_workers/matcher.py; both repositories test the same cases
+ * - The relay allow list is built from the switches (sourceweb_src_relay_hosts_from_pubs), once phase 1 is migrated.
+ * - The keyword matcher (sourceweb_match_term) is the workers' aw_workers/matcher.py; both repositories test the same cases
  *   (tests/fixtures/match_cases.json).
  *
  * @package aw-sourcing
@@ -34,7 +34,7 @@ const AW_SRC_RELAY_MAP = array( 'substack.com' => 'peopleforanimals.substack.com
  * @param string $url URL.
  * @return string
  */
-function aw_src_url_host( $url ) {
+function sourceweb_src_url_host( $url ) {
 	$h = strtolower( (string) parse_url( (string) $url, PHP_URL_HOST ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- pure function, tested without WordPress
 	return (string) preg_replace( '/^www\./', '', $h );
 }
@@ -45,7 +45,7 @@ function aw_src_url_host( $url ) {
  * @param string $url Feed URL.
  * @return string
  */
-function aw_src_search_site( $url ) {
+function sourceweb_src_search_site( $url ) {
 	if ( false === strpos( (string) $url, 'news.google.com/rss/search' ) ) {
 		return '';
 	}
@@ -62,12 +62,12 @@ function aw_src_search_site( $url ) {
  * @param array $s Source (aw_sources.sources entry).
  * @return string
  */
-function aw_src_source_host( array $s ) {
+function sourceweb_src_source_host( array $s ) {
 	if ( ! empty( $s['host'] ) ) {
 		return strtolower( (string) $s['host'] );
 	}
-	$site = aw_src_search_site( (string) ( $s['url'] ?? '' ) );
-	return '' !== $site ? $site : aw_src_url_host( (string) ( $s['url'] ?? '' ) );
+	$site = sourceweb_src_search_site( (string) ( $s['url'] ?? '' ) );
+	return '' !== $site ? $site : sourceweb_src_url_host( (string) ( $s['url'] ?? '' ) );
 }
 
 /**
@@ -76,7 +76,7 @@ function aw_src_source_host( array $s ) {
  * @param array $s Source.
  * @return string
  */
-function aw_src_read_by( array $s ) {
+function sourceweb_src_read_by( array $s ) {
 	return 'rss' === ( $s['kind'] ?? '' ) ? 'feed' : 'code';
 }
 
@@ -87,7 +87,7 @@ function aw_src_read_by( array $s ) {
  * @param string[] $list Hosts.
  * @return bool
  */
-function aw_src_host_in( $host, array $list ) {
+function sourceweb_src_host_in( $host, array $list ) {
 	$host = strtolower( trim( (string) $host, '.' ) );
 	if ( '' === $host ) {
 		return false;
@@ -108,17 +108,17 @@ function aw_src_host_in( $host, array $list ) {
  * @param string[] $default        The built-in list (AW_RELAY_DEFAULT).
  * @return string[]
  */
-function aw_src_relay_legacy( array $sources_option, array $default ) {
+function sourceweb_src_relay_legacy( array $sources_option, array $default ) {
 	return isset( $sources_option['relay_hosts'] ) ? array_values( (array) $sources_option['relay_hosts'] ) : array_values( $default );
 }
 
 /**
  * The relay allow list from the publishers' switches (in the records' order).
  *
- * @param array $pubs aw_publishers.
+ * @param array $pubs sourceweb_publishers.
  * @return string[]
  */
-function aw_src_relay_hosts_from_pubs( array $pubs ) {
+function sourceweb_src_relay_hosts_from_pubs( array $pubs ) {
 	$out = array();
 	foreach ( $pubs as $h => $p ) {
 		if ( is_array( $p ) && ! empty( $p['relay'] ) ) {
@@ -130,12 +130,12 @@ function aw_src_relay_hosts_from_pubs( array $pubs ) {
 
 /**
  * The relay log reduced to the newest row per host it names (a few hosts, however long the log), for
- * aw_src_relay_last() over many hosts.
+ * sourceweb_src_relay_last() over many hosts.
  *
- * @param array $log aw_relay_log rows (oldest first).
+ * @param array $log sourceweb_relay_log rows (oldest first).
  * @return array<string, array>
  */
-function aw_src_relay_index( array $log ) {
+function sourceweb_src_relay_index( array $log ) {
 	$out = array();
 	foreach ( $log as $r ) {
 		if ( ! is_array( $r ) ) {
@@ -152,14 +152,14 @@ function aw_src_relay_index( array $log ) {
 /**
  * The newest relay request (the log row) for a host or one of its subdomains, or null.
  *
- * @param array  $log  aw_relay_log rows, or an index from aw_src_relay_index().
+ * @param array  $log  sourceweb_relay_log rows, or an index from sourceweb_src_relay_index().
  * @param string $host Host.
  * @return array|null
  */
-function aw_src_relay_last( array $log, $host ) {
+function sourceweb_src_relay_last( array $log, $host ) {
 	$best = null;
 	foreach ( $log as $r ) {
-		if ( ! is_array( $r ) || ! aw_src_host_in( (string) ( $r['host'] ?? '' ), array( $host ) ) ) {
+		if ( ! is_array( $r ) || ! sourceweb_src_host_in( (string) ( $r['host'] ?? '' ), array( $host ) ) ) {
 			continue;
 		}
 		if ( null === $best || (int) ( $r['at'] ?? 0 ) >= (int) ( $best['at'] ?? 0 ) ) {
@@ -179,7 +179,7 @@ function aw_src_relay_last( array $log, $host ) {
  * @param int   $cap   Entries kept.
  * @return array
  */
-function aw_src_log_push( array $log, array $entry, $old = null, $new = null, $cap = AW_SOURCING_LOG_CAP ) {
+function sourceweb_src_log_push( array $log, array $entry, $old = null, $new = null, $cap = AW_SOURCING_LOG_CAP ) {
 	if ( null !== $old ) {
 		$entry['old'] = $old;
 	}
@@ -196,7 +196,7 @@ function aw_src_log_push( array $log, array $entry, $old = null, $new = null, $c
  * @param mixed $v Value.
  * @return string
  */
-function aw_src_log_value( $v ) {
+function sourceweb_src_log_value( $v ) {
 	if ( null === $v ) {
 		return '';
 	}
@@ -221,21 +221,21 @@ function aw_src_log_value( $v ) {
  * switches on publisher records (a host without a record gets one with kind=relay). Hosts are mapped first
  * (AW_SRC_RELAY_MAP).
  *
- * @param array    $pubs    aw_publishers.
+ * @param array    $pubs    sourceweb_publishers.
  * @param array    $sources aw_sources.sources.
  * @param string[] $relay   The relay allow list before (stored relay_hosts or the built-in list).
  * @param string   $today   Y-m-d, for a new record's first-seen date.
  * @param array    $map     Host => host to switch on instead.
  * @return array{pubs: array, sources: array, flagged: string[], added: string[], hosts: array, hosted: string[], relay_before: string[], relay_after: string[], mapped: array}
  */
-function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, array $map = AW_SRC_RELAY_MAP ) {
+function sourceweb_src_phase1_plan( array $pubs, array $sources, array $relay, $today, array $map = AW_SRC_RELAY_MAP ) {
 	$hosts  = array();
 	$hosted = array();
 	foreach ( $sources as $i => $s ) {
 		if ( ! is_array( $s ) ) {
 			continue;
 		}
-		$h = aw_src_source_host( $s );
+		$h = sourceweb_src_source_host( $s );
 		if ( '' !== $h && empty( $s['host'] ) ) {
 			$sources[ $i ]['host'] = $h;
 			$hosted[]              = (string) ( $s['id'] ?? '' );
@@ -263,7 +263,7 @@ function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, 
 		}
 		$name = '';
 		foreach ( $sources as $s ) {
-			if ( is_array( $s ) && aw_src_host_in( aw_src_source_host( $s ), array( $t ) ) ) {
+			if ( is_array( $s ) && sourceweb_src_host_in( sourceweb_src_source_host( $s ), array( $t ) ) ) {
 				$name = (string) ( $s['name'] ?? '' );
 				break;
 			}
@@ -279,7 +279,7 @@ function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, 
 		'hosts'        => $hosts,
 		'hosted'       => $hosted,
 		'relay_before' => array_values( array_map( 'strval', $relay ) ),
-		'relay_after'  => aw_src_relay_hosts_from_pubs( $pubs ),
+		'relay_after'  => sourceweb_src_relay_hosts_from_pubs( $pubs ),
 		'mapped'       => $mapped,
 	);
 }
@@ -290,12 +290,12 @@ function aw_src_phase1_plan( array $pubs, array $sources, array $relay, $today, 
  * (unless the ingest gate has since made one a publisher), and the host key taken off the sources the migration gave
  * one (a host set by hand before it stays).
  *
- * @param array         $pubs    aw_publishers now.
+ * @param array         $pubs    sourceweb_publishers now.
  * @param array         $sources aw_sources.sources now.
  * @param string[]|null $hosted  Ids of the sources the migration gave a host (null: every source).
  * @return array{pubs: array, sources: array, unflagged: string[], removed: string[]}
  */
-function aw_src_phase1_undo( array $pubs, array $sources, $hosted = null ) {
+function sourceweb_src_phase1_undo( array $pubs, array $sources, $hosted = null ) {
 	$unflagged = array();
 	$removed   = array();
 	foreach ( $pubs as $h => $p ) {
@@ -325,17 +325,17 @@ function aw_src_phase1_undo( array $pubs, array $sources, $hosted = null ) {
  * the icon), so those keys and hosts first seen since the backup are reported as "since the backup", never as
  * differences. Everything the migration changed on purpose is listed as planned.
  *
- * @param array    $bk_pubs      aw_publishers in the backup.
+ * @param array    $bk_pubs      sourceweb_publishers in the backup.
  * @param array    $bk_sources   aw_sources.sources in the backup.
- * @param array    $pubs         aw_publishers now.
+ * @param array    $pubs         sourceweb_publishers now.
  * @param array    $sources      aw_sources.sources now.
  * @param string[] $relay_before Relay allow list before.
  * @param string[] $relay_after  Relay allow list now.
- * @param array    $relay_log    aw_relay_log rows.
+ * @param array    $relay_log    sourceweb_relay_log rows.
  * @param array    $map          Host mapping of the migration.
  * @return array{diffs: string[], planned: string[], since: string[]}
  */
-function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, array $sources, array $relay_before, array $relay_after, array $relay_log, array $map = AW_SRC_RELAY_MAP ) {
+function sourceweb_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, array $sources, array $relay_before, array $relay_after, array $relay_log, array $map = AW_SRC_RELAY_MAP ) {
 	$diffs   = array();
 	$planned = array();
 	$since   = array();
@@ -390,7 +390,7 @@ function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, 
 				$since[] = $h . ' became a publisher (ingest)';
 				continue;
 			}
-			$diffs[] = 'publisher ' . $h . ' ' . $k . ': ' . aw_src_log_value( $old[ $k ] ?? null ) . ' → ' . aw_src_log_value( $now[ $k ] ?? null );
+			$diffs[] = 'publisher ' . $h . ' ' . $k . ': ' . sourceweb_src_log_value( $old[ $k ] ?? null ) . ' → ' . sourceweb_src_log_value( $now[ $k ] ?? null );
 		}
 	}
 	foreach ( $pubs as $h => $p ) {
@@ -409,13 +409,13 @@ function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, 
 	foreach ( $relay_before as $h ) {
 		$h = strtolower( (string) $h );
 		if ( isset( $map[ $h ] ) ) {
-			$planned[] = 'relay ' . $h . ' narrowed to ' . $map[ $h ] . ( aw_src_host_in( $map[ $h ], $relay_after ) ? '' : ' (NOT on the list now)' );
-			if ( ! aw_src_host_in( $map[ $h ], $relay_after ) ) {
+			$planned[] = 'relay ' . $h . ' narrowed to ' . $map[ $h ] . ( sourceweb_src_host_in( $map[ $h ], $relay_after ) ? '' : ' (NOT on the list now)' );
+			if ( ! sourceweb_src_host_in( $map[ $h ], $relay_after ) ) {
 				$diffs[] = 'relay host ' . $map[ $h ] . ' (for ' . $h . ') is not allowed';
 			}
 			continue;
 		}
-		if ( ! aw_src_host_in( $h, $relay_after ) ) {
+		if ( ! sourceweb_src_host_in( $h, $relay_after ) ) {
 			$diffs[] = 'relay host ' . $h . ' is no longer allowed';
 		}
 	}
@@ -424,14 +424,14 @@ function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, 
 	$kept     = array_values( array_diff( array_map( 'strtolower', array_map( 'strval', $relay_before ) ), $narrowed ) );
 	foreach ( $relay_log as $r ) {
 		$host = strtolower( (string) ( $r['host'] ?? '' ) );
-		if ( '' === $host || isset( $seen[ $host ] ) || ! is_int( $r['status'] ?? null ) || $r['status'] >= 400 || ! aw_src_host_in( $host, $relay_before ) ) {
+		if ( '' === $host || isset( $seen[ $host ] ) || ! is_int( $r['status'] ?? null ) || $r['status'] >= 400 || ! sourceweb_src_host_in( $host, $relay_before ) ) {
 			continue; // refused or failed requests, and hosts never allowed, are not a use to keep
 		}
 		$seen[ $host ] = true;
-		if ( aw_src_host_in( $host, $relay_after ) ) {
+		if ( sourceweb_src_host_in( $host, $relay_after ) ) {
 			continue;
 		}
-		if ( ! aw_src_host_in( $host, $kept ) && aw_src_host_in( $host, $narrowed ) ) { // allowed only through a narrowed entry
+		if ( ! sourceweb_src_host_in( $host, $kept ) && sourceweb_src_host_in( $host, $narrowed ) ) { // allowed only through a narrowed entry
 			$planned[] = 'relayed host ' . $host . ' (in the relay log) no longer relayed: narrowed on purpose';
 			continue;
 		}
@@ -450,20 +450,20 @@ function aw_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, 
  * @param string[] $relay Relay allow list.
  * @return array
  */
-function aw_src_sources_v2( array $v1, array $relay ) {
+function sourceweb_src_sources_v2( array $v1, array $relay ) {
 	$out = array();
 	foreach ( $v1 as $s ) {
 		if ( ! is_array( $s ) ) {
 			continue;
 		}
-		$h     = aw_src_source_host( $s );
+		$h     = sourceweb_src_source_host( $s );
 		$check = isset( $s['check'] ) && is_array( $s['check'] ) ? $s['check'] : array();
 		$out[] = array_merge(
 			$s,
 			array(
 				'host'    => $h,
-				'relay'   => aw_src_host_in( $h, $relay ),
-				'read_by' => aw_src_read_by( $s ),
+				'relay'   => sourceweb_src_host_in( $h, $relay ),
+				'read_by' => sourceweb_src_read_by( $s ),
 				'check'   => array(
 					'roles'      => array_values( array_map( 'strval', (array) ( $check['roles'] ?? array() ) ) ),
 					'categories' => array_values( array_map( 'strval', (array) ( $check['categories'] ?? array() ) ) ),
@@ -483,7 +483,7 @@ function aw_src_sources_v2( array $v1, array $relay ) {
  * @param string $term Keyword.
  * @return bool
  */
-function aw_match_term( $hay, $term ) {
+function sourceweb_match_term( $hay, $term ) {
 	$t = trim( (string) preg_replace( '/\s+/u', ' ', mb_strtolower( (string) $term ) ) );
 	if ( '' === $t ) {
 		return false;
@@ -511,7 +511,7 @@ function aw_match_term( $hay, $term ) {
  * @param string $url Source URL.
  * @return string Digits, or ''.
  */
-function aw_src_pib_prid( $url ) {
+function sourceweb_src_pib_prid( $url ) {
 	$parts = parse_url( (string) $url ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- no WordPress in tests/run.php
 	$host  = isset( $parts['host'] ) ? strtolower( $parts['host'] ) : '';
 	if ( ( 'pib.gov.in' !== $host && ! str_ends_with( $host, '.pib.gov.in' ) ) || empty( $parts['query'] ) ) {

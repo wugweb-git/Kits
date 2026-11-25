@@ -17,7 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Pages tab list table.
  */
-class AW_SI_Pages_Table extends WP_List_Table {
+class InsightWeb_SI_Pages_Table extends WP_List_Table {
 
 	/**
 	 * All rows (path => figures), read once.
@@ -40,7 +40,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 	/** Every row, cached for the screen. */
 	private function all(): array {
 		if ( null === $this->all ) {
-			$this->all = aw_si_pages_data();
+			$this->all = insightweb_si_pages_data();
 		}
 		return $this->all;
 	}
@@ -129,7 +129,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		$out     = array();
 		foreach ( $this->view_tests() as $key => $test ) {
 			$n           = count( array_filter( $this->all(), $test ) );
-			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'pages' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, insightweb_si_url( 'pages' ) ) ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $labels[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -195,7 +195,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 			$out .= ' — <span class="post-state"><span class="dashicons dashicons-flag" aria-hidden="true"></span> ' . esc_html( sprintf( __( 'Page quality (%s)', 'insightweb' ), implode( ', ', $why ) ) ) . '</span>';
 		}
 		$actions = array(
-			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), aw_si_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'insightweb' ) . '</a>',
+			'note' => '<a href="' . esc_url( add_query_arg( 'note', rawurlencode( $item['path'] ), insightweb_si_url( 'pages' ) ) ) . '">' . esc_html__( 'Add Clarity note', 'insightweb' ) . '</a>',
 		);
 		return $out . $this->row_actions( $actions );
 	}
@@ -226,7 +226,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( empty( $item['ai'] ) ) {
 			return '–';
 		}
-		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ai_by'] ?? array() ) ) . '</span>';
+		return esc_html( number_format_i18n( (int) $item['ai'] ) ) . '<br><span class="description">' . insightweb_si_ref_top( (array) ( $item['ai_by'] ?? array() ) ) . '</span>';
 	}
 
 	/**
@@ -238,7 +238,7 @@ class AW_SI_Pages_Table extends WP_List_Table {
 		if ( empty( $item['ref'] ) ) {
 			return '–';
 		}
-		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . aw_si_ref_top( (array) ( $item['ref_by'] ?? array() ) ) . '</span>';
+		return esc_html( number_format_i18n( (int) $item['ref'] ) ) . '<br><span class="description">' . insightweb_si_ref_top( (array) ( $item['ref_by'] ?? array() ) ) . '</span>';
 	}
 
 	/**

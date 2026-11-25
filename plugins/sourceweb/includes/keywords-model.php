@@ -4,15 +4,15 @@
  * functions over arrays (no WordPress calls), so tests/run.php checks them without WordPress (owner rule: no local
  * WordPress or MySQL).
  *
- * - The migration plan (aw_kw_phase2_plan): every word of the Include, Animal, Context and Exclude lists, the press
+ * - The migration plan (sourceweb_kw_phase2_plan): every word of the Include, Animal, Context and Exclude lists, the press
  *   queries, the category words, the two lab words and the open-web Google News searches becomes a role on the record
- *   of its normal form (aw_si_norm). Roles add up; nothing is removed by a merge. Every original spelling is kept, in
+ *   of its normal form (insightweb_si_norm). Roles add up; nothing is removed by a merge. Every original spelling is kept, in
  *   the record's other spellings and, with its list and place, in src_note, so the old lists are rebuilt exactly.
  *   Hindi and Hinglish records get no Sourcing or Press role (the standing rule; owner's decision 13).
- * - The mirrors (aw_kw_mirrors): the old lists rebuilt from the records, written back to the old options on every save
+ * - The mirrors (sourceweb_kw_mirrors): the old lists rebuilt from the records, written back to the old options on every save
  *   until phase 4 (read-only copies for old readers and old workers).
- * - The workers' keywords block (aw_kw_payload): only records with a Sourcing or Press role, English only.
- * - The whole-word report (aw_kw_word_report): each category word's hits on the site's items with today's matching
+ * - The workers' keywords block (sourceweb_kw_payload): only records with a Sourcing or Press role, English only.
+ * - The whole-word report (sourceweb_kw_word_report): each category word's hits on the site's items with today's matching
  *   and with whole words, and whether a trailing * is added because whole words lose hits (owner's decision 6).
  *
  * @package aw-sourcing
@@ -24,11 +24,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The old lists and the role each gives: list key => [role bit, where it lives, label]. */
 const AW_KW_LISTS = array(
-	'strong'  => array( AW_KW_ROLE_INCLUDE, 'aw_relevance.strong', 'Include' ),
-	'animal'  => array( AW_KW_ROLE_ANIMAL, 'aw_relevance.animal', 'Animal' ),
-	'context' => array( AW_KW_ROLE_CONTEXT, 'aw_relevance.context', 'Context' ),
-	'exclude' => array( AW_KW_ROLE_EXCLUDE, 'aw_relevance.exclude', 'Exclude' ),
-	'press'   => array( AW_KW_ROLE_PRESS, 'aw_sources.press.queries', 'Press queries' ),
+	'strong'  => array( SOURCEWEB_KW_ROLE_INCLUDE, 'sourceweb_relevance.strong', 'Include' ),
+	'animal'  => array( SOURCEWEB_KW_ROLE_ANIMAL, 'sourceweb_relevance.animal', 'Animal' ),
+	'context' => array( SOURCEWEB_KW_ROLE_CONTEXT, 'sourceweb_relevance.context', 'Context' ),
+	'exclude' => array( SOURCEWEB_KW_ROLE_EXCLUDE, 'sourceweb_relevance.exclude', 'Exclude' ),
+	'press'   => array( SOURCEWEB_KW_ROLE_PRESS, 'aw_sources.press.queries', 'Press queries' ),
 );
 
 /** The category the lab check words belong to, and the lab words no category list had (owner's decision 5). */
@@ -45,16 +45,16 @@ const AW_KW_PRESS_DROPPED = array( 'sites', 'monthly_requests', 'weekly_requests
  * (a phase 2 migration record, complete or partial, means phase 2 must be rolled back first).
  *
  * @param int  $phase     Phase to roll back.
- * @param int  $current   aw_sourcing_phase now.
+ * @param int  $current   sourceweb_sourcing_phase now.
  * @param bool $p2_record A phase 2 migration record exists (aw_sourcing_phase2_record).
  * @return string Why not ('' when it may run).
  */
-function aw_src_rollback_refusal( $phase, $current, $p2_record ) {
+function sourceweb_src_rollback_refusal( $phase, $current, $p2_record ) {
 	if ( 1 === (int) $phase && ( (int) $current > 1 || $p2_record ) ) {
 		return 'Phase 2 is migrated or half-migrated: roll it back first (wp aw-sourcing rollback --phase=2).';
 	}
 	if ( 2 === (int) $phase && (int) $current < 2 && ! $p2_record ) {
-		return 'Phase 2 is not migrated (aw_sourcing_phase = ' . (int) $current . ').';
+		return 'Phase 2 is not migrated (sourceweb_sourcing_phase = ' . (int) $current . ').';
 	}
 	return '';
 }
@@ -63,12 +63,12 @@ function aw_src_rollback_refusal( $phase, $current, $p2_record ) {
  * The phase marker after a phase 2 rollback: the one before phase 2 (from the backup), never higher than the marker now
  * (a half-done migration never set it to 2, and must not raise it past a phase that was rolled back since).
  *
- * @param int  $backup  aw_sourcing_phase in the phase 2 backup.
- * @param int  $current aw_sourcing_phase now.
+ * @param int  $backup  sourceweb_sourcing_phase in the phase 2 backup.
+ * @param int  $current sourceweb_sourcing_phase now.
  * @param bool $partial The migration stopped before setting the phase.
  * @return int
  */
-function aw_src_phase_after_p2_rollback( $backup, $current, $partial ) {
+function sourceweb_src_phase_after_p2_rollback( $backup, $current, $partial ) {
 	return $partial ? min( (int) $backup, (int) $current ) : min( (int) $backup, 1 );
 }
 
@@ -78,7 +78,7 @@ function aw_src_phase_after_p2_rollback( $backup, $current, $partial ) {
  * @param string $term Search words.
  * @return string
  */
-function aw_kw_feed_id( $term ) {
+function sourceweb_kw_feed_id( $term ) {
 	return 'gnews-kw-' . trim( (string) preg_replace( '/[^a-z0-9]+/', '-', strtolower( (string) $term ) ), '-' );
 }
 
@@ -88,7 +88,7 @@ function aw_kw_feed_id( $term ) {
  * @param string $s Text.
  * @return bool
  */
-function aw_kw_ascii( $s ) {
+function sourceweb_kw_ascii( $s ) {
 	return (bool) preg_match( '/^[\x20-\x7e]+$/', (string) $s );
 }
 
@@ -99,13 +99,13 @@ function aw_kw_ascii( $s ) {
  * @param array $sources aw_sources.sources.
  * @return array<string, string>
  */
-function aw_kw_open_searches( array $sources ) {
+function sourceweb_kw_open_searches( array $sources ) {
 	$out = array();
 	foreach ( $sources as $s ) {
 		if ( ! is_array( $s ) || 'rss' !== ( $s['kind'] ?? '' ) || false === strpos( (string) ( $s['url'] ?? '' ), 'news.google.com/rss/search' ) ) {
 			continue;
 		}
-		if ( '' !== aw_src_search_site( (string) $s['url'] ) || ! empty( $s['keyword_id'] ) ) {
+		if ( '' !== sourceweb_src_search_site( (string) $s['url'] ) || ! empty( $s['keyword_id'] ) ) {
 			continue;
 		}
 		$label = trim( (string) preg_replace( array( '/^\s*Google News\s*[–—-]\s*/u', '/\s+India\s*$/i' ), '', (string) ( $s['name'] ?? '' ) ) );
@@ -114,7 +114,7 @@ function aw_kw_open_searches( array $sources ) {
 			$label = trim( (string) preg_replace( '/\bwhen:\S+|\bIndia\b|["()]/i', ' ', (string) ( $q['q'] ?? '' ) ) );
 		}
 		$label = trim( (string) preg_replace( '/\s+/', ' ', $label ) );
-		if ( '' !== aw_si_norm( $label ) ) { // a search with no words of its own stays a feed
+		if ( '' !== insightweb_si_norm( $label ) ) { // a search with no words of its own stays a feed
 			$out[ (string) $s['id'] ] = $label;
 		}
 	}
@@ -128,9 +128,9 @@ function aw_kw_open_searches( array $sources ) {
  * @param string[] $spellings Spellings in list order.
  * @return string
  */
-function aw_kw_new_label( array $spellings ) {
+function sourceweb_kw_new_label( array $spellings ) {
 	foreach ( $spellings as $sp ) {
-		if ( aw_si_norm( $sp ) === trim( (string) preg_replace( '/\s+/u', ' ', mb_strtolower( $sp ) ) ) ) {
+		if ( insightweb_si_norm( $sp ) === trim( (string) preg_replace( '/\s+/u', ' ', mb_strtolower( $sp ) ) ) ) {
 			return $sp;
 		}
 	}
@@ -146,7 +146,7 @@ function aw_kw_new_label( array $spellings ) {
  * @param string[] $seed    aw_sources.keywords.
  * @return array<string, array> source id => check {roles, categories}.
  */
-function aw_kw_feed_checks( array $sources, array $seed ) {
+function sourceweb_kw_feed_checks( array $sources, array $seed ) {
 	$lab = array();
 	foreach ( $sources as $s ) {
 		if ( is_array( $s ) && 'press' === ( $s['file_as'] ?? '' ) && ! empty( $s['keywords'] ) ) {
@@ -171,15 +171,15 @@ function aw_kw_feed_checks( array $sources, array $seed ) {
 /**
  * The phase 2 migration, computed (nothing written).
  *
- * @param array $rel       aw_relevance (strong, animal, context, exclude).
+ * @param array $rel       sourceweb_relevance (strong, animal, context, exclude).
  * @param array $cfg       aw_sources (keywords, sources, categories, press).
- * @param array $dismissed aw_sourcing_dismissed.
+ * @param array $dismissed sourceweb_sourcing_dismissed.
  * @param array $rows      Keyword records that exist: id, norm, label, lang, roles, variants (list), query, feed_id,
  *                         search_on, dismissed, src (array), categories, sections. Only records whose norm one of the
  *                         lists has are needed.
  * @return array
  */
-function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $rows ) {
+function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $rows ) {
 	$by_norm = array();
 	foreach ( $rows as $r ) {
 		$by_norm[ (string) $r['norm'] ] = $r;
@@ -188,7 +188,7 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 	$lists = array(); // list => counts
 	$hindi = array();
 	$touch = function ( $spelling ) use ( &$recs, $by_norm ) {
-		$norm = aw_si_norm( (string) $spelling );
+		$norm = insightweb_si_norm( (string) $spelling );
 		if ( '' === $norm ) {
 			return '';
 		}
@@ -202,7 +202,7 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 				'lang'       => $old ? (string) $old['lang'] : '',
 				'roles_was'  => $old ? (int) $old['roles'] : 0,
 				'roles'      => $old ? (int) $old['roles'] : 0,
-				'variants'   => $old ? aw_kw_variants_list( $old['variants'] ?? array() ) : array(),
+				'variants'   => $old ? insightweb_kw_variants_list( $old['variants'] ?? array() ) : array(),
 				'src'        => $old && is_array( $old['src'] ?? null ) ? (array) $old['src'] : array(),
 				'query'      => $old ? (string) ( $old['query'] ?? '' ) : '',
 				'feed_id'    => $old ? (string) ( $old['feed_id'] ?? '' ) : '',
@@ -257,28 +257,28 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 		$count( $key, $words, $def[0] );
 	}
 	foreach ( (array) ( $cfg['categories'] ?? array() ) as $slug => $words ) {
-		$count( 'cat:' . $slug, (array) $words, AW_KW_ROLE_CATEGORY, (string) $slug );
+		$count( 'cat:' . $slug, (array) $words, SOURCEWEB_KW_ROLE_CATEGORY, (string) $slug );
 	}
 	// Lab check words no category list has (owner's decision 5): mapped to Animal Experimentation.
 	$catnorms = array();
 	foreach ( (array) ( $cfg['categories'][ AW_KW_LAB_CATEGORY ] ?? array() ) as $w ) {
-		$catnorms[ aw_si_norm( (string) $w ) ] = true;
+		$catnorms[ insightweb_si_norm( (string) $w ) ] = true;
 	}
 	$labwords = array();
 	foreach ( (array) ( $cfg['sources'] ?? array() ) as $s ) {
 		if ( is_array( $s ) && 'press' === ( $s['file_as'] ?? '' ) ) {
 			foreach ( (array) ( $s['keywords'] ?? array() ) as $w ) {
-				if ( ! isset( $catnorms[ aw_si_norm( (string) $w ) ] ) ) {
+				if ( ! isset( $catnorms[ insightweb_si_norm( (string) $w ) ] ) ) {
 					$labwords[] = (string) $w;
 				}
 			}
 		}
 	}
-	$count( 'lab', $labwords, AW_KW_ROLE_CATEGORY, AW_KW_LAB_CATEGORY );
+	$count( 'lab', $labwords, SOURCEWEB_KW_ROLE_CATEGORY, AW_KW_LAB_CATEGORY );
 
 	// The open-web Google News searches (owner's decision 2) and the fixed extra search: the Search role, feed ids kept.
 	$searches = array();
-	foreach ( aw_kw_open_searches( (array) ( $cfg['sources'] ?? array() ) ) as $id => $label ) {
+	foreach ( sourceweb_kw_open_searches( (array) ( $cfg['sources'] ?? array() ) ) as $id => $label ) {
 		$src = null;
 		foreach ( (array) $cfg['sources'] as $s ) {
 			if ( is_array( $s ) && (string) ( $s['id'] ?? '' ) === $id ) {
@@ -286,7 +286,7 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 			}
 		}
 		$n = $touch( $label );
-		$put( $n, 'search', count( $searches ), $label, AW_KW_ROLE_SEARCH );
+		$put( $n, 'search', count( $searches ), $label, SOURCEWEB_KW_ROLE_SEARCH );
 		$recs[ $n ]['feed_id']   = $id;
 		$recs[ $n ]['query']     = (string) $src['url'];
 		$recs[ $n ]['search_on'] = array_key_exists( 'on', (array) $src ) && empty( $src['on'] ) ? 0 : 1; // a search the owner switched off stays off (Codex)
@@ -298,13 +298,13 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 	}
 	foreach ( AW_KW_EXTRA_SEARCHES as $t ) {
 		$n = $touch( $t );
-		$put( $n, 'search', count( $searches ), $t, AW_KW_ROLE_SEARCH );
-		$recs[ $n ]['feed_id'] = aw_kw_feed_id( $t );
+		$put( $n, 'search', count( $searches ), $t, SOURCEWEB_KW_ROLE_SEARCH );
+		$recs[ $n ]['feed_id'] = sourceweb_kw_feed_id( $t );
 		$recs[ $n ]['query']   = $t;
 		if ( ! in_array( 'aw_news', $recs[ $n ]['sections'], true ) ) {
 			$recs[ $n ]['sections'][] = 'aw_news';
 		}
-		$searches[ aw_kw_feed_id( $t ) ] = $n;
+		$searches[ sourceweb_kw_feed_id( $t ) ] = $n;
 	}
 	$lists['search'] = array(
 		'items'    => count( $searches ),
@@ -326,24 +326,24 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 	$conflicts = array();
 	foreach ( $recs as $n => $r ) {
 		if ( '' === $r['label'] ) {
-			$r['label'] = aw_kw_new_label( $r['spellings'] );
+			$r['label'] = sourceweb_kw_new_label( $r['spellings'] );
 		}
 		if ( '' === $r['lang'] ) {
-			$r['lang'] = aw_si_lang( $r['label'] );
+			$r['lang'] = insightweb_si_lang( $r['label'] );
 		}
 		$want = (int) $r['want'];
-		if ( 'en' !== $r['lang'] && ( $want & AW_KW_WORKER_ROLES ) ) {
+		if ( 'en' !== $r['lang'] && ( $want & SOURCEWEB_KW_WORKER_ROLES ) ) {
 			foreach ( (array) ( $r['src']['lists'] ?? array() ) as $list => $places ) {
 				foreach ( $places as $p ) {
 					$hindi[] = array( $list, $p[1], $r['lang'] );
 				}
 			}
-			$want &= ~AW_KW_WORKER_ROLES;
+			$want &= ~SOURCEWEB_KW_WORKER_ROLES;
 		}
 		if ( 'en' !== $r['lang'] ) {
-			$r['roles'] &= ~AW_KW_WORKER_ROLES; // e.g. Include set on a Hindi word by Search Insights' daily sync before phase 2
+			$r['roles'] &= ~SOURCEWEB_KW_WORKER_ROLES; // e.g. Include set on a Hindi word by Search Insights' daily sync before phase 2
 		}
-		list( $roles, $why ) = aw_kw_roles_check( $r['roles'], $want, 0, $r['lang'] );
+		list( $roles, $why ) = insightweb_kw_roles_check( $r['roles'], $want, 0, $r['lang'] );
 		if ( '' !== $why ) {
 			$conflicts[] = $r['label'] . ': ' . $why;
 		}
@@ -353,8 +353,8 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 				$r['variants'][] = $sp;
 			}
 		}
-		$r['variants'] = aw_kw_variants_list( $r['variants'] );
-		if ( ( $r['roles'] & AW_KW_ROLE_INCLUDE ) && ! in_array( 'aw_news', $r['sections'], true ) ) {
+		$r['variants'] = insightweb_kw_variants_list( $r['variants'] );
+		if ( ( $r['roles'] & SOURCEWEB_KW_ROLE_INCLUDE ) && ! in_array( 'aw_news', $r['sections'], true ) ) {
 			$r['sections'][] = 'aw_news'; // a keyword search files items as News, as every keyword search does today
 		}
 		if ( in_array( $n, $dis, true ) ) {
@@ -375,7 +375,7 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
 		'dismissed' => $dis,
 		'new'       => count( $new ),
 		'existing'  => count( $recs ) - count( $new ),
-		'checks'    => aw_kw_feed_checks( (array) ( $cfg['sources'] ?? array() ), (array) ( $cfg['keywords'] ?? array() ) ),
+		'checks'    => sourceweb_kw_feed_checks( (array) ( $cfg['sources'] ?? array() ), (array) ( $cfg['keywords'] ?? array() ) ),
 		'cat_maps'  => array_sum( array_map( fn( $r ) => count( array_diff( $r['categories'], (array) ( $by_norm[ $r['norm'] ]['categories'] ?? array() ) ) ), $recs ) ),
 	);
 }
@@ -388,7 +388,7 @@ function aw_kw_phase2_plan( array $rel, array $cfg, array $dismissed, array $row
  * @param array $rows Records (id, label, roles, src, categories), with a Sourcing or Press role or a src note.
  * @return array{strong: string[], animal: string[], context: string[], exclude: string[], press: string[], categories: array<string, string[]>}
  */
-function aw_kw_mirrors( array $rows ) {
+function sourceweb_kw_mirrors( array $rows ) {
 	$acc = array();
 	$add = function ( $list, $pos, $id, $spelling ) use ( &$acc ) {
 		$acc[ $list ][] = array( (float) $pos, (int) $id, (string) $spelling );
@@ -408,7 +408,7 @@ function aw_kw_mirrors( array $rows ) {
 				$add( $key, 1e6, $r['id'], $r['label'] );
 			}
 		}
-		if ( $roles & AW_KW_ROLE_CATEGORY ) {
+		if ( $roles & SOURCEWEB_KW_ROLE_CATEGORY ) {
 			foreach ( (array) ( $r['categories'] ?? array() ) as $slug ) {
 				$places = $src[ 'cat:' . $slug ] ?? ( AW_KW_LAB_CATEGORY === $slug && ! empty( $src['lab'] ) ? array( array( 1e5, $src['lab'][0][1] ) ) : array() );
 				if ( $places ) {
@@ -437,11 +437,11 @@ function aw_kw_mirrors( array $rows ) {
 /**
  * The category lists in the old option's order: the slugs as they were, then new ones.
  *
- * @param array $mirror  aw_kw_mirrors()['categories'].
+ * @param array $mirror  sourceweb_kw_mirrors()['categories'].
  * @param array $old     aw_sources.categories as it was.
  * @return array<string, string[]>
  */
-function aw_kw_categories_in_order( array $mirror, array $old ) {
+function sourceweb_kw_categories_in_order( array $mirror, array $old ) {
 	$out = array();
 	foreach ( array_keys( $old ) as $slug ) {
 		if ( ! empty( $mirror[ $slug ] ) ) {
@@ -464,24 +464,24 @@ function aw_kw_categories_in_order( array $mirror, array $old ) {
  * @param array $sources aw_sources.sources by id (a former feed keeps its name, lookback, keyword list and filing there).
  * @return array[] Each {feed, q} or a source dict with feed and url.
  */
-function aw_kw_searches( array $r, array $sources ) {
+function sourceweb_kw_searches( array $r, array $sources ) {
 	if ( empty( $r['search_on'] ) || 'en' !== ( $r['lang'] ?? 'en' ) ) {
 		return array();
 	}
 	$out = array();
-	if ( (int) $r['roles'] & AW_KW_ROLE_SEARCH ) {
+	if ( (int) $r['roles'] & SOURCEWEB_KW_ROLE_SEARCH ) {
 		$q    = '' !== (string) ( $r['query'] ?? '' ) ? (string) $r['query'] : (string) $r['label'];
-		$feed = '' !== (string) ( $r['feed_id'] ?? '' ) ? (string) $r['feed_id'] : aw_kw_feed_id( $q );
+		$feed = '' !== (string) ( $r['feed_id'] ?? '' ) ? (string) $r['feed_id'] : sourceweb_kw_feed_id( $q );
 		if ( preg_match( '#^https?://#i', $q ) ) {
 			$base = $sources[ $feed ] ?? array( 'name' => 'Google News – ' . $r['label'], 'kind' => 'rss', 'type' => 'news' );
 			unset( $base['on'], $base['filter'], $base['keyword_id'], $base['host'] ); // its keyword check (check) goes with it
 			$base['id'] = $feed;
 			$out[]      = array_merge( $base, array( 'feed' => $feed, 'url' => $q ) );
-		} elseif ( aw_kw_ascii( $q ) ) {
+		} elseif ( sourceweb_kw_ascii( $q ) ) {
 			$out[] = array( 'feed' => $feed, 'q' => $q );
 		}
 	}
-	if ( (int) $r['roles'] & AW_KW_ROLE_INCLUDE ) {
+	if ( (int) $r['roles'] & SOURCEWEB_KW_ROLE_INCLUDE ) {
 		$spell = array();
 		foreach ( (array) ( $r['src']['lists']['strong'] ?? array() ) as $p ) {
 			$spell[] = (string) $p[1];
@@ -493,8 +493,8 @@ function aw_kw_searches( array $r, array $sources ) {
 			}
 		}
 		foreach ( array_unique( $spell ) as $sp ) {
-			if ( aw_kw_ascii( $sp ) ) {
-				$out[] = array( 'feed' => aw_kw_feed_id( $sp ), 'q' => $sp );
+			if ( sourceweb_kw_ascii( $sp ) ) {
+				$out[] = array( 'feed' => sourceweb_kw_feed_id( $sp ), 'q' => $sp );
 			}
 		}
 	}
@@ -521,7 +521,7 @@ function aw_kw_searches( array $r, array $sources ) {
  * @param array $sources aw_sources.sources.
  * @return array[]
  */
-function aw_kw_payload( array $rows, array $sources ) {
+function sourceweb_kw_payload( array $rows, array $sources ) {
 	$by = array();
 	foreach ( $sources as $s ) {
 		if ( is_array( $s ) && isset( $s['id'] ) ) {
@@ -530,21 +530,21 @@ function aw_kw_payload( array $rows, array $sources ) {
 	}
 	$out = array();
 	foreach ( $rows as $r ) {
-		if ( 'en' !== ( $r['lang'] ?? '' ) || ! ( (int) $r['roles'] & AW_KW_WORKER_ROLES ) ) {
+		if ( 'en' !== ( $r['lang'] ?? '' ) || ! ( (int) $r['roles'] & SOURCEWEB_KW_WORKER_ROLES ) ) {
 			continue;
 		}
-		$roles = (int) $r['roles'] & AW_KW_WORKER_ROLES;
+		$roles = (int) $r['roles'] & SOURCEWEB_KW_WORKER_ROLES;
 		$e     = array(
 			'id'         => (int) $r['id'],
 			'label'      => (string) $r['label'],
-			'variants'   => aw_kw_variants_list( $r['variants'] ?? array() ),
-			'roles'      => aw_kw_roles_to_slugs( $roles ),
+			'variants'   => insightweb_kw_variants_list( $r['variants'] ?? array() ),
+			'roles'      => insightweb_kw_roles_to_slugs( $roles ),
 			'lang'       => 'en',
-			'searches'   => aw_kw_searches( $r, $by ),
+			'searches'   => sourceweb_kw_searches( $r, $by ),
 			'categories' => array_values( (array) ( $r['categories'] ?? array() ) ),
 			'sections'   => array_values( (array) ( $r['sections'] ?? array() ) ),
 		);
-		if ( $roles & AW_KW_ROLE_PRESS ) {
+		if ( $roles & SOURCEWEB_KW_ROLE_PRESS ) {
 			$q = array_map( fn( $p ) => (string) $p[1], (array) ( $r['src']['lists']['press'] ?? array() ) );
 			$q = $q ? $q : array( (string) $r['label'] );
 			foreach ( $e['variants'] as $v ) {
@@ -552,7 +552,7 @@ function aw_kw_payload( array $rows, array $sources ) {
 					$q[] = $v;
 				}
 			}
-			$e['queries'] = aw_kw_variants_list( $q );
+			$e['queries'] = insightweb_kw_variants_list( $q );
 		}
 		$first = 1e6;
 		foreach ( array( 'strong', 'search', 'press' ) as $l ) {
@@ -574,12 +574,12 @@ function aw_kw_payload( array $rows, array $sources ) {
  * @param string $word Category word.
  * @return bool
  */
-function aw_kw_legacy_match( $hay, $word ) {
+function sourceweb_kw_legacy_match( $hay, $word ) {
 	$w = mb_strtolower( (string) $word );
 	if ( '' === $w ) {
 		return false;
 	}
-	if ( aw_kw_ascii( $w ) && strlen( $w ) <= 4 ) {
+	if ( sourceweb_kw_ascii( $w ) && strlen( $w ) <= 4 ) {
 		return (bool) preg_match( '/\b' . preg_quote( $w, '/' ) . '\b/', $hay );
 	}
 	return false !== mb_strpos( $hay, $w );
@@ -594,18 +594,18 @@ function aw_kw_legacy_match( $hay, $word ) {
  * @param string[] $texts Items' title and summary.
  * @return array[] word => [before, after, star_after, star] (star: true when * is added).
  */
-function aw_kw_word_report( array $words, array $texts ) {
+function sourceweb_kw_word_report( array $words, array $texts ) {
 	$hays = array_map( fn( $t ) => mb_strtolower( (string) $t ), $texts );
 	$out  = array();
 	foreach ( array_values( array_unique( array_map( 'strval', $words ) ) ) as $w ) {
 		$before = 0;
 		$after  = 0;
 		$star   = 0;
-		$latin  = aw_kw_ascii( $w ) && false === strpos( $w, '*' );
+		$latin  = sourceweb_kw_ascii( $w ) && false === strpos( $w, '*' );
 		foreach ( $hays as $h ) {
-			$before += aw_kw_legacy_match( $h, $w ) ? 1 : 0;
-			$after  += aw_match_term( $h, $w ) ? 1 : 0;
-			$star   += $latin && aw_match_term( $h, $w . '*' ) ? 1 : 0;
+			$before += sourceweb_kw_legacy_match( $h, $w ) ? 1 : 0;
+			$after  += sourceweb_match_term( $h, $w ) ? 1 : 0;
+			$star   += $latin && sourceweb_match_term( $h, $w . '*' ) ? 1 : 0;
 		}
 		$out[ $w ] = array( $before, $after, $latin ? $star : $after, $latin && $after < $before && $star > $after ); // * only where it wins hits back
 	}
@@ -615,26 +615,26 @@ function aw_kw_word_report( array $words, array $texts ) {
 /**
  * Add the * spellings of the report to the planned records (category words whose whole-word hits drop).
  *
- * @param array $plan   aw_kw_phase2_plan().
- * @param array $report aw_kw_word_report().
+ * @param array $plan   sourceweb_kw_phase2_plan().
+ * @param array $report sourceweb_kw_word_report().
  * @return array The plan, with `starred` (word => norm).
  */
-function aw_kw_plan_add_stars( array $plan, array $report ) {
+function sourceweb_kw_plan_add_stars( array $plan, array $report ) {
 	$plan['starred']     = array();
 	$plan['not_starred'] = array();
 	foreach ( $report as $w => $r ) {
 		if ( empty( $r[3] ) ) {
 			continue;
 		}
-		$n = aw_si_norm( (string) $w );
-		if ( ! isset( $plan['records'][ $n ] ) || ! ( $plan['records'][ $n ]['roles'] & AW_KW_ROLE_CATEGORY ) ) {
+		$n = insightweb_si_norm( (string) $w );
+		if ( ! isset( $plan['records'][ $n ] ) || ! ( $plan['records'][ $n ]['roles'] & SOURCEWEB_KW_ROLE_CATEGORY ) ) {
 			continue;
 		}
-		if ( $plan['records'][ $n ]['roles'] & ( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_EXCLUDE ) ) { // a spelling counts for every role: never widen Include or Exclude
+		if ( $plan['records'][ $n ]['roles'] & ( SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_EXCLUDE ) ) { // a spelling counts for every role: never widen Include or Exclude
 			$plan['not_starred'][ (string) $w ] = $n;
 			continue;
 		}
-		$plan['records'][ $n ]['variants'] = aw_kw_variants_list( array_merge( $plan['records'][ $n ]['variants'], array( mb_strtolower( (string) $w ) . '*' ) ) );
+		$plan['records'][ $n ]['variants'] = insightweb_kw_variants_list( array_merge( $plan['records'][ $n ]['variants'], array( mb_strtolower( (string) $w ) . '*' ) ) );
 		$plan['starred'][ (string) $w ]    = $n;
 	}
 	return $plan;
@@ -645,11 +645,11 @@ function aw_kw_plan_add_stars( array $plan, array $report ) {
  * from the planned changes (Hindi words that lost their Sourcing role, new lab category words).
  *
  * @param array $old    The old lists: strong, animal, context, exclude, press (queries), categories.
- * @param array $mirror aw_kw_mirrors().
+ * @param array $mirror sourceweb_kw_mirrors().
  * @param array $hindi  Hindi spellings the migration left without a Sourcing role: [list, spelling, lang].
  * @return array{diffs: string[], planned: string[]}
  */
-function aw_kw_compare_mirrors( array $old, array $mirror, array $hindi ) {
+function sourceweb_kw_compare_mirrors( array $old, array $mirror, array $hindi ) {
 	$diffs   = array();
 	$planned = array();
 	$gone    = array();
@@ -691,23 +691,23 @@ function aw_kw_compare_mirrors( array $old, array $mirror, array $hindi ) {
  * @param string[] $include The Include list.
  * @return array<string, string> feed id => normalised query.
  */
-function aw_kw_v1_searches( array $sources, array $include ) {
+function sourceweb_kw_v1_searches( array $sources, array $include ) {
 	$out = array();
 	$qs  = array();
 	foreach ( $sources as $s ) {
 		if ( is_array( $s ) && false !== strpos( (string) ( $s['url'] ?? '' ), 'news.google.com/rss/search' ) ) {
-			$q                        = aw_kw_norm_q( (string) $s['url'] );
+			$q                        = sourceweb_kw_norm_q( (string) $s['url'] );
 			$out[ (string) $s['id'] ] = $q;
 			$qs[ $q ]                 = true;
 		}
 	}
 	foreach ( array_merge( $include, AW_KW_EXTRA_SEARCHES ) as $kw ) {
 		$kw = trim( (string) $kw );
-		if ( '' === $kw || ! aw_kw_ascii( $kw ) ) {
+		if ( '' === $kw || ! sourceweb_kw_ascii( $kw ) ) {
 			continue;
 		}
-		$id = aw_kw_feed_id( $kw );
-		$q  = aw_kw_norm_q( 'https://news.google.com/rss/search?q=' . rawurlencode( '"' . $kw . '" India' ) );
+		$id = sourceweb_kw_feed_id( $kw );
+		$q  = sourceweb_kw_norm_q( 'https://news.google.com/rss/search?q=' . rawurlencode( '"' . $kw . '" India' ) );
 		if ( isset( $out[ $id ] ) || isset( $qs[ $q ] ) ) {
 			continue;
 		}
@@ -722,10 +722,10 @@ function aw_kw_v1_searches( array $sources, array $include ) {
  * searches that were feeds, then the keywords' own searches.
  *
  * @param array $sources The policy's v1 sources (on only), less the ones that became keywords.
- * @param array $payload aw_kw_payload().
+ * @param array $payload sourceweb_kw_payload().
  * @return array<string, string> feed id => normalised query.
  */
-function aw_kw_v2_searches( array $sources, array $payload ) {
+function sourceweb_kw_v2_searches( array $sources, array $payload ) {
 	$out = array();
 	$qs  = array();
 	$all = array();
@@ -737,13 +737,13 @@ function aw_kw_v2_searches( array $sources, array $payload ) {
 	usort( $all, fn( $a, $b ) => (int) isset( $b['url'] ) <=> (int) isset( $a['url'] ) ); // the former feeds first (stable)
 	foreach ( $sources as $s ) {
 		if ( is_array( $s ) && false !== strpos( (string) ( $s['url'] ?? '' ), 'news.google.com/rss/search' ) ) {
-			$q                        = aw_kw_norm_q( (string) $s['url'] );
+			$q                        = sourceweb_kw_norm_q( (string) $s['url'] );
 			$out[ (string) $s['id'] ] = $q;
 			$qs[ $q ]                 = true;
 		}
 	}
 	foreach ( $all as $s ) {
-		$q = isset( $s['url'] ) ? aw_kw_norm_q( (string) $s['url'] ) : aw_kw_norm_q( 'https://news.google.com/rss/search?q=' . rawurlencode( '"' . $s['q'] . '" India' ) );
+		$q = isset( $s['url'] ) ? sourceweb_kw_norm_q( (string) $s['url'] ) : sourceweb_kw_norm_q( 'https://news.google.com/rss/search?q=' . rawurlencode( '"' . $s['q'] . '" India' ) );
 		if ( isset( $out[ $s['feed'] ] ) || isset( $qs[ $q ] ) ) {
 			continue;
 		}
@@ -760,7 +760,7 @@ function aw_kw_v2_searches( array $sources, array $payload ) {
  * @param string $url Search URL.
  * @return string
  */
-function aw_kw_norm_q( $url ) {
+function sourceweb_kw_norm_q( $url ) {
 	parse_str( (string) parse_url( (string) $url, PHP_URL_QUERY ), $q ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- pure function
 	$s = (string) ( $q['q'] ?? '' );
 	if ( false === strpos( $s, 'when:' ) ) {
@@ -775,11 +775,11 @@ function aw_kw_norm_q( $url ) {
  * stays as the old workers' copy until phase 4; the workers from phase 2 read it from the keyword instead).
  *
  * @param array $sources aw_sources.sources.
- * @param array $checks  Source id => check (aw_kw_feed_checks()).
+ * @param array $checks  Source id => check (sourceweb_kw_feed_checks()).
  * @param array $kw_ids  Source id => keyword record id.
  * @return array
  */
-function aw_kw_apply_to_sources( array $sources, array $checks, array $kw_ids ) {
+function sourceweb_kw_apply_to_sources( array $sources, array $checks, array $kw_ids ) {
 	foreach ( $sources as $i => $s ) {
 		if ( ! is_array( $s ) ) {
 			continue;
@@ -797,7 +797,7 @@ function aw_kw_apply_to_sources( array $sources, array $checks, array $kw_ids ) 
 
 /**
  * The sourcing policy's phase 2 blocks, beside the unchanged v1 keys: sources_v2 (the sources that are still feeds,
- * each with its keyword check), keywords_v2 (aw_kw_payload()), match "word" (whole-word matching in the workers) and
+ * each with its keyword check), keywords_v2 (sourceweb_kw_payload()), match "word" (whole-word matching in the workers) and
  * the schema versions.
  *
  * @param array    $sources aw_sources.sources (as stored: on, filter, check, keyword_id).
@@ -805,7 +805,7 @@ function aw_kw_apply_to_sources( array $sources, array $checks, array $kw_ids ) 
  * @param string[] $relay   Relay allow list.
  * @return array{schema: array, match: string, sources_v2: array, keywords_v2: array}
  */
-function aw_kw_policy_blocks( array $sources, array $rows, array $relay ) {
+function sourceweb_kw_policy_blocks( array $sources, array $rows, array $relay ) {
 	$feeds = array();
 	foreach ( $sources as $s ) {
 		if ( ! is_array( $s ) || empty( $s['on'] ) || ! empty( $s['keyword_id'] ) ) {
@@ -817,7 +817,7 @@ function aw_kw_policy_blocks( array $sources, array $rows, array $relay ) {
 	return array(
 		'schema'      => array( 'sources' => 2, 'keywords' => 2 ),
 		'match'       => 'word',
-		'sources_v2'  => aw_src_sources_v2( $feeds, $relay ),
-		'keywords_v2' => aw_kw_payload( $rows, $sources ),
+		'sources_v2'  => sourceweb_src_sources_v2( $feeds, $relay ),
+		'keywords_v2' => sourceweb_kw_payload( $rows, $sources ),
 	);
 }

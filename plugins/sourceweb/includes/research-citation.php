@@ -145,33 +145,3 @@ function sourceweb_research_search_study_title( $search, $q ) {
 add_filter( 'posts_search', 'sourceweb_research_search_study_title', 10, 2 );
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals -- the older names, kept for Animal Writes Core's item-head.php.
-if ( ! function_exists( 'aw_research_doi' ) ) {
-	/**
-	 * Older name of sourceweb_research_doi().
-	 *
-	 * @param int $id Post ID.
-	 */
-	function aw_research_doi( $id ) {
-		return sourceweb_research_doi( $id );
-	}
-}
-if ( ! function_exists( 'aw_research_study_title' ) ) {
-	/**
-	 * Older name of sourceweb_research_study_title().
-	 *
-	 * @param int $id Post ID.
-	 */
-	function aw_research_study_title( $id ) {
-		return sourceweb_research_study_title( $id );
-	}
-}
-if ( ! function_exists( 'aw_research_authors_text' ) ) {
-	/**
-	 * Older name of sourceweb_research_authors_text().
-	 *
-	 * @param int $id Post ID.
-	 */
-	function aw_research_authors_text( $id ) {
-		return sourceweb_research_authors_text( $id );
-	}
-}

@@ -1,5 +1,5 @@
 {
- "_about": "Live values of 25 Oct 2026 (read-only wp option get / wp eval on animalwrites.in) for the phase 3 (Rules) tests: aw_sources sections and topic_tags, aw_summary_rules, aw_enrich_sources, the public post types; plus aw_enrich_fields() and the enrichment source keys from enrichment.php.",
+ "_about": "Live values of 25 Oct 2026 (read-only wp option get / wp eval on animalwrites.in) for the phase 3 (Rules) tests: aw_sources sections and topic_tags, sourceweb_summary_rules, sourceweb_enrich_sources, the public post types; plus sourceweb_enrich_fields() and the enrichment source keys from enrichment.php.",
  "public_types": [
   "post",
   "page",

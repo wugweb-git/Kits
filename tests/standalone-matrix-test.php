@@ -48,8 +48,8 @@ $plugins = array(
 		'name'  => 'SourceWeb',
 		'entry' => dirname( __DIR__ ) . '/plugins/sourceweb/sourceweb.php',
 		'check' => function () {
-			return defined( 'AW_SOURCING_LOADED' )
-				&& function_exists( 'aw_host' )
+			return defined( 'SOURCEWEB_SOURCING_LOADED' )
+				&& function_exists( 'sourceweb_host' )
 				&& function_exists( 'sourceweb_rest_can' )
 				&& function_exists( 'sourceweb_item_tags' )
 				&& function_exists( 'sourceweb_sanitize_meta' );

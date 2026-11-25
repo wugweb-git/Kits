@@ -7,36 +7,36 @@
  *   GET  workers                 the Workers list (view, search, orderby, order, page), the Run now log
  *   GET  workers/<id>            one worker for its form ('new' for Add New Worker), with the keys it may use
  *   GET  workers/<id>/runs       the runs the workflow reported, newest first
- *   POST workers/save            save a worker (aw_worker_save())
- *   POST workers/delete          delete a Planned worker (aw_worker_delete())
- *   POST workers/run             Run now (aw_workers_run_now())
+ *   POST workers/save            save a worker (sourceweb_worker_save())
+ *   POST workers/delete          delete a Planned worker (sourceweb_worker_delete())
+ *   POST workers/run             Run now (sourceweb_workers_run_now())
  *   GET  sources                 the Sources list (view, search, orderby, order, page)
- *   POST sources/decide          a list action on hosts (aw_sourcing_sources_apply())
- *   POST sources/short           short names for card chips (aw_sourcing_shorts_apply())
+ *   POST sources/decide          a list action on hosts (sourceweb_sourcing_sources_apply())
+ *   POST sources/short           short names for card chips (sourceweb_sourcing_shorts_apply())
  *   GET  sources/one             one source for its form (host; '' for Add New Source), with its feeds
- *   POST sources/save            save the source form (aw_sourcing_source_save())
+ *   POST sources/save            save the source form (sourceweb_sourcing_source_save())
  *   GET  sources/feeds           every feed (type, state, search, page), or one site's (host)
- *   POST sources/feeds/decide    on, off, keyword check on/off, delete (aw_sources_feed_op())
+ *   POST sources/feeds/decide    on, off, keyword check on/off, delete (sourceweb_sources_feed_op())
  *   GET  keywords                the Keywords list (view, cat, search, orderby, order, page), the two switches, Press settings
  *   GET  keywords/one            one keyword for its form (id; 0 for Add New Keyword)
- *   POST keywords/save           add (aw_sourcing_kw_add()), edit or delete from sourcing (aw_sourcing_kw_apply())
- *   POST keywords/decide         a row or bulk action on ids (aw_sourcing_kw_bulk())
- *   GET  keywords/test           Test a headline (aw_relevance_verdict())
+ *   POST keywords/save           add (sourceweb_sourcing_kw_add()), edit or delete from sourcing (sourceweb_sourcing_kw_apply())
+ *   POST keywords/decide         a row or bulk action on ids (sourceweb_sourcing_kw_bulk())
+ *   GET  keywords/test           Test a headline (sourceweb_relevance_verdict())
  *   POST keywords/settings       relevance filter, aggregator feeds, Press discovery (the Settings API forms' own sanitizers)
- *   GET  keywords/suggestions    searches from Search Insights no keyword covers (aw_sourcing_suggestions())
- *   POST keywords/suggestions/decide  include, exclude, search, dismiss, restore (aw_sourcing_suggest_apply())
+ *   GET  keywords/suggestions    searches from Search Insights no keyword covers (sourceweb_sourcing_suggestions())
+ *   POST keywords/suggestions/decide  include, exclude, search, dismiss, restore (sourceweb_sourcing_suggest_apply())
  *   GET  rules/sections          Section rules: the sections and the tag rules
  *   GET  rules/section           one section's allowed categories and tags (type)
- *   POST rules/section/save      save them (aw_sourcing_section_save())
+ *   POST rules/section/save      save them (sourceweb_sourcing_section_save())
  *   GET  rules/tag               one tag rule for its form (tag; '' for Add New Rule), with the tags to choose from
- *   POST rules/tag/save          add or edit a tag rule (aw_rules_tag_save())
- *   POST rules/tag/delete        delete a tag rule (aw_rules_tag_delete())
+ *   POST rules/tag/save          add or edit a tag rule (sourceweb_rules_tag_save())
+ *   POST rules/tag/delete        delete a tag rule (sourceweb_rules_tag_delete())
  *   GET  rules/enrich            Directory enrichment: the trust order and the field rules
- *   POST rules/priority          save the trust order (aw_rules_priority_save())
+ *   POST rules/priority          save the trust order (sourceweb_rules_priority_save())
  *   GET  rules/field             one field's rule for its form (field)
- *   POST rules/field/save        save it (aw_rules_field_save())
+ *   POST rules/field/save        save it (sourceweb_rules_field_save())
  *   GET  rules/summary           Summary rules, as the form shows them
- *   POST rules/summary/save      save them through the form's sanitizer (aw_summary_rules_sanitize())
+ *   POST rules/summary/save      save them through the form's sanitizer (sourceweb_summary_rules_sanitize())
  *
  * Keys never go out: a key is its id (a hash) and its last 4 characters.
  *
@@ -79,12 +79,12 @@ add_action(
 			'default' => false,
 		);
 		$routes = array(
-			'/workers'                                => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_workers', $list ),
-			'/workers/(?P<id>[a-z0-9_-]+)'            => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_worker', array() ),
-			'/workers/(?P<id>[a-z0-9_-]+)/runs'       => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_worker_runs', array() ),
+			'/workers'                                => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_workers', $list ),
+			'/workers/(?P<id>[a-z0-9_-]+)'            => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_worker', array() ),
+			'/workers/(?P<id>[a-z0-9_-]+)/runs'       => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_worker_runs', array() ),
 			'/workers/save'                           => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_worker_save',
 				array(
 					'edit'      => $worker,
@@ -106,12 +106,12 @@ add_action(
 					),
 				),
 			),
-			'/workers/delete'                         => array( 'POST', AW_SRC_CAP, 'sourceweb_rest_worker_delete', array( 'id' => $worker ) ),
-			'/workers/run'                            => array( 'POST', AW_SRC_CAP, 'sourceweb_rest_worker_run', array( 'id' => $worker ) ),
-			'/sources'                                => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_sources', $list ),
+			'/workers/delete'                         => array( 'POST', SOURCEWEB_SRC_CAP, 'sourceweb_rest_worker_delete', array( 'id' => $worker ) ),
+			'/workers/run'                            => array( 'POST', SOURCEWEB_SRC_CAP, 'sourceweb_rest_worker_run', array( 'id' => $worker ) ),
+			'/sources'                                => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_sources', $list ),
 			'/sources/decide'                         => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_sources_decide',
 				array(
 					'action' => array(
@@ -124,7 +124,7 @@ add_action(
 			),
 			'/sources/short'                          => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_sources_short',
 				array(
 					'short' => array(
@@ -133,10 +133,10 @@ add_action(
 					),
 				),
 			),
-			'/sources/one'                            => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_source', array( 'host' => $text ) ),
+			'/sources/one'                            => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_source', array( 'host' => $text ) ),
 			'/sources/save'                           => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_source_save',
 				array(
 					'host'   => $text,
@@ -149,7 +149,7 @@ add_action(
 			),
 			'/sources/feeds'                          => array(
 				'GET',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_feeds',
 				array(
 					'host'   => $text,
@@ -161,7 +161,7 @@ add_action(
 			),
 			'/sources/feeds/decide'                   => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_feeds_decide',
 				array(
 					'op'  => array(
@@ -172,10 +172,10 @@ add_action(
 					'ids' => $hosts,
 				),
 			),
-			'/keywords'                               => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_keywords', $list + array( 'cat' => $text ) ),
+			'/keywords'                               => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_keywords', $list + array( 'cat' => $text ) ),
 			'/keywords/one'                           => array(
 				'GET',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_keyword',
 				array(
 					'id' => array(
@@ -186,7 +186,7 @@ add_action(
 			),
 			'/keywords/save'                          => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_keyword_save',
 				array(
 					'id'         => array(
@@ -214,7 +214,7 @@ add_action(
 			),
 			'/keywords/decide'                        => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_keywords_decide',
 				array(
 					'op'  => array(
@@ -229,10 +229,10 @@ add_action(
 					),
 				),
 			),
-			'/keywords/test'                          => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_keywords_test', array( 'text' => $text ) ),
+			'/keywords/test'                          => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_keywords_test', array( 'text' => $text ) ),
 			'/keywords/settings'                      => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_keywords_settings',
 				array(
 					'enabled'          => $flag,
@@ -243,10 +243,10 @@ add_action(
 					),
 				),
 			),
-			'/keywords/suggestions'                   => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_suggestions', $list ),
+			'/keywords/suggestions'                   => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_suggestions', $list ),
 			'/keywords/suggestions/decide'            => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_suggestions_decide',
 				array(
 					'op' => array(
@@ -259,7 +259,7 @@ add_action(
 			),
 			'/keywords/suggestions/autoapprove'       => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_suggestions_autoapprove',
 				array(
 					'on_score'    => array( 'type' => 'boolean', 'default' => false ),
@@ -269,11 +269,11 @@ add_action(
 					'proven_rank' => array( 'type' => 'integer', 'default' => 10 ),
 				),
 			),
-			'/rules/sections'                         => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_sections', array() ),
-			'/rules/section'                          => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_section', array( 'type' => $text ) ),
+			'/rules/sections'                         => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_sections', array() ),
+			'/rules/section'                          => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_section', array( 'type' => $text ) ),
 			'/rules/section/save'                     => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_rules_section_save',
 				array(
 					'type'       => $text,
@@ -285,10 +285,10 @@ add_action(
 					),
 				),
 			),
-			'/rules/tag'                              => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_tag', array( 'tag' => $text ) ),
+			'/rules/tag'                              => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_tag', array( 'tag' => $text ) ),
 			'/rules/tag/save'                         => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_rules_tag_save',
 				array(
 					'tag'         => $text,
@@ -299,11 +299,11 @@ add_action(
 					'hold_reason' => $text,
 				),
 			),
-			'/rules/tag/delete'                       => array( 'POST', AW_SRC_CAP, 'sourceweb_rest_rules_tag_delete', array( 'tag' => $worker ) ),
-			'/rules/enrich'                           => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_enrich', array() ),
+			'/rules/tag/delete'                       => array( 'POST', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_tag_delete', array( 'tag' => $worker ) ),
+			'/rules/enrich'                           => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_enrich', array() ),
 			'/rules/priority'                         => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_rules_priority',
 				array(
 					'pos' => array(
@@ -312,10 +312,10 @@ add_action(
 					),
 				),
 			),
-			'/rules/field'                            => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_field', array( 'field' => $text ) ),
+			'/rules/field'                            => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_field', array( 'field' => $text ) ),
 			'/rules/field/save'                       => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_rules_field_save',
 				array(
 					'field' => $worker,
@@ -325,10 +325,10 @@ add_action(
 					),
 				),
 			),
-			'/rules/summary'                          => array( 'GET', AW_SRC_CAP, 'sourceweb_rest_rules_summary', array() ),
+			'/rules/summary'                          => array( 'GET', SOURCEWEB_SRC_CAP, 'sourceweb_rest_rules_summary', array() ),
 			'/rules/summary/save'                     => array(
 				'POST',
-				AW_SRC_CAP,
+				SOURCEWEB_SRC_CAP,
 				'sourceweb_rest_rules_summary_save',
 				array(
 					'values' => array(
@@ -366,7 +366,7 @@ const SOURCEWEB_WORKER_STATUS = array(
 /**
  * A reported run as plain text: result and its tone, the failed step, when, how long, the counts.
  *
- * @param array|null $l A run from aw_workers_last() or the runs option.
+ * @param array|null $l A run from sourceweb_workers_last() or the runs option.
  * @return array|null { result, label, tone, when, took, counts }.
  */
 function sourceweb_worker_run_text( $l ) {
@@ -394,7 +394,7 @@ function sourceweb_worker_run_text( $l ) {
 		'label'  => $m[1] . $step . ( ! empty( $l['dry_run'] ) ? ' (dry run)' : '' ),
 		'tone'   => $m[0],
 		'when'   => ! empty( $l['started'] ) ? wp_date( 'j M Y, g:i a', (int) $l['started'] ) : '',
-		'took'   => ! empty( $l['ended'] ) && ! empty( $l['started'] ) && $l['ended'] >= $l['started'] ? aw_workers_duration( $l['ended'] - $l['started'] ) : '',
+		'took'   => ! empty( $l['ended'] ) && ! empty( $l['started'] ) && $l['ended'] >= $l['started'] ? sourceweb_workers_duration( $l['ended'] - $l['started'] ) : '',
 		'counts' => implode( ', ', array_map( fn( $k, $v ) => str_replace( '_', ' ', (string) $k ) . ': ' . $v, array_keys( $counts ), $counts ) ),
 	);
 }
@@ -402,10 +402,10 @@ function sourceweb_worker_run_text( $l ) {
 /**
  * One row of the Workers list.
  *
- * @param array $r A row from aw_workers_status_rows().
+ * @param array $r A row from sourceweb_workers_status_rows().
  */
 function sourceweb_worker_row( array $r ): array {
-	$groups      = aw_worker_groups();
+	$groups      = sourceweb_worker_group_defs();
 	list( $own, $all ) = $r['keys'];
 	if ( ! $own ) {
 		$keys = 'All keys';
@@ -428,8 +428,8 @@ function sourceweb_worker_row( array $r ): array {
 		'file'        => $r['file'],
 		'fileUrl'     => $r['planned'] ? '' : 'https://github.com/wugweb-git/animal-writes-workers/blob/main/.github/workflows/' . rawurlencode( $r['file'] ),
 		'planned'     => (bool) $r['planned'],
-		'schedule'    => $r['planned'] ? ( '' !== $r['schedule'] ? 'Wanted: ' . $r['schedule'] : '' ) : aw_workers_schedule( $r['registry'] + array( 'file' => $r['file'] ) ),
-		'late'        => $r['planned'] ? '' : aw_workers_late_words( $r ),
+		'schedule'    => $r['planned'] ? ( '' !== $r['schedule'] ? 'Wanted: ' . $r['schedule'] : '' ) : sourceweb_workers_schedule( $r['registry'] + array( 'file' => $r['file'] ) ),
+		'late'        => $r['planned'] ? '' : sourceweb_workers_late_words( $r ),
 		'last'        => sourceweb_worker_run_text( $r['last'] ),
 		'lastAt'      => (int) ( $r['last']['started'] ?? 0 ),
 		'status'      => $r['status'],
@@ -437,14 +437,14 @@ function sourceweb_worker_row( array $r ): array {
 		'statusNote'  => $note,
 		'problem'     => in_array( $r['status'], array( 'late', 'failing' ), true ) ? $r['note'] : '',
 		'keys'        => $keys,
-		'canRun'      => aw_workers_can_run( $r ),
+		'canRun'      => sourceweb_workers_can_run( $r ),
 	);
 }
 
 /** The groups for the worker form: [ { value, label } ]. */
 function sourceweb_worker_groups(): array {
 	$out = array();
-	foreach ( aw_worker_groups() as $slug => $g ) {
+	foreach ( sourceweb_worker_group_defs() as $slug => $g ) {
 		$out[] = array(
 			'value' => (string) $slug,
 			'label' => (string) $g[0],
@@ -460,12 +460,12 @@ function sourceweb_worker_groups(): array {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_workers( WP_REST_Request $request ) {
-	$rows  = array_map( 'sourceweb_worker_row', aw_workers_status_rows() );
+	$rows  = array_map( 'sourceweb_worker_row', sourceweb_workers_status_rows() );
 	// Late and failing first, then the registry's order, Planned last (as today's list).
 	$first = array_values( array_filter( $rows, fn( $r ) => in_array( $r['status'], array( 'late', 'failing' ), true ) ) );
 	$rest  = array_values( array_filter( $rows, fn( $r ) => ! in_array( $r['status'], array( 'late', 'failing' ), true ) ) );
 	$views = array();
-	foreach ( aw_worker_groups() as $slug => $g ) {
+	foreach ( sourceweb_worker_group_defs() as $slug => $g ) {
 		$views[ 'group-' . $slug ] = array( $g[0], fn( $r ) => $r['group'] === $slug );
 	}
 	$views['late']    = array( 'Late', fn( $r ) => 'late' === $r['status'] );
@@ -489,7 +489,7 @@ function sourceweb_rest_workers( WP_REST_Request $request ) {
 	);
 	$log = array();
 	foreach ( (array) get_option( 'aw_worker_dispatch_log', array() ) as $e ) {
-		$w     = aw_worker( aw_worker_id( (string) ( $e['file'] ?? '' ) ) );
+		$w     = sourceweb_worker( sourceweb_worker_id( (string) ( $e['file'] ?? '' ) ) );
 		$log[] = array(
 			wp_date( 'j M Y, g:i a', (int) ( $e['at'] ?? 0 ) ),
 			(string) ( $e['user'] ?? '' ),
@@ -511,16 +511,16 @@ function sourceweb_rest_workers( WP_REST_Request $request ) {
 function sourceweb_rest_worker( WP_REST_Request $request ) {
 	$id  = sanitize_key( (string) $request['id'] );
 	$new = 'new' === $id;
-	$w   = $new ? null : aw_worker( $id );
+	$w   = $new ? null : sourceweb_worker( $id );
 	if ( ! $new && ! $w ) {
 		return new WP_Error( 'sourceweb_no_worker', __( 'No such worker.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$keys = array();
-	foreach ( aw_ai_rows() as $r ) {
-		$ws     = aw_ai_row_workers( $r );
+	foreach ( sourceweb_ai_rows() as $r ) {
+		$ws     = sourceweb_ai_row_workers( $r );
 		$keys[] = array(
-			'id'    => aw_ai_key_id( (string) $r['key'] ),
-			'short' => aw_ai_key_short( $r ),
+			'id'    => sourceweb_ai_key_id( (string) $r['key'] ),
+			'short' => sourceweb_ai_key_short( $r ),
 			'scope' => $ws ? sprintf( /* translators: %d: number of workers. */ _n( 'for %d worker', 'for %d workers', count( $ws ), 'sourceweb' ), count( $ws ) ) : __( 'all workers', 'sourceweb' ),
 			'on'    => ! $ws || ( ! $new && in_array( $id, $ws, true ) ),
 		);
@@ -539,13 +539,13 @@ function sourceweb_rest_worker( WP_REST_Request $request ) {
 			'registry' => $reg ? array(
 				'name'     => (string) $reg['name'],
 				'late'     => null === $reg['late_after_h'] ? 'never' : $reg['late_after_h'] . ' h',
-				'schedule' => aw_workers_schedule( $reg + array( 'file' => $w['file'] ) ),
+				'schedule' => sourceweb_workers_schedule( $reg + array( 'file' => $w['file'] ) ),
 				'file'     => $w['file'],
 				'fileUrl'  => 'https://github.com/wugweb-git/animal-writes-workers/blob/main/.github/workflows/' . rawurlencode( $w['file'] ),
 			) : null,
 			'groups'   => sourceweb_worker_groups(),
 			'keys'     => $keys,
-			'addKey'   => aw_ai_keys_url( array( 'edit' => 'new' ) ),
+			'addKey'   => sourceweb_ai_keys_url( array( 'edit' => 'new' ) ),
 		)
 	);
 }
@@ -556,11 +556,11 @@ function sourceweb_rest_worker( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_worker_runs( WP_REST_Request $request ) {
-	$w = aw_worker( (string) $request['id'] );
+	$w = sourceweb_worker( (string) $request['id'] );
 	if ( ! $w ) {
 		return new WP_Error( 'sourceweb_no_worker', __( 'No such worker.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
-	$runs = (array) get_option( aw_workers_option( $w['file'] ), array() );
+	$runs = (array) get_option( sourceweb_workers_option( $w['file'] ), array() );
 	krsort( $runs, SORT_NUMERIC );
 	$ev   = array(
 		'schedule'          => 'scheduled',
@@ -604,7 +604,7 @@ function sourceweb_rest_worker_runs( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_worker_save( WP_REST_Request $request ) {
-	$res = aw_worker_save(
+	$res = sourceweb_worker_save(
 		array(
 			'edit'      => (string) $request['edit'],
 			'id'        => (string) $request['id'],
@@ -639,7 +639,7 @@ function sourceweb_rest_worker_save( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_worker_delete( WP_REST_Request $request ) {
-	$res = aw_worker_delete( (string) $request['id'] );
+	$res = sourceweb_worker_delete( (string) $request['id'] );
 	if ( is_wp_error( $res ) ) {
 		return $res;
 	}
@@ -656,11 +656,11 @@ function sourceweb_rest_worker_delete( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_worker_run( WP_REST_Request $request ) {
-	$w = aw_worker( (string) $request['id'] );
-	if ( ! $w || ! aw_workers_can_run( $w ) ) {
+	$w = sourceweb_worker( (string) $request['id'] );
+	if ( ! $w || ! sourceweb_workers_can_run( $w ) ) {
 		return new WP_Error( 'sourceweb_no_run', __( 'Run now is not available for this worker.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
-	$res = aw_workers_run_now( $w['file'] );
+	$res = sourceweb_workers_run_now( $w['file'] );
 	if ( true !== $res ) {
 		return new WP_Error( 'sourceweb_run_failed', $w['name'] . ': not started — ' . $res->get_error_message(), array( 'status' => 502 ) );
 	}
@@ -680,7 +680,7 @@ function sourceweb_source_views(): array {
 		'code'    => 'Read by code',
 		'relay'   => 'Relay',
 	);
-	if ( aw_sourcing_phase() >= 2 ) { // press sites went with Brave (phase 2)
+	if ( sourceweb_sourcing_phase() >= 2 ) { // press sites went with Brave (phase 2)
 		unset( $v['press'] );
 	}
 	return $v;
@@ -689,7 +689,7 @@ function sourceweb_source_views(): array {
 /**
  * One row of the Sources list, in plain text.
  *
- * @param array $r  A row from aw_sourcing_source_rows().
+ * @param array $r  A row from sourceweb_sourcing_source_rows().
  * @param bool  $si Search Console figures are there.
  */
 function sourceweb_source_row( array $r, bool $si ): array {
@@ -710,7 +710,7 @@ function sourceweb_source_row( array $r, bool $si ): array {
 		'id'         => $r['host'],
 		'title'      => $r['host'],
 		'name'       => $r['name'],
-		'icon'       => aw_src_icon_url( $r['host'] ),
+		'icon'       => sourceweb_src_icon_url( $r['host'] ),
 		'pub'        => (bool) $r['pub'],
 		'kind'       => $r['kind'],
 		'short'      => $r['short'],
@@ -749,7 +749,7 @@ function sourceweb_source_row( array $r, bool $si ): array {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_sources( WP_REST_Request $request ) {
-	$src  = aw_sourcing_source_rows();
+	$src  = sourceweb_sourcing_source_rows();
 	$rows = array();
 	foreach ( $src['rows'] as $r ) {
 		if ( '' !== (string) $r['host'] ) {
@@ -787,7 +787,7 @@ function sourceweb_rest_sources( WP_REST_Request $request ) {
 		)
 	);
 	$out['feedCount'] = array_sum( array_column( $rows, 'feeds' ) );
-	$out['phase']     = aw_sourcing_phase();
+	$out['phase']     = sourceweb_sourcing_phase();
 	$out['si']        = (bool) $src['si'];
 	$out['stale']     = (bool) $src['stale'];
 	return rest_ensure_response( $out );
@@ -800,11 +800,11 @@ function sourceweb_rest_sources( WP_REST_Request $request ) {
  */
 function sourceweb_rest_sources_decide( WP_REST_Request $request ) {
 	$action = (string) $request['action'];
-	$phase  = aw_sourcing_phase();
+	$phase  = sourceweb_sourcing_phase();
 	if ( ( in_array( $action, array( 'press_add', 'press_remove' ), true ) && $phase >= 2 ) || ( in_array( $action, array( 'relay_on', 'relay_off' ), true ) && $phase < 1 ) ) {
 		return new WP_Error( 'sourceweb_not_now', __( 'That action is not available at this phase.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
-	$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', array_map( 'sanitize_text_field', (array) $request['hosts'] ) ) ) );
+	$hosts = array_values( array_filter( array_map( 'sourceweb_sourcing_norm_host', array_map( 'sanitize_text_field', (array) $request['hosts'] ) ) ) );
 	if ( ! $hosts ) {
 		return rest_ensure_response(
 			array(
@@ -813,11 +813,11 @@ function sourceweb_rest_sources_decide( WP_REST_Request $request ) {
 			)
 		);
 	}
-	$pubs                 = aw_publishers(); // read just before the write: the ingest gate updates the same option
+	$pubs                 = sourceweb_publishers(); // read just before the write: the ingest gate updates the same option
 	$before               = $pubs;
-	list( $pubs, $press ) = aw_sourcing_sources_apply( $pubs, $action, $hosts );
+	list( $pubs, $press ) = sourceweb_sourcing_sources_apply( $pubs, $action, $hosts );
 	if ( $pubs !== $before ) {
-		update_option( AW_PUB_OPTION, $pubs, false );
+		update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 	}
 	$changed = $pubs !== $before || $press;
 	return rest_ensure_response(
@@ -836,16 +836,16 @@ function sourceweb_rest_sources_decide( WP_REST_Request $request ) {
 function sourceweb_rest_sources_short( WP_REST_Request $request ) {
 	$in = array();
 	foreach ( (array) $request['short'] as $h => $v ) {
-		$h = aw_sourcing_norm_host( sanitize_text_field( (string) $h ) );
+		$h = sourceweb_sourcing_norm_host( sanitize_text_field( (string) $h ) );
 		if ( '' !== $h && is_scalar( $v ) ) {
 			$in[ $h ] = sanitize_text_field( (string) $v );
 		}
 	}
-	$pubs   = aw_publishers();
+	$pubs   = sourceweb_publishers();
 	$before = $pubs;
-	$pubs   = aw_sourcing_shorts_apply( $pubs, $in );
+	$pubs   = sourceweb_sourcing_shorts_apply( $pubs, $in );
 	if ( $pubs !== $before ) {
-		update_option( AW_PUB_OPTION, $pubs, false );
+		update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 	}
 	return rest_ensure_response(
 		array(
@@ -861,12 +861,12 @@ function sourceweb_rest_sources_short( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_source( WP_REST_Request $request ) {
-	$host  = aw_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) );
+	$host  = sourceweb_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) );
 	$new   = '' === $host;
-	$all   = aw_publishers();
+	$all   = sourceweb_publishers();
 	$rec   = $new ? null : ( $all[ $host ] ?? null );
-	$press = ! $new && in_array( $host, aw_sourcing_press_hosts(), true );
-	$feeds = $new ? array() : ( aw_sourcing_feeds_by_host()[ $host ] ?? array() );
+	$press = ! $new && in_array( $host, sourceweb_sourcing_press_hosts(), true );
+	$feeds = $new ? array() : ( sourceweb_sourcing_feeds_by_host()[ $host ] ?? array() );
 	if ( ! $new && null === $rec && ! $press && ! $feeds ) {
 		return new WP_Error( 'sourceweb_no_source', __( 'No such source.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
@@ -891,7 +891,7 @@ function sourceweb_rest_source( WP_REST_Request $request ) {
 			'label' => 'Not a publisher (press site, relay or feeds only)',
 		);
 	}
-	$last = $new ? null : aw_src_relay_last( aw_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ), $host );
+	$last = $new ? null : sourceweb_src_relay_last( sourceweb_src_relay_index( (array) get_option( 'aw_relay_log', array() ) ), $host );
 	return rest_ensure_response(
 		array(
 			'host'       => $host,
@@ -901,9 +901,9 @@ function sourceweb_rest_source( WP_REST_Request $request ) {
 			'status'     => $pub ? (string) ( $rec['status'] ?? 'neutral' ) : ( $new ? 'block' : 'none' ),
 			'options'    => $options,
 			'press'      => $press,
-			'pressShown' => aw_sourcing_phase() < 2 || $press,
-			'relayShown' => aw_sourcing_phase() >= 1,
-			'relay'      => ! empty( $rec['relay'] ) || ( aw_sourcing_phase() < 1 && ! $new && aw_src_host_in( $host, aw_relay_hosts() ) ),
+			'pressShown' => sourceweb_sourcing_phase() < 2 || $press,
+			'relayShown' => sourceweb_sourcing_phase() >= 1,
+			'relay'      => ! empty( $rec['relay'] ) || ( sourceweb_sourcing_phase() < 1 && ! $new && sourceweb_src_host_in( $host, sourceweb_relay_hosts() ) ),
 			'relayLast'  => $last ? (string) $last['status'] . ' · ' . wp_date( 'j M Y, g:i a', (int) $last['at'] ) : '',
 			'feeds'      => count( $feeds ),
 		)
@@ -916,7 +916,7 @@ function sourceweb_rest_source( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_source_save( WP_REST_Request $request ) {
-	list( $changed, $err ) = aw_sourcing_source_save(
+	list( $changed, $err ) = sourceweb_sourcing_source_save(
 		array(
 			'host'        => (string) $request['host'],
 			'status'      => (string) $request['status'],
@@ -938,7 +938,7 @@ function sourceweb_rest_source_save( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'changed' => $changed,
-			'host'    => aw_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) ),
+			'host'    => sourceweb_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) ),
 			'message' => $changed ? __( 'Saved. The workers use this from their next run.', 'sourceweb' ) : __( 'Nothing changed.', 'sourceweb' ),
 		)
 	);
@@ -950,16 +950,16 @@ function sourceweb_rest_source_save( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_feeds( WP_REST_Request $request ) {
-	$host = aw_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) );
+	$host = sourceweb_sourcing_norm_host( sanitize_text_field( (string) $request['host'] ) );
 	$rows = array();
-	foreach ( (array) ( aw_sources_config()['sources'] ?? array() ) as $s ) {
-		if ( ! is_array( $s ) || empty( $s['id'] ) || ( '' !== $host && aw_src_source_host( $s ) !== $host ) ) {
+	foreach ( (array) ( sourceweb_sources_config()['sources'] ?? array() ) as $s ) {
+		if ( ! is_array( $s ) || empty( $s['id'] ) || ( '' !== $host && sourceweb_src_source_host( $s ) !== $host ) ) {
 			continue;
 		}
 		$t      = (string) ( $s['type'] ?? '' );
 		$rss    = 'rss' === ( $s['kind'] ?? '' );
-		$q      = $rss ? aw_gnews_query( (string) $s['url'] ) : '';
-		$h      = aw_src_source_host( $s );
+		$q      = $rss ? sourceweb_gnews_query( (string) $s['url'] ) : '';
+		$h      = sourceweb_src_source_host( $s );
 		$args   = array(
 			'feed' => $s['id'],
 			'type' => $t,
@@ -973,12 +973,12 @@ function sourceweb_rest_feeds( WP_REST_Request $request ) {
 			'address'  => $q ? $q : (string) ( $s['url'] ?? '' ),
 			'note'     => $q ? 'Google News search' : ( $rss ? '' : (string) ( $s['kind'] ?? '' ) . '; needs code to change' ),
 			'host'     => $h,
-			'byCode'   => 'code' === aw_src_read_by( $s ),
+			'byCode'   => 'code' === sourceweb_src_read_by( $s ),
 			'on'       => ! empty( $s['on'] ),
 			'filter'   => $rss ? ( ! empty( $s['filter'] ) ? 'On' : 'Off' ) : '—',
 			'filterOn' => ! empty( $s['filter'] ),
 			// The feed form, at its own address (the new Sources screen draws it: sourceweb_feed_parts()).
-			'editUrl'  => aw_sourcing_url( 'sources', '' !== $host ? $args + array( 'host' => rawurlencode( $host ) ) : $args ),
+			'editUrl'  => sourceweb_sourcing_url( 'sources', '' !== $host ? $args + array( 'host' => rawurlencode( $host ) ) : $args ),
 		);
 	}
 	$views = array();
@@ -1001,7 +1001,7 @@ function sourceweb_rest_feeds( WP_REST_Request $request ) {
 			'per'   => '' !== $host ? 500 : 50,
 		)
 	);
-	$out['addUrl'] = aw_sourcing_url(
+	$out['addUrl'] = sourceweb_sourcing_url(
 		'sources',
 		array_filter(
 			array(
@@ -1020,7 +1020,7 @@ function sourceweb_rest_feeds( WP_REST_Request $request ) {
  */
 function sourceweb_rest_feeds_decide( WP_REST_Request $request ) {
 	$ids     = array_map( 'sanitize_text_field', (array) $request['ids'] );
-	$changed = $ids && aw_sources_feed_op( (string) $request['op'], $ids );
+	$changed = $ids && sourceweb_sources_feed_op( (string) $request['op'], $ids );
 	return rest_ensure_response(
 		array(
 			'changed' => $changed,
@@ -1033,7 +1033,7 @@ function sourceweb_rest_feeds_decide( WP_REST_Request $request ) {
 
 /** Keywords is on the keyword table (phase 2 and later); before that the routes refuse. */
 function sourceweb_keywords_ready() {
-	return aw_sourcing_kw_on() ? true : new WP_Error( 'aw_kw_not_ready', __( 'The keyword table is not ready yet.', 'sourceweb' ), array( 'status' => 409 ) );
+	return sourceweb_sourcing_kw_on() ? true : new WP_Error( 'aw_kw_not_ready', __( 'The keyword table is not ready yet.', 'sourceweb' ), array( 'status' => 409 ) );
 }
 
 /** Category slug => name. */
@@ -1052,8 +1052,8 @@ function sourceweb_keyword_categories(): array {
 
 /** The two switches and the Press settings, as the forms show them. */
 function sourceweb_keyword_settings(): array {
-	$r = aw_relevance();
-	$p = (array) ( aw_sources_config()['press'] ?? array() );
+	$r = sourceweb_relevance();
+	$p = (array) ( sourceweb_sources_config()['press'] ?? array() );
 	return array(
 		'enabled'          => ! empty( $r['enabled'] ),
 		'gnews_allow_only' => ! empty( $r['gnews_allow_only'] ),
@@ -1067,20 +1067,20 @@ function sourceweb_keyword_settings(): array {
 /**
  * A keyword record as a list row.
  *
- * @param array $r    Record from aw_sourcing_kw_records().
+ * @param array $r    Record from sourceweb_sourcing_kw_records().
  * @param array $cats Category slug => name.
  */
 function sourceweb_keyword_row( array $r, array $cats ): array {
-	$search = $r['searches'] ? 'On: ' . implode( ', ', array_map( fn( $x ) => $x['feed'], $r['searches'] ) ) : ( ( $r['roles'] & ( AW_KW_ROLE_INCLUDE | AW_KW_ROLE_SEARCH ) ) && ! $r['search_on'] ? 'Off' : '—' );
+	$search = $r['searches'] ? 'On: ' . implode( ', ', array_map( fn( $x ) => $x['feed'], $r['searches'] ) ) : ( ( $r['roles'] & ( SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_SEARCH ) ) && ! $r['search_on'] ? 'Off' : '—' );
 	return array(
 		'id'         => (int) $r['id'],
 		'title'      => (string) $r['label'],
 		'lang'       => (string) $r['lang'],
 		'langLabel'  => 'en' === $r['lang'] ? '' : ( 'hi' === $r['lang'] ? 'Hindi' : 'Hinglish' ),
 		'spellings'  => $r['variants'] ? implode( ', ', $r['variants'] ) : '—',
-		'spell'      => implode( ' ', aw_kw_spellings( $r ) ),
-		'roles'      => (int) ( $r['roles'] & AW_KW_WORKER_ROLES ),
-		'rolesText'  => implode( ', ', aw_sourcing_kw_role_names( $r['roles'] ) ),
+		'spell'      => implode( ' ', insightweb_kw_spellings( $r ) ),
+		'roles'      => (int) ( $r['roles'] & SOURCEWEB_KW_WORKER_ROLES ),
+		'rolesText'  => implode( ', ', sourceweb_sourcing_kw_role_names( $r['roles'] ) ),
 		'categories' => array_map(
 			fn( $slug ) => array(
 				'slug' => $slug,
@@ -1109,15 +1109,15 @@ function sourceweb_rest_keywords( WP_REST_Request $request ) {
 	$cats = sourceweb_keyword_categories();
 	$cat  = sanitize_title( (string) $request['cat'] );
 	$cat  = isset( $cats[ $cat ] ) ? $cat : '';
-	$recs = array_values( aw_sourcing_kw_records() );
+	$recs = array_values( sourceweb_sourcing_kw_records() );
 	if ( '' !== $cat ) {
 		$recs = array_values( array_filter( $recs, fn( $r ) => in_array( $cat, (array) $r['categories'], true ) ) );
 	}
 	usort( $recs, fn( $a, $b ) => strcasecmp( $a['label'], $b['label'] ) );
 	$rows  = array_map( fn( $r ) => sourceweb_keyword_row( $r, $cats ) + array( '_r' => $r ), $recs );
-	$views = array( '' => array( __( 'All', 'sourceweb' ), fn( $x ) => aw_sourcing_kw_in_view( $x['_r'], '' ) ) );
-	foreach ( aw_sourcing_kw_views() as $k => $v ) {
-		$views[ $k ] = array( $v[0], fn( $x ) => aw_sourcing_kw_in_view( $x['_r'], $k ) );
+	$views = array( '' => array( __( 'All', 'sourceweb' ), fn( $x ) => sourceweb_sourcing_kw_in_view( $x['_r'], '' ) ) );
+	foreach ( sourceweb_sourcing_kw_views() as $k => $v ) {
+		$views[ $k ] = array( $v[0], fn( $x ) => sourceweb_sourcing_kw_in_view( $x['_r'], $k ) );
 	}
 	$out         = sourceweb_list(
 		$rows,
@@ -1141,16 +1141,16 @@ function sourceweb_rest_keywords( WP_REST_Request $request ) {
 		$out['rows']
 	);
 	$roles       = array();
-	foreach ( aw_sourcing_kw_roles() as $bit => $l ) {
+	foreach ( sourceweb_sourcing_kw_roles() as $bit => $l ) {
 		$roles[] = array(
 			'value' => (int) $bit,
 			'label' => $l,
-			'help'  => aw_sourcing_kw_role_help()[ $bit ],
+			'help'  => sourceweb_sourcing_kw_role_help()[ $bit ],
 		);
 	}
 	$out['roles']      = $roles;
-	$out['include']    = AW_KW_ROLE_INCLUDE;
-	$out['exclude']    = AW_KW_ROLE_EXCLUDE;
+	$out['include']    = SOURCEWEB_KW_ROLE_INCLUDE;
+	$out['exclude']    = SOURCEWEB_KW_ROLE_EXCLUDE;
 	$out['categories'] = array_map(
 		fn( $slug, $name ) => array(
 			'value' => $slug,
@@ -1179,11 +1179,11 @@ function sourceweb_rest_keyword( WP_REST_Request $request ) {
 		'categories' => array(),
 		'sections'   => array(),
 	);
-	foreach ( aw_sourcing_kw_roles() as $bit => $l ) {
+	foreach ( sourceweb_sourcing_kw_roles() as $bit => $l ) {
 		$choices['roles'][] = array(
 			'value' => (int) $bit,
 			'label' => $l,
-			'help'  => aw_sourcing_kw_role_help()[ $bit ],
+			'help'  => sourceweb_sourcing_kw_role_help()[ $bit ],
 		);
 	}
 	foreach ( sourceweb_keyword_categories() as $slug => $name ) {
@@ -1192,7 +1192,7 @@ function sourceweb_rest_keyword( WP_REST_Request $request ) {
 			'label' => $name,
 		);
 	}
-	foreach ( aw_sourcing_kw_sections() as $t => $l ) {
+	foreach ( sourceweb_sourcing_kw_sections() as $t => $l ) {
 		$choices['sections'][] = array(
 			'value' => $t,
 			'label' => $l,
@@ -1213,19 +1213,19 @@ function sourceweb_rest_keyword( WP_REST_Request $request ) {
 			)
 		);
 	}
-	$r = aw_kw_get( $id );
+	$r = insightweb_kw_get( $id );
 	if ( ! $r ) {
 		return new WP_Error( 'rest_not_found', __( 'No such keyword.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
-	$other    = array_values( array_filter( array_map( fn( $b, $l ) => ( $r['roles'] & $b ) && ! isset( aw_sourcing_kw_roles()[ $b ] ) ? $l : '', array_keys( aw_si_roles() ), aw_si_roles() ) ) );
-	$searches = aw_kw_searches( $r, array_column( array_filter( (array) aw_sources_config()['sources'], 'is_array' ), null, 'id' ) );
+	$other    = array_values( array_filter( array_map( fn( $b, $l ) => ( $r['roles'] & $b ) && ! isset( sourceweb_sourcing_kw_roles()[ $b ] ) ? $l : '', array_keys( insightweb_si_roles() ), insightweb_si_roles() ) ) );
+	$searches = sourceweb_kw_searches( $r, array_column( array_filter( (array) sourceweb_sources_config()['sources'], 'is_array' ), null, 'id' ) );
 	return rest_ensure_response(
 		array(
 			'id'         => (int) $r['id'],
 			'label'      => (string) $r['label'],
 			'norm'       => (string) $r['norm'],
 			'variants'   => implode( "\n", $r['variants'] ),
-			'roles'      => array_values( array_filter( array_keys( aw_sourcing_kw_roles() ), fn( $b ) => (bool) ( $r['roles'] & $b ) ) ),
+			'roles'      => array_values( array_filter( array_keys( sourceweb_sourcing_kw_roles() ), fn( $b ) => (bool) ( $r['roles'] & $b ) ) ),
 			'otherRoles' => $other ? implode( ', ', $other ) : __( 'none', 'sourceweb' ),
 			'cats'       => array_values( (array) $r['categories'] ),
 			'sections'   => array_values( (array) $r['sections'] ),
@@ -1253,10 +1253,10 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 	$id   = absint( $request['id'] );
 	$cats = sourceweb_keyword_categories();
 	$set  = array(
-		'roles'      => aw_sourcing_kw_bits( array_map( 'absint', (array) $request['roles'] ) ),
+		'roles'      => sourceweb_sourcing_kw_bits( array_map( 'absint', (array) $request['roles'] ) ),
 		'variants'   => sanitize_textarea_field( (string) $request['variants'] ),
 		'categories' => array_values( array_intersect( array_map( 'sanitize_title', (array) $request['categories'] ), array_keys( $cats ) ) ),
-		'sections'   => array_values( array_intersect( array_map( 'sanitize_key', (array) $request['sections'] ), array_keys( aw_sourcing_kw_sections() ) ) ),
+		'sections'   => array_values( array_intersect( array_map( 'sanitize_key', (array) $request['sections'] ), array_keys( sourceweb_sourcing_kw_sections() ) ) ),
 	);
 	$lang = (string) $request['lang'];
 	if ( ! $id ) {
@@ -1264,9 +1264,9 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 			return new WP_Error( 'aw_kw_roles', __( 'Choose at least one role.', 'sourceweb' ), array( 'status' => 400 ) );
 		}
 		$label = sanitize_text_field( (string) $request['label'] );
-		$r     = aw_sourcing_kw_add( $label, $set + array( 'lang' => $lang ) );
+		$r     = sourceweb_sourcing_kw_add( $label, $set + array( 'lang' => $lang ) );
 		if ( is_wp_error( $r ) ) {
-			$there = aw_kw_id_by_norm( aw_si_norm( $label ) );
+			$there = insightweb_kw_id_by_norm( insightweb_si_norm( $label ) );
 			return new WP_Error( $r->get_error_code(), $r->get_error_message(), array( 'status' => 400, 'id' => (int) $there ) );
 		}
 		return rest_ensure_response(
@@ -1277,7 +1277,7 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 			)
 		);
 	}
-	if ( ! aw_kw_get( $id ) ) {
+	if ( ! insightweb_kw_get( $id ) ) {
 		return new WP_Error( 'rest_not_found', __( 'No such keyword.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$delete = (bool) $request['delete'];
@@ -1290,7 +1290,7 @@ function sourceweb_rest_keyword_save( WP_REST_Request $request ) {
 		$set['search_on'] = $request['search_on'] ? 1 : 0;
 		$set['lang']      = $lang;
 	}
-	$r = aw_sourcing_kw_apply( $id, $set );
+	$r = sourceweb_sourcing_kw_apply( $id, $set );
 	if ( is_wp_error( $r ) ) {
 		return new WP_Error( $r->get_error_code(), $r->get_error_message(), array( 'status' => 400 ) );
 	}
@@ -1319,7 +1319,7 @@ function sourceweb_rest_keywords_decide( WP_REST_Request $request ) {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	list( $n, $errs ) = aw_sourcing_kw_bulk( (string) $request['op'], array_map( 'absint', (array) $request['ids'] ) );
+	list( $n, $errs ) = sourceweb_sourcing_kw_bulk( (string) $request['op'], array_map( 'absint', (array) $request['ids'] ) );
 	return rest_ensure_response(
 		array(
 			'changed' => $n,
@@ -1339,7 +1339,7 @@ function sourceweb_rest_keywords_test( WP_REST_Request $request ) {
 	if ( '' === $text ) {
 		return new WP_Error( 'rest_invalid_param', __( 'Paste a headline.', 'sourceweb' ), array( 'status' => 400 ) );
 	}
-	$v = aw_relevance_verdict( $text );
+	$v = sourceweb_relevance_verdict( $text );
 	return rest_ensure_response(
 		array(
 			'kept' => (bool) $v[0],
@@ -1363,19 +1363,19 @@ function sourceweb_rest_keywords_settings( WP_REST_Request $request ) {
 		require_once ABSPATH . 'wp-admin/includes/template.php'; // The sanitizers add the "Saved" notice.
 	}
 	$before = sourceweb_keyword_settings();
-	$rel    = aw_relevance_switches_sanitize(
+	$rel    = sourceweb_relevance_switches_sanitize(
 		array(
 			'_aw_tab'          => 'keywords',
 			'enabled'          => (bool) $request['enabled'],
 			'gnews_allow_only' => (bool) $request['gnews_allow_only'],
 		)
 	);
-	if ( is_array( $rel ) && $rel !== get_option( AW_REL_OPTION ) ) {
-		update_option( AW_REL_OPTION, $rel );
+	if ( is_array( $rel ) && $rel !== get_option( SOURCEWEB_REL_OPTION ) ) {
+		update_option( SOURCEWEB_REL_OPTION, $rel );
 	}
 	$press = (array) $request['press'];
 	if ( $press ) {
-		$c = aw_sources_sanitize(
+		$c = sourceweb_sources_sanitize(
 			array(
 				'_aw_tab'    => 'press',
 				'enabled'    => ! empty( $press['enabled'] ),
@@ -1407,7 +1407,7 @@ function sourceweb_rest_suggestions( WP_REST_Request $request ) {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	$all = aw_sourcing_suggestions();
+	$all = sourceweb_sourcing_suggestions();
 	if ( null === $all ) {
 		return rest_ensure_response(
 			array(
@@ -1465,7 +1465,7 @@ function sourceweb_rest_suggestions( WP_REST_Request $request ) {
 		)
 	);
 	$out['none']        = false;
-	$out['autoapprove'] = function_exists( 'aw_sourcing_push_autoapprove' ) ? aw_sourcing_push_autoapprove() : null;
+	$out['autoapprove'] = function_exists( 'sourceweb_sourcing_push_autoapprove' ) ? sourceweb_sourcing_push_autoapprove() : null;
 	return rest_ensure_response( $out );
 }
 
@@ -1479,7 +1479,7 @@ function sourceweb_rest_suggestions_decide( WP_REST_Request $request ) {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	$n = aw_sourcing_suggest_apply( (string) $request['op'], array_map( 'sanitize_text_field', (array) $request['qs'] ) );
+	$n = sourceweb_sourcing_suggest_apply( (string) $request['op'], array_map( 'sanitize_text_field', (array) $request['qs'] ) );
 	return rest_ensure_response(
 		array(
 			'changed' => $n,
@@ -1499,10 +1499,10 @@ function sourceweb_rest_suggestions_autoapprove( WP_REST_Request $request ) {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	if ( ! function_exists( 'aw_sourcing_push_autoapprove_save' ) ) {
+	if ( ! function_exists( 'sourceweb_sourcing_push_autoapprove_save' ) ) {
 		return new WP_Error( 'aw_push_not_ready', __( 'Pushed keywords are not set up yet.', 'sourceweb' ), array( 'status' => 409 ) );
 	}
-	$saved = aw_sourcing_push_autoapprove_save(
+	$saved = sourceweb_sourcing_push_autoapprove_save(
 		array(
 			'on_score'    => (bool) $request['on_score'],
 			'min_score'   => (int) $request['min_score'],
@@ -1523,7 +1523,7 @@ function sourceweb_rest_suggestions_autoapprove( WP_REST_Request $request ) {
 
 /** Rules is one tab from the phase 3 migration; before it the routes refuse. */
 function sourceweb_rules_ready() {
-	return aw_rules_live() ? true : new WP_Error( 'aw_rules_not_ready', __( 'Rules is not set up yet (the phase 3 migration).', 'sourceweb' ), array( 'status' => 409 ) );
+	return sourceweb_rules_live() ? true : new WP_Error( 'aw_rules_not_ready', __( 'Rules is not set up yet (the phase 3 migration).', 'sourceweb' ), array( 'status' => 409 ) );
 }
 
 /**
@@ -1550,8 +1550,8 @@ function sourceweb_rest_rules_sections() {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	$secs  = (array) ( aw_sources_config()['sections'] ?? array() );
-	$sums  = aw_rules_summary_by_type();
+	$secs  = (array) ( sourceweb_sources_config()['sections'] ?? array() );
+	$sums  = sourceweb_rules_summary_by_type();
 	$what  = array(
 		'news'        => __( 'News items', 'sourceweb' ),
 		'legal'       => __( 'Library items', 'sourceweb' ),
@@ -1560,7 +1560,7 @@ function sourceweb_rest_rules_sections() {
 		'press'       => __( 'Press coverage', 'sourceweb' ),
 	);
 	$rows  = array();
-	foreach ( aw_rules_sections() as $type => $def ) {
+	foreach ( sourceweb_rules_sections() as $type => $def ) {
 		$cats   = array_values( (array) ( $secs[ $type ]['categories'] ?? array() ) );
 		$tags   = array_values( (array) ( $secs[ $type ]['tags'] ?? array() ) );
 		$sum    = $sums[ $type ] ?? array();
@@ -1575,9 +1575,9 @@ function sourceweb_rest_rules_sections() {
 			'summary'    => $sum ? sprintf( '%d–%d words', (int) $sum['min_words'], (int) $sum['max_words'] ) . ( '' !== (string) ( $sum['inherit'] ?? '' ) ? ' (inherits News)' : '' ) : '—',
 		);
 	}
-	$labs  = aw_rules_section_labels();
+	$labs  = sourceweb_rules_section_labels();
 	$rules = array();
-	foreach ( aw_rules_tag_rules() as $slug => $r ) {
+	foreach ( sourceweb_rules_tag_rules() as $slug => $r ) {
 		$slug = (string) $slug;
 		$term = get_term_by( 'slug', $slug, 'post_tag' );
 		if ( ! $term && 0 === strpos( $slug, 'campaign-' ) && taxonomy_exists( ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : '' ) ) ) {
@@ -1649,11 +1649,11 @@ function sourceweb_rest_rules_section( WP_REST_Request $request ) {
 		return $ready;
 	}
 	$type  = sanitize_key( (string) $request['type'] );
-	$types = aw_rules_section_labels();
+	$types = sourceweb_rules_section_labels();
 	if ( ! isset( $types[ $type ] ) ) {
 		return new WP_Error( 'rest_not_found', __( 'No such section.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
-	$sec                 = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
+	$sec                 = (array) ( sourceweb_sources_config()['sections'][ $type ] ?? array() );
 	$cat                 = array_values( array_map( 'strval', (array) ( $sec['categories'] ?? array() ) ) );
 	$tag                 = array_values( array_map( 'strval', (array) ( $sec['tags'] ?? array() ) ) );
 	list( $cats, $cgone ) = sourceweb_rules_term_choices( 'category', $cat );
@@ -1687,7 +1687,7 @@ function sourceweb_rest_rules_section_save( WP_REST_Request $request ) {
 		return $ready;
 	}
 	$type = sanitize_key( (string) $request['type'] );
-	if ( ! isset( aw_rules_sections()[ $type ] ) ) {
+	if ( ! isset( sourceweb_rules_sections()[ $type ] ) ) {
 		return new WP_Error( 'rest_not_found', __( 'No such section.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$ids  = function ( array $slugs, string $tax ) {
@@ -1701,7 +1701,7 @@ function sourceweb_rest_rules_section_save( WP_REST_Request $request ) {
 		return $out;
 	};
 	$gone = (array) $request['gone'];
-	$done = aw_sourcing_section_save(
+	$done = sourceweb_sourcing_section_save(
 		$type,
 		array(
 			'categories' => $ids( (array) $request['categories'], 'category' ),
@@ -1712,7 +1712,7 @@ function sourceweb_rest_rules_section_save( WP_REST_Request $request ) {
 			'tags'       => array_map( 'sanitize_title', array_map( 'strval', (array) ( $gone['tags'] ?? array() ) ) ),
 		)
 	);
-	$label = aw_rules_section_labels()[ $type ];
+	$label = sourceweb_rules_section_labels()[ $type ];
 	return rest_ensure_response(
 		array(
 			'done'    => $done,
@@ -1733,7 +1733,7 @@ function sourceweb_rest_rules_tag( WP_REST_Request $request ) {
 		return $ready;
 	}
 	$slug  = sanitize_title( (string) $request['tag'] );
-	$rules = aw_rules_tag_rules();
+	$rules = sourceweb_rules_tag_rules();
 	if ( '' !== $slug && ! isset( $rules[ $slug ] ) ) {
 		return new WP_Error( 'rest_not_found', __( 'No such tag rule.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
@@ -1818,8 +1818,8 @@ function sourceweb_rest_rules_tag_save( WP_REST_Request $request ) {
 	foreach ( array( 'any', 'unless', 'hold_reason' ) as $k ) {
 		$in[ $k ] = sanitize_textarea_field( (string) $request[ $k ] );
 	}
-	$in['hold'] = wp_check_invalid_utf8( (string) $request['hold'] ); // regular expressions: checked to compile (aw_rules_tag_rule_clean), as today's form
-	return sourceweb_rules_answer( aw_rules_tag_save( sanitize_title( (string) $request['tag'] ), sanitize_title( (string) $request['original'] ), $in ) );
+	$in['hold'] = wp_check_invalid_utf8( (string) $request['hold'] ); // regular expressions: checked to compile (sourceweb_rules_tag_rule_clean), as today's form
+	return sourceweb_rules_answer( sourceweb_rules_tag_save( sanitize_title( (string) $request['tag'] ), sanitize_title( (string) $request['original'] ), $in ) );
 }
 
 /**
@@ -1833,7 +1833,7 @@ function sourceweb_rest_rules_tag_delete( WP_REST_Request $request ) {
 		return $ready;
 	}
 	$tag = sanitize_title( (string) $request['tag'] );
-	$res = aw_rules_tag_delete( $tag );
+	$res = sourceweb_rules_tag_delete( $tag );
 	return sourceweb_rules_answer( 'none' === $res[0] ? array( 'none', $tag ) : $res );
 }
 
@@ -1843,8 +1843,8 @@ function sourceweb_rest_rules_enrich() {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	$order = aw_enrich_field_rules()['priority'];
-	$names = array_map( fn( $s ) => $s[0], aw_enrich_sources() );
+	$order = sourceweb_enrich_field_rules()['priority'];
+	$names = array_map( fn( $s ) => $s[0], sourceweb_enrich_sources() );
 	$prio  = array();
 	foreach ( $names as $k => $label ) {
 		$pos    = array_search( $k, $order, true );
@@ -1855,14 +1855,14 @@ function sourceweb_rest_rules_enrich() {
 		);
 	}
 	$fields = array();
-	foreach ( aw_rules_field_rows() as $k => $row ) {
+	foreach ( sourceweb_rules_field_rows() as $k => $row ) {
 		$r        = $row['rule'];
 		$why      = (string) ( $row['why'] ?? '' );
 		$fields[] = array(
 			'id'       => $k,
 			'set'      => ! empty( $row['set'] ),
 			'title'    => $row['label'],
-			'note'     => $row['set'] || isset( aw_enrich_fields()[ $k ] ) ? '' : __( 'Added in the listing field group: off until its rule is set.', 'sourceweb' ),
+			'note'     => $row['set'] || isset( sourceweb_enrich_fields()[ $k ] ) ? '' : __( 'Added in the listing field group: off until its rule is set.', 'sourceweb' ),
 			'group'    => $row['group'],
 			'store'    => $row['store'] . ( $row['acf'] ? '' : ' (kept by code)' ),
 			'on'       => '' !== $why ? 'Off: ' . $why : ( $r['on'] ? 'On' : 'Off' ),
@@ -1896,7 +1896,7 @@ function sourceweb_rest_rules_priority( WP_REST_Request $request ) {
 	foreach ( (array) $request['pos'] as $k => $v ) {
 		$pos[ sanitize_key( (string) $k ) ] = '' === trim( (string) $v ) ? '' : absint( $v );
 	}
-	return sourceweb_rules_answer( aw_rules_priority_save( $pos ) );
+	return sourceweb_rules_answer( sourceweb_rules_priority_save( $pos ) );
 }
 
 /**
@@ -1910,13 +1910,13 @@ function sourceweb_rest_rules_field( WP_REST_Request $request ) {
 		return $ready;
 	}
 	$field = sanitize_key( (string) $request['field'] );
-	$rows  = aw_rules_field_rows();
+	$rows  = sourceweb_rules_field_rows();
 	if ( ! isset( $rows[ $field ] ) ) {
 		return new WP_Error( 'rest_not_found', __( 'No such field.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
 	$row     = $rows[ $field ];
 	$sources = array();
-	foreach ( aw_enrich_sources() as $k => $s ) {
+	foreach ( sourceweb_enrich_sources() as $k => $s ) {
 		$sources[] = array(
 			'value' => $k,
 			'label' => $s[0],
@@ -1978,7 +1978,7 @@ function sourceweb_rest_rules_field_save( WP_REST_Request $request ) {
 		'sources'  => array_map( 'sanitize_key', array_map( 'strval', (array) ( $raw['sources'] ?? array() ) ) ),
 		'apply'    => sanitize_key( (string) ( $raw['apply'] ?? '' ) ),
 	);
-	$res = aw_rules_field_save( sanitize_key( (string) $request['field'] ), $in );
+	$res = sourceweb_rules_field_save( sanitize_key( (string) $request['field'] ), $in );
 	if ( 'nosuch' === $res[0] ) {
 		return new WP_Error( 'rest_not_found', __( 'No such field.', 'sourceweb' ), array( 'status' => 404 ) );
 	}
@@ -2018,10 +2018,10 @@ function sourceweb_rest_rules_summary() {
 	if ( is_wp_error( $ready ) ) {
 		return $ready;
 	}
-	$r     = aw_summary_rules();
-	$below = aw_summary_below_counts();
+	$r     = sourceweb_summary_rules();
+	$below = sourceweb_summary_below_counts();
 	$secs  = array();
-	foreach ( aw_rules_summary_by_type() as $pt => $sec ) {
+	foreach ( sourceweb_rules_summary_by_type() as $pt => $sec ) {
 		$own    = isset( $sec['alias'] );
 		$b      = $own ? ( $below[ $sec['alias'] ] ?? array( 0, 0 ) ) : null;
 		$secs[] = array(
@@ -2098,7 +2098,7 @@ function sourceweb_rest_rules_summary_save( WP_REST_Request $request ) {
 		$in['sections'][ sanitize_key( (string) $pt ) ] = $one;
 	}
 	$before = get_option( AW_SUMMARY_RULES_OPTION );
-	$new    = aw_summary_rules_sanitize( $in );
+	$new    = sourceweb_summary_rules_sanitize( $in );
 	$saved  = $new !== $before;
 	if ( $saved ) {
 		update_option( AW_SUMMARY_RULES_OPTION, $new, false );

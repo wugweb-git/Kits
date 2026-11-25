@@ -17,7 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Links tab list table.
  */
-class AW_SI_Links_Table extends WP_List_Table {
+class InsightWeb_SI_Links_Table extends WP_List_Table {
 
 	/** Set up the list: one row per link. */
 	public function __construct() {
@@ -75,13 +75,13 @@ class AW_SI_Links_Table extends WP_List_Table {
 
 	/** Hide, Unhide and Set type. */
 	protected function get_bulk_actions() {
-		return aw_si_link_actions();
+		return insightweb_si_link_actions();
 	}
 
 	/** Views: All (not hidden), one per type, Unsorted, Hidden. Spam rows show only in Spam, even when unhidden. */
 	private function views_sql(): array {
 		$out = array( 'all' => array( __( 'All', 'insightweb' ), "hidden = 0 AND type <> 'spam'" ) );
-		foreach ( aw_si_link_types() as $key => $label ) {
+		foreach ( insightweb_si_link_types() as $key => $label ) {
 			$out[ $key ] = array( $label, 'spam' === $key ? "type = 'spam'" : "type = '{$key}' AND hidden = 0" );
 		}
 		$out['unsorted'] = array( __( 'Unsorted', 'insightweb' ), "type = '' AND hidden = 0" );
@@ -98,12 +98,12 @@ class AW_SI_Links_Table extends WP_List_Table {
 	/** Views with counts. */
 	protected function get_views() {
 		global $wpdb;
-		$t   = aw_si_table( 'links' );
+		$t   = insightweb_si_table( 'links' );
 		$out = array();
 		$cur = $this->view();
 		foreach ( $this->views_sql() as $key => $v ) {
-			$n           = aw_si_ready() ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$v[1]}", $t ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed view conditions (views_sql()); the table is %i.
-			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, aw_si_url( 'links' ) ) ) . '"' . ( $key === $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $v[0] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
+			$n           = insightweb_si_ready() ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$v[1]}", $t ) ) : 0; // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed view conditions (views_sql()); the table is %i.
+			$out[ $key ] = '<a href="' . esc_url( add_query_arg( 'view', $key, insightweb_si_url( 'links' ) ) ) . '"' . ( $key === $cur ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $v[0] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
 	}
@@ -112,11 +112,11 @@ class AW_SI_Links_Table extends WP_List_Table {
 	public function prepare_items() {
 		global $wpdb;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), $this->get_primary_column_name() );
-		if ( ! aw_si_ready() ) {
+		if ( ! insightweb_si_ready() ) {
 			$this->items = array();
 			return;
 		}
-		$t     = aw_si_table( 'links' );
+		$t     = insightweb_si_table( 'links' );
 		$where = array( $this->views_sql()[ $this->view() ][1] );
 		$args  = array();
 		$s     = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- read-only search.
@@ -163,7 +163,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 	/**
 	 * Nonce'd link for a row action.
 	 *
-	 * @param string $action A key of aw_si_link_actions().
+	 * @param string $action A key of insightweb_si_link_actions().
 	 * @param int    $id     Row.
 	 */
 	private function action_url( string $action, int $id ): string {
@@ -173,7 +173,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 					'aw_si_link' => $action,
 					'link_id[]'  => $id,
 				),
-				aw_si_url( 'links' )
+				insightweb_si_url( 'links' )
 			),
 			'bulk-links'
 		);
@@ -193,7 +193,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 			$out .= '<br><span class="description">' . esc_html( (string) $item->note ) . '</span>';
 		}
 		$act  = (int) $item->hidden ? 'link_unhide' : 'link_hide';
-		$acts = array( $act => '<a href="' . esc_url( $this->action_url( $act, (int) $item->id ) ) . '">' . esc_html( aw_si_link_actions()[ $act ] ) . '</a>' );
+		$acts = array( $act => '<a href="' . esc_url( $this->action_url( $act, (int) $item->id ) ) . '">' . esc_html( insightweb_si_link_actions()[ $act ] ) . '</a>' );
 		return $out . $this->row_actions( $acts );
 	}
 
@@ -204,7 +204,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 	 */
 	protected function column_linked_url( $item ) {
 		$url  = (string) $item->linked_url;
-		$path = aw_si_path( $url );
+		$path = insightweb_si_path( $url );
 		return '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( '' !== $path ? $path : $url ) . '</a>';
 	}
 
@@ -232,7 +232,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 	 * @param object $item Row.
 	 */
 	protected function column_dr( $item ) {
-		$dr = function_exists( 'aw_si_link_dr' ) ? aw_si_link_dr( (string) $item->domain ) : null;
+		$dr = function_exists( 'insightweb_si_link_dr' ) ? insightweb_si_link_dr( (string) $item->domain ) : null;
 		if ( ! $dr ) {
 			return '–';
 		}
@@ -245,7 +245,7 @@ class AW_SI_Links_Table extends WP_List_Table {
 	 * @param object $item Row.
 	 */
 	protected function column_type( $item ) {
-		$out = esc_html( aw_si_link_types()[ (string) $item->type ] ?? __( 'Unsorted', 'insightweb' ) );
+		$out = esc_html( insightweb_si_link_types()[ (string) $item->type ] ?? __( 'Unsorted', 'insightweb' ) );
 		if ( (int) $item->hidden ) {
 			$out .= '<br><span class="description">' . esc_html__( 'Hidden', 'insightweb' ) . '</span>';
 		}

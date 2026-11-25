@@ -2,7 +2,7 @@
 /**
  * SourceWeb's own capability, manage_sourceweb. It opens SourceWeb's screens and routes (Overview,
  * To review, Enrichment review; AW_REVIEW_CAP and AW_ENRICH_CAP point at it). The settings, reports and jobs screens
- * keep AW_SRC_CAP (manage_options), administrators only, as before.
+ * keep SOURCEWEB_SRC_CAP (manage_options), administrators only, as before.
  *
  * Nobody loses access:
  * - Granted to administrator and to every role that holds edit_others_posts (the old AW_REVIEW_CAP and AW_ENRICH_CAP),

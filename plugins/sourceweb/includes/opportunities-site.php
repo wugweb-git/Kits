@@ -4,7 +4,7 @@
  * (Wildlife SOS sits behind Cloudflare, which refuses GitHub Actions but answers this host).
  *
  * Same rules as the worker (animal-writes-workers, sources.yaml): factual listing only (title, organisation,
- * place, link), published directly, duplicates skipped by source URL. Items go through aw_ingest().
+ * place, link), published directly, duplicates skipped by source URL. Items go through sourceweb_ingest().
  *
  * @package aw-sourcing
  */
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Site-fetched sources. */
-function aw_site_opportunity_sources() {
+function sourceweb_site_opportunity_sources() {
 	return array(
 		array(
 			'name' => 'Wildlife SOS careers',
@@ -32,7 +32,7 @@ function aw_site_opportunity_sources() {
  * @param string $html Page HTML.
  * @return array<int, array{title: string, place: string}>
  */
-function aw_parse_sjm( $html ) {
+function sourceweb_parse_sjm( $html ) {
 	$doc = new DOMDocument();
 	libxml_use_internal_errors( true );
 	$doc->loadHTML( '<?xml encoding="utf-8"?>' . $html );
@@ -51,15 +51,15 @@ function aw_parse_sjm( $html ) {
 }
 
 /** Fetch every site source and ingest new roles. Returns counts per source. */
-function aw_fetch_site_opportunities() {
+function sourceweb_fetch_site_opportunities() {
 	$report = array();
-	foreach ( aw_site_opportunity_sources() as $src ) {
+	foreach ( sourceweb_site_opportunity_sources() as $src ) {
 		$res = wp_remote_get( $src['url'], array( 'timeout' => 30, 'user-agent' => 'SourceWebWorkers/1.0 (+' . home_url( '/' ) . ')' ) );
 		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
 			$report[ $src['name'] ] = 'fetch failed';
 			continue;
 		}
-		$roles = 'sjm' === $src['kind'] ? aw_parse_sjm( wp_remote_retrieve_body( $res ) ) : array();
+		$roles = 'sjm' === $src['kind'] ? sourceweb_parse_sjm( wp_remote_retrieve_body( $res ) ) : array();
 		$new   = 0;
 		foreach ( $roles as $r ) {
 			$summary = $src['org'] . ': ' . $r['title'] . '.' . ( $r['place'] ? ' Location: ' . $r['place'] . '.' : '' ) . " Details and how to apply are on the organisation's page.";
@@ -77,7 +77,7 @@ function aw_fetch_site_opportunities() {
 					'opportunity_type' => $src['type'],
 				)
 			);
-			$out = aw_ingest( $req );
+			$out = sourceweb_ingest( $req );
 			if ( $out instanceof WP_REST_Response && 'created' === ( $out->get_data()['status'] ?? '' ) ) {
 				$new++;
 			}
@@ -87,4 +87,4 @@ function aw_fetch_site_opportunities() {
 	update_option( 'aw_site_opportunities_last', array( 'at' => wp_date( 'c' ), 'report' => $report ), false );
 	return $report;
 }
-// Not fetched (owner, 9 Oct 2026): add_action( 'aw_daily', 'aw_fetch_site_opportunities' ); turns it back on.
+// Not fetched (owner, 9 Oct 2026): add_action( 'aw_daily', 'sourceweb_fetch_site_opportunities' ); turns it back on.

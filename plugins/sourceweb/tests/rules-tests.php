@@ -19,14 +19,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 $p3     = json_decode( file_get_contents( __DIR__ . '/fixtures/phase3_live_sample.json' ), true );
 $seedfx = json_decode( file_get_contents( __DIR__ . '/fixtures/enrich_field_rules_seed.json' ), true );
 $acf_gs = array_map( fn( $f ) => json_decode( file_get_contents( $f ), true ), glob( dirname( __DIR__, 2 ) . '/directoryweb/acf-json/group_aw_listing*.json' ) );
-$acf    = array( 'fields' => aw_enrich_listing_groups_fields( $acf_gs, 'group_aw_listing' ) );
+$acf    = array( 'fields' => sourceweb_enrich_listing_groups_fields( $acf_gs, 'group_aw_listing' ) );
 $fields = array_keys( $p3['enrich_fields'] );
 $p3_order = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing' ); // The order of aw_post_types().
 
 // ---- sections from the post types ----
-$types = aw_rules_section_types( $p3['public_types'], array( 'aw_press' ), $p3_order );
+$types = sourceweb_rules_section_types( $p3['public_types'], array( 'aw_press' ), $p3_order );
 aw_t( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'aw_press' ) === $types, 'sections: the 6 public content types (no page, no attachment) plus aw_press, which opts in' );
-aw_t( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'aw_reports', 'aw_press' ) === aw_rules_section_types( array_merge( $p3['public_types'], array( 'aw_reports' ) ), array( 'aw_press' ), $p3_order ), 'a new public content type is a section by itself' );
+aw_t( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing', 'aw_reports', 'aw_press' ) === sourceweb_rules_section_types( array_merge( $p3['public_types'], array( 'aw_reports' ) ), array( 'aw_press' ), $p3_order ), 'a new public content type is a section by itself' );
 
 // ---- the migration plan on live data ----
 $src  = array(
@@ -34,7 +34,7 @@ $src  = array(
 	'topic_tags' => $p3['topic_tags'],
 	'live'       => true,
 );
-$plan = aw_rules_phase3_plan( $src, $p3['summary_rules'], false, $types, $fields );
+$plan = sourceweb_rules_phase3_plan( $src, $p3['summary_rules'], false, $types, $fields );
 aw_t( 6 === count( $p3['sections'] ) && 7 === count( $plan['sources']['sections'] ), 'section rules: 6 before, 7 after' );
 aw_t(
 	array( 'aw_press' ) === $plan['added'] && array(
@@ -85,7 +85,7 @@ aw_t(
 	'news → aw_news, library → aw_legal, research → post'
 );
 aw_t( 'news' === $plan['summary']['sections']['aw_news']['alias'] && 100 === $plan['summary']['sections']['aw_news']['min_words'] && 300 === $plan['summary']['sections']['post']['max_words'], 'alias kept, word counts kept (News 100–200, Research 160–300)' );
-aw_t( aw_rules_summary_legacy( $plan['summary']['sections'] ) === $p3['summary_rules']['sections'], 'summary sections read by their old names: identical to live (sentence counts too)' );
+aw_t( sourceweb_rules_summary_legacy( $plan['summary']['sections'] ) === $p3['summary_rules']['sections'], 'summary sections read by their old names: identical to live (sentence counts too)' );
 $g_old = $p3['summary_rules'];
 $g_new = $plan['summary'];
 unset( $g_old['sections'], $g_new['sections'] );
@@ -98,12 +98,12 @@ aw_t( $seedfx['field_rules'] === $plan['field_rules']['fields'], 'every seeded f
 aw_t( 2 === $plan['field_rules']['fields']['phone']['multi'] && 'awbi' === $plan['field_rules']['fields']['pincode']['official'] && $plan['field_rules']['fields']['head']['ai'] && $plan['field_rules']['fields']['hours']['invite'] && $plan['field_rules']['fields']['linkedin']['social'], 'MULTI, OFFICIAL_AWBI, AI_FIELDS, INVITE_FIELDS, SOCIAL_FIELDS in the seed' );
 
 // Running it twice changes nothing; a stored field rule is kept.
-$again = aw_rules_phase3_plan( $plan['sources'], $plan['summary'], $plan['field_rules'], $types, $fields );
+$again = sourceweb_rules_phase3_plan( $plan['sources'], $plan['summary'], $plan['field_rules'], $types, $fields );
 aw_t( $again['sources'] === $plan['sources'] && $again['summary'] === $plan['summary'] && ! $again['added'] && ! $again['rekeyed'] && ! $again['seeded'], 'migrating twice changes nothing' );
-aw_t( false === aw_rules_phase3_plan( $src, false, false, $types, $fields )['summary'], 'no saved summary rules: nothing to rekey' );
+aw_t( false === sourceweb_rules_phase3_plan( $src, false, false, $types, $fields )['summary'], 'no saved summary rules: nothing to rekey' );
 
 // Verify: 0 differences; lost or changed values found.
-$cmp = aw_rules_phase3_compare( $src, $p3['summary_rules'], $plan['sources'], $plan['summary'], $plan['field_rules'], $types, $fields );
+$cmp = sourceweb_rules_phase3_compare( $src, $p3['summary_rules'], $plan['sources'], $plan['summary'], $plan['field_rules'], $types, $fields );
 aw_t( array() === $cmp['diffs'], 'verify: 0 differences (' . implode( '; ', $cmp['diffs'] ) . ')' );
 aw_t( 4 === count( $cmp['planned'] ), 'verify lists the 4 planned changes' );
 $bad = $plan;
@@ -111,15 +111,15 @@ $bad['sources']['sections']['aw_news']['tags'] = array( 'x' );
 unset( $bad['sources']['sections']['post'] );
 $bad['summary']['sections']['aw_legal']['max_words'] = 250;
 $bad['field_rules']['fields']['phone']['multi']      = 1;
-$cmp = aw_rules_phase3_compare( $src, $p3['summary_rules'], $bad['sources'], $bad['summary'], $bad['field_rules'], $types, $fields );
+$cmp = sourceweb_rules_phase3_compare( $src, $p3['summary_rules'], $bad['sources'], $bad['summary'], $bad['field_rules'], $types, $fields );
 aw_t( 5 === count( $cmp['diffs'] ), 'verify finds a changed and a lost section rule, a missing section, a changed summary rule and a changed field rule: ' . implode( '; ', $cmp['diffs'] ) );
 
 // Rollback (undo) gives back the options of before, keeping a section rule filled in since.
-$undo = aw_rules_phase3_undo( $plan['sources'], $plan['summary'], $plan['added'] );
+$undo = sourceweb_rules_phase3_undo( $plan['sources'], $plan['summary'], $plan['added'] );
 aw_t( $undo['sources'] === $src && $undo['summary'] === $p3['summary_rules'] && array( 'aw_press' ) === $undo['removed'], 'undo: section rules and summary rules as before' );
 $filled = $plan['sources'];
 $filled['sections']['aw_press']['categories'][] = 'wildlife';
-aw_t( array( 'aw_press' ) === aw_rules_phase3_undo( $filled, $plan['summary'], $plan['added'] )['kept'], 'undo keeps a section rule filled in since' );
+aw_t( array( 'aw_press' ) === sourceweb_rules_phase3_undo( $filled, $plan['summary'], $plan['added'] )['kept'], 'undo keeps a section rule filled in since' );
 
 // ---- summary rules by post type ----
 $v1     = $p3['summary_rules']['sections'];
@@ -132,7 +132,7 @@ $labels = array(
 	'aw_listing'     => 'Directory',
 	'aw_press'       => 'Media & PR',
 );
-$by     = aw_rules_summary_resolve( $v1, $plan['summary']['sections'], $labels );
+$by     = sourceweb_rules_summary_resolve( $v1, $plan['summary']['sections'], $labels );
 aw_t( array_keys( $labels ) === array_keys( $by ), 'by_type: one rule per section' );
 aw_t( 'news' === $by['aw_news']['alias'] && 'research' === $by['post']['alias'] && 160 === $by['post']['min_words'], 'the old sections by their post type' );
 aw_t( 'aw_news' === $by['aw_press']['inherit'] && 100 === $by['aw_press']['min_words'] && 200 === $by['aw_campaign']['max_words'] && 'Media & PR' === $by['aw_press']['label'], 'a section without its own rule inherits News' );
@@ -145,23 +145,23 @@ $own = $plan['summary']['sections'] + array(
 		'max_words' => 80,
 	),
 );
-$by2 = aw_rules_summary_resolve( $v1, $own, $labels );
+$by2 = sourceweb_rules_summary_resolve( $v1, $own, $labels );
 aw_t( '' === $by2['aw_campaign']['inherit'] && 80 === $by2['aw_campaign']['max_words'] && $by2['aw_campaign']['structure'] === $v1['news']['structure'], 'a section with its own rule: its values, the rest from News' );
 
 // ---- the Directory schema from the listing field groups ----
 $orders = array_map( fn( $g ) => (int) $g['menu_order'], $acf_gs );
 sort( $orders );
-aw_t( 8 === count( $acf_gs ) && range( 0, 7 ) === $orders && $acf['fields'] === aw_enrich_listing_groups_fields( array_reverse( $acf_gs ), 'group_aw_listing' ), 'listing fields: 8 groups, read in menu_order whatever the file order' );
+aw_t( 8 === count( $acf_gs ) && range( 0, 7 ) === $orders && $acf['fields'] === sourceweb_enrich_listing_groups_fields( array_reverse( $acf_gs ), 'group_aw_listing' ), 'listing fields: 8 groups, read in menu_order whatever the file order' );
 aw_t( 'aw_email' === $acf['fields'][0]['name'] && 'field_aw_listing_msg_gov_state' === end( $acf['fields'] )['key'] && 66 === count( $acf['fields'] ), 'listing fields: Contact first, the government records message last, 61 fields and 5 messages' );
-aw_t( array( 'x' ) === array_column( aw_enrich_listing_groups_fields( array( array( 'key' => 'group_aw_news', 'fields' => array( array( 'name' => 'n' ) ) ), array( 'key' => 'group_aw_listing_b', 'menu_order' => 1, 'fields' => array( array( 'name' => 'x' ) ) ) ), 'group_aw_listing' ), 'name' ), 'listing fields: other groups left out' );
-$schema = aw_enrich_schema_build( $acf['fields'], $p3['enrich_fields'], 'group_aw_listing', $p3['sections']['aw_listing']['tags'], array( 'rescue' => 'Rescue' ) );
+aw_t( array( 'x' ) === array_column( sourceweb_enrich_listing_groups_fields( array( array( 'key' => 'group_aw_news', 'fields' => array( array( 'name' => 'n' ) ) ), array( 'key' => 'group_aw_listing_b', 'menu_order' => 1, 'fields' => array( array( 'name' => 'x' ) ) ) ), 'group_aw_listing' ), 'name' ), 'listing fields: other groups left out' );
+$schema = sourceweb_enrich_schema_build( $acf['fields'], $p3['enrich_fields'], 'group_aw_listing', $p3['sections']['aw_listing']['tags'], array( 'rescue' => 'Rescue' ) );
 $mapped = array_filter( $schema['fields'], fn( $f ) => (bool) $f['enrich'] );
 $direct = array_filter( $p3['enrich_fields'], fn( $e ) => in_array( $e[1], array_column( $schema['fields'], 'name' ), true ) );
 aw_t( 30 === count( $direct ) && 12 === count( $schema['special'] ), 'schema: 30 of the 42 enrichment fields stored in an ACF field, 12 in a special store' );
 aw_t( 33 === count( $mapped ) && array( 'phone', 'whatsapp', 'emergency' ) === array_column( $schema['fields'], 'enrich', 'name' )['aw_phones'], 'the special stores Phone numbers, Opening hours and Photos are their listing fields too' );
 aw_t( array( 'phone', 'whatsapp', 'emergency', 'pincode', 'hours', 'logo', 'photos', 'description', 'services', 'closed', 'place', 'merge_into' ) === array_column( $schema['special'], 'field' ), 'the 12 kept by code' );
 aw_t( 29 === count( $schema['listing_types'] ) && ! in_array( 'tab', array_column( $schema['fields'], 'type' ), true ), 'listing types; tabs and messages left out' );
-$rows = aw_enrich_field_rule_rows( $schema, $p3['enrich_fields'], $plan['field_rules']['fields'] );
+$rows = sourceweb_enrich_field_rule_rows( $schema, $p3['enrich_fields'], $plan['field_rules']['fields'] );
 $only = array_filter( $rows, fn( $r ) => 'Listing field' === $r['group'] );
 aw_t( 42 + count( $only ) === count( $rows ) && count( $only ) === count( $schema['fields'] ) - 33, 'field rules: 42 enrichment fields plus every listing field no enrichment fills (' . count( $only ) . ')' );
 aw_t( ! array_filter( $only, fn( $r ) => $r['rule']['on'] || $r['set'] ), 'listing fields without an enrichment field: rule off, not set' );
@@ -171,13 +171,13 @@ $acf2[] = array(
 	'label' => 'TikTok',
 	'type'  => 'url',
 );
-$rows2  = aw_enrich_field_rule_rows( aw_enrich_schema_build( $acf2, $p3['enrich_fields'], 'g', array(), array() ), $p3['enrich_fields'], $plan['field_rules']['fields'] );
+$rows2  = sourceweb_enrich_field_rule_rows( sourceweb_enrich_schema_build( $acf2, $p3['enrich_fields'], 'g', array(), array() ), $p3['enrich_fields'], $plan['field_rules']['fields'] );
 aw_t( isset( $rows2['aw_tiktok'] ) && false === $rows2['aw_tiktok']['rule']['on'], 'a field added in wp-admin shows in Field rules with its rule off' );
 aw_t( ! isset( $rows2['aw_gallery'] ) && ! isset( $rows2['aw_email'] ) && isset( $rows2['photos'] ) && isset( $rows2['email'] ), 'a field filled by enrichment shows once, under its enrichment key' );
 
 // ---- field rules from a form ----
 $sk = $p3['source_keys'];
-$r  = aw_enrich_rule_clean(
+$r  = sourceweb_enrich_rule_clean(
 	'founded',
 	array(
 		'apply'    => 'both',
@@ -186,18 +186,18 @@ $r  = aw_enrich_rule_clean(
 		'sources'  => array( 'wikidata', 'x' ),
 	),
 	$sk,
-	aw_enrich_rule_seed( 'founded' )
+	sourceweb_enrich_rule_seed( 'founded' )
 );
 aw_t( 'empty' === $r['apply'] && '' === $r['official'] && 5 === $r['multi'] && array( 'wikidata' ) === $r['sources'], 'a field rule is checked: no "both" for a one-value field, a known official source, at most 5 values, known sources' );
-aw_t( aw_enrich_rule_clean( 'email', aw_enrich_rule_seed( 'email' ), $sk, aw_enrich_rule_seed( 'email' ) ) === aw_enrich_rule_seed( 'email' ), 'a field rule saved unchanged is unchanged' );
+aw_t( sourceweb_enrich_rule_clean( 'email', sourceweb_enrich_rule_seed( 'email' ), $sk, sourceweb_enrich_rule_seed( 'email' ) ) === sourceweb_enrich_rule_seed( 'email' ), 'a field rule saved unchanged is unchanged' );
 $pos = array();
 foreach ( AW_ENRICH_SEED_PRIORITY as $i => $k ) {
 	$pos[ $k ] = (string) ( $i + 1 );
 }
-aw_t( AW_ENRICH_SEED_PRIORITY === aw_enrich_priority_from_positions( $pos, $sk, AW_ENRICH_SEED_PRIORITY ), 'trust order saved unchanged is unchanged' );
+aw_t( AW_ENRICH_SEED_PRIORITY === sourceweb_enrich_priority_from_positions( $pos, $sk, AW_ENRICH_SEED_PRIORITY ), 'trust order saved unchanged is unchanged' );
 $pos['osm'] = '1';
-aw_t( 'osm' === aw_enrich_priority_from_positions( $pos, $sk, AW_ENRICH_SEED_PRIORITY )[0], 'trust order: a source moved to 1 comes first' );
-aw_t( AW_ENRICH_SEED_PRIORITY === aw_enrich_priority_from_positions( array(), $sk, AW_ENRICH_SEED_PRIORITY ), 'trust order: nothing numbered keeps the order' );
+aw_t( 'osm' === sourceweb_enrich_priority_from_positions( $pos, $sk, AW_ENRICH_SEED_PRIORITY )[0], 'trust order: a source moved to 1 comes first' );
+aw_t( AW_ENRICH_SEED_PRIORITY === sourceweb_enrich_priority_from_positions( array(), $sk, AW_ENRICH_SEED_PRIORITY ), 'trust order: nothing numbered keeps the order' );
 
 // ---- the apply rule: the seeded rules decide exactly as the code did before phase 3 ----
 $before = function ( $field, $conf, $protected, $empty, $phones, $alt, $place ) {
@@ -231,7 +231,7 @@ foreach ( $fields as $f ) {
 					foreach ( array( false, true ) as $alt ) {
 						foreach ( array( false, true ) as $place ) {
 							$want = $before( $f, $conf, $prot, in_array( $f, array( 'whatsapp', 'emergency' ), true ) ? true : $empty, $phones, $alt, $place );
-							$got  = aw_enrich_mode_decide( $f, $plan['field_rules']['fields'][ $f ]['apply'], $conf, $prot, fn() => in_array( $f, array( 'whatsapp', 'emergency' ), true ) ? true : $empty, fn() => $phones, fn() => $alt, fn() => $place );
+							$got  = sourceweb_enrich_mode_decide( $f, $plan['field_rules']['fields'][ $f ]['apply'], $conf, $prot, fn() => in_array( $f, array( 'whatsapp', 'emergency' ), true ) ? true : $empty, fn() => $phones, fn() => $alt, fn() => $place );
 							$same = $same && $want === $got;
 							++$n;
 						}
@@ -242,15 +242,15 @@ foreach ( $fields as $f ) {
 	}
 }
 aw_t( $same, "apply rules: the seeded field rules decide as the code did, in all $n cases" );
-aw_t( 'queue' === aw_enrich_mode_decide( 'email', 'review', 'high', false, fn() => true, fn() => false, fn() => true, fn() => true ), 'apply rule "review": always a person' );
-aw_t( 'queue' === aw_enrich_mode_decide( 'phone', 'empty', 'high', false, fn() => false, fn() => true, fn() => true, fn() => true ), 'apply rule "empty" on phones: a second number waits' );
+aw_t( 'queue' === sourceweb_enrich_mode_decide( 'email', 'review', 'high', false, fn() => true, fn() => false, fn() => true, fn() => true ), 'apply rule "review": always a person' );
+aw_t( 'queue' === sourceweb_enrich_mode_decide( 'phone', 'empty', 'high', false, fn() => false, fn() => true, fn() => true, fn() => true ), 'apply rule "empty" on phones: a second number waits' );
 
-aw_t( 'queue' === aw_enrich_mode_decide( 'merge_into', 'empty', 'high', false, fn() => true, fn() => false, fn() => true, fn() => true ), 'merge_into: always a person, whatever its rule says' );
-aw_t( 'review' === aw_enrich_rule_clean( 'closed', array( 'apply' => 'empty' ), $sk, aw_enrich_rule_seed( 'closed' ) )['apply'], 'closed and merge_into cannot be given another apply rule' );
+aw_t( 'queue' === sourceweb_enrich_mode_decide( 'merge_into', 'empty', 'high', false, fn() => true, fn() => false, fn() => true, fn() => true ), 'merge_into: always a person, whatever its rule says' );
+aw_t( 'review' === sourceweb_enrich_rule_clean( 'closed', array( 'apply' => 'empty' ), $sk, sourceweb_enrich_rule_seed( 'closed' ) )['apply'], 'closed and merge_into cannot be given another apply rule' );
 
 // ---- tag rules ----
 $live_rule        = $p3['topic_tags']['campaign-lab-animals-2026'];
-list( $tr, $bad ) = aw_rules_tag_rule_clean(
+list( $tr, $bad ) = sourceweb_rules_tag_rule_clean(
 	array(
 		'any'         => implode( "\n", $live_rule['any'] ),
 		'hold'        => implode( "\r\n", $live_rule['hold'] ),
@@ -259,21 +259,21 @@ list( $tr, $bad ) = aw_rules_tag_rule_clean(
 	)
 );
 aw_t( $tr === $live_rule && ! $bad, 'the lab campaign tag rule saved unchanged from the form is unchanged' );
-list( $tr, $bad ) = aw_rules_tag_rule_clean(
+list( $tr, $bad ) = sourceweb_rules_tag_rule_clean(
 	array(
 		'any'  => 'a',
 		'hold' => "ok\nbad(",
 	)
 );
 aw_t( array( 'bad(' ) === $bad && array( 'ok' ) === $tr['hold'] && ! isset( $tr['hold_reason'] ), 'a hold pattern that does not compile is refused' );
-aw_t( ! aw_rules_pattern_ok( '\\h+lab' ) && ! aw_rules_pattern_ok( 'foo++' ) && ! aw_rules_pattern_ok( '(?>a)' ), 'PCRE-only patterns the workers cannot read are refused' );
-aw_t( aw_rules_pattern_ok( 'a\\~b' ) && aw_rules_pattern_ok( 'laboratory animals\\)? rules,? 2026' ) && aw_rules_pattern_ok( 'a~b' ), 'patterns with ~ and the live hold pattern are accepted' );
-aw_t( ! aw_rules_pattern_ok( '\\x{1F600}' ) && ! aw_rules_pattern_ok( '\\e' ) && ! aw_rules_pattern_ok( '\\cA' ) && ! aw_rules_pattern_ok( '(?<n>a)' ) && ! aw_rules_pattern_ok( '(?R)' ), 'escapes and groups Python re cannot compile are refused (Codex, #77)' );
-aw_t( aw_rules_pattern_ok( '\\x41\\d+\\s\\bG\\.S\\.R\\.' ) && aw_rules_pattern_ok( '\\\\d' ) && aw_rules_pattern_ok( '(?P<n>a)(?<=b)(?<!c)' ), 'Python-compatible escapes and lookbehinds are accepted' );
+aw_t( ! sourceweb_rules_pattern_ok( '\\h+lab' ) && ! sourceweb_rules_pattern_ok( 'foo++' ) && ! sourceweb_rules_pattern_ok( '(?>a)' ), 'PCRE-only patterns the workers cannot read are refused' );
+aw_t( sourceweb_rules_pattern_ok( 'a\\~b' ) && sourceweb_rules_pattern_ok( 'laboratory animals\\)? rules,? 2026' ) && sourceweb_rules_pattern_ok( 'a~b' ), 'patterns with ~ and the live hold pattern are accepted' );
+aw_t( ! sourceweb_rules_pattern_ok( '\\x{1F600}' ) && ! sourceweb_rules_pattern_ok( '\\e' ) && ! sourceweb_rules_pattern_ok( '\\cA' ) && ! sourceweb_rules_pattern_ok( '(?<n>a)' ) && ! sourceweb_rules_pattern_ok( '(?R)' ), 'escapes and groups Python re cannot compile are refused (Codex, #77)' );
+aw_t( sourceweb_rules_pattern_ok( '\\x41\\d+\\s\\bG\\.S\\.R\\.' ) && sourceweb_rules_pattern_ok( '\\\\d' ) && sourceweb_rules_pattern_ok( '(?P<n>a)(?<=b)(?<!c)' ), 'Python-compatible escapes and lookbehinds are accepted' );
 $en_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/enrichment.php' );
-$pp_at  = strpos( $en_src, 'function aw_enrich_policy_pass' );
+$pp_at  = strpos( $en_src, 'function sourceweb_enrich_policy_pass' );
 $pp_src = false === $pp_at ? '' : substr( $en_src, $pp_at, 2500 );
-aw_t( false !== strpos( $pp_src, 'aw_enrich_field_rule( $r[\'field\'] )' ) && false !== strpos( $pp_src, 'aw_enrich_allowed_sources(' ), 'the policy pass rechecks the field rule and its sources before applying queued rows (Codex, #77)' );
+aw_t( false !== strpos( $pp_src, 'sourceweb_enrich_field_rule( $r[\'field\'] )' ) && false !== strpos( $pp_src, 'sourceweb_enrich_allowed_sources(' ), 'the policy pass rechecks the field rule and its sources before applying queued rows (Codex, #77)' );
 
 // ---- listing fields added in wp-admin: which can be enabled, and how their values are written ----
 // WordPress's sanitizers, as plain stand-ins (no WordPress here).
@@ -297,19 +297,19 @@ if ( ! function_exists( 'sanitize_email' ) ) {
 		return filter_var( $v, FILTER_VALIDATE_EMAIL ) ? (string) $v : '';
 	}
 }
-aw_t( '' === aw_enrich_acf_not_writable( 'url' ) && '' !== aw_enrich_acf_not_writable( 'repeater' ) && '' !== aw_enrich_acf_not_writable( 'gallery' ), 'text-like ACF fields can be enabled; repeaters and galleries cannot' );
-aw_t( 'https://tiktok.com/@bc' === aw_enrich_acf_value( 'url', ' https://tiktok.com/@bc ' ) && '' === aw_enrich_acf_value( 'url', 'javascript:x' ), 'URL values cleaned' );
-aw_t( '20261025' === aw_enrich_acf_value( 'date_picker', '2026-10-25' ) && '' === aw_enrich_acf_value( 'date_picker', '2026-02-30' ), 'dates stored as ACF does (Ymd), impossible dates refused' );
-aw_t( '12' === aw_enrich_acf_value( 'number', '12' ) && '' === aw_enrich_acf_value( 'number', 'twelve' ) && '' === aw_enrich_acf_value( 'repeater', 'x' ), 'numbers checked; other types never written' );
+aw_t( '' === sourceweb_enrich_acf_not_writable( 'url' ) && '' !== sourceweb_enrich_acf_not_writable( 'repeater' ) && '' !== sourceweb_enrich_acf_not_writable( 'gallery' ), 'text-like ACF fields can be enabled; repeaters and galleries cannot' );
+aw_t( 'https://tiktok.com/@bc' === sourceweb_enrich_acf_value( 'url', ' https://tiktok.com/@bc ' ) && '' === sourceweb_enrich_acf_value( 'url', 'javascript:x' ), 'URL values cleaned' );
+aw_t( '20261025' === sourceweb_enrich_acf_value( 'date_picker', '2026-10-25' ) && '' === sourceweb_enrich_acf_value( 'date_picker', '2026-02-30' ), 'dates stored as ACF does (Ymd), impossible dates refused' );
+aw_t( '12' === sourceweb_enrich_acf_value( 'number', '12' ) && '' === sourceweb_enrich_acf_value( 'number', 'twelve' ) && '' === sourceweb_enrich_acf_value( 'repeater', 'x' ), 'numbers checked; other types never written' );
 $acf3   = $acf['fields'];
 $acf3[] = array( 'name' => 'aw_tiktok', 'label' => 'TikTok', 'type' => 'url' );
 $acf3[] = array( 'name' => 'aw_branches', 'label' => 'Branches', 'type' => 'repeater' );
-$set    = $plan['field_rules']['fields'] + array( 'aw_tiktok' => array_merge( aw_enrich_rule_off(), array( 'on' => true, 'apply' => 'empty' ) ), 'aw_branches' => array_merge( aw_enrich_rule_off(), array( 'on' => true ) ) );
-$rows3  = aw_enrich_field_rule_rows( aw_enrich_schema_build( $acf3, $p3['enrich_fields'], 'g', array(), array() ), $p3['enrich_fields'], $set );
+$set    = $plan['field_rules']['fields'] + array( 'aw_tiktok' => array_merge( sourceweb_enrich_rule_off(), array( 'on' => true, 'apply' => 'empty' ) ), 'aw_branches' => array_merge( sourceweb_enrich_rule_off(), array( 'on' => true ) ) );
+$rows3  = sourceweb_enrich_field_rule_rows( sourceweb_enrich_schema_build( $acf3, $p3['enrich_fields'], 'g', array(), array() ), $p3['enrich_fields'], $set );
 aw_t( $rows3['aw_tiktok']['rule']['on'] && '' === $rows3['aw_tiktok']['why'], 'a URL field added in wp-admin can be switched on' );
 aw_t( false === $rows3['aw_branches']['rule']['on'] && '' !== $rows3['aw_branches']['why'], 'a repeater added in wp-admin stays off, with the reason shown' );
 $g = array( array( 'key' => 'google_places' ), array( 'key' => 'website' ) );
-aw_t( array() === aw_enrich_allowed_sources( array( array( 'key' => 'google_places' ) ), array( 'website' ) ) && array( array( 'key' => 'website' ) ) === aw_enrich_allowed_sources( $g, array( 'website' ) ), 'a source allow list without Google drops Google (place ID and Maps link too)' );
-aw_t( $g === aw_enrich_allowed_sources( $g, array() ) && 2 === count( aw_enrich_allowed_sources( $g, array( 'google_places', 'website' ) ) ), 'no allow list keeps every source; an allow list naming Google keeps it' );
+aw_t( array() === sourceweb_enrich_allowed_sources( array( array( 'key' => 'google_places' ) ), array( 'website' ) ) && array( array( 'key' => 'website' ) ) === sourceweb_enrich_allowed_sources( $g, array( 'website' ) ), 'a source allow list without Google drops Google (place ID and Maps link too)' );
+aw_t( $g === sourceweb_enrich_allowed_sources( $g, array() ) && 2 === count( sourceweb_enrich_allowed_sources( $g, array( 'google_places', 'website' ) ) ), 'no allow list keeps every source; an allow list naming Google keeps it' );
 $sra_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/summary-rules-admin.php' );
 aw_t( false === strpos( $sra_src, 'saved (no change)' ), 'an unchanged summary rules save writes no change-log entry (round trip)' );

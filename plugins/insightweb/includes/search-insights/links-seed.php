@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The seed rows. */
-function aw_si_links_seed_data(): array {
+function insightweb_si_links_seed_data(): array {
 	$home = 'https://animalwrites.in/';
 	$lab  = 'https://animalwrites.in/campaigns/lab-animals-rules-2026/';
 	$gsc  = 'Search Console Links, read 26 Oct 2026';
@@ -110,9 +110,9 @@ function aw_si_links_seed_data(): array {
  * The seed batches: option that marks a batch done => its rows.
  * A new batch gets its own option, so batches already done never run again.
  */
-function aw_si_links_seed_batches(): array {
+function insightweb_si_links_seed_batches(): array {
 	return array(
-		'aw_si_links_seeded'          => 'aw_si_links_seed_data',
+		'aw_si_links_seeded'          => 'insightweb_si_links_seed_data',
 		'aw_si_links_seeded_20261102' => fn() => (array) require __DIR__ . '/data/links-2026-11-02.php',
 	);
 }
@@ -123,7 +123,7 @@ function aw_si_links_seed_batches(): array {
  * @param bool $force Run again even when marked done or after Delete data (a repeat only moves dates).
  * @return array Counts, or an empty array when every batch is already seeded.
  */
-function aw_si_links_seed( bool $force = false ): array {
+function insightweb_si_links_seed( bool $force = false ): array {
 	// After "Delete Search Insights data" (aw_si_off is set) the built-in links stay deleted; only --force brings them back.
 	if ( ! $force && get_option( 'aw_si_off' ) ) {
 		return array();
@@ -133,7 +133,7 @@ function aw_si_links_seed( bool $force = false ): array {
 		return array();
 	}
 	$count = array();
-	foreach ( aw_si_links_seed_batches() as $option => $rows ) {
+	foreach ( insightweb_si_links_seed_batches() as $option => $rows ) {
 		if ( ! $force && get_option( $option ) ) {
 			continue;
 		}
@@ -143,7 +143,7 @@ function aw_si_links_seed( bool $force = false ): array {
 			'failed'  => 0,
 		);
 		foreach ( $rows() as $row ) {
-			$n = aw_si_link_put( (array) $row );
+			$n = insightweb_si_link_put( (array) $row );
 			if ( 1 === $n ) {
 				++$c['added'];
 			} elseif ( $n >= 0 ) {

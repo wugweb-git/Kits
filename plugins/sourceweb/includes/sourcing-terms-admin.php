@@ -15,13 +15,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * One section's ticked terms, applied to the lists. A list whose set of slugs did not change is left as stored.
  *
- * @param array  $c      The lists (aw_sources_config()).
+ * @param array  $c      The lists (sourceweb_sources_config()).
  * @param string $type   Post type.
  * @param array  $ticked categories|tags => term IDs.
  * @param array  $gone   categories|tags => ticked stored slugs that have no term.
  * @return array{0: array, 1: string[]} The lists, and what changed in words (empty when nothing changed).
  */
-function aw_sourcing_section_apply( array $c, $type, array $ticked, array $gone ) {
+function sourceweb_sourcing_section_apply( array $c, $type, array $ticked, array $gone ) {
 	$what = array();
 	foreach ( array( 'categories' => 'category', 'tags' => 'post_tag' ) as $k => $tax ) {
 		$old = array_values( array_map( 'strval', (array) ( $c['sections'][ $type ][ $k ] ?? array() ) ) );
@@ -50,33 +50,33 @@ function aw_sourcing_section_apply( array $c, $type, array $ticked, array $gone 
 			$c['sections'][ $type ] = array( 'categories' => array(), 'tags' => array() );
 		}
 		$c['sections'][ $type ][ $k ] = $new;
-		$what[]                       = aw_src_diff( $type . ' ' . $k, $old, $new );
+		$what[]                       = sourceweb_src_diff( $type . ' ' . $k, $old, $new );
 	}
 	return array( $c, array_values( array_filter( $what ) ) );
 }
 
 /**
- * Save one section's lists (aw_sourcing_section_apply()), logged; a Save with no change writes nothing.
+ * Save one section's lists (sourceweb_sourcing_section_apply()), logged; a Save with no change writes nothing.
  *
  * @param string $type   Post type.
  * @param array  $ticked categories|tags => term IDs.
  * @param array  $gone   categories|tags => ticked stored slugs that have no term.
  * @return string saved or none.
  */
-function aw_sourcing_section_save( $type, array $ticked, array $gone ) {
-	$was              = (array) ( aw_sources_config()['sections'][ $type ] ?? array() );
-	list( $c, $what ) = aw_sourcing_section_apply( aw_sources_config(), $type, $ticked, $gone );
+function sourceweb_sourcing_section_save( $type, array $ticked, array $gone ) {
+	$was              = (array) ( sourceweb_sources_config()['sections'][ $type ] ?? array() );
+	list( $c, $what ) = sourceweb_sourcing_section_apply( sourceweb_sources_config(), $type, $ticked, $gone );
 	if ( ! $what ) {
 		return 'none';
 	}
 	update_option( 'aw_sources', $c, false );
-	aw_src_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
+	sourceweb_src_log( 'sections', implode( ' · ', $what ), $was, $c['sections'][ $type ] ); // old → new (phase 3: Rules → Section rules)
 	return 'saved';
 }
 
 /*
  * The old Categories and Sections forms posted the whole list to options.php (aw_sources[_aw_tab] = categories or
- * sections). A copy still open in another browser tab must not replace the option with its text: aw_sources_sanitize()
+ * sections). A copy still open in another browser tab must not replace the option with its text: sourceweb_sources_sanitize()
  * hands such a post here, and it changes nothing (the option is then not written).
  */
 add_filter( 'aw_sources_save_categories', fn( $c ) => $c );

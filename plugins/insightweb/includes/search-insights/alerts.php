@@ -16,10 +16,10 @@ const AW_SI_ALERTS_CRON = 'aw_si_alerts';
 const AW_SI_ALERTS_KEYS = array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
 
 /** The feed addresses that are set and look like Google Alerts feeds. */
-function aw_si_alerts_feeds(): array {
+function insightweb_si_alerts_feeds(): array {
 	$out = array();
 	foreach ( AW_SI_ALERTS_KEYS as $name ) {
-		$url = trim( aw_si_key( $name ) );
+		$url = trim( insightweb_si_key( $name ) );
 		if ( preg_match( '#^https://www\.google\.[a-z.]+/alerts/feeds/#', $url ) ) {
 			$out[] = $url;
 		}
@@ -30,7 +30,7 @@ function aw_si_alerts_feeds(): array {
 add_filter(
 	'aw_si_sources',
 	function ( $s ) {
-		if ( aw_si_alerts_feeds() ) {
+		if ( insightweb_si_alerts_feeds() ) {
 			$s['alerts'] = array(
 				'label' => __( 'Google Alerts (mentions)', 'insightweb' ),
 				'every' => DAY_IN_SECONDS,
@@ -59,7 +59,7 @@ add_action(
  *
  * @param string $link Link from the feed.
  */
-function aw_si_alerts_target( string $link ): string {
+function insightweb_si_alerts_target( string $link ): string {
 	$q = array();
 	wp_parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $q );
 	return ! empty( $q['url'] ) && false !== strpos( (string) wp_parse_url( $link, PHP_URL_HOST ), 'google.' ) ? (string) $q['url'] : $link;
@@ -70,13 +70,13 @@ function aw_si_alerts_target( string $link ): string {
  *
  * @param bool $dry Read, do not write.
  */
-function aw_si_alerts_run( bool $dry = false ): array {
-	$feeds = aw_si_alerts_feeds();
-	if ( ! $feeds || get_option( 'aw_si_off' ) || ! aw_si_ready() ) {
+function insightweb_si_alerts_run( bool $dry = false ): array {
+	$feeds = insightweb_si_alerts_feeds();
+	if ( ! $feeds || get_option( 'aw_si_off' ) || ! insightweb_si_ready() ) {
 		return array( 'off' => true );
 	}
 	if ( ! $dry ) {
-		aw_si_run_start( 'alerts' );
+		insightweb_si_run_start( 'alerts' );
 	}
 	require_once ABSPATH . WPINC . '/feed.php';
 	$rep  = array(
@@ -93,7 +93,7 @@ function aw_si_alerts_run( bool $dry = false ): array {
 			continue;
 		}
 		foreach ( (array) $feed->get_items( 0, 50 ) as $item ) {
-			$from = aw_si_alerts_target( (string) $item->get_permalink() );
+			$from = insightweb_si_alerts_target( (string) $item->get_permalink() );
 			if ( '' === $from || wp_parse_url( $from, PHP_URL_HOST ) === $home ) {
 				continue; // Our own pages are not mentions.
 			}
@@ -102,7 +102,7 @@ function aw_si_alerts_run( bool $dry = false ): array {
 				continue;
 			}
 			$seen = $item->get_date( 'Y-m-d' );
-			$n    = aw_si_link_put(
+			$n    = insightweb_si_link_put(
 				array(
 					'from_url'   => $from,
 					'linked_url' => home_url( '/' ),
@@ -120,10 +120,10 @@ function aw_si_alerts_run( bool $dry = false ): array {
 		return $rep;
 	}
 	if ( ! $rep['rows'] && count( $rep['warnings'] ) === count( $feeds ) ) {
-		aw_si_run_fail( 'alerts', (string) $rep['warnings'][0] );
+		insightweb_si_run_fail( 'alerts', (string) $rep['warnings'][0] );
 	} else {
-		aw_si_run_ok( 'alerts', $rep );
+		insightweb_si_run_ok( 'alerts', $rep );
 	}
 	return $rep;
 }
-add_action( AW_SI_ALERTS_CRON, fn() => aw_si_alerts_run() );
+add_action( AW_SI_ALERTS_CRON, fn() => insightweb_si_alerts_run() );

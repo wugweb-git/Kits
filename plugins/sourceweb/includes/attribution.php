@@ -40,7 +40,7 @@ function sourceweb_source_meta( $id, $field ) {
  */
 function sourceweb_publisher_of( $id ) {
 	$url  = (string) sourceweb_source_meta( $id, 'url' );
-	$host = aw_host( $url );
+	$host = sourceweb_host( $url );
 	$name = (string) sourceweb_source_meta( $id, 'name' );
 	$name = preg_replace( '/\s+[–-]\s+(Energy & Environment|Circulars|Notifications)$/u', '', $name ); // feed labels are not the publisher
 	return array( $name ? $name : $host, $host );
@@ -53,7 +53,7 @@ function sourceweb_publisher_of( $id ) {
  * @return string
  */
 function sourceweb_favicon_url( $host ) {
-	$p  = aw_publishers();
+	$p  = sourceweb_publishers();
 	$id = (int) ( $p[ $host ]['icon'] ?? 0 );
 	return $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '';
 }
@@ -168,7 +168,7 @@ function sourceweb_fetch_favicons_run() {
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	require_once ABSPATH . 'wp-admin/includes/media.php';
-	$pubs = aw_publishers();
+	$pubs = sourceweb_publishers();
 	$done = 0;
 	foreach ( $pubs as $host => $p ) {
 		if ( array_key_exists( 'icon', $p ) || ! (int) ( $p['count'] ?? 0 ) || $done >= 10 ) {
@@ -197,7 +197,7 @@ function sourceweb_fetch_favicons_run() {
 		$pubs[ $host ]['icon'] = $att; // 0 = tried, use the letter fallback
 	}
 	if ( $done ) {
-		update_option( AW_PUB_OPTION, $pubs, false );
+		update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 	}
 }
 
@@ -271,54 +271,3 @@ function sourceweb_news_type() {
 
 /* ---------- The old names (Animal Writes Core, InsightWeb and SourceWeb's own files still call them) ---------- */
 
-if ( ! function_exists( 'aw_publisher_of' ) ) {
-	/**
-	 * Alias of sourceweb_publisher_of().
-	 *
-	 * @param int $id Post ID.
-	 */
-	function aw_publisher_of( $id ) {
-		return sourceweb_publisher_of( $id );
-	}
-}
-if ( ! function_exists( 'aw_favicon_url' ) ) {
-	/**
-	 * Alias of sourceweb_favicon_url().
-	 *
-	 * @param string $host Host.
-	 */
-	function aw_favicon_url( $host ) {
-		return sourceweb_favicon_url( $host );
-	}
-}
-if ( ! function_exists( 'aw_source_row_html' ) ) {
-	/**
-	 * Alias of sourceweb_source_row_html().
-	 *
-	 * @param int  $id   Post ID.
-	 * @param bool $link Link to the original.
-	 */
-	function aw_source_row_html( $id, $link = false ) {
-		return sourceweb_source_row_html( $id, $link );
-	}
-}
-if ( ! function_exists( 'aw_published_ts' ) ) {
-	/**
-	 * Alias of sourceweb_published_ts().
-	 *
-	 * @param int $id Post ID.
-	 */
-	function aw_published_ts( $id ) {
-		return sourceweb_published_ts( $id );
-	}
-}
-if ( ! function_exists( 'aw_rel_time_html' ) ) {
-	/**
-	 * Alias of sourceweb_rel_time_html().
-	 *
-	 * @param int $id Post ID.
-	 */
-	function aw_rel_time_html( $id ) {
-		return sourceweb_rel_time_html( $id );
-	}
-}

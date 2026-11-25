@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $summary   The first story's summary with those facts woven in ('' = summary unchanged).
  * @return array{credited:bool,added:bool,rewritten:bool}
  */
-function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '', $summary = '' ) {
+function sourceweb_same_story_fold( $keep, $url, $publisher, $text = '', $model = '', $summary = '' ) {
 	$url  = esc_url_raw( $url );
 	$out  = array(
 		'credited' => false,
@@ -73,8 +73,8 @@ function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '', $
 			// Straight to the row: wp_update_post would move post_modified (the date never changes).
 			$wpdb->update( $wpdb->posts, array( 'post_excerpt' => $summary ), array( 'ID' => (int) $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$out['rewritten'] = true;
-			if ( function_exists( 'aw_summary_store_entities' ) ) {
-				aw_summary_store_entities( $keep ); // the names the new summary uses, for internal linking
+			if ( function_exists( 'sourceweb_summary_store_entities' ) ) {
+				sourceweb_summary_store_entities( $keep ); // the names the new summary uses, for internal linking
 			}
 		}
 		$adds  = array_values( array_filter( (array) get_post_meta( $keep, 'aw_merge_additions', true ) ) );
@@ -108,7 +108,7 @@ function aw_same_story_fold( $keep, $url, $publisher, $text = '', $model = '', $
  * @param int $dup  The duplicate.
  * @param int $keep The first story.
  */
-function aw_same_story_retire( $dup, $keep ) {
+function sourceweb_same_story_retire( $dup, $keep ) {
 	$path = (string) wp_parse_url( (string) get_permalink( $dup ), PHP_URL_PATH );
 	if ( 'private' !== get_post_status( $dup ) ) {
 		wp_update_post(
@@ -129,7 +129,7 @@ function aw_same_story_retire( $dup, $keep ) {
 }
 
 /** What the workers need to compare a new report with the first story. */
-function aw_same_story_get( WP_REST_Request $req ) {
+function sourceweb_same_story_get( WP_REST_Request $req ) {
 	$id = (int) $req->get_param( 'id' );
 	$p  = get_post( $id );
 	if ( ! $p || ! in_array( $p->post_type, SOURCEWEB_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
@@ -155,7 +155,7 @@ function aw_same_story_get( WP_REST_Request $req ) {
 }
 
 /** Fold a report into the first story (and retire its copy on the site, when there is one). */
-function aw_same_story_post( WP_REST_Request $req ) {
+function sourceweb_same_story_post( WP_REST_Request $req ) {
 	$keep = (int) $req->get_param( 'keep_id' );
 	$p    = get_post( $keep );
 	if ( ! $p || ! in_array( $p->post_type, SOURCEWEB_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
@@ -165,9 +165,9 @@ function aw_same_story_post( WP_REST_Request $req ) {
 	if ( $dup && ( $dup === $keep || ! in_array( get_post_type( $dup ), SOURCEWEB_SAME_STORY_TYPES, true ) ) ) {
 		return new WP_Error( 'aw_bad_dup', 'Bad duplicate', array( 'status' => 400 ) );
 	}
-	$res = aw_same_story_fold( $keep, (string) $req->get_param( 'source_url' ), (string) $req->get_param( 'publisher' ), (string) $req->get_param( 'added_text' ), (string) $req->get_param( 'model' ), (string) $req->get_param( 'summary' ) );
+	$res = sourceweb_same_story_fold( $keep, (string) $req->get_param( 'source_url' ), (string) $req->get_param( 'publisher' ), (string) $req->get_param( 'added_text' ), (string) $req->get_param( 'model' ), (string) $req->get_param( 'summary' ) );
 	if ( $dup ) {
-		aw_same_story_retire( $dup, $keep );
+		sourceweb_same_story_retire( $dup, $keep );
 	}
 	return new WP_REST_Response( $res + array( 'keep_id' => $keep ) );
 }
@@ -183,12 +183,12 @@ add_action(
 				array(
 					'methods'             => 'GET',
 					'permission_callback' => $can,
-					'callback'            => 'aw_same_story_get',
+					'callback'            => 'sourceweb_same_story_get',
 				),
 				array(
 					'methods'             => 'POST',
 					'permission_callback' => $can,
-					'callback'            => 'aw_same_story_post',
+					'callback'            => 'sourceweb_same_story_post',
 				),
 			)
 		);
