@@ -674,7 +674,7 @@ function kits_system_page() {
 	echo '</aside>';
 
 	// Inline JavaScript for Instant Search, Filtering & Drawer Inspection
-	echo '<script>';
+	ob_start();
 	echo 'window.kitsInspectorPayload = ' . wp_json_encode( $inspector_payload ) . ';';
 	?>
 	(function() {
@@ -920,7 +920,9 @@ function kits_system_page() {
 		});
 	})();
 	<?php
-	echo '</script>';
+	wp_register_script( 'kits-system-screen', false, array(), false, true );
+	wp_enqueue_script( 'kits-system-screen' );
+	wp_add_inline_script( 'kits-system-screen', (string) ob_get_clean() );
 	echo '</div>';
 }
 

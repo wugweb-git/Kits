@@ -207,8 +207,8 @@ function kits_onboarding_page() {
 	echo '</div>';
 
 	// Media upload JS script
+	ob_start();
 	?>
-	<script>
 	jQuery(document).ready(function($){
 		var frame;
 		$('#kits_upload_logo_btn').on('click', function(e){
@@ -234,6 +234,8 @@ function kits_onboarding_page() {
 			$(this).hide();
 		});
 	});
-	</script>
 	<?php
+	wp_register_script( 'kits-onboarding-logo', false, array( 'jquery' ), false, true );
+	wp_enqueue_script( 'kits-onboarding-logo' );
+	wp_add_inline_script( 'kits-onboarding-logo', (string) ob_get_clean() );
 }
