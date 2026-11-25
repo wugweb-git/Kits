@@ -12,7 +12,7 @@ A directory of organisations in WordPress: listings with their places and types,
 
 == Description ==
 
-DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
+DirectoryWeb adds a directory of listings, places and claims to a WordPress site, with its own admin screens, public pages, blocks and REST routes.
 
 = Listings, places and types =
 
@@ -40,13 +40,35 @@ DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
 = Works with =
 
 * Kits Core (optional: gives the admin the Kits shell, list tables, icons and dates; DirectoryWeb runs without it).
-* Animal Writes Core (while it is active it loads DirectoryWeb and supplies the site's content types, among them the listing type). RankWeb reads the Directory for titles, schema and the sitemap; SourceWeb adds listings and keeps the change log.
+* RankWeb and SourceWeb (optional companions: RankWeb reads the Directory for titles, schema and the sitemap; SourceWeb adds listings and keeps the change log).
 
 == Installation ==
 
 1. Activate DirectoryWeb under Plugins. It creates a Claim page and owns the Directory's rewrite rules and capability.
-2. Optional: activate Kits Core for the Kits admin shell. While Animal Writes Core is active it loads DirectoryWeb from the plugins folder.
+2. Optional: activate Kits Core for the Kits admin shell.
 3. Under DirectoryWeb → Settings, choose whether claim emails are sent and where new-claim emails go.
+
+== Frequently Asked Questions ==
+
+= Where are claim files kept, and how are they protected? =
+
+Proof documents, logos and photos sent with a claim are stored in `wp-content/uploads/directoryweb-private/` under random names, and only a DirectoryWeb manager can open them (through the Claims screen, with a nonce). The files are also encrypted on disk with a key derived from your site's secret salts in `wp-config.php`, so a web server that serves the folder directly still returns unreadable bytes. Keep your salts: if you change them, earlier claim files can no longer be opened. Back up the folder with your uploads.
+
+Still block the folder at the web server, so it is never listed or probed.
+
+Apache: the plugin writes `.htaccess` (deny all) and an empty `index.php` into the folder. Nothing to do, unless your host ignores `.htaccess` (`AllowOverride None`): then add to your site configuration:
+
+`<Directory "/path/to/wp-content/uploads/directoryweb-private"> Require all denied </Directory>`
+
+nginx ignores `.htaccess`. Add this inside your `server { }` block, before the PHP location, and reload nginx:
+
+`location ^~ /wp-content/uploads/directoryweb-private/ { deny all; return 403; }`
+
+Test it: open `https://your-site/wp-content/uploads/directoryweb-private/index.php`. It should answer 403 (or 404), not a blank page.
+
+= Which form plugins work for claims? =
+
+With no form plugin the plugin shows its own claim form, which also accepts the proof, logo and photos. If Fluent Forms is active and you choose a claim form, that form is used. Fluent Forms' free version has no file-upload field, so uploads with Fluent Forms need its Pro upload field; this plugin copies the files that field saves into its own protected folder. That Pro path has not been tested with the real Pro uploader.
 
 == Changelog ==
 
@@ -57,10 +79,10 @@ DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
 * Settings: claim emails on or off, and who is told about new claims.
 
 = 1.1.0 =
-* The listing's data model moves in from Animal Writes Core: the 48 listing fields and their rules, the phone and opening-hours lists, the never-publish list, where a listing's details come from, and the daily re-check flags. Same keys and stored values; nothing changes on the site.
+* The listing's data model moves into this plugin: the 48 listing fields and their rules, the phone and opening-hours lists, the never-publish list, where a listing's details come from, and the daily re-check flags. Same keys and stored values; nothing changes on the site.
 
 = 1.0.0 =
-* The Directory moves out of Animal Writes Core into its own plugin. Same pages, data, field groups, blocks, shortcodes and routes; nothing changes on the site.
+* The Directory becomes its own plugin. Same pages, data, field groups, blocks, shortcodes and routes; nothing changes on the site.
 
 == Upgrade Notice ==
 

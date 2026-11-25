@@ -17,7 +17,7 @@
  * - web        A public web page listing organisations (adopt-a-pet.in, AWBP Trust, dogsindia.com); the page names itself.
  *   These four carry their own date (aw_source_date) and link (aw_source_url) from the import.
  * A listing shows only the sources it really has; nothing is shown for a source it does not come from.
- * Imports record their source in the listing meta aw_data_sources (list of slugs); older imports are recognised from
+ * Imports record their source in the listing meta directoryweb_data_sources (list of slugs); older imports are recognised from
  * the fields they left (AWBI code, source name).
  *
  * @package directoryweb
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Source registry: slug => [mark, label, as of (Y-m-d or ''), link]. */
-function aw_data_sources() {
+function directoryweb_data_sources() {
 	return array(
 		'awbi'         => array( 'AWBI', 'AWBI list of recognised organisations', '2026-05-31', 'https://awbi.gov.in/' ),
 		'awbi-abc'     => array( 'AWBI', 'AWBI list of ABC projects', '', 'https://awbi.gov.in/' ),
@@ -55,9 +55,9 @@ const AW_IMPORT_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest', 'pfa
  * @param int $id Listing ID.
  * @return array
  */
-function aw_listing_sources( $id ) {
-	$reg   = aw_data_sources();
-	$slugs = array_filter( (array) get_post_meta( $id, 'aw_data_sources', true ) );
+function directoryweb_listing_sources( $id ) {
+	$reg   = directoryweb_data_sources();
+	$slugs = array_filter( (array) get_post_meta( $id, 'directoryweb_data_sources', true ) );
 	$name  = (string) get_post_meta( $id, 'aw_source_name', true );
 	if ( get_post_meta( $id, 'aw_awbi_code', true ) ) {
 		$slugs[] = 'awbi';
@@ -104,7 +104,7 @@ function aw_listing_sources( $id ) {
 		}
 		$out[] = array( $slug, $mark, $label, $on, $link );
 	}
-	return apply_filters( 'aw_listing_sources', $out, $id ); // enrichment.php adds the enrichment worker's sources
+	return apply_filters( 'directoryweb_listing_sources', $out, $id ); // enrichment.php adds the enrichment worker's sources
 }
 
 /**
@@ -114,7 +114,7 @@ function aw_listing_sources( $id ) {
  * @param bool $full Also write the source's name and date (profile page); cards show the mark only.
  * @return string
  */
-function aw_source_labels( $id, $full = false ) {
+function directoryweb_source_labels( $id, $full = false ) {
 	$variant = array( 'awbi' => 'success', 'awbi-abc' => 'success', 'gov' => 'info', 'nalsa' => 'info', 'gujforest' => 'info', 'awol' => '', 'organisation' => '', 'gmaps' => '' );
 	// Google Maps shows as its own pin, the organisation as a building icon (owner, 12 Oct 2026); the others as their letters.
 	$marks = array(
@@ -122,16 +122,16 @@ function aw_source_labels( $id, $full = false ) {
 		'organisation' => '<svg class="aw-datasrc-img" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>',
 	);
 	$html    = '';
-	foreach ( aw_listing_sources( $id ) as list( $slug, $mark, $label, $on, $link ) ) {
+	foreach ( directoryweb_listing_sources( $id ) as list( $slug, $mark, $label, $on, $link ) ) {
 		if ( 'ngobase' === $slug ) {
 			continue; // kept as a source in the data, not shown on the site
 		}
 		$title = $label . ( $on ? ', as on ' . wp_date( 'j M Y', strtotime( $on ) ) : '' );
 		$tag   = '<span class="kit-tag aw-datasrc' . ( ! empty( $variant[ $slug ] ) ? ' kit-tag--' . $variant[ $slug ] : '' ) . '" title="' . esc_attr( $title ) . '"><span class="aw-datasrc-mark" aria-hidden="true">' . ( $marks[ $slug ] ?? esc_html( $mark ) ) . '</span><span class="screen-reader-text">' . esc_html( 'Source: ' . $title ) . '</span></span>';
 		if ( $full ) { // "Details from": the source's logo, like publishers on News
-			$logo = aw_source_logo( $slug, $id, $link );
+			$logo = directoryweb_source_logo( $slug, $id, $link );
 			$tag  = $logo ? '<span class="aw-datasrc-logo" title="' . esc_attr( $title ) . '">' . $logo . '</span>' : $tag;
-			$shown = esc_html( $label ) . ( $on ? ', as on ' . kits_date( $on ) : '' ); // the one date component
+			$shown = esc_html( $label ) . ( $on ? ', as on ' . directoryweb_date( $on ) : '' ); // the one date component
 			$text  = $link ? '<a href="' . esc_url( $link ) . '" rel="noopener nofollow">' . $shown . '</a>' : $shown;
 			$tag  = '<span class="aw-datasrc-row">' . $tag . ' <span class="aw-datasrc-text">' . $text . '</span></span>'; // one text cell: the date stays beside its label
 		}
@@ -152,7 +152,7 @@ const AW_SOURCE_HOSTS = array( 'awbi' => 'https://awbi.gov.in/', 'awbi-abc' => '
  * @param string $link The source's link.
  * @return string
  */
-function aw_source_logo( $slug, $id, $link ) {
+function directoryweb_source_logo( $slug, $id, $link ) {
 	if ( 0 === strpos( $slug, 'enrich-' ) && function_exists( 'aw_enrich_icon' ) ) { // a source of the enrichment worker: its site's favicon
 		return aw_enrich_icon( array( 'key' => substr( $slug, 7 ), 'name' => '', 'url' => $link ), $id );
 	}
@@ -167,8 +167,8 @@ function aw_source_logo( $slug, $id, $link ) {
 	return $aid ? (string) wp_get_attachment_image( $aid, 'thumbnail', false, array( 'alt' => '', 'width' => 20, 'height' => 20, 'loading' => 'lazy' ) ) : '';
 }
 
-/** Fetch the logos of every source site once (wp eval 'aw_source_logos_fetch();'). */
-function aw_source_logos_fetch() {
+/** Fetch the logos of every source site once (wp eval 'directoryweb_source_logos_fetch();'). */
+function directoryweb_source_logos_fetch() {
 	global $wpdb;
 	$urls = array_values( AW_SOURCE_HOSTS );
 	foreach ( $wpdb->get_col( "SELECT DISTINCT meta_value FROM {$wpdb->postmeta} pm JOIN {$wpdb->posts} p ON p.ID = pm.post_id AND p.post_type = 'aw_listing' WHERE pm.meta_key = 'aw_source_url' AND pm.meta_value <> ''" ) as $u ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery

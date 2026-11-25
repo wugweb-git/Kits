@@ -29,7 +29,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_GEO_UA       = 'AnimalWrites/1.0 (+https://animalwrites.in; contact@animalwrites.in)';
+/** Who is asking Nominatim: this plugin and this site's address, as its usage policy asks (no one else's contact details). */
+function directoryweb_geo_user_agent(): string {
+	return 'DirectoryWeb/' . ( defined( 'DIRECTORYWEB_VERSION' ) ? DIRECTORYWEB_VERSION : '1' ) . ' (+' . home_url( '/' ) . ')';
+}
+
 const AW_GEO_NEAR_KM  = 60; // a match farther than this from the listing's district centre is not trusted
 const AW_GEO_CACHE    = 90 * DAY_IN_SECONDS;
 
@@ -39,8 +43,8 @@ const AW_GEO_CACHE    = 90 * DAY_IN_SECONDS;
  * @param array $args Search parameters (q, or postalcode + country).
  * @return array|null
  */
-function aw_geo_nominatim( $args ) {
-	$args = array_merge( $args, array( 'format' => 'jsonv2', 'limit' => 1, 'countrycodes' => 'in', 'email' => 'contact@animalwrites.in' ) );
+function directoryweb_geo_nominatim( $args ) {
+	$args = array_merge( $args, array( 'format' => 'jsonv2', 'limit' => 1, 'countrycodes' => 'in' ) );
 	$key  = 'aw_geo_' . md5( wp_json_encode( $args ) );
 	$hit  = get_transient( $key );
 	if ( false !== $hit ) {
@@ -53,7 +57,7 @@ function aw_geo_nominatim( $args ) {
 		usleep( (int) ( $wait * 1000000 ) );
 	}
 	update_option( 'aw_geo_last_request', (string) microtime( true ), false );
-	$r = wp_remote_get( 'https://nominatim.openstreetmap.org/search?' . http_build_query( $args ), array( 'timeout' => 20, 'user-agent' => AW_GEO_UA ) );
+	$r = wp_remote_get( 'https://nominatim.openstreetmap.org/search?' . http_build_query( $args ), array( 'timeout' => 20, 'user-agent' => directoryweb_geo_user_agent() ) );
 	update_option( 'aw_geo_last_request', (string) microtime( true ), false );
 	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
 		return null; // not cached: tried again on the next run
@@ -65,14 +69,14 @@ function aw_geo_nominatim( $args ) {
 }
 
 /** Great-circle distance in km. */
-function aw_geo_km( $lat1, $lng1, $lat2, $lng2 ) {
+function directoryweb_geo_km( $lat1, $lng1, $lat2, $lng2 ) {
 	$r = M_PI / 180;
 	$h = sin( ( $lat2 - $lat1 ) * $r / 2 ) ** 2 + cos( $lat1 * $r ) * cos( $lat2 * $r ) * sin( ( $lng2 - $lng1 ) * $r / 2 ) ** 2;
 	return 12742 * asin( min( 1, sqrt( $h ) ) );
 }
 
 /** A listing's address for geocoding ('' when it has none). */
-function aw_geo_address( $id ) {
+function directoryweb_geo_address( $id ) {
 	foreach ( array( 'aw_address', 'aw_awbi_address', 'aw_import_address' ) as $k ) {
 		$a = trim( preg_replace( '/\s+/', ' ', (string) get_post_meta( $id, $k, true ) ) );
 		if ( strlen( $a ) >= 8 ) {
@@ -87,12 +91,12 @@ function aw_geo_address( $id ) {
 }
 
 /** The listing's PIN code: the PIN field, else a 6-digit number in its address ('' when none). */
-function aw_geo_pin( $id ) {
+function directoryweb_geo_pin( $id ) {
 	$pin = (string) get_post_meta( $id, 'aw_pincode', true );
 	if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
 		return $pin;
 	}
-	return preg_match( '/\b([1-9]\d{2})\s?(\d{3})\b/', aw_geo_address( $id ), $m ) ? $m[1] . $m[2] : '';
+	return preg_match( '/\b([1-9]\d{2})\s?(\d{3})\b/', directoryweb_geo_address( $id ), $m ) ? $m[1] . $m[2] : '';
 }
 
 /**
@@ -102,7 +106,7 @@ function aw_geo_pin( $id ) {
  * @param array  $skip     Names to leave out (district, state), lower case.
  * @return string
  */
-function aw_geo_locality( $addr, $skip ) {
+function directoryweb_geo_locality( $addr, $skip ) {
 	$parts = array_reverse( array_map( 'trim', explode( ',', $addr ) ) );
 	foreach ( $parts as $part ) {
 		$x = preg_replace( '/\b[1-9]\d{2}\s?\d{3}\b/', '', $part );
@@ -122,7 +126,7 @@ function aw_geo_locality( $addr, $skip ) {
  * @param int $id Listing ID.
  * @return array|null
  */
-function aw_geo_point( $id ) {
+function directoryweb_geo_point( $id ) {
 	$lat = (string) get_post_meta( $id, 'aw_lat', true );
 	$lng = (string) get_post_meta( $id, 'aw_lng', true );
 	if ( is_numeric( $lat ) && is_numeric( $lng ) ) {
@@ -143,44 +147,44 @@ function aw_geo_point( $id ) {
  * @param bool $redo_approx Look again for listings that only have an approximate point.
  * @return string
  */
-function aw_geocode_listing( $id, $redo_approx = false ) {
+function directoryweb_geocode_listing( $id, $redo_approx = false ) {
 	if ( is_numeric( get_post_meta( $id, 'aw_lat', true ) ) && is_numeric( get_post_meta( $id, 'aw_lng', true ) ) ) {
 		return 'own'; // never changed
 	}
 	if ( ! $redo_approx && '' !== (string) get_post_meta( $id, 'aw_geo_precision', true ) ) {
 		return (string) get_post_meta( $id, 'aw_geo_precision', true );
 	}
-	$codes = function_exists( 'aw_item_codes' ) ? aw_item_codes( $id ) : array( array(), array() );
+	$codes = function_exists( 'directoryweb_item_codes' ) ? directoryweb_item_codes( $id ) : array( array(), array() );
 	$dist  = (int) ( $codes[1][0] ?? 0 );
 	$cent  = $dist && function_exists( 'aw_district_centroid' ) ? aw_district_centroid( $dist ) : null;
-	$near  = fn( $p ) => ! $cent || aw_geo_km( $p[0], $p[1], $cent[0], $cent[1] ) <= AW_GEO_NEAR_KM;
+	$near  = fn( $p ) => ! $cent || directoryweb_geo_km( $p[0], $p[1], $cent[0], $cent[1] ) <= AW_GEO_NEAR_KM;
 	$save  = function ( $lat, $lng, $prec ) use ( $id ) {
 		update_post_meta( $id, 'aw_geo_lat', number_format( $lat, 6, '.', '' ) );
 		update_post_meta( $id, 'aw_geo_lng', number_format( $lng, 6, '.', '' ) );
 		update_post_meta( $id, 'aw_geo_precision', $prec );
 		update_post_meta( $id, 'aw_geo_at', current_time( 'mysql' ) );
-		update_post_meta( $id, 'aw_geo_hash', aw_geo_inputs_hash( $id ) );
+		update_post_meta( $id, 'aw_geo_hash', directoryweb_geo_inputs_hash( $id ) );
 		return $prec;
 	};
-	$addr = aw_geo_address( $id );
+	$addr = directoryweb_geo_address( $id );
 	if ( '' !== $addr ) {
-		$p = aw_geo_nominatim( array( 'q' => $addr ) );
+		$p = directoryweb_geo_nominatim( array( 'q' => $addr ) );
 		if ( $p && $near( $p ) ) {
 			return $save( $p[0], $p[1], $p[2] >= 26 ? 'address' : 'locality' );
 		}
 	}
-	list( $sname, $dname ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+	list( $sname, $dname ) = function_exists( 'directoryweb_item_place_names' ) ? directoryweb_item_place_names( $id ) : array( '', '' );
 	$dname                 = trim( preg_replace( '/\s*\(.*?\)/', '', $dname ) );
-	$loc                   = '' !== $addr ? aw_geo_locality( $addr, array_filter( array( strtolower( $dname ), strtolower( $sname ) ) ) ) : '';
+	$loc                   = '' !== $addr ? directoryweb_geo_locality( $addr, array_filter( array( strtolower( $dname ), strtolower( $sname ) ) ) ) : '';
 	if ( '' !== $loc && '' !== $sname ) {
-		$p = aw_geo_nominatim( array( 'q' => implode( ', ', array_filter( array( $loc, $dname, $sname, 'India' ) ) ) ) );
+		$p = directoryweb_geo_nominatim( array( 'q' => implode( ', ', array_filter( array( $loc, $dname, $sname, 'India' ) ) ) ) );
 		if ( $p && $near( $p ) ) {
 			return $save( $p[0], $p[1], 'locality' );
 		}
 	}
-	$pin = aw_geo_pin( $id );
+	$pin = directoryweb_geo_pin( $id );
 	if ( '' !== $pin ) {
-		$p = aw_geo_nominatim( array( 'postalcode' => $pin, 'country' => 'India' ) );
+		$p = directoryweb_geo_nominatim( array( 'postalcode' => $pin, 'country' => 'India' ) );
 		if ( $p && $near( $p ) ) {
 			return $save( $p[0], $p[1], 'pin' );
 		}
@@ -192,17 +196,17 @@ function aw_geocode_listing( $id, $redo_approx = false ) {
 }
 
 /** What a listing's lookup depends on: its address, PIN code and district. */
-function aw_geo_inputs_hash( $id ) {
-	$codes = function_exists( 'aw_item_codes' ) ? aw_item_codes( $id ) : array( array(), array() );
-	return md5( aw_geo_address( $id ) . '|' . aw_geo_pin( $id ) . '|' . implode( ',', (array) $codes[1] ) );
+function directoryweb_geo_inputs_hash( $id ) {
+	$codes = function_exists( 'directoryweb_item_codes' ) ? directoryweb_item_codes( $id ) : array( array(), array() );
+	return md5( directoryweb_geo_address( $id ) . '|' . directoryweb_geo_pin( $id ) . '|' . implode( ',', (array) $codes[1] ) );
 }
 
 /* ---------- New and changed listings ---------- */
 
 /** Queue one listing for a lookup (deduplicated by WordPress for 10 minutes). */
-function aw_geo_queue( $id ) {
-	if ( 'aw_listing' === get_post_type( $id ) && ! wp_next_scheduled( 'aw_geocode_one', array( (int) $id ) ) ) {
-		wp_schedule_single_event( time() + 60, 'aw_geocode_one', array( (int) $id ) );
+function directoryweb_geo_queue( $id ) {
+	if ( 'aw_listing' === get_post_type( $id ) && ! wp_next_scheduled( 'directoryweb_geocode_one', array( (int) $id ) ) ) {
+		wp_schedule_single_event( time() + 60, 'directoryweb_geocode_one', array( (int) $id ) );
 	}
 }
 
@@ -210,7 +214,7 @@ add_action(
 	'transition_post_status',
 	function ( $new, $old, $post ) {
 		if ( 'publish' === $new && 'publish' !== $old && 'aw_listing' === $post->post_type ) {
-			aw_geo_queue( $post->ID );
+			directoryweb_geo_queue( $post->ID );
 		}
 	},
 	10,
@@ -221,7 +225,7 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 		$aw_geo_hook,
 		function ( $mid, $id, $key ) {
 			if ( in_array( $key, array( 'aw_address', 'aw_awbi_address', 'aw_import_address', 'aw_pincode', 'aw_district_code' ), true ) ) {
-				aw_geo_queue( (int) $id );
+				directoryweb_geo_queue( (int) $id );
 			}
 		},
 		10,
@@ -231,13 +235,13 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 unset( $aw_geo_hook );
 
 add_action(
-	'aw_geocode_one',
+	'directoryweb_geocode_one',
 	function ( $id ) {
 		if ( 'publish' !== get_post_status( $id ) || is_numeric( get_post_meta( $id, 'aw_lat', true ) ) ) {
 			return;
 		}
 		$was  = (string) get_post_meta( $id, 'aw_geo_hash', true );
-		$now  = aw_geo_inputs_hash( $id );
+		$now  = directoryweb_geo_inputs_hash( $id );
 		$prec = (string) get_post_meta( $id, 'aw_geo_precision', true );
 		if ( '' === $was && '' !== $prec ) {
 			update_post_meta( $id, 'aw_geo_hash', $now ); // looked up before hashes were kept: this is its baseline
@@ -246,14 +250,14 @@ add_action(
 		if ( $was === $now ) {
 			return; // address, PIN and district unchanged: never asked again
 		}
-		aw_geocode_listing( $id, true );
+		directoryweb_geocode_listing( $id, true );
 		delete_transient( 'aw_dir_points' );
 	}
 );
 
 // Sources on the listing: where a looked-up location came from.
 add_filter(
-	'aw_listing_sources',
+	'directoryweb_listing_sources',
 	function ( $out, $id ) {
 		$prec = (string) get_post_meta( $id, 'aw_geo_precision', true );
 		if ( '' !== $prec && ! is_numeric( get_post_meta( $id, 'aw_lat', true ) ) ) {
@@ -293,7 +297,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$n['already'] = ( $n['already'] ?? 0 ) + 1;
 					continue;
 				}
-				$r       = aw_geocode_listing( $id, $redo );
+				$r       = directoryweb_geocode_listing( $id, $redo );
 				$r       = '' !== $r ? $r : 'none';
 				$n[ $r ] = ( $n[ $r ] ?? 0 ) + 1;
 				++$done;

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** One card. */
-function aw_local_card( $head, $line, $actions ) {
+function directoryweb_local_card( $head, $line, $actions ) {
 	directoryweb_use_style( 'aw-directory' ); // aw-local-card
 	$id = 'aw-local-' . wp_unique_id();
 	return '<aside class="aw-local-card" aria-labelledby="' . esc_attr( $id ) . '"><h2 class="aw-local-card-head" id="' . esc_attr( $id ) . '">' . esc_html( $head ) . '</h2><p>' . esc_html( $line ) . '</p><div class="aw-local-card-actions">' . $actions . '</div></aside>';
@@ -25,10 +25,10 @@ function aw_local_card( $head, $line, $actions ) {
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		if ( 'aw_listing' !== ( $block['attrs']['query']['postType'] ?? '' ) || ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() ) {
+		if ( 'aw_listing' !== ( $block['attrs']['query']['postType'] ?? '' ) || ! function_exists( 'directoryweb_is_directory_view' ) || ! directoryweb_is_directory_view() ) {
 			return $html;
 		}
-		$d = aw_dir_place( (string) get_query_var( 'aw_place' ) );
+		$d = directoryweb_dir_place( (string) get_query_var( 'aw_place' ) );
 		if ( ! $d || 'district' !== $d->kind ) {
 			return $html;
 		}
@@ -41,25 +41,25 @@ add_filter(
 		}
 		$n = 0;
 		if ( $types ) {
-			foreach ( aw_place_counts()['pairs'] as $p ) { // stored counts, as the robots rule and the sitemap (a listing with two vet types counts twice: the card is then left out, never shown wrongly)
+			foreach ( directoryweb_place_counts()['pairs'] as $p ) { // stored counts, as the robots rule and the sitemap (a listing with two vet types counts twice: the card is then left out, never shown wrongly)
 				if ( (int) $p[0] === (int) $d->code && in_array( $p[1], $vet ? AW_VET_TYPES : $types, true ) ) {
 					$n += (int) $p[3];
 				}
 			}
 		} else {
-			$n = aw_place_count( $d );
+			$n = directoryweb_place_count( $d );
 		}
-		$state = aw_place_state( $d->state );
+		$state = directoryweb_place_state( $d->state );
 		if ( $n >= 3 || ! $state ) {
 			return $html;
 		}
 		$what = $vet ? 'veterinary listings' : ( $term ? mb_strtolower( $term->name ) . ' listings' : 'listings' ); // type names are singular ("Rescue Group")
-		return $html . aw_local_card(
+		return $html . directoryweb_local_card(
 			sprintf( 'Few %s in %s yet', $what, $d->name ),
 			sprintf( 'If there\'s no group near you, you can volunteer to help animals in %s, or tell us about one we\'ve missed.', $d->name ),
 			'<a class="kit-btn" href="' . esc_url( home_url( '/volunteer/' ) ) . '">Volunteer near you</a>'
 			. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Add an organisation</a>'
-			. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( aw_directory_url( $state->slug, $vet ? 'veterinary' : $type ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>'
+			. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( directoryweb_directory_url( $state->slug, $vet ? 'veterinary' : $type ) ) . '">' . esc_html( sprintf( 'See all in %s', $state->name ) ) . '</a>'
 		);
 	},
 	10,

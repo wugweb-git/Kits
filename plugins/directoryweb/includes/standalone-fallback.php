@@ -36,6 +36,30 @@ if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL_HOSTS' ) ) {
 	);
 }
 
+if ( ! function_exists( 'directoryweb_ff_social_map' ) ) {
+	/** Form field => [ listing meta key, profile link pattern ] for the social links: Kits Core's table when it is loaded, else DirectoryWeb's own. */
+	function directoryweb_ff_social_map(): array {
+		return defined( 'KITS_FF_SOCIAL' ) ? KITS_FF_SOCIAL : DIRECTORYWEB_FF_SOCIAL;
+	}
+}
+
+if ( ! function_exists( 'directoryweb_ff_ticked' ) ) {
+	/** Whether a checkbox field was ticked in a Fluent Forms submission (any value but empty or "0"). */
+	function directoryweb_ff_ticked( $data, $name ): bool {
+		if ( function_exists( 'kits_ff_ticked' ) ) {
+			return kits_ff_ticked( $data, $name );
+		}
+		return (bool) array_filter( (array) ( $data[ $name ] ?? array() ), fn( $v ) => '' !== (string) $v && '0' !== (string) $v );
+	}
+}
+
+if ( ! function_exists( 'directoryweb_ff_dates' ) ) {
+	/** The claim form fields that hold a date (shown as "j M Y", stored as Y-m-d). */
+	function directoryweb_ff_dates(): array {
+		return defined( 'KITS_FF_DATES' ) ? KITS_FF_DATES : array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
+	}
+}
+
 if ( ! function_exists( 'directoryweb_count' ) ) {
 	/**
 	 * Formats a count badge.
@@ -215,6 +239,10 @@ if ( ! function_exists( 'directoryweb_ff_form' ) ) {
 	 * @return string
 	 */
 	function directoryweb_ff_form( $key, $ctx = array() ) {
+		if ( 'claim' === $key && function_exists( 'dw_claim_native_form' ) && function_exists( 'dw_claim_native_active' ) && dw_claim_native_active() ) {
+			$listing = $ctx['listing'] ?? 0; // no working Fluent Forms claim form, with or without Kits Core: the built-in form
+			return dw_claim_native_form( is_object( $listing ) ? (int) $listing->ID : (int) $listing );
+		}
 		if ( function_exists( 'kits_ff_form' ) ) {
 			return kits_ff_form( $key, $ctx );
 		}
@@ -248,6 +276,9 @@ if ( ! function_exists( 'directoryweb_private_dir' ) ) {
 		$dir    = $upload['basedir'] . '/kits-private';
 		if ( ! is_dir( $dir ) ) {
 			wp_mkdir_p( $dir );
+		}
+		if ( function_exists( 'dw_evidence_protect_dir' ) ) {
+			dw_evidence_protect_dir( $dir ); // never a folder the web server will list or serve
 		}
 		return $dir;
 	}

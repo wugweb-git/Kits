@@ -44,8 +44,8 @@ function directoryweb_helplines_render( $attributes = array() ) {
 	$code = ! empty( $attributes['districtCode'] ) ? (int) $attributes['districtCode'] : 0;
 
 	// Dynamic context: resolve current district place if no code provided.
-	if ( ! $code && function_exists( 'aw_current_place' ) ) {
-		$d = aw_current_place();
+	if ( ! $code && function_exists( 'directoryweb_current_place' ) ) {
+		$d = directoryweb_current_place();
 		if ( $d && 'district' === ( $d->kind ?? '' ) ) {
 			$code = (int) $d->code;
 		}
@@ -56,13 +56,13 @@ function directoryweb_helplines_render( $attributes = array() ) {
 	}
 
 	$place = function_exists( 'aw_place_by_code' ) ? aw_place_by_code( $code, 'district' ) : null;
-	if ( ! $place && function_exists( 'aw_current_place' ) ) {
-		$place = aw_current_place();
+	if ( ! $place && function_exists( 'directoryweb_current_place' ) ) {
+		$place = directoryweb_current_place();
 	}
 
-	if ( ! $place || ! function_exists( 'aw_district_helplines_html' ) ) {
+	if ( ! $place || ! function_exists( 'directoryweb_district_helplines_html' ) ) {
 		return '<!-- directoryweb/helplines: place not resolved -->';
 	}
 
-	return aw_district_helplines_html( $place );
+	return directoryweb_district_helplines_html( $place );
 }

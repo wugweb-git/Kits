@@ -62,12 +62,16 @@ const DW_CLAIM_L = array(
 );
 
 /** The claim form's Fluent Forms ID (0 when it is not set up). */
-function aw_claim_ff_id() {
-	return function_exists( 'kits_ff_id' ) ? (int) kits_ff_id( 'claim' ) : 0;
+function directoryweb_claim_ff_id() {
+	$id = function_exists( 'kits_ff_id' ) ? (int) kits_ff_id( 'claim' ) : 0;
+	if ( ! $id && function_exists( 'dw_claim_ff_form_id' ) ) {
+		$id = dw_claim_ff_form_id(); // without Kits Core: the form saved in the option, if Fluent Forms is active and has it
+	}
+	return $id;
 }
 
 /** A listing's opening hours as one line, as the form shows them ("Mon 09:00–18:00, Sun closed"). */
-function aw_claim_hours_text( $lid ) {
+function directoryweb_claim_hours_text( $lid ) {
 	$out = array();
 	foreach ( directoryweb_listing_hours( $lid ) as $r ) {
 		$out[] = substr( $r['day'], 0, 3 ) . ' ' . ( $r['closed'] ? 'closed' : $r['open'] . '–' . $r['close'] );
@@ -76,7 +80,7 @@ function aw_claim_hours_text( $lid ) {
 }
 
 /** The listing's service tags (slugs) from the claim form's list, sorted. */
-function aw_claim_service_slugs( $lid ) {
+function directoryweb_claim_service_slugs( $lid ) {
 	$slugs = array_values( array_intersect( (array) wp_get_object_terms( $lid, 'post_tag', array( 'fields' => 'slugs' ) ), array_keys( DIRECTORYWEB_SERVICES ) ) );
 	sort( $slugs );
 	return $slugs;
@@ -95,11 +99,11 @@ function dw_claim_plain( $text ) {
 }
 
 /** The listing's About text as the form shows it: its body, or its short bio when the body is empty. */
-function aw_claim_about( $lid ) {
+function directoryweb_claim_about( $lid ) {
 	$raw  = (string) get_post_field( 'post_content', $lid );
 	$body = dw_claim_plain( $raw );
-	// As the listing page shows it (aw_block_listing_about): the short bio when the body is empty or an import's template intro.
-	$bio = has_excerpt( $lid ) && ( '' === $body || ( function_exists( 'aw_listing_is_template_intro' ) && aw_listing_is_template_intro( trim( $raw ) ) ) );
+	// As the listing page shows it (directoryweb_block_listing_about): the short bio when the body is empty or an import's template intro.
+	$bio = has_excerpt( $lid ) && ( '' === $body || ( function_exists( 'directoryweb_listing_is_template_intro' ) && directoryweb_listing_is_template_intro( trim( $raw ) ) ) );
 	return $bio ? dw_claim_plain( (string) get_post_field( 'post_excerpt', $lid ) ) : $body;
 }
 
@@ -112,7 +116,7 @@ function aw_claim_about( $lid ) {
  * @param bool   $public True: '' for fields kept for the team only (the form is a public page).
  * @return string
  */
-function aw_claim_now( $lid, $key, $public = true ) {
+function directoryweb_claim_now( $lid, $key, $public = true ) {
 	$def = DW_CLAIM_L[ $key ] ?? null;
 	if ( ! $def || ( $public && ! $def[3] ) ) {
 		return '';
@@ -121,11 +125,11 @@ function aw_claim_now( $lid, $key, $public = true ) {
 		case 'phones':
 			return implode( "\n", array_map( fn( $r ) => directoryweb_ff_phone_store( $r['number'] ) . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), directoryweb_listing_phones( $lid ) ) );
 		case 'hours':
-			return aw_claim_hours_text( $lid );
+			return directoryweb_claim_hours_text( $lid );
 		case 'services':
-			return implode( ',', aw_claim_service_slugs( $lid ) );
+			return implode( ',', directoryweb_claim_service_slugs( $lid ) );
 		case 'about':
-			return aw_claim_about( $lid );
+			return directoryweb_claim_about( $lid );
 		default:
 			return dw_claim_plain( get_post_meta( $lid, $def[1], true ) ); // text, never markup, in every pre-filled box
 	}
@@ -137,7 +141,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 	add_filter(
 		'fluentform/rendering_field_data_' . $aw_claim_el,
 		function ( $data, $form ) {
-			if ( ! aw_claim_ff_id() || (int) $form->id !== aw_claim_ff_id() || ! function_exists( 'aw_ff_phone10' ) ) { // the Fluent Forms helpers are Animal Writes Core's
+			if ( ! directoryweb_claim_ff_id() || (int) $form->id !== directoryweb_claim_ff_id() || ! function_exists( 'directoryweb_ff_phone10' ) ) { // DirectoryWeb's own phone helper (standalone-fallback.php)
 				return $data;
 			}
 			$listing = function_exists( 'directoryweb_form_page_listing' ) ? directoryweb_form_page_listing() : null;
@@ -164,14 +168,14 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				return $data;
 			}
 			if ( 'l_services' === $field ) {
-				$data['attributes']['value'] = aw_claim_service_slugs( $lid );
+				$data['attributes']['value'] = directoryweb_claim_service_slugs( $lid );
 				return $data;
 			}
 			if ( isset( DW_CLAIM_L[ $field ] ) ) {
-				$now = aw_claim_now( $lid, $field, true );
-				if ( isset( KITS_FF_SOCIAL[ $field ] ) && '' !== directoryweb_ff_social_user( $field, $now ) ) {
+				$now = directoryweb_claim_now( $lid, $field, true );
+				if ( isset( directoryweb_ff_social_map()[ $field ] ) && '' !== directoryweb_ff_social_user( $field, $now ) ) {
 					$now = directoryweb_ff_social_user( $field, $now ); // the username after the link shown in front of the box
-				} elseif ( in_array( $field, KITS_FF_DATES, true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $now ) ) {
+				} elseif ( in_array( $field, directoryweb_ff_dates(), true ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $now ) ) {
 					$now = wp_date( 'j M Y', strtotime( $now . ' 12:00:00' ) ); // the site's date format
 				}
 				$data['attributes']['value'] = $now;
@@ -186,18 +190,76 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 /* ---------- A claim entry, read ---------- */
 
 /**
+ * The fields of a Fluent Forms claim form that carry files: kind => form field name. A form built for DirectoryWeb names
+ * its upload fields logo, photos and proof; a different form can say otherwise through the filter.
+ *
+ * @return array
+ */
+function dw_claim_ff_file_fields(): array {
+	return (array) apply_filters( 'directoryweb_claim_ff_file_fields', array( 'logo' => 'logo', 'photos' => 'photos', 'proof' => 'proof' ) );
+}
+
+/**
+ * A Fluent Forms claim's evidence, in DirectoryWeb's own store. The first call copies each uploaded file in (after the
+ * same checks as the built-in form) and remembers the result on the entry, so a file is imported once. A file that is
+ * refused is listed under "problems", for the reviewer; nothing is dropped without a trace.
+ *
+ * @param int   $entry_id Fluent Forms submission ID.
+ * @param array $data     The submission's response data.
+ * @return array { logo: string[], photos: string[], proof: string[], problems: string[] }
+ */
+function dw_claim_ff_evidence( int $entry_id, array $data ): array {
+	$have = array( 'logo' => array(), 'photos' => array(), 'proof' => array(), 'problems' => array() );
+	if ( ! class_exists( '\FluentForm\App\Helpers\Helper' ) ) {
+		return $have;
+	}
+	$saved = \FluentForm\App\Helpers\Helper::getSubmissionMeta( $entry_id, 'dw_evidence', '' );
+	$saved = is_array( $saved ) ? $saved : (array) json_decode( (string) $saved, true );
+	if ( isset( $saved['done'] ) ) {
+		return array_merge( $have, array_intersect_key( $saved, $have ) );
+	}
+	$kinds = dw_evidence_kinds();
+	foreach ( dw_claim_ff_file_fields() as $kind => $field ) {
+		$urls = $data[ $field ] ?? array();
+		$urls = is_array( $urls ) ? $urls : ( '' !== (string) $urls ? array( (string) $urls ) : array() );
+		foreach ( array_slice( array_filter( array_map( 'strval', $urls ) ), 0, (int) ( $kinds[ $kind ]['files'] ?? 1 ) ) as $url ) {
+			$name = dw_evidence_import_path( $url, $kind );
+			if ( is_wp_error( $name ) ) {
+				$have['problems'][] = $name->get_error_message();
+				continue;
+			}
+			$have[ $kind ][] = $name;
+		}
+	}
+	\FluentForm\App\Helpers\Helper::setSubmissionMeta( $entry_id, 'dw_evidence', wp_json_encode( $have + array( 'done' => 1 ) ), directoryweb_claim_ff_id() );
+	return $have;
+}
+
+// A claim sent through Fluent Forms has its files copied into DirectoryWeb's private store when it arrives.
+add_action(
+	'fluentform/submission_inserted',
+	function ( $entry_id, $data, $form ) {
+		if ( directoryweb_claim_ff_id() && (int) ( $form->id ?? 0 ) === directoryweb_claim_ff_id() ) {
+			dw_claim_ff_evidence( (int) $entry_id, (array) $data );
+		}
+	},
+	30,
+	3
+);
+
+/**
  * One claim entry: its data, what it proposes for the listing (DW_CLAIM_L keys => text), the person, uploads, status.
  * Entries from the earlier form (aw_phone, aw_whatsapp, aw_email, aw_website, aw_area, aw_services) are read too.
  *
  * @param int $entry_id Fluent Forms entry ID.
  * @return array|null
  */
-function aw_claim_entry( $entry_id ) {
+function directoryweb_claim_entry( $entry_id ) {
 	global $wpdb;
-	if ( ! aw_claim_ff_id() || ! function_exists( 'aw_ff_phone_store' ) ) {
-		return null; // no claim form, or Animal Writes Core's Fluent Forms helpers are not loaded
+	if ( ! directoryweb_claim_ff_id() || ! function_exists( 'directoryweb_ff_phone_store' ) ) {
+		return null; // no Fluent Forms claim form, or DirectoryWeb's phone helper is not loaded
 	}
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, form_id, serial_number, response, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND form_id = %d", $entry_id, aw_claim_ff_id() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, form_id, serial_number, response, created_at FROM {$wpdb->prefix}fluentform_submissions WHERE id = %d AND form_id = %d", $entry_id, directoryweb_claim_ff_id() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( ! $row ) {
 		return null;
 	}
@@ -234,7 +296,7 @@ function aw_claim_entry( $entry_id ) {
 					$num = directoryweb_ff_phone_store( $s( "l_phone{$i}" ) );
 					if ( '' !== $num ) {
 						$lab     = $s( "l_phone{$i}_label" );
-						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( function_exists( 'kits_ff_ticked' ) && kits_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
+						$lines[] = $num . ( '' !== $lab ? ' | ' . $lab : '' ) . ( directoryweb_ff_ticked( $d, "l_phone{$i}_wa" ) ? ' | WhatsApp' : '' );
 					}
 				}
 				foreach ( array_slice( $lid ? directoryweb_listing_phones( $lid ) : array(), 3 ) as $r ) { // numbers past the form's three stay as they are
@@ -255,11 +317,12 @@ function aw_claim_entry( $entry_id ) {
 			$propose[ $key ] = $s( $key );
 		}
 	}
+	$ev   = dw_claim_ff_evidence( (int) $row['id'], $d );
 	$file = fn( $url ) => preg_match( '/[?&]f=([A-Za-z0-9]{20}\.png)/', (string) $url, $m ) ? $m[1] : '';
 	$meta = class_exists( '\FluentForm\App\Helpers\Helper' ) ? \FluentForm\App\Helpers\Helper::getSubmissionMeta( (int) $row['id'], 'aw_claim_review', '' ) : '';
 	return array(
 		'id'      => (int) $row['id'],
-		'ref'     => function_exists( 'kits_ff_ref' ) ? kits_ff_ref( 'claim', (int) $row['id'] ) : '',
+		'ref'     => function_exists( 'kits_ff_ref' ) ? kits_ff_ref( 'claim', (int) $row['id'] ) : ( (int) $row['serial_number'] ? 'AW-C-' . (int) $row['serial_number'] : '' ),
 		'sent'    => (string) $row['created_at'],
 		'listing' => $lid,
 		'name'    => $s( 'name' ),
@@ -268,9 +331,11 @@ function aw_claim_entry( $entry_id ) {
 		'phone'   => $s( 'phone' ),
 		'show'    => 'yes' === $s( 'show_on_listing' ),
 		'notes'   => $s( 'notes' ),
-		'logo'    => $file( $d['logo_token'] ?? '' ),
-		'photos'  => array_values( array_filter( array_map( $file, explode( ',', (string) ( $d['photo_tokens'] ?? '' ) ) ) ) ),
-		'proof'   => (string) ( $d['proof_token'] ?? '' ),
+		'logo'    => $ev['logo'][0] ?? $file( $d['logo_token'] ?? '' ),
+		'photos'  => $ev['photos'] ? $ev['photos'] : array_values( array_filter( array_map( $file, explode( ',', (string) ( $d['photo_tokens'] ?? '' ) ) ) ) ),
+		'proof'   => isset( $ev['proof'][0] ) ? dw_evidence_link( $ev['proof'][0] ) : (string) ( $d['proof_token'] ?? '' ),
+		'proofs'  => array_map( 'dw_evidence_link', $ev['proof'] ),
+		'problems' => $ev['problems'],
 		'propose' => $propose,
 		'review'  => is_array( $meta ) ? $meta : (array) json_decode( (string) $meta, true ), // stored as JSON (aw_claim_ff_decide)
 	);
@@ -280,18 +345,18 @@ function aw_claim_entry( $entry_id ) {
  * The fields where the claim differs from the listing now: key => [label, now, proposed]. Compared without regard to
  * spacing; email and links also without regard to case, and links without scheme, www and a closing slash.
  *
- * @param array $c aw_claim_entry().
+ * @param array $c directoryweb_claim_entry().
  * @return array
  */
-function aw_claim_changes( $c ) {
+function directoryweb_claim_changes( $c ) {
 	$norm = function ( $v, $loose ) {
 		$v = trim( preg_replace( '/\s+/', ' ', (string) $v ) );
 		return $loose ? rtrim( preg_replace( '#^https?://(www\.)?#', '', strtolower( $v ) ), '/' ) : $v; // links and email without regard to case
 	};
 	$out = array();
 	foreach ( $c['propose'] as $key => $new ) {
-		$now   = aw_claim_now( $c['listing'], $key, false );
-		if ( isset( KITS_FF_SOCIAL[ $key ] ) && '' !== directoryweb_ff_social_user( $key, $now ) && '' !== directoryweb_ff_social_user( $key, $new ) ) {
+		$now   = directoryweb_claim_now( $c['listing'], $key, false );
+		if ( isset( directoryweb_ff_social_map()[ $key ] ) && '' !== directoryweb_ff_social_user( $key, $now ) && '' !== directoryweb_ff_social_user( $key, $new ) ) {
 			$now = directoryweb_ff_social_user( $key, $now ); // the link and its username are the same thing
 			$new = directoryweb_ff_social_user( $key, $new );
 		}
@@ -311,7 +376,7 @@ const DW_CLAIMS_LINK = 'edit.php?post_type=aw_listing&page=aw-claims';
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', DIRECTORYWEB_CAP, 'aw-claims', 'aw_claims_screen' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
+		add_submenu_page( 'edit.php?post_type=aw_listing', 'Claims', 'Claims', DIRECTORYWEB_CAP, 'aw-claims', 'directoryweb_claims_screen' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 	}
 );
 
@@ -320,7 +385,7 @@ add_action(
  * Entries, for a user who can open Fluent Forms; anyone else keeps it under Directory. Only the item moves: the screen,
  * its address and its review are as before.
  */
-function aw_claims_in_forms(): bool {
+function directoryweb_claims_in_forms(): bool {
 	global $menu;
 	foreach ( (array) $menu as $item ) {
 		if ( is_array( $item ) && 'fluent_forms' === ( $item[2] ?? '' ) ) {
@@ -333,7 +398,7 @@ add_action(
 	'admin_menu',
 	function () {
 		global $submenu;
-		if ( ! aw_claims_in_forms() ) {
+		if ( ! directoryweb_claims_in_forms() ) {
 			// No Fluent Forms menu (standalone, or with Kits Core and no forms plugin): Claims is an item of the DirectoryWeb menu.
 			// Its parent, Directory, is no longer a top-level menu, so the item registered above would be unreachable from the menu.
 			if ( current_user_can( DIRECTORYWEB_CAP ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
@@ -361,7 +426,7 @@ add_filter(
 	function ( $parent ) {
 		global $plugin_page;
 		if ( 'aw-claims' === $plugin_page ) {
-			return aw_claims_in_forms() ? 'fluent_forms' : DIRECTORYWEB_PAGE;
+			return directoryweb_claims_in_forms() ? 'fluent_forms' : DIRECTORYWEB_PAGE;
 		}
 		return $parent;
 	},
@@ -377,7 +442,7 @@ add_filter(
 );
 
 /** Directory → Claims: the list (DirectoryWeb's shell screen), one claim (&entry=), or the notice after a review (&done=). */
-function aw_claims_screen() {
+function directoryweb_claims_screen() {
 	if ( ! current_user_can( DIRECTORYWEB_CAP ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 		wp_die( 'Not allowed.', 403 );
 	}
@@ -398,14 +463,14 @@ function aw_claims_screen() {
 		return;
 	}
 	echo '<div class="wrap">';
-	if ( ! aw_claim_ff_id() ) {
+	if ( ! directoryweb_claim_ff_id() ) {
 		echo '<h1>Claims</h1>';
 		wp_admin_notice( 'The claim form is not set up (Fluent Forms off, or <code>wp aw ff-form claim &lt;ID&gt;</code>).', array( 'type' => 'warning' ) );
 		echo '</div>';
 		return;
 	}
 	if ( $entry ) {
-		aw_claim_review_screen( $entry );
+		directoryweb_claim_review_screen( $entry );
 		echo '</div>';
 		return;
 	}
@@ -416,8 +481,8 @@ function aw_claims_screen() {
 }
 
 /** One claim: who sent it, the changed fields with a tick each, uploads, and Approve / Reject. */
-function aw_claim_review_screen( $entry_id ) {
-	$c = aw_claim_entry( $entry_id );
+function directoryweb_claim_review_screen( $entry_id ) {
+	$c = directoryweb_claim_entry( $entry_id );
 	if ( ! $c ) {
 		echo '<h1>Claim</h1><p>Not found.</p>';
 		return;
@@ -440,20 +505,24 @@ function aw_claim_review_screen( $entry_id ) {
 	foreach ( $who as $k => $v ) {
 		echo '<tr><th scope="row">' . esc_html( $k ) . '</th><td>' . nl2br( esc_html( '' !== (string) $v ? (string) $v : '—' ) ) . '</td></tr>';
 	}
-	echo '<tr><th scope="row">Proof</th><td>' . ( '' !== $c['proof'] ? '<a href="' . esc_url( $c['proof'] ) . '" target="_blank">Open the document</a>' : '—' ) . '</td></tr>';
+	$proofs = $c['proofs'] ? $c['proofs'] : ( '' !== $c['proof'] ? array( $c['proof'] ) : array() );
+	echo '<tr><th scope="row">Proof</th><td>' . ( $proofs ? implode( '<br>', array_map( fn( $u, $i ) => '<a href="' . esc_url( $u ) . '" target="_blank" rel="noopener">Open document ' . ( $i + 1 ) . '</a>', $proofs, array_keys( $proofs ) ) ) : '—' ) . '</td></tr>';
+	if ( $c['problems'] ) {
+		echo '<tr><th scope="row">Files not accepted</th><td>' . implode( '<br>', array_map( 'esc_html', $c['problems'] ) ) . '</td></tr>';
+	}
 	echo '</tbody></table>';
 
-	$changes = aw_claim_changes( $c );
+	$changes = directoryweb_claim_changes( $c );
 	$pending = 'pending' === $status && $lid;
 	echo '<h2>Changes</h2>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'aw_claim_ff_decide_' . $c['id'] );
 	echo '<input type="hidden" name="action" value="aw_claim_ff_decide"><input type="hidden" name="entry" value="' . (int) $c['id'] . '">';
 	$rows = array();
-	$file = fn( $f ) => add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $f ), admin_url( 'admin-post.php' ) );
+	$file = 'dw_claim_file_url';
 	foreach ( $changes as $key => $ch ) {
 		$hand   = 'l_hours' === $key; // entered by hand in the listing's Opening hours
-		$bad    = 'phones' === $key && array_filter( explode( "\n", (string) $ch[2] ), fn( $l ) => '' !== trim( $l ) && ! aw_claim_phone_ok( explode( '|', $l )[0] ) );
+		$bad    = 'phones' === $key && array_filter( explode( "\n", (string) $ch[2] ), fn( $l ) => '' !== trim( $l ) && ! directoryweb_claim_phone_ok( explode( '|', $l )[0] ) );
 		$rows[] = array(
 			'cb'    => $pending && ! $hand ? '<input type="checkbox" name="fields[]" value="' . esc_attr( $key ) . '"' . ( $bad ? '' : ' checked' ) . '>' : '',
 			'field' => esc_html( $ch[0] ) . ( $hand ? '<br><span class="description">Enter by hand in the listing\'s Opening hours.</span>' : '' ) . ( $bad ? '<br><span class="description">A line is not a phone number: approving keeps the list as it is.</span>' : '' ),
@@ -477,7 +546,7 @@ function aw_claim_review_screen( $entry_id ) {
 			'new'   => implode( ' ', array_map( fn( $f ) => '<img src="' . esc_url( $file( $f ) ) . '" alt="" width="80" height="80" style="object-fit:cover">', $c['photos'] ) ),
 		);
 	}
-	kits_simple_table( 'aw-claim-changes', array( 'cb' => '<span class="screen-reader-text">Approve</span>', 'field' => 'Field', 'now' => 'Now', 'new' => 'Proposed' ), $rows, array( 'primary' => 'field', 'empty' => 'Nothing differs from the listing.' ) );
+	directoryweb_simple_table( 'aw-claim-changes', array( 'cb' => '<span class="screen-reader-text">Approve</span>', 'field' => 'Field', 'now' => 'Now', 'new' => 'Proposed' ), $rows, array( 'primary' => 'field', 'empty' => 'Nothing differs from the listing.' ) );
 	if ( $pending ) {
 		echo '<p class="description">Approve writes the ticked fields to the listing (source "Claimed by organisation", today) and marks it claimed. Each field can be undone in Plugins → SourceWeb → Enrichment review.</p>';
 		echo '<p>';
@@ -492,14 +561,14 @@ function aw_claim_review_screen( $entry_id ) {
 }
 
 /** A plausible phone number: digits with spaces, +, -, brackets or /, and 6 to 15 digits. */
-function aw_claim_phone_ok( $v ) {
+function directoryweb_claim_phone_ok( $v ) {
 	$v = trim( (string) $v );
 	$n = strlen( preg_replace( '/\D+/', '', $v ) );
 	return (bool) preg_match( '#^[0-9+()\-/ .]+$#', $v ) && $n >= 6 && $n <= 15;
 }
 
 /** A claimed value cleaned for its listing field ('' when it cannot be used). */
-function aw_claim_clean( $meta_key, $v ) {
+function directoryweb_claim_clean( $meta_key, $v ) {
 	$v = trim( (string) $v );
 	switch ( $meta_key ) {
 		case 'aw_email':
@@ -518,9 +587,9 @@ function aw_claim_clean( $meta_key, $v ) {
 			if ( preg_match( '#^(?:https?://)?(?:[a-z]+\.)?[a-z.]+\.[a-z]+/#i', $v ) ) {
 				return (string) esc_url_raw( preg_match( '#^https?://#i', $v ) ? $v : 'https://' . $v ); // a link the username box cannot hold (a YouTube channel, a LinkedIn /in/ profile)
 			}
-			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], KITS_FF_SOCIAL ), true );
+			$field = (string) array_search( $meta_key, array_map( fn( $d ) => $d[0], directoryweb_ff_social_map() ), true );
 			$user  = '' !== $field ? directoryweb_ff_social_user( $field, $v ) : '';
-			return '' !== $user ? sprintf( KITS_FF_SOCIAL[ $field ][1], rawurlencode( $user ) ) : '';
+			return '' !== $user ? sprintf( directoryweb_ff_social_map()[ $field ][1], rawurlencode( $user ) ) : '';
 		case 'aw_founded':
 			return preg_match( '/^(18|19|20)\d{2}$/', $v ) ? $v : '';
 		case 'aw_reg_date':
@@ -533,20 +602,28 @@ function aw_claim_clean( $meta_key, $v ) {
 	}
 }
 
-/** A private upload (claim logo or photo) into the media library for the listing; attachment ID or 0. */
-function aw_claim_sideload( $file, $lid, $title ) {
-	if ( ! function_exists( 'kits_private_dir' ) ) {
-		return 0; // the private folder is Animal Writes Core's: no file to bring in
+/** The link to a stored claim file: DirectoryWeb's own store, or (for a file an older Kits Core form kept) Kits Core's handler. */
+function dw_claim_file_url( $name ) {
+	if ( function_exists( 'dw_evidence_name_ok' ) && dw_evidence_name_ok( (string) $name ) ) {
+		return dw_evidence_link( (string) $name );
 	}
-	$path = kits_private_dir() . '/' . $file;
-	if ( ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', (string) $file ) || ! is_file( $path ) ) {
+	return add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $name ), admin_url( 'admin-post.php' ) );
+}
+
+/** A private upload (claim logo or photo) into the media library for the listing; attachment ID or 0. */
+function directoryweb_claim_sideload( $file, $lid, $title ) {
+	$bytes = function_exists( 'dw_evidence_read' ) ? dw_evidence_read( (string) $file ) : '';
+	if ( '' === $bytes && function_exists( 'kits_private_dir' ) && preg_match( '/^[A-Za-z0-9]{20}\.png$/', (string) $file ) && is_file( kits_private_dir() . '/' . $file ) ) {
+		$bytes = (string) file_get_contents( kits_private_dir() . '/' . $file ); // a file an older Kits Core form kept, if that plugin is still here
+	}
+	if ( '' === $bytes || '.pdf' === substr( (string) $file, -4 ) ) {
 		return 0;
 	}
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	$tmp = wp_tempnam( $file );
-	if ( ! $tmp || ! copy( $path, $tmp ) ) {
+	if ( ! $tmp || false === file_put_contents( $tmp, $bytes ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions
 		return 0;
 	}
 	$att = media_handle_sideload( array( 'name' => sanitize_title( get_the_title( $lid ) ) . '-' . wp_generate_password( 4, false, false ) . '.png', 'tmp_name' => $tmp ), $lid, $title );
@@ -561,11 +638,11 @@ function aw_claim_sideload( $file, $lid, $title ) {
 /**
  * Write one approved field to the listing, logged first in the enrichment change log (with what was there, for Undo).
  *
- * @param array  $c   aw_claim_entry().
+ * @param array  $c   directoryweb_claim_entry().
  * @param string $key DW_CLAIM_L key, logo or photos.
  * @return bool
  */
-function aw_claim_apply_field( $c, $key ) {
+function directoryweb_claim_apply_field( $c, $key ) {
 	$lid = $c['listing'];
 	$src = array( array( 'key' => 'claim', 'name' => 'Claimed by organisation', 'url' => '', 'fetched_at' => wp_date( 'c' ) ) );
 	$on   = function_exists( 'aw_enrich_add_row' ) && function_exists( 'aw_enrich_snapshot' ) && function_exists( 'aw_enrich_install' );
@@ -578,7 +655,7 @@ function aw_claim_apply_field( $c, $key ) {
 	};
 	if ( 'logo' === $key ) {
 		$old = $snap( 'logo' );
-		$att = aw_claim_sideload( $c['logo'], $lid, get_the_title( $lid ) . ' logo' );
+		$att = directoryweb_claim_sideload( $c['logo'], $lid, get_the_title( $lid ) . ' logo' );
 		if ( ! $att || ! set_post_thumbnail( $lid, $att ) ) {
 			return false;
 		}
@@ -589,7 +666,7 @@ function aw_claim_apply_field( $c, $key ) {
 		$old = $snap( 'photos' );
 		$ids = array();
 		foreach ( array_slice( $c['photos'], 0, 5 ) as $f ) {
-			$att = aw_claim_sideload( $f, $lid, get_the_title( $lid ) );
+			$att = directoryweb_claim_sideload( $f, $lid, get_the_title( $lid ) );
 			if ( $att ) {
 				$ids[] = $att;
 			}
@@ -613,7 +690,7 @@ function aw_claim_apply_field( $c, $key ) {
 			$lines = array_filter( explode( "\n", $new ) );
 			foreach ( $lines as $line ) {
 				$p = array_map( 'trim', explode( '|', $line ) );
-				if ( ! aw_claim_phone_ok( $p[0] ) ) {
+				if ( ! directoryweb_claim_phone_ok( $p[0] ) ) {
 					continue; // not a phone number: never stored
 				}
 				$rows[] = array( 'number' => sanitize_text_field( $p[0] ), 'label' => sanitize_text_field( 'WhatsApp' !== ( $p[1] ?? '' ) ? ( $p[1] ?? '' ) : '' ), 'whatsapp' => in_array( 'WhatsApp', $p, true ) );
@@ -636,7 +713,7 @@ function aw_claim_apply_field( $c, $key ) {
 			wp_update_post( array( 'ID' => $lid, 'post_content' => wpautop( sanitize_textarea_field( $new ) ) ) );
 			return true;
 		default:
-			$val = aw_claim_clean( $def[1], $new );
+			$val = directoryweb_claim_clean( $def[1], $new );
 			if ( '' === $val && '' !== $new ) {
 				return false; // not usable for this field (a link, a date or a UPI ID that does not match)
 			}
@@ -657,7 +734,7 @@ add_action(
 		if ( ! current_user_can( DIRECTORYWEB_CAP ) || ! check_admin_referer( 'aw_claim_ff_decide_' . $id ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
 			wp_die( 'Not allowed.', 403 );
 		}
-		$c    = aw_claim_entry( $id );
+		$c    = directoryweb_claim_entry( $id );
 		$want = isset( $_POST['do_approve'] ) ? 'approved' : 'rejected';
 		// The state table (claim-native.php) decides whether this move is allowed; a form claim only moves out of 'pending' here.
 		$can = $c && $c['listing'] && ( function_exists( 'dw_claim_can_transition' ) ? dw_claim_can_transition( (string) ( $c['review']['status'] ?? 'pending' ), $want ) : 'pending' === (string) ( $c['review']['status'] ?? 'pending' ) );
@@ -670,7 +747,7 @@ add_action(
 			$want = array_map( 'sanitize_key', (array) wp_unslash( $_POST['fields'] ?? array() ) );
 			$ok   = array();
 			foreach ( $want as $key ) {
-				if ( aw_claim_apply_field( $c, $key ) ) {
+				if ( directoryweb_claim_apply_field( $c, $key ) ) {
 					$ok[] = $key;
 				}
 			}
@@ -679,8 +756,8 @@ add_action(
 			update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
 			update_post_meta( $lid, 'aw_needs_reverify', false );
 			delete_transient( 'aw_verified_count' );
-			if ( function_exists( 'aw_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
-				aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
+			if ( function_exists( 'directoryweb_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
+				directoryweb_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
 			}
 			if ( function_exists( 'aw_enrich_after_change' ) ) {
 				aw_enrich_after_change( $lid );
@@ -690,7 +767,7 @@ add_action(
 			$review += array( 'status' => 'rejected' );
 		}
 		if ( class_exists( '\FluentForm\App\Helpers\Helper' ) ) { // Fluent Forms is the claim form's store; without it there is nothing to write to
-			\FluentForm\App\Helpers\Helper::setSubmissionMeta( $id, 'aw_claim_review', wp_json_encode( $review ), aw_claim_ff_id() );
+			\FluentForm\App\Helpers\Helper::setSubmissionMeta( $id, 'aw_claim_review', wp_json_encode( $review ), directoryweb_claim_ff_id() );
 		}
 		delete_transient( 'directoryweb_claim_rows' ); // DirectoryWeb's Claims list reads it again.
 		wp_safe_redirect( add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims', 'done' => $review['status'] ), admin_url( 'edit.php' ) ) );

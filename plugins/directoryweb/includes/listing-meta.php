@@ -41,7 +41,7 @@ function directoryweb_meta_schema(): array {
 		return $schema;
 	}
 	$fields = array(
-		'verified'              => array( 'boolean', 'Verified by Animal Writes' ),
+		'verified'              => array( 'boolean', 'Verified' ),
 		'verified_on'           => array( 'string', 'Last verified date (Y-m-d)' ),
 		'awbi_recognised'       => array( 'string', 'AWBI recognised on (Y-m-d)' ),
 		'awbi_renewed'          => array( 'string', 'AWBI renewed on (Y-m-d)' ),
@@ -136,17 +136,172 @@ function directoryweb_sanitize_meta( $value, $key ) {
 	return sanitize_text_field( (string) $value );
 }
 
+/**
+ * Listing meta that records a decision, not a description: the Verified mark and its dates, the re-verify flag, the
+ * government-source and registry fields, the AWBI/Darpan values. Code sets these (claim approval, imports, the registry
+ * commands) with update_post_meta(), which does not pass through auth_callback; over REST or the editor only a
+ * DirectoryWeb manager may change them. Everyone who can edit the listing keeps the descriptive fields.
+ *
+ * @return string[] Meta names without the prefix.
+ */
+function directoryweb_protected_meta_names(): array {
+	return (array) apply_filters(
+		'directoryweb_protected_meta_names',
+		array(
+			'verified', 'verified_on', 'needs_reverify', 'gov_verified_on', 'gov_verified_by',
+			'awbi_recognised', 'awbi_renewed', 'awbi_valid', 'awbi_code', 'awbi_dropped', 'awbi_list_on',
+			'darpan_id', 'darpan_blacklisted_by', 'darpan_blacklisted_on', 'reg_authority', 'reg_act', 'reg_date', 'sectors',
+		)
+	);
+}
+
+/**
+ * Whether the signed-in user may change a decision field on a listing. Code with no signed-in user (WP-CLI, cron,
+ * imports) and DirectoryWeb managers may; a signed-in user without the DirectoryWeb capability may not.
+ *
+ * @return bool
+ */
+function directoryweb_can_write_protected_meta(): bool {
+	$uid = (int) get_current_user_id();
+	return 0 === $uid || current_user_can( defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_options' );
+}
+
+/**
+ * The one guard every route passes through: the REST API, the block editor, Secure Custom Fields / ACF forms, quick and
+ * bulk edit, the Custom Fields box, XML-RPC and plain update_post_meta() all end in the metadata filters, so a decision
+ * field is refused here whatever way a signed-in contributor reaches it. (auth_callback below covers the REST and
+ * capability checks; this covers the paths that never ask it.)
+ *
+ * @param mixed  $check     Short-circuit value (null to continue).
+ * @param int    $object_id Post ID.
+ * @param string $meta_key  Meta key.
+ * @return mixed false to refuse, else $check.
+ */
+function directoryweb_guard_protected_meta( $check, $object_id, $meta_key ) {
+	if ( null !== $check || ! is_string( $meta_key ) || 0 !== strpos( $meta_key, directoryweb_meta_prefix() ) ) {
+		return $check;
+	}
+	if ( ! in_array( substr( $meta_key, strlen( directoryweb_meta_prefix() ) ), directoryweb_protected_meta_names(), true ) ) {
+		return $check;
+	}
+	if ( directoryweb_post_type() !== get_post_type( (int) $object_id ) || directoryweb_can_write_protected_meta() ) {
+		return $check;
+	}
+	return false;
+}
+add_filter( 'add_post_metadata', 'directoryweb_guard_protected_meta', 1, 3 );
+add_filter( 'update_post_metadata', 'directoryweb_guard_protected_meta', 1, 3 );
+add_filter( 'delete_post_metadata', 'directoryweb_guard_protected_meta', 1, 3 );
+
+/** In Secure Custom Fields / ACF forms: a team-only field is not drawn for a non-manager; a decision field is shown read only to a user who cannot change it. */
+add_filter(
+	'acf/prepare_field',
+	function ( $field ) {
+		$name = is_array( $field ) ? (string) ( $field['name'] ?? '' ) : '';
+		if ( '' !== $name && 0 === strpos( $name, directoryweb_meta_prefix() ) && in_array( substr( $name, strlen( directoryweb_meta_prefix() ) ), directoryweb_private_meta_names(), true ) && ! current_user_can( defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_options' ) ) {
+			return false; // team-only data: the field is not drawn at all, so its stored value is never sent to the editor
+		}
+		if ( '' !== $name && 0 === strpos( $name, directoryweb_meta_prefix() ) && in_array( substr( $name, strlen( directoryweb_meta_prefix() ) ), directoryweb_protected_meta_names(), true ) && ! directoryweb_can_write_protected_meta() ) {
+			$field['readonly'] = 1;
+			$field['disabled'] = 1;
+		}
+		return $field;
+	}
+);
+
+/**
+ * Listing meta that is for the team only: it is never in a REST response to anyone without the DirectoryWeb capability.
+ * Registry and government-source working fields and the re-verify flag. (Values the listing page itself prints, such as
+ * the Verified date, the registration date and the 12A/80G numbers, are public content and stay readable.)
+ *
+ * @return string[] Meta names without the prefix.
+ */
+function directoryweb_private_meta_names(): array {
+	return (array) apply_filters(
+		'directoryweb_private_meta_names',
+		array( 'needs_reverify', 'gov_verified_by', 'darpan_blacklisted_by', 'darpan_blacklisted_on', 'reg_authority', 'reg_act', 'sectors', 'awbi_list_on' )
+	);
+}
+
+/**
+ * Remove the team-only keys from a meta array.
+ *
+ * @param mixed $meta A response's meta.
+ * @return mixed
+ */
+function directoryweb_strip_private_meta( $meta ) {
+	if ( ! is_array( $meta ) ) {
+		return $meta;
+	}
+	foreach ( directoryweb_private_meta_names() as $n ) {
+		unset( $meta[ directoryweb_meta_prefix() . $n ] );
+	}
+	return $meta;
+}
+
+/**
+ * A listing in a REST response (single, collection, embedded, or the item inside a batch request): drop the team-only
+ * meta unless the reader has the DirectoryWeb capability.
+ *
+ * @param WP_REST_Response $response Response.
+ * @return WP_REST_Response
+ */
+function directoryweb_rest_hide_private_meta( $response ) {
+	if ( ! $response instanceof WP_REST_Response || current_user_can( defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_options' ) ) {
+		return $response;
+	}
+	$data = $response->get_data();
+	if ( is_array( $data ) && isset( $data['meta'] ) ) {
+		$data['meta'] = directoryweb_strip_private_meta( $data['meta'] );
+		$response->set_data( $data );
+	}
+	return $response;
+}
+add_filter( 'rest_prepare_aw_listing', 'directoryweb_rest_hide_private_meta', 99 );
+add_filter( 'rest_prepare_revision', 'directoryweb_rest_hide_private_meta', 99 );
+add_filter( 'rest_prepare_autosave', 'directoryweb_rest_hide_private_meta', 99 );
+
+/**
+ * Second layer, over the finished response (a served request, including a batch and embedded items): any "meta" object
+ * that still carries a team-only key loses it. Covers responses built by other code.
+ *
+ * @param WP_REST_Response $result Result.
+ * @return WP_REST_Response
+ */
+function directoryweb_rest_scrub_response( $result ) {
+	if ( ! $result instanceof WP_REST_Response || current_user_can( defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_options' ) ) {
+		return $result;
+	}
+	$scrub = function ( $v, $depth = 0 ) use ( &$scrub ) {
+		if ( ! is_array( $v ) || $depth > 8 ) {
+			return $v;
+		}
+		foreach ( $v as $k => $x ) {
+			$v[ $k ] = 'meta' === $k ? directoryweb_strip_private_meta( $x ) : $scrub( $x, $depth + 1 );
+		}
+		return $v;
+	};
+	$result->set_data( $scrub( $result->get_data() ) );
+	return $result;
+}
+add_filter( 'rest_post_dispatch', 'directoryweb_rest_scrub_response', 99 );
+
 /** Register the listing meta (REST and the block editor), with the same arguments Core registered them with. */
 function directoryweb_register_meta(): void {
+	$protected = array_map( fn( $n ) => directoryweb_meta_prefix() . $n, directoryweb_protected_meta_names() );
 	foreach ( directoryweb_meta_schema() as $key => $def ) {
 		list( $type, $post_types, $description ) = $def;
+		$is_protected                            = in_array( $key, $protected, true );
 		$args                                    = array(
 			'type'          => $type,
 			'description'   => $description,
 			'single'        => true,
 			'show_in_rest'  => true,
-			'auth_callback' => function () {
-				return current_user_can( 'edit_posts' );
+			'auth_callback' => function ( $allowed, $meta_key, $post_id ) use ( $is_protected ) {
+				if ( $is_protected ) {
+					return current_user_can( defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_options' );
+				}
+				return $post_id ? current_user_can( 'edit_post', (int) $post_id ) : current_user_can( 'edit_posts' );
 			},
 		);
 		if ( 'string' === $type ) {
@@ -188,7 +343,7 @@ const DIRECTORYWEB_LIST_FIELDS = array(
 );
 
 /**
- * Never-publish list: numbers taken down on privacy grounds, as SHA-256 of the normalised digits (aw_normalise_phone,
+ * Never-publish list: numbers taken down on privacy grounds, as SHA-256 of the normalised digits (directoryweb_normalise_phone,
  * e.g. 91XXXXXXXXXX) so the code holds no copy of the number. Checked on every phone write (imports, ingest, claims,
  * the listing profile, enrichment) and on display. Add a hash with: php -r 'echo hash("sha256","91XXXXXXXXXX");'
  */
@@ -208,7 +363,7 @@ function directoryweb_phone_never_publish( $raw ) {
 		$n = '91' . $n;
 	}
 	// The older filter name keeps working inside the new one.
-	$hashes = (array) apply_filters( 'directoryweb_never_publish_phones', (array) apply_filters( 'aw_never_publish_phones', DIRECTORYWEB_NEVER_PUBLISH_PHONES ) );
+	$hashes = (array) apply_filters( 'directoryweb_never_publish_phones', (array) apply_filters( 'directoryweb_never_publish_phones', DIRECTORYWEB_NEVER_PUBLISH_PHONES ) );
 	return '' !== $n && in_array( hash( 'sha256', $n ), $hashes, true );
 }
 

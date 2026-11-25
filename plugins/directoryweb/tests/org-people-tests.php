@@ -38,7 +38,7 @@ function check( $ok, $name ) {
 }
 
 // A new claimant who did not tick "Show my name": linked, tagged, not shown.
-$p = aw_org_people_link_plan( array(), false, 42, false, 'Paws Trust', 'Staff member' );
+$p = directoryweb_org_people_link_plan( array(), false, 42, false, 'Paws Trust', 'Staff member' );
 check( 'linked' === $p['status'], 'new claimant is linked' );
 check( true === $p['tag'], 'new claimant gets org-approved' );
 check( '42' === $p['sync']['vol_org_listing'], 'listing ID stored' );
@@ -47,17 +47,17 @@ check( 'Paws Trust' === $p['sync']['vol_organisation'], 'organisation name store
 check( 'Staff member' === $p['sync']['vol_org_role'], 'role stored' );
 
 // Ticked "Show my name": shown.
-$p = aw_org_people_link_plan( array(), false, 42, true, 'Paws Trust', '' );
+$p = directoryweb_org_people_link_plan( array(), false, 42, true, 'Paws Trust', '' );
 check( '1' === $p['sync']['vol_org_show'], 'shown with opt-in' );
 check( ! isset( $p['sync']['vol_org_role'] ), 'empty role not written' );
 
 // Already tagged (a volunteer) with no listing ID: linked, no second tag, an existing "show" kept.
-$p = aw_org_people_link_plan( array( 'vol_org_show' => '1' ), true, 42, false, 'Paws Trust', '' );
+$p = directoryweb_org_people_link_plan( array( 'vol_org_show' => '1' ), true, 42, false, 'Paws Trust', '' );
 check( 'linked' === $p['status'] && false === $p['tag'], 'tagged volunteer is linked without retagging' );
 check( '1' === $p['sync']['vol_org_show'], 'a name already shown stays shown' );
 
 // Already linked to this listing.
-$p = aw_org_people_link_plan(
+$p = directoryweb_org_people_link_plan(
 	array(
 		'vol_org_listing' => '42',
 		'vol_org_show'    => '',
@@ -69,7 +69,7 @@ $p = aw_org_people_link_plan(
 	''
 );
 check( 'already' === $p['status'] && array() === $p['sync'] && false === $p['tag'], 'already linked: nothing changes' );
-$p = aw_org_people_link_plan(
+$p = directoryweb_org_people_link_plan(
 	array(
 		'vol_org_listing' => '42',
 		'vol_org_show'    => '',
@@ -81,7 +81,7 @@ $p = aw_org_people_link_plan(
 	''
 );
 check( 'updated' === $p['status'] && array( 'vol_org_show' => '1' ) === $p['sync'], 'already linked, now opted in: shown' );
-$p = aw_org_people_link_plan(
+$p = directoryweb_org_people_link_plan(
 	array(
 		'vol_org_listing' => '42',
 		'vol_org_show'    => '1',
@@ -95,15 +95,15 @@ $p = aw_org_people_link_plan(
 check( 'already' === $p['status'], 'a name already shown is never hidden' );
 
 // Listing ID set but tag missing: relinked with the tag.
-$p = aw_org_people_link_plan( array( 'vol_org_listing' => '42' ), false, 42, false, 'Paws Trust', '' );
+$p = directoryweb_org_people_link_plan( array( 'vol_org_listing' => '42' ), false, 42, false, 'Paws Trust', '' );
 check( 'linked' === $p['status'] && true === $p['tag'], 'listing set without tag: tag added' );
 
 // Linked to another listing: nothing changes.
-$p = aw_org_people_link_plan( array( 'vol_org_listing' => '7' ), true, 42, true, 'Paws Trust', '' );
+$p = directoryweb_org_people_link_plan( array( 'vol_org_listing' => '7' ), true, 42, true, 'Paws Trust', '' );
 check( 'elsewhere' === $p['status'] && array() === $p['sync'] && false === $p['tag'], 'linked elsewhere: unchanged' );
 
 // No listing.
-$p = aw_org_people_link_plan( array(), false, 0, true, '', '' );
+$p = directoryweb_org_people_link_plan( array(), false, 0, true, '', '' );
 check( 'no-listing' === $p['status'] && array() === $p['sync'], 'no listing: unchanged' );
 
 echo $count . ' checks, ' . $fails . " failed\n";

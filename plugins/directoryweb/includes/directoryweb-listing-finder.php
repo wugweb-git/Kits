@@ -41,7 +41,7 @@ function directoryweb_listing_finder_render( $attributes = array() ) { // phpcs:
 	if ( $listing ) {
 		$summary = function_exists( 'directoryweb_claim_listing_summary' ) ? directoryweb_claim_listing_summary( $listing ) : '';
 		$stepper = function_exists( 'directoryweb_claim_stepper' ) && ! ( function_exists( 'dw_claim_native_active' ) && dw_claim_native_active() ) ? directoryweb_claim_stepper( 1 ) : '';
-		$form    = function_exists( 'aw_claim_form' ) ? aw_claim_form( $listing ) : '';
+		$form    = function_exists( 'directoryweb_claim_form' ) ? directoryweb_claim_form( $listing ) : '';
 
 		return '<div class="aw-form-page aw-claim-page" id="claim">'
 			. $summary

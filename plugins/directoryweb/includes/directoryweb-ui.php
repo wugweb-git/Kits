@@ -1,6 +1,6 @@
 <?php
 /**
- * DirectoryWeb's screens on the Kits admin shell (docs/directory-plugin-plan.md §2), the default since 12 Nov 2026.
+ * DirectoryWeb's screens on the Kits admin shell (docs/plugins/directoryweb-plan.md §2), the default since 12 Nov 2026.
  *
  * Addresses:
  *   admin.php?page=directoryweb                              Dashboard   manage_directoryweb (directoryweb-caps.php)
@@ -174,7 +174,7 @@ add_action(
 			$tabs[] = array(
 				'slug'    => 'place-intros',
 				'label'   => __( 'Place intros', 'directoryweb' ),
-				'url'     => aw_place_intros_url(), // a core screen (place-intros.php)
+				'url'     => directoryweb_place_intros_url(), // a core screen (place-intros.php)
 				'current' => false,
 			);
 		}
@@ -431,19 +431,21 @@ function directoryweb_claim_status_card(): void {
 	$d    = dw_claim_diagnostics();
 	$yes  = __( 'Yes', 'directoryweb' );
 	$no   = __( 'No', 'directoryweb' );
+	$src  = fn( string $k ) => ' (' . dw_claim_source_label( (string) $d['sources'][ $k ] ) . ')';
 	$rows = array(
-		__( 'Claim path', 'directoryweb' )         => 'built-in' === $d['mode'] ? __( 'Built-in form', 'directoryweb' ) : __( 'Fluent Forms', 'directoryweb' ),
-		__( 'Fluent Forms active', 'directoryweb' ) => $d['fluent_forms'] ? $yes : $no,
-		__( 'Claim page published', 'directoryweb' ) => $d['page_live'] ? $yes : $no,
-		__( 'Claim emails', 'directoryweb' )       => $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ),
-		__( 'New-claim emails go to', 'directoryweb' ) => $d['notify_to'] . ( '' === $d['notify_stored'] ? ' ' . __( '(site admin email)', 'directoryweb' ) : '' ),
+		__( 'Claim path', 'directoryweb' )              => 'built-in' === $d['mode'] ? __( 'Built-in form', 'directoryweb' ) : __( 'Fluent Forms', 'directoryweb' ),
+		__( 'Fluent Forms active', 'directoryweb' )     => $d['fluent_forms'] ? $yes : $no,
+		__( 'Claim page published', 'directoryweb' )    => ( $d['page_live'] ? $yes : $no ) . $src( 'page' ),
+		__( 'Claim emails', 'directoryweb' )            => ( $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ) ) . $src( 'mail' ),
+		__( 'New-claim emails go to', 'directoryweb' )  => $d['notify_to'] . ' (' . ( 'option' === $d['sources']['notify'] ? dw_claim_source_label( 'option' ) : __( 'site admin email', 'directoryweb' ) . ', ' . dw_claim_source_label( 'default' ) ) . ')',
 		/* translators: 1: open claims per email, 2: submissions per hour. */
-		__( 'Limits', 'directoryweb' )             => sprintf( __( '%1$d open claims per email; %2$d submissions per hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ),
+		__( 'Limits', 'directoryweb' )                  => sprintf( __( '%1$d open claims per email; %2$d submissions per hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ) . $src( 'limits' ),
 	);
 	foreach ( $d['counts'] as $state => $n ) {
 		/* translators: %s: claim state. */
-		$rows[ sprintf( __( 'Claims %s', 'directoryweb' ), $state ) ] = number_format_i18n( $n );
+		$rows[ sprintf( __( 'Built-in claims: %s', 'directoryweb' ), $state ) ] = number_format_i18n( $n );
 	}
+	$rows[ __( 'Built-in claims: all', 'directoryweb' ) ] = number_format_i18n( $d['total'] );
 	echo '<div class="card" id="directoryweb-claim-status" style="max-width:800px; margin-top:20px; padding:20px;">';
 	echo '<h2 style="margin-top:0;">' . esc_html__( 'Claim status', 'directoryweb' ) . '</h2>';
 	echo '<table class="widefat striped" role="presentation"><tbody>';
@@ -451,6 +453,6 @@ function directoryweb_claim_status_card(): void {
 		echo '<tr><th scope="row" style="width:40%">' . esc_html( $label ) . '</th><td>' . esc_html( $value ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
-	echo '<p class="description">' . esc_html__( 'Read live from your settings and claims each time this page opens.', 'directoryweb' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Read live each time this page opens. Counts are DirectoryWeb’s built-in claims only: claims submitted through Fluent Forms or another form provider are not read and not included.', 'directoryweb' ) . '</p>';
 	echo '</div>';
 }

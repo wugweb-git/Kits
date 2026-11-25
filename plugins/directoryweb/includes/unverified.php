@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** A value in its comparable form (phones: last 10 digits; email: lower case; web address: no scheme, www or slash). */
-function aw_unverified_norm( $v ) {
+function directoryweb_unverified_norm( $v ) {
 	$v = strtolower( trim( (string) $v ) );
 	if ( false !== strpos( $v, '@' ) ) {
 		return $v;
@@ -23,27 +23,27 @@ function aw_unverified_norm( $v ) {
 }
 
 /** The values of a listing that are shown as unverified (kept next to another one; cleared when the organisation claims it). */
-function aw_unverified_list( $lid ) {
+function directoryweb_unverified_list( $lid ) {
 	$v = get_post_meta( $lid, 'aw_unverified', true );
 	return is_array( $v ) ? array_values( $v ) : array();
 }
 
 /** Mark values unverified. */
-function aw_unverified_add( $lid, array $values ) {
-	$list = array_merge( aw_unverified_list( $lid ), array_map( 'aw_unverified_norm', $values ) );
+function directoryweb_unverified_add( $lid, array $values ) {
+	$list = array_merge( directoryweb_unverified_list( $lid ), array_map( 'directoryweb_unverified_norm', $values ) );
 	update_post_meta( $lid, 'aw_unverified', array_values( array_unique( array_filter( $list ) ) ) );
 }
 
 /** A reviewer approved a value: it is no longer unverified. */
-function aw_unverified_remove( $lid, $value ) {
-	$n = aw_unverified_norm( $value );
-	$l = array_values( array_diff( aw_unverified_list( $lid ), array( $n ) ) );
+function directoryweb_unverified_remove( $lid, $value ) {
+	$n = directoryweb_unverified_norm( $value );
+	$l = array_values( array_diff( directoryweb_unverified_list( $lid ), array( $n ) ) );
 	$l ? update_post_meta( $lid, 'aw_unverified', $l ) : delete_post_meta( $lid, 'aw_unverified' );
 }
 
 /** The small mark after a value that is not verified. */
-function aw_unverified_mark( $lid, $value ) {
-	if ( ! in_array( aw_unverified_norm( $value ), aw_unverified_list( $lid ), true ) ) {
+function directoryweb_unverified_mark( $lid, $value ) {
+	if ( ! in_array( directoryweb_unverified_norm( $value ), directoryweb_unverified_list( $lid ), true ) ) {
 		return '';
 	}
 	$why = 'Unverified: this listing has another value for it. The organisation can confirm it by claiming the listing.';
