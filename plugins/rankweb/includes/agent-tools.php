@@ -30,8 +30,8 @@ add_action(
 		wp_register_ability_category(
 			AW_Agent::CATEGORY,
 			array(
-				'label'       => __( 'RankWeb', 'aw-seo-extras' ),
-				'description' => __( 'Read and change RankWeb\'s SEO data.', 'aw-seo-extras' ),
+				'label'       => __( 'RankWeb', 'rankweb' ),
+				'description' => __( 'Read and change RankWeb\'s SEO data.', 'rankweb' ),
 			)
 		);
 		$specs = aw_agent_specs();
@@ -82,19 +82,19 @@ function aw_agent_specs(): array {
 	$can_admin = fn() => current_user_can( 'manage_options' );
 	return array(
 		'rankweb/get-seo'       => array(
-			'label'      => __( 'Get SEO', 'aw-seo-extras' ),
+			'label'      => __( 'Get SEO', 'rankweb' ),
 			'input'      => aw_agent_schema( $post_id, array( 'post_id' ) ),
 			'permission' => $can_edit,
 			'execute'    => fn( $input ) => aw_agent_get_seo( (int) $input['post_id'] ),
 		),
 		'rankweb/audit-summary' => array(
-			'label'      => __( 'Internal links audit summary', 'aw-seo-extras' ),
+			'label'      => __( 'Internal links audit summary', 'rankweb' ),
 			'input'      => aw_agent_schema( array() ),
 			'permission' => $can_admin,
-			'execute'    => fn() => function_exists( 'aw_link_audit_summary' ) ? aw_link_audit_summary() : new WP_Error( 'aw_agent', __( 'The internal links audit is not available.', 'aw-seo-extras' ) ),
+			'execute'    => fn() => function_exists( 'aw_link_audit_summary' ) ? aw_link_audit_summary() : new WP_Error( 'aw_agent', __( 'The internal links audit is not available.', 'rankweb' ) ),
 		),
 		'rankweb/list-orphans'  => array(
-			'label'      => __( 'List orphans', 'aw-seo-extras' ),
+			'label'      => __( 'List orphans', 'rankweb' ),
 			'input'      => aw_agent_schema(
 				array(
 					'limit' => array(
@@ -108,7 +108,7 @@ function aw_agent_specs(): array {
 			'execute'    => fn( $input ) => aw_agent_list_orphans( (int) ( $input['limit'] ?? 100 ) ),
 		),
 		'rankweb/set-seo'       => array(
-			'label'      => __( 'Set SEO', 'aw-seo-extras' ),
+			'label'      => __( 'Set SEO', 'rankweb' ),
 			'input'      => aw_agent_schema(
 				array(
 					'post_id'       => array(
@@ -130,7 +130,7 @@ function aw_agent_specs(): array {
 			'execute'    => fn( $input ) => aw_agent_set_seo( (array) $input ),
 		),
 		'rankweb/add-redirect'  => array(
-			'label'      => __( 'Add redirect', 'aw-seo-extras' ),
+			'label'      => __( 'Add redirect', 'rankweb' ),
 			'input'      => aw_agent_schema(
 				array(
 					'source'     => array( 'type' => 'string' ),
@@ -147,7 +147,7 @@ function aw_agent_specs(): array {
 			'execute'    => fn( $input ) => aw_agent_add_redirect( (array) $input ),
 		),
 		'rankweb/set-schema'    => array(
-			'label'      => __( 'Set custom schema', 'aw-seo-extras' ),
+			'label'      => __( 'Set custom schema', 'rankweb' ),
 			'input'      => aw_agent_schema(
 				array(
 					'post_id' => array(
@@ -174,7 +174,7 @@ function aw_agent_specs(): array {
  */
 function aw_agent_get_seo( int $id ) {
 	if ( ! get_post( $id ) ) {
-		return new WP_Error( 'aw_agent', __( 'No such item.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_agent', __( 'No such item.', 'rankweb' ) );
 	}
 	$links  = function_exists( 'aw_link_keywords' ) ? aw_link_keywords( $id ) : (array) get_post_meta( $id, '_aw_link_keywords', true );
 	$robots = get_post_meta( $id, 'rank_math_robots', true );
@@ -199,7 +199,7 @@ function aw_agent_get_seo( int $id ) {
 function aw_agent_set_seo( array $input ) {
 	$id = (int) ( $input['post_id'] ?? 0 );
 	if ( ! get_post( $id ) ) {
-		return new WP_Error( 'aw_agent', __( 'No such item.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_agent', __( 'No such item.', 'rankweb' ) );
 	}
 	$meta = array(
 		'title'         => 'rank_math_title',
@@ -239,7 +239,7 @@ function aw_agent_set_seo( array $input ) {
 function aw_agent_list_orphans( int $limit ) {
 	global $wpdb;
 	if ( ! function_exists( 'aw_link_table' ) || get_option( 'aw_link_audit_db' ) !== '1' ) {
-		return new WP_Error( 'aw_agent', __( 'The internal links audit has not run.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_agent', __( 'The internal links audit has not run.', 'rankweb' ) );
 	}
 	$limit = max( 1, min( 500, $limit ) );
 	$ids   = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT post_id FROM %i WHERE flags LIKE %s ORDER BY post_id LIMIT %d', aw_link_table( 'audit' ), '%,orphan,%', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, read for an agent
@@ -265,7 +265,7 @@ function aw_agent_list_orphans( int $limit ) {
  */
 function aw_agent_add_redirect( array $input ) {
 	if ( ! function_exists( 'aw_rank_math_redirect' ) ) {
-		return new WP_Error( 'aw_agent', __( 'Redirects are not available.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_agent', __( 'Redirects are not available.', 'rankweb' ) );
 	}
 	require_once __DIR__ . '/class-aw-redirects.php';
 	$v = AW_Redirects::validate(
@@ -282,7 +282,7 @@ function aw_agent_add_redirect( array $input ) {
 	$target  = in_array( $v['code'], AW_Redirects::GONE, true ) ? '' : ( preg_match( '~^https?://~i', $v['target'] ) ? $v['target'] : home_url( '/' . ltrim( $v['target'], '/' ) ) );
 	$pattern = 'regex' === $v['comparison'] ? $v['source'] : trim( $v['source'], '/' );
 	$id      = aw_rank_math_redirect( $pattern, $target, $v['comparison'], $v['code'] );
-	return $id ? array( 'id' => (int) $id ) : new WP_Error( 'aw_agent', __( 'The redirect was already in the list or could not be saved.', 'aw-seo-extras' ) );
+	return $id ? array( 'id' => (int) $id ) : new WP_Error( 'aw_agent', __( 'The redirect was already in the list or could not be saved.', 'rankweb' ) );
 }
 
 /**
@@ -297,7 +297,7 @@ function aw_agent_set_schema( int $id, string $jsonld ) {
 		require_once __DIR__ . '/class-aw-schema.php';
 	}
 	if ( ! get_post( $id ) ) {
-		return new WP_Error( 'aw_agent', __( 'No such item.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_agent', __( 'No such item.', 'rankweb' ) );
 	}
 	$parsed = AW_Schema::parse( $jsonld );
 	if ( '' !== $parsed['error'] ) {

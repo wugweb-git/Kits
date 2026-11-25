@@ -102,28 +102,28 @@ const TILE_GROUPS = [
 	{
 		id: 'content',
 		keys: [ 'titles', 'descs', 'focus', 'schema' ],
-		title: __( 'Content & metadata', 'aw-seo-extras' ),
+		title: __( 'Content & metadata', 'rankweb' ),
 		description: __(
 			'Search titles, descriptions, focus keywords and Rank Math schema across the item types RankWeb manages.',
-			'aw-seo-extras'
+			'rankweb'
 		),
 	},
 	{
 		id: 'faq-index',
 		keys: [ 'faq', 'noindex' ],
-		title: __( 'FAQ & indexing', 'aw-seo-extras' ),
+		title: __( 'FAQ & indexing', 'rankweb' ),
 		description: __(
 			'Pages carrying an FAQ, and the pages RankWeb’s own rules keep out of search.',
-			'aw-seo-extras'
+			'rankweb'
 		),
 	},
 	{
 		id: 'system',
 		keys: [ 'endpoints', 'rankmath' ],
-		title: __( 'System', 'aw-seo-extras' ),
+		title: __( 'System', 'rankweb' ),
 		description: __(
 			'The hourly sitemap and llms.txt check, and Rank Math itself.',
-			'aw-seo-extras'
+			'rankweb'
 		),
 	},
 ];
@@ -132,33 +132,33 @@ const TILE_GROUPS = [
 const TREND_METRICS = [
 	{
 		metric: 'titles',
-		label: __( 'Search titles missing', 'aw-seo-extras' ),
-		unit: __( 'items', 'aw-seo-extras' ),
+		label: __( 'Search titles missing', 'rankweb' ),
+		unit: __( 'items', 'rankweb' ),
 	},
 	{
 		metric: 'descs',
-		label: __( 'Descriptions missing', 'aw-seo-extras' ),
-		unit: __( 'items', 'aw-seo-extras' ),
+		label: __( 'Descriptions missing', 'rankweb' ),
+		unit: __( 'items', 'rankweb' ),
 	},
 	{
 		metric: 'focus',
-		label: __( 'Focus keywords missing', 'aw-seo-extras' ),
-		unit: __( 'items', 'aw-seo-extras' ),
+		label: __( 'Focus keywords missing', 'rankweb' ),
+		unit: __( 'items', 'rankweb' ),
 	},
 	{
 		metric: 'schema',
-		label: __( 'Schema entries to write', 'aw-seo-extras' ),
-		unit: __( 'items', 'aw-seo-extras' ),
+		label: __( 'Schema entries to write', 'rankweb' ),
+		unit: __( 'items', 'rankweb' ),
 	},
 	{
 		metric: 'faq',
-		label: __( 'Pages with an FAQ', 'aw-seo-extras' ),
-		unit: __( 'pages', 'aw-seo-extras' ),
+		label: __( 'Pages with an FAQ', 'rankweb' ),
+		unit: __( 'pages', 'rankweb' ),
 	},
 	{
 		metric: 'noindex',
-		label: __( 'Kept out of search', 'aw-seo-extras' ),
-		unit: __( 'pages', 'aw-seo-extras' ),
+		label: __( 'Kept out of search', 'rankweb' ),
+		unit: __( 'pages', 'rankweb' ),
 	},
 ];
 
@@ -215,7 +215,7 @@ function Dashboard( { view } ) {
 				setNote(
 					__(
 						'A count is running in the background. The numbers change when it is done (about a minute).',
-						'aw-seo-extras'
+						'rankweb'
 					)
 				);
 			} )
@@ -229,7 +229,7 @@ function Dashboard( { view } ) {
 	if ( ! data ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the counts…', 'aw-seo-extras' ) }
+				label={ __( 'Loading the counts…', 'rankweb' ) }
 			/>
 		);
 	}
@@ -246,7 +246,7 @@ function Dashboard( { view } ) {
 		const d = t.raw - old;
 		return sprintf(
 			/* translators: 1: change (+3 or -2), 2: number of days. */
-			__( '%1$s in %2$d days', 'aw-seo-extras' ),
+			__( '%1$s in %2$d days', 'rankweb' ),
 			( d > 0 ? '+' : '' ) + d.toLocaleString(),
 			days
 		);
@@ -254,10 +254,10 @@ function Dashboard( { view } ) {
 	let after = data.atText
 		? sprintf(
 				/* translators: %s: date and time. */
-				__( 'Counted %s.', 'aw-seo-extras' ),
+				__( 'Counted %s.', 'rankweb' ),
 				data.atText
 			)
-		: __( 'Counting for the first time…', 'aw-seo-extras' );
+		: __( 'Counting for the first time…', 'rankweb' );
 	if ( data.atText && ! before ) {
 		after +=
 			' ' +
@@ -265,7 +265,7 @@ function Dashboard( { view } ) {
 				/* translators: %d: number of days. */
 				__(
 					'No count from %d days ago yet, so no change is shown.',
-					'aw-seo-extras'
+					'rankweb'
 				),
 				days
 			);
@@ -275,7 +275,7 @@ function Dashboard( { view } ) {
 			' ' +
 			__(
 				'The count is taking longer than usual; reload this page later.',
-				'aw-seo-extras'
+				'rankweb'
 			);
 	}
 	const noindex = data.tiles.find( ( t ) => 'noindex' === t.key );
@@ -307,14 +307,14 @@ function Dashboard( { view } ) {
 		<>
 			{ 'modules' !== view && (
 				<ChipRow
-					label={ __( 'Compare with', 'aw-seo-extras' ) }
+					label={ __( 'Compare with', 'rankweb' ) }
 					value={ days }
 					onChange={ setDays }
 					chips={ RANGES.map( ( n ) => ( {
 						value: n,
 						label: sprintf(
 							/* translators: %d: number of days. */
-							__( 'Last %d days', 'aw-seo-extras' ),
+							__( 'Last %d days', 'rankweb' ),
 							n
 						),
 					} ) ) }
@@ -326,7 +326,7 @@ function Dashboard( { view } ) {
 								busy={ busy }
 								onClick={ countNow }
 							>
-								{ __( 'Count now', 'aw-seo-extras' ) }
+								{ __( 'Count now', 'rankweb' ) }
 							</Button>
 						</>
 					}
@@ -340,7 +340,7 @@ function Dashboard( { view } ) {
 			{ 'dashboard' === view && attention.length > 0 && (
 				<Notice tone="warning">
 					<strong>
-						{ __( 'Needs attention', 'aw-seo-extras' ) }
+						{ __( 'Needs attention', 'rankweb' ) }
 					</strong>
 					<ul>
 						{ attention.map( ( t ) => (
@@ -354,17 +354,17 @@ function Dashboard( { view } ) {
 			{ 'dashboard' === view && ( app.tools || [] ).length > 0 && (
 				<SectionCard
 					id="rankweb-tools"
-					title={ __( 'Tools', 'aw-seo-extras' ) }
+					title={ __( 'Tools', 'rankweb' ) }
 					description={ __(
 						'RankWeb’s working screens, also under RankWeb in the menu.',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					<RefTable
-						caption={ __( 'Tools', 'aw-seo-extras' ) }
+						caption={ __( 'Tools', 'rankweb' ) }
 						head={ [
-							__( 'Tool', 'aw-seo-extras' ),
-							__( 'What it does', 'aw-seo-extras' ),
+							__( 'Tool', 'rankweb' ),
+							__( 'What it does', 'rankweb' ),
 						] }
 						rows={ app.tools.map( ( t ) => [
 							<a key="a" href={ t.url }>
@@ -401,10 +401,10 @@ function Dashboard( { view } ) {
 			{ 'insights' === view && trendCharts.length > 0 && (
 				<SectionCard
 					id="rankweb-trends"
-					title={ __( 'Over time', 'aw-seo-extras' ) }
+					title={ __( 'Over time', 'rankweb' ) }
 					description={ __(
 						'One bar per recorded day within the compare range; the latest day is the darkest. The full numbers are in each chart’s table.',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					<div className="rankweb-dash-grid">
@@ -422,10 +422,10 @@ function Dashboard( { view } ) {
 			{ 'insights' === view && ! data.counting && dists.length > 0 && (
 				<SectionCard
 					id="rankweb-gaps"
-					title={ __( 'Where the gaps are', 'aw-seo-extras' ) }
+					title={ __( 'Where the gaps are', 'rankweb' ) }
 					description={ __(
 						'The item types with the most missing fields right now (up to six types per chart). The full numbers are in each chart’s table.',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					<div className="rankweb-dash-grid">
@@ -434,7 +434,7 @@ function Dashboard( { view } ) {
 								key={ t.key }
 								label={ t.label }
 								points={ t.dist }
-								unit={ __( 'items', 'aw-seo-extras' ) }
+								unit={ __( 'items', 'rankweb' ) }
 							/>
 						) ) }
 					</div>
@@ -443,10 +443,10 @@ function Dashboard( { view } ) {
 			{ 'insights' === view && noindex && ! data.counting && (
 				<SectionCard
 					id="kept-out"
-					title={ __( 'Kept out of search', 'aw-seo-extras' ) }
+					title={ __( 'Kept out of search', 'rankweb' ) }
 					description={ __(
 						'Pages RankWeb’s own rules mark noindex. They come back by themselves when they qualify (a contact added, more listings).',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					<ul className="kits-shell-list">
@@ -460,28 +460,28 @@ function Dashboard( { view } ) {
 			{ 'modules' === view && (
 				<SectionCard
 					id="where"
-					title={ __( 'Where things are', 'aw-seo-extras' ) }
+					title={ __( 'Where things are', 'rankweb' ) }
 					description={ __(
 						'Everything Rank Math doesn’t do or keeps for Premium, for this site. Rank Math holds everything else; where a setting lives in Rank Math, the link goes there.',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					<RefTable
-						caption={ __( 'On edit screens', 'aw-seo-extras' ) }
+						caption={ __( 'On edit screens', 'rankweb' ) }
 						head={ [
-							__( 'On edit screens', 'aw-seo-extras' ),
-							__( 'What you edit there', 'aw-seo-extras' ),
+							__( 'On edit screens', 'rankweb' ),
+							__( 'What you edit there', 'rankweb' ),
 						] }
 						rows={ data.where.boxes }
 					/>
 					<RefTable
-						caption={ __( 'Commands', 'aw-seo-extras' ) }
+						caption={ __( 'Commands', 'rankweb' ) }
 						head={ [
 							__(
 								'Commands (WP-CLI on the server)',
-								'aw-seo-extras'
+								'rankweb'
 							),
-							__( 'What it does', 'aw-seo-extras' ),
+							__( 'What it does', 'rankweb' ),
 						] }
 						rows={ data.where.commands.map( ( c ) => [
 							<code key="c">{ c[ 0 ] }</code>,
@@ -489,10 +489,10 @@ function Dashboard( { view } ) {
 						] ) }
 					/>
 					<RefTable
-						caption={ __( 'In Rank Math', 'aw-seo-extras' ) }
+						caption={ __( 'In Rank Math', 'rankweb' ) }
 						head={ [
-							__( 'In Rank Math', 'aw-seo-extras' ),
-							__( 'What is set there', 'aw-seo-extras' ),
+							__( 'In Rank Math', 'rankweb' ),
+							__( 'What is set there', 'rankweb' ),
 						] }
 						rows={ data.where.rankMath.map( ( r ) => [
 							<a key="a" href={ r.url }>
@@ -727,7 +727,7 @@ function Group( { group, onSaved, onDirty } ) {
 		if (
 			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
 			window.confirm(
-				__( 'Reset this section to its defaults?', 'aw-seo-extras' )
+				__( 'Reset this section to its defaults?', 'rankweb' )
 			)
 		) {
 			save( { reset: true } );
@@ -744,10 +744,10 @@ function Group( { group, onSaved, onDirty } ) {
 				disabled={ ! onDirty_ }
 				onClick={ saveFields }
 			>
-				{ __( 'Save changes', 'aw-seo-extras' ) }
+				{ __( 'Save changes', 'rankweb' ) }
 			</Button>
 			<Button busy={ busy } onClick={ restore }>
-				{ __( 'Reset this section', 'aw-seo-extras' ) }
+				{ __( 'Reset this section', 'rankweb' ) }
 			</Button>
 			<span aria-live="polite">
 				{ msg && 'success' === msg.tone ? msg.text : '' }
@@ -764,7 +764,7 @@ function Group( { group, onSaved, onDirty } ) {
 				isModules
 					? __(
 							'A module switched off is not loaded: its screens, checks and output are gone until it is switched on again.',
-							'aw-seo-extras'
+							'rankweb'
 						)
 					: ''
 			}
@@ -787,7 +787,7 @@ function Group( { group, onSaved, onDirty } ) {
 								? b.desc
 								: `${ b.desc } ${ __(
 										'Always on: other modules use it.',
-										'aw-seo-extras'
+										'rankweb'
 									) }`
 						}
 						onChange={ ( v ) =>
@@ -811,7 +811,7 @@ function Group( { group, onSaved, onDirty } ) {
 					/>{ ' ' }
 					{ __(
 						"Delete this plugin's data when it is deleted",
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				</label>
 			) }
@@ -827,7 +827,7 @@ function Group( { group, onSaved, onDirty } ) {
 								? ''
 								: __(
 										'Off: switch it on under Modules.',
-										'aw-seo-extras'
+										'rankweb'
 									)
 						}
 					>
@@ -843,15 +843,15 @@ function Group( { group, onSaved, onDirty } ) {
 				) ) }
 			{ group.faqTypes && (
 				<SettingsBlock
-					title={ __( 'FAQ box on', 'aw-seo-extras' ) }
+					title={ __( 'FAQ box on', 'rankweb' ) }
 					description={ __(
 						'Ticked types have the FAQ box on their edit screens. A type registered later has it too.',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					{ [
-						[ 'post', __( 'Post types', 'aw-seo-extras' ) ],
-						[ 'term', __( 'Taxonomies', 'aw-seo-extras' ) ],
+						[ 'post', __( 'Post types', 'rankweb' ) ],
+						[ 'term', __( 'Taxonomies', 'rankweb' ) ],
 					].map( ( [ store, label ] ) => (
 						<fieldset key={ store } className="kits-shell-checks">
 							<legend className="kits-shell-field__label">
@@ -896,21 +896,21 @@ function Group( { group, onSaved, onDirty } ) {
 								)
 							}
 						>
-							{ __( 'Save FAQ box types', 'aw-seo-extras' ) }
+							{ __( 'Save FAQ box types', 'rankweb' ) }
 						</Button>
 					</div>
 				</SettingsBlock>
 			) }
 			{ group.keepListings && (
 				<SettingsBlock
-					title={ __( 'Listings kept indexed', 'aw-seo-extras' ) }
+					title={ __( 'Listings kept indexed', 'rankweb' ) }
 					description={ sprintf(
 						/* translators: %s: number of listings. */
 						_n(
 							'%s listing stays indexed though it has no contact (it had Search Console impressions).',
 							'%s listings stay indexed though they have no contact (they had Search Console impressions).',
 							group.keepListings.count,
-							'aw-seo-extras'
+							'rankweb'
 						),
 						group.keepListings.count.toLocaleString()
 					) }
@@ -931,7 +931,7 @@ function Group( { group, onSaved, onDirty } ) {
 								<li>
 									{ sprintf(
 										/* translators: %s: number of listings. */
-										__( 'and %s more', 'aw-seo-extras' ),
+										__( 'and %s more', 'rankweb' ),
 										(
 											group.keepListings.count -
 											group.keepListings.first.length
@@ -942,10 +942,10 @@ function Group( { group, onSaved, onDirty } ) {
 						</ul>
 					) }
 					<Field
-						label={ __( 'Listing IDs', 'aw-seo-extras' ) }
+						label={ __( 'Listing IDs', 'rankweb' ) }
 						help={ __(
 							'One ID per line (or comma separated). Only Directory listings are kept; other IDs are left out.',
-							'aw-seo-extras'
+							'rankweb'
 						) }
 						render={ ( id, helpId ) => (
 							<textarea
@@ -972,7 +972,7 @@ function Group( { group, onSaved, onDirty } ) {
 						>
 							{ __(
 								'Save listings kept indexed',
-								'aw-seo-extras'
+								'rankweb'
 							) }
 						</Button>
 					</div>
@@ -980,17 +980,17 @@ function Group( { group, onSaved, onDirty } ) {
 			) }
 			{ group.shareImage && (
 				<SettingsBlock
-					title={ __( 'Default share image', 'aw-seo-extras' ) }
+					title={ __( 'Default share image', 'rankweb' ) }
 					description={ __(
 						'Shown when a page shared on social media has no picture of its own. Best at 1200 × 630.',
-						'aw-seo-extras'
+						'rankweb'
 					) }
 				>
 					<MediaField
-						label={ __( 'Image', 'aw-seo-extras' ) }
+						label={ __( 'Image', 'rankweb' ) }
 						help={ __(
 							'An image from the media library. None: pages without a picture share no image.',
-							'aw-seo-extras'
+							'rankweb'
 						) }
 						value={ share.id }
 						url={ share.url }
@@ -1004,7 +1004,7 @@ function Group( { group, onSaved, onDirty } ) {
 								save( { id: share.id }, 'settings/share-image' )
 							}
 						>
-							{ __( 'Save share image', 'aw-seo-extras' ) }
+							{ __( 'Save share image', 'rankweb' ) }
 						</Button>
 					</div>
 				</SettingsBlock>
@@ -1032,20 +1032,20 @@ function Services() {
 	if ( ! list.length ) {
 		return (
 			<EmptyState
-				title={ __( 'No connected services.', 'aw-seo-extras' ) }
+				title={ __( 'No connected services.', 'rankweb' ) }
 			/>
 		);
 	}
 	return (
 		<SectionCard
 			id={ `rankweb-group-${ SERVICES }` }
-			title={ __( 'Connected services', 'aw-seo-extras' ) }
+			title={ __( 'Connected services', 'rankweb' ) }
 			description={ __(
 				'What RankWeb works with. Keys stay in Kits → Keys.',
-				'aw-seo-extras'
+				'rankweb'
 			) }
 		>
-			<ServiceList label={ __( 'Connected services', 'aw-seo-extras' ) }>
+			<ServiceList label={ __( 'Connected services', 'rankweb' ) }>
 				{ list.map( ( s ) => (
 					<ServiceRow
 						key={ s.slug }
@@ -1060,8 +1060,8 @@ function Services() {
 									{ f.label }:{ ' ' }
 									<strong>
 										{ f.on
-											? __( 'On', 'aw-seo-extras' )
-											: __( 'Off', 'aw-seo-extras' ) }
+											? __( 'On', 'rankweb' )
+											: __( 'Off', 'rankweb' ) }
 									</strong>
 								</li>
 							) ) }
@@ -1135,7 +1135,7 @@ function Settings() {
 	if ( ! groups ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the settings…', 'aw-seo-extras' ) }
+				label={ __( 'Loading the settings…', 'rankweb' ) }
 			/>
 		);
 	}
@@ -1143,7 +1143,7 @@ function Settings() {
 	const chips = [
 		{
 			value: SERVICES,
-			label: __( 'Connected services', 'aw-seo-extras' ),
+			label: __( 'Connected services', 'rankweb' ),
 			href: `#${ SERVICES }`,
 		},
 		...groups.map( ( g ) => ( {
@@ -1155,7 +1155,7 @@ function Settings() {
 	return (
 		<>
 			<ChipRow
-				label={ __( 'Settings groups', 'aw-seo-extras' ) }
+				label={ __( 'Settings groups', 'rankweb' ) }
 				chips={ chips }
 				value={ open }
 				onChange={ setOpen }
@@ -1171,7 +1171,7 @@ function Settings() {
 				</div>
 			) ) }
 			{ ! current && SERVICES !== open && (
-				<EmptyState title={ __( 'No such group.', 'aw-seo-extras' ) } />
+				<EmptyState title={ __( 'No such group.', 'rankweb' ) } />
 			) }
 		</>
 	);
@@ -1180,10 +1180,10 @@ function Settings() {
 /** FAQ: the FAQ screen's own output (FAQ box on, the pages with an FAQ, the counts), drawn with Kits' page parts. */
 function Faq() {
 	return (
-		<SectionCard id="faq" title={ __( 'FAQ', 'aw-seo-extras' ) }>
+		<SectionCard id="faq" title={ __( 'FAQ', 'rankweb' ) }>
 			<PageParts
 				parts={ app.parts || [] }
-				title={ __( 'FAQ', 'aw-seo-extras' ) }
+				title={ __( 'FAQ', 'rankweb' ) }
 			/>
 		</SectionCard>
 	);

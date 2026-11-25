@@ -54,7 +54,7 @@ function aw_redirect_rows(): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Redirect tools', 'aw-seo-extras' ), __( 'Redirect tools', 'aw-seo-extras' ), 'manage_options', 'aw-redirects', 'aw_redirect_tools_screen' );
+		add_submenu_page( AW_SEO_MENU, __( 'Redirect tools', 'rankweb' ), __( 'Redirect tools', 'rankweb' ), 'manage_options', 'aw-redirects', 'aw_redirect_tools_screen' );
 	}
 );
 
@@ -65,7 +65,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_redirect_export' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$csv = AW_Redirects::to_csv( aw_redirect_rows() );
 		nocache_headers();
@@ -84,7 +84,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_redirect_import' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$dry    = ! isset( $_POST['aw_apply'] );
 		$report = array(
@@ -96,11 +96,11 @@ add_action(
 			'error'   => '',
 		);
 		if ( ! aw_redirect_ready() ) {
-			$report['error'] = __( 'Rank Math\'s Redirections module is off.', 'aw-seo-extras' );
+			$report['error'] = __( 'Rank Math\'s Redirections module is off.', 'rankweb' );
 		} elseif ( empty( $_FILES['aw_csv']['tmp_name'] ) || ! is_uploaded_file( sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) ) ) ) {
-			$report['error'] = __( 'Choose a CSV file.', 'aw-seo-extras' );
+			$report['error'] = __( 'Choose a CSV file.', 'rankweb' );
 		} elseif ( absint( wp_unslash( $_FILES['aw_csv']['size'] ?? 0 ) ) > 5 * MB_IN_BYTES ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- absint() sanitises the size
-			$report['error'] = __( 'The file is larger than 5 MB.', 'aw-seo-extras' );
+			$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
 		} else {
 			$text   = (string) file_get_contents( sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
 			$parsed = AW_Redirects::from_csv( $text );
@@ -113,7 +113,7 @@ add_action(
 					$v = AW_Redirects::validate( $row );
 					if ( '' !== $v['error'] ) {
 						/* translators: 1: row number, 2: the reason. */
-						$report['skipped'][] = sprintf( __( 'Row %1$d: %2$s', 'aw-seo-extras' ), $n, $v['error'] );
+						$report['skipped'][] = sprintf( __( 'Row %1$d: %2$s', 'rankweb' ), $n, $v['error'] );
 						continue;
 					}
 					$target = in_array( $v['code'], AW_Redirects::GONE, true ) ? '' : aw_redirect_abs( $v['target'] );
@@ -126,7 +126,7 @@ add_action(
 							++$report['added'];
 						} else {
 							/* translators: %d: row number. */
-							$report['skipped'][] = sprintf( __( 'Row %d: already in the list or could not be saved.', 'aw-seo-extras' ), $n );
+							$report['skipped'][] = sprintf( __( 'Row %d: already in the list or could not be saved.', 'rankweb' ), $n );
 							continue;
 						}
 					}
@@ -158,7 +158,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_redirect_404export' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		global $wpdb;
 		$table  = $wpdb->prefix . 'rank_math_404_logs';
@@ -206,7 +206,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_redirect_htaccess' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$lines = aw_redirect_htaccess_lines();
 		$block = '# BEGIN ' . AW_HTACCESS_MARKER . "\n" . implode( "\n", $lines ) . "\n# END " . AW_HTACCESS_MARKER . "\n";
@@ -223,7 +223,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_redirect_htaccess' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$remove = isset( $_POST['aw_remove'] );
 		$msg    = aw_redirect_htaccess_apply( $remove );
@@ -250,13 +250,13 @@ add_action(
 function aw_redirect_htaccess_apply( bool $remove ): array {
 	if ( ! AW_REDIRECT_HTACCESS ) {
 		return array(
-			'error' => __( 'The .htaccess option is off (RankWeb → Settings → Redirect tools).', 'aw-seo-extras' ),
+			'error' => __( 'The .htaccess option is off (RankWeb → Settings → Redirect tools).', 'rankweb' ),
 			'ok'    => '',
 		);
 	}
 	if ( ! aw_redirect_apache() ) {
 		return array(
-			'error' => __( 'This server does not read .htaccess (not Apache or LiteSpeed).', 'aw-seo-extras' ),
+			'error' => __( 'This server does not read .htaccess (not Apache or LiteSpeed).', 'rankweb' ),
 			'ok'    => '',
 		);
 	}
@@ -266,38 +266,38 @@ function aw_redirect_htaccess_apply( bool $remove ): array {
 	global $wp_filesystem;
 	if ( ! WP_Filesystem() || ! $wp_filesystem ) {
 		return array(
-			'error' => __( 'The .htaccess file could not be opened.', 'aw-seo-extras' ),
+			'error' => __( 'The .htaccess file could not be opened.', 'rankweb' ),
 			'ok'    => '',
 		);
 	}
 	if ( $wp_filesystem->exists( $path ) ) {
 		if ( ! $wp_filesystem->is_writable( $path ) ) {
 			return array(
-				'error' => __( 'The .htaccess file is not writable.', 'aw-seo-extras' ),
+				'error' => __( 'The .htaccess file is not writable.', 'rankweb' ),
 				'ok'    => '',
 			);
 		}
 		$current = $wp_filesystem->get_contents( $path );
 		if ( false === $current || ! $wp_filesystem->put_contents( $path . '.rankweb-bak', (string) $current, FS_CHMOD_FILE ) ) {
-			return array( 'error' => __( 'A backup of .htaccess could not be written, so nothing was changed.', 'aw-seo-extras' ), 'ok' => '' );
+			return array( 'error' => __( 'A backup of .htaccess could not be written, so nothing was changed.', 'rankweb' ), 'ok' => '' );
 		}
 	} elseif ( $remove ) {
 		return array(
 			'error' => '',
-			'ok'    => __( 'There was nothing to remove.', 'aw-seo-extras' ),
+			'ok'    => __( 'There was nothing to remove.', 'rankweb' ),
 		);
 	}
 	$lines = $remove ? array() : aw_redirect_htaccess_lines();
 	if ( ! insert_with_markers( $path, AW_HTACCESS_MARKER, $lines ) ) {
 		return array(
-			'error' => __( 'The .htaccess file could not be written.', 'aw-seo-extras' ),
+			'error' => __( 'The .htaccess file could not be written.', 'rankweb' ),
 			'ok'    => '',
 		);
 	}
 	return array(
 		'error' => '',
 		/* translators: %d: number of redirects. */
-		'ok'    => $remove ? __( 'RankWeb\'s .htaccess block was removed (a backup is at .htaccess.rankweb-bak).', 'aw-seo-extras' ) : sprintf( __( '%d redirects written to .htaccess (a backup is at .htaccess.rankweb-bak).', 'aw-seo-extras' ), count( $lines ) ),
+		'ok'    => $remove ? __( 'RankWeb\'s .htaccess block was removed (a backup is at .htaccess.rankweb-bak).', 'rankweb' ) : sprintf( __( '%d redirects written to .htaccess (a backup is at .htaccess.rankweb-bak).', 'rankweb' ), count( $lines ) ),
 	);
 }
 
@@ -317,13 +317,13 @@ function aw_redirect_csv_safe( string $value ): string {
 /** RankWeb → Redirect tools. */
 function aw_redirect_tools_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You are not allowed to see this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
 	$post = admin_url( 'admin-post.php' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'Redirect tools', 'aw-seo-extras' ) . '</h1>';
-	echo '<p>' . esc_html__( 'Redirects live in Rank Math → Redirections. These tools read and write that one list.', 'aw-seo-extras' ) . '</p>';
+	echo '<div class="wrap"><h1>' . esc_html__( 'Redirect tools', 'rankweb' ) . '</h1>';
+	echo '<p>' . esc_html__( 'Redirects live in Rank Math → Redirections. These tools read and write that one list.', 'rankweb' ) . '</p>';
 	if ( ! aw_redirect_ready() ) {
-		wp_admin_notice( esc_html__( 'Rank Math\'s Redirections module is off, so these tools do nothing.', 'aw-seo-extras' ), array( 'type' => 'warning' ) );
+		wp_admin_notice( esc_html__( 'Rank Math\'s Redirections module is off, so these tools do nothing.', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
 	$report = get_transient( 'aw_seo_redirect_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {
@@ -331,42 +331,42 @@ function aw_redirect_tools_screen(): void {
 		aw_redirect_report( $report );
 	}
 
-	echo '<h2>' . esc_html__( 'Export and import', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Export and import', 'rankweb' ) . '</h2>';
 	echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block;margin-right:1em"><input type="hidden" name="action" value="aw_redirect_export">';
 	wp_nonce_field( 'aw_redirect_export' );
-	submit_button( __( 'Export redirects CSV', 'aw-seo-extras' ), 'secondary', 'submit', false );
+	submit_button( __( 'Export redirects CSV', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
 	echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block"><input type="hidden" name="action" value="aw_redirect_404export">';
 	wp_nonce_field( 'aw_redirect_404export' );
-	submit_button( __( 'Export 404 log CSV', 'aw-seo-extras' ), 'secondary', 'submit', false );
+	submit_button( __( 'Export 404 log CSV', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
-	echo '<p>' . esc_html__( 'Import a CSV with a "source" column, and target, code (301, 302, 307, 308, 410, 451) and comparison (exact or regex). The dry run reports what would be added and writes nothing.', 'aw-seo-extras' ) . '</p>';
+	echo '<p>' . esc_html__( 'Import a CSV with a "source" column, and target, code (301, 302, 307, 308, 410, 451) and comparison (exact or regex). The dry run reports what would be added and writes nothing.', 'rankweb' ) . '</p>';
 	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_redirect_import">';
 	wp_nonce_field( 'aw_redirect_import' );
 	echo '<p><input type="file" name="aw_csv" accept=".csv,text/csv" required></p>';
-	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Add the redirects (otherwise it is a dry run)', 'aw-seo-extras' ) . '</label></p>';
-	submit_button( __( 'Import redirects', 'aw-seo-extras' ), 'primary', 'submit', false );
+	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Add the redirects (otherwise it is a dry run)', 'rankweb' ) . '</label></p>';
+	submit_button( __( 'Import redirects', 'rankweb' ), 'primary', 'submit', false );
 	echo '</form>';
 
-	echo '<h2 style="margin-top:2em">' . esc_html__( 'Apache .htaccess', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2 style="margin-top:2em">' . esc_html__( 'Apache .htaccess', 'rankweb' ) . '</h2>';
 	$count = count( aw_redirect_htaccess_lines() );
 	/* translators: %d: number of redirects. */
-	echo '<p>' . esc_html( sprintf( __( '%d exact redirects can go in .htaccess (regex rules stay in Rank Math).', 'aw-seo-extras' ), $count ) ) . '</p>';
+	echo '<p>' . esc_html( sprintf( __( '%d exact redirects can go in .htaccess (regex rules stay in Rank Math).', 'rankweb' ), $count ) ) . '</p>';
 	echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block;margin-right:1em"><input type="hidden" name="action" value="aw_redirect_htaccess_download">';
 	wp_nonce_field( 'aw_redirect_htaccess' );
-	submit_button( __( 'Download the .htaccess block', 'aw-seo-extras' ), 'secondary', 'submit', false );
+	submit_button( __( 'Download the .htaccess block', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
 	if ( AW_REDIRECT_HTACCESS && aw_redirect_apache() ) {
 		echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block;margin-right:1em"><input type="hidden" name="action" value="aw_redirect_htaccess_write">';
 		wp_nonce_field( 'aw_redirect_htaccess' );
-		submit_button( __( 'Write to .htaccess now', 'aw-seo-extras' ), 'delete', 'submit', false );
+		submit_button( __( 'Write to .htaccess now', 'rankweb' ), 'delete', 'submit', false );
 		echo '</form>';
 		echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block"><input type="hidden" name="action" value="aw_redirect_htaccess_write"><input type="hidden" name="aw_remove" value="1">';
 		wp_nonce_field( 'aw_redirect_htaccess' );
-		submit_button( __( 'Remove the .htaccess block', 'aw-seo-extras' ), 'link', 'submit', false );
+		submit_button( __( 'Remove the .htaccess block', 'rankweb' ), 'link', 'submit', false );
 		echo '</form>';
 	} else {
-		echo '<p class="description">' . esc_html__( 'Writing to .htaccess is off, or this server is not Apache or LiteSpeed. Turn it on in RankWeb → Settings → Redirect tools. The downloaded block can be pasted by hand.', 'aw-seo-extras' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Writing to .htaccess is off, or this server is not Apache or LiteSpeed. Turn it on in RankWeb → Settings → Redirect tools. The downloaded block can be pasted by hand.', 'rankweb' ) . '</p>';
 	}
 	echo '</div>';
 }
@@ -387,13 +387,13 @@ function aw_redirect_report( array $report ): void {
 	}
 	$head = $report['dry']
 		/* translators: %d: number of redirects. */
-		? sprintf( __( 'Dry run: %d redirects would be added. Nothing was written.', 'aw-seo-extras' ), (int) $report['added'] )
+		? sprintf( __( 'Dry run: %d redirects would be added. Nothing was written.', 'rankweb' ), (int) $report['added'] )
 		/* translators: %d: number of redirects. */
-		: sprintf( __( '%d redirects added.', 'aw-seo-extras' ), (int) $report['added'] );
+		: sprintf( __( '%d redirects added.', 'rankweb' ), (int) $report['added'] );
 	wp_admin_notice( esc_html( $head ), array( 'type' => $report['dry'] ? 'info' : 'success' ) );
 	foreach ( array(
-		'lines'   => __( 'Redirects', 'aw-seo-extras' ),
-		'skipped' => __( 'Skipped', 'aw-seo-extras' ),
+		'lines'   => __( 'Redirects', 'rankweb' ),
+		'skipped' => __( 'Skipped', 'rankweb' ),
 	) as $key => $label ) {
 		if ( ! empty( $report[ $key ] ) ) {
 			echo '<details open><summary><strong>' . esc_html( $label ) . '</strong> (' . esc_html( number_format_i18n( count( $report[ $key ] ) ) ) . ')</summary><ul style="list-style:disc;margin-left:2em">';

@@ -56,11 +56,11 @@ function aw_bulk_column( array $cols ): array {
 	foreach ( $cols as $key => $label ) {
 		$out[ $key ] = $label;
 		if ( 'title' === $key ) {
-			$out['aw_seo'] = __( 'SEO', 'aw-seo-extras' );
+			$out['aw_seo'] = __( 'SEO', 'rankweb' );
 		}
 	}
 	if ( ! isset( $out['aw_seo'] ) ) {
-		$out['aw_seo'] = __( 'SEO', 'aw-seo-extras' );
+		$out['aw_seo'] = __( 'SEO', 'rankweb' );
 	}
 	return $out;
 }
@@ -79,13 +79,13 @@ function aw_bulk_column_cell( $col, $id ): void {
 	$title = (string) get_post_meta( $id, 'rank_math_title', true );
 	$desc  = (string) get_post_meta( $id, 'rank_math_description', true );
 	$focus = (string) get_post_meta( $id, 'rank_math_focus_keyword', true );
-	$none  = '<span style="color:#b32d2e">' . esc_html__( 'missing', 'aw-seo-extras' ) . '</span>';
+	$none  = '<span style="color:#b32d2e">' . esc_html__( 'missing', 'rankweb' ) . '</span>';
 	echo '<div class="aw-seo-col">';
-	echo '<div><strong>' . esc_html__( 'Title', 'aw-seo-extras' ) . ':</strong> ' . ( '' !== $title ? esc_html( $title ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
-	echo '<div><strong>' . esc_html__( 'Desc', 'aw-seo-extras' ) . ':</strong> ' . ( '' !== $desc ? esc_html( wp_html_excerpt( $desc, 60, '…' ) ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
-	echo '<div><strong>' . esc_html__( 'Focus', 'aw-seo-extras' ) . ':</strong> ' . ( '' !== $focus ? esc_html( $focus ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
+	echo '<div><strong>' . esc_html__( 'Title', 'rankweb' ) . ':</strong> ' . ( '' !== $title ? esc_html( $title ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
+	echo '<div><strong>' . esc_html__( 'Desc', 'rankweb' ) . ':</strong> ' . ( '' !== $desc ? esc_html( wp_html_excerpt( $desc, 60, '…' ) ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
+	echo '<div><strong>' . esc_html__( 'Focus', 'rankweb' ) . ':</strong> ' . ( '' !== $focus ? esc_html( $focus ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
 	if ( in_array( 'noindex', aw_bulk_robots( $id ), true ) ) {
-		echo '<div><em>' . esc_html__( 'noindex', 'aw-seo-extras' ) . '</em></div>';
+		echo '<div><em>' . esc_html__( 'noindex', 'rankweb' ) . '</em></div>';
 	}
 	echo '<span class="hidden aw-seo-title">' . esc_html( $title ) . '</span>';
 	echo '<span class="hidden aw-seo-desc">' . esc_html( $desc ) . '</span>';
@@ -103,12 +103,12 @@ add_action(
 		}
 		$current = isset( $_GET['aw_seo_filter'] ) ? sanitize_key( wp_unslash( $_GET['aw_seo_filter'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- a read-only list filter
 		$options = array(
-			''         => __( 'SEO: any', 'aw-seo-extras' ),
-			'no_title' => __( 'No SEO title', 'aw-seo-extras' ),
-			'no_desc'  => __( 'No description', 'aw-seo-extras' ),
-			'no_focus' => __( 'No focus keyword', 'aw-seo-extras' ),
-			'noindex'  => __( 'Noindex', 'aw-seo-extras' ),
-			'orphan'   => __( 'No internal links in', 'aw-seo-extras' ),
+			''         => __( 'SEO: any', 'rankweb' ),
+			'no_title' => __( 'No SEO title', 'rankweb' ),
+			'no_desc'  => __( 'No description', 'rankweb' ),
+			'no_focus' => __( 'No focus keyword', 'rankweb' ),
+			'noindex'  => __( 'Noindex', 'rankweb' ),
+			'orphan'   => __( 'No internal links in', 'rankweb' ),
 		);
 		echo '<select name="aw_seo_filter">';
 		foreach ( $options as $value => $label ) {
@@ -199,9 +199,9 @@ add_action(
 		wp_nonce_field( 'aw_bulk_quick', 'aw_bulk_quick_nonce' );
 		echo '<fieldset class="inline-edit-col-right"><div class="inline-edit-col"><div class="inline-edit-group wp-clearfix">';
 		echo '<input type="hidden" name="aw_seo_loaded" value="0">'; // the script sets 1 once it has filled the fields from the row
-		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'SEO title', 'aw-seo-extras' ) . '</span><input type="text" name="aw_seo_title" class="aw-seo-field" value=""></label>';
-		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Description', 'aw-seo-extras' ) . '</span><textarea name="aw_seo_desc" class="aw-seo-field" rows="1"></textarea></label>';
-		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Focus keyword', 'aw-seo-extras' ) . '</span><input type="text" name="aw_seo_focus" class="aw-seo-field" value=""></label>';
+		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'SEO title', 'rankweb' ) . '</span><input type="text" name="aw_seo_title" class="aw-seo-field" value=""></label>';
+		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Description', 'rankweb' ) . '</span><textarea name="aw_seo_desc" class="aw-seo-field" rows="1"></textarea></label>';
+		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Focus keyword', 'rankweb' ) . '</span><input type="text" name="aw_seo_focus" class="aw-seo-field" value=""></label>';
 		echo '</div></div></fieldset>';
 	},
 	10,
@@ -216,9 +216,9 @@ add_action(
 		}
 		wp_nonce_field( 'aw_bulk_quick', 'aw_bulk_quick_nonce' );
 		echo '<fieldset class="inline-edit-col-right"><div class="inline-edit-col">';
-		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Focus keyword', 'aw-seo-extras' ) . '</span><input type="text" name="aw_seo_focus_bulk" value="" placeholder="' . esc_attr__( 'leave blank to keep', 'aw-seo-extras' ) . '"></label>';
-		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Add link keyword', 'aw-seo-extras' ) . '</span><input type="text" name="aw_seo_linkkw_bulk" value="" placeholder="' . esc_attr__( 'added to each item', 'aw-seo-extras' ) . '"></label>';
-		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Search index', 'aw-seo-extras' ) . '</span><select name="aw_seo_robots_bulk"><option value="">' . esc_html__( '— No change —', 'aw-seo-extras' ) . '</option><option value="index">' . esc_html__( 'Index', 'aw-seo-extras' ) . '</option><option value="noindex">' . esc_html__( 'Noindex', 'aw-seo-extras' ) . '</option></select></label>';
+		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Focus keyword', 'rankweb' ) . '</span><input type="text" name="aw_seo_focus_bulk" value="" placeholder="' . esc_attr__( 'leave blank to keep', 'rankweb' ) . '"></label>';
+		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Add link keyword', 'rankweb' ) . '</span><input type="text" name="aw_seo_linkkw_bulk" value="" placeholder="' . esc_attr__( 'added to each item', 'rankweb' ) . '"></label>';
+		echo '<label class="inline-edit-group"><span class="title">' . esc_html__( 'Search index', 'rankweb' ) . '</span><select name="aw_seo_robots_bulk"><option value="">' . esc_html__( '— No change —', 'rankweb' ) . '</option><option value="index">' . esc_html__( 'Index', 'rankweb' ) . '</option><option value="noindex">' . esc_html__( 'Noindex', 'rankweb' ) . '</option></select></label>';
 		echo '</div></fieldset>';
 	},
 	10,

@@ -39,7 +39,7 @@ add_action(
 				'callback'            => function ( WP_REST_Request $req ) {
 					$post = get_post( (int) $req['id'] );
 					if ( ! $post ) {
-						return new WP_Error( 'aw_no_post', __( 'No such item.', 'aw-seo-extras' ), array( 'status' => 404 ) );
+						return new WP_Error( 'aw_no_post', __( 'No such item.', 'rankweb' ), array( 'status' => 404 ) );
 					}
 					return rest_ensure_response( aw_seo_content_advice( $post ) );
 				},
@@ -320,6 +320,6 @@ add_action(
 			(string) filemtime( $file ),
 			true
 		);
-		wp_set_script_translations( 'aw-seo-content-panel', 'aw-seo-extras' );
+		wp_set_script_translations( 'aw-seo-content-panel', 'rankweb' );
 	}
 );

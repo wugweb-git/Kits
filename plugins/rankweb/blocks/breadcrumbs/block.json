@@ -7,7 +7,7 @@
 	"icon": "arrow-right-alt2",
 	"description": "The page's breadcrumb trail (Rank Math's trail, as RankWeb builds it), once per page, above the title. Search engines get the same trail as BreadcrumbList.",
 	"keywords": [ "breadcrumb", "trail", "navigation", "rankweb" ],
-	"textdomain": "aw-seo-extras",
+	"textdomain": "rankweb",
 	"supports": {
 		"html": false,
 		"multiple": false,

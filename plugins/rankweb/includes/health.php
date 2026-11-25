@@ -99,6 +99,6 @@ add_action(
 		if ( empty( $last['problems'] ) ) {
 			return;
 		}
-		wp_admin_notice( '<strong>' . esc_html__( 'Sitemap or llms.txt is not answering.', 'aw-seo-extras' ) . '</strong> ' . esc_html( implode( ' ', (array) $last['problems'] ) ) . ' ' . esc_html( sprintf( 'Checked %s.', wp_date( 'j M Y, g:i a', (int) $last['at'] ) ) ), array( 'type' => 'error' ) );
+		wp_admin_notice( '<strong>' . esc_html__( 'Sitemap or llms.txt is not answering.', 'rankweb' ) . '</strong> ' . esc_html( implode( ' ', (array) $last['problems'] ) ) . ' ' . esc_html( sprintf( 'Checked %s.', wp_date( 'j M Y, g:i a', (int) $last['at'] ) ) ), array( 'type' => 'error' ) );
 	}
 );

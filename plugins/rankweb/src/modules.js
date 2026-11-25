@@ -58,10 +58,10 @@ export function ModuleCards() {
 	return (
 		<SectionCard
 			id="module-switches"
-			title={ __( 'Modules on and off', 'aw-seo-extras' ) }
+			title={ __( 'Modules on and off', 'rankweb' ) }
 			description={ __(
 				'A module switched off is not loaded and its scheduled job stops. Modules without a switch are always on.',
-				'aw-seo-extras'
+				'rankweb'
 			) }
 		>
 			{ note.text && (
@@ -74,16 +74,16 @@ export function ModuleCards() {
 			) }
 			{ null === cards ? (
 				<LoadingState
-					label={ __( 'Loading the modules…', 'aw-seo-extras' ) }
+					label={ __( 'Loading the modules…', 'rankweb' ) }
 				/>
 			) : (
 				<RefTable
-					caption={ __( 'Modules', 'aw-seo-extras' ) }
+					caption={ __( 'Modules', 'rankweb' ) }
 					head={ [
-						__( 'Module', 'aw-seo-extras' ),
-						__( 'Where it is set up', 'aw-seo-extras' ),
-						__( 'Status', 'aw-seo-extras' ),
-						__( 'On or off', 'aw-seo-extras' ),
+						__( 'Module', 'rankweb' ),
+						__( 'Where it is set up', 'rankweb' ),
+						__( 'Status', 'rankweb' ),
+						__( 'On or off', 'rankweb' ),
 					] }
 					rows={ cards.map( ( c ) => [
 						<>
@@ -96,7 +96,7 @@ export function ModuleCards() {
 									<a href={ c.settingsUrl }>
 										{ __(
 											'RankWeb Settings',
-											'aw-seo-extras'
+											'rankweb'
 										) }
 									</a>
 								</p>
@@ -112,7 +112,7 @@ export function ModuleCards() {
 							) ) }
 						</>,
 						<>
-							{ ! c.on && __( 'Off', 'aw-seo-extras' ) }
+							{ ! c.on && __( 'Off', 'rankweb' ) }
 							{ c.on && c.status && c.status.text && (
 								<p>{ c.status.text }</p>
 							) }
@@ -120,7 +120,7 @@ export function ModuleCards() {
 								<p>
 									{ sprintf(
 										/* translators: %s: date and time. */
-										__( 'Next run: %s', 'aw-seo-extras' ),
+										__( 'Next run: %s', 'rankweb' ),
 										new Date(
 											c.next * 1000
 										).toLocaleString()
@@ -132,7 +132,7 @@ export function ModuleCards() {
 							<Switch
 								label={ sprintf(
 									/* translators: %s: module name. */
-									__( '%s on', 'aw-seo-extras' ),
+									__( '%s on', 'rankweb' ),
 									c.label
 								) }
 								checked={ c.on }
@@ -142,13 +142,13 @@ export function ModuleCards() {
 										? ''
 										: __(
 												'Only administrators can switch modules.',
-												'aw-seo-extras'
+												'rankweb'
 											)
 								}
 								onChange={ ( v ) => flip( c.key, v ) }
 							/>
 						) : (
-							<p>{ __( 'Always on.', 'aw-seo-extras' ) }</p>
+							<p>{ __( 'Always on.', 'rankweb' ) }</p>
 						),
 					] ) }
 				/>

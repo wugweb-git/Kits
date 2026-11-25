@@ -234,6 +234,24 @@ function aw_news_sitemap_url() {
 	return home_url( '/news-sitemap.xml' );
 }
 
+// Without Rank Math nothing maps /news-sitemap.xml or /video-sitemap.xml to a request, so the two addresses robots.txt
+// lists would be 404. Mapped here to the same sitemap=news and sitemap=video the handlers below and in video.php answer.
+if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math() ) {
+	add_action(
+		'parse_request',
+		function ( $wp ) {
+			$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			$home = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+			foreach ( array( 'news', 'video' ) as $kind ) {
+				if ( $home . '/' . $kind . '-sitemap.xml' === $path ) {
+					$wp->query_vars['sitemap'] = $kind;
+				}
+			}
+		},
+		-1
+	);
+}
+
 // Rank Math's rule sends /news-sitemap.xml to WordPress as sitemap=news; it is answered here, before Rank Math (parse_query).
 add_action(
 	'parse_request',
@@ -418,7 +436,7 @@ add_action(
 			array(
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
-				'post_title'   => __( 'Sitemap', 'aw-seo-extras' ),
+				'post_title'   => __( 'Sitemap', 'rankweb' ),
 				'post_name'    => AW_HTML_SITEMAP_SLUG,
 				'post_content' => '<!-- wp:shortcode -->[aw_html_sitemap]<!-- /wp:shortcode -->',
 			)

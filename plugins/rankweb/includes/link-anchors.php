@@ -139,14 +139,14 @@ function aw_anchor_ok( int $target, string $kw ): bool {
 /** The types and their texts. */
 function aw_anchor_labels(): array {
 	return array(
-		'exact'     => __( 'Exact', 'aw-seo-extras' ),
-		'partial'   => __( 'Partial', 'aw-seo-extras' ),
-		'branded'   => __( 'Branded', 'aw-seo-extras' ),
-		'generic'   => __( 'Generic', 'aw-seo-extras' ),
-		'naked'     => __( 'Naked URL', 'aw-seo-extras' ),
-		'image'     => __( 'Image', 'aw-seo-extras' ),
-		'long_tail' => __( 'Long-tail', 'aw-seo-extras' ),
-		'other'     => __( 'Other', 'aw-seo-extras' ),
+		'exact'     => __( 'Exact', 'rankweb' ),
+		'partial'   => __( 'Partial', 'rankweb' ),
+		'branded'   => __( 'Branded', 'rankweb' ),
+		'generic'   => __( 'Generic', 'rankweb' ),
+		'naked'     => __( 'Naked URL', 'rankweb' ),
+		'image'     => __( 'Image', 'rankweb' ),
+		'long_tail' => __( 'Long-tail', 'rankweb' ),
+		'other'     => __( 'Other', 'rankweb' ),
 	);
 }
 
@@ -232,19 +232,19 @@ function aw_anchor_screen(): void {
 	$base   = add_query_arg( 'view', 'anchors', admin_url( 'admin.php?page=aw-links' ) );
 	$data   = aw_anchor_page( $warn, $paged, $per );
 	/* translators: 1: limit for exact match in percent, 2: limit for any other type in percent, 3: fewest links. */
-	echo '<p>' . esc_html( sprintf( __( 'The share of each anchor type among the links to an item. A warning shows when exact match is over %1$s%% or another type is over %2$s%% (only for items with %3$s links or more). Change the limits under RankWeb → Settings → Internal links.', 'aw-seo-extras' ), number_format_i18n( $limits['exact_max'] ), number_format_i18n( $limits['type_max'] ), number_format_i18n( $limits['min_links'] ) ) ) . '</p>';
-	echo '<ul class="subsubsub"><li>' . ( $warn ? '<a href="' . esc_url( $base ) . '">' : '<strong>' ) . esc_html__( 'All items', 'aw-seo-extras' ) . ( $warn ? '</a>' : '</strong>' ) . ' | </li><li>' . ( $warn ? '<strong>' : '<a href="' . esc_url( add_query_arg( 'warn', '1', $base ) ) . '">' ) . esc_html__( 'With a warning', 'aw-seo-extras' ) . ( $warn ? '</strong>' : '</a>' ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput -- each part is escaped above.
+	echo '<p>' . esc_html( sprintf( __( 'The share of each anchor type among the links to an item. A warning shows when exact match is over %1$s%% or another type is over %2$s%% (only for items with %3$s links or more). Change the limits under RankWeb → Settings → Internal links.', 'rankweb' ), number_format_i18n( $limits['exact_max'] ), number_format_i18n( $limits['type_max'] ), number_format_i18n( $limits['min_links'] ) ) ) . '</p>';
+	echo '<ul class="subsubsub"><li>' . ( $warn ? '<a href="' . esc_url( $base ) . '">' : '<strong>' ) . esc_html__( 'All items', 'rankweb' ) . ( $warn ? '</a>' : '</strong>' ) . ' | </li><li>' . ( $warn ? '<strong>' : '<a href="' . esc_url( add_query_arg( 'warn', '1', $base ) ) . '">' ) . esc_html__( 'With a warning', 'rankweb' ) . ( $warn ? '</strong>' : '</a>' ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput -- each part is escaped above.
 	$cols         = array(
-		'item'  => __( 'Item', 'aw-seo-extras' ),
-		'total' => __( 'Links in', 'aw-seo-extras' ),
+		'item'  => __( 'Item', 'rankweb' ),
+		'total' => __( 'Links in', 'rankweb' ),
 	);
 	$cols        += $labels;
-	$cols['warn'] = __( 'Warning', 'aw-seo-extras' );
+	$cols['warn'] = __( 'Warning', 'rankweb' );
 	$cells        = array();
 	foreach ( $data['items'] as $it ) {
 		$pct  = (array) $it['pct'];
 		$cell = array(
-			'item'  => '<a href="' . esc_url( (string) get_edit_post_link( $it['post_id'] ) ) . '">' . esc_html( '' !== $it['title'] ? $it['title'] : __( '(no title)', 'aw-seo-extras' ) ) . '</a> <a href="' . esc_url( $it['url'] ) . '">' . esc_html__( 'View', 'aw-seo-extras' ) . '</a>',
+			'item'  => '<a href="' . esc_url( (string) get_edit_post_link( $it['post_id'] ) ) . '">' . esc_html( '' !== $it['title'] ? $it['title'] : __( '(no title)', 'rankweb' ) ) . '</a> <a href="' . esc_url( $it['url'] ) . '">' . esc_html__( 'View', 'rankweb' ) . '</a>',
 			'total' => esc_html( number_format_i18n( $it['total'] ) ),
 		);
 		foreach ( array_keys( $labels ) as $t ) {
@@ -253,7 +253,7 @@ function aw_anchor_screen(): void {
 		$over = array();
 		foreach ( $it['warn'] as $t ) {
 			/* translators: 1: anchor type, 2: its limit in percent. */
-			$over[] = esc_html( sprintf( __( '%1$s over %2$s%%', 'aw-seo-extras' ), $labels[ $t ] ?? $t, number_format_i18n( 'exact' === $t ? $limits['exact_max'] : $limits['type_max'] ) ) );
+			$over[] = esc_html( sprintf( __( '%1$s over %2$s%%', 'rankweb' ), $labels[ $t ] ?? $t, number_format_i18n( 'exact' === $t ? $limits['exact_max'] : $limits['type_max'] ) ) );
 		}
 		$cell['warn'] = implode( '<br>', $over );
 		$cells[]      = $cell;
@@ -266,7 +266,7 @@ function aw_anchor_screen(): void {
 			'per_page' => $per,
 			'total'    => $data['total'],
 			'primary'  => 'item',
-			'empty'    => __( 'No links to items are recorded yet. Run the audit first.', 'aw-seo-extras' ),
+			'empty'    => __( 'No links to items are recorded yet. Run the audit first.', 'rankweb' ),
 		)
 	);
 }

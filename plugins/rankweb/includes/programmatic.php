@@ -562,7 +562,7 @@ function aw_seo_dir_nav() {
 			$chips[] = array( aw_directory_url( $r[0]->slug ), $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')' );
 		}
 		/* translators: %s: state. */
-		$head = sprintf( __( 'Districts in %s', 'aw-seo-extras' ), $place->name );
+		$head = sprintf( __( 'Districts in %s', 'rankweb' ), $place->name );
 		$slug = 'districts';
 	} elseif ( 'district' === $v['kind'] && '' !== $v['type'] ) {
 		foreach ( aw_seo_dir_breakdown( $place ) as $p ) {
@@ -571,9 +571,9 @@ function aw_seo_dir_nav() {
 			}
 		}
 		/* translators: %s: district. */
-		$chips[] = array( aw_directory_url( $place->slug ), sprintf( __( 'All in %s', 'aw-seo-extras' ), $place->name ) . ' (' . number_format_i18n( aw_seo_dir_count( $place ) ) . ')' );
+		$chips[] = array( aw_directory_url( $place->slug ), sprintf( __( 'All in %s', 'rankweb' ), $place->name ) . ' (' . number_format_i18n( aw_seo_dir_count( $place ) ) . ')' );
 		/* translators: %s: district. */
-		$head = sprintf( __( 'More in %s', 'aw-seo-extras' ), $place->name );
+		$head = sprintf( __( 'More in %s', 'rankweb' ), $place->name );
 		$slug = 'types';
 	} else {
 		return '';

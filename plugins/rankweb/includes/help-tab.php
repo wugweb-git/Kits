@@ -30,9 +30,9 @@ function aw_seo_help_tab( $screen ) {
 		return;
 	}
 	$screens = array(
-		__( 'Overview', 'aw-seo-extras' ) => __( 'every module, where it is set up and its status', 'aw-seo-extras' ),
-		__( 'FAQ', 'aw-seo-extras' ) => __( 'which content has the FAQ box, and questions waiting for approval', 'aw-seo-extras' ),
-		__( 'Settings', 'aw-seo-extras' ) => __( 'every rule, by module, with its default', 'aw-seo-extras' ),
+		__( 'Overview', 'rankweb' ) => __( 'every module, where it is set up and its status', 'rankweb' ),
+		__( 'FAQ', 'rankweb' ) => __( 'which content has the FAQ box, and questions waiting for approval', 'rankweb' ),
+		__( 'Settings', 'rankweb' ) => __( 'every rule, by module, with its default', 'rankweb' ),
 	);
 	$list = '';
 	foreach ( $screens as $label => $what ) {
@@ -42,8 +42,8 @@ function aw_seo_help_tab( $screen ) {
 		array(
 			'id'       => 'aw_seo-about',
 			/* translators: %s: plugin name. */
-			'title'    => sprintf( __( 'About %s', 'aw-seo-extras' ), 'RankWeb' ),
-			'content'  => '<p>' . esc_html__( 'Everything Rank Math does not do, or keeps for Premium: the FAQ system, canonical rules, breadcrumbs, content analysis on what visitors see, focus keywords and the content panel in the editor. It works only while Rank Math is active.', 'aw-seo-extras' ) . '</p><ul>' . $list . '</ul>',
+			'title'    => sprintf( __( 'About %s', 'rankweb' ), 'RankWeb' ),
+			'content'  => '<p>' . esc_html__( 'Everything Rank Math does not do, or keeps for Premium: the FAQ system, canonical rules, breadcrumbs, content analysis on what visitors see, focus keywords and the content panel in the editor. It works only while Rank Math is active.', 'rankweb' ) . '</p><ul>' . $list . '</ul>',
 			'priority' => 5,
 		)
 	);
@@ -51,7 +51,7 @@ function aw_seo_help_tab( $screen ) {
 	$data      = function_exists( 'get_file_data' ) ? get_file_data( $main_file, array( 'Version' => 'Version' ) ) : array();
 	$screen->set_help_sidebar(
 		'<p><strong>RankWeb</strong>' . ( empty( $data['Version'] ) ? '' : ' ' . esc_html( $data['Version'] ) ) . '</p>'
-		. '<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Plugins', 'aw-seo-extras' ) . '</a></p>'
-		. '<p><a href="https://wugweb.com" target="_blank" rel="noopener noreferrer">Wugweb<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'aw-seo-extras' ) . '</span></a></p>'
+		. '<p><a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' . esc_html__( 'Plugins', 'rankweb' ) . '</a></p>'
+		. '<p><a href="https://wugweb.com" target="_blank" rel="noopener noreferrer">Wugweb<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'rankweb' ) . '</span></a></p>'
 	);
 }

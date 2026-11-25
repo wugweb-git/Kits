@@ -34,7 +34,7 @@
 				style: { color: props.ok ? '#008a20' : '#757575', fontWeight: 600, marginRight: 6 },
 			},
 			props.ok ? '✓' : '–',
-			el( C.VisuallyHidden, null, props.ok ? __( 'in the text', 'aw-seo-extras' ) : __( 'not in the text', 'aw-seo-extras' ) )
+			el( C.VisuallyHidden, null, props.ok ? __( 'in the text', 'rankweb' ) : __( 'not in the text', 'rankweb' ) )
 		);
 	}
 
@@ -65,7 +65,7 @@
 						setState( { data: data } );
 					} )
 					.catch( function ( err ) {
-						setState( { error: ( err && err.message ) || __( 'Could not load the advice.', 'aw-seo-extras' ) } );
+						setState( { error: ( err && err.message ) || __( 'Could not load the advice.', 'rankweb' ) } );
 					} );
 			},
 			[ postId, saved ]
@@ -81,7 +81,7 @@
 
 		var focus = el(
 			C.PanelBody,
-			{ title: __( 'Focus keyphrases', 'aw-seo-extras' ), initialOpen: true },
+			{ title: __( 'Focus keyphrases', 'rankweb' ), initialOpen: true },
 			d.focus.length
 				? el(
 						'ul',
@@ -92,12 +92,12 @@
 								{ key: i },
 								el( Mark, { ok: f.in_text } ),
 								el( 'strong', null, f.phrase ),
-								f.primary ? ' ' + __( '(primary)', 'aw-seo-extras' ) : '',
+								f.primary ? ' ' + __( '(primary)', 'rankweb' ) : '',
 								f.owners.length
 									? el(
 											C.Notice,
 											{ status: 'warning', isDismissible: false },
-											__( 'Already the focus of:', 'aw-seo-extras' ) + ' ',
+											__( 'Already the focus of:', 'rankweb' ) + ' ',
 											f.owners.map( function ( o, j ) {
 												return el( 'a', { key: j, href: o.edit }, o.title + ( j < f.owners.length - 1 ? ', ' : '' ) );
 											} )
@@ -106,16 +106,16 @@
 							);
 						} )
 				  )
-				: el( 'p', null, __( 'No focus keyphrase yet. Set one in Rank Math.', 'aw-seo-extras' ) )
+				: el( 'p', null, __( 'No focus keyphrase yet. Set one in Rank Math.', 'rankweb' ) )
 		);
 
 		var linkKws = d.link_kws ? el( LinkKeywords, { postId: postId, data: d.link_kws } ) : null;
 
 		var queries = el(
 			C.PanelBody,
-			{ title: __( 'Searches it shows for (28 days)', 'aw-seo-extras' ), initialOpen: true },
+			{ title: __( 'Searches it shows for (28 days)', 'rankweb' ), initialOpen: true },
 			! d.insights
-				? el( 'p', null, __( 'Turn on InsightWeb (Search Insights) to see the searches this page appears for.', 'aw-seo-extras' ) )
+				? el( 'p', null, __( 'Turn on InsightWeb (Search Insights) to see the searches this page appears for.', 'rankweb' ) )
 				: d.queries.length
 				? el(
 						'ul',
@@ -131,7 +131,7 @@
 									{ style: { color: '#757575', fontSize: 12 } },
 									sprintf(
 										/* translators: 1: clicks, 2: impressions, 3: average position. */
-										__( '%1$d clicks · %2$d impressions · position %3$s', 'aw-seo-extras' ),
+										__( '%1$d clicks · %2$d impressions · position %3$s', 'rankweb' ),
 										q.clicks,
 										q.impr,
 										null === q.pos ? '–' : String( q.pos )
@@ -140,12 +140,12 @@
 							);
 						} )
 				  )
-				: el( 'p', null, __( 'No searches recorded for this page in the last 28 days.', 'aw-seo-extras' ) )
+				: el( 'p', null, __( 'No searches recorded for this page in the last 28 days.', 'rankweb' ) )
 		);
 
 		var links = el(
 			C.PanelBody,
-			{ title: __( 'Internal links to add', 'aw-seo-extras' ), initialOpen: false },
+			{ title: __( 'Internal links to add', 'rankweb' ), initialOpen: false },
 			d.links.length
 				? el(
 						'ul',
@@ -159,18 +159,18 @@
 							);
 						} )
 				  )
-				: el( 'p', null, __( 'No missing links found: every page whose keyphrase is in this text is linked.', 'aw-seo-extras' ) )
+				: el( 'p', null, __( 'No missing links found: every page whose keyphrase is in this text is linked.', 'rankweb' ) )
 		);
 
 		var shape = el(
 			C.PanelBody,
-			{ title: __( 'Length and headings', 'aw-seo-extras' ), initialOpen: false },
+			{ title: __( 'Length and headings', 'rankweb' ), initialOpen: false },
 			el(
 				'p',
 				null,
 				sprintf(
 					/* translators: 1: words, 2: H2 count, 3: H3 count. */
-					__( 'This item: %1$d words, %2$d H2, %3$d H3.', 'aw-seo-extras' ),
+					__( 'This item: %1$d words, %2$d H2, %3$d H3.', 'rankweb' ),
 					d.shape.words,
 					d.shape.h2,
 					d.shape.h3
@@ -181,7 +181,7 @@
 				{ style: { color: '#757575' } },
 				sprintf(
 					/* translators: 1: number of items compared, 2: words, 3: H2 count, 4: H3 count. */
-					__( 'Typical of %1$d published items of this type: %2$d words, %3$d H2, %4$d H3.', 'aw-seo-extras' ),
+					__( 'Typical of %1$d published items of this type: %2$d words, %3$d H2, %4$d H3.', 'rankweb' ),
 					d.typical.n,
 					d.typical.words,
 					d.typical.h2,
@@ -192,7 +192,7 @@
 
 		var questions = el(
 			C.PanelBody,
-			{ title: __( 'FAQ questions', 'aw-seo-extras' ), initialOpen: false },
+			{ title: __( 'FAQ questions', 'rankweb' ), initialOpen: false },
 			d.questions.length
 				? el(
 						'ul',
@@ -201,7 +201,7 @@
 							return el( Row, { key: i }, el( Mark, { ok: ! q.hidden } ), q.q, q.hidden ? el( 'div', { style: { color: '#757575', fontSize: 12 } }, q.hidden ) : null );
 						} )
 				  )
-				: el( 'p', null, __( 'No automatic questions for this item.', 'aw-seo-extras' ) )
+				: el( 'p', null, __( 'No automatic questions for this item.', 'rankweb' ) )
 		);
 
 		return el( wp.element.Fragment, null, focus, linkKws, queries, links, shape, questions );
@@ -230,27 +230,27 @@
 			} )
 				.then( function ( r ) {
 					setText( r.list.join( '\n' ) );
-					setS( { saved: true, busy: false, msg: __( 'Link keywords saved.', 'aw-seo-extras' ), error: '' } );
+					setS( { saved: true, busy: false, msg: __( 'Link keywords saved.', 'rankweb' ), error: '' } );
 				} )
 				.catch( function ( err ) {
-					setS( { saved: s.saved, busy: false, msg: '', error: ( err && err.message ) || __( 'Could not save the link keywords.', 'aw-seo-extras' ) } );
+					setS( { saved: s.saved, busy: false, msg: '', error: ( err && err.message ) || __( 'Could not save the link keywords.', 'rankweb' ) } );
 				} );
 		}
 
 		return el(
 			C.PanelBody,
-			{ title: __( 'Link keywords', 'aw-seo-extras' ), initialOpen: true },
+			{ title: __( 'Link keywords', 'rankweb' ), initialOpen: true },
 			el( C.TextareaControl, {
-				label: __( 'Other items link to this one where these words appear. One per line.', 'aw-seo-extras' ),
+				label: __( 'Other items link to this one where these words appear. One per line.', 'rankweb' ),
 				value: text,
 				rows: 4,
 				onChange: setText,
-				help: s.saved ? '' : __( 'From the focus keywords until you save them here.', 'aw-seo-extras' ),
+				help: s.saved ? '' : __( 'From the focus keywords until you save them here.', 'rankweb' ),
 			} ),
 			props.data.on
 				? null
-				: el( 'p', { style: { color: '#757575', fontSize: 12 } }, __( 'The auto-linker is off for this post type (RankWeb → Settings → Internal links).', 'aw-seo-extras' ) ),
-			el( C.Button, { variant: 'secondary', onClick: save, isBusy: s.busy, disabled: s.busy }, __( 'Save link keywords', 'aw-seo-extras' ) ),
+				: el( 'p', { style: { color: '#757575', fontSize: 12 } }, __( 'The auto-linker is off for this post type (RankWeb → Settings → Internal links).', 'rankweb' ) ),
+			el( C.Button, { variant: 'secondary', onClick: save, isBusy: s.busy, disabled: s.busy }, __( 'Save link keywords', 'rankweb' ) ),
 			s.msg ? el( 'p', { role: 'status', style: { color: '#008a20', marginTop: 8 } }, s.msg ) : null,
 			s.error ? el( C.Notice, { status: 'error', isDismissible: false }, s.error ) : null
 		);
@@ -262,8 +262,8 @@
 			return el(
 				wp.element.Fragment,
 				null,
-				MoreItem ? el( MoreItem, { target: 'rankweb-content', icon: icon }, __( 'RankWeb content', 'aw-seo-extras' ) ) : null,
-				el( Sidebar, { name: 'rankweb-content', title: __( 'RankWeb content', 'aw-seo-extras' ), icon: icon }, el( Panel ) )
+				MoreItem ? el( MoreItem, { target: 'rankweb-content', icon: icon }, __( 'RankWeb content', 'rankweb' ) ) : null,
+				el( Sidebar, { name: 'rankweb-content', title: __( 'RankWeb content', 'rankweb' ), icon: icon }, el( Panel ) )
 			);
 		},
 	} );

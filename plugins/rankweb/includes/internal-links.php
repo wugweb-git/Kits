@@ -181,7 +181,7 @@ add_action(
 			array(
 				'type'              => 'array',
 				'single'            => true,
-				'description'       => __( 'Link keywords: other items link to this one where these words appear.', 'aw-seo-extras' ),
+				'description'       => __( 'Link keywords: other items link to this one where these words appear.', 'rankweb' ),
 				'sanitize_callback' => 'aw_link_keywords_clean',
 				'auth_callback'     => fn( $allowed, $key, $post_id ) => current_user_can( 'edit_posts' ) && current_user_can( 'edit_post', (int) $post_id ),
 				'show_in_rest'      => array(
@@ -629,7 +629,7 @@ add_action(
 		}
 		add_meta_box(
 			'aw-link-keywords',
-			__( 'Link keywords', 'aw-seo-extras' ),
+			__( 'Link keywords', 'rankweb' ),
 			'aw_link_meta_box',
 			$post_type,
 			'side',
@@ -649,13 +649,13 @@ add_action(
 function aw_link_meta_box( WP_Post $post ): void {
 	$saved = aw_link_keywords_saved( (int) $post->ID );
 	wp_nonce_field( 'aw_link_keywords_' . $post->ID, 'aw_link_keywords_nonce' );
-	echo '<p><label for="aw-link-keywords-field">' . esc_html__( 'Other items link to this one where these words appear. One per line.', 'aw-seo-extras' ) . '</label></p>';
+	echo '<p><label for="aw-link-keywords-field">' . esc_html__( 'Other items link to this one where these words appear. One per line.', 'rankweb' ) . '</label></p>';
 	echo '<textarea id="aw-link-keywords-field" name="aw_link_keywords" rows="5" class="widefat">' . esc_textarea( implode( "\n", aw_link_keywords( (int) $post->ID ) ) ) . '</textarea>';
 	if ( ! $saved ) {
-		echo '<p class="description">' . esc_html__( 'From the focus keywords until you save this box.', 'aw-seo-extras' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'From the focus keywords until you save this box.', 'rankweb' ) . '</p>';
 	}
 	if ( ! in_array( $post->post_type, aw_link_types(), true ) ) {
-		echo '<p class="description">' . esc_html__( 'The auto-linker is off for this post type (RankWeb → Settings → Internal links).', 'aw-seo-extras' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'The auto-linker is off for this post type (RankWeb → Settings → Internal links).', 'rankweb' ) . '</p>';
 	}
 }
 
@@ -704,11 +704,11 @@ add_action(
 				),
 				'permission_callback' => function ( WP_REST_Request $req ) {
 					if ( ! is_user_logged_in() ) {
-						return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'aw-seo-extras' ), array( 'status' => 401 ) );
+						return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'rankweb' ), array( 'status' => 401 ) );
 					}
 					return current_user_can( 'edit_posts' ) && current_user_can( 'edit_post', (int) $req['id'] ) && get_post( (int) $req['id'] )
 						? true
-						: new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'aw-seo-extras' ), array( 'status' => 403 ) );
+						: new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'rankweb' ), array( 'status' => 403 ) );
 				},
 				'callback'            => function ( WP_REST_Request $req ) {
 					$id   = (int) $req['id'];

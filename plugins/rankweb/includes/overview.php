@@ -71,7 +71,7 @@ function aw_seo_overview_link( string $label, string $url ): string {
 function aw_seo_overview_endpoints_status(): string {
 	$last = (array) get_option( 'aw_seo_endpoints_last', array() );
 	if ( empty( $last['at'] ) ) {
-		return esc_html__( 'Not checked yet (hourly check).', 'aw-seo-extras' );
+		return esc_html__( 'Not checked yet (hourly check).', 'rankweb' );
 	}
 	$when = wp_date( 'j M Y, g:i a', (int) $last['at'] );
 	if ( ! empty( $last['problems'] ) ) {
