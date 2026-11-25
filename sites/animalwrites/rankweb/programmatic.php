@@ -27,27 +27,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  * "veterinary" (any veterinary type, as the Directory's Veterinary filter) and in all ("*"). A listing with two types
  * counts under each. "{key}#ph" counts those with a phone or WhatsApp number, "{key}#gov" those from a government list
  * (or a government veterinary office or 1962 unit). "={key}" counts each listing once, by its most specific type
- * (aw_seo_main_type(): a gaushala, vet or ABC centre is not also counted as an NGO), so a breakdown adds up to the whole
+ * (rankweb_seo_main_type(): a gaushala, vet or ABC centre is not also counted as an NGO), so a breakdown adds up to the whole
  * (owner, 15 Oct 2026). Rebuilt when the Directory's stored counts are (places.php), else kept for 12 hours.
  *
  * @return array{at:int, s:array, d:array, in:array}
  */
-function aw_seo_dir_data() {
+function rankweb_seo_dir_data() {
 	static $data = null;
 	if ( null !== $data ) {
 		return $data;
 	}
-	if ( ! function_exists( 'aw_place_counts' ) || ! function_exists( 'directoryweb_listing_type_slugs' ) ) { // DirectoryWeb is off: no counts
+	if ( ! function_exists( 'directoryweb_place_counts' ) || ! function_exists( 'directoryweb_listing_type_slugs' ) ) { // DirectoryWeb is off: no counts
 		$data = array( 'v' => 3, 'at' => 0, 's' => array(), 'd' => array(), 'in' => array() );
 		return $data;
 	}
-	$at   = (int) ( aw_place_counts()['at'] ?? 0 );
+	$at   = (int) ( directoryweb_place_counts()['at'] ?? 0 );
 	$data = get_transient( 'aw_seo_dir_data' );
 	if ( is_array( $data ) && ( $data['at'] ?? -1 ) === $at && 3 === ( $data['v'] ?? 0 ) ) {
 		return $data;
 	}
 	global $wpdb;
-	$ids  = aw_seo_preview_ids();
+	$ids  = rankweb_seo_preview_ids();
 	// Preview-only items are left out (integers).
 	$rows = $wpdb->get_results( "SELECT p.ID id, MAX(CASE WHEN pm.meta_key = 'aw_state_code' THEN pm.meta_value END) st, MAX(CASE WHEN pm.meta_key = 'aw_district_code' THEN pm.meta_value END) dt, MAX(CASE WHEN pm.meta_key = 'aw_phones' AND CAST(pm.meta_value AS UNSIGNED) > 0 THEN 1 ELSE 0 END) ph, MAX(CASE WHEN pm.meta_key = 'aw_source_name' AND TRIM(pm.meta_value) <> '' AND pm.meta_value NOT LIKE '%google%' AND pm.meta_value <> 'AWBI ABC list' AND pm.meta_value NOT LIKE '%Darpan%' AND pm.meta_value NOT LIKE '%data.gov.in%' AND pm.meta_value NOT LIKE 'People For Animals%' AND pm.meta_value NOT LIKE '%adopt-a-pet%' AND pm.meta_value NOT LIKE 'AWBP Trust%' AND pm.meta_value NOT LIKE '%dogsindia%' THEN 1 ELSE 0 END) gov FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key IN ('aw_state_code', 'aw_district_code', 'aw_phones', 'aw_source_name') WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" . ( $ids ? ' AND p.ID NOT IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : '' ) . ' GROUP BY p.ID', ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL
 	$tax  = $wpdb->get_results( "SELECT r.object_id id, t.slug FROM {$wpdb->term_relationships} r JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = r.term_taxonomy_id AND tt.taxonomy = 'post_tag' JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('" . implode( "','", array_map( 'esc_sql', directoryweb_listing_type_slugs() ) ) . "') JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish'", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the listing types and ids are the plugin's own, cast or escaped
@@ -59,7 +59,7 @@ function aw_seo_dir_data() {
 	$data = array( 'v' => 3, 'at' => $at, 's' => array(), 'd' => array(), 'in' => array() );
 	foreach ( $rows as $r ) {
 		$keys = $types[ (int) $r['id'] ] ?? array();
-		$main = aw_seo_main_type( $keys );
+		$main = rankweb_seo_main_type( $keys );
 		if ( array_intersect( $keys, $vet ) ) {
 			$keys[] = 'veterinary';
 		}
@@ -91,7 +91,7 @@ function aw_seo_dir_data() {
  * @param string[] $slugs The listing's type slugs.
  * @return string Type key, '' without a type.
  */
-function aw_seo_main_type( array $slugs ) {
+function rankweb_seo_main_type( array $slugs ) {
 	$vet = defined( 'AW_VET_TYPES' ) ? AW_VET_TYPES : array();
 	if ( array_intersect( $slugs, $vet ) ) {
 		return 'veterinary';
@@ -116,8 +116,8 @@ function aw_seo_main_type( array $slugs ) {
  * @param string      $key   Type slug, "veterinary" or "*".
  * @return int
  */
-function aw_seo_dir_count( $place, $key = '*' ) {
-	$d = aw_seo_dir_data();
+function rankweb_seo_dir_count( $place, $key = '*' ) {
+	$d = rankweb_seo_dir_data();
 	if ( ! $place ) {
 		return (int) ( $d['in'][ $key ] ?? 0 );
 	}
@@ -131,13 +131,13 @@ function aw_seo_dir_count( $place, $key = '*' ) {
  * @param string      $key   Type slug, "veterinary" or "*".
  * @return array List of [place, count].
  */
-function aw_seo_dir_children( $place, $key = '*' ) {
+function rankweb_seo_dir_children( $place, $key = '*' ) {
 	$out = array();
-	if ( ! function_exists( 'aw_place_states' ) ) { // DirectoryWeb is off
+	if ( ! function_exists( 'directoryweb_place_states' ) ) { // DirectoryWeb is off
 		return $out;
 	}
-	foreach ( $place ? aw_place_districts( $place->code ) : aw_place_states() as $p ) {
-		$n = aw_seo_dir_count( $p, $key );
+	foreach ( $place ? directoryweb_place_districts( $place->code ) : directoryweb_place_states() as $p ) {
+		$n = rankweb_seo_dir_count( $p, $key );
 		if ( $n ) {
 			$out[] = array( $p, $n );
 		}
@@ -148,13 +148,13 @@ function aw_seo_dir_children( $place, $key = '*' ) {
 
 /**
  * What is listed in a place, by type, most first: the types in AW_SEO_BREAKDOWN, then any other type with listings.
- * Each listing is counted once, under its most specific type (aw_seo_main_type()), so the parts add up to the whole.
+ * Each listing is counted once, under its most specific type (rankweb_seo_main_type()), so the parts add up to the whole.
  *
  * @param object $place State or district.
  * @return array List of [type key, count].
  */
-function aw_seo_dir_breakdown( $place ) {
-	$d    = aw_seo_dir_data();
+function rankweb_seo_dir_breakdown( $place ) {
+	$d    = rankweb_seo_dir_data();
 	$have = (array) ( $d[ 'state' === $place->kind ? 's' : 'd' ][ $place->code ] ?? array() );
 	$out  = array();
 	foreach ( $have as $k => $n ) {
@@ -175,7 +175,7 @@ function aw_seo_dir_breakdown( $place ) {
  * @param bool   $short Short words for a description ("NGOs", "vets").
  * @return string
  */
-function aw_seo_type_words( $key, $n = 2, $short = false ) {
+function rankweb_seo_type_words( $key, $n = 2, $short = false ) {
 	$words = array( // singular, plural, short plural
 		'animal-welfare-organisation' => array( 'animal welfare organisation', 'animal welfare organisations', 'NGOs' ),
 		'gaushala'                    => array( 'Gaushala', 'Gaushalas', 'Gaushalas' ), // always capitalised (owner, 15 Oct 2026)
@@ -192,13 +192,13 @@ function aw_seo_type_words( $key, $n = 2, $short = false ) {
 	if ( isset( $words[ $key ] ) ) {
 		return 1 === (int) $n ? $words[ $key ][0] : $words[ $key ][ $short ? 2 : 1 ];
 	}
-	$name = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_listing_type_name( $key ) ) );
+	$name = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_listing_type_name( $key ) ) );
 	$name = implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', $name ) ) );
-	return 1 === (int) $n ? $name : aw_seo_type_plural( $key );
+	return 1 === (int) $n ? $name : rankweb_seo_type_plural( $key );
 }
 
 /** Title case for a type in a title: "Gaushalas", "Vets and Veterinary Hospitals", "ABC Centres", "(1962)" kept. */
-function aw_seo_title_case( $text ) {
+function rankweb_seo_title_case( $text ) {
 	$small = array( 'and', 'or', 'of', 'in' );
 	$words = explode( ' ', $text );
 	foreach ( $words as $i => $w ) {
@@ -210,14 +210,14 @@ function aw_seo_title_case( $text ) {
 }
 
 /** "a, b and c". */
-function aw_seo_join( array $parts ) {
+function rankweb_seo_join( array $parts ) {
 	$parts = array_values( array_filter( $parts, 'strlen' ) );
 	$last  = array_pop( $parts );
 	return $parts ? implode( ', ', $parts ) . ' and ' . $last : (string) $last;
 }
 
 /** A number for a sentence: "One" at the start for 1, else 1,234. */
-function aw_seo_num( $n, $lead = false ) {
+function rankweb_seo_num( $n, $lead = false ) {
 	return ( 1 === (int) $n && $lead ) ? 'One' : number_format_i18n( (int) $n );
 }
 
@@ -228,29 +228,29 @@ function aw_seo_num( $n, $lead = false ) {
  *
  * @return array|null
  */
-function aw_seo_dir_view() {
+function rankweb_seo_dir_view() {
 	static $v = false;
 	if ( false !== $v ) {
 		return $v;
 	}
 	$v = null;
-	if ( ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() || is_404() ) {
+	if ( ! function_exists( 'directoryweb_is_directory_view' ) || ! directoryweb_is_directory_view() || is_404() ) {
 		return $v;
 	}
-	$place = aw_current_place();
+	$place = directoryweb_current_place();
 	$type  = (string) get_query_var( 'aw_type_slug' );
 	if ( '' === $type ) {
-		$type = function_exists( 'aw_request_type' ) ? aw_request_type() : ''; // ?tag= (a listing type)
+		$type = function_exists( 'directoryweb_request_type' ) ? directoryweb_request_type() : ''; // ?tag= (a listing type)
 	}
 	$other = false;
 	foreach ( array( 'q', 'verified', 'gov' ) as $k ) {
 		$other = $other || ( isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
-	$other = $other || ( function_exists( 'aw_request_services' ) && aw_request_services() ); // a service chosen too
+	$other = $other || ( function_exists( 'directoryweb_request_services' ) && directoryweb_request_services() ); // a service chosen too
 	$v = array(
 		'kind'  => $place ? $place->kind : 'india',
 		'place' => $place,
-		'state' => $place ? aw_place_parent_state( $place ) : null,
+		'state' => $place ? directoryweb_place_parent_state( $place ) : null,
 		'type'  => $type,
 		'n'     => function_exists( 'aw_hub_total' ) ? (int) aw_hub_total( 'aw_listing' ) : 0,
 		'other' => $other,
@@ -262,31 +262,31 @@ function aw_seo_dir_view() {
  * Whether a district's page may speak of "contact numbers": at least two of its listings, and at least a quarter of them,
  * have a phone or WhatsApp number.
  */
-function aw_seo_has_numbers( $place ) {
-	$ph = aw_seo_dir_count( $place, '*#ph' );
-	return $ph >= 2 && $ph * 4 >= aw_seo_dir_count( $place );
+function rankweb_seo_has_numbers( $place ) {
+	$ph = rankweb_seo_dir_count( $place, '*#ph' );
+	return $ph >= 2 && $ph * 4 >= rankweb_seo_dir_count( $place );
 }
 
 /** Listings in the current Directory view with a phone or WhatsApp number (its place and type). */
-function aw_seo_dir_view_phones( $v ) {
-	return aw_seo_dir_count( $v['place'], ( '' !== $v['type'] ? $v['type'] : '*' ) . '#ph' );
+function rankweb_seo_dir_view_phones( $v ) {
+	return rankweb_seo_dir_count( $v['place'], ( '' !== $v['type'] ? $v['type'] : '*' ) . '#ph' );
 }
 
 /**
  * Words for the current view's type: "government veterinary hospitals" when every veterinary listing in the place comes
- * from a government list, else as aw_seo_type_words().
+ * from a government list, else as rankweb_seo_type_words().
  */
-function aw_seo_view_type_words( $v, $n, $short = false ) {
-	$words = aw_seo_type_words( $v['type'], $n, $short );
+function rankweb_seo_view_type_words( $v, $n, $short = false ) {
+	$words = rankweb_seo_type_words( $v['type'], $n, $short );
 	$vet   = array( 'veterinary', 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic' );
-	if ( in_array( $v['type'], $vet, true ) && aw_seo_dir_count( $v['place'], $v['type'] ) && aw_seo_dir_count( $v['place'], $v['type'] . '#gov' ) === aw_seo_dir_count( $v['place'], $v['type'] ) ) {
+	if ( in_array( $v['type'], $vet, true ) && rankweb_seo_dir_count( $v['place'], $v['type'] ) && rankweb_seo_dir_count( $v['place'], $v['type'] . '#gov' ) === rankweb_seo_dir_count( $v['place'], $v['type'] ) ) {
 		$words = 'government ' . $words;
 	}
 	return $words;
 }
 
 /** "address, phone number and services" as far as the listings in view have them. */
-function aw_seo_view_info( $n, $phones ) {
+function rankweb_seo_view_info( $n, $phones ) {
 	if ( $phones >= $n ) {
 		return 1 === $n ? 'address, phone number and services' : 'addresses, phone numbers and services';
 	}
@@ -302,15 +302,15 @@ function aw_seo_view_info( $n, $phones ) {
  * Search title of a district × type page or a filtered list by type (state or all India); '' for other views.
  * "Gaushalas in Pune, Maharashtra – Animal Writes", "Vets in Karnataka – Animal Writes".
  */
-function aw_seo_dir_title() {
-	$v = aw_seo_dir_view();
+function rankweb_seo_dir_title() {
+	$v = rankweb_seo_dir_view();
 	if ( ! $v || '' === $v['type'] || $v['other'] ) {
 		return '';
 	}
-	$what = aw_seo_title_case( aw_seo_view_type_words( $v, max( 1, $v['n'] ) ) );
-	$ph   = aw_seo_dir_view_phones( $v );
+	$what = rankweb_seo_title_case( rankweb_seo_view_type_words( $v, max( 1, $v['n'] ) ) );
+	$ph   = rankweb_seo_dir_view_phones( $v );
 	$num  = $ph ? ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) : ''; // no separator but the " – " before the site name (owner, 15 Oct 2026)
-	$one  = aw_seo_title_case( aw_seo_view_type_words( $v, 1 ) ); // "Animal Shelter Contact Numbers", not "Animal Shelters Contact Numbers" (owner, 5 Nov 2026)
+	$one  = rankweb_seo_title_case( rankweb_seo_view_type_words( $v, 1 ) ); // "Animal Shelter Contact Numbers", not "Animal Shelters Contact Numbers" (owner, 5 Nov 2026)
 	if ( 'district' === $v['kind'] ) {
 		$full  = $v['place']->name . ', ' . $v['state']->name; // "in Gandhinagar, Gujarat" (owner, 5 Nov 2026)
 		$short = $v['place']->name;
@@ -318,17 +318,17 @@ function aw_seo_dir_title() {
 		$full  = 'state' === $v['kind'] ? $v['place']->name : 'India';
 		$short = $full;
 	}
-	return aw_seo_fit(
+	return rankweb_seo_fit(
 		array_unique(
 			array(
-				$num ? $one . $num . ' in ' . $full : aw_seo_branded( $what . ' in ' . $full ),
-				aw_seo_branded( $what . ' in ' . $full ),
+				$num ? $one . $num . ' in ' . $full : rankweb_seo_branded( $what . ' in ' . $full ),
+				rankweb_seo_branded( $what . ' in ' . $full ),
 				$what . ' in ' . $full,
-				aw_seo_branded( $what . ' in ' . $short ),
+				rankweb_seo_branded( $what . ' in ' . $short ),
 				$what . ' in ' . $short,
 			)
 		),
-		60 - mb_strlen( aw_seo_page_suffix() )
+		60 - mb_strlen( rankweb_seo_page_suffix() )
 	);
 }
 
@@ -336,20 +336,20 @@ function aw_seo_dir_title() {
  * H1 of a district or state × type page where its listings have a number: "Animal Shelter Contact Numbers in
  * Gandhinagar", the same words as its title (owner, 5 Nov 2026); '' otherwise.
  */
-function aw_seo_dir_h1() {
-	$v = aw_seo_dir_view();
+function rankweb_seo_dir_h1() {
+	$v = rankweb_seo_dir_view();
 	if ( ! $v || '' === $v['type'] || $v['other'] || ! in_array( $v['kind'], array( 'district', 'state' ), true ) ) {
 		return '';
 	}
-	$ph = aw_seo_dir_view_phones( $v );
+	$ph = rankweb_seo_dir_view_phones( $v );
 	if ( ! $ph ) {
 		return '';
 	}
-	return aw_seo_title_case( aw_seo_view_type_words( $v, 1 ) ) . ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) . ' in ' . $v['place']->name;
+	return rankweb_seo_title_case( rankweb_seo_view_type_words( $v, 1 ) ) . ( 1 === $ph ? ' Contact Number' : ' Contact Numbers' ) . ' in ' . $v['place']->name;
 }
 
 /** DirectoryWeb asks for the H1 of a place × type page (filter directoryweb_place_h1). */
-add_filter( 'directoryweb_place_h1', fn( $h1 ) => aw_seo_dir_h1() ?: $h1 );
+add_filter( 'directoryweb_place_h1', fn( $h1 ) => rankweb_seo_dir_h1() ?: $h1 );
 
 /**
  * The places worth naming as "most are in": up to $max with at least two listings and more than the next place down
@@ -359,7 +359,7 @@ add_filter( 'directoryweb_place_h1', fn( $h1 ) => aw_seo_dir_h1() ?: $h1 );
  * @param int   $max  At most this many.
  * @return array
  */
-function aw_seo_leaders( array $list, $max = 3 ) {
+function rankweb_seo_leaders( array $list, $max = 3 ) {
 	$out = array();
 	foreach ( array_slice( $list, 0, $max ) as $i => $r ) {
 		if ( $r[1] < 2 || ( isset( $list[ $max ] ) && $r[1] <= $list[ $max ][1] ) ) {
@@ -371,31 +371,31 @@ function aw_seo_leaders( array $list, $max = 3 ) {
 }
 
 /** "A (12), B (9) and C (4)" for the first $max places. */
-function aw_seo_places_line( array $list, $max = 3 ) {
-	return aw_seo_join( array_map( fn( $r ) => $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')', array_slice( $list, 0, $max ) ) );
+function rankweb_seo_places_line( array $list, $max = 3 ) {
+	return rankweb_seo_join( array_map( fn( $r ) => $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')', array_slice( $list, 0, $max ) ) );
 }
 
 /**
  * Meta description of a Directory place, district × type page or filtered list, from its counts; '' where the general
  * rules apply (the Directory hub, name searches, service or verified filters).
  */
-function aw_seo_dir_description() {
-	$v = aw_seo_dir_view();
+function rankweb_seo_dir_description() {
+	$v = rankweb_seo_dir_view();
 	if ( ! $v || $v['other'] || ( 'india' === $v['kind'] && '' === $v['type'] ) || ! $v['n'] ) {
 		return '';
 	}
 	$n     = $v['n'];
 	$place = $v['place'];
 	$state = $v['state'];
-	$tail  = array( ' From the Animal Writes Directory of animal welfare organisations in India.', ' From the Animal Writes Directory.', '' );
+	$tail  = array( ' From the ' . rankweb_site_name() . ' Directory' . rankweb_seo_dir_scope( true ) . '.', ' From the ' . rankweb_site_name() . ' Directory.', '' );
 	$cands = array();
 	if ( '' !== $v['type'] ) {
-		$what = aw_seo_view_type_words( $v, $n );
-		$info = aw_seo_view_info( $n, aw_seo_dir_view_phones( $v ) );
+		$what = rankweb_seo_view_type_words( $v, $n );
+		$info = rankweb_seo_view_info( $n, rankweb_seo_dir_view_phones( $v ) );
 		if ( 'district' === $v['kind'] ) {
-			$lead = sprintf( '%1$s %2$s in %3$s, %4$s: %5$s.', aw_seo_num( $n, true ), $what, $place->name, $state->name, $info );
-			$m    = aw_seo_dir_count( $state, $v['type'] );
-			$k    = count( aw_seo_dir_children( $state, $v['type'] ) );
+			$lead = sprintf( '%1$s %2$s in %3$s, %4$s: %5$s.', rankweb_seo_num( $n, true ), $what, $place->name, $state->name, $info );
+			$m    = rankweb_seo_dir_count( $state, $v['type'] );
+			$k    = count( rankweb_seo_dir_children( $state, $v['type'] ) );
 			$ctx  = $m > $n && $k > 1 ? sprintf( ' %1$s has %2$s in %3$s districts.', $state->name, number_format_i18n( $m ), number_format_i18n( $k ) ) : '';
 			foreach ( array( $ctx, '' ) as $c ) {
 				foreach ( $tail as $t ) {
@@ -403,47 +403,47 @@ function aw_seo_dir_description() {
 				}
 			}
 		} else {
-			$kids = aw_seo_dir_children( $place, $v['type'] );
+			$kids = rankweb_seo_dir_children( $place, $v['type'] );
 			$area = 'state' === $v['kind']
-				? sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', aw_seo_num( $n, true ), $what, $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' )
-				: sprintf( '%1$s %2$s across India, in %3$s states and union territories.', aw_seo_num( $n, true ), $what, number_format_i18n( count( $kids ) ) );
-			$lead = aw_seo_leaders( $kids );
-			$most = $lead ? ' Most are in ' . aw_seo_places_line( $lead ) . '.' : '';
-			foreach ( array_unique( array( $most, count( $lead ) > 2 ? ' Most are in ' . aw_seo_places_line( $lead, 2 ) . '.' : '', '' ) ) as $m ) {
+				? sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', rankweb_seo_num( $n, true ), $what, $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' )
+				: sprintf( '%1$s %2$s across India, in %3$s states and union territories.', rankweb_seo_num( $n, true ), $what, number_format_i18n( count( $kids ) ) );
+			$lead = rankweb_seo_leaders( $kids );
+			$most = $lead ? ' Most are in ' . rankweb_seo_places_line( $lead ) . '.' : '';
+			foreach ( array_unique( array( $most, count( $lead ) > 2 ? ' Most are in ' . rankweb_seo_places_line( $lead, 2 ) . '.' : '', '' ) ) as $m ) {
 				foreach ( array( ' ' . ucfirst( $info ) . ' of each.', '' ) as $t ) {
 					$cands[] = $area . $m . $t;
 				}
 			}
 		}
 	} else {
-		$parts = aw_seo_dir_breakdown( $place );
+		$parts = rankweb_seo_dir_breakdown( $place );
 		$where = 'district' === $v['kind'] ? $place->name . ', ' . $state->name : $place->name;
 		if ( 1 === $n ) {
-			$one     = $parts ? aw_seo_type_words( $parts[0][0], 1 ) : 'animal welfare organisation';
-			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $one, $where );
+			$one     = $parts ? rankweb_seo_type_words( $parts[0][0], 1 ) : 'animal welfare organisation';
+			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the %3$s Directory%4$s.', $one, $where, rankweb_site_name(), rankweb_seo_dir_scope() );
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services.', $one, $where );
-		} elseif ( 'district' === $v['kind'] && aw_seo_has_numbers( $place ) ) {
+		} elseif ( 'district' === $v['kind'] && rankweb_seo_has_numbers( $place ) ) {
 			// Searched as "animal helpline number {district}" and "animal rescue {district} contact number" (SC, 15 Oct 2026).
-			$ph   = aw_seo_dir_view_phones( $v );
+			$ph   = rankweb_seo_dir_view_phones( $v );
 			$lead = sprintf( 'Animal helpline and rescue contact numbers in %1$s: %2$s animal welfare organisations, %3$s', $where, number_format_i18n( $n ), $ph >= $n ? 'all with a phone number' : number_format_i18n( $ph ) . ' with a phone number' );
 			for ( $max = min( 3, count( $parts ) ); $max >= 0; $max-- ) {
-				$list    = array_map( fn( $p ) => number_format_i18n( $p[1] ) . ' ' . aw_seo_type_words( $p[0], $p[1], true ), array_slice( $parts, 0, $max ) );
-				$cands[] = $lead . ( $list ? ', including ' . aw_seo_join( $list ) : '' ) . '.';
+				$list    = array_map( fn( $p ) => number_format_i18n( $p[1] ) . ' ' . rankweb_seo_type_words( $p[0], $p[1], true ), array_slice( $parts, 0, $max ) );
+				$cands[] = $lead . ( $list ? ', including ' . rankweb_seo_join( $list ) : '' ) . '.';
 			}
 			$cands[] = sprintf( 'Animal helpline and rescue contact numbers in %1$s: %2$s animal welfare organisations.', $where, number_format_i18n( $n ) );
 		} else {
-			$kids = 'state' === $v['kind'] ? aw_seo_dir_children( $place ) : array();
+			$kids = 'state' === $v['kind'] ? rankweb_seo_dir_children( $place ) : array();
 			$lead = sprintf( '%1$s animal welfare organisations in %2$s', number_format_i18n( $n ), $where ) . ( $kids ? sprintf( ', across %1$s %2$s', number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) : '' );
 			for ( $max = min( 3, count( $parts ) ); $max >= 0; $max-- ) {
-				$list = array_map( fn( $p ) => number_format_i18n( $p[1] ) . ' ' . aw_seo_type_words( $p[0], $p[1], true ), array_slice( $parts, 0, $max ) );
-				$inc  = $list ? ', including ' . aw_seo_join( $list ) . '.' : '.';
+				$list = array_map( fn( $p ) => number_format_i18n( $p[1] ) . ' ' . rankweb_seo_type_words( $p[0], $p[1], true ), array_slice( $parts, 0, $max ) );
+				$inc  = $list ? ', including ' . rankweb_seo_join( $list ) . '.' : '.';
 				$cands[] = $lead . $inc . ' Phone, address and services of each.';
 				$cands[] = $lead . $inc;
 			}
 		}
 	}
 	foreach ( $cands as $c ) {
-		if ( mb_strlen( $c ) <= AW_SEO_DESC_MAX - mb_strlen( aw_seo_page_suffix() ) ) {
+		if ( mb_strlen( $c ) <= AW_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() ) ) {
 			return $c;
 		}
 	}
@@ -453,17 +453,17 @@ function aw_seo_dir_description() {
 /* ---------- Directory: the visible line of facts ---------- */
 
 /** A link for the facts line. */
-function aw_seo_link( $url, $text ) {
+function rankweb_seo_link( $url, $text ) {
 	return '<a href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
 }
 
 /** "A (12), B (9) and C (4)" with each place linked. */
-function aw_seo_places_links( array $list, callable $url, $max = 3 ) {
-	return aw_seo_join( array_map( fn( $r ) => aw_seo_link( $url( $r[0] ), $r[0]->name ) . ' (' . esc_html( number_format_i18n( $r[1] ) ) . ')', array_slice( $list, 0, $max ) ) );
+function rankweb_seo_places_links( array $list, callable $url, $max = 3 ) {
+	return rankweb_seo_join( array_map( fn( $r ) => rankweb_seo_link( $url( $r[0] ), $r[0]->name ) . ' (' . esc_html( number_format_i18n( $r[1] ) ) . ')', array_slice( $list, 0, $max ) ) );
 }
 
 /** " All have a phone number." / " 30 have a phone number." ('' without one). */
-function aw_seo_phone_note( $n, $phones ) {
+function rankweb_seo_phone_note( $n, $phones ) {
 	if ( ! $phones ) {
 		return '';
 	}
@@ -474,9 +474,9 @@ function aw_seo_phone_note( $n, $phones ) {
 }
 
 /** The facts line of the current Directory view (HTML), '' where there is nothing to add. */
-function aw_seo_dir_facts() {
-	$v = aw_seo_dir_view();
-	if ( ! $v || $v['other'] || ! $v['n'] || aw_seo_page_number() > 1 || ( 'india' === $v['kind'] && '' === $v['type'] ) ) {
+function rankweb_seo_dir_facts() {
+	$v = rankweb_seo_dir_view();
+	if ( ! $v || $v['other'] || ! $v['n'] || rankweb_seo_page_number() > 1 || ( 'india' === $v['kind'] && '' === $v['type'] ) ) {
 		return '';
 	}
 	$n     = $v['n'];
@@ -486,52 +486,52 @@ function aw_seo_dir_facts() {
 	$out   = '';
 	if ( '' !== $type ) {
 		if ( 'district' === $v['kind'] ) {
-			$out  = esc_html( sprintf( '%1$s %2$s listed in %3$s.', aw_seo_num( $n, true ), aw_seo_view_type_words( $v, $n ), $place->name ) ) . aw_seo_phone_note( $n, aw_seo_dir_view_phones( $v ) );
-			$m    = aw_seo_dir_count( $state, $type );
-			$kids = aw_seo_dir_children( $state, $type );
+			$out  = esc_html( sprintf( '%1$s %2$s listed in %3$s.', rankweb_seo_num( $n, true ), rankweb_seo_view_type_words( $v, $n ), $place->name ) ) . rankweb_seo_phone_note( $n, rankweb_seo_dir_view_phones( $v ) );
+			$m    = rankweb_seo_dir_count( $state, $type );
+			$kids = rankweb_seo_dir_children( $state, $type );
 			if ( count( $kids ) > 1 ) {
 				// The leaders among all the state's districts, this one included (Nagaur, 130, was left out under Jodhpur, 118);
 				// this district is named without a link to itself.
-				$lead   = aw_seo_leaders( $kids );
-				$named  = aw_seo_join(
+				$lead   = rankweb_seo_leaders( $kids );
+				$named  = rankweb_seo_join(
 					array_map(
-						fn( $r ) => ( $r[0]->code === $place->code ? esc_html( $r[0]->name ) : aw_seo_link( aw_directory_url( $r[0]->slug, $type ), $r[0]->name ) ) . ' (' . esc_html( number_format_i18n( $r[1] ) ) . ')',
+						fn( $r ) => ( $r[0]->code === $place->code ? esc_html( $r[0]->name ) : rankweb_seo_link( directoryweb_directory_url( $r[0]->slug, $type ), $r[0]->name ) ) . ' (' . esc_html( number_format_i18n( $r[1] ) ) . ')',
 						$lead
 					)
 				);
-				$out   .= ' ' . esc_html( $state->name . ' has ' ) . aw_seo_link( aw_directory_url( $state->slug, $type ), number_format_i18n( $m ) . ' ' . aw_seo_type_words( $type, $m ) )
+				$out   .= ' ' . esc_html( $state->name . ' has ' ) . rankweb_seo_link( directoryweb_directory_url( $state->slug, $type ), number_format_i18n( $m ) . ' ' . rankweb_seo_type_words( $type, $m ) )
 					. esc_html( ' in ' . number_format_i18n( count( $kids ) ) . ' districts' )
 					. ( $lead ? esc_html( '; the most in ' ) . $named : '' ) . '.';
 			} else {
-				$out .= ' ' . esc_html( sprintf( 'It is the only district in %1$s with %2$s listed.', $state->name, aw_seo_type_words( $type, 2 ) ) );
+				$out .= ' ' . esc_html( sprintf( 'It is the only district in %1$s with %2$s listed.', $state->name, rankweb_seo_type_words( $type, 2 ) ) );
 			}
 		} else {
-			$kids = aw_seo_dir_children( $place, $type );
+			$kids = rankweb_seo_dir_children( $place, $type );
 			$out  = 'state' === $v['kind']
-				? esc_html( sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', aw_seo_num( $n, true ), aw_seo_view_type_words( $v, $n ), $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) )
-				: esc_html( sprintf( '%1$s %2$s across India, in %3$s states and union territories.', aw_seo_num( $n, true ), aw_seo_view_type_words( $v, $n ), number_format_i18n( count( $kids ) ) ) );
-			if ( aw_seo_leaders( $kids ) ) {
-				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( aw_seo_leaders( $kids ), fn( $p ) => aw_directory_url( $p->slug, $type ) ) . '.'; // districts × type, or states filtered by type
+				? esc_html( sprintf( '%1$s %2$s in %3$s, across %4$s %5$s.', rankweb_seo_num( $n, true ), rankweb_seo_view_type_words( $v, $n ), $place->name, number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) )
+				: esc_html( sprintf( '%1$s %2$s across India, in %3$s states and union territories.', rankweb_seo_num( $n, true ), rankweb_seo_view_type_words( $v, $n ), number_format_i18n( count( $kids ) ) ) );
+			if ( rankweb_seo_leaders( $kids ) ) {
+				$out .= ' ' . esc_html( 'Most are in ' ) . rankweb_seo_places_links( rankweb_seo_leaders( $kids ), fn( $p ) => directoryweb_directory_url( $p->slug, $type ) ) . '.'; // districts × type, or states filtered by type
 			}
 		}
 	} else {
-		$parts = aw_seo_dir_breakdown( $place );
-		$link  = fn( $p ) => aw_seo_link( aw_directory_url( $place->slug, $p[0] ), number_format_i18n( $p[1] ) . ' ' . aw_seo_type_words( $p[0], $p[1] ) );
-		$inc   = $parts && ! ( 1 === count( $parts ) && $parts[0][1] === $n ) ? esc_html( ', including ' ) . aw_seo_join( array_map( $link, $parts ) ) : ''; // every type, so the parts add up to the count (a 5th type was dropped before)
+		$parts = rankweb_seo_dir_breakdown( $place );
+		$link  = fn( $p ) => rankweb_seo_link( directoryweb_directory_url( $place->slug, $p[0] ), number_format_i18n( $p[1] ) . ' ' . rankweb_seo_type_words( $p[0], $p[1] ) );
+		$inc   = $parts && ! ( 1 === count( $parts ) && $parts[0][1] === $n ) ? esc_html( ', including ' ) . rankweb_seo_join( array_map( $link, $parts ) ) : ''; // every type, so the parts add up to the count (a 5th type was dropped before)
 		if ( $parts && 1 === count( $parts ) && $parts[0][1] === $n ) {
 			$inc = esc_html( 1 === $n ? ': ' : ', all ' ) . $link( $parts[0] ); // one type only: still linked, so its district × type page is not an orphan (Ashoknagar, 16 Oct 2026)
 		}
 		if ( 'state' === $v['kind'] ) {
-			$kids = aw_seo_dir_children( $place );
+			$kids = rankweb_seo_dir_children( $place );
 			$out  = esc_html( sprintf( '%1$s has %2$s %3$s in %4$s %5$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings', number_format_i18n( count( $kids ) ), 1 === count( $kids ) ? 'district' : 'districts' ) ) . $inc . '.';
-			if ( aw_seo_leaders( $kids ) ) {
-				$out .= ' ' . esc_html( 'Most are in ' ) . aw_seo_places_links( aw_seo_leaders( $kids ), fn( $p ) => aw_directory_url( $p->slug ) ) . '.';
+			if ( rankweb_seo_leaders( $kids ) ) {
+				$out .= ' ' . esc_html( 'Most are in ' ) . rankweb_seo_places_links( rankweb_seo_leaders( $kids ), fn( $p ) => directoryweb_directory_url( $p->slug ) ) . '.';
 			}
 		} else {
-			$out = esc_html( sprintf( '%1$s has %2$s %3$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings' ) ) . $inc . '.' . aw_seo_phone_note( $n, aw_seo_dir_view_phones( $v ) );
-			$m   = aw_seo_dir_count( $state );
+			$out = esc_html( sprintf( '%1$s has %2$s %3$s', $place->name, number_format_i18n( $n ), 1 === $n ? 'listing' : 'listings' ) ) . $inc . '.' . rankweb_seo_phone_note( $n, rankweb_seo_dir_view_phones( $v ) );
+			$m   = rankweb_seo_dir_count( $state );
 			if ( $m > $n ) {
-				$out .= ' ' . aw_seo_link( aw_directory_url( $state->slug ), $state->name ) . esc_html( ' has ' . number_format_i18n( $m ) . ' in all.' );
+				$out .= ' ' . rankweb_seo_link( directoryweb_directory_url( $state->slug ), $state->name ) . esc_html( ' has ' . number_format_i18n( $m ) . ' in all.' );
 			}
 		}
 	}
@@ -548,30 +548,30 @@ function aw_seo_dir_facts() {
  *
  * @return string HTML ('' elsewhere).
  */
-function aw_seo_dir_nav() {
-	$v = aw_seo_dir_view();
-	if ( ! $v || $v['other'] || ! $v['place'] || aw_seo_page_number() > 1 || ! function_exists( 'aw_term_section' ) ) {
+function rankweb_seo_dir_nav() {
+	$v = rankweb_seo_dir_view();
+	if ( ! $v || $v['other'] || ! $v['place'] || rankweb_seo_page_number() > 1 || ! function_exists( 'aw_term_section' ) ) {
 		return '';
 	}
 	$place = $v['place'];
 	$chips = array(); // [url, text]
 	if ( 'state' === $v['kind'] && '' === $v['type'] ) {
-		$kids = aw_seo_dir_children( $place );
+		$kids = rankweb_seo_dir_children( $place );
 		usort( $kids, fn( $a, $b ) => strcmp( $a[0]->name, $b[0]->name ) );
 		foreach ( $kids as $r ) {
-			$chips[] = array( aw_directory_url( $r[0]->slug ), $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')' );
+			$chips[] = array( directoryweb_directory_url( $r[0]->slug ), $r[0]->name . ' (' . number_format_i18n( $r[1] ) . ')' );
 		}
 		/* translators: %s: state. */
 		$head = sprintf( __( 'Districts in %s', 'rankweb' ), $place->name );
 		$slug = 'districts';
 	} elseif ( 'district' === $v['kind'] && '' !== $v['type'] ) {
-		foreach ( aw_seo_dir_breakdown( $place ) as $p ) {
+		foreach ( rankweb_seo_dir_breakdown( $place ) as $p ) {
 			if ( $p[0] !== $v['type'] ) {
-				$chips[] = array( aw_directory_url( $place->slug, $p[0] ), ucfirst( aw_seo_type_words( $p[0], $p[1] ) ) . ' (' . number_format_i18n( $p[1] ) . ')' );
+				$chips[] = array( directoryweb_directory_url( $place->slug, $p[0] ), ucfirst( rankweb_seo_type_words( $p[0], $p[1] ) ) . ' (' . number_format_i18n( $p[1] ) . ')' );
 			}
 		}
 		/* translators: %s: district. */
-		$chips[] = array( aw_directory_url( $place->slug ), sprintf( __( 'All in %s', 'rankweb' ), $place->name ) . ' (' . number_format_i18n( aw_seo_dir_count( $place ) ) . ')' );
+		$chips[] = array( directoryweb_directory_url( $place->slug ), sprintf( __( 'All in %s', 'rankweb' ), $place->name ) . ' (' . number_format_i18n( rankweb_seo_dir_count( $place ) ) . ')' );
 		/* translators: %s: district. */
 		$head = sprintf( __( 'More in %s', 'rankweb' ), $place->name );
 		$slug = 'types';
@@ -592,7 +592,7 @@ function aw_seo_dir_nav() {
 add_filter(
 	'render_block_core/query',
 	function ( $html ) {
-		return false === strpos( (string) $html, 'aw-toolbar' ) ? $html : $html . aw_seo_dir_facts() . aw_seo_dir_nav();
+		return false === strpos( (string) $html, 'aw-toolbar' ) ? $html : $html . rankweb_seo_dir_facts() . rankweb_seo_dir_nav();
 	},
 	11
 );
@@ -605,14 +605,14 @@ add_filter(
  *
  * @return array term_id => [aw_news, aw_legal, guide, research, aw_opportunity, aw_campaign] counts.
  */
-function aw_seo_category_counts() {
+function rankweb_seo_category_counts() {
 	$out = get_transient( 'aw_seo_category_counts' );
 	if ( is_array( $out ) ) {
 		return $out;
 	}
 	global $wpdb;
 	$research = get_term_by( 'slug', 'research', 'post_tag' );
-	$rows     = $wpdb->get_results( $wpdb->prepare( "SELECT tt.term_id term, p.post_type type, SUM(EXISTS(SELECT 1 FROM {$wpdb->term_relationships} rc WHERE rc.object_id = p.ID AND rc.term_taxonomy_id = %d)) research, COUNT(DISTINCT p.ID) n FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_status = 'publish' WHERE tt.taxonomy = %s GROUP BY tt.term_id, p.post_type", $research ? (int) $research->term_taxonomy_id : 0, aw_seo_category_tax() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows     = $wpdb->get_results( $wpdb->prepare( "SELECT tt.term_id term, p.post_type type, SUM(EXISTS(SELECT 1 FROM {$wpdb->term_relationships} rc WHERE rc.object_id = p.ID AND rc.term_taxonomy_id = %d)) research, COUNT(DISTINCT p.ID) n FROM {$wpdb->term_taxonomy} tt JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_status = 'publish' WHERE tt.taxonomy = %s GROUP BY tt.term_id, p.post_type", $research ? (int) $research->term_taxonomy_id : 0, rankweb_seo_category_tax() ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$out      = array();
 	foreach ( $rows as $r ) {
 		$t = (int) $r['term'];
@@ -636,11 +636,11 @@ add_action( 'save_post', fn() => delete_transient( 'aw_seo_category_counts' ) );
  * @param bool    $help With the Directory types.
  * @return array
  */
-function aw_seo_category_parts( $term, $help = true ) {
+function rankweb_seo_category_parts( $term, $help = true ) {
 	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (Animal Writes Core) are not loaded
 		return array();
 	}
-	$c     = aw_seo_category_counts()[ $term->term_id ] ?? array();
+	$c     = rankweb_seo_category_counts()[ $term->term_id ] ?? array();
 	$words = array(
 		'aw_news'        => array( 'news story', 'news stories', 'aw_news' ),
 		'aw_legal'       => array( 'court order or official document', 'court orders and official documents', 'aw_legal' ),
@@ -659,9 +659,9 @@ function aw_seo_category_parts( $term, $help = true ) {
 	if ( $help && function_exists( 'aw_category_help_types' ) ) {
 		foreach ( aw_category_help_types( $term->term_id ) as $tid ) {
 			$t = get_term( $tid, 'post_tag' );
-			$n = ( $t && ! is_wp_error( $t ) ) ? aw_seo_dir_count( null, $t->slug ) : 0;
+			$n = ( $t && ! is_wp_error( $t ) ) ? rankweb_seo_dir_count( null, $t->slug ) : 0;
 			if ( $n ) {
-				$parts[] = array( number_format_i18n( $n ) . ' ' . aw_seo_type_words( $t->slug, $n ), add_query_arg( 'tag', $t->slug, aw_hub_url( 'aw_listing' ) ), 'dir' );
+				$parts[] = array( number_format_i18n( $n ) . ' ' . rankweb_seo_type_words( $t->slug, $n ), add_query_arg( 'tag', $t->slug, aw_hub_url( 'aw_listing' ) ), 'dir' );
 			}
 		}
 	}
@@ -671,56 +671,56 @@ function aw_seo_category_parts( $term, $help = true ) {
 /**
  * A category's parts as text: [what it holds, its Directory types].
  *
- * @param array $parts aw_seo_category_parts().
+ * @param array $parts rankweb_seo_category_parts().
  * @param bool  $links As links.
  * @return array
  */
-function aw_seo_category_split( array $parts, $links = false ) {
+function rankweb_seo_category_split( array $parts, $links = false ) {
 	$out = array( array(), array() );
 	foreach ( $parts as $p ) {
-		$out[ empty( $p[2] ) ? 0 : 1 ][] = $links ? aw_seo_link( $p[1], $p[0] ) : $p[0];
+		$out[ empty( $p[2] ) ? 0 : 1 ][] = $links ? rankweb_seo_link( $p[1], $p[0] ) : $p[0];
 	}
 	return $out;
 }
 
 /** Meta description of a category page from what it holds; '' when it holds nothing. */
-function aw_seo_category_description( $term ) {
-	$parts = aw_seo_category_parts( $term );
+function rankweb_seo_category_description( $term ) {
+	$parts = rankweb_seo_category_parts( $term );
 	if ( ! $parts ) {
 		return '';
 	}
-	list( $items, $dir ) = aw_seo_category_split( $parts );
-	$lead  = rankweb_plain_text( $term->name ) . ' in India on Animal Writes: ';
-	$room  = AW_SEO_DESC_MAX - mb_strlen( aw_seo_page_suffix() );
+	list( $items, $dir ) = rankweb_seo_category_split( $parts );
+	$lead  = rankweb_plain_text( $term->name ) . ' in India on ' . rankweb_site_name() . ': ';
+	$room  = AW_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() );
 	$cands = array();
 	for ( $d = count( $dir ); $d >= 0; $d-- ) {
-		$tail = $d ? ' In the Directory: ' . aw_seo_join( array_slice( $dir, 0, $d ) ) . '.' : '';
-		$cands[] = ( $items ? $lead . aw_seo_join( $items ) . '.' : rtrim( $lead, ': ' ) . '.' ) . $tail;
+		$tail = $d ? ' In the Directory: ' . rankweb_seo_join( array_slice( $dir, 0, $d ) ) . '.' : '';
+		$cands[] = ( $items ? $lead . rankweb_seo_join( $items ) . '.' : rtrim( $lead, ': ' ) . '.' ) . $tail;
 	}
 	for ( $max = count( $items ) - 1; $max >= 1; $max-- ) {
-		$cands[] = $lead . aw_seo_join( array_slice( $items, 0, $max ) ) . '.';
+		$cands[] = $lead . rankweb_seo_join( array_slice( $items, 0, $max ) ) . '.';
 	}
 	foreach ( $cands as $c ) {
 		if ( mb_strlen( $c ) <= $room ) {
 			return $c;
 		}
 	}
-	return aw_seo_cut( (string) end( $cands ), $room );
+	return rankweb_seo_cut( (string) end( $cands ), $room );
 }
 
 // A category page: the line of facts above its lists, page 1.
 add_filter(
 	'do_shortcode_tag',
 	function ( $html, $tag ) {
-		if ( 'aw_category_hub' !== $tag || ! aw_seo_is_category_page() || aw_seo_page_number() > 1 ) {
+		if ( 'aw_category_hub' !== $tag || ! rankweb_seo_is_category_page() || rankweb_seo_page_number() > 1 ) {
 			return $html;
 		}
-		$parts = aw_seo_category_parts( get_queried_object() );
+		$parts = rankweb_seo_category_parts( get_queried_object() );
 		if ( ! $parts ) {
 			return $html;
 		}
-		list( $items, $dir ) = aw_seo_category_split( $parts, true );
-		$line = trim( ( $items ? 'In this category: ' . aw_seo_join( $items ) . '.' : '' ) . ( $dir ? ' In the Directory: ' . aw_seo_join( $dir ) . '.' : '' ) );
+		list( $items, $dir ) = rankweb_seo_category_split( $parts, true );
+		$line = trim( ( $items ? 'In this category: ' . rankweb_seo_join( $items ) . '.' : '' ) . ( $dir ? ' In the Directory: ' . rankweb_seo_join( $dir ) . '.' : '' ) );
 		return '<p class="kit-note">' . $line . '</p>' . $html;
 	},
 	10,
@@ -731,19 +731,19 @@ add_filter(
  * Keep each category's stored Rank Math fields equal to the ones built here, so the Rank Math box shows what is printed:
  * the description, and the share image (Facebook image = the category photo, Twitter uses the Facebook one). Only
  * where the field is empty or still holds the automatic copy (_aw_seo_auto); a typed one is never replaced. Daily, when
- * a category is saved, and from WP-CLI: `wp eval 'print_r( aw_seo_sync_categories() );'`.
+ * a category is saved, and from WP-CLI: `wp eval 'print_r( rankweb_seo_sync_categories() );'`.
  *
  * @return array slug => description.
  */
-function aw_seo_sync_categories() {
+function rankweb_seo_sync_categories() {
 	$out = array();
-	foreach ( get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => false ) ) as $term ) {
+	foreach ( get_terms( array( 'taxonomy' => rankweb_seo_category_tax(), 'hide_empty' => false ) ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
 		$att   = function_exists( 'kits_category_image_id' ) ? (int) kits_category_image_id( $term ) : 0;
 		$url   = $att ? (string) wp_get_attachment_url( $att ) : '';
 		$want  = array(
-			'title'                => aw_seo_term_title( $term ),
-			'description'          => $term->count ? aw_seo_category_description( $term ) : '',
+			'title'                => rankweb_seo_term_title( $term ),
+			'description'          => $term->count ? rankweb_seo_category_description( $term ) : '',
 			'facebook_image_id'    => $url ? (string) $att : '',
 			'facebook_image'       => $url,
 			'twitter_use_facebook' => $url ? 'on' : '',
@@ -767,35 +767,35 @@ function aw_seo_sync_categories() {
 	}
 	return $out;
 }
-add_action( 'edited_category', fn() => aw_seo_sync_categories(), 30 ); // after the photo is saved (category-images.php)
-add_action( 'created_category', fn() => aw_seo_sync_categories(), 30 );
-add_action( 'aw_seo_fill_daily', 'aw_seo_sync_categories', 30 );
+add_action( 'edited_category', fn() => rankweb_seo_sync_categories(), 30 ); // after the photo is saved (category-images.php)
+add_action( 'created_category', fn() => rankweb_seo_sync_categories(), 30 );
+add_action( 'aw_seo_fill_daily', 'rankweb_seo_sync_categories', 30 );
 
 /* ---------- Category and tag titles (owner, 15 Oct 2026; Directory types "<Plural> by State and District", 20 Oct 2026) ---------- */
 
 /**
  * Search titles of the categories and tags, written to fit 55–58 characters with " – Animal Writes" (keyword first,
- * plain text, the site name only as the suffix). A term not listed gets aw_seo_term_title_rule().
+ * plain text, the site name only as the suffix). A term not listed gets rankweb_seo_term_title_rule().
  */
 // AW_SEO_TERM_TITLES: RankWeb → Settings (settings.php).
 
 /** A category's or tag's search title, with " – Animal Writes". */
-function aw_seo_term_title( $term ) {
+function rankweb_seo_term_title( $term ) {
 	$key = $term->taxonomy . ':' . $term->slug;
 	if ( isset( AW_SEO_TERM_TITLES[ $key ] ) ) {
-		return aw_seo_branded( AW_SEO_TERM_TITLES[ $key ] );
+		return rankweb_seo_branded( AW_SEO_TERM_TITLES[ $key ] );
 	}
-	return aw_seo_term_title_rule( $term );
+	return rankweb_seo_term_title_rule( $term );
 }
 
 /**
  * The title of a category or tag that has no written one: the longest of a few shapes within 58 characters
  * (55–58 when one fits), else the shortest.
  */
-function aw_seo_term_title_rule( $term ) {
+function rankweb_seo_term_title_rule( $term ) {
 	// Only tails that say what the page really lists, and no separator but the " – " before the brand (owner, 15 Oct
 	// 2026: no filler such as ": News" added to reach a length, no colons or commas, no promise of phone numbers). New terms should still get a written title in AW_SEO_TERM_TITLES.
-	$what  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : rankweb_plain_text( $term->name ) . ' in India';
+	$what  = 'post_tag' === $term->taxonomy ? rankweb_seo_tag_title( $term ) : rankweb_plain_text( $term->name ) . ' in India';
 	$types = array();
 	foreach ( array( 'aw_listing', 'aw_legal', 'aw_news', 'post', 'aw_opportunity' ) as $pt ) {
 		$q = new WP_Query( array( 'post_type' => $pt, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => true, 'tax_query' => array( array( 'taxonomy' => $term->taxonomy, 'terms' => $term->term_id ) ) ) );
@@ -804,7 +804,7 @@ function aw_seo_term_title_rule( $term ) {
 		}
 	}
 	$tries = array();
-	$name  = 'post_tag' === $term->taxonomy ? aw_seo_tag_title( $term ) : rankweb_plain_text( $term->name );
+	$name  = 'post_tag' === $term->taxonomy ? rankweb_seo_tag_title( $term ) : rankweb_plain_text( $term->name );
 	if ( in_array( 'aw_listing', $types, true ) ) {
 		$tries = array( $what . ' by State and District', $what . ' by District', str_replace( ' in India', ' across India', $what ) );
 	} elseif ( array( 'aw_legal' ) === $types ) {
@@ -814,14 +814,14 @@ function aw_seo_term_title_rule( $term ) {
 	}
 	$tries[] = $what;
 	foreach ( $tries as $t ) {
-		$n = mb_strlen( aw_seo_branded( $t ) );
+		$n = mb_strlen( rankweb_seo_branded( $t ) );
 		if ( $n >= 55 && $n <= 58 ) {
-			return aw_seo_branded( $t );
+			return rankweb_seo_branded( $t );
 		}
 	}
 	foreach ( $tries as $t ) {
-		if ( mb_strlen( aw_seo_branded( $t ) ) <= 58 ) {
-			return aw_seo_branded( $t );
+		if ( mb_strlen( rankweb_seo_branded( $t ) ) <= 58 ) {
+			return rankweb_seo_branded( $t );
 		}
 	}
 	return $what; // longer than the range: the name alone, never cut
@@ -830,8 +830,8 @@ function aw_seo_term_title_rule( $term ) {
 /* ---------- Resources hub: guides and research summaries counted apart ---------- */
 
 /** "15 guides, 1 FAQ page and 143 research summaries" for the unfiltered Resources hub ('' when it does not apply). */
-function aw_seo_resources_count_label() {
-	if ( ( function_exists( 'aw_is_filtered_list' ) && aw_is_filtered_list() ) || ! function_exists( 'aw_hub_count_label' ) ) {
+function rankweb_seo_resources_count_label() {
+	if ( ( function_exists( 'rankweb_is_filtered_list' ) && rankweb_is_filtered_list() ) || ! function_exists( 'aw_hub_count_label' ) ) {
 		return '';
 	}
 	return aw_hub_count_label( 'post' ); // the same live split the hub shows above its pagination
@@ -840,7 +840,7 @@ function aw_seo_resources_count_label() {
 /* ---------- Tags: Library, Resource, Opportunity and Listing types, and Services ---------- */
 
 /** A tag's plural for a title: "Gaushalas", "Judgments", "Official Releases", "Jobs", "Mobile Veterinary Units (1962)". */
-function aw_seo_tag_plural( $term ) {
+function rankweb_seo_tag_plural( $term ) {
 	$fixed = array(
 		'research'           => 'Research Summaries',
 		'faq'                => 'FAQs',
@@ -855,62 +855,62 @@ function aw_seo_tag_plural( $term ) {
 		return $fixed[ $term->slug ];
 	}
 	if ( function_exists( 'directoryweb_service_slugs' ) && in_array( $term->slug, directoryweb_service_slugs(), true ) ) {
-		return 'Animal Welfare Organisations Offering ' . aw_seo_title_case( mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) );
+		return 'Animal Welfare Organisations Offering ' . rankweb_seo_title_case( mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) );
 	}
 	if ( function_exists( 'directoryweb_listing_type_slugs' ) && in_array( $term->slug, directoryweb_listing_type_slugs(), true ) ) {
-		return aw_seo_title_case( aw_seo_type_plural( $term->slug ) );
+		return rankweb_seo_title_case( rankweb_seo_type_plural( $term->slug ) );
 	}
 	$words = explode( ' ', trim( $term->name ) );
 	$last  = (string) array_pop( $words );
 	$last  = preg_match( '/[^aeiou]y$/', $last ) ? substr( $last, 0, -1 ) . 'ies' : ( preg_match( '/(s|x|ch|sh)$/', $last ) ? $last . 'es' : $last . 's' );
-	return aw_seo_title_case( trim( implode( ' ', $words ) . ' ' . $last ) );
+	return rankweb_seo_title_case( trim( implode( ' ', $words ) . ' ' . $last ) );
 }
 
 /** A tag page's title without the site name: "{Tag plural} in India". */
-function aw_seo_tag_title( $term ) {
-	return aw_seo_tag_plural( $term ) . ' in India';
+function rankweb_seo_tag_title( $term ) {
+	return rankweb_seo_tag_plural( $term ) . ' in India';
 }
 
 /** Words for a sentence: lower case, except acronyms (ABC, FAQs), "Gaushala" and brackets such as "(1962)". */
-function aw_seo_sentence_case( $text ) {
+function rankweb_seo_sentence_case( $text ) {
 	return implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}s?$|^\(|^Gaushala/u', $w ) ? $w : mb_strtolower( $w ), explode( ' ', trim( $text ) ) ) );
 }
 
 /** A tag page's description from what it holds (live counts): "2,047 Gaushalas in India in the Animal Writes Directory …". */
-function aw_seo_tag_description( $term ) {
+function rankweb_seo_tag_description( $term ) {
 	$n    = (int) $term->count;
 	$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
 	$svc  = function_exists( 'directoryweb_service_slugs' ) && in_array( $term->slug, directoryweb_service_slugs(), true );
 	if ( 1 === $n ) {
-		$what = $svc ? 'animal welfare organisation offering ' . aw_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) : aw_seo_sentence_case( $term->name );
+		$what = $svc ? 'animal welfare organisation offering ' . rankweb_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) : rankweb_seo_sentence_case( $term->name );
 	} else {
-		$what = aw_seo_sentence_case( aw_seo_tag_plural( $term ) );
+		$what = rankweb_seo_sentence_case( rankweb_seo_tag_plural( $term ) );
 	}
 	$num  = 0 === $n ? '' : ( 1 === $n ? 'One ' : number_format_i18n( $n ) . ' ' );
 	if ( $svc && '' === $sec ) { // a service with no listings of its own (Animal welfare, Bird treatment): a short factual line, not the general fallback (owner, 20 Oct 2026)
-		$what = aw_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) );
+		$what = rankweb_seo_sentence_case( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) );
 		$text = 0 === $n
 			? sprintf( 'Organisations offering %s in India, with phone numbers and addresses.', $what )
 			: sprintf( '%1$s organisation%2$s offering %3$s in India, with phone numbers and addresses.', 1 === $n ? 'One' : number_format_i18n( $n ), 1 === $n ? '' : 's', $what );
-		return aw_seo_cut( $text, AW_SEO_DESC_MAX );
+		return rankweb_seo_cut( $text, AW_SEO_DESC_MAX );
 	}
 	switch ( $sec ) {
 		case 'aw_listing':
-			$text = sprintf( '%1$s%2$s in India in the Animal Writes Directory, by state and district, with address, phone number and services.', $num, $what );
+			$text = sprintf( '%1$s%2$s in India in the %3$s Directory, by state and district, with address, phone number and services.', $num, $what, rankweb_site_name() );
 			break;
 		case 'aw_legal':
-			$text = sprintf( '%1$s%2$s on animals in India, summarised in plain words with a link to the official document, in the Animal Writes Library.', $num, $what );
+			$text = sprintf( '%1$s%2$s on animals in India, summarised in plain words with a link to the official document, in the %3$s Library.', $num, $what, rankweb_site_name() );
 			break;
 		case 'aw_opportunity':
 			$text = sprintf( '%1$sanimal welfare %2$s in India with organisations across the country: the role, location and how to apply.', $num, $what );
 			break;
 		case 'post':
-			$text = sprintf( '%1$s%2$s on animal welfare in India from Animal Writes, in plain words.', $num, $what );
+			$text = sprintf( '%1$s%2$s on animal welfare in India from %3$s, in plain words.', $num, $what, rankweb_site_name() );
 			break;
 		default:
-			$text = sprintf( '%1$s%2$s on Animal Writes, animal welfare in India.', $num, $what );
+			$text = sprintf( '%1$s%2$s on %3$s, animal welfare in India.', $num, $what, rankweb_site_name() );
 	}
-	return aw_seo_cut( ucfirst( $text ), AW_SEO_DESC_MAX );
+	return rankweb_seo_cut( ucfirst( $text ), AW_SEO_DESC_MAX );
 }
 
 /**
@@ -921,7 +921,7 @@ function aw_seo_tag_description( $term ) {
  * @param WP_Term $term Tag.
  * @return string
  */
-function aw_seo_tag_keyword( $term ) {
+function rankweb_seo_tag_keyword( $term ) {
 	$known = array(
 		'abc-centre'                  => 'abc centre,animal birth control centre,dog sterilisation centre',
 		'act'                         => 'animal welfare acts india,pca act',
@@ -978,7 +978,7 @@ function aw_seo_tag_keyword( $term ) {
 		return $known[ $term->slug ];
 	}
 	$name   = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', $term->name ) ) ) ) );
-	$plural = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_tag_plural( $term ) ) ) ) ) );
+	$plural = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^\p{L}\p{N} -]+/u', ' ', mb_strtolower( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_tag_plural( $term ) ) ) ) ) );
 	$sec    = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
 	if ( function_exists( 'directoryweb_service_slugs' ) && in_array( $term->slug, directoryweb_service_slugs(), true ) ) {
 		return 0 === strpos( $name, 'animal' ) ? $name : 'animal ' . $name; // "animal rescue"
@@ -998,12 +998,12 @@ function aw_seo_tag_keyword( $term ) {
  * Keep each tag's Rank Math title, description, focus keyword and robots equal to the ones built here (marked automatic
  * in _aw_seo_auto), so the Rank Math box shows what is printed and every tag is indexed (owner, 21 Oct 2026).
  * A typed title, description or keyword is never replaced. Daily and from WP-CLI for every tag
- * (`wp eval 'print_r( aw_seo_sync_tags() );'`); when a tag is added or saved, for that tag only (plugin audit 12).
+ * (`wp eval 'print_r( rankweb_seo_sync_tags() );'`); when a tag is added or saved, for that tag only (plugin audit 12).
  *
  * @param int $term_id Only this tag (0: every tag).
  * @return array slug => [title, description, robots].
  */
-function aw_seo_sync_tags( $term_id = 0 ) {
+function rankweb_seo_sync_tags( $term_id = 0 ) {
 	$out  = array();
 	$args = array( 'taxonomy' => 'post_tag', 'hide_empty' => false );
 	if ( (int) $term_id > 0 ) {
@@ -1012,9 +1012,9 @@ function aw_seo_sync_tags( $term_id = 0 ) {
 	foreach ( get_terms( $args ) as $term ) {
 		$auto  = (array) json_decode( (string) get_term_meta( $term->term_id, '_aw_seo_auto', true ), true );
 		$want  = array(
-			'title'         => aw_seo_term_title( $term ), // plain text, 55–58 characters
-			'description'   => aw_seo_tag_description( $term ),
-			'focus_keyword' => aw_seo_tag_keyword( $term ),
+			'title'         => rankweb_seo_term_title( $term ), // plain text, 55–58 characters
+			'description'   => rankweb_seo_tag_description( $term ),
+			'focus_keyword' => rankweb_seo_tag_keyword( $term ),
 		);
 		foreach ( $want as $k => $value ) {
 			$have = trim( (string) get_term_meta( $term->term_id, 'rank_math_' . $k, true ) );
@@ -1034,6 +1034,6 @@ function aw_seo_sync_tags( $term_id = 0 ) {
 	}
 	return $out;
 }
-add_action( 'aw_seo_fill_daily', 'aw_seo_sync_tags', 31 );
-add_action( 'created_post_tag', fn( $term_id ) => aw_seo_sync_tags( (int) $term_id ), 30 );
-add_action( 'edited_post_tag', fn( $term_id ) => aw_seo_sync_tags( (int) $term_id ), 30 );
+add_action( 'aw_seo_fill_daily', 'rankweb_seo_sync_tags', 31 );
+add_action( 'created_post_tag', fn( $term_id ) => rankweb_seo_sync_tags( (int) $term_id ), 30 );
+add_action( 'edited_post_tag', fn( $term_id ) => rankweb_seo_sync_tags( (int) $term_id ), 30 );

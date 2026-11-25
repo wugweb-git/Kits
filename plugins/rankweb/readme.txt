@@ -1,6 +1,6 @@
 === RankWeb ===
 Contributors: wugweb
-Tags: seo, rank math, faq, schema, breadcrumbs
+Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
@@ -12,7 +12,11 @@ SEO for WordPress, with or without Rank Math (free): titles, descriptions, share
 
 == Description ==
 
-RankWeb works on its own, and next to Rank Math (free) when that is active. On its own it prints the SEO title and meta description you type in the editor sidebar, the Open Graph and Twitter share tags, a canonical address and the schema graph (Organization, WebSite and the item). With Rank Math active it reads Rank Math's own fields and tables and adds what Rank Math keeps for its Premium plan. It is part of the Wugweb "Kits" suite; where a feature belongs to another suite plugin, RankWeb hands it over: search analytics and Google data live in InsightWeb, not here.
+RankWeb works on its own, and next to Rank Math (free) when that is active. It is part of the Wugweb "Kits" suite and needs no other Kits plugin; where a feature belongs to another suite plugin, RankWeb hands it over: search analytics and Google data live in InsightWeb, not here.
+
+**On its own** (no other SEO plugin): RankWeb prints the SEO title and meta description you type in the editor sidebar (else the excerpt or the start of the page), the Open Graph and Twitter share tags and the structured data (JSON-LD: Organization, WebSite and the item), adds noindex through WordPress's own robots tag, and leaves pages marked "Keep out of search results" out of WordPress's sitemap. The canonical address and the sitemap itself come from WordPress. The editor sidebar also sets a page's schema type (Article, BlogPosting, NewsArticle or WebPage) and noindex.
+
+**Beside Rank Math:** Rank Math prints the page head and RankWeb prints none of it again; it reads Rank Math's own fields and tables and adds what Rank Math keeps for its Premium plan. **Beside Yoast SEO, SEOPress or All in One SEO:** RankWeb leaves the page head to them and says so on its screens; its own tools keep working.
 
 * FAQ system: an FAQ box on every public post type and taxonomy, questions filled in automatically and kept once edited, an accordion and FAQPage structured data.
 * Canonical addresses Rank Math cannot work out: hub pages, directory places and filtered or sorted lists.
@@ -24,7 +28,7 @@ RankWeb works on its own, and next to Rank Math (free) when that is active. On i
 * Video SEO: YouTube and Vimeo detection from content, a VideoObject in the schema, and a video sitemap.
 * Custom schema: a per-item JSON-LD box, Speakable, about and mentions, import from a URL, and a Rich Results Test link.
 * Bulk work: SEO columns and filters on the list screens, Quick Edit and Bulk Edit, and a CSV export and import of the SEO fields. Image find-and-replace across alt, title and caption, and fill missing captions.
-* Redirect tools: CSV export and import of Rank Math's redirect list, a 404-log export, and an Apache .htaccess block.
+* Redirect tools: CSV export and import of Rank Math's redirect list, a 404-log export, and an Apache .htaccess block (these need Rank Math's Redirections).
 * Agent tools: RankWeb's work as WordPress abilities (the Abilities API) for AI agents through the MCP adapter; reads by default, writes opt-in.
 * A password-protected item is kept out of search.
 * llms.txt, Open Graph details, share images and a watchdog for the sitemap.
@@ -40,11 +44,15 @@ RankWeb works on its own, and next to Rank Math (free) when that is active. On i
 
 = Does RankWeb replace Rank Math? =
 
-No. It runs alongside Rank Math (free) and only adds what Rank Math does not do or keeps for its Premium plan. Rank Math stays installed and active.
+No. With Rank Math active, RankWeb adds only what Rank Math does not do or keeps for its Premium plan, and prints none of the page head again. Without it, RankWeb prints the page head itself.
 
 = Does it work without Rank Math? =
 
-Yes, for the basics: the SEO title and description from the editor sidebar, share cards, canonical addresses and the schema graph. Rank Math's own analysis, redirect list and schema bridge need Rank Math and stay off without it.
+Yes, for the basics: the SEO title and description from the editor sidebar, Open Graph and Twitter tags, structured data, noindex and the sitemap exclusion. Rank Math's own analysis, redirect list and schema bridge need Rank Math and stay off without it.
+
+= Which SEO plugin prints my page head? =
+
+RankWeb → Overview says: RankWeb, Rank Math, or another plugin (Yoast SEO, SEOPress, All in One SEO).
 
 = Does it send my data anywhere? =
 
@@ -65,6 +73,14 @@ RankWeb's link audit and content analysis fetch URLs on your own site only.
 Deleting the plugin deletes no data: settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was.
 
 == Changelog ==
+
+= Unreleased =
+* Works without Rank Math: meta description, Open Graph and Twitter tags, structured data for posts and pages, noindex, and sitemap exclusion of noindex pages.
+* The block editor sidebar now changes what is printed: meta description, noindex and a schema type RankWeb can write (Article, BlogPosting, NewsArticle, WebPage).
+* Overview, Modules, Settings, FAQ and Insights screens work without Kits Core.
+* Another SEO plugin (Yoast SEO, SEOPress, All in One SEO) is detected and RankWeb leaves the page head to it.
+* No site-specific values: the site's own name, language and profiles are used. Animal Writes values load only when Animal Writes Core is active.
+* Fixed: the site tagline was copied into the description of every short post.
 
 = 2.1.0 =
 * Internal links: link audit (orphans, click depth, broken links, redirects, nofollow, canonical elsewhere, too many links), anchor-type mix with per-target warnings and keyword rotation, and silos (virtual and circle modes).

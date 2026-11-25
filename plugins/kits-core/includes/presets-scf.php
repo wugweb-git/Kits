@@ -1,6 +1,6 @@
 <?php
 /**
- * SCF field groups (Local JSON) for the content-type presets (docs/content-blocks-feasibility.md §12; owner, 18 Nov
+ * SCF field groups (Local JSON) for the content-type presets (docs/plugins/content-blocks-feasibility.md §12; owner, 18 Nov
  * 2026: SCF is first-class). Each built-in preset has one group in acf-json/{preset id}/group_{preset id}.json, with the
  * same field names as the preset's register_post_meta() keys; the group is only the editing layer, so content and the
  * kits/post-field binding work the same without SCF (then the fields are in the core Custom Fields panel).

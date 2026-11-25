@@ -39,7 +39,7 @@ $plugins = array(
 			return defined( 'RANKWEB_DIR' )
 				&& function_exists( 'rankweb_seo_canonical' )
 				&& function_exists( 'rankweb_schema_render_standalone_json_ld' )
-				&& function_exists( 'rankweb_rankweb_render_standalone_meta_description' )
+				&& function_exists( 'rankweb_print_head_tags' )
 				&& class_exists( 'RankWeb_Schema' );
 		},
 		'test'  => dirname( __DIR__ ) . '/plugins/rankweb/tests/phpunit-lite.php',

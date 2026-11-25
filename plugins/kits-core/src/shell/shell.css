@@ -1,7 +1,7 @@
 /* stylelint-disable no-descending-specificity, @stylistic/max-line-length -- parts are grouped by component, not by specificity; comments are prose. */
 
 /*
- * Kits admin shell (docs/kits-plugin-ui.md). Every value is a Kits token, copied here because wp-admin does not load
+ * Kits admin shell (docs/plugins/kits-plugin-ui-spec.md). Every value is a Kits token, copied here because wp-admin does not load
  * the theme's CSS (themes/kits-by-wugweb/assets/css/kits-v42.css):
  *   space  --kit-space-1 4px · -2 8px · -3 12px · -4 16px · -5 24px · -6 32px
  *   radius --kit-radius-control 8px · --kit-radius-card 12px · --kit-radius-pill 9999px
@@ -30,7 +30,7 @@
 	--ks-ink: #141414;
 	--ks-accent: #ffc300;
 
-	/* Row action icons only: delete and cancel, success (docs/design-system.md, color-danger and color-success). */
+	/* Row action icons only: delete and cancel, success (docs/design-system/design-system.md, color-danger and color-success). */
 	--ks-danger: #c8102e;
 	--ks-success: #137a3b;
 	--ks-control: 40px;

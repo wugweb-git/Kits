@@ -4,7 +4,7 @@
  * screen, and one screen per job. Core wp-admin parts only (nav tabs, form tables, postboxes, the Settings API, notices);
  * no admin stylesheet.
  *
- * Six items (docs/admin-ui-spec.md §B; admin-menu.php registers them and redirects the old addresses): Home, Theme
+ * Six items (docs/design-system/admin-ui-spec.md §B; admin-menu.php registers them and redirects the old addresses): Home, Theme
  * Options, Settings, Plugins, Tools, Help. This file holds the parts they are made of: the status table, the plugin
  * list, export and import, the Theme Options fields and sections, the Core Settings switches, the Docs tables.
  *

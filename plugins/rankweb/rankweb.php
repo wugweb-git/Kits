@@ -27,15 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'RANKWEB_DIR', plugin_dir_path( __FILE__ ) );
-define( 'RANKWEB_FILE', __FILE__ );
 if ( ! defined( 'RANKWEB_DIR' ) ) {
-	define( 'RANKWEB_DIR', RANKWEB_DIR );
+	define( 'RANKWEB_DIR', plugin_dir_path( __FILE__ ) );
 }
 if ( ! defined( 'RANKWEB_FILE' ) ) {
-	define( 'RANKWEB_FILE', RANKWEB_FILE );
+	define( 'RANKWEB_FILE', __FILE__ );
 }
 
+require_once RANKWEB_DIR . 'includes/legacy-aliases.php'; // the old aw_* function and constant names, for other plugins that still call them.
 require_once RANKWEB_DIR . 'includes/text.php'; // rankweb_plain_text(), used by every file.
 require_once RANKWEB_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).
 require_once RANKWEB_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen, with or without Rank Math.
@@ -55,9 +54,10 @@ add_action(
 	'plugins_loaded',
 	function () {
 		define( 'RANKWEB_STANDALONE', ! rankweb_seo_extras_rank_math() );
+		require_once RANKWEB_DIR . 'includes/standalone-seo.php'; // who prints the head, site defaults (language, profiles), standalone tags: needs nothing else
 		require_once RANKWEB_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = rankweb_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-native-admin', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( 'rank-math-schema' === $file && ! rankweb_seo_extras_rank_math() ) {
 				continue; // Rank Math schema bridge is only loaded when Rank Math is active.
 			}

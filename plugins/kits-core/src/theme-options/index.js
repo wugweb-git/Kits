@@ -1,7 +1,7 @@
 /**
  * Kits → Theme Options (admin.php?page=kits-options; the older screen is at &ui=classic until it is retired).
  *
- * On the Kits plugins' look (docs/kits-plugin-ui.md, window.kits.shell): the app header (Kits icon, name, version, the
+ * On the Kits plugins' look (docs/plugins/kits-plugin-ui-spec.md, window.kits.shell): the app header (Kits icon, name, version, the
  * five Kits tabs, Save), the sections as chips and the chosen section as a card with its fields.
  * Sections not built here yet show today's fields, printed by PHP (kits_admin_app_legacy()) and moved into the
  * section; they save with their own button, as before.

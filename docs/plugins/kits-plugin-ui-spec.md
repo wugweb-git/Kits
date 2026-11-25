@@ -1,7 +1,9 @@
 # Kits plugin screens (the Kits Core admin shell)
 
+**Status (25 Nov 2026):** Live spec for plugin screens on the Kits Core shell (`plugins/kits-core/src/shell`). Code comments now cite this path.
+
 How a Kits plugin builds its admin screens on Kits Core's shared shell. Written from what was built for RankWeb's
-new Dashboard and Settings (PR #120, 11 Nov 2026). Where this differs from `docs/admin-ui-spec.md` (the Kits menu's
+new Dashboard and Settings (PR #120, 11 Nov 2026). Where this differs from `docs/design-system/admin-ui-spec.md` (the Kits menu's
 own screens), this file applies to plugin screens.
 
 The pattern follows Google Site Kit's admin screens, using none of its code, CSS or images:
@@ -126,7 +128,7 @@ Owner, 13 Nov 2026: "Delete classic code". Every plugin screen is its shell scre
 ignored). Without Kits Core or a plugin's build, a screen shows one notice that it needs Kits Core. Views that have no
 shell version stay server-drawn on their own addresses: PlanWeb's Calendar (`&m=`, `&edit=`, import), MailWeb's
 message, form item and compose views and Settings → Site sending (`&sub=sending`), and one claim's review on
-Directory → Claims (`&entry=`, `&done=`). SourceWeb's To review shows other plugins' intake forms (`aw_review_intake`)
+Directory → Claims (`&entry=`, `&done=`). `entry` is a Fluent Forms entry id, or `dw-<post id>` for a native claim (`aw_claim` post); the shell route is `#claim-<entry>`. SourceWeb's To review shows other plugins' intake forms (`aw_review_intake`)
 and its Settings the backfill date, both as page parts (`sourceweb_extra_parts()`).
 
 ## RankWeb (the first plugin on the shell)

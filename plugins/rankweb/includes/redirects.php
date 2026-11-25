@@ -1,25 +1,22 @@
 <?php
 /**
- * Redirects. The one list is Rank Math → Redirections (owner, 10 Oct 2026): rankweb_redirect_add() adds to it, so forms,
- * merges and migrations keep writing to that one list. Author archives go to About by a Rank Math rule (^author);
- * /?author=N goes there in one hop (below).
+ * Redirects. The list is Rank Math → Redirections: rankweb_redirect_add() adds to it, so forms, merges and migrations keep
+ * writing to that one list. RankWeb has no redirect list of its own, so on a site without Rank Math these tools have
+ * nothing to write to and the redirects below that live in PHP are the only ones RankWeb serves.
  *
+ * Rules a path list cannot hold stay in PHP (they rewrite the address rather than match a path):
+ * - A link to this site's own host written without a scheme or with one slash goes to the page it meant.
+ * - Module imports by name ("@wordpress/interactivity") go to the module file.
+ * - Upper-case paths go to the lower-case one (the query string is kept).
+ * - The Home page has no page 2: /page/2/ goes to Home.
  * Fixed old addresses go into that list (audit item 18, owner 25 Oct 2026): `wp aw redirects-import` (places.php) adds
  * the old /location/{slug}/ and /source/{slug}/ pages (their PHP handler was removed once the crawl showed Rank Math
  * answers every one). `wp aw redirects-list`
  * prints the whole list for tools/redirects/crawl.py, which requests every old address and reports any 404, wrong
  * target, and which layer answered (X-Redirect-By: "Rank Math" or "RankWeb").
  *
- * Rules Rank Math's list cannot hold (they rewrite the address or read the query string rather than match a path) stay
- * in PHP:
- * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
- * - ?lang=, ?issuer= and ?court= on the Library → the same list without them; /?author=N → /about/ (below).
- * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
- * - Labels are WordPress Tags with their own pages (/tag/{slug}/); old type addresses (/?cat=N, /directory-type/…,
- *   /opportunity-type/…) and ?kind=, ?type=, ?service= are redirected in animal-writes-core tags.php.
- * - animal-writes-core: /topic/{slug}/… and ?topic= (category-moves.php), older /directory/ shapes (directory.php),
- *   ?query-N-page= on hubs (hubs.php), ?s= → /search/ and ?about= on Contact (pages.php), /report/?listing=
- *   (form-blocks.php), comment feeds (admin-ia.php).
+ * WordPress's own behaviour is left alone: a missing address is handled by core, including its guess of the item a
+ * slug most likely meant. No site-specific addresses, paths or pages are assumed here.
  *
  * @package aw-seo-extras
  */
@@ -67,52 +64,6 @@ function rankweb_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code
 
 /** DirectoryWeb's `wp aw redirects-import` adds its old-address 301s through this filter. */
 add_filter( 'directoryweb_redirect_add', fn( $done, $path, $to ) => (bool) rankweb_rank_math_redirect( (string) $path, (string) $to ) || (bool) $done, 10, 3 );
-
-/**
- * Seed redirects, added once per version to Rank Math's list (they can be edited or removed there afterwards; an exact
- * path already in the list is left alone). 12 Nov 2026: common city spellings that are not the Directory's district
- * slug (each checked as 404 on live, its target as 200), the old campaign addresses still asked for, and a removed
- * News item.
- */
-const AW_SEED_REDIRECTS_VERSION = '1';
-add_action(
-	'init',
-	function () {
-		if ( AW_SEED_REDIRECTS_VERSION === get_option( 'aw_seed_redirects_version' ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) || get_transient( 'aw_seed_redirects_wait' ) ) {
-			return;
-		}
-		$exact = array(
-			'directory/karnataka/bengaluru'                => '/directory/karnataka/bengaluru-urban/',
-			'directory/karnataka/bangalore'                => '/directory/karnataka/bengaluru-urban/',
-			'directory/karnataka/bangalore-urban'          => '/directory/karnataka/bengaluru-urban/',
-			'directory/delhi/delhi'                        => '/directory/delhi/',
-			'directory/assam/guwahati'                     => '/directory/assam/kamrup-metro/',
-			'directory/haryana/gurgaon'                    => '/directory/haryana/gurugram/',
-			'directory/uttar-pradesh/noida'                => '/directory/uttar-pradesh/gautam-buddha-nagar/',
-			'directory/uttar-pradesh/gautam-buddh-nagar'   => '/directory/uttar-pradesh/gautam-buddha-nagar/',
-			'campaign/lab-animal-rules-2026'               => '/campaigns/lab-animals-rules-2026/',
-			'campaigns/draft-laboratory-animals-rules-2026' => '/campaigns/lab-animals-rules-2026/',
-			'news/niagara-falls-man-charged-after-cat-found-severely-emaciated-at-motel' => '/news/',
-		);
-		$ok = true;
-		foreach ( $exact as $from => $to ) {
-			$ok = rankweb_rank_math_redirect( $from, home_url( $to ) ) && $ok;
-		}
-		// Any other /campaign/{slug}/ goes to /campaigns/{slug}/. Bare /campaign/ keeps its own exact rule.
-		global $wpdb;
-		$table = $wpdb->prefix . 'rank_math_redirections';
-		$have  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE sources LIKE %s', $table, '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
-		if ( ! $have ) {
-			$ok = rankweb_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
-		}
-		if ( $ok ) {
-			update_option( 'aw_seed_redirects_version', AW_SEED_REDIRECTS_VERSION, false );
-		} else {
-			set_transient( 'aw_seed_redirects_wait', 1, HOUR_IN_SECONDS ); // a save failed: try again in an hour, not on every request
-		}
-	},
-	20
-);
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
@@ -236,8 +187,6 @@ add_action(
 	},
 	1
 );
-
-add_filter( 'do_redirect_guess_404_permalink', '__return_false' );
 
 // A redirect never leads to the trash (owner, 15 Oct 2026): trashing an item switches off the redirects that point to
 // it, and restoring it switches them back on. The status is changed with Rank Math's own call

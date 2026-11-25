@@ -1,7 +1,7 @@
 <?php
 /**
  * InsightWeb's own service keys (owner, 18 Nov 2026: every Wugweb plugin keeps its own keys, like Yoast, Rank Math and
- * Site Kit; the shared Kits → Keys vault is retired, migrate first and delete second). Plan: docs/keys-per-plugin.md.
+ * Site Kit; the shared Kits → Keys vault is retired, migrate first and delete second). Plan: docs/plugins/keys-per-plugin.md.
  *
  * A key's value, first found wins:
  *   1. a wp-config.php constant of the same name (not empty);
@@ -172,7 +172,7 @@ add_action(
 );
 
 /**
- * The copy step of the move (docs/keys-per-plugin.md, stage 3): each InsightWeb key that is saved in the old shared
+ * The copy step of the move (docs/plugins/keys-per-plugin.md, stage 3): each InsightWeb key that is saved in the old shared
  * vault (option aw_keys) and not yet in InsightWeb's own option is copied over. Guarded: it copies only keys InsightWeb
  * owns, only into an empty place, and never when a wp-config.php constant sets the key. Idempotent: running it again
  * copies nothing. Reversible: it never deletes or changes aw_keys, so removing a key from Settings → Keys (or deleting

@@ -1,6 +1,6 @@
 <?php
 /**
- * MailWeb's routes for its new screens (docs/mailweb-plan.md §2–§4), under mailweb/v1, beside the webhook mail-in:
+ * MailWeb's routes for its new screens (docs/plugins/mailweb-plan.md §2–§4), under mailweb/v1, beside the webhook mail-in:
  *
  *   GET  dashboard                  MAILWEB_CAP     the tiles and sections, from the background counts
  *   POST dashboard/count            MAILWEB_CAP     ask for a count now (one background event)

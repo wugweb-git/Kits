@@ -272,7 +272,7 @@ function rankweb_seo_modules(): array {
 				'AW_LINK_ANCHOR_EXACT_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most exact match, in percent', 'help' => 'An item whose links in have more exact-match anchors than this share is warned about, and the auto-linker uses another keyword.', 'default' => 20 ),
 				'AW_LINK_ANCHOR_TYPE_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most of any other type, in percent', 'help' => 'The same for every other anchor type.', 'default' => 60 ),
 				'AW_LINK_ANCHOR_MIN' => array( 'type' => 'int', 'label' => 'Anchors: fewest links before a warning', 'help' => 'An item with fewer links in gets no warning.', 'default' => 5 ),
-				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array() ),
+				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array( rankweb_site_name() ) ),
 				'AW_LINK_GENERIC' => array( 'type' => 'list', 'label' => 'Anchors: generic anchors', 'help' => 'These anchors are generic. One per line.', 'default' => array( 'click here', 'here', 'read more', 'learn more', 'more', 'this page', 'this article', 'this link', 'link' ) ),
 				'AW_LINK_LONG_WORDS' => array( 'type' => 'int', 'label' => 'Anchors: words in a long-tail anchor', 'help' => 'An anchor with more words than this is long-tail.', 'default' => 6 ),
 				'AW_SILO_MAX' => array( 'type' => 'int', 'label' => 'Silos: most links an item shows', 'help' => 'The silo links at the end of an item. In virtual mode the others are listed from the next one round, so every item gets links.', 'default' => 10 ),

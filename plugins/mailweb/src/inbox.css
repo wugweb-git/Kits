@@ -2,7 +2,7 @@
  * MailWeb Inbox as an email app (src/inbox.js).
  * Colours, spaces and radii are the shell's tokens (--ks-*).
  * Sizes from the design docs: the list pane's minimum is
- * --kit-card-min (17rem, docs/card-sizes.md); the message
+ * --kit-card-min (17rem, docs/design-system/card-sizes.md); the message
  * frame keeps today's message screen height (65vh,
  * includes/inbox.php); targets at least 44px; breakpoints
  * 768 and 1200. Text sizes are the shell's (13px small, 18px

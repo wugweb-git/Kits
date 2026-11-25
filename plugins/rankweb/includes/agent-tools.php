@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb PRO, phase H: agent tools (docs/rankweb-pro-audit.md, H). RankWeb's work as abilities on the WordPress
+ * RankWeb PRO, phase H: agent tools (docs/org/rankweb-org-plan.md (Appendix B), H). RankWeb's work as abilities on the WordPress
  * Abilities API (6.9+); where the MCP adapter is installed it exposes them to AI agents over MCP.
  *
  * Read abilities (rankweb/get-seo, audit-summary, list-orphans) are registered when the module is on. The write

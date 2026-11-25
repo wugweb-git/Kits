@@ -243,7 +243,7 @@ function rankweb_seo_rm_setting( $key ) {
 function rankweb_publisher_profiles() {
 	$list = array_merge( array( (string) rankweb_seo_rm_setting( 'social_url_facebook' ) ), preg_split( '/\s+/', (string) rankweb_seo_rm_setting( 'social_additional_profiles' ) ) );
 	$list = array_values( array_unique( array_filter( array_map( 'trim', $list ), fn( $u ) => (bool) wp_http_validate_url( $u ) ) ) );
-	return $list;
+	return $list ? $list : (array) rankweb_site_default( 'same_as', array() ); // the site's profiles, set in Rank Math or RankWeb; none by default
 }
 
 /**
@@ -270,7 +270,7 @@ function rankweb_schema_x_profiles( $node ) {
 }
 
 /**
- * The publisher (Animal Writes) as schema.org Organization: name, URL, logo, email, description and profiles from
+ * The publisher as schema.org Organization: name, URL, logo, email, description and profiles from
  * Rank Math's Knowledge Graph settings (Titles & Meta → Local SEO, Social Meta), so the settings and the graph agree;
  * the alternate names, policies, categories and country served are added here (Rank Math has no fields for them).
  */
@@ -284,7 +284,7 @@ function rankweb_publisher_schema() {
 	$desc  = '' !== trim( $desc ) ? $desc : ( $front ? (string) get_post_field( 'post_excerpt', $front ) : '' );
 	$desc  = '' !== trim( $desc ) ? $desc : get_bloginfo( 'description' );
 	$email = sanitize_email( (string) rankweb_seo_rm_setting( 'email' ) );
-	$email = '' !== $email ? $email : sanitize_email( (string) apply_filters( 'rankweb_contact_email', '' ) ); // none unless the site sets one
+	$email = '' !== $email ? $email : sanitize_email( (string) apply_filters( 'rankweb_contact_email', (string) rankweb_site_default( 'email', '' ) ) ); // none unless the site sets one
 	$name  = trim( (string) rankweb_seo_rm_setting( 'knowledgegraph_name' ) );
 	$about = get_terms( array( 'taxonomy' => rankweb_seo_category_tax(), 'hide_empty' => true, 'fields' => 'names' ) );
 	$pages = array();
@@ -305,10 +305,10 @@ function rankweb_publisher_schema() {
 				'description'   => rankweb_plain_text( $desc ),
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
 				'email'         => '' !== $email ? $email : null,
-				'contactPoint'  => '' !== $email ? array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email ) : null,
-				'address'       => null, // a site adds its country through the rankweb_organization_node filter
-				'foundingDate'  => null,
-				'areaServed'    => null,
+				'contactPoint'  => '' !== $email ? array_filter( array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => ( get_page_by_path( 'contact' ) ? home_url( '/contact/' ) : '' ), 'areaServed' => (string) rankweb_site_default( 'country', '' ), 'availableLanguage' => (array) rankweb_site_default( 'languages', array() ) ) ) : null,
+				'address'       => '' !== (string) rankweb_site_default( 'country', '' ) ? array( '@type' => 'PostalAddress', 'addressCountry' => (string) rankweb_site_default( 'country', '' ) ) : null, // the country only: no public street address or phone (owner, 3 Nov 2026)
+				'foundingDate'  => (string) rankweb_site_default( 'founded', '' ) ?: null,
+				'areaServed'    => '' !== (string) rankweb_site_default( 'country', '' ) ? array( '@type' => 'Country', 'name' => (string) rankweb_site_default( 'country_name', '' ), 'identifier' => (string) rankweb_site_default( 'country', '' ) ) : null,
 				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'rankweb_plain_text', $about ) ) : null,
 				'sameAs'        => rankweb_publisher_profiles(),
 			),
@@ -469,7 +469,7 @@ function rankweb_article_nodes( $id ) {
 		'description'      => function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 40 ) ) : '',
 		'datePublished'    => get_the_date( 'c', $id ),
 		'dateModified'     => $reviewed ? rankweb_schema_date( $reviewed ) : get_the_modified_date( 'c', $id ),
-		'inLanguage'       => 'en-IN',
+		'inLanguage'       => rankweb_language(),
 		'image'            => rankweb_schema_image( $id ),
 		'about'            => rankweb_schema_categories( $id ),
 	);
@@ -500,7 +500,7 @@ function rankweb_article_nodes( $id ) {
 		$node['contentLocation'] = rankweb_schema_place( $id );
 		$node['author']          = array( // the editorial team, with its policy page (owner, 12 Nov 2026: Google News and Discover)
 			'@type'              => 'Organization',
-			'name'               => sprintf( /* translators: %s: site name. */ __( '%s editorial team', 'rankweb' ), get_bloginfo( 'name' ) ),
+			'name'               => sprintf( /* translators: %s: site name. */ __( '%s editorial team', 'rankweb' ), rankweb_site_name() ),
 			'url'                => home_url( '/editorial-policy/' ),
 			'parentOrganization' => $us,
 		);
@@ -625,7 +625,7 @@ function rankweb_campaign_schema( $id ) {
 		'url'         => get_permalink( $id ),
 		'name'        => rankweb_plain_text( get_the_title( $id ) ),
 		'description' => function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 40 ) ) : '',
-		'inLanguage'  => 'en-IN',
+		'inLanguage'  => rankweb_language(),
 		'image'       => $image ? array( $image ) : null,
 		'about'       => rankweb_schema_categories( $id ),
 	);
@@ -736,7 +736,7 @@ function rankweb_campaign_record_schema( $id ) {
 			'url'              => $url,
 			'mainEntityOfPage' => array( '@id' => $url . '#webpage' ),
 			'description'      => function_exists( 'aw_text' ) ? rankweb_plain_text( aw_text( $id, 40 ) ) : '',
-			'inLanguage'       => 'en-IN',
+			'inLanguage'       => rankweb_language(),
 			'image'            => $image ? array( $image ) : null,
 			'datePublished'    => get_the_date( 'c', $id ),
 			'dateModified'     => get_the_modified_date( 'c', $id ),
@@ -760,8 +760,8 @@ function rankweb_schema_language( $node ) {
 		return $node;
 	}
 	foreach ( $node as $k => $v ) {
-		if ( 'inLanguage' === $k && is_string( $v ) && 0 === stripos( $v, 'en' ) ) {
-			$node[ $k ] = 'en-IN';
+		if ( 'inLanguage' === $k && is_string( $v ) && 0 === stripos( $v, 'en' ) && 0 === stripos( rankweb_language(), 'en' ) ) {
+			$node[ $k ] = rankweb_language();
 		} elseif ( is_string( $v ) && false === strpos( $v, '<' ) && false !== strpos( $v, '&' ) ) {
 			$node[ $k ] = html_entity_decode( $v, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 		} elseif ( is_array( $v ) ) {
@@ -782,7 +782,7 @@ function rankweb_website_schema() {
 		'name'          => get_bloginfo( 'name' ),
 		'alternateName' => AW_SITE_ALT_NAMES,
 		'url'           => home_url( '/' ),
-		'inLanguage'    => 'en-IN',
+		'inLanguage'    => rankweb_language(),
 		'publisher'     => array( '@id' => home_url( '/#organization' ) ),
 	);
 }
@@ -987,7 +987,7 @@ function rankweb_opportunity_schema( $id ) {
 		'name'        => rankweb_plain_text( get_the_title( $id ) ),
 		'description' => '' !== $desc ? $desc : rankweb_plain_text( (string) get_post_field( 'post_excerpt', $id ) ),
 		'url'         => get_permalink( $id ),
-		'inLanguage'  => 'en-IN',
+		'inLanguage'  => rankweb_language(),
 	);
 	$day      = (string) get_post_meta( $id, 'aw_event_date', true );
 	$day      = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $day ) ? $day : '';
@@ -1056,7 +1056,7 @@ function rankweb_categories_schema() {
 			'url'         => $url,
 			'name'        => rankweb_plain_text( get_the_title() ),
 			'description' => rankweb_seo_description(),
-			'inLanguage'  => 'en-IN',
+			'inLanguage'  => rankweb_language(),
 			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
 			'mainEntity'  => array( '@id' => $url . '#list' ),
@@ -1082,7 +1082,7 @@ function rankweb_preset_schema_node( $post_id, array $conf ): array {
 		'@id'        => get_permalink( $post_id ) . '#' . strtolower( sanitize_key( $conf['type'] ) ),
 		'url'        => get_permalink( $post_id ),
 		'name'       => rankweb_plain_text( get_the_title( $post_id ) ),
-		'inLanguage' => 'en-IN',
+		'inLanguage' => rankweb_language(),
 		'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 	);
 
@@ -1114,7 +1114,7 @@ function rankweb_schema_nodes() {
 		return $nodes;
 	}
 	if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
-		$nodes = rankweb_article_nodes( get_queried_object_id() );
+		$nodes = function_exists( 'rankweb_apply_schema_type' ) ? rankweb_apply_schema_type( rankweb_article_nodes( get_queried_object_id() ), get_queried_object_id() ) : rankweb_article_nodes( get_queried_object_id() );
 	} elseif ( is_singular( 'aw_listing' ) ) {
 		$nodes[] = rankweb_listing_schema( get_queried_object_id() );
 	} elseif ( is_singular( 'aw_opportunity' ) ) {
@@ -1134,6 +1134,8 @@ function rankweb_schema_nodes() {
 			if ( $preset_node ) {
 				$nodes[] = $preset_node;
 			}
+		} elseif ( function_exists( 'rankweb_generic_schema_nodes' ) && in_array( $post_type, (array) apply_filters( 'rankweb_generic_schema_post_types', array( 'post', 'page' ) ), true ) ) {
+			$nodes = rankweb_generic_schema_nodes( get_queried_object_id() ); // an ordinary post or page: not tied to any `aw_*` type
 		}
 	} elseif ( is_page( 'contact' ) ) {
 		$nodes[] = array(
@@ -1141,7 +1143,7 @@ function rankweb_schema_nodes() {
 			'@id'        => get_permalink() . '#page',
 			'url'        => get_permalink(),
 			'name'       => rankweb_plain_text( get_the_title() ),
-			'inLanguage' => 'en-IN',
+			'inLanguage' => rankweb_language(),
 			'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 			'mainEntity' => array( '@id' => home_url( '/#organization' ) ), // the publisher node carries the email and contact point
 		);
@@ -1153,7 +1155,7 @@ function rankweb_schema_nodes() {
 				'@id'        => get_permalink() . '?listing=' . $listing->ID . '#webpage',
 				'url'        => add_query_arg( 'listing', $listing->ID, get_permalink() ),
 				'name'       => 'Claim Listing: ' . rankweb_plain_text( get_the_title( $listing ) ),
-				'inLanguage' => 'en-IN',
+				'inLanguage' => rankweb_language(),
 				'isPartOf'   => array( '@id' => home_url( '/#website' ) ),
 				'mainEntity' => function_exists( 'rankweb_listing_schema' ) ? rankweb_listing_schema( $listing->ID ) : array( '@type' => 'NGO', 'name' => rankweb_plain_text( get_the_title( $listing ) ) ),
 			);
@@ -1164,7 +1166,7 @@ function rankweb_schema_nodes() {
 				'url'             => get_permalink(),
 				'name'            => 'Claim Your Organisation Listing',
 				'description'     => 'Search and claim your organisation listing.',
-				'inLanguage'      => 'en-IN',
+				'inLanguage'      => rankweb_language(),
 				'isPartOf'        => array( '@id' => home_url( '/#website' ) ),
 				'potentialAction' => array(
 					'@type'       => 'SearchAction',
@@ -1174,7 +1176,7 @@ function rankweb_schema_nodes() {
 			);
 		}
 	} elseif ( is_page( 'about' ) ) {
-		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => rankweb_plain_text( get_the_title() ), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
+		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => rankweb_plain_text( get_the_title() ), 'inLanguage' => rankweb_language(), 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
 	} elseif ( is_page( 'categories' ) ) {
 		$nodes = array_merge( $nodes, rankweb_categories_schema() );
 	} elseif ( is_page( array( 'press-coverage', 'media' ) ) && function_exists( 'rankweb_press_schema' ) && function_exists( 'aw_press_list' ) ) { // the press list (Animal Writes Core)
@@ -1227,7 +1229,7 @@ function rankweb_category_schema_nodes() {
 				'url'         => $url,
 				'name'        => rankweb_plain_text( $term->name ),
 				'description' => '' !== $desc ? $desc : wp_strip_all_tags( term_description( $term ) ),
-				'inLanguage'  => 'en-IN',
+				'inLanguage'  => rankweb_language(),
 				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 				'publisher'   => array( '@id' => home_url( '/#organization' ) ),
 				'mainEntity'  => $items ? array( '@id' => $url . '#list' ) : null,
@@ -1291,7 +1293,7 @@ function rankweb_page_lists_schema_nodes( $page_id ) {
 				'url'         => $url,
 				'name'        => rankweb_plain_text( get_the_title( $page_id ) ),
 				'description' => rankweb_seo_description(),
-				'inLanguage'  => 'en-IN',
+				'inLanguage'  => rankweb_language(),
 				'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 				'publisher'   => array( '@id' => home_url( '/#organization' ) ),
 				'mainEntity'  => $items ? array( '@id' => $url . '#list' ) : null,
@@ -1402,7 +1404,7 @@ function rankweb_hub_schema_build( $type, $url, $view ) {
 	$name  = 'aw_listing' === $type && function_exists( 'directoryweb_directory_h1' ) ? directoryweb_directory_h1() : get_the_title( get_queried_object_id() );
 	$name  = $view && 'aw_listing' !== $type ? $view['name'] . ' – ' . get_the_title( get_queried_object_id() ) : $name; // "Wildlife – News"
 	if ( ! $items ) { // an empty list: the collection page alone
-		return array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => rankweb_plain_text( $name ), 'description' => rankweb_seo_description(), 'inLanguage' => 'en-IN', 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
+		return array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => rankweb_plain_text( $name ), 'description' => rankweb_seo_description(), 'inLanguage' => rankweb_language(), 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
 	}
 	return array(
 		array(
@@ -1411,7 +1413,7 @@ function rankweb_hub_schema_build( $type, $url, $view ) {
 			'url'         => $url,
 			'name'        => rankweb_plain_text( $name ),
 			'description' => rankweb_seo_description(),
-			'inLanguage'  => 'en-IN',
+			'inLanguage'  => rankweb_language(),
 			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
 			'mainEntity'  => array( '@id' => $url . '#list' ),
@@ -1463,7 +1465,7 @@ function rankweb_press_schema() {
 		'url'         => get_permalink(),
 		'name'        => rankweb_plain_text( get_the_title() ),
 		'description' => rankweb_plain_text( rankweb_seo_description() ),
-		'inLanguage'  => 'en-IN',
+		'inLanguage'  => rankweb_language(),
 		'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
 		'mainEntity'  => array( '@type' => 'ItemList', 'itemListElement' => $list ),
 	) );
@@ -1631,7 +1633,7 @@ add_filter(
 					'url'                => $link,
 					'name'               => rankweb_plain_text( wp_get_document_title() ),
 					'description'        => rankweb_plain_text( rankweb_seo_description() ),
-					'inLanguage'         => 'en-IN',
+					'inLanguage'         => rankweb_language(),
 					'isPartOf'           => array( '@id' => home_url( '/#website' ) ),
 					'primaryImageOfPage' => array( '@id' => $url ),
 					'breadcrumb'         => ! empty( $data['BreadcrumbList']['@id'] ) ? array( '@id' => $data['BreadcrumbList']['@id'] ) : null,
@@ -1690,7 +1692,7 @@ if ( ! function_exists( 'rankweb_schema_render_standalone_json_ld' ) ) {
 	 * Outputs Schema.org JSON-LD structured data in standalone mode when Rank Math is absent.
 	 */
 	function rankweb_schema_render_standalone_json_ld(): void {
-		if ( is_404() || is_admin() ) {
+		if ( is_404() || is_admin() || ( function_exists( 'rankweb_prints_head' ) && ! rankweb_prints_head() ) ) {
 			return;
 		}
 		$graph = array();

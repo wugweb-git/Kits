@@ -1,5 +1,7 @@
 # Renaming the LIVE `aw-sourcing` plugin → SourceWeb — inventory, collision check, migration plan
 
+**Status (25 Nov 2026):** Report only; Part 4 (the rename) was never done. The plugin is now `plugins/sourceweb` and its text domain is still `aw-sourcing`. Valid only if the rename is still wanted.
+
 **Status: REPORT ONLY. Parts 1–3 below. Nothing renamed, nothing migrated, branch only.**
 Part 4 (the actual rename) is NOT in this change and must wait for (a) the `live-awsourcing`
 feature work to land and (b) the owner's sign-off. Date: 17 Nov 2026. Branch `claude/zen-brattain-c7d9c8`.

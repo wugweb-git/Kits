@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb PRO, phase F: redirect tools (docs/rankweb-pro-audit.md, F). Rank Math keeps CSV import/export, 404-log
+ * RankWeb PRO, phase F: redirect tools (docs/org/rankweb-org-plan.md (Appendix B), F). Rank Math keeps CSV import/export, 404-log
  * export and .htaccess sync for Pro. The one redirect list stays Rank Math → Redirections (owner, 10 Oct 2026); this
  * screen reads and writes that list, it does not keep its own.
  *
@@ -14,7 +14,7 @@
  *   the server is Apache or LiteSpeed) write them into the site's .htaccess between RankWeb's markers, a backup first.
  *
  * Module "redirect-tools" (RankWeb → Settings → Modules). No scheduled job. Categories are not built: Rank Math's list
- * has no category field, and the owner's rule keeps redirects in that one list (noted in docs/rankweb-pro-audit.md).
+ * has no category field, and the owner's rule keeps redirects in that one list (noted in docs/org/rankweb-org-plan.md (Appendix B)).
  *
  * @package aw-seo-extras
  */

@@ -321,12 +321,12 @@ add_filter( 'get_the_archive_title', 'directoryweb_directory_title', 20 );
 // The document <title> of these views is set in aw-seo-extras (titles.php), from directoryweb_directory_title().
 
 /**
- * The Directory's own page (/directory/): Animal Writes Core's hub address while Core is active.
+ * The Directory's own page (/directory/).
  *
  * @return string
  */
 function directoryweb_hub_url(): string {
-	return function_exists( 'aw_hub_url' ) ? aw_hub_url( 'aw_listing' ) : home_url( '/directory/' );
+	return home_url( '/directory/' );
 }
 
 /**

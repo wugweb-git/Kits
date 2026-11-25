@@ -79,7 +79,7 @@ function rankweb_seo_endpoints_watchdog() {
 		set_transient( 'aw_seo_endpoints_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'aw_seo_endpoints_watchdog', 'aw_seo_endpoints_watchdog' );
+add_action( 'aw_seo_endpoints_watchdog', 'rankweb_seo_endpoints_watchdog' );
 add_action(
 	'admin_init',
 	function () {

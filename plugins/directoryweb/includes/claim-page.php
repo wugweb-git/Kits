@@ -1,6 +1,6 @@
 <?php
 /**
- * Claim pages (owner, 10 Oct 2026; moved here from Animal Writes Core `includes/form-blocks.php`, 18 Nov 2026):
+ * Claim pages (owner, 10 Oct 2026; moved here from the legacy Core plugin `includes/form-blocks.php`, 18 Nov 2026):
  *
  * - Listing card (block animal-writes/listing-help): "Is this your organisation?" with "Claim this listing", linking to
  *   /claim/?listing=<ID> (two steps, logo upload). It names the listing and links back to it.
@@ -246,6 +246,21 @@ function directoryweb_claim_finder() {
 }
 
 /**
+ * The band at the top of a form page: breadcrumbs, an optional picture, the title and a note. The site's own band
+ * (the legacy Core plugin's aw_head_band(), when present) wins; without it, plain markup of the same parts.
+ *
+ * @param array $a crumbs, title, title_class, icon, note (HTML already escaped by the caller).
+ * @return string
+ */
+function directoryweb_head_band( array $a ): string {
+	if ( function_exists( 'aw_head_band' ) ) {
+		return (string) aw_head_band( $a );
+	}
+	return '<div class="aw-head-band kit-head-band">' . ( $a['crumbs'] ?? '' ) . '<div class="kit-head-band-main">' . ( $a['icon'] ?? '' )
+		. '<h1 class="' . esc_attr( $a['title_class'] ?? '' ) . '">' . esc_html( $a['title'] ?? '' ) . '</h1>' . ( $a['note'] ?? '' ) . '</div></div>';
+}
+
+/**
  * /claim/?listing=<ID>: the listing's own head band (owner, 31 Oct 2026): breadcrumbs … › {Listing} › Claim (the trail
  * is aw-seo-extras' breadcrumbs.php), its name, logo, types and place, then the intro. Without a listing: "Claim a listing".
  */
@@ -253,19 +268,19 @@ function directoryweb_claim_head_band() {
 	$listing = directoryweb_form_page_listing();
 	$crumbs  = function_exists( 'rankweb_breadcrumbs_claim' ) ? rankweb_breadcrumbs_claim() : '';
 	if ( ! $listing ) {
-		return aw_head_band( array( 'crumbs' => $crumbs, 'title' => 'Claim a listing', 'title_class' => 'wp-block-post-title' ) );
+		return directoryweb_head_band( array( 'crumbs' => $crumbs, 'title' => 'Claim a listing', 'title_class' => 'wp-block-post-title' ) );
 	}
 	$id   = $listing->ID;
 	$meta = '';
 	foreach ( array_slice( function_exists( 'aw_item_type_terms' ) ? aw_item_type_terms( $id ) : array(), 0, 3 ) as $t ) { // as on the listing page: at most 3 types
-		$meta .= aw_item_chip( $t );
+		$meta .= function_exists( 'aw_item_chip' ) ? aw_item_chip( $t ) : '<span class="kit-tag">' . esc_html( $t->name ) . '</span>';
 	}
 	foreach ( function_exists( 'directoryweb_item_places' ) ? directoryweb_item_places( $id ) : array() as $p ) {
 		$st    = 'district' === $p->kind && function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( $p->state ) : null;
 		$meta .= '<a class="aw-item-place" href="' . esc_url( directoryweb_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
 	}
 	$logo = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'thumbnail', array( 'class' => 'aw-claim-logo', 'alt' => '', 'loading' => 'eager' ) ) : '';
-	return aw_head_band(
+	return directoryweb_head_band(
 		array(
 			'crumbs'      => $crumbs,
 			'title'       => wp_strip_all_tags( get_the_title( $listing ) ),
@@ -287,7 +302,7 @@ add_shortcode(
 		if ( $listing ) {
 			return '<div class="aw-form-page aw-claim-page" id="claim">'
 				. directoryweb_claim_listing_summary( $listing )
-				. directoryweb_claim_stepper( 1 )
+				. ( function_exists( 'dw_claim_native_active' ) && dw_claim_native_active() ? '' : directoryweb_claim_stepper( 1 ) )
 				. directoryweb_claim_form( $listing )
 				. '</div>';
 		}
@@ -298,5 +313,5 @@ add_shortcode(
 	}
 );
 
-/* ---------- Back-compat: the old names (Animal Writes Core, before 18 Nov 2026) ---------- */
+/* ---------- Back-compat: the old names (the legacy Core plugin, before 18 Nov 2026) ---------- */
 

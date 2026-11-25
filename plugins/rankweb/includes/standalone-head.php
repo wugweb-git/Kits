@@ -1,7 +1,8 @@
 <?php
 /**
- * The page head when Rank Math is not active: the SEO title typed in the editor sidebar, and the Open Graph and Twitter
- * share tags. With Rank Math active none of this runs: Rank Math prints its own, and opengraph.php adjusts them.
+ * The page head when RankWeb prints it (standalone-seo.php: rankweb_prints_head()): the SEO title typed in the editor
+ * sidebar, and rankweb_share_tags(), the Open Graph and Twitter tags as HTML. With Rank Math active none of this runs:
+ * Rank Math prints its own, and opengraph.php adjusts them.
  *
  * @package aw-seo-extras
  */
@@ -49,8 +50,10 @@ function rankweb_share_tags( array $d ): string {
 	return $out;
 }
 
-if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) {
-	// The title typed in the sidebar, for a single item (a list or an archive keeps WordPress's own).
+// The title typed in the sidebar, for a single item (a list or an archive keeps WordPress's own), when RankWeb prints the
+// page head (no Rank Math, Yoast SEO, SEOPress or All in One SEO). The description, Open Graph and Twitter tags of that
+// head are printed once, by standalone-seo.php (rankweb_print_head_tags()).
+if ( function_exists( 'rankweb_prints_head' ) ? rankweb_prints_head() : ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) ) {
 	add_filter(
 		'pre_get_document_title',
 		function ( $title ) {
@@ -61,42 +64,5 @@ if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_r
 			return '' !== $typed ? rankweb_plain_text( $typed ) : $title;
 		},
 		20
-	);
-
-	add_action(
-		'wp_head',
-		function () {
-			if ( is_404() || is_admin() || ! ( is_singular() || is_front_page() || is_home() ) ) {
-				return;
-			}
-			$obj   = get_queried_object();
-			$title = wp_get_document_title();
-			$desc  = function_exists( 'rankweb_seo_description' ) ? rankweb_plain_text( (string) rankweb_seo_description() ) : '';
-			$img   = function_exists( 'rankweb_seo_image' ) ? rankweb_seo_image() : null;
-			$image = array();
-			if ( is_array( $img ) && ! empty( $img['url'] ) ) {
-				$sq    = function_exists( 'rankweb_seo_share_square' ) ? rankweb_seo_share_square( ! empty( $img['id'] ) ? (int) $img['id'] : (string) $img['url'] ) : array( $img['url'], 0, 0, '' );
-				$image = array(
-					'url'    => (string) $sq[0],
-					'width'  => (int) ( $sq[1] ?: ( $img['width'] ?? 0 ) ),
-					'height' => (int) ( $sq[2] ?: ( $img['height'] ?? 0 ) ),
-					'type'   => (string) ( $sq[3] ?: ( $img['type'] ?? '' ) ),
-					'alt'    => $obj instanceof WP_Post ? rankweb_plain_text( $obj->post_title ) : '',
-				);
-			}
-			$types = defined( 'AW_SEO_ARTICLE_TYPES' ) ? (array) AW_SEO_ARTICLE_TYPES : array( 'post' );
-			echo rankweb_share_tags( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every value is escaped inside rankweb_share_tags()
-				array(
-					'type'        => is_singular( $types ) ? 'article' : 'website',
-					'title'       => $title,
-					'description' => $desc,
-					'url'         => is_singular() ? (string) get_permalink() : home_url( '/' ),
-					'site_name'   => get_bloginfo( 'name' ),
-					'locale'      => str_replace( '-', '_', determine_locale() ),
-					'image'       => $image,
-				)
-			);
-		},
-		5
 	);
 }

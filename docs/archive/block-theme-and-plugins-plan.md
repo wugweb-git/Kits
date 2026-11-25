@@ -4,6 +4,8 @@
 
 # Block Theme & Companion Plugins Master Architecture Plan
 
+**Status (25 Nov 2026):** Plan of 21 Nov from an Animal Writes audit. Phase 1-2 blocks (`directoryweb/search`, `kits/countdown`, `kits-core/category-hub`) are not built; live-site figures are unverified. Report only.
+
 **Product:** Kits by Wugweb (FSE Block Theme) & Wugweb Suite (Modular Plugins)  
 **Date:** 21 November 2026  
 **Auditor & Architect:** WordPress Core / FSE Architect & Gutenberg Specialist  

@@ -152,6 +152,9 @@ add_filter( 'manage_aw_claim_posts_columns', fn( $c ) => array( 'cb' => $c['cb']
 add_action(
 	'manage_aw_claim_posts_custom_column',
 	function ( $col, $id ) {
+		if ( '' !== (string) get_post_meta( $id, '_dw_claim_status', true ) ) {
+			return; // a native claim: claim-native.php draws these columns
+		}
 		if ( 'aw_status' === $col ) {
 			echo esc_html( ucfirst( (string) get_post_meta( $id, 'aw_c_status', true ) ) );
 		} elseif ( 'aw_changes' === $col ) {

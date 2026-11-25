@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb PRO, phase E: list-screen SEO columns, filters, Quick Edit and Bulk Edit (docs/rankweb-pro-audit.md, E).
+ * RankWeb PRO, phase E: list-screen SEO columns, filters, Quick Edit and Bulk Edit (docs/org/rankweb-org-plan.md (Appendix B), E).
  *
  * On the post-list screen of each configured type: a "SEO" column (title, description and focus keyword at a glance), a
  * filter (missing title, missing description, missing focus keyword, noindex, or no internal links in), Quick Edit for

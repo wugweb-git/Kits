@@ -1,5 +1,5 @@
 /**
- * Kits admin shell: the setup flow (docs/kits-plugin-ui.md). A plugin's first run, or a service's connection, as
+ * Kits admin shell: the setup flow (docs/plugins/kits-plugin-ui-spec.md). A plugin's first run, or a service's connection, as
  * numbered steps: the list of steps with what is done, one step's card, and Back / Continue under it.
  */
 import { __, sprintf } from '@wordpress/i18n';

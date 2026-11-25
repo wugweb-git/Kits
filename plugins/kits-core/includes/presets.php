@@ -1,6 +1,6 @@
 <?php
 /**
- * Content-type presets (docs/content-blocks-feasibility.md, sections 12, 13 and 20 stage 4): a preset is a PHP config
+ * Content-type presets (docs/plugins/content-blocks-feasibility.md, sections 12, 13 and 20 stage 4): a preset is a PHP config
  * array that Kits Core turns into WordPress's own calls, and nothing more. There is no type builder, no stored type
  * definition and no taxonomy of a preset's own: a preset uses only core category and post_tag.
  *

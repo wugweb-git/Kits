@@ -3,7 +3,7 @@
  * Daily backup (S0): the database and the deployed code, once a day, into ~/backups on the server (outside the web
  * root), kept 14 days. Runs on WordPress's scheduler (this host has no user cron). Files: auto-db-YYYY-MM-DD.sql.gz and
  * auto-code-YYYY-MM-DD.tar.gz; only files with the auto- prefix are ever removed by the rotation.
- * Last run and size show on Kits → Home → Backup. Restoring: docs/rollback.md.
+ * Last run and size show on Kits → Home → Backup. Restoring: docs/rollback.md (not in this repo).
  *
  * Moved whole from Animal Writes Core (18 Nov 2026): the option aw_backup_last, the cron hook aw_daily_backup and the
  * REST route aw/v1/backup/(db|code) keep their names (the workers repository's off-server copy calls the route). The

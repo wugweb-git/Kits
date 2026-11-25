@@ -58,9 +58,9 @@ function rankweb_seo_clean_keyword( $kw, $title, $text = '' ) {
 	if ( '' === $kw || $n < 2 || $n > 4 || mb_strlen( $kw ) > 60 ) {
 		return '';
 	}
-	$brand = strtolower( (string) get_bloginfo( 'name' ) );
-	if ( '' !== $brand && false !== strpos( $kw, $brand ) && false === mb_stripos( $title, $brand ) ) {
-		return ''; // a keyphrase that names the site belongs to titles that name it
+	$brand = mb_strtolower( rankweb_site_name() ); // a keyword that names the site must be in the title
+	if ( '' !== $brand && false !== strpos( $kw, $brand ) && false === mb_stripos( $title, $brand ) && false === mb_stripos( $title, str_replace( ' ', '', $brand ) ) ) {
+		return '';
 	}
 	if ( preg_match( '/^(?:' . AW_SEO_DANGLING . ')$/iu', (string) end( $parts ) ) ) {
 		return '';

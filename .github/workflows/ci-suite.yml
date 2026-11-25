@@ -190,6 +190,11 @@ jobs:
           php plugins/directoryweb/tests/directoryweb-standalone-test.php
           php plugins/directoryweb/tests/claim-native-tests.php
           php plugins/directoryweb/tests/claim-native-mail-tests.php
+          php plugins/directoryweb/tests/claim-fallback-tests.php
+          php plugins/directoryweb/tests/claim-review-standalone-tests.php
+          php plugins/directoryweb/tests/meta-authorization-tests.php
+          php plugins/directoryweb/tests/claim-evidence-tests.php
+          php plugins/directoryweb/tests/no-animal-writes-test.php
           php plugins/directoryweb/tests/collection-filter-tests.php
           php plugins/directoryweb/tests/directoryweb-scf-fallback-test.php
 
@@ -203,7 +208,9 @@ jobs:
         if: ${{ needs.changes.outputs.rankweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/rankweb/tests/run.php
+          php plugins/rankweb/tests/no-animal-writes-test.php
           php plugins/rankweb/tests/phpunit-lite.php
+          node plugins/rankweb/tests/sidebar-score.test.js
 
       - name: Test MailWeb
         if: ${{ needs.changes.outputs.mailweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -277,6 +284,22 @@ jobs:
       - name: Run every blueprint headlessly against the built ZIPs
         working-directory: tools/playground
         run: python3 smoke.py --dist ../../dist --cli "npx --no-install wp-playground-cli"
+      - name: DirectoryWeb HTTP checks against the extracted ZIPs (claim limits, evidence uploads, generic behaviour, public pages)
+        working-directory: tools/playground
+        run: |
+          python3 http-claim-limits.py --dist ../../dist
+          python3 http-claim-evidence.py --dist ../../dist
+          python3 http-generic-behavior.py --dist ../../dist
+          python3 http-directoryweb-frontend.py --dist ../../dist
+      - name: DirectoryWeb admin navigation audit (standalone and with Kits Core)
+        working-directory: tools/playground
+        run: |
+          python3 admin-nav-audit.py --dist ../../dist
+          python3 admin-nav-audit.py --dist ../../dist --blueprint suite --port 9432
+      - name: Real Fluent Forms claim review (compatibility canary; installs the current Fluent Forms from wordpress.org)
+        working-directory: tools/playground
+        continue-on-error: true
+        run: python3 http-fluentforms-claim.py --dist ../../dist
       - uses: actions/upload-artifact@v4
         if: always()
         with:

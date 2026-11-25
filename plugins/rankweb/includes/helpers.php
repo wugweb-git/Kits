@@ -335,7 +335,19 @@ foreach ( array( 'save_post', 'deleted_post', 'set_object_terms' ) as $aw_seo_ho
 }
 unset( $aw_seo_hook );
 
-/** "{Text} – Animal Writes". */
+/**
+ * The words that follow "the {Site} Directory" in a directory place's description: nothing on a generic site. A site
+ * whose directory covers one subject and country supplies them through the `rankweb_directory_scope` filter
+ * (a site layer, sites/{site}/rankweb/site.php, does this).
+ *
+ * @param bool $long True for the longer form (" of animal welfare organisations in India"); false for the short one (" of India").
+ * @return string With its leading space, or ''.
+ */
+function rankweb_seo_dir_scope( $long = false ) {
+	return (string) apply_filters( 'rankweb_directory_scope', '', (bool) $long );
+}
+
+/** "{Text} – {Site name}". */
 function rankweb_seo_branded( $text ) {
 	return $text . ' – ' . get_bloginfo( 'name' );
 }

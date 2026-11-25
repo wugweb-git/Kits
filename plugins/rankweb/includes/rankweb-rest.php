@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb's routes for its screens (docs/rankweb-plan.md §2–§4), under rankweb/v1:
+ * RankWeb's routes for its screens (docs/org/rankweb-org-plan.md §2–§4), under rankweb/v1:
  *
  *   GET  dashboard           manage_categories  the tiles, from the background counts (rankweb-dashboard.php)
  *   POST dashboard/count     manage_categories  ask for a count now (one background event)
@@ -707,7 +707,7 @@ function rankweb_services(): array {
 			'status'   => $active ? sprintf( __( 'Active, %s', 'rankweb' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '' ) : __( 'Not active', 'rankweb' ),
 			'tone'     => $active ? '' : 'error',
 			/* translators: 1: features on, 2: features RankWeb relies on. */
-			'summary'  => $active ? sprintf( __( '%1$d of the %2$d Rank Math features RankWeb relies on are on.', 'rankweb' ), $on, count( $feature ) ) : __( 'RankWeb does nothing until Rank Math SEO is active.', 'rankweb' ),
+			'summary'  => $active ? sprintf( __( '%1$d of the %2$d Rank Math features RankWeb relies on are on.', 'rankweb' ), $on, count( $feature ) ) : __( 'RankWeb works without Rank Math; this row shows whether Rank Math is active.', 'rankweb' ),
 			'features' => array_map(
 				fn( $x ) => array(
 					'label' => $x[0],

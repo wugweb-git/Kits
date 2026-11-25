@@ -45,7 +45,7 @@ function directoryweb_find_help_render( $attributes = array() ) {
 	}
 
 	$total = function_exists( 'directoryweb_listing_public_count' ) ? directoryweb_listing_public_count() : 0;
-	$dir   = function_exists( 'aw_hub_url' ) ? aw_hub_url( 'aw_listing' ) : home_url( '/directory/' );
+	$dir   = function_exists( 'directoryweb_hub_url' ) ? directoryweb_hub_url() : home_url( '/directory/' );
 
 	$opts   = '<option value="">' . esc_html__( 'All states and UTs', 'directoryweb' ) . '</option>';
 	$counts = array();

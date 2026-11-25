@@ -1,6 +1,6 @@
 /**
  * MailWeb's Inbox on the new screens, laid out like an email app: folders on the left, the message list in the middle
- * and the open message on the right (docs/mailweb-plan.md §3.3). Below 1200px one pane shows at a time, with Back.
+ * and the open message on the right (docs/plugins/mailweb-plan.md §3.3). Below 1200px one pane shows at a time, with Back.
  *
  * Reading uses GET mailweb/v1/inbox/message (opening marks a message read, as webmail does); moving, marking and
  * trashing use POST mailweb/v1/inbox/bulk. Reply, Reply all, Forward and New message open today's compose screen.

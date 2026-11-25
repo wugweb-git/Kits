@@ -1,6 +1,6 @@
 <?php
 /**
- * Internal links, phase 1: the auto-linker (docs/rankweb-internal-links.md).
+ * Internal links, phase 1: the auto-linker (docs/org/rankweb-org-plan.md (Appendix A)).
  *
  * - Each item has "Link keywords" (post meta _aw_link_keywords, a list): in the RankWeb content panel of the block
  *   editor and in a "Link keywords" box on the classic editor. Until it is saved, the item's Rank Math focus keywords

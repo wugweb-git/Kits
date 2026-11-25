@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( function_exists( 'rankweb_breadcrumbs' ) || function_exists( 'rankweb_breadcrumbs' ) ) {
-	return; // Loaded already (by RankWeb, or by Animal Writes Core from another path), or an older Core still shows its own trail: one trail per page.
+if ( function_exists( 'rankweb_breadcrumbs' ) ) {
+	return; // Loaded already from another path: one trail per page.
 }
 
 /**
@@ -145,18 +145,27 @@ add_action(
 	}
 );
 
-// The earlier block name, animal-writes/breadcrumb, is stored in the content of 7 hub pages (8811, 8935, 8937, 8939,
+/**
+ * The earlier name of the Breadcrumbs block that a site's saved pages may still hold ('' on a site that has none). Set
+ * with the `rankweb_breadcrumbs_legacy_block` filter (a site layer, sites/{site}/rankweb/site.php, sets it).
+ */
+function rankweb_breadcrumbs_legacy_block() {
+	return (string) apply_filters( 'rankweb_breadcrumbs_legacy_block', '' );
+}
+
+// The earlier block name (on the Animal Writes site, animal-writes/breadcrumb) is stored in the content of 7 hub pages (8811, 8935, 8937, 8939,
 // 8941, 8943, 8945) and in any template saved in the Site Editor. RankWeb owns it (Animal Writes Core registered it
 // until 18 Nov 2026): an alias with the same output, so those pages need no edit. Registered only when nothing else
 // registered the name. Hidden from the inserter: new pages use rankweb/breadcrumbs.
 add_action(
 	'init',
 	function () {
-		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'animal-writes/breadcrumb' ) ) {
-			return; // Another plugin registered the name first.
+		$name = rankweb_breadcrumbs_legacy_block();
+		if ( '' === $name || WP_Block_Type_Registry::get_instance()->is_registered( $name ) ) {
+			return; // No earlier name on this site, or another plugin registered it first.
 		}
 		register_block_type(
-			'animal-writes/breadcrumb',
+			$name,
 			array(
 				'api_version'     => 3,
 				'title'           => 'Breadcrumb (earlier name)',
@@ -169,64 +178,10 @@ add_action(
 			)
 		);
 		$handle = generate_block_asset_handle( 'rankweb/breadcrumbs', 'editorScript' );
-		wp_add_inline_script( $handle, 'window.rankwebBreadcrumbAlias = true;', 'before' ); // index.js registers the alias in the editor too.
+		wp_add_inline_script( $handle, 'window.rankwebBreadcrumbAlias = ' . wp_json_encode( $name ) . ';', 'before' ); // index.js registers the alias in the editor too.
 	},
 	20
 );
-
-/* ---------- The earlier names (Animal Writes Core's bands call rankweb_breadcrumbs_claim) ---------- */
-
-if ( ! function_exists( 'rankweb_breadcrumbs' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs().
-	 *
-	 * @return array
-	 */
-	function rankweb_breadcrumbs() {
-		return rankweb_breadcrumbs();
-	}
-}
-if ( ! function_exists( 'rankweb_breadcrumbs_html' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_html().
-	 *
-	 * @return string
-	 */
-	function rankweb_breadcrumbs_html() {
-		return rankweb_breadcrumbs_html();
-	}
-}
-if ( ! function_exists( 'rankweb_breadcrumbs_hidden' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_hidden().
-	 *
-	 * @return bool
-	 */
-	function rankweb_breadcrumbs_hidden() {
-		return rankweb_breadcrumbs_hidden();
-	}
-}
-if ( ! function_exists( 'rankweb_breadcrumbs_claim' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_claim().
-	 *
-	 * @return string
-	 */
-	function rankweb_breadcrumbs_claim() {
-		return rankweb_breadcrumbs_claim();
-	}
-}
-if ( ! function_exists( 'rankweb_breadcrumbs_prepend' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_prepend().
-	 *
-	 * @param string $html Block output.
-	 * @return string
-	 */
-	function rankweb_breadcrumbs_prepend( $html ) {
-		return rankweb_breadcrumbs_prepend( $html );
-	}
-}
 
 add_filter(
 	'render_block_core/post-title',

@@ -27,10 +27,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// The hook names are fixed, not built from __FILE__: Animal Writes Core loads this file from the real folder, before
-// WordPress maps a symlinked plugin folder, so __FILE__ can give a name WordPress never fires.
+// The hook names are fixed, not built from __FILE__: a symlinked plugin folder can map to a name WordPress never fires.
 if ( defined( 'DIRECTORYWEB_LOADED' ) ) {
-	return; // Loaded already (active on its own and also loaded by Animal Writes Core).
+	return; // Loaded already.
 }
 
 require_once __DIR__ . '/includes/standalone-fallback.php';
@@ -51,7 +50,7 @@ define( 'DIRECTORYWEB_FILE', __FILE__ );
 define( 'DIRECTORYWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );
 
-// Kept in the order Animal Writes Core loaded these files in, so hooks added at the same priority keep their order.
+// Kept in this order, so hooks added at the same priority keep their order.
 $directoryweb_includes = array(
 	'listing-meta', // the listing's meta, phones, hours and never-publish list (from Core's meta.php, 18 Nov 2026)
 	'listing-terms', // a listing's types and services, and tel: links (from Core's tags.php and bindings.php, 18 Nov 2026)
@@ -65,7 +64,9 @@ $directoryweb_includes = array(
 	'directory-map',
 	'claims',
 	'claim-page',
+	'claim-evidence', // DirectoryWeb's own private store for claim logos, photos and proof
 	'claims-review',
+	'legacy-aliases', // the old aw_* function names, for other plugins that still call them
 	'claim-native', // standalone claim path: state machine, form, REST (no Fluent Forms)
 	'claim-native-mail', // notification emails for native claims (wp_mail; MailWeb can take over per message)
 	'directoryweb-shape',

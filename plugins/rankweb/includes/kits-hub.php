@@ -44,7 +44,7 @@ function rankweb_seo_extras_kits_status_row( $rows ) {
 }
 
 /**
- * RankWeb's three settings options in Kits → Import / Export (docs/rankweb-plan.md §0, answer 3): the rules, the
+ * RankWeb's three settings options in Kits → Import / Export (docs/org/rankweb-org-plan.md §0, answer 3): the rules, the
  * FAQ box types and the listings kept indexed. An export before and after a change shows that no setting was lost.
  *
  * @param array $names Option names in the export.

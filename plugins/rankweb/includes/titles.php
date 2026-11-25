@@ -80,6 +80,7 @@ function rankweb_seo_item_title_rules( $post ) {
 		if ( '' !== $front ) {
 			return $front;
 		}
+		return trim( rankweb_site_name() . ( '' !== trim( (string) get_bloginfo( 'description' ) ) ? ' – ' . trim( (string) get_bloginfo( 'description' ) ) : '' ) );
 	}
 	if ( in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) ) {
 		return rankweb_seo_resource_title( $post ); // Library and Resources (helpers.php)
@@ -100,6 +101,7 @@ function rankweb_seo_item_title_rules( $post ) {
 		if ( '' !== $about ) {
 			return $about;
 		}
+		return 'About ' . rankweb_site_name();
 	}
 	return rankweb_seo_branded( rankweb_plain_text( wptexturize( $post->post_title ) ) ); // as WordPress's own document title
 }
@@ -125,6 +127,9 @@ function rankweb_seo_item_description( $post ) {
 	} elseif ( 'aw_legal' === $post->post_type && mb_strlen( rankweb_plain_text( $desc ) ) < 60 ) { // a one-line note: the intro says more
 		$better = rankweb_seo_intro( $post );
 		$desc   = mb_strlen( rankweb_plain_text( $better ) ) >= 60 ? $better : $desc;
+	}
+	if ( '' === trim( (string) $desc ) ) {
+		$desc = trim( wp_strip_all_tags( strip_shortcodes( excerpt_remove_blocks( (string) $post->post_content ) ) ) ); // a short page still says what it says
 	}
 	if ( '' === trim( (string) $desc ) ) {
 		$desc = get_bloginfo( 'description' );
@@ -269,17 +274,17 @@ add_action(
 			'aw_title',
 			array(
 				'name'        => 'RankWeb title',
-				'description' => 'The title by the site\'s rules: one separator, " – Animal Writes" only at the end',
+				'description' => 'The title by the site\'s rules: one separator, the site name only at the end',
 				'variable'    => 'aw_title',
 				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
-				'example'     => $post ? rankweb_seo_var_title( '', $post ) : 'A page title – ' . get_bloginfo( 'name' ),
+				'example'     => $post ? rankweb_seo_var_title( '', $post ) : rankweb_seo_branded( 'Example page title' ),
 			),
 			'rankweb_seo_var_title'
 		);
 		rank_math_register_var_replacement(
 			'aw_description',
 			array(
-				'name'        => 'Animal Writes description',
+				'name'        => 'RankWeb description',
 				'description' => 'The description by the site\'s rules (the summary condensed, else the intro)',
 				'variable'    => 'aw_description',
 				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
@@ -540,13 +545,14 @@ function rankweb_seo_list_description() {
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
 			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . rankweb_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
-			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
-			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= AW_SEO_DESC_MAX ? $desc . ' From the Animal Writes Directory.' : $desc );
+			$more = ' From the ' . rankweb_site_name() . ' Directory' . rankweb_seo_dir_scope( true ) . '.';
+			$short = ' From the ' . rankweb_site_name() . ' Directory.';
+			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . $short ) <= AW_SEO_DESC_MAX ? $desc . $short : $desc );
 		} elseif ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
 			$desc = '1' === $n
-				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $place->name, $state->name )
+				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the %3$s Directory%4$s.', $place->name, $state->name, rankweb_site_name(), rankweb_seo_dir_scope() )
 				: sprintf( '%1$s animal welfare NGOs, rescue groups, shelters, Gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
 		} else {
 			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
@@ -604,7 +610,7 @@ add_filter(
 			return $desc;
 		}
 		$name = rankweb_plain_text( get_the_title( $id ) );
-		return rankweb_seo_cut( 'Claim ' . $name . ' in the Animal Writes Directory: send changes to its phone, WhatsApp, email, website, area, services or logo for review.', 160 );
+		return rankweb_seo_cut( 'Claim ' . $name . ' in the ' . rankweb_site_name() . ' Directory: send changes to its phone, WhatsApp, email, website, area, services or logo for review.', 160 );
 	},
 	30
 );
@@ -613,7 +619,7 @@ add_filter(
 	'rank_math/frontend/title',
 	function ( $title ) {
 		$id = function_exists( 'rankweb_claim_listing' ) ? rankweb_claim_listing() : 0;
-		return $id ? 'Claim ' . html_entity_decode( get_the_title( $id ), ENT_QUOTES ) . ' – Animal Writes' : $title;
+		return $id ? 'Claim ' . html_entity_decode( get_the_title( $id ), ENT_QUOTES ) . ' – ' . rankweb_site_name() : $title;
 	},
 	30
 );
@@ -658,28 +664,4 @@ foreach ( array( 'rank_math/frontend/title', 'rank_math/frontend/description' ) 
 	add_filter( $aw_hook, fn( $text ) => function_exists( 'aw_heading_dates' ) ? aw_heading_dates( $text ) : $text, 20 );
 }
 
-/* ---------- Standalone meta description rendering (when Rank Math is inactive) ---------- */
-
-if ( ! function_exists( 'rankweb_rankweb_render_standalone_meta_description' ) ) {
-	/**
-	 * Render standalone meta description tag in wp_head when Rank Math is inactive.
-	 */
-	function rankweb_rankweb_render_standalone_meta_description(): void {
-		if ( is_404() || is_admin() ) {
-			return;
-		}
-		if ( function_exists( 'rankweb_seo_extras_rank_math' ) && rankweb_seo_extras_rank_math() ) {
-			return;
-		}
-		if ( function_exists( 'rankweb_seo_description' ) ) {
-			$desc = rankweb_seo_description();
-			if ( '' !== $desc ) {
-				echo '<meta name="description" content="' . esc_attr( rankweb_plain_text( $desc ) ) . '" />' . "\n";
-			}
-		}
-	}
-}
-
-if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) {
-	add_action( 'wp_head', 'rankweb_rankweb_render_standalone_meta_description', 1 );
-}
+/* The standalone meta description is printed by standalone-seo.php (rankweb_print_head_tags), once, for every kind of page. */

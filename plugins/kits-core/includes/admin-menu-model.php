@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The five Kits screens, in menu and tab order (docs/admin-ui-spec.md §B): slug => [label, address relative to
+ * The five Kits screens, in menu and tab order (docs/design-system/admin-ui-spec.md §B): slug => [label, address relative to
  * wp-admin, capability]. Home has the menu's own slug.
  *
  * Home and Help need manage_kits (kits-caps.php; whoever had manage_options has it). Theme Options keeps manage_options for now: it saves through /wp/v2/settings and options.php, which both need it.

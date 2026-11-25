@@ -1,6 +1,6 @@
 <?php
 /**
- * Internal links, phase 4: silos (docs/rankweb-internal-links.md).
+ * Internal links, phase 4: silos (docs/org/rankweb-org-plan.md (Appendix A)).
  *
  * A silo has a name, one hub item, its supporting items in order, and a mode (virtual or circle, RankWeb_Silo). Stored in two
  * tables of RankWeb's own, not a taxonomy: {prefix}aw_silos (name, hub, mode) and {prefix}aw_silo_items (item ID as the

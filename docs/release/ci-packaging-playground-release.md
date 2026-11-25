@@ -1,10 +1,13 @@
 # CI, packaging, Playground and release (infrastructure)
 
+**Status (25 Nov 2026):** CI and packaging reference, last verified 24 Nov; the new HTTP checks and nav audits are not yet run on a pushed commit.
+
 Last verified: 24 Nov 2026. Remote CI evidence is recorded in `docs/pending.md`.
 
 ## CI (`.github/workflows/ci-suite.yml`)
 - Deterministic installs only: `npm ci` (no `|| npm install` fallback), `composer validate` + `composer install` against a committed `composer.lock` (`packages/shared-php`). Composer has no `--no-fund`; `--no-audit` is not an `install` option on the runner's Composer, which is what failed run 45425360668.
 - Gates: root/design system, Shared PHP SDK (8.0-8.3), theme, Playground blueprints (generator sync + official schema), companion plugin suites (8.0-8.3: Kits Core, DirectoryWeb incl. standalone and SCF fallback, InsightWeb, RankWeb incl. phpunit-lite, MailWeb, PlanWeb, SourceWeb incl. standalone) and the root `standalone-matrix` / `remediation-verification` tests.
+- The Playground job also runs the HTTP checks (`http-claim-limits`, `http-claim-evidence`, `http-generic-behavior`, `http-directoryweb-frontend`), the admin-nav audit twice (standalone and suite) and a non-blocking Fluent Forms canary (`continue-on-error`).
 - `package-dist` needs every gate and has no `always()`: a failed, cancelled or skipped gate skips packaging. Path-filtered gates also run when packaging inputs change, so PRs and pushes receive the same required validation.
 - `playground-smoke` runs every blueprint headlessly (`@wp-playground/cli`, WP 7.1, PHP 8.2) against the ZIPs built by `package-dist`.
 - `ci-design-system.yml` was a strict subset of the root job in `ci-suite.yml` and was removed.

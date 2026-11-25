@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb PRO, phase E: CSV export and import of the SEO fields (docs/rankweb-pro-audit.md, E). Part of the "bulk"
+ * RankWeb PRO, phase E: CSV export and import of the SEO fields (docs/org/rankweb-org-plan.md (Appendix B), E). Part of the "bulk"
  * module (bulk-edit.php). Screen: RankWeb → SEO CSV.
  *
  * Columns (RankWeb_Bulk): id, title, description, focus_keyword, link_keywords (a pipe list), canonical. Only the columns

@@ -223,7 +223,7 @@ function rankweb_news_sitemap_items() {
 function rankweb_news_sitemap_xml() {
 	$x = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
 	foreach ( rankweb_news_sitemap_items() as $r ) {
-		$x .= "\t<url>\n\t\t<loc>" . esc_xml( $r['loc'] ) . "</loc>\n\t\t<news:news>\n\t\t\t<news:publication>\n\t\t\t\t<news:name>" . esc_xml( (string) apply_filters( 'rankweb_news_publication_name', get_bloginfo( 'name' ) ) ) . "</news:name>\n\t\t\t\t<news:language>en</news:language>\n\t\t\t</news:publication>\n"
+		$x .= "\t<url>\n\t\t<loc>" . esc_xml( $r['loc'] ) . "</loc>\n\t\t<news:news>\n\t\t\t<news:publication>\n\t\t\t\t<news:name>" . esc_xml( (string) apply_filters( 'rankweb_news_publication_name', rankweb_site_name() ) ) . "</news:name>\n\t\t\t\t<news:language>en</news:language>\n\t\t\t</news:publication>\n"
 			. "\t\t\t<news:publication_date>" . esc_xml( $r['date'] ) . "</news:publication_date>\n\t\t\t<news:title>" . esc_xml( $r['title'] ) . "</news:title>\n\t\t</news:news>\n\t</url>\n";
 	}
 	return $x . '</urlset>' . "\n";

@@ -1,6 +1,6 @@
 <?php
 /**
- * Internal links, phase 2: the link audit (docs/rankweb-internal-links.md).
+ * Internal links, phase 2: the link audit (docs/org/rankweb-org-plan.md (Appendix A)).
  *
  * The scheduled job aw_link_audit (daily, or at once from the screen) works in slices of about 20 seconds and carries on
  * in a one-off event until it is done, so no browser tab has to stay open:

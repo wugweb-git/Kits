@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits: its own top-level menu, first in the Wugweb block (owner, 12 Nov 2026). It opens Home; the six screens (docs/admin-ui-spec.md §B, admin-menu.php: Home, Theme
+ * Kits: its own top-level menu, first in the Wugweb block (owner, 12 Nov 2026). It opens Home; the six screens (docs/design-system/admin-ui-spec.md §B, admin-menu.php: Home, Theme
  * Options, Settings, Plugins, Tools, Help) are the tabs on every Kits screen, at the same addresses as before.
  * Help → Docs shows the tables below: the plugin's features and the design and branding of the active Kits theme
  * (colours, fonts, templates, parts, patterns, style variations, the design registry), read live from WordPress, each

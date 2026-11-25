@@ -319,10 +319,10 @@ function directoryweb_featured_rescan( $offset = 0 ) {
 		directoryweb_featured_scan( $i );
 	}
 	if ( 300 === count( $ids ) ) {
-		wp_schedule_single_event( time() + 30, 'aw_featured_rescan', array( (int) $offset + 300 ) );
+		wp_schedule_single_event( time() + 30, 'directoryweb_featured_rescan', array( (int) $offset + 300 ) );
 	}
 }
-add_action( 'aw_featured_rescan', 'aw_featured_rescan' );
+add_action( 'directoryweb_featured_rescan', 'directoryweb_featured_rescan' );
 
 // An alias added, changed or removed: forget the lists and scan everything again.
 foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_hook ) {
@@ -331,8 +331,8 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 		function ( $mid, $pid, $key ) {
 			if ( 'aw_aliases' === $key ) {
 				directoryweb_featured_flush();
-				if ( ! wp_next_scheduled( 'aw_featured_rescan', array( 0 ) ) ) {
-					wp_schedule_single_event( time() + 60, 'aw_featured_rescan', array( 0 ) );
+				if ( ! wp_next_scheduled( 'directoryweb_featured_rescan', array( 0 ) ) ) {
+					wp_schedule_single_event( time() + 60, 'directoryweb_featured_rescan', array( 0 ) );
 				}
 			}
 		},

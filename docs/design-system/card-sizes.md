@@ -1,5 +1,7 @@
 # Card sizes (21 Oct 2026)
 
+**Status (25 Nov 2026):** Card limits. Line 3's `plugins/animal-writes-core/.../aw.css` is not in this repo; the values live in the theme's `--kit-card-min` tokens.
+
 Limits every list card keeps, set in `plugins/animal-writes-core/theme/assets/css/aw.css` (custom properties on `:root`):
 
 | Limit | Value | Property |

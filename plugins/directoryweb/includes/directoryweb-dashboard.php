@@ -1,6 +1,6 @@
 <?php
 /**
- * DirectoryWeb Dashboard counts (docs/directory-plugin-plan.md §2.1): built by the hourly job directoryweb_stats_build,
+ * DirectoryWeb Dashboard counts (docs/plugins/directoryweb-plan.md §2.1): built by the hourly job directoryweb_stats_build,
  * never while a screen loads. The job keeps the newest counts in the transient directoryweb_stats (3 hours). The
  * Dashboard route only formats them; with nothing stored it asks for one single run and shows "Counting…".
  *

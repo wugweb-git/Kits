@@ -1,5 +1,7 @@
 # Kits by Wugweb — theme marketplace readiness plan
 
+**Status (25 Nov 2026):** Plan only; nothing submitted to a marketplace. "Live equals dev" is an Animal Writes claim not verified here.
+
 **Goal:** ship **Kits by Wugweb** (theme) + **Kits Core** (companion plugin) to the **wordpress.org theme directory** *and* a **commercial marketplace** (ThemeForest), without changing how the live Animal Writes site looks or behaves.
 
 **Branch:** `claude/theme-marketplace-prep` (worktree off `wordpress-dev`) → PR into `wordpress-dev` → owner merges. No direct push to `wordpress`.

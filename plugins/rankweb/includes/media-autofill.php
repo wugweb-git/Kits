@@ -99,7 +99,11 @@ function rankweb_media_autofill_caption( $name ) {
 function rankweb_media_autofill_description( $name, $is_source ) {
 	$brand = rankweb_media_autofill_brand( $name );
 	if ( $brand ) {
-		$text = sprintf( '%1$s %2$s, shown beside news from %1$s on %3$s.', $brand['host'], $brand['kind'], get_bloginfo( 'name' ) );
+		$base = sprintf( '%1$s %2$s, shown beside news from %1$s on %3$s', $brand['host'], $brand['kind'], rankweb_site_name() );
+		$text = $base . ( '' !== trim( (string) get_bloginfo( 'description' ) ) ? ', ' . lcfirst( trim( (string) get_bloginfo( 'description' ) ) ) . '.' : '.' );
+		if ( mb_strlen( $text ) > 160 ) {
+			$text = $base . '.';
+		}
 	} else {
 		$short = rankweb_media_autofill_cut( $name, 45 );
 		$text  = $is_source
@@ -107,7 +111,7 @@ function rankweb_media_autofill_description( $name, $is_source ) {
 			: sprintf( 'Image for “%1$s” on %2$s.', $short, get_bloginfo( 'name' ) );
 	}
 	if ( mb_strlen( $text ) < 100 ) {
-		$text .= ' ' . get_bloginfo( 'description' ); // Reaches the 100-character minimum the Media Library SEO check expects, when the tagline allows.
+		$text .= ' ' . trim( (string) get_bloginfo( 'description' ) ); // Reaches the 100-character minimum the Media Library SEO check expects, in the site's own words.
 	}
 	return mb_substr( $text, 0, 160 );
 }

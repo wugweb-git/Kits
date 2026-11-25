@@ -1,6 +1,6 @@
 <?php
 /**
- * MailWeb Dashboard counts (docs/mailweb-plan.md §2): built by the job mailweb_dashboard_build, never while a screen
+ * MailWeb Dashboard counts (docs/plugins/mailweb-plan.md §2): built by the job mailweb_dashboard_build, never while a screen
  * loads. It runs hourly, and once more when the Dashboard asks (its first view, Count now, or counts older than
  * 15 minutes). It keeps the newest counts in the transient mailweb_dashboard and one row a day in the option
  * mailweb_dashboard_log (not autoloaded, 120 days), which the Dashboard's time range compares against.

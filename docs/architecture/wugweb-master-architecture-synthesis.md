@@ -1,6 +1,6 @@
 # Wugweb & Kits 3.0: Master Architectural Synthesis
 
-**Status:** Canonical Living Blueprint  
+**Status (25 Nov 2026):** Canonical target architecture, not a deployment record. DirectoryWeb 1.1.0 and RankWeb 2.1.0 are built on `feat/directoryweb-completion`, not deployed.  
 **Scope:** Design System, Block Theme, Companion Plugins, Token Foundry, Multi-Tenant Fleet, Governance, and Distribution Pipeline  
 **Governing Axiom:** One Repository $\neq$ One Product $\neq$ One Release  
 
@@ -195,7 +195,7 @@ A critical architectural separation:
 * **GPL License Only**: No trialware, no locked core features, no bundled hosted plugins.
 * **No `Update URI`**: Removed from all public `.org` plugin and theme headers.
 * **`Requires Plugins` Rule**: Restricted strictly to dependencies that are themselves hosted on WordPress.org.
-* **Unique Prefixes**: Minimum 4-character prefix per plugin. No legacy `aw_` or `aw-` in new code.
+* **Unique Prefixes**: Unique prefix per plugin: the full name (`directoryweb_`) or an agreed short form (`dw_` for DirectoryWeb). No legacy `aw_` or `aw-` in new code.
 
 ### 7.2 Security Safeguards
 * **Zero Write Tokens in Client Code**: Never ship Foundry write tokens, GitHub PATs, or master keys inside plugins.

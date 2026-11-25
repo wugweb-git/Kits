@@ -6,7 +6,7 @@
  * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
  * by the rankweb/v1 routes (rankweb-rest.php).
  *
- * When Kits Core or a build file is missing, the screen shows a notice that it needs Kits Core. The front end (titles,
+ * When Kits Core or a build file is missing, the screen is drawn as a plain WordPress page (rankweb-native-admin.php). The front end (titles,
  * schema, sitemap and the rest) never needs Kits Core.
  *
  * @package aw-seo-extras
@@ -197,6 +197,10 @@ function rankweb_ui_page( string $screen ): void {
 	)[ $screen ] ?? __( 'RankWeb', 'rankweb' );
 	if ( rankweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
 		kits_shell_mount( 'rankweb-app', $title );
+		return;
+	}
+	if ( function_exists( 'rankweb_native_screen' ) ) { // no Kits Core: the same screens as plain WordPress pages (rankweb-native-admin.php)
+		rankweb_native_screen( $screen, $title );
 		return;
 	}
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';

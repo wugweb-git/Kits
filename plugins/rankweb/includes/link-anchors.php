@@ -1,6 +1,6 @@
 <?php
 /**
- * Internal links, phase 3: the anchor mix (docs/rankweb-internal-links.md).
+ * Internal links, phase 3: the anchor mix (docs/org/rankweb-org-plan.md (Appendix A)).
  *
  * - Every link recorded in {prefix}aw_links gets an anchor type (RankWeb_Anchor, class-aw-anchor.php): exact, partial,
  *   branded, generic, naked, image, long_tail or other. The type is written with the row (rankweb_link_store()).

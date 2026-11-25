@@ -1,7 +1,7 @@
 /* stylelint-disable no-descending-specificity, @stylistic/max-line-length -- parts are grouped by component, not by specificity; comments are prose. */
 
 /*
- * Kits admin shell, second set of parts (docs/kits-plugin-ui.md): working list, field review, setup flow, chart,
+ * Kits admin shell, second set of parts (docs/plugins/kits-plugin-ui-spec.md): working list, field review, setup flow, chart,
  * write-only list, linked setting, metric picker, the "not active" tile. Same --ks-* values as shell.css (each a Kits
  * token, named there). Breakpoints 767/768 and 1199/1200 only.
  */

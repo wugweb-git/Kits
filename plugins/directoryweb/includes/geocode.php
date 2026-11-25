@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function directoryweb_geo_user_agent(): string {
 	$contact = (string) apply_filters( 'directoryweb_geocode_contact', '' );
-	return 'DirectoryWeb/1.1 (+' . home_url( '/' ) . ( '' !== $contact ? '; ' . $contact : '' ) . ')';
+	return 'DirectoryWeb/' . ( defined( 'DIRECTORYWEB_VERSION' ) ? DIRECTORYWEB_VERSION : '1' ) . ' (+' . home_url( '/' ) . ( '' !== $contact ? '; ' . $contact : '' ) . ')';
 }
 
 const AW_GEO_NEAR_KM  = 60; // a match farther than this from the listing's district centre is not trusted
@@ -217,8 +217,8 @@ function directoryweb_geo_inputs_hash( $id ) {
 
 /** Queue one listing for a lookup (deduplicated by WordPress for 10 minutes). */
 function directoryweb_geo_queue( $id ) {
-	if ( 'aw_listing' === get_post_type( $id ) && ! wp_next_scheduled( 'aw_geocode_one', array( (int) $id ) ) ) {
-		wp_schedule_single_event( time() + 60, 'aw_geocode_one', array( (int) $id ) );
+	if ( 'aw_listing' === get_post_type( $id ) && ! wp_next_scheduled( 'directoryweb_geocode_one', array( (int) $id ) ) ) {
+		wp_schedule_single_event( time() + 60, 'directoryweb_geocode_one', array( (int) $id ) );
 	}
 }
 
@@ -247,7 +247,7 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 unset( $aw_geo_hook );
 
 add_action(
-	'aw_geocode_one',
+	'directoryweb_geocode_one',
 	function ( $id ) {
 		if ( 'publish' !== get_post_status( $id ) || is_numeric( get_post_meta( $id, 'aw_lat', true ) ) ) {
 			return;

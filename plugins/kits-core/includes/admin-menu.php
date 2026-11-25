@@ -1,6 +1,6 @@
 <?php
 /**
- * The Kits screens: five, which are the tabs on every Kits screen (docs/admin-ui-spec.md §B, approved by the owner on
+ * The Kits screens: five, which are the tabs on every Kits screen (docs/design-system/admin-ui-spec.md §B, approved by the owner on
  * 11 Nov 2026). Home, Theme Options, Settings, Tools, Help; plugins are on WordPress's own Plugins screen. In the
  * WordPress menu they are one item, Kits (its own top-level menu), which opens Home (admin-home.php); the five stay
  * registered under the Kits menu slug, so their addresses and hook names are as before.

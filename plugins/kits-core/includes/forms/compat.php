@@ -3,7 +3,7 @@
  * Old names of the form functions and constants (Animal Writes Core, before 18 Nov 2026).
  *
  * Callers in other plugins and older code still use these names; each one hands over to the new function or
- * constant. Remove a wrapper once nothing calls it (docs/aw-core-callers.md).
+ * constant. Remove a wrapper once nothing calls it (docs/aw-core-callers.md (not in this repo)).
  *
  * @package kits-core
  */

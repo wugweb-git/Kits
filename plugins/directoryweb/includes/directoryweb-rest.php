@@ -1,6 +1,6 @@
 <?php
 /**
- * DirectoryWeb's routes for its new screens (docs/directory-plugin-plan.md §2), under directoryweb/v1:
+ * DirectoryWeb's routes for its new screens (docs/plugins/directoryweb-plan.md §2), under directoryweb/v1:
  *
  *   GET  dashboard                 manage_directoryweb the tiles, from the background counts (directoryweb-dashboard.php)
  *   POST dashboard/count           manage_directoryweb ask for a count now (one background event)
@@ -555,7 +555,8 @@ function directoryweb_claim_row( array $r ): array {
 	$u  = $by ? get_userdata( $by ) : null;
 	return array(
 		'id'         => $r['id'],
-		'entry'      => (int) $r['entry'],
+		'entry'      => ! empty( $r['native'] ) ? (string) $r['id'] : (int) $r['entry'], // native claims are 'dw-<id>': their post ids would collide with form entry ids
+		'native'     => ! empty( $r['native'] ),
 		'ref'        => (string) ( $r['ref'] ?? '' ),
 		'old'        => (bool) $r['old'],
 		'title'      => '' !== $r['listing_title'] ? $r['listing_title'] : __( '(no listing)', 'directoryweb' ),
@@ -636,13 +637,7 @@ function directoryweb_claim_detail( int $id ): ?array {
 	}
 	$status = directoryweb_claim_status( $c['review'] );
 	$lid    = (int) $c['listing'];
-	$file   = fn( $f ) => add_query_arg(
-		array(
-			'action' => 'aw_ff_file',
-			'f'      => $f,
-		),
-		admin_url( 'admin-post.php' )
-	);
+	$file   = 'dw_claim_file_url';
 	$fields = array();
 	$undone = array();
 	$notes  = array();
@@ -731,6 +726,8 @@ function directoryweb_claim_detail( int $id ): ?array {
 			array( __( 'Decided', 'directoryweb' ), $u ? $u->display_name . ', ' . mysql2date( 'j M Y', (string) ( $c['review']['at'] ?? '' ) ) : '' ),
 		),
 		'proofUrl'   => '' !== $c['proof'] ? esc_url_raw( $c['proof'] ) : '',
+		'proofUrls'  => array_map( 'esc_url_raw', (array) $c['proofs'] ),
+		'fileProblems' => array_map( 'strval', (array) $c['problems'] ),
 		'logoUrl'    => '' !== $c['logo'] ? $file( $c['logo'] ) : '',
 		'logoNowUrl' => '' !== $c['logo'] && $lid && has_post_thumbnail( $lid ) ? (string) get_the_post_thumbnail_url( $lid, 'thumbnail' ) : '',
 		'photoUrls'  => array_map( $file, (array) $c['photos'] ),
@@ -785,6 +782,26 @@ function directoryweb_fact( string $label, string $value, string $where = '' ): 
 		'label' => $label,
 		'value' => $value,
 		'where' => '' !== $where ? $where : __( 'Set in code', 'directoryweb' ),
+	);
+}
+
+/** The Settings row for the built-in claim path: live state, read each time. */
+function directoryweb_claim_status_service(): array {
+	$d = dw_claim_diagnostics();
+	return array(
+		'slug'    => 'claims-status',
+		'name'    => __( 'Claims', 'directoryweb' ),
+		'status'  => 'built-in' === $d['mode'] ? __( 'Built-in form', 'directoryweb' ) : __( 'Fluent Forms', 'directoryweb' ),
+		'tone'    => $d['page_live'] || 'fluent_forms' === $d['mode'] ? '' : 'warn',
+		/* translators: 1: pending built-in claims, 2: all built-in claims. */
+		'summary' => sprintf( __( '%1$s built-in claims waiting for review, %2$s built-in in all. Claims sent through Fluent Forms or another form provider are not counted here.', 'directoryweb' ), number_format_i18n( $d['counts']['pending'] ), number_format_i18n( $d['total'] ) ),
+		'facts'   => array(
+			directoryweb_fact( __( 'Claim page published', 'directoryweb' ), $d['page_live'] ? __( 'Yes', 'directoryweb' ) : __( 'No', 'directoryweb' ), dw_claim_source_label( (string) $d['sources']['page'] ) ),
+			directoryweb_fact( __( 'Claim emails', 'directoryweb' ), $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), dw_claim_source_label( (string) $d['sources']['mail'] ) ),
+			directoryweb_fact( __( 'New-claim emails go to', 'directoryweb' ), $d['notify_to'], 'option' === $d['sources']['notify'] ? dw_claim_source_label( 'option' ) : __( 'Site admin email, default', 'directoryweb' ) ),
+			/* translators: 1: open claims per email, 2: submissions per hour. */
+			directoryweb_fact( __( 'Limits', 'directoryweb' ), sprintf( __( '%1$d open per email; %2$d submissions an hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ), dw_claim_source_label( (string) $d['sources']['limits'] ) ),
+		),
 	);
 }
 
@@ -877,6 +894,7 @@ function directoryweb_settings_payload(): array {
 				),
 			),
 		),
+		directoryweb_claim_status_service(),
 		array(
 			'slug'    => 'fluentcrm',
 			'name'    => __( 'FluentCRM', 'directoryweb' ),
@@ -978,7 +996,7 @@ function directoryweb_settings_payload(): array {
 				directoryweb_fact( __( 'Verified sources', 'directoryweb' ), defined( 'AW_GOV_SOURCES' ) ? implode( ', ', AW_GOV_SOURCES ) : '' ),
 				directoryweb_fact( __( 'Verified', 'directoryweb' ), get_option( 'aw_gov_verified_live' ) ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), $where( 'wp aw gov-verify' ) ),
 				/* translators: %s: number. */
-				directoryweb_fact( __( 'Phone numbers never published', 'directoryweb' ), sprintf( __( '%s kept as fingerprints only', 'directoryweb' ), $num( count( (array) apply_filters( 'directoryweb_never_publish_phones', (array) apply_filters( 'aw_never_publish_phones', DIRECTORYWEB_NEVER_PUBLISH_PHONES ) ) ) ) ) ),
+				directoryweb_fact( __( 'Phone numbers never published', 'directoryweb' ), sprintf( __( '%s kept as fingerprints only', 'directoryweb' ), $num( count( (array) apply_filters( 'directoryweb_never_publish_phones', (array) apply_filters( 'directoryweb_never_publish_phones', DIRECTORYWEB_NEVER_PUBLISH_PHONES ) ) ) ) ) ),
 			),
 		),
 		array(
@@ -1052,6 +1070,7 @@ function directoryweb_rest_save_claim_form( WP_REST_Request $request ) {
  */
 function directoryweb_native_claim_detail( array $n ): array {
 	$lid    = (int) $n['listing'];
+	$ev     = (array) ( $n['evidence'] ?? array() );
 	$fields = array();
 	foreach ( $n['propose'] as $key => $val ) {
 		$map      = defined( 'DW_CLAIM_NATIVE_MAP' ) && isset( DW_CLAIM_NATIVE_MAP[ $key ] ) ? DW_CLAIM_NATIVE_MAP[ $key ] : '';
@@ -1092,10 +1111,11 @@ function directoryweb_native_claim_detail( array $n ): array {
 			array( __( 'Anything else', 'directoryweb' ), (string) ( $n['person']['notes'] ?? '' ) ),
 			array( __( 'Decided', 'directoryweb' ), $u ? $u->display_name . ', ' . mysql2date( 'j M Y', (string) $last['at'] ) : '' ),
 		),
-		'proofUrl'   => '',
-		'logoUrl'    => '',
-		'logoNowUrl' => '',
-		'photoUrls'  => array(),
+		'proofUrl'   => ! empty( $ev['proof'][0] ) ? esc_url_raw( dw_evidence_link( $ev['proof'][0] ) ) : '',
+		'proofUrls'  => array_map( fn( $f ) => esc_url_raw( dw_evidence_link( $f ) ), (array) ( $ev['proof'] ?? array() ) ),
+		'logoUrl'    => ! empty( $ev['logo'][0] ) ? esc_url_raw( dw_evidence_link( $ev['logo'][0] ) ) : '',
+		'logoNowUrl' => ! empty( $ev['logo'][0] ) && $lid && has_post_thumbnail( $lid ) ? (string) get_the_post_thumbnail_url( $lid, 'thumbnail' ) : '',
+		'photoUrls'  => array_map( fn( $f ) => esc_url_raw( dw_evidence_link( $f ) ), (array) ( $ev['photos'] ?? array() ) ),
 		'fields'     => $fields,
 		'undone'     => array(),
 		'notes'      => array(),

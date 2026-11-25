@@ -1,5 +1,7 @@
 # wp-admin IA inventory (12 Nov 2026)
 
+**Status (25 Nov 2026):** Snapshot of the Animal Writes wp-admin on 12 Nov; not re-checked against the live site.
+
 Read on live in the built-in browser (menus, submenus, tabs, sections) and from the code. Each row has a proposal:
 **keep**, **merge**, **move**, **rename** or **remove**. Nothing is removed or moved before the owner has seen this list.
 The target layout is in the plan: content menus first, then one block of Wugweb products (each its own top-level menu,

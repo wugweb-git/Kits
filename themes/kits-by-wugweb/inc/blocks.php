@@ -52,7 +52,7 @@ add_filter( 'default_wp_template_part_areas', 'kits_sidebar_template_part_area',
  */
 function kits_block_styles() {
 	$styles = array(
-		// Default (core "fill", shown as Primary) + these three. Size and content are extra CSS classes (docs/buttons.md).
+		// Default (core "fill", shown as Primary) + these three. Size and content are extra CSS classes (docs/design-system/buttons.md).
 		// Retired names still render: kits-primary (= Brand), kits-small (= small Primary), core outline (= Secondary).
 		'core/button'          => array(
 			'kits-secondary' => __( 'Secondary', 'kits-by-wugweb' ),
@@ -60,7 +60,7 @@ function kits_block_styles() {
 			'kits-brand'     => __( 'Brand', 'kits-by-wugweb' ),
 		),
 		// Section and Head band: their padding, background and gap are settings (theme.json styles.blocks.core/group.variations;
-		// Appearance > Editor > Styles > Blocks > Group), not CSS. docs/kits-control-map.md.
+		// Appearance > Editor > Styles > Blocks > Group), not CSS. docs/plugins/kits-control-map.md.
 		'core/group'           => array(
 			'kits-card'      => __( 'Card', 'kits-by-wugweb' ),
 			'kits-surface'   => __( 'Surface', 'kits-by-wugweb' ),

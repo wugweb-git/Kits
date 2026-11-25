@@ -123,3 +123,79 @@ add_action(
 	1
 );
 
+
+/* ---------- Seed redirects that were in RankWeb's redirects.php (moved here unchanged; they need RankWeb and Rank Math Redirections) ---------- */
+
+/**
+ * Seed redirects, added once per version to Rank Math's list (they can be edited or removed there afterwards; an exact
+ * path already in the list is left alone). 12 Nov 2026: common city spellings that are not the Directory's district
+ * slug (each checked as 404 on live, its target as 200), the old campaign addresses still asked for, and a removed
+ * News item.
+ */
+const AW_SEED_REDIRECTS_VERSION = '1';
+add_action(
+	'init',
+	function () {
+		if ( ! function_exists( 'rankweb_rank_math_redirect' ) || AW_SEED_REDIRECTS_VERSION === get_option( 'aw_seed_redirects_version' ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) || get_transient( 'aw_seed_redirects_wait' ) ) {
+			return;
+		}
+		$exact = array(
+			'directory/karnataka/bengaluru'                => '/directory/karnataka/bengaluru-urban/',
+			'directory/karnataka/bangalore'                => '/directory/karnataka/bengaluru-urban/',
+			'directory/karnataka/bangalore-urban'          => '/directory/karnataka/bengaluru-urban/',
+			'directory/delhi/delhi'                        => '/directory/delhi/',
+			'directory/assam/guwahati'                     => '/directory/assam/kamrup-metro/',
+			'directory/haryana/gurgaon'                    => '/directory/haryana/gurugram/',
+			'directory/uttar-pradesh/noida'                => '/directory/uttar-pradesh/gautam-buddha-nagar/',
+			'directory/uttar-pradesh/gautam-buddh-nagar'   => '/directory/uttar-pradesh/gautam-buddha-nagar/',
+			'campaign/lab-animal-rules-2026'               => '/campaigns/lab-animals-rules-2026/',
+			'campaigns/draft-laboratory-animals-rules-2026' => '/campaigns/lab-animals-rules-2026/',
+			'news/niagara-falls-man-charged-after-cat-found-severely-emaciated-at-motel' => '/news/',
+		);
+		$ok = true;
+		foreach ( $exact as $from => $to ) {
+			$ok = rankweb_rank_math_redirect( $from, home_url( $to ) ) && $ok;
+		}
+		// Any other /campaign/{slug}/ goes to /campaigns/{slug}/. Bare /campaign/ keeps its own exact rule.
+		global $wpdb;
+		$table = $wpdb->prefix . 'rank_math_redirections';
+		$have  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE sources LIKE %s', $table, '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
+		if ( ! $have ) {
+			$ok = rankweb_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
+		}
+		if ( $ok ) {
+			update_option( 'aw_seed_redirects_version', AW_SEED_REDIRECTS_VERSION, false );
+		} else {
+			set_transient( 'aw_seed_redirects_wait', 1, HOUR_IN_SECONDS ); // a save failed: try again in an hour, not on every request
+		}
+	},
+	20
+);
+
+/* ---------- Site values RankWeb's generic code asks for through filters (were in RankWeb's animal-writes-compat.php) ---------- */
+
+// rankweb_site_default(): the WebSite and Organization nodes, the schema language and the share tags (standalone-seo.php).
+foreach (
+	array(
+		'alt_names'    => array( 'AnimalWrites', 'Animal Writes India', 'animalwrites.in' ), // people search the brand under several names (12 Nov 2026)
+		'same_as'      => array( 'https://www.facebook.com/profile.php?id=61596537146561', 'https://www.instagram.com/animal_writes_/', 'https://x.com/animal_writes_', 'https://www.linkedin.com/company/animalwrites/', 'https://www.threads.com/@animal_writes_' ),
+		'email'        => 'contact@animalwrites.in',
+		'language'     => 'en-IN',
+		'country'      => 'IN',
+		'country_name' => 'India',
+		'languages'    => array( 'en', 'hi' ),
+		'founded'      => '2025-11', // the first campaign (November 2025)
+	) as $aw_site_key => $aw_site_value
+) {
+	add_filter( 'rankweb_site_default_' . $aw_site_key, fn() => $aw_site_value );
+}
+unset( $aw_site_key, $aw_site_value );
+
+// The Directory's subject and country, after "the Animal Writes Directory" in a place's description (titles.php).
+add_filter( 'rankweb_directory_scope', fn( $scope, $long = false ) => $long ? ' of animal welfare organisations in India' : ' of India', 10, 2 );
+
+// The theme block that places the FAQ in an item template, the Breadcrumbs block's earlier name (kept as an alias so
+// saved pages still render), and the block namespace whose blocks print run-time content (analysis.php).
+add_filter( 'rankweb_faq_item_block', fn() => 'animal-writes/item-faq' );
+add_filter( 'rankweb_breadcrumbs_legacy_block', fn() => 'animal-writes/breadcrumb' );
+add_filter( 'rankweb_built_block_namespaces', fn( $spaces ) => array_merge( (array) $spaces, array( 'animal-writes' ) ) );

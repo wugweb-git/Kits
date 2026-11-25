@@ -15,7 +15,7 @@
  * The answers read Animal Writes Core, DirectoryWeb and Kits Core (listings, places, Library issuers, dates). Each
  * group of questions is added only when the functions its answers call exist (rankweb_faq_data_ready()), so a missing
  * plugin drops those questions instead of stopping the page. The answer builders use faq.php's sentence helpers
- * (rankweb_faq_a, rankweb_faq_plain, rankweb_faq_and, rankweb_faq_lc). docs/faq.md describes the questions.
+ * (rankweb_faq_a, rankweb_faq_plain, rankweb_faq_and, rankweb_faq_lc). docs/faq.md (not in this repo) describes the questions.
  *
  * @package aw-seo-extras
  */
@@ -93,7 +93,7 @@ add_filter(
 		$mine['post_tag'] = array(
 			array( 'key' => 'tag-news', 'priority' => 1, 'q' => 'What is the latest news on %s?', 'needs' => array( 'News items' ), 'pattern' => '<tag> news', 'answer' => 'rankweb_faq_tag_news', 'question' => 'rankweb_faq_tag_question' ),
 			array( 'key' => 'tag-library', 'priority' => 1.1, 'q' => 'What is the latest %s in the Library?', 'needs' => array( 'Library documents' ), 'pattern' => 'latest <tag>', 'answer' => 'rankweb_faq_tag_library', 'question' => 'rankweb_faq_tag_question' ),
-			array( 'key' => 'tag-resource', 'priority' => 1.2, 'q' => 'What is the newest %s on Animal Writes?', 'needs' => array( 'Resources' ), 'pattern' => '<tag>', 'answer' => 'rankweb_faq_tag_resource', 'question' => 'rankweb_faq_tag_question' ),
+			array( 'key' => 'tag-resource', 'priority' => 1.2, 'q' => 'What is the newest %s on ' . str_replace( '%', '%%', rankweb_site_name() ) . '?', 'needs' => array( 'Resources' ), 'pattern' => '<tag>', 'answer' => 'rankweb_faq_tag_resource', 'question' => 'rankweb_faq_tag_question' ),
 			array( 'key' => 'tag-directory', 'priority' => 2, 'q' => 'Which organisations offer %s in India?', 'needs' => array( '3 Directory listings with a state' ), 'pattern' => '<tag> near me', 'answer' => 'rankweb_faq_tag_directory', 'question' => 'rankweb_faq_tag_question' ),
 			array( 'key' => 'tag-issuers', 'priority' => 3, 'q' => 'Who issues the %s in the Library?', 'needs' => array( '2 Library documents with an issuer (not Acts, Rules, templates)' ), 'pattern' => '<issuer> <tag>', 'answer' => 'rankweb_faq_tag_issuers', 'question' => 'rankweb_faq_tag_question' ),
 			array( 'key' => 'tag-topics', 'priority' => 3.1, 'q' => 'Which topics come up most under %s?', 'needs' => array( '3 items (not listings) with a category' ), 'pattern' => '<tag> <topic>', 'answer' => 'rankweb_faq_tag_topics', 'question' => 'rankweb_faq_tag_question' ),

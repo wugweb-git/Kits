@@ -1,5 +1,7 @@
 # Blocks spec (11 Nov 2026; answers added 11 Nov)
 
+**Status (25 Nov 2026):** Approved plan. Only `kits/hero` is built in `plugins/kits-core/blocks`; the other seven blocks are not. DirectoryWeb shipped `directoryweb/collection-filter` instead of `kits/collection-filter`, and native claims replaced the Fluent Forms claim block in 3.14.
+
 The front-end plan for the owner's custom-blocks decision of 11 Nov 2026. It goes with the Kits admin rebuild of the same day (Home, Theme Options, Settings, Plugins, Tools, Help; Theme Options → Socials is the one source for social links).
 
 **Approved by the owner, 18 Nov 2026.** Each phase below is built on its own branch and pull request, and each content change on live waits for its own yes.

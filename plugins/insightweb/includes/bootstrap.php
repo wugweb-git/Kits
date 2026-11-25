@@ -1,10 +1,10 @@
 <?php
 /**
- * InsightWeb's bootstrap: Search Insights (owner, 24 Oct 2026; plan in docs/seo/search-insights-plan.md). One record
+ * InsightWeb's bootstrap: Search Insights (owner, 24 Oct 2026; plan in docs/org/insightweb-org-plan.md). One record
  * per keyword, with its roles, owning pages, Search Console figures by day, priority and a suggested action. Read-only
  * data and suggestions: nothing here edits Rank Math keyphrases or the Sourcing lists.
  *
- * Moved out of RankWeb on 11 Nov 2026 with no other change (docs/insightweb-plan.md). Called on plugins_loaded by
+ * Moved out of RankWeb on 11 Nov 2026 with no other change (docs/plugins/insightweb-plan.md). Called on plugins_loaded by
  * insightweb.php, or by RankWeb's bridge while InsightWeb is not active yet; whichever calls first loads it, once.
  *
  * @package insightweb

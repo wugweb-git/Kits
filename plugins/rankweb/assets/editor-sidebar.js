@@ -6,12 +6,19 @@
 	const { registerPlugin } = wp.plugins;
 	// PluginSidebar moved from wp.editPost to wp.editor in WordPress 6.6; the old place only warns.
 	const { PluginSidebar, PluginSidebarMoreMenuItem } = wp.editor && wp.editor.PluginSidebar ? wp.editor : wp.editPost;
-	const { TextControl, TextareaControl, SelectControl, Button } = wp.components;
+	const { TextControl, TextareaControl, ToggleControl, SelectControl, Button } = wp.components;
 	const { useSelect, useDispatch } = wp.data;
 	const { useState, useEffect, createElement: el, Fragment } = wp.element;
 	const { __, sprintf } = wp.i18n;
 	const data = window.rankwebEditorData || {};
-	const siteHost = data.siteHost || '';
+	// The site's own host, for internal/external link counts and the previews; no site name is hard-coded.
+	const siteHost = data.siteHost || ( function() {
+		try {
+			return new URL( data.siteUrl || window.location.origin ).hostname.replace( /^www\./, '' );
+		} catch ( e ) {
+			return ( window.location && window.location.hostname ? window.location.hostname : '' ).replace( /^www\./, '' );
+		}
+	}() );
 	const TITLE_MAX = 60;
 	const DESC_MAX = 160;
 
@@ -19,21 +26,31 @@
 		return String( v ).replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
 	}
 
-	/** The text of the h2 to h4 headings in a block of HTML (parsed, not matched by a pattern). */
+	/** Parsed HTML when the browser offers a parser (null elsewhere, e.g. the unit test). */
+	function parseHtml( html ) {
+		return window.DOMParser ? new window.DOMParser().parseFromString( html || '', 'text/html' ) : null;
+	}
+
+	/** The text of the h2 to h4 headings in a block of HTML. */
 	function headingText( html ) {
-		const doc = new window.DOMParser().parseFromString( html || '', 'text/html' );
-		return Array.prototype.map.call( doc.querySelectorAll( 'h2, h3, h4' ), function( h ) { return h.textContent.toLowerCase(); } );
+		const doc = parseHtml( html );
+		if ( doc ) {
+			return Array.prototype.map.call( doc.querySelectorAll( 'h2, h3, h4' ), function( h ) { return h.textContent.toLowerCase(); } );
+		}
+		return ( String( html || '' ).match( /<h[2-4][^>]*>[\s\S]*?<\/h[2-4]>/gi ) || [] ).map( function( h ) { return h.replace( /<[^>]*>/g, ' ' ).toLowerCase(); } );
 	}
 
 	/** Link counts split by whether the address is on this site. */
 	function linkCounts( html ) {
-		const doc = new window.DOMParser().parseFromString( html || '', 'text/html' );
+		const doc = parseHtml( html );
+		const hrefs = doc
+			? Array.prototype.map.call( doc.querySelectorAll( 'a[href]' ), function( a ) { return a.getAttribute( 'href' ) || ''; } )
+			: ( String( html || '' ).match( /href=["'][^"']*["']/gi ) || [] ).map( function( m ) { return m.slice( 6, -1 ); } );
 		let internal = 0;
 		let external = 0;
-		Array.prototype.forEach.call( doc.querySelectorAll( 'a[href]' ), function( a ) {
-			const href = a.getAttribute( 'href' ) || '';
+		hrefs.forEach( function( href ) {
 			if ( /^https?:\/\//i.test( href ) ) {
-				if ( siteHost && new RegExp( '^https?://(www\\.)?' + escapeRe( siteHost ), 'i' ).test( href ) ) { internal++; } else { external++; }
+				if ( siteHost && new RegExp( '^https?://(www\\.)?' + escapeRe( siteHost ) + '(?:[/:?#]|$)', 'i' ).test( href ) ) { internal++; } else { external++; }
 			} else if ( href.charAt( 0 ) === '/' || href.charAt( 0 ) === '#' ) {
 				internal++;
 			}
@@ -117,6 +134,8 @@
 		};
 	}
 
+	wp.rankweb = Object.assign( wp.rankweb || {}, { calculateSeoScore: calculateSeoScore } ); // read by tests/sidebar-score.test.js
+
 	function RankWebSidebar() {
 		const meta = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {} );
 		const title = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'title' ) || '' );
@@ -129,7 +148,8 @@
 
 		const [ previewMode, setPreviewMode ] = useState( 'desktop' );
 		const keyword = meta.rank_math_focus_keyword || '';
-		const schemaType = meta._rankweb_schema_type || 'Article';
+		const schemaType = meta._rankweb_schema_type || ( data.postType === 'page' ? 'WebPage' : 'Article' );
+		const schemaTypes = data.schemaTypes || [ 'Article', 'BlogPosting', 'NewsArticle', 'WebPage' ];
 		const seoTitle = meta.rank_math_title || '';
 		const seoDesc = meta.rank_math_description || '';
 		const shownTitle = seoTitle || title;
@@ -212,15 +232,21 @@
 						{
 							label: __( 'Structured Data Schema Type', 'rankweb' ),
 							value: schemaType,
-							options: [
-								{ label: 'Article', value: 'Article' },
-								{ label: 'NewsArticle', value: 'NewsArticle' },
-								{ label: 'Event', value: 'Event' },
-								{ label: 'FAQPage', value: 'FAQPage' },
-								{ label: 'Organization', value: 'Organization' }
-							],
+							help: __( 'Printed in the page\'s structured data (JSON-LD) when RankWeb writes the page head.', 'rankweb' ),
+							options: schemaTypes.map( function( t ) { return { label: t, value: t }; } ),
 							onChange: function( nextValue ) {
 								editPost( { meta: Object.assign( {}, meta, { _rankweb_schema_type: nextValue } ) } );
+							}
+						}
+					),
+					el(
+						ToggleControl,
+						{
+							label: __( 'Keep out of search results', 'rankweb' ),
+							checked: '1' === meta._rankweb_noindex,
+							help: __( 'Adds noindex and leaves the page out of the sitemap.', 'rankweb' ),
+							onChange: function( on ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_noindex: on ? '1' : '' } ) } );
 							}
 						}
 					),

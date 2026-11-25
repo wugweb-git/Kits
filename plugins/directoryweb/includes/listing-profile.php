@@ -60,7 +60,7 @@ function directoryweb_listing_fields() {
 
 if ( ! function_exists( 'directoryweb_scf_active' ) ) {
 	/**
-	 * Whether SCF (or ACF) is active: Kits Core's check when it has one, else Animal Writes Core's, else SCF's own
+	 * Whether SCF (or ACF) is active: Kits Core's check when it has one, else the legacy Core plugin's, else SCF's own
 	 * function. All three give the same answer on this site, whichever plugin update lands first.
 	 *
 	 * @return bool
