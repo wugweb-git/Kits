@@ -56,3 +56,10 @@ Status: **open** unless marked. Nothing here is started. Each entry: current imp
 - Alternatives: (a) neutral defaults (empty email, site name and host as alternate names, no host redirect) and move the three behaviours to the Animal Writes site layer through filters; (b) keep as is for the commercial build and strip for the WordPress.org build; (c) leave.
 - Implication: (a) changes the live Animal Writes output until its site layer carries the filters, so it must be deployed together with that change. A customer's schema currently names another organisation's email.
 - Recommendation: (a), in one change with the site-layer filters, after the owner confirms the Animal Writes values to keep.
+
+## OD10. RankWeb loads InsightWeb's bootstrap by folder path (open)
+- Now: while InsightWeb is not active, `rankweb.php` requires `wp-content/plugins/insightweb/includes/bootstrap.php` if the file exists, so Search Insights' scheduled jobs keep a handler (a bridge written for the live site, to be removed once InsightWeb is active there).
+- Done 25 Nov 2026: the bridge can be turned off with the `rankweb_insightweb_bridge` filter (default on, so live behaviour is unchanged).
+- Alternatives: remove the bridge once InsightWeb is confirmed active on live (the plan in the code comment); keep it on the commercial build only; leave it.
+- Implication: a plugin that loads a sibling's files by path is not acceptable on WordPress.org.
+- Recommendation: remove it after InsightWeb is active on live, and have the WordPress.org build strip it in the meantime.

@@ -106,6 +106,9 @@ function aw_seo_extras_insightweb_bridge(): void {
 	if ( defined( 'INSIGHTWEB_FILE' ) ) {
 		return; // InsightWeb is active: it loads Search Insights itself.
 	}
+	if ( ! apply_filters( 'rankweb_insightweb_bridge', true ) ) {
+		return; // a site or a build that does not want RankWeb to load another plugin's files turns the bridge off
+	}
 	// Never off while the theme runs (owner, 11 Nov 2026): an old saved off switch is not read.
 	$file = WP_PLUGIN_DIR . '/insightweb/includes/bootstrap.php';
 	if ( file_exists( $file ) ) {
