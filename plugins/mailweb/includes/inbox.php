@@ -610,7 +610,9 @@ function mailweb_compose_screen( $s, $mode ) {
 		foreach ( $boxes as $k => $a ) {
 			$sigs[ $k ] = wp_kses_post( (string) mailweb_profile( $a )['signature'] );
 		}
-		echo '<script>(function(){var sigs=' . wp_json_encode( $sigs ) . ',sel=document.getElementById("awm-from");if(!sel)return;sel.addEventListener("change",function(){var html=sigs[sel.value]||"",ed=window.tinymce&&tinymce.get("awm_body");if(ed&&!ed.isHidden()){var d=ed.getDoc().querySelector("div.signature");if(d){html?d.innerHTML=html:d.parentNode.removeChild(d);}else if(html){ed.dom.add(ed.getBody(),"div",{"class":"signature"},html);}ed.save();}else{var t=document.getElementById("awm_body");t.value=t.value.replace(/<div class="signature">[\\s\\S]*?<\\/div>/,html?\'<div class="signature">\'+html+"</div>":"");}});})();</script>';
+		wp_register_script( 'mailweb-from-signature', false, array(), false, true );
+		wp_enqueue_script( 'mailweb-from-signature' );
+		wp_add_inline_script( 'mailweb-from-signature', '(function(){var sigs=' . wp_json_encode( $sigs ) . ',sel=document.getElementById("awm-from");if(!sel)return;sel.addEventListener("change",function(){var html=sigs[sel.value]||"",ed=window.tinymce&&tinymce.get("awm_body");if(ed&&!ed.isHidden()){var d=ed.getDoc().querySelector("div.signature");if(d){html?d.innerHTML=html:d.parentNode.removeChild(d);}else if(html){ed.dom.add(ed.getBody(),"div",{"class":"signature"},html);}ed.save();}else{var t=document.getElementById("awm_body");t.value=t.value.replace(/<div class="signature">[\\s\\S]*?<\\/div>/,html?\'<div class="signature">\'+html+"</div>":"");}});})();' );
 	}
 }
 
