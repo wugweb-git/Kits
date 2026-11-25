@@ -40,25 +40,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 // AW_DIRECTORY_KEEP_INDEXED: RankWeb → Settings (settings.php).
 
 /** Whether a district × type page (its URL) is on the keep-indexed list. */
-function aw_directory_keep_indexed( $url ) {
+function rankweb_directory_keep_indexed( $url ) {
 	$path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
 	return in_array( preg_replace( '#^directory/#', '', $path ), AW_DIRECTORY_KEEP_INDEXED, true );
 }
 
 /** District × type page with too few listings to be worth indexing. */
-function aw_is_thin_directory_page() {
-	if ( ! function_exists( 'aw_is_directory_view' ) || ! aw_is_directory_view() || ! get_query_var( 'aw_dir_type' ) ) {
+function rankweb_is_thin_directory_page() {
+	if ( ! function_exists( 'directoryweb_is_directory_view' ) || ! directoryweb_is_directory_view() || ! get_query_var( 'aw_dir_type' ) ) {
 		return false;
 	}
-	$place = aw_current_place();
+	$place = directoryweb_current_place();
 	if ( ! $place || ! $place->parent ) {
 		return false;
 	}
 	// Stored counts (places.php), the same numbers the sitemap uses — the page query's found_posts is not reliable here.
 	$type = (string) get_query_var( 'aw_dir_type' );
-	foreach ( aw_place_counts()['pairs'] as $p ) {
+	foreach ( directoryweb_place_counts()['pairs'] as $p ) {
 		if ( (string) $p[0] === (string) $place->code && $p[1] === $type ) {
-			return (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! aw_directory_keep_indexed( aw_directory_url( $place->slug, $type ) );
+			return (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! rankweb_directory_keep_indexed( directoryweb_directory_url( $place->slug, $type ) );
 		}
 	}
 	return true; // no listings of this type here
@@ -71,22 +71,22 @@ function aw_is_thin_directory_page() {
  * Search Console impressions stay indexed: their IDs are in the option aw_seo_keep_listings (first set from the
  * Search Console export of 24 Oct 2026, 901 profiles; changed on RankWeb → Settings → Indexing).
  */
-function aw_listing_unreachable( $id ) {
+function rankweb_listing_unreachable( $id ) {
 	$id = (int) $id;
 	if ( 'aw_listing' !== get_post_type( $id ) || in_array( $id, array_map( 'intval', (array) get_option( 'aw_seo_keep_listings', array() ) ), true ) ) {
 		return false;
 	}
-	$score = get_post_meta( $id, 'aw_contact_score', true );
-	if ( '' === $score && function_exists( 'aw_contact_score' ) ) {
-		$score = aw_contact_score( $id ); // listings imported without a contact never got the stored score
-		if ( aw_seo_may_store() ) {
-			update_post_meta( $id, 'aw_contact_score', $score ); // stored by the daily job or admin, never by a page view
+	$score = get_post_meta( $id, 'directoryweb_contact_score', true );
+	if ( '' === $score && function_exists( 'directoryweb_contact_score' ) ) {
+		$score = directoryweb_contact_score( $id ); // listings imported without a contact never got the stored score
+		if ( rankweb_seo_may_store() ) {
+			update_post_meta( $id, 'directoryweb_contact_score', $score ); // stored by the daily job or admin, never by a page view
 		}
 	}
 	if ( (int) $score > 0 ) {
 		return false;
 	}
-	foreach ( aw_seo_social_keys() as $k ) {
+	foreach ( rankweb_seo_social_keys() as $k ) {
 		if ( '' !== trim( (string) get_post_meta( $id, $k, true ) ) ) {
 			return false;
 		}
@@ -95,25 +95,25 @@ function aw_listing_unreachable( $id ) {
 }
 
 /** Whether this request may write to the database: admin, cron and WP-CLI (never a front-end page view). */
-function aw_seo_may_store() {
+function rankweb_seo_may_store() {
 	return is_admin() || wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI );
 }
 
 /** Daily: listings without a stored contact score get it, so the noindex rule and the sitemap read stored values. */
-function aw_seo_fill_contact_scores() {
-	if ( ! function_exists( 'aw_contact_score' ) ) {
+function rankweb_seo_fill_contact_scores() {
+	if ( ! function_exists( 'directoryweb_contact_score' ) ) {
 		return;
 	}
 	global $wpdb;
-	$ids = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND s.meta_id IS NULL LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ids = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'directoryweb_contact_score' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND s.meta_id IS NULL LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( $ids as $id ) {
-		update_post_meta( (int) $id, 'aw_contact_score', aw_contact_score( (int) $id ) );
+		update_post_meta( (int) $id, 'directoryweb_contact_score', directoryweb_contact_score( (int) $id ) );
 	}
 }
-add_action( 'aw_seo_fill_daily', 'aw_seo_fill_contact_scores', 40 ); // the daily event of titles.php
+add_action( 'rankweb_seo_fill_daily', 'rankweb_seo_fill_contact_scores', 40 ); // the daily event of titles.php
 
 /** Whether the current view is an item or list kept out of search engines by a rule of its state. */
-function aw_seo_noindex_rule() {
+function rankweb_seo_noindex_rule() {
 	if ( AW_SEO_NOINDEX_PROTECTED && is_singular() ) {
 		$qid = get_queried_object_id();
 		if ( $qid && '' !== (string) get_post_field( 'post_password', $qid ) ) {
@@ -126,10 +126,10 @@ function aw_seo_noindex_rule() {
 	if ( is_post_type_archive( 'web-story' ) && ! (int) ( wp_count_posts( 'web-story' )->publish ?? 0 ) ) {
 		return true; // the Web Stories archive while it has no published story (it is also out of the sitemap: Rank Math)
 	}
-	if ( is_singular( 'aw_listing' ) && aw_listing_unreachable( get_queried_object_id() ) ) {
+	if ( is_singular( 'aw_listing' ) && rankweb_listing_unreachable( get_queried_object_id() ) ) {
 		return true; // a profile with no contact (also out of the sitemap: sitemap.php)
 	}
-	return aw_is_thin_directory_page();
+	return rankweb_is_thin_directory_page();
 }
 
 add_action(
@@ -146,7 +146,7 @@ add_action(
 add_filter(
 	'rank_math/frontend/robots',
 	function ( $robots ) {
-		if ( aw_seo_noindex_rule() ) {
+		if ( rankweb_seo_noindex_rule() ) {
 			$robots['index'] = 'noindex';
 		}
 		$hook = $GLOBALS['aw_seo_wp_robots'] ?? null;
@@ -172,7 +172,7 @@ add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' )
 add_filter(
 	'wp_robots',
 	function ( array $robots ) {
-		if ( aw_seo_noindex_rule() || ( is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ) ) {
+		if ( rankweb_seo_noindex_rule() || ( is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ) ) {
 			$robots['noindex'] = true;
 		}
 		return $robots;
@@ -189,9 +189,9 @@ add_action( 'template_redirect', fn() => is_feed() && ! headers_sent() ? header(
  *
  * @param string $txt robots.txt text.
  */
-function aw_seo_robots_content_signal( $txt ) {
+function rankweb_seo_robots_content_signal( $txt ) {
 	$txt    = (string) $txt;
-	$signal = (string) apply_filters( 'aw_seo_content_signal', 'search=yes, ai-input=yes, ai-train=no' );
+	$signal = (string) apply_filters( 'rankweb_seo_content_signal', 'search=yes, ai-input=yes, ai-train=no' );
 	if ( '' === $signal || preg_match( '/^\s*Content-Signal\s*:/mi', $txt ) ) {
 		return $txt;
 	}
@@ -202,26 +202,26 @@ function aw_seo_robots_content_signal( $txt ) {
 	}
 	return "User-agent: *\n" . $line . "\n\n" . $txt;
 }
-add_filter( 'robots_txt', 'aw_seo_robots_content_signal', 50 );
+add_filter( 'robots_txt', 'rankweb_seo_robots_content_signal', 50 );
 
 /* ---------- Sitemaps: what a rule above keeps out of the index stays out of Rank Math's sitemaps ---------- */
 
 /**
- * Published profiles with no contact (aw_listing_unreachable() above), as an ID-keyed set: one query per
+ * Published profiles with no contact (rankweb_listing_unreachable() above), as an ID-keyed set: one query per
  * sitemap request instead of a meta lookup per listing. Listings with no stored score count as candidates and are
- * checked one by one (their score is stored by the daily job, aw_seo_fill_contact_scores()).
+ * checked one by one (their score is stored by the daily job, rankweb_seo_fill_contact_scores()).
  */
-function aw_sitemap_unreachable_listings() {
+function rankweb_sitemap_unreachable_listings() {
 	static $set = null;
 	if ( null !== $set ) {
 		return $set;
 	}
 	global $wpdb;
-	$keys = aw_seo_social_keys();
+	$keys = rankweb_seo_social_keys();
 	$ids  = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
-			LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'aw_contact_score'
+			LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'directoryweb_contact_score'
 			WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
 			AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( " . implode( ', ', array_fill( 0, count( $keys ), '%s' ) ) . " ) AND TRIM( m.meta_value ) <> '' )",
 			$keys
@@ -230,7 +230,7 @@ function aw_sitemap_unreachable_listings() {
 	$set  = array();
 	_prime_post_caches( array_map( 'intval', $ids ), false, true );
 	foreach ( $ids as $id ) {
-		if ( aw_listing_unreachable( (int) $id ) ) {
+		if ( rankweb_listing_unreachable( (int) $id ) ) {
 			$set[ (int) $id ] = true;
 		}
 	}
@@ -246,8 +246,8 @@ add_filter(
 		}
 		$closed      = 'aw_opportunity' === $obj->post_type && function_exists( 'kits_retention_state' ) && kits_retention_state( $obj );
 		$merged      = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
-		$unreachable = 'aw_listing' === $obj->post_type && isset( aw_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
-		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, aw_seo_preview_ids(), true ) ) {
+		$unreachable = 'aw_listing' === $obj->post_type && isset( rankweb_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
+		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, rankweb_seo_preview_ids(), true ) ) {
 			return false;
 		}
 		return $url;
@@ -259,15 +259,15 @@ add_filter(
 /**
  * A post type whose every item is left out by the rule above (all opportunities closed) has an empty sitemap, which
  * Rank Math still listed in sitemap_index.xml and then answered 404 (audit, 12 Nov 2026). Such a type is left out of
- * the index until one of its items is open again. Counted once a day and after each post change (aw_seo_cached).
+ * the index until one of its items is open again. Counted once a day and after each post change (rankweb_seo_cached).
  */
 add_filter(
 	'rank_math/sitemap/exclude_post_type',
 	function ( $exclude, $type ) {
-		if ( $exclude || 'aw_opportunity' !== $type || ! function_exists( 'kits_retention_state' ) || ! function_exists( 'aw_seo_cached' ) ) {
+		if ( $exclude || 'aw_opportunity' !== $type || ! function_exists( 'kits_retention_state' ) || ! function_exists( 'rankweb_seo_cached' ) ) {
 			return $exclude;
 		}
-		$open = aw_seo_cached(
+		$open = rankweb_seo_cached(
 			'sitemap_open_opportunities|' . wp_date( 'Y-m-d' ), // closing is by date: counted again each day
 			function () {
 				$ids = get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );

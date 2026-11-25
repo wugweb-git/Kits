@@ -16,7 +16,7 @@
  *
  * The trail is placed by the Breadcrumbs block (rankweb/breadcrumbs, blocks/breadcrumbs/block.json) in the item
  * templates, by a head band through rankweb_breadcrumbs_claim(), or else before the page's H1 or its own category chips
- * (the two block filters at the end, for pages whose template has neither). The aw_breadcrumbs* functions are the
+ * (the two block filters at the end, for pages whose template has neither). The rankweb_breadcrumbs* functions are the
  * earlier names, kept for any caller outside this plugin.
  *
  * @package aw-seo-extras
@@ -26,8 +26,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( function_exists( 'rankweb_breadcrumbs' ) || function_exists( 'aw_breadcrumbs' ) ) {
-	return; // Loaded already (by RankWeb, or by Animal Writes Core from another path), or an older Core still shows its own trail: one trail per page.
+if ( function_exists( 'rankweb_breadcrumbs' ) ) {
+	return; // Loaded already from another path: one trail per page.
 }
 
 /**
@@ -173,60 +173,6 @@ add_action(
 	},
 	20
 );
-
-/* ---------- The earlier names (Animal Writes Core's bands call aw_breadcrumbs_claim) ---------- */
-
-if ( ! function_exists( 'aw_breadcrumbs' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs().
-	 *
-	 * @return array
-	 */
-	function aw_breadcrumbs() {
-		return rankweb_breadcrumbs();
-	}
-}
-if ( ! function_exists( 'aw_breadcrumbs_html' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_html().
-	 *
-	 * @return string
-	 */
-	function aw_breadcrumbs_html() {
-		return rankweb_breadcrumbs_html();
-	}
-}
-if ( ! function_exists( 'aw_breadcrumbs_hidden' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_hidden().
-	 *
-	 * @return bool
-	 */
-	function aw_breadcrumbs_hidden() {
-		return rankweb_breadcrumbs_hidden();
-	}
-}
-if ( ! function_exists( 'aw_breadcrumbs_claim' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_claim().
-	 *
-	 * @return string
-	 */
-	function aw_breadcrumbs_claim() {
-		return rankweb_breadcrumbs_claim();
-	}
-}
-if ( ! function_exists( 'aw_breadcrumbs_prepend' ) ) {
-	/**
-	 * Back-compat: rankweb_breadcrumbs_prepend().
-	 *
-	 * @param string $html Block output.
-	 * @return string
-	 */
-	function aw_breadcrumbs_prepend( $html ) {
-		return rankweb_breadcrumbs_prepend( $html );
-	}
-}
 
 add_filter(
 	'render_block_core/post-title',

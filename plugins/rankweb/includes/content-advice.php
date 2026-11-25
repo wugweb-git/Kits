@@ -41,7 +41,7 @@ add_action(
 					if ( ! $post ) {
 						return new WP_Error( 'aw_no_post', __( 'No such item.', 'aw-seo-extras' ), array( 'status' => 404 ) );
 					}
-					return rest_ensure_response( aw_seo_content_advice( $post ) );
+					return rest_ensure_response( rankweb_seo_content_advice( $post ) );
 				},
 			)
 		);
@@ -54,8 +54,8 @@ add_action(
  * @param WP_Post $post Item.
  * @return array{text: string, html: string}
  */
-function aw_seo_advice_text( WP_Post $post ) {
-	$html = function_exists( 'aw_seo_analysis_content' ) ? (string) aw_seo_analysis_content( $post ) : '';
+function rankweb_seo_advice_text( WP_Post $post ) {
+	$html = function_exists( 'rankweb_seo_analysis_content' ) ? (string) rankweb_seo_analysis_content( $post ) : '';
 	if ( '' === $html ) {
 		$html = (string) apply_filters( 'the_content', $post->post_content );
 	}
@@ -72,7 +72,7 @@ function aw_seo_advice_text( WP_Post $post ) {
  * @param string $html HTML.
  * @return array{words: int, h2: int, h3: int}
  */
-function aw_seo_advice_shape( $html ) {
+function rankweb_seo_advice_shape( $html ) {
 	$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $html ) ) );
 	return array(
 		'words' => '' === $text ? 0 : count( preg_split( '/\s+/u', $text ) ),
@@ -87,7 +87,7 @@ function aw_seo_advice_shape( $html ) {
  * @param string $type Post type.
  * @return array{words: int, h2: int, h3: int, n: int}
  */
-function aw_seo_advice_type_median( $type ) {
+function rankweb_seo_advice_type_median( $type ) {
 	$key = 'aw_seo_advice_median2_' . sanitize_key( $type );
 	$hit = get_transient( $key );
 	if ( is_array( $hit ) ) {
@@ -104,7 +104,7 @@ function aw_seo_advice_type_median( $type ) {
 	);
 	$rows = array();
 	foreach ( $ids as $id ) {
-		$rows[] = aw_seo_advice_shape( aw_seo_advice_text( get_post( $id ) )['html'] ); // what visitors read, as for the item
+		$rows[] = rankweb_seo_advice_shape( rankweb_seo_advice_text( get_post( $id ) )['html'] ); // what visitors read, as for the item
 	}
 	$med = function ( $k ) use ( $rows ) {
 		$v = array_column( $rows, $k );
@@ -127,7 +127,7 @@ function aw_seo_advice_type_median( $type ) {
  *
  * @return array
  */
-function aw_seo_advice_focus_index() {
+function rankweb_seo_advice_focus_index() {
 	$hit = get_transient( 'aw_seo_advice_focus_index_v2' );
 	if ( is_array( $hit ) ) {
 		return $hit;
@@ -142,7 +142,7 @@ function aw_seo_advice_focus_index() {
 			continue; // one-word slugs and very short phrases match too much to be link advice
 		}
 		// Link advice points at evergreen pages on this site only (guides, Library, campaigns, Pages), never News or press.
-		if ( function_exists( 'aw_seo_kp_evergreen' ) && ! aw_seo_kp_evergreen( (string) $r->post_type ) ) {
+		if ( function_exists( 'rankweb_seo_kp_evergreen' ) && ! rankweb_seo_kp_evergreen( (string) $r->post_type ) ) {
 			continue;
 		}
 		$url = (string) get_permalink( (int) $r->ID );
@@ -162,27 +162,27 @@ function aw_seo_advice_focus_index() {
  * @param WP_Post $post Item.
  * @return array
  */
-function aw_seo_content_advice( WP_Post $post ) {
+function rankweb_seo_content_advice( WP_Post $post ) {
 	$id    = (int) $post->ID;
-	$body  = aw_seo_advice_text( $post );
+	$body  = rankweb_seo_advice_text( $post );
 	$lower = mb_strtolower( $body['text'] );
 	$out   = array(
 		'focus'     => array(),
 		'queries'   => array(),
 		'links'     => array(),
-		'shape'     => aw_seo_advice_shape( $body['html'] ),
-		'typical'   => aw_seo_advice_type_median( $post->post_type ),
+		'shape'     => rankweb_seo_advice_shape( $body['html'] ),
+		'typical'   => rankweb_seo_advice_type_median( $post->post_type ),
 		'questions' => array(),
 		'insights'  => function_exists( 'aw_si_ready' ) && aw_si_ready(),
-		'link_kws'  => function_exists( 'aw_link_panel_data' ) ? aw_link_panel_data( $post ) : null, // internal-links.php
+		'link_kws'  => function_exists( 'rankweb_link_panel_data' ) ? rankweb_link_panel_data( $post ) : null, // internal-links.php
 	);
 
 	// 1. Focus keyphrases and who else has them.
 	$focus = array_filter( array_map( 'trim', explode( ',', (string) get_post_meta( $id, 'rank_math_focus_keyword', true ) ) ) );
 	foreach ( array_values( $focus ) as $i => $kw ) {
 		$owners = array();
-		if ( 0 === $i && function_exists( 'aw_seo_keyphrase_owners' ) ) {
-			foreach ( aw_seo_keyphrase_owners( $kw, $id ) as $o ) {
+		if ( 0 === $i && function_exists( 'rankweb_seo_keyphrase_owners' ) ) {
+			foreach ( rankweb_seo_keyphrase_owners( $kw, $id ) as $o ) {
 				$owners[] = 'term' === $o['type']
 					? array(
 						'title' => (string) ( get_term( $o['id'] )->name ?? '' ),
@@ -239,12 +239,12 @@ function aw_seo_content_advice( WP_Post $post ) {
 		}
 	}
 	// With the Internal links module's keyword index built, the advice reads that one index (link keywords of the
-	// linked types, longest first); without it, the pages' primary focus keyphrases (aw_seo_advice_focus_index()).
-	$index = function_exists( 'aw_link_index' ) ? aw_link_index() : array();
+	// linked types, longest first); without it, the pages' primary focus keyphrases (rankweb_seo_advice_focus_index()).
+	$index = function_exists( 'rankweb_link_index' ) ? rankweb_link_index() : array();
 	if ( $index ) {
 		// The phrases of the text that are keywords: every run of up to as many words as the longest keyword, looked up
 		// in the index (no scan of every keyword), longest first, as the auto-linker.
-		$words   = explode( ' ', AW_Linker::normalize( $body['text'] ) );
+		$words   = explode( ' ', RankWeb_Linker::normalize( $body['text'] ) );
 		$longest = 1;
 		foreach ( array_keys( $index ) as $kw ) {
 			$longest = max( $longest, substr_count( (string) $kw, ' ' ) + 1 );
@@ -273,7 +273,7 @@ function aw_seo_content_advice( WP_Post $post ) {
 			}
 		}
 	} else {
-		$focus_index = aw_seo_advice_focus_index();
+		$focus_index = rankweb_seo_advice_focus_index();
 	}
 	foreach ( $focus_index as $kw => $target ) {
 		if ( count( $out['links'] ) >= 10 ) {
@@ -290,10 +290,10 @@ function aw_seo_content_advice( WP_Post $post ) {
 	}
 
 	// 4. Automatic FAQ questions for this item.
-	if ( function_exists( 'aw_faq_context' ) && function_exists( 'aw_faq_auto' ) ) {
-		$ctx = aw_faq_context( $post );
+	if ( function_exists( 'rankweb_faq_context' ) && function_exists( 'rankweb_faq_auto' ) ) {
+		$ctx = rankweb_faq_context( $post );
 		if ( $ctx ) {
-			foreach ( aw_faq_auto( $ctx ) as $q ) {
+			foreach ( rankweb_faq_auto( $ctx ) as $q ) {
 				$out['questions'][] = array(
 					'q'      => wp_strip_all_tags( (string) $q['q'] ),
 					'hidden' => (string) $q['hidden'],

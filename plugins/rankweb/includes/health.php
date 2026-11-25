@@ -2,7 +2,7 @@
 /**
  * Sitemap and llms.txt watchdog (14 Oct 2026: both answered 404 until rewrite rules were flushed).
  *
- * Hourly (event aw_seo_endpoints_watchdog): Rank Math's rewrite rules for /sitemap_index.xml, /llms.txt and, while the
+ * Hourly (event rankweb_seo_endpoints_watchdog): Rank Math's rewrite rules for /sitemap_index.xml, /llms.txt and, while the
  * Directory sitemap module is on, /directory-sitemap.xml must be in the stored rules, and a request from the site to
  * each must answer 200. If either fails, rewrite rules are flushed once
  * and both are checked again. If they still fail, the admin email gets a message and the dashboard shows a notice.
@@ -17,12 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Address => rewrite-rule key Rank Math adds for it. */
-function aw_seo_watched_endpoints() {
+function rankweb_seo_watched_endpoints() {
 	$out = array(
 		'/sitemap_index.xml' => 'sitemap_index\.xml$',
 		'/llms.txt'          => '^llms\.txt$',
 	);
-	if ( aw_seo_module_on( 'sitemap' ) ) {
+	if ( rankweb_seo_module_on( 'sitemap' ) ) {
 		$out['/directory-sitemap.xml'] = '([^/]+?)-sitemap([0-9]+)?\.xml$'; // Rank Math's rule for every {type}-sitemap.xml
 	}
 	return $out;
@@ -33,10 +33,10 @@ function aw_seo_watched_endpoints() {
  *
  * @return array<string,string>
  */
-function aw_seo_endpoint_problems() {
+function rankweb_seo_endpoint_problems() {
 	$rules = (array) get_option( 'rewrite_rules', array() );
 	$out   = array();
-	foreach ( aw_seo_watched_endpoints() as $path => $rule ) {
+	foreach ( rankweb_seo_watched_endpoints() as $path => $rule ) {
 		if ( ! isset( $rules[ $rule ] ) ) {
 			$out[ $path ] = sprintf( '%s: its rewrite rule is missing.', $path );
 			continue;
@@ -57,13 +57,13 @@ function aw_seo_endpoint_problems() {
 }
 
 /** Hourly check: flush rewrite rules once on a failure, then email and keep a notice if it still fails. */
-function aw_seo_endpoints_watchdog() {
-	$problems = aw_seo_endpoint_problems();
+function rankweb_seo_endpoints_watchdog() {
+	$problems = rankweb_seo_endpoint_problems();
 	$flushed  = false;
 	if ( $problems ) {
 		flush_rewrite_rules( false );
 		$flushed  = true;
-		$problems = aw_seo_endpoint_problems();
+		$problems = rankweb_seo_endpoint_problems();
 	}
 	update_option( 'aw_seo_endpoints_last', array( 'at' => time(), 'flushed' => $flushed, 'problems' => $problems ), false );
 	if ( ! $problems ) {
@@ -79,12 +79,12 @@ function aw_seo_endpoints_watchdog() {
 		set_transient( 'aw_seo_endpoints_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'aw_seo_endpoints_watchdog', 'aw_seo_endpoints_watchdog' );
+add_action( 'rankweb_seo_endpoints_watchdog', 'rankweb_seo_endpoints_watchdog' );
 add_action(
 	'admin_init',
 	function () {
-		if ( ! wp_next_scheduled( 'aw_seo_endpoints_watchdog' ) ) {
-			wp_schedule_event( time() + 300, 'hourly', 'aw_seo_endpoints_watchdog' );
+		if ( ! wp_next_scheduled( 'rankweb_seo_endpoints_watchdog' ) ) {
+			wp_schedule_event( time() + 300, 'hourly', 'rankweb_seo_endpoints_watchdog' );
 		}
 	}
 );

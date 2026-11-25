@@ -45,7 +45,7 @@ msgstr ""
 #. translators: 1: features on, 2: features RankWeb relies on.
 #: aw-seo-extras.php:41
 #: includes/rankweb-rest.php:649
-msgid "RankWeb does nothing until Rank Math SEO is active."
+msgid "RankWeb works without Rank Math; this row shows whether Rank Math is active."
 msgstr ""
 
 #: includes/content-advice.php:42

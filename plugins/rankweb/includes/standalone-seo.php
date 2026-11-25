@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Who prints the page head: 'rank_math', 'other' or 'none'. */
 function rankweb_seo_owner(): string {
-	if ( function_exists( 'aw_seo_extras_rank_math' ) && aw_seo_extras_rank_math() ) {
+	if ( function_exists( 'rankweb_seo_extras_rank_math' ) && rankweb_seo_extras_rank_math() ) {
 		return 'rank_math';
 	}
 	if ( defined( 'WPSEO_VERSION' ) || defined( 'SEOPRESS_VERSION' ) || defined( 'AIOSEO_VERSION' ) || class_exists( 'AIOSEO\\Plugin\\AIOSEO' ) ) {
@@ -130,8 +130,8 @@ function rankweb_cut_text( string $text, int $max ): string {
 function rankweb_head_description(): string {
 	if ( is_singular() ) {
 		$pt = (string) get_post_type();
-		if ( 0 === strpos( $pt, 'aw_' ) && function_exists( 'aw_seo_description' ) ) {
-			$d = aw_seo_description(); // Animal Writes content types keep their own descriptions
+		if ( 0 === strpos( $pt, 'aw_' ) && function_exists( 'rankweb_seo_description' ) ) {
+			$d = rankweb_seo_description(); // Animal Writes content types keep their own descriptions
 			if ( '' !== trim( (string) $d ) ) {
 				return rankweb_plain_text( $d );
 			}

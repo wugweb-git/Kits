@@ -4,7 +4,7 @@
  * (docs/org/rankweb-org-plan.md (Appendix B), D). Rank Math keeps a custom-schema builder for Pro; this is RankWeb's version.
  *
  * On an item of a schema post type, a "Custom schema" box (a classic meta box; the block editor hides it) holds:
- * - a JSON-LD block: one object, a list of objects, or a { "@graph": [ … ] }. AW_Schema (class-aw-schema.php) checks it
+ * - a JSON-LD block: one object, a list of objects, or a { "@graph": [ … ] }. RankWeb_Schema (class-aw-schema.php) checks it
  *   on save; a broken block is not saved and the reason is shown. Each node is given a stable @id and added to Rank
  *   Math's graph, alongside the node RankWeb already builds for the item.
  * - Speakable CSS selectors, added to the page as a SpeakableSpecification.
@@ -33,12 +33,12 @@ const AW_SCHEMA_ABOUT_META     = '_aw_schema_about';
 const AW_SCHEMA_MENTIONS_META  = '_aw_schema_mentions';
 
 /** The post types that get the custom-schema box (the setting; empty: none). */
-function aw_schema_custom_types(): array {
+function rankweb_schema_custom_types(): array {
 	return array_values( array_filter( array_map( 'sanitize_key', (array) AW_SCHEMA_TYPES ), 'post_type_exists' ) );
 }
 
 /** A list field (one value per line), cleaned. */
-function aw_schema_lines( $value ): array {
+function rankweb_schema_lines( $value ): array {
 	$lines = is_array( $value ) ? $value : preg_split( '/[\r\n]+/', (string) $value );
 	$out   = array();
 	foreach ( (array) $lines as $line ) {
@@ -55,13 +55,13 @@ function aw_schema_lines( $value ): array {
 add_action(
 	'add_meta_boxes',
 	function ( $post_type, $post = null ) {
-		if ( ! $post instanceof WP_Post || ! in_array( (string) $post_type, aw_schema_custom_types(), true ) || ! current_user_can( 'edit_post', (int) $post->ID ) ) {
+		if ( ! $post instanceof WP_Post || ! in_array( (string) $post_type, rankweb_schema_custom_types(), true ) || ! current_user_can( 'edit_post', (int) $post->ID ) ) {
 			return;
 		}
 		add_meta_box(
 			'aw-schema-custom',
 			__( 'Custom schema (JSON-LD)', 'aw-seo-extras' ),
-			'aw_schema_custom_box',
+			'rankweb_schema_custom_box',
 			$post_type,
 			'normal',
 			'low',
@@ -77,7 +77,7 @@ add_action(
  *
  * @param WP_Post $post Item.
  */
-function aw_schema_custom_box( WP_Post $post ): void {
+function rankweb_schema_custom_box( WP_Post $post ): void {
 	$id = (int) $post->ID;
 	wp_nonce_field( 'aw_schema_custom_' . $id, 'aw_schema_custom_nonce' );
 	$err = get_transient( 'aw_seo_schema_err_' . $id );
@@ -141,8 +141,8 @@ add_action(
 		}
 		$done[ $post_id ] = true;
 		// JSON-LD: checked, and only saved when it is good; a bad block is kept in a notice and the stored value is left.
-		$raw    = isset( $_POST['aw_jsonld'] ) ? trim( (string) wp_unslash( $_POST['aw_jsonld'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON-LD text, validated by AW_Schema::parse() below and never echoed unescaped
-		$parsed = AW_Schema::parse( $raw );
+		$raw    = isset( $_POST['aw_jsonld'] ) ? trim( (string) wp_unslash( $_POST['aw_jsonld'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON-LD text, validated by RankWeb_Schema::parse() below and never echoed unescaped
+		$parsed = RankWeb_Schema::parse( $raw );
 		if ( '' !== $parsed['error'] ) {
 			/* translators: %s: the JSON error. */
 			set_transient( 'aw_seo_schema_err_' . $post_id, sprintf( __( 'The custom JSON-LD was not saved: %s', 'aw-seo-extras' ), $parsed['error'] ), 2 * MINUTE_IN_SECONDS );
@@ -156,7 +156,7 @@ add_action(
 			AW_SCHEMA_ABOUT_META     => 'aw_schema_about',
 			AW_SCHEMA_MENTIONS_META  => 'aw_schema_mentions',
 		) as $meta => $field ) {
-			$list = isset( $_POST[ $field ] ) ? aw_schema_lines( wp_unslash( $_POST[ $field ] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each line sanitized in aw_schema_lines()
+			$list = isset( $_POST[ $field ] ) ? rankweb_schema_lines( wp_unslash( $_POST[ $field ] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each line sanitized in rankweb_schema_lines()
 			if ( $list ) {
 				update_post_meta( $post_id, $meta, $list );
 			} else {
@@ -165,7 +165,7 @@ add_action(
 		}
 		// The Dataset starter or an import (only when its own button was clicked) replaces the JSON-LD saved above.
 		if ( isset( $_POST['rankweb_schema_dataset'] ) ) {
-			update_post_meta( $post_id, AW_SCHEMA_JSONLD_META, AW_Schema::dataset_template() );
+			update_post_meta( $post_id, AW_SCHEMA_JSONLD_META, RankWeb_Schema::dataset_template() );
 			delete_transient( 'aw_seo_schema_err_' . $post_id ); // what was typed in the box is replaced either way
 			set_transient( 'rankweb_schema_note_' . $post_id, __( 'Dataset template filled in. Complete it and Update the item.', 'aw-seo-extras' ), 2 * MINUTE_IN_SECONDS );
 		} elseif ( isset( $_POST['rankweb_schema_import'] ) ) {
@@ -212,7 +212,7 @@ function rankweb_schema_import( int $id, string $url ): void {
 		rankweb_schema_error( $id, __( 'The page could not be fetched.', 'aw-seo-extras' ) );
 		return;
 	}
-	$nodes = AW_Schema::extract_from_html( (string) wp_remote_retrieve_body( $res ) );
+	$nodes = RankWeb_Schema::extract_from_html( (string) wp_remote_retrieve_body( $res ) );
 	if ( ! $nodes ) {
 		rankweb_schema_error( $id, __( 'No JSON-LD was found on that page.', 'aw-seo-extras' ) );
 		return;
@@ -228,7 +228,7 @@ function rankweb_schema_import( int $id, string $url ): void {
 add_filter(
 	'rank_math/json_ld',
 	function ( $data ) {
-		$types = aw_schema_custom_types();
+		$types = rankweb_schema_custom_types();
 		if ( ! is_array( $data ) || ! $types || ! is_singular( $types ) ) {
 			return $data;
 		}
@@ -237,18 +237,18 @@ add_filter(
 
 		$raw = (string) get_post_meta( $id, AW_SCHEMA_JSONLD_META, true );
 		if ( '' !== $raw ) {
-			$parsed = AW_Schema::parse( $raw );
+			$parsed = RankWeb_Schema::parse( $raw );
 			$n      = 0;
-			foreach ( AW_Schema::with_ids( $parsed['nodes'], $base ) as $node ) {
+			foreach ( RankWeb_Schema::with_ids( $parsed['nodes'], $base ) as $node ) {
 				++$n;
 				$data[ 'aw_custom_' . $n ] = $node;
 			}
 		}
 
 		// Speakable, about and mentions go on the page's WebPage node (the one Rank Math always prints).
-		$speak = AW_Schema::speakable( (array) get_post_meta( $id, AW_SCHEMA_SPEAKABLE_META, true ) );
-		$about = AW_Schema::things( (array) get_post_meta( $id, AW_SCHEMA_ABOUT_META, true ) );
-		$ment  = AW_Schema::things( (array) get_post_meta( $id, AW_SCHEMA_MENTIONS_META, true ) );
+		$speak = RankWeb_Schema::speakable( (array) get_post_meta( $id, AW_SCHEMA_SPEAKABLE_META, true ) );
+		$about = RankWeb_Schema::things( (array) get_post_meta( $id, AW_SCHEMA_ABOUT_META, true ) );
+		$ment  = RankWeb_Schema::things( (array) get_post_meta( $id, AW_SCHEMA_MENTIONS_META, true ) );
 		if ( ( $speak || $about || $ment ) && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
 			if ( $speak ) {
 				$data['WebPage']['speakable'] = $speak;
@@ -260,7 +260,7 @@ add_filter(
 				$data['WebPage']['mentions'] = array_merge( (array) ( $data['WebPage']['mentions'] ?? array() ), $ment );
 			}
 		}
-		return function_exists( 'aw_rm_absolute_urls' ) ? aw_rm_absolute_urls( $data ) : $data;
+		return function_exists( 'rankweb_rm_absolute_urls' ) ? rankweb_rm_absolute_urls( $data ) : $data;
 	},
 	1100 // after schema.php (1355 is Rank Math-side; this runs after RankWeb's own nodes are in)
 );

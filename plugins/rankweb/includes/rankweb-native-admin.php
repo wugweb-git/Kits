@@ -4,7 +4,7 @@
  *
  * With Kits Core (and its build) the screens are the Kits shell (rankweb-ui.php). Without it, rankweb_ui_page() calls
  * rankweb_native_screen() here: Overview with the real state of the site's search files, Modules, Settings (every tab,
- * saved through the same aw_seo_settings_save() the shell uses), FAQ and a pointer for Insights. Nothing here needs
+ * saved through the same rankweb_seo_settings_save() the shell uses), FAQ and a pointer for Insights. Nothing here needs
  * Kits Core, Rank Math or any sibling plugin.
  *
  * @package rankweb
@@ -61,8 +61,8 @@ function rankweb_native_screen( string $screen, string $title ): void {
 			rankweb_native_settings( true );
 			break;
 		case 'faq':
-			if ( function_exists( 'aw_faq_admin_body' ) ) {
-				aw_faq_admin_body();
+			if ( function_exists( 'rankweb_faq_admin_body' ) ) {
+				rankweb_faq_admin_body();
 			}
 			break;
 		case 'insights':
@@ -82,7 +82,7 @@ function rankweb_native_overview(): void {
 		echo '<tr><th scope="row" style="width:240px">' . esc_html( $row[0] ) . '</th><td><span aria-hidden="true">' . esc_html( $mark ) . '</span> ' . esc_html( (string) $row[2] ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
-	$mods = aw_seo_modules();
+	$mods = rankweb_seo_modules();
 	$on   = 0;
 	$sw   = 0;
 	foreach ( $mods as $key => $m ) {
@@ -90,14 +90,14 @@ function rankweb_native_overview(): void {
 			continue;
 		}
 		++$sw;
-		$on += aw_seo_module_on( $key ) ? 1 : 0;
+		$on += rankweb_seo_module_on( $key ) ? 1 : 0;
 	}
 	echo '<h2>' . esc_html__( 'Modules', 'aw-seo-extras' ) . '</h2><p>' . esc_html( sprintf( /* translators: 1: modules on, 2: modules */ __( '%1$d of %2$d switchable modules are on.', 'aw-seo-extras' ), $on, $sw ) ) . ' <a href="' . esc_url( rankweb_native_url( 'aw-seo-modules' ) ) . '">' . esc_html__( 'Manage modules', 'aw-seo-extras' ) . '</a> · <a href="' . esc_url( rankweb_native_url( 'aw-seo-settings' ) ) . '">' . esc_html__( 'Settings', 'aw-seo-extras' ) . '</a></p>';
 }
 
 /** Settings (all tabs) or the Modules tab alone. */
 function rankweb_native_settings( bool $modules_only ): void {
-	$tabs = aw_seo_setting_tabs();
+	$tabs = rankweb_seo_setting_tabs();
 	$page = $modules_only ? 'aw-seo-modules' : 'aw-seo-settings';
 	$tab  = $modules_only ? 'modules' : sanitize_key( wp_unslash( $_GET['tab'] ?? 'titles' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( ! isset( $tabs[ $tab ] ) ) {
@@ -112,7 +112,7 @@ function rankweb_native_settings( bool $modules_only ): void {
 		foreach ( (array) ( $_POST['on'] ?? array() ) as $k => $v ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$on[ sanitize_key( (string) $k ) ] = (bool) $v;
 		}
-		aw_seo_settings_save( $tab, $posted, ! empty( $_POST['reset'] ), $on );
+		rankweb_seo_settings_save( $tab, $posted, ! empty( $_POST['reset'] ), $on );
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'aw-seo-extras' ) . '</p></div>';
 	}
 	if ( ! $modules_only ) {
@@ -129,22 +129,22 @@ function rankweb_native_settings( bool $modules_only ): void {
 	wp_nonce_field( 'rankweb_native_' . $tab );
 	if ( 'modules' === $tab ) {
 		echo '<table class="form-table"><tbody>';
-		foreach ( aw_seo_modules() as $key => $m ) {
+		foreach ( rankweb_seo_modules() as $key => $m ) {
 			if ( empty( $m['switch'] ) ) {
 				continue;
 			}
-			echo '<tr><th scope="row">' . esc_html( (string) ( $m['label'] ?? $key ) ) . '</th><td><label><input type="checkbox" name="on[' . esc_attr( $key ) . ']" value="1"' . checked( aw_seo_module_on( $key ), true, false ) . '> ' . esc_html__( 'On', 'aw-seo-extras' ) . '</label>' . ( ! empty( $m['desc'] ) ? '<p class="description">' . esc_html( (string) $m['desc'] ) . '</p>' : '' ) . '</td></tr>';
+			echo '<tr><th scope="row">' . esc_html( (string) ( $m['label'] ?? $key ) ) . '</th><td><label><input type="checkbox" name="on[' . esc_attr( $key ) . ']" value="1"' . checked( rankweb_seo_module_on( $key ), true, false ) . '> ' . esc_html__( 'On', 'aw-seo-extras' ) . '</label>' . ( ! empty( $m['desc'] ) ? '<p class="description">' . esc_html( (string) $m['desc'] ) . '</p>' : '' ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
 	} else {
 		$any = false;
 		echo '<table class="form-table"><tbody>';
-		foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
+		foreach ( rankweb_seo_tab_fields( $tab ) as $key => $list ) {
 			foreach ( $list as $const => $f ) {
 				$any   = true;
-				$saved = aw_seo_saved();
+				$saved = rankweb_seo_saved();
 				$value = array_key_exists( $const, (array) ( $saved[ $key ] ?? array() ) ) ? $saved[ $key ][ $const ] : $f['default']; // what is stored now, not the constant fixed at the start of this request
-				$text  = aw_seo_field_text( (string) $f['type'], $value );
+				$text  = rankweb_seo_field_text( (string) $f['type'], $value );
 				$name  = 'f[' . esc_attr( $const ) . ']';
 				echo '<tr><th scope="row"><label for="' . esc_attr( $const ) . '">' . esc_html( (string) ( $f['label'] ?? $const ) ) . '</label></th><td>';
 				if ( in_array( $f['type'], array( 'int', 'text' ), true ) ) {

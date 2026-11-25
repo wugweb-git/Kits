@@ -4,7 +4,7 @@
  * tests/linker-test.php runs it on sample HTML without a site. internal-links.php feeds it the keyword index and the
  * item's settings.
  *
- * How it matches: every keyword is stored normalised (AW_Linker::normalize(): its words, lower case, one space between).
+ * How it matches: every keyword is stored normalised (RankWeb_Linker::normalize(): its words, lower case, one space between).
  * A text node is cut into words with their byte offsets; at each word the longest run of words that is a keyword wins
  * (longest first), and the words of a run may be separated by white space only. So matching is whole words only,
  * case-insensitive and Unicode-safe (letters, combining marks and digits of any script, as in Hindi).
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOM's own property names.
 
 /** HTML auto-linker. */
-final class AW_Linker {
+final class RankWeb_Linker {
 
 	/** Elements whose text is never linked. */
 	const SKIP = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'code', 'pre', 'script', 'style', 'button', 'figcaption', 'textarea', 'svg', 'noscript', 'template', 'select', 'option' );

@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/class-aw-silo.php';
 
 /** Link audit. */
-final class AW_Link_Audit {
+final class RankWeb_Link_Audit {
 
 	/** The findings, in the order they are listed. */
 	const FLAGS = array( 'orphan', 'deep', 'too_many', 'broken', 'redirect', 'nofollow', 'canonical', 'avoided', 'silo' );
@@ -93,7 +93,7 @@ final class AW_Link_Audit {
 			if ( $tgt > 0 && '' !== (string) ( $items[ $tgt ]['canonical'] ?? '' ) ) {
 				self::note( $res, $detail, $src, 'canonical', $url );
 			}
-			if ( $tgt > 0 && $opt['silo'] && ! AW_Silo::may_link( (array) $opt['silo'], $src, $tgt ) ) {
+			if ( $tgt > 0 && $opt['silo'] && ! RankWeb_Silo::may_link( (array) $opt['silo'], $src, $tgt ) ) {
 				self::note( $res, $detail, $src, 'silo', $url );
 			}
 			$low = strtolower( $url );

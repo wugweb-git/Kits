@@ -58,8 +58,8 @@ if ( ! function_exists( 'get_post_meta' ) ) {
 		return $GLOBALS['rw_meta'][ $id ][ $key ] ?? '';
 	}
 }
-if ( ! function_exists( 'aw_seo_extras_rank_math' ) ) {
-	function aw_seo_extras_rank_math() { // phpcs:ignore
+if ( ! function_exists( 'rankweb_seo_extras_rank_math' ) ) {
+	function rankweb_seo_extras_rank_math() { // phpcs:ignore
 		return ! empty( $GLOBALS['rw_rank_math'] );
 	}
 }

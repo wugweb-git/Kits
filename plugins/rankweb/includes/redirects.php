@@ -1,25 +1,17 @@
 <?php
 /**
- * Redirects. The one list is Rank Math → Redirections (owner, 10 Oct 2026): aw_redirect_add() adds to it, so forms,
- * merges and migrations keep writing to that one list. Author archives go to About by a Rank Math rule (^author);
- * /?author=N goes there in one hop (below).
+ * Redirects. The list is Rank Math → Redirections: rankweb_redirect_add() adds to it, so forms, merges and migrations keep
+ * writing to that one list. RankWeb has no redirect list of its own, so on a site without Rank Math these tools have
+ * nothing to write to and the redirects below that live in PHP are the only ones RankWeb serves.
  *
- * Fixed old addresses go into that list (audit item 18, owner 25 Oct 2026): `wp aw redirects-import` (places.php) adds
- * the old /location/{slug}/ and /source/{slug}/ pages (their PHP handler was removed once the crawl showed Rank Math
- * answers every one). `wp aw redirects-list`
- * prints the whole list for tools/redirects/crawl.py, which requests every old address and reports any 404, wrong
- * target, and which layer answered (X-Redirect-By: "Rank Math" or "Animal Writes").
+ * Rules a path list cannot hold stay in PHP (they rewrite the address rather than match a path):
+ * - A link to this site's own host written without a scheme or with one slash goes to the page it meant.
+ * - Module imports by name ("@wordpress/interactivity") go to the module file.
+ * - Upper-case paths go to the lower-case one (the query string is kept).
+ * - The Home page has no page 2: /page/2/ goes to Home.
  *
- * Rules Rank Math's list cannot hold (they rewrite the address or read the query string rather than match a path) stay
- * in PHP:
- * - /NEWS/ and /News/ → /news/ (one 301 to the lower-case path; the query string is kept).
- * - ?lang=, ?issuer= and ?court= on the Library → the same list without them; /?author=N → /about/ (below).
- * - A missing address is a 404, never a 301 to whichever item WordPress guesses from the slug.
- * - Labels are WordPress Tags with their own pages (/tag/{slug}/); old type addresses (/?cat=N, /directory-type/…,
- *   /opportunity-type/…) and ?kind=, ?type=, ?service= are redirected in animal-writes-core tags.php.
- * - animal-writes-core: /topic/{slug}/… and ?topic= (category-moves.php), older /directory/ shapes (directory.php),
- *   ?query-N-page= on hubs (hubs.php), ?s= → /search/ and ?about= on Contact (pages.php), /report/?listing=
- *   (form-blocks.php), comment feeds (admin-ia.php).
+ * WordPress's own behaviour is left alone: a missing address is handled by core, including its guess of the item a
+ * slug most likely meant. No site-specific addresses, paths or pages are assumed here.
  *
  * @package aw-seo-extras
  */
@@ -38,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int    $code       The status code (301, 302, 307, 308, 410, 451). A 410 or 451 needs no destination.
  * @return int
  */
-function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 301 ) {
+function rankweb_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 301 ) {
 	$code = in_array( (int) $code, array( 301, 302, 307, 308, 410, 451 ), true ) ? (int) $code : 301;
 	$gone = in_array( $code, array( 410, 451 ), true );
 	if ( '' === $pattern || ( '' === $to && ! $gone ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) ) {
@@ -66,53 +58,7 @@ function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 30
 }
 
 /** DirectoryWeb's `wp aw redirects-import` adds its old-address 301s through this filter. */
-add_filter( 'directoryweb_redirect_add', fn( $done, $path, $to ) => (bool) aw_rank_math_redirect( (string) $path, (string) $to ) || (bool) $done, 10, 3 );
-
-/**
- * Seed redirects, added once per version to Rank Math's list (they can be edited or removed there afterwards; an exact
- * path already in the list is left alone). 12 Nov 2026: common city spellings that are not the Directory's district
- * slug (each checked as 404 on live, its target as 200), the old campaign addresses still asked for, and a removed
- * News item.
- */
-const AW_SEED_REDIRECTS_VERSION = '1';
-add_action(
-	'init',
-	function () {
-		if ( AW_SEED_REDIRECTS_VERSION === get_option( 'aw_seed_redirects_version' ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) || get_transient( 'aw_seed_redirects_wait' ) ) {
-			return;
-		}
-		$exact = array(
-			'directory/karnataka/bengaluru'                => '/directory/karnataka/bengaluru-urban/',
-			'directory/karnataka/bangalore'                => '/directory/karnataka/bengaluru-urban/',
-			'directory/karnataka/bangalore-urban'          => '/directory/karnataka/bengaluru-urban/',
-			'directory/delhi/delhi'                        => '/directory/delhi/',
-			'directory/assam/guwahati'                     => '/directory/assam/kamrup-metro/',
-			'directory/haryana/gurgaon'                    => '/directory/haryana/gurugram/',
-			'directory/uttar-pradesh/noida'                => '/directory/uttar-pradesh/gautam-buddha-nagar/',
-			'directory/uttar-pradesh/gautam-buddh-nagar'   => '/directory/uttar-pradesh/gautam-buddha-nagar/',
-			'campaign/lab-animal-rules-2026'               => '/campaigns/lab-animals-rules-2026/',
-			'campaigns/draft-laboratory-animals-rules-2026' => '/campaigns/lab-animals-rules-2026/',
-			'news/niagara-falls-man-charged-after-cat-found-severely-emaciated-at-motel' => '/news/',
-		);
-		$ok = true;
-		foreach ( $exact as $from => $to ) {
-			$ok = aw_rank_math_redirect( $from, home_url( $to ) ) && $ok;
-		}
-		// Any other /campaign/{slug}/ goes to /campaigns/{slug}/. Bare /campaign/ keeps its own exact rule.
-		global $wpdb;
-		$table = $wpdb->prefix . 'rank_math_redirections';
-		$have  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE sources LIKE %s', $table, '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
-		if ( ! $have ) {
-			$ok = aw_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
-		}
-		if ( $ok ) {
-			update_option( 'aw_seed_redirects_version', AW_SEED_REDIRECTS_VERSION, false );
-		} else {
-			set_transient( 'aw_seed_redirects_wait', 1, HOUR_IN_SECONDS ); // a save failed: try again in an hour, not on every request
-		}
-	},
-	20
-);
+add_filter( 'directoryweb_redirect_add', fn( $done, $path, $to ) => (bool) rankweb_rank_math_redirect( (string) $path, (string) $to ) || (bool) $done, 10, 3 );
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	/**
@@ -141,14 +87,14 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 /** Remember that $old_url now lives at post $target (an ID), or at a URL (a string such as '/volunteer/'). */
-function aw_redirect_add( $old_url, $target ) {
+function rankweb_redirect_add( $old_url, $target ) {
 	$path = trim( (string) wp_parse_url( $old_url, PHP_URL_PATH ), '/' );
 	if ( '' === $path ) {
 		return;
 	}
 	$to = is_numeric( $target ) ? (string) get_permalink( (int) $target ) : home_url( (string) $target );
 	if ( $to ) {
-		aw_rank_math_redirect( rawurldecode( $path ), $to );
+		rankweb_rank_math_redirect( rawurldecode( $path ), $to );
 	}
 }
 
@@ -172,37 +118,6 @@ add_action(
 	0
 );
 
-// Crawlers and link scrapers that strip the "tel:" scheme and request it as a path (e.g. /tel:1962, /tel:112; 404 audit).
-// Send each to its dedicated guide or directory page instead of a 404 error.
-add_action(
-	'parse_request',
-	function () {
-		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
-			return;
-		}
-		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! preg_match( '#^/+tel:([0-9\+\-]+)$#i', $path, $m ) ) {
-			return;
-		}
-		$num = preg_replace( '/\D+/', '', $m[1] );
-		if ( '1962' === $num ) {
-			wp_safe_redirect( home_url( '/resources/1962-helpline-mobile-veterinary-units/' ), 301, 'RankWeb' );
-			exit;
-		}
-		if ( '112' === $num ) {
-			wp_safe_redirect( home_url( '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ), 301, 'RankWeb' );
-			exit;
-		}
-		if ( '01292555700' === $num || '1292555700' === $num ) {
-			wp_safe_redirect( home_url( '/resources/animal-cruelty-law-india/' ), 301, 'RankWeb' );
-			exit;
-		}
-		wp_safe_redirect( home_url( '/directory/' ), 301, 'RankWeb' );
-		exit;
-	},
-	0
-);
-
 // Module imports by name ("@wordpress/interactivity") are resolved by the import map, which every page prints in its
 // head. Crawlers that ignore import maps read the name as a path beside the importing file (core's navigation
 // view.min.js, the theme's dropdown.js): 65 hits in the 404 Monitor (audit 12 Nov 2026). Browsers never ask for these
@@ -213,27 +128,6 @@ add_action(
 		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( preg_match( '#^/wp-(?:includes|content)/.*/@wordpress/interactivity(?:\.js)?$#', $path ) ) {
 			wp_safe_redirect( includes_url( 'js/dist/script-modules/interactivity/index.min.js' ), 301, 'RankWeb' );
-			exit;
-		}
-	},
-	0
-);
-
-// Addresses that are gone for good answer 410 (audit, 12 Nov 2026; checked the same day: no file of the build and none
-// of 20 live pages prints them): the removed kits-core ad slot script and Core's old visit counter, plugin files under
-// a server path (wp-content/plugins/home/…/aw_deploy/…, a plugins_url() address from before the plugin links of
-// 10–11 Nov), and sitemaps of types or taxonomies that no longer exist (news-sitemap.xml itself is the Google News
-// sitemap again since 12 Nov 2026, sitemap.php; only numbered copies stay gone). Old kits-cache CSS files are left at 404:
-// their names come from each build, so a pattern could catch a file the next build writes.
-add_action(
-	'parse_request',
-	function () {
-		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( preg_match( '#^/(?:wp-content/plugins/home/u544169507/.+|wp-content/plugins/kits-core/assets/js/ad-slot\.js|wp-content/plugins/animal-writes-core/visit\.php|(?:aw_listing_type|aw_guide)-sitemap\d*\.xml|news-sitemap\d+\.xml)$#', $path ) ) {
-			status_header( 410 );
-			nocache_headers();
-			header( 'Content-Type: text/plain; charset=utf-8' );
-			echo 'Gone';
 			exit;
 		}
 	},
@@ -273,18 +167,6 @@ add_action(
 	1
 );
 
-// /?author=N goes to About in one hop (WordPress would first send it to /author/{name}/, which the ^author rule sends on).
-add_action(
-	'template_redirect',
-	function () {
-		if ( isset( $_GET['author'] ) && is_author() ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( home_url( '/about/' ), 301, 'RankWeb' );
-			exit;
-		}
-	},
-	1
-);
-
 // The Home page has no page 2: /page/2/ (any number) is a copy of Home, so it goes to Home in one hop (5 Nov 2026).
 add_action(
 	'template_redirect',
@@ -296,8 +178,6 @@ add_action(
 	},
 	1
 );
-
-add_filter( 'do_redirect_guess_404_permalink', '__return_false' );
 
 // A redirect never leads to the trash (owner, 15 Oct 2026): trashing an item switches off the redirects that point to
 // it, and restoring it switches them back on. The status is changed with Rank Math's own call

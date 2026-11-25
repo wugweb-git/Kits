@@ -40,73 +40,73 @@ add_filter(
  *
  * @return array
  */
-function aw_seo_breadcrumb_trail() {
+function rankweb_seo_breadcrumb_trail() {
 	static $trail = null;
 	if ( null !== $trail ) {
 		return $trail;
 	}
 	$trail = array();
-	if ( is_404() || is_front_page() || ! function_exists( 'aw_post_types' ) || ! function_exists( 'aw_hub_url' ) ) { // the content types and hubs (Animal Writes Core)
+	if ( is_404() || is_front_page() || ! function_exists( 'directoryweb_post_types' ) || ! function_exists( 'aw_hub_url' ) ) { // the content types and hubs (Animal Writes Core)
 		return $trail;
 	}
 	$dir   = array( 'Directory', home_url( '/directory/' ) );
 	$place = function ( $term ) {
 		$out = array();
-		if ( ! function_exists( 'aw_directory_url' ) ) { // DirectoryWeb is off: no place steps
+		if ( ! function_exists( 'directoryweb_directory_url' ) ) { // DirectoryWeb is off: no place steps
 			return $out;
 		}
-		if ( $term && $term->parent && function_exists( 'aw_place_by_id' ) ) {
-			$st    = aw_place_by_id( $term->parent );
-			$out[] = array( $st->name, aw_directory_url( $st->slug ) );
+		if ( $term && $term->parent && function_exists( 'directoryweb_place_by_id' ) ) {
+			$st    = directoryweb_place_by_id( $term->parent );
+			$out[] = array( $st->name, directoryweb_directory_url( $st->slug ) );
 		}
 		if ( $term ) {
-			$out[] = array( $term->name, aw_directory_url( $term->slug ) );
+			$out[] = array( $term->name, directoryweb_directory_url( $term->slug ) );
 		}
 		return $out;
 	};
 
 	if ( is_singular( 'aw_listing' ) ) {
 		$id    = get_queried_object_id();
-		$best  = function_exists( 'aw_item_place' ) ? aw_item_place( $id ) : null; // the district if there is one, else the state
+		$best  = function_exists( 'directoryweb_item_place' ) ? directoryweb_item_place( $id ) : null; // the district if there is one, else the state
 		// Owner, 20 Oct 2026: the trail ends at the organisation's place (its district, else its state), like an item's ends at its category.
 		$trail = array_merge( array( $dir ), $place( $best ) );
 		if ( count( $trail ) < 2 ) {
 			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		}
-	} elseif ( is_singular( array_keys( aw_post_types() ) ) ) {
+	} elseif ( is_singular( array_keys( directoryweb_post_types() ) ) ) {
 		$id      = get_queried_object_id();
 		$type    = get_post_type( $id );
 		$obj     = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
 		$cat     = in_array( $type, array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
 		if ( $cat ) { // every item (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
-			$n       = function_exists( 'aw_seo_filtered_count' ) ? aw_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
-			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : aw_seo_term_url( $cat ) );
+			$n       = function_exists( 'rankweb_seo_filtered_count' ) ? rankweb_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
+			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : rankweb_seo_term_url( $cat ) );
 		} else {
 			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		}
-	} elseif ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() && aw_current_place() ) {
-		$city  = aw_current_place();
+	} elseif ( function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() && directoryweb_current_place() ) {
+		$city  = directoryweb_current_place();
 		$trail = array_merge( array( $dir ), $place( $city ) );
 		$tslug = (string) get_query_var( 'aw_type_slug' );
 		if ( $tslug && $city && $city->parent ) { // district × type; a state's ?type= list is the state page
-			$trail[] = array( aw_seo_listing_type_name( $tslug ), aw_directory_url( $city->slug, $tslug ) );
+			$trail[] = array( rankweb_seo_listing_type_name( $tslug ), directoryweb_directory_url( $city->slug, $tslug ) );
 		}
-	} elseif ( aw_seo_is_category_page() ) {
-		$all   = aw_seo_categories_url();
-		$trail = array_merge( $all ? array( array( 'Categories', $all ) ) : array(), array( array( single_term_title( '', false ), aw_seo_term_url( get_queried_object() ) ) ) );
+	} elseif ( rankweb_seo_is_category_page() ) {
+		$all   = rankweb_seo_categories_url();
+		$trail = array_merge( $all ? array( array( 'Categories', $all ) ) : array(), array( array( single_term_title( '', false ), rankweb_seo_term_url( get_queried_object() ) ) ) );
 	} elseif ( is_tag() ) { // Home › the tag's section › Tag
 		$term = get_queried_object();
 		$sec  = function_exists( 'aw_tag_section' ) ? aw_tag_section( $term->slug ) : '';
 		$obj  = $sec ? get_post_type_object( $sec ) : null;
-		$trail = array_merge( $obj ? array( array( $obj->labels->name, aw_hub_url( $sec ) ) ) : array(), array( array( single_term_title( '', false ), aw_seo_term_url( $term ) ) ) );
-	} elseif ( is_post_type_archive( array_keys( aw_post_types() ) ) ) {
+		$trail = array_merge( $obj ? array( array( $obj->labels->name, aw_hub_url( $sec ) ) ) : array(), array( array( single_term_title( '', false ), rankweb_seo_term_url( $term ) ) ) );
+	} elseif ( is_post_type_archive( array_keys( directoryweb_post_types() ) ) ) {
 		$obj   = get_queried_object();
 		$trail = array( array( $obj->labels->name, get_post_type_archive_link( $obj->name ) ) );
 	} elseif ( is_page( 'claim' ) && function_exists( 'directoryweb_form_page_listing' ) && directoryweb_form_page_listing() ) {
 		// /claim/?listing=<ID> (owner, 31 Oct 2026): the listing's trail, then the listing, then Claim.
 		$lid   = directoryweb_form_page_listing()->ID;
-		$trail = array_merge( array( $dir ), $place( function_exists( 'aw_item_place' ) ? aw_item_place( $lid ) : null ) );
+		$trail = array_merge( array( $dir ), $place( function_exists( 'directoryweb_item_place' ) ? directoryweb_item_place( $lid ) : null ) );
 		$trail[] = array( get_the_title( $lid ), get_permalink( $lid ) );
 		$trail[] = array( 'Claim', function_exists( 'directoryweb_claim_url' ) ? directoryweb_claim_url( $lid ) : get_permalink( get_queried_object_id() ) );
 	} elseif ( is_page() ) {
@@ -115,9 +115,9 @@ function aw_seo_breadcrumb_trail() {
 			$trail[] = array( get_the_title( $a ), get_permalink( $a ) );
 		}
 		$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
-		$view    = function_exists( 'aw_seo_filtered_named' ) && aw_seo_filtered_named() ? aw_seo_filtered_view() : null;
+		$view    = function_exists( 'rankweb_seo_filtered_named' ) && rankweb_seo_filtered_named() ? rankweb_seo_filtered_view() : null;
 		if ( $view ) { // a hub filtered by one category or tag: Home › Section › Category
-			$trail[] = array( $view['name'], add_query_arg( $view['key'], rawurlencode( $view['slug'] ), aw_hub_canonical() ) );
+			$trail[] = array( $view['name'], add_query_arg( $view['key'], rawurlencode( $view['slug'] ), rankweb_hub_canonical() ) );
 		}
 	}
 	$trail = $trail ? array_merge( array( array( 'Home', home_url( '/' ) ) ), $trail ) : array();
@@ -132,7 +132,7 @@ function aw_seo_breadcrumb_trail() {
 add_filter(
 	'rank_math/frontend/breadcrumb/items',
 	function ( $crumbs ) {
-		return is_admin() ? $crumbs : aw_seo_breadcrumb_trail();
+		return is_admin() ? $crumbs : rankweb_seo_breadcrumb_trail();
 	},
 	20
 );

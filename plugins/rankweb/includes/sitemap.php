@@ -5,8 +5,8 @@
  *   /directory/{state}/{district}/) that have listings, and district × listing-type pages with listings. Places come
  *   from the LGD file (places.php); Rank Math knows nothing of these virtual pages.
  * - a "filtered" sitemap (filtered-sitemap.xml) of the indexable filtered hub lists (filtered-views.php), rebuilt
- *   once a day (event aw_seo_sitemap_daily), never on a request.
- * - both from one provider class (AW_Rank_Math_Sitemap); this module's switch turns both off.
+ *   once a day (event rankweb_seo_sitemap_daily), never on a request.
+ * - both from one provider class (RankWeb_Rank_Math_Sitemap); this module's switch turns both off.
  * - no post-type archive links (the sections are Pages, listed in the page sitemap).
  * - Rank Math's stored sitemaps are cleared after saves through the REST API and WP-CLI too.
  * - a Google News sitemap (news-sitemap.xml): News items from the last 48 hours, listed in the index and robots.txt.
@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** District × listing-type pairs with enough listings to be indexed (no state × type pages exist). Stored counts, places.php. */
-function aw_sitemap_directory_pairs() {
-	if ( ! function_exists( 'aw_place_counts' ) ) { // DirectoryWeb is off
+function rankweb_sitemap_directory_pairs() {
+	if ( ! function_exists( 'directoryweb_place_counts' ) ) { // DirectoryWeb is off
 		return array();
 	}
 	$pairs = get_transient( 'aw_sitemap_dir_pairs' );
@@ -31,9 +31,9 @@ function aw_sitemap_directory_pairs() {
 		return $pairs;
 	}
 	$pairs = array();
-	foreach ( aw_place_counts()['pairs'] as $p ) {
-		$d = aw_place_district( $p[0] );
-		if ( $d && ( $p[3] >= AW_THIN_DISTRICT_TYPE || aw_directory_keep_indexed( aw_directory_url( $d->slug, $p[1] ) ) ) ) {
+	foreach ( directoryweb_place_counts()['pairs'] as $p ) {
+		$d = directoryweb_place_district( $p[0] );
+		if ( $d && ( $p[3] >= AW_THIN_DISTRICT_TYPE || rankweb_directory_keep_indexed( directoryweb_directory_url( $d->slug, $p[1] ) ) ) ) {
 			$pairs[] = array( 'city' => $d->slug, 'type' => $p[1], 'modified' => $p[2], 'n' => $p[3] );
 		}
 	}
@@ -43,23 +43,23 @@ function aw_sitemap_directory_pairs() {
 }
 
 /** Directory place pages (states and districts with listings), then district × type pages. */
-function aw_sitemap_directory_urls() {
+function rankweb_sitemap_directory_urls() {
 	$urls = array();
-	if ( ! function_exists( 'aw_place_states' ) ) { // DirectoryWeb is off
+	if ( ! function_exists( 'directoryweb_place_states' ) ) { // DirectoryWeb is off
 		return $urls;
 	}
-	foreach ( aw_place_states() as $st ) {
-		if ( aw_place_count( $st ) ) {
-			$urls[] = array( 'loc' => aw_directory_url( $st->slug ) );
+	foreach ( directoryweb_place_states() as $st ) {
+		if ( directoryweb_place_count( $st ) ) {
+			$urls[] = array( 'loc' => directoryweb_directory_url( $st->slug ) );
 		}
-		foreach ( aw_place_districts( $st->code ) as $d ) {
-			if ( aw_place_count( $d ) ) {
-				$urls[] = array( 'loc' => aw_directory_url( $d->slug ) );
+		foreach ( directoryweb_place_districts( $st->code ) as $d ) {
+			if ( directoryweb_place_count( $d ) ) {
+				$urls[] = array( 'loc' => directoryweb_directory_url( $d->slug ) );
 			}
 		}
 	}
-	foreach ( aw_sitemap_directory_pairs() as $r ) {
-		$urls[] = array( 'loc' => aw_directory_url( $r['city'], $r['type'] ), 'lastmod' => gmdate( 'c', strtotime( $r['modified'] . ' UTC' ) ) );
+	foreach ( rankweb_sitemap_directory_pairs() as $r ) {
+		$urls[] = array( 'loc' => directoryweb_directory_url( $r['city'], $r['type'] ), 'lastmod' => gmdate( 'c', strtotime( $r['modified'] . ' UTC' ) ) );
 	}
 	return $urls;
 }
@@ -70,31 +70,31 @@ function aw_sitemap_directory_urls() {
  *
  * @return array List of ['loc' => URL].
  */
-function aw_sitemap_filtered_urls() {
-	if ( ! function_exists( 'aw_sitemap_filtered_build' ) ) {
+function rankweb_sitemap_filtered_urls() {
+	if ( ! function_exists( 'rankweb_sitemap_filtered_build' ) ) {
 		return array(); // the Filtered views module is off: no filtered lists
 	}
 	$urls = get_option( 'aw_sitemap_filtered' );
-	return is_array( $urls ) ? $urls : aw_sitemap_filtered_build();
+	return is_array( $urls ) ? $urls : rankweb_sitemap_filtered_build();
 }
 
 /** Daily: filtered-sitemap.xml is rebuilt (never on a request), and Rank Math's stored copy of it is cleared. */
-function aw_sitemap_filtered_rebuild() {
-	if ( ! function_exists( 'aw_sitemap_filtered_build' ) ) {
+function rankweb_sitemap_filtered_rebuild() {
+	if ( ! function_exists( 'rankweb_sitemap_filtered_build' ) ) {
 		return; // the Filtered views module is off
 	}
-	update_option( 'aw_sitemap_filtered', aw_sitemap_filtered_build(), false );
+	update_option( 'aw_sitemap_filtered', rankweb_sitemap_filtered_build(), false );
 	if ( class_exists( '\RankMath\Sitemap\Cache_Watcher' ) ) {
 		\RankMath\Sitemap\Cache_Watcher::invalidate( 'filtered' );
 		add_action( 'shutdown', array( 'RankMath\Sitemap\Cache_Watcher', 'clear_queued' ) );
 	}
 }
-add_action( 'aw_seo_sitemap_daily', 'aw_sitemap_filtered_rebuild' );
+add_action( 'rankweb_seo_sitemap_daily', 'rankweb_sitemap_filtered_rebuild' );
 add_action(
 	'admin_init',
 	function () {
-		if ( ! wp_next_scheduled( 'aw_seo_sitemap_daily' ) ) {
-			wp_schedule_event( time() + 600, 'daily', 'aw_seo_sitemap_daily' );
+		if ( ! wp_next_scheduled( 'rankweb_seo_sitemap_daily' ) ) {
+			wp_schedule_event( time() + 600, 'daily', 'rankweb_seo_sitemap_daily' );
 		}
 	}
 );
@@ -107,7 +107,7 @@ add_action(
  * @param int   $current_page Page, from 1.
  * @return array
  */
-function aw_sitemap_page_links( array $urls, $max_entries, $current_page ) {
+function rankweb_sitemap_page_links( array $urls, $max_entries, $current_page ) {
 	$max_entries = max( 1, (int) $max_entries );
 	$chunk       = array_slice( $urls, ( max( 1, (int) $current_page ) - 1 ) * $max_entries, $max_entries );
 	return array_map( fn( $u ) => array_filter( array( 'loc' => $u['loc'], 'mod' => $u['lastmod'] ?? '' ) ), $chunk );
@@ -119,13 +119,13 @@ add_filter(
 		if ( ! interface_exists( '\RankMath\Sitemap\Providers\Provider' ) || ! class_exists( '\RankMath\Sitemap\Router' ) ) {
 			return $providers;
 		}
-		if ( ! class_exists( 'AW_Rank_Math_Sitemap' ) ) {
+		if ( ! class_exists( 'RankWeb_Rank_Math_Sitemap' ) ) {
 			/** The site's own sitemaps: directory-sitemap.xml and filtered-sitemap.xml (each paged by Rank Math's entries per sitemap). */
-			class AW_Rank_Math_Sitemap implements \RankMath\Sitemap\Providers\Provider {
+			class RankWeb_Rank_Math_Sitemap implements \RankMath\Sitemap\Providers\Provider {
 				/** Sitemap type => function that lists its URLs. */
 				const TYPES = array(
-					'directory' => 'aw_sitemap_directory_urls',
-					'filtered'  => 'aw_sitemap_filtered_urls',
+					'directory' => 'rankweb_sitemap_directory_urls',
+					'filtered'  => 'rankweb_sitemap_filtered_urls',
 				);
 
 				public function handles_type( $type ) {
@@ -152,11 +152,11 @@ add_filter(
 				}
 
 				public function get_sitemap_links( $type, $max_entries, $current_page ) {
-					return isset( self::TYPES[ $type ] ) ? aw_sitemap_page_links( (array) call_user_func( self::TYPES[ $type ] ), $max_entries, $current_page ) : array();
+					return isset( self::TYPES[ $type ] ) ? rankweb_sitemap_page_links( (array) call_user_func( self::TYPES[ $type ] ), $max_entries, $current_page ) : array();
 				}
 			}
 		}
-		$providers[] = new AW_Rank_Math_Sitemap();
+		$providers[] = new RankWeb_Rank_Math_Sitemap();
 		return $providers;
 	}
 );
@@ -192,12 +192,12 @@ const AW_NEWS_SITEMAP_HOURS = 48;
 
 /**
  * News items from the last 48 hours, newest first: [url, title, date]. The date is the one the item's NewsArticle
- * node prints (schema.php, aw_article_nodes(): the day the story was reported when stored, else the publish date), so
+ * node prints (schema.php, rankweb_article_nodes(): the day the story was reported when stored, else the publish date), so
  * the two never disagree. Read with $wpdb: front-end News queries are re-sorted by source date.
  *
  * @return array List of ['loc', 'title', 'date' (ISO 8601)].
  */
-function aw_news_sitemap_items() {
+function rankweb_news_sitemap_items() {
 	global $wpdb;
 	$since = gmdate( 'Y-m-d H:i:s', time() - ( AW_NEWS_SITEMAP_HOURS + 24 ) * HOUR_IN_SECONDS ); // a day more: the source date can be later than the publish date
 	$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_news' AND post_status = 'publish' AND post_password = '' AND post_date_gmt >= %s ORDER BY post_date_gmt DESC LIMIT 1000", $since ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -208,7 +208,7 @@ function aw_news_sitemap_items() {
 			continue; // preview-only items are never listed
 		}
 		$src  = (string) get_post_meta( $id, 'aw_source_date', true );
-		$date = '' !== $src && function_exists( 'aw_schema_date' ) && aw_schema_date( $src ) ? aw_schema_date( $src ) : get_the_date( 'c', $id );
+		$date = '' !== $src && function_exists( 'rankweb_schema_date' ) && rankweb_schema_date( $src ) ? rankweb_schema_date( $src ) : get_the_date( 'c', $id );
 		$ts   = strtotime( (string) $date );
 		if ( ! $ts || $ts < $cut || $ts > time() + HOUR_IN_SECONDS ) {
 			continue;
@@ -220,9 +220,9 @@ function aw_news_sitemap_items() {
 }
 
 /** The Google News sitemap XML. */
-function aw_news_sitemap_xml() {
+function rankweb_news_sitemap_xml() {
 	$x = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
-	foreach ( aw_news_sitemap_items() as $r ) {
+	foreach ( rankweb_news_sitemap_items() as $r ) {
 		$x .= "\t<url>\n\t\t<loc>" . esc_xml( $r['loc'] ) . "</loc>\n\t\t<news:news>\n\t\t\t<news:publication>\n\t\t\t\t<news:name>" . esc_xml( rankweb_site_name() ) . "</news:name>\n\t\t\t\t<news:language>en</news:language>\n\t\t\t</news:publication>\n"
 			. "\t\t\t<news:publication_date>" . esc_xml( $r['date'] ) . "</news:publication_date>\n\t\t\t<news:title>" . esc_xml( $r['title'] ) . "</news:title>\n\t\t</news:news>\n\t</url>\n";
 	}
@@ -230,7 +230,7 @@ function aw_news_sitemap_xml() {
 }
 
 /** The sitemap's address. */
-function aw_news_sitemap_url() {
+function rankweb_news_sitemap_url() {
 	return home_url( '/news-sitemap.xml' );
 }
 
@@ -248,7 +248,7 @@ add_action(
 			header( 'X-Robots-Tag: noindex, follow' );
 			header( 'Cache-Control: public, max-age=900' );
 		}
-		echo aw_news_sitemap_xml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped per value in aw_news_sitemap_xml()
+		echo rankweb_news_sitemap_xml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped per value in rankweb_news_sitemap_xml()
 		exit;
 	},
 	0
@@ -258,9 +258,9 @@ add_action(
 add_filter(
 	'rank_math/sitemap/index',
 	function ( $xml ) {
-		$items = aw_news_sitemap_items();
+		$items = rankweb_news_sitemap_items();
 		$mod   = $items ? gmdate( 'c', $items[0]['ts'] ) : '';
-		return $xml . "\t<sitemap>\n\t\t<loc>" . esc_xml( aw_news_sitemap_url() ) . "</loc>\n" . ( $mod ? "\t\t<lastmod>" . esc_xml( $mod ) . "</lastmod>\n" : '' ) . "\t</sitemap>\n";
+		return $xml . "\t<sitemap>\n\t\t<loc>" . esc_xml( rankweb_news_sitemap_url() ) . "</loc>\n" . ( $mod ? "\t\t<lastmod>" . esc_xml( $mod ) . "</lastmod>\n" : '' ) . "\t</sitemap>\n";
 	}
 );
 
@@ -271,7 +271,7 @@ add_filter(
 		if ( ! post_type_exists( 'aw_news' ) ) {
 			return $txt; // no News content type on this site: nothing to list
 		}
-		$line = 'Sitemap: ' . aw_news_sitemap_url();
+		$line = 'Sitemap: ' . rankweb_news_sitemap_url();
 		return false !== strpos( (string) $txt, $line ) ? $txt : rtrim( (string) $txt ) . "\n" . $line . "\n";
 	},
 	60
@@ -291,7 +291,7 @@ const AW_HTML_SITEMAP_SLUG = 'sitemap';
  *
  * @return string HTML.
  */
-function aw_html_sitemap() {
+function rankweb_html_sitemap() {
 	$cached = get_transient( 'aw_html_sitemap' );
 	if ( is_string( $cached ) && '' !== $cached ) {
 		return $cached;
@@ -313,7 +313,7 @@ function aw_html_sitemap() {
 	};
 	$items = function ( $type ) use ( $title, $noidx ) {
 		$ids = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'title', 'order' => 'ASC', 'suppress_filters' => true ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- our own fixed list: no query filter may reorder or add to it.
-		$ids = array_values( array_diff( array_map( 'intval', $ids ), function_exists( 'aw_seo_preview_ids' ) ? array_map( 'intval', (array) aw_seo_preview_ids() ) : array() ) );
+		$ids = array_values( array_diff( array_map( 'intval', $ids ), function_exists( 'rankweb_seo_preview_ids' ) ? array_map( 'intval', (array) rankweb_seo_preview_ids() ) : array() ) );
 		$out = array();
 		foreach ( $ids as $id ) {
 			if ( $noidx( $id ) || ( 'aw_opportunity' === $type && function_exists( 'kits_retention_state' ) && kits_retention_state( get_post( $id ) ) ) ) {
@@ -326,7 +326,7 @@ function aw_html_sitemap() {
 		return $out;
 	};
 	$cats = function ( $type ) {
-		$counts = function_exists( 'aw_seo_category_counts' ) ? aw_seo_category_counts() : array();
+		$counts = function_exists( 'rankweb_seo_category_counts' ) ? rankweb_seo_category_counts() : array();
 		$field  = 'post' === $type ? 'guide' : $type;
 		$out    = array();
 		foreach ( get_terms( array( 'taxonomy' => 'category', 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
@@ -376,19 +376,19 @@ function aw_html_sitemap() {
 
 	// Directory: every state, then its districts with listings.
 	list( $url, $name ) = $hub_title( 'aw_listing' );
-	if ( $url && function_exists( 'aw_seo_dir_children' ) ) {
+	if ( $url && function_exists( 'rankweb_seo_dir_children' ) ) {
 		$body   = '';
-		$states = aw_seo_dir_children( null );
+		$states = rankweb_seo_dir_children( null );
 		usort( $states, fn( $a, $b ) => strcmp( $a[0]->name, $b[0]->name ) );
 		foreach ( $states as $s ) {
 			$state = $s[0];
-			$kids  = aw_seo_dir_children( $state );
+			$kids  = rankweb_seo_dir_children( $state );
 			usort( $kids, fn( $a, $b ) => strcmp( $a[0]->name, $b[0]->name ) );
 			$links = array();
 			foreach ( $kids as $d ) {
-				$links[] = array( aw_directory_url( $d[0]->slug ), $d[0]->name . ' (' . number_format_i18n( $d[1] ) . ')' );
+				$links[] = array( directoryweb_directory_url( $d[0]->slug ), $d[0]->name . ' (' . number_format_i18n( $d[1] ) . ')' );
 			}
-			$body .= '<h3 id="aw-sitemap-dir-' . esc_attr( $state->slug ) . '"><a href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( $state->name . ' (' . number_format_i18n( $s[1] ) . ')' ) . '</a></h3>' . $list( $links, true );
+			$body .= '<h3 id="aw-sitemap-dir-' . esc_attr( $state->slug ) . '"><a href="' . esc_url( directoryweb_directory_url( $state->slug ) ) . '">' . esc_html( $state->name . ' (' . number_format_i18n( $s[1] ) . ')' ) . '</a></h3>' . $list( $links, true );
 		}
 		$html .= '<section class="aw-more-group" aria-labelledby="aw-sitemap-aw_listing">' . $head( 'aw_listing', $name, $url ) . $body . '</section>';
 	}
@@ -404,7 +404,7 @@ add_shortcode(
 		if ( function_exists( 'kits_use_component_style' ) ) {
 			kits_use_component_style( 'aw-single' ); // aw-more-group, aw-more-head
 		}
-		return aw_html_sitemap();
+		return rankweb_html_sitemap();
 	}
 );
 

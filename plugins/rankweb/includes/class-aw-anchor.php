@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/class-aw-linker.php';
 
 /** Anchor types. */
-final class AW_Anchor {
+final class RankWeb_Anchor {
 
 	/** The types, in the order they are shown. */
 	const TYPES = array( 'exact', 'partial', 'branded', 'generic', 'naked', 'image', 'long_tail', 'other' );
@@ -50,7 +50,7 @@ final class AW_Anchor {
 		if ( preg_match( '~^(?:https?://|www\.)\S+$~i', $anchor ) || preg_match( '~^[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+(?:/\S*)?$~i', $anchor ) ) {
 			return 'naked';
 		}
-		$norm = AW_Linker::normalize( $anchor );
+		$norm = RankWeb_Linker::normalize( $anchor );
 		if ( '' === $norm ) {
 			return 'other';
 		}
@@ -89,7 +89,7 @@ final class AW_Anchor {
 	public static function normalize_list( array $list ): array {
 		$out = array();
 		foreach ( $list as $item ) {
-			$n = AW_Linker::normalize( (string) $item );
+			$n = RankWeb_Linker::normalize( (string) $item );
 			if ( '' !== $n ) {
 				$out[ $n ] = $n;
 			}
