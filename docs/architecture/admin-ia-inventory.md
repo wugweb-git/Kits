@@ -1,96 +1,43 @@
 # wp-admin IA inventory (12 Nov 2026)
 
-**Status (25 Nov 2026):** Snapshot of the Animal Writes wp-admin on 12 Nov; not re-checked against the live site.
+**Status (25 Nov 2026):** Finished items were removed from this file on 25 Nov; what is left is open or "keep". The menu snapshot is from the Animal Writes wp-admin on 12 Nov and has not been re-checked against the live site. Nothing here is deployed.
 
-Read on live in the built-in browser (menus, submenus, tabs, sections) and from the code. Each row has a proposal:
-**keep**, **merge**, **move**, **rename** or **remove**. Nothing is removed or moved before the owner has seen this list.
-The target layout is in the plan: content menus first, then one block of Wugweb products (each its own top-level menu,
-the same with or without Kits Core), then third-party plugins as their vendors ship them.
+Target layout: content menus first, then one block of Wugweb products (each its own top-level menu, the same with or without Kits Core), then third-party plugins as their vendors ship them.
 
-## 1. Side menu and submenus (as on live)
+## Open
 
-| Menu › submenu | Owner (file) | Proposal |
+| Item | Where | Note |
 |---|---|---|
-| Dashboard › Home, Updates | core | keep |
-| Dashboard › Simple History | Simple History | keep |
-| Directory › Directory, Add Listing | Core (CPT `aw_listing`) | keep |
-| Directory › Claims | Core `claims-review.php:296` | **done 12 Nov**: the item is Fluent Forms › Claims, after Entries (owner: "With form entries"); same screen, address and review; DirectoryWeb › Claims stays read-only |
-| News › News, Add News item | Core (CPT `aw_news`) | keep |
-| News › Linked campaigns | taxonomy `kits_campaign_link` | **done 12 Nov**: one entry under Classification |
-| News › Social posts | Core `social-posts.php:146` (CPT `aw_social`) | keep under News (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)) |
-| Resources › All Resources, Add New Resource | core `post` | keep |
-| Resources › Linked campaigns | taxonomy | **done** (as above) |
-| Library › Library, Add Library item, Linked campaigns | Core (CPT `aw_legal`) | keep; Linked campaigns **done** |
-| Opportunities › …, Linked campaigns | Core (CPT `aw_opportunity`) | keep; Linked campaigns **done** |
-| Campaigns › Campaigns, Add Campaign, Linked campaigns | Core (CPT `aw_campaign`) | keep; Linked campaigns **done** |
-| Campaigns › Letter report | Core `campaign-letters.php:267` | keep (it belongs to Campaigns) |
-| Press coverage › All coverage, Add coverage, Linked campaigns | Core (CPT `aw_press`; menu set twice: `press.php:108`, `admin-ia.php:95`) | **done 12 Nov**: menu defined once (`press.php`); Linked campaigns under Classification |
-| Pages | core | keep |
-| Media › Library, Add Media File | core | keep |
-| Media › Media groups | Core (taxonomy `kits_media_group`) | keep |
-| Media › Make WebP, Duplicate files, Reuse pictures | Core `media-webp.php`, `media-merge.php`, `media-reuse.php` | keep (core convention: media tools under Media) |
-| Classification › Categories, Tags, Linked campaigns | Core `admin-ia.php:135` | keep (Linked campaigns added 12 Nov) |
-| Appearance › Themes, Editor, Fonts | core | keep |
-| Kits | Kits Core `admin-home.php:22` | **done 12 Nov**: its own top-level menu, first in the Wugweb block |
-| Appearance › Theme Check | Theme Check | keep |
-| Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | each plugin's own `add_menu_page()` (Kits 58.1, DirectoryWeb 58.2, SourceWeb 58.3, RankWeb 58.4, InsightWeb 58.5, MailWeb 58.6, PlanWeb 58.7; separator `separator-wugweb` at 58.05, added by whichever registers first) | **done 12 Nov**, no Kits Core helper since 13 Nov; Animal Writes Core keeps the content-menu order (`admin-ia.php`) |
-| Tools › Plugin Check, Plugin Check Namer, Plugin Check SVN | Plugin Check | keep (development tool) |
-| Settings › Performance, Plugin Check, Simple History | third party | keep |
-| Site Kit, LiteSpeed Cache, FluentCRM, Fluent Forms, UpdraftPlus | third party | keep |
-| Rank Math SEO › … › Black Friday Sale | Rank Math | **remove** the upsell link (`admin-tidy.php` list) |
-| (empty last menu item) | unknown | **find and remove** |
+| Empty last menu item | wp-admin side menu | Seen on live only; no empty-title submenu found in code. Find on live, then remove. |
+| Tools tab (RankWeb) and Help tab (PlanWeb, MailWeb) | `rankweb-ui.php`, `planweb-ui.php`, `mailweb-ui.php` | Wait for the owner's reference list. MailWeb already has a Help card on its Dashboard; RankWeb has a Tools card (owner, 14 Nov: no Tools tab, `docs/pending.md`). |
+| Place intros into Listings › Places | `directoryweb-ui.php:174`, `place-intros.php` | Still a separate tab and submenu. Claims stays read-only (owner). |
+| `kits_link` and `kits_options_link` | Kits Core `admin-home.php:53`, `admin-screens.php:854` | Identical bodies; merge into one. |
+| Renaming the developer parts of Kits › Help | `admin-menu.php:187-190` | Help already has Docs, Design system and "Developer: extra settings"; rename only if the owner asks. |
 
-## 2. Screens with no menu entry (hidden) and dead addresses
+Dropped by the owner on 25 Nov (no tabbing or regrouping): grouping the InsightWeb (10) and SourceWeb (12) tabs.
 
-| Address | Today | Proposal |
-|---|---|---|
-| `admin.php?page=aw-keys` (Keys) | Kits › Keys | keep in Kits (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)) |
-| `admin.php?page=aw-modules` (Modules) | Kits › Modules | keep in Kits (as above) |
-| `admin.php?page=aw-dates` | redirects to PlanWeb classic | keep the redirect, to PlanWeb's shell screen |
-| `aw-theme-parts`, `kits-docs` | redirect to Kits › Help | keep redirects |
-| `kits-fonts`, `kits-design-system`, `aw-cron-health`, `aw-core` | **403 "not allowed"** | **redirect**: fonts → Appearance › Editor › Styles › Typography; design system → Kits › Help › Design system; cron health → Dashboard; aw-core → Kits (**done 12 Nov**) |
+## Menu snapshot: keep (12 Nov)
 
-## 3. Tabs inside our screens
+| Menu › submenu | Owner (file) |
+|---|---|
+| Dashboard › Home, Updates; Simple History | core; Simple History |
+| Directory › Directory, Add Listing | CPT `aw_listing` |
+| News › News, Add News item; Social posts | CPT `aw_news`; CPT `aw_social` (kept in Kits: Animal Writes is the site layer and goes with the child theme, plan 4.3; owner, 12 Nov) |
+| Resources, Pages | core |
+| Library › Library, Add Library item | CPT `aw_legal` |
+| Opportunities | CPT `aw_opportunity` |
+| Campaigns › Campaigns, Add Campaign, Letter report | CPT `aw_campaign`; `campaign-letters.php` |
+| Press coverage › All coverage, Add coverage | CPT `aw_press` (`press.php`) |
+| Media › Library, Add Media File, Media groups, Make WebP, Duplicate files, Reuse pictures | core; `kits_media_group`; `media-webp.php`, `media-merge.php`, `media-reuse.php` |
+| Classification › Categories, Tags, Linked campaigns | `admin-ia.php` |
+| Appearance › Themes, Editor, Fonts, Theme Check | core; Theme Check |
+| Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | each plugin's own `add_menu_page()` at 58.1 to 58.7, separator `separator-wugweb` at 58.05 |
+| Tools › Plugin Check (3 items); Settings › Performance, Plugin Check, Simple History | third party |
+| Site Kit, LiteSpeed Cache, FluentCRM, Fluent Forms (with Claims), UpdraftPlus | third party |
+| `aw-keys` (Kits › Keys), `aw-modules` (Kits › Modules), `aw-dates` (redirect to PlanWeb), `aw-theme-parts` and `kits-docs` (redirect to Kits › Help) | keep in Kits (as above) |
 
-| Screen | Tabs today | Proposal |
-|---|---|---|
-| Kits | Home, Theme Options, Settings, Tools, Help | Home: **added 12 Nov** Edit the theme (Site Editor links) above the site's checks; the site's checks stay on Home (no Animal Writes menu: Animal Writes is the site layer and goes with the child theme (plan 4.3), so its screens stay in Kits (owner, 12 Nov)). Theme Options: **map** to the Site Editor where core can hold it (plan phase 4.7). |
-| Kits › Settings | Performance, CDN cache times, Shared cache, Compatibility, Preview access/IPs/devices, Connected services and modules | keep; group as sections with one line each |
-| Kits › Help | Design system (tokens, states, components 160, menus, contrast), edit-screens map (mapping, schema, third-party boxes), docs | **rename** the developer parts to Help › Developer; keep design system |
-| RankWeb | Dashboard, FAQ, Settings | add **Tools** (re-score, rebuild FAQ index) and **Help**; Settings tabs stay |
-| DirectoryWeb | Dashboard, Claims, Listings, Settings, Place intros | **merge** Place intros into Listings › Places; Claims stays read-only (owner) |
-| PlanWeb | Dashboard, Entries, Settings | keep; add Help |
-| MailWeb | Dashboard, Inbox, Settings | keep; add Help |
-| InsightWeb | Dashboard, Keywords, Rising, Pages, Clarity, Check list, Sourcing keywords, Links, Server, Settings | 10 tabs: **group** as Dashboard › Search (Keywords, Rising, Pages) › Site (Links, Server, Clarity, Check list) › Settings; Sourcing keywords shows only with SourceWeb |
-| SourceWeb | Dashboard, To review, Enrichment review, Sources, Keywords, Rules, AI models, Workers, Rejected, Relay log, Change log, Settings | 12 tabs: **group** as Dashboard › Review (To review, Enrichment) › Setup (Sources, Keywords, Rules, AI models, Workers) › Logs (Rejected, Relay, Change) › Settings |
+## Done, no longer listed
 
-## 4. Every screen twice (shell and classic)
+Fluent Forms › Claims; Linked campaigns under Classification; Press menu defined once; Kits as its own top-level menu and the Wugweb menu block (13 Nov, no Kits Core helper); redirects for `kits-fonts`, `kits-design-system`, `aw-cron-health`, `aw-core`; Edit the theme links on Kits Home; every option, term-meta and post-meta field in the old section 6 (12 Nov); `kits_term_url` duplicate; Rank Math "Black Friday Sale" link (`kits-core/includes/admin-layer/tidy.php:100`); `mailweb_crm_*` / `aw_crm_*` (the `aw_crm_*` names are wrappers in `mailweb/includes/fluentcrm-compat.php`); `aw_core_link` and `aw_theme_parts_link` (gone); shell and classic twins (classic screens removed, the shell is the one screen); Theme Options mapped to the Site Editor (`kits_options_link`, `site-editor-links.js`); Create Block Theme and Link Whisper status in the plugin table (`docs/plugins/plugin-map.md`).
 
-Each of MailWeb, RankWeb, InsightWeb, SourceWeb, DirectoryWeb and PlanWeb has the Kits shell screen and a classic PHP
-screen (`&ui=classic`), switched by six copies of `*_ui_wanted` / `*_ui_ready`. Proposal (owner, 12 Nov: keep the shell,
-on `@wordpress/components`): **merge** to one screen per product once the shell screen covers the classic one.
-
-## 5. Duplicate functions across plugins
-
-| Function | Where | Proposal |
-|---|---|---|
-| `kits_term_url` | Kits Core `primitives.php:11`, RankWeb `helpers.php:13` | **done 12 Nov**: RankWeb has `aw_seo_term_url()` |
-| `*_simple_table` + class | Kits Core, Core, RankWeb, MailWeb, SourceWeb | keep one per plugin (independence), same pattern |
-| `*_rest_can` | PlanWeb, RankWeb, SourceWeb, DirectoryWeb | keep per plugin |
-| `aw_seo_api_allowed` / `aw_si_api_allowed` | RankWeb, InsightWeb | keep per plugin |
-| `mailweb_crm_*` / `aw_crm_*` | MailWeb, Core | **merge**: Core calls MailWeb's when present |
-| `kits_link`, `aw_core_link`, `aw_theme_parts_link`, `kits_options_link` | Kits Core, Core | **merge** into one per plugin |
-
-## 6. Options with no screen (only WP-CLI can change them)
-
-`aw_default_share_image`, `aw_seo_keep_listings`, `aw_district_helplines`, `aw_issuer_short`, `aw_ff_send_email`,
-`aw_nl_ff_form_full`, `aw_sample_listing_ids`, `aw_backfill_floor`, `kits_ga4_via_gtm` (show read-only). Term meta
-`aw_category_card`, `aw_pinned`, `aw_short_name`, `aw_campaign_short`; post meta `aw_campaign_metrics`, `aw_legal_dated`.
-Proposal: **add** each to its owner's Settings section or edit box.
-
-**Done 12 Nov:** `aw_ff_send_email`, `aw_nl_ff_form_full`, `aw_sample_listing_ids` on Kits › Modules › Forms and sample listings (`site-options.php`). Also done 12 Nov: RankWeb › Settings › Indexing (listings kept indexed, new IDs must be listings) and › Share images (default share image, media picker); SourceWeb › Settings › Backfill (oldest date); Kits › Modules › Directory and Library lists (district helplines, one line per number with source and date; issuer short names); Kits › Settings › Analytics shows `kits_ga4_via_gtm` read only. Term and post meta (`edit-fields.php`): Category › Edit gets Card image (`aw_category_card`) and Pinned Resources (`aw_pinned`); Linked campaigns › Edit gets Short name (`aw_short_name`, the older `aw_campaign_short` read when empty); the Library Document box gets Dated (`aw_legal_dated`); the campaign Outcome box gets Metrics (`aw_campaign_metrics`, one line per metric). Section 6 is done.
-
-## 7. Plugin list vs docs
-
-Create Block Theme is active (docs: inactive). Link Whisper Free is inactive (docs and edit-screens map still list its
-panel). Accessibility Checker inactive. `docs/plugin-map.md` "Every plugin on live" is from 24 Oct: **refresh**.
+Kept per plugin on purpose (independence): `*_simple_table`, `*_rest_can`, `aw_seo_api_allowed` / `aw_si_api_allowed`.
