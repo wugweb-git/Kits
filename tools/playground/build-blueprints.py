@@ -17,7 +17,7 @@ import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO_SLUG = "wugweb-git/Kits"
-RELEASE_TAG = "kits-suite-2026.11.25-pre.1"
+RELEASE_TAG = "kits-suite-2026.11.25-pre.2"
 ASSET_BASE = f"https://github.com/{REPO_SLUG}/releases/download/{RELEASE_TAG}"
 SCHEMA = "https://playground.wordpress.net/blueprint-schema.json"
 # Every product declares "Requires at least: 7.1" and "Requires PHP: 8.0". PHP 8.2 is used here because the
