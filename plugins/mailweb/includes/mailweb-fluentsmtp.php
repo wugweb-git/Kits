@@ -363,8 +363,138 @@ add_action(
 				),
 			)
 		);
+
+		register_rest_route(
+			'mailweb/v1',
+			'/services/smtp-presets',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => $admin,
+				'callback'            => fn() => rest_ensure_response( array( 'presets' => mailweb_smtp_presets() ) ),
+			)
+		);
+
+		register_rest_route(
+			'mailweb/v1',
+			'/test-email',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => $admin,
+				'callback'            => function ( WP_REST_Request $r ) {
+					$to = sanitize_email( (string) $r->get_param( 'to' ) );
+					if ( ! is_email( $to ) ) {
+						return new WP_Error( 'invalid_email', __( 'Please enter a valid recipient email address.', 'mailweb' ), array( 'status' => 400 ) );
+					}
+					$html = (bool) ( $r->get_param( 'html' ) ?? true );
+					return rest_ensure_response( mailweb_test_send( $to, $html ) );
+				},
+			)
+		);
 	}
 );
+
+/* ---------- 7. SMTP Presets, Force From & Email Test (WP Mail SMTP / FluentSMTP / SMTP Mailer parity) ---------- */
+
+/**
+ * Common SMTP provider presets for provider-independent configuration.
+ *
+ * @return array<string, array<string, mixed>>
+ */
+function mailweb_smtp_presets(): array {
+	return array(
+		'hostinger' => array( 'label' => 'Hostinger Mail', 'host' => 'smtp.hostinger.com', 'port' => 465, 'encryption' => 'ssl' ),
+		'gmail'     => array( 'label' => 'Google / Gmail', 'host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls' ),
+		'outlook'   => array( 'label' => 'Microsoft 365 / Outlook', 'host' => 'smtp.office365.com', 'port' => 587, 'encryption' => 'tls' ),
+		'sendgrid'  => array( 'label' => 'SendGrid', 'host' => 'smtp.sendgrid.net', 'port' => 587, 'encryption' => 'tls' ),
+		'mailgun'   => array( 'label' => 'Mailgun', 'host' => 'smtp.mailgun.org', 'port' => 587, 'encryption' => 'tls' ),
+		'postmark'  => array( 'label' => 'Postmark', 'host' => 'smtp.postmarkapp.com', 'port' => 587, 'encryption' => 'tls' ),
+		'ses'       => array( 'label' => 'Amazon SES', 'host' => 'email-smtp.us-east-1.amazonaws.com', 'port' => 587, 'encryption' => 'tls' ),
+		'custom'    => array( 'label' => 'Custom SMTP', 'host' => '', 'port' => 587, 'encryption' => 'tls' ),
+	);
+}
+
+/**
+ * Send a diagnostic test email and return structured status.
+ *
+ * @param string $to   Recipient email.
+ * @param bool   $html Send as HTML.
+ * @return array<string, mixed>
+ */
+function mailweb_test_send( string $to, bool $html = true ): array {
+	$headers = $html ? array( 'Content-Type: text/html; charset=UTF-8' ) : array();
+	$subject = sprintf( '[%s] MailWeb Test Email', (string) get_bloginfo( 'name' ) );
+	$body    = $html
+		? '<p>' . esc_html__( 'This is a MailWeb test email confirming your outgoing mail configuration is working.', 'mailweb' ) . '</p>'
+		: __( 'This is a MailWeb test email confirming your outgoing mail configuration is working.', 'mailweb' );
+	$ok      = wp_mail( $to, $subject, $body, $headers );
+	mailweb_log_record(
+		array(
+			'to'       => $to,
+			'subject'  => $subject,
+			'status'   => $ok ? 'sent' : 'failed',
+			'provider' => 'test',
+		)
+	);
+	return array(
+		'sent'    => (bool) $ok,
+		'to'      => $to,
+		'message' => $ok ? __( 'Test email dispatched.', 'mailweb' ) : __( 'Test email failed to send.', 'mailweb' ),
+	);
+}
+
+/* ---------- 8. Admin Submenu: Email Logs & Test (FluentSMTP / WP Mail SMTP style) ---------- */
+
+add_action(
+	'admin_menu',
+	function () {
+		add_submenu_page(
+			'mailweb',
+			__( 'Email Logs & Test', 'mailweb' ),
+			__( 'Email Logs', 'mailweb' ),
+			'manage_options',
+			'mailweb-logs',
+			'mailweb_render_logs_screen'
+		);
+	},
+	30
+);
+
+/**
+ * Render the Email Logs, Resend, Fallback & Test Email screen.
+ */
+function mailweb_render_logs_screen(): void {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You are not allowed to access this page.', 'mailweb' ), 403 );
+	}
+	$logs = mailweb_logs_list( 50 );
+	$fb   = mailweb_smtp_fallback_settings();
+	echo '<div class="wrap">';
+	echo '<h1>' . esc_html__( 'MailWeb — Email Logs & Diagnostics', 'mailweb' ) . '</h1>';
+	echo '<p>' . esc_html( sprintf( /* translators: %s: fallback status */ __( 'Fallback SMTP: %s', 'mailweb' ), $fb['enabled'] ? ( $fb['host'] . ':' . $fb['port'] ) : __( 'Not enabled', 'mailweb' ) ) ) . '</p>';
+	echo '<table class="widefat striped" style="margin-top:16px;"><thead><tr>';
+	echo '<th>' . esc_html__( 'Time (UTC)', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'To', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'Subject', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'Status', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'Provider', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'Error', 'mailweb' ) . '</th>';
+	echo '</tr></thead><tbody>';
+	if ( empty( $logs ) ) {
+		echo '<tr><td colspan="6">' . esc_html__( 'No email log entries recorded yet.', 'mailweb' ) . '</td></tr>';
+	} else {
+		foreach ( $logs as $row ) {
+			echo '<tr>';
+			echo '<td>' . esc_html( (string) ( $row['at'] ?? '' ) ) . '</td>';
+			echo '<td>' . esc_html( (string) ( $row['to'] ?? '' ) ) . '</td>';
+			echo '<td>' . esc_html( (string) ( $row['subject'] ?? '' ) ) . '</td>';
+			echo '<td><strong>' . esc_html( (string) ( $row['status'] ?? '' ) ) . '</strong></td>';
+			echo '<td>' . esc_html( (string) ( $row['provider'] ?? '' ) ) . '</td>';
+			echo '<td>' . esc_html( (string) ( $row['error'] ?? '' ) ) . '</td>';
+			echo '</tr>';
+		}
+	}
+	echo '</tbody></table></div>';
+}
 
 /* ---------- 7. WP-CLI Commands (test, health, stats, prune-logs) ---------- */
 
