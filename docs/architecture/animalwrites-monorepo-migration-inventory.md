@@ -114,5 +114,6 @@ flowchart TD
    * Relocate `assets/site/` and `styles/animal-writes.json` into a tenant child theme or configure them via the `kits-core` tenant asset loader (`wp_theme_json_data_theme` filter).
 2. **Package Ingestion**:
    * In `animalwrites`, consume the theme and 7 plugins as versioned release ZIPs or Git subtrees from `wugweb-git/kits`.
-3. **Decommission `animal-writes-core`**:
-   * Migrate any lingering database schema definitions to standard `directoryweb` custom field registrations.
+3. ~~**Decommission `animal-writes-core`**~~ done 19 Nov 2026 (commit `69832857`); its capabilities are in `kits-core` and `directoryweb`. Stored `aw_*` names stay by policy (`docs/plugins/directoryweb-data-naming-policy.md`).
+
+Still open (1 and 2 belong to the Animal Writes site repo, not this one).

@@ -314,7 +314,7 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 3. **Outstanding Implementation Tasks:**
    - [x] Native `directoryweb/collection-filter` block added (the legacy shortcode intentionally stays).
    - [x] Claim state machine and review transitions complete (`claim-native.php`).
-   - [ ] Implement optional geocoding provider fallback when Google Maps API key is unset.
+   - [x] ~~Geocoding fallback without a Google Maps key~~ done: `includes/geocode.php` uses OpenStreetMap Nominatim (no key), cached, with PIN code or district centre as the approximate fallback.
 4. **Release-Readiness Acceptance Criteria:**
    - Activates cleanly on clean WordPress install without Kits Core or SCF.
    - All 9 dynamic blocks render on frontend without console or PHP errors.
@@ -331,8 +331,8 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
    - Added core WordPress `get_canonical_url` hook in `includes/canonical.php` and `wp_robots` hook in `includes/robots.php`.
    - Authored `tests/StandaloneSchemaTest.php`.
 3. **Outstanding Implementation Tasks:**
-   - [ ] Build Gutenberg Block Editor sidebar panel for per-post focus keyphrase and schema overrides.
-   - [ ] Implement standalone XML sitemap index rendering when third-party SEO plugins are absent.
+   - [x] ~~Block Editor sidebar panel~~ done: `includes/editor-sidebar.php`.
+   - [x] ~~Standalone XML sitemap~~ done: WordPress's own `wp-sitemap.xml` is used and `standalone-seo.php` keeps noindex items out of it; the Directory sitemap is `sitemap.php`.
 4. **Release-Readiness Acceptance Criteria:**
    - Activates and renders meta titles, canonicals, robots, and JSON-LD schema without Rank Math installed.
    - Breadcrumbs block renders with valid BreadcrumbList schema.
