@@ -2,6 +2,8 @@
 
 **Status (Updated 25 Nov 2026):** Shipped at `3.3.0`, standalone verified, and **WP.org Plugin Check (`0` errors)** verified (`Update URI` removed, `readme.txt` `== External services ==` added, hardcoded `animalwrites.in` FluentCRM host/reply-to replaced with dynamic site host/`admin_email`). Hostinger Mail API SDK (`hostinger/mail-api-php-sdk` v1.18.7), SMTP fallback (465 SSL), and DNS deliverability telemetry cron active. *(Provider-independent generic IMAP adapter noted below remains a future product enhancement.)*
 
+**Checked against the code, 25 Nov 2026.** Done: `Update URI` removed, Hostinger SDK bundled, SMTP fallback. **Not in this repo:** the fork `plugins/mailweb-org/` and `mailweb-shell` (`packages/mailweb-shell` is empty). **Still open:** phase 4 (remove classic screens and the simple-table helper; `mail-in.php:61` still adds a dead `ui=classic` argument), the IMAP adapter (skeleton only, `providers.php:175`), multi-tenant sender profiles, the daily DNS cron (the code checks DNS live in `smtp.php:261`), and the menu order (the code opens on Inbox, the decision below says Dashboard).
+
 <!-- Note (17 Nov 2026): the separate docs/mailweb-org-assessment.md and docs/mailweb-org-rebrand.md were folded into
 the "WordPress.org edition" section below and deleted — this is the single living MailWeb doc (owner's doc rule). -->
 

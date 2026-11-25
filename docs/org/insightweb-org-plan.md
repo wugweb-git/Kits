@@ -2,6 +2,8 @@
 
 **Status (25 Nov 2026):** Built in `plugins/insightweb/` (version 1.0.0); not deployed from this repo. The "shipped and live on production at `d51da157`" note below dates from 22 Nov and cannot be verified here, so treat it as unconfirmed. Report only: owned by another workstream.
 
+**Checked against the code, 25 Nov 2026.** Done: the RankWeb bridge is removed and the plugin is standalone. **Not in this repo:** the fork `insightweb-org` and the shared service class. **Wrong below:** the text domain is `insightweb`, not `aw-seo-extras`. **Not built:** reports (11, 12, 29), AdSense (52), the country filter (53).
+
 **Earlier note (22 Nov 2026, unverified):** Phase 1 shipped and live on production (`origin/wordpress` at `d51da157`). Standalone plugin operational in `plugins/insightweb/` with Search Console, GA4, Clarity, PageSpeed, Bing, keywords, Rising, and SVG MiniCharts telemetry.
 Owner's decision of 11 Nov ("9. Decision log": "Search Insights leaves RankWeb; plugin names"). Built on `docs/seo/search-insights-plan.md`, the Search Insights entries in `docs/pending.md`, `docs/plugin-map.md`.
 
