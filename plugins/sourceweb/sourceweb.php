@@ -23,6 +23,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.1.0' ); // keep equal to the Version header above
 // Core loads this file; if it is also active on its own, the second load stops here.
 if ( defined( 'AW_SOURCING_LOADED' ) ) {
 	return;

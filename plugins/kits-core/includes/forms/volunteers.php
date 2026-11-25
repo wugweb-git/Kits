@@ -186,7 +186,7 @@ add_action(
 	'wp_body_open',
 	function () {
 		if ( is_page( 'update' ) ) {
-			wp_register_script( 'kits-clarity-mask', false, array(), false, true );
+			wp_register_script( 'kits-clarity-mask', false, array(), KITS_CORE_VERSION, true );
 			wp_enqueue_script( 'kits-clarity-mask' );
 			wp_add_inline_script( 'kits-clarity-mask', "document.body.setAttribute('data-clarity-mask','True');" );
 		}

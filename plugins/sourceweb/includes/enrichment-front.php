@@ -68,7 +68,7 @@ function aw_enrich_profile_extras( $id ) {
 		static $queued = false;
 		if ( ! $queued ) {
 			$queued = true;
-			wp_register_script( 'sourceweb-glive', false, array(), false, true );
+			wp_register_script( 'sourceweb-glive', false, array(), SOURCEWEB_VERSION, true );
 			wp_enqueue_script( 'sourceweb-glive' );
 			wp_add_inline_script( 'sourceweb-glive', '(function(){if(!window.fetch)return;document.querySelectorAll(".aw-glive-slot").forEach(function(s){fetch(s.dataset.src).then(function(r){return r.json()}).then(function(d){if(d&&d.html){s.insertAdjacentHTML("afterend",d.html);}s.remove();}).catch(function(){s.remove();});});})();' );
 		}

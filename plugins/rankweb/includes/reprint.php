@@ -83,7 +83,7 @@ function rankweb_render_reprint_box( $post ) {
 		});
 	});
 	<?php
-	wp_register_script( 'rankweb-reprint', false, array( 'jquery' ), false, true );
+	wp_register_script( 'rankweb-reprint', false, array( 'jquery' ), RANKWEB_VERSION, true );
 	wp_enqueue_script( 'rankweb-reprint' );
 	wp_add_inline_script( 'rankweb-reprint', (string) ob_get_clean() );
 }

@@ -920,7 +920,7 @@ function kits_system_page() {
 		});
 	})();
 	<?php
-	wp_register_script( 'kits-system-screen', false, array(), false, true );
+	wp_register_script( 'kits-system-screen', false, array(), KITS_CORE_VERSION, true );
 	wp_enqueue_script( 'kits-system-screen' );
 	wp_add_inline_script( 'kits-system-screen', (string) ob_get_clean() );
 	echo '</div>';

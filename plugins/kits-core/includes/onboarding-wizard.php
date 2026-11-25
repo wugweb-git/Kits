@@ -235,7 +235,7 @@ function kits_onboarding_page() {
 		});
 	});
 	<?php
-	wp_register_script( 'kits-onboarding-logo', false, array( 'jquery' ), false, true );
+	wp_register_script( 'kits-onboarding-logo', false, array( 'jquery' ), KITS_CORE_VERSION, true );
 	wp_enqueue_script( 'kits-onboarding-logo' );
 	wp_add_inline_script( 'kits-onboarding-logo', (string) ob_get_clean() );
 }

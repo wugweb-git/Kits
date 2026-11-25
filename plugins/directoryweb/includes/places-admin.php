@@ -180,7 +180,7 @@ function directoryweb_place_box_js() {
 	pin.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); look(); } });
 })();
 	<?php
-	wp_register_script( 'directoryweb-place-box', false, array(), false, true );
+	wp_register_script( 'directoryweb-place-box', false, array(), DIRECTORYWEB_VERSION, true );
 	wp_enqueue_script( 'directoryweb-place-box' );
 	wp_add_inline_script( 'directoryweb-place-box', (string) ob_get_clean() );
 }
