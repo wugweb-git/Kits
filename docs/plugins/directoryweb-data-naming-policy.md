@@ -4,7 +4,7 @@
 
 ## 1. Rule for code (now)
 
-- New functions, hooks, options, REST routes, capabilities and meta use `directoryweb_` or the agreed short form `dw_`. Never `aw_` or `aw-` in new code.
+- New functions, hooks, options, REST routes, capabilities and meta use `directoryweb_`. Never `aw_`, `dw_` or `aw-` in new code (WordPress.org wants four or more characters).
 - Already done: `manage_directoryweb`, REST `directoryweb/v1`, `_dw_claim_*` claim meta, `directoryweb_*` helper names, the `dw_evidence_*` store.
 
 ## 1a. What is left of `aw` in code (deliberate)
@@ -21,7 +21,7 @@ Same rule as above, for the same reason (WordPress.org wants a project prefix of
 - Code names: every `aw_si_*` function is now `insightweb_si_*` (390 functions), every `aw_*` function in SourceWeb is `sourceweb_*` (about 500), classes are `InsightWeb_*` / `SourceWeb_*`, constants `INSIGHTWEB_*` / `SOURCEWEB_*`.
 - Stored names unchanged: options, post and term meta, transients, cron events and hook names (`aw_si_daily`, `aw_workers_watchdog`, ...), capabilities, nonce actions, and the `aw/v1` REST routes. Nothing to migrate.
 - Earlier function names that other plugins still call (Kits Core, RankWeb, DirectoryWeb) live in each plugin's `includes/legacy-aliases.php` (7 in InsightWeb, 16 in SourceWeb). Guard tests `plugins/{insightweb,sourceweb}/tests/no-aw-functions-test.php` fail if any other `aw_` function or `AW_` class comes back.
-- Still short-prefixed by decision: DirectoryWeb's `dw_*` functions (rename pending) and the stored names above.
+- DirectoryWeb's `dw_*` functions, `DW_*` constants and test/ephemeral names (nonce actions, error codes, transients, form fields) are now `directoryweb_*` / `DIRECTORYWEB_*`. Kept: the `_dw_claim_*` claim meta and Fluent Forms' `dw_evidence` submission meta (stored data); `dw_claim_upload_error` stays as an alias for Kits Core. Guard: `plugins/directoryweb/tests/no-short-prefix-test.php`.
 
 ## 2. Rule for stored data (now): preserve, do not migrate
 

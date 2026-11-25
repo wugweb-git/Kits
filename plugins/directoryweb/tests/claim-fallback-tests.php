@@ -29,7 +29,7 @@ define( 'ABSPATH', '/' );
 define( 'DIRECTORYWEB_CAP', 'manage_directoryweb' );
 define( 'HOUR_IN_SECONDS', 3600 );
 define( 'MINUTE_IN_SECONDS', 60 );
-const DW_CLAIM_ROLES = array( '' => 'Choose', 'founder' => 'Founder' );
+const DIRECTORYWEB_CLAIM_ROLES = array( '' => 'Choose', 'founder' => 'Founder' );
 const DIRECTORYWEB_SERVICES = array();
 function add_action( ...$a ) {}
 function add_filter( ...$a ) {}
@@ -63,7 +63,7 @@ if ( getenv( 'KITS' ) ) {
 }
 require getenv( 'ROOT' ) . '/includes/claim-native.php';
 require getenv( 'ROOT' ) . '/includes/standalone-fallback.php';
-echo dw_claim_native_active() ? 'native' : 'fluent', '|', directoryweb_ff_form( 'claim', array( 'listing' => 5 ) );
+echo directoryweb_claim_native_active() ? 'native' : 'fluent', '|', directoryweb_ff_form( 'claim', array( 'listing' => 5 ) );
 PHP;
 $file = tempnam( sys_get_temp_dir(), 'dwfb' );
 file_put_contents( $file, $child );
@@ -76,7 +76,7 @@ foreach ( $cases as $c ) {
 	$decided = strtok( $out, '|' );
 	$html    = (string) strstr( $out, '|' );
 	if ( 'native' === $want ) {
-		$ok = 'native' === $decided && false !== strpos( $html, 'dw_claim_submit' );
+		$ok = 'native' === $decided && false !== strpos( $html, 'directoryweb_claim_submit' );
 	} else {
 		$ok = 'fluent' === $decided && ( $kits ? false !== strpos( $html, 'KITS-FF-FORM' ) : false !== strpos( $html, 'FLUENT:[fluentform id="7"]' ) );
 	}

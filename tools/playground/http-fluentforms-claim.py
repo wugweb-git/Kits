@@ -23,12 +23,12 @@ import smoke  # noqa: E402
 
 MU = r"""<?php
 add_action( 'init', function () {
-	if ( ! isset( $_GET['dw_t'] ) ) { return; }
+	if ( ! isset( $_GET['directoryweb_t'] ) ) { return; }
 	header( 'Content-Type: application/json' );
 	wp_set_current_user( 1 );
-	$t = $_GET['dw_t'];
+	$t = $_GET['directoryweb_t'];
 	if ( 'info' === $t ) {
-		echo wp_json_encode( array( 'listing' => (int) get_option( 'dw_t_listing' ), 'form' => (int) get_option( 'dw_t_form' ), 'ff' => defined( 'FLUENTFORM' ), 'kits' => function_exists( 'kits_ff_id' ), 'ffver' => defined( 'FLUENTFORM_VERSION' ) ? FLUENTFORM_VERSION : '', 'claim_id' => directoryweb_claim_ff_id(), 'native' => dw_claim_native_active() ) );
+		echo wp_json_encode( array( 'listing' => (int) get_option( 'directoryweb_t_listing' ), 'form' => (int) get_option( 'directoryweb_t_form' ), 'ff' => defined( 'FLUENTFORM' ), 'kits' => function_exists( 'kits_ff_id' ), 'ffver' => defined( 'FLUENTFORM_VERSION' ) ? FLUENTFORM_VERSION : '', 'claim_id' => directoryweb_claim_ff_id(), 'native' => directoryweb_claim_native_active() ) );
 	}
 	if ( 'entries' === $t ) {
 		global $wpdb;
@@ -43,10 +43,10 @@ add_action( 'init', function () {
 		echo wp_json_encode( array( 'html' => $h, 'nonce' => wp_create_nonce( 'aw_claim_ff_decide_' . (int) $_GET['id'] ) ) );
 	}
 	if ( 'phones' === $t ) {
-		echo wp_json_encode( array( 'phones' => directoryweb_listing_phones( (int) get_option( 'dw_t_listing' ) ), 'verified' => (bool) get_post_meta( (int) get_option( 'dw_t_listing' ), 'aw_verified', true ) ) );
+		echo wp_json_encode( array( 'phones' => directoryweb_listing_phones( (int) get_option( 'directoryweb_t_listing' ) ), 'verified' => (bool) get_post_meta( (int) get_option( 'directoryweb_t_listing' ), 'aw_verified', true ) ) );
 	}
 	if ( 'dir' === $t ) {
-		$d = dw_evidence_dir();
+		$d = directoryweb_evidence_dir();
 		echo wp_json_encode( array_values( array_diff( scandir( $d ), array( '.', '..', '.htaccess', 'index.php' ) ) ) );
 	}
 	if ( 'mkfile' === $t ) {
@@ -65,7 +65,7 @@ add_filter( 'pre_wp_mail', '__return_true' );
 SEED = r"""<?php require '/wordpress/wp-load.php';
 global $wpdb;
 $lid = wp_insert_post( array( 'post_title' => 'Fluent Forms test shelter', 'post_status' => 'publish', 'post_type' => 'aw_listing', 'post_content' => 'x' ) );
-update_option( 'dw_t_listing', $lid );
+update_option( 'directoryweb_t_listing', $lid );
 $n = 0;
 $el = function ( $element, $name, $label, $attrs = array(), $settings = array() ) use ( &$n ) {
 	++$n;
@@ -93,7 +93,7 @@ $wpdb->insert( $wpdb->prefix . 'fluentform_forms', array(
 	'created_at' => current_time( 'mysql' ), 'updated_at' => current_time( 'mysql' ),
 ) );
 $fid = (int) $wpdb->insert_id;
-update_option( 'dw_t_form', $fid );
+update_option( 'directoryweb_t_form', $fid );
 update_option( 'aw_ff_forms', array( 'claim' => $fid ) );
 update_option( 'permalink_structure', '/%postname%/' );
 flush_rewrite_rules();
@@ -162,14 +162,14 @@ def main() -> int:
             print('server did not start')
             return 2
         http(base + '/')
-        info = json.loads(http(base + '/?dw_t=info')[2])
+        info = json.loads(http(base + '/?directoryweb_t=info')[2])
         print('info:', info)
         check('the real Fluent Forms plugin is active (not a stub)', info['ff'] and info['ffver'], info)
         check('Kits Core is not loaded', not info['kits'])
         check('the claim form id resolves from DirectoryWeb\'s own option, and the built-in form steps aside', info['claim_id'] == info['form'] and not info['native'], info)
 
         lid, fid = info['listing'], info['form']
-        mk = lambda n, data, d='': json.loads(http(base + '/?dw_t=mkfile&n=' + n + '&d=' + d + '&b=' + urllib.parse.quote(base64.b64encode(data).decode()))[2])['url']
+        mk = lambda n, data, d='': json.loads(http(base + '/?directoryweb_t=mkfile&n=' + n + '&d=' + d + '&b=' + urllib.parse.quote(base64.b64encode(data).decode()))[2])['url']
         logo_url = mk('ff-logo.png', base64.b64decode(PNG))
         good_proof = mk('ff-proof.pdf', b'%PDF-1.4\n%%EOF\n')
         media_png = mk('media-library.png', base64.b64decode(PNG), 'media')
@@ -183,10 +183,10 @@ def main() -> int:
 
         st, h, body = submit({'logo': logo_url, 'proof': good_proof})
         check('Fluent Forms accepts the submission through its own endpoint', st == 200 and '"insert_id"' in body, (st, body[:200]))
-        ids = json.loads(http(base + '/?dw_t=entries')[2])
+        ids = json.loads(http(base + '/?directoryweb_t=entries')[2])
         check('the entry is stored by Fluent Forms', len(ids) == 1, ids)
         eid = ids[0]
-        c = json.loads(http(base + f'/?dw_t=entry&id={eid}')[2])
+        c = json.loads(http(base + f'/?directoryweb_t=entry&id={eid}')[2])
         check('DirectoryWeb reads the entry', isinstance(c, dict) and c.get('listing') == lid and c.get('email') == 'ff1@example.org', c)
         check('role and name are read', str(c.get('role')).startswith('Founder') and c.get('name') == 'Asha Rao', {k: c.get(k) for k in ('role', 'name')})
         ph = c.get('propose', {}).get('phones', '')
@@ -194,7 +194,7 @@ def main() -> int:
         check('WhatsApp consent: the ticked box is kept on the number', '| WhatsApp' in ph, ph)
         check('"show my name" consent is kept', c.get('show') is True, c.get('show'))
         check('evidence: the logo and proof were copied into DirectoryWeb\'s private store', bool(c.get('logo')) and len(c.get('proofs', [])) == 1 and c.get('problems') == [], {k: c.get(k) for k in ('logo', 'proofs', 'problems')})
-        files = json.loads(http(base + '/?dw_t=dir')[2])
+        files = json.loads(http(base + '/?directoryweb_t=dir')[2])
         check('the stored names are random, in directoryweb-private', len(files) == 2 and all(re.match(r'^[a-z0-9]{24}\.(png|pdf)$', f) for f in files), files)
 
         page = lambda e: http(base + f'/wp-admin/edit.php?post_type=aw_listing&page=aw-claims&entry={e}')[2]
@@ -202,22 +202,22 @@ def main() -> int:
         m = re.search(r'name="_wpnonce" value="([a-z0-9]+)"', html)
         scr = {'html': html, 'nonce': m.group(1) if m else ''}
         check('the review screen renders with the real entry', 'Asha Rao' in html and 'Phone numbers' in html and 'Fatal' not in html)
-        check('the review screen shows the proof link and the logo, from DirectoryWeb\'s own handler', 'dw_evidence_file' in html and 'aw_ff_file' not in html and 'Open document 1' in html)
+        check('the review screen shows the proof link and the logo, from DirectoryWeb\'s own handler', 'directoryweb_evidence_file' in html and 'aw_ff_file' not in html and 'Open document 1' in html)
 
         st, h, body = submit({'logo': bad_proof, 'proof': 'https://example.com/elsewhere.pdf'}, 'ff2@example.org')
-        ids = json.loads(http(base + '/?dw_t=entries')[2])
-        c2 = json.loads(http(base + f'/?dw_t=entry&id={ids[-1]}')[2])
+        ids = json.loads(http(base + '/?directoryweb_t=entries')[2])
+        c2 = json.loads(http(base + f'/?directoryweb_t=entry&id={ids[-1]}')[2])
         check('a refused or foreign file is not imported and the reviewer is told why', c2.get('logo') == '' and not c2.get('proofs') and len(c2.get('problems', [])) == 2, c2.get('problems'))
         check('the review screen lists the files that were not accepted', 'Files not accepted' in page(ids[-1]))
 
         st, h, body = submit({'logo': media_png, 'proof': ''}, 'ff3@example.org')
-        ids = json.loads(http(base + '/?dw_t=entries')[2])
-        c3 = json.loads(http(base + f'/?dw_t=entry&id={ids[-1]}')[2])
+        ids = json.loads(http(base + '/?directoryweb_t=entries')[2])
+        c3 = json.loads(http(base + f'/?directoryweb_t=entry&id={ids[-1]}')[2])
         check('a file in the media library (outside the form plugin\'s folder) is refused, not copied', c3.get('logo') == '' and any('upload folder' in x for x in c3.get('problems', [])), c3.get('problems'))
         # approve the first claim with the phones ticked
         st, h, body = http(base + '/wp-admin/admin-post.php', {'action': 'aw_claim_ff_decide', 'entry': str(eid), '_wpnonce': scr['nonce'], 'fields[]': ['phones', 'logo'], 'do_approve': 'Approve'}, NOFOLLOW)
         check('approval is accepted', st == 302, st)
-        r = json.loads(http(base + '/?dw_t=phones')[2])
+        r = json.loads(http(base + '/?directoryweb_t=phones')[2])
         nums = r['phones']
         check('the listing now has the number with its WhatsApp flag', any('98765' in x['number'] and x['whatsapp'] for x in nums), nums)
         check('the listing is marked claimed', r['verified'] is True)

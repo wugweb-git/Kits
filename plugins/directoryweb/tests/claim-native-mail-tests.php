@@ -17,20 +17,20 @@ function check( $ok, $label ) { global $fails, $count; ++$count; if ( ! $ok ) { 
 
 $claim = array( 'person' => array( 'name' => 'Asha', 'email' => 'asha@example.org' ), 'listing' => 7 );
 
-$m = dw_claim_mail_build( 'created', $claim, 'Paws Home', 'owner@example.org', 'https://x.test/wp-admin/post.php?post=9', 'Demo' );
+$m = directoryweb_claim_mail_build( 'created', $claim, 'Paws Home', 'owner@example.org', 'https://x.test/wp-admin/post.php?post=9', 'Demo' );
 check( 'owner@example.org' === $m['to'] && false !== strpos( $m['subject'], 'New claim: Paws Home' ) && false !== strpos( $m['body'], 'asha@example.org' ) && false !== strpos( $m['body'], 'post=9' ), 'new claim goes to the site owner with a review link' );
-check( null === dw_claim_mail_build( 'created', $claim, 'Paws Home', '', '', 'Demo' ), 'no owner address: no message' );
+check( null === directoryweb_claim_mail_build( 'created', $claim, 'Paws Home', '', '', 'Demo' ), 'no owner address: no message' );
 
 foreach ( array( 'approved', 'rejected', 'revoked' ) as $ev ) {
-	$m = dw_claim_mail_build( $ev, $claim, 'Paws Home', 'owner@example.org', '', 'Demo' );
+	$m = directoryweb_claim_mail_build( $ev, $claim, 'Paws Home', 'owner@example.org', '', 'Demo' );
 	check( $m && 'asha@example.org' === $m['to'] && false !== strpos( $m['body'], 'Paws Home' ) && 0 === strpos( $m['body'], 'Hello Asha' ), "$ev: the claimant is told, by name" );
 }
-check( false !== strpos( dw_claim_mail_build( 'approved', $claim, 'Paws Home', '', '', 'Demo' )['body'], 'verified mark' ), 'approval says what changed' );
-check( null === dw_claim_mail_build( 'pending', $claim, 'Paws Home', 'o@x.org', '', 'Demo' ), 'back to pending sends nothing' );
-check( null === dw_claim_mail_build( 'withdrawn', $claim, 'Paws Home', 'o@x.org', '', 'Demo' ), 'withdrawn by the claimant sends nothing' );
+check( false !== strpos( directoryweb_claim_mail_build( 'approved', $claim, 'Paws Home', '', '', 'Demo' )['body'], 'verified mark' ), 'approval says what changed' );
+check( null === directoryweb_claim_mail_build( 'pending', $claim, 'Paws Home', 'o@x.org', '', 'Demo' ), 'back to pending sends nothing' );
+check( null === directoryweb_claim_mail_build( 'withdrawn', $claim, 'Paws Home', 'o@x.org', '', 'Demo' ), 'withdrawn by the claimant sends nothing' );
 $bad = array( 'person' => array( 'name' => 'A', 'email' => 'not-an-email' ) );
-check( null === dw_claim_mail_build( 'approved', $bad, 'X', 'o@x.org', '', 'Demo' ), 'a bad claimant address sends nothing' );
-check( false !== strpos( dw_claim_mail_build( 'approved', array( 'person' => array( 'email' => 'a@b.co' ) ), '', '', '', 'Demo' )['body'], 'the listing' ), 'a missing listing name falls back to a plain phrase' );
+check( null === directoryweb_claim_mail_build( 'approved', $bad, 'X', 'o@x.org', '', 'Demo' ), 'a bad claimant address sends nothing' );
+check( false !== strpos( directoryweb_claim_mail_build( 'approved', array( 'person' => array( 'email' => 'a@b.co' ) ), '', '', '', 'Demo' )['body'], 'the listing' ), 'a missing listing name falls back to a plain phrase' );
 
 echo "{$count} checks, {$fails} failed\n";
 exit( $fails ? 1 : 0 );

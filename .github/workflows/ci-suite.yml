@@ -195,6 +195,7 @@ jobs:
           php plugins/directoryweb/tests/meta-authorization-tests.php
           php plugins/directoryweb/tests/claim-evidence-tests.php
           php plugins/directoryweb/tests/no-animal-writes-test.php
+          php plugins/directoryweb/tests/no-short-prefix-test.php
           php plugins/directoryweb/tests/collection-filter-tests.php
           php plugins/directoryweb/tests/directoryweb-scf-fallback-test.php
 

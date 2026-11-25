@@ -385,7 +385,7 @@ function directoryweb_claim_light_rows_read(): array {
 				'sent'    => (string) $r['created_at'],
 				'listing' => $lid,
 				'name'    => $s( 'name' ),
-				'role'    => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role,
+				'role'    => defined( 'DIRECTORYWEB_CLAIM_ROLES' ) ? ( DIRECTORYWEB_CLAIM_ROLES[ $role ] ?? $role ) : $role,
 				'email'   => $s( 'email' ),
 				'phone'   => $s( 'phone' ),
 				'has'     => array(
@@ -430,7 +430,7 @@ function directoryweb_claim_light_rows_read(): array {
 					'sent'    => (string) get_post_field( 'post_date', $id ),
 					'listing' => (int) get_post_meta( $id, '_dw_claim_listing', true ),
 					'name'    => (string) ( $np['name'] ?? '' ),
-					'role'    => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ $np['role'] ?? '' ] ?? '' ) : '',
+					'role'    => defined( 'DIRECTORYWEB_CLAIM_ROLES' ) ? ( DIRECTORYWEB_CLAIM_ROLES[ $np['role'] ?? '' ] ?? '' ) : '',
 					'email'   => (string) ( $np['email'] ?? '' ),
 					'phone'   => (string) ( $np['phone'] ?? '' ),
 					'has'     => array( 'logo' => false, 'photos' => false, 'proof' => false ),
@@ -448,7 +448,7 @@ function directoryweb_claim_light_rows_read(): array {
 				'sent'    => (string) get_post_field( 'post_date', $id ),
 				'listing' => (int) get_post_meta( $id, 'aw_c_listing', true ),
 				'name'    => (string) get_post_meta( $id, 'aw_c_name', true ),
-				'role'    => defined( 'DW_CLAIM_ROLES' ) ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role,
+				'role'    => defined( 'DIRECTORYWEB_CLAIM_ROLES' ) ? ( DIRECTORYWEB_CLAIM_ROLES[ $role ] ?? $role ) : $role,
 				'email'   => (string) get_post_meta( $id, 'aw_c_email', true ),
 				'phone'   => (string) get_post_meta( $id, 'aw_c_phone', true ),
 				'has'     => array(

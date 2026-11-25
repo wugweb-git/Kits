@@ -158,7 +158,7 @@ function directoryweb_org_people_link( $lid, $email, $role, $show, $apply = true
  */
 function directoryweb_org_people_from_claim( $claim, $lid, $apply = true ) {
 	$role = (string) get_post_meta( $claim, 'aw_c_role', true );
-	$role = defined( 'DW_CLAIM_ROLES' ) && '' !== $role ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role;
+	$role = defined( 'DIRECTORYWEB_CLAIM_ROLES' ) && '' !== $role ? ( DIRECTORYWEB_CLAIM_ROLES[ $role ] ?? $role ) : $role;
 	return directoryweb_org_people_link( $lid, (string) get_post_meta( $claim, 'aw_c_email', true ), $role, false, $apply );
 }
 

@@ -541,7 +541,7 @@ function directoryweb_status_text( string $status ): string {
 function directoryweb_claim_row( array $r ): array {
 	$changes = null;
 	if ( ! empty( $r['native'] ) ) {
-		$nc      = function_exists( 'dw_claim_get' ) ? dw_claim_get( (int) $r['entry'] ) : null;
+		$nc      = function_exists( 'directoryweb_claim_get' ) ? directoryweb_claim_get( (int) $r['entry'] ) : null;
 		$changes = $nc ? count( $nc['propose'] ) : null;
 	} elseif ( $r['old'] ) {
 		$changes = count( (array) get_post_meta( $r['entry'], 'aw_c_proposed', true ) ) + ( $r['has']['logo'] ? 1 : 0 );
@@ -581,7 +581,7 @@ function directoryweb_claim_row( array $r ): array {
 /**
  * Label of a claim field.
  *
- * @param string $key DW_CLAIM_L key, logo or photos.
+ * @param string $key DIRECTORYWEB_CLAIM_L key, logo or photos.
  */
 function directoryweb_field_label( string $key ): string {
 	if ( 'logo' === $key ) {
@@ -590,7 +590,7 @@ function directoryweb_field_label( string $key ): string {
 	if ( 'photos' === $key ) {
 		return __( 'Photos (added before the current ones, 6 at most)', 'directoryweb' );
 	}
-	return defined( 'DW_CLAIM_L' ) && isset( DW_CLAIM_L[ $key ] ) ? (string) DW_CLAIM_L[ $key ][0] : $key;
+	return defined( 'DIRECTORYWEB_CLAIM_L' ) && isset( DIRECTORYWEB_CLAIM_L[ $key ] ) ? (string) DIRECTORYWEB_CLAIM_L[ $key ][0] : $key;
 }
 
 /**
@@ -601,7 +601,7 @@ function directoryweb_field_label( string $key ): string {
  * @return array|null [ 'id', 'status' ].
  */
 function directoryweb_claim_log_row( array $c, string $key ): ?array {
-	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! defined( 'DW_CLAIM_L' ) ) {
+	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! defined( 'DIRECTORYWEB_CLAIM_L' ) ) {
 		return null;
 	}
 	global $wpdb;
@@ -611,7 +611,7 @@ function directoryweb_claim_log_row( array $c, string $key ): ?array {
 			aw_enrich_table(),
 			(int) $c['listing'],
 			'claim-' . (int) $c['id'],
-			directoryweb_enrich_field( $key, DW_CLAIM_L )
+			directoryweb_enrich_field( $key, DIRECTORYWEB_CLAIM_L )
 		),
 		ARRAY_A
 	);
@@ -637,7 +637,7 @@ function directoryweb_claim_detail( int $id ): ?array {
 	}
 	$status = directoryweb_claim_status( $c['review'] );
 	$lid    = (int) $c['listing'];
-	$file   = 'dw_claim_file_url';
+	$file   = 'directoryweb_claim_file_url';
 	$fields = array();
 	$undone = array();
 	$notes  = array();
@@ -745,7 +745,7 @@ function directoryweb_claim_detail( int $id ): ?array {
 function directoryweb_rest_claim( WP_REST_Request $request ) {
 	$raw = (string) $request['id'];
 	if ( 0 === strpos( $raw, 'dw-' ) ) { // native claims have their own id space ('dw-<post id>'), so they never collide with form entry ids
-		$n = function_exists( 'dw_claim_get' ) ? dw_claim_get( (int) substr( $raw, 3 ) ) : null;
+		$n = function_exists( 'directoryweb_claim_get' ) ? directoryweb_claim_get( (int) substr( $raw, 3 ) ) : null;
 		return $n ? rest_ensure_response( directoryweb_native_claim_detail( $n ) ) : new WP_Error( 'rest_not_found', __( 'No such claim.', 'directoryweb' ), array( 'status' => 404 ) );
 	}
 	$d = directoryweb_claim_detail( (int) $raw );
@@ -787,7 +787,7 @@ function directoryweb_fact( string $label, string $value, string $where = '' ): 
 
 /** The Settings row for the built-in claim path: live state, read each time. */
 function directoryweb_claim_status_service(): array {
-	$d = dw_claim_diagnostics();
+	$d = directoryweb_claim_diagnostics();
 	return array(
 		'slug'    => 'claims-status',
 		'name'    => __( 'Claims', 'directoryweb' ),
@@ -796,11 +796,11 @@ function directoryweb_claim_status_service(): array {
 		/* translators: 1: pending built-in claims, 2: all built-in claims. */
 		'summary' => sprintf( __( '%1$s built-in claims waiting for review, %2$s built-in in all. Claims sent through Fluent Forms or another form provider are not counted here.', 'directoryweb' ), number_format_i18n( $d['counts']['pending'] ), number_format_i18n( $d['total'] ) ),
 		'facts'   => array(
-			directoryweb_fact( __( 'Claim page published', 'directoryweb' ), $d['page_live'] ? __( 'Yes', 'directoryweb' ) : __( 'No', 'directoryweb' ), dw_claim_source_label( (string) $d['sources']['page'] ) ),
-			directoryweb_fact( __( 'Claim emails', 'directoryweb' ), $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), dw_claim_source_label( (string) $d['sources']['mail'] ) ),
-			directoryweb_fact( __( 'New-claim emails go to', 'directoryweb' ), $d['notify_to'], 'option' === $d['sources']['notify'] ? dw_claim_source_label( 'option' ) : __( 'Site admin email, default', 'directoryweb' ) ),
+			directoryweb_fact( __( 'Claim page published', 'directoryweb' ), $d['page_live'] ? __( 'Yes', 'directoryweb' ) : __( 'No', 'directoryweb' ), directoryweb_claim_source_label( (string) $d['sources']['page'] ) ),
+			directoryweb_fact( __( 'Claim emails', 'directoryweb' ), $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), directoryweb_claim_source_label( (string) $d['sources']['mail'] ) ),
+			directoryweb_fact( __( 'New-claim emails go to', 'directoryweb' ), $d['notify_to'], 'option' === $d['sources']['notify'] ? directoryweb_claim_source_label( 'option' ) : __( 'Site admin email, default', 'directoryweb' ) ),
 			/* translators: 1: open claims per email, 2: submissions per hour. */
-			directoryweb_fact( __( 'Limits', 'directoryweb' ), sprintf( __( '%1$d open per email; %2$d submissions an hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ), dw_claim_source_label( (string) $d['sources']['limits'] ) ),
+			directoryweb_fact( __( 'Limits', 'directoryweb' ), sprintf( __( '%1$d open per email; %2$d submissions an hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ), directoryweb_claim_source_label( (string) $d['sources']['limits'] ) ),
 		),
 	);
 }
@@ -947,7 +947,7 @@ function directoryweb_settings_payload(): array {
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$types[] = function_exists( 'directoryweb_listing_type_name' ) && '' !== directoryweb_listing_type_name( $slug ) ? directoryweb_listing_type_name( $slug ) : $slug;
 	}
-	$roles  = defined( 'DW_CLAIM_ROLES' ) ? array_values( array_filter( DW_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();
+	$roles  = defined( 'DIRECTORYWEB_CLAIM_ROLES' ) ? array_values( array_filter( DIRECTORYWEB_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();
 	$where  = fn( string $cmd ) => sprintf(
 		/* translators: %s: a WP-CLI command. */
 		__( 'Set with %s', 'directoryweb' ),
@@ -1066,14 +1066,14 @@ function directoryweb_rest_save_claim_form( WP_REST_Request $request ) {
 /**
  * A native claim (claim-native.php) in the shape the Claims screen reads.
  *
- * @param array $n dw_claim_get().
+ * @param array $n directoryweb_claim_get().
  */
 function directoryweb_native_claim_detail( array $n ): array {
 	$lid    = (int) $n['listing'];
 	$ev     = (array) ( $n['evidence'] ?? array() );
 	$fields = array();
 	foreach ( $n['propose'] as $key => $val ) {
-		$map      = defined( 'DW_CLAIM_NATIVE_MAP' ) && isset( DW_CLAIM_NATIVE_MAP[ $key ] ) ? DW_CLAIM_NATIVE_MAP[ $key ] : '';
+		$map      = defined( 'DIRECTORYWEB_CLAIM_NATIVE_MAP' ) && isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $key ] ) ? DIRECTORYWEB_CLAIM_NATIVE_MAP[ $key ] : '';
 		$fields[] = array(
 			'key'      => (string) $key,
 			'label'    => '' !== $map ? directoryweb_field_label( $map ) : (string) $key,
@@ -1098,7 +1098,7 @@ function directoryweb_native_claim_detail( array $n ): array {
 		'statusText' => directoryweb_status_text( (string) $n['status'] ),
 		'pending'    => 'pending' === $n['status'] && $lid > 0,
 		'native'     => true,
-		'moves'      => array_values( array_diff( DW_CLAIM_TRANSITIONS[ $n['status'] ] ?? array(), array( 'withdrawn' ) ) ),
+		'moves'      => array_values( array_diff( DIRECTORYWEB_CLAIM_TRANSITIONS[ $n['status'] ] ?? array(), array( 'withdrawn' ) ) ),
 		'transition' => rest_url( 'directoryweb/v1/claims/' . (int) $n['id'] . '/transition' ),
 		'title'      => $lid ? html_entity_decode( get_the_title( $lid ), ENT_QUOTES, 'UTF-8' ) : __( '(no listing)', 'directoryweb' ),
 		'listingUrl' => $lid ? (string) get_edit_post_link( $lid, 'raw' ) : '',
@@ -1111,11 +1111,11 @@ function directoryweb_native_claim_detail( array $n ): array {
 			array( __( 'Anything else', 'directoryweb' ), (string) ( $n['person']['notes'] ?? '' ) ),
 			array( __( 'Decided', 'directoryweb' ), $u ? $u->display_name . ', ' . mysql2date( 'j M Y', (string) $last['at'] ) : '' ),
 		),
-		'proofUrl'   => ! empty( $ev['proof'][0] ) ? esc_url_raw( dw_evidence_link( $ev['proof'][0] ) ) : '',
-		'proofUrls'  => array_map( fn( $f ) => esc_url_raw( dw_evidence_link( $f ) ), (array) ( $ev['proof'] ?? array() ) ),
-		'logoUrl'    => ! empty( $ev['logo'][0] ) ? esc_url_raw( dw_evidence_link( $ev['logo'][0] ) ) : '',
+		'proofUrl'   => ! empty( $ev['proof'][0] ) ? esc_url_raw( directoryweb_evidence_link( $ev['proof'][0] ) ) : '',
+		'proofUrls'  => array_map( fn( $f ) => esc_url_raw( directoryweb_evidence_link( $f ) ), (array) ( $ev['proof'] ?? array() ) ),
+		'logoUrl'    => ! empty( $ev['logo'][0] ) ? esc_url_raw( directoryweb_evidence_link( $ev['logo'][0] ) ) : '',
 		'logoNowUrl' => ! empty( $ev['logo'][0] ) && $lid && has_post_thumbnail( $lid ) ? (string) get_the_post_thumbnail_url( $lid, 'thumbnail' ) : '',
-		'photoUrls'  => array_map( fn( $f ) => esc_url_raw( dw_evidence_link( $f ) ), (array) ( $ev['photos'] ?? array() ) ),
+		'photoUrls'  => array_map( fn( $f ) => esc_url_raw( directoryweb_evidence_link( $f ) ), (array) ( $ev['photos'] ?? array() ) ),
 		'fields'     => $fields,
 		'undone'     => array(),
 		'notes'      => array(),
