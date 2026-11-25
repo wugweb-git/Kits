@@ -1,6 +1,6 @@
 # Plugin screens: classic vs new (audit, 12 Nov 2026)
 
-**Status (25 Nov 2026):** Audit of 12 Nov, not re-run. Report only.
+**Status (25 Nov 2026):** Audit of 12 Nov, not re-run. Report only. Since then: the SourceWeb `$words` bug is fixed, MailWeb's `mailweb_settings_url()` carries the classic-screen argument (`mail-in.php:58-62`; the classic screens themselves are gone for PlanWeb and SourceWeb, `docs/architecture/admin-ia-inventory.md`), and the empty Theme Options → Layout Spacing form is filtered out (`admin-app.php:177`). Classic-screen sections below are history.
 
 Code read at live `d9163bf7`. **Have** = on the new screen. **Classic only** = still works at its old address, but the new screens don't show it and nothing links to it. **Missing** = gone from the new screen.
 

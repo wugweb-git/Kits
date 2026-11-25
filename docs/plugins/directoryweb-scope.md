@@ -199,7 +199,7 @@ list must drop them**. That change ships before or with Core's deletion, never a
 | Option or transient | Deleted by Core at | DirectoryWeb uses at |
 |---|---|---|
 | `aw_district_helplines` | `uninstall.php:69` | `district-helplines.php:36` |
-| `aw_place_intros` | `:75` | `place-intros.php:22` |
+| `directoryweb_place_intros` (was `aw_place_intros`) | `:75` | `place-intros.php:22` |
 | `aw_ff_forms` (form IDs) | `:74` | `directoryweb-ui.php:281`, `directoryweb-rest.php:1000` (shared with the other forms: owner = the Kits Core forms bridge, DirectoryWeb reads its two keys) |
 | `aw_ff_send_email` | `:66` | `directoryweb-rest.php:937` (shared like `aw_ff_forms`) |
 | `aw_press_logos` | `:79` | `data-sources.php:165` (owner = SourceWeb, with the source logo) |

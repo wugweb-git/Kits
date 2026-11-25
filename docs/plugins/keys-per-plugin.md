@@ -131,7 +131,7 @@ its own `<slug>_keys` option, a reader with constant → own option → old vaul
 
 ### Step 2: retire the vault (separate follow-up PR, after the owner confirms every key shows "set")
 
-1. InsightWeb: drop the `aw_keys` fallback and the `aw_keys` / `kits_service_key` filters from `insightweb-keys.php`.
+1. ~~InsightWeb: drop the `aw_keys` fallback~~ done: the read path no longer uses `aw_keys`; `INSIGHTWEB_KEYS_OLD_OPTION` is used only by `insightweb_keys_copy()` (`insightweb-keys.php:194-197`). Original text: drop the `aw_keys` fallback and the `aw_keys` / `kits_service_key` filters from `insightweb-keys.php`.
 2. Animal Writes Core: remove `includes/keys.php` (`aw_key()`, `aw_key_where()`, the screen and `admin_post_aw_keys`).
    Keep a redirect: `admin.php?page=aw-keys` → `admin.php?page=aw-search-insights&tab=settings`, plus a short notice
    "Keys now live in each plugin's settings". Remove `aw-keys` from `admin-home.php` (screen list, fold map, the two

@@ -193,5 +193,5 @@ and its Settings the backfill date, both as page parts (`sourceweb_extra_parts()
 ## Not built yet
 
 - Kits Core has no translation files for the shell yet.
-- Parts the plugins need that the shell does not have: styled select and date inputs, a calendar grid, a secret field, a confirm step with a count, a detail panel, rich text, file and media fields, a pair-list editor, a row view inside a list, read-only HashList and ServiceRow details, and FieldReview options (start unticked, reject ticked).
+- Parts the plugins need that the shell does not have (the calendar, input and secret-field parts were built on 12 Nov; still missing: a detail panel, rich text, file and media fields, a pair-list editor, a row view inside a list, read-only HashList and ServiceRow details, and FieldReview options (start unticked, reject ticked)). Source: the 12 Nov audit; confirm each against `kits-core/src/shell` before building.
 - The chart is one small part (`MiniChart`); there is no line chart or a chart with two series.
