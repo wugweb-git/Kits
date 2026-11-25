@@ -852,7 +852,7 @@ function kits_options_sections(): array {
  * @param string $path  Relative to wp-admin.
  */
 function kits_options_link( string $label, string $path ): string {
-	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
+	return kits_link( $label, $path ); // one link helper (admin-home.php); this name stays for existing callers
 }
 
 /**
