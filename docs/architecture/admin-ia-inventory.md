@@ -10,9 +10,9 @@ Target layout: content menus first, then one block of Wugweb products (each its 
 |---|---|---|
 | Empty last menu item | wp-admin side menu | Seen on live only; no empty-title submenu found in code. Find on live, then remove. |
 | Tools tab (RankWeb) and Help tab (PlanWeb, MailWeb) | `rankweb-ui.php`, `planweb-ui.php`, `mailweb-ui.php` | Wait for the owner's reference list. MailWeb already has a Help card on its Dashboard; RankWeb has a Tools card (owner, 14 Nov: no Tools tab, `docs/pending.md`). |
-| Place intros into Listings › Places | `directoryweb-ui.php:174`, `place-intros.php` | Still a separate tab and submenu. Claims stays read-only (owner). |
+| Place intros into Listings › Places | `directoryweb-ui.php:174`, `place-intros.php`, `directoryweb-listings.php:453` | Needs a front-end change: Listings is a React DataViews screen and Place intros is a server-rendered form, so a merge means a new shell view and a rebuilt `build/index.js`. Dropped for now (owner, 26 Nov: no tabbing or regrouping); it stays a tab. |
 | Setup Wizard (`kits-onboarding`) and Scripts & Pixels (`kits-scripts`) | `onboarding-wizard.php:25`, `header-footer-scripts.php:22` | Registered under Kits but hidden; reachable by URL only. Link them from Kits or retire them. |
-| RankWeb and MailWeb classic leftovers | RankWeb `overview.php`, `faq-overview.php`, `settings.php` (9 classic submenus); MailWeb still has its simple-table helper (the dead `ui=classic` argument was removed) | PlanWeb and SourceWeb are finished; these two are not. |
+| RankWeb: screens without a shell version | `bulk-csv.php`, `link-audit.php`, `redirect-tools.php`, `media-seo.php`, `faq-overview.php`, `settings.php` | Not leftovers: SEO CSV, Internal links, Redirect tools and Images exist only as these server-rendered screens, so removing them would remove features. They need shell screens first. MailWeb's classic leftover is gone (PR 25); its simple-table helper remains. |
 
 Dropped by the owner on 25 Nov (no tabbing or regrouping): grouping the InsightWeb (10) and SourceWeb (12) tabs.
 
