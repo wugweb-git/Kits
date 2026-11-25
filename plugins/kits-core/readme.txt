@@ -22,6 +22,10 @@ Kits Core is the shared layer of Kits by Wugweb sites. The site configures it th
 * The Kits menu: Home, Theme Options, Settings, Tools and Help, with the design system and the registry of every component.
 * Content types: seven ready-made presets (portfolio, cards, infographics, case studies, events, people, testimonials) registered with WordPress's own post type and post meta calls, using core categories and tags only. Each is off until switched on in Kits &rarr; Settings &rarr; Content types, so the admin menu shows only the types a site uses. Their fields show in core blocks through the kits/post-field binding; Kits Core prints no structured data of its own.
 
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/kits-core. To rebuild it, run `npm install` and then `npm run build` in that folder.
+
 == Uninstall ==
 
 By default, deleting the plugin deletes nothing — theme options, form settings and saved keys all stay (the publisher records and keyword tables are SourceWeb's and InsightWeb's since 18 Nov 2026), so reinstalling finds everything as it was. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients, after first writing a backup to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails). Shared data and anything belonging to another plugin are never touched. Items of the content types are posts: they are never deleted, also when a type is switched off.
