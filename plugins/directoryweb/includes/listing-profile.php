@@ -113,15 +113,14 @@ function directoryweb_listing_control( $key, $f, $val ) {
 		. ( $f[2] ? '<p class="description">' . esc_html( $f[2] ) . '</p>' : '' );
 }
 
-/** The one-pager's inline CSS (printed once): identity header, card grid and field spacing. Greyscale, WP admin palette. */
+/** The one-pager's CSS (added once as an inline style on its own handle): identity header, card grid and field spacing. Greyscale, WP admin palette. */
 function directoryweb_listing_profile_css() {
 	static $done = false;
 	if ( $done ) {
 		return;
 	}
 	$done = true;
-	?>
-<style>
+	$css = <<<'CSS'
 .directoryweb-profile__head{display:flex;align-items:center;gap:14px;padding:4px 0 14px;border-bottom:1px solid #dcdcde;margin-bottom:14px}
 .directoryweb-profile__logo-img{border-radius:8px;object-fit:cover;display:block}
 .directoryweb-profile__logo-ph{width:72px;height:72px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#f0f0f1;color:#8c8f94;font-size:34px}
@@ -142,8 +141,10 @@ function directoryweb_listing_profile_css() {
 .directoryweb-profile__check{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px}
 .directoryweb-profile__gallery{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
 .directoryweb-profile__gallery img{border-radius:6px;object-fit:cover}
-</style>
-	<?php
+CSS;
+	wp_register_style( 'directoryweb-profile', false, array(), DIRECTORYWEB_VERSION );
+	wp_enqueue_style( 'directoryweb-profile' );
+	wp_add_inline_style( 'directoryweb-profile', $css );
 }
 
 function directoryweb_listing_details_box( $post ) {

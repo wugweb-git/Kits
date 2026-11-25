@@ -347,7 +347,11 @@ function directoryweb_claim_native_form( int $listing ): string {
 	if ( 'error' === $sent && isset( $_GET['msg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$err = '<p class="aw-claim-error" role="alert">' . esc_html( sanitize_text_field( rawurldecode( wp_unslash( $_GET['msg'] ) ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification
 	}
-	$out  = '<style>.aw-claim-form label{display:block;margin:.6em 0}.aw-claim-form input[type=text],.aw-claim-form input[type=email],.aw-claim-form input[type=tel],.aw-claim-form input[type=url],.aw-claim-form select,.aw-claim-form textarea{display:block;width:100%;max-width:34em;box-sizing:border-box}.aw-claim-form fieldset{margin:1em 0;padding:.6em 1em}.aw-claim-svc{display:inline-block;margin-right:1em}.aw-claim-error{color:#b32d2e}</style>';
+	$css = '.aw-claim-form label{display:block;margin:.6em 0}.aw-claim-form input[type=text],.aw-claim-form input[type=email],.aw-claim-form input[type=tel],.aw-claim-form input[type=url],.aw-claim-form select,.aw-claim-form textarea{display:block;width:100%;max-width:34em;box-sizing:border-box}.aw-claim-form fieldset{margin:1em 0;padding:.6em 1em}.aw-claim-svc{display:inline-block;margin-right:1em}.aw-claim-error{color:#b32d2e}';
+	wp_register_style( 'directoryweb-claim-form', false, array(), DIRECTORYWEB_VERSION );
+	wp_enqueue_style( 'directoryweb-claim-form' );
+	wp_add_inline_style( 'directoryweb-claim-form', $css );
+	$out = '';
 	$out .= '<form class="aw-claim-form" method="post" enctype="multipart/form-data" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">' . $err;
 	$out .= '<input type="hidden" name="action" value="directoryweb_claim_submit"><input type="hidden" name="listing" value="' . (int) $listing . '">';
 	$out .= wp_nonce_field( 'directoryweb_claim_submit_' . $listing, '_dw_nonce', true, false );

@@ -260,7 +260,7 @@ function kits_uninstall_backup( string $plugin, string $main, array $names, arra
 	$abort = static function ( string $why ) use ( $gz, $part, $fail ): bool {
 		gzclose( $gz );
 		if ( is_file( $part ) ) {
-			unlink( $part ); // our own incomplete file
+			wp_delete_file( $part ); // our own incomplete file
 		}
 		return $fail( $why );
 	};
@@ -292,7 +292,7 @@ function kits_uninstall_backup( string $plugin, string $main, array $names, arra
 	}
 	if ( ! gzclose( $gz ) ) {
 		if ( is_file( $part ) ) {
-			unlink( $part );
+			wp_delete_file( $part );
 		}
 		return $fail( 'gzclose failed' );
 	}
