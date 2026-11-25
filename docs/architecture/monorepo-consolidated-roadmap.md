@@ -36,7 +36,7 @@
 5. **Remediation of Read-Only Audit Findings (Commits 6a32c29 & 48ffa0b):**
    - **Canonical Ownership & Namespace Isolation:** Kits Core is the sole canonical owner of `kits_*` identifiers (`primitives.php`, `admin-table.php`, `admin-shell.php`, `preview.php`, `private-dir.php`, `scf.php`, `fluentforms.php`), protected with `if ( ! function_exists(...) )`. Companion plugins define plugin-prefixed helpers (`directoryweb_*`, `insightweb_*`, `mailweb_*`, `planweb_*`, `sourceweb_*`) delegating to Kits Core when co-active. Zero duplicate declarations across companion plugins. Both loading orders (Order A: Kits Core first; Order B: Companion plugin first) tested and verified with zero fatal redeclarations.
    - **Strict Nonce Enforcement:** Mandatory valid `wp_rest` nonce verification enforced for cookie sessions across all companion REST endpoints (`directoryweb_rest_can`, `insightweb_rest_can`, `mailweb_rest_can`, `planweb_rest_can`, `sourceweb_rest_can`). Missing or invalid nonces strictly return 403 `rest_cookie_invalid_nonce`. Application Password authentication (`rest_get_authenticated_app_password()`) is preserved and passes without cookie nonces. Zero test bypasses in production code.
-   - **RankWeb Standalone Output:** Hooked `aw_rankweb_render_standalone_meta_description()` to `wp_head` (priority 1) when Rank Math is inactive. Suppressed automatically when Rank Math is active (`aw_seo_extras_rank_math()`), ensuring exactly one meta description, canonical, robots directive, and schema graph in both standalone and integrated environments.
+   - **RankWeb Standalone Output:** Hooked `rankweb_print_head_tags()` to `wp_head` (priority 1) when Rank Math is inactive. Suppressed automatically when Rank Math is active (`rankweb_seo_extras_rank_math()`), ensuring exactly one meta description, canonical, robots directive, and schema graph in both standalone and integrated environments.
    - **Decoupled Boot Architecture:** Hardcoded eager `require_once WP_PLUGIN_DIR . '/...'` loading blocks removed from all companion entrypoints (`directoryweb.php`, `mailweb.php`, `planweb.php`, `sourceweb.php`). Standalone compatibility layers are always loaded safely, and standalone modes (`*_STANDALONE`) are evaluated dynamically on `plugins_loaded`.
    - **Translation Domain Scoping:** Standardized REST error strings to use plugin-specific text domains (`'directoryweb'`, `'insightweb'`, `'mailweb'`, `'planweb'`, `'sourceweb'`).
 
@@ -46,13 +46,13 @@
 
 | Product / Package | Path | Declared Version | Verified Status | Evidence & Test Results |
 | :--- | :--- | :--- | :--- | :--- |
-| **Kits Block Theme** | `themes/kits-by-wugweb/` | 2.2.0 | **Verified Operational** | FSE Schema v3, 18 block patterns, 8 templates, 4 parts, 2 style variations (`forest`, `slate`). `tools/build-tokens.py` is not in this checkout (`tools/tokens` and `packages/design-tokens` are empty); token build is unverified. |
+| **Kits Block Theme** | `themes/kits-by-wugweb/` | 2.2.0 | **Verified Operational** | FSE Schema v3, 47 block patterns, 10 templates, 4 parts, 3 style variations (`dark`, `forest`, `slate`) and the `ink` colour set. `tools/build-tokens.py` is at `themes/kits-by-wugweb/tools/build-tokens.py`; the root `tools/tokens` and `packages/design-tokens` are empty. The unverified part is now only the build in CI (`tools/tokens` and `packages/design-tokens` are empty); token build is unverified. |
 | **Kits Core** | `plugins/kits-core/` | 1.0.0 | **Verified Operational** (Hardened) | Brand customizer, presets SCF bridge, ALTCHA spam guard, system screens. Tests pass (`brand-customizer-tests.php`, `admin-layer-tests.php`, `admin-menu-tests.php`, `presets-scf-tests.php`, `shell-parts-tests.php`). |
-| **DirectoryWeb** | `plugins/directoryweb/` | 1.1.0 | **Verified Operational** (Standalone Capable) | CPT `aw_listing`, 9 dynamic blocks, 12h transient facet caching. Verified operational without SCF and without Kits Core. 11 test files pass cleanly (230 checks, 0 failed). |
-| **RankWeb** | `plugins/rankweb/` | 2.1.0 | **Verified Operational** (Standalone Capable) | Complete standalone SEO suite: meta titles, canonicals, robots directives, standalone Schema.org JSON-LD, breadcrumbs, redirects, silos. All 125 tests and 94 settings checks pass cleanly. |
+| **DirectoryWeb** | `plugins/directoryweb/` | 1.1.0 | **Verified Operational** (Standalone Capable) | CPT `aw_listing`, 10 dynamic blocks, 12h transient facet caching. Verified operational without SCF and without Kits Core. 14 test files pass (311 checks, 0 failed). |
+| **RankWeb** | `plugins/rankweb/` | 2.1.0 | **Verified Operational** (Standalone Capable) | Complete standalone SEO suite: meta titles, canonicals, robots directives, standalone Schema.org JSON-LD, breadcrumbs, redirects, silos. All 137 tests and 94 settings checks pass cleanly. |
 | **SourceWeb** | `plugins/sourceweb/` | 0.1.0 | **Verified Operational** (Standalone Capable) | Content reprint engine, feed ingestion, auto-enrichment rules, publisher trust order. Decoupled from mandatory DirectoryWeb/InsightWeb boot halts. All 455 checks and standalone tests pass. |
 | **InsightWeb** | `plugins/insightweb/` | 1.0.0 | **Verified Operational** (Standalone Capable) | Search Console, GA4, Clarity, PageSpeed, Bing, keywords, empty-state dashboard tiles for fresh installs, backup engine. All 107 checks and standalone tests pass. |
-| **MailWeb** | `plugins/mailweb/` | 3.3.0 | **Verified Operational** (Standalone Capable) | Hostinger Mail API SDK (`v1.18.7`), SMTP port 465 SSL fallback, daily DKIM/SPF DNS telemetry cron, decoupled boot. All 57 checks pass cleanly. |
+| **MailWeb** | `plugins/mailweb/` | 3.3.0 | **Verified Operational** (Standalone Capable) | Hostinger Mail API SDK (`^1.18`, locked at 1.19.0), SMTP port 465 SSL fallback, daily DKIM/SPF DNS telemetry cron, decoupled boot. All 57 checks pass cleanly. |
 | **PlanWeb** | `plugins/planweb/` | 0.2.0 | **Verified Operational** (Standalone Capable) | Editorial calendar, publication scheduling, campaign timeline tracking, REST endpoints, decoupled boot. All 123 checks pass cleanly. |
 | **Shared PHP SDK** | `packages/shared-php/` | 0.1.0 | **Verified Operational** (Unlinked) | Standalone PHP SDK providing `TokenEngine`, `ExternalServiceRegistry`, `NonceGuard`, `Sanitizer`. `tests/TokenEngineTest.php` passes 5/5 test suites. |
 | **Packaging Tools** | `tools/build/build-dist.py` | — | **Verified Operational** | Builds 8 clean distribution packages into `dist/*.zip` with SHA-256 integrity reporting, MailWeb vendor SDK inclusion, and proper test/dev exclusion. |
@@ -113,7 +113,7 @@ A comprehensive inspection of `plugins/rankweb/includes/` reveals that RankWeb a
 - `schema.php`: JSON-LD structured data engine supporting WebSite, Organization, Article, NewsArticle, LegalArticle, JobPosting, LocalBusiness, and FAQ entities.
 - `sitemap.php`: XML sitemap engine supporting standard post types, directory places, filtered view combinations, Google News sitemaps, and HTML sitemaps.
 - `breadcrumbs.php` & `breadcrumbs-render.php`: Accessible frontend breadcrumb trail rendering and JSON-LD `BreadcrumbList` generation.
-- `redirects.php` & `redirect-tools.php`: 301/302 URL redirection table, 404 hit monitoring, wildcard regex patterns, and CSV export/import.
+- `redirects.php` & `redirect-tools.php`: redirect tools that write to Rank Math's redirect list (`redirects.php`, `redirect-tools.php`; a native list is not built and not planned, `rankweb/PENDING.md`), with 404 monitoring and CSV export/import.
 - `analysis.php` & `editor-sidebar.php`: Gutenberg Block Editor live 0–100 score engine, keyphrase density analysis, and content length recommendations.
 - `internal-links.php`, `link-audit.php`, `link-anchors.php`, `silos.php`: Keyword-driven internal link injection, contextual anchor text evaluation, content silo isolation, and orphan page audits.
 - `video.php`: Video metadata parser, YouTube/Vimeo thumbnail cache, and VideoObject schema builder.
@@ -142,7 +142,7 @@ A comprehensive inspection of `plugins/rankweb/includes/` reveals that RankWeb a
 
 ### 4.3 Missing Essentials (Resolved)
 Prior to this release hardening, RankWeb was artificially crippled when operating without Rank Math:
-1. **Frontend Schema Printing:** When Rank Math was absent, `schema.php` did not output structured data to the page. **Resolved:** Implemented `aw_schema_render_standalone_json_ld()` hooked directly to `wp_head` at priority 20.
+1. **Frontend Schema Printing:** When Rank Math was absent, `schema.php` did not output structured data to the page. **Resolved:** Implemented `rankweb_schema_render_standalone_json_ld()` hooked directly to `wp_head` at priority 20.
 2. **Canonical Filter Hook:** Canonicals only hooked into `rank_math/frontend/canonical`. **Resolved:** Added core WordPress `get_canonical_url` filter hook.
 3. **Robots Directives Hook:** Robots only hooked into `rank_math/frontend/robots`. **Resolved:** Added core WordPress `wp_robots` filter hook.
 4. **Boot Blocker:** Header declared `Requires Plugins: seo-by-rank-math` and lines 58–68 halted execution with an admin warning. **Resolved:** Converted to an optional bridge; plugin boots 100% of its native modules independently.
@@ -167,7 +167,7 @@ Prior to this release hardening, RankWeb was artificially crippled when operatin
    - Mock data must never be written into the production observation table (`aw_si_obs`).
 
 ### 5.2 Standalone Independence
-- In the absence of Kits Core, `aw_si_screen_fallback()` renders native WordPress admin tabs with standard WordPress list tables (`AW_SI_Keywords_Table`) and settings forms (`aw_si_settings_tab()`).
+- In the absence of Kits Core, `insightweb_si_screen_fallback()` renders native WordPress admin tabs with standard WordPress list tables (`InsightWeb_SI_Keywords_Table`) and settings forms (`aw_si_settings_tab()`).
 - In the absence of Rank Math, post SEO scoring gracefully defaults to neutral values without failing database queries.
 
 ---
@@ -178,10 +178,10 @@ Every companion plugin must boot, render, and execute on a standard WordPress in
 
 | Plugin | Standalone Core Functionality | Bundled Infrastructure | Optional Kits Core Enhancement | Missing Sibling Behavior |
 | :--- | :--- | :--- | :--- | :--- |
-| **DirectoryWeb** | CPT `aw_listing`, faceted search, 9 dynamic blocks, places, claim submissions and evidence uploads. | Bundled `standalone-fallback.php` (`directoryweb_count/icon/date/simple_table`, delegating to Kits Core when present). Native admin dashboard & settings. | Mounts into unified Kits Admin Shell (`kits-dash-cards`); Brand Customizer token styling. | Operates without SCF (native custom fields meta box); operates without Maps API (address list fallback). |
+| **DirectoryWeb** | CPT `aw_listing`, faceted search, 10 dynamic blocks, places, claim submissions and evidence uploads. | Bundled `standalone-fallback.php` (`directoryweb_count/icon/date/simple_table`, delegating to Kits Core when present). Native admin dashboard & settings. | Mounts into unified Kits Admin Shell (`kits-dash-cards`); Brand Customizer token styling. | Operates without SCF (native custom fields meta box); operates without Maps API (address list fallback). |
 | **RankWeb** | Titles, meta descriptions, canonicals, robots, XML sitemaps, schema JSON-LD, breadcrumbs, redirects, silos, analysis. | Native WP Admin settings; standalone JSON-LD printer on `wp_head`; core `wp_robots` & `get_canonical_url` hooks. | Mounts into Kits Admin Shell; links with Kits Site Overview metrics. | Operates without Rank Math (native SEO engine active); operates without InsightWeb (local keyword rules). |
 | **SourceWeb** | Feed ingestion, article reprint engine, content rules, auto-resolve rules, AI worker endpoints. | Native WP Admin fallback screens; bundled host/publisher parsers; worker webhook router. | Mounts into Kits Shell; unifies activity logs into Kits Dashboard. | Operates without DirectoryWeb (`function_exists` guards on places/phones); operates without InsightWeb (local scoring). |
-| **InsightWeb** | Search Console ingestion, GA4/Clarity ingestion, keyword scoring, SVG MiniCharts, Ahrefs import. | Bundled `standalone-fallback.php`; native WP Admin tabbed interface (`AW_SI_Keywords_Table`); empty-state tile generator. | Mounts telemetry tiles directly into Kits Shell dashboard. | Operates without Kits Core; operates without Rank Math; returns cleanly labeled empty states when GSC is unlinked. |
+| **InsightWeb** | Search Console ingestion, GA4/Clarity ingestion, keyword scoring, SVG MiniCharts, Ahrefs import. | Bundled `standalone-fallback.php`; native WP Admin tabbed interface (`InsightWeb_SI_Keywords_Table`); empty-state tile generator. | Mounts telemetry tiles directly into Kits Shell dashboard. | Operates without Kits Core; operates without Rank Math; returns cleanly labeled empty states when GSC is unlinked. |
 | **MailWeb** | SMTP transport (465 SSL), Hostinger API SDK, newsletter subscription forms, DKIM telemetry. | Bundled Hostinger SDK (`vendor/`); bundled `standalone-fallback.php`; native WP Admin mail settings. | Unified subscriber activity tile in Kits Core dashboard. | Falls back to native `wp_mail` when Hostinger API or custom SMTP credentials are unset. |
 | **PlanWeb** | Editorial calendar, publication dates, campaign timeline tracking, iCal export. | Native calendar UI; standard WP settings page; bundled `standalone-fallback.php`; ICS feed router. | Unified editorial schedule card in Kits Core admin home. | Operates standalone without external calendar synchronizers. |
 
@@ -196,7 +196,7 @@ To prevent architectural entropy, configuration ownership is strictly segregated
 - `directoryweb`: `directoryweb_settings`, `aw_place_counts`, `aw_ff_forms`, `directoryweb_facet_*` transients.
 - `insightweb`: `insightweb_keys`, `insightweb_settings`, `aw_si_*` observation tables and options.
 - `rankweb`: `rankweb_settings`, `aw_seo_*` metadata and redirection options.
-- `mailweb`: `mailweb_settings`, `mailweb_dkim_status`, `aw_smtp_*` credentials.
+- `mailweb`: `mailweb_settings`; the DNS warning is the transient `mailweb_dns_status_warning`.
 - `planweb`: `planweb_settings`, calendar visibility options.
 - `sourceweb`: `sourceweb_settings`, `sourceweb_rules`, `aw_sourcing_*` rules and sources.
 
@@ -242,8 +242,8 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 
 ### Implementation Requirements
 - **Hooking `wp_theme_json_data_theme`:**
-  Kits Core registers a filter callback on `wp_theme_json_data_theme` in `plugins/kits-core/includes/brand-customizer.php`. It merges active `kits_brand_tokens` directly into Layer 3 of the theme data resolver, caching compiled data in a transient (`kits_brand_theme_data`) with automated invalidation on option updates.
-- **Reset Behavior:**
+  **Not built.** Kits Core has no `wp_theme_json_data_theme` filter. The Brand Customizer prints CSS custom properties in `wp_head` and `admin_head` (`brand-customizer.php:48-77`); only the theme's site layer hooks the filter (`site-layer.php:91`). See task P1.2 and `multi-tenant-setup-guide.md`.
+- **Reset Behavior (target once the filter is built):**
   When a user navigates to `Appearance > Editor > Styles` and clicks "Reset to defaults", WordPress wipes the Layer 4 user post from the database and reverts to Layer 3 (Tenant Brand Presets) rather than unbranded theme defaults.
 
 ---
@@ -305,7 +305,7 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 ---
 
 #### Track P1-B: DirectoryWeb Release Readiness (Step 2)
-1. **Existing Functionality Verified:** CPT `aw_listing` registration, 9 dynamic blocks (`status`, `fields`, `people`, `featured-in`, `local-card`, `helplines`, `find-help`, `listing-finder`), 12h transient facet caching (`directoryweb_facet_*`), claim page rendering (`claim-page.php`), geocoding helpers (`geocode.php`), map REST endpoint (`/wp-json/aw/v1/dir-points`). Unit tests passing 84/84 checks across 5 test suites.
+1. **Existing Functionality Verified:** CPT `aw_listing` registration, 10 dynamic blocks (`status`, `fields`, `people`, `featured-in`, `local-card`, `helplines`, `find-help`, `listing-finder`), 12h transient facet caching (`directoryweb_facet_*`), claim page rendering (`claim-page.php`), geocoding helpers (`geocode.php`), map REST endpoint (`/wp-json/aw/v1/dir-points`). Unit tests: 14 files, 311 checks.
 2. **Decoupling Changes Drafted in Working Tree (Awaiting Authorization):**
    - Removed fatal boot halt on `! defined('KITS_CORE_LOADED')` in `directoryweb.php`.
    - Added bundled `includes/standalone-fallback.php` providing UI and REST compatibility primitives.
@@ -317,17 +317,17 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
    - [x] ~~Geocoding fallback without a Google Maps key~~ done: `includes/geocode.php` uses OpenStreetMap Nominatim (no key), cached, with PIN code or district centre as the approximate fallback.
 4. **Release-Readiness Acceptance Criteria:**
    - Activates cleanly on clean WordPress install without Kits Core or SCF.
-   - All 9 dynamic blocks render on frontend without console or PHP errors.
+   - All 10 dynamic blocks render on frontend without console or PHP errors.
    - Faceted search and district filtering function with transient caching.
    - Admin listing table and claim review operate in standalone and shell modes.
 
 ---
 
 #### Track P1-C: RankWeb Release Readiness (Step 3)
-1. **Existing Functionality Verified:** Standalone title/meta engine, canonical URL calculator, robots directives manager, schema JSON-LD engine, dynamic breadcrumbs block (`rankweb/blocks/breadcrumbs`), internal link silo engine (`silo.php`, `linker.php`), video metadata (`video.php`), redirects manager (`redirects.php`), agent tools (`agent-tools.php`). Unit tests passing 125 tests, 307 assertions in `phpunit-lite.php` and 94 settings checks in `run.php`.
+1. **Existing Functionality Verified:** Standalone title/meta engine, canonical URL calculator, robots directives manager, schema JSON-LD engine, dynamic breadcrumbs block (`rankweb/blocks/breadcrumbs`), internal link silo engine (`silo.php`, `linker.php`), video metadata (`video.php`), redirects manager (`redirects.php`), agent tools (`agent-tools.php`). Unit tests passing 137 tests, 342 assertions in `phpunit-lite.php` and 94 settings checks in `run.php`.
 2. **Decoupling Changes Drafted in Working Tree (Awaiting Authorization):**
    - Relaxed `Requires Plugins: seo-by-rank-math` header and removed boot halt in `rankweb.php`.
-   - Added standalone Schema.org JSON-LD printer (`aw_schema_render_standalone_json_ld()`) hooked to `wp_head` in `includes/schema.php`.
+   - Added standalone Schema.org JSON-LD printer (`rankweb_schema_render_standalone_json_ld()`) hooked to `wp_head` in `includes/schema.php`.
    - Added core WordPress `get_canonical_url` hook in `includes/canonical.php` and `wp_robots` hook in `includes/robots.php`.
    - Authored `tests/StandaloneSchemaTest.php`.
 3. **Outstanding Implementation Tasks:**
@@ -336,7 +336,7 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 4. **Release-Readiness Acceptance Criteria:**
    - Activates and renders meta titles, canonicals, robots, and JSON-LD schema without Rank Math installed.
    - Breadcrumbs block renders with valid BreadcrumbList schema.
-   - Redirect rules resolve with 301/302 headers.
+   - Redirect tools write to Rank Math's list when it is active.
    - Rank Math integration automatically activates when Rank Math is present.
 
 ---
@@ -349,8 +349,8 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
    - Added native WP Admin fallback screens in `includes/sourceweb-ui.php` with empty states and proper action hooks.
    - Authored and verified `tests/SourceWebStandaloneTest.php`.
 3. **Outstanding Implementation Tasks — Completed:**
-   - [x] Implement automated retry logic with exponential backoff for worker rate limits (GDELT 502/503 timeouts): `aw_worker_retry_backoff()`, `aw_worker_is_in_backoff()`, `aw_worker_clear_backoff()`, and feed retry equivalents in `workers.php` and `sourcing-lists.php`.
-   - [x] Build UI panel for manual publisher rule overrides and custom feed filters: domain trust overrides (`aw_rules_domain_override_save`, `delete`, `aw_rules_domain_overrides`), feed excluded tags (`aw_rules_feed_excluded_tags_save`, `aw_rules_feed_excluded_tags`), and enforcement in `aw_auto_review()`.
+   - [x] Implement automated retry logic with exponential backoff for worker rate limits (GDELT 502/503 timeouts): `sourceweb_worker_retry_backoff()` and its backoff helpers, and feed retry equivalents in `workers.php` and `sourcing-lists.php`.
+   - [x] Build UI panel for manual publisher rule overrides and custom feed filters: domain trust overrides (`sourceweb_rules_domain_override_save` and related functions in `rules-model.php`), feed excluded tags (`sourceweb_rules_feed_excluded_tags_*`), and enforcement in `sourceweb_auto_review()`.
 4. **Release-Readiness Acceptance Criteria:**
    - [x] Activates and ingests RSS feeds cleanly on a standalone WordPress site.
    - [x] Content reprint engine and relevance rules execute without DirectoryWeb or InsightWeb.
