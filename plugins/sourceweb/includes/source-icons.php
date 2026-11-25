@@ -79,7 +79,7 @@ function aw_src_icon_fetch( $url, $host ) {
 			'timeout'             => 6,
 			'redirection'         => 3,
 			'limit_response_size' => 102400,
-			'user-agent'          => 'AnimalWrites-SourceCheck/1.0 (+' . home_url( '/' ) . '; site icon of a news source)',
+			'user-agent'          => 'SourceWeb-SourceCheck/1.0 (+' . home_url( '/' ) . '; site icon of a news source)',
 		)
 	);
 	if ( is_wp_error( $r ) ) {

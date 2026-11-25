@@ -54,7 +54,7 @@ function aw_parse_sjm( $html ) {
 function aw_fetch_site_opportunities() {
 	$report = array();
 	foreach ( aw_site_opportunity_sources() as $src ) {
-		$res = wp_remote_get( $src['url'], array( 'timeout' => 30, 'user-agent' => 'AnimalWritesWorkers/1.0 (+https://animalwrites.in)' ) );
+		$res = wp_remote_get( $src['url'], array( 'timeout' => 30, 'user-agent' => 'SourceWebWorkers/1.0 (+' . home_url( '/' ) . ')' ) );
 		if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
 			$report[ $src['name'] ] = 'fetch failed';
 			continue;

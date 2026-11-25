@@ -293,7 +293,7 @@ function aw_sourcing_site_meta_run( $limit = 15 ) {
 					'timeout'             => 8,
 					'redirection'         => 3,
 					'limit_response_size' => 300000,
-					'user-agent'          => 'AnimalWrites-SourceCheck/1.0 (+' . home_url( '/' ) . '; home page title and description of a news source)',
+					'user-agent'          => 'SourceWeb-SourceCheck/1.0 (+' . home_url( '/' ) . '; home page title and description of a news source)',
 					'headers'             => array( 'Accept' => 'text/html' ),
 				)
 			);
