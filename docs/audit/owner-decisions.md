@@ -51,15 +51,10 @@ Status: **open** unless marked. Nothing here is started. Each entry: current imp
 - Implication: a migration touches decided, stored claims on the live directory; finished decisions must not change.
 - Recommendation: leave both. Do not migrate stored claims; new sites use the native form.
 
-## OD9. Animal Writes defaults inside RankWeb (open)
-- Now: three tenant-specific values are baked into the plugin and apply to every site that installs it: the schema contact email falls back to `contact@animalwrites.in` (`schema.php:287`), the WebSite alternate names default to "AnimalWrites", "Animal Writes India" and "animalwrites.in" (`settings.php:221`), and `parse_request` redirects any request path that looks like `/https:/animalwrites.in/...` (`redirects.php:155`). The Google News sitemap names the publication "Animal Writes" for every site (`sitemap.php`). The language file's plugin description also named the domain (the language file was regenerated from the code on 25 Nov 2026 and no longer does).
-- Alternatives: (a) neutral defaults (empty email, site name and host as alternate names, no host redirect) and move the three behaviours to the Animal Writes site layer through filters; (b) keep as is for the commercial build and strip for the WordPress.org build; (c) leave.
-- Implication: (a) changes the live Animal Writes output until its site layer carries the filters, so it must be deployed together with that change. A customer's schema currently names another organisation's email.
-- Recommendation: (a), in one change with the site-layer filters, after the owner confirms the Animal Writes values to keep.
+## OD9. Animal Writes defaults inside RankWeb (decided 25 Nov 2026: decouple; partly done)
+- Done: the schema contact email, contact point, address country, founding date and area served are no longer written for other sites (the Organization node passes through the `rankweb_organization_node` filter, the email through `rankweb_contact_email`); the WebSite alternate names default to none; the `animalwrites.in` redirect is now the site's own host plus any added through `rankweb_own_hosts`; the Google News publication name is the site name (`rankweb_news_publication_name`); the sitemap-watchdog email names the site.
+- Effect on the live Animal Writes site until its site layer carries the old values: the Organization node loses the contact email and contact point, address country, founding date and area served; the alternate names are empty; the old-domain redirect stops; the news publication name is the site name. The site layer restores all of it with `add_filter` calls on the filters above (values are in git history: commit 32d7177's parent, `schema.php`, `settings.php`, `redirects.php`, `sitemap.php`).
+- Still open (copy, not data): title and description templates and settings defaults in `settings.php`, `titles.php` and `programmatic.php` still say "Animal Writes" and "India" (about 60 strings), and `breadcrumbs-render.php` registers an `animal-writes/breadcrumb` block name. Neutralising them is the same kind of change and needs the same site-layer hand-over.
 
-## OD10. RankWeb loads InsightWeb's bootstrap by folder path (open)
-- Now: while InsightWeb is not active, `rankweb.php` requires `wp-content/plugins/insightweb/includes/bootstrap.php` if the file exists, so Search Insights' scheduled jobs keep a handler (a bridge written for the live site, to be removed once InsightWeb is active there).
-- Done 25 Nov 2026: the bridge can be turned off with the `rankweb_insightweb_bridge` filter (default on, so live behaviour is unchanged).
-- Alternatives: remove the bridge once InsightWeb is confirmed active on live (the plan in the code comment); keep it on the commercial build only; leave it.
-- Implication: a plugin that loads a sibling's files by path is not acceptable on WordPress.org.
-- Recommendation: remove it after InsightWeb is active on live, and have the WordPress.org build strip it in the meantime.
+## OD10. RankWeb loads InsightWeb's bootstrap by folder path (decided 25 Nov 2026: decouple; done)
+- The bridge is removed. RankWeb no longer loads any file of another plugin. Search Insights' scheduled jobs run only while InsightWeb is active: confirm InsightWeb is active on the live site before deploying this.

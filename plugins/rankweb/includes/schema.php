@@ -284,7 +284,7 @@ function aw_publisher_schema() {
 	$desc  = '' !== trim( $desc ) ? $desc : ( $front ? (string) get_post_field( 'post_excerpt', $front ) : '' );
 	$desc  = '' !== trim( $desc ) ? $desc : get_bloginfo( 'description' );
 	$email = sanitize_email( (string) aw_seo_rm_setting( 'email' ) );
-	$email = '' !== $email ? $email : 'contact@animalwrites.in'; // as on the Contact page
+	$email = '' !== $email ? $email : sanitize_email( (string) apply_filters( 'rankweb_contact_email', '' ) ); // none unless the site sets one
 	$name  = trim( (string) aw_seo_rm_setting( 'knowledgegraph_name' ) );
 	$about = get_terms( array( 'taxonomy' => aw_seo_category_tax(), 'hide_empty' => true, 'fields' => 'names' ) );
 	$pages = array();
@@ -294,7 +294,7 @@ function aw_publisher_schema() {
 			$pages[ $k ] = get_permalink( $page );
 		}
 	}
-	return array_filter(
+	$node = array_filter(
 		array_merge(
 			array(
 				'@type'         => 'Organization',
@@ -304,17 +304,23 @@ function aw_publisher_schema() {
 				'url'           => home_url( '/' ),
 				'description'   => rankweb_plain_text( $desc ),
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
-				'email'         => $email,
-				'contactPoint'  => array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email, 'url' => home_url( '/contact/' ), 'areaServed' => 'IN', 'availableLanguage' => array( 'en', 'hi' ) ),
-				'address'       => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ), // the country only: no public street address or phone (owner, 3 Nov 2026)
-				'foundingDate'  => '2025-11', // the first campaign, India Writes for Its Community Dogs (November 2025)
-				'areaServed'    => array( '@type' => 'Country', 'name' => 'India', 'identifier' => 'IN' ),
+				'email'         => '' !== $email ? $email : null,
+				'contactPoint'  => '' !== $email ? array( '@type' => 'ContactPoint', 'contactType' => 'customer support', 'email' => $email ) : null,
+				'address'       => null, // a site adds its country through the rankweb_organization_node filter
+				'foundingDate'  => null,
+				'areaServed'    => null,
 				'knowsAbout'    => is_array( $about ) ? array_values( array_map( 'rankweb_plain_text', $about ) ) : null,
 				'sameAs'        => aw_publisher_profiles(),
 			),
 			$pages
 		)
 	);
+	/**
+	 * The Organization node before it is printed: a site adds what is its own (address country, founding date, area served).
+	 *
+	 * @param array $node Organization node.
+	 */
+	return (array) apply_filters( 'rankweb_organization_node', $node );
 }
 
 /**

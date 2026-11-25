@@ -152,20 +152,25 @@ function aw_redirect_add( $old_url, $target ) {
 	}
 }
 
-// A link written as "https:/animalwrites.in/…" (one slash) or "animalwrites.in/…" without a scheme is read as a path on
-// this site: /https:/animalwrites.in/news/ (79 hits in the 404 Monitor, no referer; audit 12 Nov 2026). It goes to
-// the page it meant. The site's own templates and stored content have no such link; the hits come from outside.
+// A link written with the site's own host but a mangled scheme ("https:/example.org/…", one slash) or none ("example.org/…")
+// is read as a path on this site and 404s; it goes to the page it meant. The host comes from home_url(); extra hosts the
+// site was known by (an old domain) are added through the rankweb_own_hosts filter.
 add_action(
 	'parse_request',
 	function () {
 		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
 			return;
 		}
-		$uri = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?animalwrites\.in(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
+		$uri   = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$hosts = array_filter( array_map( 'strval', (array) apply_filters( 'rankweb_own_hosts', array( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) ) ) );
+		if ( ! $hosts ) {
 			return;
 		}
-		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'Animal Writes' );
+		$alt = implode( '|', array_map( fn( $h ) => preg_quote( preg_replace( '/^www\./i', '', $h ), '#' ), $hosts ) );
+		if ( ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?(?:' . $alt . ')(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
+			return;
+		}
+		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'RankWeb' );
 		exit;
 	},
 	0

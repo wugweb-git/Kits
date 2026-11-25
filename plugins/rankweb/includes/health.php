@@ -74,8 +74,8 @@ function aw_seo_endpoints_watchdog() {
 	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
 		return; // the same addresses were emailed in the last 12 hours
 	}
-	$body = "Animal Writes: search engine files are not answering, even after rewrite rules were flushed:\n\n- " . implode( "\n- ", $problems ) . "\n\nCheck: " . home_url( '/sitemap_index.xml' ) . "\n       " . home_url( '/llms.txt' ) . "\nSettings → Permalinks → Save also flushes the rules.\n";
-	if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: ' . reset( $problems ), $body ) ) {
+	$body = get_bloginfo( 'name' ) . ": search engine files are not answering, even after rewrite rules were flushed:\n\n- " . implode( "\n- ", $problems ) . "\n\nCheck: " . home_url( '/sitemap_index.xml' ) . "\n       " . home_url( '/llms.txt' ) . "\nSettings → Permalinks → Save also flushes the rules.\n";
+	if ( wp_mail( get_option( 'admin_email' ), get_bloginfo( 'name' ) . ': ' . reset( $problems ), $body ) ) {
 		set_transient( 'aw_seo_endpoints_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
 	}
 }

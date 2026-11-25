@@ -65,7 +65,6 @@ add_action(
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
 		}
-		aw_seo_extras_insightweb_bridge();
 		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
 		// Checked in admin and cron requests only, so a page view never writes.
 		$jobs = array(
@@ -95,26 +94,6 @@ add_action(
 	},
 	5
 );
-
-/**
- * Bridge while InsightWeb is not active yet (docs/insightweb-plan.md 3.2). Search Insights moved to its own plugin on
- * 11 Nov 2026; a new plugin is inactive until someone activates it, and in that gap its scheduled jobs would run with no
- * handler. So, while InsightWeb is not active and Search Insights was not switched off here, RankWeb loads InsightWeb's
- * bootstrap, which loads once whoever calls it first. Removed once InsightWeb is active on live and a daily run is OK.
- */
-function aw_seo_extras_insightweb_bridge(): void {
-	if ( defined( 'INSIGHTWEB_FILE' ) ) {
-		return; // InsightWeb is active: it loads Search Insights itself.
-	}
-	if ( ! apply_filters( 'rankweb_insightweb_bridge', true ) ) {
-		return; // a site or a build that does not want RankWeb to load another plugin's files turns the bridge off
-	}
-	// Never off while the theme runs (owner, 11 Nov 2026): an old saved off switch is not read.
-	$file = WP_PLUGIN_DIR . '/insightweb/includes/bootstrap.php';
-	if ( file_exists( $file ) ) {
-		require_once $file;
-	}
-}
 
 // Search Insights' scheduled jobs are InsightWeb's now: switching RankWeb off never stops them.
 register_deactivation_hook(
