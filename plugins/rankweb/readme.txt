@@ -8,7 +8,7 @@ Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-SEO for WordPress, with or without Rank Math (free): titles, descriptions, share cards, schema, canonicals, FAQs, breadcrumbs, internal links, video and bulk tools.
+SEO for WordPress, with or without Rank Math: titles, descriptions, share cards, schema, canonicals, FAQs, breadcrumbs, internal links and video.
 
 == Description ==
 
@@ -33,6 +33,10 @@ RankWeb works on its own, and next to Rank Math (free) when that is active. It i
 * A password-protected item is kept out of search.
 * llms.txt, Open Graph details, share images and a watchdog for the sitemap.
 * Settings for every rule, grouped by module, with their defaults. Every switchable module has an on/off switch on the dashboard.
+
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/rankweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
 
 == Installation ==
 
