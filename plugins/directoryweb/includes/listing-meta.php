@@ -41,7 +41,7 @@ function directoryweb_meta_schema(): array {
 		return $schema;
 	}
 	$fields = array(
-		'verified'              => array( 'boolean', 'Verified by Animal Writes' ),
+		'verified'              => array( 'boolean', 'Verified by the site' ),
 		'verified_on'           => array( 'string', 'Last verified date (Y-m-d)' ),
 		'awbi_recognised'       => array( 'string', 'AWBI recognised on (Y-m-d)' ),
 		'awbi_renewed'          => array( 'string', 'AWBI renewed on (Y-m-d)' ),

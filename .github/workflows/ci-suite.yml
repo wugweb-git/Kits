@@ -171,6 +171,7 @@ jobs:
         run: |
           php tests/standalone-matrix-test.php
           php tests/remediation-verification-test.php
+          php tests/no-tenant-data-test.php
 
       - name: Test Kits Core
         if: ${{ needs.changes.outputs.kits_core == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}

@@ -843,7 +843,7 @@ function directoryweb_settings_payload(): array {
 				directoryweb_fact( __( 'Country', 'directoryweb' ), 'in' ),
 				/* translators: %s: number of days. */
 				directoryweb_fact( __( 'Answers kept', 'directoryweb' ), defined( 'AW_GEO_CACHE' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( AW_GEO_CACHE / DAY_IN_SECONDS ) ) : '' ),
-				directoryweb_fact( __( 'Contact sent with each request', 'directoryweb' ), defined( 'AW_GEO_UA' ) ? AW_GEO_UA : '' ),
+				directoryweb_fact( __( 'Contact sent with each request', 'directoryweb' ), function_exists( 'aw_geo_user_agent' ) ? aw_geo_user_agent() : '' ),
 			),
 		),
 		array(

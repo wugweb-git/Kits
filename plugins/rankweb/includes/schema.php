@@ -100,7 +100,7 @@ function aw_listing_schema( $id ) {
 	}
 	if ( $state || $district ) {
 		$street = $m( 'aw_address' ) ? $m( 'aw_address' ) : $m( 'aw_area' ); // the full address when a source gives it
-		$rest   = str_ireplace( array_filter( array( $district, $state, 'India' ) ), '', $street );
+		$rest   = str_ireplace( array_filter( array( $district, $state, (string) apply_filters( 'rankweb_country_name', '' ) ) ), '', $street );
 		if ( '' === trim( preg_replace( '/[\s,.\-–]+/u', '', $rest ) ) ) {
 			$street = ''; // only repeats the district and state
 		}
@@ -243,7 +243,7 @@ function aw_seo_rm_setting( $key ) {
 function aw_publisher_profiles() {
 	$list = array_merge( array( (string) aw_seo_rm_setting( 'social_url_facebook' ) ), preg_split( '/\s+/', (string) aw_seo_rm_setting( 'social_additional_profiles' ) ) );
 	$list = array_values( array_unique( array_filter( array_map( 'trim', $list ), fn( $u ) => (bool) wp_http_validate_url( $u ) ) ) );
-	return $list ? $list : array( 'https://www.facebook.com/profile.php?id=61596537146561', 'https://www.instagram.com/animal_writes_/', 'https://x.com/animal_writes_', 'https://www.linkedin.com/company/animalwrites/', 'https://www.threads.com/@animal_writes_' );
+	return $list;
 }
 
 /**
@@ -500,7 +500,7 @@ function aw_article_nodes( $id ) {
 		$node['contentLocation'] = aw_schema_place( $id );
 		$node['author']          = array( // the editorial team, with its policy page (owner, 12 Nov 2026: Google News and Discover)
 			'@type'              => 'Organization',
-			'name'               => 'Animal Writes editorial team',
+			'name'               => sprintf( /* translators: %s: site name. */ __( '%s editorial team', 'rankweb' ), get_bloginfo( 'name' ) ),
 			'url'                => home_url( '/editorial-policy/' ),
 			'parentOrganization' => $us,
 		);
@@ -850,14 +850,14 @@ function aw_job_schema( $id ) {
 	);
 	if ( $remote ) {
 		$data['jobLocationType']               = 'TELECOMMUTE';
-		$data['applicantLocationRequirements'] = array( '@type' => 'Country', 'name' => 'India' );
+		$data['applicantLocationRequirements'] = array( '@type' => 'Country', 'name' => (string) apply_filters( 'rankweb_remote_job_country', '' ) );
 		return array_filter( $data );
 	}
 	$street = '';
 	$pin    = (string) get_post_meta( $id, 'aw_pincode', true );
 	if ( 1 === count( $places ) && 'district' === $places[0]->kind && $org_id && function_exists( 'aw_item_codes' ) && in_array( (int) $places[0]->code, aw_item_codes( $org_id )[1], true ) ) {
 		$state  = aw_place_state( $places[0]->state );
-		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $places[0]->name, $state ? $state->name : '', 'India' ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
+		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $places[0]->name, $state ? $state->name : '', (string) apply_filters( 'rankweb_country_name', '' ) ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
 		$pin    = $pin ? $pin : (string) get_post_meta( $org_id, 'aw_pincode', true ); // the role is at the organisation's own place
 	}
 	$locs = array();
@@ -946,7 +946,7 @@ function aw_opportunity_org_address( $id, $org_id ) {
 	$street = '';
 	$pin    = (string) get_post_meta( $id, 'aw_pincode', true );
 	if ( $p && 'district' === $p->kind && $org_id && in_array( (int) $p->code, aw_item_codes( $org_id )[1], true ) ) {
-		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $p->name, $state ? $state->name : '', 'India' ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
+		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $p->name, $state ? $state->name : '', (string) apply_filters( 'rankweb_country_name', '' ) ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
 		$pin    = $pin ? $pin : (string) get_post_meta( $org_id, 'aw_pincode', true );
 	}
 	return array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $p && 'district' === $p->kind ? $p->name : null, 'addressRegion' => $state ? $state->name : null, 'postalCode' => $pin, 'addressCountry' => 'IN' ) );
@@ -1163,7 +1163,7 @@ function aw_schema_nodes() {
 				'@id'             => get_permalink() . '#webpage',
 				'url'             => get_permalink(),
 				'name'            => 'Claim Your Organisation Listing',
-				'description'     => 'Search and claim your animal welfare organisation, veterinary clinic, or shelter listing in India.',
+				'description'     => 'Search and claim your organisation listing.',
 				'inLanguage'      => 'en-IN',
 				'isPartOf'        => array( '@id' => home_url( '/#website' ) ),
 				'potentialAction' => array(
