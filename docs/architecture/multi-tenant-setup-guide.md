@@ -64,4 +64,4 @@ The Brand Customizer exports and imports its tokens as JSON. Import sanitises ea
 
 ## 8. Shortcodes and native blocks
 
-Keep new content on native blocks and Block Bindings (`kits/post-field`). Kits Core currently registers one block, `kits/hero`. Blocks named in older documents (`kits-core/countdown`, `kits-core/category-hub`, `mailweb/newsletter`, `directoryweb/search`, `directoryweb/people`, `sourceweb/attribution`) have **not** been verified in this repository and should not be relied on until each plugin documents them.
+Keep new content on native blocks and Block Bindings (`kits/post-field`). Kits Core currently registers one block, `kits/hero`; `directoryweb/people` and `mailweb/newsletter` are registered by their plugins. Blocks named in older documents (`kits-core/countdown`, `kits-core/category-hub`, `directoryweb/search`, `sourceweb/attribution`) have **not** been verified in this repository and should not be relied on until each plugin documents them.

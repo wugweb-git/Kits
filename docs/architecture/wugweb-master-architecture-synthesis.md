@@ -90,14 +90,17 @@ To prevent collision between editor tools, theme presets, and component styles:
 * **`--kit-*`**: The semantic bridge variables consumed by Kits patterns, templates, and plugins:
   ```css
   --kit-radius-card: var(--wp--custom--radius--md, 8px);
-  --kit-color-accent: var(--wp--preset--color--accent, #f59e0b);
+  --kit-color-accent: var(--wp--preset--color--accent, #C6D2E0);
   ```
 
 ### 3.3 Stable Identifiers vs. Tenant Value Overrides
 * Token identifiers (`blur.md`, `stroke.default`, `radius.md`, `shadow.card`) are **frozen and immutable across releases**.
 * Tenants modify the **values**, never the keys. This guarantees that updating design tokens never breaks existing block templates, patterns, or child themes.
 
-### 3.4 The 4-Layer Cascade & The "Reset to Tenant Baseline" Requirement
+### 3.4 The 4-Layer Cascade
+
+**Status (25 Nov 2026):** the Layer 3 injection is **not built**. Kits Core has no `wp_theme_json_data_theme` filter; the Brand Customizer prints CSS in `wp_head` (see `multi-tenant-setup-guide.md`). The text below is the target.
+ & The "Reset to Tenant Baseline" Requirement
 WordPress evaluates theme JSON across four distinct hierarchical layers:
 
 1. **`wp_theme_json_data_default`**: WordPress core defaults.
@@ -137,14 +140,14 @@ To capture tenant patterns without compromising security:
 3. **Zero Secrets in Tenant Code**: The tenant plugin carries only an opaque, revocable tenant API key. The GitHub write token / Personal Access Token (PAT) resides exclusively in Cloudflare Worker environment secrets.
 4. **Automated Draft PR / Gist**: The Worker sanitizes the markup, runs initial validation, and creates a draft pull request or Gist against `wugweb-git/kits` for review.
 
-### 4.3 Pre-Promotion Sanitization Checklist
+### 4.3 Pre-Promotion Sanitization Checklist (not built: no pipeline exists yet, so no box is ticked)
 Before any tenant pattern is merged into canonical Foundry patterns:
-- [x] **Media Scrubbing**: Replace tenant images/video with neutral SVG placeholders or open Kits assets (`get_theme_file_uri(...)`).
-- [x] **Copy Neutralization**: Strip brand names, localized addresses, and private phone numbers.
-- [x] **CSS Purification**: Purge ad-hoc `<style>` tags and inline `style="..."` attributes.
-- [x] **Token Mapping**: Ensure all colors, paddings, and radii strictly map to semantic `--kit-*` tokens.
-- [x] **Licensing & IP**: Confirm explicit user reuse consent and GPL compatibility.
-- [x] **Visual QA**: Tested in disposable WordPress Playground runtime via Blueprint.
+- [ ] **Media Scrubbing**: Replace tenant images/video with neutral SVG placeholders or open Kits assets (`get_theme_file_uri(...)`).
+- [ ] **Copy Neutralization**: Strip brand names, localized addresses, and private phone numbers.
+- [ ] **CSS Purification**: Purge ad-hoc `<style>` tags and inline `style="..."` attributes.
+- [ ] **Token Mapping**: Ensure all colors, paddings, and radii strictly map to semantic `--kit-*` tokens.
+- [ ] **Licensing & IP**: Confirm explicit user reuse consent and GPL compatibility.
+- [ ] **Visual QA**: Tested in disposable WordPress Playground runtime via Blueprint.
 
 ---
 
@@ -167,7 +170,7 @@ A critical architectural separation:
 | **Editor Style Variation** | `styles/dark.json` | An editorial design choice for site owners who want a permanently dark site. | Theme configuration |
 | **Visitor Runtime Toggle** | Header button + Interactivity API | An interactive switch enabling site visitors to toggle light/dark modes. | `localStorage` + `prefers-color-scheme` |
 
-* **Zero-FOUC Micro-Script**: An inline, blocking `<script>` in `wp_head` evaluates `localStorage.getItem('kit_theme_mode')` and `window.matchMedia('(prefers-color-scheme: dark)')` to immediately inject `data-theme="dark"` into `<html>` before DOM painting, preventing white-flash.
+* **Zero-FOUC Micro-Script**: An inline, blocking `<script>` in `wp_head` evaluates `localStorage.getItem('kit-theme')` and `window.matchMedia('(prefers-color-scheme: dark)')` to immediately inject `data-theme="dark"` into `<html>` before DOM painting, preventing white-flash.
 * **Semantic Variable Shift**: `[data-theme="dark"]` swaps the values of `--kit-color-bg`, `--kit-color-ink`, `--kit-color-raised`, and `--kit-color-line` without requiring component-level CSS overrides.
 
 ---
@@ -195,7 +198,7 @@ A critical architectural separation:
 * **GPL License Only**: No trialware, no locked core features, no bundled hosted plugins.
 * **No `Update URI`**: Removed from all public `.org` plugin and theme headers.
 * **`Requires Plugins` Rule**: Restricted strictly to dependencies that are themselves hosted on WordPress.org.
-* **Unique Prefixes**: Unique prefix per plugin: the full name (`directoryweb_`) or an agreed short form (`dw_` for DirectoryWeb). No legacy `aw_` or `aw-` in new code.
+* **Unique Prefixes**: Unique prefix per plugin: the full name (`directoryweb_`) (a `dw_` short form is not allowed; the DirectoryWeb test rejects it). No legacy `aw_` or `aw-` in new code.
 
 ### 7.2 Security Safeguards
 * **Zero Write Tokens in Client Code**: Never ship Foundry write tokens, GitHub PATs, or master keys inside plugins.
@@ -215,7 +218,7 @@ To prevent privilege escalation and ensure that activating or deactivating one p
 | **RankWeb** | `manage_rankweb` | `RANKWEB_CAP` | SEO Overview, Schemas, Silos, Redirects | Administrator, `manage_categories` |
 | **InsightWeb** | `manage_insightweb` | `INSIGHTWEB_CAP` | Search Insights, Query Tables, GSC Sync | Administrator, `manage_options` |
 | **MailWeb** | `manage_mailweb` | `MAILWEB_CAP` | Mailboxes, Outbox, SMTP/DKIM Settings | Administrator, `edit_others_posts` |
-| **PlanWeb** | `edit_planweb_entries`<br>`planweb_approve` | `PLANWEB_CAP` | Editorial Calendar entries<br>Publishing approvals | Editor, Administrator<br>Administrator only |
+| **PlanWeb** | `edit_planweb_entries`<br>`planweb_approve` | `PLANWEB_CAPS` | Editorial Calendar entries<br>Publishing approvals | Editor, Administrator<br>Administrator only |
 
 ---
 
@@ -250,7 +253,7 @@ function wugweb_remote_request( $url, $args = array(), $method = 'GET' ) {
 
 ## 10. Service Keys Policy & Vault Retirement
 
-* **Vault Retirement (18 Nov 2026)**: The centralized vault (`aw_keys` / `admin.php?page=aw-keys`) is **officially retired**.
+* **Vault Retirement (18 to 19 Nov 2026)**: The centralized vault (`aw_keys` / `admin.php?page=aw-keys`) is **officially retired**.
 * **One Place Per Plugin**: Every standalone plugin keeps its service credentials in its own dedicated settings screen.
 * **Environment & Constant Precedence**: `wp-config.php` constants take unconditional precedence over database values:
   * `define( 'SMTP_HOST', 'smtp.hostinger.com' );`

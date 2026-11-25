@@ -12,7 +12,8 @@ Target layout: content menus first, then one block of Wugweb products (each its 
 | Tools tab (RankWeb) and Help tab (PlanWeb, MailWeb) | `rankweb-ui.php`, `planweb-ui.php`, `mailweb-ui.php` | Wait for the owner's reference list. MailWeb already has a Help card on its Dashboard; RankWeb has a Tools card (owner, 14 Nov: no Tools tab, `docs/pending.md`). |
 | Place intros into Listings › Places | `directoryweb-ui.php:174`, `place-intros.php` | Still a separate tab and submenu. Claims stays read-only (owner). |
 | `kits_link` and `kits_options_link` | Kits Core `admin-home.php:53`, `admin-screens.php:854` | Identical bodies; merge into one. |
-| Renaming the developer parts of Kits › Help | `admin-menu.php:187-190` | Help already has Docs, Design system and "Developer: extra settings"; rename only if the owner asks. |
+| Setup Wizard (`kits-onboarding`) and Scripts & Pixels (`kits-scripts`) | `onboarding-wizard.php:25`, `header-footer-scripts.php:22` | Registered under Kits but hidden; reachable by URL only. Link them from Kits or retire them. |
+| RankWeb and MailWeb classic leftovers | RankWeb `overview.php`, `faq-overview.php`, `settings.php` (9 classic submenus); MailWeb `mail-in.php:61` (dead `ui=classic` argument) | PlanWeb and SourceWeb are finished; these two are not. |
 
 Dropped by the owner on 25 Nov (no tabbing or regrouping): grouping the InsightWeb (10) and SourceWeb (12) tabs.
 
@@ -34,10 +35,10 @@ Dropped by the owner on 25 Nov (no tabbing or regrouping): grouping the InsightW
 | Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb | each plugin's own `add_menu_page()` at 58.1 to 58.7, separator `separator-wugweb` at 58.05 |
 | Tools › Plugin Check (3 items); Settings › Performance, Plugin Check, Simple History | third party |
 | Site Kit, LiteSpeed Cache, FluentCRM, Fluent Forms (with Claims), UpdraftPlus | third party |
-| `aw-keys` (Kits › Keys), `aw-modules` (Kits › Modules), `aw-dates` (redirect to PlanWeb), `aw-theme-parts` and `kits-docs` (redirect to Kits › Help) | keep in Kits (as above) |
+| `aw-modules` (Kits › Modules), `aw-dates` (redirect to PlanWeb), `aw-theme-parts` and `kits-docs` (redirect to Kits › Help) | keep in Kits (as above) |
 
 ## Done, no longer listed
 
-Fluent Forms › Claims; Linked campaigns under Classification; Press menu defined once; Kits as its own top-level menu and the Wugweb menu block (13 Nov, no Kits Core helper); redirects for `kits-fonts`, `kits-design-system`, `aw-cron-health`, `aw-core`; Edit the theme links on Kits Home; every option, term-meta and post-meta field in the old section 6 (12 Nov); `kits_term_url` duplicate; Rank Math "Black Friday Sale" link (`kits-core/includes/admin-layer/tidy.php:100`); `mailweb_crm_*` / `aw_crm_*` (the `aw_crm_*` names are wrappers in `mailweb/includes/fluentcrm-compat.php`); `aw_core_link` and `aw_theme_parts_link` (gone); shell and classic twins (classic screens removed, the shell is the one screen); Theme Options mapped to the Site Editor (`kits_options_link`, `site-editor-links.js`); Create Block Theme and Link Whisper status in the plugin table (`docs/plugins/plugin-map.md`).
+Fluent Forms › Claims; Linked campaigns under Classification; Press menu defined once; Kits as its own top-level menu and the Wugweb menu block (13 Nov, no Kits Core helper); redirects for `kits-fonts` (to the Font Library), `kits-design-system`, `aw-cron-health`, `aw-core`; Edit the theme links on Kits Home; every option, term-meta and post-meta field in the old section 6 (12 Nov); `kits_term_url` duplicate; Rank Math "Black Friday Sale" link (`kits-core/includes/admin-layer/tidy.php:100`); `mailweb_crm_*` / `aw_crm_*` (the `aw_crm_*` names are wrappers in `mailweb/includes/fluentcrm-compat.php`); `aw_core_link` and `aw_theme_parts_link` (gone); shell and classic twins for PlanWeb and SourceWeb; Kits › Help › Developer (`developer/extra`, `developer/edit-screens`, `developer/theme-parts`); `aw-keys` retired (redirects to InsightWeb Settings or Kits Settings, `site-screens.php:103`); Theme Options mapped to the Site Editor (`kits_options_link`, `site-editor-links.js`); Create Block Theme and Link Whisper status in the plugin table (`docs/plugins/plugin-map.md`).
 
-Kept per plugin on purpose (independence): `*_simple_table`, `*_rest_can`, `aw_seo_api_allowed` / `aw_si_api_allowed`.
+Kept per plugin on purpose (independence): `*_simple_table`, `*_rest_can`, `rankweb_seo_api_allowed` / `insightweb_si_api_allowed`.

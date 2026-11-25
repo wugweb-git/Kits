@@ -1,6 +1,6 @@
 # Wugweb — Final Repository, Git, Packaging & WordPress Delivery Architecture
 
-**Status (25 Nov 2026):** Reference for repo, packaging and release flow; matches `tools/build`, `tools/package` and `.github/workflows`. Nothing described here is deployed. Naming rule updated: full prefix or agreed short form (`dw_`).
+**Status (25 Nov 2026):** Reference for repo, packaging and release flow; matches `tools/build`, `tools/package` and the two workflows in `.github/workflows` (`ci-suite.yml`, `release.yml`); the other workflows, `pnpm-workspace.yaml` and a root `composer.json` shown in the tree below do not exist yet, and `release.yml` publishes all 8 ZIPs under one tag. Nothing described here is deployed. Naming rule updated: full prefix or agreed short form (`dw_`).
 
 **Source boundary:** Wugweb Notion records, architecture discussions, and repository contracts.  
 **Purpose:** Establish the canonical monorepo, product boundaries, Git workflow, build/package/release process, WordPress Playground previews, WordPress.org readiness, and the native-versus-plugin approach.
@@ -237,7 +237,7 @@ Every public plugin edition follows the official WordPress Plugin Developer Hand
 * **No Update URI**: `Update URI` removed for `.org` editions.
 * **Requires Plugins**: Used strictly for dependencies hosted directly on WordPress.org.
 * **External Services**: Full disclosure in `readme.txt` with privacy links and terms.
-* **Naming**: Unique plugin-specific prefix (full name such as `directoryweb_`, or an agreed short form such as `dw_`). Never use `aw_` or `aw-` in new code.
+* **Naming**: Unique plugin-specific prefix (full name such as `directoryweb_`, (`dw_` is not allowed: `directoryweb/tests/no-short-prefix-test.php` rejects it)). Never use `aw_` or `aw-` in new code.
 * **Security**: Nonces, capability checks, `wp_unslash()`, data sanitization, output escaping, and `$wpdb->prepare()`.
 
 ---
@@ -254,7 +254,7 @@ Every public plugin edition follows the official WordPress Plugin Developer Hand
 
 # 8. Admin UI Standard (Minimal UI)
 * **Design Philosophy**: Modeled structurally on **Google Site Kit** (plugin dashboards) and **Uncode** (theme management).
-* **Visual Palette**: Strict greyscale with a rare yellow accent (`#f59e0b` / `--kit-color-accent`).
+* **Visual Palette**: Strict greyscale with a rare yellow accent (the theme's `--kit-color-accent` (default `#C6D2E0`; the Brand Customizer default `#FFBE1A` is an open owner decision, OD1)).
 * **Visual Data**: Inline SVG `MiniChart` primitive (no heavy Chart.js or external library dependencies).
 * **Data Presentation**: Sortable, filterable tables with bulk actions, clear columns, pagination, and empty/loading states.
 
@@ -311,6 +311,8 @@ A tenant must be able to change the value of any registered token without alteri
 | `shadow.card` | Standard elevation | Custom elevation | Stable identifier; value overridden |
 
 ## 11.3 The "Reset to Tenant Baseline" Requirement
+
+**Status (25 Nov 2026):** target only. Kits Core has no `wp_theme_json_data_theme` filter yet; the Brand Customizer prints CSS in `wp_head`, and its Reset deletes the option (`multi-tenant-setup-guide.md`).
 Standard Site Editor behavior resets styles back to the theme's hardcoded disk values. For a multi-tenant suite:
 1. Foundry provides the original global baseline.
 2. The tenant configures custom brand values through Kits Core's Token Customizer UI.
@@ -460,7 +462,7 @@ A visitor-facing dark mode toggle and an editor-level style variation are two fu
 1. **Semantic Color Tokens in `theme.json`**:
    Backgrounds and inks use semantic tokens (`--kit-color-bg`, `--kit-color-ink`, `--kit-color-raised`, `--kit-color-line`) that resolve appropriately in both light and dark modes.
 2. **Early `wp_head` Anti-FOUC Script**:
-   Inline, blocking micro-script in `<head>` evaluating `localStorage.getItem('kit_theme_mode')` or system `window.matchMedia('(prefers-color-scheme: dark)')` to immediately apply `data-theme="dark"` before DOM rendering, preventing flash of unstyled content.
+   Inline, blocking micro-script in `<head>` evaluating `localStorage.getItem('kit-theme')` or system `window.matchMedia('(prefers-color-scheme: dark)')` to immediately apply `data-theme="dark"` before DOM rendering, preventing flash of unstyled content.
 3. **CSS Custom Property Shift**:
    `[data-theme="dark"]` shifts the underlying semantic variables without rewriting component styles.
 
