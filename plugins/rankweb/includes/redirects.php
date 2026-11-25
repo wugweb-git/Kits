@@ -1,6 +1,6 @@
 <?php
 /**
- * Redirects. The one list is Rank Math → Redirections (owner, 10 Oct 2026): aw_redirect_add() adds to it, so forms,
+ * Redirects. The one list is Rank Math → Redirections (owner, 10 Oct 2026): rankweb_redirect_add() adds to it, so forms,
  * merges and migrations keep writing to that one list. Author archives go to About by a Rank Math rule (^author);
  * /?author=N goes there in one hop (below).
  *
@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int    $code       The status code (301, 302, 307, 308, 410, 451). A 410 or 451 needs no destination.
  * @return int
  */
-function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 301 ) {
+function rankweb_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 301 ) {
 	$code = in_array( (int) $code, array( 301, 302, 307, 308, 410, 451 ), true ) ? (int) $code : 301;
 	$gone = in_array( $code, array( 410, 451 ), true );
 	if ( '' === $pattern || ( '' === $to && ! $gone ) || ! class_exists( '\RankMath\Redirections\Redirection' ) || ! \RankMath\Helper::is_module_active( 'redirections' ) ) {
@@ -66,7 +66,7 @@ function aw_rank_math_redirect( $pattern, $to, $comparison = 'exact', $code = 30
 }
 
 /** DirectoryWeb's `wp aw redirects-import` adds its old-address 301s through this filter. */
-add_filter( 'directoryweb_redirect_add', fn( $done, $path, $to ) => (bool) aw_rank_math_redirect( (string) $path, (string) $to ) || (bool) $done, 10, 3 );
+add_filter( 'directoryweb_redirect_add', fn( $done, $path, $to ) => (bool) rankweb_rank_math_redirect( (string) $path, (string) $to ) || (bool) $done, 10, 3 );
 
 /**
  * Seed redirects, added once per version to Rank Math's list (they can be edited or removed there afterwards; an exact
@@ -96,14 +96,14 @@ add_action(
 		);
 		$ok = true;
 		foreach ( $exact as $from => $to ) {
-			$ok = aw_rank_math_redirect( $from, home_url( $to ) ) && $ok;
+			$ok = rankweb_rank_math_redirect( $from, home_url( $to ) ) && $ok;
 		}
 		// Any other /campaign/{slug}/ goes to /campaigns/{slug}/. Bare /campaign/ keeps its own exact rule.
 		global $wpdb;
 		$table = $wpdb->prefix . 'rank_math_redirections';
 		$have  = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i WHERE sources LIKE %s', $table, '%' . $wpdb->esc_like( '^campaign/(.+?)/?$' ) . '%' ) ); // phpcs:ignore WordPress.DB
 		if ( ! $have ) {
-			$ok = aw_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
+			$ok = rankweb_rank_math_redirect( '^campaign/(.+?)/?$', home_url( '/campaigns/$1/' ), 'regex' ) && $ok;
 		}
 		if ( $ok ) {
 			update_option( 'aw_seed_redirects_version', AW_SEED_REDIRECTS_VERSION, false );
@@ -141,14 +141,14 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 /** Remember that $old_url now lives at post $target (an ID), or at a URL (a string such as '/volunteer/'). */
-function aw_redirect_add( $old_url, $target ) {
+function rankweb_redirect_add( $old_url, $target ) {
 	$path = trim( (string) wp_parse_url( $old_url, PHP_URL_PATH ), '/' );
 	if ( '' === $path ) {
 		return;
 	}
 	$to = is_numeric( $target ) ? (string) get_permalink( (int) $target ) : home_url( (string) $target );
 	if ( $to ) {
-		aw_rank_math_redirect( rawurldecode( $path ), $to );
+		rankweb_rank_math_redirect( rawurldecode( $path ), $to );
 	}
 }
 

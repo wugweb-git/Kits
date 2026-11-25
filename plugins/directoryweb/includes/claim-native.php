@@ -10,7 +10,7 @@
  *   revoked  -> pending
  *   withdrawn: final
  *
- * Approving applies the ticked fields to the listing through aw_claim_apply_field() (the same writer the Fluent Forms
+ * Approving applies the ticked fields to the listing through directoryweb_claim_apply_field() (the same writer the Fluent Forms
  * review uses, so Undo and the enrichment log behave the same) and marks the listing verified. Revoking takes the
  * verified mark back. The Fluent Forms path in claims-review.php is untouched; this one is used when there is no claim
  * form configured, or by REST.
@@ -30,7 +30,7 @@ const DW_CLAIM_TRANSITIONS = array(
 	'withdrawn' => array(),
 );
 
-/** Claim field => the DW_CLAIM_L key it maps to (what aw_claim_apply_field() understands). */
+/** Claim field => the DW_CLAIM_L key it maps to (what directoryweb_claim_apply_field() understands). */
 const DW_CLAIM_NATIVE_MAP = array(
 	'phone'    => 'phones',
 	'email'    => 'l_email',
@@ -73,7 +73,7 @@ function dw_claim_validate( array $in ): array {
 	if ( '' === $email || ! is_email( $email ) ) {
 		$errors['email'] = 'Enter an email address we can reach you on.';
 	}
-	if ( '' !== $phone && ! aw_claim_phone_ok( $phone ) ) {
+	if ( '' !== $phone && ! directoryweb_claim_phone_ok( $phone ) ) {
 		$errors['phone'] = 'That does not look like a phone number.';
 	}
 	if ( ! array_key_exists( $role, DW_CLAIM_ROLES ) || '' === $role ) {
@@ -86,7 +86,7 @@ function dw_claim_validate( array $in ): array {
 			continue;
 		}
 		if ( 'phone' === $f ) {
-			if ( ! aw_claim_phone_ok( $raw ) ) {
+			if ( ! directoryweb_claim_phone_ok( $raw ) ) {
 				$errors['l_phone'] = 'That does not look like a phone number.';
 				continue;
 			}
@@ -97,7 +97,7 @@ function dw_claim_validate( array $in ): array {
 			'email'   => 'aw_email',
 			'website' => 'aw_website',
 		)[ $f ] ?? '';
-		$val  = '' !== $meta ? aw_claim_clean( $meta, $raw ) : sanitize_textarea_field( $raw );
+		$val  = '' !== $meta ? directoryweb_claim_clean( $meta, $raw ) : sanitize_textarea_field( $raw );
 		if ( '' === $val ) {
 			$errors[ 'l_' . $f ] = 'We could not use that value.';
 			continue;
@@ -255,7 +255,7 @@ function dw_claim_transition( int $id, string $to, int $by, string $note = '', ?
 		}
 		$want = null === $fields ? array_keys( $c['propose'] ) : array_values( array_intersect( array_map( 'sanitize_key', $fields ), array_keys( $c['propose'] ) ) );
 		foreach ( $want as $field ) {
-			if ( isset( DW_CLAIM_NATIVE_MAP[ $field ] ) && aw_claim_apply_field( $entry, DW_CLAIM_NATIVE_MAP[ $field ] ) ) {
+			if ( isset( DW_CLAIM_NATIVE_MAP[ $field ] ) && directoryweb_claim_apply_field( $entry, DW_CLAIM_NATIVE_MAP[ $field ] ) ) {
 				$applied[] = $field;
 			}
 		}
@@ -265,8 +265,8 @@ function dw_claim_transition( int $id, string $to, int $by, string $note = '', ?
 		update_post_meta( $lid, 'aw_needs_reverify', false );
 		update_post_meta( $id, '_dw_claim_applied', wp_json_encode( $applied ) );
 		delete_transient( 'aw_verified_count' );
-		if ( ! empty( $c['person']['email'] ) && function_exists( 'aw_org_people_link' ) ) {
-			aw_org_people_link( $lid, $c['person']['email'], DW_CLAIM_ROLES[ $c['person']['role'] ?? '' ] ?? '', ! empty( $c['person']['show'] ) );
+		if ( ! empty( $c['person']['email'] ) && function_exists( 'directoryweb_org_people_link' ) ) {
+			directoryweb_org_people_link( $lid, $c['person']['email'], DW_CLAIM_ROLES[ $c['person']['role'] ?? '' ] ?? '', ! empty( $c['person']['show'] ) );
 		}
 		if ( function_exists( 'aw_enrich_after_change' ) ) {
 			aw_enrich_after_change( $lid );
@@ -385,7 +385,7 @@ function dw_claim_metabox( $post ): void {
 	echo '<p>' . esc_html__( 'Listing:', 'directoryweb' ) . ' <a href="' . esc_url( get_edit_post_link( $c['listing'] ) ) . '">' . esc_html( get_the_title( $c['listing'] ) ) . '</a> &middot; ' . esc_html__( 'State:', 'directoryweb' ) . ' <strong>' . esc_html( $c['status'] ) . '</strong></p>';
 	echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Field', 'directoryweb' ) . '</th><th>' . esc_html__( 'Now', 'directoryweb' ) . '</th><th>' . esc_html__( 'Proposed', 'directoryweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $c['propose'] as $f => $v ) {
-		$now = isset( DW_CLAIM_NATIVE_MAP[ $f ] ) ? aw_claim_now( $c['listing'], DW_CLAIM_NATIVE_MAP[ $f ], false ) : '';
+		$now = isset( DW_CLAIM_NATIVE_MAP[ $f ] ) ? directoryweb_claim_now( $c['listing'], DW_CLAIM_NATIVE_MAP[ $f ], false ) : '';
 		echo '<tr><td>' . esc_html( $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
 	}
 	echo '</tbody></table>';

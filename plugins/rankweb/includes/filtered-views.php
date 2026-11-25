@@ -60,10 +60,10 @@ const AW_FILTERED_PLACE_TITLE_WORDS = array(
  * Name and item count of a ?state= or ?publisher= view on a hub, counted with the hub's own filter clauses (open
  * opportunities only; preview-only items left out). ['', 0] when the value names nothing.
  */
-function aw_seo_filtered_place( $type, $key, $slug ) {
+function rankweb_seo_filtered_place( $type, $key, $slug ) {
 	$name = '';
-	if ( 'state' === $key && function_exists( 'aw_place_by_slug' ) ) {
-		$p    = aw_place_by_slug( $slug );
+	if ( 'state' === $key && function_exists( 'directoryweb_place_by_slug' ) ) {
+		$p    = directoryweb_place_by_slug( $slug );
 		$name = $p && empty( $p->parent ) ? (string) $p->name : '';
 	} elseif ( 'publisher' === $key && function_exists( 'aw_filter_values' ) ) {
 		$one  = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'meta_key' => 'aw_publisher', 'meta_value' => $slug ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -73,19 +73,19 @@ function aw_seo_filtered_place( $type, $key, $slug ) {
 	if ( '' === $name || ! function_exists( 'aw_filter_clauses' ) ) {
 		return array( '', 0 );
 	}
-	$n = aw_seo_cached(
-		"filtered_place|{$type}|{$key}|{$slug}", // kept until the next post change (aw_seo_cached)
+	$n = rankweb_seo_cached(
+		"filtered_place|{$type}|{$key}|{$slug}", // kept until the next post change (rankweb_seo_cached)
 		function () use ( $type, $key, $slug ) {
 			list( $tq, $mq ) = aw_filter_clauses( $type, array( $key => array( $slug ) ) );
 			$v = array( 'post_type' => $type, 'post_status' => 'publish', 'posts_per_page' => 1, 'fields' => 'ids', 'no_found_rows' => false, 'tax_query' => $tq, 'meta_query' => $mq ); // phpcs:ignore WordPress.DB.SlowDBQuery
-			return (int) ( new WP_Query( aw_seo_hub_rules( $type, $v ) ) )->found_posts;
+			return (int) ( new WP_Query( rankweb_seo_hub_rules( $type, $v ) ) )->found_posts;
 		}
 	);
 	return array( $name, (int) $n );
 }
 
 /** Filter parameters present on this request (sort is an order, not a filter): param => raw string. */
-function aw_seo_filter_params() {
+function rankweb_seo_filter_params() {
 	$out = array();
 	foreach ( array_merge( AW_FILTER_PARAMS, array( 'format' ) ) as $k ) {
 		if ( 'sort' !== $k && isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ) { // phpcs:ignore WordPress.Security.NonceVerification
@@ -97,16 +97,16 @@ function aw_seo_filter_params() {
 
 /**
  * Items a hub list holds for one category or tag, with the hub's own rules (open opportunities only; preview-only
- * items left out). The same count on the page and in the sitemap. Kept until the next post change (aw_seo_cached).
+ * items left out). The same count on the page and in the sitemap. Kept until the next post change (rankweb_seo_cached).
  *
  * @param string $type Post type of the hub.
  * @param string $key  category_name|tag.
  * @param string $slug Term slug (for the Directory, a listing type such as "veterinary" too).
  * @return int
  */
-function aw_seo_filtered_count( $type, $key, $slug ) {
-	return (int) aw_seo_cached(
-		"filtered_count|{$type}|{$key}|{$slug}", // kept until the next post change (aw_seo_cached)
+function rankweb_seo_filtered_count( $type, $key, $slug ) {
+	return (int) rankweb_seo_cached(
+		"filtered_count|{$type}|{$key}|{$slug}", // kept until the next post change (rankweb_seo_cached)
 		function () use ( $type, $key, $slug ) {
 			$v = array(
 				'post_type'      => $type,
@@ -114,9 +114,9 @@ function aw_seo_filtered_count( $type, $key, $slug ) {
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
 				'no_found_rows'  => false,
-				'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => 'aw_listing' === $type && function_exists( 'aw_listing_type_query' ) ? explode( ',', aw_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+				'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => 'aw_listing' === $type && function_exists( 'directoryweb_listing_type_query' ) ? explode( ',', directoryweb_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 			);
-			return (int) ( new WP_Query( aw_seo_hub_rules( $type, $v ) ) )->found_posts;
+			return (int) ( new WP_Query( rankweb_seo_hub_rules( $type, $v ) ) )->found_posts;
 		}
 	);
 }
@@ -126,17 +126,17 @@ function aw_seo_filtered_count( $type, $key, $slug ) {
  *
  * @return array|null [type, key, slug, name, n, index (bool), canonical (url or '')]
  */
-function aw_seo_filtered_view() {
+function rankweb_seo_filtered_view() {
 	static $view = false;
 	if ( false !== $view ) {
 		return $view;
 	}
 	$view = null;
 	$type = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
-	if ( ! $type || is_404() || ( function_exists( 'aw_current_place' ) && aw_current_place() ) || get_query_var( 'aw_dir_type' ) ) {
+	if ( ! $type || is_404() || ( function_exists( 'directoryweb_current_place' ) && directoryweb_current_place() ) || get_query_var( 'aw_dir_type' ) ) {
 		return $view; // not a hub, or a Directory place (its own rules, programmatic.php)
 	}
-	$params = aw_seo_filter_params();
+	$params = rankweb_seo_filter_params();
 	if ( ! $params ) {
 		return $view;
 	}
@@ -152,14 +152,14 @@ function aw_seo_filtered_view() {
 	}
 	if ( isset( AW_FILTERED_PLACE_TITLE_WORDS[ $key ][ $type ] ) ) { // ?state=, ?publisher=: as a category view
 		$slug = sanitize_title( $value );
-		list( $name, $n ) = aw_seo_filtered_place( $type, $key, $slug );
+		list( $name, $n ) = rankweb_seo_filtered_place( $type, $key, $slug );
 		if ( '' === $name ) {
 			return $view; // names nothing: noindex
 		}
 		$view = array_merge( $view, array( 'key' => $key, 'slug' => $slug, 'name' => rankweb_plain_text( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) ), 'n' => $n ) );
 		if ( $n >= AW_FILTERED_MIN_ITEMS && ! ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) ) {
 			$view['index']     = true;
-			$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), aw_hub_canonical() );
+			$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), rankweb_hub_canonical() );
 		}
 		return $view;
 	}
@@ -170,36 +170,36 @@ function aw_seo_filtered_view() {
 	}
 	$slug = sanitize_title( $value );
 	$term = get_term_by( 'slug', $slug, 'tag' === $key ? 'post_tag' : 'category' );
-	$name = $term ? $term->name : ( 'aw_listing' === $type && 'tag' === $key && function_exists( 'aw_listing_type_name' ) ? aw_listing_type_name( $slug ) : '' );
+	$name = $term ? $term->name : ( 'aw_listing' === $type && 'tag' === $key && function_exists( 'directoryweb_listing_type_name' ) ? directoryweb_listing_type_name( $slug ) : '' );
 	if ( '' === $name ) {
 		return $view; // no such category or tag
 	}
 	$view['key']  = $key;
 	$view['slug'] = $slug;
 	$view['name'] = rankweb_plain_text( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) );
-	$view['n']    = aw_seo_filtered_count( $type, $key, $slug );
+	$view['n']    = rankweb_seo_filtered_count( $type, $key, $slug );
 	if ( $view['n'] < AW_FILTERED_MIN_ITEMS ) {
 		return $view;
 	}
 	if ( 'tag' === $key && $term && (int) $term->count >= AW_FILTERED_MIN_ITEMS ) {
-		$view['canonical'] = aw_seo_term_url( $term ); // the tag page lists the same items and is the indexed one
+		$view['canonical'] = rankweb_seo_term_url( $term ); // the tag page lists the same items and is the indexed one
 		$view['index']     = true;
 		return $view;
 	}
 	$view['index']     = true;
-	$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), aw_hub_canonical() );
+	$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), rankweb_hub_canonical() );
 	return $view;
 }
 
 /** Whether this request is a filtered hub list that is kept out of the index. */
-function aw_seo_filtered_noindex() {
-	$v = aw_seo_filtered_view();
+function rankweb_seo_filtered_noindex() {
+	$v = rankweb_seo_filtered_view();
 	return null !== $v && ! $v['index'];
 }
 
 /** Whether this request is a filtered hub list with a category or tag of its own (title, description, breadcrumb). */
-function aw_seo_filtered_named() {
-	$v = aw_seo_filtered_view();
+function rankweb_seo_filtered_named() {
+	$v = rankweb_seo_filtered_view();
 	return null !== $v && '' !== $v['name'];
 }
 
@@ -207,24 +207,24 @@ function aw_seo_filtered_named() {
  * "Wildlife News from India – Animal Writes": the longest shape that fits 60 characters, skipping shapes that repeat a
  * word of the category name ("Laws and Rules Laws and Court Orders").
  */
-function aw_seo_filtered_title() {
-	$v = aw_seo_filtered_view();
-	if ( ! aw_seo_filtered_named() ) {
+function rankweb_seo_filtered_title() {
+	$v = rankweb_seo_filtered_view();
+	if ( ! rankweb_seo_filtered_named() ) {
 		return '';
 	}
-	if ( 'tag' === $v['key'] && function_exists( 'aw_seo_term_title' ) && ( $term = get_term_by( 'slug', $v['slug'], 'post_tag' ) ) ) {
-		return aw_seo_title_with_page( aw_seo_term_title( $term ) ); // the tag page's own title (its canonical, or the same list)
+	if ( 'tag' === $v['key'] && function_exists( 'rankweb_seo_term_title' ) && ( $term = get_term_by( 'slug', $v['slug'], 'post_tag' ) ) ) {
+		return rankweb_seo_title_with_page( rankweb_seo_term_title( $term ) ); // the tag page's own title (its canonical, or the same list)
 	}
 	$name = str_replace( ' & ', ' and ', $v['name'] );
 	if ( isset( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] ) ) { // a state or publisher
 		$tries = array();
 		foreach ( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] as $shape ) {
-			$tries[] = aw_seo_branded( sprintf( $shape, $name ) );
+			$tries[] = rankweb_seo_branded( sprintf( $shape, $name ) );
 		}
 		foreach ( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] as $shape ) {
 			$tries[] = sprintf( $shape, $name );
 		}
-		return aw_seo_title_with_page( aw_seo_fit( $tries, 60 - mb_strlen( aw_seo_page_suffix() ) ) );
+		return rankweb_seo_title_with_page( rankweb_seo_fit( $tries, 60 - mb_strlen( rankweb_seo_page_suffix() ) ) );
 	}
 	$what = array();
 	$words = fn( $t ) => array_diff( preg_split( '/\W+/u', mb_strtolower( $t ), -1, PREG_SPLIT_NO_EMPTY ), array( 'and', 'in', 'on', 'of', 'the', 'from', 'india' ) );
@@ -235,31 +235,31 @@ function aw_seo_filtered_title() {
 		}
 	}
 	$what  = $what ? $what : array( sprintf( (string) end( $all ), $name ) );
-	$room  = 60 - mb_strlen( aw_seo_page_suffix() );
+	$room  = 60 - mb_strlen( rankweb_seo_page_suffix() );
 	$tries = array();
 	foreach ( $what as $w ) {
-		$tries[] = aw_seo_branded( $w );
+		$tries[] = rankweb_seo_branded( $w );
 	}
 	foreach ( $what as $w ) {
 		$tries[] = $w;
 	}
-	return aw_seo_title_with_page( aw_seo_fit( $tries, $room ) );
+	return rankweb_seo_title_with_page( rankweb_seo_fit( $tries, $room ) );
 }
 
 /** "199 stories on wildlife. Animal-welfare news from across India, summarised with a link to every source." */
-function aw_seo_filtered_description() {
-	$v = aw_seo_filtered_view();
-	if ( ! aw_seo_filtered_named() ) {
+function rankweb_seo_filtered_description() {
+	$v = rankweb_seo_filtered_view();
+	if ( ! rankweb_seo_filtered_named() ) {
 		return '';
 	}
-	if ( 'tag' === $v['key'] && function_exists( 'aw_seo_tag_description' ) && ( $term = get_term_by( 'slug', $v['slug'], 'post_tag' ) ) ) {
-		return aw_seo_with_page( aw_seo_tag_description( $term ) ); // as the tag page
+	if ( 'tag' === $v['key'] && function_exists( 'rankweb_seo_tag_description' ) && ( $term = get_term_by( 'slug', $v['slug'], 'post_tag' ) ) ) {
+		return rankweb_seo_with_page( rankweb_seo_tag_description( $term ) ); // as the tag page
 	}
 	$count = function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $v['type'] ) : '';
-	$about = 'state' === $v['key'] ? ' in ' . $v['name'] : ( 'publisher' === $v['key'] ? ' from ' . $v['name'] : ' on ' . aw_seo_sentence_case( str_replace( ' & ', ' and ', $v['name'] ) ) );
+	$about = 'state' === $v['key'] ? ' in ' . $v['name'] : ( 'publisher' === $v['key'] ? ' from ' . $v['name'] : ' on ' . rankweb_seo_sentence_case( str_replace( ' & ', ' and ', $v['name'] ) ) );
 	$lead = '' !== $count ? $count . $about . '. ' : '';
 	$desc = $lead . ( AW_ARCHIVE_DESCRIPTIONS[ $v['type'] ] ?? '' );
-	return aw_seo_with_page( aw_seo_cut( $desc, 155 - mb_strlen( aw_seo_page_suffix() ) ) );
+	return rankweb_seo_with_page( rankweb_seo_cut( $desc, 155 - mb_strlen( rankweb_seo_page_suffix() ) ) );
 }
 
 // Robots: the filtered views that are not their own page.
@@ -267,7 +267,7 @@ add_filter(
 	'rank_math/frontend/robots',
 	function ( $robots ) {
 		$search = function_exists( 'aw_hub_type' ) && aw_hub_type() && isset( $_GET['q'] ) && '' !== $_GET['q']; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( aw_seo_filtered_noindex() || $search ) { // ?q= on a Directory place too
+		if ( rankweb_seo_filtered_noindex() || $search ) { // ?q= on a Directory place too
 			$robots['index'] = 'noindex';
 		}
 		return $robots;
@@ -280,8 +280,8 @@ add_filter(
 add_filter(
 	'rank_math/frontend/title',
 	function ( $title ) {
-		$v    = aw_seo_filtered_view();
-		$ours = $v && 'aw_listing' !== $v['type'] ? aw_seo_filtered_title() : '';
+		$v    = rankweb_seo_filtered_view();
+		$ours = $v && 'aw_listing' !== $v['type'] ? rankweb_seo_filtered_title() : '';
 		return '' !== $ours ? $ours : $title;
 	},
 	25
@@ -289,8 +289,8 @@ add_filter(
 add_filter(
 	'rank_math/frontend/description',
 	function ( $desc ) {
-		$v    = aw_seo_filtered_view();
-		$ours = $v && 'aw_listing' !== $v['type'] ? aw_seo_filtered_description() : '';
+		$v    = rankweb_seo_filtered_view();
+		$ours = $v && 'aw_listing' !== $v['type'] ? rankweb_seo_filtered_description() : '';
 		return '' !== $ours ? $ours : $desc;
 	},
 	25
@@ -304,7 +304,7 @@ add_filter(
  *
  * @return array List of ['loc' => URL].
  */
-function aw_sitemap_filtered_build() {
+function rankweb_sitemap_filtered_build() {
 	$urls = array();
 	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (Animal Writes Core) are not loaded
 		return $urls;
@@ -312,7 +312,7 @@ function aw_sitemap_filtered_build() {
 	foreach ( AW_FILTERED_CATEGORY_HUBS as $type ) {
 		$cats = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : array();
 		foreach ( (array) $cats as $slug ) {
-			if ( aw_seo_filtered_count( $type, 'category_name', (string) $slug ) >= AW_FILTERED_MIN_ITEMS ) {
+			if ( rankweb_seo_filtered_count( $type, 'category_name', (string) $slug ) >= AW_FILTERED_MIN_ITEMS ) {
 				$urls[] = array( 'loc' => add_query_arg( 'category_name', rawurlencode( (string) $slug ), aw_hub_url( $type ) ) );
 			}
 		}
@@ -322,8 +322,8 @@ function aw_sitemap_filtered_build() {
 			if ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) {
 				continue; // noindex (owner, 24 Oct 2026)
 			}
-			foreach ( aw_sitemap_filtered_values( $type, $key ) as $slug ) {
-				if ( aw_seo_filtered_place( $type, $key, $slug )[1] >= AW_FILTERED_MIN_ITEMS ) {
+			foreach ( rankweb_sitemap_filtered_values( $type, $key ) as $slug ) {
+				if ( rankweb_seo_filtered_place( $type, $key, $slug )[1] >= AW_FILTERED_MIN_ITEMS ) {
 					$urls[] = array( 'loc' => add_query_arg( $key, rawurlencode( $slug ), aw_hub_url( $type ) ) );
 				}
 			}
@@ -334,11 +334,11 @@ function aw_sitemap_filtered_build() {
 
 /**
  * Candidate ?state= or ?publisher= values of a hub: the states and publishers its published items carry at least
- * AW_FILTERED_MIN_ITEMS times (the exact count, with the hub's own rules, comes from aw_seo_filtered_place()).
+ * AW_FILTERED_MIN_ITEMS times (the exact count, with the hub's own rules, comes from rankweb_seo_filtered_place()).
  *
  * @return string[] URL values (state slugs, publisher keys).
  */
-function aw_sitemap_filtered_values( $type, $key ) {
+function rankweb_sitemap_filtered_values( $type, $key ) {
 	global $wpdb;
 	$meta = 'state' === $key ? 'aw_state_code' : 'aw_publisher';
 	$rows = $wpdb->get_col( $wpdb->prepare( "SELECT m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = %s AND p.post_type = %s AND p.post_status = 'publish' GROUP BY m.meta_value HAVING COUNT( DISTINCT p.ID ) >= %d", $meta, $type, AW_FILTERED_MIN_ITEMS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -347,7 +347,7 @@ function aw_sitemap_filtered_values( $type, $key ) {
 	}
 	$out = array();
 	foreach ( $rows as $code ) {
-		$s = function_exists( 'aw_place_state' ) ? aw_place_state( $code ) : null;
+		$s = function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( $code ) : null;
 		if ( $s ) {
 			$out[] = (string) $s->slug;
 		}

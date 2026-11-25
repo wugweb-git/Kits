@@ -38,7 +38,7 @@ const AW_PLACE_DETECT_MAX_STATES = 3;
  * named for directions ("Central", "North East"); the state is still found from "Delhi". */
 const AW_PLACE_DETECT_SKIP = array( 'east', 'west', 'north', 'south', 'central', 'northeast', 'northwest', 'southeast', 'southwest', 'centralnorth', 'anand', 'mon', 'una', 'korea', 'sagar', 'mau', 'dhar', 'guna', 'banda', 'hassan', 'salem', 'pali', 'mandi', 'tapi', 'gomati', 'saran', 'mansa', 'nadia', 'ntr', 'sakti', 'kota', 'siang', 'lohit', 'panna', 'erode', 'noney', 'kamle', 'krishna', 'narmada', 'mahisagar', 'vaishali', 'vidisha', 'kheda' );
 
-/** City and big-city neighbourhood names people write for a district (keys as aw_place_key() makes them) → the LGD
+/** City and big-city neighbourhood names people write for a district (keys as directoryweb_place_key() makes them) → the LGD
  * district name. Only names no other district shares (not Dwarka: Devbhumi Dwarka is in Gujarat). */
 const AW_PLACE_DETECT_CITIES = array(
 	'bengaluru'    => 'Bengaluru Urban',
@@ -100,15 +100,15 @@ const AW_PLACE_DETECT_CITIES = array(
 const AW_PLACE_DELHI_DIRECTIONS = array( 'central', 'centralnorth', 'east', 'north', 'northeast', 'northwest', 'outernorth', 'south', 'southeast', 'southwest', 'west' );
 
 /** A place's name in the links: "South Delhi" for Delhi's direction districts, else its own name. */
-function aw_findhelp_place_name( $p ) {
-	if ( 'district' === $p->kind && in_array( aw_place_key( $p->name ), AW_PLACE_DELHI_DIRECTIONS, true ) && 'delhi' === aw_place_key( aw_place_state( $p->state )->name, 'state' ) ) {
+function directoryweb_findhelp_place_name( $p ) {
+	if ( 'district' === $p->kind && in_array( directoryweb_place_key( $p->name ), AW_PLACE_DELHI_DIRECTIONS, true ) && 'delhi' === directoryweb_place_key( directoryweb_place_state( $p->state )->name, 'state' ) ) {
 		return $p->name . ' Delhi';
 	}
 	return $p->name;
 }
 
 /** Whether an item gets the block: News, Library, guides (not research) and campaigns. */
-function aw_findhelp_applies( $id ) {
+function directoryweb_findhelp_applies( $id ) {
 	$type = get_post_type( $id );
 	if ( 'publish' !== get_post_status( $id ) ) {
 		return false;
@@ -119,32 +119,32 @@ function aw_findhelp_applies( $id ) {
 /* ---------- Place detection ---------- */
 
 /** Name keys → places: [states by key, districts by key (a key two districts share lists both)]. */
-function aw_place_detect_index() {
+function directoryweb_place_detect_index() {
 	static $ix = null;
 	if ( null !== $ix ) {
 		return $ix;
 	}
 	$ix = array( array(), array() );
-	foreach ( aw_place_states() as $s ) {
+	foreach ( directoryweb_place_states() as $s ) {
 		foreach ( array( $s->name, $s->lgd ) as $n ) {
-			$ix[0][ aw_place_key( $n, 'state' ) ] = $s;
+			$ix[0][ directoryweb_place_key( $n, 'state' ) ] = $s;
 		}
 	}
-	foreach ( aw_lgd()['districts'] as $d ) {
+	foreach ( directoryweb_lgd()['districts'] as $d ) {
 		foreach ( array( $d->name, $d->lgd ) as $n ) {
-			$ix[1][ aw_place_key( $n ) ][ $d->code ] = $d;
+			$ix[1][ directoryweb_place_key( $n ) ][ $d->code ] = $d;
 		}
 	}
 	foreach ( AW_PLACE_DETECT_CITIES as $k => $name ) {
-		$d = aw_place_district_by_name( $name );
+		$d = directoryweb_place_district_by_name( $name );
 		if ( $d ) {
 			$ix[1][ $k ] = array( $d->code => $d );
 		}
 	}
-	$delhi = aw_place_state_by_name( 'Delhi' );
-	foreach ( $delhi ? aw_place_districts( $delhi->code ) : array() as $d ) {
-		if ( in_array( aw_place_key( $d->name ), AW_PLACE_DELHI_DIRECTIONS, true ) ) {
-			$ix[1][ aw_place_key( $d->name ) . 'delhi' ] = array( $d->code => $d );
+	$delhi = directoryweb_place_state_by_name( 'Delhi' );
+	foreach ( $delhi ? directoryweb_place_districts( $delhi->code ) : array() as $d ) {
+		if ( in_array( directoryweb_place_key( $d->name ), AW_PLACE_DELHI_DIRECTIONS, true ) ) {
+			$ix[1][ directoryweb_place_key( $d->name ) . 'delhi' ] = array( $d->code => $d );
 		}
 	}
 	return $ix;
@@ -157,8 +157,8 @@ function aw_place_detect_index() {
  * @param string $text Text.
  * @return array [states, district candidates, district counts]
  */
-function aw_place_mentions( $text ) {
-	list( $states, $districts ) = aw_place_detect_index();
+function directoryweb_place_mentions( $text ) {
+	list( $states, $districts ) = directoryweb_place_detect_index();
 	preg_match_all( '/\p{L}+|&/u', wp_strip_all_tags( (string) $text ), $m );
 	$words = $m[0];
 	$n     = count( $words );
@@ -171,8 +171,8 @@ function aw_place_mentions( $text ) {
 		}
 		for ( $len = min( 9, $n - $i ); $len >= 1; $len-- ) {
 			$phrase = implode( ' ', array_slice( $words, $i, $len ) );
-			$ks     = aw_place_key( $phrase, 'state' );
-			$kd     = aw_place_key( $phrase );
+			$ks     = directoryweb_place_key( $phrase, 'state' );
+			$kd     = directoryweb_place_key( $phrase );
 			if ( $len > 1 && 'Delhi' === $words[ $i + $len - 1 ] && isset( $districts[ $kd . 'delhi' ] ) ) {
 				$kd = $kd . 'delhi'; // "South Delhi": lgd.json reads it as "South", a skipped word
 			} elseif ( in_array( $kd, AW_PLACE_DETECT_SKIP, true ) ) {
@@ -204,11 +204,11 @@ function aw_place_mentions( $text ) {
  * @param bool   $strict  Apply the title / first sentence / 2 times rule.
  * @return array
  */
-function aw_places_in_text( $title, $summary = '', $strict = true ) {
+function directoryweb_places_in_text( $title, $summary = '', $strict = true ) {
 	$summary              = trim( wp_strip_all_tags( (string) $summary ) );
 	$first                = preg_split( '/(?<=[.!?])\s+(?=\p{Lu})/u', $summary, 2 )[0];
-	list( $lst, , $ldn )  = aw_place_mentions( $title . ' ' . $first );
-	list( $st, $ds, $dn ) = aw_place_mentions( $title . ' ' . $summary );
+	list( $lst, , $ldn )  = directoryweb_place_mentions( $title . ' ' . $first );
+	list( $st, $ds, $dn ) = directoryweb_place_mentions( $title . ' ' . $summary );
 	$counts               = fn( $lead, $all ) => ! $strict || $lead || $all >= 2;
 	$found                = array();
 	$named                = array_keys( $st ); // every state named, for the national-story limit
@@ -237,12 +237,12 @@ function aw_places_in_text( $title, $summary = '', $strict = true ) {
 }
 
 /** Whether an item should get a detected place: a News, Library or guide item with no place. */
-function aw_place_detect_wanted( $id ) {
+function directoryweb_place_detect_wanted( $id ) {
 	$type = get_post_type( $id );
 	if ( ! in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) || ( 'post' === $type && ( ! function_exists( 'aw_item_kind' ) || 'guide' !== aw_item_kind( $id ) ) ) ) {
 		return false;
 	}
-	list( $s, $d ) = aw_item_codes( $id );
+	list( $s, $d ) = directoryweb_item_codes( $id );
 	return ! $s && ! $d; // not "removed by an editor": the block editor's Place box posts the empty place it loaded with
 }
 
@@ -253,9 +253,9 @@ function aw_place_detect_wanted( $id ) {
  * @param bool $write Store them (false: only report).
  * @return array
  */
-function aw_place_detect( $id, $write = true ) {
-	$places = aw_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) );
-	if ( $places && $write && aw_set_item_places( $id, $places ) ) {
+function directoryweb_place_detect( $id, $write = true ) {
+	$places = directoryweb_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) );
+	if ( $places && $write && directoryweb_set_item_places( $id, $places ) ) {
 		update_post_meta( $id, 'aw_place_auto', '1' );
 		update_post_meta( $id, 'aw_place_source', 'auto' );
 	}
@@ -266,10 +266,10 @@ function aw_place_detect( $id, $write = true ) {
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( 'publish' !== $post->post_status || wp_is_post_revision( $id ) || wp_is_post_autosave( $id ) || ! aw_place_detect_wanted( $id ) ) {
+		if ( 'publish' !== $post->post_status || wp_is_post_revision( $id ) || wp_is_post_autosave( $id ) || ! directoryweb_place_detect_wanted( $id ) ) {
 			return;
 		}
-		aw_place_detect( $id );
+		directoryweb_place_detect( $id );
 	},
 	30,
 	2
@@ -285,14 +285,14 @@ add_action(
  * @param object|null $place Its place (default: the stored one).
  * @return array
  */
-function aw_findhelp_places( $id, $place = null ) {
-	$place = $place ? $place : aw_item_place( $id );
-	$state = $place ? aw_place_parent_state( $place ) : null;
-	if ( ! $state || aw_place_count( $state ) < 1 ) {
+function directoryweb_findhelp_places( $id, $place = null ) {
+	$place = $place ? $place : directoryweb_item_place( $id );
+	$state = $place ? directoryweb_place_parent_state( $place ) : null;
+	if ( ! $state || directoryweb_place_count( $state ) < 1 ) {
 		return array();
 	}
-	$out = array( array( $state, aw_place_count( $state ) ) );
-	$ds  = array_filter( aw_place_districts( $state->code ), fn( $d ) => aw_place_count( $d ) > 0 );
+	$out = array( array( $state, directoryweb_place_count( $state ) ) );
+	$ds  = array_filter( directoryweb_place_districts( $state->code ), fn( $d ) => directoryweb_place_count( $d ) > 0 );
 	if ( 'district' === $place->kind ) {
 		$km = array();
 		foreach ( $ds as $code => $d ) {
@@ -301,24 +301,24 @@ function aw_findhelp_places( $id, $place = null ) {
 		asort( $km );
 		$ds = array_map( fn( $c ) => $ds[ $c ], array_keys( $km ) );
 	} else {
-		uasort( $ds, fn( $a, $b ) => aw_place_count( $b ) <=> aw_place_count( $a ) );
+		uasort( $ds, fn( $a, $b ) => directoryweb_place_count( $b ) <=> directoryweb_place_count( $a ) );
 	}
 	foreach ( array_slice( $ds, 0, AW_FINDHELP_MAX - 1 ) as $d ) {
-		$out[] = array( $d, aw_place_count( $d ) );
+		$out[] = array( $d, directoryweb_place_count( $d ) );
 	}
 	return $out;
 }
 
 /** A campaign's 12 states: a window over the states with listings that moves with its ID, A–Z. */
-function aw_findhelp_states_window( $id ) {
-	$states = array_values( array_filter( aw_place_states(), fn( $s ) => aw_place_count( $s ) > 0 ) ); // A–Z
+function directoryweb_findhelp_states_window( $id ) {
+	$states = array_values( array_filter( directoryweb_place_states(), fn( $s ) => directoryweb_place_count( $s ) > 0 ) ); // A–Z
 	$n      = count( $states );
 	if ( $n > AW_FINDHELP_MAX ) {
 		$start  = ( (int) $id * 7 ) % $n;
 		$states = array_map( fn( $i ) => $states[ ( $start + $i ) % $n ], range( 0, AW_FINDHELP_MAX - 1 ) );
 		usort( $states, fn( $a, $b ) => strcmp( $a->name, $b->name ) );
 	}
-	return array_map( fn( $s ) => array( $s, aw_place_count( $s ) ), $states );
+	return array_map( fn( $s ) => array( $s, directoryweb_place_count( $s ) ), $states );
 }
 
 /**
@@ -331,7 +331,7 @@ function aw_findhelp_states_window( $id ) {
  *                       campaign band, which lists states only; owner, 24 Oct 2026).
  * @return string
  */
-function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
+function directoryweb_findhelp_html( $id, $places, $head, $all_of = true ) {
 	directoryweb_use_style( 'aw-single' ); // aw-findhelp-line, aw-browse-states, aw-findhelp (item More, campaign band)
 	$hid = 'aw-findhelp-' . (int) $id;
 	if ( ! $places ) {
@@ -341,8 +341,8 @@ function aw_findhelp_html( $id, $places, $head, $all_of = true ) {
 	}
 	$items = '';
 	foreach ( $places as list( $p, $n ) ) {
-		$label  = 'district' === $p->kind || ! $all_of ? aw_findhelp_place_name( $p ) : sprintf( /* translators: %s: state. */ __( 'All of %s', 'directoryweb' ), $p->name );
-		$items .= '<li><a href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span>' . esc_html( $label ) . '</span>' . directoryweb_count( $n ) . '</a></li>';
+		$label  = 'district' === $p->kind || ! $all_of ? directoryweb_findhelp_place_name( $p ) : sprintf( /* translators: %s: state. */ __( 'All of %s', 'directoryweb' ), $p->name );
+		$items .= '<li><a href="' . esc_url( directoryweb_directory_url( $p->slug ) ) . '"><span>' . esc_html( $label ) . '</span>' . directoryweb_count( $n ) . '</a></li>';
 	}
 	return '<nav class="aw-browse-states aw-findhelp" aria-labelledby="' . esc_attr( $hid ) . '"><h2 class="' . esc_attr( $head ) . '" id="' . esc_attr( $hid ) . '">' . esc_html__( 'Find help near you', 'directoryweb' ) . '</h2>'
 		. '<p class="aw-findhelp-lede">' . esc_html__( 'Animal welfare organisations, Gaushalas and government vets, with their contact details.', 'directoryweb' ) . '</p>'
@@ -355,10 +355,10 @@ add_filter(
 	'render_block_animal-writes/item-more',
 	function ( $html, $block, $instance ) {
 		$id = (int) ( $instance->context['postId'] ?? get_queried_object_id() );
-		if ( ! function_exists( 'aw_item_here' ) || ! aw_item_here( $id ) || 'aw_campaign' === get_post_type( $id ) || ! aw_findhelp_applies( $id ) ) {
+		if ( ! function_exists( 'aw_item_here' ) || ! aw_item_here( $id ) || 'aw_campaign' === get_post_type( $id ) || ! directoryweb_findhelp_applies( $id ) ) {
 			return $html;
 		}
-		$near = '<div class="aw-findhelp-group">' . aw_findhelp_html( $id, aw_findhelp_places( $id ), 'aw-more-head has-x-large-font-size' ) . '</div>';
+		$near = '<div class="aw-findhelp-group">' . directoryweb_findhelp_html( $id, directoryweb_findhelp_places( $id ), 'aw-more-head has-x-large-font-size' ) . '</div>';
 		$end  = strrpos( $html, '</div>' );
 		return false !== $end && 0 === strpos( ltrim( $html ), '<div class="aw-more">' ) ? substr_replace( $html, $near, $end, 0 ) : $html . '<div class="aw-more">' . $near . '</div>';
 	},
@@ -376,15 +376,15 @@ add_filter(
 			return $html;
 		}
 		$id = get_queried_object_id();
-		if ( ! aw_findhelp_applies( $id ) ) {
+		if ( ! directoryweb_findhelp_applies( $id ) ) {
 			return $html;
 		}
 		$done   = true;
-		$states = aw_findhelp_states_window( $id );
+		$states = directoryweb_findhelp_states_window( $id );
 		if ( ! $states ) {
 			return $html;
 		}
-		$band = '<section class="wp-block-group alignfull is-style-kits-section aw-camp-section aw-camp-tint aw-findhelp-band kit-section has-global-padding is-layout-constrained" id="find-help">' . aw_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>';
+		$band = '<section class="wp-block-group alignfull is-style-kits-section aw-camp-section aw-camp-tint aw-findhelp-band kit-section has-global-padding is-layout-constrained" id="find-help">' . directoryweb_findhelp_html( $id, $states, 'aw-findhelp-head', false ) . '</section>';
 		if ( function_exists( 'kits_group_html' ) ) { // a core Group with the Section style, so its padding comes from Styles
 			$band = kits_group_html(
 				$band,
@@ -444,21 +444,21 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						continue;
 					}
 					if ( $redo && 'auto' === $source ) {
-						list( $ss, $dd ) = aw_item_codes( $id );
-						$stored          = array_map( fn( $d ) => array( aw_place_district( $d )->state, $d ), array_filter( $dd, 'aw_place_district' ) );
+						list( $ss, $dd ) = directoryweb_item_codes( $id );
+						$stored          = array_map( fn( $d ) => array( directoryweb_place_district( $d )->state, $d ), array_filter( $dd, 'directoryweb_place_district' ) );
 						foreach ( $ss as $s ) {
 							if ( ! array_filter( $stored, fn( $p ) => (int) $p[0] === $s ) ) {
 								$stored[] = array( $s, 0 );
 							}
 						}
 						$title = get_the_title( $id );
-						$new   = aw_places_in_text( $title, get_post_field( 'post_excerpt', $id ) );
+						$new   = directoryweb_places_in_text( $title, get_post_field( 'post_excerpt', $id ) );
 						if ( $key( $stored ) !== $key( $new ) ) {
 							$changed[] = $id;
 							WP_CLI::log( sprintf( '  redo %s %d  %s  %s  →  %s', $t, $id, mb_substr( $title, 0, 80 ), $stored ? $key( $stored ) : 'none', $new ? $key( $new ) : 'none' ) );
 							if ( ! $dry ) {
 								if ( $new ) {
-									aw_set_item_places( $id, $new );
+									directoryweb_set_item_places( $id, $new );
 									update_post_meta( $id, 'aw_place_auto', '1' );
 								} else {
 									delete_post_meta( $id, 'aw_state_code' );
@@ -470,11 +470,11 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						++$c['had'];
 						continue;
 					}
-					if ( ! aw_place_detect_wanted( $id ) ) {
+					if ( ! directoryweb_place_detect_wanted( $id ) ) {
 						++$c['had'];
 						continue;
 					}
-					$found = aw_place_detect( $id, ! $dry );
+					$found = directoryweb_place_detect( $id, ! $dry );
 					if ( ! $found ) {
 						continue;
 					}
@@ -493,7 +493,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			foreach ( $samples as $t => $ids ) {
 				foreach ( array_slice( $ids, 0, $want ) as $id ) {
-					$names = array_map( fn( $p ) => $p[1] ? aw_findhelp_place_name( aw_place_district( $p[1] ) ) . ', ' . aw_place_state( $p[0] )->name : aw_place_state( $p[0] )->name, aw_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) ) );
+					$names = array_map( fn( $p ) => $p[1] ? directoryweb_findhelp_place_name( directoryweb_place_district( $p[1] ) ) . ', ' . directoryweb_place_state( $p[0] )->name : directoryweb_place_state( $p[0] )->name, directoryweb_places_in_text( get_the_title( $id ), get_post_field( 'post_excerpt', $id ) ) );
 					WP_CLI::log( sprintf( '  %s %d  %s  →  %s', $t, $id, mb_substr( get_the_title( $id ), 0, 90 ), implode( '; ', $names ) ) );
 				}
 			}

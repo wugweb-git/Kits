@@ -25,13 +25,13 @@ require_once dirname( __DIR__ ) . '/includes/class-aw-schema.php';
 final class SchemaTest extends PHPUnit\Framework\TestCase {
 
 	public function testEmptyInputIsGoodWithNoNodes(): void {
-		$r = AW_Schema::parse( '   ' );
+		$r = RankWeb_Schema::parse( '   ' );
 		$this->assertSame( '', $r['error'] );
 		$this->assertSame( array(), $r['nodes'] );
 	}
 
 	public function testParsesASingleObject(): void {
-		$r = AW_Schema::parse( '{"@context":"https://schema.org","@type":"HowTo","name":"Bathe a dog"}' );
+		$r = RankWeb_Schema::parse( '{"@context":"https://schema.org","@type":"HowTo","name":"Bathe a dog"}' );
 		$this->assertSame( '', $r['error'] );
 		$this->assertCount( 1, $r['nodes'] );
 		$this->assertSame( 'HowTo', $r['nodes'][0]['@type'] );
@@ -39,32 +39,32 @@ final class SchemaTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testParsesAListAndAGraphWrapper(): void {
-		$list = AW_Schema::parse( '[{"@type":"Thing","name":"A"},{"@type":"Thing","name":"B"}]' );
+		$list = RankWeb_Schema::parse( '[{"@type":"Thing","name":"A"},{"@type":"Thing","name":"B"}]' );
 		$this->assertCount( 2, $list['nodes'] );
-		$graph = AW_Schema::parse( '{"@context":"https://schema.org","@graph":[{"@type":"Thing","name":"A"},{"@type":"Thing","name":"B"}]}' );
+		$graph = RankWeb_Schema::parse( '{"@context":"https://schema.org","@graph":[{"@type":"Thing","name":"A"},{"@type":"Thing","name":"B"}]}' );
 		$this->assertCount( 2, $graph['nodes'] );
 		$this->assertSame( 'B', $graph['nodes'][1]['name'] );
 	}
 
 	public function testBrokenJsonReturnsAnError(): void {
-		$r = AW_Schema::parse( '{ not json ' );
+		$r = RankWeb_Schema::parse( '{ not json ' );
 		$this->assertCount( 0, $r['nodes'] );
 		$this->assertNotSame( '', $r['error'] );
 	}
 
 	public function testAnObjectWithoutATypeIsRejected(): void {
-		$r = AW_Schema::parse( '{"name":"no type here"}' );
+		$r = RankWeb_Schema::parse( '{"name":"no type here"}' );
 		$this->assertNotSame( '', $r['error'] );
 		$this->assertCount( 0, $r['nodes'] );
 	}
 
 	public function testANodeInAListWithoutATypeIsRejected(): void {
-		$r = AW_Schema::parse( '[{"@type":"Thing","name":"A"},{"name":"B"}]' );
+		$r = RankWeb_Schema::parse( '[{"@type":"Thing","name":"A"},{"name":"B"}]' );
 		$this->assertNotSame( '', $r['error'] );
 	}
 
 	public function testAnArrayTypeIsAllowed(): void {
-		$r = AW_Schema::parse( '{"@type":["Thing","Product"],"name":"X"}' );
+		$r = RankWeb_Schema::parse( '{"@type":["Thing","Product"],"name":"X"}' );
 		$this->assertSame( '', $r['error'] );
 		$this->assertSame( array( 'Thing', 'Product' ), $r['nodes'][0]['@type'] );
 	}
@@ -74,8 +74,8 @@ final class SchemaTest extends PHPUnit\Framework\TestCase {
 		for ( $i = 0; $i < 40; $i++ ) {
 			$items[] = '{"@type":"Thing","name":"n' . $i . '"}';
 		}
-		$r = AW_Schema::parse( '[' . implode( ',', $items ) . ']' );
-		$this->assertCount( AW_Schema::MAX_NODES, $r['nodes'] );
+		$r = RankWeb_Schema::parse( '[' . implode( ',', $items ) . ']' );
+		$this->assertCount( RankWeb_Schema::MAX_NODES, $r['nodes'] );
 	}
 
 	public function testExtractFromHtmlReadsEveryLdJsonBlock(): void {
@@ -84,18 +84,18 @@ final class SchemaTest extends PHPUnit\Framework\TestCase {
 			. '<script type="application/javascript">var x = 1;</script>'
 			. '<script type="application/ld+json">{"@graph":[{"@type":"WebSite","name":"S"}]}</script>'
 			. '</head><body>x</body></html>';
-		$nodes = AW_Schema::extract_from_html( $html );
+		$nodes = RankWeb_Schema::extract_from_html( $html );
 		$this->assertCount( 2, $nodes );
 		$this->assertSame( 'Organization', $nodes[0]['@type'] );
 		$this->assertSame( 'WebSite', $nodes[1]['@type'] );
 	}
 
 	public function testExtractFromHtmlIgnoresPagesWithNoLdJson(): void {
-		$this->assertSame( array(), AW_Schema::extract_from_html( '<p>Nothing here.</p>' ) );
+		$this->assertSame( array(), RankWeb_Schema::extract_from_html( '<p>Nothing here.</p>' ) );
 	}
 
 	public function testWithIdsAddsAStableIdOnlyWhenMissing(): void {
-		$nodes = AW_Schema::with_ids(
+		$nodes = RankWeb_Schema::with_ids(
 			array(
 				array(
 					'@type' => 'Thing',
@@ -113,14 +113,14 @@ final class SchemaTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testSpeakableFromSelectorsOrNull(): void {
-		$this->assertSame( null, AW_Schema::speakable( array( '', '  ' ) ) );
-		$s = AW_Schema::speakable( array( '.intro', ' h1 ', '' ) );
+		$this->assertSame( null, RankWeb_Schema::speakable( array( '', '  ' ) ) );
+		$s = RankWeb_Schema::speakable( array( '.intro', ' h1 ', '' ) );
 		$this->assertSame( 'SpeakableSpecification', $s['@type'] );
 		$this->assertSame( array( '.intro', 'h1' ), $s['cssSelector'] );
 	}
 
 	public function testThingsTurnUrlsIntoSameAsAndTextIntoNames(): void {
-		$things = AW_Schema::things( array( 'Stray dogs', 'https://en.wikipedia.org/wiki/Street_dog', '' ) );
+		$things = RankWeb_Schema::things( array( 'Stray dogs', 'https://en.wikipedia.org/wiki/Street_dog', '' ) );
 		$this->assertCount( 2, $things );
 		$this->assertSame(
 			array(

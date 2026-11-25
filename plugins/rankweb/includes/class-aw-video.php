@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Video detection and the VideoObject node. */
-final class AW_Video {
+final class RankWeb_Video {
 
 	/**
 	 * The videos in some HTML, in order, no repeats: array( provider 'youtube'|'vimeo', id, embed, watch ).

@@ -8,7 +8,7 @@
  *   district and a link. Points: the listing's own Google Maps location (aw_lat / aw_lng), else the geocoded point
  *   (geocode.php), shown as approximate unless it was a street match. Listings with no point are counted, not shown.
  * - Near me: the visitor's location (asked only when they press the button) or a PIN code (PIN → district through
- *   aw_pin_lookup; the district centre is the starting point) → listings within 5 / 10 / 25 / 50 km, nearest first.
+ *   directoryweb_pin_lookup; the district centre is the starting point) → listings within 5 / 10 / 25 / 50 km, nearest first.
  *   Only street, locality and PIN points are ranked (locality and PIN distances shown as "~N km"); listings placed
  *   only at their district's centre are never ranked: they follow as "In your district (location approximate)". The
  *   nearest district's Directory page is always offered.
@@ -65,7 +65,7 @@ function directoryweb_district_km( $a, $b ) {
  * district name, path, state codes, district codes, tag slugs, claimed 0/1 (aw_verified), precision (own, address,
  * locality, pin, district), Verified 0/1 (government documents)].
  */
-function aw_dir_points_all() {
+function directoryweb_dir_points_all() {
 	$all = get_transient( 'aw_dir_points' );
 	if ( is_array( $all ) ) {
 		return $all;
@@ -76,11 +76,11 @@ function aw_dir_points_all() {
 	update_object_term_cache( $ids, 'aw_listing' );
 	$type_slugs = directoryweb_listing_type_slugs();
 	foreach ( $ids as $id ) {
-		$pt                 = function_exists( 'aw_geo_point' ) ? aw_geo_point( $id ) : null;
-		list( $st, $dt )    = aw_item_codes( $id );
+		$pt                 = function_exists( 'directoryweb_geo_point' ) ? directoryweb_geo_point( $id ) : null;
+		list( $st, $dt )    = directoryweb_item_codes( $id );
 		$tags               = wp_list_pluck( (array) get_the_terms( $id, 'post_tag' ), 'slug' );
 		$types              = array_values( array_intersect( $tags, $type_slugs ) );
-		list( , $district ) = aw_item_place_names( $id );
+		list( , $district ) = directoryweb_item_place_names( $id );
 		$all[]              = array(
 			$id,
 			$pt ? round( $pt[0], 5 ) : null,
@@ -110,8 +110,8 @@ add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_dir_points' ) 
  * @param WP_REST_Request $r place (state or district slug), type (comma list), service (comma list), verified (claimed), gov (Verified), q.
  * @return array
  */
-function aw_dir_points_filter( WP_REST_Request $r ) {
-	$place    = aw_place_by_slug( sanitize_title( (string) $r->get_param( 'place' ) ) );
+function directoryweb_dir_points_filter( WP_REST_Request $r ) {
+	$place    = directoryweb_place_by_slug( sanitize_title( (string) $r->get_param( 'place' ) ) );
 	$types    = array_filter( array_map( 'sanitize_title', explode( ',', (string) $r->get_param( 'type' ) ) ) );
 	$types    = in_array( 'veterinary', $types, true ) ? array_merge( array_diff( $types, array( 'veterinary' ) ), AW_VET_TYPES ) : $types;
 	$services = array_filter( array_map( 'sanitize_title', explode( ',', (string) $r->get_param( 'service' ) ) ) );
@@ -119,7 +119,7 @@ function aw_dir_points_filter( WP_REST_Request $r ) {
 	$gov      = (bool) $r->get_param( 'gov' );
 	$q        = strtolower( trim( sanitize_text_field( (string) $r->get_param( 'q' ) ) ) );
 	$out      = array();
-	foreach ( aw_dir_points_all() as $row ) {
+	foreach ( directoryweb_dir_points_all() as $row ) {
 		if ( $place && ! in_array( (int) $place->code, 'district' === $place->kind ? $row[9] : $row[8], true ) ) {
 			continue;
 		}
@@ -138,7 +138,7 @@ function aw_dir_points_filter( WP_REST_Request $r ) {
 }
 
 /** A row as the browser gets it. */
-function aw_dir_point_out( $row, $km = null ) {
+function directoryweb_dir_point_out( $row, $km = null ) {
 	$o = array(
 		'id' => $row[0],
 		'y'  => $row[1],
@@ -157,7 +157,7 @@ function aw_dir_point_out( $row, $km = null ) {
 }
 
 /** Type names by slug, for popups and the Near me list. */
-function aw_dir_type_names() {
+function directoryweb_dir_type_names() {
 	$out = array();
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		$t            = get_term_by( 'slug', $slug, 'post_tag' );
@@ -185,14 +185,14 @@ add_action(
 				'permission_callback' => '__return_true', // public listings only
 				'args'                => $args,
 				'callback'            => function ( WP_REST_Request $r ) {
-					$rows = aw_dir_points_filter( $r );
+					$rows = directoryweb_dir_points_filter( $r );
 					$pts  = array_values( array_filter( $rows, fn( $x ) => null !== $x[1] ) );
 					$res  = new WP_REST_Response(
 						array(
 							'total'  => count( $rows ),
 							'approx' => count( array_filter( $pts, fn( $x ) => $x[3] ) ),
-							'types'  => aw_dir_type_names(),
-							'points' => array_map( 'aw_dir_point_out', $pts ),
+							'types'  => directoryweb_dir_type_names(),
+							'points' => array_map( 'directoryweb_dir_point_out', $pts ),
 						)
 					);
 					$res->header( 'Cache-Control', 'public, max-age=3600' );
@@ -212,14 +212,14 @@ add_action(
 					'pin' => array( 'type' => 'string' ),
 					'km'  => array( 'type' => 'integer' ),
 				),
-				'callback'            => 'aw_dir_near',
+				'callback'            => 'directoryweb_dir_near',
 			)
 		);
 	}
 );
 
 /** GET /aw/v1/dir-near: the nearest listings to a point or a PIN code. */
-function aw_dir_near( WP_REST_Request $r ) {
+function directoryweb_dir_near( WP_REST_Request $r ) {
 	$km     = in_array( (int) $r->get_param( 'km' ), array( 5, 10, 25, 50 ), true ) ? (int) $r->get_param( 'km' ) : 10;
 	$pin    = preg_replace( '/\D/', '', (string) $r->get_param( 'pin' ) );
 	$lat    = (float) $r->get_param( 'lat' );
@@ -229,7 +229,7 @@ function aw_dir_near( WP_REST_Request $r ) {
 		if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
 			return new WP_Error( 'aw_pin', 'Enter a 6-digit PIN code.', array( 'status' => 400 ) );
 		}
-		$found = function_exists( 'aw_pin_lookup' ) ? aw_pin_lookup( $pin ) : 'unavailable';
+		$found = function_exists( 'directoryweb_pin_lookup' ) ? directoryweb_pin_lookup( $pin ) : 'unavailable';
 		$cent  = is_array( $found ) && ! empty( $found['district'] ) ? directoryweb_district_centroid( (int) $found['district'] ) : null;
 		if ( ! $cent ) {
 			return new WP_Error( 'aw_pin', 'That PIN code was not found.', array( 'status' => 404 ) );
@@ -242,13 +242,13 @@ function aw_dir_near( WP_REST_Request $r ) {
 	// The nearest district (by centre): the PIN's own district, else the closest centre to the point.
 	$best = null;
 	if ( '' !== $pin && ! empty( $found['district'] ) ) {
-		$best = array( 0, aw_place_district( (int) $found['district'] ) );
+		$best = array( 0, directoryweb_place_district( (int) $found['district'] ) );
 	} else {
-		foreach ( aw_place_states() as $s ) {
-			foreach ( aw_place_districts( $s->code ) as $dist ) {
+		foreach ( directoryweb_place_states() as $s ) {
+			foreach ( directoryweb_place_districts( $s->code ) as $dist ) {
 				$c = directoryweb_district_centroid( $dist->code );
 				if ( $c ) {
-					$d = aw_geo_km( $lat, $lng, $c[0], $c[1] );
+					$d = directoryweb_geo_km( $lat, $lng, $c[0], $c[1] );
 					if ( ! $best || $d < $best[0] ) {
 						$best = array( $d, $dist );
 					}
@@ -259,7 +259,7 @@ function aw_dir_near( WP_REST_Request $r ) {
 	$dcode = $best && $best[1] ? (int) $best[1]->code : 0;
 	$near  = array();
 	$inds  = array();
-	foreach ( aw_dir_points_filter( $r ) as $row ) {
+	foreach ( directoryweb_dir_points_filter( $r ) as $row ) {
 		if ( null === $row[1] ) {
 			continue;
 		}
@@ -270,22 +270,22 @@ function aw_dir_near( WP_REST_Request $r ) {
 			}
 			continue;
 		}
-		$d = aw_geo_km( $lat, $lng, $row[1], $row[2] );
+		$d = directoryweb_geo_km( $lat, $lng, $row[1], $row[2] );
 		if ( $d <= $km ) {
 			$near[] = array( $d, $row );
 		}
 	}
 	usort( $near, fn( $a, $b ) => $a[0] <=> $b[0] );
-	$district = $best && $best[1] ? array( 'name' => $best[1]->name, 'url' => wp_make_link_relative( aw_directory_url( $best[1]->slug ) ), 'count' => function_exists( 'aw_place_count' ) ? (int) aw_place_count( $best[1] ) : 0 ) : null;
+	$district = $best && $best[1] ? array( 'name' => $best[1]->name, 'url' => wp_make_link_relative( directoryweb_directory_url( $best[1]->slug ) ), 'count' => function_exists( 'directoryweb_place_count' ) ? (int) directoryweb_place_count( $best[1] ) : 0 ) : null;
 	return array(
 		'origin'   => $origin,
 		'lat'      => round( $lat, 4 ),
 		'lng'      => round( $lng, 4 ),
 		'km'       => $km,
 		'count'    => count( $near ),
-		'types'    => aw_dir_type_names(),
-		'results'  => array_map( fn( $x ) => aw_dir_point_out( $x[1], $x[0] ), array_slice( $near, 0, 50 ) ),
-		'in_district' => array_map( 'aw_dir_point_out', array_slice( $inds, 0, 50 ) ),
+		'types'    => directoryweb_dir_type_names(),
+		'results'  => array_map( fn( $x ) => directoryweb_dir_point_out( $x[1], $x[0] ), array_slice( $near, 0, 50 ) ),
+		'in_district' => array_map( 'directoryweb_dir_point_out', array_slice( $inds, 0, 50 ) ),
 		'in_district_count' => count( $inds ),
 		'district' => $district,
 	);
@@ -294,17 +294,17 @@ function aw_dir_near( WP_REST_Request $r ) {
 /* ---------- The switch, Near me and the map, above the Directory list ---------- */
 
 /** The current Directory view's filters, for the browser. */
-function aw_dir_view_filters() {
-	$place = aw_current_place();
+function directoryweb_dir_view_filters() {
+	$place = directoryweb_current_place();
 	$type  = (string) get_query_var( 'aw_dir_type' );
 	if ( '' === $type ) {
-		$type = aw_request_type();
+		$type = directoryweb_request_type();
 	}
 	return array_filter(
 		array(
 			'place'    => $place ? $place->slug : '',
 			'type'     => $type,
-			'service'  => implode( ',', aw_request_services() ),
+			'service'  => implode( ',', directoryweb_request_services() ),
 			'verified' => empty( $_GET['verified'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 			'gov'      => empty( $_GET['gov'] ) ? '' : '1', // phpcs:ignore WordPress.Security.NonceVerification
 			'q'        => sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ), // phpcs:ignore WordPress.Security.NonceVerification
@@ -313,17 +313,17 @@ function aw_dir_view_filters() {
 }
 
 /** The view controls in the Directory toolbar (aw_block_result_head()): List / Map and Near me. */
-function aw_dir_tools_html() {
+function directoryweb_dir_tools_html() {
 	wp_enqueue_script( 'aw-dir-map' );
 	wp_enqueue_style( 'aw-dir-map' );
-	return '<div class="aw-dir-tools" data-filters="' . esc_attr( wp_json_encode( (object) aw_dir_view_filters() ) ) . '">'
+	return '<div class="aw-dir-tools" data-filters="' . esc_attr( wp_json_encode( (object) directoryweb_dir_view_filters() ) ) . '">'
 		. '<div class="kit-segment" role="group" aria-label="View"><button type="button" data-view="list" aria-pressed="true">List</button><button type="button" data-view="map" aria-pressed="false">Map</button></div>'
 		. '<button type="button" class="kit-btn kit-btn--sm kit-btn--ghost kit-btn--ico-map-pin aw-near-open" aria-expanded="false" aria-controls="aw-near">Near me</button>'
 		. '</div>';
 }
 
 /** The panels the toolbar opens, under it: Near me and the map (hidden until asked for). */
-function aw_dir_panels_html() {
+function directoryweb_dir_panels_html() {
 	$icons = ''; // one icon per type; dir-map.js reads each one's picture (--i) for the map's markers
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
 		directoryweb_use_style( 'aw-type-icons' ); // the type pictures (aw-type-icons.css)
@@ -357,8 +357,8 @@ function directoryweb_render_map_block( $attributes = array() ): string {
 	$custom_attrs = ' data-radius="' . esc_attr( $radius ) . '" data-zoom="' . esc_attr( $zoom ) . '" data-near-me="' . ( $near_me ? '1' : '0' ) . '" style="--aw-map-height:' . esc_attr( $height ) . ';"';
 
 	return '<div class="directoryweb-block-map' . esc_attr( $align ) . '"' . $custom_attrs . '>'
-		. aw_dir_tools_html()
-		. aw_dir_panels_html()
+		. directoryweb_dir_tools_html()
+		. directoryweb_dir_panels_html()
 		. '</div>';
 }
 add_shortcode( 'directoryweb_map', 'directoryweb_render_map_block' );

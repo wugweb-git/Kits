@@ -1,7 +1,7 @@
 <?php
 /**
  * Tests the native (no Fluent Forms) claim path: state table, validation, create, transitions, listing effects.
- * WordPress is stubbed in memory; the claim writer aw_claim_apply_field() is stubbed to record what it was asked to apply.
+ * WordPress is stubbed in memory; the claim writer directoryweb_claim_apply_field() is stubbed to record what it was asked to apply.
  *
  * Usage: php plugins/directoryweb/tests/claim-native-tests.php
  *
@@ -36,9 +36,9 @@ function sanitize_key( $s ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/i'
 function sanitize_email( $s ) { return filter_var( trim( (string) $s ), FILTER_VALIDATE_EMAIL ) ? trim( (string) $s ) : ''; }
 function is_email( $s ) { return (bool) filter_var( $s, FILTER_VALIDATE_EMAIL ); }
 function esc_url_raw( $u ) { return filter_var( $u, FILTER_VALIDATE_URL ) ? $u : ''; }
-function aw_claim_phone_ok( $v ) { $n = strlen( preg_replace( '/\D+/', '', $v ) ); return (bool) preg_match( '#^[0-9+()\-/ .]+$#', $v ) && $n >= 6 && $n <= 15; }
-function aw_claim_clean( $k, $v ) { return 'aw_email' === $k ? sanitize_email( $v ) : esc_url_raw( $v ); }
-function aw_claim_now( $l, $k, $p ) { return ''; }
+function directoryweb_claim_phone_ok( $v ) { $n = strlen( preg_replace( '/\D+/', '', $v ) ); return (bool) preg_match( '#^[0-9+()\-/ .]+$#', $v ) && $n >= 6 && $n <= 15; }
+function directoryweb_claim_clean( $k, $v ) { return 'aw_email' === $k ? sanitize_email( $v ) : esc_url_raw( $v ); }
+function directoryweb_claim_now( $l, $k, $p ) { return ''; }
 function wp_json_encode( $v ) { return json_encode( $v ); }
 function current_time( $t ) { return '2026-11-24 12:00:00'; }
 function wp_date( $f ) { return '2026-11-24'; }
@@ -62,7 +62,7 @@ function get_posts( $q ) {
 	return array_slice( $out, 0, $q['posts_per_page'] );
 }
 $GLOBALS['applied'] = array();
-function aw_claim_apply_field( $c, $key ) { $GLOBALS['applied'][] = $key . '=' . ( $c['propose'][ $key ] ?? '' ); return true; }
+function directoryweb_claim_apply_field( $c, $key ) { $GLOBALS['applied'][] = $key . '=' . ( $c['propose'][ $key ] ?? '' ); return true; }
 
 require dirname( __DIR__ ) . '/includes/claim-native.php';
 

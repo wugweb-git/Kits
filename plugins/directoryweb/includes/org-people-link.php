@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $role    Their role from the claim (may be empty).
  * @return array{status: string, tag: bool, sync: array<string, string>}
  */
-function aw_org_people_link_plan( array $fields, $has_tag, $lid, $show, $title, $role ) {
+function directoryweb_org_people_link_plan( array $fields, $has_tag, $lid, $show, $title, $role ) {
 	$lid   = (int) $lid;
 	$cur   = (int) ( $fields['vol_org_listing'] ?? 0 );
 	$shown = '1' === (string) ( $fields['vol_org_show'] ?? '' );

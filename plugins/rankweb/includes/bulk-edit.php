@@ -19,19 +19,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The post types that get the list-screen SEO tools (the setting; empty: none). */
-function aw_bulk_types(): array {
+function rankweb_bulk_types(): array {
 	return array_values( array_filter( array_map( 'sanitize_key', (array) AW_BULK_TYPES ), 'post_type_exists' ) );
 }
 
 /** An item's robots flags (Rank Math's rank_math_robots, an array like array( 'noindex' )). */
-function aw_bulk_robots( int $id ): array {
+function rankweb_bulk_robots( int $id ): array {
 	$r = get_post_meta( $id, 'rank_math_robots', true );
 	return is_array( $r ) ? array_values( array_filter( array_map( 'sanitize_key', $r ) ) ) : array();
 }
 
 /** An item's link keywords as a display string (internal links module). */
-function aw_bulk_link_keywords( int $id ): array {
-	return function_exists( 'aw_link_keywords' ) ? aw_link_keywords( $id ) : (array) get_post_meta( $id, '_aw_link_keywords', true );
+function rankweb_bulk_link_keywords( int $id ): array {
+	return function_exists( 'rankweb_link_keywords' ) ? rankweb_link_keywords( $id ) : (array) get_post_meta( $id, '_aw_link_keywords', true );
 }
 
 /* ---------- The column ---------- */
@@ -39,9 +39,9 @@ function aw_bulk_link_keywords( int $id ): array {
 add_action(
 	'admin_init',
 	function () {
-		foreach ( aw_bulk_types() as $type ) {
-			add_filter( "manage_{$type}_posts_columns", 'aw_bulk_column' );
-			add_action( "manage_{$type}_posts_custom_column", 'aw_bulk_column_cell', 10, 2 );
+		foreach ( rankweb_bulk_types() as $type ) {
+			add_filter( "manage_{$type}_posts_columns", 'rankweb_bulk_column' );
+			add_action( "manage_{$type}_posts_custom_column", 'rankweb_bulk_column_cell', 10, 2 );
 		}
 	}
 );
@@ -51,7 +51,7 @@ add_action(
  *
  * @param array $cols Columns.
  */
-function aw_bulk_column( array $cols ): array {
+function rankweb_bulk_column( array $cols ): array {
 	$out = array();
 	foreach ( $cols as $key => $label ) {
 		$out[ $key ] = $label;
@@ -71,7 +71,7 @@ function aw_bulk_column( array $cols ): array {
  * @param string $col Column key.
  * @param int    $id  Item ID.
  */
-function aw_bulk_column_cell( $col, $id ): void {
+function rankweb_bulk_column_cell( $col, $id ): void {
 	if ( 'aw_seo' !== $col ) {
 		return;
 	}
@@ -84,7 +84,7 @@ function aw_bulk_column_cell( $col, $id ): void {
 	echo '<div><strong>' . esc_html__( 'Title', 'rankweb' ) . ':</strong> ' . ( '' !== $title ? esc_html( $title ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
 	echo '<div><strong>' . esc_html__( 'Desc', 'rankweb' ) . ':</strong> ' . ( '' !== $desc ? esc_html( wp_html_excerpt( $desc, 60, '…' ) ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
 	echo '<div><strong>' . esc_html__( 'Focus', 'rankweb' ) . ':</strong> ' . ( '' !== $focus ? esc_html( $focus ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
-	if ( in_array( 'noindex', aw_bulk_robots( $id ), true ) ) {
+	if ( in_array( 'noindex', rankweb_bulk_robots( $id ), true ) ) {
 		echo '<div><em>' . esc_html__( 'noindex', 'rankweb' ) . '</em></div>';
 	}
 	echo '<span class="hidden aw-seo-title">' . esc_html( $title ) . '</span>';
@@ -98,7 +98,7 @@ function aw_bulk_column_cell( $col, $id ): void {
 add_action(
 	'restrict_manage_posts',
 	function ( $post_type ) {
-		if ( ! in_array( (string) $post_type, aw_bulk_types(), true ) ) {
+		if ( ! in_array( (string) $post_type, rankweb_bulk_types(), true ) ) {
 			return;
 		}
 		$current = isset( $_GET['aw_seo_filter'] ) ? sanitize_key( wp_unslash( $_GET['aw_seo_filter'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- a read-only list filter
@@ -125,7 +125,7 @@ add_action(
 			return;
 		}
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || 'edit' !== $screen->base || ! in_array( (string) $screen->post_type, aw_bulk_types(), true ) ) {
+		if ( ! $screen || 'edit' !== $screen->base || ! in_array( (string) $screen->post_type, rankweb_bulk_types(), true ) ) {
 			return;
 		}
 		$filter = isset( $_GET['aw_seo_filter'] ) ? sanitize_key( wp_unslash( $_GET['aw_seo_filter'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- a read-only list filter
@@ -133,7 +133,7 @@ add_action(
 			return;
 		}
 		if ( 'orphan' === $filter ) {
-			$orphans = aw_bulk_orphan_ids( (string) $screen->post_type );
+			$orphans = rankweb_bulk_orphan_ids( (string) $screen->post_type );
 			$query->set( 'post__in', $orphans ? $orphans : array( 0 ) );
 			return;
 		}
@@ -179,12 +179,12 @@ add_action(
  * @param string $type Post type.
  * @return int[]
  */
-function aw_bulk_orphan_ids( string $type ): array {
+function rankweb_bulk_orphan_ids( string $type ): array {
 	global $wpdb;
-	if ( ! function_exists( 'aw_link_table' ) || get_option( 'aw_link_audit_db' ) !== '1' ) {
+	if ( ! function_exists( 'rankweb_link_table' ) || get_option( 'aw_link_audit_db' ) !== '1' ) {
 		return array();
 	}
-	$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT a.post_id FROM %i a JOIN %i p ON p.ID = a.post_id WHERE p.post_type = %s AND a.flags LIKE %s', aw_link_table( 'audit' ), $wpdb->posts, $type, '%,orphan,%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, an admin list filter
+	$ids = $wpdb->get_col( $wpdb->prepare( 'SELECT a.post_id FROM %i a JOIN %i p ON p.ID = a.post_id WHERE p.post_type = %s AND a.flags LIKE %s', rankweb_link_table( 'audit' ), $wpdb->posts, $type, '%,orphan,%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, an admin list filter
 	return array_map( 'intval', (array) $ids );
 }
 
@@ -193,7 +193,7 @@ function aw_bulk_orphan_ids( string $type ): array {
 add_action(
 	'quick_edit_custom_box',
 	function ( $col, $post_type ) {
-		if ( 'aw_seo' !== $col || ! in_array( (string) $post_type, aw_bulk_types(), true ) ) {
+		if ( 'aw_seo' !== $col || ! in_array( (string) $post_type, rankweb_bulk_types(), true ) ) {
 			return;
 		}
 		wp_nonce_field( 'aw_bulk_quick', 'aw_bulk_quick_nonce' );
@@ -211,7 +211,7 @@ add_action(
 add_action(
 	'bulk_edit_custom_box',
 	function ( $col, $post_type ) {
-		if ( 'aw_seo' !== $col || ! in_array( (string) $post_type, aw_bulk_types(), true ) ) {
+		if ( 'aw_seo' !== $col || ! in_array( (string) $post_type, rankweb_bulk_types(), true ) ) {
 			return;
 		}
 		wp_nonce_field( 'aw_bulk_quick', 'aw_bulk_quick_nonce' );
@@ -230,7 +230,7 @@ add_action(
 add_action(
 	'save_post',
 	function ( $post_id, $post ) {
-		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || ! in_array( $post->post_type, aw_bulk_types(), true ) ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || ! in_array( $post->post_type, rankweb_bulk_types(), true ) ) {
 			return;
 		}
 		if ( ! isset( $_REQUEST['aw_bulk_quick_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['aw_bulk_quick_nonce'] ) ), 'aw_bulk_quick' ) || ! current_user_can( 'edit_post', (int) $post_id ) ) {
@@ -261,13 +261,13 @@ add_action(
 			update_post_meta( $post_id, 'rank_math_focus_keyword', $focus );
 		}
 		$add = isset( $_REQUEST['aw_seo_linkkw_bulk'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['aw_seo_linkkw_bulk'] ) ) : '';
-		if ( '' !== $add && function_exists( 'aw_link_keywords_clean' ) ) {
-			$list = aw_link_keywords_clean( array_merge( aw_bulk_link_keywords( (int) $post_id ), array( $add ) ) );
+		if ( '' !== $add && function_exists( 'rankweb_link_keywords_clean' ) ) {
+			$list = rankweb_link_keywords_clean( array_merge( rankweb_bulk_link_keywords( (int) $post_id ), array( $add ) ) );
 			update_post_meta( $post_id, '_aw_link_keywords', $list );
 		}
 		$robots = isset( $_REQUEST['aw_seo_robots_bulk'] ) ? sanitize_key( wp_unslash( $_REQUEST['aw_seo_robots_bulk'] ) ) : '';
 		if ( 'index' === $robots || 'noindex' === $robots ) {
-			$flags   = array_values( array_diff( aw_bulk_robots( (int) $post_id ), array( 'index', 'noindex' ) ) );
+			$flags   = array_values( array_diff( rankweb_bulk_robots( (int) $post_id ), array( 'index', 'noindex' ) ) );
 			$flags[] = $robots;
 			update_post_meta( $post_id, 'rank_math_robots', $flags );
 		}
@@ -281,7 +281,7 @@ add_action(
 	'admin_enqueue_scripts',
 	function ( $hook ) {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( 'edit.php' !== $hook || ! $screen || ! in_array( (string) $screen->post_type, aw_bulk_types(), true ) ) {
+		if ( 'edit.php' !== $hook || ! $screen || ! in_array( (string) $screen->post_type, rankweb_bulk_types(), true ) ) {
 			return;
 		}
 		$js = <<<'JS'

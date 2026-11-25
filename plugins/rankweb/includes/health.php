@@ -17,12 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Address => rewrite-rule key Rank Math adds for it. */
-function aw_seo_watched_endpoints() {
+function rankweb_seo_watched_endpoints() {
 	$out = array(
 		'/sitemap_index.xml' => 'sitemap_index\.xml$',
 		'/llms.txt'          => '^llms\.txt$',
 	);
-	if ( aw_seo_module_on( 'sitemap' ) ) {
+	if ( rankweb_seo_module_on( 'sitemap' ) ) {
 		$out['/directory-sitemap.xml'] = '([^/]+?)-sitemap([0-9]+)?\.xml$'; // Rank Math's rule for every {type}-sitemap.xml
 	}
 	return $out;
@@ -33,10 +33,10 @@ function aw_seo_watched_endpoints() {
  *
  * @return array<string,string>
  */
-function aw_seo_endpoint_problems() {
+function rankweb_seo_endpoint_problems() {
 	$rules = (array) get_option( 'rewrite_rules', array() );
 	$out   = array();
-	foreach ( aw_seo_watched_endpoints() as $path => $rule ) {
+	foreach ( rankweb_seo_watched_endpoints() as $path => $rule ) {
 		if ( ! isset( $rules[ $rule ] ) ) {
 			$out[ $path ] = sprintf( '%s: its rewrite rule is missing.', $path );
 			continue;
@@ -57,13 +57,13 @@ function aw_seo_endpoint_problems() {
 }
 
 /** Hourly check: flush rewrite rules once on a failure, then email and keep a notice if it still fails. */
-function aw_seo_endpoints_watchdog() {
-	$problems = aw_seo_endpoint_problems();
+function rankweb_seo_endpoints_watchdog() {
+	$problems = rankweb_seo_endpoint_problems();
 	$flushed  = false;
 	if ( $problems ) {
 		flush_rewrite_rules( false );
 		$flushed  = true;
-		$problems = aw_seo_endpoint_problems();
+		$problems = rankweb_seo_endpoint_problems();
 	}
 	update_option( 'aw_seo_endpoints_last', array( 'at' => time(), 'flushed' => $flushed, 'problems' => $problems ), false );
 	if ( ! $problems ) {

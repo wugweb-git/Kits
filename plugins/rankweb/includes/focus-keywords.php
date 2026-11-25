@@ -7,8 +7,8 @@
  * GET  /wp-json/aw/v1/seo-items?type=aw_news&page=1&per_page=100&missing=1
  *      → {items: [{id, title, seo_title, excerpt, focus, has_focus, in_title}], total, pages}
  * POST /wp-json/aw/v1/seo-focus {items: [{id, keyword}], replace: false}
- *      → writes the keyword where the field is empty and it passes aw_seo_clean_keyword() and is a phrase of the item's
- *        SEO title (aw_seo_keyword_in_title); with replace, also over a keyword that is not in the SEO title.
+ *      → writes the keyword where the field is empty and it passes rankweb_seo_clean_keyword() and is a phrase of the item's
+ *        SEO title (rankweb_seo_keyword_in_title); with replace, also over a keyword that is not in the SEO title.
  *        A keyphrase another published page already has (its focus keyphrase, or the owner of the keyword record in
  *        Search Insights) is refused, and a News item never takes one an evergreen page owns (keyphrase-model.php).
  *        An item with clear: true takes its `keyword` off the item instead (the item's other keyphrases stay).
@@ -49,8 +49,8 @@ require_once __DIR__ . '/keyphrase-model.php';
  * @param string $text  The item's own text (excerpt or intro), optional.
  * @return string
  */
-function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
-	$kw = aw_seo_no_hyphens( mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) ), false ); // a hyphen joining two words becomes a space: titles have none (owner, 18 Oct 2026)
+function rankweb_seo_clean_keyword( $kw, $title, $text = '' ) {
+	$kw = rankweb_seo_no_hyphens( mb_strtolower( trim( wp_strip_all_tags( (string) $kw ) ) ), false ); // a hyphen joining two words becomes a space: titles have none (owner, 18 Oct 2026)
 	$kw = trim( preg_replace( array( '/["“”`#]+/u', "/['‘’](?![\\p{L}\\p{N}])|(?<![\\p{L}\\p{N}])['‘’]/u", '/\s+/u' ), array( '', '', ' ' ), $kw ), " \t\n.,;:'-" ); // an apostrophe inside a word stays ("taneja's")
 	$parts = explode( ' ', $kw );
 	$n     = count( $parts );
@@ -80,7 +80,7 @@ function aw_seo_clean_keyword( $kw, $title, $text = '' ) {
 }
 
 /** The SEO title of an item as printed, without the site name: Rank Math's stored title, else the title rule. */
-function aw_seo_title_for_keyword( $post ) {
+function rankweb_seo_title_for_keyword( $post ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
 		return '';
@@ -89,8 +89,8 @@ function aw_seo_title_for_keyword( $post ) {
 	if ( '' !== $t && false !== strpos( $t, '%' ) && class_exists( '\RankMath\Helper' ) ) {
 		$t = \RankMath\Helper::replace_vars( $t, $post );
 	}
-	if ( '' === $t && function_exists( 'aw_seo_item_title' ) ) {
-		$t = aw_seo_item_title( $post );
+	if ( '' === $t && function_exists( 'rankweb_seo_item_title' ) ) {
+		$t = rankweb_seo_item_title( $post );
 	}
 	$t = rankweb_plain_text( '' !== $t ? $t : $post->post_title );
 	return trim( preg_replace( '/\s*[\x{2013}\x{2014}|-]\s*' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/iu', '', $t ) );
@@ -101,16 +101,16 @@ function aw_seo_title_for_keyword( $post ) {
  * word stays part of it ("animal-free", "taneja's"), since Rank Math finds "animal free" or "tanejas" nowhere in
  * "Animal-free" or "Taneja’s" (checked with its analyzer, 16 Oct 2026). Curly apostrophes count as straight ones here; a stored keyword keeps the title's own character.
  */
-function aw_seo_phrase_words( $text ) {
+function rankweb_seo_phrase_words( $text ) {
 	$text = str_replace( array( '’', '‘', '`' ), "'", mb_strtolower( (string) $text ) );
 	preg_match_all( "/[\\p{L}\\p{N}]+(?:['-][\\p{L}\\p{N}]+)*/u", $text, $m );
 	return $m[0];
 }
 
 /** Whether the keyword's words stand together, in order, in the SEO title (the workers check the same). */
-function aw_seo_keyword_in_title( $kw, $seo_title ) {
-	$k = aw_seo_phrase_words( $kw );
-	$t = aw_seo_phrase_words( $seo_title );
+function rankweb_seo_keyword_in_title( $kw, $seo_title ) {
+	$k = rankweb_seo_phrase_words( $kw );
+	$t = rankweb_seo_phrase_words( $seo_title );
 	$n = count( $k );
 	if ( ! $n ) {
 		return false;
@@ -124,19 +124,19 @@ function aw_seo_keyword_in_title( $kw, $seo_title ) {
 }
 
 /** The item's own text the keyword may draw on: its excerpt, else its first paragraph. */
-function aw_seo_keyword_text( $post ) {
-	return rankweb_plain_text( has_excerpt( $post ) ? $post->post_excerpt : aw_seo_intro( $post ) );
+function rankweb_seo_keyword_text( $post ) {
+	return rankweb_plain_text( has_excerpt( $post ) ? $post->post_excerpt : rankweb_seo_intro( $post ) );
 }
 
 /**
  * Other published pages that already have this keyphrase: as their primary Rank Math focus keyphrase (posts and
  * terms), or as the owner of its keyword record in Search Insights (wp_aw_si_kw_pages, role owner).
  *
- * @param string $kw Keyphrase, as aw_seo_clean_keyword() returns it.
+ * @param string $kw Keyphrase, as rankweb_seo_clean_keyword() returns it.
  * @param int    $id The page asking for it (never in the list).
  * @return array Each [ 'type' => post type or 'term', 'id' => int ].
  */
-function aw_seo_keyphrase_owners( $kw, $id ) {
+function rankweb_seo_keyphrase_owners( $kw, $id ) {
 	global $wpdb;
 	$kw  = mb_strtolower( trim( (string) $kw ) );
 	$out = array();
@@ -178,7 +178,7 @@ add_action(
 			'/seo-items',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => 'aw_seo_api_allowed',
+				'permission_callback' => 'rankweb_seo_api_allowed',
 				'args'                => array(
 					'type'     => array( 'required' => true, 'type' => 'string', 'enum' => AW_SEO_ITEM_TYPES ),
 					'page'     => array( 'type' => 'integer', 'default' => 1, 'minimum' => 1 ),
@@ -204,20 +204,20 @@ add_action(
 					$q   = new WP_Query( $args );
 					$out = array();
 					foreach ( $q->posts as $p ) {
-						if ( aw_seo_is_hub_page( $p ) ) {
+						if ( rankweb_seo_is_hub_page( $p ) ) {
 							continue;
 						}
 						$focus = trim( (string) get_post_meta( $p->ID, 'rank_math_focus_keyword', true ) );
 						$first = trim( (string) strtok( $focus, ',' ) ); // Rank Math keeps extra keywords after commas; the first is the primary one
-						$seo   = aw_seo_title_for_keyword( $p );
+						$seo   = rankweb_seo_title_for_keyword( $p );
 						$out[] = array(
 							'id'        => $p->ID,
 							'title'     => rankweb_plain_text( $p->post_title ),
 							'seo_title' => $seo,
-							'excerpt'   => aw_seo_cut( aw_seo_keyword_text( $p ), 400 ),
+							'excerpt'   => rankweb_seo_cut( rankweb_seo_keyword_text( $p ), 400 ),
 							'focus'     => $focus,
 							'has_focus' => '' !== $focus,
-							'in_title'  => '' !== $first && aw_seo_keyword_in_title( $first, $seo ),
+							'in_title'  => '' !== $first && rankweb_seo_keyword_in_title( $first, $seo ),
 						);
 					}
 					return array( 'items' => $out, 'total' => (int) $q->found_posts, 'pages' => (int) $q->max_num_pages );
@@ -229,7 +229,7 @@ add_action(
 			'/seo-focus',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => 'aw_seo_api_allowed',
+				'permission_callback' => 'rankweb_seo_api_allowed',
 				'callback'            => function ( WP_REST_Request $req ) {
 					$written = 0;
 					$skipped = array();
@@ -286,27 +286,27 @@ add_action(
 							++$written;
 							continue;
 						}
-						$seo  = aw_seo_title_for_keyword( $post );
+						$seo  = rankweb_seo_title_for_keyword( $post );
 						$rest = '';
 						if ( '' !== $have ) {
 							$parts = array_map( 'trim', explode( ',', $have ) );
-							if ( ! $replace || aw_seo_keyword_in_title( $parts[0], $seo ) ) {
+							if ( ! $replace || rankweb_seo_keyword_in_title( $parts[0], $seo ) ) {
 								$skipped[] = array( 'id' => $id, 'why' => 'already set' );
 								continue;
 							}
 							$rest = implode( ', ', array_slice( $parts, 1 ) ); // extra keywords stay after the new primary one
 						}
-						$kw = aw_seo_clean_keyword( (string) ( $it['keyword'] ?? '' ), $post->post_title, aw_seo_keyword_text( $post ) );
+						$kw = rankweb_seo_clean_keyword( (string) ( $it['keyword'] ?? '' ), $post->post_title, rankweb_seo_keyword_text( $post ) );
 						if ( '' === $kw ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'unusable keyword' );
 							continue;
 						}
-						if ( ! aw_seo_keyword_in_title( $kw, $seo ) ) {
+						if ( ! rankweb_seo_keyword_in_title( $kw, $seo ) ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'not a phrase of the SEO title' );
 							continue;
 						}
-						$owners = aw_seo_keyphrase_owners( $kw, $id );
-						$why    = aw_seo_kp_refusal( $post->post_type, $owners );
+						$owners = rankweb_seo_keyphrase_owners( $kw, $id );
+						$why    = rankweb_seo_kp_refusal( $post->post_type, $owners );
 						if ( '' !== $why ) {
 							$skipped[] = array( 'id' => $id, 'why' => $why, 'owner' => $owners );
 							continue;

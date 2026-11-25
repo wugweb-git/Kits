@@ -32,8 +32,8 @@ function sanitize_text_field( $v ) { return trim( strip_tags( (string) $v ) ); }
 function sanitize_title( $v ) { return strtolower( (string) $v ); }
 function absint( $v ) { return abs( (int) $v ); }
 function current_user_can() { return true; }
-function aw_post_types() { return array_fill_keys( array( 'aw_news', 'aw_legal', 'post', 'aw_listing', 'aw_opportunity', 'aw_campaign' ), 1 ); }
-function aw_normalise_phone( $r ) { return preg_replace( '/\D+/', '', (string) $r ); }
+function directoryweb_post_types() { return array_fill_keys( array( 'aw_news', 'aw_legal', 'post', 'aw_listing', 'aw_opportunity', 'aw_campaign' ), 1 ); }
+function directoryweb_normalise_phone( $r ) { return preg_replace( '/\D+/', '', (string) $r ); }
 function get_post_meta( $id, $k ) { global $meta; return $meta[ $id ][ $k ] ?? ''; }
 function update_post_meta( $id, $k, $v ) { global $meta; $meta[ $id ][ $k ] = $v; }
 function delete_post_meta( $id, $k ) { global $meta; unset( $meta[ $id ][ $k ] ); }

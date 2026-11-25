@@ -203,7 +203,7 @@ function directoryweb_dashboard_payload(): array {
 	$tiles = array();
 
 	$top  = directoryweb_top_types( (array) ( $l['types'] ?? array() ) );
-	$name = fn( $slug ) => function_exists( 'aw_listing_type_name' ) && '' !== aw_listing_type_name( (string) $slug ) ? aw_listing_type_name( (string) $slug ) : (string) $slug;
+	$name = fn( $slug ) => function_exists( 'directoryweb_listing_type_name' ) && '' !== directoryweb_listing_type_name( (string) $slug ) ? directoryweb_listing_type_name( (string) $slug ) : (string) $slug;
 	$most = array();
 	foreach ( $top['top'] as $slug => $n ) {
 		$most[] = $name( $slug ) . ' ' . $num( $n );
@@ -489,8 +489,8 @@ function directoryweb_rest_claims( WP_REST_Request $request ) {
 		)
 	);
 	$states = array();
-	if ( function_exists( 'aw_place_states' ) ) {
-		foreach ( aw_place_states() as $s ) {
+	if ( function_exists( 'directoryweb_place_states' ) ) {
+		foreach ( directoryweb_place_states() as $s ) {
 			$states[] = array(
 				'value' => (string) $s->code,
 				'label' => (string) $s->name,
@@ -501,7 +501,7 @@ function directoryweb_rest_claims( WP_REST_Request $request ) {
 	foreach ( $types as $slug ) {
 		$type_opts[] = array(
 			'value' => (string) $slug,
-			'label' => function_exists( 'aw_listing_type_name' ) && '' !== aw_listing_type_name( $slug ) ? aw_listing_type_name( $slug ) : (string) $slug,
+			'label' => function_exists( 'directoryweb_listing_type_name' ) && '' !== directoryweb_listing_type_name( $slug ) ? directoryweb_listing_type_name( $slug ) : (string) $slug,
 		);
 	}
 	return rest_ensure_response(
@@ -511,7 +511,7 @@ function directoryweb_rest_claims( WP_REST_Request $request ) {
 			'page'   => $q['page'],
 			'pages'  => $q['pages'],
 			'counts' => $q['counts'],
-			'form'   => function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0,
+			'form'   => function_exists( 'directoryweb_claim_ff_id' ) ? directoryweb_claim_ff_id() : 0,
 			'states' => $states,
 			'types'  => $type_opts,
 		)
@@ -545,10 +545,10 @@ function directoryweb_claim_row( array $r ): array {
 		$changes = $nc ? count( $nc['propose'] ) : null;
 	} elseif ( $r['old'] ) {
 		$changes = count( (array) get_post_meta( $r['entry'], 'aw_c_proposed', true ) ) + ( $r['has']['logo'] ? 1 : 0 );
-	} elseif ( function_exists( 'aw_claim_entry' ) ) {
-		$c = aw_claim_entry( $r['entry'] );
+	} elseif ( function_exists( 'directoryweb_claim_entry' ) ) {
+		$c = directoryweb_claim_entry( $r['entry'] );
 		if ( $c && $c['listing'] ) {
-			$changes = count( aw_claim_changes( $c ) ) + ( '' !== $c['logo'] ? 1 : 0 ) + ( $c['photos'] ? 1 : 0 );
+			$changes = count( directoryweb_claim_changes( $c ) ) + ( '' !== $c['logo'] ? 1 : 0 ) + ( $c['photos'] ? 1 : 0 );
 		}
 	}
 	$by = (int) ( $r['review']['by'] ?? 0 );
@@ -595,7 +595,7 @@ function directoryweb_field_label( string $key ): string {
 /**
  * The newest change-log row a claim's applied field wrote (SourceWeb), or null.
  *
- * @param array  $c   aw_claim_entry().
+ * @param array  $c   directoryweb_claim_entry().
  * @param string $key Claim field.
  * @return array|null [ 'id', 'status' ].
  */
@@ -627,10 +627,10 @@ function directoryweb_claim_log_row( array $c, string $key ): ?array {
  * @return array|null
  */
 function directoryweb_claim_detail( int $id ): ?array {
-	if ( ! function_exists( 'aw_claim_entry' ) || ! aw_claim_ff_id() ) {
+	if ( ! function_exists( 'directoryweb_claim_entry' ) || ! directoryweb_claim_ff_id() ) {
 		return null;
 	}
-	$c = aw_claim_entry( $id );
+	$c = directoryweb_claim_entry( $id );
 	if ( ! $c ) {
 		return null;
 	}
@@ -657,19 +657,19 @@ function directoryweb_claim_detail( int $id ): ?array {
 			$fields[] = array(
 				'key'      => $key,
 				'label'    => directoryweb_field_label( $key ),
-				'current'  => in_array( $key, array( 'logo', 'photos' ), true ) ? '' : aw_claim_now( $lid, $key, false ),
+				'current'  => in_array( $key, array( 'logo', 'photos' ), true ) ? '' : directoryweb_claim_now( $lid, $key, false ),
 				'proposed' => in_array( $key, array( 'logo', 'photos' ), true ) ? __( 'Uploaded with the claim', 'directoryweb' ) : (string) ( $c['propose'][ $key ] ?? '' ),
 				'applied'  => true,
 			);
 		}
 	} elseif ( $lid ) {
-		foreach ( aw_claim_changes( $c ) as $key => $ch ) {
+		foreach ( directoryweb_claim_changes( $c ) as $key => $ch ) {
 			if ( 'l_hours' === $key ) {
 				/* translators: %s: the proposed opening hours. */
 				$notes[] = sprintf( __( 'Opening hours proposed: %s. Enter them by hand in the listing’s Opening hours.', 'directoryweb' ), '' !== $ch[2] ? $ch[2] : __( '(none)', 'directoryweb' ) );
 				continue;
 			}
-			if ( 'phones' === $key && directoryweb_phones_bad( (string) $ch[2], 'aw_claim_phone_ok' ) ) {
+			if ( 'phones' === $key && directoryweb_phones_bad( (string) $ch[2], 'directoryweb_claim_phone_ok' ) ) {
 				$notes[] = __( 'A line of the phone numbers is not a phone number: approving on the Claims screen keeps the list as it is.', 'directoryweb' );
 			}
 			$fields[] = array(
@@ -791,11 +791,11 @@ function directoryweb_fact( string $label, string $value, string $where = '' ): 
 /** The connected services, then the groups, with today's values. */
 function directoryweb_settings_payload(): array {
 	$num   = fn( $n ) => number_format_i18n( (int) $n );
-	$lgd   = function_exists( 'aw_lgd' ) ? aw_lgd() : array();
+	$lgd   = function_exists( 'directoryweb_lgd' ) ? directoryweb_lgd() : array();
 	$head  = directoryweb_lgd_head();
 	$stats = get_transient( DIRECTORYWEB_STATS );
 	$forms = directoryweb_ff_forms();
-	$claim = function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0;
+	$claim = function_exists( 'directoryweb_claim_ff_id' ) ? directoryweb_claim_ff_id() : 0;
 	$geo   = (float) get_option( 'aw_geo_last_request', 0 );
 	$crm   = function_exists( 'FluentCrmApi' );
 	$tags  = array();
@@ -843,7 +843,7 @@ function directoryweb_settings_payload(): array {
 				directoryweb_fact( __( 'Country', 'directoryweb' ), 'in' ),
 				/* translators: %s: number of days. */
 				directoryweb_fact( __( 'Answers kept', 'directoryweb' ), defined( 'AW_GEO_CACHE' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( AW_GEO_CACHE / DAY_IN_SECONDS ) ) : '' ),
-				directoryweb_fact( __( 'Contact sent with each request', 'directoryweb' ), function_exists( 'aw_geo_user_agent' ) ? aw_geo_user_agent() : '' ),
+				directoryweb_fact( __( 'Contact sent with each request', 'directoryweb' ), function_exists( 'directoryweb_geo_user_agent' ) ? directoryweb_geo_user_agent() : '' ),
 			),
 		),
 		array(
@@ -927,7 +927,7 @@ function directoryweb_settings_payload(): array {
 
 	$types = array();
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
-		$types[] = function_exists( 'aw_listing_type_name' ) && '' !== aw_listing_type_name( $slug ) ? aw_listing_type_name( $slug ) : $slug;
+		$types[] = function_exists( 'directoryweb_listing_type_name' ) && '' !== directoryweb_listing_type_name( $slug ) ? directoryweb_listing_type_name( $slug ) : $slug;
 	}
 	$roles  = defined( 'DW_CLAIM_ROLES' ) ? array_values( array_filter( DW_CLAIM_ROLES, fn( $k ) => '' !== $k, ARRAY_FILTER_USE_KEY ) ) : array();
 	$where  = fn( string $cmd ) => sprintf(
@@ -1058,7 +1058,7 @@ function directoryweb_native_claim_detail( array $n ): array {
 		$fields[] = array(
 			'key'      => (string) $key,
 			'label'    => '' !== $map ? directoryweb_field_label( $map ) : (string) $key,
-			'current'  => '' !== $map && $lid ? (string) aw_claim_now( $lid, $map, false ) : '',
+			'current'  => '' !== $map && $lid ? (string) directoryweb_claim_now( $lid, $map, false ) : '',
 			'proposed' => (string) $val,
 			'applied'  => 'approved' === $n['status'] && in_array( $key, (array) json_decode( (string) get_post_meta( $n['id'], '_dw_claim_applied', true ), true ), true ),
 		);

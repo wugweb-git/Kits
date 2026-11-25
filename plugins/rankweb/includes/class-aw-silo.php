@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Silo rules. */
-final class AW_Silo {
+final class RankWeb_Silo {
 
 	/** The modes. */
 	const MODES = array( 'virtual', 'circle' );

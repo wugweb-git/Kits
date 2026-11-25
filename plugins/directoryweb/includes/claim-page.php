@@ -73,7 +73,7 @@ function directoryweb_claim_listing_summary( $listing ) {
 		? '<span class="kit-badge kit-badge--success"><span class="kit-ico kit-ico--check" aria-hidden="true"></span> Verified Organisation</span>'
 		: '<span class="kit-badge kit-badge--neutral"><span class="kit-ico kit-ico--clock" aria-hidden="true"></span> Unclaimed Listing</span>';
 
-	$place_parts = function_exists( 'aw_listing_place' ) ? array_filter( array_reverse( (array) aw_listing_place( $id ) ) ) : array();
+	$place_parts = function_exists( 'directoryweb_listing_place' ) ? array_filter( array_reverse( (array) directoryweb_listing_place( $id ) ) ) : array();
 	$place_text  = implode( ', ', $place_parts );
 
 	$tags_html = '';
@@ -181,7 +181,7 @@ function directoryweb_claim_finder() {
 					$initials = mb_strtoupper( mb_substr( $words[0] ?? '', 0, 1 ) . mb_substr( $words[1] ?? '', 0, 1 ) );
 					$logo     = '<span class="aw-org-mark-initials" aria-hidden="true">' . esc_html( $initials ? $initials : 'AW' ) . '</span>';
 				}
-				$place = function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( (array) aw_listing_place( $id ) ) ) ) : '';
+				$place = function_exists( 'directoryweb_listing_place' ) ? implode( ', ', array_filter( array_reverse( (array) directoryweb_listing_place( $id ) ) ) ) : '';
 				$tags  = '';
 				if ( function_exists( 'aw_item_type_terms' ) ) {
 					foreach ( array_slice( aw_item_type_terms( $id ), 0, 2 ) as $t ) {
@@ -260,9 +260,9 @@ function directoryweb_claim_head_band() {
 	foreach ( array_slice( function_exists( 'aw_item_type_terms' ) ? aw_item_type_terms( $id ) : array(), 0, 3 ) as $t ) { // as on the listing page: at most 3 types
 		$meta .= aw_item_chip( $t );
 	}
-	foreach ( function_exists( 'aw_item_places' ) ? aw_item_places( $id ) : array() as $p ) {
-		$st    = 'district' === $p->kind && function_exists( 'aw_place_state' ) ? aw_place_state( $p->state ) : null;
-		$meta .= '<a class="aw-item-place" href="' . esc_url( aw_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
+	foreach ( function_exists( 'directoryweb_item_places' ) ? directoryweb_item_places( $id ) : array() as $p ) {
+		$st    = 'district' === $p->kind && function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( $p->state ) : null;
+		$meta .= '<a class="aw-item-place" href="' . esc_url( directoryweb_directory_url( $p->slug ) ) . '"><span class="kit-ico kit-ico--map-pin" aria-hidden="true"></span>' . esc_html( $st ? $p->name . ', ' . $st->name : $p->name ) . '</a>';
 	}
 	$logo = has_post_thumbnail( $id ) ? get_the_post_thumbnail( $id, 'thumbnail', array( 'class' => 'aw-claim-logo', 'alt' => '', 'loading' => 'eager' ) ) : '';
 	return aw_head_band(
@@ -288,7 +288,7 @@ add_shortcode(
 			return '<div class="aw-form-page aw-claim-page" id="claim">'
 				. directoryweb_claim_listing_summary( $listing )
 				. directoryweb_claim_stepper( 1 )
-				. aw_claim_form( $listing )
+				. directoryweb_claim_form( $listing )
 				. '</div>';
 		}
 
@@ -300,33 +300,3 @@ add_shortcode(
 
 /* ---------- Back-compat: the old names (Animal Writes Core, before 18 Nov 2026) ---------- */
 
-if ( ! function_exists( 'aw_block_listing_help' ) ) {
-	/** Back-compat: directoryweb_block_listing_help(). */
-	function aw_block_listing_help( ...$args ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- back-compat name
-		return directoryweb_block_listing_help( ...$args );
-	}
-}
-if ( ! function_exists( 'aw_claim_url' ) ) {
-	/** Back-compat: directoryweb_claim_url(). */
-	function aw_claim_url( ...$args ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- back-compat name
-		return directoryweb_claim_url( ...$args );
-	}
-}
-if ( ! function_exists( 'aw_form_page_listing' ) ) {
-	/** Back-compat: directoryweb_form_page_listing(). */
-	function aw_form_page_listing( ...$args ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- back-compat name
-		return directoryweb_form_page_listing( ...$args );
-	}
-}
-if ( ! function_exists( 'aw_claim_finder' ) ) {
-	/** Back-compat: directoryweb_claim_finder(). */
-	function aw_claim_finder( ...$args ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- back-compat name
-		return directoryweb_claim_finder( ...$args );
-	}
-}
-if ( ! function_exists( 'aw_claim_head_band' ) ) {
-	/** Back-compat: directoryweb_claim_head_band(). */
-	function aw_claim_head_band( ...$args ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- back-compat name
-		return directoryweb_claim_head_band( ...$args );
-	}
-}

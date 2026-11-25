@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 /** Redirect CSV and the .htaccess block. */
-final class AW_Redirects {
+final class RankWeb_Redirects {
 
 	/** The CSV columns, in order. */
 	const COLUMNS = array( 'source', 'target', 'code', 'comparison' );

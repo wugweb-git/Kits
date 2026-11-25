@@ -188,7 +188,7 @@ const DIRECTORYWEB_LIST_FIELDS = array(
 );
 
 /**
- * Never-publish list: numbers taken down on privacy grounds, as SHA-256 of the normalised digits (aw_normalise_phone,
+ * Never-publish list: numbers taken down on privacy grounds, as SHA-256 of the normalised digits (directoryweb_normalise_phone,
  * e.g. 91XXXXXXXXXX) so the code holds no copy of the number. Checked on every phone write (imports, ingest, claims,
  * the listing profile, enrichment) and on display. Add a hash with: php -r 'echo hash("sha256","91XXXXXXXXXX");'
  */

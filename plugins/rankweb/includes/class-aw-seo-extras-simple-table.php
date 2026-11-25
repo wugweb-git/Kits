@@ -5,7 +5,7 @@
  * once (per_page), or one page the screen already fetched (per_page and total). Optional sorting of the rows it holds
  * (sortable). It prints no nonce and no bulk actions, so it may sit inside the screen's own form.
  * The same pattern as the other Wugweb plugins' *_simple_table() helpers, each plugin with its own copy and prefix.
- * Loaded by aw_seo_extras_simple_table() (admin-table.php) only when a screen renders one.
+ * Loaded by rankweb_seo_extras_simple_table() (admin-table.php) only when a screen renders one.
  *
  * @package aw-seo-extras
  */
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Plain rows in a core list table. */
-class AW_SEO_Extras_Simple_Table extends WP_List_Table {
+class RankWeb_SEO_Extras_Simple_Table extends WP_List_Table {
 
 	/** @var array column => label */
 	private $cols;

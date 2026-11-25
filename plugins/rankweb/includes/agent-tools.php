@@ -28,14 +28,14 @@ add_action(
 			return;
 		}
 		wp_register_ability_category(
-			AW_Agent::CATEGORY,
+			RankWeb_Agent::CATEGORY,
 			array(
 				'label'       => __( 'RankWeb', 'rankweb' ),
 				'description' => __( 'Read and change RankWeb\'s SEO data.', 'rankweb' ),
 			)
 		);
-		$specs = aw_agent_specs();
-		foreach ( AW_Agent::enabled( (bool) AW_AGENT_WRITES ) as $ability ) {
+		$specs = rankweb_agent_specs();
+		foreach ( RankWeb_Agent::enabled( (bool) AW_AGENT_WRITES ) as $ability ) {
 			$spec = $specs[ $ability['name'] ] ?? null;
 			if ( ! $spec ) {
 				continue;
@@ -45,7 +45,7 @@ add_action(
 				array(
 					'label'               => $spec['label'],
 					'description'         => $ability['summary'],
-					'category'            => AW_Agent::CATEGORY,
+					'category'            => RankWeb_Agent::CATEGORY,
 					'input_schema'        => $spec['input'],
 					'execute_callback'    => $spec['execute'],
 					'permission_callback' => $spec['permission'],
@@ -57,7 +57,7 @@ add_action(
 );
 
 /** One object input schema. */
-function aw_agent_schema( array $properties, array $required = array() ): array {
+function rankweb_agent_schema( array $properties, array $required = array() ): array {
 	return array(
 		'type'                 => 'object',
 		'properties'           => $properties,
@@ -71,7 +71,7 @@ function aw_agent_schema( array $properties, array $required = array() ): array 
  *
  * @return array<string,array>
  */
-function aw_agent_specs(): array {
+function rankweb_agent_specs(): array {
 	$post_id   = array(
 		'post_id' => array(
 			'type'    => 'integer',
@@ -83,19 +83,19 @@ function aw_agent_specs(): array {
 	return array(
 		'rankweb/get-seo'       => array(
 			'label'      => __( 'Get SEO', 'rankweb' ),
-			'input'      => aw_agent_schema( $post_id, array( 'post_id' ) ),
+			'input'      => rankweb_agent_schema( $post_id, array( 'post_id' ) ),
 			'permission' => $can_edit,
-			'execute'    => fn( $input ) => aw_agent_get_seo( (int) $input['post_id'] ),
+			'execute'    => fn( $input ) => rankweb_agent_get_seo( (int) $input['post_id'] ),
 		),
 		'rankweb/audit-summary' => array(
 			'label'      => __( 'Internal links audit summary', 'rankweb' ),
-			'input'      => aw_agent_schema( array() ),
+			'input'      => rankweb_agent_schema( array() ),
 			'permission' => $can_admin,
-			'execute'    => fn() => function_exists( 'aw_link_audit_summary' ) ? aw_link_audit_summary() : new WP_Error( 'aw_agent', __( 'The internal links audit is not available.', 'rankweb' ) ),
+			'execute'    => fn() => function_exists( 'rankweb_link_audit_summary' ) ? rankweb_link_audit_summary() : new WP_Error( 'aw_agent', __( 'The internal links audit is not available.', 'rankweb' ) ),
 		),
 		'rankweb/list-orphans'  => array(
 			'label'      => __( 'List orphans', 'rankweb' ),
-			'input'      => aw_agent_schema(
+			'input'      => rankweb_agent_schema(
 				array(
 					'limit' => array(
 						'type'    => 'integer',
@@ -105,11 +105,11 @@ function aw_agent_specs(): array {
 				)
 			),
 			'permission' => $can_admin,
-			'execute'    => fn( $input ) => aw_agent_list_orphans( (int) ( $input['limit'] ?? 100 ) ),
+			'execute'    => fn( $input ) => rankweb_agent_list_orphans( (int) ( $input['limit'] ?? 100 ) ),
 		),
 		'rankweb/set-seo'       => array(
 			'label'      => __( 'Set SEO', 'rankweb' ),
-			'input'      => aw_agent_schema(
+			'input'      => rankweb_agent_schema(
 				array(
 					'post_id'       => array(
 						'type'    => 'integer',
@@ -127,11 +127,11 @@ function aw_agent_specs(): array {
 				array( 'post_id' )
 			),
 			'permission' => $can_edit,
-			'execute'    => fn( $input ) => aw_agent_set_seo( (array) $input ),
+			'execute'    => fn( $input ) => rankweb_agent_set_seo( (array) $input ),
 		),
 		'rankweb/add-redirect'  => array(
 			'label'      => __( 'Add redirect', 'rankweb' ),
-			'input'      => aw_agent_schema(
+			'input'      => rankweb_agent_schema(
 				array(
 					'source'     => array( 'type' => 'string' ),
 					'target'     => array( 'type' => 'string' ),
@@ -144,11 +144,11 @@ function aw_agent_specs(): array {
 				array( 'source' )
 			),
 			'permission' => $can_admin,
-			'execute'    => fn( $input ) => aw_agent_add_redirect( (array) $input ),
+			'execute'    => fn( $input ) => rankweb_agent_add_redirect( (array) $input ),
 		),
 		'rankweb/set-schema'    => array(
 			'label'      => __( 'Set custom schema', 'rankweb' ),
-			'input'      => aw_agent_schema(
+			'input'      => rankweb_agent_schema(
 				array(
 					'post_id' => array(
 						'type'    => 'integer',
@@ -159,7 +159,7 @@ function aw_agent_specs(): array {
 				array( 'post_id', 'jsonld' )
 			),
 			'permission' => $can_edit,
-			'execute'    => fn( $input ) => aw_agent_set_schema( (int) ( $input['post_id'] ?? 0 ), (string) ( $input['jsonld'] ?? '' ) ),
+			'execute'    => fn( $input ) => rankweb_agent_set_schema( (int) ( $input['post_id'] ?? 0 ), (string) ( $input['jsonld'] ?? '' ) ),
 		),
 	);
 }
@@ -172,11 +172,11 @@ function aw_agent_specs(): array {
  * @param int $id Item ID.
  * @return array|WP_Error
  */
-function aw_agent_get_seo( int $id ) {
+function rankweb_agent_get_seo( int $id ) {
 	if ( ! get_post( $id ) ) {
 		return new WP_Error( 'aw_agent', __( 'No such item.', 'rankweb' ) );
 	}
-	$links  = function_exists( 'aw_link_keywords' ) ? aw_link_keywords( $id ) : (array) get_post_meta( $id, '_aw_link_keywords', true );
+	$links  = function_exists( 'rankweb_link_keywords' ) ? rankweb_link_keywords( $id ) : (array) get_post_meta( $id, '_aw_link_keywords', true );
 	$robots = get_post_meta( $id, 'rank_math_robots', true );
 	return array(
 		'post_id'       => $id,
@@ -196,7 +196,7 @@ function aw_agent_get_seo( int $id ) {
  * @param array $input The ability input.
  * @return array|WP_Error
  */
-function aw_agent_set_seo( array $input ) {
+function rankweb_agent_set_seo( array $input ) {
 	$id = (int) ( $input['post_id'] ?? 0 );
 	if ( ! get_post( $id ) ) {
 		return new WP_Error( 'aw_agent', __( 'No such item.', 'rankweb' ) );
@@ -207,9 +207,9 @@ function aw_agent_set_seo( array $input ) {
 		'focus_keyword' => 'rank_math_focus_keyword',
 		'canonical'     => 'rank_math_canonical_url',
 	);
-	foreach ( AW_Agent::writable_seo( $input ) as $key => $value ) {
+	foreach ( RankWeb_Agent::writable_seo( $input ) as $key => $value ) {
 		if ( 'link_keywords' === $key ) {
-			$list = function_exists( 'aw_link_keywords_clean' ) ? aw_link_keywords_clean( (array) $value ) : array_map( 'sanitize_text_field', (array) $value );
+			$list = function_exists( 'rankweb_link_keywords_clean' ) ? rankweb_link_keywords_clean( (array) $value ) : array_map( 'sanitize_text_field', (array) $value );
 			if ( $list ) {
 				update_post_meta( $id, '_aw_link_keywords', $list );
 			} else {
@@ -224,10 +224,10 @@ function aw_agent_set_seo( array $input ) {
 			update_post_meta( $id, $meta[ $key ], $clean );
 		}
 	}
-	if ( function_exists( 'aw_link_index_item' ) ) {
-		aw_link_index_item( $id ); // a cleared focus keyword or a changed link keyword is not caught by the meta hooks
+	if ( function_exists( 'rankweb_link_index_item' ) ) {
+		rankweb_link_index_item( $id ); // a cleared focus keyword or a changed link keyword is not caught by the meta hooks
 	}
-	return aw_agent_get_seo( $id );
+	return rankweb_agent_get_seo( $id );
 }
 
 /**
@@ -236,13 +236,13 @@ function aw_agent_set_seo( array $input ) {
  * @param int $limit How many at most.
  * @return array|WP_Error
  */
-function aw_agent_list_orphans( int $limit ) {
+function rankweb_agent_list_orphans( int $limit ) {
 	global $wpdb;
-	if ( ! function_exists( 'aw_link_table' ) || get_option( 'aw_link_audit_db' ) !== '1' ) {
+	if ( ! function_exists( 'rankweb_link_table' ) || get_option( 'aw_link_audit_db' ) !== '1' ) {
 		return new WP_Error( 'aw_agent', __( 'The internal links audit has not run.', 'rankweb' ) );
 	}
 	$limit = max( 1, min( 500, $limit ) );
-	$ids   = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT post_id FROM %i WHERE flags LIKE %s ORDER BY post_id LIMIT %d', aw_link_table( 'audit' ), '%,orphan,%', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, read for an agent
+	$ids   = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT post_id FROM %i WHERE flags LIKE %s ORDER BY post_id LIMIT %d', rankweb_link_table( 'audit' ), '%,orphan,%', $limit ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, read for an agent
 	$out   = array();
 	foreach ( array_map( 'intval', $ids ) as $id ) {
 		$out[] = array(
@@ -263,12 +263,12 @@ function aw_agent_list_orphans( int $limit ) {
  * @param array $input The ability input.
  * @return array|WP_Error
  */
-function aw_agent_add_redirect( array $input ) {
-	if ( ! function_exists( 'aw_rank_math_redirect' ) ) {
+function rankweb_agent_add_redirect( array $input ) {
+	if ( ! function_exists( 'rankweb_rank_math_redirect' ) ) {
 		return new WP_Error( 'aw_agent', __( 'Redirects are not available.', 'rankweb' ) );
 	}
 	require_once __DIR__ . '/class-aw-redirects.php';
-	$v = AW_Redirects::validate(
+	$v = RankWeb_Redirects::validate(
 		array(
 			'source'     => (string) ( $input['source'] ?? '' ),
 			'target'     => (string) ( $input['target'] ?? '' ),
@@ -279,9 +279,9 @@ function aw_agent_add_redirect( array $input ) {
 	if ( '' !== $v['error'] ) {
 		return new WP_Error( 'aw_agent', $v['error'] );
 	}
-	$target  = in_array( $v['code'], AW_Redirects::GONE, true ) ? '' : ( preg_match( '~^https?://~i', $v['target'] ) ? $v['target'] : home_url( '/' . ltrim( $v['target'], '/' ) ) );
+	$target  = in_array( $v['code'], RankWeb_Redirects::GONE, true ) ? '' : ( preg_match( '~^https?://~i', $v['target'] ) ? $v['target'] : home_url( '/' . ltrim( $v['target'], '/' ) ) );
 	$pattern = 'regex' === $v['comparison'] ? $v['source'] : trim( $v['source'], '/' );
-	$id      = aw_rank_math_redirect( $pattern, $target, $v['comparison'], $v['code'] );
+	$id      = rankweb_rank_math_redirect( $pattern, $target, $v['comparison'], $v['code'] );
 	return $id ? array( 'id' => (int) $id ) : new WP_Error( 'aw_agent', __( 'The redirect was already in the list or could not be saved.', 'rankweb' ) );
 }
 
@@ -292,14 +292,14 @@ function aw_agent_add_redirect( array $input ) {
  * @param string $jsonld The JSON-LD.
  * @return array|WP_Error
  */
-function aw_agent_set_schema( int $id, string $jsonld ) {
-	if ( ! class_exists( 'AW_Schema' ) ) {
+function rankweb_agent_set_schema( int $id, string $jsonld ) {
+	if ( ! class_exists( 'RankWeb_Schema' ) ) {
 		require_once __DIR__ . '/class-aw-schema.php';
 	}
 	if ( ! get_post( $id ) ) {
 		return new WP_Error( 'aw_agent', __( 'No such item.', 'rankweb' ) );
 	}
-	$parsed = AW_Schema::parse( $jsonld );
+	$parsed = RankWeb_Schema::parse( $jsonld );
 	if ( '' !== $parsed['error'] ) {
 		return new WP_Error( 'aw_agent', $parsed['error'] );
 	}

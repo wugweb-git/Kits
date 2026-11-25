@@ -112,7 +112,7 @@ final class StandaloneSchemaTest extends PHPUnit\Framework\TestCase {
 
 	public function testCustomSchemaNodeParsing(): void {
 		$custom = '{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is RankWeb standalone?","acceptedAnswer":{"@type":"Answer","text":"Yes."}}]}';
-		$parsed = AW_Schema::parse( $custom );
+		$parsed = RankWeb_Schema::parse( $custom );
 		$this->assertSame( '', $parsed['error'] );
 		$this->assertCount( 1, $parsed['nodes'] );
 		$this->assertSame( 'FAQPage', $parsed['nodes'][0]['@type'] );

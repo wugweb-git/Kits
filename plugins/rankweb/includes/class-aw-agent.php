@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The agent abilities. */
-final class AW_Agent {
+final class RankWeb_Agent {
 
 	/** The ability category id (registered before the abilities). */
 	const CATEGORY = 'rankweb';

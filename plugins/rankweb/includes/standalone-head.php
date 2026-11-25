@@ -49,7 +49,7 @@ function rankweb_share_tags( array $d ): string {
 	return $out;
 }
 
-if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math() ) {
+if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) {
 	// The title typed in the sidebar, for a single item (a list or an archive keeps WordPress's own).
 	add_filter(
 		'pre_get_document_title',
@@ -57,7 +57,7 @@ if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math()
 			if ( ! is_singular() || '' !== (string) $title ) {
 				return $title;
 			}
-			$typed = function_exists( 'aw_seo_typed' ) ? aw_seo_typed( 'title' ) : '';
+			$typed = function_exists( 'rankweb_seo_typed' ) ? rankweb_seo_typed( 'title' ) : '';
 			return '' !== $typed ? rankweb_plain_text( $typed ) : $title;
 		},
 		20
@@ -71,11 +71,11 @@ if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math()
 			}
 			$obj   = get_queried_object();
 			$title = wp_get_document_title();
-			$desc  = function_exists( 'aw_seo_description' ) ? rankweb_plain_text( (string) aw_seo_description() ) : '';
-			$img   = function_exists( 'aw_seo_image' ) ? aw_seo_image() : null;
+			$desc  = function_exists( 'rankweb_seo_description' ) ? rankweb_plain_text( (string) rankweb_seo_description() ) : '';
+			$img   = function_exists( 'rankweb_seo_image' ) ? rankweb_seo_image() : null;
 			$image = array();
 			if ( is_array( $img ) && ! empty( $img['url'] ) ) {
-				$sq    = function_exists( 'aw_seo_share_square' ) ? aw_seo_share_square( ! empty( $img['id'] ) ? (int) $img['id'] : (string) $img['url'] ) : array( $img['url'], 0, 0, '' );
+				$sq    = function_exists( 'rankweb_seo_share_square' ) ? rankweb_seo_share_square( ! empty( $img['id'] ) ? (int) $img['id'] : (string) $img['url'] ) : array( $img['url'], 0, 0, '' );
 				$image = array(
 					'url'    => (string) $sq[0],
 					'width'  => (int) ( $sq[1] ?: ( $img['width'] ?? 0 ) ),

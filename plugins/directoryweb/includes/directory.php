@@ -17,16 +17,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * There are no state × type pages: /directory/{state}/?tag= is a filtered state list (canonical: the state page).
  * Older patterns (/directory/{district}/, /directory/{place}/{type}/) get one 301 to the new URL.
  */
-function aw_directory_rewrites() {
+function directoryweb_directory_rewrites() {
 	add_rewrite_tag( '%aw_dir%', '(.+?)' );
 	add_rewrite_tag( '%aw_type_slug%', '([^/]+)' );
 	add_rewrite_rule( '^directory/(?!org/|page/|feed/)(.+?)/?$', 'index.php?aw_dir=$matches[1]', 'top' );
 }
-add_action( 'init', 'aw_directory_rewrites', 20 );
+add_action( 'init', 'directoryweb_directory_rewrites', 20 );
 
 /** A place (state or district) by slug, from the LGD file (places.php). */
-function aw_dir_place( $slug ) {
-	return aw_place_by_slug( $slug );
+function directoryweb_dir_place( $slug ) {
+	return directoryweb_place_by_slug( $slug );
 }
 
 /** "Veterinary" is one filter for people; the listings keep their separate veterinary types. Bird Hospital is its own
@@ -34,20 +34,20 @@ function aw_dir_place( $slug ) {
 const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic', 'mobile-veterinary-unit', 'veterinary-office' );
 
 /** A listing-type slug from a URL or filter: a real type (a Directory tag that is not a service), or "veterinary". */
-function aw_listing_type_ok( $slug ) {
+function directoryweb_listing_type_ok( $slug ) {
 	return 'veterinary' === $slug || in_array( $slug, directoryweb_listing_type_slugs(), true );
 }
 
 /** The ?tag= values on this request (tag=a,b or tag[]=a&tag[]=b). */
-function aw_request_tags() {
+function directoryweb_request_tags() {
 	$raw = wp_unslash( $_GET['tag'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below, per tag
 	return array_values( array_unique( array_filter( array_map( 'sanitize_title', is_array( $raw ) ? $raw : explode( ',', (string) $raw ) ) ) ) );
 }
 
 /** The listing type chosen by ?tag= (the first one that is a type, or "veterinary"), or ''. */
-function aw_request_type() {
-	foreach ( aw_request_tags() as $t ) {
-		if ( aw_listing_type_ok( $t ) ) {
+function directoryweb_request_type() {
+	foreach ( directoryweb_request_tags() as $t ) {
+		if ( directoryweb_listing_type_ok( $t ) ) {
 			return $t;
 		}
 	}
@@ -55,17 +55,17 @@ function aw_request_type() {
 }
 
 /** The services chosen by ?tag=. */
-function aw_request_services() {
-	return array_values( array_intersect( aw_request_tags(), directoryweb_service_slugs() ) );
+function directoryweb_request_services() {
+	return array_values( array_intersect( directoryweb_request_tags(), directoryweb_service_slugs() ) );
 }
 
 /** What to query for a type slug: the type itself, or every veterinary type. */
-function aw_listing_type_query( $slug ) {
+function directoryweb_listing_type_query( $slug ) {
 	return 'veterinary' === $slug ? implode( ',', AW_VET_TYPES ) : $slug;
 }
 
 /** Display name of a type slug. */
-function aw_listing_type_name( $slug ) {
+function directoryweb_listing_type_name( $slug ) {
 	if ( 'veterinary' === $slug ) {
 		return 'Veterinary';
 	}
@@ -74,12 +74,12 @@ function aw_listing_type_name( $slug ) {
 }
 
 /** Name of the listing type the current directory page shows, if any. */
-function aw_current_type_name() {
+function directoryweb_current_type_name() {
 	$slug = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : get_query_var( 'aw_dir_type' ) );
 	if ( '' === $slug ) {
-		$slug = aw_request_type();
+		$slug = directoryweb_request_type();
 	}
-	return false !== strpos( $slug, ',' ) ? 'Veterinary' : ( $slug ? aw_listing_type_name( $slug ) : '' );
+	return false !== strpos( $slug, ',' ) ? 'Veterinary' : ( $slug ? directoryweb_listing_type_name( $slug ) : '' );
 }
 
 /** Turn /directory/... into a listing query, or send older URL shapes to the new one. */
@@ -96,7 +96,7 @@ add_filter(
 			$paged = (int) $seg[ $n - 1 ];
 			$seg   = array_slice( $seg, 0, -2 );
 		}
-		$type_ok = 'aw_listing_type_ok';
+		$type_ok = 'directoryweb_listing_type_ok';
 		$go      = function ( $url ) use ( $paged ) {
 			if ( $paged > 1 ) {
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
@@ -106,34 +106,34 @@ add_filter(
 			exit;
 		};
 		$out     = array( 'pagename' => 'directory' ); // the Directory Page; its list reads the place and type (hubs.php)
-		$a       = isset( $seg[0] ) ? aw_dir_place( $seg[0] ) : null;
+		$a       = isset( $seg[0] ) ? directoryweb_dir_place( $seg[0] ) : null;
 		$b       = $seg[1] ?? '';
 		$c       = $seg[2] ?? '';
 		if ( 1 === count( $seg ) && $a ) {
 			if ( $a->parent ) {
-				$go( aw_directory_url( $a->slug ) ); // old /directory/{district}/
+				$go( directoryweb_directory_url( $a->slug ) ); // old /directory/{district}/
 			}
 			$out['aw_place'] = $a->slug;
-			$type            = aw_request_type();
+			$type            = directoryweb_request_type();
 			if ( $type ) {
-				$out['aw_dir_type'] = aw_listing_type_query( $type ); // filtered state list
+				$out['aw_dir_type'] = directoryweb_listing_type_query( $type ); // filtered state list
 			}
 		} elseif ( 2 === count( $seg ) && $a ) {
-			$bp = aw_dir_place( $b );
+			$bp = directoryweb_dir_place( $b );
 			if ( ! $a->parent && $bp && (int) $bp->parent === (int) $a->term_id ) {
 				$out['aw_place'] = $bp->slug;
 			} elseif ( $type_ok( $b ) ) {
-				$go( aw_directory_url( $a->slug, $b ) ); // old /directory/{place}/{type}/
+				$go( directoryweb_directory_url( $a->slug, $b ) ); // old /directory/{place}/{type}/
 			} else {
 				return array( 'error' => '404' );
 			}
 		} elseif ( 3 === count( $seg ) && $a && ! $a->parent ) {
-			$bp = aw_dir_place( $b );
+			$bp = directoryweb_dir_place( $b );
 			if ( ! $bp || (int) $bp->parent !== (int) $a->term_id || ! $type_ok( $c ) ) {
 				return array( 'error' => '404' );
 			}
 			$out['aw_place']     = $bp->slug;
-			$out['aw_dir_type']  = aw_listing_type_query( $c );
+			$out['aw_dir_type']  = directoryweb_listing_type_query( $c );
 			$out['aw_type_slug'] = $c;
 		} else {
 			return array( 'error' => '404' );
@@ -160,14 +160,14 @@ add_filter(
  * @param array $v Base query vars.
  * @return array
  */
-function aw_directory_query_vars( $v ) {
+function directoryweb_directory_query_vars( $v ) {
 	$mq                  = (array) ( $v['meta_query'] ?? array() );
 	$v['aw_digits_last'] = 1; // A–Z means letters first: names that start with a number (e.g. "1962 …") come after Z
 
 	$order = array( 'title' => 'ASC' );
 	// Verified first, once any listing is verified. Until then the step changes nothing and its OR join (aw_verified is
 	// missing on most listings) made every Directory query about 300 ms slower.
-	if ( aw_verified_count() ) {
+	if ( directoryweb_verified_count() ) {
 		$mq['ver'] = array(
 			'relation' => 'OR',
 			'ver_yes'  => array( 'key' => 'aw_verified', 'type' => 'NUMERIC', 'compare' => 'EXISTS' ),
@@ -176,12 +176,12 @@ function aw_directory_query_vars( $v ) {
 		$order     = array( 'ver_yes' => 'DESC', 'title' => 'ASC' );
 	}
 	if ( 'details' === sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		$mq['score'] = array( 'key' => 'aw_contact_score', 'type' => 'NUMERIC' );
+		$mq['score'] = array( 'key' => 'directoryweb_contact_score', 'type' => 'NUMERIC' );
 		$order       = array( 'score' => 'DESC', 'title' => 'ASC' );
 	}
-	$place = aw_current_place();
+	$place = directoryweb_current_place();
 	if ( $place ) {
-		$mq['aw_place'] = aw_place_meta_clause( $place );
+		$mq['aw_place'] = directoryweb_place_meta_clause( $place );
 	}
 	if ( ! empty( $_GET['verified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$mq['only_verified'] = array( 'key' => 'aw_verified', 'value' => '1' );
@@ -191,14 +191,14 @@ function aw_directory_query_vars( $v ) {
 	}
 	$type = (string) get_query_var( 'aw_dir_type' );
 	if ( '' === $type ) {
-		$g    = aw_request_type();
-		$type = $g ? aw_listing_type_query( $g ) : ''; // a filtered list (?tag=); canonical stays the unfiltered page
+		$g    = directoryweb_request_type();
+		$type = $g ? directoryweb_listing_type_query( $g ) : ''; // a filtered list (?tag=); canonical stays the unfiltered page
 	}
 	$tq = array();
 	if ( '' !== $type ) {
 		$tq[] = array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => explode( ',', $type ) );
 	}
-	foreach ( aw_request_services() as $service ) { // each chosen service
+	foreach ( directoryweb_request_services() as $service ) { // each chosen service
 		$tq[] = array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( $service ) );
 	}
 	if ( $tq ) {
@@ -219,7 +219,7 @@ function aw_directory_query_vars( $v ) {
  *
  * @return bool
  */
-function aw_is_directory_view() {
+function directoryweb_is_directory_view() {
 	return function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type();
 }
 
@@ -231,9 +231,9 @@ function aw_is_directory_view() {
  * "Animal Shelter Contact Numbers in Gandhinagar" where its listings have a number (filter directoryweb_place_h1, answered by RankWeb; owner, 5 Nov 2026),
  * else "Gaushala in Ernakulam" or the type.
  */
-function aw_directory_h1() {
-	$city  = aw_current_place();
-	$tname = aw_current_type_name();
+function directoryweb_directory_h1() {
+	$city  = directoryweb_current_place();
+	$tname = directoryweb_current_type_name();
 	if ( ! $city && ! $tname ) {
 		return get_the_title( get_queried_object_id() );
 	}
@@ -245,7 +245,7 @@ function aw_directory_h1() {
 		return $city ? $tname . ' in ' . $city->name : $tname;
 	}
 	if ( apply_filters( 'directoryweb_place_has_helpline', false, $city ) ) { // RankWeb answers
-		// Same fallback as the page-1 title (aw_seo_fit, 60): "Animal Helpline Numbers in …" where the NGO form is too long.
+		// Same fallback as the page-1 title (rankweb_seo_fit, 60): "Animal Helpline Numbers in …" where the NGO form is too long.
 		$ngo = $city->parent ? 'Animal NGOs and Helpline Numbers in ' : 'Animal Welfare NGOs and Helpline Numbers in ';
 		return ( mb_strlen( $ngo . $city->name ) <= 60 ? $ngo : 'Animal Helpline Numbers in ' ) . $city->name;
 	}
@@ -256,10 +256,10 @@ function aw_directory_h1() {
 add_filter(
 	'render_block_core/post-title',
 	function ( $html, $block ) {
-		if ( 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! aw_is_directory_view() || ( ! aw_current_place() && ! aw_current_type_name() ) ) {
+		if ( 1 !== (int) ( $block['attrs']['level'] ?? 2 ) || ! directoryweb_is_directory_view() || ( ! directoryweb_current_place() && ! directoryweb_current_type_name() ) ) {
 			return $html;
 		}
-		return preg_replace( '#(<h1[^>]*>)(.*?)(</h1>)#s', '$1' . esc_html( aw_directory_h1() ) . '$3', $html, 1 );
+		return preg_replace( '#(<h1[^>]*>)(.*?)(</h1>)#s', '$1' . esc_html( directoryweb_directory_h1() ) . '$3', $html, 1 );
 	},
 	5,
 	2
@@ -267,11 +267,11 @@ add_filter(
 add_filter(
 	'render_block_core/paragraph',
 	function ( $html ) {
-		if ( ! aw_is_directory_view() || false === strpos( $html, 'kit-section-desc' ) || ! aw_current_place() ) {
+		if ( ! directoryweb_is_directory_view() || false === strpos( $html, 'kit-section-desc' ) || ! directoryweb_current_place() ) {
 			return $html;
 		}
-		$html = preg_replace( '#(<p[^>]*kit-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( aw_directory_intro() ) . '$3', $html, 1 );
-		return function_exists( 'aw_place_intro_html' ) ? $html . aw_place_intro_html() : $html; // the place's own intro, when it has one (place-intros.php)
+		$html = preg_replace( '#(<p[^>]*kit-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( directoryweb_directory_intro() ) . '$3', $html, 1 );
+		return function_exists( 'directoryweb_place_intro_html' ) ? $html . directoryweb_place_intro_html() : $html; // the place's own intro, when it has one (place-intros.php)
 	}
 );
 
@@ -280,11 +280,11 @@ add_filter(
 add_filter(
 	'term_link',
 	function ( $url, $term, $tax ) {
-		if ( 'post_tag' !== $tax || ! is_singular( 'aw_listing' ) || ! in_array( $term->slug, directoryweb_listing_type_slugs(), true ) || ! function_exists( 'aw_item_place' ) ) {
+		if ( 'post_tag' !== $tax || ! is_singular( 'aw_listing' ) || ! in_array( $term->slug, directoryweb_listing_type_slugs(), true ) || ! function_exists( 'directoryweb_item_place' ) ) {
 			return $url;
 		}
-		$place = aw_item_place( get_queried_object_id() );
-		return ( $place && 'district' === $place->kind ) ? aw_directory_url( $place->slug, $term->slug ) : $url;
+		$place = directoryweb_item_place( get_queried_object_id() );
+		return ( $place && 'district' === $place->kind ) ? directoryweb_directory_url( $place->slug, $term->slug ) : $url;
 	},
 	10,
 	3
@@ -296,12 +296,12 @@ add_filter(
  * @param string $title Default title.
  * @return string
  */
-function aw_directory_title( $title ) {
-	if ( ! aw_is_directory_view() ) {
+function directoryweb_directory_title( $title ) {
+	if ( ! directoryweb_is_directory_view() ) {
 		return $title;
 	}
-	$city  = aw_current_place();
-	$tname = aw_current_type_name();
+	$city  = directoryweb_current_place();
+	$tname = directoryweb_current_type_name();
 
 	if ( $city && $tname ) {
 		/* translators: 1: listing type, 2: city. */
@@ -316,9 +316,9 @@ function aw_directory_title( $title ) {
 	}
 	return $title;
 }
-add_filter( 'get_the_archive_title', 'aw_directory_title', 20 );
+add_filter( 'get_the_archive_title', 'directoryweb_directory_title', 20 );
 
-// The document <title> of these views is set in aw-seo-extras (titles.php), from aw_directory_title().
+// The document <title> of these views is set in aw-seo-extras (titles.php), from directoryweb_directory_title().
 
 /**
  * The Directory's own page (/directory/): Animal Writes Core's hub address while Core is active.
@@ -336,8 +336,8 @@ function directoryweb_hub_url(): string {
  * @param string $type_slug Optional listing type slug (district pages only; a state gets ?tag=).
  * @return string
  */
-function aw_directory_url( $city_slug, $type_slug = '' ) {
-	$place = aw_dir_place( sanitize_title( $city_slug ) );
+function directoryweb_directory_url( $city_slug, $type_slug = '' ) {
+	$place = directoryweb_dir_place( sanitize_title( $city_slug ) );
 	$type  = sanitize_title( $type_slug );
 	if ( ! $place ) {
 		return home_url( 'directory/' );
@@ -346,11 +346,11 @@ function aw_directory_url( $city_slug, $type_slug = '' ) {
 		$url = home_url( 'directory/' . $place->slug . '/' );
 		return $type ? add_query_arg( 'tag', $type, $url ) : $url; // no state × type pages
 	}
-	$state = aw_place_by_id( $place->parent );
+	$state = directoryweb_place_by_id( $place->parent );
 	return home_url( 'directory/' . $state->slug . '/' . $place->slug . '/' . ( $type ? $type . '/' : '' ) );
 }
 
-/* ---------- Search and filters: [aw_directory_filter] ---------- */
+/* ---------- Search and filters: [directoryweb_directory_filter] ---------- */
 
 /**
  * Turn the filter form (state, district, type) into the clean directory URL, keeping q and verified.
@@ -358,7 +358,7 @@ function aw_directory_url( $city_slug, $type_slug = '' ) {
 add_action(
 	'template_redirect',
 	function () {
-		if ( ! aw_is_directory_view() ) {
+		if ( ! directoryweb_is_directory_view() ) {
 			return;
 		}
 		$g = wp_unslash( $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -372,11 +372,11 @@ add_action(
 		// the PIN, the district of the listings that store it (or the nearest PIN prefix) is used.
 		$pin = preg_replace( '/\s/', '', (string) ( $g['q'] ?? '' ) );
 		if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
-			$r = aw_pin_lookup( $pin );
+			$r = directoryweb_pin_lookup( $pin );
 			if ( ! is_array( $r ) || empty( $r['district_slug'] ) ) {
-				$near = aw_pin_nearest_district( $pin );
+				$near = directoryweb_pin_nearest_district( $pin );
 				if ( $near ) {
-					$r = array( 'state_slug' => aw_place_parent_state( $near )->slug, 'district_slug' => $near->slug );
+					$r = array( 'state_slug' => directoryweb_place_parent_state( $near )->slug, 'district_slug' => $near->slug );
 				}
 			}
 			if ( is_array( $r ) ) {
@@ -387,15 +387,15 @@ add_action(
 			}
 		} elseif ( '' === sanitize_title( $g['state'] ?? '' ) && '' === sanitize_title( $g['district'] ?? '' ) ) {
 			// A name typed another way ("bluecross", "blue-cross") is searched as the name the listings carry.
-			$alias = aw_search_name_alias( (string) ( $g['q'] ?? '' ) );
+			$alias = directoryweb_search_name_alias( (string) ( $g['q'] ?? '' ) );
 			if ( '' !== $alias ) {
 				$g['q']         = $alias;
 				$g['aw_filter'] = 1;
 			}
 			// A district, state or known city name in the search box ("Jhansi", "Kerala", "Kochi") opens that place's list.
-			$place = aw_search_place( (string) ( $g['q'] ?? '' ) );
+			$place = directoryweb_search_place( (string) ( $g['q'] ?? '' ) );
 			if ( $place ) {
-				$g['state']     = 'district' === $place->kind ? aw_place_parent_state( $place )->slug : $place->slug;
+				$g['state']     = 'district' === $place->kind ? directoryweb_place_parent_state( $place )->slug : $place->slug;
 				$g['district']  = 'district' === $place->kind ? $place->slug : '';
 				$g['q']         = '';
 				$g['aw_filter'] = 1;
@@ -406,9 +406,9 @@ add_action(
 		}
 		$city = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
 		$tags = array_values( array_filter( array_map( 'sanitize_title', (array) ( $g['tag'] ?? array() ) ) ) );
-		$type = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ? array_filter( $tags, 'aw_listing_type_ok' ) : array( '' ) );
+		$type = (string) current( array_filter( $tags, 'directoryweb_listing_type_ok' ) ? array_filter( $tags, 'directoryweb_listing_type_ok' ) : array( '' ) );
 		$more = array_values( array_diff( $tags, array( $type ) ) ); // services
-		$base = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, directoryweb_hub_url() ) : directoryweb_hub_url() );
+		$base = $city ? directoryweb_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, directoryweb_hub_url() ) : directoryweb_hub_url() );
 		if ( $more ) {
 			$have = (string) wp_parse_url( $base, PHP_URL_QUERY );
 			parse_str( $have, $hq );
@@ -443,7 +443,7 @@ const AW_SEARCH_NAME_ALIASES = array(
  * @param string $text The search box text.
  * @return string
  */
-function aw_search_name_alias( $text ) {
+function directoryweb_search_name_alias( $text ) {
 	$key = preg_replace( '/[^a-z0-9]/', '', strtolower( (string) $text ) );
 	if ( '' === $key || empty( AW_SEARCH_NAME_ALIASES[ $key ] ) ) {
 		return '';
@@ -460,20 +460,20 @@ function aw_search_name_alias( $text ) {
  * @param string $text The search box text.
  * @return object|null
  */
-function aw_search_place( $text ) {
+function directoryweb_search_place( $text ) {
 	$text = trim( (string) $text );
 	if ( '' === $text || mb_strlen( $text ) < 3 || preg_match( '/\d/', $text ) ) {
 		return null;
 	}
-	$key = aw_place_key( $text );
+	$key = directoryweb_place_key( $text );
 	if ( defined( 'AW_PLACE_DETECT_SKIP' ) && in_array( $key, AW_PLACE_DETECT_SKIP, true ) ) {
 		return null;
 	}
-	$d = aw_place_district_by_name( $text );
+	$d = directoryweb_place_district_by_name( $text );
 	if ( ! $d && defined( 'AW_PLACE_DETECT_CITIES' ) && isset( AW_PLACE_DETECT_CITIES[ $key ] ) ) {
-		$d = aw_place_district_by_name( AW_PLACE_DETECT_CITIES[ $key ] );
+		$d = directoryweb_place_district_by_name( AW_PLACE_DETECT_CITIES[ $key ] );
 	}
-	return $d ? $d : aw_place_state_by_name( $text );
+	return $d ? $d : directoryweb_place_state_by_name( $text );
 }
 
 /**
@@ -483,7 +483,7 @@ function aw_search_place( $text ) {
  * @param string $pin 6-digit PIN code.
  * @return object|null
  */
-function aw_pin_nearest_district( $pin ) {
+function directoryweb_pin_nearest_district( $pin ) {
 	global $wpdb;
 	$pin = preg_replace( '/\D/', '', (string) $pin );
 	if ( 6 !== strlen( $pin ) ) {
@@ -496,7 +496,7 @@ function aw_pin_nearest_district( $pin ) {
 				$like
 			)
 		);
-		$d    = $code ? aw_place_district( (int) $code ) : null;
+		$d    = $code ? directoryweb_place_district( (int) $code ) : null;
 		if ( $d ) {
 			return $d;
 		}
@@ -505,14 +505,14 @@ function aw_pin_nearest_district( $pin ) {
 }
 
 /** Published listings shown to visitors (preview-only ones, such as the sample listing, left out). */
-function aw_listing_public_count() {
+function directoryweb_listing_public_count() {
 	$hidden = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
 	$less   = $hidden ? count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'post__in' => $hidden, 'fields' => 'ids', 'numberposts' => -1 ) ) ) : 0;
 	return max( 0, (int) wp_count_posts( 'aw_listing' )->publish - $less );
 }
 
 /** Number of verified listings (cached). "Verified only" appears once there is at least one. */
-function aw_verified_count() {
+function directoryweb_verified_count() {
 	$n = get_transient( 'aw_verified_count' );
 	if ( false === $n ) {
 		$n = count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_verified', 'meta_value' => '1', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array() ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
@@ -529,8 +529,8 @@ function aw_verified_count() {
  * @return string
  */
 /** Services choice: only services that at least 3 listings offer (the rest would lead to near-empty lists). */
-function aw_directory_service_field( $field ) {
-	$cur      = (string) current( aw_request_services() ? aw_request_services() : array( '' ) );
+function directoryweb_directory_service_field( $field ) {
+	$cur      = (string) current( directoryweb_request_services() ? directoryweb_request_services() : array( '' ) );
 	$services = get_transient( 'directoryweb_facet_services' );
 	if ( false === $services || ! is_array( $services ) ) {
 		$services = array();
@@ -568,7 +568,7 @@ function aw_directory_service_field( $field ) {
  * }
  * @return array{q: string, state: string} The two fields' HTML.
  */
-function aw_dir_search_controls( $args ) {
+function directoryweb_dir_search_controls( $args ) {
 	$a     = wp_parse_args(
 		$args,
 		array(
@@ -585,8 +585,8 @@ function aw_dir_search_controls( $args ) {
 	$label = fn( $id, $text ) => '<label' . ( $a['show_labels'] ? '' : ' class="screen-reader-text"' ) . ' for="' . esc_attr( $id ) . '">' . esc_html( $text ) . '</label>';
 	$field = fn( $cls, $id, $text, $control ) => '<div class="kit-field ' . esc_attr( $a['cls'] . $cls ) . '">' . $label( $id, $text ) . '<div class="kit-field-control">' . $control . '</div></div>';
 	$opts  = '<option value="">All states and UTs</option>';
-	foreach ( (array) aw_place_states() as $st ) {
-		if ( aw_place_count( $st ) ) { // states and UTs with no listings are left out, so the list and the counts match
+	foreach ( (array) directoryweb_place_states() as $st ) {
+		if ( directoryweb_place_count( $st ) ) { // states and UTs with no listings are left out, so the list and the counts match
 			$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( $a['state'], $st->slug, false ) . '>' . esc_html( $st->name ) . '</option>';
 		}
 	}
@@ -598,13 +598,13 @@ function aw_dir_search_controls( $args ) {
 	);
 }
 
-function aw_directory_filter( $type = '' ) {
-	$cur_city = aw_current_place();
+function directoryweb_directory_filter( $type = '' ) {
+	$cur_city = directoryweb_current_place();
 	$cur_type = '' !== $type ? (string) $type : (string) get_query_var( 'aw_dir_type' ); // $type: an organisation type's tag page (sections.php)
 	if ( '' === $cur_type ) {
-		$cur_type = aw_request_type();
+		$cur_type = directoryweb_request_type();
 	}
-	$state    = $cur_city ? aw_place_parent_state( $cur_city ) : null;
+	$state    = $cur_city ? directoryweb_place_parent_state( $cur_city ) : null;
 	$district = $cur_city && $cur_city->parent ? $cur_city : null;
 	$text     = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$verified = ! empty( $_GET['verified'] ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -613,11 +613,11 @@ function aw_directory_filter( $type = '' ) {
 	// States and districts with listings, with their counts (cached transient, places.php).
 	$all = get_transient( 'directoryweb_facet_districts' );
 	if ( false === $all || ! is_array( $all ) ) {
-		$states = array_filter( aw_place_states(), 'aw_place_count' );
+		$states = array_filter( directoryweb_place_states(), 'directoryweb_place_count' );
 		$all    = array();
 		foreach ( $states as $st ) {
-			foreach ( aw_place_districts( $st->code ) as $k ) {
-				$n = aw_place_count( $k );
+			foreach ( directoryweb_place_districts( $st->code ) as $k ) {
+				$n = directoryweb_place_count( $k );
 				if ( $n ) {
 					$all[ $st->term_id ][] = array( $k->slug, $k->name, $n );
 				}
@@ -625,7 +625,7 @@ function aw_directory_filter( $type = '' ) {
 		}
 		set_transient( 'directoryweb_facet_districts', $all, 12 * HOUR_IN_SECONDS );
 	}
-	$states = array_filter( aw_place_states(), 'aw_place_count' );
+	$states = array_filter( directoryweb_place_states(), 'directoryweb_place_count' );
 	$d_opts = '<option value="" data-none="Choose a state first" data-all="All districts">' . ( $state ? 'All districts' : 'Choose a state first' ) . '</option>';
 	foreach ( $states as $st ) {
 		$kids = $all[ $st->term_id ] ?? array();
@@ -655,16 +655,16 @@ function aw_directory_filter( $type = '' ) {
 		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
 	}
 	$field    = fn( $id, $label, $control, $cls = '' ) => '<div class="kit-field aw-dir-' . $cls . '"><label for="' . $id . '">' . $label . '</label><div class="kit-field-control">' . $control . '</div></div>';
-	$shared   = aw_dir_search_controls(
+	$shared   = directoryweb_dir_search_controls(
 		array(
 			'q'     => $text,
 			'state' => $state ? $state->slug : '',
 		)
 	);
-	$service  = aw_directory_service_field( $field );
-	$n_active = count( array_filter( array( $district ? $district : $state, $cur_type, $service && aw_request_services(), $verified, $gov ) ) );
-	$checks   = ( aw_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
-		. ( function_exists( 'aw_gov_verified_count' ) && aw_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
+	$service  = directoryweb_directory_service_field( $field );
+	$n_active = count( array_filter( array( $district ? $district : $state, $cur_type, $service && directoryweb_request_services(), $verified, $gov ) ) );
+	$checks   = ( directoryweb_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="verified" value="1"' . checked( $verified, true, false ) . '> Claimed only</label>' : '' )
+		. ( function_exists( 'directoryweb_gov_verified_count' ) && directoryweb_gov_verified_count() ? '<label class="kit-checkbox aw-dir-check"><input type="checkbox" name="gov" value="1"' . checked( $gov, true, false ) . '> Verified only</label>' : '' );
 
 	// Active filter chips (WPBDP / modern directory faceted search standard)
 	$active_chips = array();
@@ -688,7 +688,7 @@ function aw_directory_filter( $type = '' ) {
 	}
 	if ( '' !== $cur_type ) {
 		$active_chips[] = array(
-			'label' => 'Type: ' . aw_listing_type_name( $cur_type ),
+			'label' => 'Type: ' . directoryweb_listing_type_name( $cur_type ),
 			'url'   => remove_query_arg( array( 'tag', 'aw_type_slug', 'aw_dir_type' ) ),
 		);
 	}
@@ -744,13 +744,13 @@ function aw_directory_filter( $type = '' ) {
 		. '</form>'
 		. $chips_html;
 }
-add_shortcode( 'aw_directory_filter', 'aw_directory_filter' );
+add_shortcode( 'directoryweb_directory_filter', 'directoryweb_directory_filter' );
 
 
 /* ---------- Contact score (sort "Most details first") ---------- */
 
 /** How many ways to reach a listing: phone, WhatsApp, email, website. */
-function aw_contact_score( $id ) {
+function directoryweb_contact_score( $id ) {
 	$n      = 0;
 	$phones = function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $id ) : array(); // the Phone numbers list
 	$n     += $phones ? 1 : 0;
@@ -761,50 +761,50 @@ function aw_contact_score( $id ) {
 	return $n;
 }
 /** Keep the score current when a contact field changes. */
-function aw_contact_score_sync( $mid, $id, $key ) {
+function directoryweb_contact_score_sync( $mid, $id, $key ) {
 	if ( ( in_array( $key, array( 'aw_email', 'aw_website', 'aw_phones' ), true ) || 0 === strpos( (string) $key, 'aw_phones_' ) ) && 'aw_listing' === get_post_type( $id ) ) {
-		update_post_meta( $id, 'aw_contact_score', aw_contact_score( $id ) );
+		update_post_meta( $id, 'directoryweb_contact_score', directoryweb_contact_score( $id ) );
 	}
 }
-add_action( 'updated_post_meta', 'aw_contact_score_sync', 10, 3 );
-add_action( 'added_post_meta', 'aw_contact_score_sync', 10, 3 );
+add_action( 'updated_post_meta', 'directoryweb_contact_score_sync', 10, 3 );
+add_action( 'added_post_meta', 'directoryweb_contact_score_sync', 10, 3 );
 // The one-time fill of every listing's contact score ran and was removed (audit item 16, flag confirmed on live 25 Oct 2026; see git history).
 
 /**
- * [aw_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
+ * [directoryweb_browse_states] Every state/UT with at least one listing, A–Z, with its count (Directory hub and home).
  */
-function aw_browse_states() {
-	if ( aw_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['tag'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+function directoryweb_browse_states() {
+	if ( directoryweb_is_directory_view() && ( get_query_var( 'aw_place' ) || get_query_var( 'aw_dir_type' ) || ! empty( $_GET['tag'] ) || ! empty( $_GET['q'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		return ''; // the hub and the home page only
 	}
 	directoryweb_use_style( 'aw-single' ); // aw-browse-states
 	$items = '';
-	foreach ( aw_place_states() as $st ) {
-		$n = aw_state_count( $st );
+	foreach ( directoryweb_place_states() as $st ) {
+		$n = directoryweb_state_count( $st );
 		if ( $n ) {
-			$items .= '<li><a href="' . esc_url( aw_directory_url( $st->slug ) ) . '"><span>' . esc_html( $st->name ) . '</span>' . directoryweb_count( $n ) . '</a></li>';
+			$items .= '<li><a href="' . esc_url( directoryweb_directory_url( $st->slug ) ) . '"><span>' . esc_html( $st->name ) . '</span>' . directoryweb_count( $n ) . '</a></li>';
 		}
 	}
 	return $items ? '<nav class="aw-browse-states aw-browse-states--all" aria-labelledby="aw-browse-states-h"><h2 id="aw-browse-states-h">Browse by state</h2><ul>' . $items . '</ul></nav>' : '';
 }
 
 /** Listings in a state, its districts included (stored counts, places.php). */
-function aw_state_count( $state ) {
-	return aw_place_count( $state );
+function directoryweb_state_count( $state ) {
+	return directoryweb_place_count( $state );
 }
 
 
 /**
  * The Directory's intro line for the current view: hub, "… in {State}." or "… in {District}, {State}." (copy of 8 Oct 2026).
- * On place pages the meta and share description come from aw_seo_dir_description() (RankWeb), not from this line.
+ * On place pages the meta and share description come from rankweb_seo_dir_description() (RankWeb), not from this line.
  */
-function aw_directory_intro() {
-	$city = aw_current_place();
+function directoryweb_directory_intro() {
+	$city = directoryweb_current_place();
 	if ( ! $city ) {
 		return 'Animal welfare organisations, Gaushalas and government vets across India.';
 	}
 	if ( $city->parent ) {
-		$state = aw_place_parent_state( $city );
+		$state = directoryweb_place_parent_state( $city );
 		return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %1$s, %2$s, with phone numbers where they have one.', $city->name, $state->name );
 	}
 	return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %s, with phone numbers where they have one.', $city->name );

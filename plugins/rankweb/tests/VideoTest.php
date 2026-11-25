@@ -32,7 +32,7 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 			'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
 			'https://www.youtube.com/watch?list=PL1&v=dQw4w9WgXcQ&t=3',
 		) as $url ) {
-			$v = AW_Video::parse_url( $url );
+			$v = RankWeb_Video::parse_url( $url );
 			$this->assertSame( 'youtube', $v['provider'], $url );
 			$this->assertSame( 'dQw4w9WgXcQ', $v['id'], $url );
 			$this->assertSame( 'https://www.youtube.com/embed/dQw4w9WgXcQ', $v['embed'], $url );
@@ -41,7 +41,7 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 
 	public function testParsesVimeoWatchAndPlayerUrls(): void {
 		foreach ( array( 'https://vimeo.com/123456789', 'https://player.vimeo.com/video/123456789' ) as $url ) {
-			$v = AW_Video::parse_url( $url );
+			$v = RankWeb_Video::parse_url( $url );
 			$this->assertSame( 'vimeo', $v['provider'], $url );
 			$this->assertSame( '123456789', $v['id'], $url );
 			$this->assertSame( 'https://player.vimeo.com/video/123456789', $v['embed'], $url );
@@ -49,9 +49,9 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testNonVideoUrlsAreNull(): void {
-		$this->assertSame( null, AW_Video::parse_url( 'https://example.org/watch?v=nope' ) );
-		$this->assertSame( null, AW_Video::parse_url( 'https://vimeo.com/channels/staffpicks' ) );
-		$this->assertSame( null, AW_Video::parse_url( 'https://youtube.com/@channel' ) );
+		$this->assertSame( null, RankWeb_Video::parse_url( 'https://example.org/watch?v=nope' ) );
+		$this->assertSame( null, RankWeb_Video::parse_url( 'https://vimeo.com/channels/staffpicks' ) );
+		$this->assertSame( null, RankWeb_Video::parse_url( 'https://youtube.com/@channel' ) );
 	}
 
 	public function testFindsVideosInAnEmbedBlockAndABareUrlWithoutRepeats(): void {
@@ -59,7 +59,7 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 			. '<figure class="wp-block-embed"><iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0"></iframe></figure>'
 			. '<p>https://vimeo.com/123456789</p>'
 			. '<p>and again https://youtu.be/dQw4w9WgXcQ</p>';
-		$found = AW_Video::find( $html );
+		$found = RankWeb_Video::find( $html );
 		$this->assertCount( 2, $found );
 		$this->assertSame( 'youtube', $found[0]['provider'] );
 		$this->assertSame( 'dQw4w9WgXcQ', $found[0]['id'] );
@@ -67,29 +67,29 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testFindsNothingInPlainContent(): void {
-		$this->assertSame( array(), AW_Video::find( '<p>No videos here, just a link to https://example.org/.</p>' ) );
-		$this->assertSame( array(), AW_Video::find( '' ) );
+		$this->assertSame( array(), RankWeb_Video::find( '<p>No videos here, just a link to https://example.org/.</p>' ) );
+		$this->assertSame( array(), RankWeb_Video::find( '' ) );
 	}
 
 	public function testDecodesEntityEncodedUrls(): void {
-		$found = AW_Video::find( '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&amp;t=10">x</a>' );
+		$found = RankWeb_Video::find( '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&amp;t=10">x</a>' );
 		$this->assertCount( 1, $found );
 		$this->assertSame( 'dQw4w9WgXcQ', $found[0]['id'] );
 	}
 
 	public function testDurationIsIso8601(): void {
-		$this->assertSame( 'PT1M30S', AW_Video::duration( 90 ) );
-		$this->assertSame( 'PT2H3M4S', AW_Video::duration( 7384 ) );
-		$this->assertSame( 'PT45S', AW_Video::duration( 45 ) );
-		$this->assertSame( 'PT1H', AW_Video::duration( 3600 ) );
-		$this->assertSame( '', AW_Video::duration( 0 ) );
-		$this->assertSame( '', AW_Video::duration( -5 ) );
+		$this->assertSame( 'PT1M30S', RankWeb_Video::duration( 90 ) );
+		$this->assertSame( 'PT2H3M4S', RankWeb_Video::duration( 7384 ) );
+		$this->assertSame( 'PT45S', RankWeb_Video::duration( 45 ) );
+		$this->assertSame( 'PT1H', RankWeb_Video::duration( 3600 ) );
+		$this->assertSame( '', RankWeb_Video::duration( 0 ) );
+		$this->assertSame( '', RankWeb_Video::duration( -5 ) );
 	}
 
 	public function testNodeIsNullUntilAVideoHasBeenFetched(): void {
 		$this->assertSame(
 			null,
-			AW_Video::node(
+			RankWeb_Video::node(
 				array(
 					'provider' => 'youtube',
 					'id'       => 'x',
@@ -101,7 +101,7 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testNodeUsesTheFallbackDescriptionWhenTheVideoHasNone(): void {
-		$node = AW_Video::node(
+		$node = RankWeb_Video::node(
 			array(
 				'name'  => 'A rescue story',
 				'embed' => 'https://www.youtube.com/embed/x',
@@ -118,7 +118,7 @@ final class VideoTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testNodeKeepsEveryFetchedField(): void {
-		$node = AW_Video::node(
+		$node = RankWeb_Video::node(
 			array(
 				'name'        => 'Vimeo film',
 				'description' => 'Its own description.',

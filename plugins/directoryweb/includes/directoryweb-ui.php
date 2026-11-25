@@ -174,7 +174,7 @@ add_action(
 			$tabs[] = array(
 				'slug'    => 'place-intros',
 				'label'   => __( 'Place intros', 'directoryweb' ),
-				'url'     => aw_place_intros_url(), // a core screen (place-intros.php)
+				'url'     => directoryweb_place_intros_url(), // a core screen (place-intros.php)
 				'current' => false,
 			);
 		}

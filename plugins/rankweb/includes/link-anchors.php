@@ -2,14 +2,14 @@
 /**
  * Internal links, phase 3: the anchor mix (docs/rankweb-internal-links.md).
  *
- * - Every link recorded in {prefix}aw_links gets an anchor type (AW_Anchor, class-aw-anchor.php): exact, partial,
- *   branded, generic, naked, image, long_tail or other. The type is written with the row (aw_link_store()).
+ * - Every link recorded in {prefix}aw_links gets an anchor type (RankWeb_Anchor, class-aw-anchor.php): exact, partial,
+ *   branded, generic, naked, image, long_tail or other. The type is written with the row (rankweb_link_store()).
  * - For each target the share of each type is worked out from those rows by the audit (link-audit.php) and kept in the
  *   transient aw_seo_anchor_mix. RankWeb → Internal links → Anchor mix lists the targets with their shares and warns when
  *   exact match goes over its limit (default 20%) or any other type goes over its limit (default 60%). A target with
  *   fewer links than the minimum (default 5) gets no warning.
  * - The auto-linker reads that snapshot (one transient read, no query per keyword): before it links a keyword it asks
- *   aw_anchor_ok(), and a keyword that would put its target over a limit is skipped, so the target is linked by
+ *   rankweb_anchor_ok(), and a keyword that would put its target over a limit is skipped, so the target is linked by
  *   another of its keywords, or not at all in that item. The snapshot is the last audit's: it changes once a day, and a
  *   page already cached keeps its links until it is built again.
  * - REST: GET rankweb/v1/links/anchors (warn, page, per_page), manage_rankweb.
@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/class-aw-anchor.php';
 
-/** The limits as AW_Anchor::mix() reads them. */
-function aw_anchor_limits(): array {
+/** The limits as RankWeb_Anchor::mix() reads them. */
+function rankweb_anchor_limits(): array {
 	return array(
 		'exact_max' => max( 0, (int) AW_LINK_ANCHOR_EXACT_MAX ),
 		'type_max'  => max( 0, (int) AW_LINK_ANCHOR_TYPE_MAX ),
@@ -33,17 +33,17 @@ function aw_anchor_limits(): array {
 }
 
 /** The settings that change how an anchor is typed, as one string (part of an item's cache key). */
-function aw_anchor_settings_key(): string {
+function rankweb_anchor_settings_key(): string {
 	return md5( (string) wp_json_encode( array( (array) AW_LINK_BRAND, (array) AW_LINK_GENERIC, (int) AW_LINK_LONG_WORDS ) ) );
 }
 
 /** The parts of the sorter's context that are the same for every target (brand names, generic anchors, long). */
-function aw_anchor_base_ctx(): array {
+function rankweb_anchor_base_ctx(): array {
 	static $memo = null;
 	if ( null === $memo ) {
 		$memo = array(
-			'brand'      => AW_Anchor::normalize_list( (array) AW_LINK_BRAND ),
-			'generic'    => AW_Anchor::normalize_list( (array) AW_LINK_GENERIC ),
+			'brand'      => RankWeb_Anchor::normalize_list( (array) AW_LINK_BRAND ),
+			'generic'    => RankWeb_Anchor::normalize_list( (array) AW_LINK_GENERIC ),
 			'long_words' => max( 1, (int) AW_LINK_LONG_WORDS ),
 		);
 	}
@@ -57,17 +57,17 @@ function aw_anchor_base_ctx(): array {
  * @param int    $target   Target item ID, 0 when the address is no item.
  * @param bool   $is_image The link holds an image and no text.
  */
-function aw_anchor_type( string $anchor, int $target, bool $is_image = false ): string {
+function rankweb_anchor_type( string $anchor, int $target, bool $is_image = false ): string {
 	static $kws = array();
 	if ( $target > 0 && ! isset( $kws[ $target ] ) ) {
-		$kws[ $target ] = array_values( array_filter( array_map( array( 'AW_Linker', 'normalize' ), aw_link_keywords( $target ) ), 'strlen' ) );
+		$kws[ $target ] = array_values( array_filter( array_map( array( 'RankWeb_Linker', 'normalize' ), rankweb_link_keywords( $target ) ), 'strlen' ) );
 	}
-	return AW_Anchor::type(
+	return RankWeb_Anchor::type(
 		$anchor,
 		array(
 			'keywords' => $target > 0 ? $kws[ $target ] : array(),
 			'is_image' => $is_image,
-		) + aw_anchor_base_ctx()
+		) + rankweb_anchor_base_ctx()
 	);
 }
 
@@ -76,10 +76,10 @@ function aw_anchor_type( string $anchor, int $target, bool $is_image = false ): 
  *
  * @return array Target ID => array( type => links ).
  */
-function aw_anchor_counts(): array {
+function rankweb_anchor_counts(): array {
 	global $wpdb;
 	$out  = array();
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT target_id, anchor_type, COUNT(*) AS n FROM %i WHERE target_id > 0 AND anchor_type <> '' GROUP BY target_id, anchor_type", aw_link_table( 'links' ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, once per audit.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT target_id, anchor_type, COUNT(*) AS n FROM %i WHERE target_id > 0 AND anchor_type <> '' GROUP BY target_id, anchor_type", rankweb_link_table( 'links' ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, once per audit.
 	foreach ( $rows as $r ) {
 		$out[ (int) $r['target_id'] ][ (string) $r['anchor_type'] ] = (int) $r['n'];
 	}
@@ -91,7 +91,7 @@ function aw_anchor_counts(): array {
  *
  * @param bool $build Build it when it is missing.
  */
-function aw_anchor_snapshot( bool $build = false ): array {
+function rankweb_anchor_snapshot( bool $build = false ): array {
 	static $memo = null;
 	if ( null !== $memo ) {
 		return $memo;
@@ -101,7 +101,7 @@ function aw_anchor_snapshot( bool $build = false ): array {
 		if ( ! $build ) {
 			return array(); // not remembered: nothing is refused (and not kept, so a build later in the request is read)
 		}
-		$hit = aw_anchor_counts();
+		$hit = rankweb_anchor_counts();
 		set_transient( 'aw_seo_anchor_mix', $hit, 2 * DAY_IN_SECONDS );
 	}
 	$memo = $hit;
@@ -109,13 +109,13 @@ function aw_anchor_snapshot( bool $build = false ): array {
 }
 
 /** Build the snapshot again (the audit) and count the targets over a limit. */
-function aw_anchor_rebuild(): array {
-	$counts = aw_anchor_counts();
+function rankweb_anchor_rebuild(): array {
+	$counts = rankweb_anchor_counts();
 	set_transient( 'aw_seo_anchor_mix', $counts, 2 * DAY_IN_SECONDS );
-	$limits = aw_anchor_limits();
+	$limits = rankweb_anchor_limits();
 	$warn   = 0;
 	foreach ( $counts as $c ) {
-		if ( AW_Anchor::mix( $c, $limits )['warn'] ) {
+		if ( RankWeb_Anchor::mix( $c, $limits )['warn'] ) {
 			++$warn;
 		}
 	}
@@ -131,13 +131,13 @@ function aw_anchor_rebuild(): array {
  * @param int    $target Target item ID.
  * @param string $kw     Keyword, normalised (the anchor).
  */
-function aw_anchor_ok( int $target, string $kw ): bool {
-	$snap = aw_anchor_snapshot();
-	return ! $snap || AW_Anchor::room( (array) ( $snap[ $target ] ?? array() ), aw_anchor_type( $kw, $target ), aw_anchor_limits() );
+function rankweb_anchor_ok( int $target, string $kw ): bool {
+	$snap = rankweb_anchor_snapshot();
+	return ! $snap || RankWeb_Anchor::room( (array) ( $snap[ $target ] ?? array() ), rankweb_anchor_type( $kw, $target ), rankweb_anchor_limits() );
 }
 
 /** The types and their texts. */
-function aw_anchor_labels(): array {
+function rankweb_anchor_labels(): array {
 	return array(
 		'exact'     => __( 'Exact', 'rankweb' ),
 		'partial'   => __( 'Partial', 'rankweb' ),
@@ -158,11 +158,11 @@ function aw_anchor_labels(): array {
  * @param int  $per_page  Rows per page.
  * @return array items (post_id, title, url, total, pct, warn), total.
  */
-function aw_anchor_page( bool $warn_only, int $page, int $per_page ): array {
-	$limits = aw_anchor_limits();
+function rankweb_anchor_page( bool $warn_only, int $page, int $per_page ): array {
+	$limits = rankweb_anchor_limits();
 	$rows   = array();
-	foreach ( aw_anchor_snapshot( true ) as $tid => $counts ) {
-		$mix = AW_Anchor::mix( (array) $counts, $limits );
+	foreach ( rankweb_anchor_snapshot( true ) as $tid => $counts ) {
+		$mix = RankWeb_Anchor::mix( (array) $counts, $limits );
 		if ( $warn_only && ! $mix['warn'] ) {
 			continue;
 		}
@@ -216,21 +216,21 @@ add_action(
 						'maximum' => 100,
 					),
 				),
-				'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( aw_anchor_page( (bool) $req['warn'], (int) $req['page'], (int) $req['per_page'] ) + array( 'limits' => aw_anchor_limits() ) ),
+				'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_anchor_page( (bool) $req['warn'], (int) $req['page'], (int) $req['per_page'] ) + array( 'limits' => rankweb_anchor_limits() ) ),
 			)
 		);
 	}
 );
 
 /** The "Anchor mix" view of RankWeb → Internal links. */
-function aw_anchor_screen(): void {
+function rankweb_anchor_screen(): void {
 	$warn   = isset( $_GET['warn'] ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
 	$paged  = max( 1, absint( wp_unslash( $_GET['paged'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
 	$per    = 25;
-	$labels = aw_anchor_labels();
-	$limits = aw_anchor_limits();
+	$labels = rankweb_anchor_labels();
+	$limits = rankweb_anchor_limits();
 	$base   = add_query_arg( 'view', 'anchors', admin_url( 'admin.php?page=aw-links' ) );
-	$data   = aw_anchor_page( $warn, $paged, $per );
+	$data   = rankweb_anchor_page( $warn, $paged, $per );
 	/* translators: 1: limit for exact match in percent, 2: limit for any other type in percent, 3: fewest links. */
 	echo '<p>' . esc_html( sprintf( __( 'The share of each anchor type among the links to an item. A warning shows when exact match is over %1$s%% or another type is over %2$s%% (only for items with %3$s links or more). Change the limits under RankWeb → Settings → Internal links.', 'rankweb' ), number_format_i18n( $limits['exact_max'] ), number_format_i18n( $limits['type_max'] ), number_format_i18n( $limits['min_links'] ) ) ) . '</p>';
 	echo '<ul class="subsubsub"><li>' . ( $warn ? '<a href="' . esc_url( $base ) . '">' : '<strong>' ) . esc_html__( 'All items', 'rankweb' ) . ( $warn ? '</a>' : '</strong>' ) . ' | </li><li>' . ( $warn ? '<strong>' : '<a href="' . esc_url( add_query_arg( 'warn', '1', $base ) ) . '">' ) . esc_html__( 'With a warning', 'rankweb' ) . ( $warn ? '</strong>' : '</a>' ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput -- each part is escaped above.
@@ -258,7 +258,7 @@ function aw_anchor_screen(): void {
 		$cell['warn'] = implode( '<br>', $over );
 		$cells[]      = $cell;
 	}
-	aw_seo_extras_simple_table(
+	rankweb_seo_extras_simple_table(
 		'aw-anchor-mix',
 		$cols,
 		$cells,

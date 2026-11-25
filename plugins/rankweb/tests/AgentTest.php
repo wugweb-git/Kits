@@ -24,32 +24,32 @@ require_once dirname( __DIR__ ) . '/includes/class-aw-agent.php';
 final class AgentTest extends PHPUnit\Framework\TestCase {
 
 	public function testEveryAbilityNameIsValidAndNamespaced(): void {
-		foreach ( AW_Agent::abilities() as $a ) {
-			$this->assertTrue( AW_Agent::valid_name( $a['name'] ), $a['name'] );
-			$this->assertTrue( in_array( $a['cap'], AW_Agent::CAPS, true ), $a['cap'] );
+		foreach ( RankWeb_Agent::abilities() as $a ) {
+			$this->assertTrue( RankWeb_Agent::valid_name( $a['name'] ), $a['name'] );
+			$this->assertTrue( in_array( $a['cap'], RankWeb_Agent::CAPS, true ), $a['cap'] );
 		}
 	}
 
 	public function testValidNameRejectsBadNames(): void {
-		$this->assertFalse( AW_Agent::valid_name( 'getseo' ), 'no namespace' );
-		$this->assertFalse( AW_Agent::valid_name( 'rankweb/Get_SEO' ), 'uppercase and underscore' );
-		$this->assertFalse( AW_Agent::valid_name( 'rankweb/' ), 'empty name' );
-		$this->assertFalse( AW_Agent::valid_name( 'other/get-seo' ), 'wrong namespace' );
-		$this->assertTrue( AW_Agent::valid_name( 'rankweb/set-seo' ) );
+		$this->assertFalse( RankWeb_Agent::valid_name( 'getseo' ), 'no namespace' );
+		$this->assertFalse( RankWeb_Agent::valid_name( 'rankweb/Get_SEO' ), 'uppercase and underscore' );
+		$this->assertFalse( RankWeb_Agent::valid_name( 'rankweb/' ), 'empty name' );
+		$this->assertFalse( RankWeb_Agent::valid_name( 'other/get-seo' ), 'wrong namespace' );
+		$this->assertTrue( RankWeb_Agent::valid_name( 'rankweb/set-seo' ) );
 	}
 
 	public function testReadsAreAlwaysEnabledAndWritesAreOptIn(): void {
-		$reads = AW_Agent::enabled( false );
+		$reads = RankWeb_Agent::enabled( false );
 		$this->assertCount( 3, $reads );
 		foreach ( $reads as $a ) {
 			$this->assertFalse( $a['writes'] );
 		}
-		$all = AW_Agent::enabled( true );
+		$all = RankWeb_Agent::enabled( true );
 		$this->assertCount( 6, $all );
 	}
 
 	public function testWritableSeoKeepsOnlyKnownKeys(): void {
-		$out = AW_Agent::writable_seo(
+		$out = RankWeb_Agent::writable_seo(
 			array(
 				'title'   => '  Hello  ',
 				'unknown' => 'x',
@@ -60,20 +60,20 @@ final class AgentTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testWritableSeoLeavesOutFieldsNotGiven(): void {
-		$out = AW_Agent::writable_seo( array( 'focus_keyword' => 'stray dogs' ) );
+		$out = RankWeb_Agent::writable_seo( array( 'focus_keyword' => 'stray dogs' ) );
 		$this->assertSame( array( 'focus_keyword' => 'stray dogs' ), $out );
 		$this->assertFalse( isset( $out['title'] ) );
 	}
 
 	public function testWritableSeoNormalisesLinkKeywordsToAList(): void {
-		$out = AW_Agent::writable_seo( array( 'link_keywords' => "stray dogs\nstreet dogs|cattle, cows" ) );
+		$out = RankWeb_Agent::writable_seo( array( 'link_keywords' => "stray dogs\nstreet dogs|cattle, cows" ) );
 		$this->assertSame( array( 'stray dogs', 'street dogs', 'cattle', 'cows' ), $out['link_keywords'] );
-		$out = AW_Agent::writable_seo( array( 'link_keywords' => array( ' a ', '', 'b' ) ) );
+		$out = RankWeb_Agent::writable_seo( array( 'link_keywords' => array( ' a ', '', 'b' ) ) );
 		$this->assertSame( array( 'a', 'b' ), $out['link_keywords'] );
 	}
 
 	public function testAnEmptyStringFieldIsKeptAsAClear(): void {
-		$out = AW_Agent::writable_seo( array( 'description' => '   ' ) );
+		$out = RankWeb_Agent::writable_seo( array( 'description' => '   ' ) );
 		$this->assertSame( array( 'description' => '' ), $out, 'given but blank clears the field' );
 	}
 }

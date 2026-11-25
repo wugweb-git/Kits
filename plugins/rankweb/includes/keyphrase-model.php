@@ -22,7 +22,7 @@ const AW_SEO_KP_EVERGREEN = array( 'post', 'aw_legal', 'aw_campaign', 'page', 'a
  *
  * @param string $type Post type, or 'term'.
  */
-function aw_seo_kp_evergreen( string $type ): bool {
+function rankweb_seo_kp_evergreen( string $type ): bool {
 	return in_array( $type, AW_SEO_KP_EVERGREEN, true );
 }
 
@@ -34,15 +34,15 @@ function aw_seo_kp_evergreen( string $type ): bool {
  *                       is never in the list.
  * @return string
  */
-function aw_seo_kp_refusal( string $type, array $owners ): string {
+function rankweb_seo_kp_refusal( string $type, array $owners ): string {
 	$owners = array_values( array_filter( $owners, fn( $o ) => is_array( $o ) && ! empty( $o['id'] ) ) );
 	if ( ! $owners ) {
 		return '';
 	}
-	usort( $owners, fn( $a, $b ) => (int) aw_seo_kp_evergreen( (string) $b['type'] ) - (int) aw_seo_kp_evergreen( (string) $a['type'] ) );
+	usort( $owners, fn( $a, $b ) => (int) rankweb_seo_kp_evergreen( (string) $b['type'] ) - (int) rankweb_seo_kp_evergreen( (string) $a['type'] ) );
 	$o    = $owners[0];
 	$name = (string) $o['type'] . ' ' . (int) $o['id'];
-	if ( 'aw_news' === $type && aw_seo_kp_evergreen( (string) $o['type'] ) ) {
+	if ( 'aw_news' === $type && rankweb_seo_kp_evergreen( (string) $o['type'] ) ) {
 		return 'an evergreen page owns this keyphrase: ' . $name;
 	}
 	return 'another page owns this keyphrase: ' . $name;
@@ -55,18 +55,18 @@ function aw_seo_kp_refusal( string $type, array $owners ): string {
  * @param array $pages Each [ 'type' => post type or 'term', 'id' => int, 'date' => sortable string ].
  * @return array{keep: array, refused: array} The page kept and the pages refused, each with their reason.
  */
-function aw_seo_kp_replay( array $pages ): array {
+function rankweb_seo_kp_replay( array $pages ): array {
 	usort(
 		$pages,
 		function ( $a, $b ) {
-			$e = (int) aw_seo_kp_evergreen( (string) $b['type'] ) - (int) aw_seo_kp_evergreen( (string) $a['type'] );
+			$e = (int) rankweb_seo_kp_evergreen( (string) $b['type'] ) - (int) rankweb_seo_kp_evergreen( (string) $a['type'] );
 			return $e ? $e : strcmp( (string) $a['date'], (string) $b['date'] );
 		}
 	);
 	$keep    = array_shift( $pages );
 	$refused = array();
 	foreach ( $pages as $p ) {
-		$refused[] = $p + array( 'why' => aw_seo_kp_refusal( (string) $p['type'], array( $keep ) ) );
+		$refused[] = $p + array( 'why' => rankweb_seo_kp_refusal( (string) $p['type'], array( $keep ) ) );
 	}
 	return array(
 		'keep'    => $keep,

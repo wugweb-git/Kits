@@ -2,13 +2,13 @@
 /**
  * RankWeb → Settings (owner, 25 Oct 2026: settings per module, like Rank Math's). Loaded first.
  *
- * aw_seo_modules() lists every module: label, whether it can be switched off, the files it loads, and its settings.
+ * rankweb_seo_modules() lists every module: label, whether it can be switched off, the files it loads, and its settings.
  * Each setting is one of the plugin's former constants; its default is the value the code had, so nothing changes
  * until a setting is saved. The constants are defined here from option aw_seo_settings ({module: {CONST: value, on}}).
  * Foundation modules (General, Titles, Canonicals, Robots, Filtered lists, Schema) are always on: the others call them.
  * A module switched off is not loaded (aw-seo-extras.php). The Settings screen is on the Kits shell (rankweb-ui.php);
- * it reads and saves through the rankweb/v1 settings routes (rankweb-rest.php), which call aw_seo_settings_save().
- * Every option that screen saves is registered with register_setting() (aw_seo_registered_settings()), so each
+ * it reads and saves through the rankweb/v1 settings routes (rankweb-rest.php), which call rankweb_seo_settings_save().
+ * Every option that screen saves is registered with register_setting() (rankweb_seo_registered_settings()), so each
  * update_option() runs its sanitize callback, whoever writes it, and /wp/v2/settings shows it to administrators.
  *
  * @package aw-seo-extras
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SEO_SETTINGS = 'aw_seo_settings';
 
 /** Every module and its settings. */
-function aw_seo_modules(): array {
+function rankweb_seo_modules(): array {
 	static $m = null;
 	if ( null !== $m ) {
 		return $m;
@@ -292,25 +292,25 @@ function aw_seo_modules(): array {
 }
 
 /** Saved settings (all modules). */
-function aw_seo_saved(): array {
+function rankweb_seo_saved(): array {
 	return (array) get_option( AW_SEO_SETTINGS, array() );
 }
 
 /** Whether a module is on (foundation modules always are). */
-function aw_seo_module_on( string $key ): bool {
-	$mods = aw_seo_modules();
+function rankweb_seo_module_on( string $key ): bool {
+	$mods = rankweb_seo_modules();
 	if ( empty( $mods[ $key ]['switch'] ) ) {
 		return true;
 	}
-	$saved = aw_seo_saved();
+	$saved = rankweb_seo_saved();
 	return ! isset( $saved[ $key ]['on'] ) || ! empty( $saved[ $key ]['on'] );
 }
 
 /** Files a switched-off module would load: aw-seo-extras.php skips them. */
-function aw_seo_files_off(): array {
+function rankweb_seo_files_off(): array {
 	$off = array();
-	foreach ( aw_seo_modules() as $key => $mod ) {
-		if ( ! aw_seo_module_on( $key ) ) {
+	foreach ( rankweb_seo_modules() as $key => $mod ) {
+		if ( ! rankweb_seo_module_on( $key ) ) {
 			$off = array_merge( $off, $mod['files'] );
 		}
 	}
@@ -318,20 +318,20 @@ function aw_seo_files_off(): array {
 }
 
 // The constants, from the saved settings or the defaults.
-foreach ( aw_seo_modules() as $aw_seo_key => $aw_seo_mod ) {
-	$aw_seo_saved = aw_seo_saved()[ $aw_seo_key ] ?? array();
+foreach ( rankweb_seo_modules() as $aw_seo_key => $aw_seo_mod ) {
+	$rankweb_seo_saved = rankweb_seo_saved()[ $aw_seo_key ] ?? array();
 	foreach ( $aw_seo_mod['fields'] as $aw_seo_const => $aw_seo_field ) {
 		if ( ! defined( $aw_seo_const ) ) {
-			define( $aw_seo_const, array_key_exists( $aw_seo_const, $aw_seo_saved ) ? $aw_seo_saved[ $aw_seo_const ] : $aw_seo_field['default'] );
+			define( $aw_seo_const, array_key_exists( $aw_seo_const, $rankweb_seo_saved ) ? $rankweb_seo_saved[ $aw_seo_const ] : $aw_seo_field['default'] );
 		}
 	}
 }
-unset( $aw_seo_key, $aw_seo_mod, $aw_seo_saved, $aw_seo_const, $aw_seo_field );
+unset( $aw_seo_key, $aw_seo_mod, $rankweb_seo_saved, $aw_seo_const, $aw_seo_field );
 
 /* ---------- Text in the form and back ---------- */
 
 /** A value as the text in its field. */
-function aw_seo_field_text( string $type, $value ): string {
+function rankweb_seo_field_text( string $type, $value ): string {
 	switch ( $type ) {
 		case 'int':
 			return (string) (int) $value;
@@ -348,7 +348,7 @@ function aw_seo_field_text( string $type, $value ): string {
 }
 
 /** The text of a field as its value. */
-function aw_seo_field_value( string $type, string $text ) {
+function rankweb_seo_field_value( string $type, string $text ) {
 	$lines = array_values( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $text ) ), 'strlen' ) );
 	switch ( $type ) {
 		case 'int':
@@ -381,7 +381,7 @@ function aw_seo_field_value( string $type, string $text ) {
  * own 'tab' shows on that tab. Modules holds every on/off switch. Search Insights moved to InsightWeb on 11 Nov 2026;
  * its numbers stay in this option under 'search-insights', and InsightWeb's Settings tab writes them.
  */
-function aw_seo_setting_tabs(): array {
+function rankweb_seo_setting_tabs(): array {
 	return array(
 		'modules'         => array(
 			'label'   => 'Modules',
@@ -419,8 +419,8 @@ function aw_seo_setting_tabs(): array {
 }
 
 /** The tab a module's settings are on. */
-function aw_seo_module_tab( string $module ): string {
-	foreach ( aw_seo_setting_tabs() as $tab => $t ) {
+function rankweb_seo_module_tab( string $module ): string {
+	foreach ( rankweb_seo_setting_tabs() as $tab => $t ) {
 		if ( in_array( $module, $t['modules'], true ) ) {
 			return $tab;
 		}
@@ -433,11 +433,11 @@ function aw_seo_module_tab( string $module ): string {
  *
  * @param string $tab Tab key.
  */
-function aw_seo_tab_fields( string $tab ): array {
+function rankweb_seo_tab_fields( string $tab ): array {
 	$out = array();
-	foreach ( aw_seo_modules() as $key => $mod ) {
+	foreach ( rankweb_seo_modules() as $key => $mod ) {
 		foreach ( $mod['fields'] as $const => $f ) {
-			if ( ( $f['tab'] ?? aw_seo_module_tab( $key ) ) === $tab ) {
+			if ( ( $f['tab'] ?? rankweb_seo_module_tab( $key ) ) === $tab ) {
 				$out[ $key ][ $const ] = $f;
 			}
 		}
@@ -463,7 +463,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'aw_seo_settings_page' );
+		add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'rankweb_seo_settings_page' );
 	},
 	200 // last under RankWeb
 );
@@ -473,16 +473,16 @@ add_action(
  *
  * @param string $key Tab or module key.
  */
-function aw_seo_settings_url( string $key = 'modules' ): string {
-	$tabs = aw_seo_setting_tabs();
-	if ( ! isset( $tabs[ $key ] ) && isset( aw_seo_modules()[ $key ] ) ) {
-		$key = aw_seo_module_tab( $key );
+function rankweb_seo_settings_url( string $key = 'modules' ): string {
+	$tabs = rankweb_seo_setting_tabs();
+	if ( ! isset( $tabs[ $key ] ) && isset( rankweb_seo_modules()[ $key ] ) ) {
+		$key = rankweb_seo_module_tab( $key );
 	}
 	return add_query_arg( 'page', 'aw-seo-settings', admin_url( 'admin.php' ) ) . '#' . ( isset( $tabs[ $key ] ) ? $key : 'modules' );
 }
 
 /** RankWeb → Settings on the Kits shell (rankweb-ui.php). */
-function aw_seo_settings_page() {
+function rankweb_seo_settings_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Not allowed.', 403 );
 	}
@@ -501,15 +501,15 @@ function aw_seo_settings_page() {
  * @param array  $on     Modules tab: switchable module keys that are on (key => truthy).
  * @return array The stored settings after the save.
  */
-function aw_seo_settings_save( string $tab, array $posted, bool $reset = false, array $on = array() ): array {
-	$before = aw_seo_saved();
+function rankweb_seo_settings_save( string $tab, array $posted, bool $reset = false, array $on = array() ): array {
+	$before = rankweb_seo_saved();
 	$all    = $before;
 	if ( 'modules' === $tab ) {
-		foreach ( aw_seo_modules() as $key => $mod ) {
+		foreach ( rankweb_seo_modules() as $key => $mod ) {
 			if ( empty( $mod['switch'] ) ) {
 				continue;
 			}
-			// No 'on' key means on (aw_seo_module_on()), so only "off" is stored; an 'on' => true from an older save stays.
+			// No 'on' key means on (rankweb_seo_module_on()), so only "off" is stored; an 'on' => true from an older save stays.
 			if ( empty( $on[ $key ] ) ) {
 				$all[ $key ]['on'] = false;
 			} elseif ( isset( $all[ $key ]['on'] ) && ! $all[ $key ]['on'] ) {
@@ -517,13 +517,13 @@ function aw_seo_settings_save( string $tab, array $posted, bool $reset = false, 
 			}
 		}
 	} else {
-		foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
+		foreach ( rankweb_seo_tab_fields( $tab ) as $key => $list ) {
 			foreach ( $list as $const => $f ) {
 				unset( $all[ $key ][ $const ] );
 				if ( $reset || ! isset( $posted[ $const ] ) ) {
 					continue;
 				}
-				$value = aw_seo_field_value( $f['type'], (string) $posted[ $const ] );
+				$value = rankweb_seo_field_value( $f['type'], (string) $posted[ $const ] );
 				if ( $value !== $f['default'] ) { // store only what differs, so a later default change reaches unchanged fields
 					$all[ $key ][ $const ] = $value;
 				}
@@ -531,7 +531,7 @@ function aw_seo_settings_save( string $tab, array $posted, bool $reset = false, 
 		}
 	}
 	$all = array_filter( $all );
-	if ( aw_seo_settings_sorted( $all ) === aw_seo_settings_sorted( $before ) ) {
+	if ( rankweb_seo_settings_sorted( $all ) === rankweb_seo_settings_sorted( $before ) ) {
 		return $before; // the same settings (perhaps in another key order): nothing to write
 	}
 	update_option( AW_SEO_SETTINGS, $all, true ); // read on every request (the constants), so autoloaded
@@ -544,12 +544,12 @@ function aw_seo_settings_save( string $tab, array $posted, bool $reset = false, 
  * @param mixed $value Settings or a part of them.
  * @return mixed
  */
-function aw_seo_settings_sorted( $value ) {
+function rankweb_seo_settings_sorted( $value ) {
 	if ( ! is_array( $value ) ) {
 		return $value;
 	}
 	ksort( $value );
-	return array_map( 'aw_seo_settings_sorted', $value );
+	return array_map( 'rankweb_seo_settings_sorted', $value );
 }
 
 /* ---------- The options, registered with the Settings API ---------- */
@@ -558,13 +558,13 @@ const AW_SEO_DELETE_DATA = 'aw_seo_delete_data'; // 1: uninstall.php deletes Ran
 
 /**
  * One stored setting value, cleaned by its field type. Values the screen stored come back unchanged (the same clean-up
- * as aw_seo_field_value()), so a save that changes nothing still writes nothing.
+ * as rankweb_seo_field_value()), so a save that changes nothing still writes nothing.
  *
  * @param string $type int, text, list, map, maplist, or '' (a key no field knows: kept, its texts cleaned).
  * @param mixed  $v    Value.
  * @return mixed
  */
-function aw_seo_setting_clean( string $type, $v ) {
+function rankweb_seo_setting_clean( string $type, $v ) {
 	switch ( $type ) {
 		case 'int':
 			return max( 0, (int) $v );
@@ -585,7 +585,7 @@ function aw_seo_setting_clean( string $type, $v ) {
 			return $out;
 	}
 	if ( is_array( $v ) ) {
-		return array_map( fn( $x ) => aw_seo_setting_clean( '', $x ), $v );
+		return array_map( fn( $x ) => rankweb_seo_setting_clean( '', $x ), $v );
 	}
 	return is_string( $v ) ? sanitize_text_field( $v ) : ( is_scalar( $v ) || null === $v ? $v : '' );
 }
@@ -597,8 +597,8 @@ function aw_seo_setting_clean( string $type, $v ) {
  *
  * @param mixed $value Value to store.
  */
-function aw_seo_settings_sanitize( $value ): array {
-	$mods = aw_seo_modules();
+function rankweb_seo_settings_sanitize( $value ): array {
+	$mods = rankweb_seo_modules();
 	$out  = array();
 	foreach ( (array) $value as $key => $part ) {
 		if ( ! is_array( $part ) ) {
@@ -612,7 +612,7 @@ function aw_seo_settings_sanitize( $value ): array {
 				continue;
 			}
 			$type               = $mods[ $key ]['fields'][ $name ]['type'] ?? ( 0 === strpos( $name, 'AW_SI_' ) ? 'int' : '' );
-			$out[ $key ][ $name ] = aw_seo_setting_clean( $type, $v );
+			$out[ $key ][ $name ] = rankweb_seo_setting_clean( $type, $v );
 		}
 	}
 	return $out;
@@ -622,13 +622,13 @@ function aw_seo_settings_sanitize( $value ): array {
  * Every option the RankWeb Settings screen saves, as register_setting() arguments. The names and stored shapes are the
  * ones used before (no migration); the default is what the code reads when the option is missing.
  */
-function aw_seo_registered_settings(): array {
+function rankweb_seo_registered_settings(): array {
 	return array(
 		AW_SEO_SETTINGS          => array(
 			'type'              => 'object',
 			'description'       => 'RankWeb settings by module: the values that differ from the defaults, and the module switches.',
 			'default'           => array(),
-			'sanitize_callback' => 'aw_seo_settings_sanitize',
+			'sanitize_callback' => 'rankweb_seo_settings_sanitize',
 			'show_in_rest'      => array(
 				'schema' => array(
 					'type'                 => 'object',
@@ -683,14 +683,14 @@ function aw_seo_registered_settings(): array {
 add_action(
 	'init',
 	function () {
-		foreach ( aw_seo_registered_settings() as $name => $args ) {
+		foreach ( rankweb_seo_registered_settings() as $name => $args ) {
 			register_setting( 'rankweb', $name, $args );
 		}
 	}
 );
 
 /** Whether RankWeb's data goes when the plugin is deleted (Modules group). */
-function aw_seo_delete_data_on(): bool {
+function rankweb_seo_delete_data_on(): bool {
 	return (bool) get_option( AW_SEO_DELETE_DATA, 0 );
 }
 
@@ -699,8 +699,8 @@ function aw_seo_delete_data_on(): bool {
  *
  * @param bool $on On.
  */
-function aw_seo_delete_data_save( bool $on ): bool {
-	if ( aw_seo_delete_data_on() === $on ) {
+function rankweb_seo_delete_data_save( bool $on ): bool {
+	if ( rankweb_seo_delete_data_on() === $on ) {
 		return false;
 	}
 	update_option( AW_SEO_DELETE_DATA, $on ? 1 : 0, false );
@@ -713,15 +713,15 @@ function aw_seo_delete_data_save( bool $on ): bool {
  *
  * @param string $tab Tab key.
  */
-function aw_seo_settings_reset( string $tab ): void {
-	$defaults = aw_seo_registered_settings();
+function rankweb_seo_settings_reset( string $tab ): void {
+	$defaults = rankweb_seo_registered_settings();
 	if ( 'modules' === $tab ) {
-		aw_seo_settings_save( 'modules', array(), false, array_fill_keys( array_keys( aw_seo_modules() ), true ) ); // every module on
-		aw_seo_delete_data_save( (bool) $defaults[ AW_SEO_DELETE_DATA ]['default'] );
+		rankweb_seo_settings_save( 'modules', array(), false, array_fill_keys( array_keys( rankweb_seo_modules() ), true ) ); // every module on
+		rankweb_seo_delete_data_save( (bool) $defaults[ AW_SEO_DELETE_DATA ]['default'] );
 		return;
 	}
-	aw_seo_settings_save( $tab, array(), true );
-	if ( 'schema' === $tab && function_exists( 'aw_faq_type_choices' ) && array() !== aw_faq_off_types() ) {
+	rankweb_seo_settings_save( $tab, array(), true );
+	if ( 'schema' === $tab && function_exists( 'rankweb_faq_type_choices' ) && array() !== rankweb_faq_off_types() ) {
 		update_option( 'aw_faq_off_types', $defaults['aw_faq_off_types']['default'], false ); // stored (not deleted), so the one-time move from the old list does not run again
 		delete_transient( 'aw_faq_index' );
 	}
