@@ -49,6 +49,10 @@ Administrators and editors. Every action checks a nonce and the user's capabilit
 
 The Mail API token, webhook secrets and SMTP password can be set in `wp-config.php` (`MAILWEB_API_TOKEN`, `MAILWEB_SECRET_<MAILBOX>`, `MAILWEB_SMTP_PASSWORD`). Values saved on the settings screen are stored encrypted with a key made from the site's salts; if the salts change, enter them again.
 
+= Source code =
+
+The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/mailweb. To rebuild it, run `npm install` and then `npm run build` in that folder.
+
 == Installation ==
 
 1. Upload the `mailweb` folder to `/wp-content/plugins/` and activate MailWeb.
