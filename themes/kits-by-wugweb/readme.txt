@@ -17,6 +17,14 @@ Kits by Wugweb is a full-site-editing block theme. Design tokens (colour, type, 
 
 tokens/tokens.json is the source. tools/build-tokens.py (and, for a child theme, the site's tools/build-tokens.py) writes the presets listed under "$wp" into theme.json (colour palette, font sizes, spacing, border radius, shadows) and makes the CSS variables point at them (--kit-color-ink: var(--wp--preset--color--secondary)). Core blocks are styled in theme.json (styles.elements, styles.blocks and the block style variations Primary, Secondary, Ghost, Small, Card, Surface, Hairline); kit.css only adds what theme.json cannot express (heights, hover, motion, layout). So a change in Appearance > Editor > Styles reaches core blocks and Kits components alike. Font families are written by hand in theme.json, as they carry font files. Do not edit kit-tokens.css or the generated presets by hand; edit tokens.json and rebuild.
 
+= Patterns, templates and block styles =
+
+47 patterns in the categories Kits: Components, Kits: Lists and Kits: Pages: heroes (split, centred), cards, boxes, call to action, testimonials with an optional round photo, team, product box, portfolio, progress bars, pricing (two, three or four columns), post lists, author box, FAQ, newsletter, and four starter pages (home, about, pricing, link page) with placeholder copy and empty media. Header and footer variants (default, minimal, columns, social, stacked) are offered when you replace the header or footer in the Site Editor. The 404 page and the comments area are patterns the templates use.
+
+Templates: Blank (no header or footer), No title, Page — Wide, plus the usual set.
+
+Block styles: Reverse on mobile (Columns), Plain (no bullets) (List), Outline (Social Links), and Card, Surface, Section, Head band, Hairline, Label, Note, Sources, Secondary, Ghost and Brand. Code, Preformatted, Quote and Pullquote are styled in theme.json from the Kits tokens.
+
 == Frequently Asked Questions ==
 
 = Does the theme need a plugin? =
@@ -42,6 +50,8 @@ In plugins, not the theme. Install Kits Core (or your own plugin) for those; the
 == Changelog ==
 
 = 2.2.0 =
+* 47 patterns (starter pages, pricing, testimonials, team, portfolio, progress bars, footer and header variants, and more), Blank and No title templates, block styles Reverse on mobile, Plain and Outline, and Code, Quote and Pullquote styling.
+* Breadcrumbs fallback is valid in the editor; the Sidebar template-part area works with or without Kits Core; links in the Ink colour set stay readable in dark mode.
 * Section and Head band are Group styles; their padding, background and gap are set in Styles > Blocks > Group.
 * Kits Hero block: height, colours, padding, border and shadow are block supports, set in Styles > Blocks > Hero.
 * Styles values for the hero height and section padding also reach parts that are not blocks yet.

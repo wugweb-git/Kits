@@ -34,6 +34,19 @@ add_action(
 					'auth_callback' => fn() => current_user_can( 'edit_posts' ),
 				)
 			);
+			foreach ( array( 'rank_math_title', 'rank_math_description' ) as $key ) { // Rank Math's own fields: the sidebar edits what the page prints.
+				register_post_meta(
+					$type,
+					$key,
+					array(
+						'show_in_rest'      => true,
+						'single'            => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+					)
+				);
+			}
 			register_post_meta(
 				$type,
 				'_rankweb_score',
@@ -76,7 +89,7 @@ add_action(
 		wp_enqueue_script(
 			'rankweb-editor-sidebar',
 			$uri . 'assets/editor-sidebar.js',
-			array( 'wp-plugins', 'wp-edit-post', 'wp-element', 'wp-components', 'wp-data', 'wp-compose', 'wp-i18n' ),
+			array( 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-core-data', 'wp-element', 'wp-components', 'wp-data', 'wp-compose', 'wp-i18n' ),
 			(string) filemtime( $dir . 'assets/editor-sidebar.js' ),
 			true
 		);
@@ -92,7 +105,8 @@ add_action(
 			'rankweb-editor-sidebar',
 			'rankwebEditorData',
 			array(
-				'siteUrl'    => get_site_url(),
+				'siteUrl'    => untrailingslashit( get_site_url() ),
+				'siteHost'   => (string) wp_parse_url( get_site_url(), PHP_URL_HOST ),
 				'siteName'   => get_bloginfo( 'name' ),
 				'postType'   => $screen->post_type,
 				'postId'     => get_the_ID(),

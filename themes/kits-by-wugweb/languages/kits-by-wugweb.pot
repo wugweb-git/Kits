@@ -3,13 +3,13 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Kits by Wugweb 2.2.0\n"
-"Report-Msgid-Bugs-To: https://wugweb.com/kits/\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/kits-by-wugweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-16T21:16:53+00:00\n"
+"POT-Creation-Date: 2026-11-24T21:12:38+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-by-wugweb\n"
@@ -20,8 +20,9 @@ msgid "Kits by Wugweb"
 msgstr ""
 
 #. Theme URI of the theme
+#. Author URI of the theme
 #: style.css
-msgid "https://kits.wugweb.studio"
+msgid "https://wugweb.com"
 msgstr ""
 
 #. Description of the theme
@@ -34,76 +35,146 @@ msgstr ""
 msgid "Wugweb"
 msgstr ""
 
-#. Author URI of the theme
-#: style.css
-msgid "https://wugweb.com"
-msgstr ""
-
-#: functions.php:137
+#: inc/blocks.php:16
 msgid "Kits: Components"
 msgstr ""
 
-#: functions.php:138
+#: inc/blocks.php:17
 msgid "Kits: Lists"
 msgstr ""
 
-#: functions.php:151
+#: inc/blocks.php:18
+msgid "Kits: Pages"
+msgstr ""
+
+#: inc/blocks.php:40
+msgid "Sidebar"
+msgstr ""
+
+#: inc/blocks.php:41
+msgid "The column beside a page's text (below it on phones and tablets)."
+msgstr ""
+
+#: inc/blocks.php:58
 msgid "Secondary"
 msgstr ""
 
-#: functions.php:152
+#: inc/blocks.php:59
 msgid "Ghost"
 msgstr ""
 
-#: functions.php:153
+#: inc/blocks.php:60
 msgid "Brand"
 msgstr ""
 
-#: functions.php:158
+#: inc/blocks.php:65
 msgid "Card"
 msgstr ""
 
-#: functions.php:159
+#: inc/blocks.php:66
 msgid "Surface"
 msgstr ""
 
-#: functions.php:160
+#: inc/blocks.php:67
 msgid "Section"
 msgstr ""
 
-#: functions.php:161
+#: inc/blocks.php:68
 msgid "Head band"
 msgstr ""
 
-#: functions.php:164
+#: inc/blocks.php:72
+msgid "Reverse on mobile"
+msgstr ""
+
+#: inc/blocks.php:75
 msgid "Hairline"
 msgstr ""
 
-#: functions.php:167
+#: inc/blocks.php:78
 msgid "Label"
 msgstr ""
 
-#: functions.php:168
+#: inc/blocks.php:79
 msgid "Note"
 msgstr ""
 
-#: functions.php:171
+#: inc/blocks.php:82
 msgid "Sources"
 msgstr ""
 
-#: functions.php:175
-#: functions.php:251
+#: inc/blocks.php:83
+msgid "Plain (no bullets)"
+msgstr ""
+
+#: inc/blocks.php:87
+msgid "Outline"
+msgstr ""
+
+#: inc/blocks.php:91
+#: inc/blocks.php:167
 msgid "Beta"
 msgstr ""
 
-#: functions.php:267
+#: inc/blocks.php:183
 msgid "Primary"
 msgstr ""
 
-#. translators: %s: card state
-#: functions.php:1130
+#: inc/blocks.php:281
+#: patterns/theme-toggle.php:20
+msgid "Toggle dark/light theme"
+msgstr ""
+
+#. translators: %s: file name.
+#: inc/site-layer.php:359
 #, php-format
-msgid "Card: %s"
+msgid "Could not register file \"%s\" as a block pattern (\"Slug\" field missing)"
+msgstr ""
+
+#. translators: 1: file name; 2: slug value found.
+#: inc/site-layer.php:364
+#, php-format
+msgid "Could not register file \"%1$s\" as a block pattern (invalid slug \"%2$s\")"
+msgstr ""
+
+#. translators: %s: file name.
+#: inc/site-layer.php:368
+#, php-format
+msgid "Could not register file \"%s\" as a block pattern (\"Title\" field missing)"
+msgstr ""
+
+#. translators: %s: file name.
+#: inc/site-layer.php:424
+#, php-format
+msgid "Could not register file \"%s\" as a block pattern as the file does not exist."
+msgstr ""
+
+#: patterns/404.php
+msgctxt "Pattern title"
+msgid "404 content"
+msgstr ""
+
+#: patterns/404.php
+msgctxt "Pattern description"
+msgid "The \"page not found\" heading, line and search used by templates/404.html. One source, so a site can change it in one place."
+msgstr ""
+
+#: patterns/404.php:11
+msgid "404"
+msgstr ""
+
+#: patterns/404.php:15
+msgid "Page not found."
+msgstr ""
+
+#: patterns/author-box.php
+msgctxt "Pattern title"
+msgid "Author box"
+msgstr ""
+
+#: patterns/author-box.php
+msgctxt "Pattern description"
+msgid "The post author's photo, name and biography in a Card group. Place it in a post template or in the post content; it reads the author of the post it sits in."
 msgstr ""
 
 #: patterns/banner.php
@@ -116,9 +187,138 @@ msgctxt "Pattern description"
 msgid "A wide image with optional text on it: 16:5 on wide screens, 4:3 on phones. Shows nothing until an image is chosen. Source images up to 5 MB; WebP or AVIF."
 msgstr ""
 
+#: patterns/boxes-three.php
+msgctxt "Pattern title"
+msgid "Boxes: three"
+msgstr ""
+
+#: patterns/boxes-three.php
+msgctxt "Pattern description"
+msgid "Three Card boxes, each with a heading, a line and a button. The light companion to Three big actions (the dark band)."
+msgstr ""
+
+#: patterns/boxes-three.php:16
+#: patterns/boxes-two.php:16
+#: patterns/cta.php:14
+#: patterns/footer-stacked.php:13
+#: patterns/hero-centered.php:14
+#: patterns/hero-split.php:14
+#: patterns/portfolio.php:15
+#: patterns/product-box.php:22
+msgid "Heading"
+msgstr ""
+
+#: patterns/boxes-three.php:20
+#: patterns/boxes-two.php:20
+#: patterns/cta-inline.php:14
+#: patterns/cta.php:18
+#: patterns/footer-columns.php:40
+#: patterns/footer-stacked.php:17
+#: patterns/hero-centered.php:18
+#: patterns/hero-split.php:18
+#: patterns/newsletter.php:17
+#: patterns/portfolio.php:19
+#: patterns/product-box.php:26
+msgid "Supporting text."
+msgstr ""
+
+#: patterns/boxes-three.php:25
+#: patterns/boxes-two.php:25
+#: patterns/cta-inline.php:19
+#: patterns/cta.php:23
+#: patterns/footer-columns.php:45
+#: patterns/footer-stacked.php:22
+#: patterns/product-box.php:31
+msgid "Action"
+msgstr ""
+
+#: patterns/boxes-two.php
+msgctxt "Pattern title"
+msgid "Boxes: two"
+msgstr ""
+
+#: patterns/boxes-two.php
+msgctxt "Pattern description"
+msgid "Two Card boxes, each with a heading, a line and a button. Static content, not a post list."
+msgstr ""
+
+#: patterns/breadcrumbs.php
+msgctxt "Pattern title"
+msgid "Breadcrumbs"
+msgstr ""
+
+#: patterns/breadcrumbs.php
+msgctxt "Pattern description"
+msgid "Accessible breadcrumbs navigation trail. Consumes RankWeb's rankweb/breadcrumbs block when RankWeb is active, with a dynamic WordPress-native fallback trail when RankWeb is inactive."
+msgstr ""
+
+#: patterns/breadcrumbs.php:31
+msgid "Home"
+msgstr ""
+
+#: patterns/card-block-lg.php
+msgctxt "Pattern title"
+msgid "Card: block-lg"
+msgstr ""
+
+#: patterns/card-block-lg.php
+msgctxt "Pattern description"
+msgid "A Query Loop of cards in the block-lg state (kit-card--block-lg, kit.css \"Card states\"): core date, category terms and title."
+msgstr ""
+
+#: patterns/card-block-md.php
+msgctxt "Pattern title"
+msgid "Card: block-md"
+msgstr ""
+
+#: patterns/card-block-md.php
+msgctxt "Pattern description"
+msgid "A Query Loop of cards in the block-md state (kit-card--block-md, kit.css \"Card states\"): core date, category terms and title."
+msgstr ""
+
+#: patterns/card-block-sm.php
+msgctxt "Pattern title"
+msgid "Card: block-sm"
+msgstr ""
+
+#: patterns/card-block-sm.php
+msgctxt "Pattern description"
+msgid "A Query Loop of cards in the block-sm state (kit-card--block-sm, kit.css \"Card states\"): core date, category terms and title."
+msgstr ""
+
 #: patterns/card-grid.php
 msgctxt "Pattern title"
 msgid "Card grid — latest"
+msgstr ""
+
+#: patterns/card-stacked-lg.php
+msgctxt "Pattern title"
+msgid "Card: stacked-lg"
+msgstr ""
+
+#: patterns/card-stacked-lg.php
+msgctxt "Pattern description"
+msgid "A Query Loop of cards in the stacked-lg state (kit-card--stacked-lg, kit.css \"Card states\"): core date, category terms and title."
+msgstr ""
+
+#: patterns/card-stacked-md.php
+msgctxt "Pattern title"
+msgid "Card: stacked-md"
+msgstr ""
+
+#: patterns/card-stacked-md.php
+msgctxt "Pattern description"
+msgid "A Query Loop of cards in the stacked-md state (kit-card--stacked-md, kit.css \"Card states\"): core date, category terms and title."
+msgstr ""
+
+#: patterns/card-stacked-sm.php
+msgctxt "Pattern title"
+msgid "Card: stacked-sm"
+msgstr ""
+
+#: patterns/card-stacked-sm.php
+msgctxt "Pattern description"
+msgid "A Query Loop of cards in the stacked-sm state (kit-card--stacked-sm, kit.css \"Card states\"): core date, category terms and title."
 msgstr ""
 
 #: patterns/category-hub.php
@@ -126,9 +326,38 @@ msgctxt "Pattern title"
 msgid "Category hub — category list"
 msgstr ""
 
+#: patterns/category-hub.php:12
+msgid "Categories"
+msgstr ""
+
+#: patterns/comments.php
+msgctxt "Pattern title"
+msgid "Comments"
+msgstr ""
+
+#: patterns/comments.php
+msgctxt "Pattern description"
+msgid "The comments list, pagination and form used by templates/single.html. One source, so a site can change it in one place."
+msgstr ""
+
+#: patterns/cta-inline.php
+msgctxt "Pattern title"
+msgid "Call to action: inline"
+msgstr ""
+
+#: patterns/cta-inline.php
+msgctxt "Pattern description"
+msgid "A Card with one line on the left and a button on the right; wraps on small screens. The compact companion to Call to action (the dark band)."
+msgstr ""
+
 #: patterns/cta.php
 msgctxt "Pattern title"
 msgid "Call to action"
+msgstr ""
+
+#: patterns/cta.php
+msgctxt "Pattern description"
+msgid "A dark band with a heading, a supporting line and one action, centred. The background and alignment are ordinary Group settings: change them in the block sidebar or in Styles."
 msgstr ""
 
 #: patterns/empty-state.php
@@ -136,11 +365,11 @@ msgctxt "Pattern title"
 msgid "Empty state"
 msgstr ""
 
-#: patterns/empty-state.php:12
+#: patterns/empty-state.php:13
 msgid "Nothing here yet"
 msgstr ""
 
-#: patterns/empty-state.php:16
+#: patterns/empty-state.php:17
 msgid "Try another search or browse the latest updates."
 msgstr ""
 
@@ -149,19 +378,110 @@ msgctxt "Pattern title"
 msgid "FAQ"
 msgstr ""
 
+#: patterns/faq.php:13
+msgid "FAQ"
+msgstr ""
+
+#: patterns/faq.php:17
+#: patterns/faq.php:23
+msgid "Question"
+msgstr ""
+
+#: patterns/footer-columns.php
+msgctxt "Pattern title"
+msgid "Footer: four columns"
+msgstr ""
+
+#: patterns/footer-columns.php
+msgctxt "Pattern description"
+msgid "A footer with a brand column, two link columns and a column with a line and an action, above the legal bar. Pick it in the Site Editor to replace the default footer."
+msgstr ""
+
+#: patterns/footer-columns.php:20
+msgid "Explore"
+msgstr ""
+
+#: patterns/footer-columns.php:28
+msgid "About"
+msgstr ""
+
+#: patterns/footer-columns.php:36
+msgid "Get in touch"
+msgstr ""
+
+#: patterns/footer-default.php
+msgctxt "Pattern title"
+msgid "Footer: default"
+msgstr ""
+
+#: patterns/footer-default.php
+msgctxt "Pattern description"
+msgid "The theme's default footer (brand, two link columns, legal bar), offered as a variant so a customised footer can go back to it. It matches parts/footer.html."
+msgstr ""
+
+#: patterns/footer-minimal.php
+msgctxt "Pattern title"
+msgid "Footer: minimal"
+msgstr ""
+
+#: patterns/footer-minimal.php
+msgctxt "Pattern description"
+msgid "A one-row footer: copyright with the site title, and a policies menu. Pick it in the Site Editor to replace the default footer."
+msgstr ""
+
+#: patterns/footer-social.php
+msgctxt "Pattern title"
+msgid "Footer: links and social"
+msgstr ""
+
+#: patterns/footer-social.php
+msgctxt "Pattern description"
+msgid "A three-part footer: copyright, a links menu and social icons (add your own networks in the editor). Pick it in the Site Editor to replace the default footer."
+msgstr ""
+
+#: patterns/footer-stacked.php
+msgctxt "Pattern title"
+msgid "Footer: stacked"
+msgstr ""
+
+#: patterns/footer-stacked.php
+msgctxt "Pattern description"
+msgid "A centred footer: heading, line and one action, then the legal bar. Pick it in the Site Editor to replace the default footer."
+msgstr ""
+
+#: patterns/header-default.php
+msgctxt "Pattern title"
+msgid "Header: default"
+msgstr ""
+
+#: patterns/header-default.php
+msgctxt "Pattern description"
+msgid "The theme's default header (logo, site title, main navigation), offered as a variant so a customised header can go back to it. It matches parts/header.html."
+msgstr ""
+
+#: patterns/hero-centered.php
+msgctxt "Pattern title"
+msgid "Hero: centred"
+msgstr ""
+
+#: patterns/hero-centered.php
+msgctxt "Pattern description"
+msgid "A centred intro with a heading, a line and two actions. Core blocks only: it needs no plugin and no image."
+msgstr ""
+
+#: patterns/hero-centered.php:23
+#: patterns/hero-split.php:23
+msgid "Primary action"
+msgstr ""
+
+#: patterns/hero-centered.php:27
+#: patterns/hero-split.php:27
+msgid "Secondary action"
+msgstr ""
+
 #: patterns/hero-split.php
 msgctxt "Pattern title"
 msgid "Hero — split"
-msgstr ""
-
-#: patterns/hero.php
-msgctxt "Pattern title"
-msgid "Hero"
-msgstr ""
-
-#: patterns/hero.php
-msgctxt "Pattern description"
-msgid "Page hero (Kits Hero block): label, H1, one line and two actions. Its height, colours and padding are set in Styles > Blocks > Hero."
 msgstr ""
 
 #: patterns/lead-list.php
@@ -174,9 +494,209 @@ msgctxt "Pattern description"
 msgid "Section head (kit-sec-head: H2 and a ghost \"See all\" button, the same head as every Home section) with a link, one lead post (large image and headline) and the next four as a ruled list."
 msgstr ""
 
+#: patterns/lead-list.php:15
+#: patterns/three-big-actions.php:16
+msgid "[Section heading]"
+msgstr ""
+
+#: patterns/lead-list.php:21
+msgid "[See all]"
+msgstr ""
+
 #: patterns/newsletter.php
 msgctxt "Pattern title"
 msgid "Newsletter signup"
+msgstr ""
+
+#: patterns/newsletter.php:13
+msgid "Newsletter"
+msgstr ""
+
+#: patterns/page-about.php
+msgctxt "Pattern title"
+msgid "Page: about starter"
+msgstr ""
+
+#: patterns/page-about.php
+msgctxt "Pattern description"
+msgid "A starter about page: centred intro, a product-style feature box, the team, progress bars and a call to action. All text is placeholder; the photos are empty slots for your own media."
+msgstr ""
+
+#: patterns/page-home.php
+msgctxt "Pattern title"
+msgid "Page: home starter"
+msgstr ""
+
+#: patterns/page-home.php
+msgctxt "Pattern description"
+msgid "A starter home page made of Kits patterns: centred hero, three boxes, testimonials and a call to action. All text is placeholder; replace it and the media with your own."
+msgstr ""
+
+#: patterns/page-link.php
+msgctxt "Pattern title"
+msgid "Page: links starter"
+msgstr ""
+
+#: patterns/page-link.php
+msgctxt "Pattern description"
+msgid "A single-column links page (a \"link in bio\" page): an image slot, a heading, a line and a stack of full-width buttons, then social icons. Placeholder text; add your own links, image and networks."
+msgstr ""
+
+#: patterns/page-link.php:17
+#: patterns/team.php:19
+msgid "Name"
+msgstr ""
+
+#: patterns/page-link.php:21
+msgid "Short description."
+msgstr ""
+
+#: patterns/page-link.php:26
+msgid "Link one"
+msgstr ""
+
+#: patterns/page-link.php:30
+msgid "Link two"
+msgstr ""
+
+#: patterns/page-link.php:34
+msgid "Link three"
+msgstr ""
+
+#: patterns/page-pricing.php
+msgctxt "Pattern title"
+msgid "Page: pricing starter"
+msgstr ""
+
+#: patterns/page-pricing.php
+msgctxt "Pattern description"
+msgid "A starter pricing page: centred intro, three plans, questions and a call to action. All text and prices are placeholders: write your own plans."
+msgstr ""
+
+#: patterns/portfolio.php
+msgctxt "Pattern title"
+msgid "Portfolio"
+msgstr ""
+
+#: patterns/portfolio.php
+msgctxt "Pattern description"
+msgid "A heading and line beside a gallery of work, with a link to more. Add the images in the editor; the gallery keeps each image's aspect ratio."
+msgstr ""
+
+#: patterns/portfolio.php:24
+msgid "See all"
+msgstr ""
+
+#: patterns/posts-list.php
+msgctxt "Pattern title"
+msgid "Posts: ruled rows"
+msgstr ""
+
+#: patterns/posts-list.php
+msgctxt "Pattern description"
+msgid "Latest posts as ruled rows: date, title and excerpt side by side (stacked on small screens), with pagination."
+msgstr ""
+
+#: patterns/posts.php
+msgctxt "Pattern title"
+msgid "Posts: single column"
+msgstr ""
+
+#: patterns/posts.php
+msgctxt "Pattern description"
+msgid "Latest posts in one column: title, date, author and excerpt, with pagination."
+msgstr ""
+
+#: patterns/pricing-four.php
+msgctxt "Pattern title"
+msgid "Pricing: four plans"
+msgstr ""
+
+#: patterns/pricing-four.php
+msgctxt "Pattern description"
+msgid "Four plans in Cards: name, price line, a real list of features and a button. Placeholder text only: write your own plans and prices."
+msgstr ""
+
+#: patterns/pricing-four.php:16
+#: patterns/pricing-three.php:16
+#: patterns/pricing-two.php:16
+msgid "Plan name"
+msgstr ""
+
+#: patterns/pricing-four.php:20
+#: patterns/pricing-three.php:20
+#: patterns/pricing-two.php:20
+msgid "Price line"
+msgstr ""
+
+#: patterns/pricing-four.php:29
+#: patterns/pricing-four.php:33
+#: patterns/pricing-four.php:37
+#: patterns/pricing-three.php:29
+#: patterns/pricing-three.php:33
+#: patterns/pricing-three.php:37
+#: patterns/pricing-two.php:29
+#: patterns/pricing-two.php:33
+#: patterns/pricing-two.php:37
+msgid "Feature"
+msgstr ""
+
+#: patterns/pricing-four.php:43
+#: patterns/pricing-three.php:43
+#: patterns/pricing-two.php:43
+msgid "Choose plan"
+msgstr ""
+
+#: patterns/pricing-three.php
+msgctxt "Pattern title"
+msgid "Pricing: three plans"
+msgstr ""
+
+#: patterns/pricing-three.php
+msgctxt "Pattern description"
+msgid "Three plans in Cards: name, price line, a real list of features and a button. Placeholder text only: write your own plans and prices."
+msgstr ""
+
+#: patterns/pricing-two.php
+msgctxt "Pattern title"
+msgid "Pricing: two plans"
+msgstr ""
+
+#: patterns/pricing-two.php
+msgctxt "Pattern description"
+msgid "Two plans in Cards: name, price line, a real list of features and a button. Placeholder text only: write your own plans and prices."
+msgstr ""
+
+#: patterns/product-box.php
+msgctxt "Pattern title"
+msgid "Product box"
+msgstr ""
+
+#: patterns/product-box.php
+msgctxt "Pattern description"
+msgid "A Card with an image beside a heading, a line and a button. Choose the image in the editor; it keeps its own aspect ratio and rounded corners."
+msgstr ""
+
+#: patterns/progress-bars.php
+msgctxt "Pattern title"
+msgid "Progress bars"
+msgstr ""
+
+#: patterns/progress-bars.php
+msgctxt "Pattern description"
+msgid "Labelled bars for skills or goals, made of core blocks only. The value is written in the label (\"Label, 90%\") so it reads the same to everyone; the bar repeats it visually. Change the text, then set the inner group's flex size to the same percentage."
+msgstr ""
+
+#: patterns/progress-bars.php:14
+msgid "Label one, 90%"
+msgstr ""
+
+#: patterns/progress-bars.php:24
+msgid "Label two, 75%"
+msgstr ""
+
+#: patterns/progress-bars.php:34
+msgid "Label three, 60%"
 msgstr ""
 
 #: patterns/section.php
@@ -189,9 +709,67 @@ msgctxt "Pattern description"
 msgid "A full-width section (Group style Section): its padding, background and gap are set in Styles > Blocks > Group > Section."
 msgstr ""
 
+#: patterns/section.php:14
+msgid "Section heading"
+msgstr ""
+
+#: patterns/section.php:18
+msgid "Section text."
+msgstr ""
+
 #: patterns/sponsored-label.php
 msgctxt "Pattern title"
 msgid "Sponsored label"
+msgstr ""
+
+#: patterns/sponsored-label.php:11
+msgid "Sponsored"
+msgstr ""
+
+#: patterns/team.php
+msgctxt "Pattern title"
+msgid "Team: four people"
+msgstr ""
+
+#: patterns/team.php
+msgctxt "Pattern description"
+msgid "Four people, each with a photo, a name, a role and a link. Choose the photos in the editor; they keep their own aspect ratio and rounded corners."
+msgstr ""
+
+#: patterns/team.php:23
+msgid "Role"
+msgstr ""
+
+#: patterns/team.php:28
+msgid "Profile"
+msgstr ""
+
+#: patterns/testimonials.php
+msgctxt "Pattern title"
+msgid "Testimonials: three cards"
+msgstr ""
+
+#: patterns/testimonials.php
+msgctxt "Pattern description"
+msgid "Three quotes in Card groups, each with an optional round photo. The text is a placeholder: replace it with real words from real people. Add a photo by choosing an image in the slot; a slot left empty shows nothing on the site (delete it in the editor if you do not want it)."
+msgstr ""
+
+#: patterns/testimonials.php:17
+msgid "Quote text."
+msgstr ""
+
+#: patterns/testimonials.php:27
+msgid "Name, role"
+msgstr ""
+
+#: patterns/theme-toggle.php
+msgctxt "Pattern title"
+msgid "Theme Toggle"
+msgstr ""
+
+#: patterns/theme-toggle.php
+msgctxt "Pattern description"
+msgid "Accessible Day/Night theme toggle button component for header or navigation."
 msgstr ""
 
 #: patterns/three-big-actions.php
@@ -202,6 +780,30 @@ msgstr ""
 #: patterns/three-big-actions.php
 msgctxt "Pattern description"
 msgid "A dark band with a section head (kit-sec-head, as on every section) and three large, linked actions; the first is filled with the accent colour."
+msgstr ""
+
+#: patterns/three-big-actions.php:23
+msgid "[Action one]"
+msgstr ""
+
+#: patterns/three-big-actions.php:23
+msgid "[One line about action one]"
+msgstr ""
+
+#: patterns/three-big-actions.php:24
+msgid "[Action two]"
+msgstr ""
+
+#: patterns/three-big-actions.php:24
+msgid "[One line about action two]"
+msgstr ""
+
+#: patterns/three-big-actions.php:25
+msgid "[Action three]"
+msgstr ""
+
+#: patterns/three-big-actions.php:25
+msgid "[One line about action three]"
 msgstr ""
 
 #: assets/js/button-options.js:46
@@ -257,96 +859,153 @@ msgid "Automatic"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Accent"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Accent ink"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Ink"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Text"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Muted"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Line"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Page"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Surface"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Raised"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "On ink"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Focus"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Danger"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Success"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Warning"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Danger tint"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Success tint"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Warning tint"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "Info tint"
 msgstr ""
 
 #: theme.json
+#: styles/dark.json
+#: styles/forest.json
+#: styles/slate.json
 msgctxt "Color name"
 msgid "WhatsApp"
 msgstr ""
@@ -359,6 +1018,11 @@ msgstr ""
 #: theme.json
 msgctxt "Font family name"
 msgid "Inter (headings)"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Monospace (system)"
 msgstr ""
 
 #: theme.json
@@ -558,10 +1222,35 @@ msgstr ""
 
 #: theme.json
 msgctxt "Custom template name"
+msgid "Blank"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
+msgid "No title"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
 msgid "Page — Wide"
 msgstr ""
 
 #: styles/colours/ink.json
 msgctxt "Style variation name"
 msgid "Colours: Ink"
+msgstr ""
+
+#: styles/dark.json
+msgctxt "Style variation name"
+msgid "Dark"
+msgstr ""
+
+#: styles/forest.json
+msgctxt "Style variation name"
+msgid "Forest"
+msgstr ""
+
+#: styles/slate.json
+msgctxt "Style variation name"
+msgid "Slate"
 msgstr ""

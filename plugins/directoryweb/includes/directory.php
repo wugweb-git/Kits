@@ -102,7 +102,7 @@ add_filter(
 				$url = strtok( $url, '?' ) . 'page/' . $paged . '/' . ( strpos( $url, '?' ) ? '?' . substr( $url, strpos( $url, '?' ) + 1 ) : '' );
 			}
 			$keep = array_intersect_key( wp_unslash( $_GET ), array_flip( array( 'q', 'verified', 'gov', 'tag' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( add_query_arg( map_deep( $keep, 'rawurlencode' ), $url ), 301, 'Animal Writes' );
+			wp_safe_redirect( add_query_arg( map_deep( $keep, 'rawurlencode' ), $url ), 301, 'DirectoryWeb' );
 			exit;
 		};
 		$out     = array( 'pagename' => 'directory' ); // the Directory Page; its list reads the place and type (hubs.php)
@@ -365,7 +365,7 @@ add_action(
 		// One value each: ?state[]=kerala stopped the page (sanitize_title() on a list; audit, 12 Nov 2026). The first one counts.
 		foreach ( array( 'state', 'district', 'q' ) as $k ) {
 			if ( isset( $g[ $k ] ) && ! is_string( $g[ $k ] ) ) {
-				$g[ $k ] = is_array( $g[ $k ] ) ? (string) current( array_filter( $g[ $k ], 'is_string' ) ?: array( '' ) ) : '';
+				$g[ $k ] = is_array( $g[ $k ] ) ? (string) current( array_filter( $g[ $k ], 'is_string' ) ? array_filter( $g[ $k ], 'is_string' ) : array( '' ) ) : '';
 			}
 		}
 		// A 6-digit PIN code in the search box opens that PIN's district (or state) list; when India Post does not know
@@ -406,7 +406,7 @@ add_action(
 		}
 		$city = sanitize_title( $g['district'] ?? '' ) ? sanitize_title( $g['district'] ) : sanitize_title( $g['state'] ?? '' );
 		$tags = array_values( array_filter( array_map( 'sanitize_title', (array) ( $g['tag'] ?? array() ) ) ) );
-		$type = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ?: array( '' ) );
+		$type = (string) current( array_filter( $tags, 'aw_listing_type_ok' ) ? array_filter( $tags, 'aw_listing_type_ok' ) : array( '' ) );
 		$more = array_values( array_diff( $tags, array( $type ) ) ); // services
 		$base = $city ? aw_directory_url( $city, $type ) : ( $type ? add_query_arg( 'tag', $type, directoryweb_hub_url() ) : directoryweb_hub_url() );
 		if ( $more ) {
@@ -530,7 +530,7 @@ function aw_verified_count() {
  */
 /** Services choice: only services that at least 3 listings offer (the rest would lead to near-empty lists). */
 function aw_directory_service_field( $field ) {
-	$cur      = (string) current( aw_request_services() ?: array( '' ) );
+	$cur      = (string) current( aw_request_services() ? aw_request_services() : array( '' ) );
 	$services = get_transient( 'directoryweb_facet_services' );
 	if ( false === $services || ! is_array( $services ) ) {
 		$services = array();

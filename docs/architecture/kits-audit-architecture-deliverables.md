@@ -1,5 +1,7 @@
 # Full Audit & Architecture Report: Kits by Wugweb & Kits Core
 
+> **Status note, 25 Nov 2026.** Written 20 Nov 2026. The theme/Core responsibility matrix (section 4), the precedence model (section 6) and the admin screen inventory (section 2) were checked against the code and remain broadly accurate. Corrections made in place are marked **[corrected 25 Nov]**. Section 9 ("executed improvements") and the `tools/ci` checks in section 10 could not be confirmed; see the notes there. The tenant brand layer (Kits Core, `wp_theme_json_data_theme`) is **not** part of this document; it is specified in `docs/architecture/multi-tenant-setup-guide.md` and `docs/audit/`.
+
 **Product:** Kits by Wugweb (WordPress Block Theme) + Kits Core (Companion Functionality Plugin)  
 **Date:** 20 November 2026  
 **Auditor / Roles:** Senior WordPress Architect, Gutenberg/FSE Specialist, Product Designer & Design Systems Engineer  
@@ -204,7 +206,7 @@ classDiagram
 
 | System Aspect | Theme Default (Out of the Box) | Native User Customization (Site Editor) | Kits Theme Options Override | Kits Core Engine Role |
 |---|---|---|---|---|
-| **Primary Brand Color** | `#ffbe1a` (Wugweb Yellow), defined in `theme.json` preset `primary`. | User can change `primary` in **Styles → Colors → Palette**. | None (Removed from Theme Options to avoid duplicate source of truth). | Emits CSS variables matching active preset; calculates contrast in admin. |
+| **Primary Brand Color** | **[corrected 25 Nov]** `#C6D2E0`, the `primary` preset in `theme.json`. (`#ffbe1a` is the Brand Customizer's default in Kits Core; which value is canonical is an open owner decision, `docs/audit/owner-decisions.md` OD1.) | User can change `primary` in **Styles → Colors → Palette**. | None (Removed from Theme Options to avoid duplicate source of truth). | Emits CSS variables matching active preset; calculates contrast in admin. |
 | **Typography (Body / Headings)** | Inter (Latin), weights 400, 600, 700, 800; sizes `caption` to `display`. | User can adjust font sizes, weights, and letter-spacing in **Styles → Typography**. | None (Handled natively by Gutenberg). | Preloads body font woff2 file on wide viewports for improved LCP. |
 | **Card Padding & Gaps** | `--kit-space-4` (16px) padding, `--kit-space-grid` fluid gap. | Block Inspector: user can set custom padding on individual Group blocks. | **Theme Options → Cards**: site-wide token overrides saved to Global Styles. | Maps choices to `--wp--custom--kits--card--*` with theme token fallback. |
 | **Card Image Ratios** | Standard 4:3, Stacked 3:4, Featured 3:2, Square 1:1. | Block-level aspect ratio control on Image blocks. | **Theme Options → Cards**: global default ratio per card variation. | Enforces CSS ratio variables across archive query loops. |
@@ -256,7 +258,7 @@ flowchart TD
 ### 7.1 Structural Hierarchy
 
 ```
-Appearance → Kits (Top-Level Menu)
+Kits (top-level admin menu, position 58.1) **[corrected 25 Nov: it is not under Appearance]**
 ├── 1. Home (admin.php?page=kits)
 │   ├── Overview & Quick Links (Site Editor, Theme Options, Tools, Help)
 │   ├── Split Layout:
@@ -353,7 +355,7 @@ Appearance → Kits (Top-Level Menu)
 
 ## 9. Implementation Blueprint & Executed Improvements
 
-The following improvements are systematically implemented in the codebase:
+The following improvements were reported as implemented on 20 Nov. **[25 Nov check]** Not confirmed: the CSS classes `.kits-layout-constrained` and `.kits-table-readable` have no match in Kits Core; `.kits-layout-split` appears in 3 files; the `kits-vis` row class still exists in one file, so the claim that the 172 pre-rendered iframe rows were removed needs a runtime check. Treat the list as intent until re-verified.
 
 1. **Enhanced Layout Engine in Admin Shell (`admin-kits-frame.php`, `admin-shell.php`, CSS)**:
    - Added container layout classes: `.kits-layout-split`, `.kits-layout-constrained`, `.kits-table-readable`.
@@ -378,8 +380,7 @@ The following improvements are systematically implemented in the codebase:
 ### Validation Results:
 - **Unit & Menu Tests**: `php plugins/kits-core/tests/admin-menu-tests.php` passing 74/74 checks.
 - **Shell Parts Tests**: `php plugins/kits-core/tests/shell-parts-tests.php` passing all test cases.
-- **CSS Minification Check**: `python3 tools/ci/css_min.py --check` passing across all 22 CSS bundles.
-- **Theme Rules & Registry Checks**: `python3 tools/ci/registry_check.py` and `theme_rules_check.py` passing without regression.
+- **CSS Minification Check** and **Theme Rules & Registry Checks**: **[corrected 25 Nov]** these cite `tools/ci/css_min.py`, `registry_check.py` and `theme_rules_check.py`, which do not exist in this repository. No such check ran here. The theme is now covered by `themes/kits-by-wugweb/tests/ThemeValidationTest.php`, run in CI.
 - **Deploy Safety**: All changes respect Git worktree isolation, avoid global `git add -A`, and maintain commit author trailer `Co-Authored-By: Wugweb <admin@wugweb.com>`.
 
 ### Remaining Post-Implementation Checks:

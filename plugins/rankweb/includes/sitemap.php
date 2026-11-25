@@ -223,7 +223,7 @@ function aw_news_sitemap_items() {
 function aw_news_sitemap_xml() {
 	$x = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
 	foreach ( aw_news_sitemap_items() as $r ) {
-		$x .= "\t<url>\n\t\t<loc>" . esc_xml( $r['loc'] ) . "</loc>\n\t\t<news:news>\n\t\t\t<news:publication>\n\t\t\t\t<news:name>Animal Writes</news:name>\n\t\t\t\t<news:language>en</news:language>\n\t\t\t</news:publication>\n"
+		$x .= "\t<url>\n\t\t<loc>" . esc_xml( $r['loc'] ) . "</loc>\n\t\t<news:news>\n\t\t\t<news:publication>\n\t\t\t\t<news:name>" . esc_xml( (string) apply_filters( 'rankweb_news_publication_name', get_bloginfo( 'name' ) ) ) . "</news:name>\n\t\t\t\t<news:language>en</news:language>\n\t\t\t</news:publication>\n"
 			. "\t\t\t<news:publication_date>" . esc_xml( $r['date'] ) . "</news:publication_date>\n\t\t\t<news:title>" . esc_xml( $r['title'] ) . "</news:title>\n\t\t</news:news>\n\t</url>\n";
 	}
 	return $x . '</urlset>' . "\n";
@@ -232,6 +232,24 @@ function aw_news_sitemap_xml() {
 /** The sitemap's address. */
 function aw_news_sitemap_url() {
 	return home_url( '/news-sitemap.xml' );
+}
+
+// Without Rank Math nothing maps /news-sitemap.xml or /video-sitemap.xml to a request, so the two addresses robots.txt
+// lists would be 404. Mapped here to the same sitemap=news and sitemap=video the handlers below and in video.php answer.
+if ( function_exists( 'aw_seo_extras_rank_math' ) && ! aw_seo_extras_rank_math() ) {
+	add_action(
+		'parse_request',
+		function ( $wp ) {
+			$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			$home = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
+			foreach ( array( 'news', 'video' ) as $kind ) {
+				if ( $home . '/' . $kind . '-sitemap.xml' === $path ) {
+					$wp->query_vars['sitemap'] = $kind;
+				}
+			}
+		},
+		-1
+	);
 }
 
 // Rank Math's rule sends /news-sitemap.xml to WordPress as sitemap=news; it is answered here, before Rank Math (parse_query).
@@ -418,7 +436,7 @@ add_action(
 			array(
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
-				'post_title'   => __( 'Sitemap', 'aw-seo-extras' ),
+				'post_title'   => __( 'Sitemap', 'rankweb' ),
 				'post_name'    => AW_HTML_SITEMAP_SLUG,
 				'post_content' => '<!-- wp:shortcode -->[aw_html_sitemap]<!-- /wp:shortcode -->',
 			)

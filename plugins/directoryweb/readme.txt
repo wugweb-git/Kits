@@ -12,7 +12,7 @@ A directory of organisations in WordPress: listings with their places and types,
 
 == Description ==
 
-DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
+DirectoryWeb is a directory for WordPress: listings with places and types, a map, claims and Find help.
 
 = Listings, places and types =
 
@@ -43,7 +43,7 @@ DirectoryWeb is the Directory of an Animal Writes site, as its own plugin.
 
 == Installation ==
 
-1. Activate Kits Core first. While Animal Writes Core is active it loads DirectoryWeb from the plugins folder, so the Directory works before the plugin is activated on its own.
+1. Upload the plugin and activate it. Kits Core is optional: with it the admin screens use the Kits shell, without it DirectoryWeb uses its own.
 2. Activate DirectoryWeb under Plugins to own the Directory's rewrite rules and capability.
 
 == Changelog ==

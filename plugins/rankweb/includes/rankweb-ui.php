@@ -65,10 +65,10 @@ function rankweb_ui_url( string $screen ): string {
  */
 function rankweb_ui_tools(): array {
 	$about = array(
-		'aw-links'     => __( 'The internal-link audit, anchor mix and silos.', 'aw-seo-extras' ),
-		'aw-images'    => __( 'Find and replace alt text, titles and captions across the media library.', 'aw-seo-extras' ),
-		'aw-seo-csv'   => __( 'Export and import SEO fields as a CSV file.', 'aw-seo-extras' ),
-		'aw-redirects' => __( 'Redirect imports, exports and the 404 log.', 'aw-seo-extras' ),
+		'aw-links'     => __( 'The internal-link audit, anchor mix and silos.', 'rankweb' ),
+		'aw-images'    => __( 'Find and replace alt text, titles and captions across the media library.', 'rankweb' ),
+		'aw-seo-csv'   => __( 'Export and import SEO fields as a CSV file.', 'rankweb' ),
+		'aw-redirects' => __( 'Redirect imports, exports and the 404 log.', 'rankweb' ),
 	);
 	$items = (array) ( $GLOBALS['submenu'][ AW_SEO_MENU ] ?? array() );
 	$tools = array();
@@ -99,25 +99,25 @@ add_action(
 		$tabs = array(
 			array(
 				'slug'    => 'dashboard',
-				'label'   => __( 'Dashboard', 'aw-seo-extras' ),
+				'label'   => __( 'Dashboard', 'rankweb' ),
 				'url'     => rankweb_ui_url( 'dashboard' ),
 				'current' => 'dashboard' === $screen,
 			),
 			array(
 				'slug'    => 'insights',
-				'label'   => __( 'Insights', 'aw-seo-extras' ),
+				'label'   => __( 'Insights', 'rankweb' ),
 				'url'     => rankweb_ui_url( 'insights' ),
 				'current' => 'insights' === $screen,
 			),
 			array(
 				'slug'    => 'modules',
-				'label'   => __( 'Modules', 'aw-seo-extras' ),
+				'label'   => __( 'Modules', 'rankweb' ),
 				'url'     => rankweb_ui_url( 'modules' ),
 				'current' => 'modules' === $screen,
 			),
 			array(
 				'slug'    => 'faq',
-				'label'   => __( 'FAQ', 'aw-seo-extras' ),
+				'label'   => __( 'FAQ', 'rankweb' ),
 				'url'     => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 				'current' => 'faq' === $screen,
 			),
@@ -126,7 +126,7 @@ add_action(
 		if ( current_user_can( 'manage_options' ) ) {
 			$tabs[] = array(
 				'slug'    => 'settings',
-				'label'   => __( 'Settings', 'aw-seo-extras' ),
+				'label'   => __( 'Settings', 'rankweb' ),
 				'url'     => rankweb_ui_url( 'settings' ),
 				'current' => 'settings' === $screen,
 			);
@@ -190,17 +190,17 @@ function rankweb_ui_body_class( $classes ) {
  */
 function rankweb_ui_page( string $screen ): void {
 	$title = array(
-		'settings' => __( 'RankWeb settings', 'aw-seo-extras' ),
-		'faq'      => __( 'FAQ', 'aw-seo-extras' ),
-		'insights' => __( 'RankWeb insights', 'aw-seo-extras' ),
-		'modules'  => __( 'RankWeb modules', 'aw-seo-extras' ),
-	)[ $screen ] ?? __( 'RankWeb', 'aw-seo-extras' );
+		'settings' => __( 'RankWeb settings', 'rankweb' ),
+		'faq'      => __( 'FAQ', 'rankweb' ),
+		'insights' => __( 'RankWeb insights', 'rankweb' ),
+		'modules'  => __( 'RankWeb modules', 'rankweb' ),
+	)[ $screen ] ?? __( 'RankWeb', 'rankweb' );
 	if ( rankweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
 		kits_shell_mount( 'rankweb-app', $title );
 		return;
 	}
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
-	wp_admin_notice( esc_html__( 'RankWeb needs Kits Core (active, with its build) to show this screen.', 'aw-seo-extras' ), array( 'type' => 'error' ) );
+	wp_admin_notice( esc_html__( 'RankWeb needs Kits Core (active, with its build) to show this screen.', 'rankweb' ), array( 'type' => 'error' ) );
 	echo '</div>';
 }
 

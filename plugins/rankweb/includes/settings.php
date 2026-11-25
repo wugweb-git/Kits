@@ -34,110 +34,22 @@ function aw_seo_modules(): array {
 			'desc'   => 'Shared rules: description length, the section hubs\' titles and descriptions, share images.',
 			'fields' => array(
 				'AW_SEO_DESC_MAX' => array( 'type' => 'int', 'label' => 'Longest description (characters)', 'help' => 'Search descriptions are cut at a word before this.', 'default' => 155 ),
-				'AW_HUB_TITLES' => array( 'type' => 'map', 'label' => 'Section hub titles', 'help' => 'One per line: post type | title.', 'default' => array(
-						'aw_news'        => 'Animal Welfare News from India – Animal Writes',
-						'aw_legal'       => 'Animal Laws and Court Orders in India – Animal Writes',
-						'post'           => 'Animal Welfare Guides & Research in India – Animal Writes',
-						'aw_listing'     => 'Directory of 5,000+ Animal Welfare NGOs in India',
-						'aw_opportunity' => 'Animal Welfare Volunteering and Jobs in India',
-						'aw_press'       => 'Animal Writes in the News',
-						'aw_campaign'    => 'Animal Welfare Campaigns in India – Animal Writes',
-					) ),
-				'AW_HUB_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Section hub descriptions', 'help' => 'One per line: post type | description. %s is the number of listings (Directory).', 'default' => array(
-						'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India. Each opportunity lists its role, location and how to apply.',
-						'aw_press'       => 'Press coverage of Animal Writes campaigns for animals in India: news articles, videos and social posts.',
-						'aw_listing'     => 'Find %s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in every state and district of India, with phone, address and services.',
-					) ),
-				'AW_ARCHIVE_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Archive descriptions', 'help' => 'One per line: post type | description.', 'default' => array(
-						'aw_news'        => 'Animal-welfare news from across India, summarised with a link to every source.',
-						'aw_legal'       => 'Court orders, notifications and rules that affect animals in India, explained in plain words.',
-						'post'           => 'Practical guides: what to do for an injured animal, how to report cruelty, Animal Birth Control and more.',
-						'aw_campaign'    => 'Citizen campaigns for animals in India: what each one asks for, how to take part and what it achieved.',
-						'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
-						'aw_listing'     => 'Animal welfare organisations, Gaushalas and government vets across India.',
-					) ),
-				'AW_SEO_LISTING_SHARE_IMAGE' => array( 'tab' => 'share', 'type' => 'int', 'label' => 'Listing share image (attachment ID)', 'help' => 'Used when a listing has no logo of its own.', 'default' => 8814 ),
-				'AW_SEO_SOURCE_IMAGE_TYPES' => array( 'tab' => 'share', 'type' => 'list', 'label' => 'Types that share the publisher\'s image', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ) ),
+				'AW_HUB_TITLES' => array( 'type' => 'map', 'label' => 'Section hub titles', 'help' => 'One per line: post type | title.', 'default' => array() ),
+				'AW_HUB_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Section hub descriptions', 'help' => 'One per line: post type | description. %s is the number of listings (Directory).', 'default' => array() ),
+				'AW_ARCHIVE_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Archive descriptions', 'help' => 'One per line: post type | description.', 'default' => array() ),
+				'AW_SEO_LISTING_SHARE_IMAGE' => array( 'tab' => 'share', 'type' => 'int', 'label' => 'Listing share image (attachment ID)', 'help' => 'Used when a listing has no logo of its own.', 'default' => 0 ),
+				'AW_SEO_SOURCE_IMAGE_TYPES' => array( 'tab' => 'share', 'type' => 'list', 'label' => 'Types that share the publisher\'s image', 'help' => 'One post type per line.', 'default' => array() ),
 			),
 		),
 		'titles' => array(
 			'label'  => 'Titles and descriptions',
 			'switch' => false,
-			'files'  => array( 'titles', 'programmatic' ),
+			'files'  => array( 'titles' ),
 			'desc'   => 'Search titles and descriptions of items and of list pages (hubs, Directory places, categories, tags), built from their own counts and places.',
 			'fields' => array(
-				'AW_SEO_ITEM_TYPES' => array( 'type' => 'list', 'label' => 'Item types', 'help' => 'Post types whose items get titles, descriptions and focus keywords. One per line.', 'default' => array( 'aw_listing', 'aw_news', 'post', 'aw_legal', 'aw_press', 'page', 'aw_opportunity', 'aw_campaign' ) ),
-				'AW_SEO_BREAKDOWN' => array( 'type' => 'list', 'label' => 'Directory place breakdown', 'help' => 'Listing types counted in a place\'s description, in this order. One tag slug per line.', 'default' => array( 'animal-welfare-organisation', 'gaushala', 'veterinary', 'abc-centre', 'wildlife-rescue' ) ),
-				'AW_SEO_TERM_TITLES' => array( 'type' => 'map', 'label' => 'Category and tag titles', 'help' => 'One per line: taxonomy:slug | title. Others get the rule-based title.', 'default' => array(
-						'category:adoption' => 'Animal Adoption News and Guides for India',
-						'category:animal-birth-control' => 'ABC Animal Birth Control Rules and News',
-						'category:transport-slaughter' => 'Animal Transport and Slaughter in India',
-						'category:birds' => 'Bird Rescue and Welfare News from India',
-						'category:campaigns-civic-action' => 'Animal Welfare Campaigns and Civic Action',
-						'category:cattle-gaushalas' => 'Cattle Welfare and Gaushala News in India',
-						'category:community-dogs' => 'Laws and News on Stray and Community Dogs',
-						'category:courts-judgments' => 'Animal Welfare Court Cases and Judgments',
-						'category:cruelty-prosecution' => 'Animal Cruelty Cases and Prosecution News',
-						'category:disaster-rescue' => 'Animal Rescue in Disasters and Emergencies',
-						'category:feeders-caregivers' => 'Rights of People Feeding Street Animals',
-						'category:laws-rules' => 'Animal Protection Laws and Rules in India',
-						'category:performing-captive-animals' => 'Performing and Captive Animals in India',
-						'category:pets-breeding' => 'Pet Shop and Dog Breeding Rules in India',
-						'category:policy-government' => 'Animal Welfare Policy and Government News',
-						'category:rabies-public-health' => 'Rabies Control and Public Health in India',
-						'category:veterinary-care' => 'Veterinary Care and Animal Health in India',
-						'category:wildlife' => 'Wildlife Protection and Rescue in India',
-						'post_tag:abc-centre' => 'ABC Centres by State and District',
-						'post_tag:animal-welfare-organisation' => 'Animal Welfare NGOs by State and District',
-						'post_tag:gaushala' => 'Gaushalas by State and District',
-						'post_tag:veterinary-office' => 'Government Veterinary Offices by State and District', // "Veterinary", not "Vet" (owner, 20 Oct 2026)
-						'post_tag:mobile-veterinary-unit' => '1962 Mobile Veterinary Units by State and District',
-						'post_tag:veterinary-dispensary' => 'Veterinary Dispensaries by State and District',
-						'post_tag:veterinary-hospital' => 'Veterinary Hospitals by State and District',
-						'post_tag:wildlife-rescue' => 'Wildlife Rescue Groups by State and District',
-						'post_tag:veterinary-clinic' => 'Veterinary Clinics by State and District',
-						'post_tag:bird-hospital' => 'Bird Hospitals by State and District',
-						'post_tag:animal-shelter' => 'Animal Shelters by State and District',
-						'post_tag:animal-ambulance' => 'Animal Ambulances by State and District',
-						'post_tag:adoption-network' => 'Adoption Networks by State and District',
-						'post_tag:emergency-rescue' => 'Emergency Rescue by State and District',
-						'post_tag:feeder-network' => 'Feeder Networks by State and District',
-						'post_tag:legal-aid' => 'Free Legal Aid (DLSA) by State and District',
-						'post_tag:rescue-group' => 'Animal Rescue Groups by State and District',
-						'post_tag:sanctuary' => 'Animal Sanctuaries by State and District',
-						'post_tag:animal-welfare' => 'NGOs Doing Animal Welfare Work in India', // owner-approved 20 Oct 2026
-						'post_tag:bird-treatment' => 'NGOs Treating Injured Birds across India',
-						'post_tag:adoption' => 'NGOs Offering Animal Adoption across India',
-						'post_tag:ambulance' => 'NGOs Running Animal Ambulances in India',
-						'post_tag:boarding-foster' => 'NGOs Offering Pet Boarding and Fostering',
-						'post_tag:cattle-care' => 'NGOs Offering Cattle Care in Indian States',
-						'post_tag:feeding' => 'NGOs Feeding Street Animals across India',
-						'post_tag:legal-help' => 'NGOs Offering Animal Legal Help in India',
-						'post_tag:rescue' => 'NGOs Offering Animal Rescue across India',
-						'post_tag:shelter' => 'NGOs Offering Animal Shelter across India',
-						'post_tag:sterilisation' => 'NGOs Offering ABC Sterilisation in India',
-						'post_tag:treatment' => 'NGOs Treating Injured Animals across India',
-						'post_tag:vaccination' => 'NGOs Offering Animal Vaccination in India',
-						'post_tag:act' => 'Animal Welfare Acts of India Summarised',
-						'post_tag:advisory' => 'Animal Welfare Advisories Issued in India',
-						'post_tag:circular' => 'Animal Welfare Circulars Issued in India',
-						'post_tag:judgment' => 'Animal Welfare Court Judgments in India',
-						'post_tag:notification' => 'Government Notifications on Animal Welfare',
-						'post_tag:official-release' => 'Official Press Releases on Animal Welfare',
-						'post_tag:order' => 'Court Orders on Animal Welfare in India',
-						'post_tag:rule' => 'Animal Welfare Rules of India Summarised',
-						'post_tag:template' => 'Letter Templates for Animal Welfare Cases',
-						'post_tag:event' => 'Animal Welfare Event Listings for India',
-						'post_tag:fellowship' => 'Animal Welfare Fellowship Opportunities',
-						'post_tag:foster' => 'Animal Fostering Opportunities in India',
-						'post_tag:grant' => 'Grants for Animal Welfare Work in India',
-						'post_tag:internship' => 'Animal Welfare Internship Opportunities',
-						'post_tag:job' => 'Jobs in Animal Welfare NGOs across India',
-						'post_tag:volunteer' => 'Animal Welfare Volunteer Roles in India',
-						'post_tag:faq' => 'Animal Welfare FAQs and Answers on the Law',
-						'post_tag:guide' => 'Practical Animal Welfare Guides for India',
-						'post_tag:research' => 'Animal Welfare Research Studies from India',
-					) ),
+				'AW_SEO_ITEM_TYPES' => array( 'type' => 'list', 'label' => 'Item types', 'help' => 'Post types whose items get titles, descriptions and focus keywords. One per line.', 'default' => array( 'post', 'page' ) ),
+				'AW_SEO_BREAKDOWN' => array( 'type' => 'list', 'label' => 'Directory place breakdown', 'help' => 'Listing types counted in a place\'s description, in this order. One tag slug per line.', 'default' => array() ),
+				'AW_SEO_TERM_TITLES' => array( 'type' => 'map', 'label' => 'Category and tag titles', 'help' => 'One per line: taxonomy:slug | title. Others get the rule-based title.', 'default' => array() ),
 			),
 		),
 		'canonical' => array(
@@ -157,23 +69,7 @@ function aw_seo_modules(): array {
 			'fields' => array(
 				'AW_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
 				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
-				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array(
-						'haryana/jhajjar/animal-welfare-organisation',
-						'madhya-pradesh/sheopur/animal-welfare-organisation',
-						'maharashtra/pune/animal-welfare-organisation',
-						'maharashtra/pune/wildlife-rescue',
-						'telangana/kumuram-bheem-asifabad/veterinary-office',
-						'telangana/mancherial/veterinary-office',
-						'telangana/medchal-malkajgiri/veterinary-office',
-						'telangana/nizamabad/animal-welfare-organisation',
-						'uttar-pradesh/chandauli/veterinary-office',
-						'uttar-pradesh/gautam-buddha-nagar/animal-welfare-organisation',
-						'uttar-pradesh/kushinagar/animal-welfare-organisation',
-						'uttar-pradesh/mahrajganj/animal-welfare-organisation',
-						'uttar-pradesh/siddharthnagar/gaushala',
-						'uttarakhand/chamoli/animal-welfare-organisation',
-						'west-bengal/purba-medinipur/veterinary-office',
-					) ),
+				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array() ),
 			),
 		),
 		'filtered' => array(
@@ -183,15 +79,9 @@ function aw_seo_modules(): array {
 			'desc'   => 'A hub filtered by one category or tag is a page of its own (title, description, canonical, sitemap) from a minimum number of items.',
 			'fields' => array(
 				'AW_FILTERED_MIN_ITEMS' => array( 'type' => 'int', 'label' => 'Fewest items for an indexed filtered list', 'help' => 'Below this a filtered list is noindex.', 'default' => 3 ),
-				'AW_FILTERED_CATEGORY_HUBS' => array( 'type' => 'list', 'label' => 'Hubs with filtered pages', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_campaign' ) ),
-				'AW_FILTERED_TITLE_WORDS' => array( 'type' => 'maplist', 'label' => 'Filtered list titles', 'help' => 'One per line: post type | title | shorter title …, %s is the category or tag.', 'default' => array(
-						'aw_news'        => array( '%s News from India', '%s News' ),
-						'aw_legal'       => array( '%s Laws and Court Orders in India', '%s Laws and Court Orders', '%s Library Documents in India', '%s Library Documents' ),
-						'post'           => array( '%s Guides and Research', '%s Resources' ),
-						'aw_opportunity' => array( '%s Volunteer Roles and Jobs', '%s Opportunities' ),
-						'aw_campaign'    => array( '%s Campaigns', 'Campaigns on %s' ),
-					) ),
-				'AW_FILTERED_STATE_NOINDEX' => array( 'type' => 'list', 'label' => 'Hubs whose state views are noindex', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'aw_opportunity' ) ),
+				'AW_FILTERED_CATEGORY_HUBS' => array( 'type' => 'list', 'label' => 'Hubs with filtered pages', 'help' => 'One post type per line.', 'default' => array() ),
+				'AW_FILTERED_TITLE_WORDS' => array( 'type' => 'maplist', 'label' => 'Filtered list titles', 'help' => 'One per line: post type | title | shorter title …, %s is the category or tag.', 'default' => array() ),
+				'AW_FILTERED_STATE_NOINDEX' => array( 'type' => 'list', 'label' => 'Hubs whose state views are noindex', 'help' => 'One post type per line.', 'default' => array() ),
 			),
 		),
 		'video' => array(
@@ -200,7 +90,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'video' ),
 			'desc'   => 'Finds YouTube and Vimeo videos in content, adds a VideoObject to the schema, and lists them in a video sitemap. No paid API: a YouTube video gets its title and thumbnail, not its duration or date.',
 			'fields' => array(
-				'AW_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post', 'aw_news', 'aw_legal', 'aw_campaign' ) ),
+				'AW_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post' ) ),
 			),
 		),
 		'redirect-tools' => array(
@@ -218,7 +108,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'schema' ),
 			'desc'   => 'The site\'s own JSON-LD nodes in Rank Math\'s graph (organisations, Library documents, campaigns, opportunities, lists).',
 			'fields' => array(
-				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array( 'AnimalWrites', 'Animal Writes India', 'animalwrites.in' ) ), // "Animal Writes India": 12 Nov 2026, people search the brand under several names
+				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array() ),
 			),
 		),
 		'schema-plus' => array(
@@ -227,7 +117,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'schema-custom' ),
 			'desc'   => 'A per-item JSON-LD box (several nodes), Speakable, about and mentions, import schema from a URL, and a Rich Results Test link.',
 			'fields' => array(
-				'AW_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the custom-schema box', 'help' => 'Items of these types get the Custom schema box. One per line. Empty: none.', 'default' => array( 'post', 'page', 'aw_news', 'aw_legal', 'aw_campaign', 'aw_listing', 'aw_opportunity' ) ),
+				'AW_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the custom-schema box', 'help' => 'Items of these types get the Custom schema box. One per line. Empty: none.', 'default' => array( 'post', 'page' ) ),
 			),
 		),
 		'faq' => array(
@@ -254,7 +144,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'rank-math-schema' ),
 			'desc'   => 'Rank Math\'s own schema entries naming each item\'s real schema type, so its screens show it.',
 			'fields' => array(
-				'AW_RM_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types', 'help' => 'One per line.', 'default' => array( 'page', 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' ) ),
+				'AW_RM_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types', 'help' => 'One per line.', 'default' => array( 'post', 'page' ) ),
 			),
 		),
 		'opengraph' => array(
@@ -263,7 +153,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'opengraph' ),
 			'desc'   => 'Share images and texts Rank Math\'s settings cannot express; a choice made in Rank Math wins.',
 			'fields' => array(
-				'AW_SEO_ARTICLE_TYPES' => array( 'type' => 'list', 'label' => 'Types shared as articles', 'help' => 'One post type per line.', 'default' => array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) ),
+				'AW_SEO_ARTICLE_TYPES' => array( 'type' => 'list', 'label' => 'Types shared as articles', 'help' => 'One post type per line.', 'default' => array( 'post' ) ),
 			),
 		),
 		'sitemap' => array(
@@ -296,7 +186,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'focus-keywords' ),
 			'desc'   => 'Listings get their name as focus keyword; the workers\' job fills the rest through the site\'s API.',
 			'fields' => array(
-				'AW_SEO_GENERIC_WORDS' => array( 'type' => 'list', 'label' => 'Words that alone make no keyword', 'help' => 'One per line.', 'default' => array( 'animal', 'animals', 'welfare', 'india', 'indian', 'save', 'help', 'news', 'care', 'update', 'updates', 'issue', 'case', 'story' ) ),
+				'AW_SEO_GENERIC_WORDS' => array( 'type' => 'list', 'label' => 'Words that alone make no keyword', 'help' => 'One per line.', 'default' => array( 'save', 'help', 'news', 'care', 'update', 'updates', 'issue', 'case', 'story' ) ),
 			),
 		),
 		'health' => array(
@@ -332,7 +222,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'bulk-edit', 'bulk-csv' ),
 			'desc'   => 'SEO columns, filters, Quick Edit and Bulk Edit on the post-list screens, and a CSV export and import of the SEO fields (RankWeb → SEO CSV).',
 			'fields' => array(
-				'AW_BULK_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the list-screen SEO tools', 'help' => 'One per line. Empty: none.', 'default' => array( 'aw_listing', 'aw_news', 'post', 'aw_legal', 'aw_opportunity', 'aw_campaign', 'page' ) ),
+				'AW_BULK_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the list-screen SEO tools', 'help' => 'One per line. Empty: none.', 'default' => array( 'post', 'page' ) ),
 			),
 		),
 		'media' => array(
@@ -359,7 +249,7 @@ function aw_seo_modules(): array {
 			'files'  => array( 'analysis', 'content-advice' ),
 			'desc'   => 'Rank Math\'s analyzer reads the published page for Pages built from blocks; the RankWeb content panel in the editor.',
 			'fields' => array(
-				'AW_SEO_RENDERED_TYPES' => array( 'type' => 'list', 'label' => 'Types analysed as rendered', 'help' => 'One post type per line.', 'default' => array( 'aw_legal', 'post', 'aw_campaign', 'aw_news', 'aw_opportunity', 'aw_listing' ) ),
+				'AW_SEO_RENDERED_TYPES' => array( 'type' => 'list', 'label' => 'Types analysed as rendered', 'help' => 'One post type per line.', 'default' => array( 'post', 'page' ) ),
 				'AW_SEO_SUMMARY_SKIP_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests skipped on summaries', 'help' => 'One test ID per line.', 'default' => array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' ) ),
 				'AW_SEO_COVERED_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests RankWeb covers', 'help' => 'Skipped on every item: RankWeb does this work instead. One test ID per line.', 'default' => array( 'hasContentAI' ) ),
 			),
@@ -382,7 +272,7 @@ function aw_seo_modules(): array {
 				'AW_LINK_ANCHOR_EXACT_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most exact match, in percent', 'help' => 'An item whose links in have more exact-match anchors than this share is warned about, and the auto-linker uses another keyword.', 'default' => 20 ),
 				'AW_LINK_ANCHOR_TYPE_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most of any other type, in percent', 'help' => 'The same for every other anchor type.', 'default' => 60 ),
 				'AW_LINK_ANCHOR_MIN' => array( 'type' => 'int', 'label' => 'Anchors: fewest links before a warning', 'help' => 'An item with fewer links in gets no warning.', 'default' => 5 ),
-				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array( 'Animal Writes' ) ),
+				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array() ),
 				'AW_LINK_GENERIC' => array( 'type' => 'list', 'label' => 'Anchors: generic anchors', 'help' => 'These anchors are generic. One per line.', 'default' => array( 'click here', 'here', 'read more', 'learn more', 'more', 'this page', 'this article', 'this link', 'link' ) ),
 				'AW_LINK_LONG_WORDS' => array( 'type' => 'int', 'label' => 'Anchors: words in a long-tail anchor', 'help' => 'An anchor with more words than this is long-tail.', 'default' => 6 ),
 				'AW_SILO_MAX' => array( 'type' => 'int', 'label' => 'Silos: most links an item shows', 'help' => 'The silo links at the end of an item. In virtual mode the others are listed from the next one round, so every item gets links.', 'default' => 10 ),
@@ -392,6 +282,12 @@ function aw_seo_modules(): array {
 			),
 		),
 	);
+	/**
+	 * The modules and their settings, before they are read: a site changes a default or adds a field here.
+	 *
+	 * @param array $m Modules.
+	 */
+	$m = (array) apply_filters( 'rankweb_modules', $m );
 	return $m;
 }
 

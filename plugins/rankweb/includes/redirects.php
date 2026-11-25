@@ -8,7 +8,7 @@
  * the old /location/{slug}/ and /source/{slug}/ pages (their PHP handler was removed once the crawl showed Rank Math
  * answers every one). `wp aw redirects-list`
  * prints the whole list for tools/redirects/crawl.py, which requests every old address and reports any 404, wrong
- * target, and which layer answered (X-Redirect-By: "Rank Math" or "Animal Writes").
+ * target, and which layer answered (X-Redirect-By: "Rank Math" or "RankWeb").
  *
  * Rules Rank Math's list cannot hold (they rewrite the address or read the query string rather than match a path) stay
  * in PHP:
@@ -152,51 +152,25 @@ function aw_redirect_add( $old_url, $target ) {
 	}
 }
 
-// A link written as "https:/animalwrites.in/…" (one slash) or "animalwrites.in/…" without a scheme is read as a path on
-// this site: /https:/animalwrites.in/news/ (79 hits in the 404 Monitor, no referer; audit 12 Nov 2026). It goes to
-// the page it meant. The site's own templates and stored content have no such link; the hits come from outside.
+// A link written with the site's own host but a mangled scheme ("https:/example.org/…", one slash) or none ("example.org/…")
+// is read as a path on this site and 404s; it goes to the page it meant. The host comes from home_url(); extra hosts the
+// site was known by (an old domain) are added through the rankweb_own_hosts filter.
 add_action(
 	'parse_request',
 	function () {
 		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
 			return;
 		}
-		$uri = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?animalwrites\.in(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
+		$uri   = (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		$hosts = array_filter( array_map( 'strval', (array) apply_filters( 'rankweb_own_hosts', array( (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) ) ) );
+		if ( ! $hosts ) {
 			return;
 		}
-		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'Animal Writes' );
-		exit;
-	},
-	0
-);
-
-// Crawlers and link scrapers that strip the "tel:" scheme and request it as a path (e.g. /tel:1962, /tel:112; 404 audit).
-// Send each to its dedicated guide or directory page instead of a 404 error.
-add_action(
-	'parse_request',
-	function () {
-		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? 'GET', array( 'GET', 'HEAD' ), true ) ) {
+		$alt = implode( '|', array_map( fn( $h ) => preg_quote( preg_replace( '/^www\./i', '', $h ), '#' ), $hosts ) );
+		if ( ! preg_match( '#^/+(?:https?:/+)?(?:www\.)?(?:' . $alt . ')(/[^?]*)?(\?.*)?$#i', $uri, $m ) ) {
 			return;
 		}
-		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( ! preg_match( '#^/+tel:([0-9\+\-]+)$#i', $path, $m ) ) {
-			return;
-		}
-		$num = preg_replace( '/\D+/', '', $m[1] );
-		if ( '1962' === $num ) {
-			wp_safe_redirect( home_url( '/resources/1962-helpline-mobile-veterinary-units/' ), 301, 'Animal Writes' );
-			exit;
-		}
-		if ( '112' === $num ) {
-			wp_safe_redirect( home_url( '/resources/who-to-call-for-an-animal-emergency-in-india-112-1962-local-groups/' ), 301, 'Animal Writes' );
-			exit;
-		}
-		if ( '01292555700' === $num || '1292555700' === $num ) {
-			wp_safe_redirect( home_url( '/resources/animal-cruelty-law-india/' ), 301, 'Animal Writes' );
-			exit;
-		}
-		wp_safe_redirect( home_url( '/directory/' ), 301, 'Animal Writes' );
+		wp_safe_redirect( home_url( '' !== ( $m[1] ?? '' ) ? $m[1] : '/' ) . ( $m[2] ?? '' ), 301, 'RankWeb' );
 		exit;
 	},
 	0
@@ -211,28 +185,7 @@ add_action(
 	function () {
 		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( preg_match( '#^/wp-(?:includes|content)/.*/@wordpress/interactivity(?:\.js)?$#', $path ) ) {
-			wp_safe_redirect( includes_url( 'js/dist/script-modules/interactivity/index.min.js' ), 301, 'Animal Writes' );
-			exit;
-		}
-	},
-	0
-);
-
-// Addresses that are gone for good answer 410 (audit, 12 Nov 2026; checked the same day: no file of the build and none
-// of 20 live pages prints them): the removed kits-core ad slot script and Core's old visit counter, plugin files under
-// a server path (wp-content/plugins/home/…/aw_deploy/…, a plugins_url() address from before the plugin links of
-// 10–11 Nov), and sitemaps of types or taxonomies that no longer exist (news-sitemap.xml itself is the Google News
-// sitemap again since 12 Nov 2026, sitemap.php; only numbered copies stay gone). Old kits-cache CSS files are left at 404:
-// their names come from each build, so a pattern could catch a file the next build writes.
-add_action(
-	'parse_request',
-	function () {
-		$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		if ( preg_match( '#^/(?:wp-content/plugins/home/u544169507/.+|wp-content/plugins/kits-core/assets/js/ad-slot\.js|wp-content/plugins/animal-writes-core/visit\.php|(?:aw_listing_type|aw_guide)-sitemap\d*\.xml|news-sitemap\d+\.xml)$#', $path ) ) {
-			status_header( 410 );
-			nocache_headers();
-			header( 'Content-Type: text/plain; charset=utf-8' );
-			echo 'Gone';
+			wp_safe_redirect( includes_url( 'js/dist/script-modules/interactivity/index.min.js' ), 301, 'RankWeb' );
 			exit;
 		}
 	},
@@ -254,7 +207,7 @@ add_action(
 		}
 		$lower = preg_replace_callback( '/(%[0-9A-Fa-f]{2})|([^%]+)/', fn( $m ) => '' !== $m[1] ? $m[1] : strtolower( $m[2] ), $path );
 		$query = (string) wp_parse_url( $uri, PHP_URL_QUERY );
-		wp_safe_redirect( home_url( $lower ) . ( '' !== $query ? '?' . $query : '' ), 301, 'Animal Writes' );
+		wp_safe_redirect( home_url( $lower ) . ( '' !== $query ? '?' . $query : '' ), 301, 'RankWeb' );
 		exit;
 	},
 	0
@@ -272,24 +225,12 @@ add_action(
 	1
 );
 
-// /?author=N goes to About in one hop (WordPress would first send it to /author/{name}/, which the ^author rule sends on).
-add_action(
-	'template_redirect',
-	function () {
-		if ( isset( $_GET['author'] ) && is_author() ) { // phpcs:ignore WordPress.Security.NonceVerification
-			wp_safe_redirect( home_url( '/about/' ), 301, 'Animal Writes' );
-			exit;
-		}
-	},
-	1
-);
-
 // The Home page has no page 2: /page/2/ (any number) is a copy of Home, so it goes to Home in one hop (5 Nov 2026).
 add_action(
 	'template_redirect',
 	function () {
 		if ( is_front_page() && 'page' === get_option( 'show_on_front' ) && max( (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) ) > 1 ) {
-			wp_safe_redirect( home_url( '/' ), 301, 'Animal Writes' );
+			wp_safe_redirect( home_url( '/' ), 301, 'RankWeb' );
 			exit;
 		}
 	},

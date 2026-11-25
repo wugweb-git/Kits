@@ -318,13 +318,65 @@ function kits_brand_sanitize_tokens( array $input ): array {
 }
 
 /**
+ * The default value of every token as the active theme defines it, so "unchanged" means unchanged from the theme.
+ * Colour tokens read the palette slug named by their --wp--preset--color--* bridge, radius tokens the radius preset,
+ * and the two widths the theme layout. A token the theme does not define keeps the built-in default. Pure: it takes the
+ * theme's settings array (theme.json "settings"), the palette flat or keyed by origin.
+ *
+ * @param array<string, mixed> $settings Theme settings (from theme.json).
+ * @return array<string, string> Token key => default value.
+ */
+function kits_brand_resolve_defaults( array $settings ): array {
+	$palette = $settings['color']['palette'] ?? array();
+	if ( isset( $palette['theme'] ) && is_array( $palette['theme'] ) ) {
+		$palette = $palette['theme'];
+	}
+	$colours = array();
+	foreach ( (array) $palette as $row ) {
+		if ( is_array( $row ) && isset( $row['slug'], $row['color'] ) ) {
+			$colours[ (string) $row['slug'] ] = (string) $row['color'];
+		}
+	}
+	$radii = array();
+	foreach ( (array) ( $settings['border']['radiusSizes'] ?? array() ) as $row ) {
+		if ( is_array( $row ) && isset( $row['slug'], $row['size'] ) ) {
+			$radii[ (string) $row['slug'] ] = (string) $row['size'];
+		}
+	}
+	$out = array();
+	foreach ( kits_brand_token_definitions() as $key => $def ) {
+		$value  = $def['default'];
+		$bridge = $def['wp_preset'] ?? '';
+		if ( 0 === strpos( $bridge, '--wp--preset--color--' ) ) {
+			$slug = substr( $bridge, strlen( '--wp--preset--color--' ) );
+			if ( isset( $colours[ $slug ] ) ) {
+				$value = $colours[ $slug ];
+			}
+		} elseif ( 0 === strpos( $bridge, '--wp--preset--border-radius--' ) ) {
+			$slug = substr( $bridge, strlen( '--wp--preset--border-radius--' ) );
+			if ( isset( $radii[ $slug ] ) ) {
+				$value = $radii[ $slug ];
+			}
+		} elseif ( 'width_content' === $key && ! empty( $settings['layout']['contentSize'] ) ) {
+			$value = (string) $settings['layout']['contentSize'];
+		} elseif ( 'width_wide' === $key && ! empty( $settings['layout']['wideSize'] ) ) {
+			$value = (string) $settings['layout']['wideSize'];
+		}
+		$out[ $key ] = $value;
+	}
+	return $out;
+}
+
+/**
  * Builds CSS stylesheet rules from brand token overrides.
  * Overrides both :root --kit-* custom properties and corresponding --wp--preset--* variables.
+ * A value equal to its default (the theme's, when $defaults is given; otherwise the built-in one) is not emitted.
  *
- * @param array<string, string> $tokens Active token values.
+ * @param array<string, string>      $tokens   Active token values.
+ * @param array<string, string>|null $defaults Token defaults from kits_brand_resolve_defaults(), or null.
  * @return string CSS text.
  */
-function kits_brand_compile_css( array $tokens ): string {
+function kits_brand_compile_css( array $tokens, ?array $defaults = null ): string {
 	$defs = kits_brand_token_definitions();
 	$css_lines = array();
 
@@ -333,8 +385,9 @@ function kits_brand_compile_css( array $tokens ): string {
 			continue;
 		}
 
-		$val = $tokens[ $key ];
-		if ( '' === $val || 'inherit' === $val || $val === $def['default'] ) {
+		$val     = $tokens[ $key ];
+		$default = isset( $defaults[ $key ] ) ? (string) $defaults[ $key ] : (string) $def['default'];
+		if ( '' === $val || 'inherit' === $val || 0 === strcasecmp( (string) $val, $default ) ) {
 			continue; // Do not output redundant defaults
 		}
 

@@ -29,7 +29,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_GEO_UA       = 'AnimalWrites/1.0 (+https://animalwrites.in; contact@animalwrites.in)';
+/**
+ * What a geocoding request says about this site (Nominatim's policy asks for it): the site address, and a contact
+ * address only when the site gives one through the `directoryweb_geocode_contact` filter. Nothing of another site.
+ */
+function aw_geo_user_agent(): string {
+	$contact = (string) apply_filters( 'directoryweb_geocode_contact', '' );
+	return 'DirectoryWeb/1.1 (+' . home_url( '/' ) . ( '' !== $contact ? '; ' . $contact : '' ) . ')';
+}
+
 const AW_GEO_NEAR_KM  = 60; // a match farther than this from the listing's district centre is not trusted
 const AW_GEO_CACHE    = 90 * DAY_IN_SECONDS;
 
@@ -40,7 +48,15 @@ const AW_GEO_CACHE    = 90 * DAY_IN_SECONDS;
  * @return array|null
  */
 function aw_geo_nominatim( $args ) {
-	$args = array_merge( $args, array( 'format' => 'jsonv2', 'limit' => 1, 'countrycodes' => 'in', 'email' => 'contact@animalwrites.in' ) );
+	$args = array_merge( $args, array( 'format' => 'jsonv2', 'limit' => 1 ) );
+	$country = (string) apply_filters( 'directoryweb_geocode_countries', '' ); // e.g. 'in': none unless the site limits its directory to a country
+	if ( '' !== $country ) {
+		$args['countrycodes'] = $country;
+	}
+	$contact = (string) apply_filters( 'directoryweb_geocode_contact', '' );
+	if ( '' !== $contact && is_email( $contact ) ) {
+		$args['email'] = $contact;
+	}
 	$key  = 'aw_geo_' . md5( wp_json_encode( $args ) );
 	$hit  = get_transient( $key );
 	if ( false !== $hit ) {
@@ -53,7 +69,7 @@ function aw_geo_nominatim( $args ) {
 		usleep( (int) ( $wait * 1000000 ) );
 	}
 	update_option( 'aw_geo_last_request', (string) microtime( true ), false );
-	$r = wp_remote_get( 'https://nominatim.openstreetmap.org/search?' . http_build_query( $args ), array( 'timeout' => 20, 'user-agent' => AW_GEO_UA ) );
+	$r = wp_remote_get( 'https://nominatim.openstreetmap.org/search?' . http_build_query( $args ), array( 'timeout' => 20, 'user-agent' => aw_geo_user_agent() ) );
 	update_option( 'aw_geo_last_request', (string) microtime( true ), false );
 	if ( is_wp_error( $r ) || 200 !== (int) wp_remote_retrieve_response_code( $r ) ) {
 		return null; // not cached: tried again on the next run

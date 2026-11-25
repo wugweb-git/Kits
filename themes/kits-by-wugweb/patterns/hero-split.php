@@ -21,6 +21,10 @@
 <!-- wp:buttons -->
 <div class="wp-block-buttons"><!-- wp:button -->
 <div class="wp-block-button"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Primary action', 'kits-by-wugweb' ); ?></a></div>
+<!-- /wp:button -->
+
+<!-- wp:button {"className":"is-style-kits-secondary"} -->
+<div class="wp-block-button is-style-kits-secondary"><a class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Secondary action', 'kits-by-wugweb' ); ?></a></div>
 <!-- /wp:button --></div>
 <!-- /wp:buttons --></div>
 <!-- /wp:column -->

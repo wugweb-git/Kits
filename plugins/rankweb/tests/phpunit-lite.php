@@ -54,6 +54,14 @@ if ( ! class_exists( TestCase::class ) ) {
 		public function assertFalse( $v, string $msg = '' ): void {
 			$this->assertSame( false, $v, $msg );
 		}
+
+		public function assertStringContainsString( string $needle, string $haystack, string $msg = '' ): void {
+			$this->assertTrue( false !== strpos( $haystack, $needle ), $msg ?: "contains: {$needle}" );
+		}
+
+		public function assertStringNotContainsString( string $needle, string $haystack, string $msg = '' ): void {
+			$this->assertTrue( false === strpos( $haystack, $needle ), $msg ?: "does not contain: {$needle}" );
+		}
 	}
 }
 

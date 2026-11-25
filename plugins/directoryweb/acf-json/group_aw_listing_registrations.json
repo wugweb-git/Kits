@@ -311,7 +311,7 @@
     "instruction_placement": "field",
     "hide_on_screen": "",
     "active": true,
-    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name (animal-writes-core meta.php).",
+    "description": "Directory listing details. Each field reads and writes the listing meta key of the same name.",
     "show_in_rest": 0,
     "modified": 1793506771
 }

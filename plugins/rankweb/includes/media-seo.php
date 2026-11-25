@@ -25,9 +25,9 @@ const AW_MEDIA_BATCH = 500; // attachments touched in one run
 /** The three fields and how they are stored. */
 function aw_media_fields(): array {
 	return array(
-		'alt'     => __( 'Alt text', 'aw-seo-extras' ),
-		'title'   => __( 'Title', 'aw-seo-extras' ),
-		'caption' => __( 'Caption', 'aw-seo-extras' ),
+		'alt'     => __( 'Alt text', 'rankweb' ),
+		'title'   => __( 'Title', 'rankweb' ),
+		'caption' => __( 'Caption', 'rankweb' ),
 	);
 }
 
@@ -99,7 +99,7 @@ function aw_media_caption_for( int $id ): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Images', 'aw-seo-extras' ), __( 'Images', 'aw-seo-extras' ), 'manage_options', 'aw-images', 'aw_media_screen' );
+		add_submenu_page( AW_SEO_MENU, __( 'Images', 'rankweb' ), __( 'Images', 'rankweb' ), 'manage_options', 'aw-images', 'aw_media_screen' );
 	}
 );
 
@@ -110,7 +110,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_media_replace' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$search  = isset( $_POST['search'] ) ? (string) wp_unslash( $_POST['search'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a search string; used only as a needle/pattern in AW_Bulk::replace, never echoed unescaped
 		$replace = isset( $_POST['replace'] ) ? (string) wp_unslash( $_POST['replace'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a replacement string, stored via wp_update_post/update_post_meta and escaped on output
@@ -125,9 +125,9 @@ add_action(
 			'error'   => '',
 		);
 		if ( '' === $search ) {
-			$report['error'] = __( 'Enter something to search for.', 'aw-seo-extras' );
+			$report['error'] = __( 'Enter something to search for.', 'rankweb' );
 		} elseif ( ! $fields ) {
-			$report['error'] = __( 'Choose at least one field.', 'aw-seo-extras' );
+			$report['error'] = __( 'Choose at least one field.', 'rankweb' );
 		} else {
 			foreach ( aw_media_ids() as $id ) {
 				foreach ( $fields as $field ) {
@@ -170,7 +170,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_media_captions' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$dry    = ! isset( $_POST['aw_apply'] );
 		$report = array(
@@ -211,40 +211,40 @@ add_action(
 /** RankWeb → Images. */
 function aw_media_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You are not allowed to see this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
 	$post = admin_url( 'admin-post.php' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'Image SEO', 'aw-seo-extras' ) . '</h1>';
-	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'aw-seo-extras' ), number_format_i18n( AW_MEDIA_BATCH ) ) ) . '</p>';
+	echo '<div class="wrap"><h1>' . esc_html__( 'Image SEO', 'rankweb' ) . '</h1>';
+	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'rankweb' ), number_format_i18n( AW_MEDIA_BATCH ) ) ) . '</p>';
 	$report = get_transient( 'aw_seo_media_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {
 		delete_transient( 'aw_seo_media_report_' . get_current_user_id() );
 		aw_media_report( $report );
 	}
 
-	echo '<h2>' . esc_html__( 'Find and replace', 'aw-seo-extras' ) . '</h2>';
+	echo '<h2>' . esc_html__( 'Find and replace', 'rankweb' ) . '</h2>';
 	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_media_replace">';
 	wp_nonce_field( 'aw_media_replace' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row"><label for="aw-media-search">' . esc_html__( 'Find', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-media-search" name="search" class="regular-text"></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-media-replace">' . esc_html__( 'Replace with', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-media-replace" name="replace" class="regular-text"></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Fields', 'aw-seo-extras' ) . '</th><td>';
+	echo '<tr><th scope="row"><label for="aw-media-search">' . esc_html__( 'Find', 'rankweb' ) . '</label></th><td><input type="text" id="aw-media-search" name="search" class="regular-text"></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-media-replace">' . esc_html__( 'Replace with', 'rankweb' ) . '</label></th><td><input type="text" id="aw-media-replace" name="replace" class="regular-text"></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Fields', 'rankweb' ) . '</th><td>';
 	foreach ( aw_media_fields() as $key => $label ) {
 		echo '<label style="margin-right:1em"><input type="checkbox" name="fields[]" value="' . esc_attr( $key ) . '"' . checked( 'caption' !== $key, true, false ) . '> ' . esc_html( $label ) . '</label>';
 	}
 	echo '</td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Options', 'aw-seo-extras' ) . '</th><td><label style="margin-right:1em"><input type="checkbox" name="regex" value="1"> ' . esc_html__( 'Regular expression', 'aw-seo-extras' ) . '</label><label><input type="checkbox" name="ci" value="1"> ' . esc_html__( 'Ignore case', 'aw-seo-extras' ) . '</label></td></tr>';
-	echo '<tr><th scope="row">' . esc_html__( 'Apply', 'aw-seo-extras' ) . '</th><td><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'aw-seo-extras' ) . '</label></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Options', 'rankweb' ) . '</th><td><label style="margin-right:1em"><input type="checkbox" name="regex" value="1"> ' . esc_html__( 'Regular expression', 'rankweb' ) . '</label><label><input type="checkbox" name="ci" value="1"> ' . esc_html__( 'Ignore case', 'rankweb' ) . '</label></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Apply', 'rankweb' ) . '</th><td><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'rankweb' ) . '</label></td></tr>';
 	echo '</tbody></table>';
-	submit_button( __( 'Find and replace', 'aw-seo-extras' ), 'primary', 'submit', false );
+	submit_button( __( 'Find and replace', 'rankweb' ), 'primary', 'submit', false );
 	echo '</form>';
 
-	echo '<h2 style="margin-top:2em">' . esc_html__( 'Fill missing captions', 'aw-seo-extras' ) . '</h2>';
-	echo '<p>' . esc_html( sprintf( /* translators: %s: the caption pattern. */ __( 'Fills the caption of attachments that have none, from the pattern: %s. Existing captions are left alone. Change the pattern in RankWeb → Settings → Images.', 'aw-seo-extras' ), (string) AW_MEDIA_CAPTION ) ) . '</p>';
+	echo '<h2 style="margin-top:2em">' . esc_html__( 'Fill missing captions', 'rankweb' ) . '</h2>';
+	echo '<p>' . esc_html( sprintf( /* translators: %s: the caption pattern. */ __( 'Fills the caption of attachments that have none, from the pattern: %s. Existing captions are left alone. Change the pattern in RankWeb → Settings → Images.', 'rankweb' ), (string) AW_MEDIA_CAPTION ) ) . '</p>';
 	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_media_captions">';
 	wp_nonce_field( 'aw_media_captions' );
-	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'aw-seo-extras' ) . '</label></p>';
-	submit_button( __( 'Fill captions', 'aw-seo-extras' ), 'secondary', 'submit', false );
+	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'rankweb' ) . '</label></p>';
+	submit_button( __( 'Fill captions', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form></div>';
 }
 
@@ -260,14 +260,14 @@ function aw_media_report( array $report ): void {
 	}
 	$head = $report['dry']
 		/* translators: %d: number of attachments. */
-		? sprintf( __( 'Dry run: %d attachments would change. Nothing was written.', 'aw-seo-extras' ), (int) $report['updated'] )
+		? sprintf( __( 'Dry run: %d attachments would change. Nothing was written.', 'rankweb' ), (int) $report['updated'] )
 		/* translators: %d: number of attachments. */
-		: sprintf( __( '%d attachments updated.', 'aw-seo-extras' ), (int) $report['updated'] );
+		: sprintf( __( '%d attachments updated.', 'rankweb' ), (int) $report['updated'] );
 	wp_admin_notice( esc_html( $head ), array( 'type' => $report['dry'] ? 'info' : 'success' ) );
 	if ( empty( $report['changes'] ) ) {
 		return;
 	}
-	echo '<table class="widefat striped" style="max-width:60em"><thead><tr><th>' . esc_html__( 'Attachment', 'aw-seo-extras' ) . '</th><th>' . esc_html__( 'Field', 'aw-seo-extras' ) . '</th><th>' . esc_html__( 'From', 'aw-seo-extras' ) . '</th><th>' . esc_html__( 'To', 'aw-seo-extras' ) . '</th></tr></thead><tbody>';
+	echo '<table class="widefat striped" style="max-width:60em"><thead><tr><th>' . esc_html__( 'Attachment', 'rankweb' ) . '</th><th>' . esc_html__( 'Field', 'rankweb' ) . '</th><th>' . esc_html__( 'From', 'rankweb' ) . '</th><th>' . esc_html__( 'To', 'rankweb' ) . '</th></tr></thead><tbody>';
 	$fields = aw_media_fields();
 	foreach ( (array) $report['changes'] as $c ) {
 		echo '<tr><td><a href="' . esc_url( (string) get_edit_post_link( (int) $c['id'] ) ) . '">' . esc_html( '#' . (int) $c['id'] ) . '</a></td><td>' . esc_html( $fields[ $c['field'] ] ?? $c['field'] ) . '</td><td>' . esc_html( (string) $c['from'] ) . '</td><td>' . esc_html( (string) $c['to'] ) . '</td></tr>';

@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       RankWeb
- * Plugin URI:        https://animalwrites.in/
+ * Plugin URI:        https://wugweb.com/plugins/rankweb/
  * Description:       Complete SEO suite for WordPress: structured schema, canonicals, robots directives, sitemaps, breadcrumbs, internal links, media optimization, and content analysis. Integrates with Rank Math when active.
  * Version:           2.1.0
  * Requires at least: 7.1
@@ -57,7 +57,7 @@ add_action(
 		define( 'RANKWEB_STANDALONE', ! aw_seo_extras_rank_math() );
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( 'rank-math-schema' === $file && ! aw_seo_extras_rank_math() ) {
 				continue; // Rank Math schema bridge is only loaded when Rank Math is active.
 			}
@@ -65,7 +65,6 @@ add_action(
 				require_once AW_SEO_EXTRAS_DIR . 'includes/' . $file . '.php';
 			}
 		}
-		aw_seo_extras_insightweb_bridge();
 		// A switched-off module's scheduled job is taken off (its file, which runs and reschedules it, is not loaded).
 		// Checked in admin and cron requests only, so a page view never writes.
 		$jobs = array(
@@ -95,23 +94,6 @@ add_action(
 	},
 	5
 );
-
-/**
- * Bridge while InsightWeb is not active yet (docs/insightweb-plan.md 3.2). Search Insights moved to its own plugin on
- * 11 Nov 2026; a new plugin is inactive until someone activates it, and in that gap its scheduled jobs would run with no
- * handler. So, while InsightWeb is not active and Search Insights was not switched off here, RankWeb loads InsightWeb's
- * bootstrap, which loads once whoever calls it first. Removed once InsightWeb is active on live and a daily run is OK.
- */
-function aw_seo_extras_insightweb_bridge(): void {
-	if ( defined( 'INSIGHTWEB_FILE' ) ) {
-		return; // InsightWeb is active: it loads Search Insights itself.
-	}
-	// Never off while the theme runs (owner, 11 Nov 2026): an old saved off switch is not read.
-	$file = WP_PLUGIN_DIR . '/insightweb/includes/bootstrap.php';
-	if ( file_exists( $file ) ) {
-		require_once $file;
-	}
-}
 
 // Search Insights' scheduled jobs are InsightWeb's now: switching RankWeb off never stops them.
 register_deactivation_hook(

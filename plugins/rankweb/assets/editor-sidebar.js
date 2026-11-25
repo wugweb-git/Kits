@@ -4,11 +4,42 @@
  */
 ( function( wp ) {
 	const { registerPlugin } = wp.plugins;
-	const { PluginSidebar, PluginSidebarMoreMenuItem } = wp.editPost;
-	const { PanelBody, TextControl, SelectControl, ButtonGroup, Button } = wp.components;
+	// PluginSidebar moved from wp.editPost to wp.editor in WordPress 6.6; the old place only warns.
+	const { PluginSidebar, PluginSidebarMoreMenuItem } = wp.editor && wp.editor.PluginSidebar ? wp.editor : wp.editPost;
+	const { TextControl, TextareaControl, SelectControl, Button } = wp.components;
 	const { useSelect, useDispatch } = wp.data;
 	const { useState, useEffect, createElement: el, Fragment } = wp.element;
-	const { __ } = wp.i18n;
+	const { __, sprintf } = wp.i18n;
+	const data = window.rankwebEditorData || {};
+	const siteHost = data.siteHost || '';
+	const TITLE_MAX = 60;
+	const DESC_MAX = 160;
+
+	function escapeRe( v ) {
+		return String( v ).replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+	}
+
+	/** The text of the h2 to h4 headings in a block of HTML (parsed, not matched by a pattern). */
+	function headingText( html ) {
+		const doc = new window.DOMParser().parseFromString( html || '', 'text/html' );
+		return Array.prototype.map.call( doc.querySelectorAll( 'h2, h3, h4' ), function( h ) { return h.textContent.toLowerCase(); } );
+	}
+
+	/** Link counts split by whether the address is on this site. */
+	function linkCounts( html ) {
+		const doc = new window.DOMParser().parseFromString( html || '', 'text/html' );
+		let internal = 0;
+		let external = 0;
+		Array.prototype.forEach.call( doc.querySelectorAll( 'a[href]' ), function( a ) {
+			const href = a.getAttribute( 'href' ) || '';
+			if ( /^https?:\/\//i.test( href ) ) {
+				if ( siteHost && new RegExp( '^https?://(www\\.)?' + escapeRe( siteHost ), 'i' ).test( href ) ) { internal++; } else { external++; }
+			} else if ( href.charAt( 0 ) === '/' || href.charAt( 0 ) === '#' ) {
+				internal++;
+			}
+		} );
+		return { internal: internal, external: external };
+	}
 
 	function calculateSeoScore( title, content, keyword ) {
 		let score = 10;
@@ -54,8 +85,7 @@
 		else if ( okLength ) score += 10;
 
 		// 4. Keyword in Subheadings (+15)
-		const hasHeadings = /<h[2-4][^>]*>.*?<\/h[2-4]>/i.test( content );
-		const kwInHeadings = hasHeadings && /<h[2-4][^>]*>.*?(?=.*?)/i.test( content ) && lcContent.includes( kw );
+		const kwInHeadings = headingText( content ).some( function( t ) { return t.includes( kw ); } );
 		checks.push({
 			text: kwInHeadings ? __( 'Focus Keyword found in H2/H3 subheadings', 'rankweb' ) : __( 'Use Focus Keyword in at least one subheading', 'rankweb' ),
 			pass: kwInHeadings
@@ -63,7 +93,8 @@
 		if ( kwInHeadings ) score += 15;
 
 		// 5. Internal Links (+10)
-		const internalLinkCount = ( content.match( /href=[\"'][^\"']*(?:animalwrites\.in|\/)[^\"']*[\"']/gi ) || [] ).length;
+		const links = linkCounts( content );
+		const internalLinkCount = links.internal;
 		const hasInternal = internalLinkCount >= 2;
 		checks.push({
 			text: hasInternal ? sprintf( __( '%d internal links found', 'rankweb' ), internalLinkCount ) : __( 'Add at least 2 internal links to related content', 'rankweb' ),
@@ -72,7 +103,7 @@
 		if ( hasInternal ) score += 10;
 
 		// 6. External Links (+10)
-		const externalLinkCount = ( content.match( /href=[\"']https?:\/\/(?!animalwrites\.in)[^\"']+[\"']/gi ) || [] ).length;
+		const externalLinkCount = links.external;
 		const hasExternal = externalLinkCount >= 1;
 		checks.push({
 			text: hasExternal ? sprintf( __( '%d authoritative external links found', 'rankweb' ), externalLinkCount ) : __( 'Add at least 1 external link to an authority source', 'rankweb' ),
@@ -92,20 +123,39 @@
 		const content = useSelect( ( select ) => select( 'core/editor' ).getEditedPostContent() || '' );
 		const excerpt = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ) || '' );
 		const slug = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'slug' ) || '' );
+		const featuredId = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'featured_media' ) || 0 );
+		const featured = useSelect( ( select ) => ( featuredId ? select( 'core' ).getMedia( featuredId ) : null ), [ featuredId ] );
 		const { editPost } = useDispatch( 'core/editor' );
 
 		const [ previewMode, setPreviewMode ] = useState( 'desktop' );
 		const keyword = meta.rank_math_focus_keyword || '';
 		const schemaType = meta._rankweb_schema_type || 'Article';
+		const seoTitle = meta.rank_math_title || '';
+		const seoDesc = meta.rank_math_description || '';
+		const shownTitle = seoTitle || title;
+		const plainContent = ( content || '' ).replace( /<[^>]*>?/gm, ' ' ).replace( /\s+/g, ' ' ).trim();
+		const autoDesc = excerpt ? excerpt : plainContent;
+		const shownDesc = seoDesc || ( autoDesc ? autoDesc.substring( 0, DESC_MAX - 5 ) + ( autoDesc.length > DESC_MAX - 5 ? '...' : '' ) : __( 'Add an excerpt or introduction to see the description here.', 'rankweb' ) );
+		const imageUrl = featured && featured.source_url ? featured.source_url : '';
 
-		const { score, checks } = calculateSeoScore( title, content, keyword );
+		const { score, checks } = calculateSeoScore( shownTitle, content, keyword );
 
 		let scoreClass = 'rankweb-score-pill--bad';
 		if ( score >= 80 ) scoreClass = 'rankweb-score-pill--good';
 		else if ( score >= 50 ) scoreClass = 'rankweb-score-pill--ok';
 
-		const displayUrl = ( window.rankwebEditorData ? window.rankwebEditorData.siteUrl : 'https://animalwrites.in' ) + '/' + ( slug || 'sample-post' ) + '/';
-		const displayDesc = excerpt ? excerpt.substring( 0, 155 ) : ( content ? content.replace( /<[^>]*>?/gm, ' ' ).substring( 0, 155 ) + '...' : __( 'Add an excerpt or introduction to provide an effective meta description snippet.', 'rankweb' ) );
+		const base = data.siteUrl || '';
+		const displayUrl = base + '/' + ( slug || 'sample-post' ) + '/';
+
+		function setMeta( key, value ) {
+			const next = {};
+			next[ key ] = value;
+			editPost( { meta: Object.assign( {}, meta, next ) } );
+		}
+
+		function counter( len, max ) {
+			return el( 'span', { className: 'rankweb-count' + ( len > max ? ' rankweb-count--over' : '' ) }, sprintf( __( '%1$d of %2$d characters', 'rankweb' ), len, max ) );
+		}
 
 		return el(
 			Fragment,
@@ -126,6 +176,25 @@
 						{ className: 'rankweb-score-card' },
 						el( 'span', { className: 'rankweb-score-card__label' }, __( 'SEO Content Score', 'rankweb' ) ),
 						el( 'span', { className: 'rankweb-score-pill ' + scoreClass }, score + ' / 100' )
+					),
+					el(
+						TextControl,
+						{
+							label: __( 'SEO title', 'rankweb' ),
+							value: seoTitle,
+							placeholder: title,
+							help: counter( shownTitle.length, TITLE_MAX ),
+							onChange: function( v ) { setMeta( 'rank_math_title', v ); }
+						}
+					),
+					el(
+						TextareaControl,
+						{
+							label: __( 'Meta description', 'rankweb' ),
+							value: seoDesc,
+							help: counter( shownDesc.length, DESC_MAX ),
+							onChange: function( v ) { setMeta( 'rank_math_description', v ); }
+						}
 					),
 					el(
 						TextControl,
@@ -160,17 +229,36 @@
 						{ style: { marginTop: '20px' } },
 						el( 'strong', { style: { display: 'block', marginBottom: '8px' } }, __( 'Google SERP Preview', 'rankweb' ) ),
 						el(
-							ButtonGroup,
-							{ style: { marginBottom: '10px' } },
-							el( Button, { isSmall: true, isPrimary: previewMode === 'desktop', onClick: function() { setPreviewMode('desktop'); } }, __( 'Desktop', 'rankweb' ) ),
-							el( Button, { isSmall: true, isPrimary: previewMode === 'mobile', onClick: function() { setPreviewMode('mobile'); } }, __( 'Mobile', 'rankweb' ) )
+							'div',
+							{ className: 'rankweb-mode', role: 'group', 'aria-label': __( 'Preview size', 'rankweb' ) },
+							el( Button, { size: 'small', variant: previewMode === 'desktop' ? 'primary' : 'secondary', 'aria-pressed': previewMode === 'desktop', onClick: function() { setPreviewMode( 'desktop' ); } }, __( 'Desktop', 'rankweb' ) ),
+							el( Button, { size: 'small', variant: previewMode === 'mobile' ? 'primary' : 'secondary', 'aria-pressed': previewMode === 'mobile', onClick: function() { setPreviewMode( 'mobile' ); } }, __( 'Mobile', 'rankweb' ) )
 						),
 						el(
 							'div',
-							{ className: 'rankweb-serp-preview' },
+							{ className: 'rankweb-serp-preview' + ( previewMode === 'mobile' ? ' rankweb-serp-preview--mobile' : '' ) },
 							el( 'div', { className: 'rankweb-serp-preview__url' }, displayUrl ),
-							el( 'div', { className: 'rankweb-serp-preview__title' }, title || __( 'Post Title Example', 'rankweb' ) ),
-							el( 'div', { className: 'rankweb-serp-preview__desc' }, displayDesc )
+							el( 'div', { className: 'rankweb-serp-preview__title' }, shownTitle || __( 'Post Title Example', 'rankweb' ) ),
+							el( 'div', { className: 'rankweb-serp-preview__desc' }, shownDesc )
+						)
+					),
+					el(
+						'div',
+						{ style: { marginTop: '20px' } },
+						el( 'strong', { style: { display: 'block', marginBottom: '8px' } }, __( 'Social share preview', 'rankweb' ) ),
+						el(
+							'div',
+							{ className: 'rankweb-social-preview' },
+							imageUrl
+								? el( 'img', { className: 'rankweb-social-preview__image', src: imageUrl, alt: '' } )
+								: el( 'div', { className: 'rankweb-social-preview__image rankweb-social-preview__image--empty' }, __( 'No featured image: the share card falls back to the site image.', 'rankweb' ) ),
+							el(
+								'div',
+								{ className: 'rankweb-social-preview__body' },
+								el( 'div', { className: 'rankweb-social-preview__host' }, siteHost.toUpperCase() ),
+								el( 'div', { className: 'rankweb-social-preview__title' }, shownTitle || __( 'Post Title Example', 'rankweb' ) ),
+								el( 'div', { className: 'rankweb-social-preview__desc' }, shownDesc )
+							)
 						)
 					),
 					el(

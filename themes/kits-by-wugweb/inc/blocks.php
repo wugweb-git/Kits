@@ -15,8 +15,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 function kits_pattern_categories() {
 	register_block_pattern_category( 'kits-components', array( 'label' => __( 'Kits: Components', 'kits-by-wugweb' ) ) );
 	register_block_pattern_category( 'kits-lists', array( 'label' => __( 'Kits: Lists', 'kits-by-wugweb' ) ) );
+	register_block_pattern_category( 'kits-pages', array( 'label' => __( 'Kits: Pages', 'kits-by-wugweb' ) ) );
 }
 add_action( 'init', 'kits_pattern_categories' );
+
+/**
+ * The "Sidebar" template-part area that theme.json's templateParts names (parts/sidebar.html). WordPress knows only
+ * header, footer, uncategorized and navigation-overlay, so without this the part is filed as "uncategorized" and, with
+ * WP_DEBUG, PHP logs a Notice. Kits Core registers the same area (plugins/kits-core/includes/landmarks.php, priority 10,
+ * unconditionally); this runs after it (priority 20) and adds the area only when nobody has, so there is exactly one
+ * Sidebar area with or without Kits Core and the theme needs no plugin.
+ *
+ * @param array $areas Template-part areas.
+ * @return array
+ */
+function kits_sidebar_template_part_area( $areas ) {
+	foreach ( (array) $areas as $area ) {
+		if ( 'sidebar' === ( $area['area'] ?? '' ) ) {
+			return $areas;
+		}
+	}
+	$areas[] = array(
+		'area'        => 'sidebar',
+		'label'       => __( 'Sidebar', 'kits-by-wugweb' ),
+		'description' => __( 'The column beside a page\'s text (below it on phones and tablets).', 'kits-by-wugweb' ),
+		'icon'        => 'sidebar',
+		'area_tag'    => 'aside',
+	);
+	return $areas;
+}
+add_filter( 'default_wp_template_part_areas', 'kits_sidebar_template_part_area', 20 );
 
 /**
  * Block styles (Appearance > Editor > Styles > Blocks lists them under each block). Their colours, borders, padding and
@@ -39,6 +67,10 @@ function kits_block_styles() {
 			'kits-section'   => __( 'Section', 'kits-by-wugweb' ),
 			'kits-head-band' => __( 'Head band', 'kits-by-wugweb' ),
 		),
+		// Columns that stack in reverse order on small screens (image after text on a phone, before it on a desktop); kits.css.
+		'core/columns'         => array(
+			'kits-reverse' => __( 'Reverse on mobile', 'kits-by-wugweb' ),
+		),
 		'core/separator'       => array(
 			'kits-hairline' => __( 'Hairline', 'kits-by-wugweb' ),
 		),
@@ -48,6 +80,11 @@ function kits_block_styles() {
 		),
 		'core/list'            => array(
 			'kits-sources' => __( 'Sources', 'kits-by-wugweb' ),
+			'kits-plain'   => __( 'Plain (no bullets)', 'kits-by-wugweb' ), // link lists and menus; kits.css.
+		),
+		// Social icons with a transparent fill and a line in the text colour; kits.css.
+		'core/social-links'    => array(
+			'kits-outline' => __( 'Outline', 'kits-by-wugweb' ),
 		),
 		// A menu link with a "Beta" badge after its label (kits_nav_badge below; kit-primitives.css section 6).
 		'core/navigation-link' => array(

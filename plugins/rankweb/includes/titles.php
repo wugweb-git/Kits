@@ -76,7 +76,10 @@ function aw_seo_item_title_rules( $post ) {
 		return '';
 	}
 	if ( (int) get_option( 'page_on_front' ) === (int) $post->ID ) {
-		return 'Animal Writes – Animal welfare news, law and help in India';
+		$front = (string) apply_filters( 'rankweb_front_page_title', '' ); // a site's own front-page title; none: the title the rules build below
+		if ( '' !== $front ) {
+			return $front;
+		}
 	}
 	if ( in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) ) {
 		return aw_seo_resource_title( $post ); // Library and Resources (helpers.php)
@@ -93,7 +96,10 @@ function aw_seo_item_title_rules( $post ) {
 		return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; the role and organisation are never cut (owner, 15 Oct 2026)
 	}
 	if ( 'page' === $post->post_type && 'about' === $post->post_name && ! $post->post_parent ) {
-		return 'About Animal Writes';
+		$about = (string) apply_filters( 'rankweb_about_page_title', '' );
+		if ( '' !== $about ) {
+			return $about;
+		}
 	}
 	return aw_seo_branded( rankweb_plain_text( wptexturize( $post->post_title ) ) ); // as WordPress's own document title
 }
@@ -218,7 +224,7 @@ add_action(
 /*
  * Every item type's Titles & Meta template is %aw_title% / %aw_description% (Rank Math → Titles & Meta → each post
  * type), so an item that has no stored title or description yet, and the snippet preview in the editor and in the
- * settings, show what the rules above write: one separator, " – Animal Writes" only at the end, never a bare
+ * settings, show what the rules above write: one separator, the site name only at the end, never a bare
  * %variable%. Stored values still win, as Rank Math always does.
  */
 
@@ -262,11 +268,11 @@ add_action(
 		rank_math_register_var_replacement(
 			'aw_title',
 			array(
-				'name'        => 'Animal Writes title',
+				'name'        => 'RankWeb title',
 				'description' => 'The title by the site\'s rules: one separator, " – Animal Writes" only at the end',
 				'variable'    => 'aw_title',
 				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
-				'example'     => $post ? aw_seo_var_title( '', $post ) : 'Supreme Court Order on Community Dogs – Animal Writes',
+				'example'     => $post ? aw_seo_var_title( '', $post ) : 'A page title – ' . get_bloginfo( 'name' ),
 			),
 			'aw_seo_var_title'
 		);
@@ -302,7 +308,7 @@ function aw_seo_list_title() {
 			return ''; // name searches and other filtered lists keep their own titles
 		}
 		if ( ! $place ) {
-			return aw_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( aw_seo_page_suffix() ) );
+			return aw_seo_fit( array_filter( array( AW_HUB_TITLES['aw_listing'] ?? '' ) ), 60 - mb_strlen( aw_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . aw_place_parent_state( $place )->name;
@@ -530,7 +536,7 @@ function aw_seo_list_description() {
 		$n     = number_format_i18n( aw_hub_total( 'aw_listing' ) );
 		$state = $place ? aw_place_parent_state( $place ) : null;
 		if ( ! $place ) {
-			$desc = ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'], $n ); // phpcs:ignore WordPress.Security.NonceVerification
+			$desc = ( aw_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'] ?? '%s', $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
 			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . aw_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );

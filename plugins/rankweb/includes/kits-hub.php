@@ -32,14 +32,14 @@ function aw_seo_extras_kits_status_row( $rows ) {
 	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
 	$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 	/* translators: %s: plugin version. */
-	$text = sprintf( __( 'Active, %s', 'aw-seo-extras' ), $head['Version'] );
+	$text = sprintf( __( 'Active, %s', 'rankweb' ), $head['Version'] );
 	if ( ! aw_seo_extras_rank_math() ) {
-		$fix    = __( 'Does nothing until Rank Math SEO is active.', 'aw-seo-extras' );
-		$rows[] = array( __( 'RankWeb', 'aw-seo-extras' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
+		$fix    = __( 'Does nothing until Rank Math SEO is active.', 'rankweb' );
+		$rows[] = array( __( 'RankWeb', 'rankweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
 	}
-	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html__( 'Overview', 'aw-seo-extras' ) . '</a>' : '';
-	$rows[] = array( __( 'RankWeb', 'aw-seo-extras' ), esc_html( $text ) . $link );
+	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html__( 'Overview', 'rankweb' ) . '</a>' : '';
+	$rows[] = array( __( 'RankWeb', 'rankweb' ), esc_html( $text ) . $link );
 	return $rows;
 }
 

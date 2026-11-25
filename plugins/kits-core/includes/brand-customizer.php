@@ -27,13 +27,27 @@ function kits_get_brand_tokens(): array {
 }
 
 /**
+ * The default value of every token as the active theme defines it (theme.json), so "unchanged" means unchanged from
+ * the theme. Without a theme palette that names a token's slug, the built-in default is kept.
+ *
+ * @return array<string, string>
+ */
+function kits_get_brand_defaults(): array {
+	$settings = array();
+	if ( class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+		$settings = WP_Theme_JSON_Resolver::get_theme_data()->get_settings();
+	}
+	return kits_brand_resolve_defaults( is_array( $settings ) ? $settings : array() );
+}
+
+/**
  * Injects brand tokens CSS in frontend <head>.
  */
 add_action(
 	'wp_head',
 	function () {
 		$tokens = kits_get_brand_tokens();
-		$css    = kits_brand_compile_css( $tokens );
+		$css    = kits_brand_compile_css( $tokens, kits_get_brand_defaults() );
 		if ( '' !== $css ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS compiled from sanitized token values.
 			echo "\n<!-- Kits Brand Customizer Tokens -->\n<style id=\"kits-brand-tokens\">\n" . wp_strip_all_tags( $css ) . "\n</style>\n";
@@ -53,7 +67,7 @@ add_action(
 			return;
 		}
 		$tokens = kits_get_brand_tokens();
-		$css    = kits_brand_compile_css( $tokens );
+		$css    = kits_brand_compile_css( $tokens, kits_get_brand_defaults() );
 		if ( '' !== $css ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS compiled from sanitized token values.
 			echo "\n<!-- Kits Brand Customizer Tokens (Editor) -->\n<style id=\"kits-brand-tokens-editor\">\n.editor-styles-wrapper {\n" . wp_strip_all_tags( $css ) . "\n}\n</style>\n";
@@ -152,6 +166,10 @@ function kits_brand_customizer_render_page() {
 
 	$saved   = kits_get_brand_tokens();
 	$defs    = kits_brand_token_definitions();
+	$brand_defaults = kits_get_brand_defaults();
+	foreach ( $defs as $def_key => $def_row ) {
+		$defs[ $def_key ]['default'] = $brand_defaults[ $def_key ] ?? $def_row['default'];
+	}
 	$presets = kits_brand_presets();
 
 	// Group tokens by category
@@ -164,7 +182,7 @@ function kits_brand_customizer_render_page() {
 		$categories[ $cat ][ $key ] = $def;
 	}
 
-	$compiled_css = kits_brand_compile_css( $saved );
+	$compiled_css = kits_brand_compile_css( $saved, kits_get_brand_defaults() );
 	$current_json = wp_json_encode( $saved, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
 	?>
 	<div class="wrap" style="max-width: 1040px; margin-top: 20px;">

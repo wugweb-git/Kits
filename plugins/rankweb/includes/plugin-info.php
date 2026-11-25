@@ -78,7 +78,7 @@ function aw_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
  * @return false|object|array
  */
 function aw_seo_plugin_details( $result, $action, $args ) {
-	if ( 'plugin_information' !== $action || ! in_array( $args->slug ?? '', array( 'rankweb', 'aw-seo-extras' ), true ) ) {
+	if ( 'plugin_information' !== $action || ! in_array( $args->slug ?? '', array( 'rankweb', 'rankweb' ), true ) ) {
 		return $result;
 	}
 	if ( ! function_exists( 'get_plugin_data' ) ) {

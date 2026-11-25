@@ -43,7 +43,7 @@ function aw_bulk_csv_row( int $id ): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'SEO CSV', 'aw-seo-extras' ), __( 'SEO CSV', 'aw-seo-extras' ), 'manage_options', 'aw-seo-csv', 'aw_bulk_csv_screen' );
+		add_submenu_page( AW_SEO_MENU, __( 'SEO CSV', 'rankweb' ), __( 'SEO CSV', 'rankweb' ), 'manage_options', 'aw-seo-csv', 'aw_bulk_csv_screen' );
 	}
 );
 
@@ -54,7 +54,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_bulk_export' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$types = aw_bulk_types();
 		$ids   = $types ? get_posts(
@@ -89,7 +89,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_bulk_import' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$dry    = ! isset( $_POST['aw_apply'] ); // the box "Apply the changes" turns the dry run off
 		$report = array(
@@ -100,12 +100,12 @@ add_action(
 			'error'   => '',
 		);
 		if ( empty( $_FILES['aw_csv']['tmp_name'] ) || ! is_uploaded_file( sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) ) ) ) {
-			$report['error'] = __( 'Choose a CSV file to import.', 'aw-seo-extras' );
+			$report['error'] = __( 'Choose a CSV file to import.', 'rankweb' );
 		} else {
 			$tmp  = sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) );
 			$size = absint( wp_unslash( $_FILES['aw_csv']['size'] ?? 0 ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- absint() sanitises the upload size
 			if ( $size > 5 * MB_IN_BYTES ) {
-				$report['error'] = __( 'The file is larger than 5 MB.', 'aw-seo-extras' );
+				$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
 			} else {
 				$text   = (string) file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
 				$parsed = AW_Bulk::from_csv( $text );
@@ -140,12 +140,12 @@ function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report
 		$post = $id ? get_post( $id ) : null;
 		if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, $types, true ) ) {
 			/* translators: %s: the id from the file. */
-			$report['skipped'][] = sprintf( __( 'Row %s: not an item of a supported type.', 'aw-seo-extras' ), (string) ( $row['id'] ?? '?' ) );
+			$report['skipped'][] = sprintf( __( 'Row %s: not an item of a supported type.', 'rankweb' ), (string) ( $row['id'] ?? '?' ) );
 			continue;
 		}
 		if ( ! current_user_can( 'edit_post', $id ) ) {
 			/* translators: %d: item ID. */
-			$report['skipped'][] = sprintf( __( 'Item %d: you may not edit it.', 'aw-seo-extras' ), $id );
+			$report['skipped'][] = sprintf( __( 'Item %d: you may not edit it.', 'rankweb' ), $id );
 			continue;
 		}
 		$changed = array();
@@ -182,7 +182,7 @@ function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report
 			++$report['updated'];
 			if ( count( $report['changes'] ) < 100 ) {
 				/* translators: 1: item ID, 2: list of fields. */
-				$report['changes'][] = sprintf( __( 'Item %1$d: %2$s', 'aw-seo-extras' ), $id, implode( ', ', $changed ) );
+				$report['changes'][] = sprintf( __( 'Item %1$d: %2$s', 'rankweb' ), $id, implode( ', ', $changed ) );
 			}
 		}
 	}
@@ -194,12 +194,12 @@ function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report
 /** RankWeb → SEO CSV. */
 function aw_bulk_csv_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You are not allowed to see this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
 	$post = admin_url( 'admin-post.php' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'SEO CSV', 'aw-seo-extras' ) . '</h1>';
+	echo '<div class="wrap"><h1>' . esc_html__( 'SEO CSV', 'rankweb' ) . '</h1>';
 	if ( ! aw_bulk_types() ) {
-		wp_admin_notice( esc_html__( 'No post types are set for bulk SEO work (RankWeb → Settings → Bulk edit).', 'aw-seo-extras' ), array( 'type' => 'warning' ) );
+		wp_admin_notice( esc_html__( 'No post types are set for bulk SEO work (RankWeb → Settings → Bulk edit).', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
 	$report = get_transient( 'aw_seo_bulk_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {
@@ -207,19 +207,19 @@ function aw_bulk_csv_screen(): void {
 		aw_bulk_csv_report( $report );
 	}
 
-	echo '<h2>' . esc_html__( 'Export', 'aw-seo-extras' ) . '</h2><p>' . esc_html__( 'Download every item\'s SEO fields as a CSV.', 'aw-seo-extras' ) . '</p>';
+	echo '<h2>' . esc_html__( 'Export', 'rankweb' ) . '</h2><p>' . esc_html__( 'Download every item\'s SEO fields as a CSV.', 'rankweb' ) . '</p>';
 	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_bulk_export">';
 	wp_nonce_field( 'aw_bulk_export' );
-	submit_button( __( 'Export CSV', 'aw-seo-extras' ), 'secondary', 'submit', false );
+	submit_button( __( 'Export CSV', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
 
-	echo '<h2 style="margin-top:2em">' . esc_html__( 'Import', 'aw-seo-extras' ) . '</h2>';
-	echo '<p>' . esc_html__( 'Upload a CSV with an "id" column. Only the columns in the file are written; a blank cell clears that field. The dry run reports what would change and writes nothing.', 'aw-seo-extras' ) . '</p>';
+	echo '<h2 style="margin-top:2em">' . esc_html__( 'Import', 'rankweb' ) . '</h2>';
+	echo '<p>' . esc_html__( 'Upload a CSV with an "id" column. Only the columns in the file are written; a blank cell clears that field. The dry run reports what would change and writes nothing.', 'rankweb' ) . '</p>';
 	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_bulk_import">';
 	wp_nonce_field( 'aw_bulk_import' );
 	echo '<p><input type="file" name="aw_csv" accept=".csv,text/csv" required></p>';
-	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'aw-seo-extras' ) . '</label></p>';
-	submit_button( __( 'Import CSV', 'aw-seo-extras' ), 'primary', 'submit', false );
+	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'rankweb' ) . '</label></p>';
+	submit_button( __( 'Import CSV', 'rankweb' ), 'primary', 'submit', false );
 	echo '</form></div>';
 }
 
@@ -235,13 +235,13 @@ function aw_bulk_csv_report( array $report ): void {
 	}
 	$head = $report['dry']
 		/* translators: %d: number of items. */
-		? sprintf( __( 'Dry run: %d items would change. Nothing was written.', 'aw-seo-extras' ), (int) $report['updated'] )
+		? sprintf( __( 'Dry run: %d items would change. Nothing was written.', 'rankweb' ), (int) $report['updated'] )
 		/* translators: %d: number of items. */
-		: sprintf( __( '%d items updated.', 'aw-seo-extras' ), (int) $report['updated'] );
+		: sprintf( __( '%d items updated.', 'rankweb' ), (int) $report['updated'] );
 	wp_admin_notice( esc_html( $head ), array( 'type' => $report['dry'] ? 'info' : 'success' ) );
 	foreach ( array(
-		'changes' => __( 'Changes', 'aw-seo-extras' ),
-		'skipped' => __( 'Skipped', 'aw-seo-extras' ),
+		'changes' => __( 'Changes', 'rankweb' ),
+		'skipped' => __( 'Skipped', 'rankweb' ),
 	) as $key => $label ) {
 		if ( ! empty( $report[ $key ] ) ) {
 			echo '<details open><summary><strong>' . esc_html( $label ) . '</strong> (' . esc_html( number_format_i18n( count( $report[ $key ] ) ) ) . ')</summary><ul style="list-style:disc;margin-left:2em">';

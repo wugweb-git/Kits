@@ -92,7 +92,7 @@ add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => 'en_IN' );
 /** A term's share picture alt text: "<focus keyphrase> in India – Animal Writes" (owner, 20 Oct 2026), else its name. */
 function aw_term_share_alt( $term ) {
 	$kw = trim( explode( ',', (string) get_term_meta( $term->term_id, 'rank_math_focus_keyword', true ) )[0] );
-	return ( '' !== $kw ? $kw : rankweb_plain_text( $term->name ) ) . ' in India – Animal Writes';
+	return (string) apply_filters( 'rankweb_term_share_alt', ( '' !== $kw ? $kw : rankweb_plain_text( $term->name ) ) . ' – ' . get_bloginfo( 'name' ), $term, $kw );
 }
 
 /**

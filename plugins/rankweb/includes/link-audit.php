@@ -67,15 +67,15 @@ add_action( 'admin_init', 'aw_link_audit_install' );
 /** The findings and their texts. */
 function aw_link_audit_labels(): array {
 	return array(
-		'orphan'    => __( 'Orphan: no link in', 'aw-seo-extras' ),
-		'deep'      => __( 'Too many clicks from the home page', 'aw-seo-extras' ),
-		'too_many'  => __( 'Too many links in the item', 'aw-seo-extras' ),
-		'broken'    => __( 'Broken link', 'aw-seo-extras' ),
-		'redirect'  => __( 'Link through a redirect', 'aw-seo-extras' ),
-		'nofollow'  => __( 'Internal link set to nofollow', 'aw-seo-extras' ),
-		'canonical' => __( 'Link to an item whose canonical is elsewhere', 'aw-seo-extras' ),
-		'avoided'   => __( 'Link to a page on the do-not-link list', 'aw-seo-extras' ),
-		'silo'      => __( 'Link into another silo\'s supporting item', 'aw-seo-extras' ),
+		'orphan'    => __( 'Orphan: no link in', 'rankweb' ),
+		'deep'      => __( 'Too many clicks from the home page', 'rankweb' ),
+		'too_many'  => __( 'Too many links in the item', 'rankweb' ),
+		'broken'    => __( 'Broken link', 'rankweb' ),
+		'redirect'  => __( 'Link through a redirect', 'rankweb' ),
+		'nofollow'  => __( 'Internal link set to nofollow', 'rankweb' ),
+		'canonical' => __( 'Link to an item whose canonical is elsewhere', 'rankweb' ),
+		'avoided'   => __( 'Link to a page on the do-not-link list', 'rankweb' ),
+		'silo'      => __( 'Link into another silo\'s supporting item', 'rankweb' ),
 	);
 }
 
@@ -583,7 +583,7 @@ function aw_link_audit_page( string $flag, int $page, int $per_page ): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Internal links', 'aw-seo-extras' ), __( 'Internal links', 'aw-seo-extras' ), RANKWEB_CAP, 'aw-links', 'aw_link_audit_page_html' );
+		add_submenu_page( AW_SEO_MENU, __( 'Internal links', 'rankweb' ), __( 'Internal links', 'rankweb' ), RANKWEB_CAP, 'aw-links', 'aw_link_audit_page_html' );
 	}
 );
 
@@ -593,7 +593,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_link_audit_run' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		aw_link_audit_start();
 		wp_safe_redirect( add_query_arg( 'started', '1', admin_url( 'admin.php?page=aw-links' ) ) );
@@ -604,7 +604,7 @@ add_action(
 /** The screen. */
 function aw_link_audit_page_html(): void {
 	if ( ! current_user_can( RANKWEB_CAP ) ) {
-		wp_die( esc_html__( 'You are not allowed to see this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
 	$flag   = sanitize_key( wp_unslash( $_GET['flag'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
 	$flag   = in_array( $flag, AW_Link_Audit::FLAGS, true ) ? $flag : '';
@@ -617,13 +617,13 @@ function aw_link_audit_page_html(): void {
 
 	$view = sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a tab on a read-only screen.
 	$view = 'anchors' === $view && function_exists( 'aw_anchor_screen' ) ? 'anchors' : ( 'silos' === $view && function_exists( 'aw_silo_screen' ) ? 'silos' : 'audit' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'Internal links', 'aw-seo-extras' ) . '</h1>';
-	echo '<nav class="nav-tab-wrapper"><a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'audit' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Audit', 'aw-seo-extras' ) . '</a>';
+	echo '<div class="wrap"><h1>' . esc_html__( 'Internal links', 'rankweb' ) . '</h1>';
+	echo '<nav class="nav-tab-wrapper"><a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'audit' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Audit', 'rankweb' ) . '</a>';
 	if ( function_exists( 'aw_anchor_screen' ) ) {
-		echo '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '" class="nav-tab' . ( 'anchors' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Anchor mix', 'aw-seo-extras' ) . '</a>';
+		echo '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '" class="nav-tab' . ( 'anchors' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Anchor mix', 'rankweb' ) . '</a>';
 	}
 	if ( function_exists( 'aw_silo_screen' ) ) {
-		echo '<a href="' . esc_url( add_query_arg( 'view', 'silos', $base ) ) . '" class="nav-tab' . ( 'silos' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Silos', 'aw-seo-extras' ) . '</a>';
+		echo '<a href="' . esc_url( add_query_arg( 'view', 'silos', $base ) ) . '" class="nav-tab' . ( 'silos' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Silos', 'rankweb' ) . '</a>';
 	}
 	echo '</nav>';
 	if ( 'anchors' === $view || 'silos' === $view ) {
@@ -636,33 +636,33 @@ function aw_link_audit_page_html(): void {
 		return;
 	}
 	if ( isset( $_GET['started'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- only a notice.
-		wp_admin_notice( esc_html__( 'The audit starts in a few seconds and runs in the background.', 'aw-seo-extras' ), array( 'type' => 'info' ) );
+		wp_admin_notice( esc_html__( 'The audit starts in a few seconds and runs in the background.', 'rankweb' ), array( 'type' => 'info' ) );
 	}
 	if ( ! aw_link_types() ) {
-		wp_admin_notice( esc_html__( 'No post type is linked yet, so there is nothing to audit. Add post types under RankWeb → Settings → Internal links.', 'aw-seo-extras' ), array( 'type' => 'warning' ) );
+		wp_admin_notice( esc_html__( 'No post type is linked yet, so there is nothing to audit. Add post types under RankWeb → Settings → Internal links.', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
 	if ( $prog['running'] ) {
 		/* translators: 1: step (collect, check or analyse), 2: items done, 3: items in all. */
-		$line = sprintf( __( 'Audit running: %1$s (%2$s of %3$s items).', 'aw-seo-extras' ), 'collect' === $prog['phase'] ? __( 'reading the items', 'aw-seo-extras' ) : ( 'check' === $prog['phase'] ? __( 'checking addresses', 'aw-seo-extras' ) : __( 'working out the results', 'aw-seo-extras' ) ), number_format_i18n( $prog['done'] ), number_format_i18n( $prog['total'] ) );
+		$line = sprintf( __( 'Audit running: %1$s (%2$s of %3$s items).', 'rankweb' ), 'collect' === $prog['phase'] ? __( 'reading the items', 'rankweb' ) : ( 'check' === $prog['phase'] ? __( 'checking addresses', 'rankweb' ) : __( 'working out the results', 'rankweb' ) ), number_format_i18n( $prog['done'] ), number_format_i18n( $prog['total'] ) );
 	} elseif ( $sum['at'] ) {
 		/* translators: 1: date and time, 2: items audited, 3: items with a finding. */
-		$line = sprintf( __( 'Last audit %1$s: %2$s items, %3$s with a finding.', 'aw-seo-extras' ), wp_date( 'j M Y, g:i a', $sum['at'] ), number_format_i18n( $sum['items'] ), number_format_i18n( $sum['flagged'] ) );
+		$line = sprintf( __( 'Last audit %1$s: %2$s items, %3$s with a finding.', 'rankweb' ), wp_date( 'j M Y, g:i a', $sum['at'] ), number_format_i18n( $sum['items'] ), number_format_i18n( $sum['flagged'] ) );
 	} else {
-		$line = __( 'The audit has not run yet. It runs once a day.', 'aw-seo-extras' );
+		$line = __( 'The audit has not run yet. It runs once a day.', 'rankweb' );
 	}
 	echo '<p>' . esc_html( $line ) . '</p>';
 	if ( current_user_can( 'manage_options' ) ) {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="aw_link_audit_run">';
 		wp_nonce_field( 'aw_link_audit_run' );
-		submit_button( __( 'Run the audit now', 'aw-seo-extras' ), 'secondary', 'submit', false );
+		submit_button( __( 'Run the audit now', 'rankweb' ), 'secondary', 'submit', false );
 		echo '</form>';
 	}
 
 	// The findings as core's subsubsub filter.
 	$by      = (array) $sum['by'];
 	$views   = array();
-	$views[] = ( '' === $flag ? '<strong>' : '<a href="' . esc_url( $base ) . '">' ) . esc_html__( 'All findings', 'aw-seo-extras' ) . ' (' . esc_html( number_format_i18n( $sum['flagged'] ) ) . ')' . ( '' === $flag ? '</strong>' : '</a>' );
+	$views[] = ( '' === $flag ? '<strong>' : '<a href="' . esc_url( $base ) . '">' ) . esc_html__( 'All findings', 'rankweb' ) . ' (' . esc_html( number_format_i18n( $sum['flagged'] ) ) . ')' . ( '' === $flag ? '</strong>' : '</a>' );
 	foreach ( $labels as $key => $label ) {
 		$views[] = ( $key === $flag ? '<strong>' : '<a href="' . esc_url( add_query_arg( 'flag', $key, $base ) ) . '">' ) . esc_html( $label ) . ' (' . esc_html( number_format_i18n( (int) ( $by[ $key ] ?? 0 ) ) ) . ')' . ( $key === $flag ? '</strong>' : '</a>' );
 	}
@@ -679,28 +679,28 @@ function aw_link_audit_page_html(): void {
 			$issues[] = esc_html( $text ) . ( $det ? ': ' . esc_html( implode( ', ', array_map( 'esc_url_raw', $det ) ) ) : '' );
 		}
 		$cells[] = array(
-			'item'   => '<a href="' . esc_url( (string) get_edit_post_link( $it['post_id'] ) ) . '">' . esc_html( '' !== $it['title'] ? $it['title'] : __( '(no title)', 'aw-seo-extras' ) ) . '</a> <a href="' . esc_url( $it['url'] ) . '">' . esc_html__( 'View', 'aw-seo-extras' ) . '</a>',
+			'item'   => '<a href="' . esc_url( (string) get_edit_post_link( $it['post_id'] ) ) . '">' . esc_html( '' !== $it['title'] ? $it['title'] : __( '(no title)', 'rankweb' ) ) . '</a> <a href="' . esc_url( $it['url'] ) . '">' . esc_html__( 'View', 'rankweb' ) . '</a>',
 			'in'     => esc_html( number_format_i18n( $it['links_in'] ) ),
 			'out'    => esc_html( number_format_i18n( $it['links_out'] ) ),
-			'depth'  => $it['depth'] ? esc_html( number_format_i18n( $it['depth'] ) ) : esc_html__( 'Not reached', 'aw-seo-extras' ),
+			'depth'  => $it['depth'] ? esc_html( number_format_i18n( $it['depth'] ) ) : esc_html__( 'Not reached', 'rankweb' ),
 			'issues' => implode( '<br>', $issues ),
 		);
 	}
 	aw_seo_extras_simple_table(
 		'aw-link-audit',
 		array(
-			'item'   => __( 'Item', 'aw-seo-extras' ),
-			'in'     => __( 'Links in', 'aw-seo-extras' ),
-			'out'    => __( 'Links out', 'aw-seo-extras' ),
-			'depth'  => __( 'Clicks from home', 'aw-seo-extras' ),
-			'issues' => __( 'Findings', 'aw-seo-extras' ),
+			'item'   => __( 'Item', 'rankweb' ),
+			'in'     => __( 'Links in', 'rankweb' ),
+			'out'    => __( 'Links out', 'rankweb' ),
+			'depth'  => __( 'Clicks from home', 'rankweb' ),
+			'issues' => __( 'Findings', 'rankweb' ),
 		),
 		$cells,
 		array(
 			'per_page' => $per,
 			'total'    => $data['total'],
 			'primary'  => 'item',
-			'empty'    => $sum['at'] ? __( 'Nothing to list here.', 'aw-seo-extras' ) : __( 'The audit has not run yet.', 'aw-seo-extras' ),
+			'empty'    => $sum['at'] ? __( 'Nothing to list here.', 'rankweb' ) : __( 'The audit has not run yet.', 'rankweb' ),
 		)
 	);
 	echo '</div>';

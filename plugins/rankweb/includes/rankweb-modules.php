@@ -50,29 +50,29 @@ function rankweb_module_where(): array {
 		'label' => $label,
 		'url'   => add_query_arg( 'page', $page, admin_url( 'admin.php' ) ),
 	);
-	$titles  = array( $rm( __( 'Rank Math → Titles & Meta', 'aw-seo-extras' ), 'rank-math-options-titles' ) );
-	$general = array( $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ) );
+	$titles  = array( $rm( __( 'Rank Math → Titles & Meta', 'rankweb' ), 'rank-math-options-titles' ) );
+	$general = array( $rm( __( 'Rank Math → General Settings', 'rankweb' ), 'rank-math-options-general' ) );
 	return array(
-		'titles'           => array_merge( $titles, array( array( 'text' => __( 'for single items', 'aw-seo-extras' ) ) ) ),
+		'titles'           => array_merge( $titles, array( array( 'text' => __( 'for single items', 'rankweb' ) ) ) ),
 		'canonical'        => $titles,
 		'robots'           => $titles,
 		'filtered'         => $titles,
-		'sitemap'          => array( $rm( __( 'Rank Math → Sitemap Settings', 'aw-seo-extras' ), 'rank-math-options-sitemap' ) ),
+		'sitemap'          => array( $rm( __( 'Rank Math → Sitemap Settings', 'rankweb' ), 'rank-math-options-sitemap' ) ),
 		'llms'             => $general,
 		'breadcrumbs'      => $general,
-		'redirects'        => array( $rm( __( 'Rank Math → Redirections', 'aw-seo-extras' ), 'rank-math-redirections' ) ),
-		'redirect-tools'   => array( $rm( __( 'Rank Math → Redirections', 'aw-seo-extras' ), 'rank-math-redirections' ) ),
-		'schema'           => array( array( 'text' => __( 'Each item’s Rank Math Schema tab (read-only for these types)', 'aw-seo-extras' ) ) ),
-		'rank-math-schema' => array( array( 'text' => __( 'Each item’s Rank Math Schema tab (read-only for these types)', 'aw-seo-extras' ) ) ),
-		'opengraph'        => array( array( 'text' => __( 'Each item’s Rank Math Social tab', 'aw-seo-extras' ) ) ),
-		'focus-keywords'   => array( array( 'text' => __( 'Each item’s Rank Math box', 'aw-seo-extras' ) ) ),
-		'analysis'         => array( array( 'text' => __( 'Rank Math box in the editor', 'aw-seo-extras' ) ) ),
+		'redirects'        => array( $rm( __( 'Rank Math → Redirections', 'rankweb' ), 'rank-math-redirections' ) ),
+		'redirect-tools'   => array( $rm( __( 'Rank Math → Redirections', 'rankweb' ), 'rank-math-redirections' ) ),
+		'schema'           => array( array( 'text' => __( 'Each item’s Rank Math Schema tab (read-only for these types)', 'rankweb' ) ) ),
+		'rank-math-schema' => array( array( 'text' => __( 'Each item’s Rank Math Schema tab (read-only for these types)', 'rankweb' ) ) ),
+		'opengraph'        => array( array( 'text' => __( 'Each item’s Rank Math Social tab', 'rankweb' ) ) ),
+		'focus-keywords'   => array( array( 'text' => __( 'Each item’s Rank Math box', 'rankweb' ) ) ),
+		'analysis'         => array( array( 'text' => __( 'Rank Math box in the editor', 'rankweb' ) ) ),
 		'faq'              => array(
 			array(
-				'label' => __( 'RankWeb → FAQ', 'aw-seo-extras' ),
+				'label' => __( 'RankWeb → FAQ', 'rankweb' ),
 				'url'   => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 			),
-			array( 'text' => __( 'each item’s FAQ box', 'aw-seo-extras' ) ),
+			array( 'text' => __( 'each item’s FAQ box', 'rankweb' ) ),
 		),
 	);
 }

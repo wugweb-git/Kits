@@ -173,3 +173,28 @@ html[data-theme="dark"] body {
 	color: var(--wp--preset--color--foreground);
 }
 
+/* List block style "Plain (no bullets)" (kits-plain): the list keeps its list semantics, only the markers and the indent go. */
+.wp-block-list.is-style-kits-plain {
+	list-style: none;
+	padding-inline-start: 0;
+}
+
+/* Social Links block style "Outline" (kits-outline): the network's own fill is replaced by a line in the text colour, so the
+   icons follow the page colours in light, dark and every variation. */
+.wp-block-social-links.is-style-kits-outline .wp-block-social-link {
+	background-color: transparent;
+	border: var(--kit-border-width) solid currentColor;
+	color: inherit;
+}
+.wp-block-social-links.is-style-kits-outline .wp-block-social-link .wp-block-social-link-anchor {
+	color: inherit;
+}
+
+/* Columns block style "Reverse on mobile" (kits-reverse, inc/blocks.php). 781px is where core stacks columns, so the
+   order flips exactly while they are stacked. */
+@media (max-width: 781px) {
+	.wp-block-columns.is-style-kits-reverse:not(.is-not-stacked-on-mobile) {
+		flex-direction: column-reverse;
+	}
+}
+

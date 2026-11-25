@@ -1,0 +1,1557 @@
+# Copyright (C) 2026 Wugweb
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: RankWeb 2.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rankweb\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-25T00:02:32+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: rankweb\n"
+
+#. Plugin Name of the plugin
+#: rankweb.php:11
+#: includes/agent-tools.php:33
+#: includes/kits-hub.php:38
+#: includes/kits-hub.php:42
+#: includes/rankweb-ui.php:197
+msgid "RankWeb"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: rankweb.php:12
+msgid "https://wugweb.com/plugins/rankweb/"
+msgstr ""
+
+#. Description of the plugin
+#: rankweb.php:13
+msgid "Complete SEO suite for WordPress: structured schema, canonicals, robots directives, sitemaps, breadcrumbs, internal links, media optimization, and content analysis. Integrates with Rank Math when active."
+msgstr ""
+
+#. Author of the plugin
+#: rankweb.php:17
+msgid "Wugweb"
+msgstr ""
+
+#. Author URI of the plugin
+#: rankweb.php:18
+msgid "https://wugweb.com/"
+msgstr ""
+
+#: includes/agent-tools.php:34
+msgid "Read and change RankWeb's SEO data."
+msgstr ""
+
+#: includes/agent-tools.php:85
+msgid "Get SEO"
+msgstr ""
+
+#: includes/agent-tools.php:91
+msgid "Internal links audit summary"
+msgstr ""
+
+#: includes/agent-tools.php:94
+msgid "The internal links audit is not available."
+msgstr ""
+
+#: includes/agent-tools.php:97
+msgid "List orphans"
+msgstr ""
+
+#: includes/agent-tools.php:111
+msgid "Set SEO"
+msgstr ""
+
+#: includes/agent-tools.php:133
+msgid "Add redirect"
+msgstr ""
+
+#: includes/agent-tools.php:150
+msgid "Set custom schema"
+msgstr ""
+
+#: includes/agent-tools.php:177
+#: includes/agent-tools.php:202
+#: includes/agent-tools.php:300
+#: includes/content-advice.php:42
+msgid "No such item."
+msgstr ""
+
+#: includes/agent-tools.php:242
+msgid "The internal links audit has not run."
+msgstr ""
+
+#: includes/agent-tools.php:268
+msgid "Redirects are not available."
+msgstr ""
+
+#: includes/agent-tools.php:285
+msgid "The redirect was already in the list or could not be saved."
+msgstr ""
+
+#: includes/bulk-csv.php:46
+#: includes/bulk-csv.php:200
+msgid "SEO CSV"
+msgstr ""
+
+#: includes/bulk-csv.php:57
+#: includes/bulk-csv.php:92
+#: includes/internal-links.php:711
+#: includes/link-audit.php:596
+#: includes/media-seo.php:113
+#: includes/media-seo.php:173
+#: includes/rankweb-rest.php:48
+#: includes/redirect-tools.php:68
+#: includes/redirect-tools.php:87
+#: includes/redirect-tools.php:161
+#: includes/redirect-tools.php:209
+#: includes/redirect-tools.php:226
+#: includes/silos.php:380
+#: includes/silos.php:401
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: includes/bulk-csv.php:103
+msgid "Choose a CSV file to import."
+msgstr ""
+
+#: includes/bulk-csv.php:108
+#: includes/redirect-tools.php:103
+msgid "The file is larger than 5 MB."
+msgstr ""
+
+#. translators: %s: the id from the file.
+#: includes/bulk-csv.php:143
+#, php-format
+msgid "Row %s: not an item of a supported type."
+msgstr ""
+
+#. translators: %d: item ID.
+#: includes/bulk-csv.php:148
+#, php-format
+msgid "Item %d: you may not edit it."
+msgstr ""
+
+#. translators: 1: item ID, 2: list of fields.
+#: includes/bulk-csv.php:185
+#, php-format
+msgid "Item %1$d: %2$s"
+msgstr ""
+
+#: includes/bulk-csv.php:197
+#: includes/link-audit.php:607
+#: includes/media-seo.php:214
+#: includes/redirect-tools.php:320
+msgid "You are not allowed to see this."
+msgstr ""
+
+#: includes/bulk-csv.php:202
+msgid "No post types are set for bulk SEO work (RankWeb → Settings → Bulk edit)."
+msgstr ""
+
+#: includes/bulk-csv.php:210
+msgid "Export"
+msgstr ""
+
+#: includes/bulk-csv.php:210
+msgid "Download every item's SEO fields as a CSV."
+msgstr ""
+
+#: includes/bulk-csv.php:213
+msgid "Export CSV"
+msgstr ""
+
+#: includes/bulk-csv.php:216
+msgid "Import"
+msgstr ""
+
+#: includes/bulk-csv.php:217
+msgid "Upload a CSV with an \"id\" column. Only the columns in the file are written; a blank cell clears that field. The dry run reports what would change and writes nothing."
+msgstr ""
+
+#: includes/bulk-csv.php:221
+#: includes/media-seo.php:237
+#: includes/media-seo.php:246
+msgid "Apply the changes (otherwise it is a dry run)"
+msgstr ""
+
+#: includes/bulk-csv.php:222
+msgid "Import CSV"
+msgstr ""
+
+#. translators: %d: number of items.
+#: includes/bulk-csv.php:238
+#, php-format
+msgid "Dry run: %d items would change. Nothing was written."
+msgstr ""
+
+#. translators: %d: number of items.
+#: includes/bulk-csv.php:240
+#, php-format
+msgid "%d items updated."
+msgstr ""
+
+#: includes/bulk-csv.php:243
+msgid "Changes"
+msgstr ""
+
+#: includes/bulk-csv.php:244
+#: includes/redirect-tools.php:396
+msgid "Skipped"
+msgstr ""
+
+#: includes/bulk-edit.php:59
+#: includes/bulk-edit.php:63
+msgid "SEO"
+msgstr ""
+
+#: includes/bulk-edit.php:82
+msgid "missing"
+msgstr ""
+
+#: includes/bulk-edit.php:84
+#: includes/media-seo.php:29
+msgid "Title"
+msgstr ""
+
+#: includes/bulk-edit.php:85
+msgid "Desc"
+msgstr ""
+
+#: includes/bulk-edit.php:86
+msgid "Focus"
+msgstr ""
+
+#: includes/bulk-edit.php:88
+msgid "noindex"
+msgstr ""
+
+#: includes/bulk-edit.php:106
+msgid "SEO: any"
+msgstr ""
+
+#: includes/bulk-edit.php:107
+msgid "No SEO title"
+msgstr ""
+
+#: includes/bulk-edit.php:108
+msgid "No description"
+msgstr ""
+
+#: includes/bulk-edit.php:109
+msgid "No focus keyword"
+msgstr ""
+
+#: includes/bulk-edit.php:110
+#: includes/bulk-edit.php:221
+msgid "Noindex"
+msgstr ""
+
+#: includes/bulk-edit.php:111
+msgid "No internal links in"
+msgstr ""
+
+#: includes/bulk-edit.php:202
+msgid "SEO title"
+msgstr ""
+
+#: includes/bulk-edit.php:203
+msgid "Description"
+msgstr ""
+
+#: includes/bulk-edit.php:204
+#: includes/bulk-edit.php:219
+msgid "Focus keyword"
+msgstr ""
+
+#: includes/bulk-edit.php:219
+msgid "leave blank to keep"
+msgstr ""
+
+#: includes/bulk-edit.php:220
+msgid "Add link keyword"
+msgstr ""
+
+#: includes/bulk-edit.php:220
+msgid "added to each item"
+msgstr ""
+
+#: includes/bulk-edit.php:221
+msgid "Search index"
+msgstr ""
+
+#: includes/bulk-edit.php:221
+msgid "— No change —"
+msgstr ""
+
+#: includes/bulk-edit.php:221
+msgid "Index"
+msgstr ""
+
+#: includes/health.php:102
+msgid "Sitemap or llms.txt is not answering."
+msgstr ""
+
+#: includes/help-tab.php:33
+#: includes/kits-hub.php:41
+msgid "Overview"
+msgstr ""
+
+#: includes/help-tab.php:33
+msgid "every module, where it is set up and its status"
+msgstr ""
+
+#: includes/help-tab.php:34
+#: includes/rankweb-ui.php:120
+#: includes/rankweb-ui.php:194
+msgid "FAQ"
+msgstr ""
+
+#: includes/help-tab.php:34
+msgid "which content has the FAQ box, and questions waiting for approval"
+msgstr ""
+
+#: includes/help-tab.php:35
+#: includes/rankweb-ui.php:129
+msgid "Settings"
+msgstr ""
+
+#: includes/help-tab.php:35
+msgid "every rule, by module, with its default"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/help-tab.php:45
+#, php-format
+msgid "About %s"
+msgstr ""
+
+#: includes/help-tab.php:46
+msgid "Everything Rank Math does not do, or keeps for Premium: the FAQ system, canonical rules, breadcrumbs, content analysis on what visitors see, focus keywords and the content panel in the editor. It works only while Rank Math is active."
+msgstr ""
+
+#: includes/help-tab.php:54
+#: includes/rankweb-rest.php:737
+msgid "Plugins"
+msgstr ""
+
+#: includes/help-tab.php:55
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: includes/internal-links.php:184
+msgid "Link keywords: other items link to this one where these words appear."
+msgstr ""
+
+#: includes/internal-links.php:632
+msgid "Link keywords"
+msgstr ""
+
+#: includes/internal-links.php:652
+msgid "Other items link to this one where these words appear. One per line."
+msgstr ""
+
+#: includes/internal-links.php:655
+msgid "From the focus keywords until you save this box."
+msgstr ""
+
+#: includes/internal-links.php:658
+msgid "The auto-linker is off for this post type (RankWeb → Settings → Internal links)."
+msgstr ""
+
+#: includes/internal-links.php:707
+#: includes/rankweb-rest.php:38
+msgid "Sign in to use this."
+msgstr ""
+
+#. translators: %s: plugin version.
+#. translators: %s: version.
+#: includes/kits-hub.php:35
+#: includes/rankweb-rest.php:707
+#, php-format
+msgid "Active, %s"
+msgstr ""
+
+#: includes/kits-hub.php:37
+msgid "Does nothing until Rank Math SEO is active."
+msgstr ""
+
+#: includes/link-anchors.php:142
+msgid "Exact"
+msgstr ""
+
+#: includes/link-anchors.php:143
+msgid "Partial"
+msgstr ""
+
+#: includes/link-anchors.php:144
+msgid "Branded"
+msgstr ""
+
+#: includes/link-anchors.php:145
+msgid "Generic"
+msgstr ""
+
+#: includes/link-anchors.php:146
+msgid "Naked URL"
+msgstr ""
+
+#: includes/link-anchors.php:147
+msgid "Image"
+msgstr ""
+
+#: includes/link-anchors.php:148
+msgid "Long-tail"
+msgstr ""
+
+#: includes/link-anchors.php:149
+msgid "Other"
+msgstr ""
+
+#. translators: 1: limit for exact match in percent, 2: limit for any other type in percent, 3: fewest links.
+#: includes/link-anchors.php:235
+#, php-format
+msgid "The share of each anchor type among the links to an item. A warning shows when exact match is over %1$s%% or another type is over %2$s%% (only for items with %3$s links or more). Change the limits under RankWeb → Settings → Internal links."
+msgstr ""
+
+#: includes/link-anchors.php:236
+msgid "All items"
+msgstr ""
+
+#: includes/link-anchors.php:236
+msgid "With a warning"
+msgstr ""
+
+#: includes/link-anchors.php:238
+#: includes/link-audit.php:692
+msgid "Item"
+msgstr ""
+
+#: includes/link-anchors.php:239
+#: includes/link-audit.php:693
+msgid "Links in"
+msgstr ""
+
+#: includes/link-anchors.php:242
+msgid "Warning"
+msgstr ""
+
+#: includes/link-anchors.php:247
+#: includes/link-audit.php:682
+#: includes/silos.php:412
+msgid "(no title)"
+msgstr ""
+
+#: includes/link-anchors.php:247
+#: includes/link-audit.php:682
+msgid "View"
+msgstr ""
+
+#. translators: 1: anchor type, 2: its limit in percent.
+#: includes/link-anchors.php:256
+#, php-format
+msgid "%1$s over %2$s%%"
+msgstr ""
+
+#: includes/link-anchors.php:269
+msgid "No links to items are recorded yet. Run the audit first."
+msgstr ""
+
+#: includes/link-audit.php:70
+msgid "Orphan: no link in"
+msgstr ""
+
+#: includes/link-audit.php:71
+msgid "Too many clicks from the home page"
+msgstr ""
+
+#: includes/link-audit.php:72
+msgid "Too many links in the item"
+msgstr ""
+
+#: includes/link-audit.php:73
+msgid "Broken link"
+msgstr ""
+
+#: includes/link-audit.php:74
+msgid "Link through a redirect"
+msgstr ""
+
+#: includes/link-audit.php:75
+msgid "Internal link set to nofollow"
+msgstr ""
+
+#: includes/link-audit.php:76
+msgid "Link to an item whose canonical is elsewhere"
+msgstr ""
+
+#: includes/link-audit.php:77
+msgid "Link to a page on the do-not-link list"
+msgstr ""
+
+#: includes/link-audit.php:78
+msgid "Link into another silo's supporting item"
+msgstr ""
+
+#: includes/link-audit.php:586
+#: includes/link-audit.php:620
+#: includes/rankweb-rest.php:325
+msgid "Internal links"
+msgstr ""
+
+#: includes/link-audit.php:621
+msgid "Audit"
+msgstr ""
+
+#: includes/link-audit.php:623
+msgid "Anchor mix"
+msgstr ""
+
+#: includes/link-audit.php:626
+msgid "Silos"
+msgstr ""
+
+#: includes/link-audit.php:639
+msgid "The audit starts in a few seconds and runs in the background."
+msgstr ""
+
+#: includes/link-audit.php:642
+msgid "No post type is linked yet, so there is nothing to audit. Add post types under RankWeb → Settings → Internal links."
+msgstr ""
+
+#. translators: 1: step (collect, check or analyse), 2: items done, 3: items in all.
+#: includes/link-audit.php:646
+#, php-format
+msgid "Audit running: %1$s (%2$s of %3$s items)."
+msgstr ""
+
+#. translators: 1: step (collect, check or analyse), 2: items done, 3: items in all.
+#: includes/link-audit.php:646
+msgid "reading the items"
+msgstr ""
+
+#. translators: 1: step (collect, check or analyse), 2: items done, 3: items in all.
+#: includes/link-audit.php:646
+msgid "checking addresses"
+msgstr ""
+
+#. translators: 1: step (collect, check or analyse), 2: items done, 3: items in all.
+#: includes/link-audit.php:646
+msgid "working out the results"
+msgstr ""
+
+#. translators: 1: date and time, 2: items audited, 3: items with a finding.
+#: includes/link-audit.php:649
+#, php-format
+msgid "Last audit %1$s: %2$s items, %3$s with a finding."
+msgstr ""
+
+#: includes/link-audit.php:651
+msgid "The audit has not run yet. It runs once a day."
+msgstr ""
+
+#: includes/link-audit.php:658
+msgid "Run the audit now"
+msgstr ""
+
+#: includes/link-audit.php:665
+msgid "All findings"
+msgstr ""
+
+#: includes/link-audit.php:685
+msgid "Not reached"
+msgstr ""
+
+#: includes/link-audit.php:694
+msgid "Links out"
+msgstr ""
+
+#: includes/link-audit.php:695
+msgid "Clicks from home"
+msgstr ""
+
+#: includes/link-audit.php:696
+msgid "Findings"
+msgstr ""
+
+#: includes/link-audit.php:703
+msgid "Nothing to list here."
+msgstr ""
+
+#: includes/link-audit.php:703
+msgid "The audit has not run yet."
+msgstr ""
+
+#: includes/media-seo.php:28
+msgid "Alt text"
+msgstr ""
+
+#: includes/media-seo.php:30
+msgid "Caption"
+msgstr ""
+
+#: includes/media-seo.php:102
+msgid "Images"
+msgstr ""
+
+#: includes/media-seo.php:128
+msgid "Enter something to search for."
+msgstr ""
+
+#: includes/media-seo.php:130
+msgid "Choose at least one field."
+msgstr ""
+
+#: includes/media-seo.php:217
+msgid "Image SEO"
+msgstr ""
+
+#. translators: %s: a number.
+#: includes/media-seo.php:218
+#, php-format
+msgid "Each run works on the %s most recent attachments."
+msgstr ""
+
+#: includes/media-seo.php:225
+#: includes/media-seo.php:239
+msgid "Find and replace"
+msgstr ""
+
+#: includes/media-seo.php:229
+msgid "Find"
+msgstr ""
+
+#: includes/media-seo.php:230
+msgid "Replace with"
+msgstr ""
+
+#: includes/media-seo.php:231
+msgid "Fields"
+msgstr ""
+
+#: includes/media-seo.php:236
+msgid "Options"
+msgstr ""
+
+#: includes/media-seo.php:236
+msgid "Regular expression"
+msgstr ""
+
+#: includes/media-seo.php:236
+msgid "Ignore case"
+msgstr ""
+
+#: includes/media-seo.php:237
+msgid "Apply"
+msgstr ""
+
+#: includes/media-seo.php:242
+msgid "Fill missing captions"
+msgstr ""
+
+#. translators: %s: the caption pattern.
+#: includes/media-seo.php:243
+#, php-format
+msgid "Fills the caption of attachments that have none, from the pattern: %s. Existing captions are left alone. Change the pattern in RankWeb → Settings → Images."
+msgstr ""
+
+#: includes/media-seo.php:247
+msgid "Fill captions"
+msgstr ""
+
+#. translators: %d: number of attachments.
+#: includes/media-seo.php:263
+#, php-format
+msgid "Dry run: %d attachments would change. Nothing was written."
+msgstr ""
+
+#. translators: %d: number of attachments.
+#: includes/media-seo.php:265
+#, php-format
+msgid "%d attachments updated."
+msgstr ""
+
+#: includes/media-seo.php:270
+msgid "Attachment"
+msgstr ""
+
+#: includes/media-seo.php:270
+msgid "Field"
+msgstr ""
+
+#: includes/media-seo.php:270
+msgid "From"
+msgstr ""
+
+#: includes/media-seo.php:270
+msgid "To"
+msgstr ""
+
+#: includes/overview.php:74
+msgid "Not checked yet (hourly check)."
+msgstr ""
+
+#. translators: %s: state.
+#: includes/programmatic.php:565
+#, php-format
+msgid "Districts in %s"
+msgstr ""
+
+#. translators: %s: district.
+#: includes/programmatic.php:574
+#, php-format
+msgid "All in %s"
+msgstr ""
+
+#. translators: %s: district.
+#. translators: %s: the silo's name.
+#: includes/programmatic.php:576
+#: includes/silos.php:190
+#, php-format
+msgid "More in %s"
+msgstr ""
+
+#: includes/rankweb-modules.php:53
+#: includes/rankweb-rest.php:458
+msgid "Rank Math → Titles & Meta"
+msgstr ""
+
+#: includes/rankweb-modules.php:54
+#: includes/rankweb-rest.php:459
+#: includes/rankweb-rest.php:462
+msgid "Rank Math → General Settings"
+msgstr ""
+
+#: includes/rankweb-modules.php:56
+msgid "for single items"
+msgstr ""
+
+#: includes/rankweb-modules.php:60
+#: includes/rankweb-rest.php:460
+msgid "Rank Math → Sitemap Settings"
+msgstr ""
+
+#: includes/rankweb-modules.php:63
+#: includes/rankweb-modules.php:64
+#: includes/rankweb-rest.php:461
+msgid "Rank Math → Redirections"
+msgstr ""
+
+#: includes/rankweb-modules.php:65
+#: includes/rankweb-modules.php:66
+msgid "Each item’s Rank Math Schema tab (read-only for these types)"
+msgstr ""
+
+#: includes/rankweb-modules.php:67
+msgid "Each item’s Rank Math Social tab"
+msgstr ""
+
+#: includes/rankweb-modules.php:68
+msgid "Each item’s Rank Math box"
+msgstr ""
+
+#: includes/rankweb-modules.php:69
+msgid "Rank Math box in the editor"
+msgstr ""
+
+#: includes/rankweb-modules.php:72
+msgid "RankWeb → FAQ"
+msgstr ""
+
+#: includes/rankweb-modules.php:75
+msgid "each item’s FAQ box"
+msgstr ""
+
+#: includes/rankweb-rest.php:44
+msgid "The page has expired. Reload it and try again."
+msgstr ""
+
+#: includes/rankweb-rest.php:227
+msgid "Search titles missing"
+msgstr ""
+
+#. translators: 1: number of items, 2: post type with the most missing.
+#: includes/rankweb-rest.php:231
+#, php-format
+msgid "of %1$s items; most in %2$s"
+msgstr ""
+
+#. translators: 1: number of items, 2: post type with the most missing.
+#: includes/rankweb-rest.php:231
+#, php-format
+msgid "of %s items"
+msgstr ""
+
+#: includes/rankweb-rest.php:240
+msgid "Descriptions missing"
+msgstr ""
+
+#. translators: %s: number of items.
+#: includes/rankweb-rest.php:244
+#, php-format
+msgid "%s filled by the daily job"
+msgstr ""
+
+#: includes/rankweb-rest.php:252
+#: includes/rankweb-rest.php:291
+#: includes/rankweb-rest.php:339
+msgid "Off"
+msgstr ""
+
+#: includes/rankweb-rest.php:253
+msgid "Rank Math schema entries is switched off"
+msgstr ""
+
+#. translators: %s: number of items checked so far.
+#: includes/rankweb-rest.php:257
+#, php-format
+msgid "First pass under way: %s items checked"
+msgstr ""
+
+#. translators: %s: number of items.
+#: includes/rankweb-rest.php:261
+#, php-format
+msgid "%s items the schema command would write"
+msgstr ""
+
+#: includes/rankweb-rest.php:265
+msgid "Schema entries to write"
+msgstr ""
+
+#: includes/rankweb-rest.php:277
+msgid "Focus keywords missing"
+msgstr ""
+
+#: includes/rankweb-rest.php:280
+msgid "Filled by the workers’ focus-keyword job"
+msgstr ""
+
+#: includes/rankweb-rest.php:290
+msgid "Pages with an FAQ"
+msgstr ""
+
+#. translators: %s: number of questions.
+#: includes/rankweb-rest.php:294
+#, php-format
+msgid "%s draft question waiting"
+msgid_plural "%s draft questions waiting"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number of questions.
+#: includes/rankweb-rest.php:294
+msgid "No drafts waiting"
+msgstr ""
+
+#: includes/rankweb-rest.php:302
+msgid "Kept out of search"
+msgstr ""
+
+#. translators: %s: number of pages.
+#: includes/rankweb-rest.php:306
+#, php-format
+msgid "%s kept indexed on purpose"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/rankweb-rest.php:312
+#, php-format
+msgid "%s listings with no way to reach them"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/rankweb-rest.php:314
+#, php-format
+msgid "%s thin Directory pages"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/rankweb-rest.php:316
+#, php-format
+msgid "%s category lists below the minimum"
+msgstr ""
+
+#: includes/rankweb-rest.php:326
+msgid "Not run"
+msgstr ""
+
+#. translators: %s: number of items.
+#: includes/rankweb-rest.php:329
+#, php-format
+msgid "orphans; %s items have a finding"
+msgstr ""
+
+#. translators: %s: number of items.
+#: includes/rankweb-rest.php:329
+msgid "The first audit runs within a day"
+msgstr ""
+
+#. translators: %s: number of items.
+#: includes/rankweb-rest.php:331
+#, php-format
+msgid "%s items with an anchor mix over a limit"
+msgstr ""
+
+#: includes/rankweb-rest.php:340
+msgid "The hourly check is switched off"
+msgstr ""
+
+#: includes/rankweb-rest.php:343
+msgid "Not checked"
+msgstr ""
+
+#: includes/rankweb-rest.php:344
+msgid "The hourly check has not run yet"
+msgstr ""
+
+#: includes/rankweb-rest.php:347
+msgid "Not answering"
+msgstr ""
+
+#: includes/rankweb-rest.php:351
+msgid "Answering"
+msgstr ""
+
+#. translators: %s: date and time.
+#: includes/rankweb-rest.php:353
+#, php-format
+msgid "Both checked %s"
+msgstr ""
+
+#: includes/rankweb-rest.php:358
+msgid "Sitemap and llms.txt"
+msgstr ""
+
+#: includes/rankweb-rest.php:367
+msgid "Rank Math"
+msgstr ""
+
+#: includes/rankweb-rest.php:368
+msgid "Active"
+msgstr ""
+
+#. translators: %s: version.
+#: includes/rankweb-rest.php:368
+#: includes/rankweb-rest.php:707
+msgid "Not active"
+msgstr ""
+
+#. translators: 1: Rank Math version, 2: number of modules.
+#: includes/rankweb-rest.php:370
+#, php-format
+msgid "Version %1$s; %2$s RankWeb module off"
+msgid_plural "Version %1$s; %2$s RankWeb modules off"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/rankweb-rest.php:394
+msgid "Posts and Pages (Resources guides, hub Pages)"
+msgstr ""
+
+#: includes/rankweb-rest.php:394
+msgid "FAQ box: the page’s own questions (draft or approved)."
+msgstr ""
+
+#: includes/rankweb-rest.php:395
+msgid "Library documents"
+msgstr ""
+
+#: includes/rankweb-rest.php:395
+msgid "FAQ box: the questions. Library item box: Short name, Issued under, Key sections (document fields the questions use)."
+msgstr ""
+
+#: includes/rankweb-rest.php:396
+msgid "Tags, categories, organisation types, services"
+msgstr ""
+
+#: includes/rankweb-rest.php:396
+msgid "FAQ box on the term screen: automatic questions (tags) and the term’s own questions."
+msgstr ""
+
+#: includes/rankweb-rest.php:399
+msgid "report, check, import, convert-guides, undo-guide"
+msgstr ""
+
+#: includes/rankweb-rest.php:400
+msgid "Write Rank Math’s schema entries for published items (--dry-run, --type)"
+msgstr ""
+
+#: includes/rankweb-rest.php:401
+msgid "Make JPEG copies of pictures for share images"
+msgstr ""
+
+#: includes/rankweb-rest.php:402
+msgid "List the active redirects in Rank Math’s Redirections"
+msgstr ""
+
+#: includes/rankweb-rest.php:405
+msgid "Titles & Meta"
+msgstr ""
+
+#: includes/rankweb-rest.php:405
+msgid "Title and description templates for single items"
+msgstr ""
+
+#: includes/rankweb-rest.php:406
+msgid "Sitemap Settings"
+msgstr ""
+
+#: includes/rankweb-rest.php:406
+msgid "Which types are in the sitemap"
+msgstr ""
+
+#: includes/rankweb-rest.php:407
+msgid "General Settings"
+msgstr ""
+
+#: includes/rankweb-rest.php:407
+msgid "Breadcrumbs, and Edit llms.txt"
+msgstr ""
+
+#: includes/rankweb-rest.php:408
+#: includes/rankweb-rest.php:697
+msgid "Redirections"
+msgstr ""
+
+#: includes/rankweb-rest.php:408
+msgid "The one list of redirects (forms, merges and imports add to it)"
+msgstr ""
+
+#: includes/rankweb-rest.php:561
+msgid "No such group."
+msgstr ""
+
+#: includes/rankweb-rest.php:596
+msgid "Defaults restored."
+msgstr ""
+
+#: includes/rankweb-rest.php:596
+msgid "Saved. A module switched on or off takes effect on the next page load."
+msgstr ""
+
+#: includes/rankweb-rest.php:596
+#: includes/rankweb-rest.php:627
+#: includes/rankweb-rest.php:662
+#: includes/rankweb-rest.php:683
+msgid "Saved."
+msgstr ""
+
+#: includes/rankweb-rest.php:609
+msgid "The FAQ module is switched off."
+msgstr ""
+
+#. translators: %d: number of IDs left out.
+#: includes/rankweb-rest.php:661
+#, php-format
+msgid "Saved. %d ID is not a Directory listing and was left out."
+msgid_plural "Saved. %d IDs are not Directory listings and were left out."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/rankweb-rest.php:675
+msgid "Choose an image from the media library."
+msgstr ""
+
+#: includes/rankweb-rest.php:696
+#: includes/sitemap.php:421
+msgid "Sitemap"
+msgstr ""
+
+#: includes/rankweb-rest.php:698
+msgid "llms.txt"
+msgstr ""
+
+#: includes/rankweb-rest.php:699
+msgid "Breadcrumbs"
+msgstr ""
+
+#: includes/rankweb-rest.php:705
+msgid "Rank Math SEO"
+msgstr ""
+
+#. translators: 1: features on, 2: features RankWeb relies on.
+#: includes/rankweb-rest.php:710
+#, php-format
+msgid "%1$d of the %2$d Rank Math features RankWeb relies on are on."
+msgstr ""
+
+#. translators: 1: features on, 2: features RankWeb relies on.
+#: includes/rankweb-rest.php:710
+msgid "RankWeb does nothing until Rank Math SEO is active."
+msgstr ""
+
+#: includes/rankweb-rest.php:721
+msgid "Rank Math modules"
+msgstr ""
+
+#: includes/rankweb-rest.php:731
+msgid "General Settings (breadcrumbs, llms.txt)"
+msgstr ""
+
+#: includes/rankweb-rest.php:741
+msgid "Read only: RankWeb changes nothing in Rank Math from here. No key is stored."
+msgstr ""
+
+#: includes/rankweb-ui.php:68
+msgid "The internal-link audit, anchor mix and silos."
+msgstr ""
+
+#: includes/rankweb-ui.php:69
+msgid "Find and replace alt text, titles and captions across the media library."
+msgstr ""
+
+#: includes/rankweb-ui.php:70
+msgid "Export and import SEO fields as a CSV file."
+msgstr ""
+
+#: includes/rankweb-ui.php:71
+msgid "Redirect imports, exports and the 404 log."
+msgstr ""
+
+#: includes/rankweb-ui.php:102
+msgid "Dashboard"
+msgstr ""
+
+#: includes/rankweb-ui.php:108
+msgid "Insights"
+msgstr ""
+
+#: includes/rankweb-ui.php:114
+msgid "Modules"
+msgstr ""
+
+#: includes/rankweb-ui.php:193
+msgid "RankWeb settings"
+msgstr ""
+
+#: includes/rankweb-ui.php:195
+msgid "RankWeb insights"
+msgstr ""
+
+#: includes/rankweb-ui.php:196
+msgid "RankWeb modules"
+msgstr ""
+
+#: includes/rankweb-ui.php:203
+msgid "RankWeb needs Kits Core (active, with its build) to show this screen."
+msgstr ""
+
+#: includes/redirect-tools.php:57
+#: includes/redirect-tools.php:323
+msgid "Redirect tools"
+msgstr ""
+
+#: includes/redirect-tools.php:99
+msgid "Rank Math's Redirections module is off."
+msgstr ""
+
+#: includes/redirect-tools.php:101
+msgid "Choose a CSV file."
+msgstr ""
+
+#. translators: 1: row number, 2: the reason.
+#: includes/redirect-tools.php:116
+#, php-format
+msgid "Row %1$d: %2$s"
+msgstr ""
+
+#. translators: %d: row number.
+#: includes/redirect-tools.php:129
+#, php-format
+msgid "Row %d: already in the list or could not be saved."
+msgstr ""
+
+#: includes/redirect-tools.php:253
+msgid "The .htaccess option is off (RankWeb → Settings → Redirect tools)."
+msgstr ""
+
+#: includes/redirect-tools.php:259
+msgid "This server does not read .htaccess (not Apache or LiteSpeed)."
+msgstr ""
+
+#: includes/redirect-tools.php:269
+msgid "The .htaccess file could not be opened."
+msgstr ""
+
+#: includes/redirect-tools.php:276
+msgid "The .htaccess file is not writable."
+msgstr ""
+
+#: includes/redirect-tools.php:282
+msgid "A backup of .htaccess could not be written, so nothing was changed."
+msgstr ""
+
+#: includes/redirect-tools.php:287
+msgid "There was nothing to remove."
+msgstr ""
+
+#: includes/redirect-tools.php:293
+msgid "The .htaccess file could not be written."
+msgstr ""
+
+#. translators: %d: number of redirects.
+#: includes/redirect-tools.php:300
+msgid "RankWeb's .htaccess block was removed (a backup is at .htaccess.rankweb-bak)."
+msgstr ""
+
+#. translators: %d: number of redirects.
+#: includes/redirect-tools.php:300
+#, php-format
+msgid "%d redirects written to .htaccess (a backup is at .htaccess.rankweb-bak)."
+msgstr ""
+
+#: includes/redirect-tools.php:324
+msgid "Redirects live in Rank Math → Redirections. These tools read and write that one list."
+msgstr ""
+
+#: includes/redirect-tools.php:326
+msgid "Rank Math's Redirections module is off, so these tools do nothing."
+msgstr ""
+
+#: includes/redirect-tools.php:334
+msgid "Export and import"
+msgstr ""
+
+#: includes/redirect-tools.php:337
+msgid "Export redirects CSV"
+msgstr ""
+
+#: includes/redirect-tools.php:341
+msgid "Export 404 log CSV"
+msgstr ""
+
+#: includes/redirect-tools.php:343
+msgid "Import a CSV with a \"source\" column, and target, code (301, 302, 307, 308, 410, 451) and comparison (exact or regex). The dry run reports what would be added and writes nothing."
+msgstr ""
+
+#: includes/redirect-tools.php:347
+msgid "Add the redirects (otherwise it is a dry run)"
+msgstr ""
+
+#: includes/redirect-tools.php:348
+msgid "Import redirects"
+msgstr ""
+
+#: includes/redirect-tools.php:351
+msgid "Apache .htaccess"
+msgstr ""
+
+#. translators: %d: number of redirects.
+#: includes/redirect-tools.php:354
+#, php-format
+msgid "%d exact redirects can go in .htaccess (regex rules stay in Rank Math)."
+msgstr ""
+
+#: includes/redirect-tools.php:357
+msgid "Download the .htaccess block"
+msgstr ""
+
+#: includes/redirect-tools.php:362
+msgid "Write to .htaccess now"
+msgstr ""
+
+#: includes/redirect-tools.php:366
+msgid "Remove the .htaccess block"
+msgstr ""
+
+#: includes/redirect-tools.php:369
+msgid "Writing to .htaccess is off, or this server is not Apache or LiteSpeed. Turn it on in RankWeb → Settings → Redirect tools. The downloaded block can be pasted by hand."
+msgstr ""
+
+#. translators: %d: number of redirects.
+#: includes/redirect-tools.php:390
+#, php-format
+msgid "Dry run: %d redirects would be added. Nothing was written."
+msgstr ""
+
+#. translators: %d: number of redirects.
+#: includes/redirect-tools.php:392
+#, php-format
+msgid "%d redirects added."
+msgstr ""
+
+#: includes/redirect-tools.php:395
+msgid "Redirects"
+msgstr ""
+
+#: includes/reprint.php:26
+msgid "Reprint & Canonical Attribution (RankWeb)"
+msgstr ""
+
+#: includes/reprint.php:52
+msgid "This article was originally published elsewhere (Reprint / Syndicated)"
+msgstr ""
+
+#: includes/reprint.php:57
+msgid "Original Publication URL"
+msgstr ""
+
+#: includes/reprint.php:62
+msgid "Original Publisher / Publication Name"
+msgstr ""
+
+#: includes/reprint.php:67
+msgid "Original Publication Date"
+msgstr ""
+
+#: includes/reprint.php:72
+msgid "Set rel=\"canonical\" pointing to the original URL (SEO protection)"
+msgstr ""
+
+#: includes/reprint.php:73
+msgid "Display formatted attribution badge at end of post"
+msgstr ""
+
+#. translators: %s: formatted publication date
+#: includes/reprint.php:208
+#, php-format
+msgid "on %s"
+msgstr ""
+
+#. translators: 1: original source name or link, 2: original publication date
+#: includes/reprint.php:212
+#, php-format
+msgid "This article was originally published by %1$s%2$s and is republished here with attribution."
+msgstr ""
+
+#: includes/schema-custom.php:63
+msgid "Custom schema (JSON-LD)"
+msgstr ""
+
+#: includes/schema-custom.php:93
+msgid "JSON-LD"
+msgstr ""
+
+#: includes/schema-custom.php:94
+msgid "One object, a list of objects, or a { \"@graph\": [ … ] }. Added to the page's schema. Checked when you save."
+msgstr ""
+
+#: includes/schema-custom.php:97
+msgid "Speakable (CSS selectors)"
+msgstr ""
+
+#: includes/schema-custom.php:98
+msgid "One CSS selector per line (for example .entry-title or .lead). Added as SpeakableSpecification."
+msgstr ""
+
+#: includes/schema-custom.php:101
+msgid "About"
+msgstr ""
+
+#: includes/schema-custom.php:101
+#: includes/schema-custom.php:103
+msgid "Names or URLs, one per line."
+msgstr ""
+
+#: includes/schema-custom.php:103
+msgid "Mentions"
+msgstr ""
+
+#: includes/schema-custom.php:109
+msgid "Import JSON-LD from a URL"
+msgstr ""
+
+#: includes/schema-custom.php:110
+msgid "Import and save reads the page's schema into the JSON-LD box above, replacing what is there, to adapt. Your other changes are saved with it."
+msgstr ""
+
+#: includes/schema-custom.php:113
+msgid "Import and save"
+msgstr ""
+
+#: includes/schema-custom.php:116
+msgid "Fill with a Dataset template and save"
+msgstr ""
+
+#: includes/schema-custom.php:116
+msgid "Replace the JSON-LD above with a Dataset template?"
+msgstr ""
+
+#: includes/schema-custom.php:121
+msgid "Test this page in Google Rich Results →"
+msgstr ""
+
+#. translators: %s: the JSON error.
+#: includes/schema-custom.php:148
+#, php-format
+msgid "The custom JSON-LD was not saved: %s"
+msgstr ""
+
+#: includes/schema-custom.php:170
+msgid "Dataset template filled in. Complete it and Update the item."
+msgstr ""
+
+#: includes/schema-custom.php:174
+msgid "Enter a full URL (https://…) to import from."
+msgstr ""
+
+#: includes/schema-custom.php:212
+msgid "The page could not be fetched."
+msgstr ""
+
+#: includes/schema-custom.php:217
+msgid "No JSON-LD was found on that page."
+msgstr ""
+
+#. translators: %d: number of nodes.
+#: includes/schema-custom.php:223
+#, php-format
+msgid "Imported %d node and saved it. Review it below."
+msgid_plural "Imported %d nodes and saved them. Review them below."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/silos.php:236
+msgid "The silo needs a name."
+msgstr ""
+
+#. translators: %d: an item ID.
+#: includes/silos.php:245
+#, php-format
+msgid "Item %d is not a published item with its own page."
+msgstr ""
+
+#. translators: 1: item ID, 2: the other silo's name.
+#: includes/silos.php:254
+#, php-format
+msgid "Item %1$d is already in the silo \"%2$s\". An item is in one silo only."
+msgstr ""
+
+#: includes/silos.php:283
+msgid "The silo could not be saved."
+msgstr ""
+
+#: includes/silos.php:422
+msgid "Silo saved."
+msgstr ""
+
+#: includes/silos.php:425
+msgid "Silo deleted. No item was changed."
+msgstr ""
+
+#: includes/silos.php:432
+msgid "A silo is one hub item and its supporting items. Supporting items link to the hub and to each other; an item in one silo links to another silo's hub only. An item is in one silo only."
+msgstr ""
+
+#: includes/silos.php:434
+#: includes/silos.php:494
+msgid "Add a silo"
+msgstr ""
+
+#: includes/silos.php:440
+#: includes/silos.php:500
+msgid "Virtual: each links to the hub and the others"
+msgstr ""
+
+#: includes/silos.php:441
+#: includes/silos.php:500
+msgid "Circle: each links to the next and back to the hub"
+msgstr ""
+
+#. translators: 1: items in the silo, 2: fewest items.
+#: includes/silos.php:449
+#, php-format
+msgid "Only %1$s items; at least %2$s are better."
+msgstr ""
+
+#. translators: 1: item IDs, 2: most folders deep.
+#: includes/silos.php:453
+#, php-format
+msgid "Deeper than %2$s folders: %1$s."
+msgstr ""
+
+#: includes/silos.php:466
+msgid "Silo"
+msgstr ""
+
+#: includes/silos.php:467
+msgid "Hub"
+msgstr ""
+
+#: includes/silos.php:468
+#: includes/silos.php:500
+msgid "Mode"
+msgstr ""
+
+#: includes/silos.php:469
+msgid "Supporting items"
+msgstr ""
+
+#: includes/silos.php:470
+msgid "Address checks"
+msgstr ""
+
+#: includes/silos.php:475
+msgid "No silos yet."
+msgstr ""
+
+#: includes/silos.php:494
+msgid "Change the silo"
+msgstr ""
+
+#: includes/silos.php:498
+msgid "Name"
+msgstr ""
+
+#: includes/silos.php:499
+msgid "Hub item ID"
+msgstr ""
+
+#: includes/silos.php:501
+msgid "Supporting item IDs"
+msgstr ""
+
+#: includes/silos.php:501
+msgid "One item ID per line, in the order of the circle. Published items with their own page only."
+msgstr ""
+
+#: includes/silos.php:506
+msgid "Save the silo"
+msgstr ""
+
+#: includes/silos.php:507
+msgid "Cancel"
+msgstr ""
+
+#: includes/silos.php:511
+msgid "Deleting a silo removes its settings only. No item is changed or deleted."
+msgstr ""
+
+#: includes/silos.php:512
+msgid "Delete this silo"
+msgstr ""
+
+#: blocks/breadcrumbs/block.json
+msgctxt "block title"
+msgid "Breadcrumbs"
+msgstr ""
+
+#: blocks/breadcrumbs/block.json
+msgctxt "block description"
+msgid "The page's breadcrumb trail (Rank Math's trail, as RankWeb builds it), once per page, above the title. Search engines get the same trail as BreadcrumbList."
+msgstr ""
+
+#: blocks/breadcrumbs/block.json
+msgctxt "block keyword"
+msgid "breadcrumb"
+msgstr ""
+
+#: blocks/breadcrumbs/block.json
+msgctxt "block keyword"
+msgid "trail"
+msgstr ""
+
+#: blocks/breadcrumbs/block.json
+msgctxt "block keyword"
+msgid "navigation"
+msgstr ""
+
+#: blocks/breadcrumbs/block.json
+msgctxt "block keyword"
+msgid "rankweb"
+msgstr ""

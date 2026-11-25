@@ -8,11 +8,11 @@ Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-SEO extras that run alongside Rank Math (free): FAQs, canonicals, breadcrumbs, internal links, schema, video and bulk tools.
+SEO for WordPress, with or without Rank Math (free): titles, descriptions, share cards, schema, canonicals, FAQs, breadcrumbs, internal links, video and bulk tools.
 
 == Description ==
 
-RankWeb works next to Rank Math (free) and does nothing unless Rank Math is active. It is part of the Wugweb "Kits" suite: it reads Rank Math's own fields and tables and adds what Rank Math keeps for its Premium plan. Where a feature belongs to another suite plugin, RankWeb hands it over — search analytics and Google data live in InsightWeb, not here.
+RankWeb works on its own, and next to Rank Math (free) when that is active. On its own it prints the SEO title and meta description you type in the editor sidebar, the Open Graph and Twitter share tags, a canonical address and the schema graph (Organization, WebSite and the item). With Rank Math active it reads Rank Math's own fields and tables and adds what Rank Math keeps for its Premium plan. It is part of the Wugweb "Kits" suite; where a feature belongs to another suite plugin, RankWeb hands it over: search analytics and Google data live in InsightWeb, not here.
 
 * FAQ system: an FAQ box on every public post type and taxonomy, questions filled in automatically and kept once edited, an accordion and FAQPage structured data.
 * Canonical addresses Rank Math cannot work out: hub pages, directory places and filtered or sorted lists.
@@ -32,9 +32,9 @@ RankWeb works next to Rank Math (free) and does nothing unless Rank Math is acti
 
 == Installation ==
 
-1. Install and activate Rank Math SEO (free) first. RankWeb requires it and will not activate without it.
-2. Upload the plugin to wp-content/plugins, or install the zip from Plugins → Add New.
-3. Activate RankWeb. Its settings are under the RankWeb menu; each module has an on/off switch on the RankWeb dashboard.
+1. Upload the plugin to wp-content/plugins, or install the zip from Plugins → Add New.
+2. Activate RankWeb. (Rank Math SEO is optional: install it if you want its own fields and screens next to RankWeb.)
+3. Open an item in the block editor to use the RankWeb SEO sidebar. RankWeb's settings are under the RankWeb menu; each module has an on/off switch on the RankWeb dashboard.
 
 == Frequently Asked Questions ==
 
@@ -44,7 +44,7 @@ No. It runs alongside Rank Math (free) and only adds what Rank Math does not do 
 
 = Does it work without Rank Math? =
 
-No. RankWeb depends on Rank Math and does nothing while Rank Math is inactive.
+Yes, for the basics: the SEO title and description from the editor sidebar, share cards, canonical addresses and the schema graph. Rank Math's own analysis, redirect list and schema bridge need Rank Math and stay off without it.
 
 = Does it send my data anywhere? =
 

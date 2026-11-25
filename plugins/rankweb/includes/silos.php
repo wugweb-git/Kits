@@ -187,7 +187,7 @@ function aw_silo_filter_content( $html ) {
 		$list .= '<li><a class="aw-silo-link" href="' . esc_url( $t['url'] ) . '">' . esc_html( $t['title'] ) . '</a></li>';
 	}
 	/* translators: %s: the silo's name. */
-	$heading = sprintf( __( 'More in %s', 'aw-seo-extras' ), $silo['name'] );
+	$heading = sprintf( __( 'More in %s', 'rankweb' ), $silo['name'] );
 	return $html . '<nav class="aw-silo-links" aria-label="' . esc_attr( $heading ) . '"><p class="aw-silo-heading">' . esc_html( $heading ) . '</p><ul>' . $list . '</ul></nav>';
 }
 add_filter( 'the_content', 'aw_silo_filter_content', 26 ); // after the auto-linker (25)
@@ -233,7 +233,7 @@ function aw_silo_save( int $id, string $name, int $hub, string $mode, array $ite
 	$name  = trim( mb_substr( $name, 0, 120 ) );
 	$items = array_values( array_diff( array_unique( array_filter( array_map( 'absint', $items ) ) ), array( $hub ) ) );
 	if ( '' === $name ) {
-		return new WP_Error( 'aw_silo', __( 'The silo needs a name.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_silo', __( 'The silo needs a name.', 'rankweb' ) );
 	}
 	if ( ! in_array( $mode, AW_Silo::MODES, true ) ) {
 		$mode = 'virtual';
@@ -242,7 +242,7 @@ function aw_silo_save( int $id, string $name, int $hub, string $mode, array $ite
 		$p = $pid > 0 ? get_post( $pid ) : null;
 		if ( ! $p instanceof WP_Post || 'publish' !== $p->post_status || ! is_post_type_viewable( $p->post_type ) ) {
 			/* translators: %d: an item ID. */
-			return new WP_Error( 'aw_silo', sprintf( __( 'Item %d is not a published item with its own page.', 'aw-seo-extras' ), $pid ) );
+			return new WP_Error( 'aw_silo', sprintf( __( 'Item %d is not a published item with its own page.', 'rankweb' ), $pid ) );
 		}
 	}
 	// One silo per item: a hub or an item already in another silo is refused, with its name.
@@ -251,7 +251,7 @@ function aw_silo_save( int $id, string $name, int $hub, string $mode, array $ite
 		$at = $d['map'][ $pid ]['silo'] ?? 0;
 		if ( $at && $at !== $id ) {
 			/* translators: 1: item ID, 2: the other silo's name. */
-			return new WP_Error( 'aw_silo', sprintf( __( 'Item %1$d is already in the silo "%2$s". An item is in one silo only.', 'aw-seo-extras' ), $pid, $d['silos'][ $at ]['name'] ) );
+			return new WP_Error( 'aw_silo', sprintf( __( 'Item %1$d is already in the silo "%2$s". An item is in one silo only.', 'rankweb' ), $pid, $d['silos'][ $at ]['name'] ) );
 		}
 	}
 	$silos = aw_silo_table( 'silos' );
@@ -280,7 +280,7 @@ function aw_silo_save( int $id, string $name, int $hub, string $mode, array $ite
 		$id = (int) $wpdb->insert_id;
 	}
 	if ( $id < 1 ) {
-		return new WP_Error( 'aw_silo', __( 'The silo could not be saved.', 'aw-seo-extras' ) );
+		return new WP_Error( 'aw_silo', __( 'The silo could not be saved.', 'rankweb' ) );
 	}
 	$wpdb->delete( aw_silo_table( 'items' ), array( 'silo_id' => $id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
 	foreach ( $items as $pos => $pid ) {
@@ -377,7 +377,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_silo_save' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$id    = absint( wp_unslash( $_POST['silo'] ?? 0 ) );
 		$items = preg_split( '/[\s,]+/', sanitize_textarea_field( wp_unslash( $_POST['items'] ?? '' ) ) );
@@ -398,7 +398,7 @@ add_action(
 	function () {
 		check_admin_referer( 'aw_silo_delete' );
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'aw-seo-extras' ), '', array( 'response' => 403 ) );
+			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		aw_silo_delete( absint( wp_unslash( $_POST['silo'] ?? 0 ) ) );
 		wp_safe_redirect( add_query_arg( 'deleted', '1', admin_url( 'admin.php?page=aw-links&view=silos' ) ) );
@@ -409,7 +409,7 @@ add_action(
 /** An item as "ID, title". */
 function aw_silo_item_label( int $id ): string {
 	$t = get_the_title( $id );
-	return $id . ' · ' . ( '' !== $t ? $t : __( '(no title)', 'aw-seo-extras' ) );
+	return $id . ' · ' . ( '' !== $t ? $t : __( '(no title)', 'rankweb' ) );
 }
 
 /** The "Silos" view of RankWeb → Internal links. */
@@ -419,26 +419,26 @@ function aw_silo_screen(): void {
 	$d     = aw_silo_data();
 	$edit  = isset( $_GET['silo'] ) ? sanitize_text_field( wp_unslash( $_GET['silo'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- shows a form, changes nothing.
 	if ( isset( $_GET['saved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- only a notice.
-		wp_admin_notice( esc_html__( 'Silo saved.', 'aw-seo-extras' ), array( 'type' => 'success' ) );
+		wp_admin_notice( esc_html__( 'Silo saved.', 'rankweb' ), array( 'type' => 'success' ) );
 	}
 	if ( isset( $_GET['deleted'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- only a notice.
-		wp_admin_notice( esc_html__( 'Silo deleted. No item was changed.', 'aw-seo-extras' ), array( 'type' => 'success' ) );
+		wp_admin_notice( esc_html__( 'Silo deleted. No item was changed.', 'rankweb' ), array( 'type' => 'success' ) );
 	}
 	$err = get_transient( 'aw_silo_error_' . get_current_user_id() );
 	if ( is_string( $err ) && '' !== $err ) {
 		delete_transient( 'aw_silo_error_' . get_current_user_id() );
 		wp_admin_notice( esc_html( $err ), array( 'type' => 'error' ) );
 	}
-	echo '<p>' . esc_html__( 'A silo is one hub item and its supporting items. Supporting items link to the hub and to each other; an item in one silo links to another silo\'s hub only. An item is in one silo only.', 'aw-seo-extras' ) . '</p>';
+	echo '<p>' . esc_html__( 'A silo is one hub item and its supporting items. Supporting items link to the hub and to each other; an item in one silo links to another silo\'s hub only. An item is in one silo only.', 'rankweb' ) . '</p>';
 	if ( $admin ) {
-		echo '<p><a class="button" href="' . esc_url( add_query_arg( 'silo', 'new', $base ) ) . '">' . esc_html__( 'Add a silo', 'aw-seo-extras' ) . '</a></p>';
+		echo '<p><a class="button" href="' . esc_url( add_query_arg( 'silo', 'new', $base ) ) . '">' . esc_html__( 'Add a silo', 'rankweb' ) . '</a></p>';
 	}
 	if ( '' !== $edit && $admin && ( 'new' === $edit || isset( $d['silos'][ (int) $edit ] ) ) ) {
 		aw_silo_form( 'new' === $edit ? 0 : (int) $edit, $d, $base );
 	}
 	$labels = array(
-		'virtual' => __( 'Virtual: each links to the hub and the others', 'aw-seo-extras' ),
-		'circle'  => __( 'Circle: each links to the next and back to the hub', 'aw-seo-extras' ),
+		'virtual' => __( 'Virtual: each links to the hub and the others', 'rankweb' ),
+		'circle'  => __( 'Circle: each links to the next and back to the hub', 'rankweb' ),
 	);
 	$cells  = array();
 	foreach ( $d['silos'] as $sid => $s ) {
@@ -446,11 +446,11 @@ function aw_silo_screen(): void {
 		$notes = array();
 		if ( $c['few'] ) {
 			/* translators: 1: items in the silo, 2: fewest items. */
-			$notes[] = esc_html( sprintf( __( 'Only %1$s items; at least %2$s are better.', 'aw-seo-extras' ), number_format_i18n( $c['few'] ), number_format_i18n( (int) AW_SILO_MIN ) ) );
+			$notes[] = esc_html( sprintf( __( 'Only %1$s items; at least %2$s are better.', 'rankweb' ), number_format_i18n( $c['few'] ), number_format_i18n( (int) AW_SILO_MIN ) ) );
 		}
 		if ( $c['deep'] ) {
 			/* translators: 1: item IDs, 2: most folders deep. */
-			$notes[] = esc_html( sprintf( __( 'Deeper than %2$s folders: %1$s.', 'aw-seo-extras' ), implode( ', ', $c['deep'] ), number_format_i18n( (int) AW_SILO_DEPTH ) ) );
+			$notes[] = esc_html( sprintf( __( 'Deeper than %2$s folders: %1$s.', 'rankweb' ), implode( ', ', $c['deep'] ), number_format_i18n( (int) AW_SILO_DEPTH ) ) );
 		}
 		$cells[] = array(
 			'name'  => ( $admin ? '<a href="' . esc_url( add_query_arg( 'silo', $sid, $base ) ) . '">' . esc_html( $s['name'] ) . '</a>' : esc_html( $s['name'] ) ),
@@ -463,16 +463,16 @@ function aw_silo_screen(): void {
 	aw_seo_extras_simple_table(
 		'aw-silos',
 		array(
-			'name'  => __( 'Silo', 'aw-seo-extras' ),
-			'hub'   => __( 'Hub', 'aw-seo-extras' ),
-			'mode'  => __( 'Mode', 'aw-seo-extras' ),
-			'items' => __( 'Supporting items', 'aw-seo-extras' ),
-			'check' => __( 'Address checks', 'aw-seo-extras' ),
+			'name'  => __( 'Silo', 'rankweb' ),
+			'hub'   => __( 'Hub', 'rankweb' ),
+			'mode'  => __( 'Mode', 'rankweb' ),
+			'items' => __( 'Supporting items', 'rankweb' ),
+			'check' => __( 'Address checks', 'rankweb' ),
 		),
 		$cells,
 		array(
 			'primary' => 'name',
-			'empty'   => __( 'No silos yet.', 'aw-seo-extras' ),
+			'empty'   => __( 'No silos yet.', 'rankweb' ),
 		)
 	);
 }
@@ -491,25 +491,25 @@ function aw_silo_form( int $id, array $d, string $base ): void {
 		'mode'  => 'virtual',
 		'items' => array(),
 	);
-	echo '<h2>' . esc_html( $id ? __( 'Change the silo', 'aw-seo-extras' ) : __( 'Add a silo', 'aw-seo-extras' ) ) . '</h2>';
+	echo '<h2>' . esc_html( $id ? __( 'Change the silo', 'rankweb' ) : __( 'Add a silo', 'rankweb' ) ) . '</h2>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_silo_save"><input type="hidden" name="silo" value="' . esc_attr( (string) $id ) . '">';
 	wp_nonce_field( 'aw_silo_save' );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	echo '<tr><th scope="row"><label for="aw-silo-name">' . esc_html__( 'Name', 'aw-seo-extras' ) . '</label></th><td><input type="text" id="aw-silo-name" name="name" class="regular-text" maxlength="120" value="' . esc_attr( $s['name'] ) . '"></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-silo-hub">' . esc_html__( 'Hub item ID', 'aw-seo-extras' ) . '</label></th><td><input type="number" id="aw-silo-hub" name="hub" class="small-text" min="1" value="' . esc_attr( $s['hub'] ? (string) $s['hub'] : '' ) . '">' . ( $s['hub'] ? ' <span class="description">' . esc_html( aw_silo_item_label( $s['hub'] ) ) . '</span>' : '' ) . '</td></tr>';
-	echo '<tr><th scope="row"><label for="aw-silo-mode">' . esc_html__( 'Mode', 'aw-seo-extras' ) . '</label></th><td><select id="aw-silo-mode" name="mode"><option value="virtual"' . selected( $s['mode'], 'virtual', false ) . '>' . esc_html__( 'Virtual: each links to the hub and the others', 'aw-seo-extras' ) . '</option><option value="circle"' . selected( $s['mode'], 'circle', false ) . '>' . esc_html__( 'Circle: each links to the next and back to the hub', 'aw-seo-extras' ) . '</option></select></td></tr>';
-	echo '<tr><th scope="row"><label for="aw-silo-items">' . esc_html__( 'Supporting item IDs', 'aw-seo-extras' ) . '</label></th><td><textarea id="aw-silo-items" name="items" rows="8" class="large-text code">' . esc_textarea( implode( "\n", $s['items'] ) ) . '</textarea><p class="description">' . esc_html__( 'One item ID per line, in the order of the circle. Published items with their own page only.', 'aw-seo-extras' ) . '</p>';
+	echo '<tr><th scope="row"><label for="aw-silo-name">' . esc_html__( 'Name', 'rankweb' ) . '</label></th><td><input type="text" id="aw-silo-name" name="name" class="regular-text" maxlength="120" value="' . esc_attr( $s['name'] ) . '"></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-silo-hub">' . esc_html__( 'Hub item ID', 'rankweb' ) . '</label></th><td><input type="number" id="aw-silo-hub" name="hub" class="small-text" min="1" value="' . esc_attr( $s['hub'] ? (string) $s['hub'] : '' ) . '">' . ( $s['hub'] ? ' <span class="description">' . esc_html( aw_silo_item_label( $s['hub'] ) ) . '</span>' : '' ) . '</td></tr>';
+	echo '<tr><th scope="row"><label for="aw-silo-mode">' . esc_html__( 'Mode', 'rankweb' ) . '</label></th><td><select id="aw-silo-mode" name="mode"><option value="virtual"' . selected( $s['mode'], 'virtual', false ) . '>' . esc_html__( 'Virtual: each links to the hub and the others', 'rankweb' ) . '</option><option value="circle"' . selected( $s['mode'], 'circle', false ) . '>' . esc_html__( 'Circle: each links to the next and back to the hub', 'rankweb' ) . '</option></select></td></tr>';
+	echo '<tr><th scope="row"><label for="aw-silo-items">' . esc_html__( 'Supporting item IDs', 'rankweb' ) . '</label></th><td><textarea id="aw-silo-items" name="items" rows="8" class="large-text code">' . esc_textarea( implode( "\n", $s['items'] ) ) . '</textarea><p class="description">' . esc_html__( 'One item ID per line, in the order of the circle. Published items with their own page only.', 'rankweb' ) . '</p>';
 	if ( $s['items'] ) {
 		echo '<p class="description">' . esc_html( implode( ' · ', array_map( 'aw_silo_item_label', array_slice( $s['items'], 0, 30 ) ) ) ) . ( count( $s['items'] ) > 30 ? '…' : '' ) . '</p>';
 	}
 	echo '</td></tr></tbody></table>';
-	submit_button( __( 'Save the silo', 'aw-seo-extras' ), 'primary', 'submit', false );
-	echo ' <a class="button-link" href="' . esc_url( $base ) . '">' . esc_html__( 'Cancel', 'aw-seo-extras' ) . '</a></form>';
+	submit_button( __( 'Save the silo', 'rankweb' ), 'primary', 'submit', false );
+	echo ' <a class="button-link" href="' . esc_url( $base ) . '">' . esc_html__( 'Cancel', 'rankweb' ) . '</a></form>';
 	if ( $id ) {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_silo_delete"><input type="hidden" name="silo" value="' . esc_attr( (string) $id ) . '">';
 		wp_nonce_field( 'aw_silo_delete' );
-		echo '<p class="description">' . esc_html__( 'Deleting a silo removes its settings only. No item is changed or deleted.', 'aw-seo-extras' ) . '</p>';
-		submit_button( __( 'Delete this silo', 'aw-seo-extras' ), 'delete', 'submit', false );
+		echo '<p class="description">' . esc_html__( 'Deleting a silo removes its settings only. No item is changed or deleted.', 'rankweb' ) . '</p>';
+		submit_button( __( 'Delete this silo', 'rankweb' ), 'delete', 'submit', false );
 		echo '</form>';
 	}
 }

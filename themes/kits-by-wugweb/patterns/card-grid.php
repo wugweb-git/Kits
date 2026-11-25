@@ -25,6 +25,14 @@
 <!-- /wp:group -->
 <!-- /wp:post-template -->
 
+<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"center"}} -->
+<!-- wp:query-pagination-previous /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+
 <!-- wp:query-no-results -->
 <!-- wp:pattern {"slug":"kits-by-wugweb/empty-state"} /-->
 <!-- /wp:query-no-results --></div>

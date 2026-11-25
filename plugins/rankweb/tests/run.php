@@ -32,6 +32,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 $GLOBALS['rw_options'] = array();
 $GLOBALS['rw_writes']  = 0;
 
+/** Stub: no filters registered, the value passes through. */
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( $tag, $value ) {
+		return $value;
+	}
+}
+
 /** Stub: options in memory; false when absent, as WordPress. */
 function get_option( $name, $fallback = false ) {
 	return array_key_exists( $name, $GLOBALS['rw_options'] ) ? $GLOBALS['rw_options'][ $name ] : $fallback;

@@ -35,17 +35,17 @@ const RANKWEB_REST = 'rankweb/v1';
 function rankweb_rest_can( string $cap ): callable {
 	return function ( WP_REST_Request $request ) use ( $cap ) {
 		if ( ! is_user_logged_in() ) {
-			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'aw-seo-extras' ), array( 'status' => 401 ) );
+			return new WP_Error( 'rest_not_logged_in', __( 'Sign in to use this.', 'rankweb' ), array( 'status' => 401 ) );
 		}
 		$app = function_exists( 'rest_get_authenticated_app_password' ) && null !== rest_get_authenticated_app_password();
 		if ( ! $app ) {
 			$nonce = (string) ( $request->get_header( 'X-WP-Nonce' ) ?? $request->get_param( '_wpnonce' ) ?? '' );
 			if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'aw-seo-extras' ), array( 'status' => 403 ) );
+				return new WP_Error( 'rest_cookie_invalid_nonce', __( 'The page has expired. Reload it and try again.', 'rankweb' ), array( 'status' => 403 ) );
 			}
 		}
 		if ( ! current_user_can( $cap ) ) {
-			return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'aw-seo-extras' ), array( 'status' => 403 ) );
+			return new WP_Error( 'rest_forbidden', __( 'You are not allowed to do this.', 'rankweb' ), array( 'status' => 403 ) );
 		}
 		return true;
 	};
@@ -224,11 +224,11 @@ function rankweb_dashboard_payload(): array {
 	$t       = (array) ( $c['titles'] ?? array() );
 	$tiles[] = array(
 		'key'    => 'titles',
-		'label'  => __( 'Search titles missing', 'aw-seo-extras' ),
+		'label'  => __( 'Search titles missing', 'rankweb' ),
 		'value'  => $num( $t['total'] ?? 0 ),
 		'raw'    => (int) ( $t['total'] ?? 0 ),
 		/* translators: 1: number of items, 2: post type with the most missing. */
-		'sub'    => ! empty( $t['by'] ) ? sprintf( __( 'of %1$s items; most in %2$s', 'aw-seo-extras' ), $num( $items ), $most( $t['by'] ) ) : sprintf( __( 'of %s items', 'aw-seo-extras' ), $num( $items ) ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment -- one placeholder, the number of items
+		'sub'    => ! empty( $t['by'] ) ? sprintf( __( 'of %1$s items; most in %2$s', 'rankweb' ), $num( $items ), $most( $t['by'] ) ) : sprintf( __( 'of %s items', 'rankweb' ), $num( $items ) ), // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment -- one placeholder, the number of items
 		'href'   => $list( (array) ( $t['by'] ?? array() ) ),
 		'tone'   => ! empty( $t['total'] ) ? 'warn' : '',
 		'metric' => 'titles',
@@ -237,11 +237,11 @@ function rankweb_dashboard_payload(): array {
 	$d       = (array) ( $c['descs'] ?? array() );
 	$tiles[] = array(
 		'key'    => 'descs',
-		'label'  => __( 'Descriptions missing', 'aw-seo-extras' ),
+		'label'  => __( 'Descriptions missing', 'rankweb' ),
 		'value'  => $num( $d['total'] ?? 0 ),
 		'raw'    => (int) ( $d['total'] ?? 0 ),
 		/* translators: %s: number of items. */
-		'sub'    => sprintf( __( '%s filled by the daily job', 'aw-seo-extras' ), $num( $c['filled'] ?? 0 ) ),
+		'sub'    => sprintf( __( '%s filled by the daily job', 'rankweb' ), $num( $c['filled'] ?? 0 ) ),
 		'href'   => $list( (array) ( $d['by'] ?? array() ) ),
 		'tone'   => ! empty( $d['total'] ) ? 'warn' : '',
 		'metric' => 'descs',
@@ -249,20 +249,20 @@ function rankweb_dashboard_payload(): array {
 	);
 	$s       = (array) ( $c['schema'] ?? array() );
 	if ( isset( $s['on'] ) && ! $s['on'] ) {
-		$sv = __( 'Off', 'aw-seo-extras' );
-		$ss = __( 'Rank Math schema entries is switched off', 'aw-seo-extras' );
+		$sv = __( 'Off', 'rankweb' );
+		$ss = __( 'Rank Math schema entries is switched off', 'rankweb' );
 	} elseif ( ! isset( $s['gaps'] ) || null === $s['gaps'] ) {
 		$sv = '';
 		/* translators: %s: number of items checked so far. */
-		$ss = sprintf( __( 'First pass under way: %s items checked', 'aw-seo-extras' ), $num( $s['part'] ?? 0 ) );
+		$ss = sprintf( __( 'First pass under way: %s items checked', 'rankweb' ), $num( $s['part'] ?? 0 ) );
 	} else {
 		$sv = $num( $s['gaps'] );
 		/* translators: %s: number of items. */
-		$ss = sprintf( __( '%s items the schema command would write', 'aw-seo-extras' ), $num( $s['gaps'] ) );
+		$ss = sprintf( __( '%s items the schema command would write', 'rankweb' ), $num( $s['gaps'] ) );
 	}
 	$tiles[] = array(
 		'key'      => 'schema',
-		'label'    => __( 'Schema entries to write', 'aw-seo-extras' ),
+		'label'    => __( 'Schema entries to write', 'rankweb' ),
 		'value'    => $sv,
 		'raw'      => isset( $s['gaps'] ) ? (int) $s['gaps'] : null,
 		'counting' => ! $counting && '' === $sv,
@@ -274,10 +274,10 @@ function rankweb_dashboard_payload(): array {
 	$f       = (array) ( $c['focus'] ?? array() );
 	$tiles[] = array(
 		'key'    => 'focus',
-		'label'  => __( 'Focus keywords missing', 'aw-seo-extras' ),
+		'label'  => __( 'Focus keywords missing', 'rankweb' ),
 		'value'  => $num( $f['total'] ?? 0 ),
 		'raw'    => (int) ( $f['total'] ?? 0 ),
-		'sub'    => __( 'Filled by the workers’ focus-keyword job', 'aw-seo-extras' ),
+		'sub'    => __( 'Filled by the workers’ focus-keyword job', 'rankweb' ),
 		'href'   => $list( (array) ( $f['by'] ?? array() ) ),
 		'tone'   => '',
 		'metric' => 'focus',
@@ -287,11 +287,11 @@ function rankweb_dashboard_payload(): array {
 	$faq_url = add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) );
 	$tiles[] = array(
 		'key'    => 'faq',
-		'label'  => __( 'Pages with an FAQ', 'aw-seo-extras' ),
-		'value'  => isset( $q['on'] ) && ! $q['on'] ? __( 'Off', 'aw-seo-extras' ) : $num( $q['pages'] ?? 0 ),
+		'label'  => __( 'Pages with an FAQ', 'rankweb' ),
+		'value'  => isset( $q['on'] ) && ! $q['on'] ? __( 'Off', 'rankweb' ) : $num( $q['pages'] ?? 0 ),
 		'raw'    => (int) ( $q['pages'] ?? 0 ),
 		/* translators: %s: number of questions. */
-		'sub'    => ! empty( $q['drafts'] ) ? sprintf( _n( '%s draft question waiting', '%s draft questions waiting', (int) $q['drafts'], 'aw-seo-extras' ), $num( $q['drafts'] ) ) : __( 'No drafts waiting', 'aw-seo-extras' ),
+		'sub'    => ! empty( $q['drafts'] ) ? sprintf( _n( '%s draft question waiting', '%s draft questions waiting', (int) $q['drafts'], 'rankweb' ), $num( $q['drafts'] ) ) : __( 'No drafts waiting', 'rankweb' ),
 		'href'   => ! empty( $q['drafts'] ) ? add_query_arg( 'view', 'waiting', $faq_url ) : $faq_url,
 		'tone'   => '',
 		'metric' => 'faq',
@@ -299,21 +299,21 @@ function rankweb_dashboard_payload(): array {
 	$n       = (array) ( $c['noindex'] ?? array() );
 	$tiles[] = array(
 		'key'    => 'noindex',
-		'label'  => __( 'Kept out of search', 'aw-seo-extras' ),
+		'label'  => __( 'Kept out of search', 'rankweb' ),
 		'value'  => $num( $n['total'] ?? 0 ),
 		'raw'    => (int) ( $n['total'] ?? 0 ),
 		/* translators: %s: number of pages. */
-		'sub'    => sprintf( __( '%s kept indexed on purpose', 'aw-seo-extras' ), $num( $n['kept'] ?? 0 ) ),
+		'sub'    => sprintf( __( '%s kept indexed on purpose', 'rankweb' ), $num( $n['kept'] ?? 0 ) ),
 		'href'   => $settings( 'indexing' ),
 		'tone'   => '',
 		'metric' => 'noindex',
 		'detail' => array(
 			/* translators: %s: number. */
-			sprintf( __( '%s listings with no way to reach them', 'aw-seo-extras' ), $num( $n['listings'] ?? 0 ) ),
+			sprintf( __( '%s listings with no way to reach them', 'rankweb' ), $num( $n['listings'] ?? 0 ) ),
 			/* translators: %s: number. */
-			sprintf( __( '%s thin Directory pages', 'aw-seo-extras' ), $num( $n['thin'] ?? 0 ) ),
+			sprintf( __( '%s thin Directory pages', 'rankweb' ), $num( $n['thin'] ?? 0 ) ),
 			/* translators: %s: number. */
-			sprintf( __( '%s category lists below the minimum', 'aw-seo-extras' ), $num( $n['filtered'] ?? 0 ) ),
+			sprintf( __( '%s category lists below the minimum', 'rankweb' ), $num( $n['filtered'] ?? 0 ) ),
 		),
 	);
 	// Internal links: the last audit's stored result (link-audit.php), read, not counted.
@@ -322,13 +322,13 @@ function rankweb_dashboard_payload(): array {
 		$by      = (array) $la['by'];
 		$tiles[] = array(
 			'key'    => 'links',
-			'label'  => __( 'Internal links', 'aw-seo-extras' ),
-			'value'  => $la['at'] ? $num( $by['orphan'] ?? 0 ) : __( 'Not run', 'aw-seo-extras' ),
+			'label'  => __( 'Internal links', 'rankweb' ),
+			'value'  => $la['at'] ? $num( $by['orphan'] ?? 0 ) : __( 'Not run', 'rankweb' ),
 			'raw'    => $la['at'] ? (int) ( $by['orphan'] ?? 0 ) : null,
 			/* translators: %s: number of items. */
-			'sub'    => $la['at'] ? sprintf( __( 'orphans; %s items have a finding', 'aw-seo-extras' ), $num( $la['flagged'] ) ) : __( 'The first audit runs within a day', 'aw-seo-extras' ),
+			'sub'    => $la['at'] ? sprintf( __( 'orphans; %s items have a finding', 'rankweb' ), $num( $la['flagged'] ) ) : __( 'The first audit runs within a day', 'rankweb' ),
 			/* translators: %s: number of items. */
-			'detail' => $la['at'] ? array( sprintf( __( '%s items with an anchor mix over a limit', 'aw-seo-extras' ), $num( $la['anchor_warn'] ) ) ) : array(),
+			'detail' => $la['at'] ? array( sprintf( __( '%s items with an anchor mix over a limit', 'rankweb' ), $num( $la['anchor_warn'] ) ) ) : array(),
 			'href'   => add_query_arg( 'page', 'aw-links', admin_url( 'admin.php' ) ),
 			'tone'   => $la['flagged'] ? 'warn' : '',
 		);
@@ -336,26 +336,26 @@ function rankweb_dashboard_payload(): array {
 	// The last two are stored results already (the hourly check and the plugin state): read, not counted.
 	$last = (array) get_option( 'aw_seo_endpoints_last', array() );
 	if ( ! aw_seo_module_on( 'health' ) ) {
-		$ev = __( 'Off', 'aw-seo-extras' );
-		$es = __( 'The hourly check is switched off', 'aw-seo-extras' );
+		$ev = __( 'Off', 'rankweb' );
+		$es = __( 'The hourly check is switched off', 'rankweb' );
 		$et = '';
 	} elseif ( empty( $last['at'] ) ) {
-		$ev = __( 'Not checked', 'aw-seo-extras' );
-		$es = __( 'The hourly check has not run yet', 'aw-seo-extras' );
+		$ev = __( 'Not checked', 'rankweb' );
+		$es = __( 'The hourly check has not run yet', 'rankweb' );
 		$et = '';
 	} elseif ( ! empty( $last['problems'] ) ) {
-		$ev = __( 'Not answering', 'aw-seo-extras' );
+		$ev = __( 'Not answering', 'rankweb' );
 		$es = implode( ' ', (array) $last['problems'] );
 		$et = 'error';
 	} else {
-		$ev = __( 'Answering', 'aw-seo-extras' );
+		$ev = __( 'Answering', 'rankweb' );
 		/* translators: %s: date and time. */
-		$es = sprintf( __( 'Both checked %s', 'aw-seo-extras' ), wp_date( 'j M, g:i a', (int) $last['at'] ) );
+		$es = sprintf( __( 'Both checked %s', 'rankweb' ), wp_date( 'j M, g:i a', (int) $last['at'] ) );
 		$et = '';
 	}
 	$tiles[] = array(
 		'key'   => 'endpoints',
-		'label' => __( 'Sitemap and llms.txt', 'aw-seo-extras' ),
+		'label' => __( 'Sitemap and llms.txt', 'rankweb' ),
 		'value' => $ev,
 		'sub'   => $es,
 		'href'  => home_url( '/sitemap_index.xml' ),
@@ -364,10 +364,10 @@ function rankweb_dashboard_payload(): array {
 	$off     = count( array_filter( array_keys( aw_seo_modules() ), fn( $k ) => ! aw_seo_module_on( $k ) ) );
 	$tiles[] = array(
 		'key'   => 'rankmath',
-		'label' => __( 'Rank Math', 'aw-seo-extras' ),
-		'value' => aw_seo_extras_rank_math() ? __( 'Active', 'aw-seo-extras' ) : __( 'Not active', 'aw-seo-extras' ),
+		'label' => __( 'Rank Math', 'rankweb' ),
+		'value' => aw_seo_extras_rank_math() ? __( 'Active', 'rankweb' ) : __( 'Not active', 'rankweb' ),
 		/* translators: 1: Rank Math version, 2: number of modules. */
-		'sub'   => sprintf( _n( 'Version %1$s; %2$s RankWeb module off', 'Version %1$s; %2$s RankWeb modules off', $off, 'aw-seo-extras' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '–', $num( $off ) ),
+		'sub'   => sprintf( _n( 'Version %1$s; %2$s RankWeb module off', 'Version %1$s; %2$s RankWeb modules off', $off, 'rankweb' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '–', $num( $off ) ),
 		'href'  => $settings( 'modules' ),
 		'tone'  => aw_seo_extras_rank_math() ? '' : 'error',
 	);
@@ -391,21 +391,21 @@ function rankweb_where_things_are(): array {
 	);
 	return array(
 		'boxes'    => array(
-			array( __( 'Posts and Pages (Resources guides, hub Pages)', 'aw-seo-extras' ), __( 'FAQ box: the page’s own questions (draft or approved).', 'aw-seo-extras' ) ),
-			array( __( 'Library documents', 'aw-seo-extras' ), __( 'FAQ box: the questions. Library item box: Short name, Issued under, Key sections (document fields the questions use).', 'aw-seo-extras' ) ),
-			array( __( 'Tags, categories, organisation types, services', 'aw-seo-extras' ), __( 'FAQ box on the term screen: automatic questions (tags) and the term’s own questions.', 'aw-seo-extras' ) ),
+			array( __( 'Posts and Pages (Resources guides, hub Pages)', 'rankweb' ), __( 'FAQ box: the page’s own questions (draft or approved).', 'rankweb' ) ),
+			array( __( 'Library documents', 'rankweb' ), __( 'FAQ box: the questions. Library item box: Short name, Issued under, Key sections (document fields the questions use).', 'rankweb' ) ),
+			array( __( 'Tags, categories, organisation types, services', 'rankweb' ), __( 'FAQ box on the term screen: automatic questions (tags) and the term’s own questions.', 'rankweb' ) ),
 		),
 		'commands' => array(
-			array( 'wp aw-faq', __( 'report, check, import, convert-guides, undo-guide', 'aw-seo-extras' ) ),
-			array( 'wp aw-seo rank-math-schema', __( 'Write Rank Math’s schema entries for published items (--dry-run, --type)', 'aw-seo-extras' ) ),
-			array( 'wp aw-seo share-jpegs', __( 'Make JPEG copies of pictures for share images', 'aw-seo-extras' ) ),
-			array( 'wp aw redirects-list', __( 'List the active redirects in Rank Math’s Redirections', 'aw-seo-extras' ) ),
+			array( 'wp aw-faq', __( 'report, check, import, convert-guides, undo-guide', 'rankweb' ) ),
+			array( 'wp aw-seo rank-math-schema', __( 'Write Rank Math’s schema entries for published items (--dry-run, --type)', 'rankweb' ) ),
+			array( 'wp aw-seo share-jpegs', __( 'Make JPEG copies of pictures for share images', 'rankweb' ) ),
+			array( 'wp aw redirects-list', __( 'List the active redirects in Rank Math’s Redirections', 'rankweb' ) ),
 		),
 		'rankMath' => array(
-			array_merge( $rm( __( 'Titles & Meta', 'aw-seo-extras' ), 'rank-math-options-titles' ), array( 'what' => __( 'Title and description templates for single items', 'aw-seo-extras' ) ) ),
-			array_merge( $rm( __( 'Sitemap Settings', 'aw-seo-extras' ), 'rank-math-options-sitemap' ), array( 'what' => __( 'Which types are in the sitemap', 'aw-seo-extras' ) ) ),
-			array_merge( $rm( __( 'General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ), array( 'what' => __( 'Breadcrumbs, and Edit llms.txt', 'aw-seo-extras' ) ) ),
-			array_merge( $rm( __( 'Redirections', 'aw-seo-extras' ), 'rank-math-redirections' ), array( 'what' => __( 'The one list of redirects (forms, merges and imports add to it)', 'aw-seo-extras' ) ) ),
+			array_merge( $rm( __( 'Titles & Meta', 'rankweb' ), 'rank-math-options-titles' ), array( 'what' => __( 'Title and description templates for single items', 'rankweb' ) ) ),
+			array_merge( $rm( __( 'Sitemap Settings', 'rankweb' ), 'rank-math-options-sitemap' ), array( 'what' => __( 'Which types are in the sitemap', 'rankweb' ) ) ),
+			array_merge( $rm( __( 'General Settings', 'rankweb' ), 'rank-math-options-general' ), array( 'what' => __( 'Breadcrumbs, and Edit llms.txt', 'rankweb' ) ) ),
+			array_merge( $rm( __( 'Redirections', 'rankweb' ), 'rank-math-redirections' ), array( 'what' => __( 'The one list of redirects (forms, merges and imports add to it)', 'rankweb' ) ) ),
 		),
 	);
 }
@@ -455,11 +455,11 @@ function rankweb_settings_group( string $tab ): array {
 		'url'   => add_query_arg( 'page', $page, admin_url( 'admin.php' ) ),
 	);
 	$elses  = array(
-		'titles'      => $rm( __( 'Rank Math → Titles & Meta', 'aw-seo-extras' ), 'rank-math-options-titles' ),
-		'breadcrumbs' => $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ),
-		'sitemap'     => $rm( __( 'Rank Math → Sitemap Settings', 'aw-seo-extras' ), 'rank-math-options-sitemap' ),
-		'redirects'   => $rm( __( 'Rank Math → Redirections', 'aw-seo-extras' ), 'rank-math-redirections' ),
-		'llms'        => $rm( __( 'Rank Math → General Settings', 'aw-seo-extras' ), 'rank-math-options-general' ),
+		'titles'      => $rm( __( 'Rank Math → Titles & Meta', 'rankweb' ), 'rank-math-options-titles' ),
+		'breadcrumbs' => $rm( __( 'Rank Math → General Settings', 'rankweb' ), 'rank-math-options-general' ),
+		'sitemap'     => $rm( __( 'Rank Math → Sitemap Settings', 'rankweb' ), 'rank-math-options-sitemap' ),
+		'redirects'   => $rm( __( 'Rank Math → Redirections', 'rankweb' ), 'rank-math-redirections' ),
+		'llms'        => $rm( __( 'Rank Math → General Settings', 'rankweb' ), 'rank-math-options-general' ),
 	);
 	$module = fn( string $key, bool $own ) => array(
 		'key'      => $key,
@@ -558,7 +558,7 @@ function rankweb_settings_payload(): array {
 function rankweb_rest_save_group( WP_REST_Request $request ) {
 	$tab = (string) $request['group'];
 	if ( ! isset( aw_seo_setting_tabs()[ $tab ] ) ) {
-		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'aw-seo-extras' ), array( 'status' => 400 ) );
+		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'rankweb' ), array( 'status' => 400 ) );
 	}
 	$reset = (bool) $request['reset'];
 	if ( $reset ) {
@@ -593,7 +593,7 @@ function rankweb_rest_save_group( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'group'   => rankweb_settings_group( $tab ),
-			'message' => $reset ? __( 'Defaults restored.', 'aw-seo-extras' ) : ( 'modules' === $tab ? __( 'Saved. A module switched on or off takes effect on the next page load.', 'aw-seo-extras' ) : __( 'Saved.', 'aw-seo-extras' ) ),
+			'message' => $reset ? __( 'Defaults restored.', 'rankweb' ) : ( 'modules' === $tab ? __( 'Saved. A module switched on or off takes effect on the next page load.', 'rankweb' ) : __( 'Saved.', 'rankweb' ) ),
 		)
 	);
 }
@@ -606,7 +606,7 @@ function rankweb_rest_save_group( WP_REST_Request $request ) {
  */
 function rankweb_rest_save_faq_types( WP_REST_Request $request ) {
 	if ( ! function_exists( 'aw_faq_type_choices' ) ) {
-		return new WP_Error( 'rest_no_route', __( 'The FAQ module is switched off.', 'aw-seo-extras' ), array( 'status' => 404 ) );
+		return new WP_Error( 'rest_no_route', __( 'The FAQ module is switched off.', 'rankweb' ), array( 'status' => 404 ) );
 	}
 	$on      = array_map( 'sanitize_key', (array) $request['on'] );
 	$choices = aw_faq_type_choices();
@@ -624,7 +624,7 @@ function rankweb_rest_save_faq_types( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'group'   => rankweb_settings_group( 'schema' ),
-			'message' => __( 'Saved.', 'aw-seo-extras' ),
+			'message' => __( 'Saved.', 'rankweb' ),
 		)
 	);
 }
@@ -658,8 +658,8 @@ function rankweb_rest_save_keep_listings( WP_REST_Request $request ) {
 			'group'   => rankweb_settings_group( 'indexing' ),
 			'message' => $skipped > 0
 				/* translators: %d: number of IDs left out. */
-				? sprintf( _n( 'Saved. %d ID is not a Directory listing and was left out.', 'Saved. %d IDs are not Directory listings and were left out.', $skipped, 'aw-seo-extras' ), $skipped )
-				: __( 'Saved.', 'aw-seo-extras' ),
+				? sprintf( _n( 'Saved. %d ID is not a Directory listing and was left out.', 'Saved. %d IDs are not Directory listings and were left out.', $skipped, 'rankweb' ), $skipped )
+				: __( 'Saved.', 'rankweb' ),
 		)
 	);
 }
@@ -672,7 +672,7 @@ function rankweb_rest_save_keep_listings( WP_REST_Request $request ) {
 function rankweb_rest_save_share_image( WP_REST_Request $request ) {
 	$id = absint( $request['id'] );
 	if ( $id && ! wp_attachment_is_image( $id ) ) {
-		return new WP_Error( 'rest_invalid_param', __( 'Choose an image from the media library.', 'aw-seo-extras' ), array( 'status' => 400 ) );
+		return new WP_Error( 'rest_invalid_param', __( 'Choose an image from the media library.', 'rankweb' ), array( 'status' => 400 ) );
 	}
 	if ( (int) get_option( 'aw_default_share_image', 0 ) !== $id ) {
 		update_option( 'aw_default_share_image', $id );
@@ -680,7 +680,7 @@ function rankweb_rest_save_share_image( WP_REST_Request $request ) {
 	return rest_ensure_response(
 		array(
 			'group'   => rankweb_settings_group( 'share' ),
-			'message' => __( 'Saved.', 'aw-seo-extras' ),
+			'message' => __( 'Saved.', 'rankweb' ),
 		)
 	);
 }
@@ -693,21 +693,21 @@ function rankweb_services(): array {
 	$mods    = (array) get_option( 'rank_math_modules', array() );
 	$general = (array) get_option( 'rank-math-options-general', array() );
 	$feature = array(
-		array( __( 'Sitemap', 'aw-seo-extras' ), in_array( 'sitemap', $mods, true ) ),
-		array( __( 'Redirections', 'aw-seo-extras' ), in_array( 'redirections', $mods, true ) ),
-		array( __( 'llms.txt', 'aw-seo-extras' ), in_array( 'llms-txt', $mods, true ) ),
-		array( __( 'Breadcrumbs', 'aw-seo-extras' ), 'on' === ( $general['breadcrumbs'] ?? '' ) ),
+		array( __( 'Sitemap', 'rankweb' ), in_array( 'sitemap', $mods, true ) ),
+		array( __( 'Redirections', 'rankweb' ), in_array( 'redirections', $mods, true ) ),
+		array( __( 'llms.txt', 'rankweb' ), in_array( 'llms-txt', $mods, true ) ),
+		array( __( 'Breadcrumbs', 'rankweb' ), 'on' === ( $general['breadcrumbs'] ?? '' ) ),
 	);
 	$on      = count( array_filter( $feature, fn( $x ) => $x[1] ) );
 	return array(
 		array(
 			'slug'     => 'rank-math',
-			'name'     => __( 'Rank Math SEO', 'aw-seo-extras' ),
+			'name'     => __( 'Rank Math SEO', 'rankweb' ),
 			/* translators: %s: version. */
-			'status'   => $active ? sprintf( __( 'Active, %s', 'aw-seo-extras' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '' ) : __( 'Not active', 'aw-seo-extras' ),
+			'status'   => $active ? sprintf( __( 'Active, %s', 'rankweb' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '' ) : __( 'Not active', 'rankweb' ),
 			'tone'     => $active ? '' : 'error',
 			/* translators: 1: features on, 2: features RankWeb relies on. */
-			'summary'  => $active ? sprintf( __( '%1$d of the %2$d Rank Math features RankWeb relies on are on.', 'aw-seo-extras' ), $on, count( $feature ) ) : __( 'RankWeb does nothing until Rank Math SEO is active.', 'aw-seo-extras' ),
+			'summary'  => $active ? sprintf( __( '%1$d of the %2$d Rank Math features RankWeb relies on are on.', 'rankweb' ), $on, count( $feature ) ) : __( 'RankWeb does nothing until Rank Math SEO is active.', 'rankweb' ),
 			'features' => array_map(
 				fn( $x ) => array(
 					'label' => $x[0],
@@ -718,7 +718,7 @@ function rankweb_services(): array {
 			'links'    => $active
 				? array(
 					array(
-						'label' => __( 'Rank Math modules', 'aw-seo-extras' ),
+						'label' => __( 'Rank Math modules', 'rankweb' ),
 						'url'   => add_query_arg(
 							array(
 								'page' => 'rank-math',
@@ -728,17 +728,17 @@ function rankweb_services(): array {
 						),
 					),
 					array(
-						'label' => __( 'General Settings (breadcrumbs, llms.txt)', 'aw-seo-extras' ),
+						'label' => __( 'General Settings (breadcrumbs, llms.txt)', 'rankweb' ),
 						'url'   => add_query_arg( 'page', 'rank-math-options-general', admin_url( 'admin.php' ) ),
 					),
 				)
 				: array(
 					array(
-						'label' => __( 'Plugins', 'aw-seo-extras' ),
+						'label' => __( 'Plugins', 'rankweb' ),
 						'url'   => admin_url( 'plugins.php' ),
 					),
 				),
-			'note'     => __( 'Read only: RankWeb changes nothing in Rank Math from here. No key is stored.', 'aw-seo-extras' ),
+			'note'     => __( 'Read only: RankWeb changes nothing in Rank Math from here. No key is stored.', 'rankweb' ),
 		),
 	);
 }
