@@ -1,6 +1,6 @@
 <?php
 /**
- * A listing's types and services (its tags), and the tel: link of a phone number. Copied from Animal Writes Core
+ * A listing's types and services (its tags), and the tel: link of a phone number. Copied from the legacy Core plugin
  * (tags.php, model.php, bindings.php) on 18 Nov 2026 with the same lists and results, so DirectoryWeb and the plugins
  * that read listings no longer need Core for them. Core's old functions stay until Core is deleted; keep both lists
  * the same until then.

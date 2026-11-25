@@ -521,7 +521,7 @@ function directoryweb_block_listing_opportunities( $a, $id ) {
 /** Campaigns linked to a listing, newest first: [ campaign ID => role ]. Organiser = aw_organisation, else the older aw_organiser; Partner = aw_campaign_partners plus older aw_participant rows; Supporter = aw_campaign_supporters (owner, 20 Oct 2026). */
 function directoryweb_listing_campaigns( $id, $max = 3 ) {
 	if ( ! function_exists( 'aw_campaign_organiser' ) || ! function_exists( 'aw_campaign_partner_ids' ) ) {
-		return array(); // the campaign relations are Animal Writes Core's
+		return array(); // the campaign relations belong to the legacy Core plugin
 	}
 	$base  = array( 'post_type' => 'aw_campaign', 'post_status' => 'publish', 'numberposts' => 30, 'fields' => 'ids', 'orderby' => 'date', 'order' => 'DESC' );
 	$roles = array();

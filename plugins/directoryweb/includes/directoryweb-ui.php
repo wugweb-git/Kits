@@ -115,7 +115,7 @@ add_filter(
 		}
 		return $args;
 	},
-	20, // After Animal Writes Core's own register_post_type_args filter (priority 10).
+	20, // After the legacy Core plugin's own register_post_type_args filter (priority 10).
 	2
 );
 add_filter(

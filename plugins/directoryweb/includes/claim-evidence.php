@@ -2,7 +2,7 @@
 /**
  * Claim evidence: the logo, photos and proof of ownership that come with a claim.
  *
- * DirectoryWeb owns this store. It does not use Kits Core's private folder or any Animal Writes helper. Every claim path
+ * DirectoryWeb owns this store. It does not use Kits Core's private folder or any legacy Core helper. Every claim path
  * ends here: the built-in form posts files to dw_evidence_store_upload(); a form provider (Fluent Forms today) has its
  * uploaded files copied in by dw_evidence_import_path() when the claim is submitted. A file that is not accepted is
  * refused with a reason the claimant sees; nothing is dropped silently.

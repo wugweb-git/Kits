@@ -1,7 +1,7 @@
 <?php
 /**
  * The listing's data model: its meta keys and their rules, the phone and opening-hours lists, and the never-publish
- * list. Moved from Animal Writes Core (meta.php) on 18 Nov 2026 with the keys, types and rules unchanged; Core keeps
+ * list. Moved from the legacy Core plugin (meta.php) on 18 Nov 2026 with the keys, types and rules unchanged; Core keeps
  * its old function names as wrappers that call these.
  *
  * @package directoryweb

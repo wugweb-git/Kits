@@ -1,6 +1,6 @@
 <?php
 /**
- * Claim pages (owner, 10 Oct 2026; moved here from Animal Writes Core `includes/form-blocks.php`, 18 Nov 2026):
+ * Claim pages (owner, 10 Oct 2026; moved here from the legacy Core plugin `includes/form-blocks.php`, 18 Nov 2026):
  *
  * - Listing card (block animal-writes/listing-help): "Is this your organisation?" with "Claim this listing", linking to
  *   /claim/?listing=<ID> (two steps, logo upload). It names the listing and links back to it.
@@ -247,7 +247,7 @@ function directoryweb_claim_finder() {
 
 /**
  * The band at the top of a form page: breadcrumbs, an optional picture, the title and a note. The site's own band
- * (Animal Writes Core's aw_head_band(), when that plugin is present) wins; without it, plain markup of the same parts.
+ * (the legacy Core plugin's aw_head_band(), when present) wins; without it, plain markup of the same parts.
  *
  * @param array $a crumbs, title, title_class, icon, note (HTML already escaped by the caller).
  * @return string
@@ -313,5 +313,5 @@ add_shortcode(
 	}
 );
 
-/* ---------- Back-compat: the old names (Animal Writes Core, before 18 Nov 2026) ---------- */
+/* ---------- Back-compat: the old names (the legacy Core plugin, before 18 Nov 2026) ---------- */
 

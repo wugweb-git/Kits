@@ -433,7 +433,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			foreach ( $types as $t ) {
 				$c = array( 'items' => 0, 'had' => 0, 'found' => 0, 'district' => 0, 'edited' => 0, 'nosource' => 0, 'states' => array() );
 				foreach ( get_posts( array( 'post_type' => $t, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'DESC' ) ) as $id ) {
-					if ( 'post' === $t && ( ! function_exists( 'aw_item_kind' ) || 'guide' !== aw_item_kind( $id ) ) ) { // what an item is: Animal Writes Core's
+					if ( 'post' === $t && ( ! function_exists( 'aw_item_kind' ) || 'guide' !== aw_item_kind( $id ) ) ) { // what an item is: the legacy Core plugin's
 						continue;
 					}
 					++$c['items'];

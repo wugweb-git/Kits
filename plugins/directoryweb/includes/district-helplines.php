@@ -178,7 +178,7 @@ function directoryweb_district_helplines_html( $d ) {
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		if ( ! function_exists( 'aw_hub_of_query' ) || 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) { // the hub Query Loops are Animal Writes Core's
+		if ( ! function_exists( 'aw_hub_of_query' ) || 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) { // the hub Query Loops belong to the legacy Core plugin
 			return $html;
 		}
 		$d = directoryweb_district_helplines_place();
