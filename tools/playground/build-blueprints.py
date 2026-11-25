@@ -79,13 +79,13 @@ if ( $listing ) {
 	$c( 'invalid claim refused with field errors', is_wp_error( $bad ) && ! empty( $bad->get_error_data()['errors'] ) );
 	$cid = dw_claim_create( $lid, array( 'name' => 'Asha', 'email' => 'asha@example.org', 'role' => 'founder', 'l_phone' => '+91 98765 43210', 'l_area' => 'Indiranagar' ) );
 	$c( 'claim created pending', ! is_wp_error( $cid ) && 'pending' === dw_claim_get( $cid )['status'] );
-	$get = function ( $path, $q = array() ) { $req = new WP_REST_Request( 'GET', $path ); foreach ( $q as $k => $v ) { $req->set_param( $k, $v ); } return rest_do_request( $req ); };
+	$get = function ( $path, $q = array() ) { $req = new WP_REST_Request( 'GET', $path ); $req->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) ); foreach ( $q as $k => $v ) { $req->set_param( $k, $v ); } return rest_do_request( $req ); };
 	$list = $get( '/directoryweb/v1/claims', array( 'status' => 'all' ) )->get_data();
 	$ids = is_array( $list ) ? wp_list_pluck( (array) ( $list['rows'] ?? array() ), 'id' ) : array();
 	$c( 'native claim appears in the Claims list', in_array( 'dw-' . $cid, $ids, true ), wp_json_encode( $ids ) );
 	$det = $get( '/directoryweb/v1/claims/dw-' . $cid );
 	$c( 'claim detail endpoint returns the claim', 200 === $det->get_status() && 'pending' === ( $det->get_data()['status'] ?? '' ) );
-	$post = function ( $to ) use ( $cid ) { $req = new WP_REST_Request( 'POST', '/directoryweb/v1/claims/' . $cid . '/transition' ); $req->set_param( 'to', $to ); return rest_do_request( $req ); };
+	$post = function ( $to ) use ( $cid ) { $req = new WP_REST_Request( 'POST', '/directoryweb/v1/claims/' . $cid . '/transition' ); $req->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) ); $req->set_param( 'to', $to ); return rest_do_request( $req ); };
 	$bad = $post( 'revoked' );
 	$c( 'illegal transition returns 409', 409 === $bad->get_status(), (string) $bad->get_status() );
 	$ok = $post( 'approved' );
