@@ -47,8 +47,13 @@ const AW_FAQ_ANSWER_HTML = array(
 	'em'     => array(),
 );
 
-/** The block that places the FAQ in an item template; a template without it gets the FAQ after the content. */
-const AW_FAQ_ITEM_BLOCK = 'animal-writes/item-faq';
+/**
+ * The name of the theme's block that places the FAQ in an item template ('' when the theme has none): a template with
+ * it gets the FAQ there, a template without it gets the FAQ after the content. Set with the `rankweb_faq_item_block` filter.
+ */
+function rankweb_faq_item_block_name() {
+	return (string) apply_filters( 'rankweb_faq_item_block', '' );
+}
 
 /**
  * Fewest questions a page shows (and marks up): AW_FAQ_MIN, posts AW_FAQ_MIN_GUIDE (owner, 21 and 25 Oct 2026: 2 for
@@ -204,7 +209,7 @@ const AW_FAQ_HEAD_MAX = 40;
  */
 function rankweb_faq_head_styles() {
 	return array(
-		'subject' => array( '%s FAQs', 'FAQs', '', 'Animal welfare FAQ' ), // "Animal Writes FAQs", "Directory FAQs"
+		'subject' => array( '%s FAQs', 'FAQs', '', 'Animal welfare FAQ' ), // "{Site name} FAQs", "Directory FAQs"
 		'plain'   => array( '', 'FAQs', '', 'Animal welfare FAQ' ), // "FAQs" everywhere
 		'common'  => array( '', 'Common questions', '', 'More questions' ),
 		'about'   => array( 'Questions about %s', 'Questions', '', 'Animal welfare FAQ' ), // "Questions about the Directory"
@@ -752,7 +757,8 @@ function rankweb_faq_print_once() {
 /** Whether the page's block template places the FAQ itself (the item-faq block). */
 function rankweb_faq_template_has_block() {
 	global $_wp_current_template_content;
-	return is_string( $_wp_current_template_content ) && false !== strpos( $_wp_current_template_content, '<!-- wp:' . AW_FAQ_ITEM_BLOCK . ' ' );
+	$block = rankweb_faq_item_block_name();
+	return '' !== $block && is_string( $_wp_current_template_content ) && false !== strpos( $_wp_current_template_content, '<!-- wp:' . $block . ' ' );
 }
 
 /** The item FAQ block: the page's own FAQ, where an item template puts it. */

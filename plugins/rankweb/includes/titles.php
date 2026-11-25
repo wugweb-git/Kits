@@ -265,18 +265,18 @@ add_action(
 		rank_math_register_var_replacement(
 			'aw_title',
 			array(
-				'name'        => 'Animal Writes title',
-				'description' => 'The title by the site\'s rules: one separator, " – Animal Writes" only at the end',
+				'name'        => 'RankWeb title',
+				'description' => 'The title by the site\'s rules: one separator, the site name only at the end',
 				'variable'    => 'aw_title',
 				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
-				'example'     => $post ? rankweb_seo_var_title( '', $post ) : 'Supreme Court Order on Community Dogs – Animal Writes',
+				'example'     => $post ? rankweb_seo_var_title( '', $post ) : rankweb_seo_branded( 'Example page title' ),
 			),
 			'rankweb_seo_var_title'
 		);
 		rank_math_register_var_replacement(
 			'aw_description',
 			array(
-				'name'        => 'Animal Writes description',
+				'name'        => 'RankWeb description',
 				'description' => 'The description by the site\'s rules (the summary condensed, else the intro)',
 				'variable'    => 'aw_description',
 				'nocache'     => true, // one value per post (Rank Math caches a template's result for the whole request otherwise)
@@ -305,7 +305,7 @@ function rankweb_seo_list_title() {
 			return ''; // name searches and other filtered lists keep their own titles
 		}
 		if ( ! $place ) {
-			return rankweb_seo_fit( array( AW_HUB_TITLES['aw_listing'], 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
+			return rankweb_seo_fit( array( AW_HUB_TITLES['aw_listing'] ?? 'Directory', 'Animal Welfare NGO Directory of India' ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . directoryweb_place_parent_state( $place )->name;
@@ -533,17 +533,18 @@ function rankweb_seo_list_description() {
 		$n     = number_format_i18n( aw_hub_total( 'aw_listing' ) );
 		$state = $place ? directoryweb_place_parent_state( $place ) : null;
 		if ( ! $place ) {
-			$desc = ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'], $n ); // phpcs:ignore WordPress.Security.NonceVerification
+			$desc = ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'] ?? '%s', $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
 			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . rankweb_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
-			$more = ' From the Animal Writes Directory of animal welfare organisations in India.';
-			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . ' From the Animal Writes Directory.' ) <= AW_SEO_DESC_MAX ? $desc . ' From the Animal Writes Directory.' : $desc );
+			$more = ' From the ' . rankweb_site_name() . ' Directory' . rankweb_seo_dir_scope( true ) . '.';
+			$short = ' From the ' . rankweb_site_name() . ' Directory.';
+			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . $short ) <= AW_SEO_DESC_MAX ? $desc . $short : $desc );
 		} elseif ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
 			$desc = '1' === $n
-				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $place->name, $state->name )
+				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the %3$s Directory%4$s.', $place->name, $state->name, rankweb_site_name(), rankweb_seo_dir_scope() )
 				: sprintf( '%1$s animal welfare NGOs, rescue groups, shelters, Gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
 		} else {
 			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );

@@ -387,7 +387,7 @@ function rankweb_seo_dir_description() {
 	$n     = $v['n'];
 	$place = $v['place'];
 	$state = $v['state'];
-	$tail  = array( ' From the Animal Writes Directory of animal welfare organisations in India.', ' From the Animal Writes Directory.', '' );
+	$tail  = array( ' From the ' . rankweb_site_name() . ' Directory' . rankweb_seo_dir_scope( true ) . '.', ' From the ' . rankweb_site_name() . ' Directory.', '' );
 	$cands = array();
 	if ( '' !== $v['type'] ) {
 		$what = rankweb_seo_view_type_words( $v, $n );
@@ -420,7 +420,7 @@ function rankweb_seo_dir_description() {
 		$where = 'district' === $v['kind'] ? $place->name . ', ' . $state->name : $place->name;
 		if ( 1 === $n ) {
 			$one     = $parts ? rankweb_seo_type_words( $parts[0][0], 1 ) : 'animal welfare organisation';
-			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the Animal Writes Directory of India.', $one, $where );
+			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services, in the %3$s Directory%4$s.', $one, $where, rankweb_site_name(), rankweb_seo_dir_scope() );
 			$cands[] = sprintf( 'One %1$s listed in %2$s, with its phone, address and services.', $one, $where );
 		} elseif ( 'district' === $v['kind'] && rankweb_seo_has_numbers( $place ) ) {
 			// Searched as "animal helpline number {district}" and "animal rescue {district} contact number" (SC, 15 Oct 2026).
@@ -690,7 +690,7 @@ function rankweb_seo_category_description( $term ) {
 		return '';
 	}
 	list( $items, $dir ) = rankweb_seo_category_split( $parts );
-	$lead  = rankweb_plain_text( $term->name ) . ' in India on Animal Writes: ';
+	$lead  = rankweb_plain_text( $term->name ) . ' in India on ' . rankweb_site_name() . ': ';
 	$room  = AW_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() );
 	$cands = array();
 	for ( $d = count( $dir ); $d >= 0; $d-- ) {
@@ -896,19 +896,19 @@ function rankweb_seo_tag_description( $term ) {
 	}
 	switch ( $sec ) {
 		case 'aw_listing':
-			$text = sprintf( '%1$s%2$s in India in the Animal Writes Directory, by state and district, with address, phone number and services.', $num, $what );
+			$text = sprintf( '%1$s%2$s in India in the %3$s Directory, by state and district, with address, phone number and services.', $num, $what, rankweb_site_name() );
 			break;
 		case 'aw_legal':
-			$text = sprintf( '%1$s%2$s on animals in India, summarised in plain words with a link to the official document, in the Animal Writes Library.', $num, $what );
+			$text = sprintf( '%1$s%2$s on animals in India, summarised in plain words with a link to the official document, in the %3$s Library.', $num, $what, rankweb_site_name() );
 			break;
 		case 'aw_opportunity':
 			$text = sprintf( '%1$sanimal welfare %2$s in India with organisations across the country: the role, location and how to apply.', $num, $what );
 			break;
 		case 'post':
-			$text = sprintf( '%1$s%2$s on animal welfare in India from Animal Writes, in plain words.', $num, $what );
+			$text = sprintf( '%1$s%2$s on animal welfare in India from %3$s, in plain words.', $num, $what, rankweb_site_name() );
 			break;
 		default:
-			$text = sprintf( '%1$s%2$s on Animal Writes, animal welfare in India.', $num, $what );
+			$text = sprintf( '%1$s%2$s on %3$s, animal welfare in India.', $num, $what, rankweb_site_name() );
 	}
 	return rankweb_seo_cut( ucfirst( $text ), AW_SEO_DESC_MAX );
 }

@@ -37,7 +37,10 @@ function rankweb_seo_page_is_built( $post ) {
 	if ( (int) get_option( 'page_on_front' ) === $post->ID || 'page-hub' === get_page_template_slug( $post ) ) {
 		return true;
 	}
-	return (bool) preg_match( '/<!-- wp:(?:shortcode|pattern|block \{"ref"|animal-writes\/(?!breadcrumb)|kits\/)|\[aw_/', (string) $post->post_content );
+	// Block namespaces whose blocks print run-time content (a theme's or another plugin's); the breadcrumb block of any of them is only a trail.
+	$spaces = array_filter( array_map( 'strval', (array) apply_filters( 'rankweb_built_block_namespaces', array() ) ) );
+	$extra  = $spaces ? '|(?:' . implode( '|', array_map( fn( $n ) => preg_quote( $n, '/' ), $spaces ) ) . ')\/(?!breadcrumb)' : '';
+	return (bool) preg_match( '/<!-- wp:(?:shortcode|pattern|block \{"ref"|kits\/' . $extra . ')|\[aw_/', (string) $post->post_content );
 }
 
 /**
