@@ -12,7 +12,7 @@ Target layout: content menus first, then one block of Wugweb products (each its 
 | Tools tab (RankWeb) and Help tab (PlanWeb, MailWeb) | `rankweb-ui.php`, `planweb-ui.php`, `mailweb-ui.php` | Wait for the owner's reference list. MailWeb already has a Help card on its Dashboard; RankWeb has a Tools card (owner, 14 Nov: no Tools tab, `docs/pending.md`). |
 | Place intros into Listings › Places | `directoryweb-ui.php:174`, `place-intros.php` | Still a separate tab and submenu. Claims stays read-only (owner). |
 | Setup Wizard (`kits-onboarding`) and Scripts & Pixels (`kits-scripts`) | `onboarding-wizard.php:25`, `header-footer-scripts.php:22` | Registered under Kits but hidden; reachable by URL only. Link them from Kits or retire them. |
-| RankWeb and MailWeb classic leftovers | RankWeb `overview.php`, `faq-overview.php`, `settings.php` (9 classic submenus); MailWeb `mail-in.php:61` (dead `ui=classic` argument) | PlanWeb and SourceWeb are finished; these two are not. |
+| RankWeb and MailWeb classic leftovers | RankWeb `overview.php`, `faq-overview.php`, `settings.php` (9 classic submenus); MailWeb still has its simple-table helper (the dead `ui=classic` argument was removed) | PlanWeb and SourceWeb are finished; these two are not. |
 
 Dropped by the owner on 25 Nov (no tabbing or regrouping): grouping the InsightWeb (10) and SourceWeb (12) tabs.
 
