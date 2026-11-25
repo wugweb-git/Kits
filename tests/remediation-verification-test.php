@@ -438,7 +438,7 @@ run_test_case( "RankWeb standalone (without Rank Math): exactly 1 description, c
 	$stubs = get_wp_stub_header( $root );
 	$code = <<<PHP
 {$stubs}
-define( 'AW_SEO_EXTRAS_DIR', '{$root}/plugins/rankweb/' );
+define( 'RANKWEB_DIR', '{$root}/plugins/rankweb/' );
 
 // Core wp_robots hook stub for standalone robots tag
 function wp_robots() {
@@ -496,7 +496,7 @@ run_test_case( "RankWeb integrated with Rank Math: standalone meta-description i
 	$stubs = get_wp_stub_header( $root );
 	$code = <<<PHP
 {$stubs}
-define( 'AW_SEO_EXTRAS_DIR', '{$root}/plugins/rankweb/' );
+define( 'RANKWEB_DIR', '{$root}/plugins/rankweb/' );
 define( 'RANK_MATH_VERSION', '1.0.100' );
 
 // Mock Rank Math helper class

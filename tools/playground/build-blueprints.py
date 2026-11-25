@@ -116,6 +116,10 @@ if ( $listing ) {
 	$c( 'collection-filter block renders on the front end', false !== strpos( $blk, 'wp-block-directoryweb-collection-filter' ), substr( wp_strip_all_tags( $blk ), 0, 80 ) );
 	unset( $post ); // the journey's REST helper shares its name with WordPress's global $post, which trashing a post touches
 	try {
+		// No Animal Writes coupling in the generic plugin.
+		$c( 'geocoder identifies this plugin and site, not another site', false !== strpos( directoryweb_geo_user_agent(), 'DirectoryWeb/' ) && false !== strpos( directoryweb_geo_user_agent(), home_url( '/' ) ) && false === stripos( directoryweb_geo_user_agent(), 'animal' ) && ! defined( 'AW_GEO_UA' ) );
+		$c( 'the Directory address is this site\'s own /directory/', home_url( '/directory/' ) === directoryweb_hub_url() && ! function_exists( 'aw_hub_url' ) );
+		$c( 'listing type is registered by DirectoryWeb itself', post_type_exists( 'aw_listing' ) && ! function_exists( 'aw_content_type_args' ) && 'directory' === get_post_type_object( 'aw_listing' )->rewrite['slug'] );
 		// Diagnostics read live state.
 		$d0 = dw_claim_diagnostics();
 		$c( 'diagnostics: the revoked claim is counted, nothing pending', 1 === $d0['counts']['revoked'] && 0 === $d0['counts']['pending'] && 1 === $d0['total'], wp_json_encode( $d0['counts'] ) );
@@ -136,8 +140,14 @@ if ( $listing ) {
 		wp_untrash_post( $cid2 );
 		ob_start(); directoryweb_claim_status_card(); $card = ob_get_clean();
 		$c( 'standalone Settings card shows the status and no claimant details', false !== strpos( $card, 'Claim status' ) && false !== strpos( $card, 'Built-in form' ) && false === strpos( $card, 'asha@example.org' ) && false === strpos( $card, 'ravi@example.org' ) );
+		$c( 'diagnostics: scope is built-in claims and sources are labelled', 'built-in' === $d3['scope'] && 'default' === $d3['sources']['notify'] && 'option' === $d2['sources']['notify'] && 'code' === $d3['sources']['limits'] && 'option' === $d3['sources']['page'] );
+		delete_option( 'aw_ff_send_email' );
+		$c( 'diagnostics: an unset email setting reads as default, not as stored', 'default' === dw_claim_diagnostics()['sources']['mail'] );
+		update_option( 'aw_ff_send_email', '1' );
+		$c( 'Settings card says counts are built-in and external form claims are not included', false !== strpos( $card, 'Built-in claims: pending' ) && false !== strpos( $card, 'not read and not included' ) && false !== strpos( $card, 'Stored setting' ) && false !== strpos( $card, 'Fixed in code' ) );
 		$svc = array_column( directoryweb_settings_payload()['services'], null, 'slug' );
 		$c( 'Kits shell Settings payload carries the claims status row', isset( $svc['claims-status'] ) && ! empty( $svc['claims-status']['facts'] ) );
+		$c( 'shell row says built-in and that provider claims are not counted', false !== strpos( $svc['claims-status']['summary'], 'built-in' ) && false !== strpos( $svc['claims-status']['summary'], 'not counted' ) );
 		$sreq = new WP_REST_Request( 'GET', '/directoryweb/v1/settings' );
 		$sreq->set_header( 'X-WP-Nonce', $nonce );
 		$c( 'admin can read the settings route', 200 === rest_do_request( $sreq )->get_status() );
@@ -146,6 +156,86 @@ if ( $listing ) {
 		$sreq2 = new WP_REST_Request( 'GET', '/directoryweb/v1/settings' );
 		$sreq2->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
 		$c( 'subscriber cannot read the settings route', in_array( rest_do_request( $sreq2 )->get_status(), array( 401, 403 ), true ) );
+		wp_set_current_user( 1 );
+		// F6: the Verified mark and registry fields over the real REST API.
+		$f6l = wp_insert_post( array( 'post_title' => 'F6 listing', 'post_status' => 'publish', 'post_type' => 'aw_listing', 'post_author' => 0 ) );
+		$f6u = wp_insert_user( array( 'user_login' => 'dw_contrib', 'user_pass' => wp_generate_password(), 'role' => 'contributor' ) );
+		$f6o = wp_insert_post( array( 'post_title' => 'F6 contributor listing', 'post_status' => 'draft', 'post_type' => 'aw_listing', 'post_author' => $f6u ) );
+		$f6 = function ( $meta ) use ( $f6o ) {
+			$rq = new WP_REST_Request( 'POST', '/wp/v2/aw_listing/' . $f6o );
+			$rq->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+			$rq->set_body_params( array( 'meta' => $meta ) );
+			return rest_do_request( $rq );
+		};
+		wp_set_current_user( $f6u );
+		$ra = $f6( array( 'aw_verified' => true ) );
+		$c( 'F6: a contributor cannot set the Verified mark over REST', in_array( $ra->get_status(), array( 400, 401, 403 ), true ) && ! get_post_meta( $f6o, 'aw_verified', true ), (string) $ra->get_status() );
+		$rb = $f6( array( 'aw_gov_verified_by' => 'Forged', 'aw_needs_reverify' => false, 'aw_darpan_id' => 'X1' ) );
+		$c( 'F6: nor the government source, re-verify flag or registry id', in_array( $rb->get_status(), array( 400, 401, 403 ), true ) && '' === (string) get_post_meta( $f6o, 'aw_gov_verified_by', true ) && '' === (string) get_post_meta( $f6o, 'aw_darpan_id', true ) );
+		$rc = $f6( array( 'aw_area' => 'Indiranagar' ) );
+		$c( 'F6: a contributor can still edit their own listing\'s descriptive fields', 200 === $rc->get_status() && 'Indiranagar' === get_post_meta( $f6o, 'aw_area', true ), (string) $rc->get_status() );
+		wp_set_current_user( 1 );
+		$rd = $f6( array( 'aw_verified' => true ) );
+		$c( 'F6: an administrator can set the Verified mark', 200 === $rd->get_status() && (bool) get_post_meta( $f6o, 'aw_verified', true ), (string) $rd->get_status() );
+		// F6: the other routes a signed-in contributor could take.
+		wp_set_current_user( $f6u );
+		update_post_meta( $f6o, 'aw_gov_verified_by', 'Forged by plain update_post_meta' );
+		$c( 'F6: plain update_post_meta by a contributor is refused', '' === (string) get_post_meta( $f6o, 'aw_gov_verified_by', true ) );
+		delete_post_meta( $f6o, 'aw_verified' );
+		$c( 'F6: a contributor cannot remove the Verified mark either', (bool) get_post_meta( $f6o, 'aw_verified', true ) );
+		$rn = $f6( array( 'aw_verified' => null ) );
+		$c( 'F6: nor delete it through REST (null)', (bool) get_post_meta( $f6o, 'aw_verified', true ) && ! in_array( $rn->get_status(), array( 500 ), true ), (string) $rn->get_status() );
+		$c( 'F6: the Custom Fields box capability follows (decision fields no, descriptive yes)', ! current_user_can( 'edit_post_meta', $f6o, 'aw_verified' ) && current_user_can( 'edit_post_meta', $f6o, 'aw_area' ) );
+		$fld = apply_filters( 'acf/prepare_field', array( 'name' => 'aw_verified', 'type' => 'true_false' ) );
+		$fld2 = apply_filters( 'acf/prepare_field', array( 'name' => 'aw_area', 'type' => 'text' ) );
+		$c( 'F6: Secure Custom Fields / ACF forms show the decision field read only to a contributor', ! empty( $fld['readonly'] ) && empty( $fld2['readonly'] ) );
+		$c( 'F6b: Secure Custom Fields / ACF forms do not draw the team-only fields for a contributor, and still draw public ones', false === apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_authority', 'type' => 'text' ) ) && false === apply_filters( 'acf/prepare_field', array( 'name' => 'aw_needs_reverify', 'type' => 'true_false' ) ) && is_array( apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_date', 'type' => 'text' ) ) ) );
+		$bq = new WP_REST_Request( 'POST', '/batch/v1' );
+		$bq->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$bq->set_body_params( array( 'requests' => array( array( 'method' => 'POST', 'path' => '/wp/v2/aw_listing/' . $f6o, 'body' => array( 'meta' => array( 'aw_needs_reverify' => true, 'aw_reg_authority' => 'Forged' ) ) ) ) ) );
+		rest_do_request( $bq );
+		$c( 'F6: the REST batch endpoint cannot be used to set them', ! get_post_meta( $f6o, 'aw_needs_reverify', true ) && '' === (string) get_post_meta( $f6o, 'aw_reg_authority', true ) );
+		wp_set_current_user( 1 );
+		// F6b: team-only meta must not appear in any public or non-manager read.
+		wp_set_current_user( 1 );
+		$priv = array( 'aw_reg_authority' => 'Registrar of Societies', 'aw_reg_act' => 'Societies Act', 'aw_gov_verified_by' => 'Darpan-source', 'aw_darpan_blacklisted_by' => 'Auditor', 'aw_darpan_blacklisted_on' => '2026-01-01', 'aw_sectors' => 'Animal welfare', 'aw_awbi_list_on' => '2026-05-31', 'aw_needs_reverify' => true );
+		foreach ( $priv as $k => $v ) { update_post_meta( $f6l, $k, $v ); }
+		update_post_meta( $f6l, 'aw_gov_verified_on', '2026-02-02' );
+		update_post_meta( $f6l, 'aw_area', 'Indiranagar' );
+		$leak = function ( $data ) use ( $priv ) { $j = wp_json_encode( $data ); foreach ( array_keys( $priv ) as $k ) { if ( false !== strpos( $j, '"' . $k . '"' ) ) { return $k; } } return ''; };
+		$rest_get = function ( $path, $params = array() ) { $rq = new WP_REST_Request( 'GET', $path ); foreach ( $params as $a => $b ) { $rq->set_param( $a, $b ); } return rest_do_request( $rq ); };
+		$readers = array( 'anonymous' => 0, 'contributor' => $f6u );
+		foreach ( $readers as $who => $rid ) {
+			wp_set_current_user( $rid );
+			$one = $rest_get( '/wp/v2/aw_listing/' . $f6l );
+			$many = $rest_get( '/wp/v2/aw_listing', array( 'per_page' => 50 ) );
+			$fld = $rest_get( '/wp/v2/aw_listing/' . $f6l, array( '_fields' => 'meta' ) );
+			$emb = rest_get_server()->response_to_data( $rest_get( '/wp/v2/aw_listing/' . $f6l, array( '_embed' => 1 ) ), true );
+			$c( 'F6b: ' . $who . ' single read has no team-only meta, and public meta is still there', 200 === $one->get_status() && '' === $leak( $one->get_data() ) && 'Indiranagar' === ( $one->get_data()['meta']['aw_area'] ?? '' ) && '2026-02-02' === ( $one->get_data()['meta']['aw_gov_verified_on'] ?? '' ), $leak( $one->get_data() ) . ' ' . $one->get_status() );
+			$c( 'F6b: ' . $who . ' collection read has no team-only meta', 200 === $many->get_status() && '' === $leak( $many->get_data() ), $leak( $many->get_data() ) );
+			$c( 'F6b: ' . $who . ' _fields=meta read has none', '' === $leak( $fld->get_data() ), $leak( $fld->get_data() ) );
+			$c( 'F6b: ' . $who . ' _embed read has none', '' === $leak( $emb ), $leak( $emb ) );
+		}
+		wp_set_current_user( 1 );
+		foreach ( $priv as $k => $v ) { update_post_meta( $f6o, $k, $v ); }
+		wp_set_current_user( $f6u );
+		$own = $rest_get( '/wp/v2/aw_listing/' . $f6o, array( 'context' => 'edit' ) );
+		$c( 'F6b: a contributor reading their own listing in the editor (edit context) still gets no team-only meta', 200 === $own->get_status() && '' === $leak( $own->get_data() ), $own->get_status() . ' ' . $leak( $own->get_data() ) );
+		$bq2 = new WP_REST_Request( 'POST', '/batch/v1' );
+		$bq2->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$bq2->set_body_params( array( 'requests' => array( array( 'method' => 'POST', 'path' => '/wp/v2/aw_listing/' . $f6o, 'body' => array( 'meta' => array( 'aw_area' => 'Batch area' ) ) ) ) ) );
+		$bres = rest_do_request( $bq2 );
+		$c( 'F6b: a batch request\'s response body has no team-only meta', '' === $leak( $bres->get_data() ) );
+		$post = apply_filters( 'rest_post_dispatch', new WP_REST_Response( array( 'responses' => array( array( 'body' => array( 'meta' => array( 'aw_reg_authority' => 'x', 'aw_area' => 'y' ) ) ) ) ) ), rest_get_server(), new WP_REST_Request( 'POST', '/batch/v1' ) );
+		$c( 'F6b: the response-level scrub removes a team-only key from any nested meta, keeps public ones', '' === $leak( $post->get_data() ) && false !== strpos( wp_json_encode( $post->get_data() ), 'aw_area' ) );
+		wp_set_current_user( 1 );
+		$mgr = $rest_get( '/wp/v2/aw_listing/' . $f6l, array( 'context' => 'edit' ) );
+		$mm  = $mgr->get_data()['meta'] ?? array();
+		$c( 'F6b: a manager still reads every team-only field', 'Registrar of Societies' === ( $mm['aw_reg_authority'] ?? '' ) && 'Auditor' === ( $mm['aw_darpan_blacklisted_by'] ?? '' ) && 'Darpan-source' === ( $mm['aw_gov_verified_by'] ?? '' ), wp_json_encode( array_intersect_key( $mm, $priv ) ) );
+		$c( 'F6b: a manager still sees the team-only fields in Secure Custom Fields / ACF forms', is_array( apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_authority', 'type' => 'text' ) ) ) );
+		foreach ( array_keys( $priv ) as $k ) { delete_post_meta( $f6l, $k ); }
+		update_post_meta( $f6l, 'aw_verified', true );
+		$c( 'F6: code (claim approval, imports) still writes the Verified mark', (bool) get_post_meta( $f6l, 'aw_verified', true ) );
 		wp_set_current_user( 1 );
 	} catch ( Throwable $e ) {
 		$c( 'diagnostics block ran without a fatal', false, $e->getMessage() . ' @' . basename( $e->getFile() ) . ':' . $e->getLine() );
@@ -173,6 +263,8 @@ $h = $view();
 $c( 'description printed once and from the post', 1 === $cnt( $h, '/<meta name="description"/' ) && false !== strpos( $h, 'dog care in monsoon' ) );
 $c( 'Open Graph and Twitter tags printed once each', 1 === $cnt( $h, '/property="og:title"/' ) && 1 === $cnt( $h, '/name="twitter:card"/' ) && 1 === $cnt( $h, '/property="og:url"/' ), $cnt( $h, '/property="og:title"/' ) . '/' . $cnt( $h, '/name="twitter:card"/' ) . '/' . $cnt( $h, '/property="og:url"/' ) . ' ' . substr( preg_replace( '/\s+/', ' ', $h ), 0, 300 ) );
 $c( 'canonical printed once', 1 === $cnt( $h, '/rel="canonical"/' ) );
+$c( 'WordPress 404 permalink guessing is not switched off', true === apply_filters( 'do_redirect_guess_404_permalink', true ) );
+$c( 'no Animal Writes redirect hooks: seed redirects and ?author= rule are gone', ! defined( 'AW_SEED_REDIRECTS_VERSION' ) && false === has_action( 'init', 'aw_seed_redirects' ) );
 $c( 'JSON-LD printed once with an Article node', 1 === $cnt( $h, '/application\/ld\+json/' ) && false !== strpos( $h, '"@type":"Article"' ) );
 $lst = function ( $args ) { global $wp_query; query_posts( $args ); ob_start(); do_action( 'wp_head' ); return ob_get_clean(); };
 $lh = $lst( array( 'paged' => 1 ) );
@@ -198,11 +290,11 @@ foreach ( array( 'dashboard', 'modules', 'settings', 'insights' ) as $scr ) { //
 	$out = ob_get_clean();
 	$c( 'admin screen renders without Kits Core: ' . $scr, '' !== trim( $out ) && false === strpos( $out, 'needs Kits Core' ) && false === strpos( $out, 'Fatal error' ), substr( wp_strip_all_tags( $out ), 0, 80 ) );
 }
-aw_seo_settings_save( 'schema', array( 'AW_SITE_ALT_NAMES' => "Journey Site\nJS" ) );
-$c( 'settings save and persist', array( 'Journey Site', 'JS' ) === ( aw_seo_saved()['schema']['AW_SITE_ALT_NAMES'] ?? null ) );
-$on = array(); foreach ( aw_seo_modules() as $k => $m ) { if ( ! empty( $m['switch'] ) && 'llms' !== $k ) { $on[ $k ] = true; } }
-aw_seo_settings_save( 'modules', array(), false, $on );
-$c( 'switching a module off takes its files out', ! aw_seo_module_on( 'llms' ) && in_array( 'llms', aw_seo_files_off(), true ) );
+rankweb_seo_settings_save( 'schema', array( 'AW_SITE_ALT_NAMES' => "Journey Site\nJS" ) );
+$c( 'settings save and persist', array( 'Journey Site', 'JS' ) === ( rankweb_seo_saved()['schema']['AW_SITE_ALT_NAMES'] ?? null ) );
+$on = array(); foreach ( rankweb_seo_modules() as $k => $m ) { if ( ! empty( $m['switch'] ) && 'llms' !== $k ) { $on[ $k ] = true; } }
+rankweb_seo_settings_save( 'modules', array(), false, $on );
+$c( 'switching a module off takes its files out', ! rankweb_seo_module_on( 'llms' ) && in_array( 'llms', rankweb_seo_files_off(), true ) );
 $pub = rankweb_aw_leak_probe();
 $c( 'no Animal Writes site values in a generic site graph', '' === $pub, $pub );
 $r['info']['head_has_canonical'] = false !== strpos( $head, 'rel="canonical"' );
@@ -336,7 +428,9 @@ def build():
     allrest = [n for p in PRODUCTS.values() for n in p["rest"]]
     suite["steps"].append(
         assertion("suite", [f"{s}/{s}.php" for s in slugs], allmenus, allrest,
-                  "$c( 'Kits theme active', 'kits-by-wugweb' === get_stylesheet() );", False)
+                  "$c( 'Kits theme active', 'kits-by-wugweb' === get_stylesheet() );\n"
+                  "$lid = wp_insert_post( array( 'post_title' => 'Fallback listing', 'post_status' => 'publish', 'post_type' => 'aw_listing', 'post_content' => 'x' ) );\n"
+                  "$c( 'Kits Core active, Fluent Forms not: the claim form is the built-in one', function_exists( 'kits_ff_form' ) && ! defined( 'FLUENTFORM' ) && dw_claim_native_active() && false !== strpos( directoryweb_claim_form( get_post( $lid ) ), 'dw_claim_submit' ) );", False)
     )
     out["blueprints/suite.json"] = suite
     return out
