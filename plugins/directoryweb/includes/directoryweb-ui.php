@@ -339,8 +339,8 @@ function directoryweb_dashboard_native_page(): void {
 	if ( post_type_exists( 'aw_place' ) ) {
 		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_place' ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Add New Place', 'directoryweb' ) . '</a> ';
 	}
-	if ( current_user_can( DIRECTORYWEB_CAP ) && defined( 'DW_CLAIMS_LINK' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability
-		echo '<a href="' . esc_url( admin_url( DW_CLAIMS_LINK ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Review Claims', 'directoryweb' ) . '</a> ';
+	if ( current_user_can( DIRECTORYWEB_CAP ) && defined( 'DIRECTORYWEB_CLAIMS_LINK' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability
+		echo '<a href="' . esc_url( admin_url( DIRECTORYWEB_CLAIMS_LINK ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Review Claims', 'directoryweb' ) . '</a> ';
 	}
 	echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . DIRECTORYWEB_SETTINGS_PAGE ) ) . '" class="button button-secondary">' . esc_html__( 'DirectoryWeb Settings', 'directoryweb' ) . '</a>';
 	echo '</p>';
@@ -367,11 +367,11 @@ function directoryweb_settings_native_page(): void {
 	$saved       = false;
 
 	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && check_admin_referer( 'directoryweb_standalone_settings' ) ) {
-		update_option( 'aw_ff_send_email', ! empty( $_POST['dw_claim_mail'] ) ? '1' : '0' );
-		$to = sanitize_email( wp_unslash( $_POST['dw_claim_notify_to'] ?? '' ) );
+		update_option( 'aw_ff_send_email', ! empty( $_POST['directoryweb_claim_mail'] ) ? '1' : '0' );
+		$to = sanitize_email( wp_unslash( $_POST['directoryweb_claim_notify_to'] ?? '' ) );
 		update_option( 'directoryweb_claim_notify_to', is_email( $to ) ? $to : '' );
-		if ( isset( $_POST['dw_claim_form_id'] ) ) {
-			$forms_map['claim'] = absint( $_POST['dw_claim_form_id'] );
+		if ( isset( $_POST['directoryweb_claim_form_id'] ) ) {
+			$forms_map['claim'] = absint( $_POST['directoryweb_claim_form_id'] );
 			update_option( $option_name, $forms_map );
 		}
 		$saved = true;
@@ -379,7 +379,7 @@ function directoryweb_settings_native_page(): void {
 
 	$current_claim = absint( $forms_map['claim'] ?? 0 );
 	$all_forms     = function_exists( 'directoryweb_ff_forms' ) ? directoryweb_ff_forms() : array();
-	$native        = function_exists( 'dw_claim_native_active' ) && dw_claim_native_active();
+	$native        = function_exists( 'directoryweb_claim_native_active' ) && directoryweb_claim_native_active();
 	$mail_on       = '1' === (string) get_option( 'aw_ff_send_email', '0' );
 	$notify        = (string) get_option( 'directoryweb_claim_notify_to', '' );
 	$page_id       = (int) get_option( 'directoryweb_claim_page', 0 );
@@ -406,10 +406,10 @@ function directoryweb_settings_native_page(): void {
 		echo '<p class="description">' . esc_html__( 'Claims come from the selected Fluent Forms form.', 'directoryweb' ) . '</p>';
 	}
 	echo '<table class="form-table">';
-	echo '<tr><th scope="row">' . esc_html__( 'Claim emails', 'directoryweb' ) . '</th><td><label><input type="checkbox" name="dw_claim_mail" value="1"' . checked( $mail_on, true, false ) . '> ' . esc_html__( 'Email claimants and the site owner about new claims and decisions', 'directoryweb' ) . '</label></td></tr>';
-	echo '<tr><th scope="row"><label for="dw_claim_notify_to">' . esc_html__( 'Notify', 'directoryweb' ) . '</label></th><td><input type="email" class="regular-text" name="dw_claim_notify_to" id="dw_claim_notify_to" value="' . esc_attr( $notify ) . '" placeholder="' . esc_attr( (string) get_option( 'admin_email' ) ) . '"><p class="description">' . esc_html__( 'Where new-claim emails go. Empty uses the site admin email.', 'directoryweb' ) . '</p></td></tr>';
+	echo '<tr><th scope="row">' . esc_html__( 'Claim emails', 'directoryweb' ) . '</th><td><label><input type="checkbox" name="directoryweb_claim_mail" value="1"' . checked( $mail_on, true, false ) . '> ' . esc_html__( 'Email claimants and the site owner about new claims and decisions', 'directoryweb' ) . '</label></td></tr>';
+	echo '<tr><th scope="row"><label for="directoryweb_claim_notify_to">' . esc_html__( 'Notify', 'directoryweb' ) . '</label></th><td><input type="email" class="regular-text" name="directoryweb_claim_notify_to" id="directoryweb_claim_notify_to" value="' . esc_attr( $notify ) . '" placeholder="' . esc_attr( (string) get_option( 'admin_email' ) ) . '"><p class="description">' . esc_html__( 'Where new-claim emails go. Empty uses the site admin email.', 'directoryweb' ) . '</p></td></tr>';
 	if ( ! empty( $all_forms ) ) {
-		echo '<tr><th scope="row"><label for="dw_claim_form_id">' . esc_html__( 'Fluent Forms claim form', 'directoryweb' ) . '</label></th><td><select name="dw_claim_form_id" id="dw_claim_form_id"><option value="0">' . esc_html__( 'None (use the built-in form)', 'directoryweb' ) . '</option>';
+		echo '<tr><th scope="row"><label for="directoryweb_claim_form_id">' . esc_html__( 'Fluent Forms claim form', 'directoryweb' ) . '</label></th><td><select name="directoryweb_claim_form_id" id="directoryweb_claim_form_id"><option value="0">' . esc_html__( 'None (use the built-in form)', 'directoryweb' ) . '</option>';
 		foreach ( $all_forms as $id => $title ) {
 			echo '<option value="' . esc_attr( (string) $id ) . '" ' . selected( $current_claim, (int) $id, false ) . '>' . esc_html( sprintf( '#%d — %s', $id, $title ) ) . '</option>';
 		}
@@ -425,19 +425,19 @@ function directoryweb_settings_native_page(): void {
 
 /** Standalone Settings: a read-only card with the live state of the claim path. */
 function directoryweb_claim_status_card(): void {
-	if ( ! function_exists( 'dw_claim_diagnostics' ) ) {
+	if ( ! function_exists( 'directoryweb_claim_diagnostics' ) ) {
 		return;
 	}
-	$d    = dw_claim_diagnostics();
+	$d    = directoryweb_claim_diagnostics();
 	$yes  = __( 'Yes', 'directoryweb' );
 	$no   = __( 'No', 'directoryweb' );
-	$src  = fn( string $k ) => ' (' . dw_claim_source_label( (string) $d['sources'][ $k ] ) . ')';
+	$src  = fn( string $k ) => ' (' . directoryweb_claim_source_label( (string) $d['sources'][ $k ] ) . ')';
 	$rows = array(
 		__( 'Claim path', 'directoryweb' )              => 'built-in' === $d['mode'] ? __( 'Built-in form', 'directoryweb' ) : __( 'Fluent Forms', 'directoryweb' ),
 		__( 'Fluent Forms active', 'directoryweb' )     => $d['fluent_forms'] ? $yes : $no,
 		__( 'Claim page published', 'directoryweb' )    => ( $d['page_live'] ? $yes : $no ) . $src( 'page' ),
 		__( 'Claim emails', 'directoryweb' )            => ( $d['mail_on'] ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ) ) . $src( 'mail' ),
-		__( 'New-claim emails go to', 'directoryweb' )  => $d['notify_to'] . ' (' . ( 'option' === $d['sources']['notify'] ? dw_claim_source_label( 'option' ) : __( 'site admin email', 'directoryweb' ) . ', ' . dw_claim_source_label( 'default' ) ) . ')',
+		__( 'New-claim emails go to', 'directoryweb' )  => $d['notify_to'] . ' (' . ( 'option' === $d['sources']['notify'] ? directoryweb_claim_source_label( 'option' ) : __( 'site admin email', 'directoryweb' ) . ', ' . directoryweb_claim_source_label( 'default' ) ) . ')',
 		/* translators: 1: open claims per email, 2: submissions per hour. */
 		__( 'Limits', 'directoryweb' )                  => sprintf( __( '%1$d open claims per email; %2$d submissions per hour per connection', 'directoryweb' ), $d['max_open_per_email'], $d['max_sends_per_hour'] ) . $src( 'limits' ),
 	);

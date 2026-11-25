@@ -194,3 +194,10 @@ add_action(
 	},
 	1
 );
+
+if ( ! function_exists( 'dw_claim_upload_error' ) ) {
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- earlier name, still called by Kits Core's Fluent Forms bridge.
+	function dw_claim_upload_error( ...$args ) {
+		return directoryweb_claim_upload_error( ...$args );
+	}
+}

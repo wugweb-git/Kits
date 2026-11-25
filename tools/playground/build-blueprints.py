@@ -74,11 +74,11 @@ if ( $listing ) {
 	$lid = (int) get_posts( array( 'post_type' => 'aw_listing', 'fields' => 'ids', 'posts_per_page' => 1 ) )[0];
 	update_post_meta( $lid, 'aw_verified', false );
 	$form = directoryweb_ff_form( 'claim', array( 'listing' => $lid ) );
-	$c( 'native claim form renders', false !== strpos( $form, 'dw_claim_submit' ) && false !== strpos( $form, '_dw_nonce' ) );
-	$bad = dw_claim_create( $lid, array( 'name' => '', 'email' => 'x' ) );
+	$c( 'native claim form renders', false !== strpos( $form, 'directoryweb_claim_submit' ) && false !== strpos( $form, '_dw_nonce' ) );
+	$bad = directoryweb_claim_create( $lid, array( 'name' => '', 'email' => 'x' ) );
 	$c( 'invalid claim refused with field errors', is_wp_error( $bad ) && ! empty( $bad->get_error_data()['errors'] ) );
-	$cid = dw_claim_create( $lid, array( 'name' => 'Asha', 'email' => 'asha@example.org', 'role' => 'founder', 'l_phone' => '+91 98765 43210', 'l_area' => 'Indiranagar' ) );
-	$c( 'claim created pending', ! is_wp_error( $cid ) && 'pending' === dw_claim_get( $cid )['status'] );
+	$cid = directoryweb_claim_create( $lid, array( 'name' => 'Asha', 'email' => 'asha@example.org', 'role' => 'founder', 'l_phone' => '+91 98765 43210', 'l_area' => 'Indiranagar' ) );
+	$c( 'claim created pending', ! is_wp_error( $cid ) && 'pending' === directoryweb_claim_get( $cid )['status'] );
 	$nonce = wp_create_nonce( 'wp_rest' ); // cookie-authenticated REST requires the nonce header (directoryweb_rest_can)
 	$get = function ( $path, $q = array() ) use ( $nonce ) { $req = new WP_REST_Request( 'GET', $path ); $req->set_header( 'X-WP-Nonce', $nonce ); foreach ( $q as $k => $v ) { $req->set_param( $k, $v ); } return rest_do_request( $req ); };
 	$list = $get( '/directoryweb/v1/claims', array( 'status' => 'all' ) )->get_data();
@@ -91,7 +91,7 @@ if ( $listing ) {
 	$c( 'illegal transition returns 409', 409 === $bad->get_status(), (string) $bad->get_status() );
 	$ok = $post( 'approved' );
 	$c( 'approve via REST', 200 === $ok->get_status(), (string) $ok->get_status() );
-	ob_start(); dw_claim_metabox( get_post( $cid ) ); $box = ob_get_clean();
+	ob_start(); directoryweb_claim_metabox( get_post( $cid ) ); $box = ob_get_clean();
 	$c( 'claim review box renders after approval (no fatal, shows state and applied phone)', false !== strpos( $box, 'approved' ) && false !== strpos( $box, '98765' ), substr( wp_strip_all_tags( $box ), 0, 120 ) );
 	$c( 'approval verifies listing and applies area', (bool) get_post_meta( $lid, 'aw_verified', true ) && 'Indiranagar' === get_post_meta( $lid, 'aw_area', true ) );
 	$rv = $post( 'revoked' );
@@ -121,28 +121,28 @@ if ( $listing ) {
 		$c( 'the Directory address is this site\'s own /directory/', home_url( '/directory/' ) === directoryweb_hub_url() && ! function_exists( 'aw_hub_url' ) );
 		$c( 'listing type is registered by DirectoryWeb itself', post_type_exists( 'aw_listing' ) && ! function_exists( 'aw_content_type_args' ) && 'directory' === get_post_type_object( 'aw_listing' )->rewrite['slug'] );
 		// Diagnostics read live state.
-		$d0 = dw_claim_diagnostics();
+		$d0 = directoryweb_claim_diagnostics();
 		$c( 'diagnostics: the revoked claim is counted, nothing pending', 1 === $d0['counts']['revoked'] && 0 === $d0['counts']['pending'] && 1 === $d0['total'], wp_json_encode( $d0['counts'] ) );
-		$cid2 = dw_claim_create( $lid, array( 'name' => 'Ravi', 'email' => 'ravi@example.org', 'role' => 'staff', 'l_area' => 'Koramangala' ) );
-		$d1 = dw_claim_diagnostics();
+		$cid2 = directoryweb_claim_create( $lid, array( 'name' => 'Ravi', 'email' => 'ravi@example.org', 'role' => 'staff', 'l_area' => 'Koramangala' ) );
+		$d1 = directoryweb_claim_diagnostics();
 		$c( 'diagnostics: a new claim moves the pending count', ! is_wp_error( $cid2 ) && 1 === $d1['counts']['pending'] && 2 === $d1['total'] );
 		update_option( 'aw_ff_send_email', '0' );
-		$off = dw_claim_diagnostics()['mail_on'];
+		$off = directoryweb_claim_diagnostics()['mail_on'];
 		update_option( 'aw_ff_send_email', '1' );
-		$c( 'diagnostics: claim email state follows the setting', false === $off && true === dw_claim_diagnostics()['mail_on'] );
+		$c( 'diagnostics: claim email state follows the setting', false === $off && true === directoryweb_claim_diagnostics()['mail_on'] );
 		update_option( 'directoryweb_claim_notify_to', 'desk@example.org' );
-		$d2 = dw_claim_diagnostics();
+		$d2 = directoryweb_claim_diagnostics();
 		update_option( 'directoryweb_claim_notify_to', '' );
-		$d3 = dw_claim_diagnostics();
+		$d3 = directoryweb_claim_diagnostics();
 		$c( 'diagnostics: notify address is the stored one, else the site admin email', 'desk@example.org' === $d2['notify_to'] && get_option( 'admin_email' ) === $d3['notify_to'] && '' === $d3['notify_stored'] );
 		wp_trash_post( $cid2 );
-		$c( 'diagnostics: a trashed claim is not counted', 0 === dw_claim_diagnostics()['counts']['pending'] );
+		$c( 'diagnostics: a trashed claim is not counted', 0 === directoryweb_claim_diagnostics()['counts']['pending'] );
 		wp_untrash_post( $cid2 );
 		ob_start(); directoryweb_claim_status_card(); $card = ob_get_clean();
 		$c( 'standalone Settings card shows the status and no claimant details', false !== strpos( $card, 'Claim status' ) && false !== strpos( $card, 'Built-in form' ) && false === strpos( $card, 'asha@example.org' ) && false === strpos( $card, 'ravi@example.org' ) );
 		$c( 'diagnostics: scope is built-in claims and sources are labelled', 'built-in' === $d3['scope'] && 'default' === $d3['sources']['notify'] && 'option' === $d2['sources']['notify'] && 'code' === $d3['sources']['limits'] && 'option' === $d3['sources']['page'] );
 		delete_option( 'aw_ff_send_email' );
-		$c( 'diagnostics: an unset email setting reads as default, not as stored', 'default' === dw_claim_diagnostics()['sources']['mail'] );
+		$c( 'diagnostics: an unset email setting reads as default, not as stored', 'default' === directoryweb_claim_diagnostics()['sources']['mail'] );
 		update_option( 'aw_ff_send_email', '1' );
 		$c( 'Settings card says counts are built-in and external form claims are not included', false !== strpos( $card, 'Built-in claims: pending' ) && false !== strpos( $card, 'not read and not included' ) && false !== strpos( $card, 'Stored setting' ) && false !== strpos( $card, 'Fixed in code' ) );
 		$svc = array_column( directoryweb_settings_payload()['services'], null, 'slug' );
@@ -151,7 +151,7 @@ if ( $listing ) {
 		$sreq = new WP_REST_Request( 'GET', '/directoryweb/v1/settings' );
 		$sreq->set_header( 'X-WP-Nonce', $nonce );
 		$c( 'admin can read the settings route', 200 === rest_do_request( $sreq )->get_status() );
-		$uid = wp_insert_user( array( 'user_login' => 'dw_sub2', 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
+		$uid = wp_insert_user( array( 'user_login' => 'directoryweb_sub2', 'user_pass' => wp_generate_password(), 'role' => 'subscriber' ) );
 		wp_set_current_user( $uid );
 		$sreq2 = new WP_REST_Request( 'GET', '/directoryweb/v1/settings' );
 		$sreq2->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
@@ -159,7 +159,7 @@ if ( $listing ) {
 		wp_set_current_user( 1 );
 		// F6: the Verified mark and registry fields over the real REST API.
 		$f6l = wp_insert_post( array( 'post_title' => 'F6 listing', 'post_status' => 'publish', 'post_type' => 'aw_listing', 'post_author' => 0 ) );
-		$f6u = wp_insert_user( array( 'user_login' => 'dw_contrib', 'user_pass' => wp_generate_password(), 'role' => 'contributor' ) );
+		$f6u = wp_insert_user( array( 'user_login' => 'directoryweb_contrib', 'user_pass' => wp_generate_password(), 'role' => 'contributor' ) );
 		$f6o = wp_insert_post( array( 'post_title' => 'F6 contributor listing', 'post_status' => 'draft', 'post_type' => 'aw_listing', 'post_author' => $f6u ) );
 		$f6 = function ( $meta ) use ( $f6o ) {
 			$rq = new WP_REST_Request( 'POST', '/wp/v2/aw_listing/' . $f6o );
@@ -430,7 +430,7 @@ def build():
         assertion("suite", [f"{s}/{s}.php" for s in slugs], allmenus, allrest,
                   "$c( 'Kits theme active', 'kits-by-wugweb' === get_stylesheet() );\n"
                   "$lid = wp_insert_post( array( 'post_title' => 'Fallback listing', 'post_status' => 'publish', 'post_type' => 'aw_listing', 'post_content' => 'x' ) );\n"
-                  "$c( 'Kits Core active, Fluent Forms not: the claim form is the built-in one', function_exists( 'kits_ff_form' ) && ! defined( 'FLUENTFORM' ) && dw_claim_native_active() && false !== strpos( directoryweb_claim_form( get_post( $lid ) ), 'dw_claim_submit' ) );", False)
+                  "$c( 'Kits Core active, Fluent Forms not: the claim form is the built-in one', function_exists( 'kits_ff_form' ) && ! defined( 'FLUENTFORM' ) && directoryweb_claim_native_active() && false !== strpos( directoryweb_claim_form( get_post( $lid ) ), 'directoryweb_claim_submit' ) );", False)
     )
     out["blueprints/suite.json"] = suite
     return out

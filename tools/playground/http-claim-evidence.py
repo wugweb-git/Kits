@@ -17,34 +17,34 @@ import smoke  # noqa: E402
 
 MU = r"""<?php
 add_action( 'init', function () {
-	if ( isset( $_GET['dw_t'] ) ) {
+	if ( isset( $_GET['directoryweb_t'] ) ) {
 		header( 'Content-Type: application/json' );
-		$t = $_GET['dw_t'];
+		$t = $_GET['directoryweb_t'];
 		if ( 'ids' === $t ) {
 			echo wp_json_encode( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'ASC' ) ) );
 		}
 		if ( 'reset' === $t ) {
-			delete_transient( 'dw_claim_rl_' . md5( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+			delete_transient( 'directoryweb_claim_rl_' . md5( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 			echo wp_json_encode( array( 'ok' => true ) );
 		}
 		if ( 'claims' === $t ) {
 			$o = array();
 			foreach ( get_posts( array( 'post_type' => 'aw_claim', 'post_status' => 'any', 'posts_per_page' => -1, 'orderby' => 'ID', 'order' => 'ASC' ) ) as $p ) {
-				$o[] = array( 'id' => $p->ID, 'evidence' => dw_evidence_get( $p->ID ), 'history' => json_decode( (string) get_post_meta( $p->ID, '_dw_claim_history', true ), true ) );
+				$o[] = array( 'id' => $p->ID, 'evidence' => directoryweb_evidence_get( $p->ID ), 'history' => json_decode( (string) get_post_meta( $p->ID, '_dw_claim_history', true ), true ) );
 			}
 			echo wp_json_encode( $o );
 		}
 		if ( 'dir' === $t ) {
-			$d = dw_evidence_dir();
+			$d = directoryweb_evidence_dir();
 			echo wp_json_encode( array( 'dir' => basename( $d ), 'files' => array_values( array_diff( scandir( $d ), array( '.', '..' ) ) ), 'htaccess' => is_file( $d . '/.htaccess' ) ? file_get_contents( $d . '/.htaccess' ) : '', 'index' => is_file( $d . '/index.php' ), 'perm' => wp_upload_dir()['basedir'] ) );
 		}
 		if ( 'link' === $t ) {
 			wp_set_current_user( 1 );
-			echo wp_json_encode( array( 'url' => dw_evidence_link( sanitize_file_name( $_GET['f'] ) ) ) );
+			echo wp_json_encode( array( 'url' => directoryweb_evidence_link( sanitize_file_name( $_GET['f'] ) ) ) );
 		}
 		if ( 'approve' === $t ) {
 			wp_set_current_user( 1 );
-			$r = dw_claim_transition( (int) $_GET['id'], 'approved', 1 );
+			$r = directoryweb_claim_transition( (int) $_GET['id'], 'approved', 1 );
 			$l = (int) get_post_meta( (int) $_GET['id'], '_dw_claim_listing', true );
 			echo wp_json_encode( array( 'ok' => true === $r, 'err' => is_wp_error( $r ) ? $r->get_error_message() : '', 'thumb' => has_post_thumbnail( $l ), 'attachments' => count( get_posts( array( 'post_type' => 'attachment', 'post_parent' => $l, 'post_status' => 'any', 'fields' => 'ids', 'posts_per_page' => -1 ) ) ), 'applied' => json_decode( (string) get_post_meta( (int) $_GET['id'], '_dw_claim_applied', true ) ) ) );
 		}
@@ -146,10 +146,10 @@ def main() -> int:
             print('server did not start')
             return 2
         WARM.open(base + '/', timeout=120).read()
-        ids = json.loads(http(base + '/?dw_t=ids')[2])
-        claims = lambda: json.loads(http(base + '/?dw_t=claims')[2])
-        pdir = lambda: json.loads(http(base + '/?dw_t=dir')[2])
-        reset = lambda: http(base + '/?dw_t=reset')
+        ids = json.loads(http(base + '/?directoryweb_t=ids')[2])
+        claims = lambda: json.loads(http(base + '/?directoryweb_t=claims')[2])
+        pdir = lambda: json.loads(http(base + '/?directoryweb_t=dir')[2])
+        reset = lambda: http(base + '/?directoryweb_t=reset')
 
         def nonce(listing):
             m = re.search(r'name="_dw_nonce" value="([a-z0-9]+)"', http(f'{base}/claim/?listing={listing}')[2])
@@ -159,7 +159,7 @@ def main() -> int:
             return http(f'{base}/claim/?listing={listing}')[2]
 
         def post(listing, email, files, name='Asha Rao'):
-            fields = {'action': 'dw_claim_submit', 'listing': str(listing), '_dw_nonce': nonce(listing), 'dw_website_hp': '', 'name': name, 'email': email, 'role': 'founder', 'l_area': 'Indiranagar'}
+            fields = {'action': 'directoryweb_claim_submit', 'listing': str(listing), '_dw_nonce': nonce(listing), 'directoryweb_website_hp': '', 'name': name, 'email': email, 'role': 'founder', 'l_area': 'Indiranagar'}
             body, ctype = multipart(fields, files)
             req = urllib.request.Request(base + '/wp-admin/admin-post.php', data=body, headers={'Content-Type': ctype})
             try:
@@ -169,7 +169,7 @@ def main() -> int:
                 st, h = e.code, dict(e.headers)
             loc = h.get('Location') or h.get('location') or ''
             q = urllib.parse.parse_qs(urllib.parse.urlparse(loc).query)
-            return st, (q.get('dw_claim') or [''])[0], urllib.parse.unquote((q.get('msg') or [''])[0])
+            return st, (q.get('directoryweb_claim') or [''])[0], urllib.parse.unquote((q.get('msg') or [''])[0])
 
         html = form_html(ids[0])
         check('the claim form has multipart encoding and the three file fields', 'enctype="multipart/form-data"' in html and 'name="evidence_proof"' in html and 'name="evidence_logo"' in html and 'name="evidence_photos[]"' in html)
@@ -202,7 +202,7 @@ def main() -> int:
         files = pdir()['files']
         pname = ev['proof'][0]
         lname = ev['logo'][0]
-        url = json.loads(http(base + f'/?dw_t=link&f={pname}')[2])['url'].replace('&#038;', '&').replace('&amp;', '&')
+        url = json.loads(http(base + f'/?directoryweb_t=link&f={pname}')[2])['url'].replace('&#038;', '&').replace('&amp;', '&')
         st, h, body = http(url)
         check('a manager with the nonce link downloads the proof as a PDF', st == 200 and body.startswith('%PDF-') and {k.lower(): v for k, v in h.items()}.get('content-type', '').startswith('application/pdf') and 'nosniff' in {k.lower(): v for k, v in h.items()}.get('x-content-type-options', ''), (st, {k.lower(): v for k, v in h.items()}))
         # This Playground serves files straight from disk and ignores .htaccess, like nginx with no location block: the worst case.
@@ -210,16 +210,16 @@ def main() -> int:
             raw = urllib.request.urlopen(urllib.request.Request(base + f'/wp-content/uploads/directoryweb-private/{nm}'), timeout=60).read()
             check(f'direct URL to the {label} on a server with no deny rule returns only ciphertext, never the document', raw[:4] == b'DWE1' and not raw.startswith(b'%PDF-') and not raw.startswith(b'\x89PNG'), raw[:8])
             check(f'the {label} bytes on disk contain no readable content marker', b'%PDF-' not in raw and b'IHDR' not in raw)
-        lurl = json.loads(http(base + f'/?dw_t=link&f={lname}')[2])['url'].replace('&#038;', '&').replace('&amp;', '&')
+        lurl = json.loads(http(base + f'/?directoryweb_t=link&f={lname}')[2])['url'].replace('&#038;', '&').replace('&amp;', '&')
         req = urllib.request.Request(lurl)
         raw_logo = OPENER.open(req, timeout=60).read()
         check('the authenticated handler still returns the logo as a real PNG', raw_logo.startswith(b'\x89PNG'))
-        st, h, body = http(base + f'/wp-admin/admin-post.php?action=dw_evidence_file&f={pname}')
+        st, h, body = http(base + f'/wp-admin/admin-post.php?action=directoryweb_evidence_file&f={pname}')
         check('without the nonce the file is refused', st in (403, 400) or 'Not allowed' in body, st)
-        st, h, body = http(base + '/wp-admin/admin-post.php?action=dw_evidence_file&f=../../../wp-config.php&_wpnonce=x')
+        st, h, body = http(base + '/wp-admin/admin-post.php?action=directoryweb_evidence_file&f=../../../wp-config.php&_wpnonce=x')
         check('a path-traversal name is refused', st in (403, 404) or 'Not allowed' in body or 'not found' in body.lower(), st)
 
-        r = json.loads(http(base + f'/?dw_t=approve&id={c[-1]["id"]}')[2])
+        r = json.loads(http(base + f'/?directoryweb_t=approve&id={c[-1]["id"]}')[2])
         check('approving applies the logo and photos to the listing (media library), not the proof', r['ok'] and r['thumb'] and r['attachments'] == 3 and 'logo' in (r['applied'] or []), r)
         check('the proof stays private: only the logo and two photos became attachments, and the proof file is still in the private folder', r['attachments'] == 3 and pname in pdir()['files'])
     finally:

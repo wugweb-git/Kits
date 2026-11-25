@@ -25,7 +25,7 @@ define( 'ARRAY_A', 'ARRAY_A' );
 if ( empty( $no_ff ) ) {
 	define( 'FLUENTFORM', true );
 }
-const DW_CLAIM_ROLES        = array( 'founder' => 'Founder' );
+const DIRECTORYWEB_CLAIM_ROLES        = array( 'founder' => 'Founder' );
 const DIRECTORYWEB_SERVICES = array( 'rescue' => 'Rescue' );
 
 function add_action( ...$a ) {}

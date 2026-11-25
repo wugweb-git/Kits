@@ -16,10 +16,10 @@ import smoke  # noqa: E402
 
 SEED = ("<?php require '/wordpress/wp-load.php'; "
         "wp_insert_post(array('post_title'=>'Nav audit listing','post_status'=>'publish','post_type'=>'aw_listing','post_content'=>'x')); "
-        "if(function_exists('dw_claim_create')){ $l=get_posts(array('post_type'=>'aw_listing','fields'=>'ids','posts_per_page'=>1)); if($l) dw_claim_create((int)$l[0], array('name'=>'Nav Test','email'=>'nav@example.org','role'=>'founder','l_area'=>'Indiranagar')); } "
+        "if(function_exists('directoryweb_claim_create')){ $l=get_posts(array('post_type'=>'aw_listing','fields'=>'ids','posts_per_page'=>1)); if($l) directoryweb_claim_create((int)$l[0], array('name'=>'Nav Test','email'=>'nav@example.org','role'=>'founder','l_area'=>'Indiranagar')); } "
         "update_option('permalink_structure','/%postname%/'); flush_rewrite_rules();")
 
-SKIP = re.compile(r'(action=(delete|trash|untrash|activate|deactivate|logout|dw_claim_decide)|_wpnonce|wp-login\.php|/wp-admin/(update|plugin-install|theme-install)\.php|customize\.php|load-styles|load-scripts)', re.I)
+SKIP = re.compile(r'(action=(delete|trash|untrash|activate|deactivate|logout|directoryweb_claim_decide)|_wpnonce|wp-login\.php|/wp-admin/(update|plugin-install|theme-install)\.php|customize\.php|load-styles|load-scripts)', re.I)
 
 JAR = http.cookiejar.CookieJar()
 FOLLOW = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(JAR))

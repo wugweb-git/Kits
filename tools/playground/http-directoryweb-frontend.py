@@ -26,7 +26,7 @@ foreach ( array( 'Asha Shelter', 'Bruno Clinic', 'Cat Haven' ) as $i => $n ) {
 	if ( function_exists( 'directoryweb_set_listing_list' ) ) { directoryweb_set_listing_list( $id, 'aw_phones', array( array( 'number' => '98765 4321' . $i, 'label' => 'Office', 'whatsapp' => (bool) $i ) ) ); }
 	if ( ! is_wp_error( $t ) ) { wp_set_object_terms( $id, (int) $t['term_id'], 'aw_listing_type' ); }
 }
-update_option( 'dw_first_listing', (int) get_posts( array( 'post_type' => 'aw_listing', 'fields' => 'ids', 'numberposts' => 1, 'orderby' => 'ID', 'order' => 'ASC' ) )[0] );
+update_option( 'directoryweb_first_listing', (int) get_posts( array( 'post_type' => 'aw_listing', 'fields' => 'ids', 'numberposts' => 1, 'orderby' => 'ID', 'order' => 'ASC' ) )[0] );
 flush_rewrite_rules();
 """
 
@@ -49,7 +49,7 @@ def get(url):
         return e.code, dict(e.headers), e.read().decode('utf-8', 'replace')
 
 
-MU_CODE = "<?php\nadd_action( 'init', function () {\n\tif ( ! isset( $_GET['dw_probe'] ) ) { return; }\n\theader( 'Content-Type: application/json' );\n\t$id = (int) get_option( 'dw_first_listing' );\n\t$out = array( 'kits_date_defined' => function_exists( 'kits_date' ), 'kits_core' => function_exists( 'kits_ff_id' ), 'aw_head_band_defined' => function_exists( 'aw_head_band' ), 'aw_item_chip_defined' => function_exists( 'aw_item_chip' ), 'aw_hub_page_defined' => function_exists( 'aw_hub_page' ) );\n\t$tests = array(\n\t\t'directoryweb_listing_validity' => function () { return directoryweb_listing_validity( '2027-03-31' ); },\n\t\t'directoryweb_source_labels' => function () use ( $id ) { return directoryweb_source_labels( $id, true ); },\n\t\t'directoryweb_claim_head_band' => function () { return directoryweb_claim_head_band(); },\n\t\t'claim_head_band_with_listing' => function () use ( $id ) { $_GET['listing'] = $id; return directoryweb_claim_head_band(); },\n\t\t'support_block' => function () use ( $id ) { return function_exists( 'directoryweb_block_listing_support' ) ? directoryweb_block_listing_support( array(), $id ) : 'ok: n/a'; },\n\t);\n\tforeach ( $tests as $k => $f ) {\n\t\ttry { $out[ $k ] = 'ok: ' . substr( trim( strip_tags( (string) $f() ) ), 0, 70 ); } catch ( Throwable $e ) { $out[ $k ] = 'FATAL: ' . $e->getMessage(); }\n\t}\n\techo wp_json_encode( $out );\n\texit;\n} );\n"
+MU_CODE = "<?php\nadd_action( 'init', function () {\n\tif ( ! isset( $_GET['directoryweb_probe'] ) ) { return; }\n\theader( 'Content-Type: application/json' );\n\t$id = (int) get_option( 'directoryweb_first_listing' );\n\t$out = array( 'kits_date_defined' => function_exists( 'kits_date' ), 'kits_core' => function_exists( 'kits_ff_id' ), 'aw_head_band_defined' => function_exists( 'aw_head_band' ), 'aw_item_chip_defined' => function_exists( 'aw_item_chip' ), 'aw_hub_page_defined' => function_exists( 'aw_hub_page' ) );\n\t$tests = array(\n\t\t'directoryweb_listing_validity' => function () { return directoryweb_listing_validity( '2027-03-31' ); },\n\t\t'directoryweb_source_labels' => function () use ( $id ) { return directoryweb_source_labels( $id, true ); },\n\t\t'directoryweb_claim_head_band' => function () { return directoryweb_claim_head_band(); },\n\t\t'claim_head_band_with_listing' => function () use ( $id ) { $_GET['listing'] = $id; return directoryweb_claim_head_band(); },\n\t\t'support_block' => function () use ( $id ) { return function_exists( 'directoryweb_block_listing_support' ) ? directoryweb_block_listing_support( array(), $id ) : 'ok: n/a'; },\n\t);\n\tforeach ( $tests as $k => $f ) {\n\t\ttry { $out[ $k ] = 'ok: ' . substr( trim( strip_tags( (string) $f() ) ), 0, 70 ); } catch ( Throwable $e ) { $out[ $k ] = 'FATAL: ' . $e->getMessage(); }\n\t}\n\techo wp_json_encode( $out );\n\texit;\n} );\n"
 
 
 def main() -> int:
@@ -84,7 +84,7 @@ def main() -> int:
                 return 2
             time.sleep(2)
         WARM.open(base + '/', timeout=120).read()
-        probe = json.loads(get(base + '/?dw_probe=1')[2])
+        probe = json.loads(get(base + '/?directoryweb_probe=1')[2])
         for k in ('directoryweb_listing_validity', 'directoryweb_source_labels', 'directoryweb_claim_head_band', 'claim_head_band_with_listing', 'support_block'):
             check(f'data-dependent path {k} runs standalone without a fatal error', str(probe.get(k, '')).startswith('ok'), probe.get(k))
         check('the probe really ran without Kits Core or Animal Writes helpers', probe.get('kits_core') is False and probe.get('kits_date_defined') is False and probe.get('aw_head_band_defined') is False, probe)

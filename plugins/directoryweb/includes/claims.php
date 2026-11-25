@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const DW_CLAIM_ROLES = array(
+const DIRECTORYWEB_CLAIM_ROLES = array(
 	''          => 'Choose one',
 	'founder'   => 'Founder, trustee or director',
 	'staff'     => 'Staff member',
@@ -28,7 +28,7 @@ const DW_CLAIM_ROLES = array(
  * a phone and a WhatsApp number; on approval they go into the listing's Phone numbers list (aw_listing_put_phone), not
  * into single fields.
  */
-const DW_CLAIM_FIELDS = array(
+const DIRECTORYWEB_CLAIM_FIELDS = array(
 	'aw_phone'    => array( 'Phone', 'phone' ),
 	'aw_whatsapp' => array( 'WhatsApp', 'phone' ),
 	'aw_email'    => array( 'Public email', 'email' ),
@@ -41,7 +41,7 @@ if ( ! defined( 'MB_IN_BYTES' ) ) {
 	define( 'MB_IN_BYTES', 1048576 );
 }
 
-const DW_CLAIM_LOGO_BYTES = 8 * MB_IN_BYTES; // owner plan 19 Nov 2026 (B2): was 2 MB; the server still resizes to 800 px
+const DIRECTORYWEB_CLAIM_LOGO_BYTES = 8 * MB_IN_BYTES; // owner plan 19 Nov 2026 (B2): was 2 MB; the server still resizes to 800 px
 
 /**
  * The aw_claim post type's primitive capabilities: all DIRECTORYWEB_CAP (manage_directoryweb, directoryweb-caps.php),
@@ -101,23 +101,23 @@ function directoryweb_claim_form( $listing ) {
 
 /**
  * Why an uploaded picture is refused, in words the sender can act on; '' when it is fine (a PNG, JPG or WebP up to
- * DW_CLAIM_LOGO_BYTES). One message per cause: no file, over the server's limit, not finished, too big, wrong type.
+ * DIRECTORYWEB_CLAIM_LOGO_BYTES). One message per cause: no file, over the server's limit, not finished, too big, wrong type.
  *
  * @param array|null $logo The $_FILES entry.
  * @return string
  */
-function dw_claim_upload_error( $logo ) {
-	$limit = size_format( DW_CLAIM_LOGO_BYTES, 0 );
+function directoryweb_claim_upload_error( $logo ) {
+	$limit = size_format( DIRECTORYWEB_CLAIM_LOGO_BYTES, 0 );
 	if ( ! is_array( $logo ) || ! isset( $logo['error'] ) || UPLOAD_ERR_NO_FILE === (int) $logo['error'] ) {
 		return 'No file arrived. Choose it again.';
 	}
 	if ( in_array( (int) $logo['error'], array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) {
-		return 'This file is too large for the server. Use a picture under ' . size_format( min( DW_CLAIM_LOGO_BYTES, wp_max_upload_size() ), 0 ) . '.';
+		return 'This file is too large for the server. Use a picture under ' . size_format( min( DIRECTORYWEB_CLAIM_LOGO_BYTES, wp_max_upload_size() ), 0 ) . '.';
 	}
 	if ( UPLOAD_ERR_OK !== (int) $logo['error'] || empty( $logo['tmp_name'] ) || ! is_uploaded_file( $logo['tmp_name'] ) ) {
 		return 'The upload did not finish. Check your connection and try again.';
 	}
-	if ( (int) $logo['size'] > DW_CLAIM_LOGO_BYTES ) {
+	if ( (int) $logo['size'] > DIRECTORYWEB_CLAIM_LOGO_BYTES ) {
 		return 'This file is ' . size_format( (int) $logo['size'], 1 ) . '. The limit is ' . $limit . '.';
 	}
 	$ft = wp_check_filetype_and_ext( $logo['tmp_name'], $logo['name'], array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) );
@@ -130,7 +130,7 @@ function dw_claim_upload_error( $logo ) {
 
 /** Is the uploaded logo a PNG, JPG or WebP within the size limit? */
 function directoryweb_claim_logo_ok( $logo ) {
-	return '' === dw_claim_upload_error( $logo );
+	return '' === directoryweb_claim_upload_error( $logo );
 }
 
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */
@@ -159,7 +159,7 @@ add_action(
 			echo esc_html( ucfirst( (string) get_post_meta( $id, 'aw_c_status', true ) ) );
 		} elseif ( 'aw_changes' === $col ) {
 			$p = (array) get_post_meta( $id, 'aw_c_proposed', true );
-			$n = array_map( fn( $k ) => DW_CLAIM_FIELDS[ $k ][0] ?? $k, array_keys( $p ) );
+			$n = array_map( fn( $k ) => DIRECTORYWEB_CLAIM_FIELDS[ $k ][0] ?? $k, array_keys( $p ) );
 			if ( get_post_meta( $id, 'aw_c_logo', true ) ) {
 				$n[] = 'Logo';
 			}
@@ -187,12 +187,12 @@ function directoryweb_claim_review_box( $post ) {
 	$status   = (string) get_post_meta( $post->ID, 'aw_c_status', true );
 	$proposed = (array) get_post_meta( $post->ID, 'aw_c_proposed', true );
 	$logo     = (string) get_post_meta( $post->ID, 'aw_c_logo', true );
-	$roles    = DW_CLAIM_ROLES;
+	$roles    = DIRECTORYWEB_CLAIM_ROLES;
 	echo '<p><strong>Listing:</strong> <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank">' . esc_html( get_the_title( $lid ) ) . '</a> · <strong>Status:</strong> ' . esc_html( ucfirst( $status ) ) . '</p>';
 	echo '<p><strong>From:</strong> ' . esc_html( get_post_meta( $post->ID, 'aw_c_name', true ) ) . ' (' . esc_html( $roles[ get_post_meta( $post->ID, 'aw_c_role', true ) ] ?? '' ) . '), '
 		. esc_html( get_post_meta( $post->ID, 'aw_c_email', true ) ) . ' ' . esc_html( get_post_meta( $post->ID, 'aw_c_phone', true ) ) . '</p>';
 	$cells = array();
-	foreach ( DW_CLAIM_FIELDS as $key => $def ) {
+	foreach ( DIRECTORYWEB_CLAIM_FIELDS as $key => $def ) {
 		if ( isset( $proposed[ $key ] ) ) {
 			$cells[] = array( 'field' => esc_html( $def[0] ), 'now' => esc_html( directoryweb_claim_current( $lid, $key ) ), 'proposed' => '<strong>' . esc_html( $proposed[ $key ] ) . '</strong>' );
 		}
@@ -248,7 +248,7 @@ add_action(
 		if ( 'approve' === sanitize_key( wp_unslash( $_GET['do'] ?? '' ) ) && 'aw_listing' === get_post_type( $lid ) ) {
 			do_action( 'aw_claim_before_apply', $lid, (array) get_post_meta( $id, 'aw_c_proposed', true ), $id ); // enrichment.php logs the organisation as the source
 			foreach ( (array) get_post_meta( $id, 'aw_c_proposed', true ) as $key => $val ) {
-				if ( isset( DW_CLAIM_FIELDS[ $key ] ) ) {
+				if ( isset( DIRECTORYWEB_CLAIM_FIELDS[ $key ] ) ) {
 					if ( 'aw_services' === $key ) {
 						directoryweb_set_item_tags( $lid, explode( ',', (string) $val ), directoryweb_service_slugs() ); // the services only; the listing's types stay
 					} elseif ( 'aw_phone' === $key ) {

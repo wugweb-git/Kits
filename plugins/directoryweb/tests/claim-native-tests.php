@@ -12,7 +12,7 @@ define( 'ABSPATH', __DIR__ . '/' );
 define( 'DIRECTORYWEB_CAP', 'manage_directoryweb' );
 define( 'HOUR_IN_SECONDS', 3600 );
 
-const DW_CLAIM_ROLES      = array( '' => 'Choose one', 'founder' => 'Founder', 'staff' => 'Staff', 'volunteer' => 'Volunteer', 'other' => 'Other' );
+const DIRECTORYWEB_CLAIM_ROLES      = array( '' => 'Choose one', 'founder' => 'Founder', 'staff' => 'Staff', 'volunteer' => 'Volunteer', 'other' => 'Other' );
 const DIRECTORYWEB_SERVICES = array( 'adoption' => 'Adoption', 'rescue' => 'Rescue', 'vet' => 'Vet care' );
 
 class WP_Error {
@@ -83,53 +83,53 @@ $GLOBALS['posts'][2] = array( 'type' => 'aw_listing', 'status' => 'draft', 'titl
 $good = array( 'name' => 'Asha', 'email' => 'asha@example.org', 'role' => 'founder', 'l_phone' => '+91 98765 43210', 'l_website' => 'https://paws.example.org', 'l_services' => array( 'adoption', 'bogus' ) );
 
 echo "State table\n";
-check( dw_claim_can_transition( 'pending', 'approved' ), 'pending -> approved' );
-check( dw_claim_can_transition( 'approved', 'revoked' ), 'approved -> revoked' );
-check( ! dw_claim_can_transition( 'approved', 'rejected' ), 'approved -/-> rejected' );
-check( ! dw_claim_can_transition( 'withdrawn', 'pending' ), 'withdrawn is final' );
-check( ! dw_claim_can_transition( 'nonsense', 'approved' ), 'unknown state refused' );
+check( directoryweb_claim_can_transition( 'pending', 'approved' ), 'pending -> approved' );
+check( directoryweb_claim_can_transition( 'approved', 'revoked' ), 'approved -> revoked' );
+check( ! directoryweb_claim_can_transition( 'approved', 'rejected' ), 'approved -/-> rejected' );
+check( ! directoryweb_claim_can_transition( 'withdrawn', 'pending' ), 'withdrawn is final' );
+check( ! directoryweb_claim_can_transition( 'nonsense', 'approved' ), 'unknown state refused' );
 
 echo "Validation\n";
-$v = dw_claim_validate( $good );
+$v = directoryweb_claim_validate( $good );
 check( $v['ok'] && 'adoption' === $v['propose']['services'], 'good input passes; unknown service dropped' );
-check( ! dw_claim_validate( array_merge( $good, array( 'email' => 'nope' ) ) )['ok'], 'bad email refused' );
-check( ! dw_claim_validate( array_merge( $good, array( 'role' => '' ) ) )['ok'], 'missing role refused' );
-check( ! dw_claim_validate( array_merge( $good, array( 'l_phone' => 'abc' ) ) )['ok'], 'bad proposed phone refused' );
-check( isset( dw_claim_validate( array( 'name' => 'A', 'email' => 'a@b.co', 'role' => 'staff' ) )['errors']['propose'] ), 'claim that proposes nothing refused' );
-check( ! dw_claim_validate( array_merge( $good, array( 'l_about' => str_repeat( 'x', 2001 ) ) ) )['ok'], 'over-long About refused' );
+check( ! directoryweb_claim_validate( array_merge( $good, array( 'email' => 'nope' ) ) )['ok'], 'bad email refused' );
+check( ! directoryweb_claim_validate( array_merge( $good, array( 'role' => '' ) ) )['ok'], 'missing role refused' );
+check( ! directoryweb_claim_validate( array_merge( $good, array( 'l_phone' => 'abc' ) ) )['ok'], 'bad proposed phone refused' );
+check( isset( directoryweb_claim_validate( array( 'name' => 'A', 'email' => 'a@b.co', 'role' => 'staff' ) )['errors']['propose'] ), 'claim that proposes nothing refused' );
+check( ! directoryweb_claim_validate( array_merge( $good, array( 'l_about' => str_repeat( 'x', 2001 ) ) ) )['ok'], 'over-long About refused' );
 
 echo "Create\n";
-check( is_wp_error( dw_claim_create( 2, $good ) ), 'draft listing cannot be claimed' );
-check( is_wp_error( dw_claim_create( 999, $good ) ), 'missing listing cannot be claimed' );
-$id = dw_claim_create( 1, $good );
-check( is_int( $id ) && 'pending' === dw_claim_get( $id )['status'], 'valid claim stored as pending' );
+check( is_wp_error( directoryweb_claim_create( 2, $good ) ), 'draft listing cannot be claimed' );
+check( is_wp_error( directoryweb_claim_create( 999, $good ) ), 'missing listing cannot be claimed' );
+$id = directoryweb_claim_create( 1, $good );
+check( is_int( $id ) && 'pending' === directoryweb_claim_get( $id )['status'], 'valid claim stored as pending' );
 check( 'private' === $GLOBALS['posts'][ $id ]['status'], 'claim post is private' );
-$dup = dw_claim_create( 1, $good );
-check( is_wp_error( $dup ) && 'dw_claim_duplicate' === $dup->code, 'duplicate open claim for the same listing refused' );
+$dup = directoryweb_claim_create( 1, $good );
+check( is_wp_error( $dup ) && 'directoryweb_claim_duplicate' === $dup->code, 'duplicate open claim for the same listing refused' );
 
 echo "Transitions\n";
-$r = dw_claim_transition( $id, 'revoked', 7 );
+$r = directoryweb_claim_transition( $id, 'revoked', 7 );
 check( is_wp_error( $r ) && 409 === $r->data['status'], 'pending -> revoked refused (409)' );
 check( ! get_post_meta( 1, 'aw_verified' ), 'listing not verified before approval' );
-$r = dw_claim_transition( $id, 'approved', 7, 'ok', array( 'phone', 'services', 'about' ) );
+$r = directoryweb_claim_transition( $id, 'approved', 7, 'ok', array( 'phone', 'services', 'about' ) );
 check( true === $r, 'pending -> approved' );
 check( true === get_post_meta( 1, 'aw_verified' ) && '2026-11-24' === get_post_meta( 1, 'aw_verified_on' ), 'approval verifies the listing' );
 check( array( 'phones=+91 98765 43210', 'l_services=adoption' ) === $GLOBALS['applied'], 'only ticked and proposed fields applied (about was not proposed)' );
-check( is_wp_error( dw_claim_transition( $id, 'approved', 7 ) ), 'cannot approve twice' );
-check( true === dw_claim_transition( $id, 'revoked', 7, 'lost contact' ), 'approved -> revoked' );
+check( is_wp_error( directoryweb_claim_transition( $id, 'approved', 7 ) ), 'cannot approve twice' );
+check( true === directoryweb_claim_transition( $id, 'revoked', 7, 'lost contact' ), 'approved -> revoked' );
 check( false === get_post_meta( 1, 'aw_verified' ) && true === get_post_meta( 1, 'aw_needs_reverify' ), 'revoke removes verified mark, flags re-verify' );
-check( true === dw_claim_transition( $id, 'pending', 7 ), 'revoked -> pending (re-opened)' );
-check( true === dw_claim_transition( $id, 'rejected', 7 ), 'pending -> rejected' );
-$hist = dw_claim_get( $id )['history'];
+check( true === directoryweb_claim_transition( $id, 'pending', 7 ), 'revoked -> pending (re-opened)' );
+check( true === directoryweb_claim_transition( $id, 'rejected', 7 ), 'pending -> rejected' );
+$hist = directoryweb_claim_get( $id )['history'];
 check( count( $hist ) === 5 && 'created' === $hist[0]['event'], 'history records every move (5 entries)' );
-check( null === dw_claim_get( 1 ), 'a non-claim post is not a native claim' );
+check( null === directoryweb_claim_get( 1 ), 'a non-claim post is not a native claim' );
 
 echo "Limits\n";
 foreach ( array( 'b', 'c', 'd', 'e' ) as $i => $x ) {
 	$GLOBALS['posts'][ 10 + $i ] = array( 'type' => 'aw_listing', 'status' => 'publish', 'title' => "L$x" );
-	$res = dw_claim_create( 10 + $i, array_merge( $good, array( 'email' => 'many@example.org' ) ) );
+	$res = directoryweb_claim_create( 10 + $i, array_merge( $good, array( 'email' => 'many@example.org' ) ) );
 }
-check( is_wp_error( $res ) && 'dw_claim_limit' === $res->code, 'one email cannot hold more than ' . DW_CLAIM_MAX_OPEN_PER_EMAIL . ' open claims' );
+check( is_wp_error( $res ) && 'directoryweb_claim_limit' === $res->code, 'one email cannot hold more than ' . DIRECTORYWEB_CLAIM_MAX_OPEN_PER_EMAIL . ' open claims' );
 
 echo "Emails\n";
 $m = $GLOBALS['mails'];
@@ -137,18 +137,18 @@ check( 1 === preg_match( '#Review it: https://example.test/wp-admin/post.php\?po
 check( count( $m ) >= 2 && 'asha@example.org' === $m[0]['to'] && 'owner@example.org' === $m[1]['to'], 'claim creation emails claimant and site owner' );
 $GLOBALS['mails'] = array();
 $GLOBALS['posts'][30] = array( 'type' => 'aw_listing', 'status' => 'publish', 'title' => "Evil\r\nBcc: x@y.z" );
-$eid = dw_claim_create( 30, array_merge( $good, array( 'email' => 'eve@example.org' ) ) );
+$eid = directoryweb_claim_create( 30, array_merge( $good, array( 'email' => 'eve@example.org' ) ) );
 check( false === strpbrk( $GLOBALS['mails'][0]['subject'], "\r\n" ), 'subject is header-safe (no CR/LF)' );
 $GLOBALS['mails'] = array();
-dw_claim_transition( $eid, 'approved', 7 );
+directoryweb_claim_transition( $eid, 'approved', 7 );
 check( 1 === count( $GLOBALS['mails'] ) && 'eve@example.org' === $GLOBALS['mails'][0]['to'] && false !== strpos( $GLOBALS['mails'][0]['body'], 'approved' ), 'approval emails the claimant' );
 $GLOBALS['mails'] = array();
-dw_claim_transition( $eid, 'revoked', 7 );
-dw_claim_transition( $eid, 'pending', 7 );
+directoryweb_claim_transition( $eid, 'revoked', 7 );
+directoryweb_claim_transition( $eid, 'pending', 7 );
 check( 1 === count( $GLOBALS['mails'] ), 're-opening a claim sends no email (revoke did)' );
 $GLOBALS['mails'] = array(); $GLOBALS['opts']['aw_ff_send_email'] = '0';
 $GLOBALS['posts'][31] = array( 'type' => 'aw_listing', 'status' => 'publish', 'title' => 'Quiet' );
-dw_claim_create( 31, array_merge( $good, array( 'email' => 'quiet@example.org' ) ) );
+directoryweb_claim_create( 31, array_merge( $good, array( 'email' => 'quiet@example.org' ) ) );
 check( 0 === count( $GLOBALS['mails'] ), 'no email while "Emails from forms and claims" is off' );
 
 echo "\n$pass passed, $fail failed\n";

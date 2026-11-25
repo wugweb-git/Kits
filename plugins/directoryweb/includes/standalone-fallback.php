@@ -243,9 +243,9 @@ if ( ! function_exists( 'directoryweb_ff_form' ) ) {
 	 * @return string
 	 */
 	function directoryweb_ff_form( $key, $ctx = array() ) {
-		if ( 'claim' === $key && function_exists( 'dw_claim_native_form' ) && function_exists( 'dw_claim_native_active' ) && dw_claim_native_active() ) {
+		if ( 'claim' === $key && function_exists( 'directoryweb_claim_native_form' ) && function_exists( 'directoryweb_claim_native_active' ) && directoryweb_claim_native_active() ) {
 			$listing = $ctx['listing'] ?? 0; // no working Fluent Forms claim form, with or without Kits Core: the built-in form
-			return dw_claim_native_form( is_object( $listing ) ? (int) $listing->ID : (int) $listing );
+			return directoryweb_claim_native_form( is_object( $listing ) ? (int) $listing->ID : (int) $listing );
 		}
 		if ( function_exists( 'kits_ff_form' ) ) {
 			return kits_ff_form( $key, $ctx );
@@ -255,9 +255,9 @@ if ( ! function_exists( 'directoryweb_ff_form' ) ) {
 			$forms = get_option( 'aw_ff_forms', array() );
 			$id    = absint( $forms[ $key ] ?? 0 );
 		}
-		if ( ! $id && 'claim' === $key && function_exists( 'dw_claim_native_form' ) ) {
+		if ( ! $id && 'claim' === $key && function_exists( 'directoryweb_claim_native_form' ) ) {
 			$listing = $ctx['listing'] ?? 0;
-			return dw_claim_native_form( is_object( $listing ) ? (int) $listing->ID : (int) $listing ); // no Fluent Forms form: the built-in claim form
+			return directoryweb_claim_native_form( is_object( $listing ) ? (int) $listing->ID : (int) $listing ); // no Fluent Forms form: the built-in claim form
 		}
 		if ( ! $id ) {
 			return current_user_can( 'manage_options' ) ? '<p class="notice notice-warning">' . esc_html__( 'Claim form not configured. Select a form in DirectoryWeb Settings.', 'directoryweb' ) . '</p>' : '';
@@ -281,8 +281,8 @@ if ( ! function_exists( 'directoryweb_private_dir' ) ) {
 		if ( ! is_dir( $dir ) ) {
 			wp_mkdir_p( $dir );
 		}
-		if ( function_exists( 'dw_evidence_protect_dir' ) ) {
-			dw_evidence_protect_dir( $dir ); // never a folder the web server will list or serve
+		if ( function_exists( 'directoryweb_evidence_protect_dir' ) ) {
+			directoryweb_evidence_protect_dir( $dir ); // never a folder the web server will list or serve
 		}
 		return $dir;
 	}

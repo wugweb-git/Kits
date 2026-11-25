@@ -17,17 +17,17 @@ import smoke  # noqa: E402
 
 MU = r"""<?php
 add_action( 'init', function () {
-	if ( isset( $_GET['dw_t'] ) ) {
+	if ( isset( $_GET['directoryweb_t'] ) ) {
 		header( 'Content-Type: application/json' );
-		if ( 'count' === $_GET['dw_t'] ) {
+		if ( 'count' === $_GET['directoryweb_t'] ) {
 			$n = get_posts( array( 'post_type' => 'aw_claim', 'post_status' => 'any', 'posts_per_page' => -1, 'fields' => 'ids' ) );
 			echo wp_json_encode( array( 'count' => count( $n ) ) );
 		}
-		if ( 'reset' === $_GET['dw_t'] ) {
-			delete_transient( 'dw_claim_rl_' . md5( $_SERVER['REMOTE_ADDR'] ?? '' ) );
+		if ( 'reset' === $_GET['directoryweb_t'] ) {
+			delete_transient( 'directoryweb_claim_rl_' . md5( $_SERVER['REMOTE_ADDR'] ?? '' ) );
 			echo wp_json_encode( array( 'ok' => true ) );
 		}
-		if ( 'ids' === $_GET['dw_t'] ) {
+		if ( 'ids' === $_GET['directoryweb_t'] ) {
 			echo wp_json_encode( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'ASC' ) ) );
 		}
 		exit;
@@ -101,13 +101,13 @@ def main() -> int:
             return 2
 
         WARM.open(base + '/', timeout=120).read()  # Playground sets its session cookie on the first request
-        r0 = http(base + '/?dw_t=ids')
+        r0 = http(base + '/?directoryweb_t=ids')
         if not r0[2].startswith('['):
             print('probe failed', r0[0], r0[1], r0[2][:300])
             return 2
         ids = json.loads(r0[2])
-        count = lambda: json.loads(http(base + '/?dw_t=count')[2])['count']
-        reset = lambda: http(base + '/?dw_t=reset')
+        count = lambda: json.loads(http(base + '/?directoryweb_t=count')[2])['count']
+        reset = lambda: http(base + '/?directoryweb_t=reset')
         check('seeded six published listings', len(ids) >= 6, ids)
 
         def nonce(listing):
@@ -116,18 +116,18 @@ def main() -> int:
             return m.group(1) if m else ''
 
         def submit(listing, email, name='Test Person', hp='', n=None, extra_headers=None):
-            data = {'action': 'dw_claim_submit', 'listing': listing, '_dw_nonce': nonce(listing) if n is None else n,
-                    'dw_website_hp': hp, 'name': name, 'email': email, 'role': 'founder', 'l_area': 'Indiranagar'}
+            data = {'action': 'directoryweb_claim_submit', 'listing': listing, '_dw_nonce': nonce(listing) if n is None else n,
+                    'directoryweb_website_hp': hp, 'name': name, 'email': email, 'role': 'founder', 'l_area': 'Indiranagar'}
             st, h, _ = http(base + '/wp-admin/admin-post.php', data, extra_headers)
             loc = h.get('Location') or h.get('location') or ''
             q = urllib.parse.parse_qs(urllib.parse.urlparse(loc).query)
-            return st, (q.get('dw_claim') or [''])[0], urllib.parse.unquote((q.get('msg') or [''])[0])
+            return st, (q.get('directoryweb_claim') or [''])[0], urllib.parse.unquote((q.get('msg') or [''])[0])
 
         check('claim form carries a nonce over HTTP', bool(nonce(ids[0])))
         c0 = count()
 
         st, flag, msg = submit(ids[0], 'asha@example.org')
-        check('valid post answers 302 with dw_claim=sent', st == 302 and flag == 'sent', (st, flag, msg))
+        check('valid post answers 302 with directoryweb_claim=sent', st == 302 and flag == 'sent', (st, flag, msg))
         check('one claim stored', count() == c0 + 1)
 
         st, flag, msg = submit(ids[0], 'asha@example.org')
@@ -170,7 +170,7 @@ def main() -> int:
         st, flag, msg = submit(ids[3], 'asha+second@example.org')
         print('NOTE plus-address variant of a capped email: ' + ('accepted (known limitation: the cap keys on the exact address)' if flag == 'sent' else 'refused'))
 
-        st, h, body = http(base + '/wp-admin/admin-post.php?action=dw_claim_submit')
+        st, h, body = http(base + '/wp-admin/admin-post.php?action=directoryweb_claim_submit')
         check('GET on the handler does not create a claim and does not fatal', 'Fatal error' not in body and count() >= before)
     finally:
         proc.terminate()

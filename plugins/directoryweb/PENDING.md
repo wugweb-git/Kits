@@ -58,7 +58,7 @@ Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U 
    - ✅ Abuse limits: nonce, honeypot, 5 sends/IP/hour, 3 open claims per email, 1 per email per listing.
    - ✅ Decide on the claim edit screen (Approve, Reject, Revoke, Re-open) or `POST directoryweb/v1/claims/<id>/transition`; only `manage_directoryweb`. H: subscriber, editor and anonymous are refused.
    - ✅ Native claims are listed on the Claims screen and in the Kits Core shell (`dw-<id>` rows, detail at `claims/dw-<id>`, states Withdrawn and Revoked labelled); the shell stays read-only by owner decision (11 Nov 2026).
-   - ✅ Notification emails (25 Nov 2026): the claimant on receipt and on approved, rejected or revoked; the site owner on a new claim. One sender, `dw_claim_mail()` in `claim-native.php`: obeys the "Claim emails" switch, goes to the Settings notify address (else the older `directoryweb_claim_notify` option, else the admin email), and MailWeb (or any mailer) takes a message over by returning `false` from the `directoryweb_claim_mail` filter. `claim-native-mail.php` keeps the tested message builder and registers no hooks of its own (both would email twice).
+   - ✅ Notification emails (25 Nov 2026): the claimant on receipt and on approved, rejected or revoked; the site owner on a new claim. One sender, `directoryweb_claim_mail()` in `claim-native.php`: obeys the "Claim emails" switch, goes to the Settings notify address (else the older `directoryweb_claim_notify` option, else the admin email), and MailWeb (or any mailer) takes a message over by returning `false` from the `directoryweb_claim_mail` filter. `claim-native-mail.php` keeps the tested message builder and registers no hooks of its own (both would email twice).
    - ✅ Settings (standalone): claim emails on/off, notify address, Fluent Forms form selector only when Fluent Forms is present.
    - Open: Fluent Forms claims use the state table only to refuse illegal moves (they cannot revoke or re-open; no state hooks because form-entry ids collide with post ids; **X**: needs Fluent Forms to test); moving existing Fluent Forms entries onto the state table is a data migration of live claims (OD8); claimant withdraw UI; per-claim email templates and translations.
 
@@ -75,7 +75,7 @@ Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U 
 The first two do not block standalone DirectoryWeb. They stay out of "done" until built and verified.
 
 ## Claim diagnostics, limits and navigation (25 Nov 2026)
-- ✅ `dw_claim_diagnostics()`: live claim state on standalone Settings and as a Claims row in the Kits shell Settings payload. Browser rendering of the shell row: **unverified (X)**.
+- ✅ `directoryweb_claim_diagnostics()`: live claim state on standalone Settings and as a Claims row in the Kits shell Settings payload. Browser rendering of the shell row: **unverified (X)**.
 - ✅ Claim limits verified over HTTP (`tools/playground/http-claim-limits.py`). Known limitation, unchanged: the per-email cap matches the exact address, so plus-address variants count separately. Anonymous and logged-in submissions share one handler; Playground cannot separate them (**X**).
 - ✅ Navigation audited standalone and with Kits Core (`tools/playground/admin-nav-audit.py`). Fixed: Claims menu entry without Fluent Forms; Dashboard Places links when the place type is absent.
 
