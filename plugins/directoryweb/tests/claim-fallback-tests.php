@@ -28,6 +28,7 @@ $child = <<<'PHP'
 define( 'ABSPATH', '/' );
 define( 'DIRECTORYWEB_CAP', 'manage_directoryweb' );
 define( 'HOUR_IN_SECONDS', 3600 );
+define( 'DIRECTORYWEB_VERSION', '1.1.0' );
 define( 'MINUTE_IN_SECONDS', 60 );
 const DIRECTORYWEB_CLAIM_ROLES = array( '' => 'Choose', 'founder' => 'Founder' );
 const DIRECTORYWEB_SERVICES = array();
@@ -48,6 +49,9 @@ function esc_textarea( $s ) { return (string) $s; }
 function checked( ...$a ) { return ''; }
 function selected( ...$a ) { return ''; }
 function admin_url( $p = '' ) { return '/wp-admin/' . $p; }
+function wp_register_style( ...$a ) {}
+function wp_enqueue_style( ...$a ) {}
+function wp_add_inline_style( ...$a ) {}
 function wp_nonce_field( ...$a ) { return '<input name="_dw_nonce">'; }
 function get_transient( $k ) { return false; }
 function wp_unslash( $v ) { return $v; }

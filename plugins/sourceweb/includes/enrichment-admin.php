@@ -79,9 +79,11 @@ function sourceweb_enrich_sources_html( $sources, $lid = 0 ) {
 }
 
 add_action(
-	'admin_head',
+	'admin_enqueue_scripts',
 	function () {
-		echo '<style>.aw-enrich-src{display:inline-flex;align-items:center;gap:4px;margin-right:8px;text-decoration:none;white-space:nowrap}.aw-enrich-src img,.aw-enrich-src .aw-src-icon--letter{width:16px;height:16px;border-radius:3px}.aw-src-icon--letter{display:inline-grid;place-items:center;background:#dcdcde;font-size:10px;font-weight:600}.aw-enrich-prov{margin:4px 0 0;font-size:12px;color:#50575e}</style>';
+		wp_register_style( 'sourceweb-enrich-src', false, array(), SOURCEWEB_VERSION );
+		wp_enqueue_style( 'sourceweb-enrich-src' );
+		wp_add_inline_style( 'sourceweb-enrich-src', '.aw-enrich-src{display:inline-flex;align-items:center;gap:4px;margin-right:8px;text-decoration:none;white-space:nowrap}.aw-enrich-src img,.aw-enrich-src .aw-src-icon--letter{width:16px;height:16px;border-radius:3px}.aw-src-icon--letter{display:inline-grid;place-items:center;background:#dcdcde;font-size:10px;font-weight:600}.aw-enrich-prov{margin:4px 0 0;font-size:12px;color:#50575e}' );
 	}
 );
 
