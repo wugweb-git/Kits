@@ -1,16 +1,12 @@
 name: Plugin Check
 
 # Official WordPress Plugin Check (static checks) on the WordPress.org build of every plugin, run in WordPress Playground.
-# Fails on any error; warnings are reported in the log and the uploaded report. tools/validate/plugin-check.py.
+# Manual and weekly, not on pull requests (it is slow). Fails on any error; warnings are reported in the log and the uploaded report. tools/validate/plugin-check.py.
 
 on:
-  push:
-    branches: [kits-suite]
-    paths: ['plugins/**', 'tools/build/**', 'tools/validate/plugin-check.py']
-  pull_request:
-    branches: [main, kits-suite]
-    paths: ['plugins/**', 'tools/build/**', 'tools/validate/plugin-check.py']
   workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'   # Mondays, 03:00 UTC. Too slow (30 min or more) to gate every PR; run it before a WordPress.org submission.
 
 permissions:
   contents: read
