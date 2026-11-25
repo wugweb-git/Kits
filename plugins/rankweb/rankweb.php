@@ -57,7 +57,7 @@ add_action(
 		define( 'RANKWEB_STANDALONE', ! aw_seo_extras_rank_math() );
 		require_once AW_SEO_EXTRAS_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = aw_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'programmatic', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-rest', 'rankweb-ui', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( 'rank-math-schema' === $file && ! aw_seo_extras_rank_math() ) {
 				continue; // Rank Math schema bridge is only loaded when Rank Math is active.
 			}

@@ -44,7 +44,7 @@ function aw_seo_modules(): array {
 		'titles' => array(
 			'label'  => 'Titles and descriptions',
 			'switch' => false,
-			'files'  => array( 'titles', 'programmatic' ),
+			'files'  => array( 'titles' ),
 			'desc'   => 'Search titles and descriptions of items and of list pages (hubs, Directory places, categories, tags), built from their own counts and places.',
 			'fields' => array(
 				'AW_SEO_ITEM_TYPES' => array( 'type' => 'list', 'label' => 'Item types', 'help' => 'Post types whose items get titles, descriptions and focus keywords. One per line.', 'default' => array( 'post', 'page' ) ),
@@ -282,6 +282,12 @@ function aw_seo_modules(): array {
 			),
 		),
 	);
+	/**
+	 * The modules and their settings, before they are read: a site changes a default or adds a field here.
+	 *
+	 * @param array $m Modules.
+	 */
+	$m = (array) apply_filters( 'rankweb_modules', $m );
 	return $m;
 }
 
