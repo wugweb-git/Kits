@@ -38,20 +38,6 @@ if ( ! function_exists( 'aw_seo_item_description' ) ) {
 	}
 }
 
-if ( ! function_exists( 'aw_seo_kp_refusal' ) ) {
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
-	function aw_seo_kp_refusal( ...$args ) {
-		return rankweb_seo_kp_refusal( ...$args );
-	}
-}
-
-if ( ! function_exists( 'aw_seo_kp_replay' ) ) {
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
-	function aw_seo_kp_replay( ...$args ) {
-		return rankweb_seo_kp_replay( ...$args );
-	}
-}
-
 if ( ! defined( 'AW_SEO_EXTRAS_DIR' ) && defined( 'RANKWEB_DIR' ) ) {
 	define( 'AW_SEO_EXTRAS_DIR', RANKWEB_DIR ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
 }
