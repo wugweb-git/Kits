@@ -14,6 +14,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       InsightWeb
+ * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/insightweb/
  * Description:       Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
  * Version:           1.0.0
  * Requires at least: 7.1

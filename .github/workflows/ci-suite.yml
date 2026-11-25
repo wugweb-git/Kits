@@ -247,6 +247,10 @@ jobs:
         with:
           php-version: '8.3'
           tools: composer
+      - name: Versions and identity agree across every product
+        run: python3 tools/validate/check-versions.py
+      - name: Site and registry build (offline)
+        run: python3 tools/release/build-site.py --out _site --offline
       - name: Build Distribution Packages
         run: python3 tools/build/build-dist.py --target all --track commercial --out dist
       - name: Verify packages, write checksums and release manifest

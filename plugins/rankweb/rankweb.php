@@ -9,7 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       RankWeb
- * Plugin URI:        https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/rankweb
+ * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/rankweb/
  * Description:       Complete SEO suite for WordPress: structured schema, canonicals, robots directives, sitemaps, breadcrumbs, internal links, media optimization, and content analysis. Integrates with Rank Math when active.
  * Version:           2.1.0
  * Requires at least: 7.1

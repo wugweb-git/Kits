@@ -1,6 +1,7 @@
 <?php
 /**
  * Plugin Name: SourceWeb
+ * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/sourceweb/
  * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Enhanced by Kits Core, DirectoryWeb and InsightWeb.
  * Version: 0.1.0
  * Requires at least: 7.1

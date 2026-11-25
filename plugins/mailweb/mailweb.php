@@ -9,6 +9,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       MailWeb
+ * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
  * Version:           3.3.0
  * Requires at least: 7.1

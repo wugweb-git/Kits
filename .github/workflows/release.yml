@@ -43,8 +43,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          conclusion=$(gh api "repos/${{ github.repository }}/actions/workflows/ci-suite.yml/runs?head_sha=${{ github.sha }}&status=completed" \
-            --jq '[.workflow_runs[] | select(.event=="push")] | sort_by(.created_at) | last | .conclusion')
+          conclusion=$(gh api "repos/${{ github.repository }}/actions/workflows/ci-suite.yml/runs?head_sha=${{ github.sha }}" \
+            --jq '[.workflow_runs[] | select(.event=="push" and .status=="completed")] | sort_by(.created_at) | last | .conclusion')
           echo "CI conclusion for ${{ github.sha }}: ${conclusion}"
           test "${conclusion}" = "success"
 
