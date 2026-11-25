@@ -1,0 +1,100 @@
+name: Release one product
+
+# One product, one version, one tag (<slug>-v<version>), one release. The version is read from the product's own header,
+# so a release is cut by raising the version in the product (header, readme Stable tag, changelog) and running this.
+# Refuses to run unless the commit's "Kits Suite CI/CD" run succeeded. A tag is never reused: a published version is final.
+# docs/architecture/monorepo-delivery-architecture.md, 4.2; docs/deployment/registry-and-updates.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: 'Product to release'
+        required: true
+        type: choice
+        options:
+          - kits-by-wugweb
+          - kits-core
+          - directoryweb
+          - rankweb
+          - sourceweb
+          - insightweb
+          - mailweb
+          - planweb
+      prerelease:
+        description: 'Publish as a prerelease'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  release:
+    name: Release ${{ inputs.product }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Working tree is clean and versions agree
+        run: |
+          test -z "$(git status --porcelain)"
+          python3 tools/validate/check-versions.py
+
+      - name: Require a successful CI run for this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion=$(gh api "repos/${{ github.repository }}/actions/workflows/ci-suite.yml/runs?head_sha=${{ github.sha }}" \
+            --jq '[.workflow_runs[] | select(.event=="push" and .status=="completed")] | sort_by(.created_at) | last | .conclusion')
+          echo "CI conclusion for ${{ github.sha }}: ${conclusion}"
+          test "${conclusion}" = "success"
+
+      - name: Build this product and verify its files
+        id: build
+        run: |
+          python3 tools/release/release-product.py "${{ inputs.product }}" --out dist-release --commit "${{ github.sha }}" | tee build.log
+          echo "tag=$(sed -n 's/^tag=//p' build.log)" >> "$GITHUB_OUTPUT"
+          echo "title=$(sed -n 's/^title=//p' build.log)" >> "$GITHUB_OUTPUT"
+
+      - name: A published version is final
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.build.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Release ${{ steps.build.outputs.tag }} already exists. Raise the product's version to release again."
+            exit 1
+          fi
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
+          gh release create "${{ steps.build.outputs.tag }}" ${flags} --target "${{ github.sha }}" \
+            --title "${{ steps.build.outputs.title }}" --notes-file dist-release/NOTES.md \
+            dist-release/*.zip dist-release/SHA256SUMS dist-release/*-release.json
+
+      - name: Verify every asset downloads and matches its checksum
+        run: |
+          mkdir -p verify && cd verify
+          base="https://github.com/${{ github.repository }}/releases/download/${{ steps.build.outputs.tag }}"
+          curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
+          while read -r sum file; do
+            curl -fsSL --retry 3 -o "$file" "$base/$file"
+            echo "$sum  $file" | sha256sum -c -
+          done < SHA256SUMS
+
+      - name: Refresh the product pages and registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref "${{ github.ref_name }}"

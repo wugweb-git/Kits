@@ -1,0 +1,40 @@
+name: Plugin Check
+
+# Official WordPress Plugin Check (static checks) on the WordPress.org build of every plugin, run in WordPress Playground.
+# Manual and weekly, not on pull requests (it is slow). Fails on any error; warnings are reported in the log and the uploaded report. tools/validate/plugin-check.py.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'   # Mondays, 03:00 UTC. Too slow (30 min or more) to gate every PR; run it before a WordPress.org submission.
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-check:
+    name: Plugin Check (wporg builds)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+      - name: Install Playground CLI
+        working-directory: tools/playground
+        run: npm ci
+      - name: Run Plugin Check
+        run: python3 tools/validate/plugin-check.py --out plugin-check-out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plugin-check-report
+          path: plugin-check-out/

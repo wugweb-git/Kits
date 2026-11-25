@@ -385,9 +385,9 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 ---
 
 ### Phase P3: Build, Packaging, Versioning & Releases
-- [ ] **Task P3.1: Tagged Release Workflow** (`.github/workflows/release.yml`) triggering `tools/build/build-dist.py` on `v*.*.*`.
+- [x] **Task P3.1: Tagged Release Workflow** (`.github/workflows/release.yml`) triggering `tools/build/build-dist.py` on `v*.*.*`. Done as per-product `release-product.yml` (tag `<slug>-v<version>`), see docs/deployment/registry-and-updates.md.
 - [ ] **Task P3.2: Root Build Orchestration** (`npm run build:plugins`) to build all companion plugin admin React SPAs.
-- [ ] **Task P3.3: Semantic Version Alignment** across headers and `readme.txt` files.
+- [x] **Task P3.3: Semantic Version Alignment** across headers and `readme.txt` files. Done: `tools/validate/check-versions.py`, run in CI.
 
 ---
 
