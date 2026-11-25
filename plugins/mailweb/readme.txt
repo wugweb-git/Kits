@@ -89,6 +89,16 @@ MailWeb connects to external services only when configured by the site administr
 = 3.3.0 =
 Adds Site Health email sending check, per-user pause notice dismissal, email logging & resend, fallback SMTP configuration, failure alert webhooks, and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`).
 
+== Bundled libraries ==
+
+MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (GPL-compatible). Their licence texts are in each package folder.
+
+* Hostinger Mail API PHP SDK (`hostinger/mail-api-php-sdk`) and, for it: Guzzle (`guzzlehttp/guzzle`, `guzzlehttp/promises`, `guzzlehttp/psr7`), PSR interfaces (`psr/container`, `psr/http-client`, `psr/http-factory`, `psr/http-message`), `ralouphie/getallheaders`.
+* Symfony components used by the SDK: `serializer`, `property-access`, `property-info`, `type-info`, `string`, `deprecation-contracts`, and the `polyfill-ctype`, `polyfill-intl-grapheme`, `polyfill-intl-normalizer`, `polyfill-mbstring` and `polyfill-php80` packages.
+* Type and docblock helpers: `phpdocumentor/reflection-common`, `reflection-docblock` and `type-resolver`, `phpstan/phpdoc-parser`, `doctrine/deprecations`, `webmozart/assert`.
+
+Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
+
 == Changelog ==
 
 = 3.3.0 =
