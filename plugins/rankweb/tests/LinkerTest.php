@@ -43,14 +43,14 @@ final class LinkerTest extends PHPUnit\Framework\TestCase {
 		$out = array();
 		foreach ( $map as $kw => $ids ) {
 			foreach ( (array) $ids as $p => $id ) {
-				$out[ AW_Linker::normalize( $kw ) ][] = array( $id, 100 - $p, $kw );
+				$out[ RankWeb_Linker::normalize( $kw ) ][] = array( $id, 100 - $p, $kw );
 			}
 		}
 		return $out;
 	}
 
 	private function run_linker( string $html, array $map, array $opt = array() ): array {
-		return AW_Linker::link( $html, $this->index( $map ), fn( int $id ) => self::URLS[ $id ] ?? '', $opt + array( 'home' => 'https://example.org' ) );
+		return RankWeb_Linker::link( $html, $this->index( $map ), fn( int $id ) => self::URLS[ $id ] ?? '', $opt + array( 'home' => 'https://example.org' ) );
 	}
 
 	private function a( int $id, string $text ): string {
@@ -262,14 +262,14 @@ final class LinkerTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function test_normalize(): void {
-		$this->assertSame( 'stray dogs', AW_Linker::normalize( '  Stray   DOGS ' ) );
-		$this->assertSame( 'prevention of cruelty to animals act 1960', AW_Linker::normalize( 'Prevention of Cruelty to Animals Act, 1960' ) );
-		$this->assertSame( '', AW_Linker::normalize( ' -- ' ) );
+		$this->assertSame( 'stray dogs', RankWeb_Linker::normalize( '  Stray   DOGS ' ) );
+		$this->assertSame( 'prevention of cruelty to animals act 1960', RankWeb_Linker::normalize( 'Prevention of Cruelty to Animals Act, 1960' ) );
+		$this->assertSame( '', RankWeb_Linker::normalize( ' -- ' ) );
 	}
 
 	public function test_url_key(): void {
-		$this->assertSame( 'example.org/dogs', AW_Linker::url_key( 'https://www.Example.org/dogs/?a=1#b' ) );
-		$this->assertSame( 'example.org/dogs', AW_Linker::url_key( '/dogs/', 'https://example.org' ) );
-		$this->assertSame( '', AW_Linker::url_key( '#top' ) );
+		$this->assertSame( 'example.org/dogs', RankWeb_Linker::url_key( 'https://www.Example.org/dogs/?a=1#b' ) );
+		$this->assertSame( 'example.org/dogs', RankWeb_Linker::url_key( '/dogs/', 'https://example.org' ) );
+		$this->assertSame( '', RankWeb_Linker::url_key( '#top' ) );
 	}
 }

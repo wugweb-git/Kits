@@ -31,7 +31,7 @@ const AW_GOV_REG_KEYS = array( 'aw_registration' => 'registration', 'aw_reg_12a'
  * Does a registration field's value come from the government import? Yes unless enrichment (or an approved claim) last
  * wrote it from a source that is not a government one.
  */
-function aw_gov_value_official( $id, $enrich_field ) {
+function directoryweb_gov_value_official( $id, $enrich_field ) {
 	$p = function_exists( 'aw_enrich_provenance' ) ? aw_enrich_provenance( $id, $enrich_field ) : null;
 	if ( ! $p ) {
 		return true; // never changed by enrichment: the import's own value
@@ -45,7 +45,7 @@ function aw_gov_value_official( $id, $enrich_field ) {
 }
 
 /** The listing fields whose change can change Verified. */
-const AW_GOV_WATCH = array( 'aw_awbi_code', 'aw_awbi_dropped', 'aw_awbi_list_on', 'aw_data_sources', 'aw_source_name', 'aw_source_date', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_fcra', 'aw_darpan_id' );
+const AW_GOV_WATCH = array( 'aw_awbi_code', 'aw_awbi_dropped', 'aw_awbi_list_on', 'directoryweb_data_sources', 'aw_source_name', 'aw_source_date', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_fcra', 'aw_darpan_id' );
 
 /**
  * The government documents behind a listing: source slug => the document's date (Y-m-d, or '' when unknown).
@@ -54,21 +54,21 @@ const AW_GOV_WATCH = array( 'aw_awbi_code', 'aw_awbi_dropped', 'aw_awbi_list_on'
  * @param int $id Listing ID.
  * @return array
  */
-function aw_gov_verification( $id ) {
+function directoryweb_gov_verification( $id ) {
 	$m   = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	$ymd = fn( $d ) => preg_match( '/^\d{4}-\d{2}-\d{2}$/', $d ) ? $d : '';
 	$out = array();
 	if ( '' !== $m( 'aw_awbi_code' ) && '' === $m( 'aw_awbi_dropped' ) ) {
 		$list        = $ymd( $m( 'aw_awbi_list_on' ) );
-		$out['awbi'] = '' !== $list ? $list : (string) ( function_exists( 'aw_data_sources' ) ? aw_data_sources()['awbi'][2] : '' ); // empty: the current AWBI list
+		$out['awbi'] = '' !== $list ? $list : (string) ( function_exists( 'directoryweb_data_sources' ) ? directoryweb_data_sources()['awbi'][2] : '' ); // empty: the current AWBI list
 	}
-	$srcs = array_filter( (array) get_post_meta( $id, 'aw_data_sources', true ) );
+	$srcs = array_filter( (array) get_post_meta( $id, 'directoryweb_data_sources', true ) );
 	$name = $m( 'aw_source_name' );
 	if ( ! $srcs && '' !== $name && false === stripos( $name, 'google' ) && false === stripos( $name, 'AWBI' ) ) {
-		$srcs = array( 'gov' ); // imported before aw_data_sources was kept: the named list is a government one (as aw_listing_sources() labels it)
+		$srcs = array( 'gov' ); // imported before directoryweb_data_sources was kept: the named list is a government one (as directoryweb_listing_sources() labels it)
 	}
 	$gov = array_values( array_intersect( $srcs, AW_GOV_SOURCES ) );
-	if ( $gov && array_filter( AW_GOV_REG_KEYS, fn( $f, $k ) => '' !== $m( $k ) && aw_gov_value_official( $id, $f ), ARRAY_FILTER_USE_BOTH ) ) {
+	if ( $gov && array_filter( AW_GOV_REG_KEYS, fn( $f, $k ) => '' !== $m( $k ) && directoryweb_gov_value_official( $id, $f ), ARRAY_FILTER_USE_BOTH ) ) {
 		$out[ $gov[0] ] = $ymd( $m( 'aw_source_date' ) );
 	}
 	return $out;
@@ -81,8 +81,8 @@ function aw_gov_verification( $id ) {
  * @param bool $dry True: report only.
  * @return array the sources (empty: not Verified)
  */
-function aw_gov_verified_sync( $id, $dry = false ) {
-	$docs = 'aw_listing' === get_post_type( $id ) ? aw_gov_verification( $id ) : array();
+function directoryweb_gov_verified_sync( $id, $dry = false ) {
+	$docs = 'aw_listing' === get_post_type( $id ) ? directoryweb_gov_verification( $id ) : array();
 	if ( $dry ) {
 		return $docs;
 	}
@@ -119,7 +119,7 @@ add_action(
 			return; // nothing changed, or not switched on yet (wp aw gov-verify)
 		}
 		foreach ( array_keys( (array) ( $GLOBALS['aw_gov_pending'] ?? array() ) ) as $id ) {
-			aw_gov_verified_sync( $id );
+			directoryweb_gov_verified_sync( $id );
 		}
 	}
 );
@@ -137,7 +137,7 @@ add_action(
 );
 
 /** Number of Verified listings (cached). "Verified only" appears once there is at least one. */
-function aw_gov_verified_count() {
+function directoryweb_gov_verified_count() {
 	$n = get_transient( 'aw_gov_verified_count' );
 	if ( false === $n ) {
 		global $wpdb;
@@ -149,12 +149,12 @@ function aw_gov_verified_count() {
 }
 
 /** The Verified mark beside a listing's name: the green tick. */
-function aw_gov_verified_mark() {
+function directoryweb_gov_verified_mark() {
 	return ' <span class="aw-gov-mark" title="Verified: registration details from government documents">' . directoryweb_icon( 'check' ) . '<span class="screen-reader-text">Verified: registration details from government documents</span></span>';
 }
 
 /** "Verified on {date}" for the profile's meta row, or ''. */
-function aw_gov_verified_line( $id ) {
+function directoryweb_gov_verified_line( $id ) {
 	$on = (string) get_post_meta( $id, 'aw_gov_verified_on', true );
 	if ( '' === $on ) {
 		return '';
@@ -171,12 +171,12 @@ add_filter(
 		if ( ! $id || 'aw_listing' !== get_post_type( $id ) || '' === (string) get_post_meta( $id, 'aw_gov_verified_on', true ) ) {
 			return $html;
 		}
-		if ( function_exists( 'aw_listing_here' ) && aw_listing_here( $id ) && 1 === (int) ( $block['attrs']['level'] ?? 2 ) ) {
+		if ( function_exists( 'directoryweb_listing_here' ) && directoryweb_listing_here( $id ) && 1 === (int) ( $block['attrs']['level'] ?? 2 ) ) {
 			return $html; // the profile: its meta row says "Verified on"
 		}
 		$end = strrpos( $html, '</a>' );
 		$end = false !== $end ? $end : strrpos( $html, '</h' );
-		return false === $end ? $html : substr_replace( $html, aw_gov_verified_mark(), $end, 0 );
+		return false === $end ? $html : substr_replace( $html, directoryweb_gov_verified_mark(), $end, 0 );
 	},
 	26,
 	3
@@ -189,19 +189,19 @@ add_filter(
  * @param int $id Listing ID.
  * @return string[]
  */
-function aw_gov_state_lines( $id ) {
+function directoryweb_gov_state_lines( $id ) {
 	$m     = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	$day   = fn( $d ) => strtotime( $d . ' 12:00:00' ) ? wp_date( 'j M Y', strtotime( $d . ' 12:00:00' ) ) : $d;
 	$srcs  = array();
 	$lines = array();
-	foreach ( aw_listing_sources( $id ) as list( $slug, , $label, $on ) ) {
+	foreach ( directoryweb_listing_sources( $id ) as list( $slug, , $label, $on ) ) {
 		$srcs[ $slug ] = $label . ( $on ? ', as on ' . $day( $on ) : '' ); // as "Details from" on the profile
 	}
-	$verified = wp_strip_all_tags( aw_gov_verified_line( $id ) ); // Verified on {date}
+	$verified = wp_strip_all_tags( directoryweb_gov_verified_line( $id ) ); // Verified on {date}
 	if ( '' !== $verified ) {
 		$lines[] = $verified;
 		foreach ( array_filter( explode( ',', $m( 'aw_gov_verified_by' ) ) ) as $slug ) {
-			$lines[] = $srcs[ $slug ] ?? ( aw_data_sources()[ $slug ][1] ?? $slug );
+			$lines[] = $srcs[ $slug ] ?? ( directoryweb_data_sources()[ $slug ][1] ?? $slug );
 		}
 	}
 	if ( '' !== $m( 'aw_awbi_dropped' ) ) {
@@ -223,7 +223,7 @@ add_action(
 	'acf/render_field/key=field_aw_listing_msg_gov_state',
 	function () {
 		$post  = get_post();
-		$lines = $post && 'aw_listing' === $post->post_type ? aw_gov_state_lines( $post->ID ) : array();
+		$lines = $post && 'aw_listing' === $post->post_type ? directoryweb_gov_state_lines( $post->ID ) : array();
 		if ( $lines ) {
 			echo '<ul><li>' . implode( '</li><li>', array_map( 'esc_html', $lines ) ) . '</li></ul>';
 		}
@@ -254,7 +254,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$by  = array();
 			$yes = 0;
 			foreach ( $ids as $id ) {
-				$docs = aw_gov_verified_sync( $id, $dry );
+				$docs = directoryweb_gov_verified_sync( $id, $dry );
 				if ( $docs ) {
 					++$yes;
 					$k        = implode( ' + ', array_keys( $docs ) );

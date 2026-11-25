@@ -1,5 +1,7 @@
 # Plugin screens: classic vs new (audit, 12 Nov 2026)
 
+**Status (25 Nov 2026):** Audit of 12 Nov, not re-run. Report only.
+
 Code read at live `d9163bf7`. **Have** = on the new screen. **Classic only** = still works at its old address, but the new screens don't show it and nothing links to it. **Missing** = gone from the new screen.
 
 How to add, by letter:

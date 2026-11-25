@@ -1,5 +1,7 @@
 # Animal Writes: Monorepo Migration Inventory & Tenant Decoupling Architecture
 
+**Status (25 Nov 2026):** Tenant boundary inventory for the Animal Writes site repo. Animal Writes is not a dependency of any plugin here; paths such as `tools/ci`, `tools/kits-ship.sh`, `assets/site` and `styles/animal-writes.json` belong to the site repo.
+
 > **Context & Purpose**: With the centralization of the **Kits Suite** into the dedicated monorepo (`https://github.com/wugweb-git/kits` on branch `kits-suite`), this document provides a comprehensive accounting of what has been promoted to the central platform versus what remains inside `Animal Writes` (`https://github.com/wugweb-git/animalwrites`), along with the roadmap for complete tenant decoupling.
 
 ---

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The fields in the box: group => [ key => [label, input type, hint] ]. */
-function aw_listing_fields() {
+function directoryweb_listing_fields() {
 	return array(
 		'Contact' => array(
 			'aw_email'    => array( 'Email', 'email', '' ),
@@ -60,7 +60,7 @@ function aw_listing_fields() {
 
 if ( ! function_exists( 'directoryweb_scf_active' ) ) {
 	/**
-	 * Whether SCF (or ACF) is active: Kits Core's check when it has one, else Animal Writes Core's, else SCF's own
+	 * Whether SCF (or ACF) is active: Kits Core's check when it has one, else the legacy Core plugin's, else SCF's own
 	 * function. All three give the same answer on this site, whichever plugin update lands first.
 	 *
 	 * @return bool
@@ -78,7 +78,7 @@ add_action(
 		if ( directoryweb_scf_active() ) {
 			return;
 		}
-		add_meta_box( 'aw-listing-details', __( 'Organisation profile', 'directoryweb' ), 'aw_listing_details_box', 'aw_listing', 'normal', 'high' );
+		add_meta_box( 'aw-listing-details', __( 'Organisation profile', 'directoryweb' ), 'directoryweb_listing_details_box', 'aw_listing', 'normal', 'high' );
 	}
 );
 
@@ -97,7 +97,7 @@ function directoryweb_listing_cards() {
  * One field's control (label, input, hint) for the one-pager.
  *
  * @param string $key Meta key.
- * @param array  $f   [ label, input type, hint ] from aw_listing_fields().
+ * @param array  $f   [ label, input type, hint ] from directoryweb_listing_fields().
  * @param string $val Current value.
  * @return string
  */
@@ -146,10 +146,10 @@ function directoryweb_listing_profile_css() {
 	<?php
 }
 
-function aw_listing_details_box( $post ) {
+function directoryweb_listing_details_box( $post ) {
 	wp_nonce_field( 'aw_listing_details', 'aw_listing_details_nonce' );
 	wp_enqueue_media();
-	$fields   = aw_listing_fields();
+	$fields   = directoryweb_listing_fields();
 	$cards    = directoryweb_listing_cards();
 	$logo     = get_the_post_thumbnail( $post, array( 72, 72 ), array( 'class' => 'directoryweb-profile__logo-img' ) );
 	$title    = get_the_title( $post );
@@ -224,7 +224,7 @@ add_action(
 			return;
 		}
 		$keys = array( 'aw_gallery' );
-		foreach ( aw_listing_fields() as $fields ) {
+		foreach ( directoryweb_listing_fields() as $fields ) {
 			$keys = array_merge( $keys, array_keys( $fields ) );
 		}
 		foreach ( $keys as $key ) {
@@ -252,7 +252,7 @@ add_action(
 /* ---------- Front end: animal-writes/org-details ---------- */
 
 /** Links (map, social, donate, volunteer), photos and facts of an organisation. */
-function aw_block_org_details( $a, $id ) {
+function directoryweb_block_org_details( $a, $id ) {
 	$m     = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
 	$links = '';
 	foreach ( array( 'aw_maps_url' => array( 'map-pin', 'Directions' ), 'aw_instagram' => array( 'instagram', 'Instagram' ), 'aw_facebook' => array( 'facebook', 'Facebook' ), 'aw_x' => array( 'x-brand', 'X' ), 'aw_youtube' => array( 'youtube', 'YouTube' ), 'aw_linkedin' => array( 'link', 'LinkedIn' ), 'aw_volunteer_url' => array( 'name', 'Volunteer' ), 'aw_adopt_url' => array( 'home', 'Adopt' ) ) as $k => $l ) {
@@ -275,11 +275,11 @@ function aw_block_org_details( $a, $id ) {
 	// (owner, 15 Oct 2026): "… not available yet", with a link to suggest an update (the Report form).
 	$rel     = 'noopener' . ( $m( 'aw_rel_nofollow' ) || get_post_meta( $id, 'aw_sponsored', true ) ? ' nofollow sponsored' : '' );
 	$phones  = directoryweb_listing_phones( $id ); // the Phone numbers list
-	$hours   = aw_org_hours_html( directoryweb_listing_hours( $id ) ); // the Opening hours by day list
+	$hours   = directoryweb_org_hours_html( directoryweb_listing_hours( $id ) ); // the Opening hours by day list
 	$contact = array(
-		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', aw_org_phones_html( $phones, $id ) ),
-		'aw_email'   => array( 'mail', 'Email', aw_org_two_values( $id, 'aw_email', 'email', $rel ) ),
-		'aw_website' => array( 'link', 'Website', aw_org_two_values( $id, 'aw_website', 'website', $rel ) ),
+		'aw_phone'   => array( 'phone', 1 < count( $phones ) ? 'Phone numbers' : 'Phone', directoryweb_org_phones_html( $phones, $id ) ),
+		'aw_email'   => array( 'mail', 'Email', directoryweb_org_two_values( $id, 'aw_email', 'email', $rel ) ),
+		'aw_website' => array( 'link', 'Website', directoryweb_org_two_values( $id, 'aw_website', 'website', $rel ) ),
 	);
 	$na      = array( 'aw_phone' => 'Phone number not available yet', 'aw_email' => 'Email address not available yet', 'aw_website' => 'Website not available yet', 'aw_area' => 'Address not available yet', 'aw_hours' => 'Opening hours not available yet', 'aw_services' => 'Services not available yet' );
 	$field   = array( 'aw_phone' => 'phone', 'aw_email' => 'email', 'aw_area' => 'address', 'aw_hours' => 'hours' ); // the Contact form's Field
@@ -298,7 +298,7 @@ function aw_block_org_details( $a, $id ) {
 			if ( 'aw_services' === $k && $m( 'aw_services_source' ) ) { // who said so, and when
 				$note = '<span class="aw-org-fact-note">As stated by ' . esc_html( 'organisation' === $m( 'aw_services_source' ) ? 'the organisation' : $m( 'aw_services_source' ) ) . ( $m( 'aw_services_on' ) ? ', ' . directoryweb_date( $m( 'aw_services_on' ), null, 'aw-date' ) : '' ) . '</span>';
 			}
-			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && $m( 'aw_address' ) ? $m( 'aw_address' ) : ( 'aw_area' === $k && function_exists( 'aw_listing_place' ) ? aw_listing_location_text( $m( 'aw_area' ), aw_listing_place( $id ), $m( 'aw_pincode' ) ) : $m( $k ) ) );
+			$val = 'aw_g_rating' === $k ? $m( 'aw_g_rating' ) . ' out of 5' . ( $m( 'aw_g_reviews' ) ? ' (' . number_format_i18n( (int) $m( 'aw_g_reviews' ) ) . ' reviews)' : '' ) : ( 'aw_area' === $k && $m( 'aw_address' ) ? $m( 'aw_address' ) : ( 'aw_area' === $k && function_exists( 'directoryweb_listing_place' ) ? directoryweb_listing_location_text( $m( 'aw_area' ), directoryweb_listing_place( $id ), $m( 'aw_pincode' ) ) : $m( $k ) ) );
 			$shown  = 'aw_services' === $k && $svc ? '<span class="kit-tags aw-org-services">' . implode( '', array_map( fn( $n ) => '<span class="kit-tag kit-tag--type">' . esc_html( $n ) . '</span>', $svc ) ) . '</span>' : esc_html( $val );
 			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . directoryweb_icon( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $shown . $note . '</dd></div>';
 		} elseif ( isset( $na[ $k ] ) ) {
@@ -331,14 +331,14 @@ function aw_block_org_details( $a, $id ) {
  * @param string $rel  Link rel.
  * @return string
  */
-function aw_org_two_values( $id, $key, $kind, $rel ) {
+function directoryweb_org_two_values( $id, $key, $kind, $rel ) {
 	$out = array();
 	foreach ( array( $key, $key . '_alt' ) as $k ) {
 		$v = trim( (string) get_post_meta( $id, $k, true ) );
 		if ( '' === $v ) {
 			continue;
 		}
-		$mark  = function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $id, $v ) : '';
+		$mark  = function_exists( 'directoryweb_unverified_mark' ) ? directoryweb_unverified_mark( $id, $v ) : '';
 		$out[] = 'email' === $kind
 			? '<a href="' . esc_url( 'mailto:' . $v ) . '" data-act="email">' . esc_html( $v ) . '</a>' . $mark
 			: '<a href="' . esc_url( $v ) . '" rel="' . esc_attr( $rel ) . '" data-act="website">' . esc_html( preg_replace( '#^https?://(www\\.)?|/$#', '', $v ) ) . '</a>' . $mark;
@@ -353,7 +353,7 @@ function aw_org_two_values( $id, $key, $kind, $rel ) {
  * @param array $phones directoryweb_listing_phones().
  * @return string HTML, or '' when there is no number that can be dialled.
  */
-function aw_org_phones_html( $phones, $lid = 0 ) {
+function directoryweb_org_phones_html( $phones, $lid = 0 ) {
 	$items = '';
 	foreach ( $phones as $p ) {
 		$tel = directoryweb_tel_url( $p['number'] );
@@ -361,7 +361,7 @@ function aw_org_phones_html( $phones, $lid = 0 ) {
 			continue;
 		}
 		$wa     = $p['whatsapp'] ? directoryweb_normalise_phone( $p['number'] ) : '';
-		$items .= '<li><a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>' . ( $lid && function_exists( 'aw_unverified_mark' ) ? aw_unverified_mark( $lid, $p['number'] ) : '' )
+		$items .= '<li><a href="' . esc_url( $tel ) . '" data-act="phone">' . esc_html( $p['number'] ) . '</a>' . ( $lid && function_exists( 'directoryweb_unverified_mark' ) ? directoryweb_unverified_mark( $lid, $p['number'] ) : '' )
 			. ( '' !== $p['label'] ? ' <span class="aw-org-phones-label">' . esc_html( $p['label'] ) . '</span>' : '' )
 			. ( $wa && strlen( $wa ) > 5 ? ' <a class="aw-org-phones-wa" href="' . esc_url( 'https://wa.me/' . $wa ) . '" rel="noopener" data-act="whatsapp" aria-label="' . esc_attr( 'WhatsApp ' . $p['number'] ) . '">' . directoryweb_icon( 'brand-whatsapp' ) . 'WhatsApp</a>' : '' )
 			. '</li>';
@@ -376,7 +376,7 @@ function aw_org_phones_html( $phones, $lid = 0 ) {
  * @param array $rows directoryweb_listing_hours().
  * @return string
  */
-function aw_org_hours_html( $rows ) {
+function directoryweb_org_hours_html( $rows ) {
 	if ( ! $rows ) {
 		return '';
 	}
@@ -405,7 +405,7 @@ function aw_org_hours_html( $rows ) {
  * @param string $pincode PIN code.
  * @return string
  */
-function aw_listing_location_text( $area, $place, $pincode ) {
+function directoryweb_listing_location_text( $area, $place, $pincode ) {
 	$out = array();
 	foreach ( array_merge( array_map( 'trim', explode( ',', (string) $area ) ), array_reverse( array_filter( (array) $place ) ), array( $pincode ) ) as $part ) {
 		if ( '' !== $part && ! in_array( strtolower( $part ), array_map( 'strtolower', $out ), true ) ) {

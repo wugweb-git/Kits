@@ -1,5 +1,5 @@
 /**
- * Theme Options → Cards (docs/admin-ui-spec.md D1.8).
+ * Theme Options → Cards (docs/design-system/admin-ui-spec.md D1.8).
  *
  * Card padding, Card gap and the stacked large card's padding and gap, kept in the site's Global Styles (user origin)
  * under settings.custom.kits.card through the app's one Global Styles store (../global-styles.js). WordPress prints

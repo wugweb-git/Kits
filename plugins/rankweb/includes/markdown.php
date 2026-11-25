@@ -11,7 +11,7 @@
  *   no-cache) and a canonical Link to the HTML page, so no shared cache keeps the Markdown or hands it to a browser. The HTML of
  *   these pages keeps its own cache headers (cdn-cache.php) and also gets Vary: Accept (owner, 3 Nov 2026), so a cache that
  *   honours Vary stores it per Accept header (AW_MD_VARY_HTML, RankWeb → Settings; 0 turns it off). The server's page cache (LiteSpeed) and the Hostinger CDN answer from their
- *   copy before WordPress runs; how agents get past them: docs/cdn.md, step C.
+ *   copy before WordPress runs; how agents get past them: docs/cdn.md (not in this repo), step C.
  * - Password-protected pages, previews and logged-in requests are never converted.
  * - Off with the "Markdown for agents" switch in RankWeb → Settings.
  *
@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param string $accept Accept header.
  */
-function aw_md_accept_prefers( string $accept ): bool {
+function rankweb_md_accept_prefers( string $accept ): bool {
 	$q = array();
 	foreach ( explode( ',', strtolower( $accept ) ) as $part ) {
 		$bits = array_map( 'trim', explode( ';', $part ) );
@@ -53,7 +53,7 @@ function aw_md_accept_prefers( string $accept ): bool {
 }
 
 /** Whether this request is for a page that has a Markdown version (Home and single pages, for anonymous GETs). */
-function aw_md_has_version(): bool {
+function rankweb_md_has_version(): bool {
 	if ( 'get' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '' ) || is_admin() || is_feed() || is_preview() || is_embed() || is_404() || is_user_logged_in() ) {
 		return false;
 	}
@@ -61,12 +61,12 @@ function aw_md_has_version(): bool {
 }
 
 /** Whether this request gets Markdown. */
-function aw_md_wanted(): bool {
-	if ( ! aw_md_has_version() ) {
+function rankweb_md_wanted(): bool {
+	if ( ! rankweb_md_has_version() ) {
 		return false;
 	}
 	$accept = isset( $_SERVER['HTTP_ACCEPT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT'] ) ) : '';
-	return '' !== $accept && aw_md_accept_prefers( $accept );
+	return '' !== $accept && rankweb_md_accept_prefers( $accept );
 }
 
 /**
@@ -74,7 +74,7 @@ function aw_md_wanted(): bool {
  *
  * @param string $url Address from the page.
  */
-function aw_md_url( string $url ): string {
+function rankweb_md_url( string $url ): string {
 	$url = trim( $url );
 	if ( '' === $url || preg_match( '#^[a-z][a-z0-9+.-]*:#i', $url ) ) {
 		return esc_url_raw( $url );
@@ -91,7 +91,7 @@ function aw_md_url( string $url ): string {
  *
  * @param string $s Text.
  */
-function aw_md_text( string $s ): string {
+function rankweb_md_text( string $s ): string {
 	return trim( (string) preg_replace( '/\s+/u', ' ', $s ) );
 }
 
@@ -100,14 +100,14 @@ function aw_md_text( string $s ): string {
  *
  * @param DOMNode $node Node.
  */
-function aw_md_inline( DOMNode $node ): string {
+function rankweb_md_inline( DOMNode $node ): string {
 	$out = '';
 	foreach ( $node->childNodes as $c ) {
 		if ( XML_TEXT_NODE === $c->nodeType ) {
 			$out .= preg_replace( '/\s+/u', ' ', $c->nodeValue );
 			continue;
 		}
-		if ( ! $c instanceof DOMElement || aw_md_skip( $c ) ) {
+		if ( ! $c instanceof DOMElement || rankweb_md_skip( $c ) ) {
 			continue;
 		}
 		$tag = strtolower( $c->tagName );
@@ -115,31 +115,31 @@ function aw_md_inline( DOMNode $node ): string {
 			$out .= ' '; // links, pictures and boxes side by side are separate words.
 		}
 		if ( 'a' === $tag ) {
-			$text = aw_md_text( aw_md_inline( $c ) );
+			$text = rankweb_md_text( rankweb_md_inline( $c ) );
 			$href = trim( $c->getAttribute( 'href' ) );
 			if ( '' === $text ) {
-				$text = aw_md_text( $c->getAttribute( 'aria-label' ) );
+				$text = rankweb_md_text( $c->getAttribute( 'aria-label' ) );
 			}
 			if ( '' === $text ) {
 				continue;
 			}
-			$out .= ( '' !== $href && 0 !== strpos( $href, '#' ) && 0 !== stripos( $href, 'javascript:' ) ) ? '[' . str_replace( array( '[', ']' ), array( '\[', '\]' ), $text ) . '](' . aw_md_url( $href ) . ')' : $text;
+			$out .= ( '' !== $href && 0 !== strpos( $href, '#' ) && 0 !== stripos( $href, 'javascript:' ) ) ? '[' . str_replace( array( '[', ']' ), array( '\[', '\]' ), $text ) . '](' . rankweb_md_url( $href ) . ')' : $text;
 		} elseif ( in_array( $tag, array( 'strong', 'b' ), true ) ) {
-			$t    = aw_md_text( aw_md_inline( $c ) );
+			$t    = rankweb_md_text( rankweb_md_inline( $c ) );
 			$out .= '' !== $t ? '**' . $t . '**' : '';
 		} elseif ( in_array( $tag, array( 'em', 'i' ), true ) ) {
-			$t    = aw_md_text( aw_md_inline( $c ) );
+			$t    = rankweb_md_text( rankweb_md_inline( $c ) );
 			$out .= '' !== $t ? '*' . $t . '*' : '';
 		} elseif ( 'code' === $tag ) {
-			$out .= '`' . aw_md_text( $c->textContent ) . '`';
+			$out .= '`' . rankweb_md_text( $c->textContent ) . '`';
 		} elseif ( 'br' === $tag ) {
 			$out .= "  \n";
 		} elseif ( 'img' === $tag ) {
-			$alt  = aw_md_text( $c->getAttribute( 'alt' ) );
+			$alt  = rankweb_md_text( $c->getAttribute( 'alt' ) );
 			$src  = $c->getAttribute( 'src' );
-			$out .= ( '' !== $alt && '' !== $src ) ? '![' . $alt . '](' . aw_md_url( $src ) . ')' : '';
+			$out .= ( '' !== $alt && '' !== $src ) ? '![' . $alt . '](' . rankweb_md_url( $src ) . ')' : '';
 		} else {
-			$out .= aw_md_inline( $c );
+			$out .= rankweb_md_inline( $c );
 		}
 	}
 	return $out;
@@ -150,7 +150,7 @@ function aw_md_inline( DOMNode $node ): string {
  *
  * @param DOMElement $el Element.
  */
-function aw_md_skip( DOMElement $el ): bool {
+function rankweb_md_skip( DOMElement $el ): bool {
 	$tag = strtolower( $el->tagName );
 	if ( 'button' === $tag && $el->parentNode instanceof DOMElement && preg_match( '/^h[1-6]$/i', $el->parentNode->tagName ) ) {
 		return false; // an accordion question (a button inside a heading) keeps its words.
@@ -170,11 +170,11 @@ function aw_md_skip( DOMElement $el ): bool {
  * @param DOMNode $node  Node.
  * @param int     $depth List depth.
  */
-function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
+function rankweb_md_blocks( DOMNode $node, int $depth = 0 ): string {
 	$out    = '';
 	$inline = '';
 	$flush  = function () use ( &$out, &$inline ) {
-		$t = aw_md_text( $inline );
+		$t = rankweb_md_text( $inline );
 		if ( '' !== $t ) {
 			$out .= $t . "\n\n";
 		}
@@ -185,19 +185,19 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
 			$inline .= $c->nodeValue;
 			continue;
 		}
-		if ( ! $c instanceof DOMElement || aw_md_skip( $c ) ) {
+		if ( ! $c instanceof DOMElement || rankweb_md_skip( $c ) ) {
 			continue;
 		}
 		$tag = strtolower( $c->tagName );
 		if ( preg_match( '/^h([1-6])$/', $tag, $m ) ) {
 			$flush();
-			$t = aw_md_text( aw_md_inline( $c ) );
+			$t = rankweb_md_text( rankweb_md_inline( $c ) );
 			if ( '' !== $t ) {
 				$out .= str_repeat( '#', (int) $m[1] ) . ' ' . $t . "\n\n";
 			}
 		} elseif ( 'p' === $tag ) {
 			$flush();
-			$t = trim( (string) preg_replace( '/[ \t]+/u', ' ', aw_md_inline( $c ) ) );
+			$t = trim( (string) preg_replace( '/[ \t]+/u', ' ', rankweb_md_inline( $c ) ) );
 			if ( '' !== $t ) {
 				$out .= $t . "\n\n";
 			}
@@ -205,7 +205,7 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
 			$flush();
 			$n = 0;
 			foreach ( $c->childNodes as $li ) {
-				if ( ! $li instanceof DOMElement || 'li' !== strtolower( $li->tagName ) || aw_md_skip( $li ) ) {
+				if ( ! $li instanceof DOMElement || 'li' !== strtolower( $li->tagName ) || rankweb_md_skip( $li ) ) {
 					continue;
 				}
 				++$n;
@@ -213,18 +213,18 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
 				$text = '';
 				foreach ( $li->childNodes as $part ) {
 					if ( $part instanceof DOMElement && in_array( strtolower( $part->tagName ), array( 'ul', 'ol' ), true ) ) {
-						$sub .= aw_md_blocks( $li->ownerDocument->createElement( 'div' )->appendChild( $part->cloneNode( true ) )->parentNode, $depth + 1 );
+						$sub .= rankweb_md_blocks( $li->ownerDocument->createElement( 'div' )->appendChild( $part->cloneNode( true ) )->parentNode, $depth + 1 );
 					} elseif ( $part instanceof DOMElement && in_array( strtolower( $part->tagName ), array( 'div', 'article', 'p', 'h2', 'h3', 'h4', 'figure' ), true ) ) {
-						$text .= ' ' . aw_md_text( aw_md_inline( $part ) );
+						$text .= ' ' . rankweb_md_text( rankweb_md_inline( $part ) );
 					} elseif ( XML_TEXT_NODE === $part->nodeType ) {
 						$text .= $part->nodeValue;
-					} elseif ( $part instanceof DOMElement && ! aw_md_skip( $part ) ) {
+					} elseif ( $part instanceof DOMElement && ! rankweb_md_skip( $part ) ) {
 						$wrap = $li->ownerDocument->createElement( 'span' );
 						$wrap->appendChild( $part->cloneNode( true ) );
-						$text .= aw_md_inline( $wrap );
+						$text .= rankweb_md_inline( $wrap );
 					}
 				}
-				$text = aw_md_text( $text );
+				$text = rankweb_md_text( $text );
 				if ( '' !== $text ) {
 					$out .= str_repeat( '  ', $depth ) . ( 'ol' === $tag ? $n . '. ' : '- ' ) . $text . "\n";
 				}
@@ -233,7 +233,7 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
 			$out .= 0 === $depth ? "\n" : '';
 		} elseif ( 'blockquote' === $tag ) {
 			$flush();
-			$q = trim( aw_md_blocks( $c, $depth ) );
+			$q = trim( rankweb_md_blocks( $c, $depth ) );
 			if ( '' !== $q ) {
 				$out .= '> ' . str_replace( "\n", "\n> ", $q ) . "\n\n";
 			}
@@ -244,7 +244,7 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
 				$cells = array();
 				foreach ( $tr->childNodes as $td ) {
 					if ( $td instanceof DOMElement && in_array( strtolower( $td->tagName ), array( 'td', 'th' ), true ) ) {
-						$cells[] = str_replace( '|', '\|', aw_md_text( aw_md_inline( $td ) ) );
+						$cells[] = str_replace( '|', '\|', rankweb_md_text( rankweb_md_inline( $td ) ) );
 					}
 				}
 				if ( $cells ) {
@@ -264,13 +264,13 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
 		} elseif ( in_array( $tag, array( 'a', 'strong', 'b', 'em', 'i', 'code', 'span', 'time', 'br', 'img', 'small', 'abbr', 'mark', 'sup', 'sub' ), true ) ) {
 			$wrap = $c->ownerDocument->createElement( 'span' );
 			$wrap->appendChild( $c->cloneNode( true ) );
-			$inline .= aw_md_inline( $wrap ) . ' ';
+			$inline .= rankweb_md_inline( $wrap ) . ' ';
 		} elseif ( 'hr' === $tag ) {
 			$flush();
 			$out .= "---\n\n";
 		} else {
 			$flush();
-			$out .= aw_md_blocks( $c, $depth ); // a container: div, section, article, figure.
+			$out .= rankweb_md_blocks( $c, $depth ); // a container: div, section, article, figure.
 		}
 	}
 	$flush();
@@ -283,7 +283,7 @@ function aw_md_blocks( DOMNode $node, int $depth = 0 ): string {
  * @param string $html Whole page.
  * @return string Markdown, or '' when the page has no main region.
  */
-function aw_md_from_html( string $html ): string {
+function rankweb_md_from_html( string $html ): string {
 	if ( ! class_exists( 'DOMDocument' ) || '' === trim( $html ) ) {
 		return '';
 	}
@@ -297,13 +297,13 @@ function aw_md_from_html( string $html ): string {
 	}
 	$xp      = new DOMXPath( $doc );
 	$desc    = $xp->query( '//meta[@name="description"]/@content' )->item( 0 );
-	$summary = $desc ? aw_md_text( (string) $desc->nodeValue ) : '';
-	$body    = aw_md_blocks( $main );
+	$summary = $desc ? rankweb_md_text( (string) $desc->nodeValue ) : '';
+	$body    = rankweb_md_blocks( $main );
 	$body    = (string) preg_replace( "/\n{3,}/", "\n\n", $body );
 	$h1      = preg_match( '/^# .*\n\n/', $body, $m ) ? $m[0] : '';
 	if ( '' === $h1 ) {
 		$title = $doc->getElementsByTagName( 'title' )->item( 0 );
-		$title = $title ? aw_md_text( (string) $title->textContent ) : '';
+		$title = $title ? rankweb_md_text( (string) $title->textContent ) : '';
 		$h1    = '' !== $title ? '# ' . $title . "\n\n" : ''; // the page opens with something else (Home): its title first
 		$body  = $h1 . $body;
 	}
@@ -316,15 +316,15 @@ function aw_md_from_html( string $html ): string {
 add_action(
 	'template_redirect',
 	function () {
-		if ( ! aw_md_wanted() ) {
-			if ( ( ! defined( 'AW_MD_VARY_HTML' ) || AW_MD_VARY_HTML ) && aw_md_has_version() && ! headers_sent() ) {
+		if ( ! rankweb_md_wanted() ) {
+			if ( ( ! defined( 'AW_MD_VARY_HTML' ) || AW_MD_VARY_HTML ) && rankweb_md_has_version() && ! headers_sent() ) {
 				header( 'Vary: Accept', false ); // the HTML too, so a shared cache that honours Vary keeps it apart from the Markdown.
 			}
 			return;
 		}
 		ob_start(
 			function ( $html ) {
-				$md = aw_md_from_html( (string) $html );
+				$md = rankweb_md_from_html( (string) $html );
 				if ( '' === $md || headers_sent() ) {
 					return $html; // no main region: the HTML as it was.
 				}

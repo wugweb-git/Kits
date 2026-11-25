@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits admin app, Cards section (docs/admin-ui-spec.md D1.8): the field data the new Theme Options screen needs.
+ * Kits admin app, Cards section (docs/design-system/admin-ui-spec.md D1.8): the field data the new Theme Options screen needs.
  *
  * The values live in the site's own Global Styles (user origin) under settings.custom.kits.card:
  *   padding, gap, stacked.padding, stacked.gap, ratio.standard, ratio.stacked, ratio.featured, ratio.square
@@ -36,7 +36,7 @@ function kits_cards_space_tokens(): array {
  * The Cards fields: label, help, the theme's value (shown as "Theme value") and the tokens it may pick.
  *
  * Sizes only from tokens. Padding: 16px (--kit-space-4) by default and at least that (owner, 11 Nov 2026;
- * docs/design-system.md, Layout rules 2). Gaps from the spacing scale.
+ * docs/design-system/design-system.md, Layout rules 2). Gaps from the spacing scale.
  *
  * @return array Keyed by the path under settings.custom.kits.card ('stacked.gap' = stacked → gap).
  */

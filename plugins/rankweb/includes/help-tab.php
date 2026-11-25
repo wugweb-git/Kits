@@ -10,14 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_action( 'current_screen', 'aw_seo_help_tab' );
+add_action( 'current_screen', 'rankweb_seo_help_tab' );
 
 /**
  * Add the tab when the open admin page is one of RankWeb's.
  *
  * @param WP_Screen $screen The screen.
  */
-function aw_seo_help_tab( $screen ) {
+function rankweb_seo_help_tab( $screen ) {
 	$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen is open; nothing is saved.
 	if ( '' === $page || ! is_object( $screen ) ) {
 		return;
@@ -47,7 +47,7 @@ function aw_seo_help_tab( $screen ) {
 			'priority' => 5,
 		)
 	);
-	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
 	$data      = function_exists( 'get_file_data' ) ? get_file_data( $main_file, array( 'Version' => 'Version' ) ) : array();
 	$screen->set_help_sidebar(
 		'<p><strong>RankWeb</strong>' . ( empty( $data['Version'] ) ? '' : ' ' . esc_html( $data['Version'] ) ) . '</p>'

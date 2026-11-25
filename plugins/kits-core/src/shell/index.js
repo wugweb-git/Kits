@@ -1,5 +1,5 @@
 /**
- * Kits admin shell: the parts every plugin screen is built from (docs/kits-plugin-ui.md).
+ * Kits admin shell: the parts every plugin screen is built from (docs/plugins/kits-plugin-ui-spec.md).
  *
  * The pattern follows a site-tools dashboard: an app header with the plugin's icon, name and tabs; on a dashboard a
  * row of chips (time range), a grid of tiles (one big number, one sub-line, a link) and section cards under them; on

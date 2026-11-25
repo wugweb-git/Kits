@@ -38,17 +38,17 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 				'comparison' => 'regex',
 			),
 		);
-		$csv  = AW_Redirects::to_csv( $rows );
+		$csv  = RankWeb_Redirects::to_csv( $rows );
 		$this->assertTrue( str_starts_with( $csv, 'source,target,code,comparison' ) );
-		$back = AW_Redirects::from_csv( $csv );
+		$back = RankWeb_Redirects::from_csv( $csv );
 		$this->assertSame( '', $back['error'] );
 		$this->assertCount( 2, $back['rows'] );
 		$this->assertSame( '/campaigns/$1/', $back['rows'][1]['target'] );
 	}
 
 	public function testFromCsvNeedsASourceColumnAndKeepsKnownColumns(): void {
-		$this->assertNotSame( '', AW_Redirects::from_csv( "target,code\n/x/,301\n" )['error'] );
-		$back = AW_Redirects::from_csv( "source,target,note\n/a/,/b/,hello\n" );
+		$this->assertNotSame( '', RankWeb_Redirects::from_csv( "target,code\n/x/,301\n" )['error'] );
+		$back = RankWeb_Redirects::from_csv( "source,target,note\n/a/,/b/,hello\n" );
 		$this->assertSame(
 			array(
 				'source' => '/a/',
@@ -59,7 +59,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testValidateDefaultsCodeAndComparison(): void {
-		$v = AW_Redirects::validate(
+		$v = RankWeb_Redirects::validate(
 			array(
 				'source' => '/a/',
 				'target' => '/b/',
@@ -73,7 +73,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	public function testValidateRejectsAnUnknownCodeAndAMissingTarget(): void {
 		$this->assertNotSame(
 			'',
-			AW_Redirects::validate(
+			RankWeb_Redirects::validate(
 				array(
 					'source' => '/a/',
 					'target' => '/b/',
@@ -83,7 +83,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 		);
 		$this->assertNotSame(
 			'',
-			AW_Redirects::validate(
+			RankWeb_Redirects::validate(
 				array(
 					'source' => '/a/',
 					'code'   => '302',
@@ -93,7 +93,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testGoneCodesNeedNoTarget(): void {
-		$v = AW_Redirects::validate(
+		$v = RankWeb_Redirects::validate(
 			array(
 				'source' => '/gone/',
 				'code'   => '410',
@@ -106,7 +106,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	public function testValidateRejectsAnEmptySource(): void {
 		$this->assertNotSame(
 			'',
-			AW_Redirects::validate(
+			RankWeb_Redirects::validate(
 				array(
 					'source' => '  ',
 					'target' => '/b/',
@@ -116,7 +116,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testHtaccessLinesForExactRedirects(): void {
-		$lines = AW_Redirects::htaccess_lines(
+		$lines = RankWeb_Redirects::htaccess_lines(
 			array(
 				array(
 					'source'     => 'old-page',
@@ -137,7 +137,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testHtaccessUsesPlainRedirectForGoneAndSkipsRegex(): void {
-		$lines = AW_Redirects::htaccess_lines(
+		$lines = RankWeb_Redirects::htaccess_lines(
 			array(
 				array(
 					'source'     => '/gone/',
@@ -158,7 +158,7 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testHtaccessEscapesSpacesAndStripsNewlines(): void {
-		$lines = AW_Redirects::htaccess_lines(
+		$lines = RankWeb_Redirects::htaccess_lines(
 			array(
 				array(
 					'source'     => "/a b\n",

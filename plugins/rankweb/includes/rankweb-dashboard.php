@@ -1,6 +1,6 @@
 <?php
 /**
- * RankWeb Dashboard counts (docs/rankweb-plan.md §2): built by the hourly job rankweb_health_build, never while a
+ * RankWeb Dashboard counts (docs/org/rankweb-org-plan.md §2): built by the hourly job rankweb_health_build, never while a
  * screen loads. The job keeps the newest counts in the transient rankweb_health and one row a day in the option
  * rankweb_health_log (not autoloaded, 120 days), so the Dashboard's time range can show the change.
  *
@@ -107,7 +107,7 @@ function rankweb_count_missing_meta( array $types, string $meta_key ): array {
 		)
 	);
 	foreach ( (array) $rows as $r ) {
-		if ( 'page' === $r->post_type && function_exists( 'aw_seo_is_hub_page' ) && aw_seo_is_hub_page( (int) $r->ID ) ) {
+		if ( 'page' === $r->post_type && function_exists( 'rankweb_seo_is_hub_page' ) && rankweb_seo_is_hub_page( (int) $r->ID ) ) {
 			continue;
 		}
 		$out['by'][ $r->post_type ] = ( $out['by'][ $r->post_type ] ?? 0 ) + 1;
@@ -142,7 +142,7 @@ function rankweb_count_filled_descriptions( array $types ): int {
  * @return array [ 'on' => bool, 'gaps' => n|null, 'seen' => n, 'at' => time|0, 'part' => items checked in this pass ].
  */
 function rankweb_count_schema_gaps(): array {
-	if ( ! function_exists( 'aw_rm_schema_sync' ) || ! defined( 'AW_RM_SCHEMA_TYPES' ) ) {
+	if ( ! function_exists( 'rankweb_rm_schema_sync' ) || ! defined( 'AW_RM_SCHEMA_TYPES' ) ) {
 		return array(
 			'on'   => false,
 			'gaps' => null,
@@ -183,7 +183,7 @@ function rankweb_count_schema_gaps(): array {
 		}
 		_prime_post_caches( array_map( 'intval', $ids ), false, true );
 		foreach ( $ids as $id ) {
-			$did = (string) aw_rm_schema_sync( (int) $id, true ); // Dry run: reports, writes nothing.
+			$did = (string) rankweb_rm_schema_sync( (int) $id, true ); // Dry run: reports, writes nothing.
 			if ( preg_match( '/^(added|updated|closed)\b/', $did ) ) {
 				++$state['gaps'];
 			}
@@ -208,14 +208,14 @@ function rankweb_count_schema_gaps(): array {
  * @return array [ 'on' => bool, 'pages' => n, 'drafts' => n ].
  */
 function rankweb_count_faq(): array {
-	if ( ! function_exists( 'aw_faq_index' ) ) {
+	if ( ! function_exists( 'rankweb_faq_index' ) ) {
 		return array(
 			'on'     => false,
 			'pages'  => 0,
 			'drafts' => 0,
 		);
 	}
-	$ix = aw_faq_index();
+	$ix = rankweb_faq_index();
 	return array(
 		'on'     => true,
 		'pages'  => (int) array_sum( wp_list_pluck( (array) $ix['counts'], 'faq' ) ),
@@ -236,21 +236,21 @@ function rankweb_count_noindex(): array {
 		'filtered' => 0,
 		'kept'     => count( (array) ( defined( 'AW_DIRECTORY_KEEP_INDEXED' ) ? AW_DIRECTORY_KEEP_INDEXED : array() ) ) + count( (array) get_option( 'aw_seo_keep_listings', array() ) ),
 	);
-	if ( function_exists( 'aw_sitemap_unreachable_listings' ) ) {
-		$out['listings'] = count( (array) aw_sitemap_unreachable_listings() );
+	if ( function_exists( 'rankweb_sitemap_unreachable_listings' ) ) {
+		$out['listings'] = count( (array) rankweb_sitemap_unreachable_listings() );
 	}
-	if ( function_exists( 'aw_place_counts' ) && function_exists( 'aw_place_district' ) && function_exists( 'aw_directory_keep_indexed' ) && function_exists( 'aw_directory_url' ) && defined( 'AW_THIN_DISTRICT_TYPE' ) ) {
-		foreach ( (array) ( aw_place_counts()['pairs'] ?? array() ) as $p ) {
-			$d = aw_place_district( $p[0] );
-			if ( $d && (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! aw_directory_keep_indexed( aw_directory_url( $d->slug, $p[1] ) ) ) {
+	if ( function_exists( 'directoryweb_place_counts' ) && function_exists( 'directoryweb_place_district' ) && function_exists( 'rankweb_directory_keep_indexed' ) && function_exists( 'directoryweb_directory_url' ) && defined( 'AW_THIN_DISTRICT_TYPE' ) ) {
+		foreach ( (array) ( directoryweb_place_counts()['pairs'] ?? array() ) as $p ) {
+			$d = directoryweb_place_district( $p[0] );
+			if ( $d && (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! rankweb_directory_keep_indexed( directoryweb_directory_url( $d->slug, $p[1] ) ) ) {
 				++$out['thin'];
 			}
 		}
 	}
-	if ( function_exists( 'aw_seo_filtered_count' ) && function_exists( 'aw_section_categories' ) && defined( 'AW_FILTERED_CATEGORY_HUBS' ) ) {
+	if ( function_exists( 'rankweb_seo_filtered_count' ) && function_exists( 'aw_section_categories' ) && defined( 'AW_FILTERED_CATEGORY_HUBS' ) ) {
 		foreach ( (array) AW_FILTERED_CATEGORY_HUBS as $type ) {
 			foreach ( (array) aw_section_categories( $type ) as $slug ) {
-				$n = (int) aw_seo_filtered_count( $type, 'category_name', (string) $slug );
+				$n = (int) rankweb_seo_filtered_count( $type, 'category_name', (string) $slug );
 				if ( $n > 0 && $n < AW_FILTERED_MIN_ITEMS ) {
 					++$out['filtered'];
 				}

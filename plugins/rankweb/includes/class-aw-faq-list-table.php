@@ -1,8 +1,8 @@
 <?php
 /**
- * RankWeb → FAQ: the core list table of items with an FAQ (aw_faq_index() rows). Views: "With an FAQ" and
+ * RankWeb → FAQ: the core list table of items with an FAQ (rankweb_faq_index() rows). Views: "With an FAQ" and
  * "Waiting for approval" (items with draft questions; bulk Approve). Search by name, sort by name, type or questions
- * shown, filter by type. Loaded by aw_faq_admin_body() only.
+ * shown, filter by type. Loaded by rankweb_faq_admin_body() only.
  *
  * @package aw-seo-extras
  */
@@ -12,16 +12,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Items with an FAQ, as a core list table. */
-class AW_FAQ_List_Table extends WP_List_Table {
+class RankWeb_FAQ_List_Table extends WP_List_Table {
 
-	/** @var array aw_faq_index() rows */
+	/** @var array rankweb_faq_index() rows */
 	private $all;
 
 	/** @var string 'all' | 'waiting' */
 	public $view;
 
 	/**
-	 * @param array $rows aw_faq_index() rows.
+	 * @param array $rows rankweb_faq_index() rows.
 	 */
 	public function __construct( array $rows ) {
 		parent::__construct( array( 'singular' => 'aw-faq-item', 'plural' => 'aw-faq-items', 'ajax' => false, 'screen' => get_current_screen() ) );
@@ -66,7 +66,7 @@ class AW_FAQ_List_Table extends WP_List_Table {
 		$cur   = sanitize_key( wp_unslash( $_GET['aw_type'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter
 		echo '<div class="alignleft actions"><label class="screen-reader-text" for="aw-faq-type">Filter by type</label><select name="aw_type" id="aw-faq-type"><option value="">All types</option>';
 		foreach ( $types as $t ) {
-			echo '<option value="' . esc_attr( $t ) . '"' . selected( $cur, $t, false ) . '>' . esc_html( aw_faq_type_label( $t ) ) . '</option>';
+			echo '<option value="' . esc_attr( $t ) . '"' . selected( $cur, $t, false ) . '>' . esc_html( rankweb_faq_type_label( $t ) ) . '</option>';
 		}
 		echo '</select>';
 		submit_button( 'Filter', '', 'filter_action', false );
@@ -106,7 +106,7 @@ class AW_FAQ_List_Table extends WP_List_Table {
 	}
 
 	protected function column_name( $item ) {
-		$edit = aw_faq_can_edit( $item['store'], $item['id'] ) ? aw_faq_edit_url( $item['store'], $item['id'] ) : '';
+		$edit = rankweb_faq_can_edit( $item['store'], $item['id'] ) ? rankweb_faq_edit_url( $item['store'], $item['id'] ) : '';
 		$view = 'term' === $item['store'] ? get_term_link( (int) $item['id'] ) : get_permalink( (int) $item['id'] );
 		$name = '' !== $edit ? '<a class="row-title" href="' . esc_url( $edit ) . '">' . esc_html( $item['name'] ) . '</a>' : esc_html( $item['name'] );
 		$acts = array();
@@ -120,7 +120,7 @@ class AW_FAQ_List_Table extends WP_List_Table {
 	}
 
 	protected function column_type( $item ) {
-		return esc_html( aw_faq_type_label( $item['type'] ) );
+		return esc_html( rankweb_faq_type_label( $item['type'] ) );
 	}
 
 	protected function column_shown( $item ) {

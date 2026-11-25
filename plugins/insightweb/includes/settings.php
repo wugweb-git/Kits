@@ -1,6 +1,6 @@
 <?php
 /**
- * Search Insights' seven numbers and its API rule, as they were in RankWeb (moved 11 Nov 2026, docs/insightweb-plan.md).
+ * Search Insights' seven numbers and its API rule, as they were in RankWeb (moved 11 Nov 2026, docs/plugins/insightweb-plan.md).
  *
  * The numbers stay where RankWeb stored them: option aw_seo_settings, key 'search-insights', only values that differ
  * from the default. The constants are defined here from that key, with the same defaults. The Settings screen writes

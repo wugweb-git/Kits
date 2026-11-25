@@ -1,6 +1,6 @@
 <?php
 /**
- * DirectoryWeb Dashboard counts (docs/directory-plugin-plan.md §2.1): built by the hourly job directoryweb_stats_build,
+ * DirectoryWeb Dashboard counts (docs/plugins/directoryweb-plan.md §2.1): built by the hourly job directoryweb_stats_build,
  * never while a screen loads. The job keeps the newest counts in the transient directoryweb_stats (3 hours). The
  * Dashboard route only formats them; with nothing stored it asks for one single run and shows "Counting…".
  *
@@ -162,11 +162,11 @@ function directoryweb_count_completeness(): array {
  * @return array|null [ 'states', 'districts', 'states_all', 'districts_all', 'version', 'source' ].
  */
 function directoryweb_count_places(): ?array {
-	if ( ! function_exists( 'aw_place_counts' ) || ! function_exists( 'aw_lgd' ) ) {
+	if ( ! function_exists( 'directoryweb_place_counts' ) || ! function_exists( 'directoryweb_lgd' ) ) {
 		return null;
 	}
-	$c   = aw_place_counts();
-	$lgd = aw_lgd();
+	$c   = directoryweb_place_counts();
+	$lgd = directoryweb_lgd();
 	return array(
 		'states'        => count( array_filter( (array) ( $c['state'] ?? array() ) ) ),
 		'districts'     => count( array_filter( (array) ( $c['district'] ?? array() ) ) ),
@@ -199,11 +199,11 @@ function directoryweb_lgd_head(): array {
  * @return array|null Null when RankWeb's rule is not there.
  */
 function directoryweb_count_indexing(): ?array {
-	if ( ! function_exists( 'aw_sitemap_unreachable_listings' ) ) {
+	if ( ! function_exists( 'rankweb_sitemap_unreachable_listings' ) ) {
 		return null;
 	}
 	return array(
-		'nocontact' => count( (array) aw_sitemap_unreachable_listings() ),
+		'nocontact' => count( (array) rankweb_sitemap_unreachable_listings() ),
 		'kept'      => count( (array) get_option( 'aw_seo_keep_listings', array() ) ),
 	);
 }
@@ -219,7 +219,7 @@ function directoryweb_count_claims(): ?array {
 		'approved' => 0,
 		'rejected' => 0,
 		'oldest'   => '',
-		'form'     => function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0,
+		'form'     => function_exists( 'directoryweb_claim_ff_id' ) ? directoryweb_claim_ff_id() : 0,
 	);
 	$seen = false;
 	foreach ( directoryweb_claim_light_rows() as $r ) {
@@ -328,7 +328,7 @@ add_action( 'deleted_post_meta', 'directoryweb_claim_rows_forget', 10, 3 );
  */
 function directoryweb_claim_rows_fingerprint(): string {
 	global $wpdb;
-	$form  = function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0;
+	$form  = function_exists( 'directoryweb_claim_ff_id' ) ? directoryweb_claim_ff_id() : 0;
 	$parts = array( (string) $form );
 	if ( $form ) {
 		$parts[] = (string) wp_json_encode(
@@ -361,7 +361,7 @@ function directoryweb_claim_rows_fingerprint(): string {
 function directoryweb_claim_light_rows_read(): array {
 	global $wpdb;
 	$out  = array();
-	$form = function_exists( 'aw_claim_ff_id' ) ? aw_claim_ff_id() : 0;
+	$form = function_exists( 'directoryweb_claim_ff_id' ) ? directoryweb_claim_ff_id() : 0;
 	if ( $form ) {
 		$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the claim form's entries
 			$wpdb->prepare(

@@ -14,8 +14,8 @@ function add_action( ...$a ) {}
 function __( $t ) { return $t; }
 function sanitize_key( $s ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/i', '', (string) $s ) ); }
 function register_block_type( $name, $args ) { $GLOBALS['registered'][ $name ] = $args; }
-function aw_listing_type_ok( $slug ) { return in_array( $slug, array( 'shelter', 'vet' ), true ); }
-function aw_directory_filter( $type = '' ) { $GLOBALS['filter_args'][] = $type; return '<form data-type="' . $type . '"></form>'; }
+function directoryweb_listing_type_ok( $slug ) { return in_array( $slug, array( 'shelter', 'vet' ), true ); }
+function directoryweb_directory_filter( $type = '' ) { $GLOBALS['filter_args'][] = $type; return '<form data-type="' . $type . '"></form>'; }
 
 require dirname( __DIR__ ) . '/includes/directoryweb-collection-filter.php';
 directoryweb_register_collection_filter_block();

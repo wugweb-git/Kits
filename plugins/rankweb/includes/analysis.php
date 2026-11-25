@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Whether a Page's visible content is built at run time rather than written in the Page itself. */
-function aw_seo_page_is_built( $post ) {
+function rankweb_seo_page_is_built( $post ) {
 	$post = get_post( $post );
 	if ( ! $post || 'page' !== $post->post_type ) {
 		return false;
@@ -37,7 +37,10 @@ function aw_seo_page_is_built( $post ) {
 	if ( (int) get_option( 'page_on_front' ) === $post->ID || 'page-hub' === get_page_template_slug( $post ) ) {
 		return true;
 	}
-	return (bool) preg_match( '/<!-- wp:(?:shortcode|pattern|block \{"ref"|animal-writes\/(?!breadcrumb)|kits\/)|\[aw_/', (string) $post->post_content );
+	// Block namespaces whose blocks print run-time content (a theme's or another plugin's); the breadcrumb block of any of them is only a trail.
+	$spaces = array_filter( array_map( 'strval', (array) apply_filters( 'rankweb_built_block_namespaces', array() ) ) );
+	$extra  = $spaces ? '|(?:' . implode( '|', array_map( fn( $n ) => preg_quote( $n, '/' ), $spaces ) ) . ')\/(?!breadcrumb)' : '';
+	return (bool) preg_match( '/<!-- wp:(?:shortcode|pattern|block \{"ref"|kits\/' . $extra . ')|\[aw_/', (string) $post->post_content );
 }
 
 /**
@@ -49,7 +52,7 @@ function aw_seo_page_is_built( $post ) {
  * @param bool $store Keep the copy for 12 hours (false: score runs, which read each item once).
  * @return string
  */
-function aw_seo_rendered_main( $id, $fresh = false, $store = true ) {
+function rankweb_seo_rendered_main( $id, $fresh = false, $store = true ) {
 	$id  = (int) $id;
 	$key = 'aw_seo_rendered_' . $id;
 	if ( ! $fresh ) {
@@ -85,15 +88,15 @@ function aw_seo_rendered_main( $id, $fresh = false, $store = true ) {
  * The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''.
  *
  * @param int|WP_Post $post  Post.
- * @param bool        $store Keep the rendered copy (see aw_seo_rendered_main()).
+ * @param bool        $store Keep the rendered copy (see rankweb_seo_rendered_main()).
  * @return string
  */
-function aw_seo_analysis_content( $post, $store = true ) {
+function rankweb_seo_analysis_content( $post, $store = true ) {
 	$post = get_post( $post );
 	if ( ! $post ) {
 		return '';
 	}
-	return ( in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) || aw_seo_page_is_built( $post ) ) ? aw_seo_rendered_main( $post->ID, false, $store ) : '';
+	return ( in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) || rankweb_seo_page_is_built( $post ) ) ? rankweb_seo_rendered_main( $post->ID, false, $store ) : '';
 }
 
 add_action(
@@ -129,7 +132,7 @@ add_filter(
 add_filter(
 	'rank_math/recalculate_score/data',
 	function ( $values, $post_id ) {
-		$html = aw_seo_analysis_content( $post_id, false ); // each item is read once per run: no cached copy kept
+		$html = rankweb_seo_analysis_content( $post_id, false ); // each item is read once per run: no cached copy kept
 		if ( '' !== $html ) {
 			$values['content'] = $html;
 		}
@@ -144,7 +147,7 @@ add_action(
 	'rank_math/admin/editor_scripts',
 	function () {
 		$post = get_post();
-		$html = $post ? aw_seo_analysis_content( $post ) : '';
+		$html = $post ? rankweb_seo_analysis_content( $post ) : '';
 		if ( '' === $html ) {
 			return;
 		}
@@ -168,7 +171,7 @@ add_action(
  */
 
 /** Published items with a page and a focus keyword but no stored Rank Math score (newest first). */
-function aw_seo_unscored_ids( $limit ) {
+function rankweb_seo_unscored_ids( $limit ) {
 	global $wpdb;
 	$types = array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_press' ) ) );
 	$in    = implode( ', ', array_fill( 0, count( $types ), '%s' ) );
@@ -183,7 +186,7 @@ function aw_seo_unscored_ids( $limit ) {
  * @param int[] $ids Item IDs.
  * @return array{rankMath: array, posts: array}
  */
-function aw_seo_score_values( $ids ) {
+function rankweb_seo_score_values( $ids ) {
 	if ( ! $ids ) {
 		return array( 'rankMath' => new stdClass(), 'posts' => new stdClass() );
 	}
@@ -231,11 +234,11 @@ add_action(
 			'/seo-score-items',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => 'aw_seo_api_allowed',
+				'permission_callback' => 'rankweb_seo_api_allowed',
 				'args'                => array( 'limit' => array( 'type' => 'integer', 'default' => 20, 'minimum' => 1, 'maximum' => 50 ) ),
 				'callback'            => function ( WP_REST_Request $req ) {
 					do_action( 'litespeed_control_set_nocache', 'seo score API' );
-					return aw_seo_score_values( aw_seo_unscored_ids( (int) $req['limit'] ) );
+					return rankweb_seo_score_values( rankweb_seo_unscored_ids( (int) $req['limit'] ) );
 				},
 			)
 		);
@@ -244,7 +247,7 @@ add_action(
 			'/seo-scores',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => 'aw_seo_api_allowed',
+				'permission_callback' => 'rankweb_seo_api_allowed',
 				'callback'            => function ( WP_REST_Request $req ) {
 					$written = array();
 					foreach ( array_slice( (array) $req->get_param( 'scores' ), 0, 100, true ) as $id => $score ) {

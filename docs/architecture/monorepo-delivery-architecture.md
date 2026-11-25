@@ -1,5 +1,7 @@
 # Wugweb — Final Repository, Git, Packaging & WordPress Delivery Architecture
 
+**Status (25 Nov 2026):** Reference for repo, packaging and release flow; matches `tools/build`, `tools/package` and `.github/workflows`. Nothing described here is deployed. Naming rule updated: full prefix or agreed short form (`dw_`).
+
 **Source boundary:** Wugweb Notion records, architecture discussions, and repository contracts.  
 **Purpose:** Establish the canonical monorepo, product boundaries, Git workflow, build/package/release process, WordPress Playground previews, WordPress.org readiness, and the native-versus-plugin approach.
 
@@ -235,7 +237,7 @@ Every public plugin edition follows the official WordPress Plugin Developer Hand
 * **No Update URI**: `Update URI` removed for `.org` editions.
 * **Requires Plugins**: Used strictly for dependencies hosted directly on WordPress.org.
 * **External Services**: Full disclosure in `readme.txt` with privacy links and terms.
-* **Naming**: Unique plugin-specific prefix (min 4 characters). Never use `aw_` or `aw-` in new code.
+* **Naming**: Unique plugin-specific prefix (full name such as `directoryweb_`, or an agreed short form such as `dw_`). Never use `aw_` or `aw-` in new code.
 * **Security**: Nonces, capability checks, `wp_unslash()`, data sanitization, output escaping, and `$wpdb->prepare()`.
 
 ---

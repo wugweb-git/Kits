@@ -49,22 +49,22 @@ function directoryweb_local_card_render( $attributes = array() ) {
 	if ( '' !== $heading ) {
 		$actions = '<a class="kit-btn" href="' . esc_url( home_url( '/volunteer/' ) ) . '">' . esc_html__( 'Volunteer near you', 'directoryweb' ) . '</a>'
 			. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">' . esc_html__( 'Add an organisation', 'directoryweb' ) . '</a>';
-		return function_exists( 'aw_local_card' ) ? aw_local_card( $heading, $description, $actions ) : '<aside class="aw-local-card"><h2>' . esc_html( $heading ) . '</h2><p>' . esc_html( $description ) . '</p></aside>';
+		return function_exists( 'directoryweb_local_card' ) ? directoryweb_local_card( $heading, $description, $actions ) : '<aside class="aw-local-card"><h2>' . esc_html( $heading ) . '</h2><p>' . esc_html( $description ) . '</p></aside>';
 	}
 
 	// Dynamic context: resolve current place on district pages.
-	if ( ! function_exists( 'aw_dir_place' ) || ! function_exists( 'aw_place_count' ) ) {
+	if ( ! function_exists( 'directoryweb_dir_place' ) || ! function_exists( 'directoryweb_place_count' ) ) {
 		return '';
 	}
 
 	$place_var = (string) get_query_var( 'aw_place' );
-	$d         = $place_var ? aw_dir_place( $place_var ) : null;
+	$d         = $place_var ? directoryweb_dir_place( $place_var ) : null;
 	if ( ! $d || 'district' !== $d->kind ) {
 		return '';
 	}
 
-	$n = aw_place_count( $d );
-	$state = function_exists( 'aw_place_state' ) ? aw_place_state( $d->state ) : null;
+	$n = directoryweb_place_count( $d );
+	$state = function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( $d->state ) : null;
 	if ( $n >= 3 || ! $state ) {
 		return '';
 	}
@@ -78,7 +78,7 @@ function directoryweb_local_card_render( $attributes = array() ) {
 
 	$actions = '<a class="kit-btn" href="' . esc_url( home_url( '/volunteer/' ) ) . '">' . esc_html__( 'Volunteer near you', 'directoryweb' ) . '</a>'
 		. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">' . esc_html__( 'Add an organisation', 'directoryweb' ) . '</a>'
-		. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( aw_directory_url( $state->slug ) ) . '">' . esc_html( $see_all ) . '</a>';
+		. '<a class="kit-btn kit-btn--ghost" href="' . esc_url( directoryweb_directory_url( $state->slug ) ) . '">' . esc_html( $see_all ) . '</a>';
 
-	return function_exists( 'aw_local_card' ) ? aw_local_card( $head, $line, $actions ) : '<aside class="aw-local-card"><h2>' . esc_html( $head ) . '</h2><p>' . esc_html( $line ) . '</p><div class="aw-local-card-actions">' . $actions . '</div></aside>';
+	return function_exists( 'directoryweb_local_card' ) ? directoryweb_local_card( $head, $line, $actions ) : '<aside class="aw-local-card"><h2>' . esc_html( $head ) . '</h2><p>' . esc_html( $line ) . '</p><div class="aw-local-card-actions">' . $actions . '</div></aside>';
 }

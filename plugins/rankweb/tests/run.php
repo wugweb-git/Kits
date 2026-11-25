@@ -89,6 +89,28 @@ function sanitize_text_field( $str ) {
 	return $str;
 }
 
+// settings.php reads site defaults and the site name through standalone-seo.php's seam (generic here: no filter runs).
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( $tag, $value ) { // phpcs:ignore
+		return $value;
+	}
+}
+foreach ( array( 'add_filter', 'add_action' ) as $rankweb_hook_fn ) {
+	if ( ! function_exists( $rankweb_hook_fn ) ) {
+		eval( 'function ' . $rankweb_hook_fn . '() { return true; }' ); // phpcs:ignore
+	}
+}
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	function get_bloginfo( $what = '' ) { // phpcs:ignore
+		return 'name' === $what ? 'Test Site' : '';
+	}
+}
+if ( ! function_exists( 'wp_specialchars_decode' ) ) {
+	function wp_specialchars_decode( $s, $q = 0 ) { // phpcs:ignore
+		return $s;
+	}
+}
+require dirname( __DIR__ ) . '/includes/standalone-seo.php';
 require dirname( __DIR__ ) . '/includes/settings.php';
 
 $fails = 0;
@@ -111,12 +133,12 @@ function rw_check( bool $ok, string $what ): void {
 
 /** The texts of a tab's fields as the screen shows them (stored value, else the default). */
 function rw_texts( string $tab ): array {
-	$saved = aw_seo_saved();
+	$saved = rankweb_seo_saved();
 	$out   = array();
-	foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
+	foreach ( rankweb_seo_tab_fields( $tab ) as $key => $list ) {
 		foreach ( $list as $const => $f ) {
 			$v             = array_key_exists( $const, $saved[ $key ] ?? array() ) ? $saved[ $key ][ $const ] : $f['default'];
-			$out[ $const ] = aw_seo_field_text( $f['type'], $v );
+			$out[ $const ] = rankweb_seo_field_text( $f['type'], $v );
 		}
 	}
 	return $out;
@@ -125,9 +147,9 @@ function rw_texts( string $tab ): array {
 /** Switchable modules as the screen shows them. */
 function rw_on(): array {
 	$on = array();
-	foreach ( aw_seo_modules() as $key => $mod ) {
+	foreach ( rankweb_seo_modules() as $key => $mod ) {
 		if ( ! empty( $mod['switch'] ) ) {
-			$on[ $key ] = aw_seo_module_on( $key );
+			$on[ $key ] = rankweb_seo_module_on( $key );
 		}
 	}
 	return $on;
@@ -135,16 +157,16 @@ function rw_on(): array {
 
 // 1. Defaults survive the text round trip.
 $fields = 0;
-foreach ( aw_seo_modules() as $key => $mod ) {
+foreach ( rankweb_seo_modules() as $key => $mod ) {
 	foreach ( $mod['fields'] as $const => $f ) {
 		++$fields;
-		$back = aw_seo_field_value( $f['type'], aw_seo_field_text( $f['type'], $f['default'] ) );
+		$back = rankweb_seo_field_value( $f['type'], rankweb_seo_field_text( $f['type'], $f['default'] ) );
 		rw_check( $back === $f['default'], "default round trip {$key}.{$const}" );
 	}
 }
 rw_check( 57 === $fields, "57 fields found ({$fields})" ); // 31, 7 Internal links, 3 audit, 6 anchor mix, 3 silos, 1 noindex-protected, 1 video (C), 1 custom schema (D), 1 bulk + 1 media (E), 1 redirect (F), 1 agent writes (H, 17 Nov)
 
-$tabs = array_keys( array_filter( aw_seo_setting_tabs(), fn( $t ) => empty( $t['hidden'] ) ) );
+$tabs = array_keys( array_filter( rankweb_seo_setting_tabs(), fn( $t ) => empty( $t['hidden'] ) ) );
 rw_check( 8 === count( $tabs ), 'eight groups (Internal links added 14 Nov 2026): ' . implode( ', ', $tabs ) );
 
 // 2a. Option absent (live, 11 Nov 2026): every group saved unchanged writes nothing.
@@ -152,9 +174,9 @@ $GLOBALS['rw_options'] = array();
 $GLOBALS['rw_writes']  = 0;
 foreach ( $tabs as $tab ) {
 	if ( 'modules' === $tab ) {
-		aw_seo_settings_save( 'modules', array(), false, rw_on() );
+		rankweb_seo_settings_save( 'modules', array(), false, rw_on() );
 	} else {
-		aw_seo_settings_save( $tab, rw_texts( $tab ), false );
+		rankweb_seo_settings_save( $tab, rw_texts( $tab ), false );
 	}
 }
 rw_check( 0 === $GLOBALS['rw_writes'], 'absent option: no write after an unchanged Save of every group (' . $GLOBALS['rw_writes'] . ' writes)' );
@@ -181,9 +203,9 @@ $GLOBALS['rw_writes']  = 0;
 $bytes                 = serialize( $stored );
 foreach ( $tabs as $tab ) {
 	if ( 'modules' === $tab ) {
-		aw_seo_settings_save( 'modules', array(), false, rw_on() );
+		rankweb_seo_settings_save( 'modules', array(), false, rw_on() );
 	} else {
-		aw_seo_settings_save( $tab, rw_texts( $tab ), false );
+		rankweb_seo_settings_save( $tab, rw_texts( $tab ), false );
 	}
 }
 rw_check( 0 === $GLOBALS['rw_writes'], 'stored option: no write after an unchanged Save of every group (' . $GLOBALS['rw_writes'] . ' writes)' );
@@ -192,12 +214,12 @@ rw_check( serialize( get_option( AW_SEO_SETTINGS ) ) === $bytes, 'stored option 
 // 3. A change is stored; Restore defaults takes it out; other groups and InsightWeb's numbers stay.
 $t                    = rw_texts( 'ai' );
 $t['AW_MD_VARY_HTML'] = '0';
-aw_seo_settings_save( 'ai', $t, false );
+rankweb_seo_settings_save( 'ai', $t, false );
 $now = get_option( AW_SEO_SETTINGS );
 rw_check( 0 === ( $now['markdown']['AW_MD_VARY_HTML'] ?? null ), 'changed field stored' );
 rw_check( $now['search-insights'] === $stored['search-insights'], 'search-insights kept after a save' );
 rw_check( 150 === ( $now['general']['AW_SEO_DESC_MAX'] ?? null ), 'another group kept after a save' );
-aw_seo_settings_save( 'ai', array(), true );
+rankweb_seo_settings_save( 'ai', array(), true );
 $now = get_option( AW_SEO_SETTINGS );
 rw_check( ! isset( $now['markdown']['AW_MD_VARY_HTML'] ), 'Restore defaults takes the field out' );
 rw_check( false === ( $now['llms']['on'] ?? null ), 'Restore defaults keeps a module switch' );
@@ -207,16 +229,16 @@ rw_check( serialize( $now ) === $bytes, 'after change and Restore defaults the o
 $GLOBALS['rw_options'] = array();
 $on                    = rw_on();
 $on['redirects']       = false;
-aw_seo_settings_save( 'modules', array(), false, $on );
+rankweb_seo_settings_save( 'modules', array(), false, $on );
 rw_check( array( 'redirects' => array( 'on' => false ) ) === get_option( AW_SEO_SETTINGS ), 'module off stored as { on: false } only' );
 $on['redirects'] = true;
-aw_seo_settings_save( 'modules', array(), false, $on );
+rankweb_seo_settings_save( 'modules', array(), false, $on );
 rw_check( array() === get_option( AW_SEO_SETTINGS ), 'module on again: nothing stored' );
 
 // 5. An 'on' => true left by an older save: an unchanged modules Save keeps it and writes nothing.
 $GLOBALS['rw_options'] = array( AW_SEO_SETTINGS => array( 'faq' => array( 'on' => true ) ) );
 $GLOBALS['rw_writes']  = 0;
-aw_seo_settings_save( 'modules', array(), false, rw_on() );
+rankweb_seo_settings_save( 'modules', array(), false, rw_on() );
 rw_check( 0 === $GLOBALS['rw_writes'], "older 'on' => true: no write after an unchanged modules Save" );
 
 // 6. The registered sanitize callback (register_setting(), runs on every update_option()) returns a stored value
@@ -229,14 +251,14 @@ $full = array(
 	'llms'            => array( 'on' => false ),
 	'faq'             => array( 'AW_FAQ_OFF_TYPES' => array( 'aw_listing' ) ),
 );
-foreach ( aw_seo_modules() as $key => $mod ) {
+foreach ( rankweb_seo_modules() as $key => $mod ) {
 	foreach ( $mod['fields'] as $const => $f ) {
 		$full[ $key ][ $const ] = $f['default'];
 	}
 }
-rw_check( serialize( aw_seo_settings_sanitize( $full ) ) === serialize( $full ), 'sanitize callback: a stored value comes back byte for byte' );
-rw_check( serialize( aw_seo_settings_sanitize( $stored ) ) === serialize( $stored ), 'sanitize callback: the test option comes back byte for byte' );
-rw_check( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( 'a', 'b' ) ) ) === aw_seo_settings_sanitize( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( '<b>a</b>', 'b' ) ) ) ), 'sanitize callback: list texts cleaned' );
+rw_check( serialize( rankweb_seo_settings_sanitize( $full ) ) === serialize( $full ), 'sanitize callback: a stored value comes back byte for byte' );
+rw_check( serialize( rankweb_seo_settings_sanitize( $stored ) ) === serialize( $stored ), 'sanitize callback: the test option comes back byte for byte' );
+rw_check( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( 'a', 'b' ) ) ) === rankweb_seo_settings_sanitize( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( '<b>a</b>', 'b' ) ) ) ), 'sanitize callback: list texts cleaned' );
 
 // 7. Reset this section on Modules: every module on again, "Delete this plugin's data" off; other groups kept.
 $GLOBALS['rw_options'] = array(
@@ -246,10 +268,10 @@ $GLOBALS['rw_options'] = array(
 	),
 	AW_SEO_DELETE_DATA => 1,
 );
-aw_seo_settings_reset( 'modules' );
+rankweb_seo_settings_reset( 'modules' );
 rw_check( array( 'general' => array( 'AW_SEO_DESC_MAX' => 150 ) ) === get_option( AW_SEO_SETTINGS ), 'Reset Modules: switches back on, fields kept' );
 rw_check( 0 === get_option( AW_SEO_DELETE_DATA ), 'Reset Modules: delete data back to off' );
-aw_seo_settings_reset( 'titles' );
+rankweb_seo_settings_reset( 'titles' );
 rw_check( array() === get_option( AW_SEO_SETTINGS ), 'Reset a field group: its fields back to defaults' );
 
 // Backup before uninstall deletes (includes/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
@@ -257,26 +279,26 @@ require_once dirname( __DIR__ ) . '/includes/uninstall-backup.php';
 $ub_t = static function ( bool $ok, string $what ): void {
 	rw_check( $ok, $what );
 };
-$ub_h = json_decode( aw_seo_backup_header( 'aw-seo-extras', '1.2.3', 'https://example.org/', 1763000000, array( 'a_opt', 'b_opt' ), array( 'wp_x' ) ), true );
+$ub_h = json_decode( rankweb_seo_backup_header( 'aw-seo-extras', '1.2.3', 'https://example.org/', 1763000000, array( 'a_opt', 'b_opt' ), array( 'wp_x' ) ), true );
 $ub_t( 'header' === $ub_h['type'] && 'aw-seo-extras' === $ub_h['plugin'] && '1.2.3' === $ub_h['version'] && 'https://example.org/' === $ub_h['site'], 'backup: header names the plugin, version and site' );
 $ub_t( '2025-11-13T02:13:20Z' === $ub_h['time'] && array( 'a_opt', 'b_opt' ) === $ub_h['options'] && array( 'wp_x' ) === $ub_h['tables'], 'backup: header has the time, the options and the tables' );
-$ub_l = aw_seo_backup_option_line( 'a_opt', 'a:1:{s:1:"k";s:3:"é/";}', 'yes' );
+$ub_l = rankweb_seo_backup_option_line( 'a_opt', 'a:1:{s:1:"k";s:3:"é/";}', 'yes' );
 $ub_o = json_decode( $ub_l, true );
 $ub_t( "\n" === substr( $ub_l, -1 ) && 1 === substr_count( $ub_l, "\n" ), 'backup: one line per option' );
 $ub_t( 'option' === $ub_o['type'] && 'a:1:{s:1:"k";s:3:"é/";}' === $ub_o['value'] && 'yes' === $ub_o['autoload'] && ! isset( $ub_o['b64'] ), 'backup: option value kept exactly as stored' );
-$ub_o = json_decode( aw_seo_backup_option_line( 'bin', "\xff\x00\xfe", 'no' ), true );
+$ub_o = json_decode( rankweb_seo_backup_option_line( 'bin', "\xff\x00\xfe", 'no' ), true );
 $ub_t( array( 'value' ) === $ub_o['b64'] && "\xff\x00\xfe" === base64_decode( $ub_o['value'] ), 'backup: a value that is not UTF-8 is kept base64-encoded' ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- the test reads the value back
-$ub_r = json_decode( aw_seo_backup_row_line( 'wp_x', array( 'id' => '7', 'note' => null, 'blob' => "\x80" ) ), true );
+$ub_r = json_decode( rankweb_seo_backup_row_line( 'wp_x', array( 'id' => '7', 'note' => null, 'blob' => "\x80" ) ), true );
 $ub_t( 'row' === $ub_r['type'] && 'wp_x' === $ub_r['table'] && '7' === $ub_r['row']['id'] && null === $ub_r['row']['note'] && array( 'blob' ) === $ub_r['b64'], 'backup: row line keeps every column, null and binary' );
-$ub_t( '{}' === substr( trim( aw_seo_backup_row_line( 'wp_x', array() ) ), -3, 2 ), 'backup: an empty row is an object' );
-$ub_t( 500 === AW_SEO_BACKUP_BATCH, 'backup: tables are read 500 rows at a time' );
+$ub_t( '{}' === substr( trim( rankweb_seo_backup_row_line( 'wp_x', array() ) ), -3, 2 ), 'backup: an empty row is an object' );
+$ub_t( 500 === RANKWEB_SEO_BACKUP_BATCH, 'backup: tables are read 500 rows at a time' );
 $ub_calls = array();
 $ub_seen  = 0;
 $ub_fetch = static function ( int $offset, int $limit ) use ( &$ub_calls ) {
 	$ub_calls[] = array( $offset, $limit );
 	return array_fill( 0, max( 0, min( $limit, 1203 - $offset ) ), array( 'id' => '1' ) );
 };
-$ub_n     = aw_seo_backup_rows(
+$ub_n     = rankweb_seo_backup_rows(
 	$ub_fetch,
 	static function ( array $row ) use ( &$ub_seen ): bool {
 		++$ub_seen;
@@ -285,24 +307,24 @@ $ub_n     = aw_seo_backup_rows(
 );
 $ub_t( 1203 === $ub_n && 1203 === $ub_seen && array( array( 0, 500 ), array( 500, 500 ), array( 1000, 500 ) ) === $ub_calls, 'backup: 1203 rows in batches of 500' );
 $ub_calls = array();
-$ub_n     = aw_seo_backup_rows( static fn( int $o, int $l ) => $o < 1000 ? array_fill( 0, $l, array() ) : array(), static fn( array $r ): bool => true );
+$ub_n     = rankweb_seo_backup_rows( static fn( int $o, int $l ) => $o < 1000 ? array_fill( 0, $l, array() ) : array(), static fn( array $r ): bool => true );
 $ub_t( 1000 === $ub_n, 'backup: an exact multiple of 500 ends on the empty batch' );
-$ub_t( false === aw_seo_backup_rows( static fn( int $o, int $l ) => null, static fn( array $r ): bool => true ), 'backup: a read error stops the backup' );
+$ub_t( false === rankweb_seo_backup_rows( static fn( int $o, int $l ) => null, static fn( array $r ): bool => true ), 'backup: a read error stops the backup' );
 $ub_w = 0;
-$ub_n = aw_seo_backup_rows(
+$ub_n = rankweb_seo_backup_rows(
 	static fn( int $o, int $l ) => array_fill( 0, $l, array() ),
 	static function ( array $r ) use ( &$ub_w ): bool {
 		return ++$ub_w < 3;
 	}
 );
 $ub_t( false === $ub_n && 3 === $ub_w, 'backup: a write error stops the backup at once' );
-$ub_t( 1 === preg_match( '/^aw-seo-extras-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', aw_seo_backup_name( 'aw-seo-extras', 1763000000 ) ) && 'aw-seo-extras-uninstall-20251113-021320.jsonl.gz' === aw_seo_backup_name( 'aw-seo-extras', 1763000000 ), 'backup: file name' );
+$ub_t( 1 === preg_match( '/^aw-seo-extras-uninstall-\d{8}-\d{6}\.jsonl\.gz$/', rankweb_seo_backup_name( 'aw-seo-extras', 1763000000 ) ) && 'aw-seo-extras-uninstall-20251113-021320.jsonl.gz' === rankweb_seo_backup_name( 'aw-seo-extras', 1763000000 ), 'backup: file name' );
 $ub_dir = sys_get_temp_dir() . '/aw-seo-extras-ub-' . getmypid();
 @mkdir( $ub_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a temporary folder for the test
 file_put_contents( $ub_dir . '/index.php', 'kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
-$ub_t( aw_seo_backup_protect( $ub_dir ) && false !== strpos( (string) file_get_contents( $ub_dir . '/.htaccess' ), 'Require all denied' ) && 'kept' === file_get_contents( $ub_dir . '/index.php' ), 'backup: folder guarded by .htaccess and index.php, an existing file kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
+$ub_t( rankweb_seo_backup_protect( $ub_dir ) && false !== strpos( (string) file_get_contents( $ub_dir . '/.htaccess' ), 'Require all denied' ) && 'kept' === file_get_contents( $ub_dir . '/index.php' ), 'backup: folder guarded by .htaccess and index.php, an existing file kept' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own files
 $ub_gz = gzopen( $ub_dir . '/t.jsonl.gz', 'wb6' ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own file
-gzwrite( $ub_gz, aw_seo_backup_header( 'aw-seo-extras', '1', 's', 0, array( 'a' ), array() ) . aw_seo_backup_option_line( 'a', 'v', 'yes' ) );
+gzwrite( $ub_gz, rankweb_seo_backup_header( 'aw-seo-extras', '1', 's', 0, array( 'a' ), array() ) . rankweb_seo_backup_option_line( 'a', 'v', 'yes' ) );
 gzclose( $ub_gz );
 $ub_lines = gzfile( $ub_dir . '/t.jsonl.gz' );
 $ub_t( 2 === count( $ub_lines ) && 'header' === json_decode( $ub_lines[0], true )['type'] && 'v' === json_decode( $ub_lines[1], true )['value'], 'backup: gzip JSON lines read back' );
@@ -312,7 +334,7 @@ foreach ( array( 'index.php', '.htaccess', 't.jsonl.gz' ) as $ub_f ) {
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
 $ub_dir = sys_get_temp_dir() . '/aw-seo-extras-ub-ro-' . getmypid();
 @mkdir( $ub_dir, 0555 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions -- a read-only folder for the test
-$ub_t( 0 === getmyuid() || ! @aw_seo_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
+$ub_t( 0 === getmyuid() || ! @rankweb_seo_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
 
 echo $fails ? "{$fails} of {$count} checks failed\n" : "all {$count} RankWeb settings checks passed\n";

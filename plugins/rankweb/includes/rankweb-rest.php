@@ -1,13 +1,13 @@
 <?php
 /**
- * RankWeb's routes for its screens (docs/rankweb-plan.md §2–§4), under rankweb/v1:
+ * RankWeb's routes for its screens (docs/org/rankweb-org-plan.md §2–§4), under rankweb/v1:
  *
  *   GET  dashboard           manage_categories  the tiles, from the background counts (rankweb-dashboard.php)
  *   POST dashboard/count     manage_categories  ask for a count now (one background event)
  *   GET  settings            manage_options     every group, module and field with today's values
- *   POST settings/<group>    manage_options     save one group (aw_seo_settings_save(), the same as the form); reset: true
+ *   POST settings/<group>    manage_options     save one group (rankweb_seo_settings_save(), the same as the form); reset: true
  *                                               puts the group's registered settings back to their defaults
- *                                               (aw_seo_settings_reset()); Modules also takes delete_data
+ *                                               (rankweb_seo_settings_reset()); Modules also takes delete_data
  *   POST settings/faq-types  manage_options     "FAQ box on" (aw_faq_off_types, the same as RankWeb → FAQ)
  *   POST settings/keep-listings manage_options  listings kept indexed with no contact (aw_seo_keep_listings)
  *   POST settings/share-image manage_options    the site's default share image (aw_default_share_image)
@@ -138,7 +138,7 @@ add_action(
 				'args'                => array(
 					'group'       => array(
 						'type' => 'string',
-						'enum' => array_keys( aw_seo_setting_tabs() ),
+						'enum' => array_keys( rankweb_seo_setting_tabs() ),
 					),
 					'fields'      => array(
 						'type'                 => 'object',
@@ -317,8 +317,8 @@ function rankweb_dashboard_payload(): array {
 		),
 	);
 	// Internal links: the last audit's stored result (link-audit.php), read, not counted.
-	if ( function_exists( 'aw_link_audit_summary' ) ) {
-		$la      = aw_link_audit_summary();
+	if ( function_exists( 'rankweb_link_audit_summary' ) ) {
+		$la      = rankweb_link_audit_summary();
 		$by      = (array) $la['by'];
 		$tiles[] = array(
 			'key'    => 'links',
@@ -335,7 +335,7 @@ function rankweb_dashboard_payload(): array {
 	}
 	// The last two are stored results already (the hourly check and the plugin state): read, not counted.
 	$last = (array) get_option( 'aw_seo_endpoints_last', array() );
-	if ( ! aw_seo_module_on( 'health' ) ) {
+	if ( ! rankweb_seo_module_on( 'health' ) ) {
 		$ev = __( 'Off', 'rankweb' );
 		$es = __( 'The hourly check is switched off', 'rankweb' );
 		$et = '';
@@ -361,15 +361,15 @@ function rankweb_dashboard_payload(): array {
 		'href'  => home_url( '/sitemap_index.xml' ),
 		'tone'  => $et,
 	);
-	$off     = count( array_filter( array_keys( aw_seo_modules() ), fn( $k ) => ! aw_seo_module_on( $k ) ) );
+	$off     = count( array_filter( array_keys( rankweb_seo_modules() ), fn( $k ) => ! rankweb_seo_module_on( $k ) ) );
 	$tiles[] = array(
 		'key'   => 'rankmath',
 		'label' => __( 'Rank Math', 'rankweb' ),
-		'value' => aw_seo_extras_rank_math() ? __( 'Active', 'rankweb' ) : __( 'Not active', 'rankweb' ),
+		'value' => rankweb_seo_extras_rank_math() ? __( 'Active', 'rankweb' ) : __( 'Not active', 'rankweb' ),
 		/* translators: 1: Rank Math version, 2: number of modules. */
 		'sub'   => sprintf( _n( 'Version %1$s; %2$s RankWeb module off', 'Version %1$s; %2$s RankWeb modules off', $off, 'rankweb' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '–', $num( $off ) ),
 		'href'  => $settings( 'modules' ),
-		'tone'  => aw_seo_extras_rank_math() ? '' : 'error',
+		'tone'  => rankweb_seo_extras_rank_math() ? '' : 'error',
 	);
 
 	return array(
@@ -428,22 +428,22 @@ function rankweb_settings_field( string $module, string $const, array $f, array 
 		'type'        => $f['type'],
 		'label'       => $f['label'],
 		'help'        => $f['help'],
-		'text'        => aw_seo_field_text( $f['type'], $value ),
-		'defaultText' => aw_seo_field_text( $f['type'], $f['default'] ),
+		'text'        => rankweb_seo_field_text( $f['type'], $value ),
+		'defaultText' => rankweb_seo_field_text( $f['type'], $f['default'] ),
 		'changed'     => $has && $value !== $f['default'],
 	);
 }
 
 /**
  * A group as the screen shows it: one block per module of the tab, then fields of other modules shown on the tab
- * (the share images under General), in the order of the module list (aw_seo_tab_fields()).
+ * (the share images under General), in the order of the module list (rankweb_seo_tab_fields()).
  *
  * @param string $tab Tab key.
  */
 function rankweb_settings_group( string $tab ): array {
-	$tabs   = aw_seo_setting_tabs();
-	$mods   = aw_seo_modules();
-	$saved  = aw_seo_saved();
+	$tabs   = rankweb_seo_setting_tabs();
+	$mods   = rankweb_seo_modules();
+	$saved  = rankweb_seo_saved();
 	$group  = array(
 		'slug'   => $tab,
 		'label'  => $tabs[ $tab ]['label'],
@@ -466,20 +466,20 @@ function rankweb_settings_group( string $tab ): array {
 		'label'    => $mods[ $key ]['label'],
 		'desc'     => $own ? $mods[ $key ]['desc'] : '',
 		'switch'   => ! empty( $mods[ $key ]['switch'] ),
-		'on'       => aw_seo_module_on( $key ),
+		'on'       => rankweb_seo_module_on( $key ),
 		'fields'   => array(),
-		'changeIn' => $own && aw_seo_extras_rank_math() ? ( $elses[ $key ] ?? null ) : null,
+		'changeIn' => $own && rankweb_seo_extras_rank_math() ? ( $elses[ $key ] ?? null ) : null,
 	);
 	if ( 'modules' === $tab ) {
 		foreach ( $mods as $key => $mod ) {
 			$b                 = $module( $key, true );
-			$b['settings']     = aw_seo_module_tab( $key );
+			$b['settings']     = rankweb_seo_module_tab( $key );
 			$group['blocks'][] = $b;
 		}
-		$group['deleteData'] = aw_seo_delete_data_on();
+		$group['deleteData'] = rankweb_seo_delete_data_on();
 		return $group;
 	}
-	$fields = aw_seo_tab_fields( $tab );
+	$fields = rankweb_seo_tab_fields( $tab );
 	foreach ( $tabs[ $tab ]['modules'] as $key ) {
 		$b = $module( $key, true );
 		foreach ( $fields[ $key ] ?? array() as $const => $f ) {
@@ -497,11 +497,11 @@ function rankweb_settings_group( string $tab ): array {
 		}
 		$group['blocks'][] = $b;
 	}
-	if ( 'schema' === $tab && function_exists( 'aw_faq_type_choices' ) ) {
-		// The option itself, not aw_faq_off_types(): that keeps a per-request copy, stale right after a save here.
+	if ( 'schema' === $tab && function_exists( 'rankweb_faq_type_choices' ) ) {
+		// The option itself, not rankweb_faq_off_types(): that keeps a per-request copy, stale right after a save here.
 		$stored            = get_option( 'aw_faq_off_types', null );
-		$off               = array_map( 'strval', null === $stored ? aw_faq_off_types() : (array) $stored );
-		$choices           = aw_faq_type_choices();
+		$off               = array_map( 'strval', null === $stored ? rankweb_faq_off_types() : (array) $stored );
+		$choices           = rankweb_faq_type_choices();
 		$group['faqTypes'] = array();
 		foreach ( array( 'post', 'term' ) as $store ) {
 			foreach ( $choices[ $store ] as $slug => $name ) {
@@ -542,7 +542,7 @@ function rankweb_settings_group( string $tab ): array {
 /** Every group, in the order of today's tabs. */
 function rankweb_settings_payload(): array {
 	$groups = array();
-	foreach ( aw_seo_setting_tabs() as $tab => $t ) {
+	foreach ( rankweb_seo_setting_tabs() as $tab => $t ) {
 		if ( empty( $t['hidden'] ) ) {
 			$groups[] = rankweb_settings_group( $tab );
 		}
@@ -557,38 +557,38 @@ function rankweb_settings_payload(): array {
  */
 function rankweb_rest_save_group( WP_REST_Request $request ) {
 	$tab = (string) $request['group'];
-	if ( ! isset( aw_seo_setting_tabs()[ $tab ] ) ) {
+	if ( ! isset( rankweb_seo_setting_tabs()[ $tab ] ) ) {
 		return new WP_Error( 'rest_invalid_param', __( 'No such group.', 'rankweb' ), array( 'status' => 400 ) );
 	}
 	$reset = (bool) $request['reset'];
 	if ( $reset ) {
-		aw_seo_settings_reset( $tab ); // "Reset this section": the group's registered defaults
+		rankweb_seo_settings_reset( $tab ); // "Reset this section": the group's registered defaults
 	} elseif ( 'modules' === $tab ) {
 		if ( null !== $request['delete_data'] ) {
-			aw_seo_delete_data_save( (bool) $request['delete_data'] );
+			rankweb_seo_delete_data_save( (bool) $request['delete_data'] );
 		}
 		$on = array();
-		foreach ( aw_seo_modules() as $key => $mod ) {
+		foreach ( rankweb_seo_modules() as $key => $mod ) {
 			if ( ! empty( $mod['switch'] ) ) {
 				$sent       = (array) $request['on'];
-				$on[ $key ] = array_key_exists( $key, $sent ) ? ! empty( $sent[ $key ] ) : aw_seo_module_on( $key );
+				$on[ $key ] = array_key_exists( $key, $sent ) ? ! empty( $sent[ $key ] ) : rankweb_seo_module_on( $key );
 			}
 		}
-		aw_seo_settings_save( 'modules', array(), false, $on );
+		rankweb_seo_settings_save( 'modules', array(), false, $on );
 	} else {
 		$sent   = (array) $request['fields'];
-		$saved  = aw_seo_saved();
+		$saved  = rankweb_seo_saved();
 		$posted = array();
-		foreach ( aw_seo_tab_fields( $tab ) as $key => $list ) {
+		foreach ( rankweb_seo_tab_fields( $tab ) as $key => $list ) {
 			foreach ( $list as $const => $f ) {
 				if ( array_key_exists( $const, $sent ) ) {
 					$posted[ $const ] = (string) $sent[ $const ];
 				} else {
-					$posted[ $const ] = aw_seo_field_text( $f['type'], array_key_exists( $const, $saved[ $key ] ?? array() ) ? $saved[ $key ][ $const ] : $f['default'] );
+					$posted[ $const ] = rankweb_seo_field_text( $f['type'], array_key_exists( $const, $saved[ $key ] ?? array() ) ? $saved[ $key ][ $const ] : $f['default'] );
 				}
 			}
 		}
-		aw_seo_settings_save( $tab, $posted );
+		rankweb_seo_settings_save( $tab, $posted );
 	}
 	return rest_ensure_response(
 		array(
@@ -605,14 +605,14 @@ function rankweb_rest_save_group( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function rankweb_rest_save_faq_types( WP_REST_Request $request ) {
-	if ( ! function_exists( 'aw_faq_type_choices' ) ) {
+	if ( ! function_exists( 'rankweb_faq_type_choices' ) ) {
 		return new WP_Error( 'rest_no_route', __( 'The FAQ module is switched off.', 'rankweb' ), array( 'status' => 404 ) );
 	}
 	$on      = array_map( 'sanitize_key', (array) $request['on'] );
-	$choices = aw_faq_type_choices();
+	$choices = rankweb_faq_type_choices();
 	$all     = array_merge( array_keys( $choices['post'] ), array_keys( $choices['term'] ) );
 	$off     = array_values( array_diff( $all, $on ) );
-	$now     = aw_faq_off_types();
+	$now     = rankweb_faq_off_types();
 	$a       = $off;
 	$b       = $now;
 	sort( $a );
@@ -665,7 +665,7 @@ function rankweb_rest_save_keep_listings( WP_REST_Request $request ) {
 }
 
 /**
- * The site's default share image (helpers.php aw_seo_default_image()): an image from the media library, or 0 for none.
+ * The site's default share image (helpers.php rankweb_seo_default_image()): an image from the media library, or 0 for none.
  *
  * @param WP_REST_Request $request Request.
  */
@@ -689,7 +689,7 @@ function rankweb_rest_save_share_image( WP_REST_Request $request ) {
 
 /** Connected services: Rank Math only (keys stay in Kits → Keys, owner 11 Nov 2026). */
 function rankweb_services(): array {
-	$active  = aw_seo_extras_rank_math();
+	$active  = rankweb_seo_extras_rank_math();
 	$mods    = (array) get_option( 'rank_math_modules', array() );
 	$general = (array) get_option( 'rank-math-options-general', array() );
 	$feature = array(
@@ -707,7 +707,7 @@ function rankweb_services(): array {
 			'status'   => $active ? sprintf( __( 'Active, %s', 'rankweb' ), defined( 'RANK_MATH_VERSION' ) ? RANK_MATH_VERSION : '' ) : __( 'Not active', 'rankweb' ),
 			'tone'     => $active ? '' : 'error',
 			/* translators: 1: features on, 2: features RankWeb relies on. */
-			'summary'  => $active ? sprintf( __( '%1$d of the %2$d Rank Math features RankWeb relies on are on.', 'rankweb' ), $on, count( $feature ) ) : __( 'RankWeb does nothing until Rank Math SEO is active.', 'rankweb' ),
+			'summary'  => $active ? sprintf( __( '%1$d of the %2$d Rank Math features RankWeb relies on are on.', 'rankweb' ), $on, count( $feature ) ) : __( 'RankWeb works without Rank Math; this row shows whether Rank Math is active.', 'rankweb' ),
 			'features' => array_map(
 				fn( $x ) => array(
 					'label' => $x[0],

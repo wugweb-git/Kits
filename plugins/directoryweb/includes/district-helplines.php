@@ -32,19 +32,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_HELPLINE_FIRST = array( 'ambulance', 'emergency-rescue', 'rescue', 'wildlife-rescue', 'bird-treatment' );
 
 /** Official numbers for a district (option aw_district_helplines). */
-function aw_district_official_numbers( $code ) {
+function directoryweb_district_official_numbers( $code ) {
 	$all = get_option( 'aw_district_helplines', array() );
 	return is_array( $all ) && ! empty( $all[ (int) $code ] ) ? (array) $all[ (int) $code ] : array();
 }
 
 /** A tel: address for a number as printed. */
-function aw_helpline_tel( $num ) {
+function directoryweb_helpline_tel( $num ) {
 	$n = preg_replace( '/[^\d+]/', '', (string) $num );
 	return 'tel:' . $n;
 }
 
 /** Listings in a district with a phone, best first. */
-function aw_district_helpline_listings( $code, $max = 6 ) {
+function directoryweb_district_helpline_listings( $code, $max = 6 ) {
 	static $memo = array(); // the row and the block both ask for the same district in one request
 	$key = (int) $code;
 	if ( isset( $memo[ $key ] ) ) {
@@ -90,25 +90,25 @@ function aw_district_helpline_listings( $code, $max = 6 ) {
 }
 
 /** One card. */
-function aw_helpline_card( $head, $num, $line, $src, $href = '' ) {
+function directoryweb_helpline_card( $head, $num, $line, $src, $href = '' ) {
 	$h = $href ? '<a href="' . esc_url( $href ) . '">' . esc_html( $head ) . '</a>' : esc_html( $head );
-	return '<div class="aw-helpline"><h3>' . $h . '</h3><a class="aw-helpline-num" href="' . esc_attr( aw_helpline_tel( $num ) ) . '">' . esc_html( $num ) . '</a>'
+	return '<div class="aw-helpline"><h3>' . $h . '</h3><a class="aw-helpline-num" href="' . esc_attr( directoryweb_helpline_tel( $num ) ) . '">' . esc_html( $num ) . '</a>'
 		. ( $line ? '<p>' . esc_html( $line ) . '</p>' : '' ) . ( $src ? '<p class="aw-helpline-src">' . $src . '</p>' : '' ) . '</div>';
 }
 
 /** The state's published "1962 Mobile Veterinary Unit" listing for a district place, or null. */
-function aw_district_mvu( $d ) {
-	$state = aw_place_state( $d->state );
+function directoryweb_district_mvu( $d ) {
+	$state = directoryweb_place_state( $d->state );
 	$mvu   = $state ? get_page_by_path( '1962-mobile-veterinary-unit-' . $state->slug, OBJECT, 'aw_listing' ) : null;
 	return $mvu && 'publish' === $mvu->post_status ? $mvu : null;
 }
 
 /** Whether this request is a district page that shows the helplines (page 1, no type filter). Returns the place or null. */
-function aw_district_helplines_place() {
-	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_type() || (int) get_query_var( 'paged' ) > 1 ) { // page 2 on (as Core's aw_hub_page())
+function directoryweb_district_helplines_place() {
+	if ( ! directoryweb_is_directory_view() || get_query_var( 'aw_dir_type' ) || directoryweb_request_type() || (int) get_query_var( 'paged' ) > 1 ) { // page 2 on (as Core's aw_hub_page())
 		return null;
 	}
-	$d = aw_current_place();
+	$d = directoryweb_current_place();
 	return $d && 'district' === $d->kind ? $d : null;
 }
 
@@ -117,26 +117,26 @@ function aw_district_helplines_place() {
  * state runs it, then the district's own numbers) and a link to the full block under the list. Shown only when the
  * block is (the district has a number of its own).
  */
-function aw_district_helplines_row() {
-	$d = aw_district_helplines_place();
+function directoryweb_district_helplines_row() {
+	$d = directoryweb_district_helplines_place();
 	if ( ! $d ) {
 		return '';
 	}
 	$own = array();
-	foreach ( aw_district_official_numbers( $d->code ) as $o ) {
+	foreach ( directoryweb_district_official_numbers( $d->code ) as $o ) {
 		$own[] = array( (string) $o['name'], (string) $o['number'] );
 	}
-	foreach ( aw_district_helpline_listings( $d->code, 3 ) as $r ) {
+	foreach ( directoryweb_district_helpline_listings( $d->code, 3 ) as $r ) {
 		$own[] = array( html_entity_decode( get_the_title( $r['id'] ) ), $r['num'] );
 	}
 	if ( ! $own ) {
 		return '';
 	}
-	$items = aw_district_mvu( $d ) ? array( array( __( 'Mobile Veterinary Units', 'directoryweb' ), '1962' ) ) : array();
+	$items = directoryweb_district_mvu( $d ) ? array( array( __( 'Mobile Veterinary Units', 'directoryweb' ), '1962' ) ) : array();
 	$items = array_slice( array_merge( $items, $own ), 0, 3 );
 	$chips = '';
 	foreach ( $items as $it ) {
-		$chips .= '<a class="kit-chip" href="' . esc_attr( aw_helpline_tel( $it[1] ) ) . '"><span class="aw-dh-row-name">' . esc_html( $it[0] ) . '</span> <strong>' . esc_html( $it[1] ) . '</strong></a>';
+		$chips .= '<a class="kit-chip" href="' . esc_attr( directoryweb_helpline_tel( $it[1] ) ) . '"><span class="aw-dh-row-name">' . esc_html( $it[0] ) . '</span> <strong>' . esc_html( $it[1] ) . '</strong></a>';
 	}
 	directoryweb_use_style( 'aw-directory' ); // aw-dh-row
 	/* translators: %s: district. */
@@ -146,25 +146,25 @@ function aw_district_helplines_row() {
 }
 
 /** The block for a district place, or ''. */
-function aw_district_helplines_html( $d ) {
+function directoryweb_district_helplines_html( $d ) {
 	$own = '';
-	foreach ( aw_district_official_numbers( $d->code ) as $o ) {
+	foreach ( directoryweb_district_official_numbers( $d->code ) as $o ) {
 		$src  = esc_html( (string) ( $o['source'] ?? '' ) );
 		$src  = ! empty( $o['url'] ) ? '<a href="' . esc_url( $o['url'] ) . '" rel="nofollow noopener" target="_blank">' . $src . '</a>' : $src;
 		$src .= ! empty( $o['checked'] ) ? ', checked ' . directoryweb_date( $o['checked'], null, 'aw-date' ) : '';
-		$own .= aw_helpline_card( (string) $o['name'], (string) $o['number'], (string) ( $o['line'] ?? '' ), $src );
+		$own .= directoryweb_helpline_card( (string) $o['name'], (string) $o['number'], (string) ( $o['line'] ?? '' ), $src );
 	}
-	foreach ( aw_district_helpline_listings( $d->code ) as $r ) {
-		$own .= aw_helpline_card( html_entity_decode( get_the_title( $r['id'] ) ), $r['num'], $r['type'], esc_html__( 'From the listing (source on its page)', 'directoryweb' ), get_permalink( $r['id'] ) );
+	foreach ( directoryweb_district_helpline_listings( $d->code ) as $r ) {
+		$own .= directoryweb_helpline_card( html_entity_decode( get_the_title( $r['id'] ) ), $r['num'], $r['type'], esc_html__( 'From the listing (source on its page)', 'directoryweb' ), get_permalink( $r['id'] ) );
 	}
 	if ( '' === $own ) {
 		return '';
 	}
-	$cards = aw_helpline_card( __( 'Emergency', 'directoryweb' ), '112', __( 'Police, fire and ambulance, anywhere in India.', 'directoryweb' ), esc_html__( 'Ministry of Home Affairs', 'directoryweb' ) );
-	$state = aw_place_state( $d->state );
-	$mvu   = aw_district_mvu( $d );
+	$cards = directoryweb_helpline_card( __( 'Emergency', 'directoryweb' ), '112', __( 'Police, fire and ambulance, anywhere in India.', 'directoryweb' ), esc_html__( 'Ministry of Home Affairs', 'directoryweb' ) );
+	$state = directoryweb_place_state( $d->state );
+	$mvu   = directoryweb_district_mvu( $d );
 	if ( $mvu ) {
-		$cards .= aw_helpline_card( __( 'Mobile Veterinary Units', 'directoryweb' ), '1962', __( 'A vet comes to the animal.', 'directoryweb' ), esc_html( sprintf( '%s animal husbandry department', $state->name ) ), get_permalink( $mvu ) );
+		$cards .= directoryweb_helpline_card( __( 'Mobile Veterinary Units', 'directoryweb' ), '1962', __( 'A vet comes to the animal.', 'directoryweb' ), esc_html( sprintf( '%s animal husbandry department', $state->name ) ), get_permalink( $mvu ) );
 	}
 	directoryweb_use_style( 'aw-directory' ); // aw-district-helplines, aw-helpline
 	$id = 'aw-dh-' . wp_unique_id();
@@ -178,11 +178,11 @@ function aw_district_helplines_html( $d ) {
 add_filter(
 	'render_block_core/query',
 	function ( $html, $block ) {
-		if ( ! function_exists( 'aw_hub_of_query' ) || 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) { // the hub Query Loops are Animal Writes Core's
+		if ( ! function_exists( 'aw_hub_of_query' ) || 'aw_listing' !== aw_hub_of_query( $block['attrs']['queryId'] ?? 0 ) ) { // the hub Query Loops belong to the legacy Core plugin
 			return $html;
 		}
-		$d = aw_district_helplines_place();
-		return $d ? $html . aw_district_helplines_html( $d ) : $html;
+		$d = directoryweb_district_helplines_place();
+		return $d ? $html . directoryweb_district_helplines_html( $d ) : $html;
 	},
 	9,
 	2

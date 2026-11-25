@@ -17,8 +17,8 @@ add_action(
 		if ( ! function_exists( 'kits_admin_tabs' ) ) {
 			return;
 		}
-		add_filter( 'kits_status_rows', 'aw_seo_extras_kits_status_row' );
-		add_filter( 'kits_settings_transfer_options', 'aw_seo_extras_kits_export' );
+		add_filter( 'kits_status_rows', 'rankweb_seo_extras_kits_status_row' );
+		add_filter( 'kits_settings_transfer_options', 'rankweb_seo_extras_kits_export' );
 	},
 	20 // after the plugin's own plugins_loaded (5), which loads the menu.
 );
@@ -28,12 +28,12 @@ add_action(
  *
  * @param array $rows Rows: [label, HTML value].
  */
-function aw_seo_extras_kits_status_row( $rows ) {
-	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+function rankweb_seo_extras_kits_status_row( $rows ) {
+	$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
 	$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 	/* translators: %s: plugin version. */
 	$text = sprintf( __( 'Active, %s', 'rankweb' ), $head['Version'] );
-	if ( ! aw_seo_extras_rank_math() ) {
+	if ( ! rankweb_seo_extras_rank_math() ) {
 		$fix    = __( 'Does nothing until Rank Math SEO is active.', 'rankweb' );
 		$rows[] = array( __( 'RankWeb', 'rankweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
@@ -44,11 +44,11 @@ function aw_seo_extras_kits_status_row( $rows ) {
 }
 
 /**
- * RankWeb's three settings options in Kits → Import / Export (docs/rankweb-plan.md §0, answer 3): the rules, the
+ * RankWeb's three settings options in Kits → Import / Export (docs/org/rankweb-org-plan.md §0, answer 3): the rules, the
  * FAQ box types and the listings kept indexed. An export before and after a change shows that no setting was lost.
  *
  * @param array $names Option names in the export.
  */
-function aw_seo_extras_kits_export( $names ) {
+function rankweb_seo_extras_kits_export( $names ) {
 	return array_values( array_unique( array_merge( (array) $names, array( 'aw_seo_settings', 'aw_faq_off_types', 'aw_seo_keep_listings' ) ) ) );
 }

@@ -2,8 +2,9 @@
 /**
  * Notification emails for native claims (claim-native.php): plain text through wp_mail(), no other plugin needed.
  *
- * A site owner is told when a claim comes in; the claimant is told when it is approved, rejected or revoked.
- * MailWeb (or any mailer) can take over per message: return false from the `directoryweb_claim_mail` filter and nothing is sent here.
+ * The message builder (pure, tested) and a sender for callers that want this wording. The live claim emails are
+ * sent by claim-native.php through dw_claim_mail(), which honours the "Claim emails" Settings switch and lets MailWeb
+ * (or any mailer) take a message over: return false from the `directoryweb_claim_mail` filter and nothing is sent.
  *
  * @package directoryweb
  */
@@ -64,7 +65,7 @@ function dw_claim_mail_send( string $event, int $id ): void {
 	if ( ! $claim ) {
 		return;
 	}
-	$to_admin = (string) get_option( 'directoryweb_claim_notify', get_option( 'admin_email', '' ) );
+	$to_admin = function_exists( 'dw_claim_notify_address' ) ? dw_claim_notify_address() : (string) get_option( 'admin_email', '' );
 	$msg      = dw_claim_mail_build(
 		$event,
 		$claim,
@@ -73,24 +74,14 @@ function dw_claim_mail_send( string $event, int $id ): void {
 		(string) get_edit_post_link( $id, 'raw' ),
 		wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES )
 	);
-	if ( null === $msg || false === apply_filters( 'directoryweb_claim_mail', true, $event, $msg, $claim ) ) {
+	if ( null === $msg ) {
 		return;
 	}
-	wp_mail( $msg['to'], $msg['subject'], $msg['body'] );
+	if ( function_exists( 'dw_claim_mail' ) ) {
+		dw_claim_mail( $msg['to'], $msg['subject'], $msg['body'], $event, $claim ); // the Settings switch and the directoryweb_claim_mail filter apply
+	}
 }
 
-add_action(
-	'directoryweb_claim_created',
-	function ( $id ) {
-		dw_claim_mail_send( 'created', (int) $id );
-	}
-);
-add_action(
-	'directoryweb_claim_transitioned',
-	function ( $id, $from, $to ) {
-		unset( $from );
-		dw_claim_mail_send( (string) $to, (int) $id );
-	},
-	10,
-	3
-);
+// No hooks here: claim-native.php sends the claim emails (directoryweb_claim_created / _transitioned) through
+// dw_claim_mail(), which obeys the Settings switch and the directoryweb_claim_mail filter. Registering this file's
+// sender as well would email everyone twice.

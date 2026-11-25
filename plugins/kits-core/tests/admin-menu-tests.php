@@ -1,7 +1,7 @@
 <?php
 /**
  * Kits menu tests that need no WordPress (owner rule: no local WordPress or MySQL): the six items and their order,
- * where every old address of docs/admin-ui-spec.md §E1 goes, that other submenu entries leave the menu, and that a
+ * where every old address of docs/design-system/admin-ui-spec.md §E1 goes, that other submenu entries leave the menu, and that a
  * tab added through the filter is dropped (includes/admin-menu-model.php). The Deploy check also loads each screen and
  * each old address in a real WordPress (tools/ci/smoke.sh).
  *

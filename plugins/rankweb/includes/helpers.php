@@ -10,12 +10,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * A term's address, '' for a WP_Error (RankWeb's own; Kits Core has aw_seo_term_url()).
+ * A term's address, '' for a WP_Error (RankWeb's own; Kits Core has rankweb_seo_term_url()).
  *
  * @param WP_Term|int|string $term     Term.
  * @param string             $taxonomy Taxonomy, when $term is not an object.
  */
-function aw_seo_term_url( $term, $taxonomy = '' ): string {
+function rankweb_seo_term_url( $term, $taxonomy = '' ): string {
 	$url = get_term_link( $term, $taxonomy );
 	return is_wp_error( $url ) ? '' : (string) $url;
 }
@@ -31,7 +31,7 @@ function aw_seo_term_url( $term, $taxonomy = '' ): string {
  * @param string $more Added when the text was cut ('' for none).
  * @return string
  */
-function aw_seo_cut( $text, $max, $more = '…' ) {
+function rankweb_seo_cut( $text, $max, $more = '…' ) {
 	$text = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
 	if ( mb_strlen( $text ) <= $max ) {
 		return $text;
@@ -50,13 +50,13 @@ function aw_seo_cut( $text, $max, $more = '…' ) {
 }
 
 /** Page number of a list view (hub Page, Directory place, category): 1 on the first page. */
-function aw_seo_page_number() {
+function rankweb_seo_page_number() {
 	return max( 1, (int) get_query_var( 'paged' ), is_singular() ? 1 : (int) get_query_var( 'page' ) );
 }
 
 /** " – Page N" for the second and later pages of a list, '' otherwise. */
-function aw_seo_page_suffix() {
-	$n = aw_seo_page_number();
+function rankweb_seo_page_suffix() {
+	$n = rankweb_seo_page_number();
 	return $n > 1 ? ' – Page ' . $n : '';
 }
 
@@ -64,8 +64,8 @@ function aw_seo_page_suffix() {
  * A title with its page number on later pages: " Page N" before " – Animal Writes" (the only separator a title has),
  * else at the end; unchanged when it already names the page.
  */
-function aw_seo_title_with_page( $text ) {
-	$n = aw_seo_page_number();
+function rankweb_seo_title_with_page( $text ) {
+	$n = rankweb_seo_page_number();
 	if ( $n < 2 || false !== stripos( $text, 'Page ' . $n ) ) {
 		return $text;
 	}
@@ -83,7 +83,7 @@ function aw_seo_title_with_page( $text ) {
  * @param string $publisher Publisher name to drop when it is appended.
  * @return string
  */
-function aw_seo_unseparate( $text, $publisher = '' ) {
+function rankweb_seo_unseparate( $text, $publisher = '' ) {
 	$t = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
 	$publisher = trim( (string) $publisher );
 	if ( '' !== $publisher ) {
@@ -110,7 +110,7 @@ function aw_seo_unseparate( $text, $publisher = '' ) {
  * @param bool   $case Capitalise the word after a removed hyphen.
  * @return string
  */
-function aw_seo_no_hyphens( $text, $case = true ) {
+function rankweb_seo_no_hyphens( $text, $case = true ) {
 	$t    = (string) $text;
 	$keep = array(); // email addresses are kept as written (cpcsea-mef@gov.in stays one address)
 	$t    = (string) preg_replace_callback(
@@ -146,19 +146,19 @@ function aw_seo_no_hyphens( $text, $case = true ) {
 }
 
 /** A title (with or without " – Animal Writes" at the end) without hyphens; the separator before the site name stays. */
-function aw_seo_no_hyphens_title( $title, $case = true ) {
+function rankweb_seo_no_hyphens_title( $title, $case = true ) {
 	$brand = ' – ' . get_bloginfo( 'name' );
 	$title = (string) $title;
 	if ( mb_substr( $title, -mb_strlen( $brand ) ) === $brand ) {
-		return aw_seo_no_hyphens( mb_substr( $title, 0, -mb_strlen( $brand ) ), $case ) . $brand;
+		return rankweb_seo_no_hyphens( mb_substr( $title, 0, -mb_strlen( $brand ) ), $case ) . $brand;
 	}
-	return aw_seo_no_hyphens( $title, $case );
+	return rankweb_seo_no_hyphens( $title, $case );
 }
 
 /** $text with the page suffix, unless it already names the page. */
-function aw_seo_with_page( $text ) {
-	$suffix = aw_seo_page_suffix();
-	return ( '' === $suffix || false !== stripos( $text, 'Page ' . aw_seo_page_number() ) ) ? $text : $text . $suffix;
+function rankweb_seo_with_page( $text ) {
+	$suffix = rankweb_seo_page_suffix();
+	return ( '' === $suffix || false !== stripos( $text, 'Page ' . rankweb_seo_page_number() ) ) ? $text : $text . $suffix;
 }
 
 /**
@@ -168,7 +168,7 @@ function aw_seo_with_page( $text ) {
  * @param WP_Post $post Post.
  * @return string
  */
-function aw_seo_intro( $post ) {
+function rankweb_seo_intro( $post ) {
 	$content = (string) $post->post_content;
 	$skip    = '/^(last\s+(updated|reviewed|modified)|updated( on)?|effective( from| date)?|published( on)?|date)\b/i';
 	if ( false === strpos( $content, '<!-- wp:' ) && false === stripos( $content, '<p' ) ) {
@@ -197,24 +197,24 @@ function aw_seo_intro( $post ) {
  * @return string
  */
 /** A hub's place, type, name-search or filtered view (Directory state/district/type pages, ?tag=, ?category_name=, ?q=). */
-function aw_seo_hub_subview() {
-	if ( ( function_exists( 'aw_current_place' ) && aw_current_place() ) || ( function_exists( 'aw_current_type_name' ) && aw_current_type_name() ) || get_query_var( 'aw_dir_type' ) ) {
+function rankweb_seo_hub_subview() {
+	if ( ( function_exists( 'directoryweb_current_place' ) && directoryweb_current_place() ) || ( function_exists( 'directoryweb_current_type_name' ) && directoryweb_current_type_name() ) || get_query_var( 'aw_dir_type' ) ) {
 		return true;
 	}
 	return ! empty( $_GET['tag'] ) || ! empty( $_GET['category_name'] ) || ! empty( $_GET['q'] ); // phpcs:ignore WordPress.Security.NonceVerification
 }
 
-function aw_seo_typed( $key ) {
+function rankweb_seo_typed( $key ) {
 	$id = get_queried_object_id();
 	if ( ! $id ) {
 		return '';
 	}
 	if ( is_singular() ) {
 		$typed = trim( (string) get_post_meta( $id, 'rank_math_' . $key, true ) );
-		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && aw_seo_is_hub_page( $id ) && aw_seo_hub_subview() ) {
+		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && rankweb_seo_is_hub_page( $id ) && rankweb_seo_hub_subview() ) {
 			return ''; // a hub's own title and description belong to its first view only, never to its place, type or filtered views
 		}
-		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && aw_seo_is_hub_page( $id ) ) {
+		if ( '' !== $typed && in_array( $key, array( 'title', 'description' ), true ) && rankweb_seo_is_hub_page( $id ) ) {
 			$auto = (array) json_decode( (string) get_post_meta( $id, '_aw_seo_auto', true ), true );
 			if ( ( $auto[ $key ] ?? null ) === $typed ) {
 				return ''; // a hub's stored copy of its own page-1 title (titles.php): built live, not typed
@@ -236,12 +236,12 @@ function aw_seo_typed( $key ) {
  *
  * @return bool
  */
-function aw_seo_is_list_view() {
+function rankweb_seo_is_list_view() {
 	return ! is_singular() || ( function_exists( 'aw_hub_type' ) && aw_hub_type() );
 }
 
 /** An item hidden from search engines (Rank Math's robots field). */
-function aw_is_noindex_item( $id ) {
+function rankweb_is_noindex_item( $id ) {
 	return in_array( 'noindex', (array) get_post_meta( $id, 'rank_math_robots', true ), true );
 }
 
@@ -252,7 +252,7 @@ function aw_is_noindex_item( $id ) {
  *
  * @return int[]
  */
-function aw_seo_preview_ids() {
+function rankweb_seo_preview_ids() {
 	return function_exists( 'kits_preview_only_ids' ) ? array_map( 'intval', (array) kits_preview_only_ids() ) : array();
 }
 
@@ -264,13 +264,13 @@ function aw_seo_preview_ids() {
  * @param array  $v    WP_Query arguments.
  * @return array
  */
-function aw_seo_hub_rules( $type, array $v ) {
+function rankweb_seo_hub_rules( $type, array $v ) {
 	if ( 'aw_opportunity' === $type && function_exists( 'kits_open_opportunities_meta_query' ) ) {
 		$v['meta_query']   = (array) ( $v['meta_query'] ?? array() ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$v['meta_query'][] = kits_open_opportunities_meta_query();
 	}
-	if ( aw_seo_preview_ids() ) {
-		$v['post__not_in'] = aw_seo_preview_ids();
+	if ( rankweb_seo_preview_ids() ) {
+		$v['post__not_in'] = rankweb_seo_preview_ids();
 	}
 	return $v;
 }
@@ -280,7 +280,7 @@ function aw_seo_hub_rules( $type, array $v ) {
  *
  * @return string[]
  */
-function aw_seo_social_keys() {
+function rankweb_seo_social_keys() {
 	return array( 'aw_facebook', 'aw_instagram', 'aw_x', 'aw_youtube', 'aw_linkedin' );
 }
 
@@ -291,7 +291,7 @@ function aw_seo_social_keys() {
  * @param string $url Picture address.
  * @return string
  */
-function aw_seo_upload_path( $url ) {
+function rankweb_seo_upload_path( $url ) {
 	$up   = wp_get_upload_dir();
 	$base = set_url_scheme( $up['baseurl'], 'https' );
 	$abs  = set_url_scheme( (string) strtok( (string) $url, '?' ), 'https' );
@@ -306,7 +306,7 @@ function aw_seo_upload_path( $url ) {
  * @param callable $build Builds the value.
  * @return mixed
  */
-function aw_seo_cached( $name, callable $build ) {
+function rankweb_seo_cached( $name, callable $build ) {
 	$key = 'aw_seo_c_' . md5( $name . '|' . (string) get_option( 'aw_seo_cache_gen', '0' ) );
 	$hit = get_transient( $key );
 	if ( is_array( $hit ) && array_key_exists( 'v', $hit ) ) {
@@ -316,27 +316,39 @@ function aw_seo_cached( $name, callable $build ) {
 	set_transient( $key, array( 'v' => $value ), 12 * HOUR_IN_SECONDS );
 	return $value;
 }
-/** A post, its terms or its trash state changed: aw_seo_cached() values are rebuilt (written once, at the end of the request). */
-function aw_seo_cache_flush() {
+/** A post, its terms or its trash state changed: rankweb_seo_cached() values are rebuilt (written once, at the end of the request). */
+function rankweb_seo_cache_flush() {
 	$GLOBALS['aw_seo_cache_stale'] = true;
-	if ( ! has_action( 'shutdown', 'aw_seo_cache_flush_write' ) ) {
-		add_action( 'shutdown', 'aw_seo_cache_flush_write', 0 );
+	if ( ! has_action( 'shutdown', 'rankweb_seo_cache_flush_write' ) ) {
+		add_action( 'shutdown', 'rankweb_seo_cache_flush_write', 0 );
 	}
 }
 /** Moves aw_seo_cache_gen on, so every key built before is no longer read. */
-function aw_seo_cache_flush_write() {
+function rankweb_seo_cache_flush_write() {
 	if ( ! empty( $GLOBALS['aw_seo_cache_stale'] ) ) {
 		update_option( 'aw_seo_cache_gen', (string) microtime( true ), true );
 		$GLOBALS['aw_seo_cache_stale'] = false;
 	}
 }
 foreach ( array( 'save_post', 'deleted_post', 'set_object_terms' ) as $aw_seo_hook ) {
-	add_action( $aw_seo_hook, 'aw_seo_cache_flush' );
+	add_action( $aw_seo_hook, 'rankweb_seo_cache_flush' );
 }
 unset( $aw_seo_hook );
 
-/** "{Text} – Animal Writes". */
-function aw_seo_branded( $text ) {
+/**
+ * The words that follow "the {Site} Directory" in a directory place's description: nothing on a generic site. A site
+ * whose directory covers one subject and country supplies them through the `rankweb_directory_scope` filter
+ * (a site layer, sites/{site}/rankweb/site.php, does this).
+ *
+ * @param bool $long True for the longer form (" of animal welfare organisations in India"); false for the short one (" of India").
+ * @return string With its leading space, or ''.
+ */
+function rankweb_seo_dir_scope( $long = false ) {
+	return (string) apply_filters( 'rankweb_directory_scope', '', (bool) $long );
+}
+
+/** "{Text} – {Site name}". */
+function rankweb_seo_branded( $text ) {
 	return $text . ' – ' . get_bloginfo( 'name' );
 }
 
@@ -347,8 +359,8 @@ const AW_SEO_DANGLING = '&|\+|and|or|but|nor|of|the|a|an|to|in|on|at|by|for|with
  * A title cut to at most $max characters at a word boundary that leaves a whole phrase: no dangling connector
  * ("and", "of", "to", "&" …), no trailing comma, colon or dash, no half bracket.
  */
-function aw_seo_cut_title( $text, $max = 60 ) {
-	$cut  = aw_seo_cut( $text, $max, '' );
+function rankweb_seo_cut_title( $text, $max = 60 ) {
+	$cut  = rankweb_seo_cut( $text, $max, '' );
 	$full = trim( preg_replace( '/\s+/u', ' ', (string) $text ) );
 	if ( $cut === $full ) {
 		return $cut;
@@ -376,11 +388,11 @@ function aw_seo_cut_title( $text, $max = 60 ) {
 
 /**
  * One rule for news, Library and Resources headlines, kept within 60 characters: "{Headline} – Animal Writes" when
- * that fits, the headline alone when only it fits, else the headline cut at a whole phrase (aw_seo_cut_title).
+ * that fits, the headline alone when only it fits, else the headline cut at a whole phrase (rankweb_seo_cut_title).
  */
-function aw_seo_headline_title( $title ) {
-	$t = aw_seo_headline_case( rankweb_plain_text( $title ) ); // Title Case like every other title on the site
-	return mb_strlen( aw_seo_branded( $t ) ) <= 60 ? aw_seo_branded( $t ) : $t; // over 60: no site name; a headline is never cut (owner, 15 Oct 2026)
+function rankweb_seo_headline_title( $title ) {
+	$t = rankweb_seo_headline_case( rankweb_plain_text( $title ) ); // Title Case like every other title on the site
+	return mb_strlen( rankweb_seo_branded( $t ) ) <= 60 ? rankweb_seo_branded( $t ) : $t; // over 60: no site name; a headline is never cut (owner, 15 Oct 2026)
 }
 
 /** Words a headline in Title Case keeps lower case (not first). */
@@ -390,8 +402,8 @@ const AW_SEO_SMALL_WORDS = array( 'a', 'an', 'the', 'and', 'or', 'nor', 'but', '
  * A headline in Title Case: each word capitalised except short connectors; acronyms, numbers and words with capitals
  * inside (NHAI, CBI-DRI, iPhone) stay as written. A headline written all in capitals is lowered first.
  */
-function aw_seo_headline_case( $text ) {
-	$text = trim( preg_replace( '/\s+/u', ' ', aw_seo_no_hyphens( (string) $text ) ) ); // no hyphens in a title (owner, 18 Oct 2026)
+function rankweb_seo_headline_case( $text ) {
+	$text = trim( preg_replace( '/\s+/u', ' ', rankweb_seo_no_hyphens( (string) $text ) ) ); // no hyphens in a title (owner, 18 Oct 2026)
 	if ( ! preg_match( '/\p{Ll}/u', $text ) ) {
 		$text = mb_strtolower( $text );
 	}
@@ -414,44 +426,44 @@ function aw_seo_headline_case( $text ) {
  *   "… Research Summary"), without a separator.
  * - Over 60: the headline alone; then its first part (before ":", " – " or ";") when that part has at least 30
  *   characters; else the whole headline, never cut inside.
- * - No separator but the " – " before the site name (aw_seo_unseparate).
+ * - No separator but the " – " before the site name (rankweb_seo_unseparate).
  *
  * @param WP_Post $post Library item or Resource.
  * @return string
  */
-function aw_seo_resource_title( $post ) {
+function rankweb_seo_resource_title( $post ) {
 	$t = rankweb_plain_text( $post->post_title );
 	$t = preg_replace( '/[\s,(–—-]*(?:dated\b)?[\s:–—-]*\d{1,2}\.\d{1,2}\.\d{4}\)?\.?$/u', '', $t ); // "… dated - 11.08.2026"
 	$t = preg_replace( '/[\s,;:.–—-]*\bdated$/u', '', $t );
 	$t = trim( preg_replace( '/^[“"]\s*(.*?)\s*[”"]$/u', '$1', trim( $t ) ), " \t.,;:" );
-	$t = aw_seo_headline_case( $t );
+	$t = rankweb_seo_headline_case( $t );
 	$max = 60;
-	if ( mb_strlen( aw_seo_branded( $t ) ) <= $max ) {
-		$kind = aw_seo_resource_kind( $post );
-		$t = aw_seo_unseparate( $t );
-		if ( mb_strlen( aw_seo_branded( $t ) ) < 50 && '' !== $kind && false === mb_stripos( $t, $kind ) && mb_strlen( aw_seo_branded( $t . ' ' . $kind ) ) <= $max ) {
-			return aw_seo_branded( $t . ' ' . $kind );
+	if ( mb_strlen( rankweb_seo_branded( $t ) ) <= $max ) {
+		$kind = rankweb_seo_resource_kind( $post );
+		$t = rankweb_seo_unseparate( $t );
+		if ( mb_strlen( rankweb_seo_branded( $t ) ) < 50 && '' !== $kind && false === mb_stripos( $t, $kind ) && mb_strlen( rankweb_seo_branded( $t . ' ' . $kind ) ) <= $max ) {
+			return rankweb_seo_branded( $t . ' ' . $kind );
 		}
-		return aw_seo_branded( $t );
+		return rankweb_seo_branded( $t );
 	}
-	if ( mb_strlen( aw_seo_unseparate( $t ) ) <= $max ) {
-		return aw_seo_unseparate( $t );
+	if ( mb_strlen( rankweb_seo_unseparate( $t ) ) <= $max ) {
+		return rankweb_seo_unseparate( $t );
 	}
 	$parts = preg_split( '/\s*(?::|;|\s[–—-])\s+/u', $t );
-	$first = aw_seo_unseparate( trim( (string) ( $parts[0] ?? '' ) ) );
+	$first = rankweb_seo_unseparate( trim( (string) ( $parts[0] ?? '' ) ) );
 	if ( count( $parts ) > 1 && mb_strlen( $first ) >= 30 ) {
-		if ( mb_strlen( aw_seo_branded( $first ) ) <= $max ) {
-			return aw_seo_branded( $first );
+		if ( mb_strlen( rankweb_seo_branded( $first ) ) <= $max ) {
+			return rankweb_seo_branded( $first );
 		}
 		if ( mb_strlen( $first ) <= $max ) {
 			return $first;
 		}
 	}
-	return aw_seo_unseparate( $t ); // longer than 60 and no whole first part that fits: the name is never cut
+	return rankweb_seo_unseparate( $t ); // longer than 60 and no whole first part that fits: the name is never cut
 }
 
 /** What a Library item or Resource is, for its title: the Library type ("Circular"), "Research Summary", "Guide", "FAQ". */
-function aw_seo_resource_kind( $post ) {
+function rankweb_seo_resource_kind( $post ) {
 	$tags = wp_get_post_terms( $post->ID, 'post_tag', array( 'fields' => 'all' ) );
 	$by   = is_wp_error( $tags ) ? array() : array_column( $tags, 'name', 'slug' );
 	if ( 'post' === $post->post_type ) {
@@ -464,26 +476,26 @@ function aw_seo_resource_kind( $post ) {
 	}
 	foreach ( array( 'act', 'rule', 'notification', 'circular', 'advisory', 'judgment', 'order', 'official-release', 'template' ) as $slug ) {
 		if ( isset( $by[ $slug ] ) ) {
-			return aw_seo_headline_case( $by[ $slug ] );
+			return rankweb_seo_headline_case( $by[ $slug ] );
 		}
 	}
 	return '';
 }
 
 /** The first of $titles within $max characters (the last one, cut at a whole phrase, when none fits). */
-function aw_seo_fit( array $titles, $max = 60 ) {
+function rankweb_seo_fit( array $titles, $max = 60 ) {
 	foreach ( $titles as $t ) {
 		if ( mb_strlen( $t ) <= $max ) {
 			return $t;
 		}
 	}
-	return aw_seo_cut_title( (string) end( $titles ), $max );
+	return rankweb_seo_cut_title( (string) end( $titles ), $max );
 }
 
 /** "{Name} in {District}" or "{Name} in {State}" (no comma as a separator; the place is not repeated when the name has it). */
-function aw_seo_listing_name( $id ) {
+function rankweb_seo_listing_name( $id ) {
 	$name = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', rankweb_plain_text( get_post_field( 'post_title', $id ) ) ); // organisation names keep their hyphens (owner, 18 Oct 2026)
-	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+	list( $state, $district ) = function_exists( 'directoryweb_item_place_names' ) ? directoryweb_item_place_names( $id ) : array( '', '' );
 	$where = $district ? $district : $state;
 	return ( '' !== $where && false === mb_stripos( $name, $where ) ) ? $name . ' in ' . $where : $name;
 }
@@ -502,8 +514,8 @@ function aw_seo_listing_name( $id ) {
  *
  * @param string $slug The listing type's slug.
  */
-function aw_seo_listing_type_name( $slug ) {
-	return function_exists( 'aw_listing_type_name' ) ? (string) aw_listing_type_name( $slug ) : ucfirst( str_replace( '-', ' ', (string) $slug ) );
+function rankweb_seo_listing_type_name( $slug ) {
+	return function_exists( 'directoryweb_listing_type_name' ) ? (string) directoryweb_listing_type_name( $slug ) : ucfirst( str_replace( '-', ' ', (string) $slug ) );
 }
 
 /**
@@ -512,12 +524,12 @@ function aw_seo_listing_type_name( $slug ) {
  * @param int $id The item.
  * @return array{0: string, 1: string}
  */
-function aw_seo_item_place_names( $id ) {
-	return function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+function rankweb_seo_item_place_names( $id ) {
+	return function_exists( 'directoryweb_item_place_names' ) ? directoryweb_item_place_names( $id ) : array( '', '' );
 }
 
 /** Plural of a listing type for a sentence: "Gaushalas" (always capitalised, owner 15 Oct 2026), "ABC centres", "veterinary dispensaries". */
-function aw_seo_type_plural( $slug ) {
+function rankweb_seo_type_plural( $slug ) {
 	$fixed = array(
 		'veterinary'             => 'veterinary hospitals and dispensaries',
 		'veterinary-office'      => 'government veterinary offices',
@@ -529,7 +541,7 @@ function aw_seo_type_plural( $slug ) {
 	if ( isset( $fixed[ $slug ] ) ) {
 		return $fixed[ $slug ];
 	}
-	$name  = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', aw_seo_listing_type_name( $slug ) ) );
+	$name  = trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_listing_type_name( $slug ) ) );
 	$words = array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', $name ) );
 	$last  = (string) array_pop( $words );
 	if ( preg_match( '/[^aeiou]y$/', $last ) ) {
@@ -543,12 +555,12 @@ function aw_seo_type_plural( $slug ) {
 }
 
 /** The categories with the most published items of a type, as lower-case names (cached for 12 hours). */
-function aw_seo_top_categories( $type ) {
+function rankweb_seo_top_categories( $type ) {
 	$key = 'aw_seo_categories_' . $type;
 	$out = get_transient( $key );
 	if ( false === $out ) {
 		global $wpdb;
-		$names = $wpdb->get_col( $wpdb->prepare( "SELECT t.name FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = %s JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = %s AND p.post_status = 'publish' GROUP BY t.term_id ORDER BY COUNT(*) DESC LIMIT 4", aw_seo_category_tax(), $type ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$names = $wpdb->get_col( $wpdb->prepare( "SELECT t.name FROM {$wpdb->terms} t JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id AND tt.taxonomy = %s JOIN {$wpdb->term_relationships} r ON r.term_taxonomy_id = tt.term_taxonomy_id JOIN {$wpdb->posts} p ON p.ID = r.object_id AND p.post_type = %s AND p.post_status = 'publish' GROUP BY t.term_id ORDER BY COUNT(*) DESC LIMIT 4", rankweb_seo_category_tax(), $type ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$out   = array_map( fn( $n ) => implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', html_entity_decode( $n, ENT_QUOTES, 'UTF-8' ) ) ) ), (array) $names );
 		set_transient( $key, $out, 12 * HOUR_IN_SECONDS );
 	}
@@ -559,15 +571,15 @@ function aw_seo_top_categories( $type ) {
  * Hub description built from its own intro (the hub Page's excerpt, as shown under its H1) and the list's facts:
  * "{intro} {N stories} on {category}, {category} and {category}." up to AW_SEO_DESC_MAX (155) characters.
  */
-function aw_seo_hub_intro_description( $type ) {
+function rankweb_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
 	$intro = rankweb_plain_text( ( $page instanceof WP_Post && '' !== trim( $page->post_excerpt ) ) ? $page->post_excerpt : ( function_exists( 'aw_hub_intro' ) ? aw_hub_intro( $type ) : '' ) );
-	$count = 'post' === $type ? aw_seo_resources_count_label() : ''; // guides and research summaries counted apart
+	$count = 'post' === $type ? rankweb_seo_resources_count_label() : ''; // guides and research summaries counted apart
 	$count = '' !== $count ? $count : ( function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $type ) : '' );
 	if ( '' === $count ) {
 		return $intro;
 	}
-	$cats = array_values( array_filter( aw_seo_top_categories( $type ), fn( $t ) => false === strpos( $t, ' and ' ) ) ); // "laws and rules" would blur the list
+	$cats = array_values( array_filter( rankweb_seo_top_categories( $type ), fn( $t ) => false === strpos( $t, ' and ' ) ) ); // "laws and rules" would blur the list
 	$best   = $intro . ' ' . $count . '.';
 	for ( $n = 1; $n <= count( $cats ); $n++ ) {
 		$list = array_slice( $cats, 0, $n );
@@ -582,7 +594,7 @@ function aw_seo_hub_intro_description( $type ) {
 }
 
 /** AWBI-recognised listing without a description of its own: one line of its facts ('' when it does not apply). */
-function aw_seo_awbi_description( $id, $desc ) {
+function rankweb_seo_awbi_description( $id, $desc ) {
 	$code = trim( (string) get_post_meta( $id, 'aw_awbi_code', true ) );
 	if ( '' === $code || get_post_meta( $id, 'aw_awbi_dropped', true ) || has_excerpt( $id ) || ( '' !== trim( (string) $desc ) && ! preg_match( '/^Recognised by the Animal Welfare Board of India/i', trim( wp_strip_all_tags( (string) $desc ) ) ) ) ) {
 		return '';
@@ -592,7 +604,7 @@ function aw_seo_awbi_description( $id, $desc ) {
 		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
 	}
 	$type  = $types ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
-	list( $state, $district ) = aw_seo_item_place_names( $id );
+	list( $state, $district ) = rankweb_seo_item_place_names( $id );
 	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
 	$name  = preg_replace( '/[\s,;:]+$/u', '', rankweb_plain_text( get_post_field( 'post_title', $id ) ) );
 	$line  = sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s).', $name, $type, $where ? ' in ' . $where : '', $code );
@@ -600,10 +612,10 @@ function aw_seo_awbi_description( $id, $desc ) {
 }
 
 /** "{Listing type} in {District}, {State}. {Services}. Contact details, location and how to help." ('' without type or place). */
-function aw_listing_fact_description( $id ) {
+function rankweb_listing_fact_description( $id ) {
 	$types = function_exists( 'directoryweb_listing_types' ) ? directoryweb_listing_types( $id ) : array();
 	$type  = $types ? $types[0]->name : '';
-	list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+	list( $state, $district ) = function_exists( 'directoryweb_item_place_names' ) ? directoryweb_item_place_names( $id ) : array( '', '' );
 	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
 	if ( '' === $type && '' === $where ) {
 		return '';
@@ -623,7 +635,7 @@ function aw_listing_fact_description( $id ) {
  * @param string $size Image size.
  * @return array|null
  */
-function aw_seo_attachment( $att, $size = 'large' ) {
+function rankweb_seo_attachment( $att, $size = 'large' ) {
 	$src = $att ? wp_get_attachment_image_src( (int) $att, $size ) : false;
 	if ( ! $src || empty( $src[0] ) ) {
 		return null;
@@ -642,18 +654,18 @@ function aw_seo_attachment( $att, $size = 'large' ) {
  * reliably show, so an AVIF or WebP picture from our uploads goes out as its original upload (the JPEG or PNG kept
  * beside it); without one, a 1200x630 JPEG is made once and kept beside it ({name}-og.jpg). Anything that is not an AVIF
  * or WebP upload passes through. Since 13 Nov 2026 og:image and twitter:image are the 1080x1080 share square
- * (aw_seo_share_square); this keeps a picture's own shape and is used for the pictures in structured data (schema.php),
+ * (rankweb_seo_share_square); this keeps a picture's own shape and is used for the pictures in structured data (schema.php),
  * and as the square's fallback when the square cannot be made.
  *
  * @param string $url Picture address.
  * @return array [url, width, height, mime]; width, height 0 and mime '' when unchanged.
  */
-function aw_seo_share_safe_url( $url ) {
+function rankweb_seo_share_safe_url( $url ) {
 	$plain = strtok( (string) $url, '?' );
 	if ( ! preg_match( '/\.(avif|webp)$/i', (string) $plain ) ) {
 		return array( $url, 0, 0, '' );
 	}
-	$path = aw_seo_upload_path( $plain );
+	$path = rankweb_seo_upload_path( $plain );
 	if ( '' === $path ) {
 		return array( $url, 0, 0, '' );
 	}
@@ -668,7 +680,7 @@ function aw_seo_share_safe_url( $url ) {
 		}
 	}
 	// Made at upload (wp_generate_attachment_metadata, below); built here only for older uploads, or if it failed then.
-	$out = file_exists( $stem . '-og.jpg' ) ? $stem . '-og.jpg' : aw_seo_share_jpeg_build( $path );
+	$out = file_exists( $stem . '-og.jpg' ) ? $stem . '-og.jpg' : rankweb_seo_share_jpeg_build( $path );
 	if ( '' === $out ) {
 		return array( $url, 0, 0, '' );
 	}
@@ -682,7 +694,7 @@ function aw_seo_share_safe_url( $url ) {
  * @param string $path AVIF or WebP file (the full upload or one of its sizes).
  * @return string The JPEG's path ('' when the file is not such an AVIF or the JPEG could not be made).
  */
-function aw_seo_share_jpeg_build( $path ) {
+function rankweb_seo_share_jpeg_build( $path ) {
 	if ( ! preg_match( '/\.(avif|webp)$/i', (string) $path ) || ! file_exists( $path ) ) {
 		return '';
 	}
@@ -716,7 +728,7 @@ function aw_seo_share_jpeg_build( $path ) {
  * @param array|null $meta Attachment metadata (read when null).
  * @return int
  */
-function aw_seo_share_jpegs_for( $att, $meta = null ) {
+function rankweb_seo_share_jpegs_for( $att, $meta = null ) {
 	$file = (string) get_attached_file( (int) $att );
 	if ( ! preg_match( '/\.avif$/i', $file ) ) {
 		return 0;
@@ -730,7 +742,7 @@ function aw_seo_share_jpegs_for( $att, $meta = null ) {
 	}
 	$made = array();
 	foreach ( $paths as $path ) {
-		$out = aw_seo_share_jpeg_build( $path );
+		$out = rankweb_seo_share_jpeg_build( $path );
 		if ( '' !== $out ) {
 			$made[ $out ] = 1;
 		}
@@ -745,7 +757,7 @@ function aw_seo_share_jpegs_for( $att, $meta = null ) {
 add_filter(
 	'wp_generate_attachment_metadata',
 	function ( $meta, $att ) {
-		aw_seo_share_jpegs_for( (int) $att, $meta );
+		rankweb_seo_share_jpegs_for( (int) $att, $meta );
 		return $meta;
 	},
 	100,
@@ -761,7 +773,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$f = 0;
 			// Every picture: a converted upload may keep its original type while its file is AVIF; others are skipped.
 			foreach ( get_posts( array( 'post_type' => 'attachment', 'post_mime_type' => 'image', 'post_status' => 'inherit', 'numberposts' => -1, 'fields' => 'ids' ) ) as $att ) {
-				$c  = aw_seo_share_jpegs_for( $att );
+				$c  = rankweb_seo_share_jpegs_for( $att );
 				$n += $c;
 				$f += $c ? 1 : 0;
 			}
@@ -780,12 +792,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
  * @param string $path A picture file in the uploads folder (the full upload, one of its sizes, or a share file).
  * @return string
  */
-function aw_seo_share_source( $path ) {
+function rankweb_seo_share_source( $path ) {
 	$path = (string) $path;
 	if ( '' === $path ) {
 		return '';
 	}
-	$stem = dirname( $path ) . '/' . aw_seo_share_stem( basename( $path ) );
+	$stem = dirname( $path ) . '/' . rankweb_seo_share_stem( basename( $path ) );
 	foreach ( array( '', '-scaled' ) as $scaled ) {
 		foreach ( array( 'jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG', 'webp', 'avif', 'gif' ) as $ext ) {
 			if ( file_exists( $stem . $scaled . '.' . $ext ) ) {
@@ -803,7 +815,7 @@ function aw_seo_share_source( $path ) {
  * @param string $name File name.
  * @return string
  */
-function aw_seo_share_stem( $name ) {
+function rankweb_seo_share_stem( $name ) {
 	return (string) preg_replace( '/(?:-scaled)?(?:-\d+x\d+)?(?:-og|-share-1080)?\.[A-Za-z0-9]+$/', '', (string) $name );
 }
 
@@ -818,7 +830,7 @@ function aw_seo_share_stem( $name ) {
  * @param int|string $src Attachment ID or picture address.
  * @return array [url, width, height, mime]; width, height 0 and mime '' when unchanged.
  */
-function aw_seo_share_square( $src ) {
+function rankweb_seo_share_square( $src ) {
 	static $done = array();
 	$key = (string) $src;
 	if ( isset( $done[ $key ] ) ) {
@@ -826,8 +838,8 @@ function aw_seo_share_square( $src ) {
 	}
 	$att  = is_numeric( $src ) ? (int) $src : 0;
 	$url  = $att ? (string) wp_get_attachment_url( $att ) : (string) $src;
-	$path = $att ? (string) wp_get_original_image_path( $att ) : aw_seo_upload_path( $url );
-	$from = aw_seo_share_source( '' !== $path ? $path : ( $att ? (string) get_attached_file( $att ) : '' ) );
+	$path = $att ? (string) wp_get_original_image_path( $att ) : rankweb_seo_upload_path( $url );
+	$from = rankweb_seo_share_source( '' !== $path ? $path : ( $att ? (string) get_attached_file( $att ) : '' ) );
 	if ( '' === $from || ! preg_match( '/\.(jpe?g|png|webp|avif|gif)$/i', $from ) ) {
 		$done[ $key ] = array( $url, 0, 0, '' ); // not one of our uploads
 		return $done[ $key ];
@@ -841,11 +853,11 @@ function aw_seo_share_square( $src ) {
 		$done[ $key ] = array( $to_url( $from ), 1080, 1080, $mime );
 		return $done[ $key ];
 	}
-	$out = dirname( $from ) . '/' . aw_seo_share_stem( basename( $from ) ) . '-share-1080.' . ( $png ? 'png' : 'jpg' );
+	$out = dirname( $from ) . '/' . rankweb_seo_share_stem( basename( $from ) ) . '-share-1080.' . ( $png ? 'png' : 'jpg' );
 	if ( ! file_exists( $out ) || filemtime( $out ) < filemtime( $from ) ) {
 		$ed = wp_get_image_editor( $from );
 		if ( is_wp_error( $ed ) ) {
-			$done[ $key ] = aw_seo_share_safe_url( $url ); // never AVIF or WebP, even when the square cannot be made
+			$done[ $key ] = rankweb_seo_share_safe_url( $url ); // never AVIF or WebP, even when the square cannot be made
 			return $done[ $key ];
 		}
 		$dim  = $ed->get_size();
@@ -856,7 +868,7 @@ function aw_seo_share_square( $src ) {
 		$saved = $ed->save( $out, $png ? 'image/png' : 'image/jpeg' );
 		remove_filter( 'image_editor_output_format', '__return_empty_array', PHP_INT_MAX );
 		if ( is_wp_error( $saved ) || ! file_exists( $out ) ) {
-			$done[ $key ] = aw_seo_share_safe_url( $url );
+			$done[ $key ] = rankweb_seo_share_safe_url( $url );
 			return $done[ $key ];
 		}
 	}
@@ -864,9 +876,9 @@ function aw_seo_share_square( $src ) {
 	return $done[ $key ];
 }
 
-/** The site's default share image (Settings), as aw_seo_attachment(). */
-function aw_seo_default_image() {
-	return aw_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // shared as its 1080x1080 square (aw_seo_share_square)
+/** The site's default share image (Settings), as rankweb_seo_attachment(). */
+function rankweb_seo_default_image() {
+	return rankweb_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // shared as its 1080x1080 square (rankweb_seo_share_square)
 }
 
 /** Share image of a listing without a logo of its own (owner, 15 Oct 2026): banner-aw_listing-wide.webp, the Directory band picture. */
@@ -889,8 +901,8 @@ function aw_seo_default_image() {
  * @param int $id Post ID.
  * @return array|null [id, url, width, height]; id 0 for a linked publisher image.
  */
-function aw_seo_item_image( $id ) {
-	$img = aw_seo_attachment( (int) get_post_meta( $id, 'rank_math_facebook_image_id', true ) );
+function rankweb_seo_item_image( $id ) {
+	$img = rankweb_seo_attachment( (int) get_post_meta( $id, 'rank_math_facebook_image_id', true ) );
 	if ( $img ) {
 		return $img;
 	}
@@ -910,7 +922,7 @@ function aw_seo_item_image( $id ) {
 		$cands[] = (int) $m[1];
 	}
 	foreach ( $cands as $att ) {
-		$img = aw_seo_attachment( $att );
+		$img = rankweb_seo_attachment( $att );
 		if ( $img ) {
 			return $img;
 		}
@@ -919,17 +931,17 @@ function aw_seo_item_image( $id ) {
 }
 
 /** The share image of a category page: its category photo (term meta aw_category_image), or null. */
-function aw_seo_term_image() {
-	if ( ! aw_seo_is_category_page() || ! function_exists( 'kits_category_image_id' ) ) {
+function rankweb_seo_term_image() {
+	if ( ! rankweb_seo_is_category_page() || ! function_exists( 'kits_category_image_id' ) ) {
 		return null;
 	}
 	$att = (int) get_term_meta( get_queried_object_id(), 'rank_math_facebook_image_id', true );
-	return aw_seo_attachment( $att ? $att : (int) kits_category_image_id( get_queried_object() ) );
+	return rankweb_seo_attachment( $att ? $att : (int) kits_category_image_id( get_queried_object() ) );
 }
 
 /**
  * The share image of the current view (og:image and article schema): the item's own image (portrait too: the share
- * card is a centre-cropped square now, aw_seo_share_square(), so a portrait photo no longer gives way to the site
+ * card is a centre-cropped square now, rankweb_seo_share_square(), so a portrait photo no longer gives way to the site
  * image), a category page's category photo, for a listing the Directory band picture, else the site share image,
  * else the site icon. Other tags keep the site share image; Directory type tags have their own, set in Rank Math's
  * Social tab (20 Oct 2026), which Rank Math prints (opengraph.php). The picture keeps its own shape here (the article
@@ -937,23 +949,23 @@ function aw_seo_term_image() {
  *
  * @return array|null
  */
-function aw_seo_image() {
+function rankweb_seo_image() {
 	static $img = false;
 	if ( false !== $img ) {
 		return $img;
 	}
-	$img = is_singular() ? aw_seo_item_image( get_queried_object_id() ) : aw_seo_term_image();
+	$img = is_singular() ? rankweb_seo_item_image( get_queried_object_id() ) : rankweb_seo_term_image();
 	if ( ! $img && is_singular( 'aw_listing' ) ) {
-		$img = aw_seo_attachment( AW_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
+		$img = rankweb_seo_attachment( AW_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
 	}
 	if ( ! $img ) {
-		$img = aw_seo_default_image();
+		$img = rankweb_seo_default_image();
 	}
 	if ( ! $img ) {
-		$img = aw_seo_attachment( (int) get_option( 'site_icon' ) );
+		$img = rankweb_seo_attachment( (int) get_option( 'site_icon' ) );
 	}
 	if ( $img ) {
-		list( $url, $w, $h, $type ) = aw_seo_share_safe_url( $img['url'] );
+		list( $url, $w, $h, $type ) = rankweb_seo_share_safe_url( $img['url'] );
 		if ( $url !== $img['url'] ) {
 			$img = array_merge( $img, array( 'url' => $url, 'type' => $type ), $w ? array( 'width' => $w, 'height' => $h ) : array() );
 		}
@@ -961,25 +973,25 @@ function aw_seo_image() {
 	return $img;
 }
 
-if ( ! function_exists( 'aw_seo_category_tax' ) ) {
+if ( ! function_exists( 'rankweb_seo_category_tax' ) ) {
 	/**
 	 * The taxonomy that holds the site's categories: WordPress's own category (since 15 Oct 2026).
 	 *
 	 * @return string
 	 */
-	function aw_seo_category_tax() {
+	function rankweb_seo_category_tax() {
 		return 'category';
 	}
 }
 
 /** Whether the current view is a category page. */
-function aw_seo_is_category_page() {
-	$tax = aw_seo_category_tax();
+function rankweb_seo_is_category_page() {
+	$tax = rankweb_seo_category_tax();
 	return 'category' === $tax ? is_category() : is_tax( $tax );
 }
 
 /** The page that lists every category (/categories/), or ''. */
-function aw_seo_categories_url() {
+function rankweb_seo_categories_url() {
 	foreach ( array( 'categories' ) as $slug ) {
 		$page = get_page_by_path( $slug );
 		if ( $page && 'publish' === $page->post_status ) {
@@ -1020,6 +1032,6 @@ add_action(
 );
 
 /** Whether the current request may use the site's SEO APIs (focus keywords, Search Insights): administrators, or the workers' user (aw_worker capability). */
-function aw_seo_api_allowed() {
+function rankweb_seo_api_allowed() {
 	return current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' );
 }

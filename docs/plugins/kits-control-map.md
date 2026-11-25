@@ -1,5 +1,7 @@
 # Kits control map
 
+**Status (25 Nov 2026):** Plan. Part counts are out of date (the registry now lists 64 items) and the Animal Writes registry it cites is not in this repo.
+
 Every Kits part, and the WordPress control that will hold its look.
 
 ## 1. What this is

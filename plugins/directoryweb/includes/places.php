@@ -50,7 +50,7 @@ const AW_DISTRICT_COMMON_NAMES = array(
 /* ---------- Reference data ---------- */
 
 /** The LGD file, indexed. */
-function aw_lgd() {
+function directoryweb_lgd() {
 	static $d = null;
 	if ( null !== $d ) {
 		return $d;
@@ -82,51 +82,51 @@ function aw_lgd() {
 }
 
 /** States, A–Z. */
-function aw_place_states() {
-	return aw_lgd()['states'];
+function directoryweb_place_states() {
+	return directoryweb_lgd()['states'];
 }
 
 /** A state's districts, A–Z. */
-function aw_place_districts( $state_code ) {
-	return aw_lgd()['by_state'][ (int) $state_code ] ?? array();
+function directoryweb_place_districts( $state_code ) {
+	return directoryweb_lgd()['by_state'][ (int) $state_code ] ?? array();
 }
 
-function aw_place_state( $code ) {
-	return aw_lgd()['states'][ (int) $code ] ?? null;
+function directoryweb_place_state( $code ) {
+	return directoryweb_lgd()['states'][ (int) $code ] ?? null;
 }
 
-function aw_place_district( $code ) {
-	return aw_lgd()['districts'][ (int) $code ] ?? null;
+function directoryweb_place_district( $code ) {
+	return directoryweb_lgd()['districts'][ (int) $code ] ?? null;
 }
 
 /** A place by URL name (state or district). */
-function aw_place_by_slug( $slug ) {
-	return aw_lgd()['slugs'][ (string) $slug ] ?? null;
+function directoryweb_place_by_slug( $slug ) {
+	return directoryweb_lgd()['slugs'][ (string) $slug ] ?? null;
 }
 
 /** A place by its ID (the old location-list ID). */
-function aw_place_by_id( $id ) {
-	return aw_lgd()['ids'][ (int) $id ] ?? null;
+function directoryweb_place_by_id( $id ) {
+	return directoryweb_lgd()['ids'][ (int) $id ] ?? null;
 }
 
 /** The state a place belongs to (itself for a state). */
-function aw_place_parent_state( $place ) {
-	return $place ? aw_place_state( $place->state ) : null;
+function directoryweb_place_parent_state( $place ) {
+	return $place ? directoryweb_place_state( $place->state ) : null;
 }
 
 /** Comparison key for names: letters only, lower case, "&" read as "and", spelling map applied. */
-function aw_place_key( $name, $kind = 'district' ) {
+function directoryweb_place_key( $name, $kind = 'district' ) {
 	$k = trim( preg_replace( '/\s+/', ' ', preg_replace( '/[^a-z ]/', ' ', strtolower( str_replace( '&', 'and', (string) $name ) ) ) ) );
 	$k = preg_replace( '/ (district|dist)$/', '', $k );
-	$a = aw_lgd()['aliases'][ $kind ] ?? array();
+	$a = directoryweb_lgd()['aliases'][ $kind ] ?? array();
 	return str_replace( ' ', '', $a[ $k ] ?? $k );
 }
 
 /** A state by name (LGD or display name, or a known other spelling). */
-function aw_place_state_by_name( $name ) {
-	$k = aw_place_key( $name, 'state' );
-	foreach ( aw_place_states() as $s ) {
-		if ( $k && ( aw_place_key( $s->name, 'state' ) === $k || aw_place_key( $s->lgd, 'state' ) === $k ) ) {
+function directoryweb_place_state_by_name( $name ) {
+	$k = directoryweb_place_key( $name, 'state' );
+	foreach ( directoryweb_place_states() as $s ) {
+		if ( $k && ( directoryweb_place_key( $s->name, 'state' ) === $k || directoryweb_place_key( $s->lgd, 'state' ) === $k ) ) {
 			return $s;
 		}
 	}
@@ -134,14 +134,14 @@ function aw_place_state_by_name( $name ) {
 }
 
 /** A district by name, inside a state when one is given; null when the name is unknown or not unique. */
-function aw_place_district_by_name( $name, $state = null ) {
-	$k = aw_place_key( $name );
+function directoryweb_place_district_by_name( $name, $state = null ) {
+	$k = directoryweb_place_key( $name );
 	if ( '' === $k ) {
 		return null;
 	}
 	$hits = array();
-	foreach ( $state ? aw_place_districts( $state->code ) : aw_lgd()['districts'] as $d ) {
-		if ( aw_place_key( $d->name ) === $k || aw_place_key( $d->lgd ) === $k ) {
+	foreach ( $state ? directoryweb_place_districts( $state->code ) : directoryweb_lgd()['districts'] as $d ) {
+		if ( directoryweb_place_key( $d->name ) === $k || directoryweb_place_key( $d->lgd ) === $k ) {
 			$hits[ $d->code ] = $d;
 		}
 	}
@@ -151,7 +151,7 @@ function aw_place_district_by_name( $name, $state = null ) {
 /* ---------- Places of an item ---------- */
 
 /** Codes stored on an item: [state codes], [district codes]. */
-function aw_item_codes( $id ) {
+function directoryweb_item_codes( $id ) {
 	return array(
 		array_values( array_unique( array_map( 'intval', (array) get_post_meta( $id, 'aw_state_code' ) ) ) ),
 		array_values( array_unique( array_map( 'intval', (array) get_post_meta( $id, 'aw_district_code' ) ) ) ),
@@ -159,19 +159,19 @@ function aw_item_codes( $id ) {
 }
 
 /** An item's places, most precise first: its districts, then any state that has none of them. */
-function aw_item_places( $id ) {
-	list( $states, $districts ) = aw_item_codes( $id );
+function directoryweb_item_places( $id ) {
+	list( $states, $districts ) = directoryweb_item_codes( $id );
 	$out = array();
 	$has = array();
 	foreach ( $districts as $c ) {
-		$d = aw_place_district( $c );
+		$d = directoryweb_place_district( $c );
 		if ( $d ) {
 			$out[]               = $d;
 			$has[ $d->state ] = true;
 		}
 	}
 	foreach ( $states as $c ) {
-		$s = aw_place_state( $c );
+		$s = directoryweb_place_state( $c );
 		if ( $s && empty( $has[ $s->code ] ) ) {
 			$out[] = $s;
 		}
@@ -180,18 +180,18 @@ function aw_item_places( $id ) {
 }
 
 /** The place shown for an item: its district if it has one, else its state. */
-function aw_item_place( $id ) {
-	$p = aw_item_places( $id );
+function directoryweb_item_place( $id ) {
+	$p = directoryweb_item_places( $id );
 	return $p ? $p[0] : null;
 }
 
 /** State and district names of an item. */
-function aw_item_place_names( $id ) {
-	$p = aw_item_place( $id );
+function directoryweb_item_place_names( $id ) {
+	$p = directoryweb_item_place( $id );
 	if ( ! $p ) {
 		return array( '', '' );
 	}
-	return 'district' === $p->kind ? array( aw_place_state( $p->state )->name, $p->name ) : array( $p->name, '' );
+	return 'district' === $p->kind ? array( directoryweb_place_state( $p->state )->name, $p->name ) : array( $p->name, '' );
 }
 
 /**
@@ -204,14 +204,14 @@ function aw_item_place_names( $id ) {
  * @param string $city    Optional free-text city (null to leave as is).
  * @return bool
  */
-function aw_set_item_places( $id, $places, $pincode = null, $city = null ) {
+function directoryweb_set_item_places( $id, $places, $pincode = null, $city = null ) {
 	$states    = array();
 	$districts = array();
 	foreach ( $places as $pl ) {
-		$s = aw_place_state( (int) ( $pl[0] ?? 0 ) );
-		$d = ! empty( $pl[1] ) ? aw_place_district( (int) $pl[1] ) : null;
+		$s = directoryweb_place_state( (int) ( $pl[0] ?? 0 ) );
+		$d = ! empty( $pl[1] ) ? directoryweb_place_district( (int) $pl[1] ) : null;
 		if ( ! $s && $d ) {
-			$s = aw_place_state( $d->state );
+			$s = directoryweb_place_state( $d->state );
 		}
 		if ( ! $s || ( ! empty( $pl[1] ) && ( ! $d || $d->state !== $s->code ) ) ) {
 			return false;
@@ -238,7 +238,7 @@ function aw_set_item_places( $id, $places, $pincode = null, $city = null ) {
 	if ( null !== $city ) {
 		'' === trim( $city ) ? delete_post_meta( $id, 'aw_place_city' ) : update_post_meta( $id, 'aw_place_city', sanitize_text_field( $city ) );
 	}
-	aw_place_counts_reset();
+	directoryweb_place_counts_reset();
 	return true;
 }
 
@@ -246,15 +246,15 @@ function aw_set_item_places( $id, $places, $pincode = null, $city = null ) {
  * Places named in free text ("Pune/Hyderabad", "Bhopal, Madhya Pradesh", "Kerala"): every part that names a known
  * district or state. Returns a list of [state code, district code or 0].
  */
-function aw_places_from_text( $text ) {
+function directoryweb_places_from_text( $text ) {
 	$out   = array();
 	$parts = array_filter( array_map( 'trim', preg_split( '#\s*[/,&;]\s*|\s+and\s+#i', (string) $text ) ) );
 	$state = null;
 	foreach ( $parts as $part ) {
-		$state = $state ? $state : aw_place_state_by_name( $part );
+		$state = $state ? $state : directoryweb_place_state_by_name( $part );
 	}
 	foreach ( $parts as $part ) {
-		$d = aw_place_district_by_name( $part, $state ) ?? aw_place_district_by_name( $part );
+		$d = directoryweb_place_district_by_name( $part, $state ) ?? directoryweb_place_district_by_name( $part );
 		if ( $d ) {
 			$out[ 'd' . $d->code ] = array( $d->state, $d->code );
 		}
@@ -264,8 +264,8 @@ function aw_places_from_text( $text ) {
 	}
 	// A state named beside districts of another state ("Delhi NCR, Agra/Mathura") is a place of its own.
 	foreach ( $parts as $part ) {
-		$s = aw_place_state_by_name( $part );
-		if ( $s && ! aw_place_district_by_name( $part ) && ! array_filter( $out, fn( $p ) => (int) $p[0] === (int) $s->code ) ) {
+		$s = directoryweb_place_state_by_name( $part );
+		if ( $s && ! directoryweb_place_district_by_name( $part ) && ! array_filter( $out, fn( $p ) => (int) $p[0] === (int) $s->code ) ) {
 			$out[ 's' . $s->code ] = array( $s->code, 0 );
 		}
 	}
@@ -275,7 +275,7 @@ function aw_places_from_text( $text ) {
 /* ---------- Counts (stored; recalculated after an item is saved) ---------- */
 
 /** Mark the counts out of date; they are rebuilt on the next read. */
-function aw_place_counts_reset() {
+function directoryweb_place_counts_reset() {
 	delete_option( 'aw_place_counts' );
 	delete_transient( 'aw_sitemap_dir_pairs' );
 	directoryweb_facet_counts_reset();
@@ -293,7 +293,7 @@ function directoryweb_facet_counts_reset() {
  *
  * @return array{state: array<int,int>, district: array<int,int>, pairs: array}
  */
-function aw_place_counts() {
+function directoryweb_place_counts() {
 	$c = get_option( 'aw_place_counts' );
 	if ( is_array( $c ) && isset( $c['state'] ) ) {
 		return $c;
@@ -317,11 +317,11 @@ function aw_place_counts() {
 }
 
 /** Listings in a place (a state's districts included). */
-function aw_place_count( $place ) {
+function directoryweb_place_count( $place ) {
 	if ( ! $place ) {
 		return 0;
 	}
-	$c = aw_place_counts();
+	$c = directoryweb_place_counts();
 	return (int) ( $c[ 'state' === $place->kind ? 'state' : 'district' ][ $place->code ] ?? 0 );
 }
 
@@ -329,14 +329,14 @@ add_action(
 	'save_post',
 	function ( $id, $post ) {
 		if ( in_array( $post->post_type, AW_PLACE_TYPES, true ) ) {
-			aw_place_counts_reset();
+			directoryweb_place_counts_reset();
 		}
 	},
 	10,
 	2
 );
-add_action( 'deleted_post', 'aw_place_counts_reset' );
-add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'post_tag' === $tax && 'aw_listing' === get_post_type( $id ) && aw_place_counts_reset(), 10, 4 );
+add_action( 'deleted_post', 'directoryweb_place_counts_reset' );
+add_action( 'set_object_terms', fn( $id, $terms, $tt, $tax ) => 'post_tag' === $tax && 'aw_listing' === get_post_type( $id ) && directoryweb_place_counts_reset(), 10, 4 );
 
 /* ---------- Directory and list queries ---------- */
 
@@ -349,13 +349,13 @@ add_filter(
 );
 
 /** The place the current directory page shows, if any. */
-function aw_current_place() {
+function directoryweb_current_place() {
 	$s = (string) get_query_var( 'aw_place' );
-	return $s ? aw_place_by_slug( $s ) : null;
+	return $s ? directoryweb_place_by_slug( $s ) : null;
 }
 
 /** Meta clause for items in a place (a state includes its districts: every item stores its state code too). */
-function aw_place_meta_clause( $place ) {
+function directoryweb_place_meta_clause( $place ) {
 	return 'state' === $place->kind
 		? array( 'key' => 'aw_state_code', 'value' => (string) $place->code )
 		: array( 'key' => 'aw_district_code', 'value' => (string) $place->code );
@@ -387,7 +387,7 @@ add_action(
  *
  * @return array<string, string>
  */
-function aw_old_place_redirects() {
+function directoryweb_old_place_redirects() {
 	global $wpdb;
 	$out = array();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the old lists are not registered taxonomies, so no term API.
@@ -400,8 +400,8 @@ function aw_old_place_redirects() {
 		if ( 'aw_source_type' === $r->taxonomy ) {
 			$out[ 'source/' . $slug ] = home_url( '/library/' );
 		} else {
-			$p                          = aw_place_by_slug( $slug );
-			$out[ 'location/' . $slug ] = $p && function_exists( 'aw_directory_url' ) ? aw_directory_url( $p->slug ) : home_url( '/directory/' );
+			$p                          = directoryweb_place_by_slug( $slug );
+			$out[ 'location/' . $slug ] = $p && function_exists( 'directoryweb_directory_url' ) ? directoryweb_directory_url( $p->slug ) : home_url( '/directory/' );
 		}
 	}
 	return $out;
@@ -420,7 +420,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				WP_CLI::error( 'RankWeb (directoryweb_redirect_add) with Rank Math Redirections is needed.' );
 			}
 			$dry  = ! empty( $assoc['dry-run'] );
-			$all  = aw_old_place_redirects();
+			$all  = directoryweb_old_place_redirects();
 			$new  = 0;
 			$have  = 0;
 			$fail  = array();
@@ -467,7 +467,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
  * @param string $pin PIN code.
  * @return array|string
  */
-function aw_pin_lookup( $pin ) {
+function directoryweb_pin_lookup( $pin ) {
 	$pin = preg_replace( '/\D/', '', (string) $pin );
 	if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
 		return 'Enter a 6-digit PIN code, like 682011';
@@ -482,8 +482,8 @@ function aw_pin_lookup( $pin ) {
 		set_transient( 'aw_pin_' . $pin, $data, WEEK_IN_SECONDS );
 	}
 	$po       = $data[0]['PostOffice'][0] ?? null;
-	$state    = $po ? aw_place_state_by_name( (string) ( $po['State'] ?? '' ) ) : null;
-	$district = $state ? aw_place_district_by_name( (string) ( $po['District'] ?? '' ), $state ) : null;
+	$state    = $po ? directoryweb_place_state_by_name( (string) ( $po['State'] ?? '' ) ) : null;
+	$district = $state ? directoryweb_place_district_by_name( (string) ( $po['District'] ?? '' ), $state ) : null;
 	if ( ! $state ) {
 		return 'Couldn\'t find this PIN. Choose your state and district instead.';
 	}
@@ -499,9 +499,9 @@ function aw_pin_lookup( $pin ) {
 }
 
 // The same lookup for public forms (volunteer, claim): no login, a few per minute per visitor.
-add_action( 'wp_ajax_nopriv_aw_pin', 'aw_pin_public' );
-add_action( 'wp_ajax_aw_pin', 'aw_pin_public' );
-function aw_pin_public() {
+add_action( 'wp_ajax_nopriv_aw_pin', 'directoryweb_pin_public' );
+add_action( 'wp_ajax_aw_pin', 'directoryweb_pin_public' );
+function directoryweb_pin_public() {
 	nocache_headers();
 	$key = 'aw_pin_rl_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	$n   = (int) get_transient( $key );
@@ -509,7 +509,7 @@ function aw_pin_public() {
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
 	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
-	$r = aw_pin_lookup( sanitize_text_field( (string) wp_unslash( $_GET['pin'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$r = directoryweb_pin_lookup( sanitize_text_field( (string) wp_unslash( $_GET['pin'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
 }
 
@@ -523,6 +523,6 @@ function aw_pin_public() {
  * @param int $id Post ID.
  * @return array{0: string, 1: string} state, district.
  */
-function aw_listing_place( $id ) {
-	return aw_item_place_names( $id ); // LGD places (places.php)
+function directoryweb_listing_place( $id ) {
+	return directoryweb_item_place_names( $id ); // LGD places (places.php)
 }

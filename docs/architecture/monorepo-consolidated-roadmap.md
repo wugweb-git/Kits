@@ -1,10 +1,10 @@
 # Wugweb Monorepo — Consolidated Master Architecture & Implementation Roadmap
 
-**Document Status:** Master Living Architecture & Execution Roadmap  
+**Status (25 Nov 2026):** Per-product inventory as of branch `feat/directoryweb-completion`; products are built and tested, not deployed. "Verified Operational" means its listed tests pass; real Fluent Forms Pro uploads, real mail transport and SEOPress/AIOSEO coexistence remain untested (see `audit/acceptance-gates.md`).  
 **Established Date:** 23 November 2026  
 **Repository:** `https://github.com/wugweb-git/Kits.git`  
-**Active Branch:** `kits-suite`  
-**Verification Baseline:** Standalone CLI & PHP 8.0–8.3 verification against `origin/kits-suite` @ commit `f8ff4ed`  
+**Active Branch:** `feat/directoryweb-completion` (from `kits-suite`)  
+**Verification Baseline:** Standalone CLI & PHP 8.0–8.3 verification against `origin/kits-suite` @ commit `f8ff4ed` (23 Nov baseline; the DirectoryWeb and RankWeb rows below are updated to the branch head)  
 **Core Directive:** Single monorepo architecture housing multiple independently buildable, testable, versioned, and distributable products. Preserves 100% backward compatibility with active production data.
 
 ---
@@ -46,9 +46,9 @@
 
 | Product / Package | Path | Declared Version | Verified Status | Evidence & Test Results |
 | :--- | :--- | :--- | :--- | :--- |
-| **Kits Block Theme** | `themes/kits-by-wugweb/` | 2.2.0 | **Verified Operational** | FSE Schema v3, 18 block patterns, 8 templates, 4 parts, 2 style variations (`forest`, `slate`). `tools/build-tokens.py` compiler functional. |
+| **Kits Block Theme** | `themes/kits-by-wugweb/` | 2.2.0 | **Verified Operational** | FSE Schema v3, 18 block patterns, 8 templates, 4 parts, 2 style variations (`forest`, `slate`). `tools/build-tokens.py` is not in this checkout (`tools/tokens` and `packages/design-tokens` are empty); token build is unverified. |
 | **Kits Core** | `plugins/kits-core/` | 1.0.0 | **Verified Operational** (Hardened) | Brand customizer, presets SCF bridge, ALTCHA spam guard, system screens. Tests pass (`brand-customizer-tests.php`, `admin-layer-tests.php`, `admin-menu-tests.php`, `presets-scf-tests.php`, `shell-parts-tests.php`). |
-| **DirectoryWeb** | `plugins/directoryweb/` | 1.1.0 | **Verified Operational** (Standalone Capable) | CPT `aw_listing`, 8 dynamic blocks, 12h transient facet caching. Verified operational without SCF and without Kits Core. All 5 test suites pass cleanly (84 checks, 0 failed). |
+| **DirectoryWeb** | `plugins/directoryweb/` | 1.1.0 | **Verified Operational** (Standalone Capable) | CPT `aw_listing`, 9 dynamic blocks, 12h transient facet caching. Verified operational without SCF and without Kits Core. 11 test files pass cleanly (230 checks, 0 failed). |
 | **RankWeb** | `plugins/rankweb/` | 2.1.0 | **Verified Operational** (Standalone Capable) | Complete standalone SEO suite: meta titles, canonicals, robots directives, standalone Schema.org JSON-LD, breadcrumbs, redirects, silos. All 125 tests and 94 settings checks pass cleanly. |
 | **SourceWeb** | `plugins/sourceweb/` | 0.1.0 | **Verified Operational** (Standalone Capable) | Content reprint engine, feed ingestion, auto-enrichment rules, publisher trust order. Decoupled from mandatory DirectoryWeb/InsightWeb boot halts. All 455 checks and standalone tests pass. |
 | **InsightWeb** | `plugins/insightweb/` | 1.0.0 | **Verified Operational** (Standalone Capable) | Search Console, GA4, Clarity, PageSpeed, Bing, keywords, empty-state dashboard tiles for fresh installs, backup engine. All 107 checks and standalone tests pass. |
@@ -178,7 +178,7 @@ Every companion plugin must boot, render, and execute on a standard WordPress in
 
 | Plugin | Standalone Core Functionality | Bundled Infrastructure | Optional Kits Core Enhancement | Missing Sibling Behavior |
 | :--- | :--- | :--- | :--- | :--- |
-| **DirectoryWeb** | CPT `aw_listing`, faceted search, 8 dynamic blocks, places, claim submissions. | Bundled `standalone-fallback.php` (`kits_count`, `kits_icon`, `kits_date`, `kits_simple_table`, `kits_shell_rest_can`). Native admin dashboard & settings. | Mounts into unified Kits Admin Shell (`kits-dash-cards`); Brand Customizer token styling. | Operates without SCF (native custom fields meta box); operates without Maps API (address list fallback). |
+| **DirectoryWeb** | CPT `aw_listing`, faceted search, 9 dynamic blocks, places, claim submissions and evidence uploads. | Bundled `standalone-fallback.php` (`directoryweb_count/icon/date/simple_table`, delegating to Kits Core when present). Native admin dashboard & settings. | Mounts into unified Kits Admin Shell (`kits-dash-cards`); Brand Customizer token styling. | Operates without SCF (native custom fields meta box); operates without Maps API (address list fallback). |
 | **RankWeb** | Titles, meta descriptions, canonicals, robots, XML sitemaps, schema JSON-LD, breadcrumbs, redirects, silos, analysis. | Native WP Admin settings; standalone JSON-LD printer on `wp_head`; core `wp_robots` & `get_canonical_url` hooks. | Mounts into Kits Admin Shell; links with Kits Site Overview metrics. | Operates without Rank Math (native SEO engine active); operates without InsightWeb (local keyword rules). |
 | **SourceWeb** | Feed ingestion, article reprint engine, content rules, auto-resolve rules, AI worker endpoints. | Native WP Admin fallback screens; bundled host/publisher parsers; worker webhook router. | Mounts into Kits Shell; unifies activity logs into Kits Dashboard. | Operates without DirectoryWeb (`function_exists` guards on places/phones); operates without InsightWeb (local scoring). |
 | **InsightWeb** | Search Console ingestion, GA4/Clarity ingestion, keyword scoring, SVG MiniCharts, Ahrefs import. | Bundled `standalone-fallback.php`; native WP Admin tabbed interface (`AW_SI_Keywords_Table`); empty-state tile generator. | Mounts telemetry tiles directly into Kits Shell dashboard. | Operates without Kits Core; operates without Rank Math; returns cleanly labeled empty states when GSC is unlinked. |
@@ -305,19 +305,19 @@ To ensure WordPress Full Site Editing (`Appearance > Editor`) remains the primar
 ---
 
 #### Track P1-B: DirectoryWeb Release Readiness (Step 2)
-1. **Existing Functionality Verified:** CPT `aw_listing` registration, 8 dynamic blocks (`status`, `fields`, `people`, `featured-in`, `local-card`, `helplines`, `find-help`, `listing-finder`), 12h transient facet caching (`directoryweb_facet_*`), claim page rendering (`claim-page.php`), geocoding helpers (`geocode.php`), map REST endpoint (`/wp-json/aw/v1/dir-points`). Unit tests passing 84/84 checks across 5 test suites.
+1. **Existing Functionality Verified:** CPT `aw_listing` registration, 9 dynamic blocks (`status`, `fields`, `people`, `featured-in`, `local-card`, `helplines`, `find-help`, `listing-finder`), 12h transient facet caching (`directoryweb_facet_*`), claim page rendering (`claim-page.php`), geocoding helpers (`geocode.php`), map REST endpoint (`/wp-json/aw/v1/dir-points`). Unit tests passing 84/84 checks across 5 test suites.
 2. **Decoupling Changes Drafted in Working Tree (Awaiting Authorization):**
    - Removed fatal boot halt on `! defined('KITS_CORE_LOADED')` in `directoryweb.php`.
    - Added bundled `includes/standalone-fallback.php` providing UI and REST compatibility primitives.
    - Added native WP Admin fallback screens in `directoryweb-ui.php` and safe redirect fallback in `directoryweb-listings.php`.
    - Authored `tests/directoryweb-standalone-test.php` and `tests/directoryweb-scf-fallback-test.php`.
 3. **Outstanding Implementation Tasks:**
-   - [ ] Replace legacy shortcode `[aw_directory_filter]` with native `kits/collection-filter`.
-   - [ ] Complete claim review status action transitions in `includes/claims-review.php`.
+   - [x] Native `directoryweb/collection-filter` block added (the legacy shortcode intentionally stays).
+   - [x] Claim state machine and review transitions complete (`claim-native.php`).
    - [ ] Implement optional geocoding provider fallback when Google Maps API key is unset.
 4. **Release-Readiness Acceptance Criteria:**
    - Activates cleanly on clean WordPress install without Kits Core or SCF.
-   - All 8 dynamic blocks render on frontend without console or PHP errors.
+   - All 9 dynamic blocks render on frontend without console or PHP errors.
    - Faceted search and district filtering function with transient caching.
    - Admin listing table and claim review operate in standalone and shell modes.
 

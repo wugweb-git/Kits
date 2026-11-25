@@ -17,12 +17,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Post types the sidebar and its meta are registered for. Default post, page and aw_press; filterable.
+ *
+ * @return string[]
+ */
+function rankweb_sidebar_post_types(): array {
+	return array_values( array_filter( array_map( 'sanitize_key', (array) apply_filters( 'rankweb_sidebar_post_types', array( 'post', 'page', 'aw_press' ) ) ) ) );
+}
+
+/**
  * Register post meta fields for block editor.
  */
 add_action(
 	'init',
 	function () {
-		$screens = array( 'post', 'page', 'aw_press' );
+		$screens = rankweb_sidebar_post_types();
 		foreach ( $screens as $type ) {
 			register_post_meta(
 				$type,
@@ -61,11 +70,33 @@ add_action(
 				$type,
 				'_rankweb_schema_type',
 				array(
-					'show_in_rest'  => true,
-					'single'        => true,
-					'type'          => 'string',
-					'default'       => 'Article',
-					'auth_callback' => fn() => current_user_can( 'edit_posts' ),
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => fn( $v ) => function_exists( 'rankweb_schema_types' ) && in_array( $v, rankweb_schema_types(), true ) ? $v : '',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+				)
+			);
+			register_post_meta(
+				$type,
+				'_rankweb_description',
+				array(
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_textarea_field',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+				)
+			);
+			register_post_meta(
+				$type,
+				'_rankweb_noindex',
+				array(
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => fn( $v ) => '1' === (string) $v ? '1' : '',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
 				)
 			);
 		}
@@ -79,7 +110,7 @@ add_action(
 	'enqueue_block_editor_assets',
 	function () {
 		$screen = get_current_screen();
-		if ( ! $screen || ! in_array( $screen->post_type, array( 'post', 'page', 'aw_press' ), true ) ) {
+		if ( ! $screen || ! in_array( $screen->post_type, rankweb_sidebar_post_types(), true ) ) {
 			return;
 		}
 
@@ -111,6 +142,7 @@ add_action(
 				'postType'   => $screen->post_type,
 				'postId'     => get_the_ID(),
 				'pluginName' => 'RankWeb SEO',
+				'schemaTypes' => function_exists( 'rankweb_schema_types' ) ? rankweb_schema_types() : array( 'Article' ),
 			)
 		);
 	}

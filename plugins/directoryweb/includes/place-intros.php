@@ -1,9 +1,9 @@
 <?php
 /**
  * Place intros: a short paragraph on a Directory state or district page, under the page's fixed intro line
- * (aw_directory_intro()). On place pages the meta and share description come from aw_seo_dir_description() (RankWeb).
+ * (directoryweb_directory_intro()). On place pages the meta and share description come from rankweb_seo_dir_description() (RankWeb).
  *
- * Kept in the option aw_place_intros, one entry per place, keyed by kind and LGD code, because states and districts
+ * Kept in the option directoryweb_place_intros, one entry per place, keyed by kind and LGD code, because states and districts
  * have separate code lists ("state:27", "district:519"; Delhi is a state page):
  *   {text, sources (list of URLs), checked (Y-m-d)}
  * The text is plain words with links (<a href> only). Sources and the checked date are for the editor; the page shows
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_PLACE_INTROS      = 'aw_place_intros';
+const AW_PLACE_INTROS      = 'directoryweb_place_intros';
 const AW_PLACE_INTROS_PAGE = 'directoryweb-place-intros';
 const AW_PLACE_INTRO_MAX   = 1000; // characters of visible text: a short paragraph, not an article
 const AW_PLACE_INTRO_SRCS  = 10;
@@ -27,34 +27,34 @@ const AW_PLACE_INTRO_SRCS  = 10;
 /* ---------- Store ---------- */
 
 /** The entry key of a place: "state:{code}" or "district:{code}". */
-function aw_place_intro_key( $place ): string {
+function directoryweb_place_intro_key( $place ): string {
 	return ( 'district' === $place->kind ? 'district' : 'state' ) . ':' . (int) $place->code;
 }
 
 /** The place an entry key names, or null when the key is not a state or district in the LGD file. */
-function aw_place_intro_place_of( $key ) {
+function directoryweb_place_intro_place_of( $key ) {
 	if ( ! is_string( $key ) || ! preg_match( '/^(state|district):(\d{1,6})$/', $key, $m ) ) {
 		return null;
 	}
-	$place = 'state' === $m[1] ? aw_place_state( (int) $m[2] ) : aw_place_district( (int) $m[2] );
+	$place = 'state' === $m[1] ? directoryweb_place_state( (int) $m[2] ) : directoryweb_place_district( (int) $m[2] );
 	return $place && $m[1] === $place->kind ? $place : null;
 }
 
 /** Every stored entry, key => {text, sources, checked}. */
-function aw_place_intros(): array {
+function directoryweb_place_intros(): array {
 	$all = get_option( AW_PLACE_INTROS, array() );
 	return is_array( $all ) ? $all : array();
 }
 
 /** One place's entry ({text, sources, checked}), or an empty array. */
-function aw_place_intro( $place ): array {
-	$all = aw_place_intros();
-	$e   = $all[ aw_place_intro_key( $place ) ] ?? array();
+function directoryweb_place_intro( $place ): array {
+	$all = directoryweb_place_intros();
+	$e   = $all[ directoryweb_place_intro_key( $place ) ] ?? array();
 	return is_array( $e ) && '' !== trim( (string) ( $e['text'] ?? '' ) ) ? $e : array();
 }
 
 /** The text with links only (<a href>); every other tag is removed. */
-function aw_place_intro_kses( $text ): string {
+function directoryweb_place_intro_kses( $text ): string {
 	return wp_kses( (string) $text, array( 'a' => array( 'href' => true ) ) );
 }
 
@@ -66,9 +66,9 @@ function aw_place_intro_kses( $text ): string {
  * @param string       $checked Date, Y-m-d or ''.
  * @return array|WP_Error {text, sources, checked}; text '' means "remove".
  */
-function aw_place_intro_clean( $text, $sources, $checked ) {
+function directoryweb_place_intro_clean( $text, $sources, $checked ) {
 	$text = (string) $text;
-	$flat = '' === wp_check_invalid_utf8( $text ) ? null : preg_replace( '/\s+/u', ' ', force_balance_tags( aw_place_intro_kses( $text ) ) ); // one paragraph, every link closed
+	$flat = '' === wp_check_invalid_utf8( $text ) ? null : preg_replace( '/\s+/u', ' ', force_balance_tags( directoryweb_place_intro_kses( $text ) ) ); // one paragraph, every link closed
 	if ( null === $flat && '' !== trim( $text ) ) { // a stray byte (text pasted from another encoding) must not turn a save into a removal
 		return new WP_Error( 'aw_place_intro_utf8', __( 'The intro has characters that are not text (often from a paste). Type them again. Nothing was saved.', 'directoryweb' ) );
 	}
@@ -102,15 +102,15 @@ function aw_place_intro_clean( $text, $sources, $checked ) {
 /**
  * Store a clean entry for a key; an entry with no text removes the key.
  *
- * @param string $key   Entry key (aw_place_intro_key()).
- * @param array  $entry Clean entry (aw_place_intro_clean()).
+ * @param string $key   Entry key (directoryweb_place_intro_key()).
+ * @param array  $entry Clean entry (directoryweb_place_intro_clean()).
  * @return bool False when the key is not a place.
  */
-function aw_place_intro_store( $key, array $entry ): bool {
-	if ( ! aw_place_intro_place_of( $key ) ) {
+function directoryweb_place_intro_store( $key, array $entry ): bool {
+	if ( ! directoryweb_place_intro_place_of( $key ) ) {
 		return false;
 	}
-	$all = aw_place_intros();
+	$all = directoryweb_place_intros();
 	if ( '' === (string) ( $entry['text'] ?? '' ) ) {
 		unset( $all[ $key ] );
 	} else {
@@ -118,28 +118,28 @@ function aw_place_intro_store( $key, array $entry ): bool {
 	}
 	ksort( $all, SORT_NATURAL );
 	update_option( AW_PLACE_INTROS, $all, false ); // read only on place pages and this screen
-	do_action( 'litespeed_purge_url', aw_directory_url( aw_place_intro_place_of( $key )->slug ) ); // the page shows the change now, not when its cached copy runs out
+	do_action( 'litespeed_purge_url', directoryweb_directory_url( directoryweb_place_intro_place_of( $key )->slug ) ); // the page shows the change now, not when its cached copy runs out
 	return true;
 }
 
 /* ---------- Page ---------- */
 
 /** The place whose page shows its intro on this request (page 1, no type, service, name, Claimed or Verified filter), or null. */
-function aw_place_intro_place() {
-	if ( ! aw_is_directory_view() || get_query_var( 'aw_dir_type' ) || aw_request_tags() || ! empty( $_GET['q'] ) || ! empty( $_GET['verified'] ) || ! empty( $_GET['gov'] ) || (int) get_query_var( 'paged' ) > 1 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read only: is the list filtered (paged > 1: page 2 on, as Core's aw_hub_page())
+function directoryweb_place_intro_place() {
+	if ( ! directoryweb_is_directory_view() || get_query_var( 'aw_dir_type' ) || directoryweb_request_tags() || ! empty( $_GET['q'] ) || ! empty( $_GET['verified'] ) || ! empty( $_GET['gov'] ) || (int) get_query_var( 'paged' ) > 1 ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read only: is the list filtered (paged > 1: page 2 on, as Core's aw_hub_page())
 		return null;
 	}
-	return aw_current_place();
+	return directoryweb_current_place();
 }
 
 /** The intro paragraph for the current place page, or ''. */
-function aw_place_intro_html(): string {
-	$place = aw_place_intro_place();
-	$entry = $place ? aw_place_intro( $place ) : array();
+function directoryweb_place_intro_html(): string {
+	$place = directoryweb_place_intro_place();
+	$entry = $place ? directoryweb_place_intro( $place ) : array();
 	if ( ! $entry ) {
 		return '';
 	}
-	return '<p class="kit-section-desc">' . aw_place_intro_kses( $entry['text'] ) . '</p>';
+	return '<p class="kit-section-desc">' . directoryweb_place_intro_kses( $entry['text'] ) . '</p>';
 }
 
 /* ---------- DirectoryWeb → Place intros ---------- */
@@ -147,28 +147,28 @@ function aw_place_intro_html(): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', AW_PLACE_INTROS_PAGE, 'aw_place_intros_page' );
+		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', AW_PLACE_INTROS_PAGE, 'directoryweb_place_intros_page' );
 	},
 	11 // after DirectoryWeb's own menu (directoryweb-ui.php)
 );
 
 /** The screen's address, with extra query args. */
-function aw_place_intros_url( array $args = array() ): string {
+function directoryweb_place_intros_url( array $args = array() ): string {
 	return add_query_arg( array_merge( array( 'page' => AW_PLACE_INTROS_PAGE ), $args ), admin_url( 'admin.php' ) );
 }
 
 /** A place's name as the screen shows it: "Mumbai, Maharashtra" or "Kerala". */
-function aw_place_intro_label( $place ): string {
-	return 'district' === $place->kind ? $place->name . ', ' . aw_place_state( $place->state )->name : $place->name;
+function directoryweb_place_intro_label( $place ): string {
+	return 'district' === $place->kind ? $place->name . ', ' . directoryweb_place_state( $place->state )->name : $place->name;
 }
 
 /** The screen: the stored intros and a place picker, or one place's form. */
-function aw_place_intros_page(): void {
+function directoryweb_place_intros_page(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You are not allowed to do this.', 'directoryweb' ), 403 );
 	}
 	$key   = sanitize_text_field( wp_unslash( $_GET['place'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which form to show; saving checks its own nonce
-	$place = '' !== $key ? aw_place_intro_place_of( $key ) : null;
+	$place = '' !== $key ? directoryweb_place_intro_place_of( $key ) : null;
 	$msg   = sanitize_key( wp_unslash( $_GET['aw_msg'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the notice after a save
 	echo '<div class="wrap"><h1>' . esc_html__( 'Place intros', 'directoryweb' ) . '</h1>';
 	if ( function_exists( 'kits_admin_fold_tabs' ) ) {
@@ -188,26 +188,26 @@ function aw_place_intros_page(): void {
 		wp_admin_notice( esc_html__( 'That place is not in the list of states and districts.', 'directoryweb' ), array( 'type' => 'error' ) );
 	}
 	if ( $place ) {
-		aw_place_intro_form( $place );
+		directoryweb_place_intro_form( $place );
 	} else {
-		aw_place_intros_list();
+		directoryweb_place_intros_list();
 	}
 	echo '</div>';
 }
 
 /** The stored intros as a core list table, and the picker that opens a place's form. */
-function aw_place_intros_list(): void {
+function directoryweb_place_intros_list(): void {
 	echo '<p>' . esc_html__( 'A short paragraph under the usual line on a state or district page of the Directory, on its first page only. A place with no intro shows only its usual line.', 'directoryweb' ) . '</p>';
 	echo '<form method="get" action="' . esc_url( admin_url( 'admin.php' ) ) . '"><input type="hidden" name="page" value="' . esc_attr( AW_PLACE_INTROS_PAGE ) . '">';
 	echo '<label for="aw-pi-place">' . esc_html__( 'Place', 'directoryweb' ) . '</label> <select id="aw-pi-place" name="place"><optgroup label="' . esc_attr__( 'States and union territories', 'directoryweb' ) . '">';
-	foreach ( aw_place_states() as $s ) {
-		echo '<option value="' . esc_attr( aw_place_intro_key( $s ) ) . '">' . esc_html( $s->name ) . '</option>';
+	foreach ( directoryweb_place_states() as $s ) {
+		echo '<option value="' . esc_attr( directoryweb_place_intro_key( $s ) ) . '">' . esc_html( $s->name ) . '</option>';
 	}
 	echo '</optgroup>';
-	foreach ( aw_place_states() as $s ) {
+	foreach ( directoryweb_place_states() as $s ) {
 		echo '<optgroup label="' . esc_attr( $s->name ) . '">';
-		foreach ( aw_place_districts( $s->code ) as $d ) {
-			echo '<option value="' . esc_attr( aw_place_intro_key( $d ) ) . '">' . esc_html( $d->name ) . '</option>';
+		foreach ( directoryweb_place_districts( $s->code ) as $d ) {
+			echo '<option value="' . esc_attr( directoryweb_place_intro_key( $d ) ) . '">' . esc_html( $d->name ) . '</option>';
 		}
 		echo '</optgroup>';
 	}
@@ -216,16 +216,16 @@ function aw_place_intros_list(): void {
 	echo '</form>';
 
 	$rows = array();
-	foreach ( aw_place_intros() as $k => $e ) {
-		$p = aw_place_intro_place_of( (string) $k );
+	foreach ( directoryweb_place_intros() as $k => $e ) {
+		$p = directoryweb_place_intro_place_of( (string) $k );
 		if ( ! $p || ! is_array( $e ) ) {
 			continue;
 		}
 		$text   = wp_strip_all_tags( (string) ( $e['text'] ?? '' ) );
 		$rows[] = array(
-			'place'   => '<strong><a href="' . esc_url( aw_place_intros_url( array( 'place' => $k ) ) ) . '">' . esc_html( aw_place_intro_label( $p ) ) . '</a></strong>'
-				. '<div class="row-actions"><span class="edit"><a href="' . esc_url( aw_place_intros_url( array( 'place' => $k ) ) ) . '">' . esc_html__( 'Edit', 'directoryweb' ) . '</a> | </span>'
-				. '<span class="view"><a href="' . esc_url( aw_directory_url( $p->slug ) ) . '">' . esc_html__( 'View page', 'directoryweb' ) . '</a></span></div>',
+			'place'   => '<strong><a href="' . esc_url( directoryweb_place_intros_url( array( 'place' => $k ) ) ) . '">' . esc_html( directoryweb_place_intro_label( $p ) ) . '</a></strong>'
+				. '<div class="row-actions"><span class="edit"><a href="' . esc_url( directoryweb_place_intros_url( array( 'place' => $k ) ) ) . '">' . esc_html__( 'Edit', 'directoryweb' ) . '</a> | </span>'
+				. '<span class="view"><a href="' . esc_url( directoryweb_directory_url( $p->slug ) ) . '">' . esc_html__( 'View page', 'directoryweb' ) . '</a></span></div>',
 			'kind'    => esc_html( 'district' === $p->kind ? __( 'District', 'directoryweb' ) : __( 'State', 'directoryweb' ) ),
 			'text'    => esc_html( wp_trim_words( $text, 24 ) ),
 			'sources' => esc_html( number_format_i18n( count( (array) ( $e['sources'] ?? array() ) ) ) ),
@@ -248,17 +248,17 @@ function aw_place_intros_list(): void {
 }
 
 /** One place's form (core form table). */
-function aw_place_intro_form( $place ): void {
-	$key   = aw_place_intro_key( $place );
-	$entry = aw_place_intros()[ $key ] ?? array();
+function directoryweb_place_intro_form( $place ): void {
+	$key   = directoryweb_place_intro_key( $place );
+	$entry = directoryweb_place_intros()[ $key ] ?? array();
 	$entry = is_array( $entry ) ? $entry : array();
 	$draft = get_transient( 'aw_place_intro_draft_' . get_current_user_id() );
 	if ( is_array( $draft ) && ( $draft['key'] ?? '' ) === $key ) { // after a save that was refused: what the editor typed
 		delete_transient( 'aw_place_intro_draft_' . get_current_user_id() );
 		$entry = $draft;
 	}
-	echo '<h2>' . esc_html( aw_place_intro_label( $place ) ) . '</h2>';
-	echo '<p><a href="' . esc_url( aw_place_intros_url() ) . '">' . esc_html__( 'All place intros', 'directoryweb' ) . '</a> | <a href="' . esc_url( aw_directory_url( $place->slug ) ) . '">' . esc_html__( 'View page', 'directoryweb' ) . '</a></p>';
+	echo '<h2>' . esc_html( directoryweb_place_intro_label( $place ) ) . '</h2>';
+	echo '<p><a href="' . esc_url( directoryweb_place_intros_url() ) . '">' . esc_html__( 'All place intros', 'directoryweb' ) . '</a> | <a href="' . esc_url( directoryweb_directory_url( $place->slug ) ) . '">' . esc_html__( 'View page', 'directoryweb' ) . '</a></p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	echo '<input type="hidden" name="action" value="aw_place_intro_save"><input type="hidden" name="place" value="' . esc_attr( $key ) . '">';
 	wp_nonce_field( 'aw_place_intro_save_' . $key );
@@ -284,11 +284,11 @@ add_action(
 		}
 		$key = sanitize_text_field( wp_unslash( $_POST['place'] ?? '' ) );
 		check_admin_referer( 'aw_place_intro_save_' . $key );
-		if ( ! aw_place_intro_place_of( $key ) ) {
+		if ( ! directoryweb_place_intro_place_of( $key ) ) {
 			wp_die( esc_html__( 'That place is not in the list of states and districts.', 'directoryweb' ), 400 );
 		}
-		$entry = aw_place_intro_clean(
-			wp_unslash( $_POST['aw_text'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- kept to links by aw_place_intro_clean() (wp_kses)
+		$entry = directoryweb_place_intro_clean(
+			wp_unslash( $_POST['aw_text'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- kept to links by directoryweb_place_intro_clean() (wp_kses)
 			sanitize_textarea_field( wp_unslash( $_POST['aw_sources'] ?? '' ) ),
 			sanitize_text_field( wp_unslash( $_POST['aw_checked'] ?? '' ) )
 		);
@@ -301,18 +301,18 @@ add_action(
 				'aw_place_intro_draft_' . get_current_user_id(),
 				array(
 					'key'     => $key,
-					'text'    => aw_place_intro_kses( wp_unslash( $_POST['aw_text'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- kept to links by wp_kses
+					'text'    => directoryweb_place_intro_kses( wp_unslash( $_POST['aw_text'] ?? '' ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- kept to links by wp_kses
 					'sources' => array_filter( array_map( 'esc_url_raw', preg_split( '/[\r\n]+/', sanitize_textarea_field( wp_unslash( $_POST['aw_sources'] ?? '' ) ) ) ) ),
 					'checked' => sanitize_text_field( wp_unslash( $_POST['aw_checked'] ?? '' ) ),
 				),
 				10 * MINUTE_IN_SECONDS
 			); // the form shows what was typed again, not the stored text
 		} else {
-			aw_place_intro_store( $key, $entry );
+			directoryweb_place_intro_store( $key, $entry );
 			$msg = '' === $entry['text'] ? 'removed' : 'saved';
 		}
 		wp_safe_redirect(
-			aw_place_intros_url(
+			directoryweb_place_intros_url(
 				array(
 					'place'  => $key,
 					'aw_msg' => $msg,
@@ -339,33 +339,33 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		function ( $args, $assoc ) {
 			$cmd = $args[0] ?? 'list';
 			if ( 'list' === $cmd ) {
-				foreach ( aw_place_intros() as $k => $e ) {
-					$p = aw_place_intro_place_of( (string) $k );
-					WP_CLI::line( $k . "\t" . ( $p ? aw_place_intro_label( $p ) : '?' ) . "\t" . ( $e['checked'] ?? '' ) . "\t" . wp_trim_words( wp_strip_all_tags( (string) ( $e['text'] ?? '' ) ), 12 ) );
+				foreach ( directoryweb_place_intros() as $k => $e ) {
+					$p = directoryweb_place_intro_place_of( (string) $k );
+					WP_CLI::line( $k . "\t" . ( $p ? directoryweb_place_intro_label( $p ) : '?' ) . "\t" . ( $e['checked'] ?? '' ) . "\t" . wp_trim_words( wp_strip_all_tags( (string) ( $e['text'] ?? '' ) ), 12 ) );
 				}
 				return;
 			}
 			$key = (string) ( $args[1] ?? '' );
-			if ( ! aw_place_intro_place_of( $key ) ) {
+			if ( ! directoryweb_place_intro_place_of( $key ) ) {
 				WP_CLI::error( 'Give a place as state:{code} or district:{code} (LGD codes).' );
 			}
 			if ( 'get' === $cmd ) {
-				WP_CLI::line( (string) wp_json_encode( aw_place_intros()[ $key ] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+				WP_CLI::line( (string) wp_json_encode( directoryweb_place_intros()[ $key ] ?? null, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
 				return;
 			}
 			if ( 'delete' === $cmd ) {
-				aw_place_intro_store( $key, array( 'text' => '' ) );
+				directoryweb_place_intro_store( $key, array( 'text' => '' ) );
 				WP_CLI::success( 'Removed ' . $key . '.' );
 				return;
 			}
 			if ( 'set' !== $cmd ) {
 				WP_CLI::error( 'Use list, get, set or delete.' );
 			}
-			$entry = aw_place_intro_clean( (string) ( $assoc['text'] ?? '' ), preg_split( '/\s+/', trim( (string) ( $assoc['sources'] ?? '' ) ) ), (string) ( $assoc['checked'] ?? '' ) );
+			$entry = directoryweb_place_intro_clean( (string) ( $assoc['text'] ?? '' ), preg_split( '/\s+/', trim( (string) ( $assoc['sources'] ?? '' ) ) ), (string) ( $assoc['checked'] ?? '' ) );
 			if ( is_wp_error( $entry ) ) {
 				WP_CLI::error( $entry->get_error_message() );
 			}
-			aw_place_intro_store( $key, $entry );
+			directoryweb_place_intro_store( $key, $entry );
 			WP_CLI::success( ( '' === $entry['text'] ? 'Removed ' : 'Saved ' ) . $key . '.' );
 		}
 	);

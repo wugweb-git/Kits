@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 /** CSV and find-and-replace for bulk SEO work. */
-final class AW_Bulk {
+final class RankWeb_Bulk {
 
 	/** The CSV columns, in order. */
 	const COLUMNS = array( 'id', 'title', 'description', 'focus_keyword', 'link_keywords', 'canonical' );

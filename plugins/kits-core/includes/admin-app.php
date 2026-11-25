@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits admin app: the Theme Options screen (docs/admin-ui-spec.md, phase 1), built with WordPress packages from
+ * Kits admin app: the Theme Options screen (docs/design-system/admin-ui-spec.md, phase 1), built with WordPress packages from
  * src/theme-options/ into build/theme-options/ (npm run build in this plugin's folder; build/ is committed).
  *
  * Kits → Theme Options opens it. It edits the fields of kits_theme_options (theme-options.php), Identity (site title,
@@ -223,7 +223,7 @@ add_action(
 			'initial'      => $asked,
 		);
 		$data = (array) apply_filters( 'kits_admin_app_data', $data ); // Sections in their own files add their data.
-		// On the Kits plugins' look: the shell's header, chips and cards (docs/kits-plugin-ui.md).
+		// On the Kits plugins' look: the shell's header, chips and cards (docs/plugins/kits-plugin-ui-spec.md).
 		$ok = kits_shell_app(
 			array(
 				'handle'      => 'kits-admin-theme-options',

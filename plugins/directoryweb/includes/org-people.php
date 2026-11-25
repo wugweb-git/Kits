@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/org-people-link.php'; // aw_org_people_link_plan(): the claimant link decision, tested without WordPress
+require_once __DIR__ . '/org-people-link.php'; // directoryweb_org_people_link_plan(): the claimant link decision, tested without WordPress
 
 /** A name for matching: lower case, letters and digits only. */
-function aw_org_people_norm( $s ) {
+function directoryweb_org_people_norm( $s ) {
 	return trim( preg_replace( '/[^a-z0-9]+/', ' ', strtolower( (string) $s ) ) );
 }
 
@@ -33,7 +33,7 @@ function aw_org_people_norm( $s ) {
  * @param string $tag org-approved | org-pending.
  * @return array list of array{id, name, show}
  */
-function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
+function directoryweb_org_people_crm( $lid, $tag = 'org-approved' ) {
 	static $cache = array();
 	$lid = (int) $lid;
 	if ( isset( $cache[ $tag ][ $lid ] ) ) {
@@ -42,10 +42,10 @@ function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
 	$out = array();
 	$t   = function_exists( 'mailweb_fcrm_on' ) && mailweb_fcrm_on() ? FluentCrmApi( 'tags' )->getInstance()->where( 'slug', $tag )->first() : null;
 	if ( $t ) {
-		$title = aw_org_people_norm( get_the_title( $lid ) );
+		$title = directoryweb_org_people_norm( get_the_title( $lid ) );
 		foreach ( \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $t->id ) )->limit( 2000 )->get() as $c ) {
 			$f    = (array) $c->custom_fields();
-			$org  = aw_org_people_norm( $f['vol_organisation'] ?? '' );
+			$org  = directoryweb_org_people_norm( $f['vol_organisation'] ?? '' );
 			$for  = (int) ( $f['vol_org_listing'] ?? 0 );
 			$hits = $for ? $for === $lid : ( strlen( $org ) >= 3 && strlen( $title ) >= 3 && ( false !== strpos( $title, $org ) || false !== strpos( $org, $title ) ) );
 			if ( $hits ) {
@@ -63,8 +63,8 @@ function aw_org_people_crm( $lid, $tag = 'org-approved' ) {
  * @param int $lid Listing.
  * @return string[]
  */
-function aw_org_people_public_names( $lid ) {
-	return array_values( array_filter( wp_list_pluck( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] ), 'name' ) ) );
+function directoryweb_org_people_public_names( $lid ) {
+	return array_values( array_filter( wp_list_pluck( array_filter( directoryweb_org_people_crm( $lid ), fn( $p ) => $p['show'] ), 'name' ) ) );
 }
 
 /**
@@ -73,8 +73,8 @@ function aw_org_people_public_names( $lid ) {
  * @param int $lid Listing.
  * @return string
  */
-function aw_org_people_html( $lid ) {
-	$people = array_values( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
+function directoryweb_org_people_html( $lid ) {
+	$people = array_values( array_filter( directoryweb_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
 	if ( ! $people ) {
 		return '';
 	}
@@ -88,7 +88,7 @@ function aw_org_people_html( $lid ) {
 add_shortcode(
 	'aw_org_people',
 	function () {
-		$html = 'aw_listing' === get_post_type() ? aw_org_people_html( get_the_ID() ) : '';
+		$html = 'aw_listing' === get_post_type() ? directoryweb_org_people_html( get_the_ID() ) : '';
 		return '' !== $html ? '<div class="aw-org-links">' . $html . '</div>' : '';
 	}
 );
@@ -99,8 +99,8 @@ add_shortcode(
  * @param int $lid Listing.
  * @return array
  */
-function aw_org_people_schema( $lid ) {
-	$people = array_values( array_filter( aw_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
+function directoryweb_org_people_schema( $lid ) {
+	$people = array_values( array_filter( directoryweb_org_people_crm( $lid ), fn( $p ) => $p['show'] && '' !== $p['name'] ) );
 	return array_map( fn( $p ) => array( '@type' => 'OrganizationRole', 'roleName' => '' !== $p['role'] ? $p['role'] : 'Volunteer', 'member' => array( '@type' => 'Person', 'name' => $p['name'] ) ), $people );
 }
 
@@ -108,7 +108,7 @@ function aw_org_people_schema( $lid ) {
 
 /**
  * Link a claimant's FluentCRM contact to a listing, privately unless they ticked "Show my name"
- * (aw_org_people_link_plan()).
+ * (directoryweb_org_people_link_plan()).
  *
  * @param int    $lid   Listing.
  * @param string $email The claimant's email.
@@ -117,7 +117,7 @@ function aw_org_people_schema( $lid ) {
  * @param bool   $apply False: work out what would change and write nothing.
  * @return string crm-off | no-email | no-contact | no-listing | elsewhere | already | updated | linked
  */
-function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
+function directoryweb_org_people_link( $lid, $email, $role, $show, $apply = true ) {
 	if ( ! function_exists( 'mailweb_fcrm_on' ) || ! mailweb_fcrm_on() ) {
 		return 'crm-off';
 	}
@@ -135,7 +135,7 @@ function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
 	}
 	$tag     = FluentCrmApi( 'tags' )->getInstance()->where( 'slug', 'org-approved' )->first();
 	$has_tag = $tag && \FluentCrm\App\Models\Subscriber::filterByTags( array( (int) $tag->id ) )->where( 'id', (int) $contact->id )->first();
-	$plan    = aw_org_people_link_plan( (array) $contact->custom_fields(), (bool) $has_tag, $lid, (bool) $show, html_entity_decode( get_the_title( $lid ), ENT_QUOTES ), (string) $role );
+	$plan    = directoryweb_org_people_link_plan( (array) $contact->custom_fields(), (bool) $has_tag, $lid, (bool) $show, html_entity_decode( get_the_title( $lid ), ENT_QUOTES ), (string) $role );
 	if ( $apply ) {
 		if ( $plan['tag'] && function_exists( 'mailweb_fcrm_tag_ids' ) ) { // without MailWeb the tag is not added
 			$contact->attachTags( mailweb_fcrm_tag_ids( array( 'org-approved' ) ) );
@@ -154,12 +154,12 @@ function aw_org_people_link( $lid, $email, $role, $show, $apply = true ) {
  * @param int  $claim aw_claim post.
  * @param int  $lid   Listing.
  * @param bool $apply False: write nothing.
- * @return string aw_org_people_link() status.
+ * @return string directoryweb_org_people_link() status.
  */
-function aw_org_people_from_claim( $claim, $lid, $apply = true ) {
+function directoryweb_org_people_from_claim( $claim, $lid, $apply = true ) {
 	$role = (string) get_post_meta( $claim, 'aw_c_role', true );
 	$role = defined( 'DW_CLAIM_ROLES' ) && '' !== $role ? ( DW_CLAIM_ROLES[ $role ] ?? $role ) : $role;
-	return aw_org_people_link( $lid, (string) get_post_meta( $claim, 'aw_c_email', true ), $role, false, $apply );
+	return directoryweb_org_people_link( $lid, (string) get_post_meta( $claim, 'aw_c_email', true ), $role, false, $apply );
 }
 
 /**
@@ -168,7 +168,7 @@ function aw_org_people_from_claim( $claim, $lid, $apply = true ) {
  * @param bool $apply Write the links.
  * @return array{counts: array<string, int>, rows: array<int, array{claim: string, listing: int, status: string}>}
  */
-function aw_org_people_backfill( $apply = false ) {
+function directoryweb_org_people_backfill( $apply = false ) {
 	$todo = array();
 	$old  = get_posts(
 		array(
@@ -184,21 +184,21 @@ function aw_org_people_backfill( $apply = false ) {
 		$todo[] = array(
 			'claim' => 'old #' . $id,
 			'lid'   => (int) get_post_meta( $id, 'aw_c_listing', true ),
-			'run'   => fn( $lid, $go ) => aw_org_people_from_claim( $id, $lid, $go ),
+			'run'   => fn( $lid, $go ) => directoryweb_org_people_from_claim( $id, $lid, $go ),
 		);
 	}
-	if ( function_exists( 'aw_claim_ff_id' ) && function_exists( 'aw_claim_entry' ) && aw_claim_ff_id() ) {
+	if ( function_exists( 'directoryweb_claim_ff_id' ) && function_exists( 'directoryweb_claim_entry' ) && directoryweb_claim_ff_id() ) {
 		global $wpdb;
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d ORDER BY id", aw_claim_ff_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$wpdb->prefix}fluentform_submissions WHERE form_id = %d ORDER BY id", directoryweb_claim_ff_id() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		foreach ( $ids as $eid ) {
-			$c = aw_claim_entry( (int) $eid );
+			$c = directoryweb_claim_entry( (int) $eid );
 			if ( ! $c || 'approved' !== ( $c['review']['status'] ?? '' ) ) {
 				continue;
 			}
 			$todo[] = array(
 				'claim' => '' !== $c['ref'] ? $c['ref'] : 'entry #' . $c['id'],
 				'lid'   => (int) $c['listing'],
-				'run'   => fn( $lid, $go ) => aw_org_people_link( $lid, $c['email'], $c['role'], $c['show'], $go ),
+				'run'   => fn( $lid, $go ) => directoryweb_org_people_link( $lid, $c['email'], $c['role'], $c['show'], $go ),
 			);
 		}
 	}
@@ -235,7 +235,7 @@ add_action(
 				'permission_callback' => fn() => current_user_can( 'manage_options' ),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$apply = 'POST' === $req->get_method() && rest_sanitize_boolean( $req->get_param( 'apply' ) );
-					return rest_ensure_response( array( 'applied' => $apply ) + aw_org_people_backfill( $apply ) );
+					return rest_ensure_response( array( 'applied' => $apply ) + directoryweb_org_people_backfill( $apply ) );
 				},
 			)
 		);
@@ -251,7 +251,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		'aw claim-people',
 		function ( $args, $assoc ) {
 			$apply = ! empty( $assoc['apply'] );
-			$out   = aw_org_people_backfill( $apply );
+			$out   = directoryweb_org_people_backfill( $apply );
 			foreach ( $out['rows'] as $r ) {
 				WP_CLI::log( $r['claim'] . "\t" . $r['listing'] . "\t" . $r['status'] );
 			}
@@ -266,7 +266,7 @@ add_action(
 	'add_meta_boxes_aw_listing',
 	function () {
 		if ( current_user_can( 'edit_aw_volunteers' ) ) {
-			add_meta_box( 'aw_org_people', 'Volunteers', 'aw_org_people_box', 'aw_listing', 'normal', 'low' );
+			add_meta_box( 'aw_org_people', 'Volunteers', 'directoryweb_org_people_box', 'aw_listing', 'normal', 'low' );
 		}
 	}
 );
@@ -276,10 +276,10 @@ add_action(
  *
  * @param WP_Post $post Listing.
  */
-function aw_org_people_box( $post ) {
+function directoryweb_org_people_box( $post ) {
 	$link = fn( $id ) => admin_url( 'admin.php?page=fluentcrm-admin#/subscribers/' . (int) $id );
 	foreach ( array( 'org-approved' => 'Approved (tag org-approved)', 'org-pending' => 'Waiting (tag org-pending): approve by swapping the tag for org-approved in FluentCRM' ) as $tag => $head ) {
-		$rows = aw_org_people_crm( $post->ID, $tag );
+		$rows = directoryweb_org_people_crm( $post->ID, $tag );
 		echo '<p><strong>' . esc_html( $head ) . '</strong></p>';
 		if ( ! $rows ) {
 			echo '<p class="description">None.</p>';
@@ -300,7 +300,7 @@ function aw_org_people_box( $post ) {
  * org_listing (FluentCRM vol_org_listing) and its name in org_name; "My organisation isn't listed" keeps a typed name.
  * Public and read-only, like the PIN lookup (places.php), with a per-connection limit.
  */
-function aw_org_search_public() {
+function directoryweb_org_search_public() {
 	nocache_headers();
 	$key = 'aw_orgq_rl_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	$n   = (int) get_transient( $key );
@@ -315,16 +315,16 @@ function aw_org_search_public() {
 	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'posts_per_page' => 8, 'fields' => 'ids', 'orderby' => 'relevance', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? (array) kits_preview_only_ids() : array() ) );
 	$out = array();
 	foreach ( $ids as $id ) {
-		list( $state, $district ) = function_exists( 'aw_item_place_names' ) ? aw_item_place_names( $id ) : array( '', '' );
+		list( $state, $district ) = function_exists( 'directoryweb_item_place_names' ) ? directoryweb_item_place_names( $id ) : array( '', '' );
 		$out[] = array( 'id' => (int) $id, 'name' => html_entity_decode( get_the_title( $id ), ENT_QUOTES ), 'place' => implode( ', ', array_filter( array( $district, $state ) ) ) );
 	}
 	wp_send_json_success( $out );
 }
-add_action( 'wp_ajax_nopriv_aw_org_search', 'aw_org_search_public' );
-add_action( 'wp_ajax_aw_org_search', 'aw_org_search_public' );
+add_action( 'wp_ajax_nopriv_aw_org_search', 'directoryweb_org_search_public' );
+add_action( 'wp_ajax_aw_org_search', 'directoryweb_org_search_public' );
 
 /** A picked organisation: the published listing's ID, or 0. */
-function aw_org_listing_ok( $id ) {
+function directoryweb_org_listing_ok( $id ) {
 	$id = absint( $id );
 	return $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ? $id : 0;
 }

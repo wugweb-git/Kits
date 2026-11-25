@@ -1,9 +1,9 @@
 <?php
 /**
- * RankWeb PRO, phase E: CSV export and import of the SEO fields (docs/rankweb-pro-audit.md, E). Part of the "bulk"
+ * RankWeb PRO, phase E: CSV export and import of the SEO fields (docs/org/rankweb-org-plan.md (Appendix B), E). Part of the "bulk"
  * module (bulk-edit.php). Screen: RankWeb → SEO CSV.
  *
- * Columns (AW_Bulk): id, title, description, focus_keyword, link_keywords (a pipe list), canonical. Only the columns
+ * Columns (RankWeb_Bulk): id, title, description, focus_keyword, link_keywords (a pipe list), canonical. Only the columns
  * present in an imported file are written, so a file with just id and title touches the title only; a column that is
  * present but blank clears that field. Import has a dry run (the default) that reports what would change without
  * writing, and lists the rows it could not use and why.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/class-aw-bulk.php';
 
 /** CSV column => the meta key it reads and writes (id is the post, not a meta). */
-function aw_bulk_csv_meta(): array {
+function rankweb_bulk_csv_meta(): array {
 	return array(
 		'title'         => 'rank_math_title',
 		'description'   => 'rank_math_description',
@@ -29,13 +29,13 @@ function aw_bulk_csv_meta(): array {
 }
 
 /** One item's row for export. */
-function aw_bulk_csv_row( int $id ): array {
+function rankweb_bulk_csv_row( int $id ): array {
 	return array(
 		'id'            => (string) $id,
 		'title'         => (string) get_post_meta( $id, 'rank_math_title', true ),
 		'description'   => (string) get_post_meta( $id, 'rank_math_description', true ),
 		'focus_keyword' => (string) get_post_meta( $id, 'rank_math_focus_keyword', true ),
-		'link_keywords' => implode( '|', (array) aw_bulk_link_keywords( $id ) ),
+		'link_keywords' => implode( '|', (array) rankweb_bulk_link_keywords( $id ) ),
 		'canonical'     => (string) get_post_meta( $id, 'rank_math_canonical_url', true ),
 	);
 }
@@ -43,7 +43,7 @@ function aw_bulk_csv_row( int $id ): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'SEO CSV', 'rankweb' ), __( 'SEO CSV', 'rankweb' ), 'manage_options', 'aw-seo-csv', 'aw_bulk_csv_screen' );
+		add_submenu_page( AW_SEO_MENU, __( 'SEO CSV', 'rankweb' ), __( 'SEO CSV', 'rankweb' ), 'manage_options', 'aw-seo-csv', 'rankweb_bulk_csv_screen' );
 	}
 );
 
@@ -56,7 +56,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$types = aw_bulk_types();
+		$types = rankweb_bulk_types();
 		$ids   = $types ? get_posts(
 			array(
 				'post_type'        => $types,
@@ -70,14 +70,14 @@ add_action(
 		) : array();
 		$rows  = array();
 		foreach ( array_map( 'intval', $ids ) as $id ) {
-			$rows[] = aw_bulk_csv_row( $id );
+			$rows[] = rankweb_bulk_csv_row( $id );
 		}
-		$csv = AW_Bulk::to_csv( $rows );
+		$csv = RankWeb_Bulk::to_csv( $rows );
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=UTF-8' );
 		header( 'Content-Disposition: attachment; filename="rankweb-seo-' . gmdate( 'Ymd-His' ) . '.csv"' );
 		header( 'Content-Length: ' . strlen( $csv ) );
-		echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a CSV download built by AW_Bulk::to_csv()
+		echo $csv; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a CSV download built by RankWeb_Bulk::to_csv()
 		exit;
 	}
 );
@@ -108,11 +108,11 @@ add_action(
 				$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
 			} else {
 				$text   = (string) file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
-				$parsed = AW_Bulk::from_csv( $text );
+				$parsed = RankWeb_Bulk::from_csv( $text );
 				if ( '' !== $parsed['error'] ) {
 					$report['error'] = $parsed['error'];
 				} else {
-					$report = aw_bulk_csv_apply( $parsed['rows'], $parsed['header'], $dry, $report );
+					$report = rankweb_bulk_csv_apply( $parsed['rows'], $parsed['header'], $dry, $report );
 				}
 			}
 		}
@@ -125,14 +125,14 @@ add_action(
 /**
  * Apply (or, on a dry run, only report) the CSV rows.
  *
- * @param array $rows   Rows from AW_Bulk::from_csv().
+ * @param array $rows   Rows from RankWeb_Bulk::from_csv().
  * @param array $header The file's columns.
  * @param bool  $dry    Report only, write nothing.
  * @param array $report The report so far.
  */
-function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report ): array {
-	$types     = aw_bulk_types();
-	$meta      = aw_bulk_csv_meta();
+function rankweb_bulk_csv_apply( array $rows, array $header, bool $dry, array $report ): array {
+	$types     = rankweb_bulk_types();
+	$meta      = rankweb_bulk_csv_meta();
 	$cols      = array_values( array_intersect( array_keys( $meta ), $header ) );
 	$has_links = in_array( 'link_keywords', $header, true );
 	foreach ( $rows as $row ) {
@@ -164,9 +164,9 @@ function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report
 				}
 			}
 		}
-		if ( $has_links && function_exists( 'aw_link_keywords_clean' ) ) {
-			$new = aw_link_keywords_clean( explode( '|', (string) $row['link_keywords'] ) );
-			$old = array_values( (array) aw_bulk_link_keywords( $id ) );
+		if ( $has_links && function_exists( 'rankweb_link_keywords_clean' ) ) {
+			$new = rankweb_link_keywords_clean( explode( '|', (string) $row['link_keywords'] ) );
+			$old = array_values( (array) rankweb_bulk_link_keywords( $id ) );
 			if ( $new !== $old ) {
 				$changed[] = 'link_keywords';
 				if ( ! $dry ) {
@@ -192,19 +192,19 @@ function aw_bulk_csv_apply( array $rows, array $header, bool $dry, array $report
 /* ---------- The screen ---------- */
 
 /** RankWeb → SEO CSV. */
-function aw_bulk_csv_screen(): void {
+function rankweb_bulk_csv_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
 	$post = admin_url( 'admin-post.php' );
 	echo '<div class="wrap"><h1>' . esc_html__( 'SEO CSV', 'rankweb' ) . '</h1>';
-	if ( ! aw_bulk_types() ) {
+	if ( ! rankweb_bulk_types() ) {
 		wp_admin_notice( esc_html__( 'No post types are set for bulk SEO work (RankWeb → Settings → Bulk edit).', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
 	$report = get_transient( 'aw_seo_bulk_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {
 		delete_transient( 'aw_seo_bulk_report_' . get_current_user_id() );
-		aw_bulk_csv_report( $report );
+		rankweb_bulk_csv_report( $report );
 	}
 
 	echo '<h2>' . esc_html__( 'Export', 'rankweb' ) . '</h2><p>' . esc_html__( 'Download every item\'s SEO fields as a CSV.', 'rankweb' ) . '</p>';
@@ -228,7 +228,7 @@ function aw_bulk_csv_screen(): void {
  *
  * @param array $report The report.
  */
-function aw_bulk_csv_report( array $report ): void {
+function rankweb_bulk_csv_report( array $report ): void {
 	if ( '' !== (string) $report['error'] ) {
 		wp_admin_notice( esc_html( (string) $report['error'] ), array( 'type' => 'error' ) );
 		return;

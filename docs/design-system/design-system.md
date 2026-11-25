@@ -1,5 +1,7 @@
 # Animal Writes design system
 
+**Status (25 Nov 2026):** The colour rule and breakpoints are current. The rest (`--aw-*` tokens, Animal Writes sections) is history.
+
 How the site looks and behaves. No component hardcodes a colour, size, radius or duration.
 
 **Current and history (24 Oct 2026).** The colour rule and the breakpoints below are current. The Product systems, Scales, States vocabulary and Components sections are the first version (5 to 7 Oct 2026: `--aw-*` tokens, `aw-*` classes, the old section names Legal Watch, Knowledge Centre, Research Library and Campaign Hub), kept as history; several values have changed since. Current components: [component-map.md](component-map.md) (generated), [buttons.md](buttons.md), [card-sizes.md](card-sizes.md), [item-template.md](item-template.md), [listing-template.md](listing-template.md) and the states sheet (/kits-demo/).

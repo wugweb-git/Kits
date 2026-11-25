@@ -6,7 +6,7 @@
  *
  * No WordPress calls in this file: every function takes plain values and returns plain values, so the daily recompute
  * (compute.php) can store the results and the no-WordPress test runner can check them. The weights, caps and the owner
- * ladder live here as constants and are documented in docs/insightweb-plan.md.
+ * ladder live here as constants and are documented in docs/plugins/insightweb-plan.md.
  *
  * @package insightweb
  */

@@ -20,16 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 // AW_FILTER_PARAMS: RankWeb → Settings (settings.php).
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
-function aw_hub_canonical() {
+function rankweb_hub_canonical() {
 	if ( ! function_exists( 'aw_hub_base_url' ) || ! function_exists( 'aw_hub_page' ) ) { // the hubs (Animal Writes Core) are not loaded
-		return aw_list_canonical();
+		return rankweb_list_canonical();
 	}
 	return strtok( aw_hub_base_url(), '?' ) . ( aw_hub_page() > 1 ? 'page/' . aw_hub_page() . '/' : '' );
 }
 
 /** Whether the current URL is a filtered or sorted list (?tag=, ?state=, ?q=, ?category_name= …). */
-function aw_is_filtered_list() {
-	$is_list = ( function_exists( 'aw_hub_type' ) && aw_hub_type() ) || ( function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ) || is_page( 'directory' );
+function rankweb_is_filtered_list() {
+	$is_list = ( function_exists( 'aw_hub_type' ) && aw_hub_type() ) || ( function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() ) || is_page( 'directory' );
 	if ( is_singular() && ! $is_list ) {
 		return false;
 	}
@@ -42,8 +42,8 @@ function aw_is_filtered_list() {
 }
 
 /** Canonical URL of the current list page: its path (with /page/N/) plus its filters, in a fixed order. */
-function aw_list_canonical() {
-	if ( is_search() || is_404() || ( is_singular() && ! aw_is_filtered_list() ) ) { // hub pages are Pages: filtered ones still count
+function rankweb_list_canonical() {
+	if ( is_search() || is_404() || ( is_singular() && ! rankweb_is_filtered_list() ) ) { // hub pages are Pages: filtered ones still count
 		return '';
 	}
 	$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
@@ -58,7 +58,7 @@ function aw_list_canonical() {
 }
 
 /** The listing a /claim/?listing=ID page is for (0 elsewhere). */
-function aw_claim_listing() {
+function rankweb_claim_listing() {
 	$id = is_page( 'claim' ) ? absint( $_GET['listing'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
 	return ( $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) ? $id : 0;
 }
@@ -69,17 +69,17 @@ function aw_claim_listing() {
  *
  * @return string
  */
-function aw_seo_canonical() {
+function rankweb_seo_canonical() {
 	$url = '';
 	if ( function_exists( 'aw_hub_type' ) && aw_hub_type() && ! is_404() ) {
-		$url = aw_hub_canonical();
+		$url = rankweb_hub_canonical();
 	}
-	if ( '' === $url && aw_claim_listing() ) {
-		$url = add_query_arg( 'listing', aw_claim_listing(), get_permalink() );
+	if ( '' === $url && rankweb_claim_listing() ) {
+		$url = add_query_arg( 'listing', rankweb_claim_listing(), get_permalink() );
 	}
-	if ( aw_is_filtered_list() ) {
-		$view = function_exists( 'aw_seo_filtered_view' ) ? aw_seo_filtered_view() : null;
-		$url  = ( $view && '' !== $view['canonical'] ) ? $view['canonical'] : ( $view && ! $view['index'] ? aw_hub_canonical() : aw_list_canonical() ); // filtered-views.php: noindex views point at the section page
+	if ( rankweb_is_filtered_list() ) {
+		$view = function_exists( 'rankweb_seo_filtered_view' ) ? rankweb_seo_filtered_view() : null;
+		$url  = ( $view && '' !== $view['canonical'] ) ? $view['canonical'] : ( $view && ! $view['index'] ? rankweb_hub_canonical() : rankweb_list_canonical() ); // filtered-views.php: noindex views point at the section page
 	}
 	if ( '' !== $url ) {
 		return $url;
@@ -95,10 +95,10 @@ function aw_seo_canonical() {
 add_filter(
 	'rank_math/frontend/canonical',
 	function ( $url ) {
-		if ( is_404() || '' !== aw_seo_typed( 'canonical_url' ) || ( ! aw_seo_is_list_view() && ! aw_claim_listing() ) ) {
+		if ( is_404() || '' !== rankweb_seo_typed( 'canonical_url' ) || ( ! rankweb_seo_is_list_view() && ! rankweb_claim_listing() ) ) {
 			return $url; // typed in Rank Math, or an item: Rank Math's own
 		}
-		$ours = aw_seo_canonical();
+		$ours = rankweb_seo_canonical();
 		return '' !== $ours ? $ours : $url;
 	},
 	20
@@ -107,10 +107,10 @@ add_filter(
 add_filter(
 	'get_canonical_url',
 	function ( $url ) {
-		if ( is_404() || ( function_exists( 'aw_seo_typed' ) && '' !== aw_seo_typed( 'canonical_url' ) ) || ( ! aw_seo_is_list_view() && ! aw_claim_listing() ) ) {
+		if ( is_404() || ( function_exists( 'rankweb_seo_typed' ) && '' !== rankweb_seo_typed( 'canonical_url' ) ) || ( ! rankweb_seo_is_list_view() && ! rankweb_claim_listing() ) ) {
 			return $url;
 		}
-		$ours = aw_seo_canonical();
+		$ours = rankweb_seo_canonical();
 		return '' !== $ours ? $ours : $url;
 	},
 	20

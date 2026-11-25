@@ -1,5 +1,7 @@
 # Buttons
 
+**Status (25 Nov 2026):** Current button spec (`themes/kits-by-wugweb/assets/css/kit-primitives.css` section 10). Not re-checked token by token.
+
 One button system for the Kits master theme. `.kit-btn` (theme and plugin markup) and the core Button block render the same. All rules are in `themes/kits-by-wugweb/assets/css/kit-primitives.css` section 10. The values are `--kit-btn-*` tokens (`tokens/tokens.json`). The registry entry is "Button" in `kits-registry.json`, and every state is drawn on the states sheet (/kits-demo/, section 10: both systems, light and dark, every variant, state, content type and size, and Brand in each campaign palette).
 
 ## Variants

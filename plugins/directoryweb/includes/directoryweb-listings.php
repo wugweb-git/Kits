@@ -214,7 +214,7 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 			'label' => __( 'Every state', 'directoryweb' ),
 		),
 	);
-	foreach ( function_exists( 'aw_place_states' ) ? aw_place_states() : array() as $code => $s ) {
+	foreach ( function_exists( 'directoryweb_place_states' ) ? directoryweb_place_states() : array() as $code => $s ) {
 		$states[] = array(
 			'value' => (string) $code,
 			'label' => (string) $s->name,
@@ -227,7 +227,7 @@ function directoryweb_rest_listings( WP_REST_Request $r ) {
 		),
 	);
 	foreach ( directoryweb_listing_type_slugs() as $slug ) {
-		$name    = function_exists( 'aw_listing_type_name' ) ? aw_listing_type_name( $slug ) : '';
+		$name    = function_exists( 'directoryweb_listing_type_name' ) ? directoryweb_listing_type_name( $slug ) : '';
 		$types[] = array(
 			'value' => $slug,
 			'label' => '' !== $name ? $name : $slug,
@@ -422,8 +422,8 @@ function directoryweb_rest_listing_detail( WP_REST_Request $r ) {
  */
 function directoryweb_listing_row( WP_Post $p ): array {
 	$id       = (int) $p->ID;
-	$state    = function_exists( 'aw_place_state' ) ? aw_place_state( (int) get_post_meta( $id, 'aw_state_code', true ) ) : null;
-	$district = function_exists( 'aw_place_district' ) ? aw_place_district( (int) get_post_meta( $id, 'aw_district_code', true ) ) : null;
+	$state    = function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( (int) get_post_meta( $id, 'aw_state_code', true ) ) : null;
+	$district = function_exists( 'directoryweb_place_district' ) ? directoryweb_place_district( (int) get_post_meta( $id, 'aw_district_code', true ) ) : null;
 	$statuses = get_post_statuses();
 	$web      = (string) get_post_meta( $id, 'aw_website', true );
 	$gov      = (string) get_post_meta( $id, 'aw_gov_verified_on', true );

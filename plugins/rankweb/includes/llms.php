@@ -35,7 +35,7 @@ add_filter(
 			$rm   = class_exists( '\RankMath\Helper' ) ? \RankMath\Helper::replace_vars( $rm, $post ) : $rm;
 			$desc = '' !== trim( wp_strip_all_tags( $rm ) ) ? $rm : $desc;
 		}
-		return aw_llms_hub_count( $post, $desc );
+		return rankweb_llms_hub_count( $post, $desc );
 	},
 	10,
 	2
@@ -49,21 +49,21 @@ add_filter(
  * @param string  $desc Its description.
  * @return string
  */
-function aw_llms_hub_count( $post, $desc ) {
+function rankweb_llms_hub_count( $post, $desc ) {
 	if ( 'page' !== $post->post_type || $post->post_parent || ! function_exists( 'aw_hub_count_label' ) || ! defined( 'AW_HUBS' ) ) {
 		return $desc;
 	}
 	foreach ( AW_HUBS as $type => $h ) {
 		if ( $h[0] === $post->post_name ) {
 			$label = aw_hub_count_label( $type );
-			return '' !== $label ? rtrim( (string) $desc ) . ' ' . aw_llms_ucfirst( $label ) . ' on ' . wp_date( 'j M Y' ) . '.' : $desc;
+			return '' !== $label ? rtrim( (string) $desc ) . ' ' . rankweb_llms_ucfirst( $label ) . ' on ' . wp_date( 'j M Y' ) . '.' : $desc;
 		}
 	}
 	return $desc;
 }
 
 /** First letter upper case (a count starts with a digit, so usually unchanged). */
-function aw_llms_ucfirst( $text ) {
+function rankweb_llms_ucfirst( $text ) {
 	return mb_strtoupper( mb_substr( $text, 0, 1 ) ) . mb_substr( $text, 1 );
 }
 
@@ -107,8 +107,8 @@ add_filter(
  *
  * @return string
  */
-function aw_llms_directory_section() {
-	if ( ! function_exists( 'aw_seo_dir_children' ) || ! function_exists( 'aw_directory_url' ) ) {
+function rankweb_llms_directory_section() {
+	if ( ! function_exists( 'rankweb_seo_dir_children' ) || ! function_exists( 'directoryweb_directory_url' ) ) {
 		return '';
 	}
 	$hub   = get_page_by_path( 'directory' );
@@ -116,9 +116,9 @@ function aw_llms_directory_section() {
 	$lines = array( '## Directory' );
 	$lines[] = '- [Directory](' . esc_url_raw( home_url( '/directory/' ) ) . ')' . ( '' !== $desc ? ': ' . $desc : '' );
 	$lines[] = '- Pages by place: /directory/{state}/, /directory/{state}/{district}/ and /directory/{state}/{district}/{type}/; each organisation has its own page at /directory/org/{name}/.';
-	foreach ( aw_seo_dir_children( null ) as $row ) {
+	foreach ( rankweb_seo_dir_children( null ) as $row ) {
 		list( $place, $n ) = $row;
-		$lines[] = '- [' . $place->name . '](' . esc_url_raw( aw_directory_url( $place->slug ) ) . '): ' . number_format_i18n( $n ) . ( 1 === $n ? ' listing' : ' listings' );
+		$lines[] = '- [' . $place->name . '](' . esc_url_raw( directoryweb_directory_url( $place->slug ) ) . '): ' . number_format_i18n( $n ) . ( 1 === $n ? ' listing' : ' listings' );
 	}
 	return implode( "\n", $lines ) . "\n";
 }
@@ -126,7 +126,7 @@ function aw_llms_directory_section() {
 add_filter(
 	'rank_math/llms_txt/extra_content',
 	function ( $extra ) {
-		$dir = aw_llms_directory_section();
+		$dir = rankweb_llms_directory_section();
 		return trim( $dir . ( '' !== trim( (string) $extra ) ? "\n" . $extra : '' ) );
 	}
 );

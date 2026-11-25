@@ -1,6 +1,6 @@
 <?php
 /**
- * Internal links, phase 2: the link audit (docs/rankweb-internal-links.md).
+ * Internal links, phase 2: the link audit (docs/org/rankweb-org-plan.md (Appendix A)).
  *
  * The scheduled job aw_link_audit (daily, or at once from the screen) works in slices of about 20 seconds and carries on
  * in a one-off event until it is done, so no browser tab has to stay open:
@@ -8,7 +8,7 @@
  *               and the settings of the auto-linker) and its links are recorded in {prefix}aw_links (auto and manual);
  *   2. check    addresses on this site that no item owns are asked for once (HEAD, no redirect followed, at most 20
  *               seconds per slice; an answer is kept six days): 404 and 410 are broken, 3xx is a redirect;
- *   3. analyse  AW_Link_Audit (class-aw-link-audit.php) works out links in and out, clicks from the home page, orphans and
+ *   3. analyse  RankWeb_Link_Audit (class-aw-link-audit.php) works out links in and out, clicks from the home page, orphans and
  *               the findings of each item, and the result is stored in {prefix}aw_link_audit (one row per item).
  * The home page and the menus (menus, block navigation and template parts saved in the database) are the first click.
  * Rank Math's link counter is Rank Math's: not read or written here.
@@ -32,7 +32,7 @@ const AW_LINK_AUDIT_JOB     = 'aw_link_audit';
 const AW_LINK_AUDIT_DB      = 'aw_link_audit_db';
 const AW_LINK_AUDIT_DB_VER  = '1';
 const AW_LINK_AUDIT_STATE   = 'aw_link_audit_state';
-const AW_LINK_AUDIT_SUMMARY = 'aw_link_audit_summary';
+const AW_LINK_AUDIT_SUMMARY = 'rankweb_link_audit_summary';
 const AW_LINK_AUDIT_CHECKS  = 'aw_link_audit_checks';
 const AW_LINK_AUDIT_SLICE   = 20; // seconds of work in one run of the job
 const AW_LINK_AUDIT_KEEP    = 6 * DAY_IN_SECONDS; // an address answer is kept this long
@@ -40,13 +40,13 @@ const AW_LINK_AUDIT_KEEP    = 6 * DAY_IN_SECONDS; // an address answer is kept t
 /* ---------- The table ---------- */
 
 /** Create the audit table (its own version option, so the auto-linker's tables are never gated by it). */
-function aw_link_audit_install(): void {
+function rankweb_link_audit_install(): void {
 	if ( get_option( AW_LINK_AUDIT_DB ) === AW_LINK_AUDIT_DB_VER ) {
 		return;
 	}
 	global $wpdb;
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	$t = aw_link_table( 'audit' );
+	$t = rankweb_link_table( 'audit' );
 	$c = $wpdb->get_charset_collate();
 	dbDelta(
 		"CREATE TABLE {$t} (
@@ -62,10 +62,10 @@ function aw_link_audit_install(): void {
 	);
 	update_option( AW_LINK_AUDIT_DB, AW_LINK_AUDIT_DB_VER, true );
 }
-add_action( 'admin_init', 'aw_link_audit_install' );
+add_action( 'admin_init', 'rankweb_link_audit_install' );
 
 /** The findings and their texts. */
-function aw_link_audit_labels(): array {
+function rankweb_link_audit_labels(): array {
 	return array(
 		'orphan'    => __( 'Orphan: no link in', 'rankweb' ),
 		'deep'      => __( 'Too many clicks from the home page', 'rankweb' ),
@@ -82,9 +82,9 @@ function aw_link_audit_labels(): array {
 /* ---------- The job ---------- */
 
 /** IDs of the items to audit: published, no password, a linked type, not left out. */
-function aw_link_audit_ids(): array {
+function rankweb_link_audit_ids(): array {
 	global $wpdb;
-	$types = aw_link_types();
+	$types = rankweb_link_types();
 	if ( ! $types ) {
 		return array();
 	}
@@ -93,7 +93,7 @@ function aw_link_audit_ids(): array {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- $in is a list of %s.
 		$wpdb->prepare( "SELECT ID FROM %i WHERE post_status = 'publish' AND post_password = '' AND post_type IN ( {$in} ) ORDER BY ID", array_merge( array( $wpdb->posts ), $types ) )
 	);
-	$skip = array_flip( aw_link_excluded() );
+	$skip = array_flip( rankweb_link_excluded() );
 	return array_values( array_filter( array_map( 'intval', (array) $ids ), fn( $id ) => ! isset( $skip[ $id ] ) ) );
 }
 
@@ -102,34 +102,34 @@ function aw_link_audit_ids(): array {
  *
  * @param string $why '' (daily), 'now' (asked for on the screen) or 'more' (the next slice).
  */
-function aw_link_audit_job( $why = '' ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- the event's argument ('now' or 'more') is for the schedule, not for the work
+function rankweb_link_audit_job( $why = '' ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- the event's argument ('now' or 'more') is for the schedule, not for the work
 	if ( get_transient( 'aw_link_audit_lock' ) ) {
 		return; // another slice is running
 	}
 	set_transient( 'aw_link_audit_lock', 1, 2 * MINUTE_IN_SECONDS );
-	aw_link_install();
-	aw_link_audit_install();
-	if ( function_exists( 'aw_silo_install' ) ) {
-		aw_silo_install();
+	rankweb_link_install();
+	rankweb_link_audit_install();
+	if ( function_exists( 'rankweb_silo_install' ) ) {
+		rankweb_silo_install();
 	}
 	$state = get_option( AW_LINK_AUDIT_STATE );
 	if ( ! is_array( $state ) || empty( $state['phase'] ) ) {
 		$state = array(
 			'phase'   => 'collect',
-			'ids'     => aw_link_audit_ids(),
+			'ids'     => rankweb_link_audit_ids(),
 			'pos'     => 0,
 			'started' => time(),
 		);
 	}
 	$end = microtime( true ) + AW_LINK_AUDIT_SLICE;
 	if ( 'collect' === $state['phase'] ) {
-		$state = aw_link_audit_collect( $state, $end );
+		$state = rankweb_link_audit_collect( $state, $end );
 	}
 	if ( 'check' === $state['phase'] ) {
-		$state = aw_link_audit_check( $state, $end );
+		$state = rankweb_link_audit_check( $state, $end );
 	}
 	if ( 'analyse' === $state['phase'] ) {
-		aw_link_audit_analyse( (array) $state['ids'], (int) $state['started'] );
+		rankweb_link_audit_analyse( (array) $state['ids'], (int) $state['started'] );
 		delete_option( AW_LINK_AUDIT_STATE );
 	} else {
 		update_option( AW_LINK_AUDIT_STATE, $state, false );
@@ -139,7 +139,7 @@ function aw_link_audit_job( $why = '' ): void { // phpcs:ignore Generic.CodeAnal
 	}
 	delete_transient( 'aw_link_audit_lock' );
 }
-add_action( AW_LINK_AUDIT_JOB, 'aw_link_audit_job' );
+add_action( AW_LINK_AUDIT_JOB, 'rankweb_link_audit_job' );
 
 add_action(
 	'init',
@@ -156,7 +156,7 @@ add_action(
  * @param array $state The audit's state.
  * @param float $end   When the slice ends (microtime).
  */
-function aw_link_audit_collect( array $state, float $end ): array {
+function rankweb_link_audit_collect( array $state, float $end ): array {
 	$ids   = (array) $state['ids'];
 	$total = count( $ids );
 	while ( (int) $state['pos'] < $total && microtime( true ) < $end ) {
@@ -166,8 +166,8 @@ function aw_link_audit_collect( array $state, float $end ): array {
 		if ( ! $post instanceof WP_Post || 'publish' !== $post->post_status ) {
 			continue;
 		}
-		$html = aw_link_audit_render( $post );
-		aw_link_store( $id, aw_link_run( $html, $id ) );
+		$html = rankweb_link_audit_render( $post );
+		rankweb_link_store( $id, rankweb_link_run( $html, $id ) );
 	}
 	if ( (int) $state['pos'] >= $total ) {
 		$state['phase'] = 'check';
@@ -180,7 +180,7 @@ function aw_link_audit_collect( array $state, float $end ): array {
  *
  * @param WP_Post $post Item.
  */
-function aw_link_audit_render( WP_Post $post ): string {
+function rankweb_link_audit_render( WP_Post $post ): string {
 	// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the content filters read the global post, as on a page view; restored below.
 	$GLOBALS['post'] = $post;
 	setup_postdata( $post );
@@ -190,9 +190,9 @@ function aw_link_audit_render( WP_Post $post ): string {
 }
 
 /** The addresses on this site that no item owns, from the links table (without their #fragment). */
-function aw_link_audit_unowned(): array {
+function rankweb_link_audit_unowned(): array {
 	global $wpdb;
-	$rows = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT url FROM %i WHERE target_id = 0 AND origin = 'manual'", aw_link_table( 'links' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, once per audit.
+	$rows = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT url FROM %i WHERE target_id = 0 AND origin = 'manual'", rankweb_link_table( 'links' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, once per audit.
 	$out  = array();
 	foreach ( $rows as $url ) {
 		$url = (string) strtok( (string) $url, '#' );
@@ -210,10 +210,10 @@ function aw_link_audit_unowned(): array {
  * @param array $state The audit's state.
  * @param float $end   When the slice ends (microtime).
  */
-function aw_link_audit_check( array $state, float $end ): array {
+function rankweb_link_audit_check( array $state, float $end ): array {
 	$checks = (array) get_option( AW_LINK_AUDIT_CHECKS, array() );
 	$now    = time();
-	$urls   = aw_link_audit_unowned();
+	$urls   = rankweb_link_audit_unowned();
 	$checks = array_intersect_key( $checks, array_flip( $urls ) ); // addresses no longer linked are forgotten
 	foreach ( $urls as $url ) {
 		if ( microtime( true ) >= $end ) {
@@ -264,7 +264,7 @@ function aw_link_audit_check( array $state, float $end ): array {
  *
  * @return int[] Item IDs.
  */
-function aw_link_audit_roots(): array {
+function rankweb_link_audit_roots(): array {
 	$urls   = array();
 	$take   = function ( $html ) use ( &$urls ) {
 		if ( ! is_string( $html ) || '' === $html || ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
@@ -294,7 +294,7 @@ function aw_link_audit_roots(): array {
 	if ( $front ) {
 		$post = get_post( $front );
 		if ( $post instanceof WP_Post ) {
-			$take( aw_link_audit_render( $post ) );
+			$take( rankweb_link_audit_render( $post ) );
 		}
 	}
 	// Menus, block navigation and template parts saved in the database.
@@ -314,7 +314,7 @@ function aw_link_audit_roots(): array {
 	$home = home_url();
 	foreach ( array_unique( $urls ) as $url ) {
 		$abs = 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ? home_url( $url ) : $url;
-		if ( '' === AW_Linker::url_key( $abs, $home ) || 0 !== strpos( AW_Linker::url_key( $abs, $home ) . '/', AW_Linker::url_key( $home ) . '/' ) ) {
+		if ( '' === RankWeb_Linker::url_key( $abs, $home ) || 0 !== strpos( RankWeb_Linker::url_key( $abs, $home ) . '/', RankWeb_Linker::url_key( $home ) . '/' ) ) {
 			continue; // another site
 		}
 		$id = (int) url_to_postid( $abs );
@@ -331,7 +331,7 @@ function aw_link_audit_roots(): array {
  * @param array $ids     Item IDs audited.
  * @param int   $started When the audit started.
  */
-function aw_link_audit_analyse( array $ids, int $started ): void {
+function rankweb_link_audit_analyse( array $ids, int $started ): void {
 	global $wpdb;
 	$items = array();
 	$link  = array();
@@ -342,7 +342,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 		}
 		$perma              = (string) get_permalink( $post );
 		$canon              = (string) get_post_meta( (int) $id, 'rank_math_canonical_url', true );
-		$same               = '' === $canon || AW_Linker::url_key( $canon, home_url() ) === AW_Linker::url_key( $perma, home_url() );
+		$same               = '' === $canon || RankWeb_Linker::url_key( $canon, home_url() ) === RankWeb_Linker::url_key( $perma, home_url() );
 		$link[ (int) $id ]  = $perma;
 		$items[ (int) $id ] = array(
 			'url'       => $perma,
@@ -351,7 +351,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 	}
 	$checks = (array) get_option( AW_LINK_AUDIT_CHECKS, array() );
 	$edges  = array();
-	$rows   = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT source_id, target_id, url, rel FROM %i', aw_link_table( 'links' ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, once per audit.
+	$rows   = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT source_id, target_id, url, rel FROM %i', rankweb_link_table( 'links' ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, once per audit.
 	foreach ( $rows as $r ) {
 		$src = (int) $r['source_id'];
 		$tgt = (int) $r['target_id'];
@@ -363,7 +363,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 		if ( 0 === $tgt ) {
 			$c      = $checks[ (string) strtok( $url, '#' ) ]['s'] ?? '';
 			$status = in_array( $c, array( 'broken', 'redirect' ), true ) ? $c : '';
-		} elseif ( isset( $link[ $tgt ] ) && AW_Linker::url_key( $url, home_url() ) !== AW_Linker::url_key( $link[ $tgt ], home_url() ) ) {
+		} elseif ( isset( $link[ $tgt ] ) && RankWeb_Linker::url_key( $url, home_url() ) !== RankWeb_Linker::url_key( $link[ $tgt ], home_url() ) ) {
 			$status = 'redirect'; // written with an old address: the visitor is sent on
 		}
 		$edges[] = array(
@@ -375,7 +375,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 		);
 	}
 	// Silo links are shown on the page, not saved in the content: they count as links here.
-	$silos = function_exists( 'aw_silo_data' ) ? aw_silo_data() : array(
+	$silos = function_exists( 'rankweb_silo_data' ) ? rankweb_silo_data() : array(
 		'silos' => array(),
 		'map'   => array(),
 	);
@@ -384,7 +384,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 			if ( ! isset( $items[ $member ] ) ) {
 				continue;
 			}
-			foreach ( AW_Silo::links( $s['mode'], $s['hub'], $s['items'], (int) $member, max( 1, (int) AW_SILO_MAX ) ) as $tid ) {
+			foreach ( RankWeb_Silo::links( $s['mode'], $s['hub'], $s['items'], (int) $member, max( 1, (int) AW_SILO_MAX ) ) as $tid ) {
 				$edges[] = array(
 					'source' => (int) $member,
 					'target' => (int) $tid,
@@ -395,10 +395,10 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 			}
 		}
 	}
-	$result = AW_Link_Audit::analyze(
+	$result = RankWeb_Link_Audit::analyze(
 		$items,
 		$edges,
-		aw_link_audit_roots(),
+		rankweb_link_audit_roots(),
 		array(
 			'max_depth' => max( 1, (int) AW_LINK_AUDIT_DEPTH ),
 			'max_links' => max( 1, (int) AW_LINK_AUDIT_MAX ),
@@ -406,7 +406,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 			'silo'      => $silos['map'],
 		)
 	);
-	$table  = aw_link_table( 'audit' );
+	$table  = rankweb_link_table( 'audit' );
 	$now    = current_time( 'mysql', true );
 	$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, replaced whole.
 	foreach ( array_chunk( $result, 200, true ) as $chunk ) {
@@ -419,8 +419,8 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders -- RankWeb's own table; the placeholders are built above.
 		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (post_id, links_in, links_out, depth, flags, detail, checked) VALUES ' . implode( ',', $sql ), $args ) );
 	}
-	$sum    = AW_Link_Audit::summary( $result );
-	$anchor = function_exists( 'aw_anchor_rebuild' ) ? aw_anchor_rebuild() : array(
+	$sum    = RankWeb_Link_Audit::summary( $result );
+	$anchor = function_exists( 'rankweb_anchor_rebuild' ) ? rankweb_anchor_rebuild() : array(
 		'targets' => 0,
 		'warn'    => 0,
 	);
@@ -439,7 +439,7 @@ function aw_link_audit_analyse( array $ids, int $started ): void {
 }
 
 /** Start an audit now: drop what a running one had, and run the job in a few seconds. */
-function aw_link_audit_start(): void {
+function rankweb_link_audit_start(): void {
 	delete_option( AW_LINK_AUDIT_STATE );
 	delete_transient( 'aw_link_audit_lock' );
 	if ( ! wp_next_scheduled( AW_LINK_AUDIT_JOB, array( 'now' ) ) ) {
@@ -448,7 +448,7 @@ function aw_link_audit_start(): void {
 }
 
 /** What the audit is doing now: array( running (bool), phase, done, total ), from its state. */
-function aw_link_audit_progress(): array {
+function rankweb_link_audit_progress(): array {
 	$state = get_option( AW_LINK_AUDIT_STATE );
 	if ( ! is_array( $state ) || empty( $state['phase'] ) ) {
 		return array(
@@ -481,7 +481,7 @@ add_action(
 					'flag'     => array(
 						'type'    => 'string',
 						'default' => '',
-						'enum'    => array_merge( array( '' ), AW_Link_Audit::FLAGS ),
+						'enum'    => array_merge( array( '' ), RankWeb_Link_Audit::FLAGS ),
 					),
 					'page'     => array(
 						'type'    => 'integer',
@@ -496,8 +496,8 @@ add_action(
 					),
 				),
 				'callback'            => function ( WP_REST_Request $req ) {
-					$page = aw_link_audit_page( (string) $req['flag'], (int) $req['page'], (int) $req['per_page'] );
-					return rest_ensure_response( $page + array( 'summary' => aw_link_audit_summary() ) );
+					$page = rankweb_link_audit_page( (string) $req['flag'], (int) $req['page'], (int) $req['per_page'] );
+					return rest_ensure_response( $page + array( 'summary' => rankweb_link_audit_summary() ) );
 				},
 			)
 		);
@@ -507,7 +507,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
-				'callback'            => fn() => rest_ensure_response( aw_link_audit_summary() ),
+				'callback'            => fn() => rest_ensure_response( rankweb_link_audit_summary() ),
 			)
 		);
 		register_rest_route(
@@ -517,8 +517,8 @@ add_action(
 				'methods'             => 'POST',
 				'permission_callback' => rankweb_rest_can( 'manage_options' ),
 				'callback'            => function () {
-					aw_link_audit_start();
-					return rest_ensure_response( aw_link_audit_summary() );
+					rankweb_link_audit_start();
+					return rest_ensure_response( rankweb_link_audit_summary() );
 				},
 			)
 		);
@@ -526,7 +526,7 @@ add_action(
 );
 
 /** The last audit's counts and what a running one is doing. */
-function aw_link_audit_summary(): array {
+function rankweb_link_audit_summary(): array {
 	$s = (array) get_option( AW_LINK_AUDIT_SUMMARY, array() );
 	return array(
 		'at'          => (int) ( $s['at'] ?? 0 ),
@@ -535,7 +535,7 @@ function aw_link_audit_summary(): array {
 		'flagged'     => (int) ( $s['flagged'] ?? 0 ),
 		'anchor_warn' => (int) ( $s['anchor_warn'] ?? 0 ),
 		'by'          => (object) ( $s['by'] ?? array() ),
-		'progress'    => aw_link_audit_progress(),
+		'progress'    => rankweb_link_audit_progress(),
 	);
 }
 
@@ -547,9 +547,9 @@ function aw_link_audit_summary(): array {
  * @param int    $per_page Rows per page.
  * @return array items (post_id, title, url, links_in, links_out, depth, flags, detail), total.
  */
-function aw_link_audit_page( string $flag, int $page, int $per_page ): array {
+function rankweb_link_audit_page( string $flag, int $page, int $per_page ): array {
 	global $wpdb;
-	$table = aw_link_table( 'audit' );
+	$table = rankweb_link_table( 'audit' );
 	if ( get_option( AW_LINK_AUDIT_DB ) !== AW_LINK_AUDIT_DB_VER ) {
 		return array(
 			'items' => array(),
@@ -583,7 +583,7 @@ function aw_link_audit_page( string $flag, int $page, int $per_page ): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Internal links', 'rankweb' ), __( 'Internal links', 'rankweb' ), RANKWEB_CAP, 'aw-links', 'aw_link_audit_page_html' );
+		add_submenu_page( AW_SEO_MENU, __( 'Internal links', 'rankweb' ), __( 'Internal links', 'rankweb' ), RANKWEB_CAP, 'aw-links', 'rankweb_link_audit_page_html' );
 	}
 );
 
@@ -595,42 +595,42 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		aw_link_audit_start();
+		rankweb_link_audit_start();
 		wp_safe_redirect( add_query_arg( 'started', '1', admin_url( 'admin.php?page=aw-links' ) ) );
 		exit;
 	}
 );
 
 /** The screen. */
-function aw_link_audit_page_html(): void {
+function rankweb_link_audit_page_html(): void {
 	if ( ! current_user_can( RANKWEB_CAP ) ) {
 		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
 	$flag   = sanitize_key( wp_unslash( $_GET['flag'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
-	$flag   = in_array( $flag, AW_Link_Audit::FLAGS, true ) ? $flag : '';
+	$flag   = in_array( $flag, RankWeb_Link_Audit::FLAGS, true ) ? $flag : '';
 	$paged  = max( 1, absint( wp_unslash( $_GET['paged'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
 	$per    = 25;
-	$labels = aw_link_audit_labels();
-	$sum    = aw_link_audit_summary();
+	$labels = rankweb_link_audit_labels();
+	$sum    = rankweb_link_audit_summary();
 	$prog   = $sum['progress'];
 	$base   = admin_url( 'admin.php?page=aw-links' );
 
 	$view = sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a tab on a read-only screen.
-	$view = 'anchors' === $view && function_exists( 'aw_anchor_screen' ) ? 'anchors' : ( 'silos' === $view && function_exists( 'aw_silo_screen' ) ? 'silos' : 'audit' );
+	$view = 'anchors' === $view && function_exists( 'rankweb_anchor_screen' ) ? 'anchors' : ( 'silos' === $view && function_exists( 'rankweb_silo_screen' ) ? 'silos' : 'audit' );
 	echo '<div class="wrap"><h1>' . esc_html__( 'Internal links', 'rankweb' ) . '</h1>';
 	echo '<nav class="nav-tab-wrapper"><a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'audit' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Audit', 'rankweb' ) . '</a>';
-	if ( function_exists( 'aw_anchor_screen' ) ) {
+	if ( function_exists( 'rankweb_anchor_screen' ) ) {
 		echo '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '" class="nav-tab' . ( 'anchors' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Anchor mix', 'rankweb' ) . '</a>';
 	}
-	if ( function_exists( 'aw_silo_screen' ) ) {
+	if ( function_exists( 'rankweb_silo_screen' ) ) {
 		echo '<a href="' . esc_url( add_query_arg( 'view', 'silos', $base ) ) . '" class="nav-tab' . ( 'silos' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Silos', 'rankweb' ) . '</a>';
 	}
 	echo '</nav>';
 	if ( 'anchors' === $view || 'silos' === $view ) {
 		if ( 'anchors' === $view ) {
-			aw_anchor_screen();
+			rankweb_anchor_screen();
 		} else {
-			aw_silo_screen();
+			rankweb_silo_screen();
 		}
 		echo '</div>';
 		return;
@@ -638,7 +638,7 @@ function aw_link_audit_page_html(): void {
 	if ( isset( $_GET['started'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- only a notice.
 		wp_admin_notice( esc_html__( 'The audit starts in a few seconds and runs in the background.', 'rankweb' ), array( 'type' => 'info' ) );
 	}
-	if ( ! aw_link_types() ) {
+	if ( ! rankweb_link_types() ) {
 		wp_admin_notice( esc_html__( 'No post type is linked yet, so there is nothing to audit. Add post types under RankWeb → Settings → Internal links.', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
 	if ( $prog['running'] ) {
@@ -668,7 +668,7 @@ function aw_link_audit_page_html(): void {
 	}
 	echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $views ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput -- each part is escaped above.
 
-	$data  = aw_link_audit_page( $flag, $paged, $per );
+	$data  = rankweb_link_audit_page( $flag, $paged, $per );
 	$cells = array();
 	foreach ( $data['items'] as $it ) {
 		$issues = array();
@@ -686,7 +686,7 @@ function aw_link_audit_page_html(): void {
 			'issues' => implode( '<br>', $issues ),
 		);
 	}
-	aw_seo_extras_simple_table(
+	rankweb_seo_extras_simple_table(
 		'aw-link-audit',
 		array(
 			'item'   => __( 'Item', 'rankweb' ),

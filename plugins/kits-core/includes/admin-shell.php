@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits admin shell: the shared parts plugin screens are built from (docs/kits-plugin-ui.md).
+ * Kits admin shell: the shared parts plugin screens are built from (docs/plugins/kits-plugin-ui-spec.md).
  *
  * Kits Core registers one script and one stylesheet, both with the handle `kits-shell` (built from src/shell/ into
  * build/shell/, npm run build:shell). The script sets window.kits.shell: app header, tile, chip row, section card,
@@ -136,7 +136,7 @@ function kits_shell_ui_next(): bool {
 }
 
 /**
- * The permission check of a shell screen's REST route (docs/kits-plugin-ui.md, Data):
+ * The permission check of a shell screen's REST route (docs/plugins/kits-plugin-ui-spec.md, Data):
  * 401 when signed out; 403 when a browser request has no valid wp_rest nonce (an Application Password request has
  * none); 403 without the capability.
  *

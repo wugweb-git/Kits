@@ -6,7 +6,7 @@
  * edited / own; search, sort, filter by type), a "Waiting for approval" view of draft questions with bulk Approve, and
  * the counts by type with Recount.
  *
- * aw_faq_index() walks every item with the box once an hour (transient aw_faq_index): items of a type with automatic
+ * rankweb_faq_index() walks every item with the box once an hour (transient aw_faq_index): items of a type with automatic
  * questions all, other items only when their box holds questions.
  *
  * @package aw-seo-extras
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // The RankWeb Overview's FAQ status asks for this when the hourly count has run out (5 Nov 2026).
-add_action( 'aw_faq_index_build', fn() => aw_faq_index( true ) );
+add_action( 'aw_faq_index_build', fn() => rankweb_faq_index( true ) );
 
 /**
  * Every item that shows an FAQ or has draft questions, and the counts by type. Cached for an hour.
@@ -25,15 +25,15 @@ add_action( 'aw_faq_index_build', fn() => aw_faq_index( true ) );
  * @param bool $fresh Count again.
  * @return array [ at, rows[ [ store, id, name, type, shown, auto, edited, own, drafts, draft_q[] ] ], counts[ type => [ store, published, faq, below, drafts ] ] ]
  */
-function aw_faq_index( $fresh = false ) {
+function rankweb_faq_index( $fresh = false ) {
 	$ix = $fresh ? false : get_transient( 'aw_faq_index' );
 	if ( is_array( $ix ) && isset( $ix['rows'], $ix['counts'] ) ) {
 		return $ix;
 	}
 	$ix  = array( 'at' => time(), 'rows' => array(), 'counts' => array() );
-	$reg = aw_faq_registry();
+	$reg = rankweb_faq_registry();
 	$add = function ( $ctx, $name, &$c ) use ( &$ix ) {
-		$r      = aw_faq_rows( $ctx, false );
+		$r      = rankweb_faq_rows( $ctx, false );
 		$shown  = $r['ok'] ? array_values( array_filter( $r['rows'], fn( $x ) => $x['shown'] ) ) : array();
 		$drafts = array_values( array_filter( $r['rows'], fn( $x ) => 'own' === $x['origin'] && 'approved' !== $x['status'] ) );
 		$c['faq']    += $shown ? 1 : 0;
@@ -56,7 +56,7 @@ function aw_faq_index( $fresh = false ) {
 			'draft_q' => array_slice( wp_list_pluck( $drafts, 'q' ), 0, 10 ),
 		);
 	};
-	foreach ( aw_faq_post_types() as $pt ) {
+	foreach ( rankweb_faq_post_types() as $pt ) {
 		$c    = array( 'store' => 'post', 'published' => (int) ( wp_count_posts( $pt )->publish ?? 0 ), 'faq' => 0, 'below' => 0, 'drafts' => 0 );
 		$args = array( 'post_type' => $pt, 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true, 'orderby' => 'ID', 'order' => 'ASC' );
 		if ( empty( $reg[ $pt ] ) ) {
@@ -64,7 +64,7 @@ function aw_faq_index( $fresh = false ) {
 		}
 		foreach ( array_chunk( get_posts( $args ), 200 ) as $chunk ) {
 			foreach ( get_posts( array( 'post_type' => $pt, 'post_status' => 'publish', 'post__in' => $chunk, 'numberposts' => count( $chunk ), 'orderby' => 'post__in', 'no_found_rows' => true ) ) as $p ) { // meta and terms primed per chunk
-				$ctx = aw_faq_context( $p );
+				$ctx = rankweb_faq_context( $p );
 				if ( $ctx ) {
 					$add( $ctx, html_entity_decode( get_the_title( $p ), ENT_QUOTES, 'UTF-8' ), $c );
 				}
@@ -72,7 +72,7 @@ function aw_faq_index( $fresh = false ) {
 		}
 		$ix['counts'][ $pt ] = $c;
 	}
-	foreach ( aw_faq_taxonomies() as $tax ) {
+	foreach ( rankweb_faq_taxonomies() as $tax ) {
 		$c     = array( 'store' => 'term', 'published' => (int) wp_count_terms( array( 'taxonomy' => $tax, 'hide_empty' => false ) ), 'faq' => 0, 'below' => 0, 'drafts' => 0 );
 		$targs = array( 'taxonomy' => $tax, 'hide_empty' => false );
 		if ( empty( $reg[ $tax ] ) ) {
@@ -80,7 +80,7 @@ function aw_faq_index( $fresh = false ) {
 		}
 		$terms = get_terms( $targs );
 		foreach ( is_wp_error( $terms ) ? array() : $terms as $t ) {
-			$ctx = aw_faq_context( $t );
+			$ctx = rankweb_faq_context( $t );
 			if ( $ctx ) {
 				$add( $ctx, html_entity_decode( $t->name, ENT_QUOTES, 'UTF-8' ), $c );
 			}
@@ -94,34 +94,34 @@ function aw_faq_index( $fresh = false ) {
 }
 
 /** A type's name for the screen: the post type's or taxonomy's singular label. */
-function aw_faq_type_label( $type ) {
+function rankweb_faq_type_label( $type ) {
 	$o = post_type_exists( $type ) ? get_post_type_object( $type ) : get_taxonomy( $type );
 	return $o ? (string) $o->labels->singular_name : (string) $type;
 }
 
 /** The edit screen of an item, at its FAQ box. */
-function aw_faq_edit_url( $store, $id ) {
+function rankweb_faq_edit_url( $store, $id ) {
 	$url = 'term' === $store ? (string) get_edit_term_link( (int) $id ) : (string) get_edit_post_link( (int) $id, 'raw' );
 	return '' !== $url ? $url . '#aw-faq' : '';
 }
 
 /** Whether the current user may edit an item's FAQ box. */
-function aw_faq_can_edit( $store, $id ) {
+function rankweb_faq_can_edit( $store, $id ) {
 	return 'term' === $store ? current_user_can( 'edit_term', (int) $id ) : current_user_can( 'edit_post', (int) $id );
 }
 
 add_action(
 	'admin_menu',
 	function () {
-		$hook = add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', RANKWEB_CAP, 'aw-faq', 'aw_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
+		$hook = add_submenu_page( AW_SEO_MENU, 'FAQ', 'FAQ', RANKWEB_CAP, 'aw-faq', 'rankweb_faq_admin_page' ); // RankWeb → FAQ (overview.php has the menu)
 		if ( $hook ) {
-			add_action( 'load-' . $hook, 'aw_faq_admin_load' );
+			add_action( 'load-' . $hook, 'rankweb_faq_admin_load' );
 		}
 	}
 );
 
 /** Before the screen: bulk Approve and Recount, then back to the list. */
-function aw_faq_admin_load() {
+function rankweb_faq_admin_load() {
 	$action = sanitize_key( wp_unslash( $_GET['action'] ?? '-1' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked below
 	if ( '-1' === $action || '' === $action ) {
 		$action = sanitize_key( wp_unslash( $_GET['action2'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked below
@@ -130,10 +130,10 @@ function aw_faq_admin_load() {
 		check_admin_referer( 'bulk-aw-faq-items' );
 		$done = 0;
 		foreach ( array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['item'] ?? array() ) ) as $pick ) {
-			if ( ! preg_match( '/^(post|term):(\d+)$/', $pick, $m ) || ! aw_faq_can_edit( $m[1], $m[2] ) ) {
+			if ( ! preg_match( '/^(post|term):(\d+)$/', $pick, $m ) || ! rankweb_faq_can_edit( $m[1], $m[2] ) ) {
 				continue;
 			}
-			$items = aw_faq_items( $m[1], (int) $m[2] );
+			$items = rankweb_faq_items( $m[1], (int) $m[2] );
 			foreach ( $items as $i => $it ) {
 				if ( '' === ( $it['auto'] ?? '' ) && 'approved' !== $it['status'] ) {
 					$items[ $i ]['status']   = 'approved';
@@ -141,22 +141,22 @@ function aw_faq_admin_load() {
 					++$done;
 				}
 			}
-			aw_faq_items_save( $m[1], (int) $m[2], $items );
+			rankweb_faq_items_save( $m[1], (int) $m[2], $items );
 		}
-		aw_faq_index( true );
+		rankweb_faq_index( true );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'view' => 'waiting', 'approved' => $done ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 	if ( isset( $_GET['recount'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked below
 		check_admin_referer( 'aw_faq_recount' );
-		aw_faq_index( true );
+		rankweb_faq_index( true );
 		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'counted' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 }
 
 /** Every public post type (not attachments) and every public taxonomy with an edit screen: slug => label. */
-function aw_faq_type_choices() {
+function rankweb_faq_type_choices() {
 	$out = array( 'post' => array(), 'term' => array() );
 	foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $slug => $o ) {
 		if ( 'attachment' !== $slug ) {
@@ -170,9 +170,9 @@ function aw_faq_type_choices() {
 }
 
 /** "FAQ box on": a core form-table of checkboxes, ticked = the type has the box. Administrators only can save it. */
-function aw_faq_types_form() {
-	$choices = aw_faq_type_choices();
-	$off     = aw_faq_off_types();
+function rankweb_faq_types_form() {
+	$choices = rankweb_faq_type_choices();
+	$off     = rankweb_faq_off_types();
 	$can     = current_user_can( 'manage_options' );
 	echo '<h2>FAQ box on</h2>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_faq_types">';
@@ -202,7 +202,7 @@ add_action(
 		}
 		check_admin_referer( 'aw_faq_types' );
 		$on      = array_map( 'sanitize_key', (array) wp_unslash( $_POST['on'] ?? array() ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize_key on each
-		$choices = aw_faq_type_choices();
+		$choices = rankweb_faq_type_choices();
 		$all     = array_merge( array_keys( $choices['post'] ), array_keys( $choices['term'] ) );
 		update_option( 'aw_faq_off_types', array_values( array_diff( $all, $on ) ), false ); // only the unticked: a type registered later has the box
 		delete_transient( 'aw_faq_index' );
@@ -212,18 +212,18 @@ add_action(
 );
 
 /** RankWeb → FAQ on the Kits shell (rankweb-ui.php). */
-function aw_faq_admin_page() {
+function rankweb_faq_admin_page() {
 	rankweb_ui_page( 'faq' );
 }
 
 /** The FAQ screen's body: notices, FAQ box on, the list, the counts. The shell draws it through page parts (rankweb_faq_parts()). */
-function aw_faq_admin_body() {
+function rankweb_faq_admin_body() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 	}
 	require_once __DIR__ . '/class-aw-faq-list-table.php';
-	$ix    = aw_faq_index();
-	$table = new AW_FAQ_List_Table( $ix['rows'] );
+	$ix    = rankweb_faq_index();
+	$table = new RankWeb_FAQ_List_Table( $ix['rows'] );
 	$table->prepare_items();
 	if ( isset( $_GET['approved'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a notice after the redirect
 		wp_admin_notice( esc_html( sprintf( '%d questions approved.', (int) $_GET['approved'] ) ), array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -235,7 +235,7 @@ function aw_faq_admin_body() {
 		wp_admin_notice( 'Saved: the FAQ box is on the ticked types.', array( 'type' => 'success', 'dismissible' => true ) );
 	}
 	echo '<p>Every page’s questions are in its own FAQ box: open it with Edit. A page shows its FAQ when its box has enough questions to show. This list: the pages that show one, and the draft questions waiting for approval.</p>';
-	aw_faq_types_form();
+	rankweb_faq_types_form();
 	echo '<h2>Pages with an FAQ</h2>';
 	$table->views();
 	echo '<form method="get"><input type="hidden" name="page" value="aw-faq">';
@@ -253,13 +253,13 @@ function aw_faq_admin_body() {
 			continue;
 		}
 		$cells[] = array(
-			'type'      => esc_html( aw_faq_type_label( $type ) ) . ( 'term' === $c['store'] ? ' <span class="description">(terms)</span>' : '' ),
+			'type'      => esc_html( rankweb_faq_type_label( $type ) ) . ( 'term' === $c['store'] ? ' <span class="description">(terms)</span>' : '' ),
 			'published' => esc_html( number_format_i18n( $c['published'] ) ),
 			'faq'       => esc_html( number_format_i18n( $c['faq'] ) ),
 			'below'     => esc_html( number_format_i18n( $c['below'] ) ),
 			'drafts'    => esc_html( number_format_i18n( $c['drafts'] ) ),
 		);
 	}
-	aw_seo_extras_simple_table( 'faq-counts', array( 'type' => 'Type', 'published' => 'Published', 'faq' => 'Show an FAQ', 'below' => 'Questions, but fewer than the minimum (no FAQ)', 'drafts' => 'Draft questions waiting' ), $cells );
+	rankweb_seo_extras_simple_table( 'faq-counts', array( 'type' => 'Type', 'published' => 'Published', 'faq' => 'Show an FAQ', 'below' => 'Questions, but fewer than the minimum (no FAQ)', 'drafts' => 'Draft questions waiting' ), $cells );
 	echo '<p>' . esc_html( sprintf( 'Counted %s.', wp_date( 'j M Y, H:i', (int) $ix['at'] ) ) ) . ' <a href="' . esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aw-faq', 'recount' => 1 ), admin_url( 'admin.php' ) ), 'aw_faq_recount' ) ) . '">Recount</a></p>';
 }

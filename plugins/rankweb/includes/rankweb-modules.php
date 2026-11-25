@@ -85,10 +85,10 @@ function rankweb_module_where(): array {
  */
 function rankweb_module_status( string $key ): array {
 	$text = '';
-	if ( in_array( $key, array( 'sitemap', 'llms', 'health' ), true ) && function_exists( 'aw_seo_overview_endpoints_status' ) ) {
-		$text = aw_seo_overview_endpoints_status();
-	} elseif ( 'faq' === $key && function_exists( 'aw_seo_overview_faq_status' ) ) {
-		$text = aw_seo_overview_faq_status();
+	if ( in_array( $key, array( 'sitemap', 'llms', 'health' ), true ) && function_exists( 'rankweb_seo_overview_endpoints_status' ) ) {
+		$text = rankweb_seo_overview_endpoints_status();
+	} elseif ( 'faq' === $key && function_exists( 'rankweb_seo_overview_faq_status' ) ) {
+		$text = rankweb_seo_overview_faq_status();
 	}
 	return array(
 		'text' => trim( wp_strip_all_tags( $text ) ),
@@ -102,17 +102,17 @@ function rankweb_module_cards(): array {
 	$jobs  = rankweb_module_jobs();
 	$cards = array();
 	$where = rankweb_module_where();
-	foreach ( aw_seo_modules() as $key => $mod ) {
-		$on      = aw_seo_module_on( $key );
+	foreach ( rankweb_seo_modules() as $key => $mod ) {
+		$on      = rankweb_seo_module_on( $key );
 		$next    = isset( $jobs[ $key ] ) && $on ? wp_next_scheduled( $jobs[ $key ] ) : false;
-		$tab     = aw_seo_module_tab( $key );
+		$tab     = rankweb_seo_module_tab( $key );
 		$cards[] = array(
 			'key'         => $key,
 			'label'       => $mod['label'],
 			'desc'        => $mod['desc'] ?? '',
 			'switch'      => ! empty( $mod['switch'] ),
 			'on'          => $on,
-			'settingsUrl' => $admin && 'modules' !== $tab ? aw_seo_settings_url( $tab ) : '',
+			'settingsUrl' => $admin && 'modules' !== $tab ? rankweb_seo_settings_url( $tab ) : '',
 			'next'        => $next ? (int) $next : 0,
 			'where'       => $where[ $key ] ?? array(),
 			'status'      => $on ? rankweb_module_status( $key ) : array(

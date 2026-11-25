@@ -13,8 +13,8 @@
  *
  * Never deleted, even when ticked:
  * - Listings, claims, form entries, posts of any type, terms, users, attachments and any post, term or user meta.
- * - The Directory's data options that keep their Animal Writes names (aw_place_counts, aw_district_helplines,
- *   aw_place_intros, aw_gov_verified_live, aw_geo_last_request and the others): Animal Writes Core's uninstall owns them.
+ * - The Directory's data options that keep their legacy aw_ names (aw_place_counts, aw_district_helplines,
+ *   directoryweb_place_intros, aw_gov_verified_live, aw_geo_last_request and the others): the legacy Core plugin's uninstall owns them.
  * - The capability manage_directoryweb given to roles (it is part of the users' roles).
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/directoryweb-uninstall-<YYYYmmdd-His>.jsonl.gz

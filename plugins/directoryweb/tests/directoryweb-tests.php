@@ -158,7 +158,7 @@ check( '' === directoryweb_enrich_field( 'nope', $l ), 'unknown field' );
 // The Claims routes only read: nothing decides, applies or undoes a claim from the new screen.
 $rest = (string) file_get_contents( dirname( __DIR__ ) . '/includes/directoryweb-rest.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
 check( false === strpos( $rest, '/decide' ) && false === strpos( $rest, '/undo' ), 'no decide or undo route' );
-check( false === strpos( $rest, 'aw_claim_ff_decide' ) && false === strpos( $rest, 'aw_claim_apply_field' ) && false === strpos( $rest, 'aw_enrich_undo(' ), 'no claim or listing write' );
+check( false === strpos( $rest, 'aw_claim_ff_decide' ) && false === strpos( $rest, 'directoryweb_claim_apply_field' ) && false === strpos( $rest, 'aw_enrich_undo(' ), 'no claim or listing write' );
 check( 2 === preg_match_all( "/'methods'\s*=>\s*'POST'/", $rest ), 'POST only for dashboard/count and settings/claim-form' );
 
 // Native claims (claim-native.php) share the screen: their own id space, and every state has a label.
@@ -217,12 +217,12 @@ check( false !== strpos( $cl, "'aw-claims'                => array( 'claims', DI
 check( false !== strpos( $cl, '$claims = directoryweb_rest_can( DIRECTORYWEB_CAP );' ), 'Claims: routes on DIRECTORYWEB_CAP' );
 $rest = (string) file_get_contents( $inc . 'directoryweb-rest.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- a local file read by the test
 check( 2 === substr_count( $rest, "'permission_callback' => \$claims," ), 'Claims: both claims routes use the claims check' );
-check( ! preg_match( '/aw_claim_apply_field|aw_claim_ff_decide|update_post_meta|wp_update_post/', $rest ), 'Claims: the new screen\'s routes approve, reject or apply nothing' );
+check( ! preg_match( '/directoryweb_claim_apply_field|aw_claim_ff_decide|update_post_meta|wp_update_post/', $rest ), 'Claims: the new screen\'s routes approve, reject or apply nothing' );
 
 // The aw_claim post type itself is on DIRECTORYWEB_CAP too (owner, 14 Nov 2026).
 check( false === strpos( $cl, "'capability_type' => array( 'aw_volunteer'" ), 'Claims: the post type no longer uses the volunteer capabilities' );
-check( false !== strpos( $cl, "'capabilities'    => aw_claim_caps()," ), 'Claims: the post type takes aw_claim_caps()' );
-if ( ! function_exists( 'aw_claim_caps' ) ) {
+check( false !== strpos( $cl, "'capabilities'    => directoryweb_claim_caps()," ), 'Claims: the post type takes directoryweb_claim_caps()' );
+if ( ! function_exists( 'directoryweb_claim_caps' ) ) {
 	if ( ! function_exists( 'add_action' ) ) {
 		function add_action() {}
 	}
@@ -234,7 +234,7 @@ if ( ! function_exists( 'aw_claim_caps' ) ) {
 	}
 	require_once $inc . 'claims.php';
 }
-$cc = aw_claim_caps();
+$cc = directoryweb_claim_caps();
 check( 'do_not_allow' === $cc['create_posts'] && 10 === count( array_filter( $cc, fn( $v ) => 'manage_directoryweb' === $v ) ), 'Claims: every claim capability is manage_directoryweb, none can be created by hand' );
 
 echo "{$count} checks, {$fails} failed\n";

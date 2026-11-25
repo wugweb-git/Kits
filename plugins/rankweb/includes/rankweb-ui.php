@@ -6,7 +6,7 @@
  * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
  * by the rankweb/v1 routes (rankweb-rest.php).
  *
- * When Kits Core or a build file is missing, the screen shows a notice that it needs Kits Core. The front end (titles,
+ * When Kits Core or a build file is missing, the screen is drawn as a plain WordPress page (rankweb-native-admin.php). The front end (titles,
  * schema, sitemap and the rest) never needs Kits Core.
  *
  * @package aw-seo-extras
@@ -91,10 +91,10 @@ add_action(
 	'admin_enqueue_scripts',
 	function () {
 		$screen = rankweb_ui_wanted();
-		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( AW_SEO_EXTRAS_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : RANKWEB_CAP ) ) {
+		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( RANKWEB_DIR . 'build/index.js' ) || ! current_user_can( 'settings' === $screen ? 'manage_options' : RANKWEB_CAP ) ) {
 			return;
 		}
-		$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+		$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
 		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
 		$tabs = array(
 			array(
@@ -138,7 +138,7 @@ add_action(
 			array(
 				'handle'      => 'rankweb-admin',
 				'src'         => plugins_url( 'build/index.js', $main_file ),
-				'asset'       => AW_SEO_EXTRAS_DIR . 'build/index.asset.php',
+				'asset'       => RANKWEB_DIR . 'build/index.asset.php',
 				'object'      => 'rankwebApp',
 				'text_domain' => 'rankweb',
 				'data'        => array(
@@ -199,17 +199,21 @@ function rankweb_ui_page( string $screen ): void {
 		kits_shell_mount( 'rankweb-app', $title );
 		return;
 	}
+	if ( function_exists( 'rankweb_native_screen' ) ) { // no Kits Core: the same screens as plain WordPress pages (rankweb-native-admin.php)
+		rankweb_native_screen( $screen, $title );
+		return;
+	}
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
 	wp_admin_notice( esc_html__( 'RankWeb needs Kits Core (active, with its build) to show this screen.', 'rankweb' ), array( 'type' => 'error' ) );
 	echo '</div>';
 }
 
-/** The FAQ screen's output (aw_faq_admin_body()) as page parts for the shell screen. */
+/** The FAQ screen's output (rankweb_faq_admin_body()) as page parts for the shell screen. */
 function rankweb_faq_parts(): array {
-	if ( ! function_exists( 'aw_faq_admin_body' ) || ! function_exists( 'kits_shell_html_parts' ) ) {
+	if ( ! function_exists( 'rankweb_faq_admin_body' ) || ! function_exists( 'kits_shell_html_parts' ) ) {
 		return array();
 	}
 	ob_start();
-	aw_faq_admin_body();
+	rankweb_faq_admin_body();
 	return kits_shell_html_parts( (string) ob_get_clean() );
 }

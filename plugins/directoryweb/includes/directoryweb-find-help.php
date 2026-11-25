@@ -44,15 +44,15 @@ function directoryweb_find_help_render( $attributes = array() ) {
 		directoryweb_use_style( 'dw-listing' );
 	}
 
-	$total = function_exists( 'aw_listing_public_count' ) ? aw_listing_public_count() : 0;
-	$dir   = function_exists( 'aw_hub_url' ) ? aw_hub_url( 'aw_listing' ) : home_url( '/directory/' );
+	$total = function_exists( 'directoryweb_listing_public_count' ) ? directoryweb_listing_public_count() : 0;
+	$dir   = function_exists( 'directoryweb_hub_url' ) ? directoryweb_hub_url() : home_url( '/directory/' );
 
 	$opts   = '<option value="">' . esc_html__( 'All states and UTs', 'directoryweb' ) . '</option>';
 	$counts = array();
-	$states = function_exists( 'aw_place_states' ) ? (array) aw_place_states() : array();
+	$states = function_exists( 'directoryweb_place_states' ) ? (array) directoryweb_place_states() : array();
 
 	foreach ( $states as $st ) {
-		$n = function_exists( 'aw_state_count' ) ? aw_state_count( $st ) : ( function_exists( 'aw_place_count' ) ? aw_place_count( $st ) : 0 );
+		$n = function_exists( 'directoryweb_state_count' ) ? directoryweb_state_count( $st ) : ( function_exists( 'directoryweb_place_count' ) ? directoryweb_place_count( $st ) : 0 );
 		if ( ! $n ) {
 			continue;
 		}
@@ -71,8 +71,8 @@ function directoryweb_find_help_render( $attributes = array() ) {
 		$q_input     = '<label class="screen-reader-text" for="aw-ed-q">' . esc_html__( 'Organisation name', 'directoryweb' ) . '</label><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="aw-ed-q" class="aw-findhelp-q" type="search" name="q" placeholder="' . esc_attr__( 'Search by name', 'directoryweb' ) . '">';
 		$state_input = '<label class="screen-reader-text" for="aw-ed-state">' . esc_html__( 'State or union territory', 'directoryweb' ) . '</label><select id="aw-ed-state" class="aw-findhelp-state" name="state">' . $opts . '</select>';
 
-		if ( function_exists( 'aw_dir_search_controls' ) ) {
-			$shared      = aw_dir_search_controls(
+		if ( function_exists( 'directoryweb_dir_search_controls' ) ) {
+			$shared      = directoryweb_dir_search_controls(
 				array(
 					'prefix'      => 'aw-ed',
 					'cls'         => 'aw-findhelp-',

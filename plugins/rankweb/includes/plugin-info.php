@@ -12,15 +12,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_filter( 'update_plugins_wugweb.com', 'aw_seo_plugin_update_row', 10, 3 );
-add_filter( 'plugins_api', 'aw_seo_plugin_details', 10, 3 );
+add_filter( 'update_plugins_wugweb.com', 'rankweb_seo_plugin_update_row', 10, 3 );
+add_filter( 'plugins_api', 'rankweb_seo_plugin_details', 10, 3 );
 
-function aw_seo_plugin_file(): string {
+function rankweb_seo_plugin_file(): string {
 	if ( defined( 'RANKWEB_FILE' ) ) {
 		return RANKWEB_FILE;
 	}
-	$new = ( defined( 'AW_SEO_EXTRAS_DIR' ) ? AW_SEO_EXTRAS_DIR : plugin_dir_path( __DIR__ ) ) . 'rankweb.php';
-	return file_exists( $new ) ? $new : ( defined( 'AW_SEO_EXTRAS_DIR' ) ? AW_SEO_EXTRAS_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-seo-extras.php';
+	$new = ( defined( 'RANKWEB_DIR' ) ? RANKWEB_DIR : plugin_dir_path( __DIR__ ) ) . 'rankweb.php';
+	return file_exists( $new ) ? $new : ( defined( 'RANKWEB_DIR' ) ? RANKWEB_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-seo-extras.php';
 }
 
 /**
@@ -28,8 +28,8 @@ function aw_seo_plugin_file(): string {
  *
  * @return array{icons: array<string, string>, banners: array<string, string>}
  */
-function aw_seo_plugin_art(): array {
-	$base = plugins_url( 'assets/', aw_seo_plugin_file() );
+function rankweb_seo_plugin_art(): array {
+	$base = plugins_url( 'assets/', rankweb_seo_plugin_file() );
 	return array(
 		'icons'   => array(
 			'1x'  => $base . 'icon-128x128.png',
@@ -51,9 +51,9 @@ function aw_seo_plugin_art(): array {
  * @param string      $plugin_file The plugin's file, relative to the plugins folder.
  * @return array|false
  */
-function aw_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
-	$main = plugin_basename( aw_seo_plugin_file() );
-	if ( $main !== $plugin_file && plugin_basename( ( defined( 'AW_SEO_EXTRAS_DIR' ) ? AW_SEO_EXTRAS_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-seo-extras.php' ) !== $plugin_file ) {
+function rankweb_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
+	$main = plugin_basename( rankweb_seo_plugin_file() );
+	if ( $main !== $plugin_file && plugin_basename( ( defined( 'RANKWEB_DIR' ) ? RANKWEB_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-seo-extras.php' ) !== $plugin_file ) {
 		return $update;
 	}
 	return array_merge(
@@ -65,7 +65,7 @@ function aw_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
 			'package'      => '',
 			'requires_php' => (string) ( $plugin_data['RequiresPHP'] ?? '' ),
 		),
-		aw_seo_plugin_art()
+		rankweb_seo_plugin_art()
 	);
 }
 
@@ -77,14 +77,14 @@ function aw_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
  * @param object             $args   Its arguments (slug).
  * @return false|object|array
  */
-function aw_seo_plugin_details( $result, $action, $args ) {
+function rankweb_seo_plugin_details( $result, $action, $args ) {
 	if ( 'plugin_information' !== $action || ! in_array( $args->slug ?? '', array( 'rankweb', 'rankweb' ), true ) ) {
 		return $result;
 	}
 	if ( ! function_exists( 'get_plugin_data' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
-	$plugin_file = aw_seo_plugin_file();
+	$plugin_file = rankweb_seo_plugin_file();
 	$head   = get_plugin_data( $plugin_file, false, false );
 	$readme = (string) @file_get_contents( dirname( $plugin_file ) . '/readme.txt' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged -- the plugin's own readme; none is fine.
 	$parts  = array();
@@ -92,11 +92,11 @@ function aw_seo_plugin_details( $result, $action, $args ) {
 		if ( $i % 2 ) {
 			$name = strtolower( trim( $chunk ) );
 		} elseif ( isset( $name ) ) {
-			$parts[ $name ] = aw_seo_plugin_readme_html( $chunk );
+			$parts[ $name ] = rankweb_seo_plugin_readme_html( $chunk );
 		}
 	}
 	$tested = preg_match( '/^Tested up to:\s*(\S+)/mi', $readme, $m ) ? $m[1] : '';
-	$art    = aw_seo_plugin_art();
+	$art    = rankweb_seo_plugin_art();
 	return (object) array(
 		'name'          => 'RankWeb',
 		'slug'          => 'aw-seo-extras',
@@ -123,7 +123,7 @@ function aw_seo_plugin_details( $result, $action, $args ) {
  *
  * @param string $text The section's text.
  */
-function aw_seo_plugin_readme_html( string $text ): string {
+function rankweb_seo_plugin_readme_html( string $text ): string {
 	$html = '';
 	$list = false;
 	foreach ( preg_split( '/\R/', trim( $text ) ) as $line ) {

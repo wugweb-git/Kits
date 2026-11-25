@@ -1,5 +1,7 @@
 # Plugin map
 
+**Status (25 Nov 2026):** Animal Writes-era map (cites `animal-writes-core` and `aw-sourcing` paths that are not in this repo). The current layout is the `plugins/*` tree; this file needs a rewrite.
+
 Each file in the plugins and what it does. animal-writes-core, Kits Core, DirectoryWeb and SourceWeb load from `animal-writes-core/animal-writes-core.php` (Kits Core is required first, DirectoryWeb where the Directory files were, SourceWeb last; either may also be active on its own and is then not loaded twice); MailWeb (`mailweb`), `aw-seo-extras` and InsightWeb (`insightweb`) are separate plugins. Forms: see `how-to-change-a-form.md`.
 
 Plugin names and update source (owner, 10 Nov 2026): `aw-seo-extras` is RankWeb, `mailweb` is MailWeb, `sourceweb` (formerly `aw-sourcing`) is SourceWeb, `insightweb` is InsightWeb (Search Insights, out of RankWeb on 11 Nov 2026); database options, REST routes, cron hooks and menu slugs kept their `aw_*` / `aw/v1` names. All of our plugins carry an `Update URI` header (`https://wugweb.com/plugins/<folder>/`: `aw-seo-extras`, `mailweb`, `sourceweb`, `kits-core`, `directoryweb`, `insightweb`), so WordPress never offers a WordPress.org plugin of the same name as an update.

@@ -31,21 +31,21 @@ add_action(
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__ ) . '/assets/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-search'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( 'RankWeb', 'RankWeb', RANKWEB_CAP, AW_SEO_MENU, 'aw_seo_overview_page', $icon, '58.4' );
+		add_menu_page( 'RankWeb', 'RankWeb', RANKWEB_CAP, AW_SEO_MENU, 'rankweb_seo_overview_page', $icon, '58.4' );
 		$GLOBALS['admin_page_hooks'][ AW_SEO_MENU ] = 'aw-seo-plus'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (aw-seo-plus_page_…), whatever the title.
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', RANKWEB_CAP, AW_SEO_MENU, 'aw_seo_overview_page' );
+		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', RANKWEB_CAP, AW_SEO_MENU, 'rankweb_seo_overview_page' );
 		// The Dashboard's other two pages (trends and gaps; module switches and reference tables), so no page is long.
-		add_submenu_page( AW_SEO_MENU, 'RankWeb insights', 'Insights', RANKWEB_CAP, 'aw-seo-insights', 'aw_seo_insights_page' );
-		add_submenu_page( AW_SEO_MENU, 'RankWeb modules', 'Modules', RANKWEB_CAP, 'aw-seo-modules', 'aw_seo_modules_page' );
+		add_submenu_page( AW_SEO_MENU, 'RankWeb insights', 'Insights', RANKWEB_CAP, 'aw-seo-insights', 'rankweb_seo_insights_page' );
+		add_submenu_page( AW_SEO_MENU, 'RankWeb modules', 'Modules', RANKWEB_CAP, 'aw-seo-modules', 'rankweb_seo_modules_page' );
 	},
 	9 // Before FAQ (10), so Overview is the first item.
 );
 
 // Plugins screen: Overview and FAQ under the plugin's name (Search Insights is under InsightWeb's).
-$rankweb_main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( AW_SEO_EXTRAS_DIR . 'rankweb.php' ) ? AW_SEO_EXTRAS_DIR . 'rankweb.php' : AW_SEO_EXTRAS_DIR . 'aw-seo-extras.php' );
+$rankweb_main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'aw-seo-extras.php' );
 add_filter(
 	'plugin_action_links_' . plugin_basename( $rankweb_main_file ),
 	function ( $links ) {
@@ -58,17 +58,17 @@ add_filter(
 );
 
 /** A Rank Math screen's address. */
-function aw_seo_rank_math_url( string $page ): string {
+function rankweb_seo_rank_math_url( string $page ): string {
 	return add_query_arg( 'page', $page, admin_url( 'admin.php' ) );
 }
 
 /** One "where to set it up" link. */
-function aw_seo_overview_link( string $label, string $url ): string {
+function rankweb_seo_overview_link( string $label, string $url ): string {
 	return '<a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
 }
 
 /** Status of the sitemap and llms.txt from the hourly check (health.php). */
-function aw_seo_overview_endpoints_status(): string {
+function rankweb_seo_overview_endpoints_status(): string {
 	$last = (array) get_option( 'aw_seo_endpoints_last', array() );
 	if ( empty( $last['at'] ) ) {
 		return esc_html__( 'Not checked yet (hourly check).', 'rankweb' );
@@ -81,7 +81,7 @@ function aw_seo_overview_endpoints_status(): string {
 }
 
 /** Status of Search Insights from its Site Health test. */
-function aw_seo_overview_si_status(): string {
+function rankweb_seo_overview_si_status(): string {
 	if ( ! function_exists( 'aw_si_health_test' ) ) {
 		return '';
 	}
@@ -90,11 +90,11 @@ function aw_seo_overview_si_status(): string {
 }
 
 /** Status of the FAQ: pages with one and drafts waiting (from the FAQ screen's hourly count, when there is one). */
-function aw_seo_overview_faq_status(): string {
+function rankweb_seo_overview_faq_status(): string {
 	$ix = get_transient( 'aw_faq_index' );
 	if ( ! is_array( $ix ) || ! isset( $ix['counts'] ) ) {
 		// The count is kept for an hour after RankWeb → FAQ builds it; rebuild it in the background, not on this view.
-		if ( function_exists( 'aw_faq_index' ) && ! wp_next_scheduled( 'aw_faq_index_build' ) ) {
+		if ( function_exists( 'rankweb_faq_index' ) && ! wp_next_scheduled( 'aw_faq_index_build' ) ) {
 			wp_schedule_single_event( time(), 'aw_faq_index_build' );
 		}
 		return '';
@@ -105,16 +105,16 @@ function aw_seo_overview_faq_status(): string {
 }
 
 /** RankWeb → Dashboard (rankweb-ui.php). */
-function aw_seo_overview_page() {
+function rankweb_seo_overview_page() {
 	rankweb_ui_page( 'dashboard' );
 }
 
 /** RankWeb → Insights: the trends, where the gaps are, what is kept out of search. */
-function aw_seo_insights_page() {
+function rankweb_seo_insights_page() {
 	rankweb_ui_page( 'insights' );
 }
 
 /** RankWeb → Modules: the module switches, the modules table, where things are. */
-function aw_seo_modules_page() {
+function rankweb_seo_modules_page() {
 	rankweb_ui_page( 'modules' );
 }

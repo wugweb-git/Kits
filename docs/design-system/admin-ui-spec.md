@@ -1,5 +1,7 @@
 # Kits admin UI: spec
 
+**Status (25 Nov 2026):** Live spec for the Kits Core admin menu; phase 1 is built (`plugins/kits-core/includes/admin-menu*.php`). Still names Animal Writes-era items. Code comments cite this path.
+
 Status: approved by the owner, 11 Nov 2026. Phase 1 is being built one part at a time; the four questions at the end take the answers written in the spec (sticky header switch added; Kits writes Socials into Rank Math; breakpoints read-only; Keys and Modules stay until the plugin screens exist).
 
 Scope: the Kits menu and the screens Animal Writes adds to it. The plugin dashboards (RankWeb, SourceWeb, MailWeb, Directory) are specified separately. This document only names where items moved out of Kits land in them.

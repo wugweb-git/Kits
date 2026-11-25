@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Custom JSON-LD helpers. */
-final class AW_Schema {
+final class RankWeb_Schema {
 
 	/** The most nodes kept from one source (a box or an import), so a bad paste cannot fill the graph. */
 	const MAX_NODES = 25;

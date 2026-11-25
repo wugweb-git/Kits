@@ -25,34 +25,34 @@ require_once dirname( __DIR__ ) . '/includes/class-aw-link-audit.php';
 final class SiloTest extends PHPUnit\Framework\TestCase {
 
 	public function testVirtualSiblingsLinkToTheHubAndTheOthersStartingAfterThemselves(): void {
-		$this->assertSame( array( 1, 12, 13, 10 ), AW_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 11, 4 ) );
-		$this->assertSame( array( 1, 11, 12, 13 ), AW_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 10, 4 ) );
+		$this->assertSame( array( 1, 12, 13, 10 ), RankWeb_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 11, 4 ) );
+		$this->assertSame( array( 1, 11, 12, 13 ), RankWeb_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 10, 4 ) );
 	}
 
 	public function testVirtualLinksAreCappedAndTheHubLinksToItsItems(): void {
-		$this->assertSame( array( 1, 11, 12 ), AW_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 10, 3 ) );
-		$this->assertSame( array( 10, 11 ), AW_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 1, 2 ) );
+		$this->assertSame( array( 1, 11, 12 ), RankWeb_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 10, 3 ) );
+		$this->assertSame( array( 10, 11 ), RankWeb_Silo::links( 'virtual', 1, array( 10, 11, 12, 13 ), 1, 2 ) );
 	}
 
 	public function testCircleLinksToTheNextAndBackToTheHub(): void {
 		$items = array( 10, 11, 12 );
-		$this->assertSame( array( 10 ), AW_Silo::links( 'circle', 1, $items, 1 ), 'the hub starts the circle' );
-		$this->assertSame( array( 11, 1 ), AW_Silo::links( 'circle', 1, $items, 10 ) );
-		$this->assertSame( array( 1 ), AW_Silo::links( 'circle', 1, $items, 12 ), 'the last one has no next' );
+		$this->assertSame( array( 10 ), RankWeb_Silo::links( 'circle', 1, $items, 1 ), 'the hub starts the circle' );
+		$this->assertSame( array( 11, 1 ), RankWeb_Silo::links( 'circle', 1, $items, 10 ) );
+		$this->assertSame( array( 1 ), RankWeb_Silo::links( 'circle', 1, $items, 12 ), 'the last one has no next' );
 	}
 
 	public function testAnItemOutsideTheSiloGetsNoSiloLinks(): void {
-		$this->assertSame( array(), AW_Silo::links( 'virtual', 1, array( 10 ), 99 ) );
-		$this->assertSame( array(), AW_Silo::links( 'circle', 1, array( 10 ), 99 ) );
+		$this->assertSame( array(), RankWeb_Silo::links( 'virtual', 1, array( 10 ), 99 ) );
+		$this->assertSame( array(), RankWeb_Silo::links( 'circle', 1, array( 10 ), 99 ) );
 	}
 
 	public function testAnEmptySiloLinksNowhereFromTheHub(): void {
-		$this->assertSame( array(), AW_Silo::links( 'circle', 1, array(), 1 ) );
-		$this->assertSame( array(), AW_Silo::links( 'virtual', 1, array(), 1 ) );
+		$this->assertSame( array(), RankWeb_Silo::links( 'circle', 1, array(), 1 ) );
+		$this->assertSame( array(), RankWeb_Silo::links( 'virtual', 1, array(), 1 ) );
 	}
 
 	public function testRepeatedItemsCountOnce(): void {
-		$this->assertSame( array( 1, 11 ), AW_Silo::links( 'virtual', 1, array( 10, 11, 11, 10 ), 10, 5 ) );
+		$this->assertSame( array( 1, 11 ), RankWeb_Silo::links( 'virtual', 1, array( 10, 11, 11, 10 ), 10, 5 ) );
 	}
 
 	private function map(): array {
@@ -78,22 +78,22 @@ final class SiloTest extends PHPUnit\Framework\TestCase {
 
 	public function testAnItemMayLinkInsideItsSiloAndToAnotherSilosHubOnly(): void {
 		$map = $this->map();
-		$this->assertTrue( AW_Silo::may_link( $map, 10, 1 ) );
-		$this->assertTrue( AW_Silo::may_link( $map, 10, 2 ), 'another silo\'s hub' );
-		$this->assertFalse( AW_Silo::may_link( $map, 10, 20 ), 'another silo\'s supporting item' );
-		$this->assertFalse( AW_Silo::may_link( $map, 1, 20 ), 'a hub too' );
+		$this->assertTrue( RankWeb_Silo::may_link( $map, 10, 1 ) );
+		$this->assertTrue( RankWeb_Silo::may_link( $map, 10, 2 ), 'another silo\'s hub' );
+		$this->assertFalse( RankWeb_Silo::may_link( $map, 10, 20 ), 'another silo\'s supporting item' );
+		$this->assertFalse( RankWeb_Silo::may_link( $map, 1, 20 ), 'a hub too' );
 	}
 
 	public function testItemsOutsideEverySiloAreNotRestricted(): void {
 		$map = $this->map();
-		$this->assertTrue( AW_Silo::may_link( $map, 99, 20 ) );
-		$this->assertTrue( AW_Silo::may_link( $map, 10, 99 ) );
+		$this->assertTrue( RankWeb_Silo::may_link( $map, 99, 20 ) );
+		$this->assertTrue( RankWeb_Silo::may_link( $map, 10, 99 ) );
 	}
 
 	public function testDepthCountsPathFoldersAfterTheSitePath(): void {
-		$this->assertSame( 3, AW_Silo::depth( 'https://example.org/library/guides/stray-dogs/', 'https://example.org' ) );
-		$this->assertSame( 1, AW_Silo::depth( 'https://example.org/sub/page/', 'https://example.org/sub' ) );
-		$this->assertSame( 0, AW_Silo::depth( 'https://example.org/', 'https://example.org' ) );
+		$this->assertSame( 3, RankWeb_Silo::depth( 'https://example.org/library/guides/stray-dogs/', 'https://example.org' ) );
+		$this->assertSame( 1, RankWeb_Silo::depth( 'https://example.org/sub/page/', 'https://example.org/sub' ) );
+		$this->assertSame( 0, RankWeb_Silo::depth( 'https://example.org/', 'https://example.org' ) );
 	}
 
 	public function testCheckFlagsFewItemsAndDeepAddresses(): void {
@@ -102,14 +102,14 @@ final class SiloTest extends PHPUnit\Framework\TestCase {
 			10 => 'https://example.org/a/b/c/d/',
 			11 => 'https://example.org/a/b/',
 		);
-		$c    = AW_Silo::check( $urls, 'https://example.org', 5, 3 );
+		$c    = RankWeb_Silo::check( $urls, 'https://example.org', 5, 3 );
 		$this->assertSame( 3, $c['few'] );
 		$this->assertSame( array( 10 ), $c['deep'] );
 		$urls += array(
 			12 => 'https://example.org/a/e/',
 			13 => 'https://example.org/a/f/',
 		);
-		$this->assertSame( 0, AW_Silo::check( $urls, 'https://example.org', 5, 3 )['few'], 'five is enough' );
+		$this->assertSame( 0, RankWeb_Silo::check( $urls, 'https://example.org', 5, 3 )['few'], 'five is enough' );
 	}
 
 	public function testTheAuditFlagsALinkIntoAnotherSilosSupportingItem(): void {
@@ -143,7 +143,7 @@ final class SiloTest extends PHPUnit\Framework\TestCase {
 				'status' => '',
 			),
 		);
-		$r     = AW_Link_Audit::analyze( $items, $edges, array( 1, 2 ), array( 'silo' => $this->map() ) );
+		$r     = RankWeb_Link_Audit::analyze( $items, $edges, array( 1, 2 ), array( 'silo' => $this->map() ) );
 		$this->assertTrue( in_array( 'silo', $r[10]['flags'], true ) );
 		$this->assertSame( array( 'https://example.org/p20/' ), $r[10]['detail']['silo'], 'only the supporting item, not the hubs' );
 		$this->assertFalse( in_array( 'silo', $r[1]['flags'], true ) );

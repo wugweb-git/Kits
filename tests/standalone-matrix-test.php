@@ -37,10 +37,10 @@ $plugins = array(
 		'entry' => dirname( __DIR__ ) . '/plugins/rankweb/rankweb.php',
 		'check' => function () {
 			return defined( 'RANKWEB_DIR' )
-				&& function_exists( 'aw_seo_canonical' )
-				&& function_exists( 'aw_schema_render_standalone_json_ld' )
-				&& function_exists( 'aw_rankweb_render_standalone_meta_description' )
-				&& class_exists( 'AW_Schema' );
+				&& function_exists( 'rankweb_seo_canonical' )
+				&& function_exists( 'rankweb_schema_render_standalone_json_ld' )
+				&& function_exists( 'rankweb_print_head_tags' )
+				&& class_exists( 'RankWeb_Schema' );
 		},
 		'test'  => dirname( __DIR__ ) . '/plugins/rankweb/tests/phpunit-lite.php',
 	),

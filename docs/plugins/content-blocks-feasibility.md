@@ -1,5 +1,7 @@
 # Content blocks under Kits Core: feasibility (18 Nov 2026)
 
+**Status (25 Nov 2026):** Plan for retiring the Animal Writes tenant plugin; that plugin is not in this repo. Report only.
+
 Scope: the content parts of `plugins/animal-writes-core` (Animal Writes Core, "the tenant plugin"): the content types,
 their render files, and the blocks and helpers they print with. The tenant plugin is deleted at the end (owner, 18 Nov 2026): no
 code stays in it. Generic code moves to Kits Core (blocks, patterns, helpers, presets) or to RankWeb, DirectoryWeb,

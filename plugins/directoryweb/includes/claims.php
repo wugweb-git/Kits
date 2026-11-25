@@ -2,7 +2,7 @@
 /**
  * Claim or update a directory listing: /claim/?listing=<ID> (form-blocks.php) shows the Fluent Forms form "Claim this
  * listing", the only claim form since 25 Oct 2026 (owner: the site's own form and its handler were removed). Claims are
- * Fluent Forms entries; the logo and proof uploads use aw_claim_logo_ok() and aw_claim_logo_store() below.
+ * Fluent Forms entries; the logo and proof uploads use directoryweb_claim_logo_ok() and directoryweb_claim_logo_store() below.
  *
  * Claims sent before Fluent Forms are private aw_claim posts (still registered so they stay readable), administrators
  * only. An administrator reviews current against proposed values and approves, which applies the changes and marks
@@ -49,7 +49,7 @@ const DW_CLAIM_LOGO_BYTES = 8 * MB_IN_BYTES; // owner plan 19 Nov 2026 (B2): was
  *
  * @return array<string, string>
  */
-function aw_claim_caps(): array {
+function directoryweb_claim_caps(): array {
 	$cap  = defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'manage_directoryweb';
 	$caps = array( 'create_posts' => 'do_not_allow' );
 	foreach ( array( 'edit_posts', 'edit_others_posts', 'edit_private_posts', 'edit_published_posts', 'publish_posts', 'read_private_posts', 'delete_posts', 'delete_others_posts', 'delete_private_posts', 'delete_published_posts' ) as $key ) {
@@ -73,14 +73,14 @@ add_action(
 				'map_meta_cap'    => true,
 				// Every claim capability is DirectoryWeb's own (owner, 14 Nov 2026), like the Claims screens; claims are never
 				// added by hand. map_meta_cap turns edit_post, delete_post and read_post into these.
-				'capabilities'    => aw_claim_caps(),
+				'capabilities'    => directoryweb_claim_caps(),
 			)
 		);
 	}
 );
 
 /** What a listing shows now for a claim field: phones from the Phone numbers list, the rest from its meta. */
-function aw_claim_current( $lid, $key ) {
+function directoryweb_claim_current( $lid, $key ) {
 	if ( 'aw_phone' === $key || 'aw_whatsapp' === $key ) {
 		return directoryweb_listing_first_phone( $lid, 'aw_whatsapp' === $key );
 	}
@@ -95,7 +95,7 @@ function aw_claim_current( $lid, $key ) {
 }
 
 /** The claim form for a listing: the Fluent Forms form. */
-function aw_claim_form( $listing ) {
+function directoryweb_claim_form( $listing ) {
 	return directoryweb_ff_form( 'claim', array( 'listing' => $listing ) );
 }
 
@@ -129,12 +129,12 @@ function dw_claim_upload_error( $logo ) {
 }
 
 /** Is the uploaded logo a PNG, JPG or WebP within the size limit? */
-function aw_claim_logo_ok( $logo ) {
+function directoryweb_claim_logo_ok( $logo ) {
 	return '' === dw_claim_upload_error( $logo );
 }
 
 /** A logo as a PNG of at most 800 px in the private folder: its file name, or ''. */
-function aw_claim_logo_store( $tmp, $name = '' ) {
+function directoryweb_claim_logo_store( $tmp, $name = '' ) {
 	wp_raise_memory_limit( 'image' ); // an 8 MB photo needs more than the 40 MB front-end limit to resize
 	$editor = wp_get_image_editor( $tmp );
 	if ( is_wp_error( $editor ) || ! function_exists( 'directoryweb_private_dir' ) ) { // never saved outside the private folder
@@ -152,6 +152,9 @@ add_filter( 'manage_aw_claim_posts_columns', fn( $c ) => array( 'cb' => $c['cb']
 add_action(
 	'manage_aw_claim_posts_custom_column',
 	function ( $col, $id ) {
+		if ( '' !== (string) get_post_meta( $id, '_dw_claim_status', true ) ) {
+			return; // a native claim: claim-native.php draws these columns
+		}
 		if ( 'aw_status' === $col ) {
 			echo esc_html( ucfirst( (string) get_post_meta( $id, 'aw_c_status', true ) ) );
 		} elseif ( 'aw_changes' === $col ) {
@@ -170,7 +173,7 @@ add_action(
 add_action(
 	'add_meta_boxes_aw_claim',
 	function () {
-		add_meta_box( 'aw_claim_review', 'Review', 'aw_claim_review_box', 'aw_claim', 'normal', 'high' );
+		add_meta_box( 'aw_claim_review', 'Review', 'directoryweb_claim_review_box', 'aw_claim', 'normal', 'high' );
 	}
 );
 
@@ -179,7 +182,7 @@ add_action(
  *
  * @param WP_Post $post Claim.
  */
-function aw_claim_review_box( $post ) {
+function directoryweb_claim_review_box( $post ) {
 	$lid      = (int) get_post_meta( $post->ID, 'aw_c_listing', true );
 	$status   = (string) get_post_meta( $post->ID, 'aw_c_status', true );
 	$proposed = (array) get_post_meta( $post->ID, 'aw_c_proposed', true );
@@ -191,7 +194,7 @@ function aw_claim_review_box( $post ) {
 	$cells = array();
 	foreach ( DW_CLAIM_FIELDS as $key => $def ) {
 		if ( isset( $proposed[ $key ] ) ) {
-			$cells[] = array( 'field' => esc_html( $def[0] ), 'now' => esc_html( aw_claim_current( $lid, $key ) ), 'proposed' => '<strong>' . esc_html( $proposed[ $key ] ) . '</strong>' );
+			$cells[] = array( 'field' => esc_html( $def[0] ), 'now' => esc_html( directoryweb_claim_current( $lid, $key ) ), 'proposed' => '<strong>' . esc_html( $proposed[ $key ] ) . '</strong>' );
 		}
 	}
 	if ( $logo ) {
@@ -278,8 +281,8 @@ add_action(
 			update_post_meta( $lid, 'aw_verified', true );
 			update_post_meta( $lid, 'aw_verified_on', wp_date( 'Y-m-d' ) );
 			update_post_meta( $lid, 'aw_needs_reverify', false );
-			if ( function_exists( 'aw_org_people_from_claim' ) ) {
-				aw_org_people_from_claim( $id, $lid ); // the claimant becomes one of its people, not shown (org-people.php)
+			if ( function_exists( 'directoryweb_org_people_from_claim' ) ) {
+				directoryweb_org_people_from_claim( $id, $lid ); // the claimant becomes one of its people, not shown (org-people.php)
 			}
 			update_post_meta( $id, 'aw_c_status', 'approved' );
 		} else {

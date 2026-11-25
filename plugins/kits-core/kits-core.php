@@ -94,7 +94,7 @@ require_once KITS_CORE_DIR . 'includes/admin-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-menu.php';
 require_once KITS_CORE_DIR . 'includes/admin-bar-products.php'; // The Wugweb menu in the admin bar.
 require_once KITS_CORE_DIR . 'includes/admin-app.php';
-require_once KITS_CORE_DIR . 'includes/admin-shell.php'; // Shared parts plugin screens are built from (docs/kits-plugin-ui.md).
+require_once KITS_CORE_DIR . 'includes/admin-shell.php'; // Shared parts plugin screens are built from (docs/plugins/kits-plugin-ui-spec.md).
 require_once KITS_CORE_DIR . 'includes/admin-shell-parts.php'; // A classic screen's output as page parts for the shell.
 require_once KITS_CORE_DIR . 'includes/admin-kits-frame.php'; // Kits → Home, Settings, Tools and Help on the plugin screens' look.
 require_once KITS_CORE_DIR . 'includes/admin-app-global-styles.php';
