@@ -4,7 +4,7 @@
  * admin.php?page=kits-tools, admin.php?page=kits-help. Theme Options' own screen (includes/admin-app.php) uses the same
  * header, chips and cards.
  *
- * The same frame as the Kits plugins (docs/kits-plugin-ui.md): the app header with the Kits icon, name and version and
+ * The same frame as the Kits plugins (docs/plugins/kits-plugin-ui-spec.md): the app header with the Kits icon, name and version and
  * the five Kits tabs (yellow bar on the open one), then each section as a card, printed by the section's own function,
  * so every form, button and link works as it is.
  *

@@ -1,7 +1,7 @@
 <?php
 /**
  * The site's rows on the Kits screens (moved from Animal Writes Core's admin-home.php, 18 Nov 2026; owner, 25 Oct,
- * 10 Nov and 11 Nov 2026; docs/admin-ui-spec.md §B, §C, §E3). There is no site tab or menu item: the site's parts join
+ * 10 Nov and 11 Nov 2026; docs/design-system/admin-ui-spec.md §B, §C, §E3). There is no site tab or menu item: the site's parts join
  * the Kits screens through Kits' own filters.
  * - Home: Page check, Deployed commit, Joined files, Email sending (each only when the part that prints it is loaded;
  *   Thumbnails and Pictures are added by Kits Core's thumbs.php and SourceWeb's cc0-images.php themselves); Dates is linked from Home and keeps its address (aw-dates) until PlanWeb has it.
@@ -90,7 +90,7 @@ add_filter(
 	}
 );
 
-// Old addresses (docs/admin-ui-spec.md §E1). Dates and Modules keep theirs; Keys redirects to InsightWeb's own Keys.
+// Old addresses (docs/design-system/admin-ui-spec.md §E1). Dates and Modules keep theirs; Keys redirects to InsightWeb's own Keys.
 add_filter(
 	'kits_admin_redirects',
 	fn( $map ) => array_merge(
@@ -166,7 +166,7 @@ function kits_site_section_if( array $sections, string $id, string $title, strin
 }
 
 /**
- * Kits → Home: the site's checks (docs/admin-ui-spec.md §B1, §D6). Email stays here until the MailWeb dashboard has it
+ * Kits → Home: the site's checks (docs/design-system/admin-ui-spec.md §B1, §D6). Email stays here until the MailWeb dashboard has it
  * (owner, 11 Nov 2026); Thumbnails and Pictures are added by thumbs.php (Kits Core) and cc0-images.php (SourceWeb). Nothing WordPress or another plugin already shows
  * (owner, 11 Nov 2026): backups are UpdraftPlus's, the theme is Appearance → Themes, dates are PlanWeb's.
  *

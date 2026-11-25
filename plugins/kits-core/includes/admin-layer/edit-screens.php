@@ -14,7 +14,7 @@
  * Also here: the boxes that start collapsed on post edit screens (kits_edit_screen_collapsed_boxes(), core filter only).
  *
  * Screen: Kits → Help → Developer: edit screens (manage_options). WP-CLI: wp aw-edit-screens [--type=<type>]
- * [--format=table|json]. How to add an entry: docs/edit-screens.md.
+ * [--format=table|json]. How to add an entry: docs/edit-screens.md (not in this repo).
  *
  * @package kits-core
  */

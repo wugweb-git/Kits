@@ -1,5 +1,5 @@
 /**
- * Kits admin shell: the working list and the field-by-field review (docs/kits-plugin-ui.md).
+ * Kits admin shell: the working list and the field-by-field review (docs/plugins/kits-plugin-ui-spec.md).
  *
  * DataList is driven by the screen: it shows the rows it is given and reports what the user asks for (search, a filter,
  * a sort, a page, a view, a bulk or row action). The screen fetches the rows from its own REST route; nothing is

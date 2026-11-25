@@ -1,6 +1,6 @@
 <?php
 /**
- * PlanWeb's routes for its new screens (docs/calendar-plugin-plan.md §4), under planweb/v1:
+ * PlanWeb's routes for its new screens (docs/plugins/planweb-plan.md §4), under planweb/v1:
  *
  *   GET  dashboard                 edit_planweb_entries  the tiles, from the stored counts (planweb-dashboard.php)
  *   POST dashboard/count           edit_planweb_entries  count now, in this request (the person pressed Count now; a page view never counts)

@@ -3,7 +3,7 @@
  * InsightWeb
  *
  * Search Insights, moved out of RankWeb on 11 Nov 2026 with no other change: the same screen, names, tables, options,
- * scheduled jobs and routes (docs/insightweb-plan.md). It needs Kits Core and Rank Math, checked in
+ * scheduled jobs and routes (docs/plugins/insightweb-plan.md). It needs Kits Core and Rank Math, checked in
  * includes/bootstrap.php (not with a Requires Plugins header: on live Kits Core is loaded by Animal Writes Core). It also
  * owns the keyword table SourceWeb shares (includes/keywords.php, moved from Kits Core on 18 Nov 2026), loaded first.
  *

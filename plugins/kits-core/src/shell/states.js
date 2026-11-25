@@ -1,5 +1,5 @@
 /**
- * Kits admin shell: the empty, loading and error states (docs/kits-plugin-ui.md), shared by every part that loads.
+ * Kits admin shell: the empty, loading and error states (docs/plugins/kits-plugin-ui-spec.md), shared by every part that loads.
  */
 import { __ } from '@wordpress/i18n';
 import { Spinner } from '@wordpress/components';

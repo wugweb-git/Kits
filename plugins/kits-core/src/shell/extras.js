@@ -1,5 +1,5 @@
 /**
- * Kits admin shell: smaller parts (docs/kits-plugin-ui.md): a bar chart, a write-only list, a setting that lives in
+ * Kits admin shell: smaller parts (docs/plugins/kits-plugin-ui-spec.md): a bar chart, a write-only list, a setting that lives in
  * another plugin, and the tile picker ("Select metrics").
  */
 import { useId, useState } from '@wordpress/element';

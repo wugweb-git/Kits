@@ -1207,7 +1207,7 @@ body { background: var(--kit-surface-page); }
 .kit-error-links a .kit-ico { --kit-ico-size: var(--kit-icon-md); }
 /* The error-page photo (set per site): on phones after the lead, the column's width, no frame. From 768px it fills the section
    behind the text at the page hero's height (--kit-hero-min, so the section stays within 720px): the page colour fades
-   in from the left over the photo, so the text keeps its contrast whatever the picture (stops: docs/design-system.md,
+   in from the left over the photo, so the text keeps its contrast whatever the picture (stops: docs/design-system/design-system.md,
    Error pages) */
 .kit-error-media { margin: var(--kit-space-5) 0; }
 .kit-error-media img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }

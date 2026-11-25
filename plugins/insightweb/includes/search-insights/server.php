@@ -6,7 +6,7 @@
  *   not available here; hPanel shows them. What is counted:
  *   - AI and search crawler requests per bot, by user agent, for requests that reach WordPress. Pages the CDN or the
  *     server's LiteSpeed page cache answer from a stored copy never reach WordPress, so these are lower bounds until
- *     those caches let crawlers through (docs/cdn.md, step C).
+ *     those caches let crawlers through (docs/cdn.md (not in this repo), step C).
  *   - 4xx and 5xx answers WordPress gave to front-end requests (not wp-admin, cron or the REST API), with the top
  *     addresses (path only, no query string).
  *   - PHP errors per day by kind from this domain's PHP error logs (the same files as the daily error count,

@@ -87,7 +87,7 @@ function kits_demo_panel( $suffix = '' ) {
 }
 
 /**
- * The button matrix (docs/buttons.md): every variant in every state, the content types and sizes, for .kit-btn and the
+ * The button matrix (docs/design-system/buttons.md): every variant in every state, the content types and sizes, for .kit-btn and the
  * core Button block, on a light and on a dark surface. Hover and active are drawn with demo classes. Every button is a
  * link, as on the site; form buttons (submit) have their own row.
  */

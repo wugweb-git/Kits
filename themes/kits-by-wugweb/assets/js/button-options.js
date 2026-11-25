@@ -1,5 +1,5 @@
 /**
- * Button block: Size, Content and Icon (docs/buttons.md). The variant is the block style (Primary, Secondary, Ghost,
+ * Button block: Size, Content and Icon (docs/design-system/buttons.md). The variant is the block style (Primary, Secondary, Ghost,
  * Brand); these three set the extra classes kit-btn--sm, kit-btn--label / kit-btn--icon and kit-btn--ico-<name>, so
  * they combine with any style. No build step: plain wp.* globals.
  */
