@@ -31,7 +31,7 @@ add_filter(
 add_filter(
 	'aw_si_import_run',
 	function ( $out, string $kind, string $raw ) {
-		return AW_SI_OPENSEO_POS === $kind ? aw_si_openseo_pos_import( $raw ) : $out;
+		return AW_SI_OPENSEO_POS === $kind ? insightweb_si_openseo_pos_import( $raw ) : $out;
 	},
 	10,
 	3
@@ -43,14 +43,14 @@ add_filter(
  * @param string $raw File or pasted text: a header row, then one row per search.
  * @return array{rows: int, skipped: int, error: string, other: int}
  */
-function aw_si_openseo_pos_import( string $raw ): array {
+function insightweb_si_openseo_pos_import( string $raw ): array {
 	$out                 = array(
 		'rows'    => 0,
 		'skipped' => 0,
 		'other'   => 0,
 		'error'   => '',
 	);
-	list( $head, $rows ) = aw_si_parse_table( $raw, 'position' );
+	list( $head, $rows ) = insightweb_si_parse_table( $raw, 'position' );
 	$qcol                = $head ? (string) current( array_intersect( $head, array( 'query', 'keyword', 'search', 'term' ) ) ) : '';
 	$pcol                = $head ? (string) current( array_intersect( $head, array( 'position', 'rank' ) ) ) : '';
 	if ( '' === $qcol || '' === $pcol ) {
@@ -65,14 +65,14 @@ function aw_si_openseo_pos_import( string $raw ): array {
 		'top3' => $col( array( 'top3', 'top 3' ) ),
 		'paa'  => $col( array( 'paa', 'people also ask' ) ),
 	);
-	$map   = aw_si_kw_map(); // Our keywords only: an OpenSEO search never becomes a keyword record by itself.
+	$map   = insightweb_si_kw_map(); // Our keywords only: an OpenSEO search never becomes a keyword record by itself.
 	$today = wp_date( 'Y-m-d' );
 	foreach ( $rows as $r ) {
 		if ( '' !== $scol && false === stripos( (string) $r[ $scol ], 'openseo' ) ) {
 			++$out['other']; // A browser check or another source in the same file: not stored here.
 			continue;
 		}
-		$id  = (int) ( $map[ aw_si_norm( sanitize_text_field( (string) $r[ $qcol ] ) ) ] ?? 0 );
+		$id  = (int) ( $map[ insightweb_si_norm( sanitize_text_field( (string) $r[ $qcol ] ) ) ] ?? 0 );
 		$pos = trim( sanitize_text_field( (string) $r[ $pcol ] ) );
 		$day = $today;
 		if ( '' !== $dcol && '' !== trim( (string) $r[ $dcol ] ) ) {
@@ -83,7 +83,7 @@ function aw_si_openseo_pos_import( string $raw ): array {
 			++$out['skipped'];
 			continue;
 		}
-		$ok = aw_si_obs_put(
+		$ok = insightweb_si_obs_put(
 			$id,
 			'',
 			AW_SI_OPENSEO_POS,
@@ -98,7 +98,7 @@ function aw_si_openseo_pos_import( string $raw ): array {
 		foreach ( $extra as $metric => $c ) {
 			$v = '' !== $c ? trim( sanitize_text_field( (string) $r[ $c ] ) ) : '';
 			if ( '' !== $v ) {
-				$ok = aw_si_obs_put( $id, '', AW_SI_OPENSEO_POS, $metric, 'month', $day, array( 'txt' => $v ) ) && $ok;
+				$ok = insightweb_si_obs_put( $id, '', AW_SI_OPENSEO_POS, $metric, 'month', $day, array( 'txt' => $v ) ) && $ok;
 			}
 		}
 		$ok ? ++$out['rows'] : ++$out['skipped'];
@@ -112,13 +112,13 @@ function aw_si_openseo_pos_import( string $raw ): array {
  * @param int[] $ids Keyword IDs.
  * @return array<int, object> id => row (value, txt, d).
  */
-function aw_si_openseo_positions( array $ids ): array {
+function insightweb_si_openseo_positions( array $ids ): array {
 	global $wpdb;
 	$ids = array_filter( array_map( 'intval', $ids ) );
-	if ( ! $ids || ! aw_si_ready() ) {
+	if ( ! $ids || ! insightweb_si_ready() ) {
 		return array();
 	}
-	$o    = aw_si_table( 'obs' );
+	$o    = insightweb_si_table( 'obs' );
 	$in   = implode( ',', $ids );
 	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value, txt, d FROM %i WHERE src = %s AND metric = 'position' AND kw_id IN ({$in}) ORDER BY d", $o, AW_SI_OPENSEO_POS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
 	$out  = array();

@@ -1,7 +1,7 @@
 <?php
 /**
  * Tools → Site Health → "Sourcing ran on time" (owner, 24 Oct 2026): the ingest heartbeat as a core Site Health test.
- * Same rules as the hourly watchdog and its dashboard notice (aw_ingest_problems, relevance.php):
+ * Same rules as the hourly watchdog and its dashboard notice (sourceweb_ingest_problems, relevance.php):
  * - critical: no worker run has reported for 8 hours;
  * - recommended: no News published for 12 hours (or none ever, 12 hours after the first report), or half the
  *   sources failed in the last run;
@@ -16,14 +16,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The Site Health result. */
-function aw_sourcing_health_test() {
+function sourceweb_sourcing_health_test() {
 	$hb    = (array) get_option( 'aw_ingest_heartbeat', array() );
-	$probs = array_intersect_key( aw_ingest_problems(), array_flip( array( 'no_run', 'quiet', 'sources' ) ) ); // scheduled tasks have their own test
+	$probs = array_intersect_key( sourceweb_ingest_problems(), array_flip( array( 'no_run', 'quiet', 'sources' ) ) ); // scheduled tasks have their own test
 	// No News published yet at all: the watchdog's 12-hour rule needs a first published item, so the workers' first
 	// report is the baseline here (first_run; last_new for heartbeats from before it existed). last_new alone moves on
 	// whenever any other type publishes (Codex review, 24 Oct 2026).
 	$new_at = (int) ( $hb['first_run'] ?? $hb['last_new'] ?? 0 );
-	if ( ! isset( $probs['quiet'] ) && ! aw_newest_published_news() && $new_at && time() - $new_at >= 12 * HOUR_IN_SECONDS ) {
+	if ( ! isset( $probs['quiet'] ) && ! sourceweb_newest_published_news() && $new_at && time() - $new_at >= 12 * HOUR_IN_SECONDS ) {
 		$probs['quiet'] = sprintf( 'No News has been published yet; the workers have reported runs since %s.', wp_date( 'j M Y, g:i a', $new_at ) );
 	}
 	$last  = (int) ( $hb['last_run'] ?? 0 );
@@ -36,7 +36,7 @@ function aw_sourcing_health_test() {
 		(int) ( $hb['sources_failed'] ?? 0 )
 	) : ''; // the problem list says so
 
-	$actions = '<a href="' . esc_url( admin_url( aw_src_overview_path() ) ) . '">Plugins → SourceWeb → Overview</a>';
+	$actions = '<a href="' . esc_url( admin_url( sourceweb_src_overview_path() ) ) . '">Plugins → SourceWeb → Overview</a>';
 	if ( ! empty( $hb['last_link'] ) ) {
 		$actions .= ' · <a href="' . esc_url( (string) $hb['last_link'] ) . '" target="_blank" rel="noopener">Last run on GitHub<span class="screen-reader-text"> (opens in a new tab)</span></a>';
 	}
@@ -62,7 +62,7 @@ add_filter(
 	function ( $tests ) {
 		$tests['direct']['aw_sourcing_on_time'] = array(
 			'label' => 'Sourcing ran on time',
-			'test'  => 'aw_sourcing_health_test',
+			'test'  => 'sourceweb_sourcing_health_test',
 		);
 		return $tests;
 	}

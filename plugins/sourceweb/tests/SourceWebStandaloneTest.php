@@ -19,7 +19,7 @@ if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
 	define( 'HOUR_IN_SECONDS', 3600 );
 	define( 'DAY_IN_SECONDS', 86400 );
 }
-defined( 'AW_SOURCING_DIR' ) || define( 'AW_SOURCING_DIR', dirname( __DIR__ ) . '/' );
+defined( 'SOURCEWEB_SOURCING_DIR' ) || define( 'SOURCEWEB_SOURCING_DIR', dirname( __DIR__ ) . '/' );
 
 // Minimal WordPress stubs.
 $GLOBALS['test_options'] = array();
@@ -127,8 +127,8 @@ function check( $ok, $name ) {
 }
 
 // 1. Sourcing basics.
-check( 'example.com' === aw_host( 'https://www.example.com/feed.xml' ), 'aw_host extracts clean host' );
-check( '' === aw_host( 'not a url' ), 'aw_host handles invalid URL' );
+check( 'example.com' === sourceweb_host( 'https://www.example.com/feed.xml' ), 'sourceweb_host extracts clean host' );
+check( '' === sourceweb_host( 'not a url' ), 'sourceweb_host handles invalid URL' );
 
 // 2. Tag fallback when DirectoryWeb is absent.
 $tags = sourceweb_item_tags( 123 );
@@ -141,45 +141,45 @@ check( 'https://example.com/article' === sourceweb_sanitize_meta( 'https://examp
 check( 'CONTRACTOR' === sourceweb_sanitize_meta( 'contract', 'aw_employment_type' ), 'sourceweb_sanitize_meta normalizes employment type' );
 
 // 4. Worker exponential retry backoff.
-$b1 = aw_worker_retry_backoff( 'sourcing.yml', 503 );
-check( 1 === $b1['attempts'] && 60 === $b1['delay'], 'aw_worker_retry_backoff 1st attempt is 60s' );
-check( aw_worker_is_in_backoff( 'sourcing.yml' ), 'aw_worker_is_in_backoff returns true' );
+$b1 = sourceweb_worker_retry_backoff( 'sourcing.yml', 503 );
+check( 1 === $b1['attempts'] && 60 === $b1['delay'], 'sourceweb_worker_retry_backoff 1st attempt is 60s' );
+check( sourceweb_worker_is_in_backoff( 'sourcing.yml' ), 'sourceweb_worker_is_in_backoff returns true' );
 
-$b2 = aw_worker_retry_backoff( 'sourcing.yml', 503 );
-check( 2 === $b2['attempts'] && 300 === $b2['delay'], 'aw_worker_retry_backoff 2nd attempt is 300s' );
+$b2 = sourceweb_worker_retry_backoff( 'sourcing.yml', 503 );
+check( 2 === $b2['attempts'] && 300 === $b2['delay'], 'sourceweb_worker_retry_backoff 2nd attempt is 300s' );
 
-$b3 = aw_worker_retry_backoff( 'sourcing.yml', 503 );
-check( 3 === $b3['attempts'] && 900 === $b3['delay'], 'aw_worker_retry_backoff 3rd attempt is 900s' );
+$b3 = sourceweb_worker_retry_backoff( 'sourcing.yml', 503 );
+check( 3 === $b3['attempts'] && 900 === $b3['delay'], 'sourceweb_worker_retry_backoff 3rd attempt is 900s' );
 
-$b4 = aw_worker_retry_backoff( 'sourcing.yml', 503 );
-check( 4 === $b4['attempts'] && 3600 === $b4['delay'], 'aw_worker_retry_backoff 4th attempt capped at 3600s' );
+$b4 = sourceweb_worker_retry_backoff( 'sourcing.yml', 503 );
+check( 4 === $b4['attempts'] && 3600 === $b4['delay'], 'sourceweb_worker_retry_backoff 4th attempt capped at 3600s' );
 
-check( aw_worker_clear_backoff( 'sourcing.yml' ), 'aw_worker_clear_backoff cleans state' );
-check( ! aw_worker_is_in_backoff( 'sourcing.yml' ), 'aw_worker_is_in_backoff returns false after clear' );
+check( sourceweb_worker_clear_backoff( 'sourcing.yml' ), 'sourceweb_worker_clear_backoff cleans state' );
+check( ! sourceweb_worker_is_in_backoff( 'sourcing.yml' ), 'sourceweb_worker_is_in_backoff returns false after clear' );
 
 // 5. Feed retry backoff.
-$f1 = aw_feed_retry_backoff( 'https://feed.example.com/rss', 429 );
-check( 1 === $f1['attempts'] && 60 === $f1['delay'], 'aw_feed_retry_backoff sets initial backoff' );
-check( aw_feed_is_in_backoff( 'https://feed.example.com/rss' ), 'aw_feed_is_in_backoff returns true' );
-aw_feed_clear_backoff( 'https://feed.example.com/rss' );
-check( ! aw_feed_is_in_backoff( 'https://feed.example.com/rss' ), 'aw_feed_clear_backoff removes backoff' );
+$f1 = sourceweb_feed_retry_backoff( 'https://feed.example.com/rss', 429 );
+check( 1 === $f1['attempts'] && 60 === $f1['delay'], 'sourceweb_feed_retry_backoff sets initial backoff' );
+check( sourceweb_feed_is_in_backoff( 'https://feed.example.com/rss' ), 'sourceweb_feed_is_in_backoff returns true' );
+sourceweb_feed_clear_backoff( 'https://feed.example.com/rss' );
+check( ! sourceweb_feed_is_in_backoff( 'https://feed.example.com/rss' ), 'sourceweb_feed_clear_backoff removes backoff' );
 
 // 6. Domain trust overrides.
-check( aw_rules_domain_override_save( 'trusted-news.in', 'allow', 'Trusted News' ), 'aw_rules_domain_override_save allow succeeds' );
-check( aw_rules_domain_override_save( 'spam-site.com', 'block', 'Spam Site' ), 'aw_rules_domain_override_save block succeeds' );
+check( sourceweb_rules_domain_override_save( 'trusted-news.in', 'allow', 'Trusted News' ), 'sourceweb_rules_domain_override_save allow succeeds' );
+check( sourceweb_rules_domain_override_save( 'spam-site.com', 'block', 'Spam Site' ), 'sourceweb_rules_domain_override_save block succeeds' );
 
-$overrides = aw_rules_domain_overrides();
+$overrides = sourceweb_rules_domain_overrides();
 check( isset( $overrides['trusted-news.in'] ) && 'allow' === $overrides['trusted-news.in']['status'], 'trusted-news.in has allow status' );
 check( isset( $overrides['spam-site.com'] ) && 'block' === $overrides['spam-site.com']['status'], 'spam-site.com has block status' );
 
-check( aw_rules_domain_override_delete( 'trusted-news.in' ), 'aw_rules_domain_override_delete succeeds' );
-$overrides_after = aw_rules_domain_overrides();
+check( sourceweb_rules_domain_override_delete( 'trusted-news.in' ), 'sourceweb_rules_domain_override_delete succeeds' );
+$overrides_after = sourceweb_rules_domain_overrides();
 check( ! isset( $overrides_after['trusted-news.in'] ), 'trusted-news.in reset from overrides' );
 
 // 7. Feed excluded tags.
-check( aw_rules_feed_excluded_tags_save( array( 'politics', 'gossip', 'sports' ) ), 'aw_rules_feed_excluded_tags_save succeeds' );
-$excluded = aw_rules_feed_excluded_tags();
-check( in_array( 'politics', $excluded, true ) && in_array( 'gossip', $excluded, true ), 'aw_rules_feed_excluded_tags returns saved tags' );
+check( sourceweb_rules_feed_excluded_tags_save( array( 'politics', 'gossip', 'sports' ) ), 'sourceweb_rules_feed_excluded_tags_save succeeds' );
+$excluded = sourceweb_rules_feed_excluded_tags();
+check( in_array( 'politics', $excluded, true ) && in_array( 'gossip', $excluded, true ), 'sourceweb_rules_feed_excluded_tags returns saved tags' );
 
 echo sprintf( "%d checks, %d failed\n", $count, $fails );
 exit( $fails > 0 ? 1 : 0 );

@@ -7,22 +7,22 @@
  * (aw_src_delete_data_on_uninstall is true) does it delete SourceWeb's own data, exactly this:
  *
  * Options:
- *   Settings: aw_backfill_floor, aw_enrich_sources, aw_enrich_google_key, aw_enrich_live_cap, aw_enrich_field_rules,
- *   aw_summary_rules, aw_sourcing_dismissed, aw_workers_groups.
- *   Records, logs and markers: aw_ai_free_caps, aw_ai_usage, aw_ai_provider_icons, aw_enrich_db, aw_enrich_hosts,
- *   aw_enrich_ledger, aw_ingest_heartbeat, aw_ingest_watchdog_at, aw_ingest_watchdog_last, aw_relay_log,
+ *   Settings: aw_backfill_floor, sourceweb_enrich_sources, aw_enrich_google_key, aw_enrich_live_cap, sourceweb_enrich_field_rules,
+ *   sourceweb_summary_rules, sourceweb_sourcing_dismissed, aw_workers_groups.
+ *   Records, logs and markers: aw_ai_free_caps, sourceweb_ai_usage, aw_ai_provider_icons, aw_enrich_db, aw_enrich_hosts,
+ *   aw_enrich_ledger, aw_ingest_heartbeat, aw_ingest_watchdog_at, aw_ingest_watchdog_last, sourceweb_relay_log,
  *   aw_relevance_alert_notice, aw_relevance_alert_pending, aw_relevance_rejected, aw_site_opportunities_last,
- *   aw_source_icons, aw_sourcing_migrating, aw_sourcing_phase, aw_sourcing_phase1_record … aw_sourcing_phase4_record,
+ *   aw_source_icons, aw_sourcing_migrating, sourceweb_sourcing_phase, aw_sourcing_phase1_record … aw_sourcing_phase4_record,
  *   aw_sourcing_seed_hc, aw_sourcing_seed_s35, aw_sourcing_v1_archive, kits_sourcing_log (the retired v1 log),
- *   aw_worker_dispatch_log, aw_workers_meta, aw_workers_tick, aw_workers_tick_lock, aw_workers_watchdog_at,
+ *   aw_worker_dispatch_log, sourceweb_workers_meta, sourceweb_workers_tick, aw_workers_tick_lock, aw_workers_watchdog_at,
  *   sourceweb_dashboard_log, the picture pipeline's aw_cc0_log, aw_ov_last and aw_ov_quota (cc0-images.php, from Animal
  *   Writes Core on 18 Nov 2026), aw_worker_runs_*, the migration backups aw_backup_1_* … aw_backup_4_* and
  *   aw_backup_latest_1 … aw_backup_latest_4, aw_src_delete_data_on_uninstall.
- * Transients (caches; they expire anyway): aw_ingest_alert_mailed, aw_relevance_alert_sent, aw_review_count,
- *   aw_sourcing_host_stats, aw_summary_below, aw_workers_alert_mailed, sourceweb_dashboard, aw_cc0_lock, and those
+ * Transients (caches; they expire anyway): aw_ingest_alert_mailed, aw_relevance_alert_sent, sourceweb_review_count,
+ *   sourceweb_sourcing_host_stats, aw_summary_below, aw_workers_alert_mailed, sourceweb_dashboard, aw_cc0_lock, and those
  *   starting aw_newsm_, aw_glive_, aw_sourcing_kw_stats_, aw_relay_rl_, aw_ov_ (Openverse pages and aw_ov_pause).
- * Scheduled events (all of each hook, whatever its arguments): aw_sourcing_site_meta, aw_ai_check_all,
- *   aw_ai_check_all_now, aw_ai_check_new, aw_ingest_watchdog, aw_workers_watchdog, sourceweb_dashboard_build,
+ * Scheduled events (all of each hook, whatever its arguments): aw_sourcing_site_meta, sourceweb_ai_check_all,
+ *   aw_ai_check_all_now, aw_ai_check_new, sourceweb_ingest_watchdog, sourceweb_workers_watchdog, sourceweb_dashboard_build,
  *   aw_sources_sync_dispatch, aw_cc0_run.
  * Tables: {prefix}aw_enrich (the enrichment proposals and their sources; the values applied to listings are post meta
  *   and stay).
@@ -31,9 +31,9 @@
  * - Posts (News items, review queue items, listings), terms, users, attachments (the source icons stay in the media
  *   library) and any post meta.
  * - The AI model rows and keys (aw_ai_models, aw_ai_keys): keys are removed only by hand.
- * - Data other plugins read: the sourcing lists aw_sources and the publishers aw_publishers (SourceWeb's since
- *   18 Nov 2026; Animal Writes Core, DirectoryWeb and InsightWeb read them), aw_relevance, the keyword tables
- *   ({prefix}aw_si_keywords, {prefix}aw_si_kw_map) and aw_kw_db (InsightWeb's), and the hourly aw_fetch_favicons event
+ * - Data other plugins read: the sourcing lists aw_sources and the publishers sourceweb_publishers (SourceWeb's since
+ *   18 Nov 2026; Animal Writes Core, DirectoryWeb and InsightWeb read them), sourceweb_relevance, the keyword tables
+ *   ({prefix}aw_si_keywords, {prefix}insightweb_si_kw_map) and aw_kw_db (InsightWeb's), and the hourly aw_fetch_favicons event
  *   (taken off when SourceWeb is deactivated; InsightWeb books it too); Animal Writes Core's aw_social_on and aw_social_show
  *   (SourceWeb's Settings also saves them); the aw_research_citation event (its work is Animal Writes Core's).
  *
@@ -107,7 +107,7 @@ global $wpdb;
 require_once __DIR__ . '/includes/uninstall-backup.php';
 $sourceweb_uninst_slug = file_exists( __DIR__ . '/sourceweb.php' ) ? 'sourceweb' : 'aw-sourcing';
 $sourceweb_uninst_file = file_exists( __DIR__ . '/sourceweb.php' ) ? __DIR__ . '/sourceweb.php' : __DIR__ . '/aw-sourcing.php';
-if ( ! aw_src_uninstall_backup( $sourceweb_uninst_slug, $sourceweb_uninst_file, array_merge( $aw_src_options, array( 'aw_src_delete_data_on_uninstall' ) ), array( 'aw_worker_runs_', 'aw_backup_1_', 'aw_backup_2_', 'aw_backup_3_', 'aw_backup_4_' ), array( $wpdb->prefix . 'aw_enrich' ) ) ) {
+if ( ! sourceweb_src_uninstall_backup( $sourceweb_uninst_slug, $sourceweb_uninst_file, array_merge( $aw_src_options, array( 'aw_src_delete_data_on_uninstall' ) ), array( 'aw_worker_runs_', 'aw_backup_1_', 'aw_backup_2_', 'aw_backup_3_', 'aw_backup_4_' ), array( $wpdb->prefix . 'aw_enrich' ) ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 

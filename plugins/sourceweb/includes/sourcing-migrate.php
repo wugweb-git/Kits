@@ -2,7 +2,7 @@
 /**
  * Sourcing restructure (owner, 25 Oct 2026): back up, migrate, verify and roll back each phase from WP-CLI. Phase 1
  * (Sources): every source gets its publisher host; the relay allow list becomes a switch on each source
- * (aw_publishers[host].relay, a kind=relay record for a site that is not a publisher; substack.com narrowed to
+ * (sourceweb_publishers[host].relay, a kind=relay record for a site that is not a publisher; substack.com narrowed to
  * peopleforanimals.substack.com, decision 8); the policy adds sources_v2. The method is PR #40's round trip: the
  * backup first, a dry run that prints every count, the migration, then verify rebuilds the old shapes and compares
  * them with the backup. Rollback undoes the migration on the current records (keeping what the ingest gate wrote since)
@@ -41,7 +41,7 @@ const AW_SOURCING_BACKUP_OPTIONS = array( 'aw_publishers', 'aw_sources', 'aw_rel
 const AW_SOURCING_BACKUP_OPTIONS_2 = array( 'aw_relevance', 'aw_sources', 'aw_sourcing_dismissed', 'kits_sourcing_log', 'aw_sourcing_phase' );
 
 /** The phase asked for (1, 2, or a phase another file adds through aw_sourcing_cli_phases), or an error. */
-function aw_sourcing_cli_phase( $assoc ) {
+function sourceweb_sourcing_cli_phase( $assoc ) {
 	$phase  = (int) ( $assoc['phase'] ?? 0 );
 	$phases = array_map( 'intval', (array) apply_filters( 'aw_sourcing_cli_phases', array( 1, 2 ) ) );
 	if ( ! in_array( $phase, $phases, true ) ) {
@@ -51,12 +51,12 @@ function aw_sourcing_cli_phase( $assoc ) {
 }
 
 /**
- * The options a phase's backup holds (aw_sourcing_cli_backup_options filter for phases after 2).
+ * The options a phase's backup holds (sourceweb_sourcing_cli_backup_options filter for phases after 2).
  *
  * @param int $phase Phase.
  * @return string[]
  */
-function aw_sourcing_cli_backup_options( $phase ) {
+function sourceweb_sourcing_cli_backup_options( $phase ) {
 	if ( in_array( (int) $phase, array( 1, 2 ), true ) ) {
 		return 2 === (int) $phase ? AW_SOURCING_BACKUP_OPTIONS_2 : AW_SOURCING_BACKUP_OPTIONS;
 	}
@@ -64,12 +64,12 @@ function aw_sourcing_cli_backup_options( $phase ) {
 }
 
 /** A value's checksum (sha256 of its JSON). */
-function aw_sourcing_cli_sum( $v ) {
+function sourceweb_sourcing_cli_sum( $v ) {
 	return hash( 'sha256', (string) wp_json_encode( $v ) );
 }
 
 /** One line of counts for the options a backup holds. */
-function aw_sourcing_cli_counts( array $opts ) {
+function sourceweb_sourcing_cli_counts( array $opts ) {
 	$c = (array) ( $opts['aw_sources'] ?? array() );
 	if ( array_key_exists( 'aw_relevance', $opts ) ) { // a phase 2 backup
 		$r = (array) $opts['aw_relevance'];
@@ -88,7 +88,7 @@ function aw_sourcing_cli_counts( array $opts ) {
 		);
 	}
 	return sprintf(
-		'aw_publishers %d · aw_sources.sources %d · aw_relay_log %d · kits_sourcing_log %d · phase %d',
+		'sourceweb_publishers %d · aw_sources.sources %d · sourceweb_relay_log %d · kits_sourcing_log %d · phase %d',
 		count( (array) ( $opts['aw_publishers'] ?? array() ) ),
 		count( (array) ( $c['sources'] ?? array() ) ),
 		count( (array) ( $opts['aw_relay_log'] ?? array() ) ),
@@ -105,10 +105,10 @@ function aw_sourcing_cli_counts( array $opts ) {
  * @param string $name  Backup option name ('' for the one to use).
  * @return array
  */
-function aw_sourcing_cli_backup( $phase, $name = '' ) {
+function sourceweb_sourcing_cli_backup( $phase, $name = '' ) {
 	if ( '' === $name ) {
 		$rec  = get_option( 'aw_sourcing_phase' . $phase . '_record' );
-		$name = is_array( $rec ) && ! empty( $rec['backup'] ) && aw_sourcing_phase() >= $phase ? (string) $rec['backup'] : (string) get_option( 'aw_backup_latest_' . $phase, '' );
+		$name = is_array( $rec ) && ! empty( $rec['backup'] ) && sourceweb_sourcing_phase() >= $phase ? (string) $rec['backup'] : (string) get_option( 'aw_backup_latest_' . $phase, '' );
 	}
 	$data = '' !== $name ? get_option( $name ) : false;
 	if ( ! is_array( $data ) || empty( $data['options'] ) ) {
@@ -118,16 +118,16 @@ function aw_sourcing_cli_backup( $phase, $name = '' ) {
 		WP_CLI::error( "Backup $name was taken after phase $phase was migrated; it cannot be used to migrate, verify or roll back. Take a backup before migrating." );
 	}
 	foreach ( (array) $data['options'] as $k => $v ) {
-		if ( ( $data['sums'][ $k ] ?? '' ) !== aw_sourcing_cli_sum( $v ) ) {
+		if ( ( $data['sums'][ $k ] ?? '' ) !== sourceweb_sourcing_cli_sum( $v ) ) {
 			WP_CLI::error( "Backup $name: the checksum of $k does not match." );
 		}
 	}
 	return array( $name, (array) $data['options'] );
 }
 
-/** The relay allow list as it was before phase 1, from a backup's aw_sources (as aw_relay_hosts_legacy reads it). */
-function aw_sourcing_cli_relay_before( array $sources_option ) {
-	return aw_src_relay_legacy( $sources_option, AW_RELAY_DEFAULT );
+/** The relay allow list as it was before phase 1, from a backup's aw_sources (as sourceweb_relay_hosts_legacy reads it). */
+function sourceweb_sourcing_cli_relay_before( array $sources_option ) {
+	return sourceweb_src_relay_legacy( $sources_option, AW_RELAY_DEFAULT );
 }
 
 /**
@@ -141,18 +141,18 @@ function aw_sourcing_cli_relay_before( array $sources_option ) {
 WP_CLI::add_command(
 	'aw-sourcing backup',
 	function ( $args, $assoc ) {
-		$phase = aw_sourcing_cli_phase( $assoc );
+		$phase = sourceweb_sourcing_cli_phase( $assoc );
 		$stamp = gmdate( 'YmdHis' );
 		$opts  = array();
 		$sums  = array();
-		foreach ( aw_sourcing_cli_backup_options( $phase ) as $k ) {
+		foreach ( sourceweb_sourcing_cli_backup_options( $phase ) as $k ) {
 			$opts[ $k ] = get_option( $k, null );
 		}
 		if ( 2 === $phase ) { // the keyword table's own columns and the map table (Search Insights' figures are not needed)
-			$opts += aw_sourcing_cli_p2_tables();
+			$opts += sourceweb_sourcing_cli_p2_tables();
 		}
 		foreach ( $opts as $k => $v ) {
-			$sums[ $k ] = aw_sourcing_cli_sum( $v );
+			$sums[ $k ] = sourceweb_sourcing_cli_sum( $v );
 		}
 		$data = array( 'phase' => $phase, 'at' => gmdate( 'c' ), 'site' => home_url(), 'options' => $opts, 'sums' => $sums );
 		$name = 'aw_backup_' . $phase . '_' . $stamp;
@@ -179,12 +179,12 @@ WP_CLI::add_command(
 		if ( ! $n || filesize( $file ) < 100 ) { // an empty file is no backup (owner, 24 Oct 2026)
 			WP_CLI::error( "The backup file $file is empty (the option backup $name was written)." );
 		}
-		if ( aw_sourcing_phase() < $phase ) {
+		if ( sourceweb_sourcing_phase() < $phase ) {
 			update_option( 'aw_backup_latest_' . $phase, $name, false ); // the one migrate uses
 		} else {
 			WP_CLI::warning( "Phase $phase is already migrated: this backup is kept, but migrate, verify and rollback use the one taken before the migration." );
 		}
-		WP_CLI::log( $phase <= 2 ? aw_sourcing_cli_counts( $opts ) : (string) apply_filters( 'aw_sourcing_cli_counts', '', $phase, $opts ) );
+		WP_CLI::log( $phase <= 2 ? sourceweb_sourcing_cli_counts( $opts ) : (string) apply_filters( 'aw_sourcing_cli_counts', '', $phase, $opts ) );
 		foreach ( $sums as $k => $v ) {
 			WP_CLI::log( "sha256 $k: $v" );
 		}
@@ -207,28 +207,28 @@ WP_CLI::add_command(
 WP_CLI::add_command(
 	'aw-sourcing migrate',
 	function ( $args, $assoc ) {
-		$phase = aw_sourcing_cli_phase( $assoc );
+		$phase = sourceweb_sourcing_cli_phase( $assoc );
 		$dry   = ! empty( $assoc['dry-run'] );
 		if ( 2 === $phase ) {
-			aw_sourcing_cli_p2_migrate( $dry );
+			sourceweb_sourcing_cli_p2_migrate( $dry );
 			return;
 		}
 		if ( 1 !== $phase ) { // a later phase's steps (sourcing-migrate-rules.php for phase 3)
 			do_action( 'aw_sourcing_cli_migrate_' . $phase, $assoc, $dry );
 			return;
 		}
-		if ( aw_sourcing_phase() >= $phase ) {
-			WP_CLI::error( "Phase $phase is already migrated (aw_sourcing_phase = " . aw_sourcing_phase() . '). wp aw-sourcing verify --phase=1 checks it.' );
+		if ( sourceweb_sourcing_phase() >= $phase ) {
+			WP_CLI::error( "Phase $phase is already migrated (sourceweb_sourcing_phase = " . sourceweb_sourcing_phase() . '). wp aw-sourcing verify --phase=1 checks it.' );
 		}
 		$bk = '';
 		if ( ! $dry ) {
-			list( $bk ) = aw_sourcing_cli_backup( $phase, (string) get_option( 'aw_backup_latest_' . $phase, '' ) ); // refuses without a backup
+			list( $bk ) = sourceweb_sourcing_cli_backup( $phase, (string) get_option( 'aw_backup_latest_' . $phase, '' ) ); // refuses without a backup
 			WP_CLI::log( "Backup: $bk" );
 		}
 		$c      = (array) get_option( 'aw_sources', array() );
-		$before = aw_sourcing_cli_relay_before( $c );
-		$pubs   = aw_publishers();
-		$plan   = aw_src_phase1_plan( $pubs, (array) ( $c['sources'] ?? array() ), $before, current_time( 'Y-m-d' ) );
+		$before = sourceweb_sourcing_cli_relay_before( $c );
+		$pubs   = sourceweb_publishers();
+		$plan   = sourceweb_src_phase1_plan( $pubs, (array) ( $c['sources'] ?? array() ), $before, current_time( 'Y-m-d' ) );
 		WP_CLI::log( sprintf( 'Sources: %d before, %d after (feed ids unchanged); host added to %d.', count( (array) ( $c['sources'] ?? array() ) ), count( $plan['sources'] ), count( array_filter( $plan['sources'], fn( $s ) => ! empty( $s['host'] ) ) ) - count( array_filter( (array) ( $c['sources'] ?? array() ), fn( $s ) => ! empty( $s['host'] ) ) ) ) );
 		foreach ( $plan['hosts'] as $id => $h ) {
 			WP_CLI::log( "  $id → $h" . ( isset( $pubs[ $h ] ) ? '' : ' (no publisher record: shown as a site feeds come from)' ) );
@@ -241,7 +241,7 @@ WP_CLI::add_command(
 		}
 		WP_CLI::log( 'Relay switched on for: ' . ( $plan['flagged'] ? implode( ', ', $plan['flagged'] ) : '(none)' ) );
 		WP_CLI::log( 'Relay-only records added: ' . ( $plan['added'] ? implode( ', ', $plan['added'] ) : '(none)' ) );
-		$cmp = aw_src_phase1_compare( $pubs, (array) ( $c['sources'] ?? array() ), $plan['pubs'], $plan['sources'], $before, $plan['relay_after'], (array) get_option( 'aw_relay_log', array() ) );
+		$cmp = sourceweb_src_phase1_compare( $pubs, (array) ( $c['sources'] ?? array() ), $plan['pubs'], $plan['sources'], $before, $plan['relay_after'], (array) get_option( 'aw_relay_log', array() ) );
 		foreach ( $cmp['diffs'] as $d ) {
 			WP_CLI::warning( 'conflict: ' . $d );
 		}
@@ -252,9 +252,9 @@ WP_CLI::add_command(
 		if ( $cmp['diffs'] ) {
 			WP_CLI::error( 'Not migrated: resolve the conflicts above first.' );
 		}
-		// Read-modify-write right before saving (the ingest gate writes aw_publishers too): apply the plan's changes
+		// Read-modify-write right before saving (the ingest gate writes sourceweb_publishers too): apply the plan's changes
 		// to the records as they are now.
-		$now = aw_publishers();
+		$now = sourceweb_publishers();
 		foreach ( $plan['flagged'] as $h ) {
 			if ( isset( $now[ $h ] ) ) {
 				$now[ $h ]['relay'] = true;
@@ -267,18 +267,18 @@ WP_CLI::add_command(
 				$now[ $h ]['relay'] = true;
 			}
 		}
-		update_option( AW_PUB_OPTION, $now, false );
+		update_option( SOURCEWEB_PUB_OPTION, $now, false );
 		$c            = (array) get_option( 'aw_sources', array() );
-		$hostplan     = aw_src_phase1_plan( $now, (array) ( $c['sources'] ?? array() ), array(), current_time( 'Y-m-d' ) );
+		$hostplan     = sourceweb_src_phase1_plan( $now, (array) ( $c['sources'] ?? array() ), array(), current_time( 'Y-m-d' ) );
 		$c['sources'] = $hostplan['sources'];
 		update_option( 'aw_sources', $c, false );
 		update_option( 'aw_sourcing_phase1_record', array( 'at' => current_time( 'mysql' ), 'backup' => $bk, 'flagged' => $plan['flagged'], 'added' => $plan['added'], 'hosted' => $hostplan['hosted'], 'mapped' => $plan['mapped'], 'relay_before' => $plan['relay_before'] ), false );
 		update_option( 'aw_sourcing_phase', 1, false );
-		aw_src_log(
+		sourceweb_src_log(
 			'sources',
-			sprintf( 'Phase 1 migrated (WP-CLI): %d sources got their publisher; relay on for %d sources, %d relay-only record(s) added; relay hosts %d → %d', count( $c['sources'] ), count( $plan['flagged'] ), count( $plan['added'] ), count( $plan['relay_before'] ), count( aw_relay_hosts() ) ),
+			sprintf( 'Phase 1 migrated (WP-CLI): %d sources got their publisher; relay on for %d sources, %d relay-only record(s) added; relay hosts %d → %d', count( $c['sources'] ), count( $plan['flagged'] ), count( $plan['added'] ), count( $plan['relay_before'] ), count( sourceweb_relay_hosts() ) ),
 			$plan['relay_before'],
-			aw_relay_hosts()
+			sourceweb_relay_hosts()
 		);
 		WP_CLI::success( 'Phase 1 migrated. Next: wp aw-sourcing verify --phase=1' );
 	},
@@ -296,7 +296,7 @@ WP_CLI::add_command(
 WP_CLI::add_command(
 	'aw-sourcing verify',
 	function ( $args, $assoc ) {
-		$phase = aw_sourcing_cli_phase( $assoc );
+		$phase = sourceweb_sourcing_cli_phase( $assoc );
 		$why   = (string) apply_filters( 'aw_sourcing_cli_refusal', '', $phase, 'verify' ); // a later phase may forbid it (phase 4)
 		if ( '' !== $why ) {
 			WP_CLI::error( $why );
@@ -305,24 +305,24 @@ WP_CLI::add_command(
 			do_action( 'aw_sourcing_cli_verify_' . $phase, $assoc );
 			return;
 		}
-		list( $bk, $old ) = aw_sourcing_cli_backup( $phase );
+		list( $bk, $old ) = sourceweb_sourcing_cli_backup( $phase );
 		if ( 2 === $phase ) {
-			aw_sourcing_cli_p2_verify( $bk, $old );
+			sourceweb_sourcing_cli_p2_verify( $bk, $old );
 			return;
 		}
 		WP_CLI::log( "Backup: $bk" );
-		WP_CLI::log( 'Backup: ' . aw_sourcing_cli_counts( $old ) );
+		WP_CLI::log( 'Backup: ' . sourceweb_sourcing_cli_counts( $old ) );
 		$now = array();
 		foreach ( AW_SOURCING_BACKUP_OPTIONS as $k ) {
 			$now[ $k ] = get_option( $k, null );
 		}
-		WP_CLI::log( 'Now:    ' . aw_sourcing_cli_counts( $now ) );
-		if ( aw_sourcing_phase() < $phase ) {
-			WP_CLI::error( "Phase $phase is not migrated (aw_sourcing_phase = " . aw_sourcing_phase() . ').' );
+		WP_CLI::log( 'Now:    ' . sourceweb_sourcing_cli_counts( $now ) );
+		if ( sourceweb_sourcing_phase() < $phase ) {
+			WP_CLI::error( "Phase $phase is not migrated (sourceweb_sourcing_phase = " . sourceweb_sourcing_phase() . ').' );
 		}
 		$c_old = (array) $old['aw_sources'];
 		$c_now = (array) $now['aw_sources'];
-		$cmp   = aw_src_phase1_compare( (array) $old['aw_publishers'], (array) ( $c_old['sources'] ?? array() ), aw_publishers(), (array) ( $c_now['sources'] ?? array() ), aw_sourcing_cli_relay_before( $c_old ), aw_relay_hosts(), (array) get_option( 'aw_relay_log', array() ) );
+		$cmp   = sourceweb_src_phase1_compare( (array) $old['aw_publishers'], (array) ( $c_old['sources'] ?? array() ), sourceweb_publishers(), (array) ( $c_now['sources'] ?? array() ), sourceweb_sourcing_cli_relay_before( $c_old ), sourceweb_relay_hosts(), (array) get_option( 'aw_relay_log', array() ) );
 		// The rest of aw_sources: unchanged.
 		$rest_old = $c_old;
 		$rest_now = $c_now;
@@ -349,7 +349,7 @@ WP_CLI::add_command(
 			WP_CLI::log( 'policy: "Workers use these lists" is off, so config (and sources_v2) is not sent.' );
 		}
 		$rec = (array) get_option( 'aw_sourcing_phase1_record', array() );
-		if ( isset( $rec['relay_before'] ) && array_values( (array) $rec['relay_before'] ) !== aw_sourcing_cli_relay_before( $c_old ) ) {
+		if ( isset( $rec['relay_before'] ) && array_values( (array) $rec['relay_before'] ) !== sourceweb_sourcing_cli_relay_before( $c_old ) ) {
 			$cmp['diffs'][] = 'the relay list the migration started from (' . implode( ', ', (array) $rec['relay_before'] ) . ') is not the backup\'s';
 		}
 		foreach ( $cmp['planned'] as $p ) {
@@ -379,7 +379,7 @@ WP_CLI::add_command(
  * : The phase (1 to 4).
  *
  * [--restore-all]
- * : Restore aw_publishers and aw_sources exactly as backed up (loses the ingest gate's counts and new hosts since).
+ * : Restore sourceweb_publishers and aw_sources exactly as backed up (loses the ingest gate's counts and new hosts since).
  *
  * [--yes]
  * : Do not ask for confirmation.
@@ -387,7 +387,7 @@ WP_CLI::add_command(
 WP_CLI::add_command(
 	'aw-sourcing rollback',
 	function ( $args, $assoc ) {
-		$phase = aw_sourcing_cli_phase( $assoc );
+		$phase = sourceweb_sourcing_cli_phase( $assoc );
 		$why   = (string) apply_filters( 'aw_sourcing_cli_refusal', '', $phase, 'rollback' ); // a later phase may forbid it (phase 4)
 		if ( '' !== $why ) {
 			WP_CLI::error( $why );
@@ -396,30 +396,30 @@ WP_CLI::add_command(
 			do_action( 'aw_sourcing_cli_rollback_' . $phase, $assoc );
 			return;
 		}
-		if ( aw_sourcing_phase() > $phase ) {
-			WP_CLI::error( 'Phase ' . aw_sourcing_phase() . ' is migrated: roll it back first (wp aw-sourcing rollback --phase=' . aw_sourcing_phase() . ').' );
+		if ( sourceweb_sourcing_phase() > $phase ) {
+			WP_CLI::error( 'Phase ' . sourceweb_sourcing_phase() . ' is migrated: roll it back first (wp aw-sourcing rollback --phase=' . sourceweb_sourcing_phase() . ').' );
 		}
-		list( $bk, $old ) = aw_sourcing_cli_backup( $phase );
+		list( $bk, $old ) = sourceweb_sourcing_cli_backup( $phase );
 		if ( 2 === $phase ) {
-			aw_sourcing_cli_p2_rollback( $bk, $old, $assoc );
+			sourceweb_sourcing_cli_p2_rollback( $bk, $old, $assoc );
 			return;
 		}
-		$why = aw_src_rollback_refusal( 1, aw_sourcing_phase(), (bool) get_option( 'aw_sourcing_phase2_record' ) );
+		$why = sourceweb_src_rollback_refusal( 1, sourceweb_sourcing_phase(), (bool) get_option( 'aw_sourcing_phase2_record' ) );
 		if ( '' !== $why ) {
 			WP_CLI::error( $why );
 		}
 		$all              = ! empty( $assoc['restore-all'] );
-		WP_CLI::confirm( "Roll phase $phase back " . ( $all ? "to backup $bk exactly (aw_publishers and aw_sources as backed up)" : '(undo the migration on the current records)' ) . '?', $assoc );
+		WP_CLI::confirm( "Roll phase $phase back " . ( $all ? "to backup $bk exactly (sourceweb_publishers and aw_sources as backed up)" : '(undo the migration on the current records)' ) . '?', $assoc );
 		if ( $all ) {
-			update_option( AW_PUB_OPTION, $old['aw_publishers'], false );
+			update_option( SOURCEWEB_PUB_OPTION, $old['aw_publishers'], false );
 			update_option( 'aw_sources', $old['aw_sources'], false );
-			$what = "restored aw_publishers and aw_sources from $bk";
+			$what = "restored sourceweb_publishers and aw_sources from $bk";
 		} else {
 			$rec          = get_option( 'aw_sourcing_phase1_record' );
 			$c            = (array) get_option( 'aw_sources', array() );
-			$undo         = aw_src_phase1_undo( aw_publishers(), (array) ( $c['sources'] ?? array() ), is_array( $rec ) && isset( $rec['hosted'] ) ? (array) $rec['hosted'] : null );
+			$undo         = sourceweb_src_phase1_undo( sourceweb_publishers(), (array) ( $c['sources'] ?? array() ), is_array( $rec ) && isset( $rec['hosted'] ) ? (array) $rec['hosted'] : null );
 			$c['sources'] = $undo['sources'];
-			update_option( AW_PUB_OPTION, $undo['pubs'], false );
+			update_option( SOURCEWEB_PUB_OPTION, $undo['pubs'], false );
 			update_option( 'aw_sources', $c, false );
 			$what = sprintf( 'relay off on %d, %d relay-only record(s) removed, host taken off the sources', count( $undo['unflagged'] ), count( $undo['removed'] ) );
 		}
@@ -430,8 +430,8 @@ WP_CLI::add_command(
 		}
 		delete_option( 'aw_sourcing_phase1_record' );
 		delete_option( 'aw_backup_latest_' . $phase ); // a new migration starts from a new backup (the backups themselves stay)
-		aw_src_log( 'sources', "Phase $phase rolled back (WP-CLI): $what; relay list back to " . implode( ', ', aw_relay_hosts() ), 'phase ' . $phase, 'phase ' . aw_sourcing_phase() );
-		WP_CLI::success( "Rolled back: $what. Relay hosts: " . implode( ', ', aw_relay_hosts() ) . '. The backup stays (' . $bk . ').' );
+		sourceweb_src_log( 'sources', "Phase $phase rolled back (WP-CLI): $what; relay list back to " . implode( ', ', sourceweb_relay_hosts() ), 'phase ' . $phase, 'phase ' . sourceweb_sourcing_phase() );
+		WP_CLI::success( "Rolled back: $what. Relay hosts: " . implode( ', ', sourceweb_relay_hosts() ) . '. The backup stays (' . $bk . ').' );
 	},
 	array( 'shortdesc' => 'Roll a sourcing restructure phase back.' )
 );

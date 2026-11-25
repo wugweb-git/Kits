@@ -1,7 +1,7 @@
 <?php
 /**
  * Check list tab list table: the keywords of the monthly live check, this month's result and the last one, with
- * Remove as a row and bulk action. Changes only the list (option aw_si_checklist).
+ * Remove as a row and bulk action. Changes only the list (option insightweb_si_checklist).
  *
  * @package insightweb
  */
@@ -17,7 +17,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Check list tab list table.
  */
-class AW_SI_Checklist_Table extends WP_List_Table {
+class InsightWeb_SI_Checklist_Table extends WP_List_Table {
 
 	/** One row per keyword on the list. */
 	public function __construct() {
@@ -66,9 +66,9 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 	/** The list with this month's and the latest live results. */
 	public function prepare_items() {
 		global $wpdb;
-		$ids = aw_si_checklist();
+		$ids = insightweb_si_checklist();
 		$per = $this->get_items_per_page( 'aw_si_checklist_per_page', 50 );
-		if ( ! $ids || ! aw_si_ready() ) {
+		if ( ! $ids || ! insightweb_si_ready() ) {
 			$this->items           = array();
 			$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'label' );
 			$this->set_pagination_args(
@@ -79,8 +79,8 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 			);
 			return;
 		}
-		$k      = aw_si_table( 'keywords' );
-		$o      = aw_si_table( 'obs' );
+		$k      = insightweb_si_table( 'keywords' );
+		$o      = insightweb_si_table( 'obs' );
 		$in     = implode( ',', array_map( 'intval', $ids ) );
 		$where  = "id IN ({$in})";
 		$args   = array();
@@ -104,7 +104,7 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 		$page  = implode( ',', array_map( 'intval', wp_list_pluck( $rows, 'id' ) ) );
 		$live  = $page ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, metric, d, value, txt FROM %i WHERE src = 'live' AND kw_id IN ({$page}) AND metric IN ('position', 'top3', 'paa') ORDER BY d", $o ) ) : array();
 		// phpcs:enable
-		$month = aw_si_live_month();
+		$month = insightweb_si_live_month();
 		$by_kw = array();
 		foreach ( $live as $l ) {
 			$by_kw[ (int) $l->kw_id ][ $l->metric ] = $l; // Ordered by date: the latest wins.
@@ -151,7 +151,7 @@ class AW_SI_Checklist_Table extends WP_List_Table {
 					'aw_si_cl' => 'remove',
 					'kw[]'     => (int) $item->id,
 				),
-				aw_si_url( 'checklist' )
+				insightweb_si_url( 'checklist' )
 			),
 			'bulk-checklist'
 		);

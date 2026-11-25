@@ -2,7 +2,7 @@
 /**
  * Directory enrichment in WP Admin:
  * - Sourcing → Enrichment review (Directory → Enrichment review until 25 Oct 2026): its menu item and the filter its
- *   lists use (aw_enrich_where()); the screen is the Kits shell's (sourceweb-ui.php, sourceweb/v1 routes).
+ *   lists use (sourceweb_enrich_where()); the screen is the Kits shell's (sourceweb-ui.php, sourceweb/v1 routes).
  * - The Directory enrichment settings (each source on or off, the live Google block's key and monthly cap): their
  *   options and checks; they are set on SourceWeb → Settings.
  * - On each listing: the source icon and name beside every field the worker set (hover: the page and the date).
@@ -19,12 +19,12 @@ const AW_ENRICH_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); w
 /* ---------- Source icons ---------- */
 
 /** Register the sources' hosts once in the publisher registry, so the favicon job fetches each icon once. */
-function aw_enrich_register_hosts() {
-	if ( ! function_exists( 'aw_publishers' ) || get_option( 'aw_enrich_hosts' ) === '1' ) {
+function sourceweb_enrich_register_hosts() {
+	if ( ! function_exists( 'sourceweb_publishers' ) || get_option( 'aw_enrich_hosts' ) === '1' ) {
 		return;
 	}
-	$pubs = aw_publishers();
-	foreach ( aw_enrich_sources() as $k => $s ) {
+	$pubs = sourceweb_publishers();
+	foreach ( sourceweb_enrich_sources() as $k => $s ) {
 		$h = $s[1];
 		if ( $h && ! isset( $pubs[ $h ] ) ) {
 			$pubs[ $h ] = array( 'status' => 'neutral', 'name' => $s[0], 'count' => 1, 'first' => wp_date( 'Y-m-d' ), 'last' => wp_date( 'Y-m-d' ), 'kind' => 'directory-source' );
@@ -35,10 +35,10 @@ function aw_enrich_register_hosts() {
 			$pubs[ $h ] = array( 'status' => 'neutral', 'name' => $n, 'count' => 1, 'first' => wp_date( 'Y-m-d' ), 'last' => wp_date( 'Y-m-d' ), 'kind' => 'directory-source' );
 		}
 	}
-	update_option( AW_PUB_OPTION, $pubs, false );
+	update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 	update_option( 'aw_enrich_hosts', '1', false );
 }
-add_action( 'admin_init', 'aw_enrich_register_hosts' );
+add_action( 'admin_init', 'sourceweb_enrich_register_hosts' );
 
 /**
  * A source's icon: its site's favicon from the Media Library (fetched once per host), the organisation's logo for its
@@ -48,13 +48,13 @@ add_action( 'admin_init', 'aw_enrich_register_hosts' );
  * @param int   $lid Listing ID.
  * @return string
  */
-function aw_enrich_icon( $src, $lid = 0 ) {
+function sourceweb_enrich_icon( $src, $lid = 0 ) {
 	$key  = (string) ( $src['key'] ?? '' );
-	$host = aw_enrich_sources()[ $key ][1] ?? '';
+	$host = sourceweb_enrich_sources()[ $key ][1] ?? '';
 	if ( 'social' === $key && false !== strpos( (string) ( $src['url'] ?? '' ), 'facebook.com' ) ) {
 		$host = 'facebook.com';
 	}
-	$url = $host && function_exists( 'aw_favicon_url' ) ? aw_favicon_url( $host ) : '';
+	$url = $host && function_exists( 'sourceweb_favicon_url' ) ? sourceweb_favicon_url( $host ) : '';
 	if ( ! $url && in_array( $key, array( 'website', 'claim' ), true ) && $lid && has_post_thumbnail( $lid ) ) {
 		$url = (string) get_the_post_thumbnail_url( $lid, 'thumbnail' );
 	}
@@ -65,12 +65,12 @@ function aw_enrich_icon( $src, $lid = 0 ) {
 }
 
 /** Icon + name of each source, linked to the exact page, with the date on hover. */
-function aw_enrich_sources_html( $sources, $lid = 0 ) {
+function sourceweb_enrich_sources_html( $sources, $lid = 0 ) {
 	$out = array();
 	foreach ( (array) $sources as $s ) {
 		$when  = ! empty( $s['fetched_at'] ) ? wp_date( 'j M Y, g:i a', strtotime( $s['fetched_at'] ) ) . ' IST' : '';
 		$title = trim( ( $s['url'] ?? '' ) . ( $when ? ' · ' . $when : '' ), ' ·' );
-		$inner = aw_enrich_icon( $s, $lid ) . ' <span>' . esc_html( $s['name'] ?? '' ) . '</span>';
+		$inner = sourceweb_enrich_icon( $s, $lid ) . ' <span>' . esc_html( $s['name'] ?? '' ) . '</span>';
 		$out[] = ! empty( $s['url'] )
 			? '<a class="aw-enrich-src" href="' . esc_url( $s['url'] ) . '" target="_blank" rel="noopener nofollow" title="' . esc_attr( $title ) . '">' . $inner . '</a>'
 			: '<span class="aw-enrich-src" title="' . esc_attr( $title ) . '">' . $inner . '</span>';
@@ -88,9 +88,9 @@ add_action(
 /* ---------- Beside each field on the listing ---------- */
 
 /** Meta key => enrichment field. */
-function aw_enrich_meta_fields() {
+function sourceweb_enrich_meta_fields() {
 	$out = array();
-	foreach ( aw_enrich_fields_all() as $f => $def ) {
+	foreach ( sourceweb_enrich_fields_all() as $f => $def ) {
 		$key         = array( 'phones' => 'aw_phones', 'hours' => 'aw_opening_hours', 'photos' => 'aw_gallery' )[ $def[1] ] ?? $def[1];
 		$out[ $key ] = $out[ $key ] ?? $f;
 	}
@@ -98,12 +98,12 @@ function aw_enrich_meta_fields() {
 }
 
 /** "Source: icon name" line for one field of the listing being edited. */
-function aw_enrich_prov_line( $lid, $field ) {
-	$p = aw_enrich_provenance( $lid, $field );
+function sourceweb_enrich_prov_line( $lid, $field ) {
+	$p = sourceweb_enrich_provenance( $lid, $field );
 	if ( ! $p ) {
 		return '';
 	}
-	return '<p class="aw-enrich-prov">Source: ' . aw_enrich_sources_html( $p['sources'], $lid ) . ' <span class="aw-enrich-conf aw-enrich-conf--' . esc_attr( $p['confidence'] ) . '">' . esc_html( $p['confidence'] ) . '</span> · ' . esc_html( 'approved' === $p['status'] ? 'approved' : 'applied automatically' ) . '</p>';
+	return '<p class="aw-enrich-prov">Source: ' . sourceweb_enrich_sources_html( $p['sources'], $lid ) . ' <span class="aw-enrich-conf aw-enrich-conf--' . esc_attr( $p['confidence'] ) . '">' . esc_html( $p['confidence'] ) . '</span> · ' . esc_html( 'approved' === $p['status'] ? 'approved' : 'applied automatically' ) . '</p>';
 }
 
 // SCF fields (the listing groups): the line under the field.
@@ -114,10 +114,10 @@ add_action(
 		if ( ! $post || 'aw_listing' !== $post->post_type ) {
 			return;
 		}
-		$map = aw_enrich_meta_fields();
+		$map = sourceweb_enrich_meta_fields();
 		$f   = $map[ $field['name'] ?? '' ] ?? '';
 		if ( $f ) {
-			echo aw_enrich_prov_line( $post->ID, $f ); // phpcs:ignore WordPress.Security.EscapeOutput
+			echo sourceweb_enrich_prov_line( $post->ID, $f ); // phpcs:ignore WordPress.Security.EscapeOutput
 		}
 	}
 );
@@ -129,24 +129,24 @@ add_action(
 	function () {
 		$post = get_post();
 		if ( $post && 'aw_listing' === $post->post_type ) {
-			aw_enrich_prov_box( $post );
+			sourceweb_enrich_prov_box( $post );
 		}
 	}
 );
 
-function aw_enrich_prov_box( $post ) {
+function sourceweb_enrich_prov_box( $post ) {
 	$rows = '';
-	foreach ( aw_enrich_fields_all() as $f => $def ) {
-		$p = aw_enrich_provenance( $post->ID, $f );
+	foreach ( sourceweb_enrich_fields_all() as $f => $def ) {
+		$p = sourceweb_enrich_provenance( $post->ID, $f );
 		if ( $p ) {
-			$rows .= '<li><strong>' . esc_html( $def[0] ) . '</strong><br>' . aw_enrich_sources_html( $p['sources'], $post->ID ) . '</li>';
+			$rows .= '<li><strong>' . esc_html( $def[0] ) . '</strong><br>' . sourceweb_enrich_sources_html( $p['sources'], $post->ID ) . '</li>';
 		}
 	}
-	$flags = aw_enrich_flags( $post->ID );
+	$flags = sourceweb_enrich_flags( $post->ID );
 	$chk   = (string) get_post_meta( $post->ID, 'aw_enrich_checked', true );
 	echo $rows ? '<ul>' . $rows . '</ul>' : '<p>Nothing set by the enrichment worker yet.</p>'; // phpcs:ignore WordPress.Security.EscapeOutput
 	if ( $flags ) {
-		echo '<p>' . esc_html( implode( ' · ', array_map( fn( $k ) => aw_enrich_flag_label( $k ), array_keys( $flags ) ) ) ) . '</p>';
+		echo '<p>' . esc_html( implode( ' · ', array_map( fn( $k ) => sourceweb_enrich_flag_label( $k ), array_keys( $flags ) ) ) ) . '</p>';
 	}
 	echo '<p class="description">' . ( $chk ? 'Last checked ' . esc_html( wp_date( 'j M Y', strtotime( $chk ) ) ) . '. ' : '' ) . '<a href="' . esc_url( admin_url( 'admin.php?page=aw-enrich-review&listing=' . $post->ID . '&status=all' ) ) . '">Changes and proposals</a></p>';
 	wp_nonce_field( 'aw_enrich_identity', 'aw_enrich_identity_nonce' );
@@ -162,14 +162,14 @@ add_action(
 			return;
 		}
 		$on  = ! empty( $_POST['aw_enrich_identity'] );
-		$was = aw_enrich_identity_unresolved( $id );
+		$was = sourceweb_enrich_identity_unresolved( $id );
 		if ( $on !== $was ) {
-			aw_enrich_flag( $id, 'identity', $on ? wp_date( 'Y-m-d' ) : false );
+			sourceweb_enrich_flag( $id, 'identity', $on ? wp_date( 'Y-m-d' ) : false );
 		}
 	}
 );
 
-function aw_enrich_flag_label( $k ) {
+function sourceweb_enrich_flag_label( $k ) {
 	return array( 'invite_claim' => 'Invite to claim', 'reported_closed' => 'Reported closed', 'duplicate' => 'Possible duplicate', 'identity' => 'Identity unresolved' )[ $k ] ?? $k;
 }
 
@@ -181,9 +181,9 @@ add_action(
 		$n = 0;
 		if ( get_option( 'aw_enrich_db' ) ) {
 			global $wpdb;
-			$n = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", aw_enrich_table() ) ); // phpcs:ignore WordPress.DB
+			$n = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", sourceweb_enrich_table() ) ); // phpcs:ignore WordPress.DB
 		}
-		add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'kits_menu_count' ) ? kits_menu_count( $n ) : '' ), AW_ENRICH_CAP, 'aw-enrich-review', 'aw_enrich_review_page' );
+		add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'kits_menu_count' ) ? kits_menu_count( $n ) : '' ), AW_ENRICH_CAP, 'aw-enrich-review', 'sourceweb_enrich_review_page' );
 	},
 	11 // after To review (review-queue.php, 10)
 );
@@ -193,7 +193,7 @@ add_action(
  *
  * @return array{0: string, 1: array}
  */
-function aw_enrich_where( $q ) {
+function sourceweb_enrich_where( $q ) {
 	global $wpdb;
 	$w    = array( '1=1' );
 	$args = array();
@@ -235,7 +235,7 @@ function aw_enrich_where( $q ) {
 }
 
 /** Sourcing → Enrichment review: the shell screen (sourceweb-ui.php). */
-function aw_enrich_review_page() {
+function sourceweb_enrich_review_page() {
 	if ( ! current_user_can( AW_ENRICH_CAP ) ) {
 		return;
 	}
@@ -247,36 +247,36 @@ function aw_enrich_review_page() {
 add_action(
 	'admin_init',
 	function () {
-		register_setting( 'aw_sourcing_enrich', 'aw_enrich_sources', array( 'type' => 'array', 'sanitize_callback' => 'aw_enrich_sources_sanitize', 'show_in_rest' => false ) );
-		register_setting( 'aw_sourcing_enrich', 'aw_enrich_google_key', array( 'type' => 'string', 'sanitize_callback' => 'aw_enrich_google_key_sanitize', 'show_in_rest' => false ) );
+		register_setting( 'aw_sourcing_enrich', 'aw_enrich_sources', array( 'type' => 'array', 'sanitize_callback' => 'sourceweb_enrich_sources_sanitize', 'show_in_rest' => false ) );
+		register_setting( 'aw_sourcing_enrich', 'aw_enrich_google_key', array( 'type' => 'string', 'sanitize_callback' => 'sourceweb_enrich_google_key_sanitize', 'show_in_rest' => false ) );
 		register_setting( 'aw_sourcing_enrich', 'aw_enrich_live_cap', array( 'type' => 'string', 'sanitize_callback' => fn( $v ) => (string) max( 0, (int) $v ) === (string) get_option( 'aw_enrich_live_cap', '20' ) ? get_option( 'aw_enrich_live_cap', '20' ) : (string) max( 0, (int) $v ), 'show_in_rest' => false ) );
 	}
 );
 
 /** The sources' switches (posted with _aw_tab enrich; logged); any other save passes through. */
-function aw_enrich_sources_sanitize( $value ) {
-	if ( ! aw_sourcing_settings_tab( $value, 'enrich' ) ) {
+function sourceweb_enrich_sources_sanitize( $value ) {
+	if ( ! sourceweb_sourcing_settings_tab( $value, 'enrich' ) ) {
 		return $value;
 	}
-	$old = aw_enrich_sources_on();
+	$old = sourceweb_enrich_sources_on();
 	$new = array();
-	foreach ( array_keys( aw_enrich_sources() ) as $k ) {
+	foreach ( array_keys( sourceweb_enrich_sources() ) as $k ) {
 		$new[ $k ] = ! empty( $value[ $k ] );
 	}
 	$changed = array();
 	foreach ( $new as $k => $v ) {
 		if ( $v !== $old[ $k ] ) {
-			$changed[] = aw_enrich_sources()[ $k ][0] . ( $v ? ' on' : ' off' );
+			$changed[] = sourceweb_enrich_sources()[ $k ][0] . ( $v ? ' on' : ' off' );
 		}
 	}
 	$key = trim( sanitize_text_field( wp_unslash( $_POST['aw_enrich_google_key'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- options.php checked the group's nonce
-	aw_src_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
-	aw_sourcing_settings_saved();
+	sourceweb_src_log( 'enrich', $changed ? implode( ', ', $changed ) : 'Directory enrichment saved' . ( '' !== $key ? ' (new Google key)' : '' ) );
+	sourceweb_sourcing_settings_saved();
 	return $changed ? $new : get_option( 'aw_enrich_sources' ); // no change: stored as it is
 }
 
 /** An empty key field keeps the saved key (the field never shows it). */
-function aw_enrich_google_key_sanitize( $value ) {
+function sourceweb_enrich_google_key_sanitize( $value ) {
 	$value = trim( sanitize_text_field( (string) $value ) );
 	return '' === $value ? get_option( 'aw_enrich_google_key' ) : $value; // as stored (false when there is none: nothing is written)
 }

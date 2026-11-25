@@ -4,7 +4,7 @@
  *
  * The numbers stay where RankWeb stored them: option aw_seo_settings, key 'search-insights', only values that differ
  * from the default. The constants are defined here from that key, with the same defaults. The Settings screen writes
- * only that key (aw_si_settings_save()).
+ * only that key (insightweb_si_settings_save()).
  *
  * @package insightweb
  */
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The settings numbers: constant => [label, help, default]. As RankWeb's module list had them. */
-function aw_si_setting_fields(): array {
+function insightweb_si_setting_fields(): array {
 	return array(
 		'AW_SI_HIGH_TRENDS'       => array(
 			'label'   => 'High demand: Trends at least',
@@ -60,22 +60,22 @@ function aw_si_setting_fields(): array {
 }
 
 /** The saved numbers (only those that differ from the default; the key may also hold RankWeb's old switch, 'on'). */
-function aw_si_settings_saved(): array {
+function insightweb_si_settings_saved(): array {
 	$all = (array) get_option( 'aw_seo_settings', array() );
 	return (array) ( $all['search-insights'] ?? array() );
 }
 
 // The constants, from the saved numbers or the defaults.
-$aw_si_saved = aw_si_settings_saved();
-foreach ( aw_si_setting_fields() as $aw_si_const => $aw_si_field ) {
+$aw_si_saved = insightweb_si_settings_saved();
+foreach ( insightweb_si_setting_fields() as $aw_si_const => $aw_si_field ) {
 	if ( ! defined( $aw_si_const ) ) {
 		define( $aw_si_const, array_key_exists( $aw_si_const, $aw_si_saved ) ? $aw_si_saved[ $aw_si_const ] : $aw_si_field['default'] );
 	}
 }
 unset( $aw_si_const, $aw_si_field, $aw_si_saved );
 
-/** Whether the current request may use the Search Insights APIs: administrators, or the workers' user (aw_worker). */
-function aw_si_api_allowed() {
+/** Whether the current request may use the Search Insights APIs: administrators, or the workers' user (sourceweb_worker). */
+function insightweb_si_api_allowed() {
 	return current_user_can( 'manage_options' ) || current_user_can( 'aw_worker' );
 }
 
@@ -89,11 +89,11 @@ function aw_si_api_allowed() {
  * @param bool  $reset  Restore defaults: every number goes back to its default.
  * @return bool Whether the option was written.
  */
-function aw_si_settings_save( array $posted, bool $reset = false ): bool {
+function insightweb_si_settings_save( array $posted, bool $reset = false ): bool {
 	$all  = (array) get_option( 'aw_seo_settings', array() ); // RankWeb's option: every other key stays as it is.
 	$had  = (array) ( $all['search-insights'] ?? array() );
 	$mine = $had;
-	foreach ( aw_si_setting_fields() as $const => $f ) {
+	foreach ( insightweb_si_setting_fields() as $const => $f ) {
 		if ( $reset ) {
 			unset( $mine[ $const ] ); // Back to the default.
 			continue;
@@ -132,15 +132,15 @@ add_action(
 		}
 		check_admin_referer( 'aw_si_settings' );
 		$reset  = isset( $_POST['reset'] );
-		$posted = (array) wp_unslash( $_POST['f'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each known field is read as an integer in aw_si_settings_save().
+		$posted = (array) wp_unslash( $_POST['f'] ?? array() ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each known field is read as an integer in insightweb_si_settings_save().
 		// The form sends every field; one it leaves out goes back to its default, as before.
-		foreach ( aw_si_setting_fields() as $const => $f ) {
+		foreach ( insightweb_si_setting_fields() as $const => $f ) {
 			if ( ! isset( $posted[ $const ] ) ) {
 				$posted[ $const ] = $f['default'];
 			}
 		}
-		aw_si_settings_save( $posted, $reset );
-		wp_safe_redirect( add_query_arg( 'saved', $reset ? 'reset' : 'saved', aw_si_url( 'settings' ) ) );
+		insightweb_si_settings_save( $posted, $reset );
+		wp_safe_redirect( add_query_arg( 'saved', $reset ? 'reset' : 'saved', insightweb_si_url( 'settings' ) ) );
 		exit;
 	}
 );
@@ -156,7 +156,7 @@ const INSIGHTWEB_DELETE_DATA = 'insightweb_delete_data'; // 1: uninstall.php del
  *
  * @param mixed $part The key's value.
  */
-function aw_si_settings_part_clean( $part ): array {
+function insightweb_si_settings_part_clean( $part ): array {
 	$out = array();
 	foreach ( (array) $part as $name => $v ) {
 		$name = (string) $name;
@@ -178,10 +178,10 @@ function aw_si_settings_part_clean( $part ): array {
  *
  * @param mixed $value Value to store.
  */
-function aw_si_settings_sanitize( $value ): array {
+function insightweb_si_settings_sanitize( $value ): array {
 	$value = (array) $value;
 	if ( isset( $value['search-insights'] ) ) {
-		$value['search-insights'] = aw_si_settings_part_clean( $value['search-insights'] );
+		$value['search-insights'] = insightweb_si_settings_part_clean( $value['search-insights'] );
 		if ( ! $value['search-insights'] ) {
 			unset( $value['search-insights'] );
 		}
@@ -206,7 +206,7 @@ function insightweb_registered_settings(): array {
 			'type'              => 'string',
 			'description'       => 'Seeds for keyword tools, one search per line.',
 			'default'           => '',
-			'sanitize_callback' => fn( $v ) => function_exists( 'aw_si_tool_seeds_clean' ) ? aw_si_tool_seeds_clean( sanitize_textarea_field( (string) $v ) ) : sanitize_textarea_field( (string) $v ),
+			'sanitize_callback' => fn( $v ) => function_exists( 'insightweb_si_tool_seeds_clean' ) ? insightweb_si_tool_seeds_clean( sanitize_textarea_field( (string) $v ) ) : sanitize_textarea_field( (string) $v ),
 			'show_in_rest'      => array( 'schema' => array( 'type' => 'string' ) ),
 		),
 		INSIGHTWEB_DELETE_DATA => array(
@@ -243,7 +243,7 @@ add_action(
 				'type'              => 'object',
 				'description'       => 'RankWeb settings by module; key search-insights holds InsightWeb\'s numbers.',
 				'default'           => array(),
-				'sanitize_callback' => 'aw_si_settings_sanitize',
+				'sanitize_callback' => 'insightweb_si_settings_sanitize',
 				'show_in_rest'      => array(
 					'schema' => array(
 						'type'                 => 'object',

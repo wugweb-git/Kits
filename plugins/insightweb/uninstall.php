@@ -9,8 +9,8 @@
  * Custom tables:
  *   {prefix}aw_si_kw_pages, {prefix}aw_si_obs, {prefix}aw_si_rising, {prefix}aw_si_links, {prefix}aw_si_visits
  * Options:
- *   every option named aw_si_… (aw_si_db, aw_si_runs, aw_si_off, aw_si_gdelt_on, aw_si_tool_seeds, aw_si_checklist,
- *   aw_si_psi_queue, aw_si_inspect_queue, aw_si_ref_icons, aw_si_link_dr, aw_si_links_gsc_pages, aw_si_links_imports,
+ *   every option named aw_si_… (aw_si_db, insightweb_si_runs, aw_si_off, insightweb_si_gdelt_on, insightweb_si_tool_seeds, insightweb_si_checklist,
+ *   aw_si_psi_queue, aw_si_inspect_queue, aw_si_ref_icons, insightweb_si_link_dr, aw_si_links_gsc_pages, aw_si_links_imports,
  *   aw_si_gsc_coverage, aw_si_bing_cursor, aw_si_crawl_inside, aw_si_crawl_outside, aw_si_live_token, aw_si_vis_db,
  *   the daily server counts aw_si_srv_…, and the other run markers), every option named insightweb_… (with
  *   insightweb_delete_data), and the key 'search-insights' (the seven numbers) inside RankWeb's aw_seo_settings —
@@ -19,9 +19,9 @@
  *   every transient named aw_si_… or insightweb_… (insightweb_dash, aw_si_redirects, aw_si_rm_scores, per-user import
  *   results, Bing keyword volumes, …)
  * Scheduled events:
- *   aw_si_daily, aw_si_rollup, aw_si_alerts, aw_si_ga4, aw_si_psi, aw_si_psi_more, aw_si_clarity, aw_si_clarity_retry,
+ *   insightweb_si_daily, insightweb_si_rollup, aw_si_alerts, aw_si_ga4, aw_si_psi, aw_si_psi_more, aw_si_clarity, aw_si_clarity_retry,
  *   aw_si_bing, aw_si_bing_kw, aw_si_bing_crawl, aw_si_gsc_types, aw_si_inspect, aw_si_inspect_more, aw_si_crawl,
- *   aw_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build — every event of
+ *   insightweb_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build — every event of
  *   these hooks, whatever its arguments. Not aw_fetch_favicons: the hourly icon run is shared with SourceWeb and is
  *   left booked (an icon run with nothing to do costs nothing)
  *
@@ -32,7 +32,7 @@
  * The service keys (option insightweb_keys) are deleted but never written to the backup file: they are secrets, pasted
  * again (or set in wp-config.php) after a reinstall, as Kits Core does with its ALTCHA key.
  *
- * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}aw_si_kw_map (InsightWeb's since 18 Nov 2026 and
+ * Never deleted: the keyword tables {prefix}aw_si_keywords and {prefix}insightweb_si_kw_map (InsightWeb's since 18 Nov 2026 and
  * shared with SourceWeb: they hold the owner's Sourcing, Press and Tracked keywords) and their option aw_kw_db,
  * posts, users, Site Kit's and Rank Math's data, and any other plugin's options.
  *

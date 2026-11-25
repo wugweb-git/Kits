@@ -35,8 +35,8 @@ add_action(
 );
 
 /** Whether the phase 3 migration has run on this site. */
-function aw_rules_live() {
-	return function_exists( 'aw_sourcing_phase' ) && aw_sourcing_phase() >= 3;
+function sourceweb_rules_live() {
+	return function_exists( 'sourceweb_sourcing_phase' ) && sourceweb_sourcing_phase() >= 3;
 }
 
 /**
@@ -46,14 +46,14 @@ function aw_rules_live() {
  * @param bool $from_types The content types whatever the phase (the migration's dry run).
  * @return array<string, array{label: string, worker_type: string}>
  */
-function aw_rules_sections( $from_types = false ) {
+function sourceweb_rules_sections( $from_types = false ) {
 	static $memo = array();
-	$live = $from_types || aw_rules_live();
+	$live = $from_types || sourceweb_rules_live();
 	if ( isset( $memo[ (int) $live ] ) && did_action( 'init' ) ) {
 		return $memo[ (int) $live ];
 	}
 	$order = function_exists( 'aw_post_types' ) ? array_keys( aw_post_types() ) : array();
-	$types = $live ? aw_rules_section_types( array_values( get_post_types( array( 'public' => true ) ) ), array_values( get_post_types_by_support( 'aw-section' ) ), $order ) : $order;
+	$types = $live ? sourceweb_rules_section_types( array_values( get_post_types( array( 'public' => true ) ) ), array_values( get_post_types_by_support( 'aw-section' ) ), $order ) : $order;
 	$out   = array();
 	foreach ( $types as $t ) {
 		$obj       = get_post_type_object( $t );
@@ -72,11 +72,11 @@ function aw_rules_sections( $from_types = false ) {
 /**
  * Section post type => label.
  *
- * @param bool $from_types As aw_rules_sections().
+ * @param bool $from_types As sourceweb_rules_sections().
  * @return array
  */
-function aw_rules_section_labels( $from_types = false ) {
-	return array_map( fn( $s ) => $s['label'], aw_rules_sections( $from_types ) );
+function sourceweb_rules_section_labels( $from_types = false ) {
+	return array_map( fn( $s ) => $s['label'], sourceweb_rules_sections( $from_types ) );
 }
 
 /**
@@ -86,8 +86,8 @@ function aw_rules_section_labels( $from_types = false ) {
  * @param array  $args More query arguments.
  * @return string
  */
-function aw_rules_url( $part = 'sections', array $args = array() ) {
-	$q = aw_rules_live() ? array(
+function sourceweb_rules_url( $part = 'sections', array $args = array() ) {
+	$q = sourceweb_rules_live() ? array(
 		'tab'  => 'rules',
 		'part' => $part,
 	) : array( 'tab' => $part );
@@ -102,16 +102,16 @@ function aw_rules_url( $part = 'sections', array $args = array() ) {
  *
  * @return array
  */
-function aw_rules_summary_by_type() {
+function sourceweb_rules_summary_by_type() {
 	$saved = get_option( AW_SUMMARY_RULES_OPTION );
-	return aw_rules_summary_resolve( aw_summary_rules()['sections'], is_array( $saved ) ? (array) ( $saved['sections'] ?? array() ) : array(), aw_rules_section_labels() );
+	return sourceweb_rules_summary_resolve( sourceweb_summary_rules()['sections'], is_array( $saved ) ? (array) ( $saved['sections'] ?? array() ) : array(), sourceweb_rules_section_labels() );
 }
 
 /* ---------- Directory enrichment field rules and schema ---------- */
 
 /** The enrichment source keys. */
-function aw_enrich_source_keys() {
-	return array_keys( aw_enrich_sources() );
+function sourceweb_enrich_source_keys() {
+	return array_keys( sourceweb_enrich_sources() );
 }
 
 /**
@@ -120,19 +120,19 @@ function aw_enrich_source_keys() {
  *
  * @return array{priority: string[], fields: array}
  */
-function aw_enrich_field_rules() {
+function sourceweb_enrich_field_rules() {
 	static $memo = array();
-	$saved = aw_rules_live() ? get_option( AW_ENRICH_RULES_OPTION ) : false; // before phase 3 (or after its rollback): the code's rules
+	$saved = sourceweb_rules_live() ? get_option( AW_ENRICH_RULES_OPTION ) : false; // before phase 3 (or after its rollback): the code's rules
 	$key   = md5( (string) wp_json_encode( $saved ) );
 	if ( isset( $memo[ $key ] ) ) {
 		return $memo[ $key ]; // read once per request (the results endpoint asks for each proposal)
 	}
-	$seed = aw_enrich_field_rules_seed( array_keys( aw_enrich_fields() ) );
+	$seed = sourceweb_enrich_field_rules_seed( array_keys( sourceweb_enrich_fields() ) );
 	if ( ! is_array( $saved ) || empty( $saved['fields'] ) ) {
 		$memo[ $key ] = $seed;
 		return $seed;
 	}
-	$src = aw_enrich_source_keys();
+	$src = sourceweb_enrich_source_keys();
 	$out = array(
 		'priority' => array_values( array_intersect( array_map( 'strval', (array) ( $saved['priority'] ?? array() ) ), $src ) ),
 		'fields'   => array(),
@@ -141,8 +141,8 @@ function aw_enrich_field_rules() {
 		$out['priority'] = $seed['priority'];
 	}
 	foreach ( (array) $saved['fields'] as $f => $r ) {
-		$base                = $seed['fields'][ $f ] ?? aw_enrich_rule_off();
-		$out['fields'][ $f ] = aw_enrich_rule_clean( (string) $f, (array) $r, $src, $base );
+		$base                = $seed['fields'][ $f ] ?? sourceweb_enrich_rule_off();
+		$out['fields'][ $f ] = sourceweb_enrich_rule_clean( (string) $f, (array) $r, $src, $base );
 	}
 	foreach ( $seed['fields'] as $f => $r ) { // an enrichment field added in code later: its seeded rule
 		if ( ! isset( $out['fields'][ $f ] ) ) {
@@ -159,12 +159,12 @@ function aw_enrich_field_rules() {
  * @param string $field Field key.
  * @return array
  */
-function aw_enrich_field_rule( $field ) {
-	$rules = aw_enrich_field_rules()['fields'];
+function sourceweb_enrich_field_rule( $field ) {
+	$rules = sourceweb_enrich_field_rules()['fields'];
 	if ( isset( $rules[ $field ] ) ) {
 		return $rules[ $field ];
 	}
-	return isset( aw_enrich_fields()[ $field ] ) ? aw_enrich_rule_seed( $field ) : aw_enrich_rule_off();
+	return isset( sourceweb_enrich_fields()[ $field ] ) ? sourceweb_enrich_rule_seed( $field ) : sourceweb_enrich_rule_off();
 }
 
 /**
@@ -174,7 +174,7 @@ function aw_enrich_field_rule( $field ) {
  *
  * @return array
  */
-function aw_enrich_listing_acf_fields() {
+function sourceweb_enrich_listing_acf_fields() {
 	if ( function_exists( 'acf_get_field_groups' ) && function_exists( 'acf_get_fields' ) ) {
 		$groups = array();
 		foreach ( (array) acf_get_field_groups() as $g ) {
@@ -183,7 +183,7 @@ function aw_enrich_listing_acf_fields() {
 				$groups[]    = $g;
 			}
 		}
-		$f = aw_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
+		$f = sourceweb_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
 		if ( $f ) {
 			return $f;
 		}
@@ -196,18 +196,18 @@ function aw_enrich_listing_acf_fields() {
 			$groups[] = $json;
 		}
 	}
-	return aw_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
+	return sourceweb_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
 }
 
-/** The Directory schema (rules-model.php aw_enrich_schema_build) for enrich/config; built once per request. */
-function aw_enrich_schema() {
+/** The Directory schema (rules-model.php sourceweb_enrich_schema_build) for enrich/config; built once per request. */
+function sourceweb_enrich_schema() {
 	static $memo = null;
 	if ( null !== $memo && did_action( 'init' ) ) {
 		return $memo;
 	}
-	$secs  = function_exists( 'aw_sources_config' ) ? (array) ( aw_sources_config()['sections'] ?? array() ) : array();
+	$secs  = function_exists( 'sourceweb_sources_config' ) ? (array) ( sourceweb_sources_config()['sections'] ?? array() ) : array();
 	$types = (array) ( $secs['aw_listing']['tags'] ?? array() );
-	$out   = aw_enrich_schema_build( aw_enrich_listing_acf_fields(), aw_enrich_fields(), AW_ENRICH_LISTING_GROUP, $types, defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
+	$out   = sourceweb_enrich_schema_build( sourceweb_enrich_listing_acf_fields(), sourceweb_enrich_fields(), AW_ENRICH_LISTING_GROUP, $types, defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
 	if ( did_action( 'init' ) ) {
 		$memo = $out;
 	}
@@ -216,18 +216,18 @@ function aw_enrich_schema() {
 
 /**
  * Listing fields added in wp-admin whose field rule is on (phase 3): field name => [label, meta key, group, ACF type],
- * the shape of aw_enrich_fields(). Only types enrichment can write (AW_ENRICH_ACF_WRITABLE).
+ * the shape of sourceweb_enrich_fields(). Only types enrichment can write (AW_ENRICH_ACF_WRITABLE).
  *
  * @return array
  */
-function aw_enrich_listing_extra_fields() {
-	if ( ! aw_rules_live() ) {
+function sourceweb_enrich_listing_extra_fields() {
+	if ( ! sourceweb_rules_live() ) {
 		return array();
 	}
-	$rules = aw_enrich_field_rules()['fields'];
+	$rules = sourceweb_enrich_field_rules()['fields'];
 	$out   = array();
-	foreach ( aw_enrich_schema()['fields'] as $f ) {
-		if ( $f['enrich'] || isset( aw_enrich_fields()[ $f['name'] ] ) || empty( $rules[ $f['name'] ]['on'] ) || '' !== aw_enrich_acf_not_writable( $f['type'] ) ) {
+	foreach ( sourceweb_enrich_schema()['fields'] as $f ) {
+		if ( $f['enrich'] || isset( sourceweb_enrich_fields()[ $f['name'] ] ) || empty( $rules[ $f['name'] ]['on'] ) || '' !== sourceweb_enrich_acf_not_writable( $f['type'] ) ) {
 			continue;
 		}
 		$out[ $f['name'] ] = array( $f['label'], $f['name'], 'Listing field', $f['type'] );
@@ -236,8 +236,8 @@ function aw_enrich_listing_extra_fields() {
 }
 
 /** Every field enrichment may fill: the built-in fields and the listing fields switched on in Field rules. */
-function aw_enrich_fields_all() {
-	return aw_enrich_fields() + aw_enrich_listing_extra_fields();
+function sourceweb_enrich_fields_all() {
+	return sourceweb_enrich_fields() + sourceweb_enrich_listing_extra_fields();
 }
 
 
@@ -248,13 +248,13 @@ function aw_enrich_fields_all() {
  *
  * @return array[]
  */
-function aw_rules_sections_v2() {
-	$c    = aw_sources_config();
+function sourceweb_rules_sections_v2() {
+	$c    = sourceweb_sources_config();
 	$secs = (array) ( $c['sections'] ?? array() );
 	$tags = (array) ( $c['topic_tags'] ?? array() );
-	$by   = aw_rules_summary_by_type();
+	$by   = sourceweb_rules_summary_by_type();
 	$out  = array();
-	foreach ( aw_rules_sections() as $t => $s ) {
+	foreach ( sourceweb_rules_sections() as $t => $s ) {
 		$allowed_tags = array_values( array_map( 'strval', (array) ( $secs[ $t ]['tags'] ?? array() ) ) );
 		$out[]        = array(
 			'post_type'   => $t,
@@ -272,12 +272,12 @@ function aw_rules_sections_v2() {
 add_filter(
 	'kits_sourcing_policy',
 	function ( $data ) {
-		if ( ! aw_rules_live() || ! isset( $data['config'] ) || ! is_array( $data['config'] ) ) {
+		if ( ! sourceweb_rules_live() || ! isset( $data['config'] ) || ! is_array( $data['config'] ) ) {
 			return $data;
 		}
 		$schema                        = isset( $data['config']['schema'] ) && is_array( $data['config']['schema'] ) ? $data['config']['schema'] : array();
 		$data['config']['schema']      = $schema + array( 'rules' => 2 );
-		$data['config']['sections_v2'] = aw_rules_sections_v2();
+		$data['config']['sections_v2'] = sourceweb_rules_sections_v2();
 		return $data;
 	},
 	20 // after the lists (sourcing-lists.php) build config
@@ -285,10 +285,10 @@ add_filter(
 
 /*
  * Sources sync copies the summary rules and the Directory schema too (phase 3): a save of either starts it, as a save
- * of the lists does (sourcing-lists.php aw_sources_sync_soon).
+ * of the lists does (sourcing-lists.php sourceweb_sources_sync_soon).
  */
 foreach ( array( 'aw_summary_rules', AW_ENRICH_RULES_OPTION ) as $aw_rules_sync_option ) {
-	add_action( 'add_option_' . $aw_rules_sync_option, fn() => function_exists( 'aw_sources_sync_soon' ) && aw_rules_live() ? aw_sources_sync_soon() : null );
-	add_action( 'update_option_' . $aw_rules_sync_option, fn() => function_exists( 'aw_sources_sync_soon' ) && aw_rules_live() ? aw_sources_sync_soon() : null );
+	add_action( 'add_option_' . $aw_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
+	add_action( 'update_option_' . $aw_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
 }
 unset( $aw_rules_sync_option );

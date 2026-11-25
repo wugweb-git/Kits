@@ -1,5 +1,5 @@
 {
-    "about": "Read-only copy of the live lists and of the keyword records they name (animalwrites.in, 25 Oct 2026): aw_relevance, aw_sources (keywords, press, categories, sources), aw_sourcing_dismissed, and the wp_aw_si_keywords rows (id, norm, label, lang, roles) whose normal form one of the lists has, or with the Include role. The table had 4578 records.",
+    "about": "Read-only copy of the live lists and of the keyword records they name (animalwrites.in, 25 Oct 2026): sourceweb_relevance, aw_sources (keywords, press, categories, sources), sourceweb_sourcing_dismissed, and the wp_aw_si_keywords rows (id, norm, label, lang, roles) whose normal form one of the lists has, or with the Include role. The table had 4578 records.",
     "table_count": 4578,
     "relevance": {
         "enabled": false,

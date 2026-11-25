@@ -5,7 +5,7 @@
  *
  * Plugins → SourceWeb (one item since 11 Nov 2026) opens the Overview (this file). Its screens, at the same addresses
  * as before and shown as tabs on each: Overview, To review (review-queue.php), Enrichment review (enrichment-admin.php),
- * then one per screen of the Sourcing page (admin.php?page=aw-sourcing&tab=…, sourcing-policy.php aw_sourcing_page): the
+ * then one per screen of the Sourcing page (admin.php?page=aw-sourcing&tab=…, sourcing-policy.php sourceweb_sourcing_page): the
  * settings screens (Sources, Keywords, Rules, AI models), the reports and jobs (Workers, Rejected, Relay log, Change
  * log), and Settings. Every screen is drawn on the Kits shell (sourceweb-ui.php). The order and the addresses are in
  * menu-model.php. Until 25 Oct 2026 the screens were Settings → Sourcing (tabs), Inbox → To review and
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @return array
  */
-function aw_sourcing_tabs() {
+function sourceweb_sourcing_tabs() {
 	static $memo = null; // the same answer all request: the menu, the current item, the title and the page ask for it
 	if ( null !== $memo ) {
 		return $memo;
@@ -34,7 +34,7 @@ function aw_sourcing_tabs() {
 		'keywords' => array( 'Keywords' ),
 	) + (array) apply_filters( 'kits_sourcing_tabs', array() ) + array( 'log' => array( 'Change log' ) );
 	$out = array();
-	foreach ( array_keys( aw_src_menu_order( array_map( fn( $t ) => (string) $t[0], $all ) ) ) as $k ) {
+	foreach ( array_keys( sourceweb_src_menu_order( array_map( fn( $t ) => (string) $t[0], $all ) ) ) as $k ) {
 		$out[ $k ] = $all[ $k ];
 	}
 	$memo = $out;
@@ -42,14 +42,14 @@ function aw_sourcing_tabs() {
 }
 
 /** The tab shown on the Sourcing page (Sources when none or an unknown one is asked for). */
-function aw_sourcing_current_tab() {
+function sourceweb_sourcing_current_tab() {
 	$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification -- which screen to show
-	return isset( aw_sourcing_tabs()[ $tab ] ) ? $tab : 'sources';
+	return isset( sourceweb_sourcing_tabs()[ $tab ] ) ? $tab : 'sources';
 }
 
 /** A Sourcing screen's address (tab '' or sources: the Sources screen). */
-function aw_sourcing_url( $tab = '', array $args = array() ) {
-	return admin_url( aw_src_tab_path( (string) $tab, $args ) );
+function sourceweb_sourcing_url( $tab = '', array $args = array() ) {
+	return admin_url( sourceweb_src_tab_path( (string) $tab, $args ) );
 }
 
 add_action(
@@ -59,18 +59,18 @@ add_action(
 		// count; the other screens are its tabs (the shell header). Without Kits Core, a menu of its own as before.
 		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (AW_SRC_SCREEN,
 		// sourcing_page_…): saved screen options and columns stay.
-		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'aw_review_count' ) && function_exists( 'kits_menu_count' ) ? kits_menu_count( aw_review_count() ) : '';
+		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'sourceweb_review_count' ) && function_exists( 'kits_menu_count' ) ? kits_menu_count( sourceweb_review_count() ) : '';
 		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
 		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__ ) . '/assets/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-rss'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( 'SourceWeb', 'SourceWeb' . $count, AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page', $icon, '58.3' );
+		add_menu_page( 'SourceWeb', 'SourceWeb' . $count, AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page', $icon, '58.3' );
 		$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (sourcing_page_…), whatever the title.
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'aw_sourcing_overview_page' );
+		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' );
 	},
 	9 // before To review (10) and Enrichment review (11)
 );
@@ -80,9 +80,9 @@ add_action(
 	'admin_menu',
 	function () {
 		$first = true;
-		foreach ( aw_sourcing_tabs() as $tab => $t ) {
+		foreach ( sourceweb_sourcing_tabs() as $tab => $t ) {
 			if ( $first ) {
-				$hook = add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, AW_SRC_PAGE, 'aw_sourcing_page' );
+				$hook = add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], SOURCEWEB_SRC_CAP, AW_SRC_PAGE, 'sourceweb_sourcing_page' );
 				if ( $hook && AW_SRC_SCREEN !== $hook ) { // the menu title changed: the screens' hooks would not fire, so pass them on and say so
 					add_action( 'load-' . $hook, fn() => do_action( 'load-' . AW_SRC_SCREEN ) );
 					error_log( 'SourceWeb: the Sourcing page is ' . $hook . ', not ' . AW_SRC_SCREEN . ' (menu-model.php); list-table settings and columns will not apply.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
@@ -90,7 +90,7 @@ add_action(
 				$first = false;
 				continue;
 			}
-			add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], AW_SRC_CAP, aw_src_tab_menu_slug( $tab ) );
+			add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], SOURCEWEB_SRC_CAP, sourceweb_src_tab_menu_slug( $tab ) );
 		}
 	},
 	12
@@ -100,7 +100,7 @@ add_action(
 add_filter(
 	'submenu_file',
 	function ( $file, $parent ) {
-		return AW_SRC_MENU === $parent && AW_SRC_PAGE === sanitize_key( $_GET['page'] ?? '' ) ? aw_src_tab_menu_slug( aw_sourcing_current_tab() ) : $file; // phpcs:ignore WordPress.Security.NonceVerification -- which item to mark
+		return AW_SRC_MENU === $parent && AW_SRC_PAGE === sanitize_key( $_GET['page'] ?? '' ) ? sourceweb_src_tab_menu_slug( sourceweb_sourcing_current_tab() ) : $file; // phpcs:ignore WordPress.Security.NonceVerification -- which item to mark
 	},
 	10,
 	2
@@ -111,19 +111,19 @@ add_filter(
 		if ( AW_SRC_PAGE !== sanitize_key( $_GET['page'] ?? '' ) || '' === (string) $title || 0 !== strpos( (string) $admin_title, (string) $title ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a title only
 			return $admin_title;
 		}
-		return aw_sourcing_tabs()[ aw_sourcing_current_tab() ][0] . substr( (string) $admin_title, strlen( (string) $title ) );
+		return sourceweb_sourcing_tabs()[ sourceweb_sourcing_current_tab() ][0] . substr( (string) $admin_title, strlen( (string) $title ) );
 	},
 	10,
 	2
 );
 
 // Plugins screen: Overview and Settings under the plugin's name (when SourceWeb is listed there as its own plugin).
-$sourceweb_main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( AW_SOURCING_DIR . 'sourceweb.php' ) ? AW_SOURCING_DIR . 'sourceweb.php' : AW_SOURCING_DIR . 'aw-sourcing.php' );
+$sourceweb_main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( SOURCEWEB_SOURCING_DIR . 'sourceweb.php' ) ? SOURCEWEB_SOURCING_DIR . 'sourceweb.php' : SOURCEWEB_SOURCING_DIR . 'aw-sourcing.php' );
 add_filter(
 	'plugin_action_links_' . plugin_basename( $sourceweb_main_file ),
 	function ( $links ) {
 		$own = array();
-		foreach ( aw_src_action_link_paths() as $label => $path ) {
+		foreach ( sourceweb_src_action_link_paths() as $label => $path ) {
 			$own[] = '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
 		}
 		return array_merge( $own, (array) $links );
@@ -150,17 +150,17 @@ add_action(
 			array(
 				'type'              => 'string',
 				'default'           => '2025-11-01',
-				'sanitize_callback' => 'aw_src_backfill_floor_clean',
+				'sanitize_callback' => 'sourceweb_src_backfill_floor_clean',
 				'show_in_rest'      => false,
 			)
 		);
 		add_settings_section( 'aw_src_backfill', 'Backfill', '__return_null', 'aw-src-backfill' );
-		add_settings_field( 'aw_backfill_floor', 'Oldest date', 'aw_src_backfill_floor_field', 'aw-src-backfill', 'aw_src_backfill', array( 'label_for' => 'aw_backfill_floor' ) );
+		add_settings_field( 'aw_backfill_floor', 'Oldest date', 'sourceweb_src_backfill_floor_field', 'aw-src-backfill', 'aw_src_backfill', array( 'label_for' => 'aw_backfill_floor' ) );
 	}
 );
 
 /** The backfill date field. */
-function aw_src_backfill_floor_field(): void {
+function sourceweb_src_backfill_floor_field(): void {
 	printf(
 		'<input type="date" id="aw_backfill_floor" name="aw_backfill_floor" value="%1$s"> <p class="description">%2$s</p>',
 		esc_attr( (string) get_option( 'aw_backfill_floor', '2025-11-01' ) ),
@@ -173,7 +173,7 @@ function aw_src_backfill_floor_field(): void {
  *
  * @param mixed $value Posted value.
  */
-function aw_src_backfill_floor_clean( $value ): string {
+function sourceweb_src_backfill_floor_clean( $value ): string {
 	$value = trim( (string) $value );
 	$d     = DateTime::createFromFormat( '!Y-m-d', $value );
 	if ( $d && $d->format( 'Y-m-d' ) === $value ) {
@@ -189,7 +189,7 @@ function aw_src_backfill_floor_clean( $value ): string {
  * old Settings address through to admin_init (it finds the page on this menu) and then cannot load it; it refuses the
  * old Directory address before admin_init. So both hooks.
  */
-function aw_sourcing_moved_redirect() {
+function sourceweb_sourcing_moved_redirect() {
 	global $pagenow;
 	// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a GET redirect, nothing saved; each value is sanitized below.
 	$page = sanitize_key( $_GET['page'] ?? '' );
@@ -209,13 +209,13 @@ function aw_sourcing_moved_redirect() {
 	wp_safe_redirect( add_query_arg( array_map( 'rawurlencode', $q ), admin_url( 'admin.php' ) ) ); // 302: browsers keep no copy, so a rollback of this change is clean
 	exit;
 }
-add_action( 'admin_init', 'aw_sourcing_moved_redirect', 1 );
-add_action( 'admin_page_access_denied', 'aw_sourcing_moved_redirect' );
+add_action( 'admin_init', 'sourceweb_sourcing_moved_redirect', 1 );
+add_action( 'admin_page_access_denied', 'sourceweb_sourcing_moved_redirect' );
 
 /* ---------- Sourcing → Overview ---------- */
 
 /** A link to a Sourcing screen, or the screen's name alone for someone who cannot open it. */
-function aw_sourcing_overview_link( $label, $url, $cap = AW_SRC_CAP ) {
+function sourceweb_sourcing_overview_link( $label, $url, $cap = SOURCEWEB_SRC_CAP ) {
 	return current_user_can( $cap ) ? '<a href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>' : esc_html( $label . ' (administrators)' );
 }
 
@@ -225,7 +225,7 @@ function aw_sourcing_overview_link( $label, $url, $cap = AW_SRC_CAP ) {
  *
  * @return array { saved: bool, old: bool, works, wait, bad, tool, providers: string[] }.
  */
-function aw_sourcing_ai_counts() {
+function sourceweb_sourcing_ai_counts() {
 	$rows = get_option( 'aw_ai_models', null );
 	$n    = array(
 		'saved'     => is_array( $rows ),
@@ -264,7 +264,7 @@ function aw_sourcing_ai_counts() {
 }
 
 /** Sourcing → Overview: the shell Dashboard (sourceweb-ui.php). */
-function aw_sourcing_overview_page() {
+function sourceweb_sourcing_overview_page() {
 	if ( ! current_user_can( AW_REVIEW_CAP ) ) {
 		return;
 	}

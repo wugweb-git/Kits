@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function sourceweb_sources_config() {
 	$c = get_option( 'aw_sources' );
 	if ( ! is_array( $c ) ) {
-		$c         = json_decode( (string) file_get_contents( AW_SOURCING_DIR . 'data/sources-seed.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$c         = json_decode( (string) file_get_contents( SOURCEWEB_SOURCING_DIR . 'data/sources-seed.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		$c['live'] = false; // the owner switches the workers over after checking
 		update_option( 'aw_sources', $c, false );
 	}
@@ -24,9 +24,3 @@ function sourceweb_sources_config() {
 	return $c;
 }
 
-if ( ! function_exists( 'aw_sources_config' ) ) {
-	/** Alias of sourceweb_sources_config() (Animal Writes Core and SourceWeb's own files call this name). */
-	function aw_sources_config() {
-		return sourceweb_sources_config();
-	}
-}

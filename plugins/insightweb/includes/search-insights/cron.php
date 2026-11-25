@@ -20,39 +20,39 @@ const INSIGHTWEB_CRON_TELEMETRY = 'insightweb_daily_telemetry_cron';
  *
  * @param bool $by_hand Started from Settings or WP-CLI: switches Search Insights on again.
  */
-function aw_si_daily( bool $by_hand = false ): array {
+function insightweb_si_daily( bool $by_hand = false ): array {
 	if ( get_option( 'aw_si_off' ) ) {
 		if ( ! $by_hand ) {
 			return array( 'off' => true );
 		}
 		delete_option( 'aw_si_off' );
 	}
-	aw_si_install();
-	aw_si_run_start( 'gsc' );
-	$out        = array( 'seed' => aw_si_seed() );
-	$gsc        = aw_si_gsc_run();
+	insightweb_si_install();
+	insightweb_si_run_start( 'gsc' );
+	$out        = array( 'seed' => insightweb_si_seed() );
+	$gsc        = insightweb_si_gsc_run();
 	$out['gsc'] = $gsc;
 	// Roles, the calculation and topics are one entry in the run log ("Keyword roles"): its Detail shows the seed's
 	// problem, the role counts, the priorities worked out and any write that failed.
-	aw_si_run_start( 'roles' );
+	insightweb_si_run_start( 'roles' );
 	$errors = array();
 	if ( ! empty( $out['seed']['error'] ) ) {
 		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'insightweb' );
 	}
 	$failed = '';
 	try {
-		$out['roles'] = aw_si_sync_roles();
+		$out['roles'] = insightweb_si_sync_roles();
 	} catch ( Throwable $e ) {
 		$failed       = $e->getMessage();
 		$out['roles'] = array();
 	}
 	try {
-		$out['compute'] = aw_si_compute();
+		$out['compute'] = insightweb_si_compute();
 	} catch ( Throwable $e ) {
 		$errors[] = __( 'Priorities could not be worked out: ', 'insightweb' ) . $e->getMessage();
 	}
 	try {
-		$out['topics'] = aw_si_sync_topics(); // After the calculation: it reads the page Google shows most.
+		$out['topics'] = insightweb_si_sync_topics(); // After the calculation: it reads the page Google shows most.
 	} catch ( Throwable $e ) {
 		$errors[] = __( 'Topics could not be updated: ', 'insightweb' ) . $e->getMessage();
 	}
@@ -62,13 +62,13 @@ function aw_si_daily( bool $by_hand = false ): array {
 		$info['prio'][ $p ] = (int) ( $out['compute'][ $p ] ?? 0 );
 	}
 	if ( '' !== $failed ) {
-		aw_si_run_fail( 'roles', $failed ); // the priorities above still ran, on yesterday's roles
+		insightweb_si_run_fail( 'roles', $failed ); // the priorities above still ran, on yesterday's roles
 	} else {
-		aw_si_run_ok( 'roles', $info );
+		insightweb_si_run_ok( 'roles', $info );
 	}
 	return $out;
 }
-add_action( AW_SI_CRON_DAILY, fn() => aw_si_daily() );
+add_action( AW_SI_CRON_DAILY, fn() => insightweb_si_daily() );
 
 /**
  * Execute daily telemetry refresh: Search Console sync and metric compute.
@@ -77,7 +77,7 @@ function insightweb_daily_telemetry_refresh(): array {
 	if ( get_option( 'aw_si_off' ) ) {
 		return array( 'off' => true );
 	}
-	$res = aw_si_daily();
+	$res = insightweb_si_daily();
 	if ( function_exists( 'insightweb_dash_request' ) ) {
 		insightweb_dash_request();
 	}
@@ -86,23 +86,23 @@ function insightweb_daily_telemetry_refresh(): array {
 add_action( INSIGHTWEB_CRON_TELEMETRY, 'insightweb_daily_telemetry_refresh' );
 
 /** The nightly rollup, with its result in the run log. */
-function aw_si_rollup_cron(): void {
-	if ( ! aw_si_ready() ) {
+function insightweb_si_rollup_cron(): void {
+	if ( ! insightweb_si_ready() ) {
 		return;
 	}
-	aw_si_run_start( 'rollup' );
+	insightweb_si_run_start( 'rollup' );
 	try {
-		$result = aw_si_rollup();
+		$result = insightweb_si_rollup();
 		if ( ! empty( $result['error'] ) ) {
-			aw_si_run_fail( 'rollup', $result['error'] );
+			insightweb_si_run_fail( 'rollup', $result['error'] );
 		} else {
-			aw_si_run_ok( 'rollup', $result );
+			insightweb_si_run_ok( 'rollup', $result );
 		}
 	} catch ( Throwable $e ) {
-		aw_si_run_fail( 'rollup', $e->getMessage() );
+		insightweb_si_run_fail( 'rollup', $e->getMessage() );
 	}
 }
-add_action( AW_SI_CRON_ROLLUP, 'aw_si_rollup_cron' );
+add_action( AW_SI_CRON_ROLLUP, 'insightweb_si_rollup_cron' );
 
 add_action(
 	'init',

@@ -37,7 +37,7 @@ const AW_WORKER_BACKOFF_STEPS = array( 60, 300, 900, 3600 );
  * @param int    $http_code HTTP status or error code.
  * @return array Updated backoff record.
  */
-function aw_worker_retry_backoff( $worker_id, $http_code = 0 ) {
+function sourceweb_worker_retry_backoff( $worker_id, $http_code = 0 ) {
 	$key   = 'aw_w_backoff_' . substr( md5( (string) $worker_id ), 0, 16 );
 	$state = get_transient( $key );
 	if ( ! is_array( $state ) ) {
@@ -65,7 +65,7 @@ function aw_worker_retry_backoff( $worker_id, $http_code = 0 ) {
  * @param int|null $now       Current timestamp (or null for time()).
  * @return bool
  */
-function aw_worker_is_in_backoff( $worker_id, $now = null ) {
+function sourceweb_worker_is_in_backoff( $worker_id, $now = null ) {
 	$key   = 'aw_w_backoff_' . substr( md5( (string) $worker_id ), 0, 16 );
 	$state = get_transient( $key );
 	if ( ! is_array( $state ) || empty( $state['until'] ) ) {
@@ -81,7 +81,7 @@ function aw_worker_is_in_backoff( $worker_id, $now = null ) {
  * @param string $worker_id Worker identifier.
  * @return bool
  */
-function aw_worker_clear_backoff( $worker_id ) {
+function sourceweb_worker_clear_backoff( $worker_id ) {
 	$key = 'aw_w_backoff_' . substr( md5( (string) $worker_id ), 0, 16 );
 	return delete_transient( $key );
 }
@@ -95,7 +95,7 @@ function aw_worker_clear_backoff( $worker_id ) {
  * @param int    $max   Largest value of the field.
  * @return bool
  */
-function aw_tick_field_matches( $field, $value, $min, $max ) {
+function sourceweb_tick_field_matches( $field, $value, $min, $max ) {
 	foreach ( explode( ',', $field ) as $part ) {
 		$step = 1;
 		if ( false !== strpos( $part, '/' ) ) {
@@ -124,16 +124,16 @@ function aw_tick_field_matches( $field, $value, $min, $max ) {
  * @param int    $ts   Unix time (any second of the minute).
  * @return bool
  */
-function aw_tick_cron_matches( $cron, $ts ) {
+function sourceweb_tick_cron_matches( $cron, $ts ) {
 	$f = preg_split( '/\s+/', trim( $cron ) );
 	if ( 5 !== count( $f ) ) {
 		return false;
 	}
 	$dow = (int) gmdate( 'w', $ts );
-	$dom = aw_tick_field_matches( $f[2], (int) gmdate( 'j', $ts ), 1, 31 );
-	$wd  = aw_tick_field_matches( $f[4], $dow, 0, 7 ) || ( 0 === $dow && aw_tick_field_matches( $f[4], 7, 0, 7 ) );
+	$dom = sourceweb_tick_field_matches( $f[2], (int) gmdate( 'j', $ts ), 1, 31 );
+	$wd  = sourceweb_tick_field_matches( $f[4], $dow, 0, 7 ) || ( 0 === $dow && sourceweb_tick_field_matches( $f[4], 7, 0, 7 ) );
 	$day = ( '*' !== $f[2] && '*' !== $f[4] ) ? ( $dom || $wd ) : ( $dom && $wd );
-	return $day && aw_tick_field_matches( $f[0], (int) gmdate( 'i', $ts ), 0, 59 ) && aw_tick_field_matches( $f[1], (int) gmdate( 'G', $ts ), 0, 23 ) && aw_tick_field_matches( $f[3], (int) gmdate( 'n', $ts ), 1, 12 );
+	return $day && sourceweb_tick_field_matches( $f[0], (int) gmdate( 'i', $ts ), 0, 59 ) && sourceweb_tick_field_matches( $f[1], (int) gmdate( 'G', $ts ), 0, 23 ) && sourceweb_tick_field_matches( $f[3], (int) gmdate( 'n', $ts ), 1, 12 );
 }
 
 /**
@@ -144,11 +144,11 @@ function aw_tick_cron_matches( $cron, $ts ) {
  * @param int    $now   Unix time.
  * @return int
  */
-function aw_tick_last_slot( $cron, $after, $now ) {
+function sourceweb_tick_last_slot( $cron, $after, $now ) {
 	$now   -= $now % 60;
 	$after  = max( $after - $after % 60, $now - AW_TICK_LOOKBACK_MIN * 60 );
 	for ( $t = $now; $t > $after; $t -= 60 ) {
-		if ( aw_tick_cron_matches( $cron, $t ) ) {
+		if ( sourceweb_tick_cron_matches( $cron, $t ) ) {
 			return $t;
 		}
 	}
@@ -162,7 +162,7 @@ function aw_tick_last_slot( $cron, $after, $now ) {
  * @param callable|null $dispatch fn( $file, $inputs ) => true|WP_Error (default kits_dispatch_workflow).
  * @return string[]
  */
-function aw_workers_tick( $now, $dispatch = null ) {
+function sourceweb_workers_tick( $now, $dispatch = null ) {
 	$dispatch = $dispatch ?? 'kits_dispatch_workflow';
 	$state    = (array) get_option( 'aw_workers_tick', array() ); // "file|cron" => last slot started; "_last" => last tick
 	$last     = (int) ( $state['_last'] ?? 0 );
@@ -171,7 +171,7 @@ function aw_workers_tick( $now, $dispatch = null ) {
 		if ( in_array( $file, AW_TICK_SKIP, true ) ) {
 			continue;
 		}
-		if ( aw_worker_is_in_backoff( $file, $now ) ) {
+		if ( sourceweb_worker_is_in_backoff( $file, $now ) ) {
 			$lines[] = sprintf( '%s %s: skipped (worker is in retry backoff window)', gmdate( 'Y-m-d H:i', $now ), $file );
 			continue;
 		}
@@ -180,17 +180,17 @@ function aw_workers_tick( $now, $dispatch = null ) {
 			// Slots since this cron's last start, else since the last tick; the very first tick looks back 20 minutes only,
 			// so switching over does not start every workflow at once.
 			$after = (int) ( $state[ $key ] ?? ( $last ? $last : $now - 20 * 60 ) );
-			$slot  = aw_tick_last_slot( $cron, $after, $now );
+			$slot  = sourceweb_tick_last_slot( $cron, $after, $now );
 			if ( ! $slot ) {
 				continue;
 			}
 			$res = call_user_func( $dispatch, $file, array( 'scheduled_cron' => $cron ) );
 			if ( true === $res ) {
-				aw_worker_clear_backoff( $file );
+				sourceweb_worker_clear_backoff( $file );
 				$state[ $key ] = $slot;
 			} else {
 				$code = is_wp_error( $res ) ? (int) $res->get_error_data() : 500;
-				aw_worker_retry_backoff( $file, $code );
+				sourceweb_worker_retry_backoff( $file, $code );
 				$state[ $key ] = $slot - 60; // refused: the same slot is tried again after backoff expires
 			}
 			$lines[] = sprintf( '%s %s (%s, slot %s UTC): %s', gmdate( 'Y-m-d H:i', $now ), $file, $cron, gmdate( 'H:i', $slot ), true === $res ? 'started' : 'NOT started: ' . ( is_wp_error( $res ) ? $res->get_error_message() : 'unknown' ) );
@@ -228,7 +228,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				return;
 			}
 			$saved = get_option( 'aw_workers_tick', array() );
-			$lines = aw_workers_tick( $now, $dry ? fn() => true : null );
+			$lines = sourceweb_workers_tick( $now, $dry ? fn() => true : null );
 			if ( $dry ) {
 				update_option( 'aw_workers_tick', $saved, false ); // a dry run moves nothing on
 				$lines = array_map( fn( $l ) => str_replace( ': started', ': would start', $l ), $lines );

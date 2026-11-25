@@ -3,9 +3,9 @@
  * SourceWeb's report routes on the Kits shell (12 Nov 2026), under sourceweb/v1: read-only lists of what the workers
  * and the screens logged. Each reads the rows today's tab reads. Administrators only (manage_options):
  *
- *   GET  rejected    items the relevance check refused (aw_relevance_rejected_rows())
- *   GET  relay-log   requests the workers made through the site, the last 200 (aw_relay_log_rows())
- *   GET  changes     the Change log: who changed what and when (aw_sourcing_change_rows())
+ *   GET  rejected    items the relevance check refused (sourceweb_relevance_rejected_rows())
+ *   GET  relay-log   requests the workers made through the site, the last 200 (sourceweb_relay_log_rows())
+ *   GET  changes     the Change log: who changed what and when (sourceweb_sourcing_change_rows())
  *
  * Each takes view, search, orderby, order and page.
  *
@@ -43,7 +43,7 @@ add_action(
 				$route,
 				array(
 					'methods'             => 'GET',
-					'permission_callback' => sourceweb_rest_can( AW_SRC_CAP ),
+					'permission_callback' => sourceweb_rest_can( SOURCEWEB_SRC_CAP ),
 					'callback'            => $callback,
 					'args'                => $list,
 				)
@@ -58,7 +58,7 @@ add_action(
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_rejected( WP_REST_Request $request ) {
-	$rows  = aw_relevance_rejected_rows();
+	$rows  = sourceweb_relevance_rejected_rows();
 	$views = array( 'allowed' => array( 'From an allowed publisher', fn( $r ) => '' !== $r['problem'] ) );
 	foreach ( array_unique( array_filter( array_column( $rows, 'type' ) ) ) as $t ) {
 		$views[ 'type-' . sanitize_key( $t ) ] = array( $t, fn( $r ) => $r['type'] === $t );
@@ -91,7 +91,7 @@ function sourceweb_rest_rejected( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_relay_log( WP_REST_Request $request ) {
-	$rows  = aw_relay_log_rows();
+	$rows  = sourceweb_relay_log_rows();
 	$views = array( 'failed' => array( 'Failed', fn( $r ) => ! $r['ok'] ) );
 	foreach ( array_unique( array_filter( array_column( $rows, 'host' ) ) ) as $h ) {
 		$views[ 'host-' . sanitize_key( $h ) ] = array( $h, fn( $r ) => $r['host'] === $h );
@@ -126,7 +126,7 @@ function sourceweb_rest_relay_log( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_changes( WP_REST_Request $request ) {
-	$rows  = aw_sourcing_change_rows();
+	$rows  = sourceweb_sourcing_change_rows();
 	$views = array();
 	foreach ( array_unique( array_filter( array_column( $rows, 'tab' ) ) ) as $t ) {
 		$views[ 'tab-' . sanitize_title( $t ) ] = array( $t, fn( $r ) => $r['tab'] === $t );

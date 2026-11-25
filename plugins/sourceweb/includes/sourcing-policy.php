@@ -1,7 +1,7 @@
 <?php
 /**
  * Sourcing policy managed in WP Admin (Sourcing): sources (publishers) and relevance keywords. Moved from Kits Core
- * (24 Oct 2026); the sourced post types, aw_host(), aw_publishers() and the option constants stay there.
+ * (24 Oct 2026); the sourced post types, sourceweb_host(), sourceweb_publishers() and the option constants stay there.
  *
  * - Publishers: every host the workers send is recorded automatically. Each is Allowed, Neutral or Blocked.
  *   Blocked hosts are refused by the ingest endpoint. With "Only allowed publishers from aggregator feeds" on
@@ -24,12 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $feed Worker feed id.
  * @return bool
  */
-function aw_is_aggregator_feed( $feed ) {
+function sourceweb_is_aggregator_feed( $feed ) {
 	return (bool) preg_match( '/^(gnews|applenews|agg)-/', (string) $feed );
 }
 
 /** A publisher's status in words with a core dashicon (no custom CSS). */
-function aw_publisher_status_html( $st ) {
+function sourceweb_publisher_status_html( $st ) {
 	$map = array(
 		'allow'   => array( 'yes-alt', 'Allowed' ),
 		'neutral' => array( 'minus', 'Neutral' ),
@@ -49,12 +49,12 @@ function aw_publisher_status_html( $st ) {
  * @param mixed  $old  Value before (null: not given; for an add, '' or an empty list).
  * @param mixed  $new  Value after (null: not given; for a delete, '' or an empty list).
  */
-function aw_src_log( $tab, $what, $old = null, $new = null ) {
+function sourceweb_src_log( $tab, $what, $old = null, $new = null ) {
 	if ( '' === trim( $what ) ) {
 		return;
 	}
 	$log = (array) get_option( 'kits_sourcing_log', array() );
-	$log = aw_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ), $old, $new );
+	$log = sourceweb_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ), $old, $new );
 	update_option( 'kits_sourcing_log', $log, false );
 }
 
@@ -63,7 +63,7 @@ function aw_src_log( $tab, $what, $old = null, $new = null ) {
  *
  * @param array[] $entries Entries, in the order they happened.
  */
-function aw_src_log_many( array $entries ) {
+function sourceweb_src_log_many( array $entries ) {
 	$entries = array_filter( $entries, fn( $e ) => '' !== trim( (string) ( $e[1] ?? '' ) ) );
 	if ( ! $entries ) {
 		return;
@@ -71,13 +71,13 @@ function aw_src_log_many( array $entries ) {
 	$log  = (array) get_option( 'kits_sourcing_log', array() );
 	$user = wp_get_current_user()->display_name;
 	foreach ( $entries as $e ) {
-		$log = aw_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => $user, 'tab' => (string) $e[0], 'what' => (string) $e[1] ), $e[2] ?? null, $e[3] ?? null );
+		$log = sourceweb_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => $user, 'tab' => (string) $e[0], 'what' => (string) $e[1] ), $e[2] ?? null, $e[3] ?? null );
 	}
 	update_option( 'kits_sourcing_log', $log, false );
 }
 
 /** What changed between two lists, in words ("added: a, b; removed: c"). */
-function aw_src_diff( $label, $old, $new ) {
+function sourceweb_src_diff( $label, $old, $new ) {
 	$add = array_diff( (array) $new, (array) $old );
 	$del = array_diff( (array) $old, (array) $new );
 	$out = array();
@@ -95,7 +95,7 @@ function aw_src_diff( $label, $old, $new ) {
  */
 if ( ! function_exists( 'kits_sourcing_log' ) ) {
 	/**
-	 * Older name of aw_src_log().
+	 * Older name of sourceweb_src_log().
 	 *
 	 * @param string $tab  Tab.
 	 * @param string $what What changed, in words.
@@ -103,35 +103,35 @@ if ( ! function_exists( 'kits_sourcing_log' ) ) {
 	 * @param mixed  $new  Value after.
 	 */
 	function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
-		aw_src_log( $tab, $what, $old, $new );
+		sourceweb_src_log( $tab, $what, $old, $new );
 	}
 }
 if ( ! function_exists( 'kits_sourcing_log_many' ) ) {
 	/**
-	 * Older name of aw_src_log_many().
+	 * Older name of sourceweb_src_log_many().
 	 *
 	 * @param array[] $entries Entries.
 	 */
 	function kits_sourcing_log_many( array $entries ) {
-		aw_src_log_many( $entries );
+		sourceweb_src_log_many( $entries );
 	}
 }
 if ( ! function_exists( 'kits_sourcing_diff' ) ) {
 	/**
-	 * Older name of aw_src_diff().
+	 * Older name of sourceweb_src_diff().
 	 *
 	 * @param string $label The list's name.
 	 * @param array  $old   Before.
 	 * @param array  $new   After.
 	 */
 	function kits_sourcing_diff( $label, $old, $new ) {
-		return aw_src_diff( $label, $old, $new );
+		return sourceweb_src_diff( $label, $old, $new );
 	}
 }
 
 /** Relevance settings. */
-function aw_relevance() {
-	$r = get_option( AW_REL_OPTION );
+function sourceweb_relevance() {
+	$r = get_option( SOURCEWEB_REL_OPTION );
 	return is_array( $r ) ? $r : array( 'enabled' => false, 'gnews_allow_only' => false, 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array() );
 }
 
@@ -139,7 +139,7 @@ function aw_relevance() {
 add_action(
 	'init',
 	function () {
-		if ( false !== get_option( AW_REL_OPTION ) ) {
+		if ( false !== get_option( SOURCEWEB_REL_OPTION ) ) {
 			return;
 		}
 		$now  = current_time( 'Y-m-d' );
@@ -154,7 +154,7 @@ add_action(
 		global $wpdb;
 		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('" . implode( "','", array_map( 'esc_sql', kits_sourced_types() ) ) . "')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the post types are the plugin's own list, escaped
 		foreach ( $rows as $r ) {
-			$h = aw_host( $r->url );
+			$h = sourceweb_host( $r->url );
 			if ( ! $h ) {
 				continue;
 			}
@@ -165,9 +165,9 @@ add_action(
 			$rec['first']   = min( (string) $rec['first'], substr( $r->d, 0, 10 ) );
 			$pubs[ $h ]     = $rec;
 		}
-		update_option( AW_PUB_OPTION, $pubs, false );
+		update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 		update_option(
-			AW_REL_OPTION,
+			SOURCEWEB_REL_OPTION,
 			array(
 				'enabled'          => false,
 				'gnews_allow_only' => false,
@@ -188,13 +188,13 @@ add_action(
  * @param string $term Term.
  * @return bool
  */
-function aw_has_term( $hay, $term ) {
+function sourceweb_has_term( $hay, $term ) {
 	$t = mb_strtolower( trim( $term ) );
 	if ( '' === $t ) {
 		return false;
 	}
 	if ( str_ends_with( $t, '*' ) ) { // a prefix ("steriliz*"): the shared matcher, as in the workers (policy.has_term)
-		return aw_match_term( $hay, $t );
+		return sourceweb_match_term( $hay, $t );
 	}
 	if ( preg_match( "/^[a-z0-9 \\-'’]+$/u", $t ) ) { // Latin terms: whole words only, plural allowed ("hen" no longer matches "when")
 		return (bool) preg_match( '/(?<![a-z0-9])' . preg_quote( $t, '/' ) . '(?:s|es)?(?![a-z0-9])/u', $hay );
@@ -208,29 +208,29 @@ function aw_has_term( $hay, $term ) {
  * @param string $text Title and summary.
  * @return array{0: bool, 1: string} keep?, reason.
  */
-function aw_relevance_verdict( $text ) {
-	$r   = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists() : aw_relevance(); // phase 2: the keyword table
+function sourceweb_relevance_verdict( $text ) {
+	$r   = function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ? sourceweb_sourcing_kw_lists() : sourceweb_relevance(); // phase 2: the keyword table
 	$hay = mb_strtolower( $text );
 	foreach ( (array) $r['exclude'] as $t ) {
-		if ( aw_has_term( $hay, $t ) ) {
+		if ( sourceweb_has_term( $hay, $t ) ) {
 			return array( false, 'exclude term: ' . $t );
 		}
 	}
 	foreach ( (array) $r['strong'] as $t ) {
-		if ( aw_has_term( $hay, $t ) ) {
+		if ( sourceweb_has_term( $hay, $t ) ) {
 			return array( true, 'strong term: ' . $t );
 		}
 	}
 	$a = null;
 	foreach ( (array) $r['animal'] as $t ) {
-		if ( aw_has_term( $hay, $t ) ) {
+		if ( sourceweb_has_term( $hay, $t ) ) {
 			$a = $t;
 			break;
 		}
 	}
 	if ( $a ) {
 		foreach ( (array) $r['context'] as $t ) {
-			if ( aw_has_term( $hay, $t ) ) {
+			if ( sourceweb_has_term( $hay, $t ) ) {
 				return array( true, "animal term: {$a} + context term: {$t}" );
 			}
 		}
@@ -241,7 +241,7 @@ function aw_relevance_verdict( $text ) {
 
 /**
  * Record a host and decide whether an incoming item may be stored.
- * Called by aw_ingest() before anything is created.
+ * Called by sourceweb_ingest() before anything is created.
  *
  * @param string $url   Source URL.
  * @param string $name  Publisher name.
@@ -249,12 +249,12 @@ function aw_relevance_verdict( $text ) {
  * @param string $text  Title + summary.
  * @return string '' to accept, or 'blocked' / 'filtered'.
  */
-function aw_sourcing_gate( $url, $name, $feed, $text ) {
-	$host = aw_host( $url );
+function sourceweb_sourcing_gate( $url, $name, $feed, $text ) {
+	$host = sourceweb_host( $url );
 	if ( ! $host ) {
 		return '';
 	}
-	$pubs = aw_publishers();
+	$pubs = sourceweb_publishers();
 	$rec  = $pubs[ $host ] ?? array( 'status' => 'neutral', 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' );
 	if ( 'relay' === ( $rec['kind'] ?? '' ) ) { // a relay-only site sends its first item: from now on a publisher (relay kept)
 		unset( $rec['kind'] );
@@ -264,24 +264,24 @@ function aw_sourcing_gate( $url, $name, $feed, $text ) {
 	$rec['last']  = current_time( 'Y-m-d' );
 	$rec['count'] = (int) $rec['count'] + 1;
 	$pubs[ $host ] = $rec;
-	update_option( AW_PUB_OPTION, $pubs, false );
+	update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
 
-	$rel = aw_relevance();
+	$rel = sourceweb_relevance();
 	if ( 'block' === $rec['status'] ) {
 		return 'blocked';
 	}
-	if ( ! empty( $rel['gnews_allow_only'] ) && aw_is_aggregator_feed( $feed ) && 'allow' !== $rec['status'] ) {
+	if ( ! empty( $rel['gnews_allow_only'] ) && sourceweb_is_aggregator_feed( $feed ) && 'allow' !== $rec['status'] ) {
 		return 'blocked';
 	}
-	if ( ! empty( $rel['enabled'] ) && 'allow' !== $rec['status'] && ! aw_relevance_verdict( $text )[0] ) {
+	if ( ! empty( $rel['enabled'] ) && 'allow' !== $rec['status'] && ! sourceweb_relevance_verdict( $text )[0] ) {
 		return 'filtered';
 	}
 	// Exclude keywords always apply, filter on or off and whatever the publisher, as in the workers (owner's decision 14,
 	// 25 Oct 2026; policy.py verdict).
-	$excl = function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ? aw_sourcing_kw_lists()['exclude'] : (array) ( $rel['exclude'] ?? array() );
+	$excl = function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ? sourceweb_sourcing_kw_lists()['exclude'] : (array) ( $rel['exclude'] ?? array() );
 	$hay  = mb_strtolower( $text );
 	foreach ( $excl as $t ) {
-		if ( aw_has_term( $hay, (string) $t ) ) {
+		if ( sourceweb_has_term( $hay, (string) $t ) ) {
 			return 'filtered';
 		}
 	}
@@ -299,7 +299,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
-				'callback'            => 'aw_sourcing_policy_payload',
+				'callback'            => 'sourceweb_sourcing_policy_payload',
 			)
 		);
 	}
@@ -307,29 +307,29 @@ add_action(
 
 /**
  * The sourcing policy the workers read. From phase 4 (owner, 25 Oct 2026) the v1 keys are not sent: relevance holds
- * only its switch and config only the v2 blocks (retire-model.php aw_retire_policy()). The v1 code stays, so a
+ * only its switch and config only the v2 blocks (retire-model.php sourceweb_retire_policy()). The v1 code stays, so a
  * rollback to phase 3 sends them again.
  *
  * @return array
  */
-function aw_sourcing_policy_payload() {
-	$pubs = aw_publishers();
-	$rel  = aw_relevance();
+function sourceweb_sourcing_policy_payload() {
+	$pubs = sourceweb_publishers();
+	$rel  = sourceweb_relevance();
 	$by   = fn( $s ) => array_values( array_keys( array_filter( $pubs, fn( $p ) => ( $p['status'] ?? '' ) === $s ) ) );
 	$data = array(
 		'publishers' => array( 'blocked' => $by( 'block' ), 'allowed' => $by( 'allow' ), 'gnews_allow_only' => ! empty( $rel['gnews_allow_only'] ) ),
 		'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'] ?? array(), 'animal' => $rel['animal'] ?? array(), 'context' => $rel['context'] ?? array(), 'exclude' => $rel['exclude'] ?? array() ),
 	);
 	$data = apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here
-	if ( aw_sourcing_phase() < 4 || ! function_exists( 'aw_retire_policy' ) ) {
+	if ( sourceweb_sourcing_phase() < 4 || ! function_exists( 'sourceweb_retire_policy' ) ) {
 		return $data;
 	}
 	// Phase 4: the keyword table always goes (also with "Workers use these lists" off), so the workers have the words
 	// the relevance switch needs; without the table nothing is stripped (the archived v1 lists still go).
-	if ( ! isset( $data['keywords'] ) && function_exists( 'aw_sourcing_kw_on' ) && aw_sourcing_kw_on() ) {
-		$data['keywords'] = aw_kw_payload( aw_sourcing_kw_worker_rows(), (array) ( aw_sources_config()['sources'] ?? array() ) );
+	if ( ! isset( $data['keywords'] ) && function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) {
+		$data['keywords'] = sourceweb_kw_payload( sourceweb_sourcing_kw_worker_rows(), (array) ( sourceweb_sources_config()['sources'] ?? array() ) );
 	}
-	return aw_retire_policy( $data );
+	return sourceweb_retire_policy( $data );
 }
 
 /* ---------- WP Admin: the Sourcing page (admin-menu.php); its screens are the Kits shell's (sourceweb-ui.php) ---------- */
@@ -339,21 +339,21 @@ function aw_sourcing_policy_payload() {
  * and relay-only sites), press_add / press_remove (before phase 2), relay_on / relay_off (from phase 1), delete (a
  * source with nothing attached). Logged as each was before. The caller writes the records.
  *
- * @param array  $pubs   aw_publishers(), read just before.
+ * @param array  $pubs   sourceweb_publishers(), read just before.
  * @param string $status The action.
  * @param array  $hosts  Hosts.
  * @return array [ records, press sites changed ].
  */
-function aw_sourcing_sources_apply( array $pubs, $status, array $hosts ) {
+function sourceweb_sourcing_sources_apply( array $pubs, $status, array $hosts ) {
 	$press = false;
 	if ( in_array( $status, array( 'press_add', 'press_remove' ), true ) ) { // Search here for coverage / Stop searching here
-		$hosts = array_values( array_filter( array_map( 'aw_sourcing_norm_host', $hosts ) ) );
-		$press = aw_sourcing_press_change( 'press_add' === $status ? $hosts : array(), 'press_remove' === $status ? $hosts : array() );
-	} elseif ( in_array( $status, array( 'relay_on', 'relay_off' ), true ) && aw_sourcing_phase() >= 1 ) { // logged per host
-		$pubs = aw_relay_switch( $pubs, $hosts, 'relay_on' === $status );
+		$hosts = array_values( array_filter( array_map( 'sourceweb_sourcing_norm_host', $hosts ) ) );
+		$press = sourceweb_sourcing_press_change( 'press_add' === $status ? $hosts : array(), 'press_remove' === $status ? $hosts : array() );
+	} elseif ( in_array( $status, array( 'relay_on', 'relay_off' ), true ) && sourceweb_sourcing_phase() >= 1 ) { // logged per host
+		$pubs = sourceweb_relay_switch( $pubs, $hosts, 'relay_on' === $status );
 	} elseif ( 'delete' === $status ) {
 		foreach ( $hosts as $h ) {
-			$pubs = aw_sourcing_source_delete( $pubs, $h );
+			$pubs = sourceweb_sourcing_source_delete( $pubs, $h );
 		}
 	} elseif ( in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 		$was = array();
@@ -366,7 +366,7 @@ function aw_sourcing_sources_apply( array $pubs, $status, array $hosts ) {
 			}
 		}
 		if ( $was ) {
-			aw_src_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
+			sourceweb_src_log( 'publishers', implode( ', ', array_keys( $was ) ) . ' → ' . $status, $was, $status );
 		}
 	}
 	return array( $pubs, $press );
@@ -375,15 +375,15 @@ function aw_sourcing_sources_apply( array $pubs, $status, array $hosts ) {
 /**
  * Short names for card chips (host => name), publishers only. Logged per host. The caller writes the records.
  *
- * @param array $pubs   aw_publishers().
+ * @param array $pubs   sourceweb_publishers().
  * @param array $shorts Host => short name (sanitised).
  * @return array The records.
  */
-function aw_sourcing_shorts_apply( array $pubs, array $shorts ) {
+function sourceweb_sourcing_shorts_apply( array $pubs, array $shorts ) {
 	foreach ( $shorts as $h => $v ) {
 		$v = mb_substr( (string) $v, 0, 24 );
 		if ( isset( $pubs[ $h ] ) && empty( $pubs[ $h ]['kind'] ) && (string) ( $pubs[ $h ]['short'] ?? '' ) !== $v ) {
-			aw_src_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
+			sourceweb_src_log( 'publishers', $h . ' short name → ' . ( '' === $v ? '(none)' : $v ), (string) ( $pubs[ $h ]['short'] ?? '' ), $v );
 			$pubs[ $h ]['short'] = $v;
 		}
 	}
@@ -397,7 +397,7 @@ function aw_sourcing_shorts_apply( array $pubs, array $shorts ) {
 add_action(
 	'admin_post_aw_sourcing',
 	function () {
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_sourcing' ) ) {
+		if ( ! current_user_can( SOURCEWEB_SRC_CAP ) || ! check_admin_referer( 'aw_sourcing' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$tab = sanitize_key( $_POST['tab'] ?? '' );
@@ -416,17 +416,17 @@ add_action(
 	'admin_post_aw_block_publisher',
 	function () {
 		$host = sanitize_text_field( wp_unslash( $_GET['host'] ?? '' ) );
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_block_' . $host ) ) {
+		if ( ! current_user_can( SOURCEWEB_SRC_CAP ) || ! check_admin_referer( 'aw_block_' . $host ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
-		$pubs            = aw_publishers();
+		$pubs            = sourceweb_publishers();
 		$prev            = $pubs[ $host ] ?? null;
 		$pubs[ $host ]   = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $host ] ?? array(), array( 'status' => 'block' ) );
 		if ( 'relay' === ( $pubs[ $host ]['kind'] ?? '' ) ) { // a relay-only site given a status is a publisher
 			unset( $pubs[ $host ]['kind'] );
 		}
-		update_option( AW_PUB_OPTION, $pubs, false );
-		aw_src_log( 'publishers', $host . ' → block (from the item list)', null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), 'block' );
+		update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
+		sourceweb_src_log( 'publishers', $host . ' → block (from the item list)', null === $prev ? '' : (string) ( $prev['status'] ?? 'neutral' ), 'block' );
 		wp_safe_redirect( add_query_arg( 'aw_blocked', rawurlencode( $host ), wp_get_referer() ? wp_get_referer() : admin_url() ) );
 		exit;
 	}
@@ -450,11 +450,11 @@ add_action(
 					if ( 'aw_publisher' !== $col ) {
 						return;
 					}
-					$host = aw_host( get_post_meta( $id, 'aw_source_url', true ) );
+					$host = sourceweb_host( get_post_meta( $id, 'aw_source_url', true ) );
 					if ( ! $host ) {
 						return;
 					}
-					echo esc_html( $host ) . '<br>' . aw_publisher_status_html( (string) ( aw_publishers()[ $host ]['status'] ?? 'neutral' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
+					echo esc_html( $host ) . '<br>' . sourceweb_publisher_status_html( (string) ( sourceweb_publishers()[ $host ]['status'] ?? 'neutral' ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped in the helper
 				},
 				10,
 				2
@@ -466,11 +466,11 @@ add_action(
 add_filter(
 	'post_row_actions',
 	function ( $actions, $post ) {
-		if ( ! in_array( $post->post_type, kits_sourced_types(), true ) || ! current_user_can( AW_SRC_CAP ) ) {
+		if ( ! in_array( $post->post_type, kits_sourced_types(), true ) || ! current_user_can( SOURCEWEB_SRC_CAP ) ) {
 			return $actions;
 		}
-		$host = aw_host( get_post_meta( $post->ID, 'aw_source_url', true ) );
-		if ( $host && 'block' !== ( aw_publishers()[ $host ]['status'] ?? '' ) ) {
+		$host = sourceweb_host( get_post_meta( $post->ID, 'aw_source_url', true ) );
+		if ( $host && 'block' !== ( sourceweb_publishers()[ $host ]['status'] ?? '' ) ) {
 			$url             = wp_nonce_url( add_query_arg( array( 'action' => 'aw_block_publisher', 'host' => $host ), admin_url( 'admin-post.php' ) ), 'aw_block_' . $host );
 			$actions['spam'] = '<a href="' . esc_url( $url ) . '">Block ' . esc_html( $host ) . '</a>'; // core colours the "spam" row action red (as for comments); posts have no spam action
 		}
@@ -497,8 +497,8 @@ add_action(
  *
  * @return array[] { at, user, tab, what, change }
  */
-function aw_sourcing_change_rows(): array {
-	$tabs = array_map( fn( $t ) => $t[0], aw_sourcing_tabs() );
+function sourceweb_sourcing_change_rows(): array {
+	$tabs = array_map( fn( $t ) => $t[0], sourceweb_sourcing_tabs() );
 	$old  = array(
 		'publishers'    => 'Sources',
 		'feeds'         => 'Sources (feeds)',
@@ -506,7 +506,7 @@ function aw_sourcing_change_rows(): array {
 		'opportunities' => 'Sources (Opportunity feeds)',
 		'relay'         => 'Sources (relay)',
 	);
-	if ( function_exists( 'aw_rules_live' ) && aw_rules_live() ) {
+	if ( function_exists( 'sourceweb_rules_live' ) && sourceweb_rules_live() ) {
 		$old += array(
 			'sections' => 'Rules (section rules)',
 			'summary'  => 'Rules (summary rules)',
@@ -522,15 +522,15 @@ function aw_sourcing_change_rows(): array {
 			'user'   => (string) ( $e['user'] ?? '' ),
 			'tab'    => (string) ( $old[ $e['tab'] ?? '' ] ?? ( $tabs[ $e['tab'] ?? '' ] ?? ( $e['tab'] ?? '' ) ) ),
 			'what'   => (string) ( $e['what'] ?? '' ),
-			'change' => $has ? aw_src_log_value( $e['old'] ?? '' ) . ' → ' . aw_src_log_value( $e['new'] ?? '' ) : '',
+			'change' => $has ? sourceweb_src_log_value( $e['old'] ?? '' ) . ' → ' . sourceweb_src_log_value( $e['new'] ?? '' ) : '',
 		);
 	}
 	return $rows;
 }
 
 /** The Sourcing page: each tab is a shell screen (sourceweb-ui.php). */
-function aw_sourcing_page() {
-	if ( ! current_user_can( AW_SRC_CAP ) ) {
+function sourceweb_sourcing_page() {
+	if ( ! current_user_can( SOURCEWEB_SRC_CAP ) ) {
 		return;
 	}
 	sourceweb_ui_page( sourceweb_ui_wanted() );
@@ -547,38 +547,38 @@ function aw_sourcing_page() {
  * @param string $tab   Tab that posts it ('' for any).
  * @return string The tab, or ''.
  */
-function aw_sourcing_settings_tab( $value, $tab = '' ) {
+function sourceweb_sourcing_settings_tab( $value, $tab = '' ) {
 	$t = is_array( $value ) ? sanitize_key( $value['_aw_tab'] ?? '' ) : '';
 	return ( '' === $tab || $t === $tab ) ? $t : '';
 }
 
 /** After a Sourcing form saved: one notice in place of core's "Settings saved." */
-function aw_sourcing_settings_saved() {
+function sourceweb_sourcing_settings_saved() {
 	add_settings_error( 'aw_sourcing', 'saved', 'Saved. The workers use this from their next run.', 'success' );
 }
 
 /** A textarea list (one per line) as a clean array. */
-function aw_sourcing_lines( $text ) {
+function sourceweb_sourcing_lines( $text ) {
 	return array_values( array_unique( array_filter( array_map( 'trim', explode( "\n", sanitize_textarea_field( (string) $text ) ) ) ) ) );
 }
 
 // Options.php checks the group's capability: the Sourcing screen's own.
 foreach ( array( 'aw_sourcing_switches', 'aw_sourcing_sources', 'aw_sourcing_summary', 'aw_sourcing_enrich' ) as $aw_group ) {
-	add_filter( 'option_page_capability_' . $aw_group, fn() => AW_SRC_CAP );
+	add_filter( 'option_page_capability_' . $aw_group, fn() => SOURCEWEB_SRC_CAP );
 }
 
-// Keywords: the two switches (option aw_relevance).
+// Keywords: the two switches (option sourceweb_relevance).
 add_action(
 	'admin_init',
-	fn() => register_setting( 'aw_sourcing_switches', AW_REL_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'aw_relevance_switches_sanitize', 'show_in_rest' => false ) )
+	fn() => register_setting( 'aw_sourcing_switches', SOURCEWEB_REL_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'sourceweb_relevance_switches_sanitize', 'show_in_rest' => false ) )
 );
 
-/** The two switches from the Keywords screen; any other save of aw_relevance passes through. */
-function aw_relevance_switches_sanitize( $value ) {
-	if ( ! aw_sourcing_settings_tab( $value, 'keywords' ) ) {
+/** The two switches from the Keywords screen; any other save of sourceweb_relevance passes through. */
+function sourceweb_relevance_switches_sanitize( $value ) {
+	if ( ! sourceweb_sourcing_settings_tab( $value, 'keywords' ) ) {
 		return $value;
 	}
-	$rel                     = aw_relevance();
+	$rel                     = sourceweb_relevance();
 	$old                     = $rel;
 	$rel['enabled']          = ! empty( $value['enabled'] );
 	$rel['gnews_allow_only'] = ! empty( $value['gnews_allow_only'] );
@@ -589,10 +589,10 @@ function aw_relevance_switches_sanitize( $value ) {
 	if ( ! empty( $old['gnews_allow_only'] ) !== $rel['gnews_allow_only'] ) {
 		$what[] = 'aggregators allowed-only ' . ( $rel['gnews_allow_only'] ? 'on' : 'off' );
 	}
-	aw_sourcing_settings_saved();
+	sourceweb_sourcing_settings_saved();
 	if ( ! $what ) {
-		return get_option( AW_REL_OPTION ); // Save with no change writes nothing
+		return get_option( SOURCEWEB_REL_OPTION ); // Save with no change writes nothing
 	}
-	aw_src_log( 'keywords', implode( ' · ', $what ) );
+	sourceweb_src_log( 'keywords', implode( ' · ', $what ) );
 	return $rel;
 }

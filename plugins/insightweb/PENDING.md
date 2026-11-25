@@ -13,7 +13,7 @@ The analytics, telemetry, and search metrics plugin owns:
 
 1. **Dashboard Tile & Telemetry Core**:
    - ✅ Verified dashboard tiles and SVG MiniCharts render safely when analytics tables are empty without fatal errors.
-   - ✅ Monthly rankings CSV export (`aw_si_snapshot_csv`) and markdown keyword map download (`snapshot.php`).
+   - ✅ Monthly rankings CSV export (`insightweb_si_snapshot_csv`) and markdown keyword map download (`snapshot.php`).
    - ✅ Kits settings transfer export integration (`insightweb_kits_export`).
 
 ---

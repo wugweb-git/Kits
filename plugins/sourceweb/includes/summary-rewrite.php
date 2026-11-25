@@ -35,14 +35,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-function aw_summary_rw_clean( $id ) {
+function sourceweb_summary_rw_clean( $id ) {
 	return trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $id, 'raw' ) ) ) );
 }
 
 /** The current word minimum of an item's section (0 when it has none). */
-function aw_summary_rw_min( $id ) {
-	$sec = aw_summary_section( $id );
-	return '' === $sec ? 0 : (int) ( aw_summary_rules()['sections'][ $sec ]['min_words'] ?? 0 );
+function sourceweb_summary_rw_min( $id ) {
+	$sec = sourceweb_summary_section( $id );
+	return '' === $sec ? 0 : (int) ( sourceweb_summary_rules()['sections'][ $sec ]['min_words'] ?? 0 );
 }
 
 /**
@@ -55,24 +55,24 @@ function aw_summary_rw_min( $id ) {
  * @param array  $m       Its aw_summary_rw meta.
  * @return bool
  */
-function aw_summary_rw_below_min( $id, $excerpt, array $m ) {
+function sourceweb_summary_rw_below_min( $id, $excerpt, array $m ) {
 	if ( ! in_array( $m['state'] ?? '', array( 'ok', 'done' ), true ) ) {
 		return false;
 	}
-	$min = aw_summary_rw_min( $id );
+	$min = sourceweb_summary_rw_min( $id );
 	if ( ! $min || (int) ( $m['min_words'] ?? 0 ) === $min ) {
 		return false;
 	}
-	return aw_summary_words( trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) $excerpt ) ) ) ) < $min;
+	return sourceweb_summary_words( trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( (string) $excerpt ) ) ) ) < $min;
 }
 
 /** Is this item's summary settled (a state recorded for exactly this text, and not below a raised minimum)? */
-function aw_summary_rw_settled( $id, $excerpt ) {
+function sourceweb_summary_rw_settled( $id, $excerpt ) {
 	$m = get_post_meta( $id, 'aw_summary_rw', true );
 	if ( ! is_array( $m ) || md5( (string) $excerpt ) !== ( $m['md5'] ?? '' ) ) {
 		return false;
 	}
-	if ( aw_summary_rw_below_min( $id, $excerpt, $m ) ) {
+	if ( sourceweb_summary_rw_below_min( $id, $excerpt, $m ) ) {
 		return false;
 	}
 	return in_array( $m['state'] ?? '', array( 'ok', 'done', 'short' ), true ) || ( 'failed' === ( $m['state'] ?? '' ) && (int) ( $m['tries'] ?? 0 ) >= 2 );
@@ -82,7 +82,7 @@ function aw_summary_rw_settled( $id, $excerpt ) {
 const AW_SUMMARY_RW_RECHECK_DAYS = 14;
 
 /** The word minimum a short item was judged by: stored since 25 Oct 2026, before that read from its reason. */
-function aw_summary_rw_short_min( array $m ) {
+function sourceweb_summary_rw_short_min( array $m ) {
 	if ( isset( $m['min_words'] ) ) {
 		return (int) $m['min_words'];
 	}
@@ -97,9 +97,9 @@ function aw_summary_rw_short_min( array $m ) {
  * @param int    $now     Timestamp.
  * @return string
  */
-function aw_summary_rw_short_due( array $m, $section, $now ) {
-	$min = (int) ( aw_summary_rules()['sections'][ $section ]['min_words'] ?? 0 );
-	if ( $min && aw_summary_rw_short_min( $m ) !== $min && (int) ( $m['retry_min'] ?? -1 ) !== $min ) {
+function sourceweb_summary_rw_short_due( array $m, $section, $now ) {
+	$min = (int) ( sourceweb_summary_rules()['sections'][ $section ]['min_words'] ?? 0 );
+	if ( $min && sourceweb_summary_rw_short_min( $m ) !== $min && (int) ( $m['retry_min'] ?? -1 ) !== $min ) {
 		return 'rules'; // the minimum changed since it was judged: one try per change
 	}
 	$last = strtotime( (string) ( $m['checked'] ?? $m['at'] ?? '' ) );
@@ -107,7 +107,7 @@ function aw_summary_rw_short_due( array $m, $section, $now ) {
 }
 
 /** GET ?short=1: the short items due another try, oldest first (the day they were judged or re-read). */
-function aw_summary_rw_short_list( $per ) {
+function sourceweb_summary_rw_short_list( $per ) {
 	global $wpdb;
 	$rows = $wpdb->get_results( "SELECT p.ID, p.post_type, p.post_title, p.post_excerpt, p.post_date, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_summary_rw' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post') AND m.meta_value LIKE '%short%'" ); // phpcs:ignore WordPress.DB
 	$now  = strtotime( current_time( 'mysql' ) ); // the meta's times are local, as current_time( 'mysql' )
@@ -118,12 +118,12 @@ function aw_summary_rw_short_list( $per ) {
 			continue;
 		}
 		$id  = (int) $r->ID;
-		$sec = aw_summary_section( $id );
+		$sec = sourceweb_summary_section( $id );
 		$url = (string) get_post_meta( $id, 'aw_source_url', true );
 		if ( '' === $sec || '' === $url ) {
 			continue;
 		}
-		$why = aw_summary_rw_short_due( $m, $sec, $now );
+		$why = sourceweb_summary_rw_short_due( $m, $sec, $now );
 		if ( '' === $why ) {
 			continue;
 		}
@@ -153,7 +153,7 @@ function aw_summary_rw_short_list( $per ) {
 	);
 }
 
-function aw_summary_rw_set( $id, $excerpt, $state, $extra = array() ) {
+function sourceweb_summary_rw_set( $id, $excerpt, $state, $extra = array() ) {
 	$old   = get_post_meta( $id, 'aw_summary_rw', true );
 	$tries = ( is_array( $old ) && md5( (string) $excerpt ) === ( $old['md5'] ?? '' ) ) ? (int) ( $old['tries'] ?? 0 ) : 0;
 	update_post_meta(
@@ -165,21 +165,21 @@ function aw_summary_rw_set( $id, $excerpt, $state, $extra = array() ) {
 				'md5'   => md5( (string) $excerpt ),
 				'at'    => current_time( 'mysql' ),
 				'tries' => 'failed' === $state ? $tries + 1 : $tries,
-				'min_words' => aw_summary_rw_min( $id ), // the minimum it was judged by: a raised one opens it again
+				'min_words' => sourceweb_summary_rw_min( $id ), // the minimum it was judged by: a raised one opens it again
 			),
 			$extra
 		)
 	);
 }
 
-function aw_summary_rw_list( WP_REST_Request $req ) {
+function sourceweb_summary_rw_list( WP_REST_Request $req ) {
 	global $wpdb;
 	if ( $req->get_param( 'progress' ) ) {
-		return aw_summary_rw_progress();
+		return sourceweb_summary_rw_progress();
 	}
 	$per  = max( 1, min( 100, (int) ( $req->get_param( 'per_page' ) ?: 100 ) ) );
 	if ( $req->get_param( 'short' ) ) {
-		return aw_summary_rw_short_list( $per );
+		return sourceweb_summary_rw_short_list( $per );
 	}
 	$skip = max( 0, (int) $req->get_param( 'skip' ) );
 	$only = array_map( 'intval', (array) $req->get_param( 'ids' ) );
@@ -193,10 +193,10 @@ function aw_summary_rw_list( WP_REST_Request $req ) {
 		foreach ( $chunk as $r ) {
 			++$at;
 			$id = (int) $r->ID;
-			if ( aw_summary_rw_settled( $id, $r->post_excerpt ) ) {
+			if ( sourceweb_summary_rw_settled( $id, $r->post_excerpt ) ) {
 				continue;
 			}
-			$sec = aw_summary_section( $id );
+			$sec = sourceweb_summary_section( $id );
 			if ( '' === $sec || '' === (string) get_post_meta( $id, 'aw_source_url', true ) ) {
 				continue; // our own content (templates, guides) has no source: never rewritten (20 Oct 2026: two letter templates got unrelated stories)
 			}
@@ -227,14 +227,14 @@ function aw_summary_rw_list( WP_REST_Request $req ) {
 	);
 }
 
-function aw_summary_rw_progress() {
+function sourceweb_summary_rw_progress() {
 	global $wpdb;
 	$rows  = $wpdb->get_results( "SELECT ID, post_type, post_excerpt FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_news','aw_legal','post')" ); // phpcs:ignore WordPress.DB
 	$count = array();
 	$list  = array();
 	foreach ( $rows as $r ) {
 		$id  = (int) $r->ID;
-		$sec = aw_summary_section( $id );
+		$sec = sourceweb_summary_section( $id );
 		if ( '' === $sec || '' === (string) get_post_meta( $id, 'aw_source_url', true ) ) {
 			continue; // own content: not counted, never rewritten
 		}
@@ -243,7 +243,7 @@ function aw_summary_rw_progress() {
 		if ( 'failed' === $st && (int) ( $m['tries'] ?? 0 ) < 2 ) {
 			$st = 'open';
 		}
-		if ( 'open' !== $st && aw_summary_rw_below_min( $id, $r->post_excerpt, $m ) ) {
+		if ( 'open' !== $st && sourceweb_summary_rw_below_min( $id, $r->post_excerpt, $m ) ) {
 			$st = 'below_min'; // settled before the minimum was raised: waiting for its rewrite
 		}
 		$count[ $sec ][ $st ] = ( $count[ $sec ][ $st ] ?? 0 ) + 1;
@@ -252,7 +252,7 @@ function aw_summary_rw_progress() {
 				'id'      => $id,
 				'section' => $sec,
 				'state'   => $st,
-				'words'   => aw_summary_words( aw_summary_rw_clean( $id ) ),
+				'words'   => sourceweb_summary_words( sourceweb_summary_rw_clean( $id ) ),
 				'reason'  => (string) ( $m['reason'] ?? '' ),
 			);
 		}
@@ -265,15 +265,15 @@ function aw_summary_rw_progress() {
 	);
 }
 
-function aw_summary_rw_post( WP_REST_Request $req ) {
+function sourceweb_summary_rw_post( WP_REST_Request $req ) {
 	global $wpdb;
 	$ok = (array) $req->get_param( 'ok' );
 	if ( $ok ) {
 		$n = 0;
 		foreach ( $ok as $id ) {
 			$id = (int) $id;
-			if ( 'publish' === get_post_status( $id ) && '' !== aw_summary_section( $id ) ) {
-				aw_summary_rw_set( $id, get_post_field( 'post_excerpt', $id, 'raw' ), 'ok' );
+			if ( 'publish' === get_post_status( $id ) && '' !== sourceweb_summary_section( $id ) ) {
+				sourceweb_summary_rw_set( $id, get_post_field( 'post_excerpt', $id, 'raw' ), 'ok' );
 				++$n;
 			}
 		}
@@ -281,7 +281,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 	}
 	$id = (int) $req->get_param( 'id' );
 	$p  = get_post( $id );
-	$sec = $p ? aw_summary_section( $p ) : '';
+	$sec = $p ? sourceweb_summary_section( $p ) : '';
 	if ( ! $p || 'publish' !== $p->post_status || '' === $sec ) {
 		return new WP_Error( 'aw_not_found', 'No such published item', array( 'status' => 404 ) );
 	}
@@ -289,7 +289,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 		return new WP_Error( 'aw_changed', 'The summary changed since it was read', array( 'status' => 409 ) );
 	}
 	$src_chars = null !== $req->get_param( 'src_chars' ) ? max( 0, (int) $req->get_param( 'src_chars' ) ) : null;
-	$sec_min   = (int) ( aw_summary_rules()['sections'][ $sec ]['min_words'] ?? 0 );
+	$sec_min   = (int) ( sourceweb_summary_rules()['sections'][ $sec ]['min_words'] ?? 0 );
 	$short_by  = array( 'min_words' => $sec_min ) + ( null !== $src_chars ? array( 'src_chars' => $src_chars ) : array() );
 	if ( null !== $req->get_param( 'recheck' ) ) { // a short item's source re-read and nothing new found: state kept
 		$m = get_post_meta( $id, 'aw_summary_rw', true );
@@ -304,7 +304,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 	}
 	$failed = trim( (string) $req->get_param( 'failed' ) );
 	if ( '' !== $failed ) {
-		aw_summary_rw_set( $id, $p->post_excerpt, 'failed', array( 'reason' => mb_substr( sanitize_text_field( $failed ), 0, 300 ) ) );
+		sourceweb_summary_rw_set( $id, $p->post_excerpt, 'failed', array( 'reason' => mb_substr( sanitize_text_field( $failed ), 0, 300 ) ) );
 		return new WP_REST_Response( array( 'id' => $id, 'state' => 'failed' ) );
 	}
 	$settle = trim( (string) $req->get_param( 'settle' ) );
@@ -312,18 +312,18 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 		$old = get_post_meta( $id, 'aw_summary_rw', true );
 		$was = is_array( $old ) && 'short' === ( $old['state'] ?? '' ) && md5( (string) $p->post_excerpt ) === ( $old['md5'] ?? '' ) ? $old : array();
 		$keep = $was ? array_intersect_key( $was, array_flip( array( 'src_chars', 'model' ) ) ) : array();
-		aw_summary_rw_set( $id, $p->post_excerpt, 'short', array_merge( $keep, array( 'reason' => mb_substr( sanitize_text_field( $settle ), 0, 300 ), 'checked' => current_time( 'mysql' ), 'retry_min' => $sec_min ), $short_by ) );
+		sourceweb_summary_rw_set( $id, $p->post_excerpt, 'short', array_merge( $keep, array( 'reason' => mb_substr( sanitize_text_field( $settle ), 0, 300 ), 'checked' => current_time( 'mysql' ), 'retry_min' => $sec_min ), $short_by ) );
 		return new WP_REST_Response( array( 'id' => $id, 'state' => 'short' ) );
 	}
 	$summary = trim( preg_replace( '/\s+/u', ' ', sanitize_textarea_field( (string) $req->get_param( 'summary' ) ) ) );
 	$summary = sourceweb_whole_sentences( $summary ); // never cut mid-sentence
 	$state   = 'short' === $req->get_param( 'state' ) ? 'short' : 'done';
-	$why     = aw_summary_problem( $summary, $sec, 'short' === $state );
+	$why     = sourceweb_summary_problem( $summary, $sec, 'short' === $state );
 	if ( '' !== $why || '' === $summary ) {
 		return new WP_Error( 'aw_rules', $why ? $why : 'empty summary', array( 'status' => 422 ) );
 	}
 	$before   = (string) $p->post_excerpt;
-	$old_desc = aw_summary_description( trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( $before ) ) ) );
+	$old_desc = sourceweb_summary_description( trim( str_replace( '[Needs legal review]', '', wp_strip_all_tags( $before ) ) ) );
 	$suffix   = false !== strpos( $before, '[Needs legal review]' ) ? "\n[Needs legal review]" : '';
 	$now      = current_time( 'mysql' );
 	$hist     = array_values( array_filter( (array) get_post_meta( $id, 'aw_summary_history', true ) ) );
@@ -354,8 +354,8 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 			update_post_meta( $id, 'aw_also_reported', $also );
 		}
 	}
-	if ( function_exists( 'aw_summary_store_entities' ) ) {
-		aw_summary_store_entities( $id );
+	if ( function_exists( 'sourceweb_summary_store_entities' ) ) {
+		sourceweb_summary_store_entities( $id );
 	}
 	// The search description is the new lead (Rank Math), unless an editor typed a different one.
 	$desc = '';
@@ -369,7 +369,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 			update_post_meta( $id, '_aw_seo_auto', wp_slash( wp_json_encode( $auto, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) ) );
 		}
 	}
-	aw_summary_rw_set(
+	sourceweb_summary_rw_set(
 		$id,
 		$summary . $suffix,
 		$state,
@@ -386,7 +386,7 @@ function aw_summary_rw_post( WP_REST_Request $req ) {
 		array(
 			'id'          => $id,
 			'state'       => $state,
-			'words'       => aw_summary_words( $summary ),
+			'words'       => sourceweb_summary_words( $summary ),
 			'description' => $desc,
 		)
 	);
@@ -402,12 +402,12 @@ add_action(
 				array(
 					'methods'             => 'GET',
 					'permission_callback' => fn() => current_user_can( 'edit_posts' ),
-					'callback'            => 'aw_summary_rw_list',
+					'callback'            => 'sourceweb_summary_rw_list',
 				),
 				array(
 					'methods'             => 'POST',
 					'permission_callback' => fn() => current_user_can( 'edit_posts' ),
-					'callback'            => 'aw_summary_rw_post',
+					'callback'            => 'sourceweb_summary_rw_post',
 				),
 			)
 		);

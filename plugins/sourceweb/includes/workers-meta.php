@@ -5,7 +5,7 @@
  * name does. A worker could later map to a workflow and one of its jobs (key "job"), but nothing splits one yet.
  *
  * AW_WORKERS (workers-registry.php, an exact copy of docs/workers.json in the workers repository) stays the source of
- * truth for what exists, its schedule and its workflow file. Option aw_workers_meta (id => fields, not autoloaded) adds:
+ * truth for what exists, its schedule and its workflow file. Option sourceweb_workers_meta (id => fields, not autoloaded) adds:
  * - overrides for a registry worker: name, what, group, late_after_h (present = overridden; null = never late);
  * - Planned workers (planned => true): ID, name, what, group, schedule wanted (words), late_after_h. They show
  *   "Not built yet" until a workflow with that ID reports a run, and never raise an alert.
@@ -50,12 +50,12 @@ const AW_WORKER_DEFAULT_GROUP = array(
 );
 
 /** "sourcing.yml" => "sourcing". */
-function aw_worker_id( $file ) {
+function sourceweb_worker_id( $file ) {
 	return sanitize_key( preg_replace( '/\.ya?ml$/i', '', (string) $file ) );
 }
 
 /** Groups: slug => [label, dashicon]. */
-function aw_worker_groups() {
+function sourceweb_worker_group_defs() {
 	$extra = array();
 	foreach ( (array) get_option( 'aw_workers_groups', array() ) as $slug => $g ) {
 		if ( is_array( $g ) && ! empty( $g[0] ) ) {
@@ -66,7 +66,7 @@ function aw_worker_groups() {
 }
 
 /** Saved overrides and Planned workers. */
-function aw_workers_meta() {
+function sourceweb_workers_meta() {
 	return (array) get_option( 'aw_workers_meta', array() );
 }
 
@@ -75,18 +75,18 @@ function aw_workers_meta() {
  *
  * @return array<string,array> id => id, file, name, what, group, late_after_h, planned, schedule, registry (AW_WORKERS row or null), overrides (field names)
  */
-function aw_workers_all() {
+function sourceweb_workers_all() {
 	static $memo = null;
 	static $memo_key = '';
-	$meta = aw_workers_meta();
+	$meta = sourceweb_workers_meta();
 	$key  = md5( wp_json_encode( $meta ) . wp_json_encode( get_option( 'aw_workers_groups', array() ) ) );
 	if ( null !== $memo && $memo_key === $key ) {
 		return $memo;
 	}
-	$groups = aw_worker_groups();
+	$groups = sourceweb_worker_group_defs();
 	$out    = array();
 	foreach ( AW_WORKERS as $file => $w ) {
-		$id         = aw_worker_id( $file );
+		$id         = sourceweb_worker_id( $file );
 		$m          = (array) ( $meta[ $id ] ?? array() );
 		$over       = array_values( array_intersect( array( 'name', 'what', 'group', 'late_after_h' ), array_keys( $m ) ) );
 		$group      = (string) ( $m['group'] ?? ( AW_WORKER_DEFAULT_GROUP[ $id ] ?? ( $w['crons'] || ! empty( $w['after'] ) ? 'maintenance' : 'one-off' ) ) );
@@ -130,13 +130,13 @@ function aw_workers_all() {
 }
 
 /** One worker, or null. */
-function aw_worker( $id ) {
-	return aw_workers_all()[ sanitize_key( $id ) ] ?? null;
+function sourceweb_worker( $id ) {
+	return sourceweb_workers_all()[ sanitize_key( $id ) ] ?? null;
 }
 
 /** A Planned worker (not in the registry) with this ID exists. */
-function aw_worker_is_planned( $id ) {
-	$w = aw_worker( $id );
+function sourceweb_worker_is_planned( $id ) {
+	$w = sourceweb_worker( $id );
 	return $w && $w['planned'];
 }
 
@@ -147,8 +147,8 @@ function aw_worker_is_planned( $id ) {
  * @param array  $w    Its AW_WORKERS row.
  * @return array
  */
-function aw_worker_def( $file, array $w ) {
-	$all = aw_workers_all()[ aw_worker_id( $file ) ] ?? null;
+function sourceweb_worker_def( $file, array $w ) {
+	$all = sourceweb_workers_all()[ sourceweb_worker_id( $file ) ] ?? null;
 	if ( ! $all ) {
 		return $w;
 	}
@@ -168,11 +168,11 @@ function aw_worker_def( $file, array $w ) {
  * @param string $id Worker ID.
  * @return int[] [ specific, for all ]
  */
-function aw_worker_key_count( $id ) {
+function sourceweb_worker_key_count( $id ) {
 	$own = 0;
 	$all = 0;
-	foreach ( aw_ai_rows() as $r ) {
-		$ws = aw_ai_row_workers( $r );
+	foreach ( sourceweb_ai_rows() as $r ) {
+		$ws = sourceweb_ai_row_workers( $r );
 		if ( ! $ws ) {
 			++$all;
 		} elseif ( in_array( $id, $ws, true ) ) {
@@ -188,7 +188,7 @@ function aw_worker_key_count( $id ) {
  * @param mixed $raw Posted value.
  * @return string[]
  */
-function aw_workers_posted_ids( $raw ) {
-	$all = aw_workers_all();
+function sourceweb_workers_posted_ids( $raw ) {
+	$all = sourceweb_workers_all();
 	return array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $raw ), fn( $id ) => isset( $all[ $id ] ) ) ) );
 }

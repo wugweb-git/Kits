@@ -1,5 +1,5 @@
 {
- "_about": "The Directory enrichment field rules and trust order as seeded on the site (option aw_enrich_field_rules, sourcing restructure phase 3, owner 25 Oct 2026) from the workers' constants in aw_workers/directory/merge.py (MULTI, AI_FIELDS, OFFICIAL_AWBI, INVITE_FIELDS, SOCIAL_FIELDS, PRIORITY). The same file is in both repos: the site's tests check its seed equals this file, the workers' tests check this file equals the constants. 'apply' is the site's apply rule (enrichment.php aw_enrich_mode): empty = fill an empty field, both = keep it next to what is there, review = always a person.",
+ "_about": "The Directory enrichment field rules and trust order as seeded on the site (option sourceweb_enrich_field_rules, sourcing restructure phase 3, owner 25 Oct 2026) from the workers' constants in aw_workers/directory/merge.py (MULTI, AI_FIELDS, OFFICIAL_AWBI, INVITE_FIELDS, SOCIAL_FIELDS, PRIORITY). The same file is in both repos: the site's tests check its seed equals this file, the workers' tests check this file equals the constants. 'apply' is the site's apply rule (enrichment.php sourceweb_enrich_mode): empty = fill an empty field, both = keep it next to what is there, review = always a person.",
  "priority": [
   "claim",
   "website",

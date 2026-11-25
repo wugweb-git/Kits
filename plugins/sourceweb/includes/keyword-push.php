@@ -39,7 +39,7 @@ const AW_SOURCING_PUSHED_TYPES = array( 'news', 'library', 'campaign' );
  * @param mixed  $default Default.
  * @return mixed
  */
-function aw_sourcing_pushed_field( array $term, array $context, $key, $default = null ) {
+function sourceweb_sourcing_pushed_field( array $term, array $context, $key, $default = null ) {
 	if ( array_key_exists( $key, $term ) ) {
 		return $term[ $key ];
 	}
@@ -56,26 +56,26 @@ function aw_sourcing_pushed_field( array $term, array $context, $key, $default =
  * @param array $context The batch context.
  * @return array{q:string, source:string, score:int, recommended_type:string, impressions:int, clicks:int, position:float, topic:string, focus_keyphrase:bool, rank:int, pushed_at:int}|null
  */
-function aw_sourcing_pushed_clean( $term, array $context ) {
+function sourceweb_sourcing_pushed_clean( $term, array $context ) {
 	$row = is_array( $term ) ? $term : array();
 	$q   = is_string( $term ) ? $term : (string) ( $row['q'] ?? $row['term'] ?? $row['keyword'] ?? $row['label'] ?? '' );
 	$q   = trim( (string) preg_replace( '/\s+/u', ' ', (string) $q ) );
 	if ( '' === $q ) {
 		return null;
 	}
-	$type = (string) aw_sourcing_pushed_field( $row, $context, 'recommended_type', '' );
+	$type = (string) sourceweb_sourcing_pushed_field( $row, $context, 'recommended_type', '' );
 	$type = in_array( $type, AW_SOURCING_PUSHED_TYPES, true ) ? $type : '';
-	$rank = (int) aw_sourcing_pushed_field( $row, $context, 'rank', 0 );
+	$rank = (int) sourceweb_sourcing_pushed_field( $row, $context, 'rank', 0 );
 	return array(
 		'q'                => $q,
-		'source'           => sanitize_key( (string) aw_sourcing_pushed_field( $row, $context, 'source', 'insightweb' ) ),
-		'score'            => max( 0, (int) round( (float) aw_sourcing_pushed_field( $row, $context, 'score', 0 ) ) ),
+		'source'           => sanitize_key( (string) sourceweb_sourcing_pushed_field( $row, $context, 'source', 'insightweb' ) ),
+		'score'            => max( 0, (int) round( (float) sourceweb_sourcing_pushed_field( $row, $context, 'score', 0 ) ) ),
 		'recommended_type' => $type,
-		'impressions'      => max( 0, (int) aw_sourcing_pushed_field( $row, $context, 'impressions', 0 ) ),
-		'clicks'           => max( 0, (int) aw_sourcing_pushed_field( $row, $context, 'clicks', 0 ) ),
-		'position'         => max( 0.0, (float) aw_sourcing_pushed_field( $row, $context, 'position', 0 ) ),
-		'topic'            => sanitize_text_field( (string) aw_sourcing_pushed_field( $row, $context, 'topic', '' ) ),
-		'focus_keyphrase'  => (bool) aw_sourcing_pushed_field( $row, $context, 'focus_keyphrase', false ),
+		'impressions'      => max( 0, (int) sourceweb_sourcing_pushed_field( $row, $context, 'impressions', 0 ) ),
+		'clicks'           => max( 0, (int) sourceweb_sourcing_pushed_field( $row, $context, 'clicks', 0 ) ),
+		'position'         => max( 0.0, (float) sourceweb_sourcing_pushed_field( $row, $context, 'position', 0 ) ),
+		'topic'            => sanitize_text_field( (string) sourceweb_sourcing_pushed_field( $row, $context, 'topic', '' ) ),
+		'focus_keyphrase'  => (bool) sourceweb_sourcing_pushed_field( $row, $context, 'focus_keyphrase', false ),
 		'rank'             => $rank > 0 ? $rank : 0,
 		'pushed_at'        => time(),
 	);
@@ -88,30 +88,30 @@ function aw_sourcing_pushed_clean( $term, array $context ) {
  * @param mixed $context The batch context (array).
  * @return void
  */
-function aw_sourcing_receive_pushed_keywords( $terms, $context = array() ) {
+function sourceweb_sourcing_receive_pushed_keywords( $terms, $context = array() ) {
 	if ( ! is_array( $terms ) ) {
 		$terms = array( $terms );
 	}
 	$context = is_array( $context ) ? $context : array();
-	$store   = aw_sourcing_pushed_raw();
+	$store   = sourceweb_sourcing_pushed_raw();
 	$changed = false;
 	foreach ( $terms as $term ) {
-		$row = aw_sourcing_pushed_clean( $term, $context );
+		$row = sourceweb_sourcing_pushed_clean( $term, $context );
 		if ( null === $row ) {
 			continue;
 		}
-		$norm              = function_exists( 'aw_si_norm' ) ? aw_si_norm( $row['q'] ) : mb_strtolower( $row['q'] );
+		$norm              = function_exists( 'insightweb_si_norm' ) ? insightweb_si_norm( $row['q'] ) : mb_strtolower( $row['q'] );
 		$store[ $norm ]    = $row;
 		$changed           = true;
 	}
 	if ( $changed ) {
-		aw_sourcing_pushed_save( $store );
+		sourceweb_sourcing_pushed_save( $store );
 	}
 }
-add_action( 'sourceweb_push_keywords', 'aw_sourcing_receive_pushed_keywords', 10, 2 );
+add_action( 'sourceweb_push_keywords', 'sourceweb_sourcing_receive_pushed_keywords', 10, 2 );
 
 /** The raw store (norm => candidate), old ones dropped. */
-function aw_sourcing_pushed_raw() {
+function sourceweb_sourcing_pushed_raw() {
 	$store = (array) get_option( AW_SOURCING_PUSHED, array() );
 	$cut   = time() - AW_SOURCING_PUSHED_TTL;
 	$out   = array();
@@ -129,7 +129,7 @@ function aw_sourcing_pushed_raw() {
  * @param array $store norm => candidate.
  * @return void
  */
-function aw_sourcing_pushed_save( array $store ) {
+function sourceweb_sourcing_pushed_save( array $store ) {
 	if ( count( $store ) > AW_SOURCING_PUSHED_MAX ) {
 		uasort( $store, fn( $a, $b ) => ( (int) $b['score'] <=> (int) $a['score'] ) ?: ( (int) $b['pushed_at'] <=> (int) $a['pushed_at'] ) );
 		$store = array_slice( $store, 0, AW_SOURCING_PUSHED_MAX, true );
@@ -138,8 +138,8 @@ function aw_sourcing_pushed_save( array $store ) {
 }
 
 /** Forget one pushed candidate by its normalised keyword (after it is approved or dismissed). */
-function aw_sourcing_pushed_forget( $norm ) {
-	$store = aw_sourcing_pushed_raw();
+function sourceweb_sourcing_pushed_forget( $norm ) {
+	$store = sourceweb_sourcing_pushed_raw();
 	if ( isset( $store[ (string) $norm ] ) ) {
 		unset( $store[ (string) $norm ] );
 		update_option( AW_SOURCING_PUSHED, $store, false );
@@ -152,9 +152,9 @@ function aw_sourcing_pushed_forget( $norm ) {
  *
  * @return array<string, array> norm => {q, impr, clicks, pos, score, recommended_type, topic, focus_keyphrase, rank, source, pushed}
  */
-function aw_sourcing_pushed_suggestions() {
+function sourceweb_sourcing_pushed_suggestions() {
 	$out = array();
-	foreach ( aw_sourcing_pushed_raw() as $norm => $row ) {
+	foreach ( sourceweb_sourcing_pushed_raw() as $norm => $row ) {
 		$out[ (string) $norm ] = array(
 			'q'                => (string) $row['q'],
 			'impr'             => (int) $row['impressions'],

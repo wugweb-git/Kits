@@ -8,10 +8,10 @@
  *   by itself: its section rule is empty (every category) and its summary rule inherits News.
  * - Section rules stay in aw_sources['sections'] (post type => categories, tags); the migration adds the missing types
  *   with empty lists. Tag rules stay in aw_sources['topic_tags'] (tag slug => any, hold, unless, hold_reason).
- * - Summary rules: aw_summary_rules['sections'] is keyed by post type from phase 3 (aw_news, aw_legal, post), each
- *   with its old name as alias (news, library, research), so aw_summary_rules() and the workers' v1 reader see the same
+ * - Summary rules: sourceweb_summary_rules['sections'] is keyed by post type from phase 3 (aw_news, aw_legal, post), each
+ *   with its old name as alias (news, library, research), so sourceweb_summary_rules() and the workers' v1 reader see the same
  *   rules. A section without a row of its own inherits News (inherit: aw_news).
- * - Directory enrichment field rules: option aw_enrich_field_rules {priority: [source keys], fields: {field: rule}},
+ * - Directory enrichment field rules: option sourceweb_enrich_field_rules {priority: [source keys], fields: {field: rule}},
  *   seeded from the workers' constants (aw_workers/directory/merge.py), which tests/fixtures/enrich_field_rules_seed.json
  *   holds in both repositories. A field rule: on, sources (which may fill it; [] = any), multi (0 = one value; n = up
  *   to n different values), official (the source whose value alone is high), ai (read by the AI: at most medium),
@@ -69,7 +69,7 @@ const AW_ENRICH_SEED_OFFICIAL = array(
 const AW_ENRICH_PHONE_FIELDS = array( 'phone', 'whatsapp', 'emergency' );
 const AW_ENRICH_TWO_FIELDS   = array( 'phone', 'whatsapp', 'emergency', 'email', 'website', 'services', 'animals', 'areas_served' );
 
-/** Fields a person always decides (enrichment.php aw_enrich_mode before phase 3). */
+/** Fields a person always decides (enrichment.php sourceweb_enrich_mode before phase 3). */
 const AW_ENRICH_REVIEW_FIELDS = array( 'closed', 'merge_into' );
 
 /** Special stores kept in a listing field by code: store => the ACF field (Phone numbers, Opening hours, Photos). */
@@ -91,7 +91,7 @@ const AW_ENRICH_ACF_WRITABLE = array( 'text', 'textarea', 'url', 'email', 'numbe
  * @param string $type ACF field type.
  * @return string
  */
-function aw_enrich_acf_not_writable( $type ) {
+function sourceweb_enrich_acf_not_writable( $type ) {
 	return in_array( (string) $type, AW_ENRICH_ACF_WRITABLE, true ) ? '' : sprintf( 'a %s field cannot be filled by enrichment (only text, text area, URL, email, number and date fields)', str_replace( '_', ' ', (string) $type ) );
 }
 
@@ -103,7 +103,7 @@ function aw_enrich_acf_not_writable( $type ) {
  * @param string $value Value.
  * @return string
  */
-function aw_enrich_acf_value( $type, $value ) {
+function sourceweb_enrich_acf_value( $type, $value ) {
 	$value = trim( (string) $value );
 	switch ( $type ) {
 		case 'url':
@@ -131,7 +131,7 @@ function aw_enrich_acf_value( $type, $value ) {
  * @param string[] $allow The rule's sources ([] = any).
  * @return array
  */
-function aw_enrich_allowed_sources( array $srcs, array $allow ) {
+function sourceweb_enrich_allowed_sources( array $srcs, array $allow ) {
 	if ( ! $allow ) {
 		return $srcs;
 	}
@@ -154,7 +154,7 @@ const AW_ENRICH_APPLY = array(
  * @param string[] $order  Preferred order (the site's own types).
  * @return string[]
  */
-function aw_rules_section_types( array $public, array $opt_in, array $order = array() ) {
+function sourceweb_rules_section_types( array $public, array $opt_in, array $order = array() ) {
 	$all = array_values( array_unique( array_merge( array_diff( $public, AW_RULES_NOT_SECTIONS ), $opt_in ) ) );
 	$out = array_values( array_intersect( $order, $all ) );
 	foreach ( $all as $t ) {
@@ -170,10 +170,10 @@ function aw_rules_section_types( array $public, array $opt_in, array $order = ar
  * the old name as alias; every value is kept as stored (sentence counts too). A key that is already a post type, or
  * that has no post type, stays as it is.
  *
- * @param array $sections aw_summary_rules['sections'].
+ * @param array $sections sourceweb_summary_rules['sections'].
  * @return array
  */
-function aw_rules_summary_by_post_type( array $sections ) {
+function sourceweb_rules_summary_by_post_type( array $sections ) {
 	$by_alias = array_flip( AW_RULES_SUMMARY_ALIAS );
 	$out      = array();
 	foreach ( $sections as $name => $sec ) {
@@ -190,10 +190,10 @@ function aw_rules_summary_by_post_type( array $sections ) {
  * The summary rule sections as they were before phase 3 (keyed by the old names, without alias): what verify compares
  * with the backup and rollback puts back. Sections of new post types (no alias) are dropped.
  *
- * @param array $sections aw_summary_rules['sections'].
+ * @param array $sections sourceweb_summary_rules['sections'].
  * @return array
  */
-function aw_rules_summary_legacy( array $sections ) {
+function sourceweb_rules_summary_legacy( array $sections ) {
 	$out = array();
 	foreach ( $sections as $name => $sec ) {
 		if ( is_array( $sec ) && isset( $sec['alias'] ) && isset( AW_RULES_SUMMARY_ALIAS[ $name ] ) ) {
@@ -211,28 +211,28 @@ function aw_rules_summary_legacy( array $sections ) {
  * Each section's summary rule, resolved: aliased sections take the rule in force for their old name; a section with
  * its own stored rule (inherit '') has it over News; any other inherits News.
  *
- * @param array    $v1     aw_summary_rules()['sections'] (news, library, research), the rules in force.
- * @param array    $stored aw_summary_rules option's 'sections' (by post type).
+ * @param array    $v1     sourceweb_summary_rules()['sections'] (news, library, research), the rules in force.
+ * @param array    $stored sourceweb_summary_rules option's 'sections' (by post type).
  * @param string[] $labels post type => label, for every section.
  * @return array post type => {label, min_words, max_words, structure, attribution, alias?|inherit?}
  */
-function aw_rules_summary_resolve( array $v1, array $stored, array $labels ) {
+function sourceweb_rules_summary_resolve( array $v1, array $stored, array $labels ) {
 	$out  = array();
 	$base = $v1[ AW_RULES_SUMMARY_ALIAS[ AW_RULES_SUMMARY_INHERIT ] ] ?? array();
 	foreach ( $labels as $pt => $label ) {
 		if ( isset( AW_RULES_SUMMARY_ALIAS[ $pt ] ) && isset( $v1[ AW_RULES_SUMMARY_ALIAS[ $pt ] ] ) ) {
-			$out[ $pt ] = aw_rules_summary_fields( $v1[ AW_RULES_SUMMARY_ALIAS[ $pt ] ] ) + array( 'alias' => AW_RULES_SUMMARY_ALIAS[ $pt ] );
+			$out[ $pt ] = sourceweb_rules_summary_fields( $v1[ AW_RULES_SUMMARY_ALIAS[ $pt ] ] ) + array( 'alias' => AW_RULES_SUMMARY_ALIAS[ $pt ] );
 			continue;
 		}
 		$own = is_array( $stored[ $pt ] ?? null ) ? $stored[ $pt ] : array();
 		if ( $own && '' === (string) ( $own['inherit'] ?? AW_RULES_SUMMARY_INHERIT ) ) {
-			$rule          = aw_rules_summary_fields( array_merge( $base, array_filter( $own, fn( $x ) => '' !== $x && array() !== $x ) ) );
+			$rule          = sourceweb_rules_summary_fields( array_merge( $base, array_filter( $own, fn( $x ) => '' !== $x && array() !== $x ) ) );
 			$rule['label'] = (string) ( $own['label'] ?? $label );
 			$out[ $pt ]    = $rule + array( 'inherit' => '' );
 			continue;
 		}
 		$out[ $pt ] = array_merge(
-			aw_rules_summary_fields( $base ),
+			sourceweb_rules_summary_fields( $base ),
 			array(
 				'label'   => (string) $label,
 				'inherit' => AW_RULES_SUMMARY_INHERIT,
@@ -248,7 +248,7 @@ function aw_rules_summary_resolve( array $v1, array $stored, array $labels ) {
  * @param array $sec A section's rule.
  * @return array
  */
-function aw_rules_summary_fields( array $sec ) {
+function sourceweb_rules_summary_fields( array $sec ) {
 	$out = array(
 		'label'       => (string) ( $sec['label'] ?? '' ),
 		'min_words'   => (int) ( $sec['min_words'] ?? 0 ),
@@ -268,7 +268,7 @@ function aw_rules_summary_fields( array $sec ) {
  * @param string $field Enrichment field key.
  * @return array
  */
-function aw_enrich_rule_seed( $field ) {
+function sourceweb_enrich_rule_seed( $field ) {
 	if ( in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
 		$apply = 'review';
 	} elseif ( in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) {
@@ -289,18 +289,18 @@ function aw_enrich_rule_seed( $field ) {
 }
 
 /**
- * The seeded option aw_enrich_field_rules: the trust order and one rule per enrichment field.
+ * The seeded option sourceweb_enrich_field_rules: the trust order and one rule per enrichment field.
  *
- * @param string[] $fields Enrichment field keys (aw_enrich_fields()).
+ * @param string[] $fields Enrichment field keys (sourceweb_enrich_fields()).
  * @return array
  */
-function aw_enrich_field_rules_seed( array $fields ) {
+function sourceweb_enrich_field_rules_seed( array $fields ) {
 	$out = array(
 		'priority' => AW_ENRICH_SEED_PRIORITY,
 		'fields'   => array(),
 	);
 	foreach ( $fields as $f ) {
-		$out['fields'][ $f ] = aw_enrich_rule_seed( $f );
+		$out['fields'][ $f ] = sourceweb_enrich_rule_seed( $f );
 	}
 	return $out;
 }
@@ -310,7 +310,7 @@ function aw_enrich_field_rules_seed( array $fields ) {
  *
  * @return array
  */
-function aw_enrich_rule_off() {
+function sourceweb_enrich_rule_off() {
 	return array(
 		'on'       => false,
 		'sources'  => array(),
@@ -328,11 +328,11 @@ function aw_enrich_rule_off() {
  *
  * @param string   $field   Field key.
  * @param array    $in      Posted or stored rule.
- * @param string[] $sources Source keys (aw_enrich_sources()).
+ * @param string[] $sources Source keys (sourceweb_enrich_sources()).
  * @param array    $base    The rule that missing values come from.
  * @return array
  */
-function aw_enrich_rule_clean( $field, array $in, array $sources, array $base ) {
+function sourceweb_enrich_rule_clean( $field, array $in, array $sources, array $base ) {
 	$out = $base;
 	foreach ( array( 'on', 'ai', 'invite', 'social' ) as $k ) {
 		if ( array_key_exists( $k, $in ) ) {
@@ -371,7 +371,7 @@ function aw_enrich_rule_clean( $field, array $in, array $sources, array $base ) 
  * @param string[] $current   The order now.
  * @return string[]
  */
-function aw_enrich_priority_from_positions( array $positions, array $sources, array $current ) {
+function sourceweb_enrich_priority_from_positions( array $positions, array $sources, array $current ) {
 	$rank = array();
 	foreach ( $sources as $i => $k ) {
 		$p = isset( $positions[ $k ] ) ? trim( (string) $positions[ $k ] ) : '';
@@ -390,7 +390,7 @@ function aw_enrich_priority_from_positions( array $positions, array $sources, ar
 }
 
 /**
- * What the site does with a sourced value (enrichment.php aw_enrich_mode), by the field's apply rule. The listing's
+ * What the site does with a sourced value (enrichment.php sourceweb_enrich_mode), by the field's apply rule. The listing's
  * facts are callables, so only what the decision needs is read.
  *
  * @param string   $field       Field key.
@@ -403,7 +403,7 @@ function aw_enrich_priority_from_positions( array $positions, array $sources, ar
  * @param callable $place_fills Whether a place value fills the listing's place.
  * @return string apply, both or queue.
  */
-function aw_enrich_mode_decide( $field, $apply, $conf, $protected, callable $is_empty, callable $has_phones, callable $alt_empty, callable $place_fills ) {
+function sourceweb_enrich_mode_decide( $field, $apply, $conf, $protected, callable $is_empty, callable $has_phones, callable $alt_empty, callable $place_fills ) {
 	if ( $protected || 'low' === $conf || 'review' === $apply || in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
 		return 'queue'; // closed and merge_into: always a person, whatever the rule says (a merge is the owner's decision)
 	}
@@ -436,7 +436,7 @@ function aw_enrich_mode_decide( $field, $apply, $conf, $protected, callable $is_
  * @param string $prefix Key prefix of the listing groups.
  * @return array
  */
-function aw_enrich_listing_groups_fields( array $groups, $prefix ) {
+function sourceweb_enrich_listing_groups_fields( array $groups, $prefix ) {
 	$own = array_values( array_filter( $groups, fn( $g ) => is_array( $g ) && 0 === strpos( (string) ( $g['key'] ?? '' ), (string) $prefix ) ) );
 	usort( $own, fn( $a, $b ) => array( (int) ( $a['menu_order'] ?? 0 ), (string) $a['key'] ) <=> array( (int) ( $b['menu_order'] ?? 0 ), (string) $b['key'] ) );
 	$out = array();
@@ -452,14 +452,14 @@ function aw_enrich_listing_groups_fields( array $groups, $prefix ) {
  * The Directory schema the workers get with enrich/config: the listing field groups' fields (from ACF), the enrichment
  * fields kept in special stores, listing types and services.
  *
- * @param array  $acf_fields The groups' fields (aw_enrich_listing_groups_fields): name, label, type, sub_fields.
- * @param array  $enrich     aw_enrich_fields(): key => [label, store, group].
+ * @param array  $acf_fields The groups' fields (sourceweb_enrich_listing_groups_fields): name, label, type, sub_fields.
+ * @param array  $enrich     sourceweb_enrich_fields(): key => [label, store, group].
  * @param string $group      Field group key.
  * @param array  $types      Listing types (tag slugs allowed for aw_listing).
  * @param array  $services   Service slug => name.
  * @return array
  */
-function aw_enrich_schema_build( array $acf_fields, array $enrich, $group, array $types, array $services ) {
+function sourceweb_enrich_schema_build( array $acf_fields, array $enrich, $group, array $types, array $services ) {
 	$by_store = array(); // listing field name => the enrichment fields that fill it
 	foreach ( $enrich as $k => $e ) {
 		$store               = (string) $e[1];
@@ -504,12 +504,12 @@ function aw_enrich_schema_build( array $acf_fields, array $enrich, $group, array
  * Every row of Field rules: each enrichment field with its rule, then each listing field no enrichment field fills
  * (its rule off until set).
  *
- * @param array $schema aw_enrich_schema_build().
- * @param array $enrich aw_enrich_fields().
- * @param array $rules  aw_enrich_field_rules()['fields'].
+ * @param array $schema sourceweb_enrich_schema_build().
+ * @param array $enrich sourceweb_enrich_fields().
+ * @param array $rules  sourceweb_enrich_field_rules()['fields'].
  * @return array field key => {label, group, store, acf, rule, set}
  */
-function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules ) {
+function sourceweb_enrich_field_rule_rows( array $schema, array $enrich, array $rules ) {
 	$acf  = array();
 	$rows = array();
 	foreach ( $schema['fields'] as $f ) {
@@ -521,7 +521,7 @@ function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules )
 			'group' => (string) $e[2],
 			'store' => (string) $e[1],
 			'acf'   => isset( $acf[ AW_ENRICH_SPECIAL_ACF[ $e[1] ] ?? $e[1] ] ),
-			'rule'  => isset( $rules[ $k ] ) ? $rules[ $k ] : aw_enrich_rule_seed( $k ),
+			'rule'  => isset( $rules[ $k ] ) ? $rules[ $k ] : sourceweb_enrich_rule_seed( $k ),
 			'set'   => isset( $rules[ $k ] ),
 		);
 	}
@@ -534,10 +534,10 @@ function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules )
 			'group' => 'Listing field',
 			'store' => $f['name'],
 			'acf'   => true,
-			'rule'  => isset( $rules[ $f['name'] ] ) && '' === aw_enrich_acf_not_writable( $f['type'] ) ? $rules[ $f['name'] ] : aw_enrich_rule_off(),
+			'rule'  => isset( $rules[ $f['name'] ] ) && '' === sourceweb_enrich_acf_not_writable( $f['type'] ) ? $rules[ $f['name'] ] : sourceweb_enrich_rule_off(),
 			'set'   => isset( $rules[ $f['name'] ] ),
 			'type'  => $f['type'],
-			'why'   => aw_enrich_acf_not_writable( $f['type'] ),
+			'why'   => sourceweb_enrich_acf_not_writable( $f['type'] ),
 		);
 	}
 	return $rows;
@@ -550,7 +550,7 @@ function aw_enrich_field_rule_rows( array $schema, array $enrich, array $rules )
  * @param string $p Pattern.
  * @return bool
  */
-function aw_rules_pattern_ok( $p ) {
+function sourceweb_rules_pattern_ok( $p ) {
 	if ( preg_match( '/[+*?}]\\+|\\(\\?[|>R0-9&+-]|\\(\\?P>|\\(\\?<(?![=!])|\\(\\*/', $p ) ) {
 		return false;
 	}
@@ -588,12 +588,12 @@ function aw_rules_pattern_ok( $p ) {
  * @param array $in Posted values (any, hold, unless as text, one per line; hold_reason).
  * @return array{0: array, 1: string[]} The rule, and the hold patterns refused.
  */
-function aw_rules_tag_rule_clean( array $in ) {
+function sourceweb_rules_tag_rule_clean( array $in ) {
 	$lines = fn( $v ) => array_values( array_unique( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', is_array( $v ) ? implode( "\n", $v ) : (string) $v ) ), 'strlen' ) ) );
 	$hold  = array();
 	$bad   = array();
 	foreach ( $lines( $in['hold'] ?? '' ) as $p ) {
-		if ( aw_rules_pattern_ok( $p ) ) {
+		if ( sourceweb_rules_pattern_ok( $p ) ) {
 			$hold[] = $p;
 		} else {
 			$bad[] = $p;
@@ -617,13 +617,13 @@ function aw_rules_tag_rule_clean( array $in ) {
  * What the phase 3 migration writes, from the options as they are.
  *
  * @param array       $sources_opt aw_sources.
- * @param array|false $summary_opt aw_summary_rules (false: none saved; the defaults apply).
- * @param array|false $rules_opt   aw_enrich_field_rules (false: not seeded yet).
- * @param string[]    $types       The sections (aw_rules_section_types).
+ * @param array|false $summary_opt sourceweb_summary_rules (false: none saved; the defaults apply).
+ * @param array|false $rules_opt   sourceweb_enrich_field_rules (false: not seeded yet).
+ * @param string[]    $types       The sections (sourceweb_rules_section_types).
  * @param string[]    $fields      Enrichment field keys.
  * @return array{sources: array, summary: array|false, field_rules: array, added: string[], rekeyed: array, seeded: bool}
  */
-function aw_rules_phase3_plan( array $sources_opt, $summary_opt, $rules_opt, array $types, array $fields ) {
+function sourceweb_rules_phase3_plan( array $sources_opt, $summary_opt, $rules_opt, array $types, array $fields ) {
 	$secs  = (array) ( $sources_opt['sections'] ?? array() );
 	$added = array();
 	foreach ( $types as $t ) {
@@ -638,7 +638,7 @@ function aw_rules_phase3_plan( array $sources_opt, $summary_opt, $rules_opt, arr
 	$sources_opt['sections'] = $secs;
 	$rekeyed                 = array();
 	if ( is_array( $summary_opt ) && isset( $summary_opt['sections'] ) && is_array( $summary_opt['sections'] ) ) {
-		$by = aw_rules_summary_by_post_type( $summary_opt['sections'] );
+		$by = sourceweb_rules_summary_by_post_type( $summary_opt['sections'] );
 		foreach ( AW_RULES_SUMMARY_ALIAS as $pt => $alias ) {
 			if ( isset( $summary_opt['sections'][ $alias ] ) && isset( $by[ $pt ] ) ) {
 				$rekeyed[ $alias ] = $pt;
@@ -650,7 +650,7 @@ function aw_rules_phase3_plan( array $sources_opt, $summary_opt, $rules_opt, arr
 	return array(
 		'sources'     => $sources_opt,
 		'summary'     => $summary_opt,
-		'field_rules' => $seeded ? aw_enrich_field_rules_seed( $fields ) : $rules_opt,
+		'field_rules' => $seeded ? sourceweb_enrich_field_rules_seed( $fields ) : $rules_opt,
 		'added'       => $added,
 		'rekeyed'     => $rekeyed,
 		'seeded'      => $seeded,
@@ -661,15 +661,15 @@ function aw_rules_phase3_plan( array $sources_opt, $summary_opt, $rules_opt, arr
  * Verify phase 3 against the backup: the planned changes by name, and any other difference.
  *
  * @param array       $old_sources  aw_sources in the backup.
- * @param array|false $old_summary  aw_summary_rules in the backup.
+ * @param array|false $old_summary  sourceweb_summary_rules in the backup.
  * @param array       $new_sources  aw_sources now.
- * @param array|false $new_summary  aw_summary_rules now.
- * @param array|false $field_rules  aw_enrich_field_rules now.
+ * @param array|false $new_summary  sourceweb_summary_rules now.
+ * @param array|false $field_rules  sourceweb_enrich_field_rules now.
  * @param string[]    $types        The sections now.
  * @param string[]    $fields       Enrichment field keys.
  * @return array{planned: string[], diffs: string[]}
  */
-function aw_rules_phase3_compare( array $old_sources, $old_summary, array $new_sources, $new_summary, $field_rules, array $types, array $fields ) {
+function sourceweb_rules_phase3_compare( array $old_sources, $old_summary, array $new_sources, $new_summary, $field_rules, array $types, array $fields ) {
 	$planned = array();
 	$diffs   = array();
 	$o       = (array) ( $old_sources['sections'] ?? array() );
@@ -705,7 +705,7 @@ function aw_rules_phase3_compare( array $old_sources, $old_summary, array $new_s
 		$planned[] = 'tag rules unchanged (' . count( (array) ( $old_sources['topic_tags'] ?? array() ) ) . ')';
 	}
 	if ( is_array( $old_summary ) && isset( $old_summary['sections'] ) ) {
-		$legacy = aw_rules_summary_legacy( (array) ( $new_summary['sections'] ?? array() ) );
+		$legacy = sourceweb_rules_summary_legacy( (array) ( $new_summary['sections'] ?? array() ) );
 		if ( $legacy !== $old_summary['sections'] ) {
 			$diffs[] = 'summary rules: the sections read by their old names differ from the backup';
 		} else {
@@ -723,7 +723,7 @@ function aw_rules_phase3_compare( array $old_sources, $old_summary, array $new_s
 	if ( ! is_array( $field_rules ) ) {
 		$diffs[] = 'field rules not seeded';
 	} else {
-		$seed = aw_enrich_field_rules_seed( $fields );
+		$seed = sourceweb_enrich_field_rules_seed( $fields );
 		if ( $field_rules['priority'] !== $seed['priority'] ) {
 			$diffs[] = 'trust order differs from the constants';
 		}
@@ -749,11 +749,11 @@ function aw_rules_phase3_compare( array $old_sources, $old_summary, array $new_s
  * summary rule sections go back to their old names; the field rules are removed (the code's rules apply again).
  *
  * @param array       $sources_opt aw_sources now.
- * @param array|false $summary_opt aw_summary_rules now.
+ * @param array|false $summary_opt sourceweb_summary_rules now.
  * @param string[]    $added       The section rules the migration added.
  * @return array{sources: array, summary: array|false, removed: string[], kept: string[]}
  */
-function aw_rules_phase3_undo( array $sources_opt, $summary_opt, array $added ) {
+function sourceweb_rules_phase3_undo( array $sources_opt, $summary_opt, array $added ) {
 	$removed = array();
 	$kept    = array();
 	foreach ( $added as $t ) {
@@ -768,7 +768,7 @@ function aw_rules_phase3_undo( array $sources_opt, $summary_opt, array $added ) 
 		}
 	}
 	if ( is_array( $summary_opt ) && isset( $summary_opt['sections'] ) && is_array( $summary_opt['sections'] ) ) {
-		$summary_opt['sections'] = aw_rules_summary_legacy( $summary_opt['sections'] );
+		$summary_opt['sections'] = sourceweb_rules_summary_legacy( $summary_opt['sections'] );
 	}
 	return array(
 		'sources' => $sources_opt,
@@ -792,11 +792,11 @@ const AW_DOMAIN_TRUST_STATUSES = array(
  *
  * @return array<string, array>
  */
-function aw_rules_domain_overrides() {
-	if ( ! function_exists( 'aw_publishers' ) ) {
+function sourceweb_rules_domain_overrides() {
+	if ( ! function_exists( 'sourceweb_publishers' ) ) {
 		return array();
 	}
-	$all = aw_publishers();
+	$all = sourceweb_publishers();
 	$out = array();
 	foreach ( $all as $host => $data ) {
 		$st = (string) ( $data['status'] ?? 'neutral' );
@@ -820,12 +820,12 @@ function aw_rules_domain_overrides() {
  * @param string $name   Optional display name.
  * @return bool
  */
-function aw_rules_domain_override_save( $host, $status, $name = '' ) {
-	$host = function_exists( 'aw_host' ) ? aw_host( $host ) : strtolower( trim( (string) $host ) );
+function sourceweb_rules_domain_override_save( $host, $status, $name = '' ) {
+	$host = function_exists( 'sourceweb_host' ) ? sourceweb_host( $host ) : strtolower( trim( (string) $host ) );
 	if ( '' === $host || ! in_array( $status, array( 'allow', 'neutral', 'block' ), true ) ) {
 		return false;
 	}
-	$pubs = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+	$pubs = function_exists( 'sourceweb_publishers' ) ? sourceweb_publishers() : array();
 	$prev = $pubs[ $host ] ?? array();
 	$pubs[ $host ] = array_merge(
 		array(
@@ -844,10 +844,10 @@ function aw_rules_domain_override_save( $host, $status, $name = '' ) {
 		$pubs[ $host ]['name'] = $name;
 	}
 	if ( function_exists( 'update_option' ) ) {
-		update_option( defined( 'AW_PUB_OPTION' ) ? AW_PUB_OPTION : 'aw_publishers', $pubs, false );
+		update_option( defined( 'SOURCEWEB_PUB_OPTION' ) ? SOURCEWEB_PUB_OPTION : 'aw_publishers', $pubs, false );
 	}
-	if ( function_exists( 'aw_src_log' ) ) {
-		aw_src_log( 'publishers', "$host domain override → $status", $prev['status'] ?? 'neutral', $status );
+	if ( function_exists( 'sourceweb_src_log' ) ) {
+		sourceweb_src_log( 'publishers', "$host domain override → $status", $prev['status'] ?? 'neutral', $status );
 	}
 	return true;
 }
@@ -858,19 +858,19 @@ function aw_rules_domain_override_save( $host, $status, $name = '' ) {
  * @param string $host Domain host.
  * @return bool
  */
-function aw_rules_domain_override_delete( $host ) {
-	$host = function_exists( 'aw_host' ) ? aw_host( $host ) : strtolower( trim( (string) $host ) );
-	$pubs = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+function sourceweb_rules_domain_override_delete( $host ) {
+	$host = function_exists( 'sourceweb_host' ) ? sourceweb_host( $host ) : strtolower( trim( (string) $host ) );
+	$pubs = function_exists( 'sourceweb_publishers' ) ? sourceweb_publishers() : array();
 	if ( ! isset( $pubs[ $host ] ) ) {
 		return false;
 	}
 	unset( $pubs[ $host ]['manual_override'] );
 	$pubs[ $host ]['status'] = 'neutral';
 	if ( function_exists( 'update_option' ) ) {
-		update_option( defined( 'AW_PUB_OPTION' ) ? AW_PUB_OPTION : 'aw_publishers', $pubs, false );
+		update_option( defined( 'SOURCEWEB_PUB_OPTION' ) ? SOURCEWEB_PUB_OPTION : 'aw_publishers', $pubs, false );
 	}
-	if ( function_exists( 'aw_src_log' ) ) {
-		aw_src_log( 'publishers', "$host domain override reset to neutral", '', 'neutral' );
+	if ( function_exists( 'sourceweb_src_log' ) ) {
+		sourceweb_src_log( 'publishers', "$host domain override reset to neutral", '', 'neutral' );
 	}
 	return true;
 }
@@ -881,7 +881,7 @@ function aw_rules_domain_override_delete( $host ) {
  * @param string $section Optional section (post type).
  * @return string[]
  */
-function aw_rules_feed_excluded_tags( $section = '' ) {
+function sourceweb_rules_feed_excluded_tags( $section = '' ) {
 	$cfg = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : ( function_exists( 'get_option' ) ? (array) get_option( 'aw_sources', array() ) : array() );
 	if ( '' !== $section && isset( $cfg['sections'][ $section ]['excluded_tags'] ) ) {
 		return array_values( (array) $cfg['sections'][ $section ]['excluded_tags'] );
@@ -896,7 +896,7 @@ function aw_rules_feed_excluded_tags( $section = '' ) {
  * @param string $section Optional section.
  * @return bool
  */
-function aw_rules_feed_excluded_tags_save( array $tags, $section = '' ) {
+function sourceweb_rules_feed_excluded_tags_save( array $tags, $section = '' ) {
 	$cfg   = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : ( function_exists( 'get_option' ) ? (array) get_option( 'aw_sources', array() ) : array() );
 	$slugs = array_values( array_unique( array_filter( array_map( 'sanitize_title', $tags ) ) ) );
 	if ( '' !== $section ) {
@@ -910,8 +910,8 @@ function aw_rules_feed_excluded_tags_save( array $tags, $section = '' ) {
 	if ( function_exists( 'update_option' ) ) {
 		update_option( 'aw_sources', $cfg, false );
 	}
-	if ( function_exists( 'aw_src_log' ) ) {
-		aw_src_log( 'rules', 'Excluded feed tags updated: ' . implode( ', ', $slugs ) );
+	if ( function_exists( 'sourceweb_src_log' ) ) {
+		sourceweb_src_log( 'rules', 'Excluded feed tags updated: ' . implode( ', ', $slugs ) );
 	}
 	return true;
 }

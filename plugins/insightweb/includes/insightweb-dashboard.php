@@ -31,7 +31,7 @@ add_action(
 	}
 );
 
-// Right after the daily import (aw_si_daily runs at priority 10): count again in a separate request.
+// Right after the daily import (insightweb_si_daily runs at priority 10): count again in a separate request.
 add_action( 'aw_si_daily', 'insightweb_dash_request', 20 );
 
 // Delete data clears this job with the others.
@@ -67,7 +67,7 @@ function insightweb_dash_build( $why = '' ) {
 		'end'    => '',
 		'ranges' => array(),
 	);
-	if ( function_exists( 'aw_si_ready' ) && aw_si_ready() ) {
+	if ( function_exists( 'insightweb_si_ready' ) && insightweb_si_ready() ) {
 		$c = insightweb_dash_count( $c );
 	}
 	set_transient( INSIGHTWEB_DASH, $c, 2 * DAY_IN_SECONDS );
@@ -82,7 +82,7 @@ function insightweb_dash_build( $why = '' ) {
  */
 function insightweb_dash_count( array $c ): array {
 	global $wpdb;
-	$o   = aw_si_table( 'obs' );
+	$o   = insightweb_si_table( 'obs' );
 	$end = (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(d) FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day'", $o ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count.
 	if ( '' === $end ) {
 		foreach ( INSIGHTWEB_DASH_RANGES as $n ) {
@@ -121,7 +121,7 @@ function insightweb_dash_count( array $c ): array {
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT d, SUM(clicks) c, SUM(impr) i, SUM(pos * impr) pw FROM %i WHERE src = 'gsc' AND metric = 'total' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY d ORDER BY d", $o, $first, $end ) ) as $r ) {
 		$days[ (string) $r->d ] = array( (int) $r->c, (int) $r->i, (float) $r->pw );
 	}
-	$k = aw_si_table( 'keywords' );
+	$k = insightweb_si_table( 'keywords' );
 	foreach ( INSIGHTWEB_DASH_RANGES as $n ) {
 		$from  = $e->modify( '-' . ( $n - 1 ) . ' days' )->format( 'Y-m-d' );
 		$pfrom = $e->modify( '-' . ( 2 * $n - 1 ) . ' days' )->format( 'Y-m-d' );

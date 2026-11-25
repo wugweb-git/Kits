@@ -23,22 +23,22 @@ require_once __DIR__ . '/workers-registry.php';
 const AW_WORKERS_KEEP = 20; // runs kept per workflow
 
 /** Workflow file => array of runs (run_id => record), newest last. */
-function aw_workers_runs() {
+function sourceweb_workers_runs() {
 	$all = array();
 	foreach ( array_keys( AW_WORKERS ) as $file ) {
-		$all[ $file ] = (array) get_option( aw_workers_option( $file ), array() );
+		$all[ $file ] = (array) get_option( sourceweb_workers_option( $file ), array() );
 	}
 	return $all;
 }
 
 /** One option per workflow (aw_worker_runs_sourcing_yml), so reports from different workflows never overwrite each other. */
-function aw_workers_option( $file ) {
+function sourceweb_workers_option( $file ) {
 	return 'aw_worker_runs_' . preg_replace( '/[^a-z0-9]+/', '_', strtolower( $file ) );
 }
 
 /** The newest run of a workflow (highest run id), or null. */
-function aw_workers_last( $file ) {
-	$runs = (array) get_option( aw_workers_option( $file ), array() );
+function sourceweb_workers_last( $file ) {
+	$runs = (array) get_option( sourceweb_workers_option( $file ), array() );
 	if ( ! $runs ) {
 		return null;
 	}
@@ -51,7 +51,7 @@ function aw_workers_last( $file ) {
  *
  * @return int[]
  */
-function aw_workers_cron_field( $spec, $lo, $hi ) {
+function sourceweb_workers_cron_field( $spec, $lo, $hi ) {
 	$out = array();
 	foreach ( explode( ',', $spec ) as $part ) {
 		$bits = explode( '/', $part );
@@ -73,15 +73,15 @@ function aw_workers_cron_field( $spec, $lo, $hi ) {
 }
 
 /** Next time (Unix) any of the crons fires after $from, or 0. */
-function aw_workers_next( array $crons, $from ) {
+function sourceweb_workers_next( array $crons, $from ) {
 	$best = 0;
 	foreach ( $crons as $cron ) {
 		list( $m, $h, $dom, $mon, $dow ) = preg_split( '/\s+/', trim( $cron ) );
-		$mins                            = aw_workers_cron_field( $m, 0, 59 );
-		$hrs                             = aw_workers_cron_field( $h, 0, 23 );
-		$doms                            = aw_workers_cron_field( $dom, 1, 31 );
-		$mons                            = aw_workers_cron_field( $mon, 1, 12 );
-		$dows                            = array_map( fn( $d ) => $d % 7, aw_workers_cron_field( $dow, 0, 7 ) );
+		$mins                            = sourceweb_workers_cron_field( $m, 0, 59 );
+		$hrs                             = sourceweb_workers_cron_field( $h, 0, 23 );
+		$doms                            = sourceweb_workers_cron_field( $dom, 1, 31 );
+		$mons                            = sourceweb_workers_cron_field( $mon, 1, 12 );
+		$dows                            = array_map( fn( $d ) => $d % 7, sourceweb_workers_cron_field( $dow, 0, 7 ) );
 		$day                             = (int) ( floor( $from / DAY_IN_SECONDS ) * DAY_IN_SECONDS );
 		for ( $i = 0; $i < 62; $i++, $day += DAY_IN_SECONDS ) {
 			$dok    = in_array( (int) gmdate( 'j', $day ), $doms, true );
@@ -105,7 +105,7 @@ function aw_workers_next( array $crons, $from ) {
 }
 
 /** The schedule in India time, in words ("05:47, 08:17, … IST", "every 15 min", "Mondays 09:10 IST"). */
-function aw_workers_schedule( array $w ) {
+function sourceweb_workers_schedule( array $w ) {
 	if ( ! empty( $w['after'] ) ) {
 		return 'After "' . $w['after'] . '"' . ( 'tests.yml' === $w['file'] ? ' and every push' : '' );
 	}
@@ -117,8 +117,8 @@ function aw_workers_schedule( array $w ) {
 	$mins = array();
 	foreach ( $w['crons'] as $cron ) {
 		list( $m, $h, $dom, , $dow ) = preg_split( '/\s+/', trim( $cron ) );
-		foreach ( aw_workers_cron_field( $h, 0, 23 ) as $hh ) {
-			foreach ( aw_workers_cron_field( $m, 0, 59 ) as $mm ) {
+		foreach ( sourceweb_workers_cron_field( $h, 0, 23 ) as $hh ) {
+			foreach ( sourceweb_workers_cron_field( $m, 0, 59 ) as $mm ) {
 				$mins[] = ( $hh * 60 + $mm + $ist ) % 1440;
 			}
 		}
@@ -133,7 +133,7 @@ function aw_workers_schedule( array $w ) {
 	$day   = (string) reset( $days );
 	if ( 0 === strpos( $day, 'dow:' ) ) {
 		$names = array( 'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays' );
-		return implode( ', ', array_map( fn( $d ) => $names[ $d % 7 ], aw_workers_cron_field( substr( $day, 4 ), 0, 7 ) ) ) . ' ' . $times;
+		return implode( ', ', array_map( fn( $d ) => $names[ $d % 7 ], sourceweb_workers_cron_field( substr( $day, 4 ), 0, 7 ) ) ) . ' ' . $times;
 	}
 	if ( 0 === strpos( $day, 'dom:' ) ) {
 		return 'Day ' . substr( $day, 4 ) . ' of the month, ' . $times;
@@ -142,7 +142,7 @@ function aw_workers_schedule( array $w ) {
 }
 
 /** "4 min 20 s" / "1 h 05 min". */
-function aw_workers_duration( $s ) {
+function sourceweb_workers_duration( $s ) {
 	$s = max( 0, (int) $s );
 	return $s < 3600 ? ( $s >= 60 ? intdiv( $s, 60 ) . ' min ' : '' ) . ( $s % 60 ) . ' s' : sourceweb_cron_span( $s );
 }
@@ -154,7 +154,7 @@ function aw_workers_duration( $s ) {
  * @param int|null $now Unix time (tests).
  * @return array<string,string>
  */
-function aw_workers_problems( $now = null ) {
+function sourceweb_workers_problems( $now = null ) {
 	static $memo = null; // one check per request (notice, dashboard box, table, Site Health)
 	if ( null === $now && null !== $memo ) {
 		return $memo;
@@ -163,11 +163,11 @@ function aw_workers_problems( $now = null ) {
 	$now   = $now ? $now : time();
 	$out   = array();
 	foreach ( AW_WORKERS as $file => $w ) {
-		$last = aw_workers_last( $file );
+		$last = sourceweb_workers_last( $file );
 		if ( ! $last ) {
 			continue;
 		}
-		$w = aw_worker_def( $file, $w ); // the owner's name and late limit (Planned workers are not here: they never alert)
+		$w = sourceweb_worker_def( $file, $w ); // the owner's name and late limit (Planned workers are not here: they never alert)
 		$seen = max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) );
 		if ( ! empty( $w['late_after_h'] ) && $now - $seen > (int) $w['late_after_h'] * HOUR_IN_SECONDS ) {
 			$out[ $file . ':late' ] = sprintf( '%s has not reported for %s (late after %d h; last: %s).', $w['name'], sourceweb_cron_span( $now - $seen ), (int) $w['late_after_h'], wp_date( 'j M, g:i a', $seen ) );
@@ -199,9 +199,9 @@ function aw_workers_problems( $now = null ) {
 }
 
 /** Email the owner about worker problems, once per new set (hourly event, and after every end report). */
-function aw_workers_watchdog() {
+function sourceweb_workers_watchdog() {
 	update_option( 'aw_workers_watchdog_at', time(), true );
-	$problems = aw_workers_problems();
+	$problems = sourceweb_workers_problems();
 	if ( ! $problems ) {
 		delete_transient( 'aw_workers_alert_mailed' );
 		return;
@@ -215,14 +215,14 @@ function aw_workers_watchdog() {
 		set_transient( 'aw_workers_alert_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
 	}
 }
-add_action( 'aw_workers_watchdog', fn() => aw_workers_watchdog() ); // the "report" argument only keeps the one-off event apart
+add_action( 'aw_workers_watchdog', fn() => sourceweb_workers_watchdog() ); // the "report" argument only keeps the one-off event apart
 // Like the ingestion watchdog: any request that reaches PHP also checks when the last check is an hour old, so a late
 // worker is noticed even when scheduled tasks have stopped.
 add_action(
 	'shutdown',
 	function () {
 		if ( time() - (int) get_option( 'aw_workers_watchdog_at', 0 ) >= HOUR_IN_SECONDS && ! wp_installing() ) {
-			aw_workers_watchdog();
+			sourceweb_workers_watchdog();
 		}
 	}
 );
@@ -249,7 +249,7 @@ add_action(
 					$file = sanitize_file_name( (string) $req->get_param( 'workflow' ) );
 					$run  = preg_replace( '/\D/', '', (string) $req->get_param( 'run_id' ) );
 					// A Planned worker's new workflow may report before the registry has it: its runs are kept (no alerts).
-					if ( ( ! isset( AW_WORKERS[ $file ] ) && ! ( preg_match( '/\.ya?ml$/', $file ) && aw_worker_is_planned( aw_worker_id( $file ) ) ) ) || '' === $run ) {
+					if ( ( ! isset( AW_WORKERS[ $file ] ) && ! ( preg_match( '/\.ya?ml$/', $file ) && sourceweb_worker_is_planned( sourceweb_worker_id( $file ) ) ) ) || '' === $run ) {
 						return new WP_Error( 'aw_worker_unknown', 'Unknown workflow or run.', array( 'status' => 400 ) );
 					}
 					$now    = time();
@@ -262,9 +262,9 @@ add_action(
 					if ( 1 !== (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 10)', $lock ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a MySQL named lock, nothing to cache
 						return new WP_Error( 'aw_worker_busy', 'Another report for this workflow is being saved; nothing was written.', array( 'status' => 503 ) );
 					}
-					wp_cache_delete( aw_workers_option( $file ), 'options' );
+					wp_cache_delete( sourceweb_workers_option( $file ), 'options' );
 					wp_cache_delete( 'notoptions', 'options' );
-					$runs   = (array) get_option( aw_workers_option( $file ), array() );
+					$runs   = (array) get_option( sourceweb_workers_option( $file ), array() );
 					$r      = (array) ( $runs[ $run ] ?? array() );
 					$try    = max( 1, (int) $req->get_param( 'attempt' ) );
 					if ( $try < (int) ( $r['attempt'] ?? 0 ) ) { // a late report from an attempt a re-run has replaced
@@ -307,7 +307,7 @@ add_action(
 					}
 					$runs[ $run ] = $r;
 					ksort( $runs, SORT_NUMERIC );
-					update_option( aw_workers_option( $file ), array_slice( $runs, -AW_WORKERS_KEEP, null, true ), false );
+					update_option( sourceweb_workers_option( $file ), array_slice( $runs, -AW_WORKERS_KEEP, null, true ), false );
 					$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- releases the lock above
 					if ( 'end' === $phase && ! wp_next_scheduled( 'aw_workers_watchdog', array( 'report' ) ) ) {
 						// Checked (and emailed) by the next scheduled-task tick, not inside the worker's request.
@@ -334,7 +334,7 @@ add_filter(
  * @param string $file Workflow file.
  * @return true|WP_Error
  */
-function aw_workers_run_now( $file ) {
+function sourceweb_workers_run_now( $file ) {
 	$res = function_exists( 'kits_dispatch_workflow' ) // Kits Core's ops/cron-health.php (GitHub token, dispatch)
 		? kits_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) )
 		: new WP_Error( 'sourceweb_no_dispatch', 'Run now needs the GitHub dispatch from Kits Core.' );
@@ -350,7 +350,7 @@ function aw_workers_run_now( $file ) {
 		)
 	);
 	update_option( 'aw_worker_dispatch_log', array_slice( $log, 0, 50 ), false );
-	aw_src_log( 'workers', 'Run now: ' . $file . ( true === $res ? '' : ' (not started: ' . $res->get_error_message() . ')' ) );
+	sourceweb_src_log( 'workers', 'Run now: ' . $file . ( true === $res ? '' : ' (not started: ' . $res->get_error_message() . ')' ) );
 	return $res;
 }
 
@@ -362,7 +362,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) || ! $screen || ! in_array( $screen->id, array( 'dashboard', AW_SRC_SCREEN ), true ) ) {
 			return;
 		}
-		$problems = aw_workers_problems();
+		$problems = sourceweb_workers_problems();
 		if ( $problems ) {
 			wp_admin_notice( '<strong>Workers need attention.</strong> ' . esc_html( implode( ' ', $problems ) ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Workers</a>', array( 'type' => 'error', 'dismissible' => true ) );
 		}
@@ -379,7 +379,7 @@ add_action(
 		add_action(
 			'aw_cron_health_after',
 			function () {
-				$problems = aw_workers_problems();
+				$problems = sourceweb_workers_problems();
 				$url      = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );
 				if ( ! $problems ) {
 					echo '<p><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> Workers: no problems. <a href="' . esc_url( $url ) . '">Workers</a></p>';
@@ -401,7 +401,7 @@ add_filter(
 		$tests['direct']['aw_workers'] = array(
 			'label' => 'Workers report on time',
 			'test'  => function () {
-				$problems = aw_workers_problems();
+				$problems = sourceweb_workers_problems();
 				return array(
 					'label'       => $problems ? 'Workers need attention' : 'Workers report on time',
 					'status'      => $problems ? 'critical' : 'good',

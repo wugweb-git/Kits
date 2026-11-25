@@ -8,7 +8,7 @@
  *
  * The screens are one script (build/index.js, from src/), drawn with Kits Core's shell parts
  * (kits-core/includes/admin-shell.php) and fed by the insightweb/v1 routes (insightweb-rest.php). When Kits Core or a
- * build file is missing, aw_si_screen() shows a notice instead.
+ * build file is missing, insightweb_si_screen() shows a notice instead.
  *
  * @package insightweb
  */
@@ -36,7 +36,7 @@ function insightweb_ui_wanted(): string {
 	if ( AW_SI_SLUG !== $page || ! function_exists( 'kits_shell_app' ) ) {
 		return '';
 	}
-	$tab = aw_si_tab();
+	$tab = insightweb_si_tab();
 	if ( function_exists( 'insightweb_tab_keys' ) && in_array( $tab, insightweb_tab_keys(), true ) ) {
 		return $tab; // Keywords and the other tabs (insightweb-tabs.php)
 	}
@@ -65,14 +65,14 @@ function insightweb_ui_ready( ?bool $set = null ): bool {
  * @param string $screen 'dashboard' or 'settings'.
  */
 function insightweb_ui_url( string $screen ): string {
-	return aw_si_url( 'settings' === $screen ? 'settings' : 'overview' );
+	return insightweb_si_url( 'settings' === $screen ? 'settings' : 'overview' );
 }
 
 add_action(
 	'admin_enqueue_scripts',
 	function () {
 		$screen = insightweb_ui_wanted();
-		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! current_user_can( aw_si_cap() ) ) {
+		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! current_user_can( insightweb_si_cap() ) ) {
 			return;
 		}
 		$main = INSIGHTWEB_DIR . 'insightweb.php';
@@ -90,7 +90,7 @@ add_action(
 			$tabs[] = array(
 				'slug'    => $key,
 				'label'   => $label,
-				'url'     => aw_si_url( $key ),
+				'url'     => insightweb_si_url( $key ),
 				'current' => $key === $screen,
 			);
 		}
@@ -136,7 +136,7 @@ add_action(
 );
 
 /**
- * Draw the shell screen for the current tab, when it is ready. aw_si_screen() calls this first.
+ * Draw the shell screen for the current tab, when it is ready. insightweb_si_screen() calls this first.
  *
  * @param string $tab The current tab.
  * @return bool True when the shell screen was drawn.

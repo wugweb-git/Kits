@@ -93,10 +93,10 @@ function sourceweb_dashboard_build( $why = '' ) {
 		'today'   => sourceweb_count_today(),
 		'sources' => sourceweb_count_sources(),
 		'workers' => sourceweb_count_workers(),
-		'ai'      => function_exists( 'aw_sourcing_ai_counts' ) ? aw_sourcing_ai_counts() : array(),
+		'ai'      => function_exists( 'sourceweb_sourcing_ai_counts' ) ? sourceweb_sourcing_ai_counts() : array(),
 		'google'  => array(
-			'live'   => function_exists( 'aw_enrich_spent' ) ? aw_enrich_spent( 'live' ) : 0.0,
-			'worker' => function_exists( 'aw_enrich_spent' ) ? aw_enrich_spent( 'worker' ) : 0.0,
+			'live'   => function_exists( 'sourceweb_enrich_spent' ) ? sourceweb_enrich_spent( 'live' ) : 0.0,
+			'worker' => function_exists( 'sourceweb_enrich_spent' ) ? sourceweb_enrich_spent( 'worker' ) : 0.0,
 			'cap'    => (int) get_option( 'aw_enrich_live_cap', '20' ),
 			'key'    => '' !== (string) get_option( 'aw_enrich_google_key', '' ),
 		),
@@ -115,10 +115,10 @@ function sourceweb_count_review(): array {
 		'by'     => array(),
 		'oldest' => 0,
 	);
-	if ( ! function_exists( 'aw_review_items' ) ) {
+	if ( ! function_exists( 'sourceweb_review_items' ) ) {
 		return $out;
 	}
-	foreach ( aw_review_items() as $p ) {
+	foreach ( sourceweb_review_items() as $p ) {
 		++$out['total'];
 		$out['by'][ $p->post_type ] = ( $out['by'][ $p->post_type ] ?? 0 ) + 1;
 		$t                          = (int) get_post_timestamp( $p );
@@ -139,16 +139,16 @@ function sourceweb_count_enrich(): array {
 		'checked'  => 0,
 		'total'    => 0,
 	);
-	if ( function_exists( 'aw_enrich_progress' ) ) {
-		$p              = aw_enrich_progress();
+	if ( function_exists( 'sourceweb_enrich_progress' ) ) {
+		$p              = sourceweb_enrich_progress();
 		$out['pending'] = (int) $p['pending'];
 		$out['checked'] = (int) $p['checked'];
 		$out['total']   = (int) $p['total'];
 	}
-	if ( ! get_option( 'aw_enrich_db' ) || ! function_exists( 'aw_enrich_table' ) ) {
+	if ( ! get_option( 'aw_enrich_db' ) || ! function_exists( 'sourceweb_enrich_table' ) ) {
 		return $out;
 	}
-	$t               = aw_enrich_table();
+	$t               = sourceweb_enrich_table();
 	$since           = wp_date( 'Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS );
 	$out['listings'] = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( DISTINCT listing_id ) FROM %i WHERE status = 'pending'", $t ) ); // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is the plugin's own
 	$rows            = $wpdb->get_results( $wpdb->prepare( "SELECT status, COUNT(*) AS n FROM %i WHERE status IN ( 'approved', 'auto-applied' ) AND ( decided_at >= %s OR created >= %s ) GROUP BY status", $t, $since, $since ) ); // phpcs:ignore WordPress.DB -- same
@@ -164,7 +164,7 @@ function sourceweb_count_enrich(): array {
 /** Today's intake: the workers' last report, the Site Health test and items refused today. */
 function sourceweb_count_intake(): array {
 	$hb    = (array) get_option( 'aw_ingest_heartbeat', array() );
-	$test  = function_exists( 'aw_sourcing_health_test' ) ? aw_sourcing_health_test() : array();
+	$test  = function_exists( 'sourceweb_sourcing_health_test' ) ? sourceweb_sourcing_health_test() : array();
 	$today = current_time( 'Y-m-d' );
 	$rej   = 0;
 	foreach ( (array) get_option( defined( 'AW_RELEVANCE_LOG' ) ? AW_RELEVANCE_LOG : 'aw_relevance_rejected', array() ) as $e ) {
@@ -189,9 +189,9 @@ function sourceweb_count_intake(): array {
 
 /** Sources: publishers by status (not the Directory's own source hosts) and the lists' feeds. */
 function sourceweb_count_sources(): array {
-	$pubs = function_exists( 'aw_publishers' ) ? aw_publishers() : array();
+	$pubs = function_exists( 'sourceweb_publishers' ) ? sourceweb_publishers() : array();
 	$by   = array_count_values( array_map( fn( $p ) => (string) ( $p['status'] ?? 'neutral' ), array_filter( $pubs, fn( $p ) => is_array( $p ) && empty( $p['kind'] ) ) ) );
-	$cfg  = get_option( 'aw_sources' ); // Read as stored: aw_sources_config() would seed it.
+	$cfg  = get_option( 'aw_sources' ); // Read as stored: sourceweb_sources_config() would seed it.
 	return array(
 		'allow'   => (int) ( $by['allow'] ?? 0 ),
 		'neutral' => (int) ( $by['neutral'] ?? 0 ),
@@ -203,18 +203,18 @@ function sourceweb_count_sources(): array {
 
 /** Workers: every workflow's last report and next run, and the problems the hourly watchdog sees. */
 function sourceweb_count_workers(): array {
-	if ( ! function_exists( 'aw_workers_runs' ) || ! defined( 'AW_WORKERS' ) ) {
+	if ( ! function_exists( 'sourceweb_workers_runs' ) || ! defined( 'AW_WORKERS' ) ) {
 		return array();
 	}
 	$now  = time();
 	$runs = array();
 	$good = 0;
-	foreach ( aw_workers_runs() as $file => $list ) {
-		$w = function_exists( 'aw_worker_def' ) ? aw_worker_def( $file, AW_WORKERS[ $file ] ) : AW_WORKERS[ $file ];
+	foreach ( sourceweb_workers_runs() as $file => $list ) {
+		$w = function_exists( 'sourceweb_worker_def' ) ? sourceweb_worker_def( $file, AW_WORKERS[ $file ] ) : AW_WORKERS[ $file ];
 		krsort( $list, SORT_NUMERIC );
 		$last   = $list ? reset( $list ) : null;
 		$seen   = $last ? max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) ) : 0;
-		$next   = ! empty( $w['crons'] ) && function_exists( 'aw_workers_next' ) ? aw_workers_next( (array) $w['crons'], $now ) : 0;
+		$next   = ! empty( $w['crons'] ) && function_exists( 'sourceweb_workers_next' ) ? sourceweb_workers_next( (array) $w['crons'], $now ) : 0;
 		$result = $last ? (string) ( $last['result'] ?? 'failed' ) : '';
 		$good  += 'success' === $result ? 1 : 0;
 		$runs[] = array(
@@ -229,7 +229,7 @@ function sourceweb_count_workers(): array {
 	return array(
 		'total'    => count( $runs ),
 		'good'     => $good,
-		'problems' => function_exists( 'aw_workers_problems' ) ? array_values( array_map( 'strval', (array) aw_workers_problems() ) ) : array(),
+		'problems' => function_exists( 'sourceweb_workers_problems' ) ? array_values( array_map( 'strval', (array) sourceweb_workers_problems() ) ) : array(),
 		'runs'     => $runs,
 		'token'    => defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN,
 	);

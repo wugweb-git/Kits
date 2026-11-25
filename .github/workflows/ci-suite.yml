@@ -203,6 +203,7 @@ jobs:
         run: |
           php plugins/insightweb/tests/run.php
           php plugins/insightweb/tests/StandaloneInsightsTest.php
+          php plugins/insightweb/tests/no-aw-functions-test.php
 
       - name: Test RankWeb
         if: ${{ needs.changes.outputs.rankweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -227,6 +228,7 @@ jobs:
         run: |
           php plugins/sourceweb/tests/run.php
           php plugins/sourceweb/tests/SourceWebStandaloneTest.php
+          php plugins/sourceweb/tests/no-aw-functions-test.php
 
   package-dist:
     name: Package Distribution Artifacts

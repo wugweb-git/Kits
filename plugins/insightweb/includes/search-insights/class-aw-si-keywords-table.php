@@ -19,7 +19,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * The Keywords tab list table.
  */
-class AW_SI_Keywords_Table extends WP_List_Table {
+class InsightWeb_SI_Keywords_Table extends WP_List_Table {
 
 	/**
 	 * IDs of the listing names that moved most, read once per screen.
@@ -28,10 +28,10 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 */
 	private $movers = null;
 
-	/** The listing names that moved most (aw_si_entity_movers()), cached. */
+	/** The listing names that moved most (insightweb_si_entity_movers()), cached. */
 	private function movers(): array {
 		if ( null === $this->movers ) {
-			$this->movers = aw_si_entity_movers();
+			$this->movers = insightweb_si_entity_movers();
 		}
 		return $this->movers;
 	}
@@ -124,7 +124,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 
 	/** SQL condition of each view. */
 	private function view_sql(): array {
-		return aw_si_view_sql(); // One rule for every view (compute.php).
+		return insightweb_si_view_sql(); // One rule for every view (compute.php).
 	}
 
 	/** Labels of the views. */
@@ -151,7 +151,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		if ( 'entity' === $view ) {
 			return '1=1';
 		}
-		return aw_si_entity_sql( $this->movers() );
+		return insightweb_si_entity_sql( $this->movers() );
 	}
 
 	/** Whether the list is the plain All view: no filter, no search. The combined listing-names row shows only there. */
@@ -167,7 +167,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** The combined row for every listing name: count and summed Search Console figures, linking to the Entities view. */
 	private function entity_row(): ?object {
 		global $wpdb;
-		$t = aw_si_table( 'keywords' );
+		$t = insightweb_si_table( 'keywords' );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$a = $wpdb->get_row( $wpdb->prepare( 'SELECT COUNT(*) n, SUM(impr28) i, SUM(clicks28) c, SUM(pos28 * impr28) / NULLIF(SUM(IF(pos28 IS NULL, 0, impr28)), 0) p, SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, (pos_prev - pos28) * impr28)) / NULLIF(SUM(IF(pos_prev IS NULL OR pos28 IS NULL, 0, impr28)), 0) d FROM %i WHERE entity = 1', $t ) );
 		if ( ! $a || ! (int) $a->n ) {
@@ -202,13 +202,13 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** Views with their counts. */
 	protected function get_views() {
 		global $wpdb;
-		$t       = aw_si_table( 'keywords' );
+		$t       = insightweb_si_table( 'keywords' );
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';
 		$out     = array();
 		foreach ( $this->view_sql() as $key => $sql ) {
 			$sql        .= ' AND ' . $this->entity_sql( $key );
 			$n           = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE {$sql}", $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed conditions (no %).
-			$url         = add_query_arg( array( 'view' => $key ), aw_si_url( 'keywords' ) );
+			$url         = add_query_arg( array( 'view' => $key ), insightweb_si_url( 'keywords' ) );
 			$out[ $key ] = '<a href="' . esc_url( $url ) . '"' . ( $key === $current ? ' class="current" aria-current="page"' : '' ) . '>' . esc_html( $this->view_labels()[ $key ] ) . ' <span class="count">(' . esc_html( number_format_i18n( $n ) ) . ')</span></a>';
 		}
 		return $out;
@@ -224,9 +224,9 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			return;
 		}
 		echo '<div class="alignleft actions">';
-		$this->dropdown( 'role', __( 'All roles', 'insightweb' ), array_map( 'strval', aw_si_roles() ) );
+		$this->dropdown( 'role', __( 'All roles', 'insightweb' ), array_map( 'strval', insightweb_si_roles() ) );
 		global $wpdb;
-		$topics = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT topic FROM %i WHERE topic <> '' ORDER BY topic", aw_si_table( 'keywords' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$topics = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT topic FROM %i WHERE topic <> '' ORDER BY topic", insightweb_si_table( 'keywords' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$this->dropdown( 'topic', __( 'All topics', 'insightweb' ), array_combine( $topics, $topics ), true );
 		$this->dropdown(
 			'page_type',
@@ -249,7 +249,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 				'hinglish' => __( 'Hinglish', 'insightweb' ),
 			)
 		);
-		if ( aw_si_ready() ) {
+		if ( insightweb_si_ready() ) {
 			$this->dropdown(
 				'focus_health',
 				__( 'All focus-keyphrase health', 'insightweb' ),
@@ -292,7 +292,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	/** Query one page of keyword records for the current view, filters, search and sort. */
 	public function prepare_items() {
 		global $wpdb;
-		$t       = aw_si_table( 'keywords' );
+		$t       = insightweb_si_table( 'keywords' );
 		$where   = array();
 		$args    = array();
 		$view    = $this->arg( 'view' );
@@ -300,7 +300,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$where[] = $views[ $view ] ?? '1=1';
 		$where[] = $this->entity_sql( $view );
 		$role    = (int) $this->arg( 'role' );
-		if ( $role && isset( aw_si_roles()[ $role ] ) ) {
+		if ( $role && isset( insightweb_si_roles()[ $role ] ) ) {
 			$where[] = 'roles & %d';
 			$args[]  = $role;
 		}
@@ -322,8 +322,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		// The score store (InsightWeb's own table, schema version 3): join it for the Score column, sorting and the
 		// focus-keyphrase-health filter. Every score column is spelled with the s. alias; the keyword columns are
 		// unique to the keyword table, so the WHERE and ORDER built below stay unqualified.
-		$sc    = aw_si_table( 'scores' );
-		$store = aw_si_ready();
+		$sc    = insightweb_si_table( 'scores' );
+		$store = insightweb_si_ready();
 		if ( $store ) {
 			$fh = $this->arg( 'focus_health' );
 			if ( in_array( $fh, array( 'poor-rank', 'should-be' ), true ) ) {
@@ -339,7 +339,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		$orderby = $this->arg( 'orderby' );
 		$cols    = array(
 			'label'    => 'label',
-			'priority' => aw_si_eff_sql(),
+			'priority' => insightweb_si_eff_sql(),
 			'topic'    => "topic = '', topic",
 			'impr28'   => 'impr28',
 			'clicks28' => 'clicks28',
@@ -379,7 +379,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		// Monthly search volume from the latest Keyword Planner import, for the keywords on this page.
 		$page_ids = array_filter( array_map( 'intval', wp_list_pluck( (array) $this->items, 'id' ) ) );
 		if ( $page_ids ) {
-			$o  = aw_si_table( 'obs' );
+			$o  = insightweb_si_table( 'obs' );
 			$in = implode( ',', array_map( 'intval', $page_ids ) );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 			$vols = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, src, value, txt FROM %i WHERE src = 'kp' AND metric = 'volume' AND kw_id IN ({$in}) ORDER BY d", $o ) );
@@ -392,8 +392,8 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 			$bing  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, SUM(IF(metric = 'q', impr, 0)) i, AVG(IF(metric = 'kw-volume', value, NULL)) v FROM %i WHERE src = 'bing' AND metric IN ('q', 'kw-volume') AND kw_id IN ({$in}) AND d >= %s GROUP BY kw_id", $o, $since ), OBJECT_K );
-			$tools = function_exists( 'aw_si_tool_figures' ) ? aw_si_tool_figures( $page_ids ) : array();
-			$oseo  = function_exists( 'aw_si_openseo_positions' ) ? aw_si_openseo_positions( $page_ids ) : array(); // Kept apart from the Live check.
+			$tools = function_exists( 'insightweb_si_tool_figures' ) ? insightweb_si_tool_figures( $page_ids ) : array();
+			$oseo  = function_exists( 'insightweb_si_openseo_positions' ) ? insightweb_si_openseo_positions( $page_ids ) : array(); // Kept apart from the Live check.
 			foreach ( $this->items as $item ) {
 				$item->tools    = $tools[ (int) $item->id ] ?? array();
 				$item->oseo_pos = $oseo[ (int) $item->id ] ?? null;
@@ -444,14 +444,14 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	protected function column_label( $item ) {
 		if ( ! empty( $item->aggregate ) ) {
 			/* translators: %s: number of listing names. */
-			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', aw_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'insightweb' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
+			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', insightweb_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'insightweb' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
 			/* translators: %d: number of listing names listed one by one. */
 			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'insightweb' ), AW_SI_MOVERS ) ) . '</span>';
 			return $out;
 		}
 		$out   = '<strong>' . esc_html( $item->label ) . '</strong>';
 		$roles = array();
-		foreach ( aw_si_roles() as $bit => $name ) {
+		foreach ( insightweb_si_roles() as $bit => $name ) {
 			if ( (int) $item->roles & $bit ) {
 				$roles[] = $name;
 			}
@@ -472,11 +472,11 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		foreach ( array( 'P1', 'P2', 'P3' ) as $p ) {
 			if ( $p !== $item->priority_override ) {
 				/* translators: %s: priority such as P1. */
-				$actions[ 'set_' . strtolower( $p ) ] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_' . strtolower( $p ), (int) $item->id ) ) . '">' . esc_html( sprintf( __( 'Set %s', 'insightweb' ), $p ) ) . '</a>';
+				$actions[ 'set_' . strtolower( $p ) ] = '<a href="' . esc_url( insightweb_si_kw_action_url( 'override_' . strtolower( $p ), (int) $item->id ) ) . '">' . esc_html( sprintf( __( 'Set %s', 'insightweb' ), $p ) ) . '</a>';
 			}
 		}
 		if ( '' !== $item->priority_override ) {
-			$actions['clear'] = '<a href="' . esc_url( aw_si_kw_action_url( 'override_clear', (int) $item->id ) ) . '">' . esc_html__( 'Use calculated', 'insightweb' ) . '</a>';
+			$actions['clear'] = '<a href="' . esc_url( insightweb_si_kw_action_url( 'override_clear', (int) $item->id ) ) . '">' . esc_html__( 'Use calculated', 'insightweb' ) . '</a>';
 		}
 		return $out . $this->row_actions( $actions );
 	}
@@ -567,7 +567,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 	 * @param object $item Keyword record.
 	 */
 	protected function column_action( $item ) {
-		return esc_html( aw_si_actions()[ $item->action ] ?? '' );
+		return esc_html( insightweb_si_actions()[ $item->action ] ?? '' );
 	}
 
 	/**
@@ -591,13 +591,13 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 		if ( ! empty( $item->aggregate ) ) {
 			return '';
 		}
-		$labels = aw_si_use_labels();
+		$labels = insightweb_si_use_labels();
 		$out    = array();
 		foreach ( array_filter( explode( ',', (string) ( $item->iw_recommended ?? '' ) ) ) as $key ) {
 			$out[] = esc_html( $labels[ $key ] ?? $key );
 		}
 		$html  = $out ? implode( '<br>', $out ) : '–';
-		$flags = aw_si_flag_labels();
+		$flags = insightweb_si_flag_labels();
 		$fh    = (string) ( $item->iw_focus_health ?? '' );
 		if ( '' !== $fh ) {
 			$html .= '<br><span class="post-state">' . esc_html( $flags[ $fh ] ?? $fh ) . '</span>';
@@ -628,7 +628,7 @@ class AW_SI_Keywords_Table extends WP_List_Table {
 			case 'pos28':
 				return null === $item->pos28 ? '–' : esc_html( number_format_i18n( (float) $item->pos28, 1 ) );
 			case 'trends':
-				if ( null === $item->trends && aw_si_trends_failed() ) {
+				if ( null === $item->trends && insightweb_si_trends_failed() ) {
 					return '<span title="' . esc_attr__( 'Google Trends refused the last request, so there is no figure: this says nothing about demand.', 'insightweb' ) . '">' . esc_html__( 'source failed', 'insightweb' ) . '</span>';
 				}
 				return null === $item->trends ? '–' : esc_html( number_format_i18n( (int) $item->trends ) );

@@ -3,7 +3,7 @@
  * Review-queue rules (owner, 13 and 14 Nov 2026: "you don't have to put me on review"): what to do with a waiting value
  * for a field that already holds a value. No WordPress calls, so tests/autoresolve-tests.php runs it on its own.
  *
- * aw_ar_decide() returns approve (write it), reject (nothing new, or another place or page) or leave (a real
+ * sourceweb_ar_decide() returns approve (write it), reject (nothing new, or another place or page) or leave (a real
  * difference: the owner decides). A field with no value yet follows the plugin's own rules, not these.
  *
  * - Address: adds nothing (same words, spelling variants, "No." prefixes): reject. Holds everything now there and more:
@@ -39,7 +39,7 @@ const AW_AR_GENERIC = array( 'people', 'pages', 'pg', 'profile.php', 'groups', '
  * @param string $s Text.
  * @return string
  */
-function aw_ar_pin( $s ) {
+function sourceweb_ar_pin( $s ) {
 	return preg_match( '/\b([1-9]\d{2})\s?(\d{3})\b/', (string) $s, $m ) ? $m[1] . $m[2] : '';
 }
 
@@ -49,7 +49,7 @@ function aw_ar_pin( $s ) {
  * @param string $s Address.
  * @return string[]
  */
-function aw_ar_tokens( $s ) {
+function sourceweb_ar_tokens( $s ) {
 	$s   = strtolower( html_entity_decode( wp_strip_all_tags( (string) $s ) ) );
 	$s   = preg_replace( '/\b\d{3}\s?\d{3}\b/', ' ', $s );
 	$s   = preg_replace( '/[^a-z0-9\/ ]+/', ' ', $s );
@@ -69,7 +69,7 @@ function aw_ar_tokens( $s ) {
  * @param string[] $set Words.
  * @return bool
  */
-function aw_ar_in( $w, array $set ) {
+function sourceweb_ar_in( $w, array $set ) {
 	foreach ( $set as $s ) {
 		if ( $w === $s ) {
 			return true;
@@ -90,7 +90,7 @@ function aw_ar_in( $w, array $set ) {
  * @param string $u Link.
  * @return string
  */
-function aw_ar_url( $u ) {
+function sourceweb_ar_url( $u ) {
 	$u = strtolower( trim( (string) $u ) );
 	$u = preg_replace( '#^https?://(www\.|m\.|mobile\.|web\.)?#', '', $u );
 	$u = preg_replace( '/[?#].*$/', '', $u );
@@ -104,7 +104,7 @@ function aw_ar_url( $u ) {
  * @param string $u Link.
  * @return string
  */
-function aw_ar_path( $u ) {
+function sourceweb_ar_path( $u ) {
 	return trim( (string) preg_replace( '#^(https?://)?[^/]+#i', '', (string) $u ), '/' );
 }
 
@@ -136,7 +136,7 @@ const AW_AR_ACTIONS = array(
  *
  * @return array<string, array{label: string, fields: string[]}>
  */
-function aw_ar_conditions() {
+function sourceweb_ar_conditions() {
 	$social = array( 'social' );
 	return array(
 		'any'            => array( 'label' => 'always (anything that reaches this rule)', 'fields' => array_keys( AW_AR_FIELDS ) ),
@@ -164,7 +164,7 @@ function aw_ar_conditions() {
  *
  * @return array[] each array{id, field, cond, action, on}
  */
-function aw_ar_default_rules() {
+function sourceweb_ar_default_rules() {
 	$rows = array(
 		array( 'address', 'unusable', 'reject' ),
 		array( 'address', 'pin_differs', 'reject' ),
@@ -202,7 +202,7 @@ function aw_ar_default_rules() {
 /**
  * Whether a condition holds for a waiting value.
  *
- * @param string $cond  Condition key (aw_ar_conditions()).
+ * @param string $cond  Condition key (sourceweb_ar_conditions()).
  * @param string $field Field key.
  * @param string $now   What the listing holds.
  * @param string $value The waiting value.
@@ -210,45 +210,45 @@ function aw_ar_default_rules() {
  * @param array  $ctx   own_site, site_stem, site_host.
  * @return bool
  */
-function aw_ar_test( $cond, $field, $now, $value, $conf, array $ctx ) {
+function sourceweb_ar_test( $cond, $field, $now, $value, $conf, array $ctx ) {
 	switch ( $cond ) {
 		case 'any':
 			return true;
 		case 'low_tier':
 			return 'low' === $conf;
 		case 'unusable':
-			return ! aw_ar_tokens( $value );
+			return ! sourceweb_ar_tokens( $value );
 		case 'pin_differs':
-			$pp = aw_ar_pin( $value );
-			$np = aw_ar_pin( $now );
+			$pp = sourceweb_ar_pin( $value );
+			$np = sourceweb_ar_pin( $now );
 			return '' !== $pp && '' !== $np && $pp !== $np;
 		case 'adds_nothing':
-			$nt = aw_ar_tokens( $now );
-			return ! array_filter( aw_ar_tokens( $value ), fn( $w ) => ! aw_ar_in( $w, $nt ) );
+			$nt = sourceweb_ar_tokens( $now );
+			return ! array_filter( sourceweb_ar_tokens( $value ), fn( $w ) => ! sourceweb_ar_in( $w, $nt ) );
 		case 'fuller':
-			$pt = aw_ar_tokens( $value );
-			$nt = aw_ar_tokens( $now );
-			return $nt && ! array_filter( $nt, fn( $w ) => ! aw_ar_in( $w, $pt ) );
+			$pt = sourceweb_ar_tokens( $value );
+			$nt = sourceweb_ar_tokens( $now );
+			return $nt && ! array_filter( $nt, fn( $w ) => ! sourceweb_ar_in( $w, $pt ) );
 		case 'same_value':
 			return 'pincode' === $field ? preg_replace( '/\D/', '', $value ) === preg_replace( '/\D/', '', $now ) : strtolower( $value ) === strtolower( $now );
 		case 'same_link':
-			return aw_ar_url( $value ) === aw_ar_url( $now );
+			return sourceweb_ar_url( $value ) === sourceweb_ar_url( $now );
 		case 'content_link':
 			return (bool) preg_match( '#/(posts|photos|videos|permalink|story\.php|share|reels?|watch|events|hashtag)(/|\?|$)#', strtolower( $value ) );
 		case 'bare_link':
-			$bp = explode( '/', aw_ar_url( $now ) );
+			$bp = explode( '/', sourceweb_ar_url( $now ) );
 			return count( $bp ) <= 1 || ( count( $bp ) <= 2 && in_array( $bp[1] ?? '', AW_AR_GENERIC, true ) );
 		case 'same_handle':
-			$bp = explode( '/', aw_ar_url( $now ) );
-			$ap = explode( '/', aw_ar_url( $value ) );
+			$bp = explode( '/', sourceweb_ar_url( $now ) );
+			$ap = explode( '/', sourceweb_ar_url( $value ) );
 			$bh = preg_replace( '/[._\-]/', '', $bp[1] ?? '' );
 			return '' !== $bh && $bh === preg_replace( '/[._\-]/', '', $ap[1] ?? "\0" );
 		case 'same_site':
-			return preg_replace( '#/.*$#', '', aw_ar_url( $value ) ) === preg_replace( '#/.*$#', '', aw_ar_url( $now ) );
+			return preg_replace( '#/.*$#', '', sourceweb_ar_url( $value ) ) === preg_replace( '#/.*$#', '', sourceweb_ar_url( $now ) );
 		case 'home_page':
-			return '' === aw_ar_path( $value );
+			return '' === sourceweb_ar_path( $value );
 		case 'names_donation':
-			return false !== stripos( aw_ar_path( $value ), 'donat' ) && false === stripos( aw_ar_path( $now ), 'donat' );
+			return false !== stripos( sourceweb_ar_path( $value ), 'donat' ) && false === stripos( sourceweb_ar_path( $now ), 'donat' );
 		case 'typo_own_site':
 		case 'near_duplicate':
 		case 'domain_typo':
@@ -283,22 +283,22 @@ function aw_ar_test( $cond, $field, $now, $value, $conf, array $ctx ) {
  * @param string     $conf  high | medium | low.
  * @param array      $ctx   own_site (read on the organisation's own website), site_stem (the first word of its
  *                          website's name, e.g. wildcer), site_host (its host without www).
- * @param array|null $rules The rules in order (aw_ar_default_rules() when null).
+ * @param array|null $rules The rules in order (sourceweb_ar_default_rules() when null).
  * @return array{act: string, why: string} act is approve, reject or leave.
  */
-function aw_ar_decide( $field, $now, $value, $conf = '', array $ctx = array(), $rules = null ) {
+function sourceweb_ar_decide( $field, $now, $value, $conf = '', array $ctx = array(), $rules = null ) {
 	$now   = trim( (string) $now );
 	$value = trim( (string) $value );
 	if ( '' === $value || ( '' === $now && 'phone' !== $field ) ) {
 		return array( 'act' => 'leave', 'why' => 'nothing to compare' ); // an empty field follows the plugin's own rules
 	}
 	$group = in_array( $field, AW_AR_SOCIAL, true ) ? 'social' : $field;
-	$conds = aw_ar_conditions();
-	foreach ( null === $rules ? aw_ar_default_rules() : $rules as $r ) {
+	$conds = sourceweb_ar_conditions();
+	foreach ( null === $rules ? sourceweb_ar_default_rules() : $rules as $r ) {
 		if ( empty( $r['on'] ) || ( $r['field'] ?? '' ) !== $group || ! isset( $conds[ $r['cond'] ?? '' ] ) || ! isset( AW_AR_ACTIONS[ $r['action'] ?? '' ] ) ) {
 			continue;
 		}
-		if ( aw_ar_test( $r['cond'], $field, $now, $value, $conf, $ctx ) ) {
+		if ( sourceweb_ar_test( $r['cond'], $field, $now, $value, $conf, $ctx ) ) {
 			return array( 'act' => $r['action'], 'why' => $conds[ $r['cond'] ]['label'] );
 		}
 	}

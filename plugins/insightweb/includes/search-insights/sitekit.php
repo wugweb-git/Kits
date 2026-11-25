@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Site Kit's plugin context, or null. */
-function aw_si_sitekit_context() {
+function insightweb_si_sitekit_context() {
 	if ( defined( 'GOOGLESITEKIT_PLUGIN_MAIN_FILE' ) && class_exists( '\Google\Site_Kit\Context' ) ) {
 		return new \Google\Site_Kit\Context( GOOGLESITEKIT_PLUGIN_MAIN_FILE );
 	}
@@ -38,7 +38,7 @@ function aw_si_sitekit_context() {
  * @param callable $callback Receives the module.
  * @return mixed|WP_Error What $callback returned, or a WP_Error saying in plain words why the module cannot be used.
  */
-function aw_si_with_module( string $slug, callable $callback ) {
+function insightweb_si_with_module( string $slug, callable $callback ) {
 	$fake = apply_filters( 'aw_si_sitekit_module', null, $slug );
 	if ( $fake ) {
 		return $callback( $fake );
@@ -69,7 +69,7 @@ function aw_si_with_module( string $slug, callable $callback ) {
 	$was = get_current_user_id();
 	wp_set_current_user( $owner ); // Site Kit binds the Google client to the current user when the module is built.
 	try {
-		$ctx = aw_si_sitekit_context();
+		$ctx = insightweb_si_sitekit_context();
 		if ( ! $ctx ) {
 			return new WP_Error( 'aw_si_sitekit', __( 'Site Kit by Google is not active.', 'insightweb' ) );
 		}

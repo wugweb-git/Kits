@@ -44,7 +44,7 @@ add_action(
 		$want = array();
 		foreach ( (array) get_option( 'aw_ai_models', array() ) as $r ) {
 			$host = AW_AI_HOSTS[ $r['provider'] ?? '' ] ?? '';
-			if ( '' !== $host && ! array_key_exists( $host, $have ) && ( ! function_exists( 'aw_favicon_url' ) || '' === aw_favicon_url( $host ) ) ) {
+			if ( '' !== $host && ! array_key_exists( $host, $have ) && ( ! function_exists( 'sourceweb_favicon_url' ) || '' === sourceweb_favicon_url( $host ) ) ) {
 				$want[ $host ] = true;
 			}
 		}

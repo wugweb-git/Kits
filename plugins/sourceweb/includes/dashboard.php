@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * AI keys refused or out of credit: the same rule as the Dashboard's AI tile (aw_sourcing_ai_counts()).
+ * AI keys refused or out of credit: the same rule as the Dashboard's AI tile (sourceweb_sourcing_ai_counts()).
  * Null when the keys are not saved on the AI models screen yet. Counts only; never reads a key's value.
  */
-function aw_sourcing_dash_ai_refused(): ?int {
+function sourceweb_sourcing_dash_ai_refused(): ?int {
 	$rows = get_option( 'aw_ai_models', null );
 	if ( ! is_array( $rows ) ) {
 		return null;
@@ -34,19 +34,19 @@ function aw_sourcing_dash_ai_refused(): ?int {
 }
 
 /**
- * One row per worker (aw_workers_all(): the registry's, then Planned), problems first.
+ * One row per worker (sourceweb_workers_all(): the registry's, then Planned), problems first.
  *
  * @return array[] name, last (Unix or 0), status (failed, late, running, ok, off), problem (bool).
  */
-function aw_sourcing_dash_workers(): array {
+function sourceweb_sourcing_dash_workers(): array {
 	$kinds = array();
-	foreach ( array_keys( aw_workers_problems() ) as $k ) {
+	foreach ( array_keys( sourceweb_workers_problems() ) as $k ) {
 		list( $file, $kind )              = explode( ':', $k, 2 );
-		$kinds[ aw_worker_id( $file ) ][] = $kind;
+		$kinds[ sourceweb_worker_id( $file ) ][] = $kind;
 	}
 	$rows = array();
-	foreach ( aw_workers_all() as $id => $w ) {
-		$last  = aw_workers_last( $w['file'] );
+	foreach ( sourceweb_workers_all() as $id => $w ) {
+		$last  = sourceweb_workers_last( $w['file'] );
 		$k     = $kinds[ $id ] ?? array();
 		$reg   = (array) ( $w['registry'] ?? array() );
 		$sched = ! empty( $reg['crons'] ) || ! empty( $reg['after'] );
@@ -85,11 +85,11 @@ add_action(
 			'aw_sourcing_dashboard',
 			'SourceWeb',
 			function () {
-				$rows    = aw_sourcing_dash_workers();
+				$rows    = sourceweb_sourcing_dash_workers();
 				$need    = count( array_filter( $rows, fn( $r ) => $r['problem'] ) );
-				$refused = aw_sourcing_dash_ai_refused();
-				$review  = aw_review_count();
-				$to_rev  = aw_sourcing_overview_link( 'To review', admin_url( 'admin.php?page=aw-review' ), AW_REVIEW_CAP );
+				$refused = sourceweb_sourcing_dash_ai_refused();
+				$review  = sourceweb_review_count();
+				$to_rev  = sourceweb_sourcing_overview_link( 'To review', admin_url( 'admin.php?page=aw-review' ), AW_REVIEW_CAP );
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 						array(
@@ -100,7 +100,7 @@ add_action(
 					);
 				}
 				/* translators: 1: number of items, 2: link to To review. */
-				echo '<p>' . sprintf( esc_html( _n( '%1$d item waiting in %2$s.', '%1$d items waiting in %2$s.', $review, 'sourceweb' ) ), (int) $review, $to_rev ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the link is escaped by aw_sourcing_overview_link().
+				echo '<p>' . sprintf( esc_html( _n( '%1$d item waiting in %2$s.', '%1$d items waiting in %2$s.', $review, 'sourceweb' ) ), (int) $review, $to_rev ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the link is escaped by sourceweb_sourcing_overview_link().
 
 				$status = array(
 					'failed'  => array( 'dismiss', '#b32d2e', 'Failed' ),
@@ -119,7 +119,7 @@ add_action(
 				}
 				echo '</tbody></table></details>';
 
-				echo '<p>' . aw_sourcing_overview_link( 'Plugins → SourceWeb → Workers', admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . ' | ' . $to_rev . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by aw_sourcing_overview_link().
+				echo '<p>' . sourceweb_sourcing_overview_link( 'Plugins → SourceWeb → Workers', admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . ' | ' . $to_rev . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped by sourceweb_sourcing_overview_link().
 			}
 		);
 	},

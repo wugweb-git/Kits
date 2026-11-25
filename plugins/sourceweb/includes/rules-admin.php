@@ -40,7 +40,7 @@ add_action(
 	function () {
 		global $pagenow;
 		// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a GET redirect, nothing saved; each value is sanitized below.
-		if ( ! aw_rules_live() || 'admin.php' !== $pagenow || 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) || 'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
+		if ( ! sourceweb_rules_live() || 'admin.php' !== $pagenow || 'aw-sourcing' !== sanitize_key( $_GET['page'] ?? '' ) || 'GET' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
 			return;
 		}
 		$tab = sanitize_key( $_GET['tab'] ?? '' );
@@ -55,7 +55,7 @@ add_action(
 		}
 		// phpcs:enable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		unset( $q['page'], $q['tab'] );
-		wp_safe_redirect( aw_rules_url( $tab, array_map( 'rawurlencode', $q ) ) ); // 302: a rollback brings the old tabs back
+		wp_safe_redirect( sourceweb_rules_url( $tab, array_map( 'rawurlencode', $q ) ) ); // 302: a rollback brings the old tabs back
 		exit;
 	}
 );
@@ -63,8 +63,8 @@ add_action(
 /* ---------- Section rules → Tag rules ---------- */
 
 /** The tag rules (aw_sources['topic_tags']): tag slug => rule. */
-function aw_rules_tag_rules() {
-	return (array) ( aw_sources_config()['topic_tags'] ?? array() );
+function sourceweb_rules_tag_rules() {
+	return (array) ( sourceweb_sources_config()['topic_tags'] ?? array() );
 }
 
 /**
@@ -76,15 +76,15 @@ function aw_rules_tag_rules() {
  * @param array  $in       any, unless, hold_reason (sanitized text), hold (regular expressions, one per line).
  * @return array{0: string, 1: string} Notice key (tag_added, tag_saved, tag_exists, tag_empty, tag_badre, none) and what it is about.
  */
-function aw_rules_tag_save( $tag, $original, array $in ) {
-	list( $rule, $bad ) = aw_rules_tag_rule_clean( $in );
+function sourceweb_rules_tag_save( $tag, $original, array $in ) {
+	list( $rule, $bad ) = sourceweb_rules_tag_rule_clean( $in );
 	if ( '' === $tag || ! $rule['any'] ) {
 		return array( 'tag_empty', '' );
 	}
 	if ( $bad ) {
 		return array( 'tag_badre', implode( ', ', $bad ) );
 	}
-	$c     = aw_sources_config();
+	$c     = sourceweb_sources_config();
 	$rules = (array) ( $c['topic_tags'] ?? array() );
 	if ( $tag !== $original && isset( $rules[ $tag ] ) ) {
 		return array( 'tag_exists', $tag );
@@ -115,7 +115,7 @@ function aw_rules_tag_save( $tag, $original, array $in ) {
 	}
 	$c['topic_tags'] = $out;
 	update_option( 'aw_sources', $c, false );
-	aw_src_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
+	sourceweb_src_log( 'sections', null === $old ? "Tag rule $tag added" : ( $tag === $original ? "Tag rule $tag edited" : "Tag rule $original moved to the tag $tag and edited" . ( $moved ? ' (allowed tag changed with it in ' . implode( ', ', $moved ) . ')' : '' ) ), null === $old ? '' : array( $original => $old ), array( $tag => $rule ) );
 	return array( null === $old ? 'tag_added' : 'tag_saved', $tag );
 }
 
@@ -125,24 +125,24 @@ function aw_rules_tag_save( $tag, $original, array $in ) {
  * @param string $tag Tag slug.
  * @return array{0: string, 1: string} tag_deleted or none, and the tag.
  */
-function aw_rules_tag_delete( $tag ) {
-	$c = aw_sources_config();
+function sourceweb_rules_tag_delete( $tag ) {
+	$c = sourceweb_sources_config();
 	if ( '' === $tag || ! isset( $c['topic_tags'][ $tag ] ) ) {
 		return array( 'none', $tag );
 	}
 	$old = $c['topic_tags'][ $tag ];
 	unset( $c['topic_tags'][ $tag ] );
 	update_option( 'aw_sources', $c, false );
-	aw_src_log( 'sections', "Tag rule $tag deleted", array( $tag => $old ), '' );
+	sourceweb_src_log( 'sections', "Tag rule $tag deleted", array( $tag => $old ), '' );
 	return array( 'tag_deleted', $tag );
 }
 
 /* ---------- Directory enrichment → trust order and field rules ---------- */
 
 /** The stored option, or the seed when it is not stored yet. */
-function aw_rules_enrich_option() {
+function sourceweb_rules_enrich_option() {
 	$o = get_option( AW_ENRICH_RULES_OPTION );
-	return is_array( $o ) && ! empty( $o['fields'] ) ? $o : aw_enrich_field_rules_seed( array_keys( aw_enrich_fields() ) );
+	return is_array( $o ) && ! empty( $o['fields'] ) ? $o : sourceweb_enrich_field_rules_seed( array_keys( sourceweb_enrich_fields() ) );
 }
 
 /**
@@ -151,19 +151,19 @@ function aw_rules_enrich_option() {
  * @param string $field Field key.
  * @return array{0: string, 1: string} field_reset, none or nosuch, and the field.
  */
-function aw_rules_field_reset( $field ) {
-	$rows = aw_rules_field_rows();
+function sourceweb_rules_field_reset( $field ) {
+	$rows = sourceweb_rules_field_rows();
 	if ( ! isset( $rows[ $field ] ) ) {
 		return array( 'nosuch', $field );
 	}
-	$opt = aw_rules_enrich_option();
+	$opt = sourceweb_rules_enrich_option();
 	if ( ! isset( $opt['fields'][ $field ] ) ) {
 		return array( 'none', $rows[ $field ]['label'] );
 	}
 	$old = $opt['fields'][ $field ];
 	unset( $opt['fields'][ $field ] );
 	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-	aw_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ') put back to the built-in rule', $old, '' );
+	sourceweb_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ') put back to the built-in rule', $old, '' );
 	return array( 'field_reset', $rows[ $field ]['label'] );
 }
 
@@ -173,33 +173,33 @@ function aw_rules_field_reset( $field ) {
  * @param array $pos Source key => position.
  * @return array{0: string, 1: string} order_saved or none, and the order in words.
  */
-function aw_rules_priority_save( array $pos ) {
-	$opt = aw_rules_enrich_option();
-	$old = aw_enrich_field_rules()['priority'];
-	$new = aw_enrich_priority_from_positions( $pos, aw_enrich_source_keys(), $old );
+function sourceweb_rules_priority_save( array $pos ) {
+	$opt = sourceweb_rules_enrich_option();
+	$old = sourceweb_enrich_field_rules()['priority'];
+	$new = sourceweb_enrich_priority_from_positions( $pos, sourceweb_enrich_source_keys(), $old );
 	if ( $new === $old ) {
 		return array( 'none', 'the trust order' );
 	}
 	$opt['priority'] = $new;
 	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-	aw_src_log( 'enrich', 'Trust order changed', $old, $new );
+	sourceweb_src_log( 'enrich', 'Trust order changed', $old, $new );
 	return array( 'order_saved', implode( ', ', $new ) );
 }
 
-/** Every Field rules row: the enrichment fields and the listing fields (rules-model.php aw_enrich_field_rule_rows). */
-function aw_rules_field_rows() {
-	return aw_enrich_field_rule_rows( aw_enrich_schema(), aw_enrich_fields(), aw_enrich_field_rules()['fields'] );
+/** Every Field rules row: the enrichment fields and the listing fields (rules-model.php sourceweb_enrich_field_rule_rows). */
+function sourceweb_rules_field_rows() {
+	return sourceweb_enrich_field_rule_rows( sourceweb_enrich_schema(), sourceweb_enrich_fields(), sourceweb_enrich_field_rules()['fields'] );
 }
 
 /**
  * Save one field's rule.
  *
- * @param string $field Field key (one of aw_rules_field_rows()).
+ * @param string $field Field key (one of sourceweb_rules_field_rows()).
  * @param array  $in    on, ai, invite, social (bool), multi (int), official (key), sources (keys), apply (key).
  * @return array{0: string, 1: string} field_saved or none, and the field's label.
  */
-function aw_rules_field_save( $field, array $in ) {
-	$rows = aw_rules_field_rows();
+function sourceweb_rules_field_save( $field, array $in ) {
+	$rows = sourceweb_rules_field_rows();
 	if ( ! isset( $rows[ $field ] ) ) {
 		return array( 'nosuch', $field );
 	}
@@ -207,14 +207,14 @@ function aw_rules_field_save( $field, array $in ) {
 		$in['on'] = false; // a field type enrichment cannot write stays off
 	}
 	$old = $rows[ $field ]['rule'];
-	$new = aw_enrich_rule_clean( $field, $in, aw_enrich_source_keys(), $old );
+	$new = sourceweb_enrich_rule_clean( $field, $in, sourceweb_enrich_source_keys(), $old );
 	if ( $new === $old && $rows[ $field ]['set'] ) {
 		return array( 'none', $rows[ $field ]['label'] );
 	}
-	$opt                     = aw_rules_enrich_option();
+	$opt                     = sourceweb_rules_enrich_option();
 	$opt['fields'][ $field ] = $new;
 	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
-	aw_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
+	sourceweb_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
 	return array( 'field_saved', $rows[ $field ]['label'] );
 }
 
@@ -223,7 +223,7 @@ function aw_rules_field_save( $field, array $in ) {
 add_action(
 	'load-' . AW_SRC_SCREEN,
 	function () {
-		if ( ! aw_rules_live() || 'rules' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which help to show
+		if ( ! sourceweb_rules_live() || 'rules' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which help to show
 			return;
 		}
 		$s    = get_current_screen();
@@ -250,17 +250,17 @@ add_action(
 add_action(
 	'admin_post_aw_domain_override',
 	function () {
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_rules_domain_override' ) ) {
+		if ( ! current_user_can( SOURCEWEB_SRC_CAP ) || ! check_admin_referer( 'aw_rules_domain_override' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$del = ! empty( $_POST['aw_delete'] );
 		$host = sanitize_text_field( wp_unslash( $_POST['host'] ?? '' ) );
 		if ( $del ) {
-			aw_rules_domain_override_delete( $host );
+			sourceweb_rules_domain_override_delete( $host );
 		} else {
 			$status = sanitize_key( wp_unslash( $_POST['status'] ?? 'neutral' ) );
 			$name   = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
-			aw_rules_domain_override_save( $host, $status, $name );
+			sourceweb_rules_domain_override_save( $host, $status, $name );
 		}
 		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ?? '' ) ), '' );
 		wp_safe_redirect( add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) );
@@ -271,13 +271,13 @@ add_action(
 add_action(
 	'admin_post_aw_feed_filter',
 	function () {
-		if ( ! current_user_can( AW_SRC_CAP ) || ! check_admin_referer( 'aw_rules_feed_filter' ) ) {
+		if ( ! current_user_can( SOURCEWEB_SRC_CAP ) || ! check_admin_referer( 'aw_rules_feed_filter' ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$raw_tags = sanitize_textarea_field( wp_unslash( $_POST['excluded_tags'] ?? '' ) );
 		$tags     = preg_split( '/[\r\n,]+/', $raw_tags, -1, PREG_SPLIT_NO_EMPTY );
 		$section  = sanitize_key( wp_unslash( $_POST['section'] ?? '' ) );
-		aw_rules_feed_excluded_tags_save( (array) $tags, $section );
+		sourceweb_rules_feed_excluded_tags_save( (array) $tags, $section );
 		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['_wp_http_referer'] ?? '' ) ), '' );
 		wp_safe_redirect( add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=rules' ) ) );
 		exit;
