@@ -1,5 +1,7 @@
 # SourceWeb on the Kits plugin standard (plan, 11 Nov 2026)
 
+**Status (25 Nov 2026):** Superseded by `docs/org/sourceweb-org-plan.md`; this 11 Nov plan predates the build (SourceWeb 0.1.0). Kept for its decision log only.
+
 **Status:** plan only, waiting on the owner. No code until the owner approves it.
 **Decision (owner, 11 Nov 2026):** SourceWeb (`plugins/aw-sourcing`) moves onto the shared Kits Core admin shell (Dashboard, one working list, Settings) and meets the Kits plugin standard (header, readme, translations, tests). The data stays as it is: options, the `aw_enrich` table, the `aw/v1` routes the workers use and every `aw_` name. The aw→kits rename is deferred. The workers repo is out of scope.
 **Checked against:** `origin/wordpress-dev` at `c37d3b7c`. Every file:line below was read on that commit.

@@ -5,7 +5,7 @@
 - **Phase 2 (blocks):** done: `fields`, `status`, `people`, `featured-in`, `local-card`, `helplines`, `find-help`, `listing-finder`, and **`collection-filter`** (the block §0.2 says does not exist now does, as `directoryweb/collection-filter`, not `kits/collection-filter`).
 - **Phase 3 (admin):** done: Dashboard, Claims, Settings, `directoryweb/v1`, `manage_directoryweb`.
 - **Added since the plan:** native claims and a claim lifecycle that need no Fluent Forms (`claim-native.php`), optional claim emails, and standalone operation. Kits Core is **optional**: the "requires Kits Core" decision below was relaxed on 23 Nov 2026 when the plugins became independent.
-- **Still open:** Fluent Forms claims cannot revoke or re-open; proof upload; a real mail transport is untested (Playground cannot deliver mail).
+- **Still open:** Fluent Forms claims cannot revoke or re-open; Fluent Forms Pro uploader (X); a real mail transport is untested (Playground cannot deliver mail).
 **Decision (owner, 11 Nov 2026):** the Directory (listings, types, places, claims, badges, Find help, government records) leaves Animal Writes Core and becomes the Kits plugin **DirectoryWeb**. It started as requiring Kits Core (now optional, see the status above), keeps today's data keys (the aw→kits rename is deferred), and follows the Kits plugin UI standard (Dashboard, one working list, Settings).
 **Checked against:** `origin/wordpress-dev` at `b0512a4e` (live `wordpress` is `637e9e64`). Every file:line below was read on that commit.
 

@@ -1,5 +1,7 @@
 # Kits master audit matrix (24 Nov 2026)
 
+**Status (25 Nov 2026):** DirectoryWeb and RankWeb rows are current for `feat/directoryweb-completion`; MailWeb, PlanWeb, SourceWeb and InsightWeb rows are report only.
+
 Source of truth for both agents. Evidence is from reading code and running the listed commands on `kits-suite` @ `675e96a`
 (plus the DirectoryWeb branch `feat/directoryweb-completion`). Nothing here was exercised in a browser or with live credentials
 unless a row says so. "Passes its tests" is not "functionally verified": the Status column says which one it is.
@@ -23,17 +25,20 @@ Owners: **CC** = Claude Code, **AG** = Antigravity (reports only; not edited by 
 |---|---|---|---|---|---|
 | Listing type, facets, filter engine, find-help, local cards | Implemented, not functionally verified | `directory.php`, `find-help.php`; suites `directoryweb-tests` (44), `listing-meta-tests` (2), `org-people-tests` (16) pass | Browser/E2E of facet UI | P2 | Playground journey: filter by state/type, URL state persists |
 | Collection/filter block | Implemented, not functionally verified | `directoryweb-collection-filter.php`; `collection-filter-tests` 8/8; Playground renders the block (21/21 smoke) | Editor UI check in a browser; block patterns using it | P1 | Block insertable and saved in editor; renders filtered results |
-| Native claim submit (no Fluent Forms) | Implemented, not functionally verified | `claim-native.php`; Playground creates a claim via `dw_claim_create` and renders the form | Real form POST through `admin-post.php` (nonce, honeypot, rate limit) not exercised end-to-end; no proof upload | P1 | HTTP POST journey in Playground |
+| Native claim submit (no Fluent Forms) | Implemented, not functionally verified | `claim-native.php`; Playground creates a claim via `dw_claim_create` and renders the form | Real form POST through `admin-post.php` (nonce, honeypot, rate limit) not exercised end-to-end; evidence upload built (see rows below) | P1 | HTTP POST journey in Playground |
 | Claim limits over HTTP | **Headless-verified (extracted ZIP)** | 17 HTTP checks: per-email cap 3, per-IP 5/hour, honeypot, nonce, spoofed headers; plus-address variants are a known limitation; anonymous vs logged-in path not distinguishable in Playground (X) |
 | Claim diagnostics and admin navigation | **Headless-verified; shell row browser-unverified** | Live-state card on standalone Settings and a Claims row in the Kits shell payload; menu/link audit clean standalone and with Kits Core; Claims menu entry and Places dead links fixed |
-| Claim state machine and transitions | Verified complete (REST + core) | `claim-native-tests` 29/29; Playground: 409 on illegal move, approve applies area and verifies, revoke unverifies, anonymous denied | Withdraw UI for claimant; re-open from admin screen | P1 | Done for REST; UI pending |
+| Claim state machine and transitions | Verified complete (REST + core) | `claim-native-tests` 35/35; Playground: 409 on illegal move, approve applies area and verifies, revoke unverifies, anonymous denied | Withdraw UI for claimant; re-open from admin screen | P1 | Done for REST; UI pending |
 | Claims list/detail show native claims | **Browser-verified** (24 Nov, Playground full suite) | Kits Core shell Claims screen lists native claim `DW-5` ("Waiting 1"); View opens detail (`#claim-dw-5`). Fixed in this pass: shell hash route and `open > 0` check ignored `dw-<id>`; row `entry` collided with form-entry ids | Shell stays read-only by owner decision (11 Nov); decisions are made on the claim's edit screen | P1 | Done |
 | Decide native claims in admin (standalone) | **Browser-verified** | Claim edit screen metabox: Approve applied phone/website/area to listing; Revoke approval set state Revoked; list columns show state and changed fields. Fixed: legacy "Review" box garbled native claims; `kits_ff_phone_store` undefined standalone caused a fatal after approval (`claims-review.php` now uses `directoryweb_ff_*` wrappers) | Success notice after decide; shell "Claims" screen itself needs Kits Core with build (standalone shows "needs Kits Core") | P2 | Standalone Claims screen without Core |
 | Fluent Forms review path uses the state table | Partially implemented | `claims-review.php` decide handler now asks `dw_claim_can_transition` (409 on illegal move); behaviour unchanged (form claims still only leave `pending`); no state-change hooks fired because form-entry ids collide with post ids | Revoke/re-open for form claims; unified id space | P2 | Same 409 on both paths: done; revoke for form claims: pending |
 | Claim emails (claimant/reviewer) | Implemented, not functionally verified | `claim-native.php` sends via `wp_mail` (MailWeb/SMTP plugins carry it; no dependency) on create (claimant + site owner) and on approve/reject/revoke; gated by existing `aw_ff_send_email`; unit tests 5/5; not sent in a real mail transport | Delivery test with MailWeb; templates/translation | P1 | Mail observed with a real transport |
 | Admin UI, settings, onboarding | Partially implemented | Dashboard/Claims/Settings built (`directoryweb-ui.php`); onboarding not found | Audit with a browser; onboarding flow | P2 | Walkthrough passes in Playground |
 | Standalone without SCF/Kits Core | Implemented, not functionally verified | `directoryweb-standalone-test` 16, `directoryweb-scf-fallback-test` 10; real-WP activation | Field editing without SCF | P2 | Listing editable standalone |
-| Security | Partially implemented | Nonce enforced on REST; capability `manage_directoryweb`; claim abuse limits | Nonce-less admin-post path review, upload validation for proofs | P1 | Security checklist |
+| Security | Partially implemented | Nonce enforced on REST; capability `manage_directoryweb`; claim abuse limits | Nonce-less admin-post path review; security review of the evidence store | P1 | Security checklist |
+| Claim review without Kits Core or Animal Writes (F5) | Verified (U, P) | `claim-review-standalone-tests` 12; real Fluent Forms 6.2.17, `http-fluentforms-claim.py` 22 | Fluent Forms Pro uploader (X) | P1 | Pro upload test |
+| Protected listing fields and REST redaction (F6) | Verified (U, P) | `meta-authorization-tests` 64; journeys F6/F6b as anonymous, contributor, manager | Revisions/autosave hiding implemented, untested | P1 | Add revision/autosave probe |
+| Claim evidence store | Verified (U, P); web-server rules untested (X) | `claim-evidence-tests` 15; `http-claim-evidence.py` 22; encrypted at rest, served only by `manage_directoryweb` with nonce | Apache/nginx deny rules; provider originals stay plaintext | P1 | Deploy-time check |
 
 ### RankWeb (CC, priority 2) — updated 25 Nov 2026
 
@@ -133,7 +138,7 @@ Credential-dependent and therefore untestable here: MailWeb Hostinger token and 
 
 1. Roadmap §7.3 treats `shared-php` as shared infra; release doc says nothing consumes it.
 2. Roadmap says Kits Core "Hardened" and 5 suites; Core `PENDING.md` lists core features open; 11 test files exist.
-3. SourceWeb and InsightWeb readmes claim hard dependencies the code no longer enforces; RankWeb readme says it will not activate without Rank Math.
+3. SourceWeb and InsightWeb readmes claim hard dependencies the code no longer enforces.
 4. SourceWeb PENDING says 480 checks (actual 455); InsightWeb PENDING says 150 (actual 109 + 14).
 5. `docs/pending.md` links `docs/animalwrites-monorepo-migration-inventory.md`; the file is under `docs/architecture/`.
 6. Roadmap lists 2 theme style variations; theme has 3 (`dark` added).

@@ -1,5 +1,7 @@
 # UI, Spacing & Vertical Rhythm Audit
 
+**Status (25 Nov 2026):** Audit of the Animal Writes site, 21 Nov. Fixes are recorded as resolved in `themes/kits-by-wugweb/PENDING.md`; the target CSS is not in this repo, so not verifiable here.
+
 **Scope:** Sitewide Section Padding, Hub Layouts, Responsive Spacing & Container Rhythm  
 **Date:** 21 November 2026  
 **Auditor:** Design Systems & Frontend Engineering Specialist  

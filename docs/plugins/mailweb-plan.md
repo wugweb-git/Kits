@@ -1,5 +1,7 @@
 # MailWeb on the Kits plugin standard (plan)
 
+**Status (25 Nov 2026):** Superseded by `docs/org/mailweb-org-plan.md`; this 11 Nov plan predates the build (MailWeb 3.3.0). Kept for its decision log only.
+
 Status: plan only, for the owner's yes (owner, 11 Nov 2026). No code until it is approved. Checked against `origin/wordpress-dev` at c37d3b7c on 11 Nov 2026; every file:line below is from that commit.
 
 ## Fixed for this plan (owner)

@@ -1,5 +1,7 @@
 # Acceptance gates: DirectoryWeb and RankWeb
 
+**Status (25 Nov 2026):** Authoritative DirectoryWeb/RankWeb gate. The docs items and every "CI green on the final commit" item stay open; nothing is merged or deployed.
+
 A product is **complete** only when every box in its section is ticked **with evidence** (command, run URL, or browser
 session note). Evidence classes are kept apart: **U** unit/integration (PHP/JS), **H** headless Playground
 (`tools/playground/smoke.py`), **B** browser (real admin/front end in Playground), **X** external integration (real
@@ -24,7 +26,7 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 ## DirectoryWeb
 
 ### Claims
-- [x] U Native claim lifecycle and state table (`claim-native-tests` 34/34)
+- [x] U Native claim lifecycle and state table (`claim-native-tests` 35/35)
 - [x] H REST journey: create, list, detail, 409, approve, revoke, anonymous denied (22 checks)
 - [x] B Approve and Revoke from the claim edit screen (Playground, 24 Nov)
 - [x] B Kits Core shell Claims list and detail open `#claim-dw-<id>` (24 Nov)
@@ -35,7 +37,7 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 - [x] H Subscriber, editor and anonymous get 401/403 on claim list and transition (journey, 28 checks). Browser role switching not possible: Playground treats every request as admin
 - [x] B/U Claim emails captured via `pre_wp_mail`: received (claimant), new claim with working review link (owner), decision (claimant); none on re-open (25 Nov)
 - [ ] X Claim email delivery through a real transport (classify: not testable in Playground unless an SMTP sink is reachable)
-- [ ] U/H Fluent Forms claim decisions: state table enforced on the Fluent Forms path (needs Fluent Forms; classify X if not installed)
+- [x] U/H Fluent Forms claim decisions: state table enforced on the Fluent Forms path (needs Fluent Forms; classify X if not installed)
 - [x] B Claim list columns, button labels (Approve, Reject, Re-open, Revoke) and state shown after each decision
 
 ### Blocks and front end
@@ -108,4 +110,4 @@ Last updated: 25 Nov 2026 on `feat/directoryweb-completion`. Branch is not merge
 ### Classified, not built (25 Nov)
 - [ ] DirectoryWeb CRM events: deferred (no hook in code; waits on the shared connector decision)
 - [ ] DirectoryWeb default preset: deferred (no preset object; waits on Kits Core preset format)
-- [ ] DirectoryWeb claim proof upload: deferred (needs validation, private storage and a security review)
+- [x] U/H DirectoryWeb claim evidence upload (logo, photos, proof): built 25 Nov. Private encrypted store, `manage_directoryweb`-only nonce serving (`claim-evidence-tests` 15, `http-claim-evidence.py` 22). Security review before release. Apache `.htaccess`/nginx deny rules are documented but untested (X); the Fluent Forms Pro uploader is untested (X)

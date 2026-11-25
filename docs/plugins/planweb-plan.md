@@ -1,5 +1,7 @@
 # PlanWeb: the team's calendar as its own Kits plugin (plan)
 
+**Status (25 Nov 2026):** Superseded by `docs/org/planweb-org-plan.md`; this 11 Nov plan predates the build (PlanWeb 0.2.0). Kept for its decision log only.
+
 Owner, 11 Nov 2026: Dates moves into its own Kits plugin, **PlanWeb**, which holds the team's schedule and the content
 and marketing calendar, and runs a scheduler for internal jobs and reminders. **This is step 1, a plan only. No code
 until the owner says yes.**

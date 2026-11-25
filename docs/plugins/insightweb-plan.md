@@ -1,5 +1,7 @@
 # InsightWeb: Search Insights out of RankWeb (plan)
 
+**Status (25 Nov 2026):** Superseded by `docs/org/insightweb-org-plan.md`; this 11 Nov plan predates the build (InsightWeb 1.0.0). Kept for its decision log only.
+
 11 November 2026. Owner's decision of 11 Nov ("9. Decision log": "Search Insights leaves RankWeb; plugin names"). **Plan only: no code until the owner approves.** Built on `docs/seo/search-insights-plan.md`, the Search Insights entries in `docs/pending.md`, `docs/plugin-map.md` and the code on `wordpress-dev` at `b0512a4e` (live `wordpress` is `637e9e64`; the two commits between touch only the joined CSS files, nothing here).
 
 ## The split in one line

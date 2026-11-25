@@ -1,5 +1,7 @@
 # Service keys: one place per plugin (18 Nov 2026)
 
+**Status (25 Nov 2026):** Rule is current (each plugin keeps its own keys). Retirement of the shared vault (step 2) is not evidenced in this repo.
+
 Owner rule, 18 Nov 2026: every Wugweb Kits plugin that is sold or listed on WordPress.org keeps its own service keys in
 its own settings, as Yoast, Rank Math and Site Kit do. A `wp-config.php` constant of the same name wins. The shared
 vault (Kits → Keys: Animal Writes Core `includes/keys.php`, option `aw_keys`, reader `aw_key()`, page

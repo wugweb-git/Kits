@@ -3,7 +3,7 @@
 **Site Architecture:** Kits by Wugweb Universal Block Theme & Companion Plugins  
 **Target Matrix:** 1 Default Instance (Animal Writes / Neutral Kits) + 3 Tenant WordPress Deployments  
 **Repository:** [https://github.com/wugweb-git/kits](https://github.com/wugweb-git/kits) (Branch: `kits-suite`)  
-**Status:** Live & Documented (November 2026)
+**Status (25 Nov 2026):** Design guide, not a live record. The block mapping table names blocks that do not exist in code yet, and Animal Writes is a tenant, not a dependency.
 
 ---
 

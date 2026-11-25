@@ -1,6 +1,7 @@
 # RankWeb on the Kits plugin standard (plan)
 
 **Status (25 Nov 2026):** built on `feat/directoryweb-completion`; **not deployed, no stable release**. Earlier text here said "shipped and live on production": that was not verified and is removed. This is the one RankWeb plan; it holds the internal-links plan (Appendix A), the Rank Math Pro audit (Appendix B), the public WordPress.org scope (Appendix C) and the shared-shell admin decision (Appendix D). The former `rankweb-plan.md`, `rankweb-internal-links.md` and `rankweb-pro-audit.md` were duplicates of this file and are deleted.
+- Animal Writes redirects (`?author`, `/tel:`, 410, seeds) were removed from RankWeb; the Animal Writes site must re-home them (Rank Math list or its own code).
 - **Standalone (new, 25 Nov):** RankWeb runs with no Rank Math, no Kits Core and no DirectoryWeb: it prints the meta description, Open Graph, Twitter tags, structured data (with `_rankweb_schema_type` honoured), noindex and sitemap exclusion itself, detects Rank Math and other SEO plugins so nothing prints twice, and its admin screens work without Kits Core. Site-specific values moved to `includes/animal-writes-compat.php`. See `plugins/rankweb/PENDING.md`.
 - **Open:** redirects need Rank Math's list; archive canonical standalone; Animal Writes hub copy still in `titles.php`/`programmatic.php`; the ranking formula is undefined (owner); real Yoast/SEOPress/AIOSEO coexistence untested.
 11 November 2026. Owner's request of 11 Nov: bring the three existing plugins onto the shared Kits Core admin shell.
@@ -71,7 +72,7 @@ The four lines ship in the commit that removes Search Insights (phase 2, 2.0.0).
 | Search Insights | `aw-search-insights`, `includes/search-insights/admin.php` | `aw_si_cap()` | — | SI |
 | Old link `aw-seo-settings&tab=search-insights` → Search Insights → Settings | `includes/settings.php:486-489` | — | — | Kept, as InsightWeb §1.10 says |
 | Settings autoload fix-up | `includes/settings.php:482-484` | — | — | Same |
-| Admin notice: "RankWeb does nothing until Rank Math SEO is active." | `aw-seo-extras.php:35-41` | `activate_plugins` | — | Same (all admin screens, it is a blocker); also **D** Rank Math tile |
+| Admin notice: "RankWeb works without Rank Math; this row shows whether Rank Math is active." | `aw-seo-extras.php:35-41` | `activate_plugins` | — | Same (all admin screens, it is a blocker); also **D** Rank Math tile |
 | Admin notice: "Sitemap or llms.txt is not answering." | `includes/health.php:92-104` | `manage_options` | — | Same (all admin screens: it means search engines lose the sitemap); also **D** tile |
 | Kits → Plugins row, Kits → Welcome status row | `includes/kits-hub.php:15-56` (`kits_plugin_screens`, `kits_status_rows`) | `manage_categories` | Name, link to Overview, description, "Active, 1.9.3" or "Does nothing until Rank Math…" | Same filters; description becomes "What Rank Math doesn't do or keeps for Premium." in the SI commit (§0); icon added (§7) |
 | CI baseline lines | `tools/ci/settings_parts_baseline.txt:29-33` | — | — | Updated in the phase that changes each screen; line 33 leaves (SI) |
@@ -182,7 +183,7 @@ Front-end hooks, by file (all **Same**; this plan changes no output):
 | `rank-math-schema.php` | `wp_after_insert_post` 286, `rank_math/json_ld` 299 |
 | `opengraph.php` | 8 `rank_math/opengraph/*` hooks 32-85 |
 | `sitemap.php` | `rank_math/sitemap/providers` 109, `rank_math/sitemap/post_type_archive_link` 156, `save_post` 165 |
-| `redirects.php` | `parse_request` (upper case → lower case, 301) 105, `template_redirect` 126 (Library lang/issuer/court), 138 (`?author=` → About), 150 (Home `/page/N/` → Home), `do_redirect_guess_404_permalink` 160, `wp_trash_post` 167, `untrashed_post` 183 |
+| `redirects.php` | `parse_request` (upper case → lower case, 301) 105, `template_redirect` 126 (Library lang/issuer/court), 150 (Home `/page/N/` → Home), `wp_trash_post` 167, `untrashed_post` 183 |
 | `breadcrumbs.php` | `rank_math/frontend/breadcrumb/items` 130 |
 | `llms.php` | `rank_math/llms_txt/*` 28-127 |
 | `markdown.php` | `template_redirect` 317 (text/markdown on `Accept`) |
@@ -761,7 +762,7 @@ _Folded in 17 Nov 2026 from the former `docs/rankweb-org-rebrand.md`. The public
 # RankWeb → a public WordPress.org plugin: rebrand and generalise (scope, 17 Nov 2026)
 
 Scope only. Nothing here is built. It plans extracting a **generic, reusable, WordPress.org-listable** plugin from
-RankWeb (`plugins/aw-seo-extras`). RankWeb itself stays as the Animal Writes site plugin, self-hosted; the public
+RankWeb (`plugins/aw-seo-extras`). RankWeb is generic and standalone; Animal Writes values live in `animal-writes-compat.php`, loaded only when Animal Writes Core is active; the public
 plugin is a **separate codebase** that reuses RankWeb's generic parts.
 
 ## 1. Why this is feasible

@@ -1,7 +1,9 @@
 # Kits plugin screens (the Kits Core admin shell)
 
+**Status (25 Nov 2026):** Live spec for plugin screens on the Kits Core shell (`plugins/kits-core/src/shell`). Code comments now cite this path.
+
 How a Kits plugin builds its admin screens on Kits Core's shared shell. Written from what was built for RankWeb's
-new Dashboard and Settings (PR #120, 11 Nov 2026). Where this differs from `docs/admin-ui-spec.md` (the Kits menu's
+new Dashboard and Settings (PR #120, 11 Nov 2026). Where this differs from `docs/design-system/admin-ui-spec.md` (the Kits menu's
 own screens), this file applies to plugin screens.
 
 The pattern follows Google Site Kit's admin screens, using none of its code, CSS or images:

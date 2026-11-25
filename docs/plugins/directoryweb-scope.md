@@ -7,7 +7,7 @@
 > | 1 Inventory, 1.3 already in DirectoryWeb | Done for the data model, listing meta, data sources, re-verify job. 1.4 calls into Core: `kits_ff_*` calls replaced by `directoryweb_ff_*` wrappers in the claim code; remaining Core calls are optional integrations |
 > | 2 Dependency map | Holds. Kits Core, SCF, Fluent Forms, FluentCRM, MailWeb are all optional; standalone suites pass (`directoryweb-standalone-test` 16, `scf-fallback` 10) |
 > | 3 Engine and presets | **Not built as specified**: no `directoryweb-default` preset object exists in code; types and settings are still the Animal Writes defaults held in constants and options. Open |
-> | 4 Taxonomies | Done for tags/categories on the listing type; rename of `aw_*` deferred by decision |
+> | 4 Taxonomies | Done for tags/categories on the listing type; rename of `aw_*` deferred by decision; policy and migration path in `docs/plugins/directoryweb-data-naming-policy.md` |
 > | 5.1 Forms contract | **Done natively**: `directoryweb_ff_form('claim')` returns the built-in claim form when no form is configured; Fluent Forms still honoured. 5.2 enrichment: SourceWeb engine unchanged. 5.3 CRM events: not built (no event hook exists) |
 > | 6 SCF | Optional; fallback fields when SCF is absent |
 > | 7 Front end | Blocks done (nine registered, including `collection-filter`); shortcodes kept |
@@ -47,7 +47,7 @@ on this branch where marked "(branch)". Paths:
    settings are [A].
 4. **Move code, never data.** `aw_*` keys, `aw_listing`, terms, slugs, URLs and options stay.
 
-**Where we start.** DirectoryWeb 1.0.0 (live since 17 Nov) already holds 28 files and 9,372 lines in `dw/`, the 8 SCF
+**Where we start.** DirectoryWeb 1.0.0 (live since 17 Nov; now 1.1.0 on the branch, not deployed) already holds 28 files and 9,372 lines in `dw/`, the 8 SCF
 listing groups, the LGD place files, the map, the admin and the REST routes. Core still loads it from the sibling folder
 (`plugins/animal-writes-core/animal-writes-core.php:61-77`), and DirectoryWeb still needs Core
 (`plugins/directoryweb/directoryweb.php:35-46`).
