@@ -156,7 +156,7 @@ function rankweb_anchor_labels(): array {
  * @param bool $warn_only Only targets over a limit.
  * @param int  $page      Page, from 1.
  * @param int  $per_page  Rows per page.
- * @return array items (post_id, title, url, total, pct, warn), total.
+ * @return array items (post_id, title, url, edit, total, pct, warn), total.
  */
 function rankweb_anchor_page( bool $warn_only, int $page, int $per_page ): array {
 	$limits = rankweb_anchor_limits();
@@ -179,6 +179,7 @@ function rankweb_anchor_page( bool $warn_only, int $page, int $per_page ): array
 			'post_id' => $tid,
 			'title'   => (string) get_the_title( $tid ),
 			'url'     => (string) get_permalink( $tid ),
+			'edit'    => (string) get_edit_post_link( $tid, 'raw' ),
 			'total'   => $mix['total'],
 			'pct'     => (object) $mix['pct'],
 			'warn'    => $mix['warn'],
@@ -190,37 +191,49 @@ function rankweb_anchor_page( bool $warn_only, int $page, int $per_page ): array
 	);
 }
 
-add_action(
-	'rest_api_init',
-	function () {
-		register_rest_route(
-			'rankweb/v1',
-			'/links/anchors',
-			array(
-				'methods'             => 'GET',
-				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
-				'args'                => array(
-					'warn'     => array(
-						'type'    => 'boolean',
-						'default' => false,
-					),
-					'page'     => array(
-						'type'    => 'integer',
-						'default' => 1,
-						'minimum' => 1,
-					),
-					'per_page' => array(
-						'type'    => 'integer',
-						'default' => 25,
-						'minimum' => 1,
-						'maximum' => 100,
-					),
+add_action( 'rest_api_init', 'rankweb_anchor_register_routes' );
+
+/** GET rankweb/v1/links/anchors (manage_rankweb): one page of targets with their anchor mix (warn, page, per_page), the type labels and the limits. */
+function rankweb_anchor_register_routes(): void {
+	register_rest_route(
+		'rankweb/v1',
+		'/links/anchors',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
+			'args'                => array(
+				'warn'     => array(
+					'type'    => 'boolean',
+					'default' => false,
 				),
-				'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_anchor_page( (bool) $req['warn'], (int) $req['page'], (int) $req['per_page'] ) + array( 'limits' => rankweb_anchor_limits() ) ),
-			)
-		);
-	}
-);
+				'page'     => array(
+					'type'    => 'integer',
+					'default' => 1,
+					'minimum' => 1,
+				),
+				'per_page' => array(
+					'type'    => 'integer',
+					'default' => 25,
+					'minimum' => 1,
+					'maximum' => 100,
+				),
+			),
+			'callback'            => function ( WP_REST_Request $req ) {
+				$per  = (int) $req['per_page'];
+				$page = rankweb_anchor_page( (bool) $req['warn'], (int) $req['page'], $per );
+				return rest_ensure_response(
+					$page + array(
+						'page'     => (int) $req['page'],
+						'per_page' => $per,
+						'pages'    => max( 1, (int) ceil( $page['total'] / $per ) ),
+						'labels'   => rankweb_anchor_labels(),
+						'limits'   => rankweb_anchor_limits(),
+					)
+				);
+			},
+		)
+	);
+}
 
 /** The "Anchor mix" view of RankWeb → Internal links. */
 function rankweb_anchor_screen(): void {

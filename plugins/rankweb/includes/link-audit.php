@@ -468,62 +468,78 @@ function rankweb_link_audit_progress(): array {
 
 /* ---------- REST ---------- */
 
-add_action(
-	'rest_api_init',
-	function () {
-		register_rest_route(
-			'rankweb/v1',
-			'/links',
-			array(
-				'methods'             => 'GET',
-				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
-				'args'                => array(
-					'flag'     => array(
-						'type'    => 'string',
-						'default' => '',
-						'enum'    => array_merge( array( '' ), RankWeb_Link_Audit::FLAGS ),
-					),
-					'page'     => array(
-						'type'    => 'integer',
-						'default' => 1,
-						'minimum' => 1,
-					),
-					'per_page' => array(
-						'type'    => 'integer',
-						'default' => 25,
-						'minimum' => 1,
-						'maximum' => 100,
-					),
+add_action( 'rest_api_init', 'rankweb_link_audit_register_routes' );
+
+/**
+ * The audit's routes under rankweb/v1 (the native Internal links screen reads and starts it here):
+ *
+ *   GET  links          manage_rankweb  one page of findings (flag, page, per_page), the labels and the summary
+ *   GET  links/summary  manage_rankweb  the last audit's counts and what a running one is doing
+ *   POST links/audit    manage_options  start an audit now
+ */
+function rankweb_link_audit_register_routes(): void {
+	register_rest_route(
+		'rankweb/v1',
+		'/links',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
+			'args'                => array(
+				'flag'     => array(
+					'type'    => 'string',
+					'default' => '',
+					'enum'    => array_merge( array( '' ), RankWeb_Link_Audit::FLAGS ),
 				),
-				'callback'            => function ( WP_REST_Request $req ) {
-					$page = rankweb_link_audit_page( (string) $req['flag'], (int) $req['page'], (int) $req['per_page'] );
-					return rest_ensure_response( $page + array( 'summary' => rankweb_link_audit_summary() ) );
-				},
-			)
-		);
-		register_rest_route(
-			'rankweb/v1',
-			'/links/summary',
-			array(
-				'methods'             => 'GET',
-				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
-				'callback'            => fn() => rest_ensure_response( rankweb_link_audit_summary() ),
-			)
-		);
-		register_rest_route(
-			'rankweb/v1',
-			'/links/audit',
-			array(
-				'methods'             => 'POST',
-				'permission_callback' => rankweb_rest_can( 'manage_options' ),
-				'callback'            => function () {
-					rankweb_link_audit_start();
-					return rest_ensure_response( rankweb_link_audit_summary() );
-				},
-			)
-		);
-	}
-);
+				'page'     => array(
+					'type'    => 'integer',
+					'default' => 1,
+					'minimum' => 1,
+				),
+				'per_page' => array(
+					'type'    => 'integer',
+					'default' => 25,
+					'minimum' => 1,
+					'maximum' => 100,
+				),
+			),
+			'callback'            => function ( WP_REST_Request $req ) {
+				$per  = (int) $req['per_page'];
+				$page = rankweb_link_audit_page( (string) $req['flag'], (int) $req['page'], $per );
+				return rest_ensure_response(
+					$page + array(
+						'page'      => (int) $req['page'],
+						'per_page'  => $per,
+						'pages'     => max( 1, (int) ceil( $page['total'] / $per ) ),
+						'labels'    => rankweb_link_audit_labels(),
+						'has_types' => ! function_exists( 'rankweb_link_types' ) || (bool) rankweb_link_types(),
+						'summary'   => rankweb_link_audit_summary(),
+					)
+				);
+			},
+		)
+	);
+	register_rest_route(
+		'rankweb/v1',
+		'/links/summary',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
+			'callback'            => fn() => rest_ensure_response( rankweb_link_audit_summary() ),
+		)
+	);
+	register_rest_route(
+		'rankweb/v1',
+		'/links/audit',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'callback'            => function () {
+				rankweb_link_audit_start();
+				return rest_ensure_response( rankweb_link_audit_summary() );
+			},
+		)
+	);
+}
 
 /** The last audit's counts and what a running one is doing. */
 function rankweb_link_audit_summary(): array {
@@ -545,7 +561,7 @@ function rankweb_link_audit_summary(): array {
  * @param string $flag     A finding, or '' for every item with one.
  * @param int    $page     Page, from 1.
  * @param int    $per_page Rows per page.
- * @return array items (post_id, title, url, links_in, links_out, depth, flags, detail), total.
+ * @return array items (post_id, title, url, edit, links_in, links_out, depth, flags, detail), total.
  */
 function rankweb_link_audit_page( string $flag, int $page, int $per_page ): array {
 	global $wpdb;
@@ -565,6 +581,7 @@ function rankweb_link_audit_page( string $flag, int $page, int $per_page ): arra
 			'post_id'   => (int) $r['post_id'],
 			'title'     => (string) $r['post_title'],
 			'url'       => (string) get_permalink( (int) $r['post_id'] ),
+			'edit'      => (string) get_edit_post_link( (int) $r['post_id'], 'raw' ),
 			'links_in'  => (int) $r['links_in'],
 			'links_out' => (int) $r['links_out'],
 			'depth'     => (int) $r['depth'],

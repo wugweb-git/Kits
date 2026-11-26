@@ -2,8 +2,8 @@
 /**
  * RankWeb's screens on the Kits admin shell: admin.php?page=aw-seo-plus (Dashboard: the counts and the tools),
  * aw-seo-insights (Insights: trends and gaps), aw-seo-modules (Modules: switches, the modules table, where things
- * are), aw-faq (FAQ, native), aw-seo-settings (Settings) and the four working
- * tools aw-links, aw-images, aw-seo-csv and aw-redirects (each one's own output and forms as page parts). The screens are one
+ * are), aw-faq (FAQ, native), aw-links (Internal links, native), aw-seo-settings (Settings) and the three other working
+ * tools aw-images, aw-seo-csv and aw-redirects (each one's own output and forms as page parts). The screens are one
  * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
  * by the rankweb/v1 routes (rankweb-rest.php).
  *
@@ -44,6 +44,24 @@ function rankweb_ui_wanted(): string {
  */
 function rankweb_ui_cap( string $screen ): string {
 	return in_array( $screen, array( 'settings', 'images', 'csv', 'redirects' ), true ) ? 'manage_options' : RANKWEB_CAP;
+}
+
+/**
+ * The views of the Internal links screen that are available: the audit always, the anchor mix and the silos when their
+ * files are loaded.
+ *
+ * @return string[] 'audit', 'anchors', 'silos'.
+ */
+function rankweb_ui_link_views(): array {
+	return array_values(
+		array_filter(
+			array(
+				'audit',
+				function_exists( 'rankweb_anchor_page' ) ? 'anchors' : '',
+				function_exists( 'rankweb_silo_payload' ) ? 'silos' : '',
+			)
+		)
+	);
 }
 
 /**
@@ -167,6 +185,8 @@ add_action(
 					'faqUrl'    => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 					// The Dashboard's module switches save through settings/modules (manage_options).
 					'canSwitch' => current_user_can( 'manage_options' ),
+					// Internal links: the views whose files are loaded (a module switched off has none).
+					'linkViews' => 'links' === $screen ? rankweb_ui_link_views() : array(),
 					// The tools still drawn as page parts (Kits Core's page parts); the FAQ screen is native.
 					'parts'     => rankweb_tool_parts( $screen ),
 					// The Dashboard's Tools card.
@@ -236,7 +256,6 @@ function rankweb_ui_page( string $screen ): void {
  */
 function rankweb_tool_parts( string $screen ): array {
 	$body = array(
-		'links'     => 'rankweb_link_audit_body',
 		'images'    => 'rankweb_media_body',
 		'csv'       => 'rankweb_bulk_csv_body',
 		'redirects' => 'rankweb_redirect_tools_body',

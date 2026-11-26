@@ -81,6 +81,20 @@ if ( ! class_exists( 'WP_REST_Request' ) ) {
 		}
 	}
 }
+if ( ! class_exists( 'WP_Post' ) ) {
+	class WP_Post {
+		public $ID            = 0;
+		public $post_status   = 'publish';
+		public $post_type     = 'page';
+		public $post_password = '';
+		public $post_title    = '';
+		public function __construct( array $f = array() ) {
+			foreach ( $f as $k => $v ) {
+				$this->$k = $v;
+			}
+		}
+	}
+}
 if ( ! function_exists( 'is_wp_error' ) ) {
 	function is_wp_error( $v ) {
 		return $v instanceof WP_Error;
@@ -148,8 +162,9 @@ if ( ! function_exists( 'rest_ensure_response' ) ) {
 }
 if ( ! function_exists( 'register_rest_route' ) ) {
 	function register_rest_route( $ns, $route, $args ) {
-		$methods = (string) ( $args['methods'] ?? '' );
-		$GLOBALS['rw_routes'][ $methods . ' ' . $route ] = $args;
+		foreach ( isset( $args[0] ) ? $args : array( $args ) as $handler ) { // one handler, or a list of them
+			$GLOBALS['rw_routes'][ (string) ( $handler['methods'] ?? '' ) . ' ' . $route ] = $handler;
+		}
 		return true;
 	}
 }

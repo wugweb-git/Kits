@@ -36,6 +36,7 @@ import {
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
 import { ModuleCards } from './modules';
 import { Faq } from './tools/faq';
+import { Links } from './tools/links';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -1166,7 +1167,6 @@ function Settings() {
 
 /** The working tools (Internal links, Image SEO, SEO CSV, Redirect tools): each one's own output and forms, as page parts. */
 const TOOL_TITLES = {
-	links: __( 'Internal links', 'rankweb' ),
 	images: __( 'Image SEO', 'rankweb' ),
 	csv: __( 'SEO CSV', 'rankweb' ),
 	redirects: __( 'Redirect tools', 'rankweb' ),
@@ -1188,6 +1188,7 @@ function App() {
 		<AppShell header={ <Header /> }>
 			{ 'settings' === app.screen && <Settings /> }
 			{ 'faq' === app.screen && <Faq /> }
+			{ 'links' === app.screen && <Links /> }
 			{ TOOL_TITLES[ app.screen ] && <Tool screen={ app.screen } /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />
