@@ -53,3 +53,6 @@ ul{padding-left:1.25rem}
 .foot{margin-top:2rem;padding-top:1rem;padding-bottom:2rem;border-top:1px solid var(--g2);color:var(--g6);font-size:.875rem}
 @media (max-width:1199px){.tiles,.tiles-wide{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:767px){.wrap{padding:0 1rem}.tiles,.tiles-wide{grid-template-columns:1fr}.facts th{width:8rem}.ah{align-items:flex-start}}
+.ah-cta{margin:.75rem 0 0}.ah-cta .btn{margin:0}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}

@@ -179,8 +179,16 @@ def tile(label: str, value: str, sub: str = "", href: str = "") -> str:
     return f'<li class="tile"><span class="tile-label">{esc(label)}</span><span class="tile-value">{v}</span>{s}</li>'
 
 
-def layout(title: str, body: str, depth: int, tabs: list[tuple[str, str]] | None = None, header: str = "") -> str:
+def layout(title: str, body: str, depth: int, tabs: list[tuple[str, str]] | None = None, header: str = "", desc: str = "", path: str = "", ld: dict | None = None) -> str:
     up = "../" * depth
+    url = f"{pi.PAGES}/{path}"
+    meta = ""
+    if desc:
+        meta += f'<meta name="description" content="{esc(desc)}">\n<meta property="og:description" content="{esc(desc)}">\n'
+    meta += f'<link rel="canonical" href="{esc(url)}">\n<meta property="og:title" content="{esc(title)}">\n<meta property="og:type" content="website">\n<meta property="og:url" content="{esc(url)}">\n<meta name="twitter:card" content="summary">\n<meta name="theme-color" content="#141414">\n'
+    meta += '<link rel="icon" href="' + up + 'assets/icon.svg" type="image/svg+xml">\n'
+    if ld:
+        meta += '<script type="application/ld+json">' + json.dumps(ld).replace("</", "<\\/") + "</script>\n"
     nav = ""
     if tabs:
         cur = ' aria-current="page"'
@@ -192,7 +200,7 @@ def layout(title: str, body: str, depth: int, tabs: list[tuple[str, str]] | None
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)}</title>
-<link rel="stylesheet" href="{up}assets/style.css">
+{meta}<link rel="stylesheet" href="{up}assets/style.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -259,9 +267,14 @@ def product_page(i: dict, rel: dict | None) -> str:
         cards.append(card("Credits and copyright", text_to_html(i["credits"]), "credits"))
     tabs = [(t, "#" + h) for t, h, present in (("Download", "download", True), ("Description", "description", bool(i["description_long"].strip())), ("FAQ", "faq", bool(i["faq"].strip())), ("Changelog", "changelog", bool(i["changelog"].strip())), ("Details", "details", True)) if present]
     header = (f'<div class="ah"><div class="ah-icon" aria-hidden="true">{esc(i["name"][:1])}</div><div><p class="kind">{esc(i["type"].capitalize())}</p>'
-              f'<h1>{esc(i["name"])} <span class="ver">{esc(i["version"])}</span></h1><p class="lead">{esc(i["short_description"])}</p></div></div>')
+              f'<h1>{esc(i["name"])} <span class="ver">{esc(i["version"])}</span></h1><p class="lead">{esc(i["short_description"])}</p>'
+              + (f'<p class="ah-cta"><a class="btn" href="{esc(rel["download"].get("commercial") or "#download")}">Download {esc(rel["version"])}</a></p>' if rel else '<p class="ah-cta"><a class="btn btn-2" href="#download">Release status</a></p>') + '</div></div>')
+    ld = {"@context": "https://schema.org", "@type": "WebApplication" if False else ("SoftwareApplication"), "name": i["name"], "softwareVersion": (rel or {}).get("version") or i["version"],
+          "description": i["short_description"], "applicationCategory": "WordPress " + i["type"], "operatingSystem": "WordPress " + (i["requires_wp"] + "+" if i["requires_wp"] else ""),
+          "license": i["license_uri"] or None, "url": i["page"], "author": {"@type": "Organization", "name": i["author"] or "Wugweb"}}
+    ld = {k: v for k, v in ld.items() if v}
     body = f'<ul class="tiles">{"".join(tiles)}</ul>' + "\n".join(cards)
-    return layout(f'{i["name"]} {i["version"]}', body, 2, tabs, header)
+    return layout(f'{i["name"]} {i["version"]} | Kits by Wugweb', body, 2, tabs, header, i["short_description"], f'{"themes" if theme else "plugins"}/{i["slug"]}/', ld)
 
 
 def index_page(infos: list[dict], facts: dict) -> str:
@@ -274,7 +287,7 @@ def index_page(infos: list[dict], facts: dict) -> str:
                      f'<span class="tile-sub">{status} · source {esc(i["version"])}</span><span class="tile-desc">{esc(i["short_description"])}</span></li>')
     header = '<div class="ah"><div class="ah-icon" aria-hidden="true">K</div><div><h1>Kits by Wugweb</h1><p class="lead">The theme and the plugins of the Kits suite. Each product has its own version, changelog and release.</p></div></div>'
     body = f'<ul class="tiles tiles-wide">{"".join(cards)}</ul>' + card("Registry", '<p>The machine-readable list of every product\'s latest release, with download addresses and SHA-256, is the <a href="registry/index.json">registry</a>.</p>', "registry")
-    return layout("Kits by Wugweb: products", body, 0, None, header)
+    return layout("Kits by Wugweb: products", body, 0, None, header, "The Kits by Wugweb block theme and plugins for WordPress. Each has its own version, changelog and release.", "")
 
 
 def registry_entry(i: dict, rel: dict | None) -> dict:
@@ -315,6 +328,10 @@ def main() -> int:
         e = registry_entry(i, rel)
         entries[i["slug"]] = e
         (out / "registry" / f"{i['slug']}.json").write_text(json.dumps({"schema_version": 1, "product": i["slug"], **e}, indent=2) + "\n")
+    urls = [pi.PAGES + "/"] + [i["page"] for i in infos]
+    (out / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(f"<url><loc>{u}</loc></url>" for u in urls) + "</urlset>\n")
+    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {pi.PAGES}/sitemap.xml\n")
+    (out / "404.html").write_text(layout("Page not found | Kits by Wugweb", '<section class="card"><h2>Page not found</h2><p>This address has no page. Go to <a href="/Kits/">all products</a>.</p></section>', 0, None, '<div class="ah"><div><h1>Page not found</h1></div></div>', "", "404.html"), encoding="utf-8")
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     (out / "registry" / "index.json").write_text(json.dumps({"schema_version": 1, "generated_at": stamp, "repository": f"https://github.com/{pi.GITHUB}", "products": entries}, indent=2) + "\n")
     print(f"site: {len(infos)} product pages, registry with {sum(1 for e in entries.values() if e['released'])} released products -> {out}")
