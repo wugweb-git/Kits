@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,9 @@ DirectoryWeb calls two outside services, only for the tasks below. Nothing is se
 * **OpenStreetMap Nominatim (`https://nominatim.openstreetmap.org/`):** when a listing with an address is saved or its address changes, a background task about a minute later (and the geocode tool) looks up the listing's map position. The address, PIN code or place names are sent, with your site address in the User-Agent header. A contact email is sent only if your site adds one through the `directoryweb_geocode_contact` filter. Usage policy: [https://operations.osmfoundation.org/policies/nominatim/](https://operations.osmfoundation.org/policies/nominatim/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
 
 == Changelog ==
+
+= 1.2.1 =
+* The WordPress dashboard box is a row of tiles: each number links to its screen and a count to act on says Needs attention.
 
 = 1.2.0 =
 * New menu: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Claims, Import / Export, Settings.
