@@ -7,7 +7,7 @@ Source: git history of kits-suite (313 commits), CI run history (100 runs), GitH
 - 308 commits by the owner's account, 5 by Claude. (Authorship does not say who wrote the code.)
 
 ## A. Release mistakes (user-visible)
-1. **MailWeb 3.3.2 and InsightWeb 1.1.2 shipped held code.** Held code is code PENDING.md says must not load. Checked tag by tag: only 3.3.2 and 1.1.2 loaded it (3.3.0, 3.3.1, 1.1.0, 1.1.1 did not). MailWeb stored full failed-mail bodies (including password resets) in an option; InsightWeb stored 404 paths and visitor search terms. Live from 17:36 until 3.3.3 and 1.1.3 at 17:52 on 26 Nov. Found by audit, not by CI. Fixed.
+1. **MailWeb 3.3.2, InsightWeb 1.1.2 and SourceWeb 0.2.4 shipped held code** (SourceWeb found later, by the new check; see Suggested fixes). Held code is code PENDING.md says must not load. Checked tag by tag: only 3.3.2 and 1.1.2 loaded it (3.3.0, 3.3.1, 1.1.0, 1.1.1 did not). MailWeb stored full failed-mail bodies (including password resets) in an option; InsightWeb stored 404 paths and visitor search terms. Live from 17:36 until 3.3.3 and 1.1.3 at 17:52 on 26 Nov. Found by audit, not by CI. Fixed.
 2. **RankWeb 2.3.0 to 2.3.2: false "Sitemap not answering" notice and hourly email** on any site without Rank Math. Page cache could store WooCommerce cart and checkout pages. Fixed in 2.3.3.
 3. **Kits Core dashboard and wizard shipped looking wrong** (1.2.0 to 1.3.1): unstyled boxes, an empty Cron health box, Animal Writes-only alarms on every site. Fixed in 1.3.2 after repeated complaints.
 4. **Updater cached the registry 12 hours** and "Check again" did not clear it, so a new release looked missing. Fixed in 1.3.2.
@@ -21,7 +21,7 @@ Source: git history of kits-suite (313 commits), CI run history (100 runs), GitH
 3. **Red again on 26 Nov:** 5be7952 and 5921e83 (PHP 8.0/8.2 test matrix), 4117975 (DirectoryWeb 1.2.1, admin navigation audit), 0959092 (version check: changelog entries missing for bumped versions). Each was fixed by a follow-up commit.
 4. **0959092 bumped seven plugins in one commit without changelog entries.** CI caught it. Same class of mistake as releasing 3.3.2 with held code: the release step has no check that held code is not loaded.
 5. **16 CI runs were cancelled, never finished** (rapid merges: 25 Nov 12:55, 13:02, 16:52, 18:19 to 19:14, 26 Nov 04:11 to 04:45, and four on 26 Nov afternoon). Those commits have no result of their own. A later run on a newer commit covered them, but a failure in between would have been hidden.
-6. **Releases were made while only the head commit was proven.** No check ties a release tag to a green CI run on that exact commit. I did that by hand this time.
+6. **(Corrected 26 Nov)** An earlier version of this file said nothing ties a release to green CI. That was wrong: `release-product.yml` already refuses to run unless CI succeeded on that exact commit. The held-code releases passed that gate because the gate does not read the zip.
 7. **Too many changes per day to review.** 112 and 142 commits on 25 and 26 Nov, with a standalone audit only on day 5. The two held-code releases and the RankWeb false alarm all got through because nothing read the shipped zip.
 8. **Documentation churn:** about 24 commits are doc corrections ("fix stale names", "correct names, counts and not-built claims"). The docs were wrong often enough to need their own fix cycles.
 
@@ -46,7 +46,7 @@ Full list: docs/standalone-audit-2026-11-26.md. Headlines:
 Plugin Check output for any plugin; real-browser rendering of the fallback screens; live mail, Site Kit and Fluent Forms behaviour; job logs of the other 22 to 24 Nov failures (only the first and last of each kind were read; the rest are inferred from the same job names and the fix commits).
 
 ## Suggested fixes to the process (not done)
-1. A CI step that fails if a file listed as HOLD in a PENDING.md is required by any loader.
-2. A release step that refuses a tag unless CI is green on that exact commit.
+1. DONE 26 Nov: `tools/validate/check-held-code.py`, run in CI and in the release workflow. It immediately found a third held-code release: SourceWeb 0.2.4 loaded the held open-model consent file (two admin-only REST routes, no visible feature). Fixed in SourceWeb 0.2.5.
+2. (Already exists in release-product.yml; removed from this list.)
 3. A CI step that installs each built zip alone and opens each admin screen, failing on "needs Kits Core".
 4. Stop running CI with cancel-in-progress on the main branch.

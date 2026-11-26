@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.2.5
+
+- Stops loading the unfinished open-model consent and source-quality code that 0.2.4 shipped by mistake. It added two admin-only REST routes and no visible feature.
+
 ## 0.2.4
 
 - The "Upgrade to Premium" link is gone from the Plugins screen.

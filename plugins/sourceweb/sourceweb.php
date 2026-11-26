@@ -3,7 +3,7 @@
  * Plugin Name: SourceWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/sourceweb/
  * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Enhanced by Kits Core, DirectoryWeb and InsightWeb.
- * Version: 0.2.4
+ * Version: 0.2.5
  * Update URI: https://wugweb.com/plugins/sourceweb/
  * Requires at least: 7.1
  * Requires PHP: 8.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.2.4' ); // keep equal to the Version header above
+defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.2.5' ); // keep equal to the Version header above
 // Core loads this file; if it is also active on its own, the second load stops here.
 if ( defined( 'SOURCEWEB_SOURCING_LOADED' ) ) {
 	return;
@@ -127,7 +127,6 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/review/review-queue.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-suggestions.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-jobs.php'; // what each AI job needs (pure)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-router-consent.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/site-health.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/relay.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
