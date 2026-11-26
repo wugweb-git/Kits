@@ -2,7 +2,7 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
-## Unreleased
+## 0.2.0
 
 - Places tab: routes (a boolean expression sends an item to a place, first match wins), per-place enhancements, a source-type registry, and a read-out of what each place says back.
 - Closed loop: a source with 10 or more decisions and under 30% accepted is flagged "Review this source". Nothing is blocked automatically.

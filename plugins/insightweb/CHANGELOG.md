@@ -2,7 +2,7 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
-## Unreleased
+## 0.3.0
 
 - Tabs follow a fixed order; SourceWeb's tab label is translatable.
 - A scheduled report email (weekly or monthly, off by default) with an optional white-label line.

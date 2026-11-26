@@ -11,7 +11,7 @@
  * Plugin Name:       DirectoryWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/directoryweb/
  * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Enhanced by Kits Core.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -45,7 +45,7 @@ add_action(
 );
 
 define( 'DIRECTORYWEB_LOADED', '1.1.0' );
-define( 'DIRECTORYWEB_VERSION', '1.1.0' );
+define( 'DIRECTORYWEB_VERSION', '1.2.0' );
 define( 'DIRECTORYWEB_FILE', __FILE__ );
 define( 'DIRECTORYWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );

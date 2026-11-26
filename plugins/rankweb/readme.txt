@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,7 +78,16 @@ Deleting the plugin deletes no data: settings, FAQ records, focus keywords and t
 
 == Changelog ==
 
-= Unreleased =
+= 2.2.0 =
+* Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off.
+* Transport (RankWeb → Transport): copy SEO title, description, focus keyword and robots settings from Yoast SEO, Rank Math or All in One SEO. A dry run is the default, a filled field is never overwritten, and a title still made of the other plugin's variables is skipped.
+* The SEO Bar on the category, tag and user list screens.
+* An image sitemap (`/image-sitemap.xml`) when Rank Math is absent, listed in robots.txt. Rank Math's own sitemap already lists images.
+* SEO Bar on the post lists: a colour-coded bar with icons and a spoken summary for title, description, focus keyword, noindex and address.
+* Structured data box for Google gallery types: Recipe, Product, Local business, Event, Job posting, Course, Fact check, Profile page, Software app, Book, Movie and Review. Required properties are checked and an incomplete type prints nothing.
+* Search engines and crawlers: verification tags for Google, Bing, Yandex and Pinterest, and crawlers kept out of the whole site in robots.txt.
+* Native screens on the Kits shell for FAQ, Internal links, Images, SEO CSV and Redirect tools.
+* A WordPress dashboard box showing gaps (titles, descriptions, focus keywords, schema).
 * Works without Rank Math: meta description, Open Graph and Twitter tags, structured data for posts and pages, noindex, and sitemap exclusion of noindex pages.
 * The block editor sidebar now changes what is printed: meta description, noindex and a schema type RankWeb can write (Article, BlogPosting, NewsArticle, WebPage).
 * Overview, Modules, Settings, FAQ and Insights screens work without Kits Core.

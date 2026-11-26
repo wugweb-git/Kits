@@ -2,7 +2,7 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
-## Unreleased
+## 2.2.0
 
 - Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off.
 - Transport (RankWeb → Transport): copy SEO title, description, focus keyword and robots settings from Yoast SEO, Rank Math or All in One SEO. A dry run is the default, a filled field is never overwritten, and a title still made of the other plugin's variables is skipped.

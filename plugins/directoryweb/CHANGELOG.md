@@ -2,7 +2,7 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
-## Unreleased
+## 1.2.0
 
 - New menu: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Claims, Import / Export, Settings.
 - One canonical schema (10 field types, with required, choices, min, max and pattern) and listing types that use it.
