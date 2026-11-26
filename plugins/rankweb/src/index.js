@@ -23,7 +23,6 @@ import {
 	MediaField,
 	MiniChart,
 	Notice,
-	PageParts,
 	RefTable,
 	SectionCard,
 	ServiceList,
@@ -35,6 +34,10 @@ import {
 	TileGrid,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
 import { ModuleCards } from './modules';
+import { Faq } from './tools/faq';
+import { Links } from './tools/links';
+import { Images, SeoCsv } from './tools/files';
+import { Redirects } from './tools/redirects';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -228,9 +231,7 @@ function Dashboard( { view } ) {
 	}
 	if ( ! data ) {
 		return (
-			<LoadingState
-				label={ __( 'Loading the counts…', 'rankweb' ) }
-			/>
+			<LoadingState label={ __( 'Loading the counts…', 'rankweb' ) } />
 		);
 	}
 	const before = rowBefore( data.log, data.today, days );
@@ -339,9 +340,7 @@ function Dashboard( { view } ) {
 			) }
 			{ 'dashboard' === view && attention.length > 0 && (
 				<Notice tone="warning">
-					<strong>
-						{ __( 'Needs attention', 'rankweb' ) }
-					</strong>
+					<strong>{ __( 'Needs attention', 'rankweb' ) }</strong>
 					<ul>
 						{ attention.map( ( t ) => (
 							<li key={ t.key }>
@@ -477,10 +476,7 @@ function Dashboard( { view } ) {
 					<RefTable
 						caption={ __( 'Commands', 'rankweb' ) }
 						head={ [
-							__(
-								'Commands (WP-CLI on the server)',
-								'rankweb'
-							),
+							__( 'Commands (WP-CLI on the server)', 'rankweb' ),
 							__( 'What it does', 'rankweb' ),
 						] }
 						rows={ data.where.commands.map( ( c ) => [
@@ -970,10 +966,7 @@ function Group( { group, onSaved, onDirty } ) {
 								)
 							}
 						>
-							{ __(
-								'Save listings kept indexed',
-								'rankweb'
-							) }
+							{ __( 'Save listings kept indexed', 'rankweb' ) }
 						</Button>
 					</div>
 				</SettingsBlock>
@@ -1031,9 +1024,7 @@ function Services() {
 	}
 	if ( ! list.length ) {
 		return (
-			<EmptyState
-				title={ __( 'No connected services.', 'rankweb' ) }
-			/>
+			<EmptyState title={ __( 'No connected services.', 'rankweb' ) } />
 		);
 	}
 	return (
@@ -1134,9 +1125,7 @@ function Settings() {
 	}
 	if ( ! groups ) {
 		return (
-			<LoadingState
-				label={ __( 'Loading the settings…', 'rankweb' ) }
-			/>
+			<LoadingState label={ __( 'Loading the settings…', 'rankweb' ) } />
 		);
 	}
 	const current = groups.find( ( g ) => g.slug === open );
@@ -1177,43 +1166,15 @@ function Settings() {
 	);
 }
 
-/** FAQ: the FAQ screen's own output (FAQ box on, the pages with an FAQ, the counts), drawn with Kits' page parts. */
-function Faq() {
-	return (
-		<SectionCard id="faq" title={ __( 'FAQ', 'rankweb' ) }>
-			<PageParts
-				parts={ app.parts || [] }
-				title={ __( 'FAQ', 'rankweb' ) }
-			/>
-		</SectionCard>
-	);
-}
-
-/** The working tools (Internal links, Image SEO, SEO CSV, Redirect tools): each one's own output and forms, as page parts. */
-const TOOL_TITLES = {
-	links: __( 'Internal links', 'rankweb' ),
-	images: __( 'Image SEO', 'rankweb' ),
-	csv: __( 'SEO CSV', 'rankweb' ),
-	redirects: __( 'Redirect tools', 'rankweb' ),
-};
-
-function Tool( { screen } ) {
-	return (
-		<SectionCard id={ screen } title={ TOOL_TITLES[ screen ] }>
-			<PageParts
-				parts={ app.parts || [] }
-				title={ TOOL_TITLES[ screen ] }
-			/>
-		</SectionCard>
-	);
-}
-
 function App() {
 	return (
 		<AppShell header={ <Header /> }>
 			{ 'settings' === app.screen && <Settings /> }
 			{ 'faq' === app.screen && <Faq /> }
-			{ TOOL_TITLES[ app.screen ] && <Tool screen={ app.screen } /> }
+			{ 'links' === app.screen && <Links /> }
+			{ 'images' === app.screen && <Images /> }
+			{ 'csv' === app.screen && <SeoCsv /> }
+			{ 'redirects' === app.screen && <Redirects /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />
 			) }

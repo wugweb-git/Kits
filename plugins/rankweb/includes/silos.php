@@ -15,7 +15,7 @@
  *   another silo's supporting item.
  * - Checks on the Silos screen: fewer items than the minimum (hub included) and addresses deeper than the limit.
  *
- * Screen: RankWeb → Internal links → Silos (manage_options to change; manage_rankweb to see). REST: GET rankweb/v1/links/silos.
+ * Screen: RankWeb → Internal links → Silos (manage_options to change; manage_rankweb to see). REST: GET, POST and DELETE rankweb/v1/links/silos (rankweb_silo_register_routes()).
  *
  * @package rankweb
  */
@@ -342,69 +342,204 @@ function rankweb_silo_checks( array $silo ): array {
 	return RankWeb_Silo::check( $urls, home_url(), max( 1, (int) AW_SILO_MIN ), max( 1, (int) AW_SILO_DEPTH ) );
 }
 
-add_action(
-	'rest_api_init',
-	function () {
-		register_rest_route(
-			'rankweb/v1',
-			'/links/silos',
+/**
+ * A silo's item as { id, title } for the screen.
+ *
+ * @param int $id Item ID.
+ */
+function rankweb_silo_item_info( int $id ): array {
+	$t = (string) get_the_title( $id );
+	return array(
+		'id'    => $id,
+		'title' => '' !== $t ? $t : __( '(no title)', 'rankweb' ),
+	);
+}
+
+/**
+ * Every silo for the screen: its settings, the item titles, the address checks, and the limits the checks use.
+ * (The ID lists in `hub` and `items` are what GET links/silos has always returned.)
+ */
+function rankweb_silo_payload(): array {
+	$out = array();
+	foreach ( rankweb_silo_data()['silos'] as $sid => $s ) {
+		$out[] = array(
+			'id'         => $sid,
+			'name'       => $s['name'],
+			'hub'        => $s['hub'],
+			'mode'       => $s['mode'],
+			'items'      => $s['items'],
+			'hub_info'   => rankweb_silo_item_info( (int) $s['hub'] ),
+			'items_info' => array_map( 'rankweb_silo_item_info', array_map( 'intval', array_slice( $s['items'], 0, 200 ) ) ),
+			'checks'     => rankweb_silo_checks( $s ),
+		);
+	}
+	return array(
+		'silos'    => $out,
+		'min'      => max( 1, (int) AW_SILO_MIN ),
+		'depth'    => max( 1, (int) AW_SILO_DEPTH ),
+		'can_edit' => current_user_can( 'manage_options' ),
+	);
+}
+
+/**
+ * Save a silo from what the form or the REST route sends: the items as one text (IDs split by white space or commas) or
+ * as a list. The classic handler and POST links/silos both call this.
+ *
+ * @param array $in { silo|id, name, hub, mode, items }.
+ * @return int|WP_Error The silo's ID, or an error that names the problem.
+ */
+function rankweb_silo_save_request( array $in ) {
+	$items = $in['items'] ?? array();
+	if ( is_string( $items ) ) {
+		$items = preg_split( '/[\s,]+/', sanitize_textarea_field( $items ) );
+	}
+	return rankweb_silo_save(
+		absint( $in['silo'] ?? $in['id'] ?? 0 ),
+		sanitize_text_field( (string) ( $in['name'] ?? '' ) ),
+		absint( $in['hub'] ?? 0 ),
+		sanitize_key( (string) ( $in['mode'] ?? '' ) ),
+		(array) $items
+	);
+}
+
+/**
+ * Delete a silo that exists (its settings only: no item is changed).
+ *
+ * @param int $id Silo ID.
+ * @return true|WP_Error An error when there is no such silo.
+ */
+function rankweb_silo_remove( int $id ) {
+	if ( ! isset( rankweb_silo_data()['silos'][ $id ] ) ) {
+		return new WP_Error( 'aw_silo', __( 'There is no such silo.', 'rankweb' ), array( 'status' => 404 ) );
+	}
+	rankweb_silo_delete( $id );
+	return true;
+}
+
+add_action( 'rest_api_init', 'rankweb_silo_register_routes' );
+
+/**
+ * The silo routes under rankweb/v1:
+ *
+ *   GET    links/silos       manage_rankweb  every silo with its checks
+ *   POST   links/silos       manage_options  save a silo ({ id (0 for a new one), name, hub, mode, items[] }); returns the list
+ *   DELETE links/silos/<id>  manage_options  delete a silo's settings (no item is changed); returns the list
+ */
+function rankweb_silo_register_routes(): void {
+	register_rest_route(
+		'rankweb/v1',
+		'/links/silos',
+		array(
 			array(
 				'methods'             => 'GET',
 				'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
-				'callback'            => function () {
-					$out = array();
-					foreach ( rankweb_silo_data()['silos'] as $sid => $s ) {
-						$out[] = array(
-							'id'     => $sid,
-							'name'   => $s['name'],
-							'hub'    => $s['hub'],
-							'mode'   => $s['mode'],
-							'items'  => $s['items'],
-							'checks' => rankweb_silo_checks( $s ),
-						);
+				'callback'            => fn() => rest_ensure_response( rankweb_silo_payload() ),
+			),
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => rankweb_rest_can( 'manage_options' ),
+				'args'                => array(
+					'id'    => array(
+						'type'    => 'integer',
+						'minimum' => 0,
+						'default' => 0,
+					),
+					'name'  => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+					'hub'   => array(
+						'type'     => 'integer',
+						'required' => true,
+					),
+					'mode'  => array(
+						'type'    => 'string',
+						'enum'    => RankWeb_Silo::MODES,
+						'default' => 'virtual',
+					),
+					'items' => array(
+						'type'    => 'array',
+						'items'   => array( 'type' => 'integer' ),
+						'default' => array(),
+					),
+				),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$id = rankweb_silo_save_request( $req->get_params() );
+					if ( is_wp_error( $id ) ) {
+						return new WP_Error( 'rest_invalid_param', $id->get_error_message(), array( 'status' => 400 ) );
 					}
-					return rest_ensure_response( array( 'silos' => $out ) );
+					return rest_ensure_response( array( 'id' => $id, 'message' => __( 'Silo saved.', 'rankweb' ) ) + rankweb_silo_payload() );
 				},
-			)
-		);
-	}
-);
+			),
+		)
+	);
+	register_rest_route(
+		'rankweb/v1',
+		'/links/silos/(?P<id>\d+)',
+		array(
+			array(
+				'methods'             => 'DELETE',
+				'permission_callback' => rankweb_rest_can( 'manage_options' ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$r = rankweb_silo_remove( (int) $req['id'] );
+					if ( is_wp_error( $r ) ) {
+						return $r;
+					}
+					return rest_ensure_response( array( 'message' => __( 'Silo deleted. No item was changed.', 'rankweb' ) ) + rankweb_silo_payload() );
+				},
+			),
+		)
+	);
+}
 
 /* ---------- The screen: RankWeb → Internal links → Silos ---------- */
 
-add_action(
-	'admin_post_aw_silo_save',
-	function () {
-		check_admin_referer( 'rankweb_silo_save' );
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
-		}
-		$id    = absint( wp_unslash( $_POST['silo'] ?? 0 ) );
-		$items = preg_split( '/[\s,]+/', sanitize_textarea_field( wp_unslash( $_POST['items'] ?? '' ) ) );
-		$res   = rankweb_silo_save( $id, sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) ), absint( wp_unslash( $_POST['hub'] ?? 0 ) ), sanitize_key( wp_unslash( $_POST['mode'] ?? '' ) ), (array) $items );
-		$url   = admin_url( 'admin.php?page=aw-links&view=silos' );
-		if ( is_wp_error( $res ) ) {
-			set_transient( 'aw_silo_error_' . get_current_user_id(), $res->get_error_message(), MINUTE_IN_SECONDS ); // shown once, on the form (not carried in the address)
-			wp_safe_redirect( add_query_arg( 'silo', $id ? $id : 'new', $url ) );
-			exit;
-		}
-		wp_safe_redirect( add_query_arg( 'saved', '1', $url ) );
+/** The classic form's save: a thin wrapper over rankweb_silo_save_request() (the shell screen posts to the REST route). */
+function rankweb_silo_save_post(): void {
+	check_admin_referer( 'rankweb_silo_save' );
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
+	}
+	$id  = absint( wp_unslash( $_POST['silo'] ?? 0 ) );
+	$res = rankweb_silo_save_request(
+		array(
+			'silo'  => $id,
+			'name'  => wp_unslash( $_POST['name'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised in rankweb_silo_save_request().
+			'hub'   => wp_unslash( $_POST['hub'] ?? 0 ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- absint() in rankweb_silo_save_request().
+			'mode'  => wp_unslash( $_POST['mode'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised in rankweb_silo_save_request().
+			'items' => wp_unslash( $_POST['items'] ?? '' ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised in rankweb_silo_save_request().
+		)
+	);
+	$url = admin_url( 'admin.php?page=aw-links&view=silos' );
+	if ( is_wp_error( $res ) ) {
+		set_transient( 'aw_silo_error_' . get_current_user_id(), $res->get_error_message(), MINUTE_IN_SECONDS ); // shown once, on the form (not carried in the address)
+		wp_safe_redirect( add_query_arg( 'silo', $id ? $id : 'new', $url ) );
 		exit;
 	}
-);
+	wp_safe_redirect( add_query_arg( 'saved', '1', $url ) );
+	exit;
+}
 
-add_action(
-	'admin_post_aw_silo_delete',
-	function () {
-		check_admin_referer( 'rankweb_silo_delete' );
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
-		}
-		rankweb_silo_delete( absint( wp_unslash( $_POST['silo'] ?? 0 ) ) );
-		wp_safe_redirect( add_query_arg( 'deleted', '1', admin_url( 'admin.php?page=aw-links&view=silos' ) ) );
-		exit;
+/** The classic form's delete: a thin wrapper over rankweb_silo_remove(). */
+function rankweb_silo_delete_post(): void {
+	check_admin_referer( 'rankweb_silo_delete' );
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
-);
+	rankweb_silo_remove( absint( wp_unslash( $_POST['silo'] ?? 0 ) ) );
+	wp_safe_redirect( add_query_arg( 'deleted', '1', admin_url( 'admin.php?page=aw-links&view=silos' ) ) );
+	exit;
+}
+
+// The classic forms post action=rankweb_silo_save and rankweb_silo_delete; the handlers were hooked as aw_silo_*, so the
+// forms reached nothing. Both names are hooked now.
+foreach ( array( 'aw_silo_save', 'rankweb_silo_save' ) as $rankweb_silo_hook ) {
+	add_action( 'admin_post_' . $rankweb_silo_hook, 'rankweb_silo_save_post' );
+}
+foreach ( array( 'aw_silo_delete', 'rankweb_silo_delete' ) as $rankweb_silo_hook ) {
+	add_action( 'admin_post_' . $rankweb_silo_hook, 'rankweb_silo_delete_post' );
+}
+unset( $rankweb_silo_hook );
 
 /** An item as "ID, title". */
 function rankweb_silo_item_label( int $id ): string {

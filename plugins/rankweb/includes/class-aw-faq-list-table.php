@@ -80,19 +80,10 @@ class RankWeb_FAQ_List_Table extends WP_List_Table {
 		$orderby = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'name' ) );
 		$order   = 'desc' === strtolower( sanitize_key( wp_unslash( $_GET['order'] ?? 'asc' ) ) ) ? -1 : 1;
 		// phpcs:enable
-		$rows = array_filter( $this->all, fn( $r ) => 'waiting' === $this->view ? $r['drafts'] > 0 : $r['shown'] > 0 );
-		if ( '' !== $type ) {
-			$rows = array_filter( $rows, fn( $r ) => $r['type'] === $type );
-		}
-		if ( '' !== $s ) {
-			$rows = array_filter( $rows, fn( $r ) => false !== mb_stripos( $r['name'], $s ) );
-		}
-		$key = in_array( $orderby, array( 'name', 'type', 'shown' ), true ) ? $orderby : 'name';
-		usort( $rows, fn( $a, $b ) => $order * ( 'shown' === $key ? $a['shown'] <=> $b['shown'] : strnatcasecmp( (string) $a[ $key ], (string) $b[ $key ] ) ) );
 		$per  = 50;
-		$page = $this->get_pagenum();
-		$this->set_pagination_args( array( 'total_items' => count( $rows ), 'per_page' => $per ) );
-		$this->items           = array_slice( $rows, ( $page - 1 ) * $per, $per );
+		$q    = rankweb_faq_query( $this->all, array( 'view' => $this->view, 'type' => $type, 's' => $s, 'orderby' => $orderby, 'order' => 1 === $order ? 'asc' : 'desc', 'page' => $this->get_pagenum(), 'per_page' => $per ) );
+		$this->set_pagination_args( array( 'total_items' => $q['total'], 'per_page' => $per ) );
+		$this->items           = $q['rows'];
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns(), 'name' );
 	}
 

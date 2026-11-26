@@ -49,6 +49,27 @@ add_action(
 
 /* ---------- Export ---------- */
 
+/** The CSV of every item's SEO fields (the supported types, up to 5000 items). */
+function rankweb_bulk_csv_text(): string {
+	$types = rankweb_bulk_types();
+	$ids   = $types ? get_posts(
+		array(
+			'post_type'        => $types,
+			'post_status'      => array( 'publish', 'draft', 'pending', 'future', 'private' ),
+			'posts_per_page'   => 5000, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- a one-off CSV export the admin asked for
+			'orderby'          => 'ID',
+			'order'            => 'ASC',
+			'fields'           => 'ids',
+			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
+		)
+	) : array();
+	$rows  = array();
+	foreach ( array_map( 'intval', $ids ) as $id ) {
+		$rows[] = rankweb_bulk_csv_row( $id );
+	}
+	return RankWeb_Bulk::to_csv( $rows );
+}
+
 add_action(
 	'admin_post_aw_bulk_export',
 	function () {
@@ -56,23 +77,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$types = rankweb_bulk_types();
-		$ids   = $types ? get_posts(
-			array(
-				'post_type'        => $types,
-				'post_status'      => array( 'publish', 'draft', 'pending', 'future', 'private' ),
-				'posts_per_page'   => 5000, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- a one-off CSV export the admin asked for
-				'orderby'          => 'ID',
-				'order'            => 'ASC',
-				'fields'           => 'ids',
-				'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
-			)
-		) : array();
-		$rows  = array();
-		foreach ( array_map( 'intval', $ids ) as $id ) {
-			$rows[] = rankweb_bulk_csv_row( $id );
-		}
-		$csv = RankWeb_Bulk::to_csv( $rows );
+		$csv = rankweb_bulk_csv_text();
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=UTF-8' );
 		header( 'Content-Disposition: attachment; filename="rankweb-seo-' . gmdate( 'Ymd-His' ) . '.csv"' );
@@ -84,6 +89,42 @@ add_action(
 
 /* ---------- Import ---------- */
 
+/**
+ * Import an uploaded CSV: checks the upload, reads it, then applies it (or, on a dry run, only reports). The classic
+ * handler and POST rankweb/v1/seo-csv/import both call this.
+ *
+ * @param array|null    $file      One $_FILES entry ( tmp_name, size, error ), or null when none was sent.
+ * @param bool          $apply     Write the changes (false: a dry run).
+ * @param callable|null $is_upload Whether a path is an uploaded file (is_uploaded_file; a test passes its own).
+ * @return array { dry, updated, changes[], skipped[], error }.
+ */
+function rankweb_bulk_csv_import_file( ?array $file, bool $apply, ?callable $is_upload = null ): array {
+	$is_upload = $is_upload ?? 'is_uploaded_file';
+	$report    = array(
+		'dry'     => ! $apply,
+		'updated' => 0,
+		'changes' => array(),
+		'skipped' => array(),
+		'error'   => '',
+	);
+	$tmp       = is_array( $file ) ? (string) ( $file['tmp_name'] ?? '' ) : '';
+	if ( '' === $tmp || ( isset( $file['error'] ) && UPLOAD_ERR_OK !== (int) $file['error'] ) || ! $is_upload( $tmp ) ) {
+		$report['error'] = __( 'Choose a CSV file to import.', 'rankweb' );
+		return $report;
+	}
+	if ( (int) ( $file['size'] ?? 0 ) > 5 * MB_IN_BYTES ) {
+		$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
+		return $report;
+	}
+	$text   = (string) file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
+	$parsed = RankWeb_Bulk::from_csv( $text );
+	if ( '' !== $parsed['error'] ) {
+		$report['error'] = $parsed['error'];
+		return $report;
+	}
+	return rankweb_bulk_csv_apply( $parsed['rows'], $parsed['header'], ! $apply, $report );
+}
+
 add_action(
 	'admin_post_aw_bulk_import',
 	function () {
@@ -91,36 +132,78 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$dry    = ! isset( $_POST['aw_apply'] ); // the box "Apply the changes" turns the dry run off
-		$report = array(
-			'dry'     => $dry,
-			'updated' => 0,
-			'changes' => array(),
-			'skipped' => array(),
-			'error'   => '',
-		);
-		if ( empty( $_FILES['aw_csv']['tmp_name'] ) || ! is_uploaded_file( sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) ) ) ) {
-			$report['error'] = __( 'Choose a CSV file to import.', 'rankweb' );
-		} else {
-			$tmp  = sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) );
-			$size = absint( wp_unslash( $_FILES['aw_csv']['size'] ?? 0 ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- absint() sanitises the upload size
-			if ( $size > 5 * MB_IN_BYTES ) {
-				$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
-			} else {
-				$text   = (string) file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
-				$parsed = RankWeb_Bulk::from_csv( $text );
-				if ( '' !== $parsed['error'] ) {
-					$report['error'] = $parsed['error'];
-				} else {
-					$report = rankweb_bulk_csv_apply( $parsed['rows'], $parsed['header'], $dry, $report );
-				}
-			}
-		}
+		$file   = isset( $_FILES['aw_csv'] ) && is_array( $_FILES['aw_csv'] ) ? array_map( 'wp_unslash', $_FILES['aw_csv'] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- an upload; tmp_name and size are only read by rankweb_bulk_csv_import_file(), which checks is_uploaded_file()
+		$report = rankweb_bulk_csv_import_file( $file, isset( $_POST['aw_apply'] ) ); // the box "Apply the changes" turns the dry run off
 		set_transient( 'aw_seo_bulk_report_' . get_current_user_id(), $report, 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( 'imported', '1', admin_url( 'admin.php?page=aw-seo-csv' ) ) );
 		exit;
 	}
 );
+
+/* ---------- REST ---------- */
+
+add_action( 'rest_api_init', 'rankweb_bulk_csv_register_routes' );
+
+/**
+ * SEO CSV on the shell, under rankweb/v1 (manage_options, the menu entry's capability). The export is not a route: it
+ * is a download, so the screen links to the nonce'd admin-post address (rankweb_bulk_csv_payload() gives it).
+ *
+ *   GET  seo-csv         the supported types, the columns, the size limit and the export link
+ *   POST seo-csv/import  multipart: aw_csv (the file) and apply (false: a dry run); the report
+ */
+function rankweb_bulk_csv_register_routes(): void {
+	register_rest_route(
+		RANKWEB_REST,
+		'/seo-csv',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'callback'            => fn() => rest_ensure_response( rankweb_bulk_csv_payload() ),
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/seo-csv/import',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'args'                => array(
+				'apply' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'callback'            => function ( WP_REST_Request $req ) {
+				$files = $req->get_file_params();
+				return rest_ensure_response( rankweb_bulk_csv_import_file( isset( $files['aw_csv'] ) && is_array( $files['aw_csv'] ) ? $files['aw_csv'] : null, (bool) $req['apply'] ) );
+			},
+		)
+	);
+}
+
+/** What the SEO CSV screen shows: the types the CSV covers, the columns, the size limit, and the export's nonce'd link. */
+function rankweb_bulk_csv_payload(): array {
+	$types = array();
+	foreach ( rankweb_bulk_types() as $slug ) {
+		$o       = get_post_type_object( $slug );
+		$types[] = array(
+			'slug'  => (string) $slug,
+			'label' => $o ? (string) $o->labels->name : (string) $slug,
+		);
+	}
+	return array(
+		'types'     => $types,
+		'columns'   => array( 'id', 'title', 'description', 'focus_keyword', 'link_keywords', 'canonical' ),
+		'max_bytes' => 5 * MB_IN_BYTES,
+		'export'    => add_query_arg(
+			array(
+				'action'   => 'aw_bulk_export',
+				'_wpnonce' => wp_create_nonce( 'aw_bulk_export' ),
+			),
+			admin_url( 'admin-post.php' )
+		),
+	);
+}
 
 /**
  * Apply (or, on a dry run, only report) the CSV rows.
@@ -199,7 +282,7 @@ function rankweb_bulk_csv_screen(): void {
 	rankweb_ui_page( 'csv' );
 }
 
-/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+/** The classic page's body, for a site with no Kits Core. The shell screen is native (src/tools/files.js) and uses the routes above. */
 function rankweb_bulk_csv_body(): void {
 	$post = admin_url( 'admin-post.php' );
 	if ( ! rankweb_bulk_types() ) {

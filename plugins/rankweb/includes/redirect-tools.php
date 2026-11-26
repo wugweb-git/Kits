@@ -116,6 +116,78 @@ add_action(
 
 /* ---------- Import redirects ---------- */
 
+/**
+ * Import an uploaded CSV into Rank Math's list: checks the upload, reads it, then adds the rows (or, on a dry run, only
+ * reports them). The classic handler and POST rankweb/v1/redirects/import both call this.
+ *
+ * @param array|null    $file      One $_FILES entry ( tmp_name, size, error ), or null when none was sent.
+ * @param bool          $apply     Add the redirects (false: a dry run).
+ * @param callable|null $is_upload Whether a path is an uploaded file (is_uploaded_file; a test passes its own).
+ * @return array { kind, dry, added, lines[] (the first 100), skipped[], error }.
+ */
+function rankweb_redirect_import_file( ?array $file, bool $apply, ?callable $is_upload = null ): array {
+	$is_upload = $is_upload ?? 'is_uploaded_file';
+	$dry       = ! $apply;
+	$report    = array(
+		'kind'    => 'import',
+		'dry'     => $dry,
+		'added'   => 0,
+		'lines'   => array(),
+		'skipped' => array(),
+		'error'   => '',
+	);
+	$tmp       = is_array( $file ) ? (string) ( $file['tmp_name'] ?? '' ) : '';
+	if ( ! rankweb_redirect_ready() ) {
+		$report['error'] = __( 'Rank Math\'s Redirections module is off.', 'rankweb' );
+		return $report;
+	}
+	if ( '' === $tmp || ( isset( $file['error'] ) && UPLOAD_ERR_OK !== (int) $file['error'] ) || ! $is_upload( $tmp ) ) {
+		$report['error'] = __( 'Choose a CSV file.', 'rankweb' );
+		return $report;
+	}
+	if ( (int) ( $file['size'] ?? 0 ) > 5 * MB_IN_BYTES ) {
+		$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
+		return $report;
+	}
+	$text   = (string) file_get_contents( $tmp ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
+	$parsed = RankWeb_Redirects::from_csv( $text );
+	if ( '' !== $parsed['error'] ) {
+		$report['error'] = $parsed['error'];
+		return $report;
+	}
+	$n = 0;
+	foreach ( $parsed['rows'] as $row ) {
+		++$n;
+		$v = RankWeb_Redirects::validate( $row );
+		if ( '' !== $v['error'] ) {
+			/* translators: 1: row number, 2: the reason. */
+			$report['skipped'][] = sprintf( __( 'Row %1$d: %2$s', 'rankweb' ), $n, $v['error'] );
+			continue;
+		}
+		$target = in_array( $v['code'], RankWeb_Redirects::GONE, true ) ? '' : rankweb_redirect_abs( $v['target'] );
+		if ( $dry ) {
+			++$report['added'];
+		} else {
+			$pattern = 'regex' === $v['comparison'] ? $v['source'] : trim( $v['source'], '/' );
+			$id      = rankweb_rank_math_redirect( $pattern, $target, $v['comparison'], $v['code'] );
+			if ( $id ) {
+				if ( '' !== $v['category'] ) {
+					rankweb_redirect_category_set( $pattern, $v['comparison'], $v['category'] );
+				}
+				++$report['added'];
+			} else {
+				/* translators: %d: row number. */
+				$report['skipped'][] = sprintf( __( 'Row %d: already in the list or could not be saved.', 'rankweb' ), $n );
+				continue;
+			}
+		}
+		if ( count( $report['lines'] ) < 100 ) {
+			$report['lines'][] = $v['source'] . ' → ' . ( '' !== $target ? $target : (string) $v['code'] );
+		}
+	}
+	return $report;
+}
+
 add_action(
 	'admin_post_aw_redirect_import',
 	function () {
@@ -123,59 +195,8 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$dry    = ! isset( $_POST['aw_apply'] );
-		$report = array(
-			'kind'    => 'import',
-			'dry'     => $dry,
-			'added'   => 0,
-			'lines'   => array(),
-			'skipped' => array(),
-			'error'   => '',
-		);
-		if ( ! rankweb_redirect_ready() ) {
-			$report['error'] = __( 'Rank Math\'s Redirections module is off.', 'rankweb' );
-		} elseif ( empty( $_FILES['aw_csv']['tmp_name'] ) || ! is_uploaded_file( sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) ) ) ) {
-			$report['error'] = __( 'Choose a CSV file.', 'rankweb' );
-		} elseif ( absint( wp_unslash( $_FILES['aw_csv']['size'] ?? 0 ) ) > 5 * MB_IN_BYTES ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- absint() sanitises the size
-			$report['error'] = __( 'The file is larger than 5 MB.', 'rankweb' );
-		} else {
-			$text   = (string) file_get_contents( sanitize_text_field( wp_unslash( $_FILES['aw_csv']['tmp_name'] ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- an uploaded CSV in the PHP temp dir
-			$parsed = RankWeb_Redirects::from_csv( $text );
-			if ( '' !== $parsed['error'] ) {
-				$report['error'] = $parsed['error'];
-			} else {
-				$n = 0;
-				foreach ( $parsed['rows'] as $row ) {
-					++$n;
-					$v = RankWeb_Redirects::validate( $row );
-					if ( '' !== $v['error'] ) {
-						/* translators: 1: row number, 2: the reason. */
-						$report['skipped'][] = sprintf( __( 'Row %1$d: %2$s', 'rankweb' ), $n, $v['error'] );
-						continue;
-					}
-					$target = in_array( $v['code'], RankWeb_Redirects::GONE, true ) ? '' : rankweb_redirect_abs( $v['target'] );
-					if ( $dry ) {
-						++$report['added'];
-					} else {
-						$pattern = 'regex' === $v['comparison'] ? $v['source'] : trim( $v['source'], '/' );
-						$id      = rankweb_rank_math_redirect( $pattern, $target, $v['comparison'], $v['code'] );
-						if ( $id ) {
-							if ( '' !== $v['category'] ) {
-								rankweb_redirect_category_set( $pattern, $v['comparison'], $v['category'] );
-							}
-							++$report['added'];
-						} else {
-							/* translators: %d: row number. */
-							$report['skipped'][] = sprintf( __( 'Row %d: already in the list or could not be saved.', 'rankweb' ), $n );
-							continue;
-						}
-					}
-					if ( count( $report['lines'] ) < 100 ) {
-						$report['lines'][] = $v['source'] . ' → ' . ( '' !== $target ? $target : (string) $v['code'] );
-					}
-				}
-			}
-		}
+		$file   = isset( $_FILES['aw_csv'] ) && is_array( $_FILES['aw_csv'] ) ? array_map( 'wp_unslash', $_FILES['aw_csv'] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- an upload; tmp_name and size are only read by rankweb_redirect_import_file(), which checks is_uploaded_file()
+		$report = rankweb_redirect_import_file( $file, isset( $_POST['aw_apply'] ) );
 		set_transient( 'aw_seo_redirect_report_' . get_current_user_id(), $report, 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( admin_url( 'admin.php?page=aw-redirects' ) );
 		exit;
@@ -191,7 +212,53 @@ function rankweb_redirect_abs( string $target ): string {
 	return preg_match( '~^https?://~i', $target ) ? $target : home_url( '/' . ltrim( $target, '/' ) );
 }
 
-/* ---------- 404 log export ---------- */
+/* ---------- 404 log ---------- */
+
+/**
+ * Rank Math's 404 log, most recent first (reused, not a second monitor).
+ *
+ * @param int $limit Rows (the CSV takes 5000, the screen 100).
+ * @return array { exists: Rank Math's table is there, rows[ { uri, hits, last_seen, referer, user_agent } ] }.
+ */
+function rankweb_redirect_404_rows( int $limit ): array {
+	global $wpdb;
+	$table  = $wpdb->prefix . 'rank_math_404_logs';
+	$exists = (string) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a one-off check for Rank Math's 404 table
+	if ( $exists !== $table ) {
+		return array(
+			'exists' => false,
+			'rows'   => array(),
+		);
+	}
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT uri, times_accessed, accessed, referer, user_agent FROM %i ORDER BY accessed DESC LIMIT %d', $table, max( 1, $limit ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Rank Math's 404 table, shown or exported because the admin asked
+	$out  = array();
+	foreach ( $rows as $r ) {
+		$out[] = array(
+			'uri'        => (string) $r['uri'],
+			'hits'       => (int) $r['times_accessed'],
+			'last_seen'  => (string) $r['accessed'],
+			'referer'    => (string) $r['referer'],
+			'user_agent' => (string) $r['user_agent'],
+		);
+	}
+	return array(
+		'exists' => true,
+		'rows'   => $out,
+	);
+}
+
+/** The 404 log as CSV text (up to 5000 rows); the referer and user agent are attacker-set, so each cell is made safe for a spreadsheet. */
+function rankweb_redirect_404_csv(): string {
+	$fh = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- an in-memory stream
+	fputcsv( $fh, array( 'uri', 'hits', 'last_seen', 'referer', 'user_agent' ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
+	foreach ( rankweb_redirect_404_rows( 5000 )['rows'] as $r ) {
+		fputcsv( $fh, array( rankweb_redirect_csv_safe( $r['uri'] ), (string) $r['hits'], $r['last_seen'], rankweb_redirect_csv_safe( $r['referer'] ), rankweb_redirect_csv_safe( $r['user_agent'] ) ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
+	}
+	rewind( $fh );
+	$csv = (string) stream_get_contents( $fh );
+	fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- in-memory
+	return $csv;
+}
 
 add_action(
 	'admin_post_aw_redirect_404export',
@@ -200,18 +267,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		global $wpdb;
-		$table  = $wpdb->prefix . 'rank_math_404_logs';
-		$exists = (string) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- a one-off check for Rank Math's 404 table
-		$rows   = $exists === $table ? (array) $wpdb->get_results( $wpdb->prepare( 'SELECT uri, times_accessed, accessed, referer, user_agent FROM %i ORDER BY accessed DESC LIMIT 5000', $table ), ARRAY_A ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- Rank Math's 404 table, an export the admin asked for
-		$fh     = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- an in-memory stream
-		fputcsv( $fh, array( 'uri', 'hits', 'last_seen', 'referer', 'user_agent' ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
-		foreach ( $rows as $r ) {
-			fputcsv( $fh, array( rankweb_redirect_csv_safe( (string) $r['uri'] ), (string) (int) $r['times_accessed'], (string) $r['accessed'], rankweb_redirect_csv_safe( (string) $r['referer'] ), rankweb_redirect_csv_safe( (string) $r['user_agent'] ) ), ',', '"', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- in-memory
-		}
-		rewind( $fh );
-		$csv = (string) stream_get_contents( $fh );
-		fclose( $fh ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- in-memory
+		$csv = rankweb_redirect_404_csv();
 		nocache_headers();
 		header( 'Content-Type: text/csv; charset=UTF-8' );
 		header( 'Content-Disposition: attachment; filename="rankweb-404-log-' . gmdate( 'Ymd-His' ) . '.csv"' );
@@ -241,6 +297,11 @@ function rankweb_redirect_apache(): bool {
 	return false !== strpos( $server, 'apache' ) || false !== strpos( $server, 'litespeed' );
 }
 
+/** The block of Apache directives the .htaccess download and the write both use. */
+function rankweb_redirect_htaccess_block(): string {
+	return '# BEGIN ' . AW_HTACCESS_MARKER . "\n" . implode( "\n", rankweb_redirect_htaccess_lines() ) . "\n# END " . AW_HTACCESS_MARKER . "\n";
+}
+
 add_action(
 	'admin_post_aw_redirect_htaccess_download',
 	function () {
@@ -248,8 +309,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$lines = rankweb_redirect_htaccess_lines();
-		$block = '# BEGIN ' . AW_HTACCESS_MARKER . "\n" . implode( "\n", $lines ) . "\n# END " . AW_HTACCESS_MARKER . "\n";
+		$block = rankweb_redirect_htaccess_block();
 		nocache_headers();
 		header( 'Content-Type: text/plain; charset=UTF-8' );
 		header( 'Content-Disposition: attachment; filename="rankweb-htaccess-redirects.txt"' );
@@ -258,6 +318,25 @@ add_action(
 	}
 );
 
+/**
+ * Write (or remove) RankWeb's .htaccess block, only when the caller confirmed it: the server asks for the flag whatever
+ * the screen did. The classic handler (its tick box) and POST rankweb/v1/redirects/htaccess both call this.
+ *
+ * @param bool $confirm The editing of .htaccess was confirmed.
+ * @param bool $remove  Remove the block instead of writing it.
+ * @return array{kind: string, error: string, ok: string}
+ */
+function rankweb_redirect_htaccess_write( bool $confirm, bool $remove ): array {
+	if ( ! $confirm ) {
+		return array(
+			'kind'  => 'htaccess',
+			'error' => __( 'Nothing was changed: confirm that .htaccess may be edited.', 'rankweb' ),
+			'ok'    => '',
+		);
+	}
+	return array( 'kind' => 'htaccess' ) + rankweb_redirect_htaccess_apply( $remove );
+}
+
 add_action(
 	'admin_post_aw_redirect_htaccess_write',
 	function () {
@@ -265,22 +344,7 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$remove = isset( $_POST['aw_remove'] );
-		if ( ! isset( $_POST['aw_confirm'] ) ) { // The write is confirmed on the screen, with no script needed.
-			set_transient( 'aw_seo_redirect_report_' . get_current_user_id(), array( 'kind' => 'htaccess', 'error' => __( 'Nothing was changed: tick the box to confirm that .htaccess may be edited.', 'rankweb' ), 'ok' => '' ), 5 * MINUTE_IN_SECONDS );
-			wp_safe_redirect( admin_url( 'admin.php?page=aw-redirects' ) );
-			exit;
-		}
-		$msg = rankweb_redirect_htaccess_apply( $remove );
-		set_transient(
-			'aw_seo_redirect_report_' . get_current_user_id(),
-			array(
-				'kind'  => 'htaccess',
-				'error' => $msg['error'],
-				'ok'    => $msg['ok'],
-			),
-			5 * MINUTE_IN_SECONDS
-		);
+		set_transient( 'aw_seo_redirect_report_' . get_current_user_id(), rankweb_redirect_htaccess_write( isset( $_POST['aw_confirm'] ), isset( $_POST['aw_remove'] ) ), 5 * MINUTE_IN_SECONDS ); // the tick box is the confirmation, checked here
 		wp_safe_redirect( admin_url( 'admin.php?page=aw-redirects' ) );
 		exit;
 	}
@@ -357,6 +421,113 @@ function rankweb_redirect_csv_safe( string $value ): string {
 	return '' !== $value && 1 === preg_match( '/^[=+\-@\t\r]/', $value ) ? "'" . $value : $value;
 }
 
+/* ---------- REST ---------- */
+
+add_action( 'rest_api_init', 'rankweb_redirect_register_routes' );
+
+/**
+ * Redirect tools on the shell, under rankweb/v1 (manage_options, the menu entry's capability). The list itself stays in
+ * Rank Math → Redirections; these routes add to it (import) and read around it. The exports are downloads: the screen
+ * links to the nonce'd admin-post addresses rankweb_redirect_payload() gives.
+ *
+ *   GET  redirects           whether Rank Math's module is on, the categories, the .htaccess state, the export links
+ *   GET  redirects/404       Rank Math's 404 log, the 100 most recent
+ *   POST redirects/import    multipart: aw_csv (the file) and apply (false: a dry run); the report
+ *   POST redirects/htaccess  { confirm, remove } write (or remove) RankWeb's .htaccess block; refused unless confirm is true
+ */
+function rankweb_redirect_register_routes(): void {
+	register_rest_route(
+		RANKWEB_REST,
+		'/redirects',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'callback'            => fn() => rest_ensure_response( rankweb_redirect_payload() ),
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/redirects/404',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'callback'            => fn() => rest_ensure_response( rankweb_redirect_404_rows( 100 ) ),
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/redirects/import',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'args'                => array(
+				'apply' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'callback'            => function ( WP_REST_Request $req ) {
+				$files = $req->get_file_params();
+				return rest_ensure_response( rankweb_redirect_import_file( isset( $files['aw_csv'] ) && is_array( $files['aw_csv'] ) ? $files['aw_csv'] : null, (bool) $req['apply'] ) );
+			},
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/redirects/htaccess',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'args'                => array(
+				'confirm' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'remove'  => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_redirect_htaccess_write( (bool) $req['confirm'], (bool) $req['remove'] ) ),
+		)
+	);
+}
+
+/** What the Redirect tools screen shows before anything is run. */
+function rankweb_redirect_payload(): array {
+	$post = admin_url( 'admin-post.php' );
+	$link = fn( string $action, string $nonce ) => add_query_arg(
+		array(
+			'action'   => $action,
+			'_wpnonce' => wp_create_nonce( $nonce ),
+		),
+		$post
+	);
+	$cats = array();
+	foreach ( rankweb_redirect_category_counts() as $name => $n ) {
+		$cats[] = array(
+			'name'  => (string) $name,
+			'count' => (int) $n,
+		);
+	}
+	$apache = rankweb_redirect_apache();
+	return array(
+		'ready'      => rankweb_redirect_ready(),
+		'categories' => $cats,
+		'htaccess'   => array(
+			'count'  => count( rankweb_redirect_htaccess_lines() ),
+			'on'     => (bool) AW_REDIRECT_HTACCESS,
+			'apache' => $apache,
+			'can'    => (bool) AW_REDIRECT_HTACCESS && $apache,
+		),
+		'export'     => array(
+			'redirects' => $link( 'aw_redirect_export', 'aw_redirect_export' ),
+			'log404'    => $link( 'aw_redirect_404export', 'aw_redirect_404export' ),
+			'htaccess'  => $link( 'aw_redirect_htaccess_download', 'aw_redirect_htaccess' ),
+		),
+	);
+}
+
 /* ---------- The screen ---------- */
 
 /** RankWeb → Redirect tools. */
@@ -367,7 +538,7 @@ function rankweb_redirect_tools_screen(): void {
 	rankweb_ui_page( 'redirects' );
 }
 
-/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+/** The classic page's body, for a site with no Kits Core. The shell screen is native (src/tools/redirects.js) and uses the routes above. */
 function rankweb_redirect_tools_body(): void {
 	$post = admin_url( 'admin-post.php' );
 	echo '<p>' . esc_html__( 'Redirects live in Rank Math → Redirections. These tools read and write that one list.', 'rankweb' ) . '</p>';

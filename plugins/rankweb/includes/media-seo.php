@@ -105,6 +105,64 @@ add_action(
 
 /* ---------- Find and replace ---------- */
 
+/**
+ * Find and replace in the alt text, title and caption of the most recent attachments. A dry run (the default) writes
+ * nothing and lists the first matches. The classic handler and POST rankweb/v1/images/replace both call this.
+ *
+ * @param string   $search  What to find (plain text, or a pattern when $regex).
+ * @param string   $replace What to put there.
+ * @param string[] $fields  'alt', 'title', 'caption'.
+ * @param bool     $regex   $search is a regular expression.
+ * @param bool     $ci      Ignore case.
+ * @param bool     $apply   Write the changes (false: a dry run).
+ * @return array { dry, updated, changes[ { id, field, from, to } ] (the first 50), error }.
+ */
+function rankweb_media_replace( string $search, string $replace, array $fields, bool $regex, bool $ci, bool $apply ): array {
+	$fields = array_values( array_intersect( array_map( 'sanitize_key', $fields ), array_keys( rankweb_media_fields() ) ) );
+	$report = array(
+		'dry'     => ! $apply,
+		'updated' => 0,
+		'changes' => array(),
+		'error'   => '',
+	);
+	if ( '' === $search ) {
+		$report['error'] = __( 'Enter something to search for.', 'rankweb' );
+		return $report;
+	}
+	if ( ! $fields ) {
+		$report['error'] = __( 'Choose at least one field.', 'rankweb' );
+		return $report;
+	}
+	foreach ( rankweb_media_ids() as $id ) {
+		foreach ( $fields as $field ) {
+			$old = rankweb_media_get( $id, $field );
+			if ( '' === $old ) {
+				continue;
+			}
+			$res = RankWeb_Bulk::replace( $old, $search, $replace, $regex, $ci );
+			if ( '' !== $res['error'] ) {
+				$report['error'] = $res['error'];
+				return $report;
+			}
+			if ( $res['count'] > 0 && $res['text'] !== $old ) {
+				++$report['updated'];
+				if ( count( $report['changes'] ) < 50 ) {
+					$report['changes'][] = array(
+						'id'    => $id,
+						'field' => $field,
+						'from'  => $old,
+						'to'    => $res['text'],
+					);
+				}
+				if ( $apply ) {
+					rankweb_media_set( $id, $field, $res['text'] );
+				}
+			}
+		}
+	}
+	return $report;
+}
+
 add_action(
 	'admin_post_aw_media_replace',
 	function () {
@@ -114,49 +172,7 @@ add_action(
 		}
 		$search  = isset( $_POST['search'] ) ? (string) wp_unslash( $_POST['search'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a search string; used only as a needle/pattern in RankWeb_Bulk::replace, never echoed unescaped
 		$replace = isset( $_POST['replace'] ) ? (string) wp_unslash( $_POST['replace'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a replacement string, stored via wp_update_post/update_post_meta and escaped on output
-		$fields  = array_intersect( array_map( 'sanitize_key', (array) ( $_POST['fields'] ?? array() ) ), array_keys( rankweb_media_fields() ) );
-		$regex   = isset( $_POST['regex'] );
-		$ci      = isset( $_POST['ci'] );
-		$dry     = ! isset( $_POST['aw_apply'] );
-		$report  = array(
-			'dry'     => $dry,
-			'updated' => 0,
-			'changes' => array(),
-			'error'   => '',
-		);
-		if ( '' === $search ) {
-			$report['error'] = __( 'Enter something to search for.', 'rankweb' );
-		} elseif ( ! $fields ) {
-			$report['error'] = __( 'Choose at least one field.', 'rankweb' );
-		} else {
-			foreach ( rankweb_media_ids() as $id ) {
-				foreach ( $fields as $field ) {
-					$old = rankweb_media_get( $id, $field );
-					if ( '' === $old ) {
-						continue;
-					}
-					$res = RankWeb_Bulk::replace( $old, $search, $replace, $regex, $ci );
-					if ( '' !== $res['error'] ) {
-						$report['error'] = $res['error'];
-						break 2;
-					}
-					if ( $res['count'] > 0 && $res['text'] !== $old ) {
-						++$report['updated'];
-						if ( count( $report['changes'] ) < 50 ) {
-							$report['changes'][] = array(
-								'id'    => $id,
-								'field' => $field,
-								'from'  => $old,
-								'to'    => $res['text'],
-							);
-						}
-						if ( ! $dry ) {
-							rankweb_media_set( $id, $field, $res['text'] );
-						}
-					}
-				}
-			}
-		}
+		$report  = rankweb_media_replace( $search, $replace, (array) ( $_POST['fields'] ?? array() ), isset( $_POST['regex'] ), isset( $_POST['ci'] ), isset( $_POST['aw_apply'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- each field is sanitize_key'd in rankweb_media_replace()
 		set_transient( 'aw_seo_media_report_' . get_current_user_id(), $report, 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( 'done', '1', admin_url( 'admin.php?page=aw-images' ) ) );
 		exit;
@@ -165,6 +181,44 @@ add_action(
 
 /* ---------- Fill missing captions ---------- */
 
+/**
+ * Fill the caption of attachments that have none from the pattern (AW_MEDIA_CAPTION); an existing caption is never
+ * touched. A dry run (the default) writes nothing. The classic handler and POST rankweb/v1/images/captions call this.
+ *
+ * @param bool $apply Write the captions (false: a dry run).
+ * @return array { dry, updated, changes[ { id, field, from, to } ] (the first 50), error }.
+ */
+function rankweb_media_fill_captions( bool $apply ): array {
+	$report = array(
+		'dry'     => ! $apply,
+		'updated' => 0,
+		'changes' => array(),
+		'error'   => '',
+	);
+	foreach ( rankweb_media_ids() as $id ) {
+		if ( '' !== rankweb_media_get( $id, 'caption' ) ) {
+			continue; // never touch an existing caption
+		}
+		$caption = rankweb_media_caption_for( $id );
+		if ( '' === $caption ) {
+			continue;
+		}
+		++$report['updated'];
+		if ( count( $report['changes'] ) < 50 ) {
+			$report['changes'][] = array(
+				'id'    => $id,
+				'field' => 'caption',
+				'from'  => '',
+				'to'    => $caption,
+			);
+		}
+		if ( $apply ) {
+			rankweb_media_set( $id, 'caption', $caption );
+		}
+	}
+	return $report;
+}
+
 add_action(
 	'admin_post_aw_media_captions',
 	function () {
@@ -172,39 +226,106 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
-		$dry    = ! isset( $_POST['aw_apply'] );
-		$report = array(
-			'dry'     => $dry,
-			'updated' => 0,
-			'changes' => array(),
-			'error'   => '',
-		);
-		foreach ( rankweb_media_ids() as $id ) {
-			if ( '' !== rankweb_media_get( $id, 'caption' ) ) {
-				continue; // never touch an existing caption
-			}
-			$caption = rankweb_media_caption_for( $id );
-			if ( '' === $caption ) {
-				continue;
-			}
-			++$report['updated'];
-			if ( count( $report['changes'] ) < 50 ) {
-				$report['changes'][] = array(
-					'id'    => $id,
-					'field' => 'caption',
-					'from'  => '',
-					'to'    => $caption,
-				);
-			}
-			if ( ! $dry ) {
-				rankweb_media_set( $id, 'caption', $caption );
-			}
-		}
-		set_transient( 'aw_seo_media_report_' . get_current_user_id(), $report, 5 * MINUTE_IN_SECONDS );
+		set_transient( 'aw_seo_media_report_' . get_current_user_id(), rankweb_media_fill_captions( isset( $_POST['aw_apply'] ) ), 5 * MINUTE_IN_SECONDS );
 		wp_safe_redirect( add_query_arg( 'done', '1', admin_url( 'admin.php?page=aw-images' ) ) );
 		exit;
 	}
 );
+
+/* ---------- REST ---------- */
+
+add_action( 'rest_api_init', 'rankweb_media_register_routes' );
+
+/**
+ * Image SEO on the shell, under rankweb/v1 (manage_options, the menu entry's capability). Every write route is a dry run
+ * unless `apply` is true.
+ *
+ *   GET  images           the fields, the run cap and the caption pattern
+ *   POST images/replace   { search, replace, fields[], regex, ci, apply } find and replace in alt, title and caption
+ *   POST images/captions  { apply } fill missing captions from the pattern
+ */
+function rankweb_media_register_routes(): void {
+	register_rest_route(
+		RANKWEB_REST,
+		'/images',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'callback'            => fn() => rest_ensure_response( rankweb_media_payload() ),
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/images/replace',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'args'                => array(
+				'search'  => array(
+					'type'     => 'string',
+					'required' => true,
+				),
+				'replace' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'fields'  => array(
+					'type'    => 'array',
+					'items'   => array(
+						'type' => 'string',
+						'enum' => array_keys( rankweb_media_fields() ),
+					),
+					'default' => array(),
+				),
+				'regex'   => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'ci'      => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'apply'   => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_media_replace( (string) $req['search'], (string) $req['replace'], (array) $req['fields'], (bool) $req['regex'], (bool) $req['ci'], (bool) $req['apply'] ) ),
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/images/captions',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( 'manage_options' ),
+			'args'                => array(
+				'apply' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_media_fill_captions( (bool) $req['apply'] ) ),
+		)
+	);
+}
+
+/** What the Image SEO screen shows before anything is run. */
+function rankweb_media_payload(): array {
+	$fields = array();
+	foreach ( rankweb_media_fields() as $key => $label ) {
+		$fields[] = array(
+			'key'     => $key,
+			'label'   => $label,
+			'default' => 'caption' !== $key, // the classic form ticks alt and title
+		);
+	}
+	return array(
+		'fields'  => $fields,
+		'batch'   => (int) AW_MEDIA_BATCH,
+		'pattern' => (string) AW_MEDIA_CAPTION,
+	);
+}
 
 /* ---------- The screen ---------- */
 
@@ -216,7 +337,7 @@ function rankweb_media_screen(): void {
 	rankweb_ui_page( 'images' );
 }
 
-/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+/** The classic page's body, for a site with no Kits Core. The shell screen is native (src/tools/files.js) and uses the routes above. */
 function rankweb_media_body(): void {
 	$post = admin_url( 'admin-post.php' );
 	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'rankweb' ), number_format_i18n( AW_MEDIA_BATCH ) ) ) . '</p>';

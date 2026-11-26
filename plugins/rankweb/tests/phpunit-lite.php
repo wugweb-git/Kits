@@ -80,7 +80,11 @@ foreach ( glob( __DIR__ . '/*Test.php' ) as $file ) {
 			}
 			++$count;
 			try {
-				( new $class() )->$method();
+				$test = new $class();
+				if ( method_exists( $test, 'setUp' ) ) { // PHPUnit calls setUp() (protected) before each test
+					( new \ReflectionMethod( $test, 'setUp' ) )->invoke( $test );
+				}
+				$test->$method();
 			} catch ( \Throwable $e ) {
 				++$fails;
 				echo "FAIL {$class}::{$method}\n  " . $e->getMessage() . "\n";
