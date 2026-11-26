@@ -119,6 +119,16 @@ function rankweb_seo_modules(): array {
 				'RANKWEB_WEBP_UPLOADS'  => array( 'type' => 'int', 'label' => 'Save new JPEG and PNG uploads as WebP (1 on, 0 off)', 'help' => 'Only when the server can write WebP. Images already uploaded are not changed.', 'default' => 0 ),
 			),
 		),
+		'social' => array(
+			'label'  => 'Social and feeds',
+			'switch' => true,
+			'files'  => array( 'social' ),
+			'desc'   => 'The twitter:site tag, and a link back to your site in each feed item.',
+			'fields' => array(
+				'RANKWEB_TWITTER_SITE' => array( 'type' => 'text', 'label' => 'X (Twitter) handle of the site', 'help' => 'For example @yoursite, or the profile address. Printed as twitter:site when RankWeb prints the page head.', 'default' => '' ),
+				'RANKWEB_FEED_SOURCE'  => array( 'type' => 'int', 'label' => 'Add "appeared first on" to feed items (1 on, 0 off)', 'help' => 'A line with links to the post and the site, so a site that copies your feed links back.', 'default' => 0 ),
+			),
+		),
 		'transport' => array(
 			'label'  => 'Transport',
 			'switch' => true,
@@ -431,7 +441,7 @@ function rankweb_seo_setting_tabs(): array {
 		),
 		'indexing'        => array(
 			'label'   => 'Indexing',
-			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'redirect-tools', 'speed', 'health', 'video' ),
+			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'redirect-tools', 'speed', 'social', 'health', 'video' ),
 		),
 		'schema'          => array(
 			'label'   => 'Schema and FAQ',
