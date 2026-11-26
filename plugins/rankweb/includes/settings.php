@@ -67,6 +67,11 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'robots' ),
 			'desc'   => 'Noindex rules that depend on an item\'s state or a list\'s size.',
 			'fields' => array(
+				'RANKWEB_NOINDEX_AUTHOR'     => array( 'type' => 'int', 'label' => 'Keep author archives out of search (1 on, 0 off)', 'help' => 'Without Rank Math, RankWeb adds noindex to author archive pages.', 'default' => 0 ),
+				'RANKWEB_NOINDEX_DATE'       => array( 'type' => 'int', 'label' => 'Keep date archives out of search (1 on, 0 off)', 'help' => 'Year, month and day archives.', 'default' => 0 ),
+				'RANKWEB_NOINDEX_PAGED'      => array( 'type' => 'int', 'label' => 'Keep page 2 and later of lists out of search (1 on, 0 off)', 'help' => 'The first page stays indexed.', 'default' => 0 ),
+				'RANKWEB_NOINDEX_ATTACHMENT' => array( 'type' => 'int', 'label' => 'Keep attachment pages out of search (1 on, 0 off)', 'help' => 'The page WordPress makes for each uploaded file.', 'default' => 0 ),
+				'RANKWEB_NOINDEX_EMPTY'      => array( 'type' => 'int', 'label' => 'Keep empty category and tag archives out of search (1 on, 0 off)', 'help' => 'Archives with no items.', 'default' => 0 ),
 				'AW_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
 				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
 				'RANKWEB_ITEM_ROBOTS' => array( 'type' => 'int', 'label' => 'Per-item robots options in the editor (1 on, 0 off)', 'help' => 'Nofollow, noarchive, nosnippet and max-snippet next to "Keep out of search results". Off: items print only the page-kind rules.', 'default' => 1 ),

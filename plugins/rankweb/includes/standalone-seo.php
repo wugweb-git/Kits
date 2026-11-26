@@ -270,8 +270,35 @@ add_action(
 );
 
 require_once __DIR__ . '/class-rankweb-robots.php';
+require_once __DIR__ . '/class-rankweb-archive-rules.php';
 
 /* ---------- robots: noindex by rule, through core's wp_robots (one robots tag) ---------- */
+
+/** Whether the archive rules (settings) make the viewed page noindex. */
+function rankweb_archive_noindex(): bool {
+	$rules = array();
+	foreach ( array( 'author' => 'RANKWEB_NOINDEX_AUTHOR', 'date' => 'RANKWEB_NOINDEX_DATE', 'paged' => 'RANKWEB_NOINDEX_PAGED', 'attachment' => 'RANKWEB_NOINDEX_ATTACHMENT', 'empty' => 'RANKWEB_NOINDEX_EMPTY' ) as $rule => $const ) {
+		$rules[ $rule ] = defined( $const ) && constant( $const );
+	}
+	if ( ! array_filter( $rules ) ) {
+		return false;
+	}
+	$empty = false;
+	if ( is_category() || is_tag() ) {
+		$term  = get_queried_object();
+		$empty = $term instanceof WP_Term && 0 === (int) $term->count;
+	}
+	return RankWeb_Archive_Rules::noindex(
+		array(
+			'author'     => is_author(),
+			'date'       => is_date(),
+			'attachment' => is_attachment(),
+			'paged'      => (int) max( 1, (int) get_query_var( 'paged' ) ),
+			'empty_term' => $empty,
+		),
+		$rules
+	);
+}
 
 /** Whether the viewed page should stay out of search results, by a post's own setting or a rule of the page kind. */
 function rankweb_page_is_noindex(): bool {
@@ -284,12 +311,12 @@ function rankweb_page_is_noindex(): bool {
 		if ( '1' === (string) get_post_meta( $id, '_rankweb_noindex', true ) ) {
 			return true;
 		}
-		return false;
+		return is_attachment() && rankweb_archive_noindex();
 	}
 	if ( is_search() ) {
 		return true; // search result pages are not for the index
 	}
-	return false;
+	return rankweb_archive_noindex();
 }
 
 add_filter(
