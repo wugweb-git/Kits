@@ -822,7 +822,7 @@ function directoryweb_settings_payload(): array {
 			$tags[] = array( $slug, ! empty( $found ) );
 		}
 	}
-	$sw   = defined( 'AW_SOURCING_DIR' );
+	$sw   = defined( 'SOURCEWEB_SOURCING_DIR' ) || defined( 'AW_SOURCING_DIR' );
 	$rw   = function_exists( 'rankweb_ui_url' );
 	$iw   = defined( 'INSIGHTWEB_LOADED' );
 	$rule = $rw ? rankweb_ui_url( 'settings' ) . '#indexing' : '';

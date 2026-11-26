@@ -143,7 +143,7 @@ if ( ! function_exists( 'aw_places_from_text' ) ) {
 	}
 }
 
-if ( ! function_exists( 'aw_post_types' ) ) {
+if ( ! function_exists( 'aw_post_types' ) && function_exists( 'directoryweb_post_types' ) ) { // only when there is something to pass to: SourceWeb tests for aw_post_types() and was fatal on an alias with no target
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
 	function aw_post_types( ...$args ) {
 		return directoryweb_post_types( ...$args );
