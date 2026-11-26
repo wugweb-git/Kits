@@ -714,4 +714,59 @@ unset( $in['sourcing'] );
 iw_check( array( 'rising', 'pages', 'links', 'clarity', 'server', 'checklist', 'mine' ) === array_keys( insightweb_tab_order( $in ) ), 'tab order: without SourceWeb the Sourcing tab is skipped' );
 iw_check( 'R' === insightweb_tab_order( $in )['rising'] && 'M' === insightweb_tab_order( $in )['mine'], 'tab order: labels are kept' );
 
+// Search report by email: the builder, and a run that sends once per period and only records a successful send.
+if ( ! defined( 'INSIGHTWEB_DASH' ) ) {
+	define( 'INSIGHTWEB_DASH', 'insightweb_dash' );
+}
+$GLOBALS['iw_mail'] = array( 'ok' => true, 'sent' => array() );
+if ( ! function_exists( 'wp_mail' ) ) {
+	/** Stub. */
+	function wp_mail( $to, $subject, $body ) {
+		$GLOBALS['iw_mail']['sent'][] = array( $to, $subject, $body );
+		return $GLOBALS['iw_mail']['ok'];
+	}
+}
+if ( ! function_exists( 'get_transient' ) ) {
+	/** Stub. */
+	function get_transient( $k ) {
+		return $GLOBALS['iw_options'][ 'tr_' . $k ] ?? false;
+	}
+}
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	/** Stub. */
+	function get_bloginfo() {
+		return 'Test Site';
+	}
+}
+if ( ! function_exists( 'insightweb_si_url' ) ) {
+	/** Stub. */
+	function insightweb_si_url() {
+		return 'https://example.invalid/wp-admin/admin.php?page=search-insights';
+	}
+}
+require dirname( __DIR__ ) . '/includes/search-insights/report-email.php';
+$range = array( 'days' => 7, 'stored' => 7, 'prevStored' => 7, 'clicks' => 120, 'impr' => 4000, 'pos' => 8.4, 'prevClicks' => 100, 'prevImpr' => 4000, 'prevPos' => 9.0, 'pages' => 30, 'queries' => 90, 'topPages' => array( array( '/a/', 50, 900, 5.0 ) ), 'topQueries' => array( array( 'kw', 20, 400, 4.0 ) ) );
+$mail  = insightweb_report_build( $range, 'Test Site', 'example.invalid', 'Prepared by Studio', 'weekly', 'https://x.invalid/' );
+iw_check( is_array( $mail ) && 'Test Site: weekly search report' === $mail['subject'], 'report: subject names the site and the period' );
+iw_check( 0 === strpos( $mail['body'], 'Prepared by Studio' ) && false !== strpos( $mail['body'], 'Clicks: 120 (+20% on the 7 days before)' ), 'report: the brand line leads and a change is shown against a full window' );
+$half = $range;
+$half['prevStored'] = 3;
+iw_check( false === strpos( insightweb_report_build( $half, 'S', 'h', '', 'weekly', 'u' )['body'], 'days before' ), 'report: no change is shown against a part-stored window' );
+$none = $range;
+$none['stored'] = 0;
+iw_check( null === insightweb_report_build( $none, 'S', 'h', '', 'weekly', 'u' ), 'report: nothing is built before any day is stored' );
+iw_check( '2026-W48' === insightweb_report_period( 'weekly', gmmktime( 12, 0, 0, 11, 26, 2026 ) ) && '2026-11' === insightweb_report_period( 'monthly', gmmktime( 12, 0, 0, 11, 26, 2026 ) ), 'report: the period is the ISO week or the month' );
+$GLOBALS['iw_options']['aw_si_off'] = 0;
+iw_check( 'off' === insightweb_report_run(), 'report: off by default, nothing is sent' );
+$GLOBALS['iw_options']['insightweb_report_on']  = 1;
+$GLOBALS['iw_options']['tr_insightweb_dash'] = array( 'ranges' => array( 7 => $range ) );
+$GLOBALS['iw_mail']['ok'] = false;
+iw_check( 'failed' === insightweb_report_run() && ! isset( $GLOBALS['iw_options']['insightweb_report_sent'] ), 'report: a failed send is not recorded, so the next run tries again' );
+$GLOBALS['iw_mail']['ok'] = true;
+iw_check( 'sent' === insightweb_report_run() && isset( $GLOBALS['iw_options']['insightweb_report_sent'] ), 'report: a successful send is recorded' );
+iw_check( 'already' === insightweb_report_run(), 'report: a second run in the same period sends nothing' );
+iw_check( 'sent' === insightweb_report_run( true ), 'report: Send now ignores the period' );
+unset( $GLOBALS['iw_options']['tr_insightweb_dash'] );
+iw_check( 'nodata' === insightweb_report_run( true ), 'report: no stored counts, nothing to send' );
+
 exit( $GLOBALS['iw_fail'] );
