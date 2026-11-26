@@ -120,7 +120,272 @@ add_action(
 	}
 );
 
-/** Before the screen: bulk Approve and Recount, then back to the list. */
+/**
+ * Approve the draft questions of the picked items (their own questions only: automatic ones need no approval), then
+ * count again. The classic bulk Approve and POST rankweb/v1/faq/approve both call this.
+ *
+ * @param string[] $picks "post:ID" or "term:ID", as the list's tick boxes carry them.
+ * @return array { approved: questions approved, items: items changed, skipped: picks left out (bad form, or not editable by this user) }.
+ */
+function rankweb_faq_approve( array $picks ): array {
+	$done    = 0;
+	$items_n = 0;
+	$skipped = 0;
+	foreach ( array_unique( array_map( 'strval', $picks ) ) as $pick ) {
+		if ( ! preg_match( '/^(post|term):(\d+)$/', $pick, $m ) || ! rankweb_faq_can_edit( $m[1], (int) $m[2] ) ) {
+			++$skipped;
+			continue;
+		}
+		$items = rankweb_faq_items( $m[1], (int) $m[2] );
+		$here  = 0;
+		foreach ( $items as $i => $it ) {
+			if ( '' === ( $it['auto'] ?? '' ) && 'approved' !== $it['status'] ) {
+				$items[ $i ]['status']   = 'approved';
+				$items[ $i ]['reviewed'] = wp_date( 'Y-m-d' );
+				++$here;
+			}
+		}
+		if ( $here ) {
+			rankweb_faq_items_save( $m[1], (int) $m[2], $items );
+			$done += $here;
+			++$items_n;
+		}
+	}
+	rankweb_faq_index( true );
+	return array(
+		'approved' => $done,
+		'items'    => $items_n,
+		'skipped'  => $skipped,
+	);
+}
+
+/**
+ * Count the FAQs again now (the hourly count, run on demand).
+ *
+ * @return array { at: when it was counted }.
+ */
+function rankweb_faq_recount(): array {
+	$ix = rankweb_faq_index( true );
+	return array( 'at' => (int) $ix['at'] );
+}
+
+/**
+ * Filter, sort and page the index rows: the "With an FAQ" and "Waiting for approval" views, a type, a name search.
+ * The classic list table and GET rankweb/v1/faq both use it.
+ *
+ * @param array $rows rankweb_faq_index() rows.
+ * @param array $args { view: 'all'|'waiting', type, s, orderby: name|type|shown, order: asc|desc, page, per_page }.
+ * @return array { rows: this page's rows, total: rows in all pages }.
+ */
+function rankweb_faq_query( array $rows, array $args ): array {
+	$view    = 'waiting' === ( $args['view'] ?? '' ) ? 'waiting' : 'all';
+	$type    = (string) ( $args['type'] ?? '' );
+	$s       = trim( (string) ( $args['s'] ?? '' ) );
+	$orderby = in_array( $args['orderby'] ?? '', array( 'name', 'type', 'shown' ), true ) ? (string) $args['orderby'] : 'name';
+	$sign    = 'desc' === strtolower( (string) ( $args['order'] ?? 'asc' ) ) ? -1 : 1;
+	$per     = max( 1, (int) ( $args['per_page'] ?? 50 ) );
+	$page    = max( 1, (int) ( $args['page'] ?? 1 ) );
+	$rows    = array_filter( $rows, fn( $r ) => 'waiting' === $view ? $r['drafts'] > 0 : $r['shown'] > 0 );
+	if ( '' !== $type ) {
+		$rows = array_filter( $rows, fn( $r ) => $r['type'] === $type );
+	}
+	if ( '' !== $s ) {
+		$rows = array_filter( $rows, fn( $r ) => false !== mb_stripos( $r['name'], $s ) );
+	}
+	usort( $rows, fn( $a, $b ) => $sign * ( 'shown' === $orderby ? $a['shown'] <=> $b['shown'] : strnatcasecmp( (string) $a[ $orderby ], (string) $b[ $orderby ] ) ) );
+	return array(
+		'rows'  => array_slice( $rows, ( $page - 1 ) * $per, $per ),
+		'total' => count( $rows ),
+	);
+}
+
+/**
+ * The FAQ screen's data: the views with their counts, one page of rows, the types to filter by, the counts by type
+ * and "FAQ box on". Read from the hourly index; nothing is counted here.
+ *
+ * @param array $args As rankweb_faq_query().
+ */
+function rankweb_faq_payload( array $args ): array {
+	$ix   = rankweb_faq_index();
+	$per  = max( 1, (int) ( $args['per_page'] ?? 50 ) );
+	$q    = rankweb_faq_query( $ix['rows'], array_merge( $args, array( 'per_page' => $per ) ) );
+	$view = 'waiting' === ( $args['view'] ?? '' ) ? 'waiting' : 'all';
+	$rows = array();
+	foreach ( $q['rows'] as $r ) {
+		$edit   = rankweb_faq_can_edit( $r['store'], $r['id'] ) ? rankweb_faq_edit_url( $r['store'], $r['id'] ) : '';
+		$link   = 'term' === $r['store'] ? get_term_link( (int) $r['id'] ) : get_permalink( (int) $r['id'] );
+		$rows[] = array(
+			'key'       => $r['store'] . ':' . $r['id'],
+			'name'      => $r['name'],
+			'type'      => $r['type'],
+			'typeLabel' => rankweb_faq_type_label( $r['type'] ),
+			'shown'     => $r['shown'],
+			'auto'      => $r['auto'],
+			'edited'    => $r['edited'],
+			'own'       => $r['own'],
+			'drafts'    => $r['drafts'],
+			'draftQ'    => $r['draft_q'],
+			'editUrl'   => $edit,
+			'viewUrl'   => $link && ! is_wp_error( $link ) ? (string) $link : '',
+		);
+	}
+	$types = array();
+	foreach ( array_unique( wp_list_pluck( $ix['rows'], 'type' ) ) as $t ) {
+		$types[] = array(
+			'value' => (string) $t,
+			'label' => rankweb_faq_type_label( (string) $t ),
+		);
+	}
+	$counts = array();
+	foreach ( $ix['counts'] as $type => $c ) {
+		if ( ! $c['published'] && ! $c['faq'] ) {
+			continue;
+		}
+		$counts[] = array(
+			'type'      => rankweb_faq_type_label( $type ),
+			'terms'     => 'term' === $c['store'],
+			'published' => (int) $c['published'],
+			'faq'       => (int) $c['faq'],
+			'below'     => (int) $c['below'],
+			'drafts'    => (int) $c['drafts'],
+		);
+	}
+	$off     = rankweb_faq_off_types();
+	$choices = rankweb_faq_type_choices();
+	$box     = array();
+	foreach ( array( 'post', 'term' ) as $store ) {
+		foreach ( $choices[ $store ] as $slug => $name ) {
+			$box[] = array(
+				'slug'  => (string) $slug,
+				'label' => (string) $name,
+				'store' => $store,
+				'on'    => ! in_array( (string) $slug, $off, true ),
+			);
+		}
+	}
+	return array(
+		'view'     => $view,
+		'rows'     => $rows,
+		'total'    => $q['total'],
+		'page'     => max( 1, (int) ( $args['page'] ?? 1 ) ),
+		'pages'    => max( 1, (int) ceil( $q['total'] / $per ) ),
+		'views'    => array(
+			array(
+				'value' => 'all',
+				'label' => __( 'With an FAQ', 'rankweb' ),
+				'count' => count( array_filter( $ix['rows'], fn( $r ) => $r['shown'] > 0 ) ),
+			),
+			array(
+				'value' => 'waiting',
+				'label' => __( 'Waiting for approval', 'rankweb' ),
+				'count' => count( array_filter( $ix['rows'], fn( $r ) => $r['drafts'] > 0 ) ),
+			),
+		),
+		'types'    => $types,
+		'counts'   => $counts,
+		'at'       => (int) $ix['at'],
+		'atText'   => wp_date( 'j M Y, H:i', (int) $ix['at'] ),
+		'faqTypes' => $box,
+		'canTypes' => current_user_can( 'manage_options' ),
+	);
+}
+
+add_action( 'rest_api_init', 'rankweb_faq_register_routes' );
+
+/**
+ * RankWeb → FAQ on the shell, under rankweb/v1 (all manage_rankweb, the menu entry's capability; Approve checks each
+ * item's own edit right):
+ *
+ *   GET  faq          the views, a page of rows (view, type, s, orderby, order, page), the counts and "FAQ box on"
+ *   POST faq/approve  { items: [ "post:ID", "term:ID" ] } approve those items' draft questions
+ *   POST faq/recount  count the FAQs again now
+ *
+ * "FAQ box on" saves through POST settings/faq-types (manage_options), as on the Settings screen.
+ */
+function rankweb_faq_register_routes(): void {
+	register_rest_route(
+		RANKWEB_REST,
+		'/faq',
+		array(
+			'methods'             => 'GET',
+			'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
+			'args'                => array(
+				'view'     => array(
+					'type'    => 'string',
+					'enum'    => array( 'all', 'waiting' ),
+					'default' => 'all',
+				),
+				'type'     => array(
+					'type'              => 'string',
+					'default'           => '',
+					'sanitize_callback' => 'sanitize_key',
+				),
+				's'        => array(
+					'type'              => 'string',
+					'default'           => '',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'orderby'  => array(
+					'type'    => 'string',
+					'enum'    => array( 'name', 'type', 'shown' ),
+					'default' => 'name',
+				),
+				'order'    => array(
+					'type'    => 'string',
+					'enum'    => array( 'asc', 'desc' ),
+					'default' => 'asc',
+				),
+				'page'     => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+					'default' => 1,
+				),
+				'per_page' => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+					'maximum' => 100,
+					'default' => 50,
+				),
+			),
+			'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_faq_payload( (array) $req->get_params() ) ),
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/faq/approve',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
+			'args'                => array(
+				'items' => array(
+					'type'     => 'array',
+					'items'    => array( 'type' => 'string' ),
+					'required' => true,
+				),
+			),
+			'callback'            => function ( WP_REST_Request $req ) {
+				$r = rankweb_faq_approve( (array) $req['items'] );
+				return rest_ensure_response(
+					$r + array(
+						/* translators: %d: number of questions. */
+						'message' => sprintf( _n( '%d question approved.', '%d questions approved.', $r['approved'], 'rankweb' ), $r['approved'] ),
+					)
+				);
+			},
+		)
+	);
+	register_rest_route(
+		RANKWEB_REST,
+		'/faq/recount',
+		array(
+			'methods'             => 'POST',
+			'permission_callback' => rankweb_rest_can( RANKWEB_CAP ),
+			'callback'            => fn() => rest_ensure_response( rankweb_faq_recount() + array( 'message' => __( 'Counted again.', 'rankweb' ) ) ),
+		)
+	);
+}
+
+/** Before the screen: bulk Approve and Recount, then back to the list (the classic screen; the shell uses the REST routes). */
 function rankweb_faq_admin_load() {
 	$action = sanitize_key( wp_unslash( $_GET['action'] ?? '-1' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked below
 	if ( '-1' === $action || '' === $action ) {
@@ -128,28 +393,13 @@ function rankweb_faq_admin_load() {
 	}
 	if ( 'approve' === $action ) {
 		check_admin_referer( 'bulk-aw-faq-items' );
-		$done = 0;
-		foreach ( array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['item'] ?? array() ) ) as $pick ) {
-			if ( ! preg_match( '/^(post|term):(\d+)$/', $pick, $m ) || ! rankweb_faq_can_edit( $m[1], $m[2] ) ) {
-				continue;
-			}
-			$items = rankweb_faq_items( $m[1], (int) $m[2] );
-			foreach ( $items as $i => $it ) {
-				if ( '' === ( $it['auto'] ?? '' ) && 'approved' !== $it['status'] ) {
-					$items[ $i ]['status']   = 'approved';
-					$items[ $i ]['reviewed'] = wp_date( 'Y-m-d' );
-					++$done;
-				}
-			}
-			rankweb_faq_items_save( $m[1], (int) $m[2], $items );
-		}
-		rankweb_faq_index( true );
-		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'view' => 'waiting', 'approved' => $done ), admin_url( 'admin.php' ) ) );
+		$r = rankweb_faq_approve( array_map( 'sanitize_text_field', (array) wp_unslash( $_GET['item'] ?? array() ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'view' => 'waiting', 'approved' => $r['approved'] ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 	if ( isset( $_GET['recount'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked below
 		check_admin_referer( 'aw_faq_recount' );
-		rankweb_faq_index( true );
+		rankweb_faq_recount();
 		wp_safe_redirect( add_query_arg( array( 'page' => 'aw-faq', 'counted' => 1 ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
@@ -216,7 +466,7 @@ function rankweb_faq_admin_page() {
 	rankweb_ui_page( 'faq' );
 }
 
-/** The FAQ screen's body: notices, FAQ box on, the list, the counts. The shell draws it through page parts (rankweb_faq_parts()). */
+/** The FAQ screen's body: notices, FAQ box on, the list, the counts. The classic page, for a site with no Kits Core; the shell screen is native (src/tools/faq.js) and reads GET rankweb/v1/faq. */
 function rankweb_faq_admin_body() {
 	if ( ! class_exists( 'WP_List_Table' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';

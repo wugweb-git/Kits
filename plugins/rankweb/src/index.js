@@ -35,6 +35,7 @@ import {
 	TileGrid,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
 import { ModuleCards } from './modules';
+import { Faq } from './tools/faq';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -228,9 +229,7 @@ function Dashboard( { view } ) {
 	}
 	if ( ! data ) {
 		return (
-			<LoadingState
-				label={ __( 'Loading the counts…', 'rankweb' ) }
-			/>
+			<LoadingState label={ __( 'Loading the counts…', 'rankweb' ) } />
 		);
 	}
 	const before = rowBefore( data.log, data.today, days );
@@ -339,9 +338,7 @@ function Dashboard( { view } ) {
 			) }
 			{ 'dashboard' === view && attention.length > 0 && (
 				<Notice tone="warning">
-					<strong>
-						{ __( 'Needs attention', 'rankweb' ) }
-					</strong>
+					<strong>{ __( 'Needs attention', 'rankweb' ) }</strong>
 					<ul>
 						{ attention.map( ( t ) => (
 							<li key={ t.key }>
@@ -477,10 +474,7 @@ function Dashboard( { view } ) {
 					<RefTable
 						caption={ __( 'Commands', 'rankweb' ) }
 						head={ [
-							__(
-								'Commands (WP-CLI on the server)',
-								'rankweb'
-							),
+							__( 'Commands (WP-CLI on the server)', 'rankweb' ),
 							__( 'What it does', 'rankweb' ),
 						] }
 						rows={ data.where.commands.map( ( c ) => [
@@ -970,10 +964,7 @@ function Group( { group, onSaved, onDirty } ) {
 								)
 							}
 						>
-							{ __(
-								'Save listings kept indexed',
-								'rankweb'
-							) }
+							{ __( 'Save listings kept indexed', 'rankweb' ) }
 						</Button>
 					</div>
 				</SettingsBlock>
@@ -1031,9 +1022,7 @@ function Services() {
 	}
 	if ( ! list.length ) {
 		return (
-			<EmptyState
-				title={ __( 'No connected services.', 'rankweb' ) }
-			/>
+			<EmptyState title={ __( 'No connected services.', 'rankweb' ) } />
 		);
 	}
 	return (
@@ -1134,9 +1123,7 @@ function Settings() {
 	}
 	if ( ! groups ) {
 		return (
-			<LoadingState
-				label={ __( 'Loading the settings…', 'rankweb' ) }
-			/>
+			<LoadingState label={ __( 'Loading the settings…', 'rankweb' ) } />
 		);
 	}
 	const current = groups.find( ( g ) => g.slug === open );
@@ -1174,18 +1161,6 @@ function Settings() {
 				<EmptyState title={ __( 'No such group.', 'rankweb' ) } />
 			) }
 		</>
-	);
-}
-
-/** FAQ: the FAQ screen's own output (FAQ box on, the pages with an FAQ, the counts), drawn with Kits' page parts. */
-function Faq() {
-	return (
-		<SectionCard id="faq" title={ __( 'FAQ', 'rankweb' ) }>
-			<PageParts
-				parts={ app.parts || [] }
-				title={ __( 'FAQ', 'rankweb' ) }
-			/>
-		</SectionCard>
 	);
 }
 

@@ -94,10 +94,7 @@ export function ModuleCards() {
 							{ c.settingsUrl && (
 								<p>
 									<a href={ c.settingsUrl }>
-										{ __(
-											'RankWeb Settings',
-											'rankweb'
-										) }
+										{ __( 'RankWeb Settings', 'rankweb' ) }
 									</a>
 								</p>
 							) }

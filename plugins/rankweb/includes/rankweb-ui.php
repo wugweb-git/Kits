@@ -2,7 +2,7 @@
 /**
  * RankWeb's screens on the Kits admin shell: admin.php?page=aw-seo-plus (Dashboard: the counts and the tools),
  * aw-seo-insights (Insights: trends and gaps), aw-seo-modules (Modules: switches, the modules table, where things
- * are), aw-faq (FAQ, from its own output through Kits Core's page parts), aw-seo-settings (Settings) and the four working
+ * are), aw-faq (FAQ, native), aw-seo-settings (Settings) and the four working
  * tools aw-links, aw-images, aw-seo-csv and aw-redirects (each one's own output and forms as page parts). The screens are one
  * script (build/index.js, from src/), drawn with Kits Core's shell parts (kits-core/includes/admin-shell.php) and fed
  * by the rankweb/v1 routes (rankweb-rest.php).
@@ -33,6 +33,17 @@ function rankweb_ui_wanted(): string {
 		'aw-seo-csv'      => 'csv',
 		'aw-redirects'    => 'redirects',
 	)[ $page ] ?? '';
+}
+
+/**
+ * The capability a screen needs: the menu entry's own (Settings, Images, SEO CSV and Redirect tools are manage_options;
+ * the rest manage_rankweb). The script is enqueued only for a user who has it, and each screen's REST routes check the
+ * same one (rankweb_rest_can()).
+ *
+ * @param string $screen A screen from rankweb_ui_wanted().
+ */
+function rankweb_ui_cap( string $screen ): string {
+	return in_array( $screen, array( 'settings', 'images', 'csv', 'redirects' ), true ) ? 'manage_options' : RANKWEB_CAP;
 }
 
 /**
@@ -96,7 +107,7 @@ add_action(
 	'admin_enqueue_scripts',
 	function () {
 		$screen = rankweb_ui_wanted();
-		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( RANKWEB_DIR . 'build/index.js' ) || ! current_user_can( in_array( $screen, array( 'settings', 'images', 'csv', 'redirects' ), true ) ? 'manage_options' : RANKWEB_CAP ) ) {
+		if ( '' === $screen || ! function_exists( 'kits_shell_app' ) || ! is_readable( RANKWEB_DIR . 'build/index.js' ) || ! current_user_can( rankweb_ui_cap( $screen ) ) ) {
 			return;
 		}
 		$main_file = defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : ( file_exists( RANKWEB_DIR . 'rankweb.php' ) ? RANKWEB_DIR . 'rankweb.php' : RANKWEB_DIR . 'rankweb.php' );
@@ -156,8 +167,8 @@ add_action(
 					'faqUrl'    => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 					// The Dashboard's module switches save through settings/modules (manage_options).
 					'canSwitch' => current_user_can( 'manage_options' ),
-					// The FAQ screen's own output as parts, after its load hook ran (Kits Core's page parts).
-					'parts'     => 'faq' === $screen ? rankweb_faq_parts() : rankweb_tool_parts( $screen ),
+					// The tools still drawn as page parts (Kits Core's page parts); the FAQ screen is native.
+					'parts'     => rankweb_tool_parts( $screen ),
 					// The Dashboard's Tools card.
 					'tools'     => 'dashboard' === $screen ? rankweb_ui_tools() : array(),
 				),
@@ -215,16 +226,6 @@ function rankweb_ui_page( string $screen ): void {
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
 	wp_admin_notice( esc_html__( 'RankWeb needs Kits Core (active, with its build) to show this screen.', 'rankweb' ), array( 'type' => 'error' ) );
 	echo '</div>';
-}
-
-/** The FAQ screen's output (rankweb_faq_admin_body()) as page parts for the shell screen. */
-function rankweb_faq_parts(): array {
-	if ( ! function_exists( 'rankweb_faq_admin_body' ) || ! function_exists( 'kits_shell_html_parts' ) ) {
-		return array();
-	}
-	ob_start();
-	rankweb_faq_admin_body();
-	return kits_shell_html_parts( (string) ob_get_clean() );
 }
 
 /**
