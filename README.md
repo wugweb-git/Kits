@@ -3,24 +3,40 @@
 
 The canonical monorepo for the Wugweb ecosystem: WordPress theme, modular companion plugins, design system tokens, shared packages, skills, agents, and release tooling.
 
-Detailed Architecture & Delivery Specification: [`docs/architecture/monorepo-delivery-architecture.md`](docs/architecture/monorepo-delivery-architecture.md)
+Delivery and CI/CD: [`DEPLOYMENT.md`](DEPLOYMENT.md). Each product's open work and decisions: `plugins/<name>/PENDING.md` and `themes/kits-by-wugweb/PENDING.md`. The old `docs/` folder was retired on 26 Nov 2026; its text is in git history (kits-suite `9f81e36` and earlier).
 
 ---
 
 ## 1. Monorepo Structure
 
 ```text
-wugweb/ (https://github.com/wugweb-git/kits)
-├── plugins/              # Independently buildable WordPress plugins (Kits Core, RankWeb, MailWeb, etc.)
-├── themes/               # Kits by Wugweb universal FSE block theme
-├── packages/             # Shared contracts, Token Foundry, and namespaced plugin shells
-├── skills/               # Reusable task skills (WordPress, Design System, Testing, etc.)
-├── agents/               # Role-specific agent instructions
-├── tools/                # Build, package, release, and Playground preview scripts
-├── docs/                 # Canonical architecture, ADRs, and product specifications
+wugweb/ (https://github.com/wugweb-git/Kits, branch kits-suite)
+├── plugins/              # Seven WordPress plugins, each independently built and released:
+│                         #   kits-core, directoryweb, rankweb, sourceweb, insightweb, mailweb, planweb
+├── themes/               # kits-by-wugweb: the universal block theme
+├── packages/             # Shared PHP and JS, design tokens, and the namespaced admin shells
+├── design-system/        # Token and component docs, taxonomy, token build
+├── tools/                # build/ (zips), release/ (per-product release, product pages, registry),
+│                         #   validate/ (versions, Plugin Check), playground/ (WordPress previews and audits)
+├── .github/workflows/    # ci-suite, plugin-check, release-product, release-tokens, release, pages
 ├── marketplace/          # WordPress.org and commercial distribution assets
-└── tests/                # Shared, integration, and contract tests
+├── skills/ agents/       # Reusable task skills and role instructions
+├── tests/                # Shared, integration and contract tests
+├── sites/animalwrites/   # The Animal Writes site layer (not packaged)
+├── reports/ system/      # Audit reports and the inventory
+├── scripts/              # Audit and token scripts
+├── vendor/workflow/      # Local compatibility copy of the Workflow SDK
+├── src/ + index.html     # The original React/Vite design-system app (Vercel build to build/)
+└── Wugweb_Brand_OS_Foundation/   # Brand operating system reference (kept as is)
 ```
+
+### How a release reaches a site
+
+1. Bump the version in the main plugin file, `readme.txt` (Stable tag and changelog) and `CHANGELOG.md`; `python3 tools/validate/check-versions.py` checks they agree.
+2. Push to `kits-suite`. `ci-suite.yml` must pass for that exact commit.
+3. Run the `release-product.yml` workflow for one product (`product`, `prerelease`). It tags `<slug>-v<version>` and attaches `<slug>.zip` (direct build, keeps `Update URI`), `<slug>-wporg.zip` (no `Update URI`), `SHA256SUMS` and a release JSON.
+4. `pages.yml` rebuilds the product pages and `registry/index.json` on GitHub Pages.
+5. Sites running the direct zip of Kits Core 1.1.0 or newer read the registry (cached 12 hours), offer the new version on the Plugins screen, check its SHA-256 and install on Update. A pre-release is offered only to a site whose `kits_update_channel` option is `pre`.
 
 ---
 
