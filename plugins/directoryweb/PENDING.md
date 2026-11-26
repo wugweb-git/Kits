@@ -122,3 +122,7 @@ Menu: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Cl
 - Not verified: none of this has been opened in a browser.
 - Not built: the Animal Writes connector as a separate plugin, adapters for WPForms, Gravity Forms, Formidable, Ninja Forms and Contact Form 7 (each is an adapter with the contract above), editing a listing in the listing editor from the schema (the existing field groups still draw the editor), and a native form builder.
 - The stored post type's name is not written in new code: everything asks `directoryweb_post_type()` (now filterable). `directoryweb-ui.php` no longer names it.
+
+## HOLD: Plugins-screen row links (review of 26 Nov 2026, not released)
+
+`includes/plugin-info.php` (commit 9e85a56, also in RankWeb) adds FAQ, Rate, Details, Support and an "Upgrade to Premium" link with an inline style. WordPress.org review can flag a promotional link in its build, and "Rate" points to wugweb.com. Before release: take the Premium link out of the WordPress.org build (`tools/build/build-dist.py` already tailors `Update URI`) or confirm a premium product exists, and point Rate at the right page.

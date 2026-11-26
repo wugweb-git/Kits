@@ -34,3 +34,7 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - The Step 0 to 9 action plan surface and 404 / internal-search surfacing: unverified.
 - Tabs: 10 flat tabs; grouping inside the plugin is allowed (owner, 26 Nov) and proposed in `docs/ux-discovery/2026-11-26-admin-ia-discovery.md`.
 - `data/links-2026-11-02.php` holds static seeded links: confirm they are never shown as live data.
+
+## HOLD: 404 and internal search logging (review of 26 Nov 2026, not released)
+
+Code is on kits-suite (`includes/search-insights/telemetry-404.php`, commit 15ee659). It logs every front-end 404 path and every visitor search into two options, unconditionally, with no setting and no readme disclosure. Before release: off by default with a switch; say in readme.txt what is stored (no outbound call, but visitor search terms can hold names or emails and 404 paths can hold tokens); retention by days; purge on uninstall whatever the delete-data switch says; mask email-like terms; fix the 100-row cap, which drops every new path once the log is full; write at most once per interval, not on every hit; show it in the UI (today it is REST only). `insightweb_keyword_movers()` is not called anywhere outside the tests.

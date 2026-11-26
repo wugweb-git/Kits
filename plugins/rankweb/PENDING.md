@@ -84,3 +84,7 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Not verifiable here (class X): SEOPress and AIOSEO coexistence (detected by constant only); real Yoast, SEOPress and AIOSEO installs beyond the Yoast check already done; Google Search Console accepting the sitemap.
 - Robots rules for archives and 404 beyond core and search noindex: open.
 - Animal Writes copy still in the plugin, inert without the site's hub functions: directory place phrasing in `titles.php`, question wording in `faq-data.php`, and the `animal-writes/breadcrumb` and `render_block_animal-writes/*` compatibility hooks. Live Animal Writes needs its site layer (`sites/animalwrites/rankweb/`) to restore the old schema values; confirm InsightWeb is active on live, because RankWeb no longer loads its bootstrap.
+
+## HOLD: Plugins-screen row links (review of 26 Nov 2026, not released)
+
+Same as DirectoryWeb's: `includes/plugin-info.php` (commit 9e85a56) adds an "Upgrade to Premium" link that must stay out of the WordPress.org build, and "Rate" points to wugweb.com.

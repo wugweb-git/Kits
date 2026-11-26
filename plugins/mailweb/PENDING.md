@@ -43,3 +43,14 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Multi-tenant sender profiles; (the daily DNS check already existed: 26 Nov it also checks SPF, shows its warning on MailWeb screens and is removed on uninstall).
 - Menu order: the plan says Dashboard first, the code opens on Inbox; owner to decide.
 - No tests for the Hostinger API transport, flush and retry, or inbox. A live check needs the Hostinger token and SMTP credentials.
+
+## HOLD: tenant sender profiles and retry queue (review of 26 Nov 2026, not released)
+
+Code is on kits-suite (`includes/tenant-profiles.php`, commit 207df6a) but MUST NOT ship in a release until these are fixed. Found by reading the code:
+- The daily limit does not stop the mail: it queues a copy and still returns the arguments, so the mail goes out now and again from the queue.
+- Retry loop: the queue re-sends through `wp_mail()`; a failure fires `wp_mail_failed`, which pushes a new item with the attempt count back at 0, so the cap of 3 never holds.
+- A second queue beside the existing `mailweb_queue` table (`mail-cap.php`), so one failed mail can be retried twice, including during a mailbox pause.
+- Full message bodies, recipients and headers (password-reset links included) are kept in the plain option `mailweb_retry_queue`, with no expiry.
+- `from_name` and `label` are only trimmed: a newline can inject a header.
+- `mailweb_retry_queue_tick` and the options `mailweb_tenant_profiles`, `mailweb_retry_queue` and the `mailweb_rate_*` transients are not cleaned up on deactivation or in `uninstall.php`; the option is read, changed and written back with no lock.
+- Fix shape: reuse the `mailweb_queue` table instead of a second queue; a real hold or cancel for over-limit mail; carry the attempt count; sanitise headers; retention; uninstall cleanup; tests for retry, loop and duplicate. Readme must then describe profiles and what is kept.
