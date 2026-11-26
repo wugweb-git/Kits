@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.2.0' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.3.0' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
@@ -88,6 +88,7 @@ require_once KITS_CORE_DIR . 'includes/preview.php';
 // InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/registry-updates.php';
+require_once KITS_CORE_DIR . 'includes/site-checkin.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';
@@ -154,6 +155,7 @@ register_deactivation_hook(
 		}
 		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
 		wp_unschedule_hook( 'aw_thumb_rebuild' ); // a queued thumbnail map rebuild (thumbs.php)
+		wp_unschedule_hook( 'kits_checkin_weekly' ); // the optional site check-in (includes/site-checkin.php)
 		// While it is off the rules may be rebuilt without the preset types and consent items may be published:
 		// rebuild the rules and recheck consent when it is back on (includes/presets.php).
 		delete_option( 'kits_presets_rewrite' );

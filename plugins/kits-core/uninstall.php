@@ -83,6 +83,9 @@ $kits_options = array(
 	'aw_dispatch_log',
 	'aw_error_count',
 	'aw_site_check_last',
+	'kits_checkin_on',
+	'kits_checkin_url',
+	'kits_checkin_last',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the

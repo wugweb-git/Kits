@@ -338,6 +338,9 @@ function kits_transfer_parts(): array {
 		if ( function_exists( 'kits_media_merge_screen' ) || function_exists( 'kits_media_reuse_screen' ) ) {
 			$parts['media'] = array( 'Media clean-up', 'kits_tools_media_part' );
 		}
+		if ( function_exists( 'kits_checkin_part' ) ) {
+			$parts['checkin'] = array( 'Site check-in', 'kits_checkin_part' );
+		}
 	}
 	return $parts;
 }
