@@ -1,0 +1,32 @@
+# RankWeb changelog
+
+Each version's notes also sit in `readme.txt`. Newest first.
+
+## Unreleased
+
+- SEO Bar on the post lists: a colour-coded bar with icons and a spoken summary for title, description, focus keyword, noindex and address.
+- Structured data box for Google gallery types: Recipe, Product, Local business, Event, Job posting, Course, Fact check, Profile page, Software app, Book, Movie and Review. Required properties are checked and an incomplete type prints nothing.
+- Search engines and crawlers: verification tags for Google, Bing, Yandex and Pinterest, and crawlers kept out of the whole site in robots.txt.
+- Native screens on the Kits shell for FAQ, Internal links, Images, SEO CSV and Redirect tools.
+- A WordPress dashboard box showing gaps (titles, descriptions, focus keywords, schema).
+- Works without Rank Math: meta description, Open Graph and Twitter tags, structured data for posts and pages, noindex, and sitemap exclusion of noindex pages.
+- The block editor sidebar now changes what is printed: meta description, noindex and a schema type RankWeb can write (Article, BlogPosting, NewsArticle, WebPage).
+- Overview, Modules, Settings, FAQ and Insights screens work without Kits Core.
+- Another SEO plugin (Yoast SEO, SEOPress, All in One SEO) is detected and RankWeb leaves the page head to it.
+- No site-specific values: the site's own name, language and profiles are used. Animal Writes values load only when Animal Writes Core is active.
+- Fixed: the site tagline was copied into the description of every short post.
+
+## 2.1.0
+
+- Internal links: link audit (orphans, click depth, broken links, redirects, nofollow, canonical elsewhere, too many links), anchor-type mix with per-target warnings and keyword rotation, and silos (virtual and circle modes).
+- Video SEO: YouTube and Vimeo detection, VideoObject schema from oEmbed, and a video sitemap.
+- Custom schema: a per-item JSON-LD box (checked on save), Speakable, about and mentions, import JSON-LD from a URL, and a Rich Results Test link.
+- Bulk work: a SEO column, list filters, Quick Edit and Bulk Edit, and a SEO CSV export and import; image find-and-replace and fill missing captions.
+- Redirect tools: redirect CSV export and import, a 404-log export, and an Apache .htaccess block.
+- Agent tools: RankWeb abilities on the WordPress Abilities API for the MCP adapter; reads by default, writes opt-in.
+- A password-protected item is set to noindex.
+- Module on/off switches on the dashboard.
+
+## 2.0.0
+
+- FAQ, canonicals, breadcrumbs, content analysis, focus keywords, the content panel, and the internal-links auto-linker.
