@@ -14,6 +14,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_filter( 'update_plugins_wugweb.com', 'sourceweb_src_plugin_update_row', 10, 3 );
 add_filter( 'plugins_api', 'sourceweb_src_plugin_details', 10, 3 );
+add_filter( 'plugin_row_meta', 'sourceweb_src_plugin_row_meta', 10, 2 );
+add_action( 'admin_enqueue_scripts', fn( $hook ) => 'plugins.php' === $hook ? add_thickbox() : null );
+
+/**
+ * Adds FAQ, Rate, View details, Support, More, and Upgrade to Premium links on the Plugins screen.
+ *
+ * @param array<int, string> $links Existing row meta links.
+ * @param string             $file  Plugin file basename.
+ * @return array<int, string>
+ */
+function sourceweb_src_plugin_row_meta( array $links, string $file ): array {
+	if ( plugin_basename( sourceweb_src_plugin_file() ) !== $file ) {
+		return $links;
+	}
+	$details = admin_url( 'plugin-install.php?tab=plugin-information&plugin=sourceweb&TB_iframe=true&width=772&height=650' );
+	$faq     = admin_url( 'plugin-install.php?tab=plugin-information&plugin=sourceweb&section=faq&TB_iframe=true&width=772&height=650' );
+	return array_merge(
+		$links,
+		array(
+			'<a href="' . esc_url( $faq ) . '" class="thickbox open-plugin-details-modal">' . esc_html__( 'FAQ', 'sourceweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/plugins/sourceweb/reviews/#new-post' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Rate SourceWeb', 'sourceweb' ) . '</a>',
+			'<a href="' . esc_url( $details ) . '" class="thickbox open-plugin-details-modal">' . esc_html__( 'View details', 'sourceweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/support/?product=sourceweb' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Support', 'sourceweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/plugins/' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'More', 'sourceweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/pricing/?product=sourceweb' ) . '" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#1d4ed8;">' . esc_html__( 'Upgrade to Premium', 'sourceweb' ) . '</a>',
+		)
+	);
+}
 
 function sourceweb_src_plugin_file(): string {
 	if ( defined( 'SOURCEWEB_FILE' ) ) {
@@ -99,7 +127,7 @@ function sourceweb_src_plugin_details( $result, $action, $args ) {
 	$art    = sourceweb_src_plugin_art();
 	return (object) array(
 		'name'          => 'SourceWeb',
-		'slug'          => 'aw-sourcing',
+		'slug'          => 'sourceweb',
 		'version'       => (string) $head['Version'],
 		'author'        => '<a href="https://wugweb.com">Wugweb</a>',
 		'homepage'      => 'https://wugweb.com',
@@ -109,6 +137,7 @@ function sourceweb_src_plugin_details( $result, $action, $args ) {
 		'sections'      => array_filter(
 			array(
 				'description' => $parts['description'] ?? esc_html( (string) $head['Description'] ),
+				'faq'         => $parts['frequently asked questions'] ?? '',
 				'changelog'   => $parts['changelog'] ?? '',
 			)
 		),

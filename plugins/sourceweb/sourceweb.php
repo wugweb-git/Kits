@@ -127,6 +127,7 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/review/review-queue.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-suggestions.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-jobs.php'; // what each AI job needs (pure)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-router-consent.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/site-health.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/relay.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback

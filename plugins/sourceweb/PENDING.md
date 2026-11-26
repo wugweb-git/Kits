@@ -23,11 +23,11 @@ The content ingestion and syndication plugin owns:
 
 ---
 
-## Open Tasks & Enhancements
+## Open Tasks & Enhancements (Resolved 26 Nov 2026)
 
 1. **AI Model Router Parity**:
-   - Free/open model integration when gated by owner consent.
-   - Ongoing evaluation of feed sources against quality thresholds.
+   - ✅ Added owner-consent gate for free/open model routers (`includes/ai/ai-router-consent.php`: `sourceweb_ai_open_models_allowed()`, `sourceweb_ai_filter_router_models()`, `/sourceweb/v1/ai/open-consent`).
+   - ✅ Added feed source quality threshold evaluator (`sourceweb_evaluate_source_quality()`, `/sourceweb/v1/sources/evaluate-quality`).
 
 ## Carried over from docs/org (26 Nov 2026)
 

@@ -618,5 +618,14 @@ $fl = sourceweb_outcome_flags( array( 'A' => array( 'accepted' => 2, 'rejected' 
 aw_t( array( 'A' ) === $fl, 'outcome flags: only a source with enough decisions and a low accepted share' );
 aw_t( array( 'C' ) === sourceweb_outcome_flags( array( 'C' => array( 'accepted' => 0, 'rejected' => 3 ) ), 3, 0.3 ), 'outcome flags: the thresholds can be changed' );
 
+require_once dirname( __DIR__ ) . '/includes/ai/ai-router-consent.php';
+$all_p = array( 'openai' => array(), 'openrouter' => array(), 'requesty' => array(), 'huggingface' => array() );
+aw_t( array( 'openai' ) === array_keys( sourceweb_ai_filter_router_models( $all_p, false ) ), 'ai consent: free/open providers hidden without owner consent' );
+aw_t( 4 === count( sourceweb_ai_filter_router_models( $all_p, true ) ), 'ai consent: free/open providers exposed with owner consent' );
+$q_good = sourceweb_evaluate_source_quality( array( 'fetched' => 20, 'accepted' => 16, 'duplicates' => 1, 'rejected' => 2, 'errors' => 0 ) );
+$q_bad  = sourceweb_evaluate_source_quality( array( 'fetched' => 20, 'accepted' => 1, 'duplicates' => 12, 'rejected' => 14, 'errors' => 3 ) );
+aw_t( true === $q_good['passes'] && 'healthy' === $q_good['grade'], 'source quality: healthy feed passes threshold' );
+aw_t( false === $q_bad['passes'] && 'poor' === $q_bad['grade'] && ! empty( $q_bad['reasons'] ), 'source quality: poor feed fails with reasons' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

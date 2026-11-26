@@ -4,3 +4,4 @@ dist/
 .DS_Store
 Wugweb_Brand_OS_Foundation/.DS_Store
 vendor/
+.claude/
