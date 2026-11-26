@@ -4,7 +4,7 @@
  *
  * Addresses:
  *   admin.php?page=directoryweb                              Dashboard   manage_directoryweb (directoryweb-caps.php)
- *   edit.php?post_type=aw_listing&page=aw-claims              Claims      manage_directoryweb (menu: Fluent Forms → Claims)
+ *   edit.php?post_type=<listing type>&page=aw-claims              Claims      manage_directoryweb (menu: Fluent Forms → Claims)
  *   admin.php?page=directoryweb-settings                      Settings    manage_options
  *
  * One claim (&entry=) and the notice after a review (&done=) are server-rendered on the Claims address
@@ -29,6 +29,10 @@ function directoryweb_ui_screens(): array {
 		'aw-claims'                => array( 'claims', DIRECTORYWEB_CAP ),
 		DIRECTORYWEB_SETTINGS_PAGE => array( 'settings', 'manage_options' ),
 		DIRECTORYWEB_LISTINGS_PAGE => array( 'listings', DIRECTORYWEB_LISTINGS_CAP ),
+		'directoryweb-types'       => array( 'types', 'manage_options' ),
+		'directoryweb-schema'      => array( 'schema', 'manage_options' ),
+		'directoryweb-forms'       => array( 'forms', 'manage_options' ),
+		'directoryweb-transfer'    => array( 'transfer', 'manage_options' ),
 	);
 }
 
@@ -66,11 +70,15 @@ function directoryweb_ui_url( string $screen ): string {
 	$pages = array(
 		'settings' => DIRECTORYWEB_SETTINGS_PAGE,
 		'listings' => DIRECTORYWEB_LISTINGS_PAGE,
+		'types'    => 'directoryweb-types',
+		'schema'   => 'directoryweb-schema',
+		'forms'    => 'directoryweb-forms',
+		'transfer' => 'directoryweb-transfer',
 	);
 	if ( 'claims' === $screen ) {
 		return add_query_arg(
 			array(
-				'post_type' => 'aw_listing',
+				'post_type' => directoryweb_post_type(),
 				'page'      => 'aw-claims',
 			),
 			admin_url( 'edit.php' )
@@ -97,7 +105,48 @@ add_action(
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb', 'directoryweb' ), __( 'Dashboard', 'directoryweb' ), DIRECTORYWEB_CAP, DIRECTORYWEB_PAGE, 'directoryweb_dashboard_page' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown -- as above
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Directory listings', 'directoryweb' ), __( 'Listings', 'directoryweb' ), DIRECTORYWEB_LISTINGS_CAP, DIRECTORYWEB_LISTINGS_PAGE, 'directoryweb_listings_page' );
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'DirectoryWeb settings', 'directoryweb' ), __( 'Settings', 'directoryweb' ), 'manage_options', DIRECTORYWEB_SETTINGS_PAGE, 'directoryweb_settings_page' );
+		foreach ( array(
+			'types'    => array( 'directoryweb-types', __( 'Listing Types', 'directoryweb' ) ),
+			'schema'   => array( 'directoryweb-schema', __( 'Schema & Fields', 'directoryweb' ) ),
+			'forms'    => array( 'directoryweb-forms', __( 'Form Integrations', 'directoryweb' ) ),
+			'transfer' => array( 'directoryweb-transfer', __( 'Import / Export', 'directoryweb' ) ),
+		) as $directoryweb_screen => $directoryweb_item ) {
+			add_submenu_page(
+				DIRECTORYWEB_PAGE,
+				$directoryweb_item[1],
+				$directoryweb_item[1],
+				'manage_options',
+				$directoryweb_item[0],
+				static function () use ( $directoryweb_screen, $directoryweb_item ) {
+					if ( directoryweb_ui_page( $directoryweb_screen ) ) {
+						return;
+					}
+					directoryweb_missing_page( $directoryweb_item[1] );
+				}
+			);
+		}
 	}
+);
+
+// The menu's order: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Claims, Import / Export,
+// Settings; any other item (Place intros) after them. Claims is added elsewhere (claims-review.php), so this runs last.
+add_action(
+	'admin_menu',
+	function () {
+		global $submenu;
+		if ( empty( $submenu[ DIRECTORYWEB_PAGE ] ) ) {
+			return;
+		}
+		$order = array( DIRECTORYWEB_PAGE, DIRECTORYWEB_LISTINGS_PAGE, 'directoryweb-types', 'directoryweb-schema', 'directoryweb-forms', 'aw-claims', DIRECTORYWEB_CLAIMS_LINK, 'directoryweb-transfer', DIRECTORYWEB_SETTINGS_PAGE );
+		$rank  = static function ( $item ) use ( $order ) {
+			$i = array_search( $item[2], $order, true );
+			return false === $i ? count( $order ) : $i;
+		};
+		$items = array_values( $submenu[ DIRECTORYWEB_PAGE ] );
+		usort( $items, static fn( $a, $b ) => $rank( $a ) <=> $rank( $b ) );
+		$submenu[ DIRECTORYWEB_PAGE ] = $items; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- reordering this plugin's own submenu
+	},
+	999
 );
 
 // One top-level menu for the plugin (WordPress Plugin Handbook): the listing type sits under DirectoryWeb instead of a
@@ -110,7 +159,7 @@ add_action(
 add_filter(
 	'register_post_type_args',
 	function ( $args, $type ) {
-		if ( 'aw_listing' === $type ) {
+		if ( directoryweb_post_type() === $type ) {
 			$args['show_in_menu'] = false;
 		}
 		return $args;
@@ -122,14 +171,14 @@ add_filter(
 	'parent_file',
 	function ( $parent_file ) {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		return $screen && 'aw_listing' === $screen->post_type ? DIRECTORYWEB_PAGE : $parent_file;
+		return $screen && directoryweb_post_type() === $screen->post_type ? DIRECTORYWEB_PAGE : $parent_file;
 	}
 );
 add_filter(
 	'submenu_file',
 	function ( $submenu ) {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		return $screen && 'aw_listing' === $screen->post_type ? DIRECTORYWEB_LISTINGS_PAGE : $submenu;
+		return $screen && directoryweb_post_type() === $screen->post_type ? DIRECTORYWEB_LISTINGS_PAGE : $submenu;
 	}
 );
 
@@ -144,33 +193,25 @@ add_action(
 		if ( ! current_user_can( $caps[ $screen ] ) ) {
 			return;
 		}
+		$tab = static fn( $slug, $label, $url ) => array(
+			'slug'    => $slug,
+			'label'   => $label,
+			'url'     => $url,
+			'current' => $slug === $screen,
+		);
 		$tabs = array(
-			array(
-				'slug'    => 'dashboard',
-				'label'   => __( 'Dashboard', 'directoryweb' ),
-				'url'     => directoryweb_ui_url( 'dashboard' ),
-				'current' => 'dashboard' === $screen,
-			),
-			array(
-				'slug'    => 'claims',
-				'label'   => __( 'Claims', 'directoryweb' ),
-				'url'     => directoryweb_ui_url( 'claims' ),
-				'current' => 'claims' === $screen,
-			),
-			array(
-				'slug'    => 'listings',
-				'label'   => __( 'Listings', 'directoryweb' ),
-				'url'     => current_user_can( DIRECTORYWEB_LISTINGS_CAP ) ? directoryweb_ui_url( 'listings' ) : add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ),
-				'current' => 'listings' === $screen,
-			),
+			$tab( 'dashboard', __( 'Dashboard', 'directoryweb' ), directoryweb_ui_url( 'dashboard' ) ),
+			$tab( 'listings', __( 'Listings', 'directoryweb' ), current_user_can( DIRECTORYWEB_LISTINGS_CAP ) ? directoryweb_ui_url( 'listings' ) : add_query_arg( 'post_type', directoryweb_post_type(), admin_url( 'edit.php' ) ) ),
 		);
 		if ( current_user_can( 'manage_options' ) ) {
-			$tabs[] = array(
-				'slug'    => 'settings',
-				'label'   => __( 'Settings', 'directoryweb' ),
-				'url'     => directoryweb_ui_url( 'settings' ),
-				'current' => 'settings' === $screen,
-			);
+			$tabs[] = $tab( 'types', __( 'Listing Types', 'directoryweb' ), directoryweb_ui_url( 'types' ) );
+			$tabs[] = $tab( 'schema', __( 'Schema & Fields', 'directoryweb' ), directoryweb_ui_url( 'schema' ) );
+			$tabs[] = $tab( 'forms', __( 'Form Integrations', 'directoryweb' ), directoryweb_ui_url( 'forms' ) );
+		}
+		$tabs[] = $tab( 'claims', __( 'Claims', 'directoryweb' ), directoryweb_ui_url( 'claims' ) );
+		if ( current_user_can( 'manage_options' ) ) {
+			$tabs[] = $tab( 'transfer', __( 'Import / Export', 'directoryweb' ), directoryweb_ui_url( 'transfer' ) );
+			$tabs[] = $tab( 'settings', __( 'Settings', 'directoryweb' ), directoryweb_ui_url( 'settings' ) );
 			$tabs[] = array(
 				'slug'    => 'place-intros',
 				'label'   => __( 'Place intros', 'directoryweb' ),
@@ -191,7 +232,7 @@ add_action(
 					'version'  => DIRECTORYWEB_VERSION,
 					'icon'     => plugins_url( 'assets/icon.svg', DIRECTORYWEB_FILE ),
 					'tabs'     => $tabs,
-					'listings' => add_query_arg( 'post_type', 'aw_listing', admin_url( 'edit.php' ) ),
+					'listings' => add_query_arg( 'post_type', directoryweb_post_type(), admin_url( 'edit.php' ) ),
 					'rest'     => DIRECTORYWEB_REST,
 				),
 			)
@@ -224,6 +265,10 @@ function directoryweb_ui_page( string $screen ): bool {
 		'claims'    => __( 'Claims', 'directoryweb' ),
 		'listings'  => __( 'Directory listings', 'directoryweb' ),
 		'settings'  => __( 'DirectoryWeb settings', 'directoryweb' ),
+		'types'     => __( 'Listing Types', 'directoryweb' ),
+		'schema'    => __( 'Schema & Fields', 'directoryweb' ),
+		'forms'     => __( 'Form Integrations', 'directoryweb' ),
+		'transfer'  => __( 'Import / Export', 'directoryweb' ),
 	);
 	kits_shell_mount( 'directoryweb-app', $titles[ $screen ] );
 	return true;
@@ -291,7 +336,7 @@ function directoryweb_dashboard_page(): void {
 
 /** Standalone native Dashboard page. */
 function directoryweb_dashboard_native_page(): void {
-	$listing_counts = function_exists( 'wp_count_posts' ) ? wp_count_posts( 'aw_listing' ) : (object) array( 'publish' => 0 );
+	$listing_counts = function_exists( 'wp_count_posts' ) ? wp_count_posts( directoryweb_post_type() ) : (object) array( 'publish' => 0 );
 	$published      = (int) ( $listing_counts->publish ?? 0 );
 	$drafts         = (int) ( $listing_counts->draft ?? 0 );
 	$places_count   = function_exists( 'wp_count_posts' ) ? wp_count_posts( 'aw_place' ) : (object) array( 'publish' => 0 );
@@ -310,14 +355,14 @@ function directoryweb_dashboard_native_page(): void {
 	echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
 	echo '<h2 style="margin-top:0;">' . esc_html__( 'Published Listings', 'directoryweb' ) . '</h2>';
 	echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $published ) ) . '</p>';
-	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=aw_listing' ) ) . '" class="button button-secondary">' . esc_html__( 'View Listings', 'directoryweb' ) . '</a></p>';
+	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_type=' . directoryweb_post_type() ) ) . '" class="button button-secondary">' . esc_html__( 'View Listings', 'directoryweb' ) . '</a></p>';
 	echo '</div>';
 
 	// Draft listings card
 	echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
 	echo '<h2 style="margin-top:0;">' . esc_html__( 'Draft Listings', 'directoryweb' ) . '</h2>';
 	echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $drafts ) ) . '</p>';
-	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_status=draft&post_type=aw_listing' ) ) . '" class="button button-secondary">' . esc_html__( 'View Drafts', 'directoryweb' ) . '</a></p>';
+	echo '<p><a href="' . esc_url( admin_url( 'edit.php?post_status=draft&post_type=' . directoryweb_post_type() ) ) . '" class="button button-secondary">' . esc_html__( 'View Drafts', 'directoryweb' ) . '</a></p>';
 	echo '</div>';
 
 	// Places card: only where the place type exists (it is not registered on a standalone site), or its links lead nowhere.
@@ -335,7 +380,7 @@ function directoryweb_dashboard_native_page(): void {
 	echo '<div class="card" style="margin-top:20px; max-width:800px; padding:16px;">';
 	echo '<h2 style="margin-top:0;">' . esc_html__( 'Quick Actions', 'directoryweb' ) . '</h2>';
 	echo '<p>';
-	echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_listing' ) ) . '" class="button button-primary" style="margin-right:8px;">' . esc_html__( 'Add New Listing', 'directoryweb' ) . '</a> ';
+	echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=' . directoryweb_post_type() ) ) . '" class="button button-primary" style="margin-right:8px;">' . esc_html__( 'Add New Listing', 'directoryweb' ) . '</a> ';
 	if ( post_type_exists( 'aw_place' ) ) {
 		echo '<a href="' . esc_url( admin_url( 'post-new.php?post_type=aw_place' ) ) . '" class="button button-secondary" style="margin-right:8px;">' . esc_html__( 'Add New Place', 'directoryweb' ) . '</a> ';
 	}

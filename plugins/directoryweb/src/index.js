@@ -29,6 +29,13 @@ import {
 	Tile,
 	TileGrid,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
+import {
+	Companions,
+	FormsScreen,
+	SchemaScreen,
+	TransferScreen,
+	TypesScreen,
+} from './schema-screens';
 
 const app = window.directorywebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -1510,7 +1517,20 @@ function App() {
 	} else if ( 'listings' === app.screen ) {
 		screen = <Listings />;
 	} else if ( 'settings' === app.screen ) {
-		screen = <Settings />;
+		screen = (
+			<>
+				<Settings />
+				<Companions />
+			</>
+		);
+	} else if ( 'schema' === app.screen ) {
+		screen = <SchemaScreen />;
+	} else if ( 'types' === app.screen ) {
+		screen = <TypesScreen />;
+	} else if ( 'forms' === app.screen ) {
+		screen = <FormsScreen />;
+	} else if ( 'transfer' === app.screen ) {
+		screen = <TransferScreen />;
 	}
 	return <AppShell header={ <Header /> }>{ screen }</AppShell>;
 }
