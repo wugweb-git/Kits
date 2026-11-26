@@ -9,11 +9,12 @@ This directory houses the official WordPress Suite for **Kits by Wugweb**, desig
 ```
 ├── themes/
 │   └── kits-by-wugweb/          # Universal Full Site Editing (FSE) block theme
-│       ├── theme.json           # Design system root presets (palette, fluid typography, spacing)
-│       ├── styles/              # WordPress style variations (Animal Writes, Slate, Forest)
+│       ├── theme.json           # Design system root presets (palette, typography, spacing, radii)
+│       ├── styles/              # WordPress style variations (Dark, Slate, Forest, Colours/Ink)
 │       ├── templates/           # Native Gutenberg block templates (index, single, archive, 404, etc.)
 │       ├── parts/               # Modular template parts (header, footer, announcement, sidebar)
-│       └── patterns/            # Curated block patterns (heroes, cards, FAQs, CTAs)
+│       ├── patterns/            # Curated block patterns (heroes, cards, FAQs, CTAs)
+│       └── inc/theme-info.php   # Full theme metadata (title, purpose, functions, logo, themes_api)
 │
 └── plugins/
     ├── kits-core/               # Shared engine: Brand Customizer, forms, ALTCHA spam guard, Block Bindings, sharing
@@ -51,10 +52,13 @@ Each tenant administrator can customize design tokens directly via the WordPress
    - **Shapes & Corners:** Controls/Buttons (`--kit-radius-control`), Cards (`--kit-radius-card`), Media/Hero (`--kit-radius-media`), and Badges/Pills (`--kit-radius-pill`).
    - **Layout Dimensions:** Content max-width (`--kit-width-content`), Wide grid container max-width (`--kit-width-wide`), and Section vertical padding (`--kit-space-section-base`).
 3. Click **Save Brand Tokens**:
+   - Tenant overrides are injected into **Layer 3 `theme.json`** (`wp_theme_json_data_theme`, cached in `kits_brand_theme_data` transient) so Site Editor **Reset styles** restores tenant defaults.
    - Dynamic CSS overrides are compiled into `<style id="kits-brand-tokens">`.
    - Variables seamlessly bridge to WordPress native block styles via `--wp--preset--*`.
    - Both the frontend and Gutenberg Block Editor canvases reflect changes immediately.
    - Any active page cache (LiteSpeed Cache) is automatically purged upon save.
+   - Use **Restore Active Preset** to revert to the active tenant preset, or **Clear Brand** to remove all tenant overrides.
+   - Preset profiles are filterable via `kits_brand_presets`, and `kits_brand_tokens` is included in **Settings Transfer** and uninstall backups.
 
 ---
 
