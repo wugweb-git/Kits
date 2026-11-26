@@ -103,6 +103,14 @@ function rankweb_seo_modules(): array {
 				'AW_REDIRECT_HTACCESS' => array( 'type' => 'int', 'label' => 'Allow writing redirects to .htaccess (1 on, 0 off)', 'help' => 'Off by default. Apache or LiteSpeed only; a backup is written first. The download works whether this is on or off.', 'default' => 0 ),
 			),
 		),
+		'transport' => array(
+			'label'  => 'Transport',
+			'switch' => true,
+			'files'  => array( 'transport' ),
+			'desc'   => 'Copy titles, descriptions, focus keywords and robots settings from Yoast SEO, Rank Math or All in One SEO (RankWeb → Transport). A dry run first; a filled field is never overwritten.',
+			'fields' => array(
+			),
+		),
 		'schema' => array(
 			'label'  => 'Schema',
 			'switch' => false,
@@ -403,7 +411,7 @@ function rankweb_seo_setting_tabs(): array {
 		),
 		'titles'          => array(
 			'label'   => 'Titles and descriptions',
-			'modules' => array( 'general', 'titles', 'breadcrumbs', 'bulk' ),
+			'modules' => array( 'general', 'titles', 'breadcrumbs', 'bulk', 'transport' ),
 		),
 		'indexing'        => array(
 			'label'   => 'Indexing',

@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Which screen this request asks for: 'dashboard', 'insights', 'modules', 'faq', 'settings', 'links', 'images', 'csv', 'redirects' or ''.
+ * Which screen this request asks for: 'dashboard', 'insights', 'modules', 'faq', 'settings', 'links', 'images', 'csv', 'redirects', 'transport' or ''.
  */
 function rankweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
@@ -32,6 +32,7 @@ function rankweb_ui_wanted(): string {
 		'aw-images'       => 'images',
 		'aw-seo-csv'      => 'csv',
 		'aw-redirects'    => 'redirects',
+		'aw-transport'    => 'transport',
 	)[ $page ] ?? '';
 }
 
@@ -43,7 +44,7 @@ function rankweb_ui_wanted(): string {
  * @param string $screen A screen from rankweb_ui_wanted().
  */
 function rankweb_ui_cap( string $screen ): string {
-	return in_array( $screen, array( 'settings', 'images', 'csv', 'redirects' ), true ) ? 'manage_options' : RANKWEB_CAP;
+	return in_array( $screen, array( 'settings', 'images', 'csv', 'redirects', 'transport' ), true ) ? 'manage_options' : RANKWEB_CAP;
 }
 
 /**
@@ -103,6 +104,7 @@ function rankweb_ui_tools(): array {
 		'aw-images'    => __( 'Find and replace alt text, titles and captions across the media library.', 'rankweb' ),
 		'aw-seo-csv'   => __( 'Export and import SEO fields as a CSV file.', 'rankweb' ),
 		'aw-redirects' => __( 'Redirect imports, exports and the 404 log.', 'rankweb' ),
+		'aw-transport' => __( 'Copy titles, descriptions and robots settings from Yoast, Rank Math or All in One SEO.', 'rankweb' ),
 	);
 	$items = (array) ( $GLOBALS['submenu'][ AW_SEO_MENU ] ?? array() );
 	$tools = array();
@@ -232,6 +234,7 @@ function rankweb_ui_page( string $screen ): void {
 		'images'   => __( 'Image SEO', 'rankweb' ),
 		'csv'      => __( 'SEO CSV', 'rankweb' ),
 		'redirects' => __( 'Redirect tools', 'rankweb' ),
+		'transport' => __( 'Transport', 'rankweb' ),
 	)[ $screen ] ?? __( 'RankWeb', 'rankweb' );
 	if ( rankweb_ui_ready() && function_exists( 'kits_shell_mount' ) ) {
 		kits_shell_mount( 'rankweb-app', $title );

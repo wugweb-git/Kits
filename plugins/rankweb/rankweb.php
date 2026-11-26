@@ -59,7 +59,7 @@ add_action(
 		require_once RANKWEB_DIR . 'includes/standalone-seo.php'; // who prints the head, site defaults (language, profiles), standalone tags: needs nothing else
 		require_once RANKWEB_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = rankweb_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'schema-gallery', 'site-tags', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'agent-tools', 'rankweb-dashboard', 'rankweb-widget', 'rankweb-rest', 'rankweb-ui', 'rankweb-native-admin', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'schema-gallery', 'site-tags', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'transport', 'agent-tools', 'rankweb-dashboard', 'rankweb-widget', 'rankweb-rest', 'rankweb-ui', 'rankweb-native-admin', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( 'rank-math-schema' === $file && ! rankweb_seo_extras_rank_math() ) {
 				continue; // Rank Math schema bridge is only loaded when Rank Math is active.
 			}

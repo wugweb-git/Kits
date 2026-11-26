@@ -38,6 +38,7 @@ import { Faq } from './tools/faq';
 import { Links } from './tools/links';
 import { Images, SeoCsv } from './tools/files';
 import { Redirects } from './tools/redirects';
+import { Transport } from './tools/transport';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -1175,6 +1176,7 @@ function App() {
 			{ 'images' === app.screen && <Images /> }
 			{ 'csv' === app.screen && <SeoCsv /> }
 			{ 'redirects' === app.screen && <Redirects /> }
+			{ 'transport' === app.screen && <Transport /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />
 			) }
