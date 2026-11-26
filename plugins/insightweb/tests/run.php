@@ -706,4 +706,12 @@ insightweb_keys_copy( true );
 iw_check( 'new-clarity' === $GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'], 'keys copy: a key already set in InsightWeb is never overwritten by the old one' );
 iw_check( ! in_array( 'old-clarity', array_map( 'strval', array_values( $res ) ), true ), 'keys copy: the result carries names and words, never a value' );
 
+// Tab order: reading screens, then site screens; unknown tabs last; missing tabs skipped.
+require_once dirname( __DIR__ ) . '/includes/insightweb-tabs.php';
+$in = array( 'pages' => 'P', 'checklist' => 'C', 'rising' => 'R', 'links' => 'L', 'sourcing' => 'S', 'clarity' => 'Cl', 'server' => 'Sv', 'mine' => 'M' );
+iw_check( array( 'rising', 'pages', 'sourcing', 'links', 'clarity', 'server', 'checklist', 'mine' ) === array_keys( insightweb_tab_order( $in ) ), 'tab order: rising, pages, sourcing, links, clarity, server, check list, then other plugins\' tabs' );
+unset( $in['sourcing'] );
+iw_check( array( 'rising', 'pages', 'links', 'clarity', 'server', 'checklist', 'mine' ) === array_keys( insightweb_tab_order( $in ) ), 'tab order: without SourceWeb the Sourcing tab is skipped' );
+iw_check( 'R' === insightweb_tab_order( $in )['rising'] && 'M' === insightweb_tab_order( $in )['mine'], 'tab order: labels are kept' );
+
 exit( $GLOBALS['iw_fail'] );
