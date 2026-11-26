@@ -2,7 +2,7 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
-## 2.3.1
+## 2.3.2
 
 - The "Upgrade to Premium" link is gone from the Plugins screen.
 - The sitemap check watches the Directory sitemap only when a Directory exists, so other sites no longer get a false "not answering" notice.

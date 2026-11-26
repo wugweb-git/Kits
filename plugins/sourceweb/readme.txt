@@ -59,7 +59,7 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 
 == Changelog ==
 
-= 0.2.3 =
+= 0.2.4 =
 * The "Upgrade to Premium" link is gone from the Plugins screen.
 * A site whose workers have never reported no longer shows "Ingestion needs attention" or "Late" for every worker; alarms start after the first report.
 
