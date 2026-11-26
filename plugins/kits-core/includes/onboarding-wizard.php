@@ -45,6 +45,30 @@ add_action(
 		if ( wp_style_is( 'kits-shell', 'registered' ) ) {
 			wp_enqueue_style( 'kits-shell' );
 		}
+		// The wizard in the Kits look (black, white, greys): cards, big step titles, black buttons.
+		wp_register_style( 'kits-onboarding-look', false, array(), KITS_CORE_LOADED );
+		wp_enqueue_style( 'kits-onboarding-look' );
+		wp_add_inline_style(
+			'kits-onboarding-look',
+			implode(
+				"\n",
+				array(
+					'.kits-onboarding-wrap{max-width:980px;color:#2b2b2b}',
+					'.kits-onboarding-wrap>h1{font-size:28px;font-weight:700;letter-spacing:-.02em;color:#0a0a0a;margin:8px 0 6px}',
+					'.kits-onboarding-wrap>.description{font-size:14px;color:#6b6b6b;margin:0 0 8px}',
+					'.kits-onboarding-wrap .kits-action-row{background:#fff;border:1px solid #e6e6e6;border-radius:14px;padding:24px;margin:0 0 16px;box-shadow:none}',
+					'.kits-onboarding-wrap .kits-action-row__title{display:block;font-size:18px!important;font-weight:700;color:#0a0a0a;letter-spacing:-.01em}',
+					'.kits-onboarding-wrap .kits-action-row__desc{color:#6b6b6b;margin:4px 0 0}',
+					'.kits-onboarding-wrap input[type=text]{border:1px solid #d6d6d6;border-radius:8px;padding:8px 12px;min-height:40px}',
+					'.kits-onboarding-wrap input[type=text]:focus{border-color:#0a0a0a;box-shadow:0 0 0 1px #0a0a0a}',
+					'.kits-onboarding-wrap .button{border-radius:8px;border-color:#d6d6d6;color:#0a0a0a;background:#fff}',
+					'.kits-onboarding-wrap .button-primary{background:#0a0a0a;border-color:#0a0a0a;color:#fff}',
+					'.kits-onboarding-wrap .button-primary:hover{background:#2b2b2b;border-color:#2b2b2b;color:#fff}',
+					'.kits-onboarding-wrap input[type=radio]:checked::before{background-color:#0a0a0a!important}',
+					'.kits-onboarding-wrap input[type=radio]:focus{border-color:#0a0a0a;box-shadow:0 0 0 1px #0a0a0a}',
+				)
+			)
+		);
 	}
 );
 
@@ -180,8 +204,8 @@ function kits_onboarding_page() {
 	echo '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;width:100%;">';
 	foreach ( $variations as $slug => $var ) {
 		$checked = ( $slug === $active_v ) ? 'checked' : '';
-		$border  = ( $slug === $active_v ) ? '#2563eb' : '#e2e8f0';
-		echo '<label style="border:2px solid ' . esc_attr( $border ) . ';padding:14px;border-radius:8px;cursor:pointer;background:#fff;display:block;">';
+		$border  = ( $slug === $active_v ) ? '#0a0a0a' : '#e6e6e6';
+		echo '<label style="border:2px solid ' . esc_attr( $border ) . ';padding:16px;border-radius:12px;cursor:pointer;background:#fff;display:block;">';
 		echo '<input type="radio" name="kits_style_variation" value="' . esc_attr( $slug ) . '" ' . esc_attr( $checked ) . ' style="margin-right:8px;">';
 		echo '<strong>' . esc_html( $var['title'] ) . '</strong>';
 		echo '<div style="display:flex;gap:6px;margin:10px 0;">';
