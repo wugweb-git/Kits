@@ -1,0 +1,8 @@
+.kits-letter { display: grid; gap: 12px; }
+.kits-letter__grounds { border: 1px solid rgba(0, 0, 0, .2); border-radius: 8px; padding: 12px 16px; }
+.kits-letter__g { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; }
+.kits-letter__l { font-weight: 600; }
+.kits-letter__name, .kits-letter__text { width: 100%; font: inherit; padding: 8px 12px; border: 1px solid rgba(0, 0, 0, .35); border-radius: 8px; box-sizing: border-box; }
+.kits-letter__actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.kits-letter__btn { display: inline-block; min-height: 44px; padding: 10px 16px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+.kits-letter__btn:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }

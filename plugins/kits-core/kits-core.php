@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,12 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.1.0' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.2.0' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
 }
-define( 'KITS_CORE_LOADED', '1.1.0' );
+define( 'KITS_CORE_LOADED', '1.2.0' );
 define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
 // When a site plugin loads Kits Core, WordPress does not know Kits Core's folder. If that folder is a symlink in
@@ -97,6 +97,7 @@ require_once KITS_CORE_DIR . 'includes/header-footer-scripts.php'; // Header and
 require_once KITS_CORE_DIR . 'includes/admin-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-menu.php';
 require_once KITS_CORE_DIR . 'includes/admin-fold.php';
+require_once KITS_CORE_DIR . 'includes/blocks-dynamic.php';
 require_once KITS_CORE_DIR . 'includes/admin-bar-products.php'; // The Wugweb menu in the admin bar.
 require_once KITS_CORE_DIR . 'includes/admin-app.php';
 require_once KITS_CORE_DIR . 'includes/admin-shell.php'; // Shared parts plugin screens are built from (docs/plugins/kits-plugin-ui-spec.md).

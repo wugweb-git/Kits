@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "kits/share",
+	"title": "Share",
+	"category": "widgets",
+	"description": "Share links and Copy link for this page, from the Kits share settings.",
+	"keywords": [ "share", "social", "copy link", "kits" ],
+	"textdomain": "kits-core",
+	"attributes": {
+		"button": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false, "align": [ "wide" ], "spacing": { "margin": true } },
+	"editorScript": "file:../../build/blocks/index.js"
+}

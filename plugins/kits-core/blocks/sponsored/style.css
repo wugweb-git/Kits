@@ -1,0 +1,3 @@
+.kits-sponsored { border: 1px solid rgba(0, 0, 0, .2); border-radius: 12px; padding: 16px; }
+.kits-sponsored__tag { margin: 0 0 4px; font-size: .8125rem; font-weight: 600; }
+.kits-sponsored__list { margin: 0; padding-inline-start: 1.25em; }

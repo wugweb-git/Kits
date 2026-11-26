@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "kits/sponsored",
+	"title": "Sponsored",
+	"category": "widgets",
+	"description": "Sponsored slots, always labelled Sponsored, with rel=sponsored links.",
+	"keywords": [ "sponsored", "partner", "ad", "kits" ],
+	"textdomain": "kits-core",
+	"attributes": {
+		"heading": { "type": "string", "default": "" },
+		"items": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false, "align": [ "wide" ], "spacing": { "margin": true, "padding": true } },
+	"editorScript": "file:../../build/blocks/index.js",
+	"style": "file:./style.css"
+}

@@ -1,0 +1,7 @@
+/* One bar on phones only; hidden at 768 and up. */
+.kits-sticky-cta { display: none; }
+@media (max-width: 767px) {
+	.kits-sticky-cta { display: block; position: fixed; inset: auto 0 0 0; z-index: 50; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--wp--preset--color--base, #fff); border-top: 1px solid rgba(0, 0, 0, .15); }
+	.kits-sticky-cta__a { display: block; min-height: 44px; padding: 10px 16px; text-align: center; font-weight: 600; text-decoration: none; border-radius: 8px; background: var(--wp--preset--color--contrast, #141414); color: var(--wp--preset--color--base, #fff); }
+	.kits-sticky-cta__a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+}

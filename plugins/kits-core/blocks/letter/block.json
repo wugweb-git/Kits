@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "kits/letter",
+	"title": "Letter",
+	"category": "widgets",
+	"description": "A letter built from the grounds a visitor ticks. It opens in Gmail or an email app, or the visitor copies it.",
+	"keywords": [ "letter", "email", "objection", "petition", "kits" ],
+	"textdomain": "kits-core",
+	"attributes": {
+		"to": { "type": "string", "default": "" },
+		"subject": { "type": "string", "default": "" },
+		"grounds": { "type": "string", "default": "" },
+		"ticked": { "type": "string", "default": "" },
+		"salute": { "type": "string", "default": "Sir/Madam," },
+		"intro": { "type": "string", "default": "" },
+		"closing": { "type": "string", "default": "" },
+		"sign": { "type": "string", "default": "Yours faithfully," }
+	},
+	"supports": { "html": false, "align": [ "wide" ], "spacing": { "margin": true, "padding": true } },
+	"editorScript": "file:../../build/blocks/index.js",
+	"viewScript": "file:../../build/letter/view.js",
+	"style": "file:./style.css"
+}
