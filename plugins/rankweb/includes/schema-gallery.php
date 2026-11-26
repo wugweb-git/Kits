@@ -105,7 +105,7 @@ function rankweb_gallery_box( WP_Post $post ): void {
 			$fid  = 'rwg-' . $key . '-' . RankWeb_Schema_Gallery::key( $path );
 			$v    = ( $key === $cur ) ? (string) ( $vals[ $path ] ?? '' ) : '';
 			echo '<tr><th scope="row"><label for="' . esc_attr( $fid ) . '">' . esc_html( $label ) . ( $req ? ' <span aria-hidden="true" style="color:#b32d2e">*</span><span class="screen-reader-text">' . esc_html__( '(required)', 'rankweb' ) . '</span>' : '' ) . '</label></th><td>';
-			if ( 'longtext' === $kind || 'lines' === $kind || 'steps' === $kind ) {
+			if ( 'longtext' === $kind || 'lines' === $kind || 'steps' === $kind || 'items' === $kind ) {
 				echo '<textarea id="' . esc_attr( $fid ) . '" name="' . esc_attr( $name ) . '" rows="' . ( 'longtext' === $kind ? 3 : 5 ) . '" class="large-text"' . ( $req ? ' aria-required="true"' : '' ) . '>' . esc_textarea( $v ) . '</textarea>';
 			} elseif ( 'select' === $kind ) {
 				echo '<select id="' . esc_attr( $fid ) . '" name="' . esc_attr( $name ) . '">';

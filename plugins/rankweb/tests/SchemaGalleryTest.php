@@ -85,4 +85,43 @@ final class SchemaGalleryTest extends PHPUnit\Framework\TestCase {
 	public function testAnUnknownTypeBuildsNothing(): void {
 		$this->assertSame( null, RankWeb_Schema_Gallery::build( 'Nope', array() )['node'] );
 	}
+
+	public function testQaPageAndQuizUseTheirOwnNesting(): void {
+		$r = $this->node( 'QAPage', array( 'mainEntity__name' => 'How do I help a stray?', 'mainEntity__answerCount' => '1', 'mainEntity__acceptedAnswer__text' => 'Call a rescue.' ) );
+		$this->assertSame( 'Question', $r['node']['mainEntity']['@type'] );
+		$this->assertSame( 'Answer', $r['node']['mainEntity']['acceptedAnswer']['@type'] );
+		$q = $this->node( 'Quiz', array( 'about__name' => 'Dog care', 'hasPart__name' => 'Q?', 'hasPart__acceptedAnswer__text' => 'A.' ) );
+		$this->assertSame( 'Flashcard', $q['node']['hasPart']['eduQuestionType'] );
+		$p = $this->node( 'ProfilePage', array( 'mainEntity__name' => 'Asha' ) );
+		$this->assertSame( 'Person', $p['node']['mainEntity']['@type'], 'ProfilePage keeps its own mainEntity type' );
+	}
+
+	public function testNewTypesNeedTheirRequiredFields(): void {
+		$this->assertSame( array( 'Name', 'Description (at least 50 characters)' ), $this->node( 'Dataset', array() )['missing'] );
+		$this->assertSame( 'EmployerAggregateRating', $this->node( 'EmployerAggregateRating', array( 'itemReviewed__name' => 'Acme', 'ratingValue' => '4', 'ratingCount' => '20' ) )['node']['@type'] );
+		$m = $this->node( 'MathSolver', array( 'name' => 'Solver', 'url' => 'https://example.org/s', 'potentialAction__target' => 'https://example.org/s?q={math_expression_string}' ) );
+		$this->assertSame( 'SolveMathAction', $m['node']['potentialAction']['@type'] );
+		$this->assertSame( 'required name=math_expression_string', $m['node']['potentialAction']['mathExpression-input'] );
+		$v = $this->node( 'VacationRental', array( 'name' => 'Cottage', 'identifier' => 'c1', 'image' => "https://example.org/1.jpg\nhttps://example.org/2.jpg", 'latitude' => '18.5', 'longitude' => '73.8', 'containsPlace__additionalType' => 'EntirePlace', 'containsPlace__occupancy__value' => '4', 'address__streetAddress' => '1 Hill Rd', 'address__addressLocality' => 'Pune', 'address__addressCountry' => 'IN' ) );
+		$this->assertSame( 'Accommodation', $v['node']['containsPlace']['@type'] );
+		$this->assertSame( 'QuantitativeValue', $v['node']['containsPlace']['occupancy']['@type'] );
+		$this->assertSame( 2, count( $v['node']['image'] ) );
+	}
+
+	public function testPaywallAndCarousel(): void {
+		$r = $this->node( 'PaywalledContent', array( 'name' => 'Report', 'hasPart__cssSelector' => '.paywall' ) );
+		$this->assertSame( false, $r['node']['isAccessibleForFree'] );
+		$this->assertSame( false, $r['node']['hasPart']['isAccessibleForFree'] );
+		$c = $this->node( 'ItemList', array( 'itemListElement' => "https://example.org/a\nnot a url\nhttps://example.org/b" ) );
+		$this->assertSame( 2, count( $c['node']['itemListElement'] ) );
+		$this->assertSame( 2, $c['node']['itemListElement'][1]['position'] );
+		$this->assertSame( array( 'Addresses of the pages in the list (one per line, at least two)' ), $this->node( 'ItemList', array( 'itemListElement' => 'junk' ) )['missing'] );
+	}
+
+	public function testProductShippingAndReturnsGetTheirTypes(): void {
+		$r = $this->node( 'Product', array( 'name' => 'Collar', 'offers__price' => '499', 'offers__priceCurrency' => 'INR', 'offers__shippingDetails__shippingRate__value' => '0', 'offers__shippingDetails__shippingRate__currency' => 'INR', 'offers__hasMerchantReturnPolicy__merchantReturnDays' => '7' ) );
+		$this->assertSame( 'OfferShippingDetails', $r['node']['offers']['shippingDetails']['@type'] );
+		$this->assertSame( 'MonetaryAmount', $r['node']['offers']['shippingDetails']['shippingRate']['@type'] );
+		$this->assertSame( 'MerchantReturnPolicy', $r['node']['offers']['hasMerchantReturnPolicy']['@type'] );
+	}
 }

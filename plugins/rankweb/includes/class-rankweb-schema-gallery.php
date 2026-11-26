@@ -6,7 +6,9 @@
  * not all filled is not printed (Google ignores or flags incomplete markup), and the form says what is missing.
  *
  * Field kinds: text, longtext, url, date (any date or date-time text strtotime reads; stored ISO 8601), number, lines
- * (one value per line), steps (one instruction per line, written as HowToStep), select (options).
+ * (one value per line), steps (one instruction per line, written as HowToStep), items (one address per line, written as
+ * ListItem), select (options). A spec may also hold 'nest' (types for paths that differ from NEST), 'const' (fixed values) and
+ * 'any_of'.
  *
  * @package rankweb
  */
@@ -40,6 +42,10 @@ final class RankWeb_Schema_Gallery {
 		'nutrition'            => 'NutritionInformation',
 		'baseSalary'           => 'MonetaryAmount',
 		'baseSalary.value'     => 'QuantitativeValue',
+		'offers.shippingDetails'                          => 'OfferShippingDetails',
+		'offers.shippingDetails.shippingRate'             => 'MonetaryAmount',
+		'offers.shippingDetails.shippingDestination'      => 'DefinedRegion',
+		'offers.hasMerchantReturnPolicy'                  => 'MerchantReturnPolicy',
 		'itemReviewed'         => 'Thing',
 		'itemReviewed.author'  => 'Person',
 		'mainEntity'           => 'Person',
@@ -100,6 +106,16 @@ final class RankWeb_Schema_Gallery {
 						array( 'offers.price', 'Price', 'number', false ),
 						array( 'offers.priceCurrency', 'Currency (e.g. INR)', 'text', false ),
 						array( 'offers.availability', 'Availability', 'select', false, array( '' => '', 'https://schema.org/InStock' => 'In stock', 'https://schema.org/OutOfStock' => 'Out of stock', 'https://schema.org/PreOrder' => 'Pre-order' ) ),
+						array( 'offers.itemCondition', 'Condition', 'select', false, array( '' => '', 'https://schema.org/NewCondition' => 'New', 'https://schema.org/UsedCondition' => 'Used', 'https://schema.org/RefurbishedCondition' => 'Refurbished' ) ),
+						array( 'offers.priceValidUntil', 'Price valid until', 'date', false ),
+						array( 'gtin', 'GTIN or barcode', 'text', false ),
+						array( 'mpn', 'Manufacturer part number', 'text', false ),
+						array( 'offers.shippingDetails.shippingRate.value', 'Shipping cost (0 for free)', 'number', false ),
+						array( 'offers.shippingDetails.shippingRate.currency', 'Shipping currency (e.g. INR)', 'text', false ),
+						array( 'offers.shippingDetails.shippingDestination.addressCountry', 'Ships to (country, two letters)', 'text', false ),
+						array( 'offers.hasMerchantReturnPolicy.returnPolicyCategory', 'Returns', 'select', false, array( '' => '', 'https://schema.org/MerchantReturnFiniteReturnWindow' => 'Returns accepted for a set time', 'https://schema.org/MerchantReturnNotPermitted' => 'No returns', 'https://schema.org/MerchantReturnUnlimitedWindow' => 'Returns accepted any time' ) ),
+						array( 'offers.hasMerchantReturnPolicy.merchantReturnDays', 'Return window (days)', 'number', false ),
+						array( 'offers.hasMerchantReturnPolicy.applicableCountry', 'Returns from (country, two letters)', 'text', false ),
 					),
 					$rate
 				),
@@ -224,6 +240,140 @@ final class RankWeb_Schema_Gallery {
 					array( 'director.name', 'Director', 'text', false ),
 				),
 			),
+			'Dataset'             => array(
+				'label'  => 'Dataset',
+				'type'   => 'Dataset',
+				'fields' => array(
+					array( 'name', 'Name', 'text', true ),
+					array( 'description', 'Description (at least 50 characters)', 'longtext', true ),
+					array( 'url', 'Address of the dataset page', 'url', false ),
+					array( 'creator.name', 'Creator', 'text', false ),
+					array( 'license', 'Licence address', 'url', false ),
+					array( 'keywords', 'Keywords (one per line)', 'lines', false ),
+					array( 'temporalCoverage', 'Period covered (e.g. 2020-01-01/2026-12-31)', 'text', false ),
+					array( 'distribution.contentUrl', 'Download address', 'url', false ),
+					array( 'distribution.encodingFormat', 'Download format (e.g. text/csv)', 'text', false ),
+				),
+				'nest'   => array( 'creator' => 'Organization', 'distribution' => 'DataDownload' ),
+			),
+			'QAPage'              => array(
+				'label'  => 'Question and answer page',
+				'type'   => 'QAPage',
+				'fields' => array(
+					array( 'mainEntity.name', 'The question', 'text', true ),
+					array( 'mainEntity.text', 'More detail on the question', 'longtext', false ),
+					array( 'mainEntity.answerCount', 'Number of answers', 'number', true ),
+					array( 'mainEntity.dateCreated', 'Asked', 'date', false ),
+					array( 'mainEntity.author.name', 'Asked by', 'text', false ),
+					array( 'mainEntity.acceptedAnswer.text', 'The best answer', 'longtext', true ),
+					array( 'mainEntity.acceptedAnswer.url', 'Address of that answer', 'url', false ),
+					array( 'mainEntity.acceptedAnswer.upvoteCount', 'Its votes', 'number', false ),
+					array( 'mainEntity.acceptedAnswer.author.name', 'Answered by', 'text', false ),
+				),
+				'nest'   => array( 'mainEntity' => 'Question', 'mainEntity.author' => 'Person', 'mainEntity.acceptedAnswer' => 'Answer', 'mainEntity.acceptedAnswer.author' => 'Person' ),
+			),
+			'DiscussionForumPosting' => array(
+				'label'  => 'Discussion forum post',
+				'type'   => 'DiscussionForumPosting',
+				'fields' => array(
+					array( 'headline', 'Title of the post', 'text', false ),
+					array( 'text', 'The post', 'longtext', true ),
+					array( 'author.name', 'Author', 'text', true ),
+					array( 'datePublished', 'Posted', 'date', true ),
+					array( 'dateModified', 'Last edited', 'date', false ),
+					array( 'url', 'Address of the post', 'url', false ),
+				),
+			),
+			'Quiz'                => array(
+				'label'  => 'Education Q&A (flashcard)',
+				'type'   => 'Quiz',
+				'fields' => array(
+					array( 'about.name', 'Subject', 'text', true ),
+					array( 'educationalLevel', 'Level (e.g. high school)', 'text', false ),
+					array( 'hasPart.name', 'The question', 'text', true ),
+					array( 'hasPart.acceptedAnswer.text', 'The answer', 'longtext', true ),
+				),
+				'nest'   => array( 'about' => 'Thing', 'hasPart' => 'Question', 'hasPart.acceptedAnswer' => 'Answer' ),
+				'const'  => array( 'hasPart.eduQuestionType' => 'Flashcard' ),
+			),
+			'EmployerAggregateRating' => array(
+				'label'  => 'Employer rating',
+				'type'   => 'EmployerAggregateRating',
+				'fields' => array(
+					array( 'itemReviewed.name', 'Employer', 'text', true ),
+					array( 'itemReviewed.sameAs', 'Employer website', 'url', false ),
+					array( 'ratingValue', 'Average rating', 'number', true ),
+					array( 'ratingCount', 'Number of ratings', 'number', true ),
+					array( 'bestRating', 'Best possible rating (default 5)', 'number', false ),
+					array( 'worstRating', 'Worst possible rating (default 1)', 'number', false ),
+				),
+				'nest'   => array( 'itemReviewed' => 'Organization' ),
+			),
+			'MathSolver'          => array(
+				'label'  => 'Math solver',
+				'type'   => 'MathSolver',
+				'fields' => array(
+					array( 'name', 'Name', 'text', true ),
+					array( 'url', 'Address of the solver', 'url', true ),
+					array( 'usageInfo', 'Address of the terms or usage page', 'url', false ),
+					array( 'potentialAction.target', 'Address that takes the problem (ends with ?q={math_expression_string})', 'text', true ),
+					array( 'assesses', 'Topics it solves (one per line)', 'lines', false ),
+				),
+				'nest'   => array( 'potentialAction' => 'SolveMathAction' ),
+				'const'  => array( 'potentialAction.mathExpression-input' => 'required name=math_expression_string' ),
+			),
+			'VacationRental'      => array(
+				'label'  => 'Vacation rental',
+				'type'   => 'VacationRental',
+				'fields' => array_merge(
+					array(
+						array( 'name', 'Name', 'text', true ),
+						array( 'identifier', 'Your ID for it', 'text', true ),
+						array( 'image', 'Image addresses (one per line; Google wants at least 8)', 'lines', true ),
+						array( 'latitude', 'Latitude', 'number', true ),
+						array( 'longitude', 'Longitude', 'number', true ),
+						array( 'url', 'Address of the listing', 'url', false ),
+						array( 'description', 'Description', 'longtext', false ),
+						array( 'containsPlace.additionalType', 'What the guest rents', 'select', true, array( '' => '', 'EntirePlace' => 'The whole place', 'PrivateRoom' => 'A private room', 'SharedRoom' => 'A shared room' ) ),
+						array( 'containsPlace.occupancy.value', 'Most guests', 'number', true ),
+						array( 'containsPlace.numberOfBedrooms', 'Bedrooms', 'number', false ),
+						array( 'containsPlace.numberOfBathroomsTotal', 'Bathrooms', 'number', false ),
+					),
+					$addr( 'address' ),
+					$rate
+				),
+				'nest'   => array( 'containsPlace' => 'Accommodation', 'containsPlace.occupancy' => 'QuantitativeValue' ),
+			),
+			'ImageObject'         => array(
+				'label'  => 'Image licence',
+				'type'   => 'ImageObject',
+				'fields' => array(
+					array( 'contentUrl', 'Image address', 'url', true ),
+					array( 'license', 'Licence address', 'url', true ),
+					array( 'acquireLicensePage', 'Where to get a licence', 'url', true ),
+					array( 'creator.name', 'Creator', 'text', false ),
+					array( 'creditText', 'Credit line', 'text', false ),
+					array( 'copyrightNotice', 'Copyright notice', 'text', false ),
+				),
+				'nest'   => array( 'creator' => 'Person' ),
+			),
+			'PaywalledContent'    => array(
+				'label'  => 'Paywalled content',
+				'type'   => 'CreativeWork',
+				'fields' => array(
+					array( 'name', 'Title', 'text', true ),
+					array( 'hasPart.cssSelector', 'The paywalled part (a CSS selector, e.g. .paywall)', 'text', true ),
+				),
+				'nest'   => array( 'hasPart' => 'WebPageElement' ),
+				'const'  => array( 'isAccessibleForFree' => false, 'hasPart.isAccessibleForFree' => false ),
+			),
+			'ItemList'            => array(
+				'label'  => 'Carousel (list of pages)',
+				'type'   => 'ItemList',
+				'fields' => array(
+					array( 'itemListElement', 'Addresses of the pages in the list (one per line, at least two)', 'items', true ),
+				),
+			),
 			'Review'              => array(
 				'label'  => 'Review',
 				'type'   => 'Review',
@@ -293,6 +443,7 @@ final class RankWeb_Schema_Gallery {
 			return array( 'node' => null, 'missing' => array() );
 		}
 		$missing = array();
+		$nest    = array_merge( self::NEST, (array) ( $spec['nest'] ?? array() ) );
 		$node    = array( '@type' => $spec['type'] );
 		foreach ( $spec['fields'] as $f ) {
 			$v = trim( (string) ( $values[ $f[0] ] ?? '' ) );
@@ -305,12 +456,27 @@ final class RankWeb_Schema_Gallery {
 			if ( 'lines' === $f[2] || 'steps' === $f[2] ) {
 				$lines = array_values( array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', $v ) ) ) );
 				$val   = 'steps' === $f[2] ? array_map( static fn( $t ) => array( '@type' => 'HowToStep', 'text' => $t ), $lines ) : $lines;
+			} elseif ( 'items' === $f[2] ) {
+				$urls = array_values( array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', $v ) ), static fn( $u ) => (bool) preg_match( '#^https?://\S+$#i', $u ) ) );
+				$val  = array();
+				foreach ( $urls as $i => $u ) {
+					$val[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => $u );
+				}
+				if ( count( $val ) < 2 ) {
+					if ( $f[3] ) {
+						$missing[] = $f[1];
+					}
+					continue;
+				}
 			} elseif ( 'number' === $f[2] ) {
 				$val = 0 + $v;
 			} else {
 				$val = $v;
 			}
-			self::put( $node, $f[0], $val );
+			self::put( $node, $f[0], $val, $nest );
+		}
+		foreach ( (array) ( $spec['const'] ?? array() ) as $path => $val ) {
+			self::put( $node, $path, $val, $nest );
 		}
 		if ( ! empty( $spec['any_of'] ) ) {
 			$has = false;
@@ -333,7 +499,7 @@ final class RankWeb_Schema_Gallery {
 	}
 
 	/** Set a dotted path in a node, giving each created object its @type. */
-	private static function put( array &$node, string $path, $value ): void {
+	private static function put( array &$node, string $path, $value, array $nest ): void {
 		$parts = explode( '.', $path );
 		$ref   = &$node;
 		$at    = '';
@@ -344,7 +510,7 @@ final class RankWeb_Schema_Gallery {
 				break;
 			}
 			if ( ! isset( $ref[ $p ] ) ) {
-				$ref[ $p ] = isset( self::NEST[ $at ] ) ? array( '@type' => self::NEST[ $at ] ) : array();
+				$ref[ $p ] = isset( $nest[ $at ] ) ? array( '@type' => $nest[ $at ] ) : array();
 			}
 			$ref = &$ref[ $p ];
 		}
