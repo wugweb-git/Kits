@@ -41,6 +41,7 @@ const AW_WORKER_DEFAULT_GROUP = array(
 	'tests'                => 'maintenance',
 	'wp-cron'              => 'maintenance',
 	'keepalive'            => 'maintenance',
+	'backup-offsite'       => 'maintenance',
 	'backfill'             => 'one-off',
 	'submit'               => 'one-off',
 	'press-gnews'          => 'one-off',
