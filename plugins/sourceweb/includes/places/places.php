@@ -152,6 +152,17 @@ add_filter(
 );
 
 /**
+ * Every outside service SourceWeb can send data to: the built-in list, then whatever plugins add through
+ * `sourceweb_external_services` (a plugin that calls out for SourceWeb adds itself here, and says so in its readme).
+ *
+ * @return array<string, array>
+ */
+function sourceweb_external_services(): array {
+	$more = apply_filters( 'sourceweb_external_services', SOURCEWEB_EXTERNAL_SERVICES );
+	return sourceweb_external_services_clean( is_array( $more ) ? $more : SOURCEWEB_EXTERNAL_SERVICES );
+}
+
+/**
  * Every way an item can enter SourceWeb: the built-in types, then whatever plugins add through `sourceweb_source_types`.
  *
  * @return array<string, array>

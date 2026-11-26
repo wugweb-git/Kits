@@ -599,5 +599,19 @@ $steps = array_unique( array_column( $un, 'step' ) );
 aw_t( ! array_diff( $steps, SOURCEWEB_WORKER_STEPS ), 'union: every worker has a known step' );
 aw_t( ! array_diff( array_map( static fn( $f ) => preg_replace( '/\.yml$/', '', $f ), array_keys( AW_WORKERS ) ), array_keys( SOURCEWEB_WORKER_PROFILES ) ), 'union: every workflow has a profile (step and AI job)' );
 
+// External services: the readme names every one.
+require_once dirname( __DIR__ ) . '/includes/sources/external-services-model.php';
+$es = sourceweb_external_services_clean( SOURCEWEB_EXTERNAL_SERVICES );
+aw_t( count( SOURCEWEB_EXTERNAL_SERVICES ) === count( $es ), 'external services: every built-in service is valid' );
+aw_t( array() === sourceweb_external_services_readme_gaps( (string) file_get_contents( dirname( __DIR__ ) . '/readme.txt' ), $es ), 'external services: readme.txt names every listed service' );
+aw_t( array() !== sourceweb_external_services_readme_gaps( 'nothing here', $es ) && array( 'no External services section' ) === sourceweb_external_services_readme_gaps( 'x', $es ), 'external services: a readme that does not name them fails' );
+aw_t( 1 === count( sourceweb_external_services_clean( array( array( 'id' => 'a', 'name' => '' ), array( 'id' => 'b', 'name' => 'B' ) ) ) ), 'external services: one without a name is dropped' );
+
+// The workers' routes under sourceweb/v1.
+require_once dirname( __DIR__ ) . '/includes/compat/worker-routes-model.php';
+aw_t( '/worker-api/ingest' === sourceweb_worker_route_alias( '/aw/v1/ingest' ), 'worker routes: aw/v1/ingest is also worker-api/ingest' );
+aw_t( '/worker-api/review/(?P<id>\\d+)' === sourceweb_worker_route_alias( '/aw/v1/review/(?P<id>\\d+)' ), 'worker routes: a route with a pattern keeps it' );
+aw_t( '' === sourceweb_worker_route_alias( '/sourceweb/v1/places' ), 'worker routes: only aw/v1 routes are mirrored' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );
