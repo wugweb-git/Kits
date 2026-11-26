@@ -5,9 +5,9 @@
 1. **Source** things,
 2. **from** defined origins, by any method: feeds (RSS, Atom, Google News), keyword and press searches, APIs (GDELT, Openverse, DOI, Google Places), pages the site fetches itself, social posts, a link added by hand, or a push from another plugin (InsightWeb). Keywords are one method among these, not the model,
 3. **via** workers,
-4. **within** a defined guardrail (relevance and rules),
-5. **to** dedicated outputs, chosen in settings: a content type (News, Library, Opportunities), another plugin (DirectoryWeb, Resources, any plugin that registers), or a workflow (an automation, webhook, queue or worker job), and
-6. **enhance** them so they fit in (attribution, titles, summaries, images, directory facts).
+4. **within** a defined guardrail or perimeter (what is in scope, what is allowed),
+5. **to** a dedicated place, chosen in settings: a plugin (DirectoryWeb, Resources, any plugin that registers), a workflow (automation, webhook, queue, worker job), an AI generator, stats, research, a picture gallery, reviews, and so on, and
+6. **enhance** them to fit in, **for that place**: what fits a directory listing is not what fits a gallery or a stats feed, so each place declares its own enhancements. Enhancement comes after routing, not before.
 
 Everything in `includes/` serves one of those six steps, and `includes/` is grouped that way (the load order in `sourceweb.php` is unchanged; hooks and tab order depend on it).
 
@@ -17,8 +17,24 @@ Everything in `includes/` serves one of those six steps, and `includes/` is grou
 | 3. Via workers | `workers/` (registry, tick, relay, ingest) |
 | 4. Within a guardrail | `rules/` (relevance, auto-review, section rules), `review/` (what a person still decides), `ai/` (the models behind relevance) |
 | 5. To dedicated outputs | no folder of its own yet: the routing is spread over `workers/ingest.php`, `rules/` (section rules) and `output/content-helpers.php` (section lists) |
-| 6. Enhance | `enhance/`: summaries (rules, rewrite), titles, attribution, images, Library PDFs, issuer, research citation; `enhance/directory/`: directory enrichment |
+| 6. Enhance, for the place | `enhance/` (today one set for every place; it should become per place): summaries (rules, rewrite), titles, attribution, images, Library PDFs, issuer, research citation; `enhance/directory/`: directory enrichment |
 | Around all steps | `admin/`, `rest/` (screens and routes), `lifecycle/` (migrations, uninstall), `compat/` |
+
+## The pipeline model: small standard blocks
+
+The six steps are built from a few standard operations, each a plain function that takes an item and returns a result, so any step can use any of them and a place can choose its own mix.
+
+| Block | Meaning | Where it shows up today |
+|---|---|---|
+| **Boolean test** (`and`, `or`, `not`, `in`, `matches`, `>=`) | A yes or no about an item or a value. Every guardrail and every route is one or a combination | Keyword check, blocked publishers, "not News" reasons, section rules, auto-review and auto-resolve rules |
+| **Route** | Choose the place from the item and the settings | Hard-coded content type in ingest |
+| **Enhance** (per place) | Make the item fit its place | Summary rules and rewrite, titles, attribution, images, directory enrichment |
+| **Eval** | Score or judge an item or a result, giving a number and a pass or fail with a reason | The relevance gate; the Rejected log records the reason |
+| **Upscale** | Raise quality: a better summary, a larger or cleaner picture, more complete facts | Summary rewrite, CC0 image fetch, directory enrichment |
+| **Open loop** | Send an item out and do not wait for a result | Publishing a draft; a worker run |
+| **Closed loop** | The result comes back and changes the next run: a review decision, an eval score, a stats figure adjusts a source's trust, a keyword's weight or a rule | Per-keyword stats (which search brought each item in), the trust order, auto-resolve rules learned from review. Not yet joined into one loop |
+
+Rules for these blocks: they are pure where possible (no WordPress call) so they can be tested alone; every decision records its reason; a place may list which blocks run for it and in what order; a closed loop never changes stored data on its own, it proposes and a person or a rule approves.
 
 ## The flow
 
