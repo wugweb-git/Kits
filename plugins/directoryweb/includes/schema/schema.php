@@ -64,21 +64,17 @@ function directoryweb_form_adapters(): array {
 			'label'  => 'Fluent Forms',
 			'active' => static fn() => defined( 'FLUENTFORM' ) || function_exists( 'wpFluentForm' ),
 			'forms'  => static function (): array {
-				if ( ! function_exists( 'wpFluent' ) ) {
-					return array();
-				}
+				global $wpdb;
 				$rows = array();
-				foreach ( (array) wpFluent()->table( 'fluentform_forms' )->select( array( 'id', 'title' ) )->orderBy( 'id', 'desc' )->limit( 200 )->get() as $r ) {
+				foreach ( (array) $wpdb->get_results( "SELECT id, title FROM {$wpdb->prefix}fluentform_forms ORDER BY id DESC LIMIT 200" ) as $r ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- Fluent Forms' own table, read only
 					$rows[] = array( (string) $r->id, (string) $r->title );
 				}
 				return $rows;
 			},
 			'fields' => static function ( $form_id ): array {
-				if ( ! function_exists( 'wpFluent' ) ) {
-					return array();
-				}
-				$form = wpFluent()->table( 'fluentform_forms' )->where( 'id', (int) $form_id )->first();
-				$def  = $form ? json_decode( (string) $form->form_fields, true ) : array();
+				global $wpdb;
+				$json = $wpdb->get_var( $wpdb->prepare( "SELECT form_fields FROM {$wpdb->prefix}fluentform_forms WHERE id = %d", (int) $form_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- Fluent Forms' own table, read only
+				$def  = $json ? json_decode( (string) $json, true ) : array();
 				$out  = array();
 				$walk = static function ( $items ) use ( &$walk, &$out ) {
 					foreach ( (array) $items as $it ) {

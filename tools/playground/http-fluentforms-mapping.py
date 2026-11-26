@@ -90,8 +90,12 @@ $f2 = $mk( 'Quick add', array(
 	$el( 'input_text', 'shelter_name', 'Shelter', array( 'type' => 'text' ) ),
 	$el( 'input_text', 'contact', 'Contact email', array( 'type' => 'text' ) ),
 ) );
+$f4 = $mk( 'Mapping off', array(
+	$el( 'input_text', 'shelter_name', 'Shelter', array( 'type' => 'text' ) ),
+	$el( 'input_text', 'contact', 'Contact email', array( 'type' => 'text' ) ),
+) );
 $f3 = $mk( 'Unmapped form', array( $el( 'input_text', 'name', 'Name', array( 'type' => 'text' ) ) ) );
-update_option( 'directoryweb_t_forms', array( 'f1' => $f1, 'f2' => $f2, 'f3' => $f3 ) );
+update_option( 'directoryweb_t_forms', array( 'f1' => $f1, 'f2' => $f2, 'f3' => $f3, 'f4' => $f4 ) );
 update_option( 'permalink_structure', '/%postname%/' );
 flush_rewrite_rules();
 """
@@ -151,13 +155,16 @@ def main() -> int:
             return 2
         http(base + '/')
         T = lambda name, body=None, extra='': json.loads((http(base + f'/?directoryweb_t={name}{extra}', json_body=body) if body is not None else http(base + f'/?directoryweb_t={name}{extra}'))[1])
+        LL = lambda: [x for x in T('listings') if 'directoryweb_listing_type' in x['meta']]  # the fixture listing the blueprint adds is not ours
         info = T('info')
         print('info:', info)
         check('the real Fluent Forms plugin is active and the adapter sees it', info['ff'] and info['ffver'] and info['active'] and 'fluentforms' in info['adapters'], info)
         check('Kits Core is not loaded', not info['kits'])
-        f1, f2, f3 = info['forms']['f1'], info['forms']['f2'], info['forms']['f3']
+        f1, f2, f3, f4 = info['forms']['f1'], info['forms']['f2'], info['forms']['f3'], info['forms']['f4']
 
-        forms = {int(f['id']): f for f in T('forms')}
+        raw = T('forms')
+        print('forms:', raw)
+        forms = {int(f['id']): f for f in raw if str(f['id']).isdigit()}
         check('the adapter lists the real forms', {f1, f2, f3} <= set(forms), list(forms))
         check('the adapter lists a form\'s real fields', forms[f1]['fields'] == ['name', 'email', 'kind', 'animals', 'beds', 'site'], forms[f1]['fields'])
         check('the adapter reads another form\'s fields', forms[f2]['fields'] == ['shelter_name', 'contact'], forms[f2]['fields'])
@@ -173,19 +180,27 @@ def main() -> int:
         types = [{'id': 'shelter', 'label': 'Shelter', 'fields': [x['key'] for x in fields]}]
         maps = [
             {'provider': 'fluentforms', 'form': str(f1), 'type': 'shelter', 'enabled': True, 'status': 'pending', 'fields': {k: k for k in ('name', 'email', 'kind', 'animals', 'beds', 'site')}},
-            {'provider': 'fluentforms', 'form': str(f2), 'type': 'shelter', 'enabled': False, 'status': 'draft', 'fields': {'shelter_name': 'name', 'contact': 'email'}},
+            {'provider': 'fluentforms', 'form': str(f2), 'type': 'shelter', 'enabled': True, 'status': 'draft', 'fields': {'shelter_name': 'name', 'contact': 'email'}},
+            {'provider': 'fluentforms', 'form': str(f4), 'type': 'shelter', 'enabled': False, 'status': 'draft', 'fields': {'shelter_name': 'name', 'contact': 'email'}},
         ]
         saved = T('save', {'fields': fields, 'types': types, 'mappings': maps})
-        check('the schema, the listing type and both mappings are stored', saved == {'types': ['shelter'], 'mappings': 2, 'fields': 6}, saved)
+        check('the schema, the listing type and both mappings are stored', saved == {'types': ['shelter'], 'mappings': 3, 'fields': 6}, saved)
         prefix = T('prefix')['prefix']
 
         def submit(fid, data):
+            # Fluent Forms throttles one address (429 Too Many Requests); wait out the window and try again, so that every
+            # submission below really reached Fluent Forms and a "no listing" result is DirectoryWeb's doing.
             body = {'action': 'fluentform_submit', 'form_id': str(fid), 'data': urllib.parse.urlencode(data, doseq=True)}
-            return http(base + '/wp-admin/admin-ajax.php', body)
+            for _ in range(4):
+                st, txt = http(base + '/wp-admin/admin-ajax.php', body)
+                if st != 429:
+                    break
+                time.sleep(65)
+            return st, txt
 
         st, body = submit(f1, {'name': 'Paws Haven', 'email': 'hello@paws.example', 'kind': 'shelter', 'animals[]': ['dogs', 'cats'], 'beds': '40', 'site': 'https://paws.example'})
         check('Fluent Forms accepts the mapped form\'s submission', st == 200 and '"insert_id"' in body, (st, body[:200]))
-        L = T('listings')
+        L = LL()
         check('exactly one listing was made, pending', len(L) == 1 and L[0]['status'] == 'pending', L)
         l = L[0] if L else {'meta': {}, 'title': ''}
         check('the name became the title', l['title'] == 'Paws Haven', l['title'])
@@ -193,32 +208,36 @@ def main() -> int:
         check('a multiselect is stored as a list of its choices', l['meta'].get(prefix + 'animals') == 'dogs, cats', l['meta'].get(prefix + 'animals'))
         check('the listing records its type and where it came from', l['meta'].get('directoryweb_listing_type') == 'shelter' and l['meta'].get('directoryweb_submitted_via') == f'fluentforms:{f1}', l['meta'])
 
-        submit(f1, {'name': 'Bad Site', 'site': 'not a web address'})
-        check('a value that breaks the schema makes no listing', len(T('listings')) == 1)
-        submit(f1, {'name': '', 'email': 'x@y.example'})
-        check('a missing required field makes no listing', len(T('listings')) == 1)
-        submit(f1, {'name': 'Too Big', 'beds': '9999'})
-        check('a number outside its limits makes no listing', len(T('listings')) == 1)
-        submit(f3, {'name': 'Nobody Mapped'})
-        check('a form with no mapping makes no listing', len(T('listings')) == 1)
-        submit(f2, {'shelter_name': 'Off Mapping', 'contact': 'a@b.example'})
-        check('a mapping that is off makes no listing', len(T('listings')) == 1)
+        sts = submit(f1, {'name': 'Bad Site', 'site': 'not a web address'})[0]
+        check('Fluent Forms accepted that submission (so DirectoryWeb is what made no listing)', sts == 200, sts)
+        check('a value that breaks the schema makes no listing', len(LL()) == 1)
+        sts = submit(f1, {'name': '', 'email': 'x@y.example'})[0]
+        check('Fluent Forms accepted that submission (so DirectoryWeb is what made no listing)', sts == 200, sts)
+        check('a missing required field makes no listing', len(LL()) == 1)
+        sts = submit(f1, {'name': 'Too Big', 'beds': '9999'})[0]
+        check('Fluent Forms accepted that submission (so DirectoryWeb is what made no listing)', sts == 200, sts)
+        check('a number outside its limits makes no listing', len(LL()) == 1)
+        sts = submit(f3, {'name': 'Nobody Mapped'})[0]
+        check('Fluent Forms accepted that submission (so DirectoryWeb is what made no listing)', sts == 200, sts)
+        check('a form with no mapping makes no listing', len(LL()) == 1)
+        sts = submit(f4, {'shelter_name': 'Off Mapping', 'contact': 'a@b.example'})[0]
+        check('Fluent Forms accepted that submission (so DirectoryWeb is what made no listing)', sts == 200, sts)
+        check('a mapping that is off makes no listing', len(LL()) == 1)
 
-        maps[1]['enabled'] = True
-        T('save', {'fields': fields, 'types': types, 'mappings': maps})
-        submit(f2, {'shelter_name': 'Second Form Shelter', 'contact': 'two@forms.example'})
-        L = T('listings')
-        check('with the mapping on, a form with other field names feeds the same listing type, as a draft', len(L) == 2 and L[1]['title'] == 'Second Form Shelter' and L[1]['status'] == 'draft' and L[1]['meta'].get('directoryweb_listing_type') == 'shelter', L[1:] )
+        st2, body2 = submit(f2, {'shelter_name': 'Second Form Shelter', 'contact': 'two@forms.example'})
+        check('Fluent Forms accepts the second form\'s submission', st2 == 200 and '"insert_id"' in body2, (st2, body2[:200]))
+        L = LL()
+        check('a form with other field names feeds the same listing type, as a draft', len(L) == 2 and L[1]['title'] == 'Second Form Shelter' and L[1]['status'] == 'draft' and L[1]['meta'].get('directoryweb_listing_type') == 'shelter', L[1:] )
         check('the second form\'s email reached the same field', L[1]['meta'].get(prefix + 'email') == 'two@forms.example' if len(L) > 1 else False)
 
         # CSV: a dry run, then the import, then the export
         csv = 'name,email,kind,animals,beds,site,junk\r\nCsv One,one@csv.example,clinic,"dogs, cows",12,https://one.example,x\r\n=EVIL(),bad,,,,,\r\nCsv Three,,shelter,,0,,\r\n'
         r = T('import', {'type': 'shelter', 'csv': csv, 'dry': True})
         check('CSV dry run: reads three rows, one good, reports the others by row, notes the unused column', r['rows'] == 3 and r['ok'] == 1 and sorted(r['problems']) == ['2', '3'] and r['ignored'] == ['junk'] and not r['created'], r)
-        check('CSV dry run creates nothing', len(T('listings')) == 2)
+        check('CSV dry run creates nothing', len(LL()) == 2)
         r = T('import', {'type': 'shelter', 'csv': csv, 'dry': False, 'status': 'draft'})
         check('CSV import creates only the good row', len(r['created']) == 1 and r['ok'] == 1, r)
-        L = T('listings')
+        L = LL()
         check('the imported listing is a draft of the right type with its values', len(L) == 3 and L[2]['title'] == 'Csv One' and L[2]['status'] == 'draft' and L[2]['meta'].get(prefix + 'animals') == 'dogs, cows' and L[2]['meta'].get('directoryweb_submitted_via') == 'csv:', L[2:])
         ex = T('export', extra='&type=shelter')['csv']
         check('CSV export has a header of the type\'s fields and every listing', ex.splitlines()[0] == 'name,email,kind,animals,beds,site' and len(ex.splitlines()) == 4 and 'Csv One' in ex and 'Paws Haven' in ex, ex[:300])
