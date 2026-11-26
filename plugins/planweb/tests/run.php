@@ -514,5 +514,19 @@ check( str_contains( $site_ics, 'UID:planweb-site-post-77@animalwrites.in' ) && 
 check( array( 'site' ) === planweb_feed_list( 'site', PLANWEB_TYPES + PLANWEB_FEED_EXTRA_TYPES, PLANWEB_FEED_TYPE_GROUPS ) && in_array( 'site', PLANWEB_FEED_TYPE_GROUPS['marketing'], true ), 'feed: site type, in marketing' );
 check( str_contains( $ics_un, 'LAST-MODIFIED:20261114T063000Z' ) && 1 === substr_count( $ics_un, 'LAST-MODIFIED' ), 'ics: LAST-MODIFIED when the entry has one' );
 
+$cf = array(
+	array( 'id' => 1, 'type' => 'post', 'owner' => 'a', 'channels' => array( 'x', 'email' ), 'status' => 'approved' ),
+	array( 'id' => 2, 'type' => 'reminder', 'owner' => 'b', 'channels' => array(), 'status' => 'due' ),
+	array( 'id' => 3, 'type' => 'post', 'owner' => 'a', 'channels' => array( 'email' ), 'status' => 'idea' ),
+);
+check( 3 === count( planweb_calendar_filter( $cf, array() ) ), 'calendar filter: no filter keeps all' );
+check( array( 1, 3 ) === array_column( planweb_calendar_filter( $cf, array( 'type' => 'post' ) ), 'id' ), 'calendar filter: by type' );
+check( array( 1, 3 ) === array_column( planweb_calendar_filter( $cf, array( 'owner' => 'a' ) ), 'id' ), 'calendar filter: by owner' );
+check( array( 1, 3 ) === array_column( planweb_calendar_filter( $cf, array( 'channel' => 'email' ) ), 'id' ), 'calendar filter: by channel, an entry may have several' );
+check( array( 1, 2 ) === array_column( planweb_calendar_filter( $cf, array( 'status' => 'approved' ) ), 'id' ), 'calendar filter: Approved also lists Due' );
+check( array( 1 ) === array_column( planweb_calendar_filter( $cf, array( 'type' => 'post', 'status' => 'approved' ) ), 'id' ), 'calendar filter: filters combine' );
+check( '2026-11-23' === planweb_week_start( '2026-11-26' ) && '2026-11-23' === planweb_week_start( '2026-11-23' ) && '2026-11-23' === planweb_week_start( '2026-11-29' ), 'week start: Monday of the week, Sunday belongs to the week before' );
+check( '2026-12-28' === planweb_week_start( '2027-01-01' ), 'week start: across a year end' );
+
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );

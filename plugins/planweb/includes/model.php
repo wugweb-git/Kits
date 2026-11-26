@@ -274,3 +274,54 @@ function planweb_channel_list( $v ): array {
 	}
 	return $out;
 }
+
+/**
+ * Keeps the entries that match the Calendar's filters. Pure: no query, so it can be tested. An empty filter matches
+ * everything. "Approved" also lists Due (an approved entry on its day), as the Entries list does.
+ *
+ * @param array[] $entries planweb_entry() arrays.
+ * @param array   $f       type, status, owner, channel (slugs, '' for any).
+ * @return array[]
+ */
+function planweb_calendar_filter( array $entries, array $f ): array {
+	$f = $f + array(
+		'type'    => '',
+		'status'  => '',
+		'owner'   => '',
+		'channel' => '',
+	);
+	return array_values(
+		array_filter(
+			$entries,
+			static function ( $e ) use ( $f ) {
+				if ( '' !== $f['type'] && ( $e['type'] ?? '' ) !== $f['type'] ) {
+					return false;
+				}
+				if ( '' !== $f['owner'] && ( $e['owner'] ?? '' ) !== $f['owner'] ) {
+					return false;
+				}
+				if ( '' !== $f['channel'] && ! in_array( $f['channel'], (array) ( $e['channels'] ?? array() ), true ) ) {
+					return false;
+				}
+				if ( '' !== $f['status'] ) {
+					$status = (string) ( $e['status'] ?? 'idea' );
+					$want   = 'approved' === $f['status'] ? array( 'approved', 'due' ) : array( $f['status'] );
+					if ( ! in_array( $status, $want, true ) ) {
+						return false;
+					}
+				}
+				return true;
+			}
+		)
+	);
+}
+
+/**
+ * The Monday of the week that holds a date, as Y-m-d. Pure.
+ *
+ * @param string $ymd Y-m-d.
+ */
+function planweb_week_start( string $ymd ): string {
+	$t = strtotime( $ymd . ' 12:00:00 UTC' );
+	return gmdate( 'Y-m-d', $t - ( (int) gmdate( 'N', $t ) - 1 ) * 86400 );
+}
