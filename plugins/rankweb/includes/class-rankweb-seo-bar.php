@@ -70,6 +70,28 @@ final class RankWeb_Seo_Bar {
 	}
 
 	/**
+	 * The checks' input for an item that is not a post (a category, a tag, a user): what it stores for search, and what
+	 * stands in when it stores nothing.
+	 *
+	 * @param array $stored   title, description, focus, robots (a list or a comma string), as stored.
+	 * @param array $fallback name (the title when no SEO title), description (the item's own text), slug.
+	 * @return array Input for checks().
+	 */
+	public static function input_for( array $stored, array $fallback ): array {
+		$robots = $stored['robots'] ?? '';
+		$words  = array_map( 'trim', explode( ',', strtolower( is_array( $robots ) ? implode( ',', $robots ) : (string) $robots ) ) );
+		$desc   = trim( (string) ( $stored['description'] ?? '' ) );
+		return array(
+			'title'       => (string) ( $stored['title'] ?? '' ),
+			'post_title'  => (string) ( $fallback['name'] ?? '' ),
+			'description' => '' !== $desc ? $desc : (string) ( $fallback['description'] ?? '' ),
+			'focus'       => (string) ( $stored['focus'] ?? '' ),
+			'noindex'     => in_array( 'noindex', $words, true ),
+			'slug'        => (string) ( $fallback['slug'] ?? '' ),
+		);
+	}
+
+	/**
 	 * Counts per status.
 	 *
 	 * @param array[] $checks From checks().

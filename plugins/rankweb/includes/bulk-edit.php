@@ -68,29 +68,13 @@ function rankweb_bulk_column( array $cols ): array {
 }
 
 /**
- * The SEO column cell, with the raw values in hidden spans for Quick Edit to read.
+ * Print one SEO Bar: a segment per check, the worst status in words and the checks to look at. Shared by the post lists,
+ * the term lists and the user list. $extra goes inside the wrapper, for a screen's own hidden values.
  *
- * @param string $col Column key.
- * @param int    $id  Item ID.
+ * @param array  $checks From RankWeb_Seo_Bar::checks().
+ * @param string $extra  Escaped HTML printed inside the wrapper after the checks.
  */
-function rankweb_bulk_column_cell( $col, $id ): void {
-	if ( 'aw_seo' !== $col ) {
-		return;
-	}
-	$id    = (int) $id;
-	$title = (string) get_post_meta( $id, 'rank_math_title', true );
-	$desc  = (string) get_post_meta( $id, 'rank_math_description', true );
-	$focus = (string) get_post_meta( $id, 'rank_math_focus_keyword', true );
-	$checks = RankWeb_Seo_Bar::checks(
-		array(
-			'title'       => $title,
-			'post_title'  => (string) get_the_title( $id ),
-			'description' => '' !== $desc ? $desc : (string) get_post_meta( $id, '_rankweb_description', true ),
-			'focus'       => $focus,
-			'noindex'     => rankweb_is_noindex_item( $id ) || '1' === (string) get_post_meta( $id, '_rankweb_noindex', true ),
-			'slug'        => (string) get_post_field( 'post_name', $id ),
-		)
-	);
+function rankweb_seo_bar_render( array $checks, string $extra = '' ): void {
 	$colors = array(
 		RankWeb_Seo_Bar::GOOD => '#00a32a',
 		RankWeb_Seo_Bar::WARN => '#dba617',
@@ -131,11 +115,139 @@ function rankweb_bulk_column_cell( $col, $id ): void {
 		}
 		echo '</ul>';
 	}
-	echo '<span class="hidden aw-seo-title">' . esc_html( $title ) . '</span>';
-	echo '<span class="hidden aw-seo-desc">' . esc_html( $desc ) . '</span>';
-	echo '<span class="hidden aw-seo-focus">' . esc_html( $focus ) . '</span>';
+	echo $extra; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the callers escape what they pass
 	echo '</div>';
 }
+
+/**
+ * The SEO column cell, with the raw values in hidden spans for Quick Edit to read.
+ *
+ * @param string $col Column key.
+ * @param int    $id  Item ID.
+ */
+function rankweb_bulk_column_cell( $col, $id ): void {
+	if ( 'aw_seo' !== $col ) {
+		return;
+	}
+	$id    = (int) $id;
+	$title = (string) get_post_meta( $id, 'rank_math_title', true );
+	$desc  = (string) get_post_meta( $id, 'rank_math_description', true );
+	$focus = (string) get_post_meta( $id, 'rank_math_focus_keyword', true );
+	$checks = RankWeb_Seo_Bar::checks(
+		array(
+			'title'       => $title,
+			'post_title'  => (string) get_the_title( $id ),
+			'description' => '' !== $desc ? $desc : (string) get_post_meta( $id, '_rankweb_description', true ),
+			'focus'       => $focus,
+			'noindex'     => rankweb_is_noindex_item( $id ) || '1' === (string) get_post_meta( $id, '_rankweb_noindex', true ),
+			'slug'        => (string) get_post_field( 'post_name', $id ),
+		)
+	);
+	rankweb_seo_bar_render(
+		$checks,
+		'<span class="hidden aw-seo-title">' . esc_html( $title ) . '</span>'
+		. '<span class="hidden aw-seo-desc">' . esc_html( $desc ) . '</span>'
+		. '<span class="hidden aw-seo-focus">' . esc_html( $focus ) . '</span>'
+	);
+}
+
+/* ---------- The bar on the category, tag and user lists ---------- */
+
+/** The taxonomies whose list screen shows the SEO Bar (public ones with a screen; filterable). */
+function rankweb_bulk_taxonomies(): array {
+	$tax = (array) apply_filters( 'rankweb_bulk_taxonomies', array( 'category', 'post_tag' ) );
+	return array_values( array_filter( array_map( 'sanitize_key', $tax ), 'taxonomy_exists' ) );
+}
+
+/** The SEO Bar for a term, as HTML. */
+function rankweb_seo_bar_for_term( int $term_id, string $taxonomy ): string {
+	$term = get_term( $term_id, $taxonomy );
+	if ( ! $term instanceof WP_Term ) {
+		return '';
+	}
+	$checks = RankWeb_Seo_Bar::checks(
+		RankWeb_Seo_Bar::input_for(
+			array(
+				'title'       => (string) get_term_meta( $term_id, 'rank_math_title', true ),
+				'description' => (string) get_term_meta( $term_id, 'rank_math_description', true ),
+				'focus'       => (string) get_term_meta( $term_id, 'rank_math_focus_keyword', true ),
+				'robots'      => get_term_meta( $term_id, 'rank_math_robots', true ),
+			),
+			array(
+				'name'        => $term->name,
+				'description' => wp_strip_all_tags( $term->description ),
+				'slug'        => $term->slug,
+			)
+		)
+	);
+	ob_start();
+	rankweb_seo_bar_render( $checks );
+	return (string) ob_get_clean();
+}
+
+/** The SEO Bar for a user (the author page), as HTML. */
+function rankweb_seo_bar_for_user( int $user_id ): string {
+	$user = get_userdata( $user_id );
+	if ( ! $user ) {
+		return '';
+	}
+	$checks = RankWeb_Seo_Bar::checks(
+		RankWeb_Seo_Bar::input_for(
+			array(
+				'title'       => (string) get_user_meta( $user_id, 'rank_math_title', true ),
+				'description' => (string) get_user_meta( $user_id, 'rank_math_description', true ),
+				'focus'       => '',
+				'robots'      => get_user_meta( $user_id, 'rank_math_robots', true ),
+			),
+			array(
+				'name'        => (string) $user->display_name,
+				'description' => (string) $user->description,
+				'slug'        => (string) $user->user_nicename,
+			)
+		)
+	);
+	ob_start();
+	rankweb_seo_bar_render( $checks );
+	return (string) ob_get_clean();
+}
+
+add_action(
+	'admin_init',
+	function () {
+		foreach ( rankweb_bulk_taxonomies() as $tax ) {
+			add_filter(
+				"manage_edit-{$tax}_columns",
+				function ( $cols ) {
+					$cols['aw_seo'] = __( 'SEO', 'rankweb' );
+					return $cols;
+				}
+			);
+			add_filter(
+				"manage_{$tax}_custom_column",
+				function ( $content, $col, $term_id ) use ( $tax ) {
+					return 'aw_seo' === $col ? $content . rankweb_seo_bar_for_term( (int) $term_id, $tax ) : $content;
+				},
+				10,
+				3
+			);
+		}
+		if ( current_user_can( 'list_users' ) ) {
+			add_filter(
+				'manage_users_columns',
+				function ( $cols ) {
+					$cols['aw_seo'] = __( 'SEO', 'rankweb' );
+					return $cols;
+				}
+			);
+			add_filter(
+				'manage_users_custom_column',
+				fn( $content, $col, $user_id ) => 'aw_seo' === $col ? $content . rankweb_seo_bar_for_user( (int) $user_id ) : $content,
+				10,
+				3
+			);
+		}
+	}
+);
 
 /* ---------- The filter ---------- */
 

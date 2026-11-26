@@ -70,4 +70,21 @@ final class SeoBarTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 'warn', $this->status( $c, 'slug' ) );
 		$this->assertSame( 'warn', RankWeb_Seo_Bar::worst( $c ) );
 	}
+
+	public function testInputForATermOrUser(): void {
+		$in = RankWeb_Seo_Bar::input_for(
+			array( 'title' => '', 'description' => '', 'focus' => 'rescue', 'robots' => array( 'index', 'noindex' ) ),
+			array( 'name' => 'Rescue stories from the monsoon', 'description' => str_repeat( 'd', 90 ), 'slug' => 'rescue' )
+		);
+		$this->assertSame( 'Rescue stories from the monsoon', $in['post_title'] );
+		$this->assertSame( str_repeat( 'd', 90 ), $in['description'] );
+		$this->assertTrue( $in['noindex'] );
+		$c = RankWeb_Seo_Bar::checks( $in );
+		$this->assertSame( 'good', $this->status( $c, 'title' ) );
+		$this->assertSame( 'good', $this->status( $c, 'description' ) );
+		$this->assertSame( 'warn', $this->status( $c, 'noindex' ) );
+		$own = RankWeb_Seo_Bar::input_for( array( 'description' => 'Own text', 'robots' => 'index,follow' ), array( 'description' => 'Fallback' ) );
+		$this->assertSame( 'Own text', $own['description'] );
+		$this->assertFalse( $own['noindex'] );
+	}
 }
