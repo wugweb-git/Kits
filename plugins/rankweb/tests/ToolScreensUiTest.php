@@ -31,6 +31,7 @@ final class ToolScreensUiTest extends PHPUnit\Framework\TestCase {
 			'aw-seo-csv'   => 'csv',
 			'aw-redirects' => 'redirects',
 			'aw-transport' => 'transport',
+			'aw-webp'      => 'webp',
 		);
 		foreach ( $want as $page => $screen ) {
 			$_GET['page'] = $page;
@@ -47,6 +48,7 @@ final class ToolScreensUiTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 'manage_options', rankweb_ui_cap( 'csv' ) );
 		$this->assertSame( 'manage_options', rankweb_ui_cap( 'redirects' ) );
 		$this->assertSame( 'manage_options', rankweb_ui_cap( 'transport' ) );
+		$this->assertSame( 'manage_options', rankweb_ui_cap( 'webp' ) );
 		$this->assertSame( 'manage_options', rankweb_ui_cap( 'settings' ) );
 	}
 

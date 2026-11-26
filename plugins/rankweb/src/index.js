@@ -39,6 +39,7 @@ import { Links } from './tools/links';
 import { Images, SeoCsv } from './tools/files';
 import { Redirects } from './tools/redirects';
 import { Transport } from './tools/transport';
+import { Webp } from './tools/webp';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -1177,6 +1178,7 @@ function App() {
 			{ 'csv' === app.screen && <SeoCsv /> }
 			{ 'redirects' === app.screen && <Redirects /> }
 			{ 'transport' === app.screen && <Transport /> }
+			{ 'webp' === app.screen && <Webp /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />
 			) }

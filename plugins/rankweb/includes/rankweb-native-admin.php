@@ -68,6 +68,7 @@ function rankweb_native_screen( string $screen, string $title ): void {
 		case 'links':
 		case 'images':
 		case 'csv':
+		case 'webp':
 		case 'transport':
 		case 'redirects':
 			$body = array(
@@ -76,6 +77,7 @@ function rankweb_native_screen( string $screen, string $title ): void {
 				'csv'       => 'rankweb_bulk_csv_body',
 				'redirects' => 'rankweb_redirect_tools_body',
 				'transport' => 'rankweb_transport_body',
+				'webp'      => 'rankweb_webp_body',
 			)[ $screen ];
 			if ( function_exists( $body ) ) {
 				$body();
