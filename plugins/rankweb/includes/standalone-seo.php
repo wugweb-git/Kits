@@ -142,6 +142,10 @@ function rankweb_head_description(): string {
 		return trim( wp_strip_all_tags( (string) get_bloginfo( 'description' ) ) );
 	}
 	if ( is_category() || is_tag() || is_tax() ) {
+		$own = function_exists( 'rankweb_term_seo_current' ) ? rankweb_term_seo_current() : null;
+		if ( $own && '' !== $own['description'] ) {
+			return $own['description'];
+		}
 		$d = term_description();
 		return rankweb_cut_text( trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $d ) ) ), 160 );
 	}
@@ -352,6 +356,10 @@ function rankweb_page_is_noindex(): bool {
 	}
 	if ( is_search() ) {
 		return true; // search result pages are not for the index
+	}
+	$own = function_exists( 'rankweb_term_seo_current' ) ? rankweb_term_seo_current() : null;
+	if ( $own && $own['noindex'] ) {
+		return true;
 	}
 	return rankweb_archive_noindex();
 }
