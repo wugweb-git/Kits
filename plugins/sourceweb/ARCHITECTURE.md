@@ -3,20 +3,20 @@
 ## What SourceWeb is for (owner, 26 Nov 2026)
 
 1. **Source** things,
-2. **from** defined origins (feeds, publishers, hosts),
+2. **from** defined origins, by any method: feeds (RSS, Atom, Google News), keyword and press searches, APIs (GDELT, Openverse, DOI, Google Places), pages the site fetches itself, social posts, a link added by hand, or a push from another plugin (InsightWeb). Keywords are one method among these, not the model,
 3. **via** workers,
 4. **within** a defined guardrail (relevance and rules),
-5. **to** dedicated places (News, Library, Opportunities, Directory and the other content types), and
+5. **to** dedicated outputs, chosen in settings: a content type (News, Library, Opportunities), another plugin (DirectoryWeb, Resources, any plugin that registers), or a workflow (an automation, webhook, queue or worker job), and
 6. **enhance** them so they fit in (attribution, titles, summaries, images, directory facts).
 
 Everything in `includes/` serves one of those six steps, and `includes/` is grouped that way (the load order in `sourceweb.php` is unchanged; hooks and tab order depend on it).
 
 | Step | Folders |
 |---|---|
-| 1 and 2. Source, from origins | `sources/`, `keywords/` (the search terms that steer what is sought) |
+| 1 and 2. Source, from origins | `sources/` (feeds, hosts, icons, site-fetched pages), `keywords/` (one search method: terms, press queries, pushed candidates). Other methods (APIs, manual link, social) live with their worker or screen today and should be listed as source types |
 | 3. Via workers | `workers/` (registry, tick, relay, ingest) |
 | 4. Within a guardrail | `rules/` (relevance, auto-review, section rules), `review/` (what a person still decides), `ai/` (the models behind relevance) |
-| 5. To dedicated places | no folder of its own yet: the routing is spread over `workers/ingest.php`, `rules/` (section rules) and `output/content-helpers.php` (section lists) |
+| 5. To dedicated outputs | no folder of its own yet: the routing is spread over `workers/ingest.php`, `rules/` (section rules) and `output/content-helpers.php` (section lists) |
 | 6. Enhance | `enhance/`: summaries (rules, rewrite), titles, attribution, images, Library PDFs, issuer, research citation; `enhance/directory/`: directory enrichment |
 | Around all steps | `admin/`, `rest/` (screens and routes), `lifecycle/` (migrations, uninstall), `compat/` |
 
@@ -54,7 +54,8 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 ## Still scattered (next steps, not done)
 
 - **Summaries in ingest.** `workers/ingest.php` still trims the summary to whole sentences, strips the legal-review flag and checks the section minimum while an item arrives. That is enhancement: move it to `enhance/` and have ingest call it.
-- **Step 5 has no home.** Where an item lands (which content type, section, status) should be one `places/` folder with one function per place, so adding or changing a destination touches one file. Today it is spread across the three files above.
+- **Step 5 has no home.** Where an item goes should be one `outputs/` folder with a registry of destinations. A destination has a kind (content type, plugin, or workflow), a label, a test for "is it available", and a handler that takes the finished item. Settings choose which kind of item goes to which destination; today's routing is the default. Adding a destination (another plugin, a webhook, a workflow) touches one registration, not the intake. Today the routing is spread across the three files above and assumes a content type.
+- **Step 1 has no list of source types.** Feed, keyword search, API, site-fetched page, manual link, social and pushed candidate are handled in different places. A source-type registry (type, label, which worker or screen runs it) would let Sources show them all in one place.
 - Names: `sourcing-*`, `sourceweb-*` and plain names mix inside folders; `sourcing-basics.php` is loaded first and used everywhere.
 - `rest/sourceweb-rest-pages.php` is 2,100 lines and serves five screens; split it per feature and move each part next to its model.
 - `rules/` and `keywords/` each hold a model, an admin file and a WP side with overlapping helpers; they could share one small settings layer.
@@ -83,7 +84,7 @@ Read from `menu-model.php`, `sourceweb-ui.php`, the settings payload and `src/in
 
 1. **Rules mixes three steps.** Section rules decide where an item lands (step 5), Summary rules and Directory enrichment shape it (step 6), Review-queue rules and Tag rules guard it (step 4). Someone changing how summaries read must open the same tab as someone changing what is rejected.
 2. **Settings is a drawer.** It holds one switch for workers, one cap for enrichment, a destination (Social posts), connected services and Backfill. None belongs to "settings of the plugin" except Backfill-style switches.
-3. **Step 5 has no screen.** Destinations appear only as "Section rules" and as the Social posts switch. There is nowhere to see or choose where each kind of item goes, or to add a destination that another plugin provides.
+3. **Step 5 has no screen.** Destinations appear only as "Section rules" and as the Social posts switch, and the code assumes every destination is a content type. There is nowhere to see or choose where each kind of item goes, or to add a plugin or a workflow as a destination.
 4. **Reports are scattered.** Rejected (the guardrail's output) and Relay log (the workers' output) are top-level tabs beside settings, and the Overview has a fourth reports block.
 5. **Two review screens** (To review, Enrichment review) do one job for two kinds of item.
 6. **Add by link** (a manual source) is inside To review.
@@ -96,10 +97,10 @@ Read from `menu-model.php`, `sourceweb-ui.php`, the settings payload and `src/in
 | Tab | Holds | Moves from |
 |---|---|---|
 | Overview | Pipeline, worker runs, what needs attention | as now |
-| Sources (1, 2) | Hosts, Feeds, Keywords and Press discovery, **Add by link** | Sources, Keywords, To review |
+| Sources (1, 2) | Every source type in one list: hosts and feeds, keyword and press searches, APIs, site-fetched pages, social, **Add by link**, pushes from other plugins | Sources, Keywords, To review, Settings |
 | Workers (3) | Workers, runs, relay and its log, the "workers use these lists" switch, worker keys | Workers, Relay log, Settings |
 | Guardrails (4) | Keyword check, Review-queue rules, Tag rules, Rejected log, relevance model choice | Keywords, Rules, Rejected |
-| Places (5) | Each destination (News, Library, Opportunities, Directory, Social, any plugin's) with its section rules and allowed categories and tags | Rules (Section rules), Settings (Social posts) |
+| Outputs (5) | Each destination, whether a content type, a plugin or a workflow, with its section rules and allowed categories and tags; which kind of item goes where | Rules (Section rules), Settings (Social posts) |
 | Enhance (6) | Summary rules, titles, images, Directory enrichment rules, trust order, live cap | Rules, Settings |
 | Review | One queue for items and enrichment values, filter by kind | To review, Enrichment review |
 | Settings and logs | Backfill, connected services, AI keys and caps, change log | Settings, AI models, Change log |
