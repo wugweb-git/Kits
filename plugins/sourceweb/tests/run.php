@@ -613,5 +613,10 @@ aw_t( '/worker-api/ingest' === sourceweb_worker_route_alias( '/aw/v1/ingest' ), 
 aw_t( '/worker-api/review/(?P<id>\\d+)' === sourceweb_worker_route_alias( '/aw/v1/review/(?P<id>\\d+)' ), 'worker routes: a route with a pattern keeps it' );
 aw_t( '' === sourceweb_worker_route_alias( '/sourceweb/v1/places' ), 'worker routes: only aw/v1 routes are mirrored' );
 
+// Closed loop: sources a place mostly turns down are flagged, not blocked.
+$fl = sourceweb_outcome_flags( array( 'A' => array( 'accepted' => 2, 'rejected' => 18 ), 'B' => array( 'accepted' => 9, 'rejected' => 1 ), 'C' => array( 'accepted' => 0, 'rejected' => 3 ), 'D' => array( 'delivered' => 50 ) ) );
+aw_t( array( 'A' ) === $fl, 'outcome flags: only a source with enough decisions and a low accepted share' );
+aw_t( array( 'C' ) === sourceweb_outcome_flags( array( 'C' => array( 'accepted' => 0, 'rejected' => 3 ) ), 3, 0.3 ), 'outcome flags: the thresholds can be changed' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

@@ -44,4 +44,6 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 - Places tab (routes, per-place enhancements, source types, what places say back); AI keys ordered by job (`?job=`) with the paid providers removed; worker union (`workers/union`, `sourceweb_workers` filter); manual re-check tool on Rejected; REST callbacks split by feature.
 - Not verified in a browser: the Places screen and the re-check card (built and linted, never opened).
-- Not built: closed loops that act on the feedback (today it is recorded and shown only); the workers repo does not yet send `job` or call `places/outcome`; the worker union has no screen yet; the standalone edition.
+- Closed loop (26 Nov): a source with 10 or more decisions and under 30% accepted is flagged "Review this source" on Places; nothing is blocked automatically. Workers screen has an "All workers" table (the union). The workers repo sends `job` when `AW_AI_JOB` is set (branch chore/retire-eight-workflows); the site picks a default job from the worker otherwise.
+- Fixed 26 Nov: the first Places build shipped enhancement handlers in the wrong component and no checkboxes (lint showed it; I had not read the lint output). Rebuilt and relinted clean.
+- Not built: anything that acts on a flag (auto-pausing a source); places calling `places/outcome` (no place calls it yet); the standalone edition's renames.

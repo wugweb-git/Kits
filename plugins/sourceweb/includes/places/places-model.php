@@ -330,3 +330,24 @@ function sourceweb_outcome_rate( array $row ): ?float {
 	$r = (int) ( $row['rejected'] ?? 0 );
 	return $a + $r > 0 ? $a / ( $a + $r ) : null;
 }
+
+/**
+ * Sources whose items a place mostly turns down: those with at least $min decisions and an accepted share below $below.
+ * A flag only; nothing is blocked automatically.
+ *
+ * @param array $stats source => [ delivered, accepted, rejected ].
+ * @param int   $min   Fewest decisions before a source can be flagged.
+ * @param float $below Accepted share under which it is flagged (0 to 1).
+ * @return string[] Source names.
+ */
+function sourceweb_outcome_flags( array $stats, int $min = 10, float $below = 0.3 ): array {
+	$out = array();
+	foreach ( $stats as $source => $row ) {
+		$decided = (int) ( $row['accepted'] ?? 0 ) + (int) ( $row['rejected'] ?? 0 );
+		$rate    = sourceweb_outcome_rate( (array) $row );
+		if ( $decided >= $min && null !== $rate && $rate < $below ) {
+			$out[] = (string) $source;
+		}
+	}
+	return $out;
+}

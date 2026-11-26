@@ -1282,31 +1282,6 @@ function Group( { group, onSaved, onDirty } ) {
 		() => onDirty( group.slug, dirty ),
 		[ group.slug, dirty, onDirty ]
 	);
-	const toggle = ( place, id ) =>
-		setEnh( ( e ) => ( {
-			...e,
-			[ place ]: e[ place ].includes( id )
-				? e[ place ].filter( ( x ) => x !== id )
-				: [ ...e[ place ], id ],
-		} ) );
-	const saveEnhance = () => {
-		setBusy( true );
-		setMsg( null );
-		apiFetch( {
-			path: path( 'places/enhance' ),
-			method: 'POST',
-			data: { enhance: enh },
-		} )
-			.then( ( d ) => {
-				take( d );
-				setMsg( {
-					tone: 'success',
-					text: __( 'Enhancements saved.', 'aw-sourcing' ),
-				} );
-			} )
-			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
-			.finally( () => setBusy( false ) );
-	};
 	const save = () => {
 		setBusy( true );
 		setMsg( null );
@@ -1785,7 +1760,66 @@ function Workers() {
 	if ( sub.runs ) {
 		return <WorkerRuns id={ sub.runs } onBack={ () => back() } />;
 	}
-	return <WorkerList go={ go } msg={ msg } setMsg={ setMsg } />;
+	return (
+		<>
+			<WorkerList go={ go } msg={ msg } setMsg={ setMsg } />
+			<WorkerUnion />
+		</>
+	);
+}
+
+/** Every worker in one list: workflows from the workers repository and any a plugin adds. */
+function WorkerUnion() {
+	const [ rows, setRows ] = useState( null );
+	const [ error, setError ] = useState( '' );
+	useEffect( () => {
+		apiFetch( { path: path( 'workers/union' ) } )
+			.then( setRows )
+			.catch( ( e ) => setError( errText( e ) ) );
+	}, [] );
+	return (
+		<SectionCard
+			id="union"
+			title={ __( 'All workers', 'aw-sourcing' ) }
+			description={ __(
+				'Each worker’s step, where it runs, how it starts, what a person can change and the AI job it uses.',
+				'aw-sourcing'
+			) }
+		>
+			{ error && <Notice tone="error">{ error }</Notice> }
+			{ ! rows && ! error && (
+				<LoadingState
+					label={ __( 'Loading workers…', 'aw-sourcing' ) }
+				/>
+			) }
+			{ rows && (
+				<table className="widefat striped">
+					<thead>
+						<tr>
+							<th>{ __( 'Worker', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Step', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Runs as', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Starts', 'aw-sourcing' ) }</th>
+							<th>{ __( 'A person can', 'aw-sourcing' ) }</th>
+							<th>{ __( 'AI job', 'aw-sourcing' ) }</th>
+						</tr>
+					</thead>
+					<tbody>
+						{ rows.map( ( w ) => (
+							<tr key={ w.id }>
+								<td>{ w.label }</td>
+								<td>{ w.step }</td>
+								<td>{ w.runner }</td>
+								<td>{ w.trigger }</td>
+								<td>{ w.accepts }</td>
+								<td>{ w.ai || '—' }</td>
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			) }
+		</SectionCard>
+	);
 }
 
 function WorkerList( { go, msg, setMsg } ) {
@@ -7246,6 +7280,31 @@ function Places() {
 		[ next[ i ], next[ j ] ] = [ next[ j ], next[ i ] ];
 		setRows( next );
 	};
+	const toggle = ( place, id ) =>
+		setEnh( ( e ) => ( {
+			...e,
+			[ place ]: e[ place ].includes( id )
+				? e[ place ].filter( ( x ) => x !== id )
+				: [ ...e[ place ], id ],
+		} ) );
+	const saveEnhance = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'places/enhance' ),
+			method: 'POST',
+			data: { enhance: enh },
+		} )
+			.then( ( d ) => {
+				take( d );
+				setMsg( {
+					tone: 'success',
+					text: __( 'Enhancements saved.', 'aw-sourcing' ),
+				} );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
 	const save = () => {
 		setBusy( true );
 		setMsg( null );
@@ -7428,8 +7487,22 @@ function Places() {
 								<td>{ KIND_LABELS[ p.kind ] || p.kind }</td>
 								<td>{ p.owner || '—' }</td>
 								<td>
-									{ p.enhance.length
-										? p.enhance.join( ', ' )
+									{ data.enhancers.length
+										? data.enhancers.map( ( e ) => (
+												// eslint-disable-next-line jsx-a11y/label-has-associated-control -- the label wraps its checkbox
+												<label key={ e.id }>
+													<input
+														type="checkbox"
+														checked={ (
+															enh[ p.id ] || []
+														).includes( e.id ) }
+														onChange={ () =>
+															toggle( p.id, e.id )
+														}
+													/>{ ' ' }
+													{ e.label }{ ' ' }
+												</label>
+											) )
 										: '—' }
 								</td>
 							</tr>
@@ -7472,7 +7545,20 @@ function Places() {
 						<tbody>
 							{ data.outcomes.map( ( o ) => (
 								<tr key={ o.source }>
-									<td>{ o.source }</td>
+									<td>
+										{ o.source }
+										{ o.flag && (
+											<>
+												{ ' ' }
+												<strong>
+													{ __(
+														'Review this source',
+														'aw-sourcing'
+													) }
+												</strong>
+											</>
+										) }
+									</td>
 									<td>{ o.delivered }</td>
 									<td>{ o.accepted }</td>
 									<td>{ o.rejected }</td>

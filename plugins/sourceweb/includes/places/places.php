@@ -174,8 +174,10 @@ function sourceweb_source_types(): array {
 
 /** The feedback table: one row per source, worst acceptance first. */
 function sourceweb_outcome_rows(): array {
-	$rows = array();
-	foreach ( (array) get_option( SOURCEWEB_OUTCOMES_OPTION, array() ) as $source => $row ) {
+	$rows  = array();
+	$stats = (array) get_option( SOURCEWEB_OUTCOMES_OPTION, array() );
+	$flags = sourceweb_outcome_flags( $stats );
+	foreach ( $stats as $source => $row ) {
 		$rate   = sourceweb_outcome_rate( (array) $row );
 		$rows[] = array(
 			'source'    => (string) $source,
@@ -183,6 +185,7 @@ function sourceweb_outcome_rows(): array {
 			'accepted'  => (int) ( $row['accepted'] ?? 0 ),
 			'rejected'  => (int) ( $row['rejected'] ?? 0 ),
 			'rate'      => null === $rate ? null : round( $rate * 100 ),
+			'flag'      => in_array( (string) $source, $flags, true ),
 		);
 	}
 	usort( $rows, static fn( $a, $b ) => ( $a['rate'] ?? 101 ) <=> ( $b['rate'] ?? 101 ) );
