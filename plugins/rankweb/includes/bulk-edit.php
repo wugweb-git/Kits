@@ -101,6 +101,16 @@ function rankweb_bulk_column_cell( $col, $id ): void {
 		RankWeb_Seo_Bar::WARN => __( 'Check', 'rankweb' ),
 		RankWeb_Seo_Bar::BAD  => __( 'Fix', 'rankweb' ),
 	);
+	$ink    = array( // text colours with enough contrast on white; the bar keeps the lighter ones
+		RankWeb_Seo_Bar::GOOD => '#007017',
+		RankWeb_Seo_Bar::WARN => '#8a5a00',
+		RankWeb_Seo_Bar::BAD  => '#b32d2e',
+	);
+	$icons  = array(
+		RankWeb_Seo_Bar::GOOD => 'yes-alt',
+		RankWeb_Seo_Bar::WARN => 'warning',
+		RankWeb_Seo_Bar::BAD  => 'dismiss',
+	);
 	$worst  = RankWeb_Seo_Bar::worst( $checks );
 	echo '<div class="aw-seo-col">';
 	// One segment per check, in colour and, because colour alone is not enough, with the worst status in words.
@@ -112,12 +122,12 @@ function rankweb_bulk_column_cell( $col, $id ): void {
 	$n = RankWeb_Seo_Bar::counts( $checks );
 	/* translators: 1: checks that pass, 2: checks to look at, 3: checks to fix. */
 	echo '<span class="screen-reader-text">' . esc_html( sprintf( __( 'SEO checks: %1$d good, %2$d to check, %3$d to fix.', 'rankweb' ), $n['good'], $n['warn'], $n['bad'] ) ) . '</span>';
-	echo '<div aria-hidden="true"><strong>' . esc_html( $words[ $worst ] ) . '</strong></div>';
+	echo '<div aria-hidden="true" style="color:' . esc_attr( $ink[ $worst ] ) . ';font-weight:600"><span class="dashicons dashicons-' . esc_attr( $icons[ $worst ] ) . '" style="vertical-align:middle"></span> ' . esc_html( $words[ $worst ] ) . '</div>';
 	$todo = array_filter( $checks, fn( $c ) => RankWeb_Seo_Bar::GOOD !== $c['status'] );
 	if ( $todo ) {
-		echo '<ul style="margin:2px 0 0 1em;list-style:disc" aria-label="' . esc_attr__( 'SEO checks to look at', 'rankweb' ) . '">';
+		echo '<ul style="margin:2px 0 0;list-style:none" aria-label="' . esc_attr__( 'SEO checks to look at', 'rankweb' ) . '">';
 		foreach ( $todo as $c ) {
-			echo '<li>' . esc_html( $c['label'] ) . '</li>';
+			echo '<li style="color:' . esc_attr( $ink[ $c['status'] ] ) . '"><span class="dashicons dashicons-' . esc_attr( $icons[ $c['status'] ] ) . '" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom" aria-hidden="true"></span> ' . esc_html( $c['label'] ) . '</li>';
 		}
 		echo '</ul>';
 	}

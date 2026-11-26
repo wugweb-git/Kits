@@ -1722,6 +1722,12 @@ if ( ! function_exists( 'rankweb_schema_render_standalone_json_ld' ) ) {
 				$graph[] = $faq;
 			}
 		}
+		if ( function_exists( 'rankweb_gallery_page_node' ) ) {
+			$gallery = rankweb_gallery_page_node();
+			if ( $gallery ) {
+				$graph[] = $gallery;
+			}
+		}
 		if ( ! empty( $graph ) ) {
 			$payload = array(
 				'@context' => 'https://schema.org',
