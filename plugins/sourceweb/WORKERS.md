@@ -101,3 +101,30 @@ The groups today are Sourcing, SEO, Directory, Maintenance, One-off. They mix pu
 5. Join the closed loops (search-insights, keyword stats, review outcomes) so a result can propose a change to a source, keyword or rule.
 
 Steps 1 and 2 are small and safe; 3 to 5 change how the Workers and AI screens behave and need the shell rebuilt and checked in a browser.
+
+## 7. The 12 workflows to keep (focus, 26 Nov 2026)
+
+Source: the Workers Union page's 17 Nov audit (19 workflows: six proposed for removal, two moved to a manual Tools task). That cleanup was never merged, so all 20 workflow files still exist. Nothing below is changed yet; retiring a workflow is the owner's call.
+
+**Keep (12)**
+
+| Worker | Step | Why it stays |
+|---|---|---|
+| sourcing | source + guard + enhance | The main pipeline |
+| summary-rewrite | enhance | Keeps summaries inside the rules |
+| research | source | Library papers, weekly |
+| search-insights | source (keywords) | Feeds InsightWeb |
+| focus-keywords | enhance (SEO) | Daily, free AI or title words |
+| seo-scores | enhance (eval) | Rank Math's own analyser, no AI |
+| directory-enrichment | enhance (Directory place) | Contact details for review |
+| crawl-check | platform (eval) | Crawler access, weekly |
+| sources-sync | platform | The workers' fallback lists |
+| tests | platform | Failure opens an issue |
+| keepalive | platform | Stops schedules going quiet |
+| backup-offsite | platform | Offsite copy of the daily backup (the twelfth: it was missing from the 19) |
+
+**Retire (6)**: wp-cron (the site's own cron already runs), same-story-fold (needs input, rare), backfill (one-off, done), news-title-case (dry run only), press-gnews (one-off), darpan-import (one-off).
+
+**Move to a manual Tools task (2)**: submit (URLs found by hand) and relevance-existing (re-check on demand). Both are person-triggered, not workers.
+
+To do, once approved: delete the eight files in the workers repo, regenerate `docs/workers.json`, and copy it to `AW_WORKERS` (the Deploy check fails if the two differ). The twelfth entry is inferred (11 marked Keep plus the backup worker); confirm it.
