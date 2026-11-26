@@ -2,6 +2,11 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.3.0
+
+- The WordPress dashboard box is a row of tiles: each number links to its screen and a count to act on says Needs attention (words and icon, not colour alone).
+- Transport also reads SEOPress and The SEO Framework; robots choices are in the classic editor too.
+
 ## 2.2.0
 
 - Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off. The classic editor has the same choices in a "Search engines (RankWeb)" box.

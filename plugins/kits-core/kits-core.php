@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,12 +21,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.0.0' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.1.0' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
 }
-define( 'KITS_CORE_LOADED', '1.0.0' );
+define( 'KITS_CORE_LOADED', '1.1.0' );
 define( 'KITS_CORE_DIR', __DIR__ . '/' );
 
 // When a site plugin loads Kits Core, WordPress does not know Kits Core's folder. If that folder is a symlink in
@@ -87,6 +87,7 @@ require_once KITS_CORE_DIR . 'includes/preview.php';
 // The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
 // InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
+require_once KITS_CORE_DIR . 'includes/registry-updates.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';

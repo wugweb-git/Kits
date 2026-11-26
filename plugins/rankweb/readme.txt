@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.2.0
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,10 @@ RankWeb's link audit and content analysis fetch URLs on your own site only.
 Deleting the plugin deletes no data: settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was.
 
 == Changelog ==
+
+= 2.3.0 =
+* The WordPress dashboard box is a row of tiles: each number links to its screen and a count to act on says Needs attention.
+* Transport also reads SEOPress and The SEO Framework; robots choices are in the classic editor too.
 
 = 2.2.0 =
 * Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off.

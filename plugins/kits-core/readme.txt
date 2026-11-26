@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,11 +36,15 @@ Each of these loads only when you turn it on; none runs by default.
 
 * Google Tag Manager / Google Analytics — loaded only when a GTM or GA container is configured (through Site Kit or the site's own settings), under consent mode (denied by default where the law requires it). What is collected is whatever your container is set up to send. Terms: https://marketingplatform.google.com/about/analytics/terms/ — Privacy: https://policies.google.com/privacy
 * Microsoft Clarity — loaded only when a Clarity project is configured, under the same consent gate. Terms: https://www.microsoft.com/en-us/legal/terms-of-use — Privacy: https://privacy.microsoft.com/privacystatement
-* Update check — only when the site sets an update URL (off by default): the plugin fetches an update manifest from that URL to offer in-dashboard updates.
+* Update check (direct build only) — WordPress asks the Wugweb registry (https://wugweb-git.github.io/Kits/registry/index.json, GitHub Pages) for newer versions of the Wugweb plugins and theme, at most every 12 hours; no site data is sent. A new version downloads from the project's GitHub releases and is checked against the registry's SHA-256 before it installs. Turn it off with `define( 'KITS_NO_REGISTRY_UPDATES', true );`. Pre-releases are offered only when the channel is set to pre-release. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service — Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
 
+= 1.1.0 =
+* Menus fold: Kits is one item under Appearance, and each Wugweb plugin is one item under Plugins, opening its first screen with the other screens as tabs. Addresses and capabilities are unchanged.
+* Updates from the Wugweb registry for the Wugweb plugins and the Kits theme (direct build only): stable releases by default, a SHA-256 check before install, off with one constant.
+
 = 1.0.0 =
-* Current release.
+* First release.
