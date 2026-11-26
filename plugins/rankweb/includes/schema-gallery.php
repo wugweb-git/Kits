@@ -5,7 +5,7 @@
  * the markup. The types and their fields are in class-rankweb-schema-gallery.php; this file is the box, the save and
  * the printing. A type whose required fields are not all filled prints nothing, and the box says what is missing.
  *
- * The box is a classic meta box inside the edit screen's own form, so it has no form or action of its own.
+ * The box is a meta box (both editors show it) inside the edit screen's own form, so it has no form or action of its own.
  * One node per item, in post meta `_rankweb_gallery` (type and values). Into Rank Math's graph when Rank Math prints
  * the head, into RankWeb's own JSON-LD when it does.
  *
@@ -56,8 +56,7 @@ add_action(
 			'rankweb_gallery_box',
 			$post_type,
 			'normal',
-			'low',
-			array( '__back_compat_meta_box' => true ) // classic editor only, as the Custom schema box
+			'low' // shown in the block editor's box area too: this is the box most people will use
 		);
 	},
 	10,
