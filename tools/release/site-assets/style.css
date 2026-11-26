@@ -56,3 +56,7 @@ ul{padding-left:1.25rem}
 .ah-cta{margin:.75rem 0 0}.ah-cta .btn{margin:0}
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 html{scroll-behavior:smooth}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px;box-shadow:0 0 0 2px var(--accent)}
+h2.tile-value{margin:0}
+.tile a{text-underline-offset:.2em}
+@media (forced-colors:active){.btn{border:2px solid ButtonText}.tabs a[aria-current=page]{border-bottom-color:Highlight}}

@@ -222,13 +222,13 @@ def product_page(i: dict, rel: dict | None) -> str:
     if rel:
         tiles.append(tile("Released", rel["version"], rel["released_at"][:10] + (" · prerelease" if rel["prerelease"] else ""), f'https://github.com/{pi.GITHUB}/releases/tag/{rel["tag"]}'))
     else:
-        tiles.append(tile("Released", "Not yet", "no download offered"))
+        tiles.append(tile("Released", "Not released", "no download offered"))
     tiles += [tile("WordPress", i["requires_wp"] + "+" if i["requires_wp"] else "", f'tested to {i["tested"]}' if i["tested"] else ""), tile("PHP", i["requires_php"] + "+" if i["requires_php"] else "")]
     tiles = [t for t in tiles if '<span class="tile-value"></span>' not in t]
     cards = []
     if rel:
         dl = ['<ul class="dl">']
-        for key, label, note in (("commercial", "Download", "for a site you manage yourself"), ("wporg", "WordPress.org build", "no update header of its own, source included")):
+        for key, label, note in (("commercial", f'Download {i["name"]}', "for a site you manage yourself"), ("wporg", f'Download {i["name"]} for WordPress.org', "no update header of its own, source included")):
             url = rel["download"].get(key)
             if url:
                 sha = rel["sha256"].get(key)
@@ -283,7 +283,7 @@ def index_page(infos: list[dict], facts: dict) -> str:
         rel = facts.get(i["slug"])
         status = f'Released {esc(rel["version"])}' if rel else "Not released yet"
         href = f'{"themes" if i["type"] == "theme" else "plugins"}/{esc(i["slug"])}/'
-        cards.append(f'<li class="tile"><span class="tile-label">{esc(i["type"].capitalize())}</span><span class="tile-value"><a href="{href}">{esc(i["name"])}</a></span>'
+        cards.append(f'<li class="tile"><span class="tile-label">{esc(i["type"].capitalize())}</span><h2 class="tile-value"><a href="{href}">{esc(i["name"])}</a></h2>'
                      f'<span class="tile-sub">{status} · source {esc(i["version"])}</span><span class="tile-desc">{esc(i["short_description"])}</span></li>')
     header = '<div class="ah"><div class="ah-icon" aria-hidden="true">K</div><div><h1>Kits by Wugweb</h1><p class="lead">A block theme and plugins for WordPress: SEO, directories, news sources, search insights, mail and a team calendar. Each has its own version, changelog and release.</p></div></div>'
     body = f'<ul class="tiles tiles-wide">{"".join(cards)}</ul>' + card("Registry", '<p>The machine-readable list of every product\'s latest release, with download addresses and SHA-256, is the <a href="registry/index.json">registry</a>.</p>', "registry")
