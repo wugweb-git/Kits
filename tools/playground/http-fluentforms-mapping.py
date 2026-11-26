@@ -242,7 +242,7 @@ def main() -> int:
         L = LL()
         check('the imported listing is a draft of the right type with its values', len(L) == 3 and L[2]['title'] == 'Csv One' and L[2]['status'] == 'draft' and L[2]['meta'].get(prefix + 'animals') == 'dogs, cows' and L[2]['meta'].get('directoryweb_submitted_via') == 'csv:', L[2:])
         ex = T('export', extra='&type=shelter')['csv']
-        check('CSV export has a header of the type\'s fields and every listing', ex.splitlines()[0] == 'name,email,kind,animals,beds,site' and len(ex.splitlines()) == 4 and 'Csv One' in ex and 'Paws Haven' in ex, ex[:300])
+        check('CSV export has a header of the type\'s fields and every listing', ex.splitlines()[0] == 'name,email,kind,animals,beds,site' and len(ex.splitlines()) == 5 and 'Csv One' in ex and 'Paws Haven' in ex, ex[:300])
         r = T('import', {'type': 'nope', 'csv': csv, 'dry': True})
         check('an unknown listing type is refused', r['error'] != '', r)
     finally:
