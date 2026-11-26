@@ -207,6 +207,19 @@ function rankweb_seo_modules(): array {
 				'AW_LLMS_GUIDE_TYPES' => array( 'type' => 'list', 'label' => 'Guide tags', 'help' => 'Tags whose Resources items are listed as guides. One per line.', 'default' => array( 'guide', 'faq' ) ),
 			),
 		),
+		'site-tags' => array(
+			'label'  => 'Search engines and crawlers',
+			'switch' => true,
+			'files'  => array( 'site-tags' ),
+			'desc'   => 'Verification tags for Google, Bing, Yandex and Pinterest, and crawlers kept out in robots.txt. Both are empty until you set them.',
+			'fields' => array(
+				'RANKWEB_VERIFY_GOOGLE'    => array( 'type' => 'text', 'label' => 'Google Search Console code', 'help' => 'The code, or the whole meta tag Google gives you.', 'default' => '' ),
+				'RANKWEB_VERIFY_BING'      => array( 'type' => 'text', 'label' => 'Bing Webmaster code', 'help' => 'The code, or the whole meta tag.', 'default' => '' ),
+				'RANKWEB_VERIFY_YANDEX'    => array( 'type' => 'text', 'label' => 'Yandex code', 'help' => '', 'default' => '' ),
+				'RANKWEB_VERIFY_PINTEREST' => array( 'type' => 'text', 'label' => 'Pinterest code', 'help' => '', 'default' => '' ),
+				'RANKWEB_BLOCK_CRAWLERS'   => array( 'type' => 'list', 'label' => 'Crawlers kept out of the whole site', 'help' => 'One name per line, e.g. GPTBot, ClaudeBot, CCBot, Google-Extended, PerplexityBot, Bytespider. A crawler that ignores robots.txt is not stopped.', 'default' => array() ),
+			),
+		),
 		'markdown' => array(
 			'label'  => 'Markdown for agents',
 			'switch' => true,
