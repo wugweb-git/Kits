@@ -6,6 +6,13 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 - The WordPress dashboard box is a row of tiles: each number links to its screen and a count to act on says Needs attention (words and icon, not colour alone).
 - Transport also reads SEOPress and The SEO Framework; robots choices are in the classic editor too.
+- Per-item share title and description.
+- A title separator and prefix setting, and SEO fields on the user profile for the author page.
+- A primary category per post, used for the address and the breadcrumbs.
+- WooCommerce cart, checkout and account pages stay out of search.
+- Gallery types Product with variants and Loyalty program.
+- Transport also copies category, tag and author fields.
+- Page speed options: delay scripts, shrink and prune CSS, local Google Fonts, WebP serving and conversion, and a page cache. Each is off until switched on.
 
 ## 2.2.0
 
