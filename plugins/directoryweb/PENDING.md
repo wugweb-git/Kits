@@ -102,3 +102,7 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - A data-prefix migration is only documented, not built or scheduled: a `directoryweb_data_prefix` setting with dual reads, a dry-run command, batch copy with no deletes, verification, then a switch. It needs the owner's yes, a seeded-site Playground run before and after, and a stop-and-rerun test. Renaming a post type is a separate decision.
 - Guards: `plugins/directoryweb/tests/no-short-prefix-test.php`.
 
+## Carried over from the acceptance gates (26 Nov 2026)
+
+- Not verifiable without outside systems (class X): claim email delivery through a real transport; anonymous versus logged-in claim submission over HTTP (Playground answers every request as an administrator; both hooks call one handler); the Kits shell Settings Claims row drawn in a browser (payload checked in PHP only); the Fluent Forms Pro uploader; Apache and nginx deny rules for the private evidence folder (documented, untested).
+- Deferred: CRM events (no hook consumer yet) and the default preset (waits on Kits Core's preset format).

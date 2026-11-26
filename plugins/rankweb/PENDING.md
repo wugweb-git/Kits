@@ -56,3 +56,8 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - SEO CSV, Internal links, Redirect tools and Images (26 Nov): now drawn inside the Kits shell through page parts, the way the FAQ list is (`rankweb_tool_parts()`, `rankweb-ui.php`). Their forms still post to `admin-post.php` with their own nonce; with no Kits Core they stay plain WordPress pages. Not done: REST routes and native React screens for them, (the "Write to .htaccess now" form now needs a ticked confirm box, checked on the server).
 - Redirect categories (26 Nov): built as a label per source kept in RankWeb (`rankweb_redirect_categories`), carried by a `category` column on the redirects CSV and listed on Redirect tools. Rank Math's list is unchanged and nothing reads the label at request time. A native redirect list is not planned.
 - Not in this repo: a bundled `rankweb-shell` package (`packages/rankweb-shell` is empty).
+
+## Carried over from the acceptance gates (26 Nov 2026)
+
+- Not verifiable here (class X): SEOPress and AIOSEO coexistence (detected by constant only); real Yoast, SEOPress and AIOSEO installs beyond the Yoast check already done; Google Search Console accepting the sitemap.
+- Robots rules for archives and 404 beyond core and search noindex: open.

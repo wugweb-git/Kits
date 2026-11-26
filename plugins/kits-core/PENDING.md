@@ -50,3 +50,10 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Settings "Features" section with `kits_settings_fields` and `kits_features` filters; a `kits/v1/site-check` route; a `kits/socials` block.
 - Hidden screens: Setup Wizard (saves an option nothing reads, OD2) and Scripts & Pixels (raw save, no `unfiltered_html` check, OD3) wait for owner decisions; Brand Customizer is reachable only through Appearance › Brand Tokens.
 - Deleting the old `aw_keys` option on live is owner-gated (the read fallback is already gone).
+
+## Carried over from the admin IA inventory (26 Nov 2026)
+
+- Empty last item in the wp-admin side menu: seen on the live site only; no empty-title submenu in code. Find it on live, then remove.
+- Tools tab (RankWeb) and Help tab (PlanWeb, MailWeb): wait for the owner's reference list. MailWeb already has a Help card; RankWeb has a Tools card (owner, 14 Nov: no Tools tab).
+- Setup Wizard (`kits-onboarding`) and Scripts & Pixels (`kits-scripts`): registered under Kits but hidden, reachable by URL only. Link them from Kits or retire them (owner decisions OD2, OD3).
+- Kept on purpose, per plugin (independence): `*_simple_table`, `*_rest_can`, `rankweb_seo_api_allowed`, `insightweb_si_api_allowed`.
