@@ -213,8 +213,12 @@ function rankweb_media_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
+	rankweb_ui_page( 'images' );
+}
+
+/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+function rankweb_media_body(): void {
 	$post = admin_url( 'admin-post.php' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'Image SEO', 'rankweb' ) . '</h1>';
 	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'rankweb' ), number_format_i18n( AW_MEDIA_BATCH ) ) ) . '</p>';
 	$report = get_transient( 'aw_seo_media_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {
@@ -245,7 +249,7 @@ function rankweb_media_screen(): void {
 	wp_nonce_field( 'aw_media_captions' );
 	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'rankweb' ) . '</label></p>';
 	submit_button( __( 'Fill captions', 'rankweb' ), 'secondary', 'submit', false );
-	echo '</form></div>';
+	echo '</form>';
 }
 
 /**

@@ -202,8 +202,8 @@ function aw_team_date_when( $ymd ) {
 add_action(
 	'admin_menu',
 	function () {
-		if ( aw_team_dates_moved() ) {
-			return; // PlanWeb opens admin.php?page=aw-dates as its Calendar.
+		if ( aw_team_dates_moved() || ! function_exists( 'kits_site_menu_parent' ) || ! function_exists( 'kits_site_screen_cap' ) ) {
+			return; // PlanWeb opens admin.php?page=aw-dates as its Calendar; without Kits Core there is no Kits menu to join.
 		}
 		add_submenu_page( kits_site_menu_parent(), 'Dates', 'Dates', kits_site_screen_cap( 'aw-dates' ), 'aw-dates', 'aw_team_dates_screen' ); // Kits → Dates
 	},

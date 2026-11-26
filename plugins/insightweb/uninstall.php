@@ -90,7 +90,7 @@ if ( is_array( $insightweb_seo ) && array_key_exists( 'search-insights', $insigh
 unset( $insightweb_seo );
 
 // Scheduled events first: wp_clear_scheduled_hook() needs the arguments, so each event is taken off as it is listed.
-$insightweb_hooks = array( 'aw_si_daily', 'aw_si_rollup', 'aw_si_alerts', 'aw_si_ga4', 'aw_si_psi', 'aw_si_psi_more', 'aw_si_clarity', 'aw_si_clarity_retry', 'aw_si_bing', 'aw_si_bing_kw', 'aw_si_bing_crawl', 'aw_si_gsc_types', 'aw_si_inspect', 'aw_si_inspect_more', 'aw_si_crawl', 'aw_si_geo_refresh', 'aw_si_rising_spikes', 'aw_si_srv_ai', 'aw_si_srv_speed', 'insightweb_dash_build' );
+$insightweb_hooks = array( 'aw_si_daily', 'aw_si_rollup', 'aw_si_alerts', 'aw_si_ga4', 'aw_si_psi', 'aw_si_psi_more', 'aw_si_clarity', 'aw_si_clarity_retry', 'aw_si_bing', 'aw_si_bing_kw', 'aw_si_bing_crawl', 'aw_si_gsc_types', 'aw_si_inspect', 'aw_si_inspect_more', 'aw_si_crawl', 'aw_si_geo_refresh', 'aw_si_rising_spikes', 'aw_si_srv_ai', 'aw_si_srv_speed', 'insightweb_dash_build', 'insightweb_report_cron' );
 foreach ( $insightweb_hooks as $insightweb_hook ) {
 	wp_unschedule_hook( $insightweb_hook );
 }

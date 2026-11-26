@@ -601,11 +601,16 @@ add_action(
 	}
 );
 
-/** The screen. */
+/** The screen: on the Kits shell (rankweb-ui.php), else a plain WordPress page. */
 function rankweb_link_audit_page_html(): void {
 	if ( ! current_user_can( RANKWEB_CAP ) ) {
 		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
+	rankweb_ui_page( 'links' );
+}
+
+/** The screen's body: the tabs, the audit line, the findings and the list. The shell draws it through page parts (rankweb_tool_parts()). */
+function rankweb_link_audit_body(): void {
 	$flag   = sanitize_key( wp_unslash( $_GET['flag'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
 	$flag   = in_array( $flag, RankWeb_Link_Audit::FLAGS, true ) ? $flag : '';
 	$paged  = max( 1, absint( wp_unslash( $_GET['paged'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
@@ -617,22 +622,22 @@ function rankweb_link_audit_page_html(): void {
 
 	$view = sanitize_key( wp_unslash( $_GET['view'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a tab on a read-only screen.
 	$view = 'anchors' === $view && function_exists( 'rankweb_anchor_screen' ) ? 'anchors' : ( 'silos' === $view && function_exists( 'rankweb_silo_screen' ) ? 'silos' : 'audit' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'Internal links', 'rankweb' ) . '</h1>';
-	echo '<nav class="nav-tab-wrapper"><a href="' . esc_url( $base ) . '" class="nav-tab' . ( 'audit' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Audit', 'rankweb' ) . '</a>';
+	// The three views as a plain list of links: the shell's page parts draw a list with links, and keep no nav bar.
+	echo '<ul class="aw-links-views" style="display:flex;gap:1.5em;list-style:none;margin:0 0 1em;padding:0">';
+	echo '<li>' . ( 'audit' === $view ? '<strong>' . esc_html__( 'Audit', 'rankweb' ) . '</strong>' : '<a href="' . esc_url( $base ) . '">' . esc_html__( 'Audit', 'rankweb' ) . '</a>' ) . '</li>';
 	if ( function_exists( 'rankweb_anchor_screen' ) ) {
-		echo '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '" class="nav-tab' . ( 'anchors' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Anchor mix', 'rankweb' ) . '</a>';
+		echo '<li>' . ( 'anchors' === $view ? '<strong>' . esc_html__( 'Anchor mix', 'rankweb' ) . '</strong>' : '<a href="' . esc_url( add_query_arg( 'view', 'anchors', $base ) ) . '">' . esc_html__( 'Anchor mix', 'rankweb' ) . '</a>' ) . '</li>';
 	}
 	if ( function_exists( 'rankweb_silo_screen' ) ) {
-		echo '<a href="' . esc_url( add_query_arg( 'view', 'silos', $base ) ) . '" class="nav-tab' . ( 'silos' === $view ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Silos', 'rankweb' ) . '</a>';
+		echo '<li>' . ( 'silos' === $view ? '<strong>' . esc_html__( 'Silos', 'rankweb' ) . '</strong>' : '<a href="' . esc_url( add_query_arg( 'view', 'silos', $base ) ) . '">' . esc_html__( 'Silos', 'rankweb' ) . '</a>' ) . '</li>';
 	}
-	echo '</nav>';
+	echo '</ul>';
 	if ( 'anchors' === $view || 'silos' === $view ) {
 		if ( 'anchors' === $view ) {
 			rankweb_anchor_screen();
 		} else {
 			rankweb_silo_screen();
 		}
-		echo '</div>';
 		return;
 	}
 	if ( isset( $_GET['started'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- only a notice.
@@ -666,7 +671,7 @@ function rankweb_link_audit_page_html(): void {
 	foreach ( $labels as $key => $label ) {
 		$views[] = ( $key === $flag ? '<strong>' : '<a href="' . esc_url( add_query_arg( 'flag', $key, $base ) ) . '">' ) . esc_html( $label ) . ' (' . esc_html( number_format_i18n( (int) ( $by[ $key ] ?? 0 ) ) ) . ')' . ( $key === $flag ? '</strong>' : '</a>' );
 	}
-	echo '<ul class="subsubsub"><li>' . implode( ' | </li><li>', $views ) . '</li></ul><br class="clear">'; // phpcs:ignore WordPress.Security.EscapeOutput -- each part is escaped above.
+	echo '<ul class="aw-links-flags" style="display:flex;flex-wrap:wrap;gap:1.5em;list-style:none;margin:0 0 1em;padding:0"><li>' . implode( '</li><li>', $views ) . '</li></ul>'; // phpcs:ignore WordPress.Security.EscapeOutput -- each part is escaped above.
 
 	$data  = rankweb_link_audit_page( $flag, $paged, $per );
 	$cells = array();
@@ -703,5 +708,4 @@ function rankweb_link_audit_page_html(): void {
 			'empty'    => $sum['at'] ? __( 'Nothing to list here.', 'rankweb' ) : __( 'The audit has not run yet.', 'rankweb' ),
 		)
 	);
-	echo '</div>';
 }
