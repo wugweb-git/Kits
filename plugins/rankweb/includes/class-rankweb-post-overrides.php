@@ -21,6 +21,17 @@ final class RankWeb_Post_Overrides {
 		'og_image'  => '_rankweb_og_image',
 	);
 
+	/** Text overrides: the title and description used when the page is shared. */
+	const TEXT_KEYS = array(
+		'og_title'       => '_rankweb_og_title',
+		'og_description' => '_rankweb_og_description',
+	);
+
+	/** Text cleaned to one line, no tags. */
+	public static function clean_text( $v ): string {
+		return trim( preg_replace( '/\s+/u', ' ', strip_tags( (string) $v ) ) );
+	}
+
 	/** An address cleaned: http or https with a host, no spaces or script, else ''. */
 	public static function clean_url( $v ): string {
 		$v = trim( strip_tags( (string) $v ) );
@@ -60,6 +71,9 @@ final class RankWeb_Post_Overrides {
 		$out = array();
 		foreach ( self::KEYS as $field => $key ) {
 			$out[ $key ] = self::clean_url( $in[ $field ] ?? '' );
+		}
+		foreach ( self::TEXT_KEYS as $field => $key ) {
+			$out[ $key ] = self::clean_text( $in[ $field ] ?? '' );
 		}
 		return $out;
 	}

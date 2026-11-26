@@ -115,6 +115,19 @@ add_action(
 					)
 				);
 			}
+			foreach ( RankWeb_Post_Overrides::TEXT_KEYS as $text_key ) {
+				register_post_meta(
+					$type,
+					$text_key,
+					array(
+						'show_in_rest'      => true,
+						'single'            => true,
+						'type'              => 'string',
+						'sanitize_callback' => array( 'RankWeb_Post_Overrides', 'clean_text' ),
+						'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+					)
+				);
+			}
 			foreach ( array( '_rankweb_nofollow', '_rankweb_noarchive', '_rankweb_nosnippet' ) as $flag_key ) {
 				register_post_meta(
 					$type,
@@ -224,6 +237,9 @@ function rankweb_robots_box( WP_Post $post ): void {
 		echo '<p><label><input type="checkbox" name="rankweb_robots[' . esc_attr( $key ) . ']" value="1"' . checked( '1', (string) get_post_meta( $id, '_rankweb_' . $key, true ), false ) . ' /> ' . esc_html( $label ) . '</label></p>';
 	}
 	echo '<p><label for="rankweb-max-snippet">' . esc_html__( 'Longest text snippet (characters)', 'rankweb' ) . '</label><br /><input type="number" min="-1" id="rankweb-max-snippet" name="rankweb_robots[max_snippet]" value="' . esc_attr( (string) get_post_meta( $id, '_rankweb_max_snippet', true ) ) . '" aria-describedby="rankweb-max-snippet-help" /></p>';
+	foreach ( array( 'og_title' => __( 'Share title (leave empty for the page title)', 'rankweb' ), 'og_description' => __( 'Share description (leave empty for the description)', 'rankweb' ) ) as $field => $label ) {
+		echo '<p><label for="rankweb-' . esc_attr( $field ) . '">' . esc_html( $label ) . '</label><br /><input type="text" class="widefat" id="rankweb-' . esc_attr( $field ) . '" name="rankweb_robots[' . esc_attr( $field ) . ']" value="' . esc_attr( (string) get_post_meta( $id, RankWeb_Post_Overrides::TEXT_KEYS[ $field ], true ) ) . '" /></p>';
+	}
 	foreach ( array( 'canonical' => __( 'Canonical address (leave empty for the page itself)', 'rankweb' ), 'redirect' => __( 'Send visitors to (301 redirect)', 'rankweb' ), 'og_image' => __( 'Share image address', 'rankweb' ) ) as $field => $label ) {
 		echo '<p><label for="rankweb-' . esc_attr( $field ) . '">' . esc_html( $label ) . '</label><br /><input type="url" class="widefat" id="rankweb-' . esc_attr( $field ) . '" name="rankweb_robots[' . esc_attr( $field ) . ']" value="' . esc_attr( (string) get_post_meta( $id, RankWeb_Post_Overrides::KEYS[ $field ], true ) ) . '" /></p>';
 	}

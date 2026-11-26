@@ -196,6 +196,15 @@ function rankweb_print_head_tags(): void {
 	$title = html_entity_decode( wp_get_document_title(), ENT_QUOTES, 'UTF-8' );
 	$url   = rankweb_head_url();
 	$img   = rankweb_head_image();
+	if ( is_singular() ) { // an item's own share title and description
+		$own_t = RankWeb_Post_Overrides::clean_text( get_post_meta( get_queried_object_id(), '_rankweb_og_title', true ) );
+		$own_d = RankWeb_Post_Overrides::clean_text( get_post_meta( get_queried_object_id(), '_rankweb_og_description', true ) );
+		$share_title = '' !== $own_t ? $own_t : '';
+		$share_desc  = '' !== $own_d ? $own_d : '';
+	} else {
+		$share_title = '';
+		$share_desc  = '';
+	}
 	$post  = is_singular() ? get_queried_object() : null;
 	$type  = $post instanceof WP_Post && 'page' !== $post->post_type ? 'article' : 'website';
 	$tags  = array();
@@ -204,9 +213,9 @@ function rankweb_print_head_tags(): void {
 	}
 	$tags[] = array( 'property', 'og:locale', str_replace( '-', '_', get_locale() ) );
 	$tags[] = array( 'property', 'og:type', $type );
-	$tags[] = array( 'property', 'og:title', $title );
-	if ( '' !== $desc ) {
-		$tags[] = array( 'property', 'og:description', $desc );
+	$tags[] = array( 'property', 'og:title', '' !== $share_title ? $share_title : $title );
+	if ( '' !== $share_desc || '' !== $desc ) {
+		$tags[] = array( 'property', 'og:description', '' !== $share_desc ? $share_desc : $desc );
 	}
 	if ( '' !== $url ) {
 		$tags[] = array( 'property', 'og:url', $url );
@@ -227,9 +236,9 @@ function rankweb_print_head_tags(): void {
 		$tags[] = array( 'property', 'article:modified_time', get_post_modified_time( 'c', true, $post ) );
 	}
 	$tags[] = array( 'name', 'twitter:card', $img ? 'summary_large_image' : 'summary' );
-	$tags[] = array( 'name', 'twitter:title', $title );
-	if ( '' !== $desc ) {
-		$tags[] = array( 'name', 'twitter:description', $desc );
+	$tags[] = array( 'name', 'twitter:title', '' !== $share_title ? $share_title : $title );
+	if ( '' !== $share_desc || '' !== $desc ) {
+		$tags[] = array( 'name', 'twitter:description', '' !== $share_desc ? $share_desc : $desc );
 	}
 	if ( $img ) {
 		$tags[] = array( 'name', 'twitter:image', $img['url'] );

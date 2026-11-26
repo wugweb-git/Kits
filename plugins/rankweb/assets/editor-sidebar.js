@@ -333,6 +333,28 @@
 						}
 					),
 					el(
+						TextControl,
+						{
+							label: __( 'Share title', 'rankweb' ),
+							value: meta._rankweb_og_title || '',
+							help: __( 'Used in Open Graph and Twitter tags. Leave empty for the page title.', 'rankweb' ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_og_title: v } ) } );
+							}
+						}
+					),
+					el(
+						TextControl,
+						{
+							label: __( 'Share description', 'rankweb' ),
+							value: meta._rankweb_og_description || '',
+							help: __( 'Used in Open Graph and Twitter tags. Leave empty for the description.', 'rankweb' ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_og_description: v } ) } );
+							}
+						}
+					),
+					el(
 						'div',
 						{ style: { marginTop: '20px' } },
 						el( 'strong', { style: { display: 'block', marginBottom: '8px' } }, __( 'Google SERP Preview', 'rankweb' ) ),

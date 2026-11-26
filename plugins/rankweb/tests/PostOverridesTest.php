@@ -39,4 +39,11 @@ final class PostOverridesTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( '', $m['_rankweb_redirect'] );
 		$this->assertSame( 'https://example.org/i.jpg', $m['_rankweb_og_image'] );
 	}
+
+	public function testShareTextIsOneLinePlainText(): void {
+		$m = RankWeb_Post_Overrides::clean_form( array( 'og_title' => " <b>Adopt</b>\n a dog ", 'og_description' => 'Short & sweet' ) );
+		$this->assertSame( 'Adopt a dog', $m['_rankweb_og_title'] );
+		$this->assertSame( 'Short & sweet', $m['_rankweb_og_description'] );
+		$this->assertSame( '', RankWeb_Post_Overrides::clean_form( array() )['_rankweb_og_title'] );
+	}
 }
