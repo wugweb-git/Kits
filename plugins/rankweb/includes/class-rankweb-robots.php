@@ -68,7 +68,8 @@ final class RankWeb_Robots {
 			$robots['nosnippet'] = true;
 			unset( $robots['max-snippet'] );
 		} elseif ( isset( $item['max_snippet'] ) && null !== $item['max_snippet'] ) {
-			$robots['max-snippet'] = (int) $item['max_snippet'];
+			// A string: core's wp_robots prints "directive:value" only for strings, and a bare directive for any other truthy value.
+			$robots['max-snippet'] = (string) (int) $item['max_snippet'];
 		}
 		return $robots;
 	}

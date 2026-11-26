@@ -74,7 +74,7 @@ export function Transport() {
 			id="transport"
 			title={ __( 'Copy from another SEO plugin', 'rankweb' ) }
 			description={ __(
-				'Copies the SEO title, description, focus keyword and robots settings (noindex, nofollow, noarchive, nosnippet, max-snippet) into RankWeb’s fields. A field that already has a value is never overwritten, and a title or description that still holds the other plugin’s variables (like %%title%%) is skipped. The dry run reports what would be copied and writes nothing. Nothing is deleted from the other plugin.',
+				'Copies the SEO title, description, focus keyword and robots settings (noindex, nofollow, noarchive, nosnippet, max-snippet) into RankWeb’s fields. A field that already has a value is never overwritten, and a title or description that still holds the other plugin’s variables (like %title%) is skipped. The dry run reports what would be copied and writes nothing. Nothing is deleted from the other plugin.',
 				'rankweb'
 			) }
 		>

@@ -52,6 +52,8 @@ final class RobotsTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( null, RankWeb_Robots::max_snippet( '-5' ) );
 		$this->assertSame( null, RankWeb_Robots::max_snippet( 'abc' ) );
 		$r = RankWeb_Robots::apply( array(), RankWeb_Robots::from_meta( array( 'max_snippet' => '0' ) ) );
-		$this->assertSame( array( 'max-snippet' => 0 ), $r );
+		$this->assertSame( array( 'max-snippet' => '0' ), $r );
+		$r = RankWeb_Robots::apply( array(), RankWeb_Robots::from_meta( array( 'max_snippet' => '-1' ) ) );
+		$this->assertSame( '-1', $r['max-snippet'], 'a string, so wp_robots prints max-snippet:-1' );
 	}
 }

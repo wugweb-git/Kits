@@ -27,6 +27,16 @@ The SEO, schema, and sitemap plugin owns:
 - ✅ Ranking formula (owner, 26 Nov: "do it"): there is one formula and it is InsightWeb's keyword score, `round(0.35·Demand + 0.30·Opportunity + 0.20·Momentum + 0.15·Engagement)` (`insightweb/includes/search-insights/score.php`, weights and caps as constants, tested). RankWeb has no second formula and does not need one.
 - ⏳ **X** Yoast / SEOPress / AIOSEO coexistence with the real plugins; Google Search Console acceptance of the sitemap.
 
+## Features from The SEO Framework, Rank Math Pro and Yoast — 26 Nov 2026
+
+- ✅ Per-item robots (nofollow, noarchive, nosnippet, max-snippet): `class-rankweb-robots.php`, sidebar controls, `wp_robots` filter. **U** `RobotsTest.php`. **B** (Playground, 26 Nov) toggles and max-snippet in the block-editor sidebar saved and printed one tag (`nofollow, max-snippet:120`); found and fixed: max-snippet printed bare because core prints a value only for strings.
+- ✅ Transport from Yoast, Rank Math and AIOSEO: `class-rankweb-transport.php`, `transport.php`, `src/tools/transport.js`. **U** `TransportTest.php`. **B** screen loads, dry run then apply then a second dry run (nothing left to copy) against seeded Yoast meta. AIOSEO 4's table columns and Yoast's meta keys are from their documented schema, **unverified (X)** against the real plugins' data.
+- ✅ SEO Bar on term and user lists (`bulk-edit.php`, `RankWeb_Seo_Bar::input_for`). **U** `SeoBarTest.php`. **B** post, category and user lists. Found and fixed: the SEO column was about 50px wide and wrapped each check a few characters per line; it now has a width.
+- ✅ Image sitemap `/image-sitemap.xml` without Rank Math (`sitemap.php`, `class-rankweb-image-sitemap.php`). **U** `ImageSitemapTest.php`. **B** `/image-sitemap.xml` answers with the image entries and robots.txt lists it. Not in core's `wp-sitemap.xml` index (core's renderer cannot carry image tags); listed in robots.txt.
+- ✅ **B** Rendered in Playground (suite blueprint, WordPress 7.1.5, 26 Nov): the SEO Bar column, the Structured data box in the block editor (meta box area) and the classic editor (a type choice shows its fields), and the RankWeb dashboard box (shows counts once the background count has run; Playground's cron did not fire on its own, so the box stayed on "Counting" until the job was run by hand; on a real site WP-Cron runs it).
+- ⏳ Not seen: Transport against real Yoast, Rank Math and AIOSEO data; the block editor logged unrelated `core/separator` block-validation errors on the sample post (not RankWeb's).
+- ⏳ Not built: Transport for SEOPress and The SEO Framework; Transport of term and user meta; a Search Console check of the image sitemap (**X**).
+
 ## Open Tasks & Enhancements
 
 1. **Editor Sidebar Integration** — ✅ built, ✅ open work refined:

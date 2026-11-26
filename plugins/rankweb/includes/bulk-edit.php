@@ -151,6 +151,18 @@ function rankweb_bulk_column_cell( $col, $id ): void {
 	);
 }
 
+// The column needs room: WordPress shares the width among the columns, and with several plugin columns the SEO one
+// gets a few characters, so every check wraps a word to a line. Found in the browser (26 Nov 2026).
+add_action(
+	'admin_head',
+	function () {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen && in_array( $screen->base, array( 'edit', 'edit-tags', 'users' ), true ) ) {
+			echo '<style>.wp-list-table th.column-aw_seo,.wp-list-table td.column-aw_seo{width:200px;min-width:160px}.column-aw_seo .aw-seo-col ul{margin-left:0;padding-left:0}</style>' . "\n";
+		}
+	}
+);
+
 /* ---------- The bar on the category, tag and user lists ---------- */
 
 /** The taxonomies whose list screen shows the SEO Bar (public ones with a screen; filterable). */

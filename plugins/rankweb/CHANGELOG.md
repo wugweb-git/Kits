@@ -4,6 +4,10 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 ## Unreleased
 
+- Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off.
+- Transport (RankWeb → Transport): copy SEO title, description, focus keyword and robots settings from Yoast SEO, Rank Math or All in One SEO. A dry run is the default, a filled field is never overwritten, and a title still made of the other plugin's variables is skipped.
+- The SEO Bar on the category, tag and user list screens.
+- An image sitemap (`/image-sitemap.xml`) when Rank Math is absent, listed in robots.txt. Rank Math's own sitemap already lists images.
 - SEO Bar on the post lists: a colour-coded bar with icons and a spoken summary for title, description, focus keyword, noindex and address.
 - Structured data box for Google gallery types: Recipe, Product, Local business, Event, Job posting, Course, Fact check, Profile page, Software app, Book, Movie and Review. Required properties are checked and an incomplete type prints nothing.
 - Search engines and crawlers: verification tags for Google, Bing, Yandex and Pinterest, and crawlers kept out of the whole site in robots.txt.
