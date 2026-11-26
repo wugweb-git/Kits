@@ -8,7 +8,7 @@ Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-SourceWeb manages RSS/Atom feed ingestion, source trust rules, keyword relevance, review queues, and optional AI-assisted enrichment.
+Brings in news from RSS and Atom feeds, applies source trust and keyword rules, and queues items for editors to review.
 
 == Description ==
 

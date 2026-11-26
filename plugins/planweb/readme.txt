@@ -8,7 +8,7 @@ Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-The team's calendar inside WordPress. A Kits plugin.
+A team calendar inside WordPress: content, social, email and campaign dates with an owner, channels and a status. Nothing posts or sends.
 
 == Description ==
 

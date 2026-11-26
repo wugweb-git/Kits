@@ -285,7 +285,7 @@ def index_page(infos: list[dict], facts: dict) -> str:
         href = f'{"themes" if i["type"] == "theme" else "plugins"}/{esc(i["slug"])}/'
         cards.append(f'<li class="tile"><span class="tile-label">{esc(i["type"].capitalize())}</span><span class="tile-value"><a href="{href}">{esc(i["name"])}</a></span>'
                      f'<span class="tile-sub">{status} · source {esc(i["version"])}</span><span class="tile-desc">{esc(i["short_description"])}</span></li>')
-    header = '<div class="ah"><div class="ah-icon" aria-hidden="true">K</div><div><h1>Kits by Wugweb</h1><p class="lead">The theme and the plugins of the Kits suite. Each product has its own version, changelog and release.</p></div></div>'
+    header = '<div class="ah"><div class="ah-icon" aria-hidden="true">K</div><div><h1>Kits by Wugweb</h1><p class="lead">A block theme and plugins for WordPress: SEO, directories, news sources, search insights, mail and a team calendar. Each has its own version, changelog and release.</p></div></div>'
     body = f'<ul class="tiles tiles-wide">{"".join(cards)}</ul>' + card("Registry", '<p>The machine-readable list of every product\'s latest release, with download addresses and SHA-256, is the <a href="registry/index.json">registry</a>.</p>', "registry")
     return layout("Kits by Wugweb: products", body, 0, None, header, "The Kits by Wugweb block theme and plugins for WordPress. Each has its own version, changelog and release.", "")
 
