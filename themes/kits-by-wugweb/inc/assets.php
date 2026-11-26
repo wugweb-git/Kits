@@ -104,5 +104,14 @@ function kits_enqueue_components() {
 			'strategy'  => 'defer',
 		)
 	); // scroll-in motion: the browser's own (element.animate), no GSAP (owner, 2 Nov 2026).
+	wp_localize_script(
+		'kits-interactions',
+		'kitsI18n',
+		array(
+			'closeSearch'    => __( 'Close search', 'kits-by-wugweb' ),
+			'externalSite'   => __( ' (external site)', 'kits-by-wugweb' ),
+			'loadingResults' => __( 'Loading results', 'kits-by-wugweb' ),
+		)
+	);
 }
 add_action( 'wp_enqueue_scripts', 'kits_enqueue_components', 15 );

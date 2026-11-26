@@ -40,7 +40,7 @@
 			close = document.createElement('button');
 			close.type = 'button';
 			close.className = 'kit-hsearch-close';
-			close.setAttribute('aria-label', 'Close search');
+			close.setAttribute('aria-label', (window.kitsI18n && window.kitsI18n.closeSearch) || 'Close search');
 			close.innerHTML = '<span class="kit-ico kit-ico--x" aria-hidden="true"></span>';
 			form.appendChild(close);
 		}
@@ -159,7 +159,7 @@
 			a.classList.add('kit-link-ext');
 			var sr = document.createElement('span');
 			sr.className = 'screen-reader-text';
-			sr.textContent = ' (external site)';
+			sr.textContent = (window.kitsI18n && window.kitsI18n.externalSite) || ' (external site)';
 			a.appendChild(sr);
 		});
 	}
@@ -207,7 +207,7 @@
 		});
 		Object.keys(lists).forEach(function (n) { params.set(n, lists[n].join(',')); });
 		var status = form.parentNode.querySelector('[data-kit-filter-status]');
-		if (status) status.textContent = 'Loading results';
+		if (status) status.textContent = (window.kitsI18n && window.kitsI18n.loadingResults) || 'Loading results';
 		var q = params.toString();
 		form.dispatchEvent(new CustomEvent('kit:filter', { bubbles: true, detail: { params: q } }));
 		window.location.href = form.getAttribute('action').split('?')[0] + (q ? '?' + q : '');

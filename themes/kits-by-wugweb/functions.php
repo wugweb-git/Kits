@@ -15,6 +15,7 @@ require_once get_template_directory() . '/inc/site-layer.php';
 
 // The theme's code, by purpose (inc/), in the order it runs.
 require_once get_template_directory() . '/inc/store.php';
+require_once get_template_directory() . '/inc/theme-info.php';
 require_once get_template_directory() . '/inc/assets.php';
 require_once get_template_directory() . '/inc/blocks.php';
 require_once get_template_directory() . '/inc/component-styles.php';
