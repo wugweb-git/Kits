@@ -137,8 +137,8 @@ function insightweb_si_clarity_call( array $dimensions ) {
 	$code = (int) wp_remote_retrieve_response_code( $http );
 	if ( 200 !== $code ) {
 		$why = array(
-			401 => __( 'the token is missing, wrong or expired', 'insightweb' ),
-			403 => __( 'the token is not allowed to export data', 'insightweb' ),
+			401 => __( 'the token is missing, wrong or expired. Generate a new one in Clarity under Settings → Data Export and paste it under InsightWeb → Settings → Keys', 'insightweb' ),
+			403 => __( 'the token is not allowed to export data. It must be an API token made under Clarity → Settings → Data Export (not a project ID or a sharing link); paste the new one under InsightWeb → Settings → Keys', 'insightweb' ),
 			429 => __( 'the daily limit of 10 calls is used up', 'insightweb' ),
 		);
 		/* translators: 1: HTTP status, 2: reason. */

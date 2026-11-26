@@ -370,29 +370,37 @@ function Dashboard() {
 function OverviewBoxes() {
 	const boxes = app.boxes || [];
 	const [ got, setGot ] = useState( {} );
+	const load = ( key ) => {
+		setGot( ( o ) => {
+			const rest = { ...o };
+			delete rest[ key ];
+			return rest;
+		} );
+		return apiFetch( {
+			path: `${ path( 'dashboard/box' ) }?key=${ encodeURIComponent( key ) }`,
+		} )
+			.then( ( r ) =>
+				setGot( ( o ) => ( { ...o, [ key ]: { blocks: r.blocks } } ) )
+			)
+			.catch( ( e ) =>
+				setGot( ( o ) => ( {
+					...o,
+					[ key ]: { error: errText( e ) },
+				} ) )
+			);
+	};
 	useEffect( () => {
+		// Four boxes at a time, so the page fills in about four times faster than one by one.
 		let stop = false;
-		( async () => {
-			for ( const b of boxes ) {
-				if ( stop ) {
-					return;
-				}
-				try {
-					const r = await apiFetch( {
-						path: `${ path( 'dashboard/box' ) }?key=${ encodeURIComponent( b.key ) }`,
-					} );
-					setGot( ( o ) => ( {
-						...o,
-						[ b.key ]: { blocks: r.blocks },
-					} ) );
-				} catch ( e ) {
-					setGot( ( o ) => ( {
-						...o,
-						[ b.key ]: { error: errText( e ) },
-					} ) );
-				}
+		const queue = boxes.map( ( b ) => b.key );
+		const worker = async () => {
+			while ( ! stop && queue.length ) {
+				await load( queue.shift() );
 			}
-		} )();
+		};
+		for ( let i = 0; i < 4; i++ ) {
+			worker();
+		}
 		return () => {
 			stop = true;
 		};
@@ -403,7 +411,16 @@ function OverviewBoxes() {
 		if ( ! g ) {
 			body = <LoadingState label={ __( 'Loading…', 'insightweb' ) } />;
 		} else if ( g.error ) {
-			body = <Notice tone="error">{ g.error }</Notice>;
+			body = (
+				<>
+					<Notice tone="error">{ g.error }</Notice>
+					<p>
+						<Button onClick={ () => load( b.key ) }>
+							{ __( 'Try again', 'insightweb' ) }
+						</Button>
+					</p>
+				</>
+			);
 		} else if ( ! g.blocks.length ) {
 			body = <p>{ __( 'Nothing yet.', 'insightweb' ) }</p>;
 		} else {
@@ -415,7 +432,7 @@ function OverviewBoxes() {
 				id={ `box-${ b.key }` }
 				title={ b.title }
 			>
-				{ body }
+				<div aria-busy={ ! g }>{ body }</div>
 			</SectionCard>
 		);
 	} );
