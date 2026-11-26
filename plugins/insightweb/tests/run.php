@@ -769,4 +769,14 @@ iw_check( 'sent' === insightweb_report_run( true ), 'report: Send now ignores th
 unset( $GLOBALS['iw_options']['tr_insightweb_dash'] );
 iw_check( 'nodata' === insightweb_report_run( true ), 'report: no stored counts, nothing to send' );
 
+require_once dirname( __DIR__ ) . '/includes/search-insights/telemetry-404.php';
+iw_check( '/missing-page' === insightweb_normalize_404_path( '/missing-page?utm_source=x#top' ), 'telemetry: 404 path strips query string and fragment' );
+$movers = insightweb_keyword_movers(
+	array(
+		array( 'keyword' => 'rising term', 'clicks_delta' => 18, 'clicks' => 42 ),
+		array( 'keyword' => 'dropping term', 'clicks_delta' => -12, 'clicks' => 15 ),
+	)
+);
+iw_check( 'rising term' === ( $movers['rising'][0]['keyword'] ?? '' ) && 'dropping term' === ( $movers['declining'][0]['keyword'] ?? '' ), 'telemetry: keyword movers split rising and declining queries' );
+
 exit( $GLOBALS['iw_fail'] );

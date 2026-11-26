@@ -18,11 +18,11 @@ The analytics, telemetry, and search metrics plugin owns:
 
 ---
 
-## Open Tasks & Enhancements
+## Open Tasks & Enhancements (Resolved 26 Nov 2026)
 
 1. **Search Insights Integration**:
-   - Step 0–9 keyword action plan integration: surface rising queries and declining keywords directly in the dashboard.
-   - 404 error tracking and internal search query logging.
+   - ✅ Added rising queries and declining keywords aggregation (`includes/search-insights/telemetry-404.php`: `insightweb_keyword_movers()`).
+   - ✅ Added privacy-first 404 tracking and internal search query logging (`insightweb_record_404()`, `insightweb_record_internal_search()`, `template_redirect` hook, `/insightweb/v1/telemetry/404-searches`).
 
 ## Carried over from docs/org (26 Nov 2026)
 
