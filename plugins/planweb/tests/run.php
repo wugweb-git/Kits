@@ -528,5 +528,19 @@ check( array( 1 ) === array_column( planweb_calendar_filter( $cf, array( 'type' 
 check( '2026-11-23' === planweb_week_start( '2026-11-26' ) && '2026-11-23' === planweb_week_start( '2026-11-23' ) && '2026-11-23' === planweb_week_start( '2026-11-29' ), 'week start: Monday of the week, Sunday belongs to the week before' );
 check( '2026-12-28' === planweb_week_start( '2027-01-01' ), 'week start: across a year end' );
 
+require_once dirname( __DIR__ ) . '/includes/calendar-views.php';
+$cal_entries = array(
+	array( 'id' => 10, 'date' => '2026-11-05', 'end_date' => '2026-11-10', 'title' => 'Launch', 'author' => 'editor1', 'category' => 'news', 'campaign_tag' => 'winter', 'status' => 'approved' ),
+	array( 'id' => 11, 'date' => '2026-11-12', 'title' => 'Follow-up', 'author' => 'editor2', 'category' => 'social', 'campaign_tag' => 'spring', 'status' => 'draft' ),
+);
+check( 1 === count( planweb_calendar_filter_entries( $cal_entries, array( 'author' => 'editor1', 'tag' => 'winter' ) ) ), 'calendar views: filters by author and campaign tag' );
+$mo = planweb_calendar_month_grid( 2026, 11, $cal_entries );
+check( 5 === count( $mo['weeks'] ) && 1 === count( $mo['weeks'][0][4]['entries'] ), 'calendar views: monthly grid slots Nov 5 entry' );
+$wk = planweb_calendar_week_grid( '2026-11-05', $cal_entries );
+check( 7 === count( $wk['days'] ) && 1 === count( $wk['days'][0]['entries'] ), 'calendar views: weekly grid has 7 days and slots Nov 5' );
+$tl = planweb_campaign_timeline_data( $cal_entries );
+check( 8 === $tl['span_days'] && 0.0 === $tl['bars'][0]['left_pct'] && 75.0 === $tl['bars'][0]['width_pct'], 'campaign timeline: percentage bars computed without Gantt lib' );
+check( false !== strpos( planweb_render_campaign_timeline( $cal_entries ), 'planweb-timeline-bar' ), 'campaign timeline: renders HTML bar markup' );
+
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );
