@@ -16,6 +16,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 - Per-item share title and description (Open Graph and Twitter), beside the canonical address, 301 redirect and share image address, in the editor sidebar and the classic box.
 - Archive rules (without Rank Math): keep author archives, date archives, page 2 and later of lists, attachment pages and empty category or tag archives out of search. All off until set.
 - Page speed (Core Web Vitals): defer chosen scripts, Google Fonts shown at once (display=swap), and WebP for new JPEG and PNG uploads. No outside service.
+- Transport also copies category and tag fields and author fields (title, description, noindex).
 - Transport (RankWeb → Transport): copy SEO title, description, focus keyword and robots settings from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework. A dry run is the default, a filled field is never overwritten, and a title still made of the other plugin's variables is skipped.
 - The SEO Bar on the category, tag and user list screens.
 - An image sitemap (`/image-sitemap.xml`) when Rank Math is absent, listed in robots.txt. Rank Math's own sitemap already lists images.

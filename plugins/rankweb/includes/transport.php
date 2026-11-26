@@ -16,6 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/class-rankweb-transport.php';
+require_once __DIR__ . '/class-rankweb-term-seo.php';
 
 const RANKWEB_TRANSPORT_BATCH = 200;
 
@@ -131,10 +132,13 @@ function rankweb_transport_source_meta( string $source, int $id, array $aioseo_r
  * @param int    $after  The last item ID of the batch before (0 for the first).
  * @return array dry, error, updated (items changed), counts (writes per field), kept (values left because the field was filled), scanned, changes (lines, up to 25), next (0 when done).
  */
-function rankweb_transport_run( string $source, bool $apply, int $after = 0 ): array {
+function rankweb_transport_run( string $source, bool $apply, int $after = 0, string $kind = 'posts' ): array {
 	global $wpdb;
 	if ( ! isset( RankWeb_Transport::sources()[ $source ] ) ) {
 		return array( 'dry' => ! $apply, 'error' => __( 'Choose where to copy from.', 'rankweb' ) );
+	}
+	if ( 'terms' === $kind || 'users' === $kind ) {
+		return rankweb_transport_run_other( $kind, $source, $apply, $after );
 	}
 	$types = rankweb_transport_types();
 	if ( ! $types ) {
@@ -197,6 +201,112 @@ function rankweb_transport_run( string $source, bool $apply, int $after = 0 ): a
 	);
 }
 
+/**
+ * One batch of Transport for terms or users (title, description and noindex only).
+ *
+ * @param string $kind   'terms' or 'users'.
+ * @param string $source Source key.
+ * @param bool   $apply  False: a dry run.
+ * @param int    $after  The last ID of the batch before.
+ */
+function rankweb_transport_run_other( string $kind, string $source, bool $apply, int $after ): array {
+	global $wpdb;
+	$limit = RANKWEB_TRANSPORT_BATCH + 1;
+	$map   = array(); // id => taxonomy ('' for users)
+	if ( 'terms' === $kind ) {
+		$tax = function_exists( 'rankweb_term_seo_taxonomies' ) ? rankweb_term_seo_taxonomies() : array( 'category', 'post_tag' );
+		if ( ! $tax ) {
+			return array( 'dry' => ! $apply, 'error' => __( 'No taxonomies have the SEO fields.', 'rankweb' ) );
+		}
+		$in   = implode( ',', array_fill( 0, count( $tax ), '%s' ) );
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT term_id, taxonomy FROM {$wpdb->term_taxonomy} WHERE taxonomy IN ($in) AND term_id > %d ORDER BY term_id ASC LIMIT %d", array_merge( $tax, array( $after, $limit ) ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- placeholders built from a fixed list
+		foreach ( $rows as $r ) {
+			$map[ (int) $r['term_id'] ] = (string) $r['taxonomy'];
+		}
+	} else {
+		foreach ( (array) $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->users} WHERE ID > %d ORDER BY ID ASC LIMIT %d", $after, $limit ) ) as $id ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			$map[ (int) $id ] = '';
+		}
+	}
+	$ids  = array_keys( $map );
+	$next = 0;
+	if ( count( $ids ) > RANKWEB_TRANSPORT_BATCH ) {
+		$ids  = array_slice( $ids, 0, RANKWEB_TRANSPORT_BATCH );
+		$next = (int) end( $ids );
+	}
+	$yoast = 'terms' === $kind && 'yoast' === $source ? (array) get_option( 'wpseo_taxonomy_meta', array() ) : array();
+	$rows  = array();
+	if ( 'terms' === $kind && 'aioseo' === $source && $ids ) {
+		$table = $wpdb->prefix . 'aioseo_terms';
+		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+			foreach ( (array) $wpdb->get_results( "SELECT term_id, title, description, robots_default, robots_noindex FROM $table WHERE term_id IN (" . implode( ',', array_map( 'intval', $ids ) ) . ')', ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer ids, another plugin's table
+				$rows[ (int) $r['term_id'] ] = $r;
+			}
+		}
+	}
+	$plans   = array();
+	$changes = array();
+	foreach ( $ids as $id ) {
+		if ( 'terms' === $kind ) {
+			$meta = array();
+			foreach ( array( 'rank_math_robots', '_seopress_titles_title', '_seopress_titles_desc', '_seopress_robots_index', 'autodescription-term-settings' ) as $k ) {
+				$meta[ $k ] = get_term_meta( $id, $k, true );
+			}
+			foreach ( (array) ( $yoast[ $map[ $id ] ][ $id ] ?? array() ) as $k => $v ) {
+				$meta[ $k ] = $v;
+			}
+			foreach ( (array) ( $rows[ $id ] ?? array() ) as $k => $v ) {
+				$meta[ 'row_' . $k ] = $v;
+			}
+			$in  = RankWeb_Transport::read_term( $source, $meta );
+			$own = array();
+			foreach ( RankWeb_Term_Seo::KEYS as $f => $key ) {
+				$own[ $f ] = (string) get_term_meta( $id, $key, true );
+			}
+			$cur = rankweb_term_seo_values_for_transport( $id, $own );
+		} else {
+			$meta = array();
+			foreach ( array( 'wpseo_title', 'wpseo_metadesc', 'wpseo_noindex_author', 'rank_math_title', 'rank_math_description', 'rank_math_robots', 'autodescription-user-settings' ) as $k ) {
+				$meta[ $k ] = get_user_meta( $id, $k, true );
+			}
+			$in  = RankWeb_Transport::read_user( $source, $meta );
+			$cur = array();
+			foreach ( RankWeb_Term_Seo::USER_KEYS as $f => $key ) {
+				$cur[ $f ] = (string) get_user_meta( $id, $key, true );
+			}
+		}
+		$in   = array_intersect_key( $in, array_flip( array( 'title', 'description', 'noindex' ) ) );
+		$plan = RankWeb_Transport::plan( $in, $cur );
+		$plans[] = $plan;
+		if ( ! $plan['write'] ) {
+			continue;
+		}
+		if ( $apply ) {
+			$keys = 'terms' === $kind ? RankWeb_Term_Seo::KEYS : RankWeb_Term_Seo::USER_KEYS;
+			foreach ( $plan['write'] as $field => $value ) {
+				$val = 'noindex' === $field ? '1' : sanitize_text_field( $value );
+				'terms' === $kind ? update_term_meta( $id, $keys[ $field ], $val ) : update_user_meta( $id, $keys[ $field ], $val );
+			}
+		}
+		if ( count( $changes ) < 25 ) {
+			$name = 'terms' === $kind ? ( get_term( $id )->name ?? '#' . $id ) : ( get_userdata( $id )->display_name ?? '#' . $id );
+			/* translators: 1: term or user name, 2: the fields copied. */
+			$changes[] = sprintf( __( '%1$s: %2$s', 'rankweb' ), $name, implode( ', ', array_keys( $plan['write'] ) ) );
+		}
+	}
+	$t = RankWeb_Transport::tally( $plans );
+	return array( 'dry' => ! $apply, 'updated' => $t['changed'], 'counts' => $t['fields'], 'kept' => $t['kept'], 'scanned' => $t['items'], 'changes' => $changes, 'next' => $next );
+}
+
+/** A term's values for Transport: RankWeb's own, else what Rank Math stored (the page already shows those). */
+function rankweb_term_seo_values_for_transport( int $term_id, array $own ): array {
+	return array(
+		'title'       => $own['title'],
+		'description' => $own['description'],
+		'noindex'     => $own['noindex'],
+	);
+}
+
 add_filter(
 	'posts_where',
 	function ( $where, $query ) {
@@ -230,8 +340,9 @@ add_action(
 					'source' => array( 'type' => 'string', 'default' => '' ),
 					'apply'  => array( 'type' => 'boolean', 'default' => false ),
 					'after'  => array( 'type' => 'integer', 'default' => 0 ),
+					'kind'   => array( 'type' => 'string', 'default' => 'posts' ),
 				),
-				'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_transport_run( sanitize_key( (string) $req['source'] ), (bool) $req['apply'], max( 0, (int) $req['after'] ) ) ),
+				'callback'            => fn( WP_REST_Request $req ) => rest_ensure_response( rankweb_transport_run( sanitize_key( (string) $req['source'] ), (bool) $req['apply'], max( 0, (int) $req['after'] ), in_array( (string) $req['kind'], array( 'posts', 'terms', 'users' ), true ) ? (string) $req['kind'] : 'posts' ) ),
 			)
 		);
 	}
@@ -244,10 +355,11 @@ function rankweb_transport_body(): void {
 	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && current_user_can( 'manage_options' ) && check_admin_referer( 'rankweb_transport' ) ) {
 		$apply  = ! empty( $_POST['apply'] );
 		$source = sanitize_key( wp_unslash( $_POST['source'] ?? '' ) );
+		$kind   = sanitize_key( wp_unslash( $_POST['kind'] ?? 'posts' ) );
 		$report = array( 'dry' => ! $apply, 'updated' => 0, 'kept' => 0, 'scanned' => 0 );
 		$after  = 0;
 		do {
-			$r = rankweb_transport_run( $source, $apply, $after );
+			$r = rankweb_transport_run( $source, $apply, $after, in_array( $kind, array( 'posts', 'terms', 'users' ), true ) ? $kind : 'posts' );
 			if ( ! empty( $r['error'] ) ) {
 				$report = $r;
 				break;
@@ -273,7 +385,7 @@ function rankweb_transport_body(): void {
 	foreach ( RankWeb_Transport::sources() as $key => $name ) {
 		echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $name ) . '</option>';
 	}
-	echo '</select></label></p><p><label><input type="checkbox" name="apply" value="1" /> ' . esc_html__( 'Write the changes (leave empty for a dry run)', 'rankweb' ) . '</label></p>';
+	echo '</select></label></p><p><label>' . esc_html__( 'What to copy', 'rankweb' ) . ' <select name="kind"><option value="posts">' . esc_html__( 'Posts and pages', 'rankweb' ) . '</option><option value="terms">' . esc_html__( 'Categories and tags (title, description, noindex)', 'rankweb' ) . '</option><option value="users">' . esc_html__( 'Authors (title, description, noindex)', 'rankweb' ) . '</option></select></label></p><p><label><input type="checkbox" name="apply" value="1" /> ' . esc_html__( 'Write the changes (leave empty for a dry run)', 'rankweb' ) . '</label></p>';
 	submit_button( __( 'Run', 'rankweb' ), 'primary', 'submit', false );
 	echo '</form>';
 }

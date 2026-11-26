@@ -21,10 +21,11 @@ import { DryThenApply, Report, errText, num, path, useRun } from './common';
  * Run every batch of one source and add the reports up.
  *
  * @param {string}  source The source key.
+ * @param {string}  kind   'posts', 'terms' or 'users'.
  * @param {boolean} apply  False: a dry run.
  * @return {Promise<Object>} { dry, updated, kept, scanned, changes, error }.
  */
-const runAll = async ( source, apply ) => {
+const runAll = async ( source, apply, kind ) => {
 	const total = {
 		dry: ! apply,
 		updated: 0,
@@ -37,7 +38,7 @@ const runAll = async ( source, apply ) => {
 		const r = await apiFetch( {
 			path: path( 'transport/run' ),
 			method: 'POST',
-			data: { source, apply, after },
+			data: { source, apply, after, kind },
 		} );
 		if ( r.error ) {
 			return { dry: ! apply, error: r.error };
@@ -55,6 +56,7 @@ export function Transport() {
 	const [ info, setInfo ] = useState( null );
 	const [ error, setError ] = useState( '' );
 	const [ source, setSource ] = useState( '' );
+	const [ kind, setKind ] = useState( 'posts' );
 	const run = useRun();
 	const load = () => {
 		setError( '' );
@@ -105,6 +107,35 @@ export function Transport() {
 					</select>
 				) }
 			/>
+			<Field
+				label={ __( 'What to copy', 'rankweb' ) }
+				render={ ( id ) => (
+					<select
+						id={ id }
+						value={ kind }
+						onChange={ ( e ) => {
+							run.clear();
+							setKind( e.target.value );
+						} }
+					>
+						<option value="posts">
+							{ __( 'Posts and pages', 'rankweb' ) }
+						</option>
+						<option value="terms">
+							{ __(
+								'Categories and tags (title, description, noindex)',
+								'rankweb'
+							) }
+						</option>
+						<option value="users">
+							{ __(
+								'Authors (title, description, noindex)',
+								'rankweb'
+							) }
+						</option>
+					</select>
+				) }
+			/>
 			{ run.error && <Notice tone="error">{ run.error }</Notice> }
 			{ run.report && (
 				<>
@@ -132,7 +163,7 @@ export function Transport() {
 			<DryThenApply
 				run={ run }
 				noun={ __( 'items', 'rankweb' ) }
-				start={ ( apply ) => runAll( source, apply ) }
+				start={ ( apply ) => runAll( source, apply, kind ) }
 				dryText={ __( 'Dry run', 'rankweb' ) }
 				disabled={ ! source }
 			/>

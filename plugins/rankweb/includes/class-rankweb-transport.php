@@ -108,6 +108,80 @@ final class RankWeb_Transport {
 		return $out;
 	}
 
+	/**
+	 * The other plugin's values for a category, tag or other term, in RankWeb's shape (title, description, noindex only).
+	 *
+	 * @param string $source 'yoast', 'rankmath', 'aioseo', 'seopress' or 'tsf'.
+	 * @param array  $meta   Yoast: wpseo_title, wpseo_desc, wpseo_noindex ('noindex' = on) from its taxonomy option. Rank Math:
+	 *                       rank_math_robots. SEOPress: _seopress_titles_title, _seopress_titles_desc, _seopress_robots_index.
+	 *                       AIOSEO: row_title, row_description, row_robots_default, row_robots_noindex. The SEO Framework:
+	 *                       autodescription-term-settings (array title, description, noindex).
+	 */
+	public static function read_term( string $source, array $meta ): array {
+		$out = array_fill_keys( self::FIELDS, '' );
+		$m   = static fn( string $k ): string => isset( $meta[ $k ] ) && is_scalar( $meta[ $k ] ) ? trim( (string) $meta[ $k ] ) : '';
+		if ( 'yoast' === $source ) {
+			$out['title']       = $m( 'wpseo_title' );
+			$out['description'] = $m( 'wpseo_desc' );
+			$out['noindex']     = 'noindex' === $m( 'wpseo_noindex' ) ? '1' : '';
+		} elseif ( 'rankmath' === $source ) {
+			$raw            = $meta['rank_math_robots'] ?? '';
+			$out['noindex'] = in_array( 'noindex', array_map( 'trim', explode( ',', strtolower( is_array( $raw ) ? implode( ',', $raw ) : (string) $raw ) ) ), true ) ? '1' : '';
+		} elseif ( 'seopress' === $source ) {
+			$out['title']       = $m( '_seopress_titles_title' );
+			$out['description'] = $m( '_seopress_titles_desc' );
+			$out['noindex']     = 'yes' === $m( '_seopress_robots_index' ) ? '1' : '';
+		} elseif ( 'aioseo' === $source ) {
+			$out['title']       = $m( 'row_title' );
+			$out['description'] = $m( 'row_description' );
+			$out['noindex']     = ( '0' === $m( 'row_robots_default' ) && '1' === $m( 'row_robots_noindex' ) ) ? '1' : '';
+		} elseif ( 'tsf' === $source ) {
+			$s                  = is_array( $meta['autodescription-term-settings'] ?? null ) ? $meta['autodescription-term-settings'] : array();
+			$out['title']       = trim( (string) ( $s['doctitle'] ?? $s['title'] ?? '' ) );
+			$out['description'] = trim( (string) ( $s['description'] ?? '' ) );
+			$out['noindex']     = '1' === (string) ( $s['noindex'] ?? '' ) ? '1' : '';
+		}
+		return self::clean_templates( $out );
+	}
+
+	/**
+	 * The other plugin's values for a user (the author page), in RankWeb's shape (title, description, noindex only).
+	 *
+	 * @param string $source 'yoast', 'rankmath' or 'tsf' (the others keep no author fields).
+	 * @param array  $meta   Yoast: wpseo_title, wpseo_metadesc, wpseo_noindex_author ('on'). Rank Math: rank_math_title,
+	 *                       rank_math_description, rank_math_robots. The SEO Framework: autodescription-user-settings (array).
+	 */
+	public static function read_user( string $source, array $meta ): array {
+		$out = array_fill_keys( self::FIELDS, '' );
+		$m   = static fn( string $k ): string => isset( $meta[ $k ] ) && is_scalar( $meta[ $k ] ) ? trim( (string) $meta[ $k ] ) : '';
+		if ( 'yoast' === $source ) {
+			$out['title']       = $m( 'wpseo_title' );
+			$out['description'] = $m( 'wpseo_metadesc' );
+			$out['noindex']     = 'on' === $m( 'wpseo_noindex_author' ) ? '1' : '';
+		} elseif ( 'rankmath' === $source ) {
+			$out['title']       = $m( 'rank_math_title' );
+			$out['description'] = $m( 'rank_math_description' );
+			$raw                = $meta['rank_math_robots'] ?? '';
+			$out['noindex']     = in_array( 'noindex', array_map( 'trim', explode( ',', strtolower( is_array( $raw ) ? implode( ',', $raw ) : (string) $raw ) ) ), true ) ? '1' : '';
+		} elseif ( 'tsf' === $source ) {
+			$s                  = is_array( $meta['autodescription-user-settings'] ?? null ) ? $meta['autodescription-user-settings'] : array();
+			$out['title']       = trim( (string) ( $s['doctitle'] ?? $s['title'] ?? '' ) );
+			$out['description'] = trim( (string) ( $s['description'] ?? '' ) );
+			$out['noindex']     = '1' === (string) ( $s['noindex'] ?? '' ) ? '1' : '';
+		}
+		return self::clean_templates( $out );
+	}
+
+	/** Values with the other plugin's variables in them are dropped (title and description only). */
+	private static function clean_templates( array $out ): array {
+		foreach ( array( 'title', 'description' ) as $f ) {
+			if ( self::is_template( $out[ $f ] ) ) {
+				$out[ $f ] = '';
+			}
+		}
+		return $out;
+	}
+
 	/** Whether a value still holds the other plugin's variables (%%title%%, %title%, #post_title). */
 	public static function is_template( string $v ): bool {
 		return 1 === preg_match( '/%%?[a-z_]+%%?|#[a-z_]{3,}/i', $v );

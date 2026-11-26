@@ -118,4 +118,27 @@ final class TransportTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( '', $t['focus'] );
 		$this->assertTrue( isset( RankWeb_Transport::sources()['seopress'], RankWeb_Transport::sources()['tsf'] ) );
 	}
+
+	public function testTermsFromEachSource(): void {
+		$y = RankWeb_Transport::read_term( 'yoast', array( 'wpseo_title' => 'Rescue', 'wpseo_desc' => '%%term_description%%', 'wpseo_noindex' => 'noindex' ) );
+		$this->assertSame( 'Rescue', $y['title'] );
+		$this->assertSame( '', $y['description'] );
+		$this->assertSame( '1', $y['noindex'] );
+		$this->assertSame( '1', RankWeb_Transport::read_term( 'rankmath', array( 'rank_math_robots' => array( 'noindex' ) ) )['noindex'] );
+		$this->assertSame( '1', RankWeb_Transport::read_term( 'seopress', array( '_seopress_robots_index' => 'yes' ) )['noindex'] );
+		$a = RankWeb_Transport::read_term( 'aioseo', array( 'row_title' => 'T', 'row_robots_default' => '0', 'row_robots_noindex' => '1' ) );
+		$this->assertSame( '1', $a['noindex'] );
+		$f = RankWeb_Transport::read_term( 'tsf', array( 'autodescription-term-settings' => array( 'doctitle' => 'Tt', 'noindex' => '1' ) ) );
+		$this->assertSame( 'Tt', $f['title'] );
+		$this->assertSame( '1', $f['noindex'] );
+	}
+
+	public function testUsersFromEachSource(): void {
+		$y = RankWeb_Transport::read_user( 'yoast', array( 'wpseo_title' => 'Asha', 'wpseo_metadesc' => 'Writer', 'wpseo_noindex_author' => 'on' ) );
+		$this->assertSame( 'Asha', $y['title'] );
+		$this->assertSame( '1', $y['noindex'] );
+		$this->assertSame( 'Rm', RankWeb_Transport::read_user( 'rankmath', array( 'rank_math_title' => 'Rm' ) )['title'] );
+		$this->assertSame( '1', RankWeb_Transport::read_user( 'tsf', array( 'autodescription-user-settings' => array( 'noindex' => '1' ) ) )['noindex'] );
+		$this->assertSame( '', RankWeb_Transport::read_user( 'seopress', array( '_seopress_titles_title' => 'x' ) )['title'] );
+	}
 }
