@@ -34,7 +34,7 @@ function directoryweb_schema_fields(): array {
 }
 
 /** The listing types: what was saved, else one that uses every field and the directory's own post type. @return array<string, array> */
-function directoryweb_listing_types(): array {
+function directoryweb_schema_types(): array {
 	$keys  = array_keys( directoryweb_schema_fields() );
 	$saved = get_option( DIRECTORYWEB_TYPES_OPTION, null );
 	if ( is_array( $saved ) && $saved ) {
@@ -45,7 +45,7 @@ function directoryweb_listing_types(): array {
 
 /** The mappings, one per form. @return array[] */
 function directoryweb_form_mappings(): array {
-	$types = directoryweb_listing_types();
+	$types = directoryweb_schema_types();
 	$out   = array();
 	foreach ( (array) get_option( DIRECTORYWEB_MAPPINGS_OPTION, array() ) as $m ) {
 		$c = is_array( $m ) ? directoryweb_mapping_clean( $m, $types ) : null;
@@ -111,7 +111,7 @@ function directoryweb_form_adapters(): array {
  * @return array{id:int,errors:array} The new listing's id (0 when refused) and the problems.
  */
 function directoryweb_submit( string $type, array $values, array $source = array() ): array {
-	$types = directoryweb_listing_types();
+	$types = directoryweb_schema_types();
 	if ( ! isset( $types[ $type ] ) ) {
 		return array( 'id' => 0, 'errors' => array( '_type' => 'Unknown listing type.' ) );
 	}
@@ -207,7 +207,7 @@ function directoryweb_companions(): array {
 			}
 		}
 		$c['active'] = $on;
-		$c['url']    = $c['url'] ?? ( $on ? '' : admin_url( 'plugin-install.php?tab=search&type=term&s=' . rawurlencode( $c['plugin'] ) ) );
+		$c['url']    = $c['url'] ?? ( $on ? '' : 'https://wugweb-git.github.io/Kits/plugins/' . rawurlencode( $c['plugin'] ) . '/' ); // each plugin's own Plugin URI page, which says where to get it
 		$out[]       = $c;
 	}
 	return $out;
@@ -234,7 +234,7 @@ add_action(
 			),
 		) );
 		register_rest_route( DIRECTORYWEB_REST, '/listing-types', array(
-			$get( fn() => array( 'types' => array_values( directoryweb_listing_types() ), 'fields' => array_keys( directoryweb_schema_fields() ) ) ),
+			$get( fn() => array( 'types' => array_values( directoryweb_schema_types() ), 'fields' => array_keys( directoryweb_schema_fields() ) ) ),
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => $can,
@@ -244,7 +244,7 @@ add_action(
 						return new WP_Error( 'directoryweb_types', __( 'Keep at least one listing type.', 'directoryweb' ), array( 'status' => 400 ) );
 					}
 					update_option( DIRECTORYWEB_TYPES_OPTION, array_values( $types ), false );
-					return rest_ensure_response( array( 'types' => array_values( directoryweb_listing_types() ), 'fields' => array_keys( directoryweb_schema_fields() ) ) );
+					return rest_ensure_response( array( 'types' => array_values( directoryweb_schema_types() ), 'fields' => array_keys( directoryweb_schema_fields() ) ) );
 				},
 			),
 		) );
@@ -262,14 +262,14 @@ add_action(
 						}
 						$out[] = array( 'id' => $a['id'], 'label' => $a['label'], 'active' => $on, 'forms' => $forms );
 					}
-					return array( 'providers' => $out, 'mappings' => directoryweb_form_mappings(), 'types' => array_values( directoryweb_listing_types() ), 'fields' => array_values( directoryweb_schema_fields() ) );
+					return array( 'providers' => $out, 'mappings' => directoryweb_form_mappings(), 'types' => array_values( directoryweb_schema_types() ), 'fields' => array_values( directoryweb_schema_fields() ) );
 				}
 			),
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => $can,
 				'callback'            => function ( WP_REST_Request $r ) {
-					$types = directoryweb_listing_types();
+					$types = directoryweb_schema_types();
 					$save  = array();
 					foreach ( (array) $r->get_param( 'mappings' ) as $m ) {
 						$c = is_array( $m ) ? directoryweb_mapping_clean( $m, $types ) : null;
@@ -284,7 +284,7 @@ add_action(
 		) );
 		register_rest_route( DIRECTORYWEB_REST, '/companions', $get( 'directoryweb_companions' ) );
 		register_rest_route( DIRECTORYWEB_REST, '/config', array(
-			$get( fn() => array( 'fields' => array_values( directoryweb_schema_fields() ), 'types' => array_values( directoryweb_listing_types() ), 'mappings' => directoryweb_form_mappings() ) ),
+			$get( fn() => array( 'fields' => array_values( directoryweb_schema_fields() ), 'types' => array_values( directoryweb_schema_types() ), 'mappings' => directoryweb_form_mappings() ) ),
 			array(
 				'methods'             => 'POST',
 				'permission_callback' => $can,

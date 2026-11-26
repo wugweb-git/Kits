@@ -75,9 +75,11 @@ $directoryweb_includes = array(
 	'directoryweb-rest',
 	'schema/schema-model', // canonical listing fields and listing types (pure)
 	'schema/integrations-model', // form provider adapter contract and field mapping (pure)
+	'schema/csv-model', // listing CSV format (pure)
 	'schema/schema', // Schema & Fields, Listing Types, Form Integrations: storage, submission engine, routes
 	'directoryweb-listings',
 	'directoryweb-caps',
+	'schema/csv', // listing CSV import and export through the schema
 	'directoryweb-ui',
 	'place-intros',
 	'unverified',

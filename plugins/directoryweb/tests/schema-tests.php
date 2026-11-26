@@ -10,6 +10,7 @@
 define( 'ABSPATH', __DIR__ . '/' );
 require dirname( __DIR__ ) . '/includes/schema/schema-model.php';
 require dirname( __DIR__ ) . '/includes/schema/integrations-model.php';
+require dirname( __DIR__ ) . '/includes/schema/csv-model.php';
 
 $fails = 0; $count = 0;
 function check( $ok, $label ) { global $fails, $count; ++$count; if ( ! $ok ) { ++$fails; echo "FAIL: $label\n"; } }
@@ -75,6 +76,20 @@ check( array( 'name' => 'Paws', 'email' => 'a@b.co' ) === directoryweb_map_submi
 // Two forms from two providers feed one type.
 $m2 = directoryweb_mapping_clean( array( 'provider' => 'gravityforms', 'form' => '2', 'type' => 'clinic', 'enabled' => 1, 'fields' => array( '1.3' => 'name' ) ), $types );
 check( directoryweb_mapping_for( array( $m, $m2 ), 'gravityforms', '2' )['type'] === $m['type'], 'forms from different providers map into the same listing type' );
+
+// CSV.
+$csv = directoryweb_csv_build( array( 'name', 'note' ), array( array( 'name' => 'Paws, Inc', 'note' => "Says \"hi\"\nline two" ), array( 'name' => '=SUM(A1)', 'note' => '' ) ) );
+check( 3 === count( directoryweb_csv_rows( $csv ) ), 'csv: a header and two rows, line breaks inside quotes kept' );
+check( array( 'Paws, Inc', "Says \"hi\"\nline two" ) === directoryweb_csv_rows( $csv )[1], 'csv: commas, quotes and line breaks round-trip' );
+check( "'=SUM(A1)" === directoryweb_csv_rows( $csv )[2][0], 'csv: a formula is written with an apostrophe' );
+$cf = directoryweb_fields_clean( array( array( 'key' => 'name', 'type' => 'text' ), array( 'key' => 'animals', 'type' => 'multiselect', 'options' => array( 'dogs', 'cats' ) ) ) );
+$imp = directoryweb_csv_listings( "\xEF\xBB\xBFName,Animals,Junk\r\n'=Paws,\"dogs, cats\",x\r\n\r\nB,,\r\n", $cf );
+check( '' === $imp['error'] && array( 'junk' ) === $imp['ignored'], 'csv import: the BOM and case are tolerated; an unknown column is reported' );
+check( '=Paws' === $imp['rows'][1]['name'] && array( 'dogs', 'cats' ) === $imp['rows'][1]['animals'], 'csv import: the apostrophe is taken off; a multiselect is split' );
+check( isset( $imp['rows'][2] ) && 'B' === $imp['rows'][2]['name'], 'csv import: a blank line is skipped and rows are numbered after the header' );
+check( '' !== directoryweb_csv_listings( 'x,y\r\n1,2', $cf )['error'], 'csv import: a file with no matching column is refused' );
+check( '' !== directoryweb_csv_listings( '', $cf )['error'], 'csv import: an empty file is refused' );
+check( '' !== directoryweb_csv_listings( "name\r\n" . str_repeat( "a\r\n", DIRECTORYWEB_CSV_MAX_ROWS + 1 ), $cf )['error'], 'csv import: more than the row limit is refused' );
 
 echo $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n";
 exit( $fails ? 1 : 0 );

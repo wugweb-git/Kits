@@ -909,7 +909,193 @@ export function TransferScreen() {
 					</Button>
 				</p>
 			</SectionCard>
+			<ListingsCsv />
 		</>
+	);
+}
+
+/** Listings as CSV: one column per field of the chosen listing type. */
+function ListingsCsv() {
+	const r = useRoute( 'listing-types' );
+	const [ type, setType ] = useState( '' );
+	const [ text, setText ] = useState( '' );
+	const [ status, setStatus ] = useState( 'pending' );
+	const [ report, setReport ] = useState( null );
+	const [ msg, setMsg ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const chosen = type || r.data?.types?.[ 0 ]?.id || '';
+	const exportCsv = () => {
+		setBusy( true );
+		apiFetch( {
+			path: path(
+				`listings/export?type=${ encodeURIComponent( chosen ) }`
+			),
+		} )
+			.then( ( d ) => {
+				const url = URL.createObjectURL(
+					new Blob( [ d.csv ], { type: 'text/csv' } )
+				);
+				const a = document.createElement( 'a' );
+				a.href = url;
+				a.download = `directoryweb-${ chosen }.csv`;
+				a.click();
+				URL.revokeObjectURL( url );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const run = ( dry ) => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'listings/import' ),
+			method: 'POST',
+			data: { type: chosen, csv: text, dry_run: dry, status },
+		} )
+			.then( ( d ) => {
+				setReport( { ...d, dry } );
+				if ( ! dry && ! d.error ) {
+					setText( '' );
+				}
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const pick = ( e ) => {
+		const file = e.target.files?.[ 0 ];
+		if ( file ) {
+			file.text().then( setText );
+			setReport( null );
+		}
+	};
+	return (
+		<SectionCard
+			id="csv"
+			title={ __( 'Listings as CSV', 'directoryweb' ) }
+			description={ __(
+				'One column per field of the listing type. Each imported row is checked like a form submission and arrives as pending or draft; nothing is overwritten.',
+				'directoryweb'
+			) }
+		>
+			<Shell r={ r }>
+				{ msg && <Notice tone={ msg.tone }>{ msg.text }</Notice> }
+				<p>
+					<label>
+						{ __( 'Listing type', 'directoryweb' ) }{ ' ' }
+						<select
+							value={ chosen }
+							onChange={ ( e ) => setType( e.target.value ) }
+						>
+							{ ( r.data?.types || [] ).map( ( t ) => (
+								<option key={ t.id } value={ t.id }>
+									{ t.label }
+								</option>
+							) ) }
+						</select>
+					</label>{ ' ' }
+					<Button busy={ busy } onClick={ exportCsv }>
+						{ __( 'Download CSV', 'directoryweb' ) }
+					</Button>
+				</p>
+				<p>
+					<input
+						type="file"
+						accept=".csv,text/csv"
+						aria-label={ __( 'CSV file', 'directoryweb' ) }
+						onChange={ pick }
+					/>
+				</p>
+				<p>
+					<label>
+						{ __( 'Imported listings are', 'directoryweb' ) }{ ' ' }
+						<select
+							value={ status }
+							onChange={ ( e ) => setStatus( e.target.value ) }
+						>
+							<option value="pending">
+								{ __( 'pending review', 'directoryweb' ) }
+							</option>
+							<option value="draft">
+								{ __( 'drafts', 'directoryweb' ) }
+							</option>
+						</select>
+					</label>{ ' ' }
+					<Button
+						busy={ busy }
+						disabled={ ! text }
+						onClick={ () => run( true ) }
+					>
+						{ __( 'Check the file', 'directoryweb' ) }
+					</Button>{ ' ' }
+					<Button
+						variant="primary"
+						busy={ busy }
+						disabled={
+							! report ||
+							report.dry !== true ||
+							report.error ||
+							! report.ok
+						}
+						onClick={ () => run( false ) }
+					>
+						{ __( 'Import the good rows', 'directoryweb' ) }
+					</Button>
+				</p>
+				{ report && report.error && (
+					<Notice tone="error">{ report.error }</Notice>
+				) }
+				{ report && ! report.error && (
+					<>
+						<p>
+							{ report.dry
+								? sprintf(
+										/* translators: 1: rows that pass, 2: rows read. */
+										__(
+											'%1$d of %2$d rows are good.',
+											'directoryweb'
+										),
+										report.ok,
+										report.rows
+									)
+								: sprintf(
+										/* translators: %d: listings created. */
+										__(
+											'%d listings created.',
+											'directoryweb'
+										),
+										report.created.length
+									) }
+							{ report.ignored.length > 0 &&
+								' ' +
+									sprintf(
+										/* translators: %s: column names. */
+										__(
+											'Columns not used: %s.',
+											'directoryweb'
+										),
+										report.ignored.join( ', ' )
+									) }
+						</p>
+						{ Object.keys( report.problems ).length > 0 && (
+							<ul>
+								{ Object.entries( report.problems ).map(
+									( [ row, list ] ) => (
+										<li key={ row }>
+											{ sprintf(
+												/* translators: %s: row number. */
+												__( 'Row %s:', 'directoryweb' ),
+												row
+											) }{ ' ' }
+											{ list.join( ' ' ) }
+										</li>
+									)
+								) }
+							</ul>
+						) }
+					</>
+				) }
+			</Shell>
+		</SectionCard>
 	);
 }
 
