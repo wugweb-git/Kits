@@ -1189,11 +1189,31 @@ function Faq() {
 	);
 }
 
+/** The working tools (Internal links, Image SEO, SEO CSV, Redirect tools): each one's own output and forms, as page parts. */
+const TOOL_TITLES = {
+	links: __( 'Internal links', 'rankweb' ),
+	images: __( 'Image SEO', 'rankweb' ),
+	csv: __( 'SEO CSV', 'rankweb' ),
+	redirects: __( 'Redirect tools', 'rankweb' ),
+};
+
+function Tool( { screen } ) {
+	return (
+		<SectionCard id={ screen } title={ TOOL_TITLES[ screen ] }>
+			<PageParts
+				parts={ app.parts || [] }
+				title={ TOOL_TITLES[ screen ] }
+			/>
+		</SectionCard>
+	);
+}
+
 function App() {
 	return (
 		<AppShell header={ <Header /> }>
 			{ 'settings' === app.screen && <Settings /> }
 			{ 'faq' === app.screen && <Faq /> }
+			{ TOOL_TITLES[ app.screen ] && <Tool screen={ app.screen } /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />
 			) }

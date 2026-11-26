@@ -65,6 +65,20 @@ function rankweb_native_screen( string $screen, string $title ): void {
 				rankweb_faq_admin_body();
 			}
 			break;
+		case 'links':
+		case 'images':
+		case 'csv':
+		case 'redirects':
+			$body = array(
+				'links'     => 'rankweb_link_audit_body',
+				'images'    => 'rankweb_media_body',
+				'csv'       => 'rankweb_bulk_csv_body',
+				'redirects' => 'rankweb_redirect_tools_body',
+			)[ $screen ];
+			if ( function_exists( $body ) ) {
+				$body();
+			}
+			break;
 		case 'insights':
 			echo '<p>' . esc_html__( 'Search insights (impressions, clicks and keyword scores) are part of InsightWeb. Install and activate InsightWeb to see them here.', 'rankweb' ) . '</p>';
 			break;

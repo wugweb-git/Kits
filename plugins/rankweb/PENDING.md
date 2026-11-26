@@ -53,7 +53,7 @@ The SEO, schema, and sitemap plugin owns:
 
 Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
 
-- Shell versions for SEO CSV, Internal links, Redirect tools and Images (`bulk-csv.php`, `link-audit.php`, `redirect-tools.php`, `media-seo.php`) and the FAQ list table: they exist only as server-rendered screens, so they cannot be removed before that.
+- SEO CSV, Internal links, Redirect tools and Images (26 Nov): now drawn inside the Kits shell through page parts, the way the FAQ list is (`rankweb_tool_parts()`, `rankweb-ui.php`). Their forms still post to `admin-post.php` with their own nonce; with no Kits Core they stay plain WordPress pages. Not done: REST routes and native React screens for them, and a confirm step on "Write to .htaccess now" (the parts bridge drops scripts).
 - Redirect categories: never built. A native redirect list is not planned; redirect tools write to Rank Math's list.
 - Ranking formula: owner decision.
 - Not in this repo: a bundled `rankweb-shell` package (`packages/rankweb-shell` is empty).

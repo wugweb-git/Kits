@@ -319,8 +319,12 @@ function rankweb_redirect_tools_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
+	rankweb_ui_page( 'redirects' );
+}
+
+/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+function rankweb_redirect_tools_body(): void {
 	$post = admin_url( 'admin-post.php' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'Redirect tools', 'rankweb' ) . '</h1>';
 	echo '<p>' . esc_html__( 'Redirects live in Rank Math → Redirections. These tools read and write that one list.', 'rankweb' ) . '</p>';
 	if ( ! rankweb_redirect_ready() ) {
 		wp_admin_notice( esc_html__( 'Rank Math\'s Redirections module is off, so these tools do nothing.', 'rankweb' ), array( 'type' => 'warning' ) );
@@ -368,7 +372,6 @@ function rankweb_redirect_tools_screen(): void {
 	} else {
 		echo '<p class="description">' . esc_html__( 'Writing to .htaccess is off, or this server is not Apache or LiteSpeed. Turn it on in RankWeb → Settings → Redirect tools. The downloaded block can be pasted by hand.', 'rankweb' ) . '</p>';
 	}
-	echo '</div>';
 }
 
 /**

@@ -196,8 +196,12 @@ function rankweb_bulk_csv_screen(): void {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You are not allowed to see this.', 'rankweb' ), '', array( 'response' => 403 ) );
 	}
+	rankweb_ui_page( 'csv' );
+}
+
+/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+function rankweb_bulk_csv_body(): void {
 	$post = admin_url( 'admin-post.php' );
-	echo '<div class="wrap"><h1>' . esc_html__( 'SEO CSV', 'rankweb' ) . '</h1>';
 	if ( ! rankweb_bulk_types() ) {
 		wp_admin_notice( esc_html__( 'No post types are set for bulk SEO work (RankWeb → Settings → Bulk edit).', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
@@ -220,7 +224,7 @@ function rankweb_bulk_csv_screen(): void {
 	echo '<p><input type="file" name="aw_csv" accept=".csv,text/csv" required></p>';
 	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'rankweb' ) . '</label></p>';
 	submit_button( __( 'Import CSV', 'rankweb' ), 'primary', 'submit', false );
-	echo '</form></div>';
+	echo '</form>';
 }
 
 /**
