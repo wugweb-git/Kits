@@ -31,9 +31,11 @@ add_action(
 					$rows = array(
 						array( 'label' => __( 'Missing a title', 'rankweb' ), 'value' => number_format_i18n( $n['titles'] ) ),
 						array( 'label' => __( 'Missing a description', 'rankweb' ), 'value' => number_format_i18n( $n['descs'] ) ),
-						array( 'label' => __( 'Pages with an FAQ', 'rankweb' ), 'value' => number_format_i18n( $n['faq'] ) ),
-						array( 'label' => __( 'Kept out of search', 'rankweb' ), 'value' => number_format_i18n( $n['noindex'] ) ),
+						array( 'label' => __( 'Missing a focus keyword', 'rankweb' ), 'value' => number_format_i18n( $n['focus'] ) ),
 					);
+					if ( isset( $n['schema'] ) ) {
+						$rows[] = array( 'label' => __( 'Schema gaps', 'rankweb' ), 'value' => number_format_i18n( $n['schema'] ) );
+					}
 					if ( function_exists( 'kits_dash_cards' ) ) {
 						echo kits_dash_cards( $rows ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 					} else {
