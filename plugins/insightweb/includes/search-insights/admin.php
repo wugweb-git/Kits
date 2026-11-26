@@ -74,7 +74,7 @@ function insightweb_si_extra_tabs(): array {
 			$out[ $key ] = (string) $label;
 		}
 	}
-	return $out;
+	return function_exists( 'insightweb_tab_order' ) ? insightweb_tab_order( $out ) : $out;
 }
 
 /** The current tab. */

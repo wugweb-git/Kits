@@ -20,6 +20,24 @@ function insightweb_tab_keys(): array {
 	return array_merge( array( 'keywords' ), array_keys( insightweb_si_extra_tabs() ) );
 }
 
+/**
+ * The order of the tabs after Keywords (Dashboard comes first and Settings last): reading screens first (Rising, Pages,
+ * Sourcing keywords), then the site screens (Links, Clarity, Server, Check list). Tabs other plugins add through the
+ * aw_si_tabs filter keep their order and come last; a tab that is not there (Sourcing without SourceWeb) is skipped.
+ *
+ * @param array $tabs Key => label, in the order the filter returned them.
+ * @return array
+ */
+function insightweb_tab_order( array $tabs ): array {
+	$out = array();
+	foreach ( array( 'rising', 'pages', 'sourcing', 'links', 'clarity', 'server', 'checklist' ) as $key ) {
+		if ( isset( $tabs[ $key ] ) ) {
+			$out[ $key ] = $tabs[ $key ];
+		}
+	}
+	return $out + $tabs;
+}
+
 /** Each tab's label: key => label. */
 function insightweb_tab_labels(): array {
 	return array( 'keywords' => __( 'Keywords', 'insightweb' ) ) + insightweb_si_extra_tabs();
