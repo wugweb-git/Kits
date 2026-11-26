@@ -22,7 +22,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 | `enrichment/` | Directory enrichment: what the directory worker found for a listing, review of changes, clean-up proposals, the listing-page output | Worker results per listing | Listing field changes, with provenance, after review |
 | `output/` | What the site shows from sourced content: attribution and source row, sentence-case titles, summary rewrite, CC0 images, Library PDFs, issuer label, research citation, content helpers | Published items | Front-end markup, images, canonical links |
 | `keywords/` | The keyword table and its screens, keywords pushed from InsightWeb, routing on approval, per-keyword stats, suggestions, the Tools → Search Insights tab | Search Insights, owner approvals | Keyword lists for the workers; stats |
-| `ai/` | AI provider keys and icons for the workers' relevance and summary passes | Pasted keys (stored encrypted-at-rest by the host plugin rules) | Provider and mode per worker |
+| `ai/` | AI provider keys and icons for the workers' relevance and summary passes | Pasted keys | Provider and mode per worker |
 | `admin/` | The SourceWeb menu and Overview, Dashboard counts and the hourly build, screens on the Kits shell, capability `manage_sourceweb`, Help tab, Plugins-screen info, Site Health test | Counts and stored state | Screens and tiles |
 | `rest/` | The `sourceweb/v1` routes the shell screens call (dashboard, review, enrichment, pages, AI, logs) | Screen requests | JSON |
 | `lifecycle/` | Phase migrations from WP-CLI (backup, dry run, migrate, verify, roll back), the retire model, the uninstall backup | WP-CLI, uninstall | Backups, migrated options |
