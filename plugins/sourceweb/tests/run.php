@@ -386,12 +386,12 @@ aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id f
 aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb' . \$count, AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page', \$icon, '58.3' );" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'SourceWeb: its own top-level menu (core add_menu_page, at 58.3 in the Wugweb block), with the To review count, opening the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
 aw_t( false === strpos( $menu, 'kits_admin_fold_menu' ) && false !== strpos( $menu, "'separator-wugweb'" ), 'the menu needs no Kits Core: no fold helper, its own separator above the block' );
 aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
-foreach ( array( 'admin/admin-menu.php', 'review/review-queue.php', 'enrichment/enrichment-admin.php', 'sources/sourcing-policy.php' ) as $f ) {
+foreach ( array( 'admin/admin-menu.php', 'review/review-queue.php', 'enhance/directory/enrichment-admin.php', 'sources/sourcing-policy.php' ) as $f ) {
 	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
 }
 aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
 aw_t( false !== strpos( (string) file_get_contents( $inc . 'review/review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment/enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'enhance/directory/enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
 // Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.
 $tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Press queries', 'categories' => 'Categories', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'relay-log' => 'Relay log', 'settings' => 'Settings', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'log' => 'Change log' );
 aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( sourceweb_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );

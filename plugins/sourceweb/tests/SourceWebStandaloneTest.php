@@ -108,7 +108,7 @@ if ( ! function_exists( 'get_post_type' ) ) {
 
 // Load files.
 require_once dirname( __DIR__ ) . '/includes/sources/sourcing-basics.php';
-require_once dirname( __DIR__ ) . '/includes/output/content-helpers.php';
+require_once dirname( __DIR__ ) . '/includes/enhance/content-helpers.php';
 require_once dirname( __DIR__ ) . '/includes/workers/workers-registry.php';
 require_once dirname( __DIR__ ) . '/includes/workers/workers-tick.php';
 require_once dirname( __DIR__ ) . '/includes/rules/rules-model.php';

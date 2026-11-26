@@ -15,9 +15,9 @@ Everything in `includes/` serves one of those six steps, and `includes/` is grou
 |---|---|
 | 1 and 2. Source, from origins | `sources/`, `keywords/` (the search terms that steer what is sought) |
 | 3. Via workers | `workers/` (registry, tick, relay, ingest) |
-| 4. Within a guardrail | `rules/`, `review/` (what a person still decides), `ai/` (the models behind relevance) |
+| 4. Within a guardrail | `rules/` (relevance, auto-review, section rules), `review/` (what a person still decides), `ai/` (the models behind relevance) |
 | 5. To dedicated places | no folder of its own yet: the routing is spread over `workers/ingest.php`, `rules/` (section rules) and `output/content-helpers.php` (section lists) |
-| 6. Enhance | `enrichment/`, `output/` |
+| 6. Enhance | `enhance/`: summaries (rules, rewrite), titles, attribution, images, Library PDFs, issuer, research citation; `enhance/directory/`: directory enrichment |
 | Around all steps | `admin/`, `rest/` (screens and routes), `lifecycle/` (migrations, uninstall), `compat/` |
 
 ## The flow
@@ -35,10 +35,9 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 |---|---|---|---|
 | `sources/` | The lists the workers fetch: feeds, publishers, hosts, their icons, the policy over them, opportunity pages the site fetches itself | The Sources and Press screens, `data/sources-seed.json` | Option `aw_sources`; the lists the workers read over REST |
 | `workers/` | The Python workers (repo `animal-writes-workers`): their registry, status, the 15-minute tick that keeps GitHub's late schedules on time, the relay for publishers that block GitHub, and **ingest**, the endpoint where items arrive | Worker POSTs (`aw/v1/*`), hPanel cron, WP-CLI | New items as drafts; run records; worker status |
-| `rules/` | The gate: relevance (is it about animal welfare?), auto-review, auto-resolve of queued values, summary rules, section rules, same-story grouping | An ingested item or a queued value | Accept, hold for review, or reject, each with a logged reason |
+| `rules/` | The gate: relevance (is it about animal welfare?), auto-review, auto-resolve of queued values, section rules, same-story grouping | An ingested item or a queued value | Accept, hold for review, or reject, each with a logged reason |
 | `review/` | The To review queue: everything that came in automatically and still needs a person | Items the rules held | A decision: publish, edit or reject |
-| `enrichment/` | Directory enrichment: what the directory worker found for a listing, review of changes, clean-up proposals, the listing-page output | Worker results per listing | Listing field changes, with provenance, after review |
-| `output/` | What the site shows from sourced content: attribution and source row, sentence-case titles, summary rewrite, CC0 images, Library PDFs, issuer label, research citation, content helpers | Published items | Front-end markup, images, canonical links |
+| `enhance/` | Making an item fit in. **Summarising is enhancement:** the summary rules and the rewrite pass. Also sentence-case titles, attribution and source row, CC0 images, Library PDFs, issuer label, research citation. `enhance/directory/` is directory enrichment: what the directory worker found for a listing, review of changes, clean-up proposals, the listing-page output | Items that passed the gate; worker results per listing | Final summary, title, image, credit; listing field changes with provenance |
 | `keywords/` | The keyword table and its screens, keywords pushed from InsightWeb, routing on approval, per-keyword stats, suggestions, the Tools → Search Insights tab | Search Insights, owner approvals | Keyword lists for the workers; stats |
 | `ai/` | AI provider keys and icons for the workers' relevance and summary passes | Pasted keys | Provider and mode per worker |
 | `admin/` | The SourceWeb menu and Overview, Dashboard counts and the hourly build, screens on the Kits shell, capability `manage_sourceweb`, Help tab, Plugins-screen info, Site Health test | Counts and stored state | Screens and tiles |
@@ -54,6 +53,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 
 ## Still scattered (next steps, not done)
 
+- **Summaries in ingest.** `workers/ingest.php` still trims the summary to whole sentences, strips the legal-review flag and checks the section minimum while an item arrives. That is enhancement: move it to `enhance/` and have ingest call it.
 - **Step 5 has no home.** Where an item lands (which content type, section, status) should be one `places/` folder with one function per place, so adding or changing a destination touches one file. Today it is spread across the three files above.
 - Names: `sourcing-*`, `sourceweb-*` and plain names mix inside folders; `sourcing-basics.php` is loaded first and used everywhere.
 - `rest/sourceweb-rest-pages.php` is 2,100 lines and serves five screens; split it per feature and move each part next to its model.

@@ -75,7 +75,7 @@ if ( ! defined( 'SOURCEWEB_KW_ROLE_INCLUDE' ) ) {
 // The host and publisher helpers first, before the check: the site layer and other plugins call sourceweb_host() and sourceweb_publishers().
 require_once __DIR__ . '/includes/sources/sourcing-basics.php';
 // The issuer label too (no dependency): the site layer's Library item box and card chips call sourceweb_issuer_short() and sourceweb_issuer_box().
-require_once __DIR__ . '/includes/output/issuers.php';
+require_once __DIR__ . '/includes/enhance/issuers.php';
 require_once __DIR__ . '/includes/compat/legacy-aliases.php'; // the earlier aw_* names that Kits Core, RankWeb and DirectoryWeb still call
 define( 'SOURCEWEB_SOURCING_LOADED', '0.1.0' );
 if ( ! defined( 'SOURCEWEB_SOURCING_DIR' ) ) {
@@ -84,11 +84,11 @@ if ( ! defined( 'SOURCEWEB_SOURCING_DIR' ) ) {
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sources-config.php'; // the sourcing lists, option aw_sources (moved from Kits Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/summary-rules.php'; // the summary rules (option sourceweb_summary_rules); moved from Core 12 Nov 2026
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rules.php'; // the summary rules (option sourceweb_summary_rules); moved from Core 12 Nov 2026
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/help-tab.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/plugin-info.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
@@ -99,25 +99,25 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/retire-model.php'; // 
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sourcing-policy.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/source-sites.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/source-icons.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/cc0-images.php'; // publisher images (check, og:image, keep a copy) and the CC0 photo fetch from Openverse (moved from Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/library-pdfs.php'; // which government PDFs we may host and the mirror that copies them (moved from Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/cc0-images.php'; // publisher images (check, og:image, keep a copy) and the CC0 photo fetch from Openverse (moved from Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/library-pdfs.php'; // which government PDFs we may host and the mirror that copies them (moved from Core, 18 Nov 2026)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sourcing-lists.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/summary-rules-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rules-admin.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/relevance.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/ingest.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/opportunities-site.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/auto-review.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/same-story.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/summary-rewrite.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/output/news-titles.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment/enrichment.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rewrite.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/news-titles.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/autoresolve.php'; // the review-queue rules applied when a value is queued (14 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment/enrichment-cleanup.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment/enrichment-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-cleanup.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-admin.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules-model.php'; // sourcing restructure phase 3: Rules
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules-admin.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment/enrichment-front.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-front.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/review/review-queue.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-suggestions.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
