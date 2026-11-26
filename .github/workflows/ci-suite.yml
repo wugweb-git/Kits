@@ -190,6 +190,7 @@ jobs:
           php plugins/directoryweb/tests/directoryweb-standalone-test.php
           php plugins/directoryweb/tests/claim-native-tests.php
           php plugins/directoryweb/tests/claim-native-mail-tests.php
+          php plugins/directoryweb/tests/claim-crm-tests.php
           php plugins/directoryweb/tests/claim-fallback-tests.php
           php plugins/directoryweb/tests/claim-review-standalone-tests.php
           php plugins/directoryweb/tests/meta-authorization-tests.php

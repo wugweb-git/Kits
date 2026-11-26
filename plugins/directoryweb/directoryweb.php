@@ -69,6 +69,7 @@ $directoryweb_includes = array(
 	'legacy-aliases', // the old aw_* function names, for other plugins that still call them
 	'claim-native', // standalone claim path: state machine, form, REST (no Fluent Forms)
 	'claim-native-mail', // notification emails for native claims (wp_mail; MailWeb can take over per message)
+	'claim-crm', // claim events for a CRM: an action for any listener, and FluentCRM contacts and tags when it is active
 	'directoryweb-shape',
 	'directoryweb-dashboard',
 	'directoryweb-rest',
