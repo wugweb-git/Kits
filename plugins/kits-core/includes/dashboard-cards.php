@@ -1,7 +1,7 @@
 <?php
 /**
  * Dashboard widget parts (owner, 3 Nov 2026: Dashboard widgets may use stat cards and small charts; every other admin
- * screen stays core-only). Plain HTML and inline SVG, no chart library and no script. WordPress admin colours, text
+ * screen stays core-only). Plain HTML and inline SVG, no chart library and no script. Kits shell look from 26 Nov 2026 (black, white, greys; red only for a fault), text
  * that says up or down (never colour alone), and the exact figures stay in a table under the chart.
  *
  * kits_dash_cards( $cards ): a row of stat cards. Each card: label, value (already formatted), and optionally
@@ -121,26 +121,41 @@ add_action(
 			implode(
 				"\n",
 				array(
-				'.aw-dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,9em),1fr));gap:8px;margin:0 0 12px;padding:0;list-style:none}',
-				'.aw-dash-card{min-width:0;margin:0;padding:12px;border:1px solid #c3c4c7;border-radius:4px;background:#fff;display:flex;flex-direction:column;gap:2px}',
-				'.aw-dash-label{color:#50575e;font-size:13px;overflow-wrap:anywhere}',
-				'.aw-dash-value{color:#1d2327;font-size:24px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}',
+				'.aw-dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,8.5em),1fr));gap:10px;margin:0 0 16px;padding:0;list-style:none}',
+				'.aw-dash-card{min-width:0;margin:0;padding:14px 14px 12px;border:1px solid #e6e6e6;border-radius:12px;background:#fafafa;display:flex;flex-direction:column;gap:4px}',
+				'.aw-dash-label{color:#6b6b6b;font-size:12px;font-weight:500;letter-spacing:.02em;overflow-wrap:anywhere}',
+				'.aw-dash-value{color:#0a0a0a;font-size:30px;font-weight:700;line-height:1.1;letter-spacing:-.02em;overflow-wrap:anywhere}',
 				'.aw-dash-value a{color:inherit;text-decoration:none}',
 				'.aw-dash-value a:hover,.aw-dash-value a:focus{text-decoration:underline}',
-				'.aw-dash-sub{color:#50575e;font-size:12px}',
+				'.aw-dash-sub{color:#6b6b6b;font-size:12px}',
 				'.aw-dash-tone{font-size:12px;font-weight:600}',
 				'.aw-dash-tone .dashicons{font-size:14px;width:14px;height:14px;vertical-align:text-bottom}',
-				'.aw-dash-tone--warn{color:#8a5a00}',
+				'.aw-dash-tone--warn{color:#0a0a0a}',
 				'.aw-dash-tone--error{color:#b32d2e}',
-				'.aw-dash-delta{font-size:13px}',
-				'.aw-dash-delta--up{color:#007017}',
+				'.aw-dash-delta{font-size:12px;color:#6b6b6b}',
+				'.aw-dash-delta--up{color:#0a0a0a}',
 				'.aw-dash-delta--down{color:#b32d2e}',
-				'.aw-dash-delta--flat{color:#50575e}',
-				'.aw-dash-chart{margin:0 0 12px}',
-				'.aw-dash-chart svg{display:block;width:100%;height:auto;max-height:120px;fill:#2271b1;overflow:visible}',
-				'.aw-dash-chart line{stroke:#c3c4c7;stroke-width:1}',
-				'.aw-dash-chart text{fill:#50575e;font-size:10px}',
+				'.aw-dash-chart{margin:0 0 14px}',
+				'.aw-dash-chart svg{display:block;width:100%;height:auto;max-height:120px;fill:#0a0a0a;overflow:visible}',
+				'.aw-dash-chart line{stroke:#e6e6e6;stroke-width:1}',
+				'.aw-dash-chart text{fill:#6b6b6b;font-size:10px}',
 				'.aw-dash-chart figcaption{margin-top:4px}',
+				'#mailweb_widget,#planweb_next,#aw_team_dates,#aw_activity,#aw_cl_widget,#aw_form_entries,#aw_cron_health,#aw_seo_dashboard,#rankweb_dashboard,#aw_sourcing_dashboard,#directoryweb_dashboard{border:1px solid #e6e6e6;border-radius:14px;box-shadow:none;background:#fff;overflow:hidden}',
+				'#mailweb_widget .postbox-header,#planweb_next .postbox-header,#aw_team_dates .postbox-header,#aw_activity .postbox-header,#aw_cl_widget .postbox-header,#aw_form_entries .postbox-header,#aw_cron_health .postbox-header,#aw_seo_dashboard .postbox-header,#rankweb_dashboard .postbox-header,#aw_sourcing_dashboard .postbox-header,#directoryweb_dashboard .postbox-header{border-bottom:1px solid #efefef}',
+				'#mailweb_widget .postbox-header .hndle,#planweb_next .postbox-header .hndle,#aw_team_dates .postbox-header .hndle,#aw_activity .postbox-header .hndle,#aw_cl_widget .postbox-header .hndle,#aw_form_entries .postbox-header .hndle,#aw_cron_health .postbox-header .hndle,#aw_seo_dashboard .postbox-header .hndle,#rankweb_dashboard .postbox-header .hndle,#aw_sourcing_dashboard .postbox-header .hndle,#directoryweb_dashboard .postbox-header .hndle{font-size:14px;font-weight:700;color:#0a0a0a;letter-spacing:-.01em;padding:12px 16px}',
+				'#mailweb_widget .inside,#planweb_next .inside,#aw_team_dates .inside,#aw_activity .inside,#aw_cl_widget .inside,#aw_form_entries .inside,#aw_cron_health .inside,#aw_seo_dashboard .inside,#rankweb_dashboard .inside,#aw_sourcing_dashboard .inside,#directoryweb_dashboard .inside{margin:0;padding:16px;color:#2b2b2b}',
+				'#mailweb_widget a,#planweb_next a,#aw_team_dates a,#aw_activity a,#aw_cl_widget a,#aw_form_entries a,#aw_cron_health a,#aw_seo_dashboard a,#rankweb_dashboard a,#aw_sourcing_dashboard a,#directoryweb_dashboard a{color:#0a0a0a;text-decoration:underline;text-underline-offset:2px}',
+				'#mailweb_widget a:hover,#planweb_next a:hover,#aw_team_dates a:hover,#aw_activity a:hover,#aw_cl_widget a:hover,#aw_form_entries a:hover,#aw_cron_health a:hover,#aw_seo_dashboard a:hover,#rankweb_dashboard a:hover,#aw_sourcing_dashboard a:hover,#directoryweb_dashboard a:hover,#mailweb_widget a:focus,#planweb_next a:focus,#aw_team_dates a:focus,#aw_activity a:focus,#aw_cl_widget a:focus,#aw_form_entries a:focus,#aw_cron_health a:focus,#aw_seo_dashboard a:focus,#rankweb_dashboard a:focus,#aw_sourcing_dashboard a:focus,#directoryweb_dashboard a:focus{color:#000;text-decoration-thickness:2px}',
+				'#mailweb_widget table.widefat,#planweb_next table.widefat,#aw_team_dates table.widefat,#aw_activity table.widefat,#aw_cl_widget table.widefat,#aw_form_entries table.widefat,#aw_cron_health table.widefat,#aw_seo_dashboard table.widefat,#rankweb_dashboard table.widefat,#aw_sourcing_dashboard table.widefat,#directoryweb_dashboard table.widefat{border:0;box-shadow:none;background:transparent}',
+				'#mailweb_widget table.widefat th,#planweb_next table.widefat th,#aw_team_dates table.widefat th,#aw_activity table.widefat th,#aw_cl_widget table.widefat th,#aw_form_entries table.widefat th,#aw_cron_health table.widefat th,#aw_seo_dashboard table.widefat th,#rankweb_dashboard table.widefat th,#aw_sourcing_dashboard table.widefat th,#directoryweb_dashboard table.widefat th{color:#6b6b6b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e6e6e6;padding:8px 4px}',
+				'#mailweb_widget table.widefat td,#planweb_next table.widefat td,#aw_team_dates table.widefat td,#aw_activity table.widefat td,#aw_cl_widget table.widefat td,#aw_form_entries table.widefat td,#aw_cron_health table.widefat td,#aw_seo_dashboard table.widefat td,#rankweb_dashboard table.widefat td,#aw_sourcing_dashboard table.widefat td,#directoryweb_dashboard table.widefat td{padding:9px 4px;border-bottom:1px solid #f1f1f1}',
+				'#mailweb_widget table.widefat tbody th,#planweb_next table.widefat tbody th,#aw_team_dates table.widefat tbody th,#aw_activity table.widefat tbody th,#aw_cl_widget table.widefat tbody th,#aw_form_entries table.widefat tbody th,#aw_cron_health table.widefat tbody th,#aw_seo_dashboard table.widefat tbody th,#rankweb_dashboard table.widefat tbody th,#aw_sourcing_dashboard table.widefat tbody th,#directoryweb_dashboard table.widefat tbody th{text-transform:none;font-size:13px;font-weight:500;color:#0a0a0a;letter-spacing:0;border-bottom:1px solid #f1f1f1;padding:9px 4px}',
+				'#mailweb_widget table.widefat tr:last-child td,#planweb_next table.widefat tr:last-child td,#aw_team_dates table.widefat tr:last-child td,#aw_activity table.widefat tr:last-child td,#aw_cl_widget table.widefat tr:last-child td,#aw_form_entries table.widefat tr:last-child td,#aw_cron_health table.widefat tr:last-child td,#aw_seo_dashboard table.widefat tr:last-child td,#rankweb_dashboard table.widefat tr:last-child td,#aw_sourcing_dashboard table.widefat tr:last-child td,#directoryweb_dashboard table.widefat tr:last-child td{border-bottom:0}',
+				'#mailweb_widget table.widefat.striped>tbody>:nth-child(odd),#planweb_next table.widefat.striped>tbody>:nth-child(odd),#aw_team_dates table.widefat.striped>tbody>:nth-child(odd),#aw_activity table.widefat.striped>tbody>:nth-child(odd),#aw_cl_widget table.widefat.striped>tbody>:nth-child(odd),#aw_form_entries table.widefat.striped>tbody>:nth-child(odd),#aw_cron_health table.widefat.striped>tbody>:nth-child(odd),#aw_seo_dashboard table.widefat.striped>tbody>:nth-child(odd),#rankweb_dashboard table.widefat.striped>tbody>:nth-child(odd),#aw_sourcing_dashboard table.widefat.striped>tbody>:nth-child(odd),#directoryweb_dashboard table.widefat.striped>tbody>:nth-child(odd){background:transparent}',
+				'#mailweb_widget details>summary,#planweb_next details>summary,#aw_team_dates details>summary,#aw_activity details>summary,#aw_cl_widget details>summary,#aw_form_entries details>summary,#aw_cron_health details>summary,#aw_seo_dashboard details>summary,#rankweb_dashboard details>summary,#aw_sourcing_dashboard details>summary,#directoryweb_dashboard details>summary{cursor:pointer;font-weight:600;color:#0a0a0a;margin:0 0 8px}',
+				'#mailweb_widget .description,#planweb_next .description,#aw_team_dates .description,#aw_activity .description,#aw_cl_widget .description,#aw_form_entries .description,#aw_cron_health .description,#aw_seo_dashboard .description,#rankweb_dashboard .description,#aw_sourcing_dashboard .description,#directoryweb_dashboard .description{color:#6b6b6b}',
+				'#mailweb_widget .button,#planweb_next .button,#aw_team_dates .button,#aw_activity .button,#aw_cl_widget .button,#aw_form_entries .button,#aw_cron_health .button,#aw_seo_dashboard .button,#rankweb_dashboard .button,#aw_sourcing_dashboard .button,#directoryweb_dashboard .button,#mailweb_widget .button-primary,#planweb_next .button-primary,#aw_team_dates .button-primary,#aw_activity .button-primary,#aw_cl_widget .button-primary,#aw_form_entries .button-primary,#aw_cron_health .button-primary,#aw_seo_dashboard .button-primary,#rankweb_dashboard .button-primary,#aw_sourcing_dashboard .button-primary,#directoryweb_dashboard .button-primary{background:#0a0a0a;border-color:#0a0a0a;color:#fff;border-radius:8px;box-shadow:none}',
+				'#mailweb_widget .button:hover,#planweb_next .button:hover,#aw_team_dates .button:hover,#aw_activity .button:hover,#aw_cl_widget .button:hover,#aw_form_entries .button:hover,#aw_cron_health .button:hover,#aw_seo_dashboard .button:hover,#rankweb_dashboard .button:hover,#aw_sourcing_dashboard .button:hover,#directoryweb_dashboard .button:hover{background:#2b2b2b;border-color:#2b2b2b;color:#fff}',
 				)
 			)
 		);

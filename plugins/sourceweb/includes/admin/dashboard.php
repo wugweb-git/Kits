@@ -57,7 +57,7 @@ function sourceweb_sourcing_dash_workers(): array {
 		} elseif ( $w['planned'] || ! $sched ) {
 			$status = 'off'; // Planned, or run by hand only
 		} elseif ( ! $last ) {
-			$status = 'late'; // scheduled but has never reported
+			$status = 'off'; // scheduled but has never reported: not set up on this site yet, so not an alarm
 		} elseif ( 'running' === (string) ( $last['result'] ?? '' ) ) {
 			$status = 'running';
 		} else {

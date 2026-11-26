@@ -480,7 +480,7 @@ function sourceweb_ingest_problems( $now = null ) {
 		$out['quiet'] = sprintf( 'No News has been published for %d hours (last: %s).', floor( ( $now - $news ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $news ) );
 	}
 	$last = (int) ( $hb['last_run'] ?? 0 );
-	if ( ! $last || $now - $last >= 8 * HOUR_IN_SECONDS ) {
+	if ( $last && $now - $last >= 8 * HOUR_IN_SECONDS ) { // a site whose workers never reported has not set them up: no alarm
 		$out['no_run'] = $last ? sprintf( 'No worker run has reported for %d hours (last: %s). The GitHub Actions schedule may have stopped, or runs are failing before the end.', floor( ( $now - $last ) / HOUR_IN_SECONDS ), wp_date( 'j M Y, g:i a', $last ) ) : 'No worker run has reported yet.';
 	}
 	// Scheduled tasks (cron-health.php): no trigger has called wp-cron.php for 30 minutes.

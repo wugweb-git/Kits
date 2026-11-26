@@ -105,6 +105,10 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+		// Hostinger cron, GitHub Actions and UptimeRobot are the owner's setup: show the box only once a trigger has called in (or a filter says so).
+		if ( ! apply_filters( 'kits_cron_health_widget', (bool) ( kits_cron_last() || kits_cron_runs() ) ) ) {
+			return;
+		}
 		wp_add_dashboard_widget(
 			'aw_cron_health',
 			'Scheduled tasks',
@@ -151,7 +155,8 @@ add_action(
 					);
 				}
 				$cells = array();
-				foreach ( $rows as $r ) {
+				$used  = array_filter( $rows, fn( $r ) => 'none' !== $r['state'] );
+				foreach ( $used ? $used : $rows as $r ) { // triggers never used are left out once one has called in
 					$m       = $marks[ $r['state'] ];
 					$cells[] = array(
 						'trigger' => esc_html( $r['name'] ) . ( '' !== $r['gap'] ? '<br><span class="description">' . esc_html( 'Longest gap, 24 h: ' . $r['gap'] ) . '</span>' : '' ),

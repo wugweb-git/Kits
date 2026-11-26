@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.3.1
+
+- The sitemap check watches the Directory sitemap only when a Directory exists, so other sites no longer get a false "not answering" notice.
+
 ## 2.3.0
 
 - The WordPress dashboard box is a row of tiles: each number links to its screen and a count to act on says Needs attention (words and icon, not colour alone).

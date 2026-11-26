@@ -22,7 +22,7 @@ function rankweb_seo_watched_endpoints() {
 		'/sitemap_index.xml' => 'sitemap_index\.xml$',
 		'/llms.txt'          => '^llms\.txt$',
 	);
-	if ( rankweb_seo_module_on( 'sitemap' ) ) {
+	if ( rankweb_seo_module_on( 'sitemap' ) && post_type_exists( 'aw_listing' ) ) { // no directory, no directory sitemap to watch
 		$out['/directory-sitemap.xml'] = '([^/]+?)-sitemap([0-9]+)?\.xml$'; // Rank Math's rule for every {type}-sitemap.xml
 	}
 	return $out;
@@ -96,9 +96,10 @@ add_action(
 			return;
 		}
 		$last = (array) get_option( 'aw_seo_endpoints_last', array() );
-		if ( empty( $last['problems'] ) ) {
+		$problems = array_intersect_key( (array) ( $last['problems'] ?? array() ), rankweb_seo_watched_endpoints() ); // a saved result for an address no longer watched is dropped
+		if ( ! $problems ) {
 			return;
 		}
-		wp_admin_notice( '<strong>' . esc_html__( 'Sitemap or llms.txt is not answering.', 'rankweb' ) . '</strong> ' . esc_html( implode( ' ', (array) $last['problems'] ) ) . ' ' . esc_html( sprintf( 'Checked %s.', wp_date( 'j M Y, g:i a', (int) $last['at'] ) ) ), array( 'type' => 'error' ) );
+		wp_admin_notice( '<strong>' . esc_html__( 'Sitemap or llms.txt is not answering.', 'rankweb' ) . '</strong> ' . esc_html( implode( ' ', $problems ) ) . ' ' . esc_html( sprintf( 'Checked %s.', wp_date( 'j M Y, g:i a', (int) $last['at'] ) ) ), array( 'type' => 'error' ) );
 	}
 );
