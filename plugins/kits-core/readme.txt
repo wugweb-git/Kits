@@ -45,6 +45,7 @@ The ALTCHA spam guard runs locally (proof of work) and contacts no third-party s
 == Changelog ==
 
 = 1.3.1 =
+* "Check again" on Dashboard → Updates now clears the stored update list too, so a new release shows at once. The "Upgrade to Premium" link is gone from the Plugins screen. The setup wizard uses the Kits look.
 * Dashboard boxes now use the Kits look (black, white and greys, large figures). The "Scheduled tasks" box appears only once a cron trigger has called in.
 
 = 1.3.0 =

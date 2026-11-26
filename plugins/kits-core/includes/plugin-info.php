@@ -18,7 +18,7 @@ add_filter( 'plugin_row_meta', 'kits_plugin_row_meta', 10, 2 );
 add_action( 'admin_enqueue_scripts', fn( $hook ) => 'plugins.php' === $hook ? add_thickbox() : null );
 
 /**
- * Adds FAQ, Rate, View details, Support, More, and Upgrade to Premium links on the Plugins screen.
+ * Adds FAQ, Rate, View details, Support, More and More links on the Plugins screen.
  *
  * @param array<int, string> $links Existing row meta links.
  * @param string             $file  Plugin file basename.
@@ -38,7 +38,6 @@ function kits_plugin_row_meta( array $links, string $file ): array {
 			'<a href="' . esc_url( $details ) . '" class="thickbox open-plugin-details-modal">' . esc_html__( 'View details', 'kits-core' ) . '</a>',
 			'<a href="' . esc_url( 'https://wugweb.com/support/?product=kits-core' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Support', 'kits-core' ) . '</a>',
 			'<a href="' . esc_url( 'https://wugweb.com/plugins/' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'More', 'kits-core' ) . '</a>',
-			'<a href="' . esc_url( 'https://wugweb.com/pricing/?product=kits-core' ) . '" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#1d4ed8;">' . esc_html__( 'Upgrade to Premium', 'kits-core' ) . '</a>',
 		)
 	);
 }

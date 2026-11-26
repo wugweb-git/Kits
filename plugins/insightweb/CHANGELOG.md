@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.1.2
+
+- The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).
+
 ## 1.1.1
 
 - The direct (non-WordPress.org) build now carries an Update URI header, so the site checks the Kits registry for new versions. The WordPress.org build still omits it.

@@ -125,4 +125,4 @@ Menu: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Cl
 
 ## HOLD: Plugins-screen row links (review of 26 Nov 2026, not released)
 
-`includes/plugin-info.php` (commit 9e85a56, also in RankWeb) adds FAQ, Rate, Details, Support and an "Upgrade to Premium" link with an inline style. WordPress.org review can flag a promotional link in its build, and "Rate" points to wugweb.com. Before release: take the Premium link out of the WordPress.org build (`tools/build/build-dist.py` already tailors `Update URI`) or confirm a premium product exists, and point Rate at the right page.
+The "Upgrade to Premium" link was removed from `includes/plugin-info.php` on 26 Nov 2026 (no premium product exists). "Rate" still points to wugweb.com: point it at the right page before a WordPress.org submission.

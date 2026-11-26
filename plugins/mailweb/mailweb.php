@@ -11,7 +11,7 @@
  * Plugin Name:       MailWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
- * Version:           3.3.1
+ * Version:           3.3.2
  * Update URI:           https://wugweb.com/plugins/mailweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -41,7 +41,7 @@ add_action(
 	1
 );
 
-define( 'MAILWEB_VERSION', '3.3.1' );
+define( 'MAILWEB_VERSION', '3.3.2' );
 define( 'MAILWEB_FILE', __FILE__ );
 define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );

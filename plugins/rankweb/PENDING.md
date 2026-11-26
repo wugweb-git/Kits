@@ -87,4 +87,4 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 ## HOLD: Plugins-screen row links (review of 26 Nov 2026, not released)
 
-Same as DirectoryWeb's: `includes/plugin-info.php` (commit 9e85a56) adds an "Upgrade to Premium" link that must stay out of the WordPress.org build, and "Rate" points to wugweb.com.
+The "Upgrade to Premium" link was removed from `includes/plugin-info.php` on 26 Nov 2026 (no premium product exists). "Rate" still points to wugweb.com: point it at the right page before a WordPress.org submission.

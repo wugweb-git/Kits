@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.2.2
+
+- The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).
+
 ## 1.2.1
 
 - The WordPress dashboard box is a row of tiles: each number links to its screen and a count to act on says Needs attention (words and icon, not colour alone).

@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,9 @@ InsightWeb connects to external services only when the corresponding integration
 * **Google Alerts RSS (`https://www.google.com/alerts/feeds/`):** Only when alert feed URLs are configured, fetches alert entries for the Links view. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy).
 
 == Changelog ==
+
+= 1.1.2 =
+* The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).
 
 = 1.1.1 =
 
