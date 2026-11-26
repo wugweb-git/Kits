@@ -242,7 +242,7 @@ if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_r
 		function ( $wp ) {
 			$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$home = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
-			foreach ( array( 'news', 'video' ) as $kind ) {
+			foreach ( array( 'news', 'video', 'image' ) as $kind ) {
 				if ( $home . '/' . $kind . '-sitemap.xml' === $path ) {
 					$wp->query_vars['sitemap'] = $kind;
 				}
@@ -291,6 +291,87 @@ add_filter(
 	},
 	60
 );
+
+/* ---------- Image sitemap: /image-sitemap.xml, only when RankWeb prints the head (Rank Math's own sitemap lists images) ---------- */
+
+require_once __DIR__ . '/class-rankweb-image-sitemap.php';
+
+/** Pages with their images, for the image sitemap: published, public, not noindex, newest first; cached six hours. */
+function rankweb_image_sitemap_pages(): array {
+	$cached = get_transient( 'rankweb_image_sitemap' );
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+	$types = array_values( array_diff( array_keys( get_post_types( array( 'public' => true ) ) ), array( 'attachment' ) ) );
+	$ids   = get_posts(
+		array(
+			'post_type'      => $types,
+			'post_status'    => 'publish',
+			'has_password'   => false,
+			'fields'         => 'ids',
+			'orderby'        => 'modified',
+			'order'          => 'DESC',
+			'posts_per_page' => (int) apply_filters( 'rankweb_image_sitemap_limit', 500 ),
+			'no_found_rows'  => true,
+			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery -- a cached, bounded list
+				'relation' => 'AND',
+				array(
+					'relation' => 'OR',
+					array( 'key' => '_rankweb_noindex', 'compare' => 'NOT EXISTS' ),
+					array( 'key' => '_rankweb_noindex', 'value' => '1', 'compare' => '!=' ),
+				),
+			),
+		)
+	);
+	$base  = untrailingslashit( home_url() );
+	$pages = array();
+	foreach ( $ids as $id ) {
+		$post   = get_post( $id );
+		$images = RankWeb_Image_Sitemap::extract( (string) $post->post_content, $base );
+		$thumb  = get_the_post_thumbnail_url( $id, 'full' );
+		if ( $thumb ) {
+			array_unshift( $images, $thumb );
+		}
+		if ( $images ) {
+			$pages[] = array( 'loc' => get_permalink( $id ), 'lastmod' => get_post_modified_time( 'c', true, $id ), 'images' => array_values( array_unique( $images ) ) );
+		}
+	}
+	set_transient( 'rankweb_image_sitemap', $pages, 6 * HOUR_IN_SECONDS );
+	return $pages;
+}
+
+/** The image sitemap's address. */
+function rankweb_image_sitemap_url() {
+	return home_url( '/image-sitemap.xml' );
+}
+
+if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) {
+	add_action(
+		'parse_request',
+		function ( $wp ) {
+			if ( 'image' !== ( $wp->query_vars['sitemap'] ?? '' ) ) {
+				return;
+			}
+			if ( ! headers_sent() ) {
+				status_header( 200 );
+				header( 'Content-Type: application/xml; charset=UTF-8' );
+				header( 'X-Robots-Tag: noindex, follow' );
+			}
+			echo RankWeb_Image_Sitemap::xml( rankweb_image_sitemap_pages(), 'esc_xml' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped per value
+			exit;
+		},
+		0
+	);
+	add_action( 'save_post', fn() => delete_transient( 'rankweb_image_sitemap' ) );
+	add_filter(
+		'robots_txt',
+		function ( $txt ) {
+			$line = 'Sitemap: ' . rankweb_image_sitemap_url();
+			return false !== strpos( (string) $txt, $line ) ? $txt : rtrim( (string) $txt ) . "\n" . $line . "\n";
+		},
+		61
+	);
+}
 
 /* ---------- HTML sitemap: /sitemap/ (indexing work, owner 12 Nov 2026) ---------- */
 
