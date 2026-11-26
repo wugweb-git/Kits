@@ -6963,7 +6963,77 @@ function Report( {
 	);
 }
 
+/** Manual tool: which published items would the rules refuse today? Reads only. */
+function Recheck() {
+	const [ data, setData ] = useState( null );
+	const [ busy, setBusy ] = useState( false );
+	const [ error, setError ] = useState( '' );
+	const run = () => {
+		setBusy( true );
+		setError( '' );
+		apiFetch( { path: path( 'tools/recheck' ) } )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<SectionCard
+			id="recheck"
+			title={ __(
+				'Check published items against the rules',
+				'aw-sourcing'
+			) }
+			description={ __(
+				'Looks at the newest 300 published news items and lists those the current rules would refuse (archive or tag pages, job vacancies). Nothing is changed.',
+				'aw-sourcing'
+			) }
+		>
+			<p>
+				<Button busy={ busy } onClick={ run }>
+					{ __( 'Check now', 'aw-sourcing' ) }
+				</Button>
+			</p>
+			{ error && <Notice tone="error">{ error }</Notice> }
+			{ data && 0 === data.flagged.length && (
+				<p>
+					{ sprintf(
+						/* translators: %d: items looked at. */
+						__(
+							'Checked %d items: none would be refused.',
+							'aw-sourcing'
+						),
+						data.checked
+					) }
+				</p>
+			) }
+			{ data && data.flagged.length > 0 && (
+				<table className="widefat striped">
+					<tbody>
+						{ data.flagged.map( ( f ) => (
+							<tr key={ f.id }>
+								<td>
+									<a href={ f.edit }>{ f.title }</a>
+								</td>
+								<td>{ f.reason }</td>
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			) }
+		</SectionCard>
+	);
+}
+
 function Rejected() {
+	return (
+		<>
+			<RejectedList />
+			<Recheck />
+		</>
+	);
+}
+
+function RejectedList() {
 	return (
 		<Report
 			route="rejected"

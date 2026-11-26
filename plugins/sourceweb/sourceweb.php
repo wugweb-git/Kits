@@ -141,6 +141,8 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-push.php'; // r
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-routing.php'; // route a pushed candidate on approval; owner auto-approve rules
 // Workers you can organise and AI keys attached to workers (owner, 24 Oct 2026).
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers-meta.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/worker-union-model.php'; // one definition for every worker (pure)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/worker-union.php'; // the list, and the filter plugins add workers through
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers-admin.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-provider-icons.php';
 // The Sourcing menu, its Overview and the Plugins screen links (owner, 25 Oct 2026).
@@ -154,4 +156,5 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-pages.php'; // Sources, Keywords, Rules, Workers, Settings
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-ai.php'; // AI models
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-logs.php'; // Rejected, Relay log, Change log
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-tools.php'; // manual tools: re-check published items
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-ui.php';

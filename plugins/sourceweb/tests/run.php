@@ -588,5 +588,16 @@ aw_t( array( 'delivered' => 1, 'accepted' => 2, 'rejected' => 1 ) === $o['BBC'],
 aw_t( $o === sourceweb_outcome_apply( $o, '', 'accepted' ) && $o === sourceweb_outcome_apply( $o, 'BBC', 'bogus' ), 'outcomes: an empty source or unknown event changes nothing' );
 aw_t( abs( 2 / 3 - sourceweb_outcome_rate( $o['BBC'] ) ) < 0.0001 && null === sourceweb_outcome_rate( array( 'delivered' => 5 ) ), 'outcomes: acceptance rate, or null with no decisions' );
 
+// Worker union.
+require_once dirname( __DIR__ ) . '/includes/workers/workers-registry.php';
+require_once dirname( __DIR__ ) . '/includes/workers/worker-union-model.php';
+$un = sourceweb_worker_union( AW_WORKERS, array( array( 'id' => 'gallery-tagger', 'step' => 'enhance', 'runner' => 'plugin' ), array( 'id' => 'sourcing', 'step' => 'source', 'runner' => 'plugin' ), array( 'id' => 'bad', 'step' => 'nope', 'runner' => 'plugin' ) ) );
+aw_t( count( AW_WORKERS ) + 1 === count( $un ), 'union: every workflow, plus the plugin worker; a bad one and a taken id are left out' );
+aw_t( 'workflow' === $un['sourcing']['runner'] && 'scheduled' === $un['sourcing']['trigger'] && 'source' === $un['sourcing']['step'], 'union: sourcing is a scheduled source workflow' );
+aw_t( 'after' === $un['tests']['trigger'] && 'platform' === $un['tests']['step'], 'union: tests runs after another' );
+$steps = array_unique( array_column( $un, 'step' ) );
+aw_t( ! array_diff( $steps, SOURCEWEB_WORKER_STEPS ), 'union: every worker has a known step' );
+aw_t( ! array_diff( array_map( static fn( $f ) => preg_replace( '/\.yml$/', '', $f ), array_keys( AW_WORKERS ) ), array_keys( SOURCEWEB_WORKER_PROFILES ) ), 'union: every workflow has a profile (step and AI job)' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );
