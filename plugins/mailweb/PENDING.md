@@ -33,3 +33,12 @@ The email and delivery management plugin owns:
 1. **Multi-Tenant Mail Sending**:
    - Allow tenants to define separate sender profiles (e.g. `alerts@tenant.com` vs `newsletter@tenant.com`).
    - Rate limiting and retry queue in database for failed outbound emails.
+
+## Carried over from docs/org (26 Nov 2026)
+
+Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
+
+- Phase 4: remove the simple-table helper (`class-mailweb-simple-table.php`, `admin-table.php`) and the classic fallback handlers.
+- IMAP adapter: skeleton only (`providers.php:175`).
+- Multi-tenant sender profiles; a scheduled daily DNS check (the code checks DNS on page view, `smtp.php:261`).
+- Menu order: the plan says Dashboard first, the code opens on Inbox; owner to decide.
