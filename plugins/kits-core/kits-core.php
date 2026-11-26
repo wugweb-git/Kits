@@ -95,6 +95,7 @@ require_once KITS_CORE_DIR . 'includes/onboarding-wizard.php'; // 1-Click Theme 
 require_once KITS_CORE_DIR . 'includes/header-footer-scripts.php'; // Header and Footer Custom Scripts & Pixels (WPCode/Insert Headers benchmark).
 require_once KITS_CORE_DIR . 'includes/admin-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-menu.php';
+require_once KITS_CORE_DIR . 'includes/admin-fold.php';
 require_once KITS_CORE_DIR . 'includes/admin-bar-products.php'; // The Wugweb menu in the admin bar.
 require_once KITS_CORE_DIR . 'includes/admin-app.php';
 require_once KITS_CORE_DIR . 'includes/admin-shell.php'; // Shared parts plugin screens are built from (docs/plugins/kits-plugin-ui-spec.md).

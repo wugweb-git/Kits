@@ -492,6 +492,10 @@ function kits_settings_analytics(): void {
  */
 function kits_admin_fold_tabs( string $menu, string $label, string $current = '' ): void {
 	global $submenu, $plugin_page;
+	static $printed = false; // One tab row per page: the automatic one (admin-fold.php) wins over a screen's own call.
+	if ( $printed ) {
+		return;
+	}
 	$block = array( 'kits', 'directoryweb', 'aw-sourcing-menu', 'aw-seo-plus', 'aw-search-insights', 'mailweb', 'planweb' );
 	if ( ! in_array( $menu, $block, true ) || ( function_exists( 'kits_admin_embedding' ) && kits_admin_embedding() ) ) {
 		return;
@@ -501,9 +505,10 @@ function kits_admin_fold_tabs( string $menu, string $label, string $current = ''
 	if ( count( $tabs ) < 2 ) {
 		return;
 	}
-	echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr( $label ) . '">';
+	$printed = true;
+	echo '<div class="wrap kits-fold-tabs"><nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr( $label ) . '">';
 	foreach ( $tabs as $t ) {
 		echo '<a class="nav-tab' . ( $t[2] ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( $t[1] ) ) . '"' . ( $t[2] ? ' aria-current="page"' : '' ) . '>' . esc_html( $t[0] ) . '</a>';
 	}
-	echo '</nav>';
+	echo '</nav></div>';
 }
