@@ -73,6 +73,9 @@ $directoryweb_includes = array(
 	'directoryweb-shape',
 	'directoryweb-dashboard',
 	'directoryweb-rest',
+	'schema/schema-model', // canonical listing fields and listing types (pure)
+	'schema/integrations-model', // form provider adapter contract and field mapping (pure)
+	'schema/schema', // Schema & Fields, Listing Types, Form Integrations: storage, submission engine, routes
 	'directoryweb-listings',
 	'directoryweb-caps',
 	'directoryweb-ui',

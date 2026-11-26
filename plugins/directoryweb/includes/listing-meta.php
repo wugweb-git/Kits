@@ -17,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function directoryweb_post_type(): string {
-	return 'aw_listing';
+	$type = function_exists( 'apply_filters' ) ? apply_filters( 'directoryweb_post_type', 'aw_listing' ) : 'aw_listing'; // the stored type's name; new code asks here and never names it
+	return is_string( $type ) && '' !== $type ? $type : 'aw_listing';
 }
 
 /**
