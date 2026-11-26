@@ -15,9 +15,10 @@
  *   mailweb_crm_done, mailweb_queue_db, mailweb_pause, mailweb_overview_last_<mailbox>, mailweb_delete_data
  * Transients (and their timeouts):
  *   mailweb_dashboard, mailweb_box_ids_wait, mailweb_flush_lock, mailweb_pause_seen, mailweb_smtp_error,
+ *   mailweb_dns_status_warning,
  *   mailweb_folders_<mailbox>, mailweb_overview_<mailbox>, mailweb_overview_down_<mailbox>
  * Scheduled events:
- *   mailweb_flush, mailweb_crm_sync, mailweb_dashboard_build — every event of these hooks, whatever its arguments
+ *   mailweb_flush, mailweb_crm_sync, mailweb_dashboard_build, mailweb_daily_dns_check — every event of these hooks, whatever its arguments
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/mailweb-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
@@ -48,7 +49,7 @@ if ( ! mailweb_uninstall_backup( 'mailweb', __DIR__ . '/mailweb.php', $mailweb_o
 
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'mailweb_queue' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table name.
 
-foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build' ) as $mailweb_hook ) {
+foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build', 'mailweb_daily_dns_check' ) as $mailweb_hook ) {
 	wp_unschedule_hook( $mailweb_hook );
 }
 unset( $mailweb_hook );
@@ -59,7 +60,7 @@ foreach ( array_merge( $mailweb_options, $mailweb_secrets ) as $mailweb_option )
 }
 unset( $mailweb_secrets, $mailweb_option, $mailweb_options );
 
-foreach ( array( 'mailweb_dashboard', 'mailweb_box_ids_wait', 'mailweb_flush_lock', 'mailweb_pause_seen', 'mailweb_smtp_error' ) as $mailweb_transient ) {
+foreach ( array( 'mailweb_dashboard', 'mailweb_box_ids_wait', 'mailweb_flush_lock', 'mailweb_pause_seen', 'mailweb_smtp_error', 'mailweb_dns_status_warning' ) as $mailweb_transient ) {
 	delete_transient( $mailweb_transient );
 }
 unset( $mailweb_transient );

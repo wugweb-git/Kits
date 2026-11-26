@@ -84,6 +84,7 @@ require_once MAILWEB_DIR . 'includes/addresses.php';
 require_once MAILWEB_DIR . 'includes/mailweb-settings-save.php';
 require_once MAILWEB_DIR . 'includes/providers.php'; // the mail-provider seam; the default adapter is the Hostinger Mail API.
 require_once MAILWEB_DIR . 'includes/mail-in.php';
+require_once MAILWEB_DIR . 'includes/dns-status.php';
 require_once MAILWEB_DIR . 'includes/smtp.php';
 require_once MAILWEB_DIR . 'includes/mail-cap.php';
 require_once MAILWEB_DIR . 'includes/mailboxes.php';

@@ -139,10 +139,16 @@ function mailweb_smtp_screen() {
 
 	// 2. DNS & Deliverability verification section (DKIM, SPF).
 	$dns   = mailweb_dns_records();
-	$dkim  = mailweb_verify_dkim();
-	$badge = 'valid' === $dkim['status']
-		? '<span style="color:#15803d; font-weight:600;">✓ ' . esc_html( $dkim['message'] ) . '</span>'
-		: '<span style="color:#b45309; font-weight:600;">⚠ ' . esc_html( $dkim['message'] ) . '</span>';
+	$badge = '';
+	foreach ( array(
+		'DKIM' => mailweb_verify_dkim(),
+		'SPF'  => mailweb_verify_spf(),
+	) as $mailweb_name => $mailweb_res ) {
+		$badge .= 'valid' === $mailweb_res['status']
+			? '<span style="color:#15803d; font-weight:600;">✓ ' . esc_html( $mailweb_name . ': ' . $mailweb_res['message'] ) . '</span> '
+			: '<span style="color:#b45309; font-weight:600;">⚠ ' . esc_html( $mailweb_name . ': ' . $mailweb_res['message'] ) . '</span> ';
+	}
+	unset( $mailweb_name, $mailweb_res );
 
 	echo '<div class="card" style="max-width: 100%; margin-top: 24px; padding: 18px 20px;">';
 	echo '<h3 style="margin-top: 0;">' . esc_html__( 'DNS & Deliverability Records (DKIM, SPF)', 'mailweb' ) . '</h3>';
@@ -256,17 +262,62 @@ function mailweb_verify_dkim(): array {
 }
 
 /**
- * Daily cron checking DKIM and SPF records, caching status for admin warning.
+ * Verifies the live SPF record of this site's domain.
+ *
+ * @return array{status: string, message: string}
+ */
+function mailweb_verify_spf(): array {
+	$domain = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+	if ( '' === $domain || ! function_exists( 'dns_get_record' ) ) {
+		return array(
+			'status'  => 'unknown',
+			'message' => __( 'DNS check not available on this server.', 'mailweb' ),
+		);
+	}
+	$records = @dns_get_record( $domain, DNS_TXT ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+	$txt     = array();
+	foreach ( is_array( $records ) ? $records : array() as $r ) {
+		$txt[] = (string) ( $r['txt'] ?? ( $r['entries'][0] ?? '' ) );
+	}
+	return mailweb_spf_status( $txt );
+}
+
+/**
+ * Daily cron checking the DKIM and SPF records. The messages of whatever is not valid are kept for a day so the
+ * MailWeb screens can show them; when both are valid the warning is cleared. "unknown" (no DNS function on the
+ * server) is not a warning.
  */
 function mailweb_dns_telemetry_check() {
-	$res = mailweb_verify_dkim();
-	if ( 'valid' !== ( $res['status'] ?? '' ) ) {
-		set_transient( 'mailweb_dns_status_warning', $res['message'] ?? __( 'DKIM configuration needs attention.', 'mailweb' ), DAY_IN_SECONDS );
+	$problems = array();
+	foreach ( array( 'DKIM' => mailweb_verify_dkim(), 'SPF' => mailweb_verify_spf() ) as $name => $res ) {
+		$status = (string) ( $res['status'] ?? '' );
+		if ( 'valid' !== $status && 'unknown' !== $status ) {
+			$problems[] = $name . ': ' . (string) ( $res['message'] ?? '' );
+		}
+	}
+	if ( $problems ) {
+		set_transient( 'mailweb_dns_status_warning', implode( ' ', $problems ), DAY_IN_SECONDS );
 	} else {
 		delete_transient( 'mailweb_dns_status_warning' );
 	}
 }
 add_action( 'mailweb_daily_dns_check', 'mailweb_dns_telemetry_check' );
+
+/** Shows the last daily DNS warning on MailWeb's own screens, to people who can change settings. */
+add_action(
+	'admin_notices',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- reading which screen this is.
+		$msg  = get_transient( 'mailweb_dns_status_warning' );
+		if ( 0 !== strpos( $page, 'mailweb' ) || ! is_string( $msg ) || '' === $msg ) {
+			return;
+		}
+		echo '<div class="notice notice-warning"><p><strong>' . esc_html__( 'MailWeb email setup:', 'mailweb' ) . '</strong> ' . esc_html( $msg ) . '</p></div>';
+	}
+);
 
 if ( ! wp_next_scheduled( 'mailweb_daily_dns_check' ) ) {
 	wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'mailweb_daily_dns_check' );

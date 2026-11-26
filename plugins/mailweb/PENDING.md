@@ -40,6 +40,6 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 - Phase 4: remove the simple-table helper (`class-mailweb-simple-table.php`, `admin-table.php`) and the classic fallback handlers.
 - IMAP adapter: skeleton only (`providers.php:175`).
-- Multi-tenant sender profiles; a scheduled daily DNS check (the code checks DNS on page view, `smtp.php:261`).
+- Multi-tenant sender profiles; (the daily DNS check already existed: 26 Nov it also checks SPF, shows its warning on MailWeb screens and is removed on uninstall).
 - Menu order: the plan says Dashboard first, the code opens on Inbox; owner to decide.
 - No tests for the Hostinger API transport, flush and retry, or inbox. A live check needs the Hostinger token and SMTP credentials.
