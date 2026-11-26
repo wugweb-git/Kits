@@ -20,6 +20,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import smoke  # noqa: E402
 
 MU = r"""<?php
+// Fluent Forms limits one address to 5 submissions in 30 seconds (FormValidationService::preventMaliciousAttacks); a test posts more than that.
+add_filter( 'fluentform/prevent_malicious_attacks', '__return_false' );
 add_action( 'init', function () {
 	if ( ! isset( $_GET['directoryweb_t'] ) ) { return; }
 	header( 'Content-Type: application/json' );
@@ -188,14 +190,14 @@ def main() -> int:
         prefix = T('prefix')['prefix']
 
         def submit(fid, data):
-            # Fluent Forms throttles one address (429 Too Many Requests); wait out the window and try again, so that every
-            # submission below really reached Fluent Forms and a "no listing" result is DirectoryWeb's doing.
+            # The throttle is switched off in the test plugin; a 429 would still be retried, so that every submission below
+            # really reached Fluent Forms and a "no listing" result is DirectoryWeb's doing.
             body = {'action': 'fluentform_submit', 'form_id': str(fid), 'data': urllib.parse.urlencode(data, doseq=True)}
             for _ in range(4):
                 st, txt = http(base + '/wp-admin/admin-ajax.php', body)
                 if st != 429:
                     break
-                time.sleep(65)
+                time.sleep(35)
             return st, txt
 
         st, body = submit(f1, {'name': 'Paws Haven', 'email': 'hello@paws.example', 'kind': 'shelter', 'animals[]': ['dogs', 'cats'], 'beds': '40', 'site': 'https://paws.example'})
