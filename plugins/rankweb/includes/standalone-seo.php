@@ -333,7 +333,7 @@ add_action(
 /** Whether the archive rules (settings) make the viewed page noindex. */
 function rankweb_archive_noindex(): bool {
 	$rules = array();
-	foreach ( array( 'author' => 'RANKWEB_NOINDEX_AUTHOR', 'date' => 'RANKWEB_NOINDEX_DATE', 'paged' => 'RANKWEB_NOINDEX_PAGED', 'attachment' => 'RANKWEB_NOINDEX_ATTACHMENT', 'empty' => 'RANKWEB_NOINDEX_EMPTY' ) as $rule => $const ) {
+	foreach ( array( 'author' => 'RANKWEB_NOINDEX_AUTHOR', 'date' => 'RANKWEB_NOINDEX_DATE', 'paged' => 'RANKWEB_NOINDEX_PAGED', 'attachment' => 'RANKWEB_NOINDEX_ATTACHMENT', 'empty' => 'RANKWEB_NOINDEX_EMPTY', 'woo' => 'RANKWEB_NOINDEX_WOO' ) as $rule => $const ) {
 		$rules[ $rule ] = defined( $const ) && constant( $const );
 	}
 	if ( ! array_filter( $rules ) ) {
@@ -349,6 +349,7 @@ function rankweb_archive_noindex(): bool {
 			'author'     => is_author(),
 			'date'       => is_date(),
 			'attachment' => is_attachment(),
+			'woo'        => ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() ) ) || ( function_exists( 'is_account_page' ) && is_account_page() ),
 			'paged'      => (int) max( 1, (int) get_query_var( 'paged' ) ),
 			'empty_term' => $empty,
 		),
@@ -367,7 +368,7 @@ function rankweb_page_is_noindex(): bool {
 		if ( '1' === (string) get_post_meta( $id, '_rankweb_noindex', true ) ) {
 			return true;
 		}
-		return is_attachment() && rankweb_archive_noindex();
+		return rankweb_archive_noindex();
 	}
 	if ( is_search() ) {
 		return true; // search result pages are not for the index

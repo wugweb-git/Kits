@@ -21,12 +21,13 @@ final class RankWeb_Archive_Rules {
 		'paged'      => 'Page 2 and later of any list',
 		'attachment' => 'Attachment pages',
 		'empty'      => 'Category and tag archives with no items',
+		'woo'        => 'WooCommerce cart, checkout and account pages',
 	);
 
 	/**
 	 * Whether the page should be noindex.
 	 *
-	 * @param array $page  Facts: author, date, attachment (bool), paged (int, 1 = first page), empty_term (bool).
+	 * @param array $page  Facts: author, date, attachment (bool), woo (bool), paged (int, 1 = first page), empty_term (bool).
 	 * @param array $rules Rule key => bool (on).
 	 */
 	public static function noindex( array $page, array $rules ): bool {
@@ -37,6 +38,9 @@ final class RankWeb_Archive_Rules {
 			return true;
 		}
 		if ( ! empty( $rules['attachment'] ) && ! empty( $page['attachment'] ) ) {
+			return true;
+		}
+		if ( ! empty( $rules['woo'] ) && ! empty( $page['woo'] ) ) {
 			return true;
 		}
 		if ( ! empty( $rules['paged'] ) && (int) ( $page['paged'] ?? 1 ) > 1 ) {

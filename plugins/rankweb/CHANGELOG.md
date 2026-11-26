@@ -14,7 +14,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 - Social and feeds: the twitter:site tag from the site's X handle, and an "appeared first on" line in feed items. Both off until set.
 - SEO fields on the category and tag screens: a search title, a search description and noindex, printed when RankWeb prints the head. Rank Math's term fields are read when RankWeb's are empty.
 - Per-item share title and description (Open Graph and Twitter), beside the canonical address, 301 redirect and share image address, in the editor sidebar and the classic box.
-- Archive rules (without Rank Math): keep author archives, date archives, page 2 and later of lists, attachment pages and empty category or tag archives out of search. All off until set.
+- Archive rules (without Rank Math): keep WooCommerce cart, checkout and account pages (on by default; does nothing without WooCommerce), author archives, date archives, page 2 and later of lists, attachment pages and empty category or tag archives out of search. All off until set.
 - Page speed (Core Web Vitals): defer chosen scripts, Google Fonts shown at once (display=swap), and WebP for new JPEG and PNG uploads. No outside service.
 - Transport also copies category and tag fields and author fields (title, description, noindex).
 - Transport (RankWeb → Transport): copy SEO title, description, focus keyword and robots settings from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework. A dry run is the default, a filled field is never overwritten, and a title still made of the other plugin's variables is skipped.

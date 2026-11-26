@@ -38,4 +38,9 @@ final class ArchiveRulesTest extends PHPUnit\Framework\TestCase {
 		$this->assertFalse( RankWeb_Archive_Rules::noindex( array(), $on ) );
 		$this->assertTrue( RankWeb_Archive_Rules::noindex( array( 'paged' => 2 ), $on ) );
 	}
+
+	public function testShopPagesFollowTheWooRule(): void {
+		$this->assertTrue( RankWeb_Archive_Rules::noindex( array( 'woo' => true ), array( 'woo' => true ) ) );
+		$this->assertFalse( RankWeb_Archive_Rules::noindex( array( 'woo' => true ), array( 'author' => true ) ) );
+	}
 }
