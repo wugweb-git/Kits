@@ -29,6 +29,8 @@ The analytics, telemetry, and search metrics plugin owns:
 Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
 
 - Search report by email (items 11, 12, 29; 26 Nov): built, off by default, weekly or monthly to the site administrator with an optional first line for white label (`search-insights/report-email.php`, Settings → Runs and data). Not built: a PDF or a recipient list.
-- AdSense (52) and a country filter (53): not built.
+- AdSense is not InsightWeb's (owner, 26 Nov): dropped from this plugin.
+- Country filter (53): not built. Site Kit's Search Console call is only known to take a page filter (`gsc.php`), and a filter it ignored would show unfiltered figures as filtered; build it once Site Kit's accepted arguments are verified on a real site.
 - The Step 0 to 9 action plan surface and 404 / internal-search surfacing: unverified.
 - Tabs: 10 flat tabs; grouping inside the plugin is allowed (owner, 26 Nov) and proposed in `docs/ux-discovery/2026-11-26-admin-ia-discovery.md`.
+- `data/links-2026-11-02.php` holds static seeded links: confirm they are never shown as live data.

@@ -85,6 +85,14 @@ const AW_WORKERS = array(
 		'runnow'       => array( 'dry_run' => 'false' ),
 		'late_after_h' => 216,
 	),
+	'backup-offsite.yml'       => array(
+		'name'         => 'Site backup copy',
+		'what'         => 'Copies the site\'s daily database and code backup to a private GitHub release (kept 14 days)',
+		'crons'        => array( '30 23 * * *' ),
+		'interval_min' => 1440,
+		'timeout_min'  => 360,
+		'late_after_h' => 36,
+	),
 	'wp-cron.yml'              => array(
 		'name'         => 'WordPress cron',
 		'what'         => 'Backup trigger for the site\'s scheduled tasks (Hostinger\'s server cron is the main one)',

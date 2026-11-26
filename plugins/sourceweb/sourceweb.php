@@ -73,81 +73,83 @@ if ( ! defined( 'SOURCEWEB_KW_ROLE_INCLUDE' ) ) {
 }
 
 // The host and publisher helpers first, before the check: the site layer and other plugins call sourceweb_host() and sourceweb_publishers().
-require_once __DIR__ . '/includes/sourcing-basics.php';
+require_once __DIR__ . '/includes/sources/sourcing-basics.php';
 // The issuer label too (no dependency): the site layer's Library item box and card chips call sourceweb_issuer_short() and sourceweb_issuer_box().
-require_once __DIR__ . '/includes/issuers.php';
-require_once __DIR__ . '/includes/legacy-aliases.php'; // the earlier aw_* names that Kits Core, RankWeb and DirectoryWeb still call
+require_once __DIR__ . '/includes/enhance/issuers.php';
+require_once __DIR__ . '/includes/compat/legacy-aliases.php'; // the earlier aw_* names that Kits Core, RankWeb and DirectoryWeb still call
 define( 'SOURCEWEB_SOURCING_LOADED', '0.1.0' );
 if ( ! defined( 'SOURCEWEB_SOURCING_DIR' ) ) {
 	define( 'SOURCEWEB_SOURCING_DIR', __DIR__ . '/' );
 }
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sources-config.php'; // the sourcing lists, option aw_sources (moved from Kits Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/summary-rules.php'; // the summary rules (option sourceweb_summary_rules); moved from Core 12 Nov 2026
-require_once SOURCEWEB_SOURCING_DIR . 'includes/help-tab.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/plugin-info.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sources-model.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/retire-model.php'; // phase 4: what stops being used, the policy without v1 keys
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sources-config.php'; // the sourcing lists, option aw_sources (moved from Kits Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/attribution.php'; // [aw_source_row], publisher icons and the favicon run, news slugs (moved from Kits Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rules.php'; // the summary rules (option sourceweb_summary_rules); moved from Core 12 Nov 2026
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/help-tab.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/plugin-info.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/menu-model.php'; // the Sourcing menu: slugs, screen id, order (admin-menu.php registers it)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sources-model.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keywords-model.php'; // phase 2: the lists in the keyword table (Core's)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/retire-model.php'; // phase 4: what stops being used, the policy without v1 keys
 // Order matters for the Sourcing screens (Sources, Keywords, then these in this order; reports and Settings go last, menu-model.php).
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-policy.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/source-sites.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/source-icons.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/cc0-images.php'; // publisher images (check, og:image, keep a copy) and the CC0 photo fetch from Openverse (moved from Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/library-pdfs.php'; // which government PDFs we may host and the mirror that copies them (moved from Core, 18 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-lists.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/summary-rules-admin.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/relevance.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/ingest.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/opportunities-site.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/auto-review.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/same-story.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/summary-rewrite.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/news-titles.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/autoresolve.php'; // the review-queue rules applied when a value is queued (14 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment-cleanup.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment-admin.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/rules-model.php'; // sourcing restructure phase 3: Rules
-require_once SOURCEWEB_SOURCING_DIR . 'includes/rules.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/rules-admin.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/enrichment-front.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/review-queue.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/keyword-suggestions.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/ai-keys.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/site-health.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/relay.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-migrate-phase2.php'; // WP-CLI only: the same for phase 2 (Keywords)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-migrate-rules.php'; // WP-CLI only: phase 3 (Rules)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-migrate-retire.php'; // WP-CLI only: phase 4 (Retire: archive, stop using the old lists)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/keyword-stats.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/search-insights-tab.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/workers.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/workers-tick.php'; // WP-CLI: wp aw workers-tick (hPanel cron every 15 minutes)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourcing-terms-admin.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords-admin.php'; // phase 2: Keywords on the keyword table
-require_once SOURCEWEB_SOURCING_DIR . 'includes/keyword-push.php'; // receive keyword candidates pushed by InsightWeb (sourceweb_push_keywords)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/keyword-routing.php'; // route a pushed candidate on approval; owner auto-approve rules
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sourcing-policy.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/source-sites.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/source-icons.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/cc0-images.php'; // publisher images (check, og:image, keep a copy) and the CC0 photo fetch from Openverse (moved from Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/library-pdfs.php'; // which government PDFs we may host and the mirror that copies them (moved from Core, 18 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sourcing-lists.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rules-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/relevance.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/places/places-model.php'; // where an item goes: places, routes, boolean tests (pure)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/places/places.php'; // the registry other plugins add to, and the routes from settings
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/ingest.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/opportunities-site.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/auto-review.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/same-story.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rewrite.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/news-titles.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/autoresolve.php'; // the review-queue rules applied when a value is queued (14 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-cleanup.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules-model.php'; // sourcing restructure phase 3: Rules
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-front.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/review/review-queue.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-suggestions.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/site-health.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/relay.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
+require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate-phase2.php'; // WP-CLI only: the same for phase 2 (Keywords)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate-rules.php'; // WP-CLI only: phase 3 (Rules)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate-retire.php'; // WP-CLI only: phase 4 (Retire: archive, stop using the old lists)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-stats.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/search-insights-tab.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers-tick.php'; // WP-CLI: wp aw workers-tick (hPanel cron every 15 minutes)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/sourcing-terms-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keywords-admin.php'; // phase 2: Keywords on the keyword table
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-push.php'; // receive keyword candidates pushed by InsightWeb (sourceweb_push_keywords)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-routing.php'; // route a pushed candidate on approval; owner auto-approve rules
 // Workers you can organise and AI keys attached to workers (owner, 24 Oct 2026).
-require_once SOURCEWEB_SOURCING_DIR . 'includes/workers-meta.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/workers-admin.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/ai-provider-icons.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers-meta.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers-admin.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-provider-icons.php';
 // The Sourcing menu, its Overview and the Plugins screen links (owner, 25 Oct 2026).
-require_once SOURCEWEB_SOURCING_DIR . 'includes/admin-menu.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/admin-menu.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 // The screens, on the Kits admin shell (sourceweb-ui.php), and their sourceweb/v1 routes.
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-model.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-dashboard.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-rest.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-rest-pages.php'; // Sources, Keywords, Rules, Workers, Settings
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-rest-ai.php'; // AI models
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-rest-logs.php'; // Rejected, Relay log, Change log
-require_once SOURCEWEB_SOURCING_DIR . 'includes/sourceweb-ui.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-model.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-dashboard.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-pages.php'; // Sources, Keywords, Rules, Workers, Settings
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-ai.php'; // AI models
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-logs.php'; // Rejected, Relay log, Change log
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-ui.php';

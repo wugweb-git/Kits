@@ -189,7 +189,7 @@ function sourceweb_enrich_listing_acf_fields() {
 		}
 	}
 	$groups = array();
-	$dir    = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : dirname( __DIR__, 2 ) . '/directoryweb/' ) . 'acf-json/'; // the listing field groups are DirectoryWeb's
+	$dir    = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : dirname( __DIR__, 3 ) . '/directoryweb/' ) . 'acf-json/'; // the listing field groups are DirectoryWeb's
 	foreach ( (array) glob( $dir . AW_ENRICH_LISTING_GROUP . '*.json' ) as $file ) {
 		$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions -- a local file
 		if ( is_array( $json ) ) {

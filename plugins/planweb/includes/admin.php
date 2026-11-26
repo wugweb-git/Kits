@@ -141,6 +141,8 @@ function planweb_screen() {
 	$month = '' !== $month ? $month : wp_date( 'Y-m' );
 	$edit  = isset( $_GET['edit'] ) && 'publish' === get_post_status( absint( $_GET['edit'] ) ) ? planweb_entry( absint( $_GET['edit'] ) ) : null; // Not from the Trash.
 	$done  = isset( $_GET['done'] ) ? sanitize_key( $_GET['done'] ) : '';
+	$week  = isset( $_GET['w'] ) && planweb_is_date( sanitize_text_field( wp_unslash( $_GET['w'] ) ) ) ? planweb_week_start( sanitize_text_field( wp_unslash( $_GET['w'] ) ) ) : '';
+	$f     = planweb_calendar_filters_arg( $_GET ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- each value is checked against its list.
 	$error = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : '';
 	// phpcs:enable
 
@@ -169,7 +171,12 @@ function planweb_screen() {
 	}
 	echo '<p class="description">' . esc_html__( 'Nothing on this calendar is posted or sent: it is the team\'s plan. Approved and Sent are set by an administrator.', 'planweb' ) . '</p>';
 
-	planweb_month_grid( $month );
+	planweb_calendar_filter_form( $month, $week, $f );
+	if ( '' !== $week ) {
+		planweb_week_view( $week, $f );
+	} else {
+		planweb_month_grid( $month, $f );
+	}
 
 	echo '<p><a href="' . esc_url( planweb_ui_url( 'entries' ) ) . '">' . esc_html__( 'All entries', 'planweb' ) . '</a></p>';
 
@@ -192,7 +199,7 @@ function planweb_screen() {
  *
  * @param string $month Y-m.
  */
-function planweb_month_grid( string $month ) {
+function planweb_month_grid( string $month, array $f = array() ) {
 	$first = strtotime( $month . '-01 12:00:00' );
 	$prev  = wp_date( 'Y-m', strtotime( '-1 month', $first ) );
 	$next  = wp_date( 'Y-m', strtotime( '+1 month', $first ) );
@@ -200,10 +207,10 @@ function planweb_month_grid( string $month ) {
 	$lead  = (int) wp_date( 'N', $first ) - 1;
 	$today = wp_date( 'Y-m-d' );
 	$by    = array();
-	foreach ( planweb_entries( $month . '-01', sprintf( '%s-%02d', $month, $days ) ) as $e ) {
+	foreach ( planweb_calendar_filter( planweb_entries( $month . '-01', sprintf( '%s-%02d', $month, $days ) ), $f ) as $e ) {
 		$by[ $e['date'] ][] = $e;
 	}
-	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $prev ) ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $next ) ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ) ) ) ) . '">' . esc_html__( 'Today', 'planweb' ) . '</a></p>';
+	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $prev ) + array_filter( $f ) ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $next ) + array_filter( $f ) ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Today', 'planweb' ) . '</a></p>';
 	echo '<table class="widefat fixed planweb-month"><caption class="screen-reader-text">' . esc_html( wp_date( 'F Y', $first ) ) . '</caption><thead><tr>';
 	foreach ( array( __( 'Mon', 'planweb' ), __( 'Tue', 'planweb' ), __( 'Wed', 'planweb' ), __( 'Thu', 'planweb' ), __( 'Fri', 'planweb' ), __( 'Sat', 'planweb' ), __( 'Sun', 'planweb' ) ) as $h ) {
 		echo '<th scope="col">' . esc_html( $h ) . '</th>';
@@ -235,6 +242,94 @@ function planweb_month_grid( string $month ) {
 		echo '<td class="alternate"></td>';
 	}
 	echo '</tr></tbody></table>';
+}
+
+/**
+ * The Calendar's filters from the address: each must be a known slug, anything else is ignored.
+ *
+ * @param array $get The query string.
+ * @return array{type: string, status: string, owner: string, channel: string}
+ */
+function planweb_calendar_filters_arg( array $get ): array {
+	$pick = static function ( string $key, array $allowed ) use ( $get ): string {
+		$v = isset( $get[ $key ] ) && is_string( $get[ $key ] ) ? sanitize_key( wp_unslash( $get[ $key ] ) ) : '';
+		return isset( $allowed[ $v ] ) ? $v : '';
+	};
+	return array(
+		'type'    => $pick( 'type', PLANWEB_TYPES ),
+		'status'  => $pick( 'status', PLANWEB_STATUSES ),
+		'owner'   => $pick( 'owner', PLANWEB_OWNERS ),
+		'channel' => $pick( 'channel', PLANWEB_CHANNELS ),
+	);
+}
+
+/**
+ * The filter bar above the Calendar (a GET form, so it changes nothing) and the Month / Week switch.
+ *
+ * @param string $month Y-m.
+ * @param string $week  Monday of the shown week, or '' for the month.
+ * @param array  $f     Current filters.
+ */
+function planweb_calendar_filter_form( string $month, string $week, array $f ) {
+	$any = array(
+		'type'    => __( 'Any type', 'planweb' ),
+		'status'  => __( 'Any status', 'planweb' ),
+		'owner'   => __( 'Any owner', 'planweb' ),
+		'channel' => __( 'Any channel', 'planweb' ),
+	);
+	$lists = array(
+		'type'    => PLANWEB_TYPES,
+		'status'  => PLANWEB_STATUSES,
+		'owner'   => PLANWEB_OWNERS,
+		'channel' => PLANWEB_CHANNELS,
+	);
+	echo '<form method="get" class="planweb-filters"><input type="hidden" name="page" value="' . esc_attr( PLANWEB_MENU ) . '">';
+	echo '<input type="hidden" name="m" value="' . esc_attr( $month ) . '">';
+	if ( '' !== $week ) {
+		echo '<input type="hidden" name="w" value="' . esc_attr( $week ) . '">';
+	}
+	foreach ( $lists as $key => $values ) {
+		echo '<label class="screen-reader-text" for="planweb-' . esc_attr( $key ) . '">' . esc_html( $any[ $key ] ) . '</label>' . planweb_select( $key, $values, $f[ $key ], $any[ $key ] ) . ' '; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- planweb_select() escapes.
+	}
+	echo '<button class="button">' . esc_html__( 'Filter', 'planweb' ) . '</button> ';
+	if ( array_filter( $f ) ) {
+		echo '<a href="' . esc_url( planweb_url( array_filter( array( 'm' => $month, 'w' => $week ) ) ) ) . '">' . esc_html__( 'Clear filters', 'planweb' ) . '</a> ';
+	}
+	$other = '' === $week
+		? '<a class="button" href="' . esc_url( planweb_url( array( 'm' => $month, 'w' => planweb_week_start( $month === wp_date( 'Y-m' ) ? wp_date( 'Y-m-d' ) : $month . '-01' ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Week view', 'planweb' ) . '</a>'
+		: '<a class="button" href="' . esc_url( planweb_url( array( 'm' => substr( $week, 0, 7 ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Month view', 'planweb' ) . '</a>';
+	echo $other . '</form>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above with esc_url / esc_html__.
+}
+
+/**
+ * One week, Monday to Sunday, one row per day with its entries (the same entry line as the month grid).
+ *
+ * @param string $week Monday, Y-m-d.
+ * @param array  $f    Filters.
+ */
+function planweb_week_view( string $week, array $f ) {
+	$start = strtotime( $week . ' 12:00:00 UTC' );
+	$end   = gmdate( 'Y-m-d', $start + 6 * DAY_IN_SECONDS );
+	$prev  = gmdate( 'Y-m-d', $start - 7 * DAY_IN_SECONDS );
+	$next  = gmdate( 'Y-m-d', $start + 7 * DAY_IN_SECONDS );
+	$today = wp_date( 'Y-m-d' );
+	$by    = array();
+	foreach ( planweb_calendar_filter( planweb_entries( $week, $end ), $f ) as $e ) {
+		$by[ $e['date'] ][] = $e;
+	}
+	$m = substr( $week, 0, 7 );
+	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $m, 'w' => $prev ) + array_filter( $f ) ) ) . '">‹ ' . esc_html__( 'Previous week', 'planweb' ) . '</a> <strong>' . esc_html( planweb_date_label( $week ) . ' – ' . planweb_date_label( $end ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $m, 'w' => $next ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Next week', 'planweb' ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ), 'w' => planweb_week_start( $today ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'This week', 'planweb' ) . '</a></p>';
+	echo '<table class="widefat striped planweb-week"><caption class="screen-reader-text">' . esc_html( planweb_date_label( $week ) . ' – ' . planweb_date_label( $end ) ) . '</caption><tbody>';
+	for ( $i = 0; $i < 7; $i++ ) {
+		$ymd = gmdate( 'Y-m-d', $start + $i * DAY_IN_SECONDS );
+		echo '<tr' . ( $ymd === $today ? ' class="highlight" aria-current="date"' : '' ) . '><th scope="row">' . esc_html( wp_date( 'D j M', strtotime( $ymd . ' 12:00:00' ) ) ) . '</th><td>';
+		foreach ( $by[ $ymd ] ?? array() as $e ) {
+			$href = planweb_url( array( 'm' => $m, 'w' => $week, 'edit' => $e['id'] ) ) . '#planweb-form';
+			echo '<p class="planweb-item">' . planweb_type_badge( $e['type'] ) . ' <a href="' . esc_url( $href ) . '">' . esc_html( ( '' !== $e['time'] ? $e['time'] . ' ' : '' ) . $e['title'] ) . '</a> ' . planweb_status_badge( $e['status'] ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the badges escape their parts.
+		}
+		echo '</td></tr>';
+	}
+	echo '</tbody></table>';
 }
 
 /**

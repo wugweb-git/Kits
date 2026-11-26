@@ -270,7 +270,7 @@ aw_t( ! sourceweb_rules_pattern_ok( '\\h+lab' ) && ! sourceweb_rules_pattern_ok(
 aw_t( sourceweb_rules_pattern_ok( 'a\\~b' ) && sourceweb_rules_pattern_ok( 'laboratory animals\\)? rules,? 2026' ) && sourceweb_rules_pattern_ok( 'a~b' ), 'patterns with ~ and the live hold pattern are accepted' );
 aw_t( ! sourceweb_rules_pattern_ok( '\\x{1F600}' ) && ! sourceweb_rules_pattern_ok( '\\e' ) && ! sourceweb_rules_pattern_ok( '\\cA' ) && ! sourceweb_rules_pattern_ok( '(?<n>a)' ) && ! sourceweb_rules_pattern_ok( '(?R)' ), 'escapes and groups Python re cannot compile are refused (Codex, #77)' );
 aw_t( sourceweb_rules_pattern_ok( '\\x41\\d+\\s\\bG\\.S\\.R\\.' ) && sourceweb_rules_pattern_ok( '\\\\d' ) && sourceweb_rules_pattern_ok( '(?P<n>a)(?<=b)(?<!c)' ), 'Python-compatible escapes and lookbehinds are accepted' );
-$en_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/enrichment.php' );
+$en_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/enhance/directory/enrichment.php' );
 $pp_at  = strpos( $en_src, 'function sourceweb_enrich_policy_pass' );
 $pp_src = false === $pp_at ? '' : substr( $en_src, $pp_at, 2500 );
 aw_t( false !== strpos( $pp_src, 'sourceweb_enrich_field_rule( $r[\'field\'] )' ) && false !== strpos( $pp_src, 'sourceweb_enrich_allowed_sources(' ), 'the policy pass rechecks the field rule and its sources before applying queued rows (Codex, #77)' );
@@ -311,5 +311,5 @@ aw_t( false === $rows3['aw_branches']['rule']['on'] && '' !== $rows3['aw_branche
 $g = array( array( 'key' => 'google_places' ), array( 'key' => 'website' ) );
 aw_t( array() === sourceweb_enrich_allowed_sources( array( array( 'key' => 'google_places' ) ), array( 'website' ) ) && array( array( 'key' => 'website' ) ) === sourceweb_enrich_allowed_sources( $g, array( 'website' ) ), 'a source allow list without Google drops Google (place ID and Maps link too)' );
 aw_t( $g === sourceweb_enrich_allowed_sources( $g, array() ) && 2 === count( sourceweb_enrich_allowed_sources( $g, array( 'google_places', 'website' ) ) ), 'no allow list keeps every source; an allow list naming Google keeps it' );
-$sra_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/summary-rules-admin.php' );
+$sra_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/enhance/summary-rules-admin.php' );
 aw_t( false === strpos( $sra_src, 'saved (no change)' ), 'an unchanged summary rules save writes no change-log entry (round trip)' );

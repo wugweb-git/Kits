@@ -24,7 +24,7 @@ The SEO, schema, and sitemap plugin owns:
 - ⏳ Still Animal Writes-shaped (no brand strings, only runs with the Animal Writes hubs/types): `aw_*` content-type keys in `titles.php`, India-specific schema fields (`addressCountry` IN), FAQ question wording in `faq-data.php`. Not shown on other sites; candidates for the site layer.
 - ⏳ Redirects (documented limitation): standalone there is no redirect list; the tools read and write Rank Math's Redirections, so redirects need Rank Math. A native list is not built and is not planned for this release.
 - ✅ Canonical: singular via core; home, archives and paginated pages get one self-referencing canonical from RankWeb (search and 404 none). Robots rules for archives/404 beyond core and search noindex: still open.
-- ⏳ Ranking formula (function + existence + consumption): unresolved. No formula exists in the repo or docs; owner to define. Not invented.
+- ✅ Ranking formula (owner, 26 Nov: "do it"): there is one formula and it is InsightWeb's keyword score, `round(0.35·Demand + 0.30·Opportunity + 0.20·Momentum + 0.15·Engagement)` (`insightweb/includes/search-insights/score.php`, weights and caps as constants, tested). RankWeb has no second formula and does not need one.
 - ⏳ **X** Yoast / SEOPress / AIOSEO coexistence with the real plugins; Google Search Console acceptance of the sitemap.
 
 ## Open Tasks & Enhancements
@@ -53,7 +53,12 @@ The SEO, schema, and sitemap plugin owns:
 
 Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
 
-- SEO CSV, Internal links, Redirect tools and Images (26 Nov): now drawn inside the Kits shell through page parts, the way the FAQ list is (`rankweb_tool_parts()`, `rankweb-ui.php`). Their forms still post to `admin-post.php` with their own nonce; with no Kits Core they stay plain WordPress pages. Not done: REST routes and native React screens for them, and a confirm step on "Write to .htaccess now" (the parts bridge drops scripts).
-- Redirect categories: never built. A native redirect list is not planned; redirect tools write to Rank Math's list.
-- Ranking formula: owner decision.
+- SEO CSV, Internal links, Redirect tools and Images (26 Nov): now drawn inside the Kits shell through page parts, the way the FAQ list is (`rankweb_tool_parts()`, `rankweb-ui.php`). Their forms still post to `admin-post.php` with their own nonce; with no Kits Core they stay plain WordPress pages. Not done: REST routes and native React screens for them, (the "Write to .htaccess now" form now needs a ticked confirm box, checked on the server).
+- Redirect categories (26 Nov): built as a label per source kept in RankWeb (`rankweb_redirect_categories`), carried by a `category` column on the redirects CSV and listed on Redirect tools. Rank Math's list is unchanged and nothing reads the label at request time. A native redirect list is not planned.
 - Not in this repo: a bundled `rankweb-shell` package (`packages/rankweb-shell` is empty).
+
+## Carried over from the acceptance gates (26 Nov 2026)
+
+- Not verifiable here (class X): SEOPress and AIOSEO coexistence (detected by constant only); real Yoast, SEOPress and AIOSEO installs beyond the Yoast check already done; Google Search Console accepting the sitemap.
+- Robots rules for archives and 404 beyond core and search noindex: open.
+- Animal Writes copy still in the plugin, inert without the site's hub functions: directory place phrasing in `titles.php`, question wording in `faq-data.php`, and the `animal-writes/breadcrumb` and `render_block_animal-writes/*` compatibility hooks. Live Animal Writes needs its site layer (`sites/animalwrites/rankweb/`) to restore the old schema values; confirm InsightWeb is active on live, because RankWeb no longer loads its bootstrap.

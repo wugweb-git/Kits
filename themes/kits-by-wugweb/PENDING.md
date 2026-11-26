@@ -36,3 +36,13 @@ The declarative FSE block theme owns:
 
 4. **Tenant Asset Decoupling**:
    - Relocate tenant-specific site files (`assets/site/`) and site style variations out of the theme core and into the tenant options loader.
+
+## Carried over from docs/org (26 Nov 2026)
+
+From the marketplace plan and the reverse-engineering matrix; the full text is in git history (`docs/org/`).
+
+- Owner steps before submission: run Theme Check on staging; run the wp.org readme validator on each `readme.txt`; a real front-page screenshot (the current one is the logo); upload to the theme and plugin directories (slug `kits-by-wugweb`).
+- Known gaps: front-end `kit.js` has a few hard-coded English strings (Next, Back, Close search, Loading results, step labels), so translating them needs a wp-i18n dependency or server-rendered data attributes; no real screen reader run; Safari proper not run.
+- Kits Core audit leftovers: roughly 200 WPCS style errors across 35 files (CI gates security only); the `aw_` / `AW_` prefix rename and the `aw_campaign` coupling (coordinated across plugins, see each plugin's notes); low-severity hardening items (nonce oracle `kits_form_nonce`, theme-update package without an integrity check and off by default, favicon host with no allow-list, nonce in the download URL, ALTCHA replay not atomic, preview token in the query string).
+- Reverse-engineering comparison with the reference theme is open: fluid typography (off in Kits), drop caps, gradients and duotone, custom weight maps, 25 versus 13 block styles in `theme.json`, `style.css` form and focus rules, navigation overlay and submenu, 600 and 782 px breakpoints, pattern, template and part block-level comparison, variations. Each needs a browser comparison and a recorded reason; nothing is copied from the reference theme.
+- Base accent: the build swaps `#FFBE1A` for `#C6D2E0` in the shipped zip only; the repo default is still the tenant yellow (see the accent decision in Kits Core's notes).

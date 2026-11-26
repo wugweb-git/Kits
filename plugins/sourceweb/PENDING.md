@@ -37,3 +37,4 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Menu: the code has Overview, Enrichment review, To review and per-tab items; the old plan wanted Dashboard, To review, Settings.
 - `enrichment-front.php` Kits Core calls (`kits_icon`, `kits_date`) are now guarded (26 Nov).
 - The AI model router is on hold (owner).
+- Organisation (26 Nov): `includes/` is now grouped by purpose and `ARCHITECTURE.md` maps the flow, folders, inputs and outputs. Still open: consistent file names, splitting `rest/sourceweb-rest-pages.php` (2,100 lines), a shared settings layer for rules and keywords, and a generated workers registry so it cannot drift from the workers repo.

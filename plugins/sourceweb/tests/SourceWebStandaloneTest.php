@@ -107,12 +107,12 @@ if ( ! function_exists( 'get_post_type' ) ) {
 }
 
 // Load files.
-require_once dirname( __DIR__ ) . '/includes/sourcing-basics.php';
-require_once dirname( __DIR__ ) . '/includes/content-helpers.php';
-require_once dirname( __DIR__ ) . '/includes/workers-registry.php';
-require_once dirname( __DIR__ ) . '/includes/workers-tick.php';
-require_once dirname( __DIR__ ) . '/includes/rules-model.php';
-require_once dirname( __DIR__ ) . '/includes/ingest.php';
+require_once dirname( __DIR__ ) . '/includes/sources/sourcing-basics.php';
+require_once dirname( __DIR__ ) . '/includes/enhance/content-helpers.php';
+require_once dirname( __DIR__ ) . '/includes/workers/workers-registry.php';
+require_once dirname( __DIR__ ) . '/includes/workers/workers-tick.php';
+require_once dirname( __DIR__ ) . '/includes/rules/rules-model.php';
+require_once dirname( __DIR__ ) . '/includes/workers/ingest.php';
 
 $fails = 0;
 $count = 0;

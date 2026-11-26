@@ -1,6 +1,6 @@
 <?php
 /**
- * Guard: sourceweb defines no function with the short 'aw_' prefix except the earlier-name aliases in includes/legacy-aliases.php
+ * Guard: sourceweb defines no function with the short 'aw_' prefix except the earlier-name aliases in includes/compat/legacy-aliases.php
  * (WordPress.org wants a project prefix of four or more characters). Stored names (options, meta, hooks, cron events,
  * REST routes) are not functions and keep their names.
  *
@@ -18,7 +18,7 @@ foreach ( $it as $file ) {
 	if ( ! preg_match( '/\.php$/', $path ) || false !== strpos( $path, '/tests/' ) || false !== strpos( $path, '/vendor/' ) || false !== strpos( $path, '/build/' ) ) {
 		continue;
 	}
-	$is_alias_file = '/includes/legacy-aliases.php' === substr( $path, -28 );
+	$is_alias_file = str_ends_with( $path, '/includes/compat/legacy-aliases.php' );
 	$code          = (string) file_get_contents( $path );
 	preg_match_all( '/^\s*function\s+(aw_[A-Za-z0-9_]+)\s*\(/m', $code, $m );
 	++$total;

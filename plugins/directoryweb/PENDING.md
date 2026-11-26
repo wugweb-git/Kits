@@ -94,3 +94,17 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Default preset (`directoryweb-default`) and a CRM adapter: `claim-native.php` fires `directoryweb_claim_created` and `directoryweb_claim_transitioned`, but nothing consumes them.
 - District pages for helpline titles print no `kit-section-desc`, so an intro would not show (`directory.php:268-275`); confirm on the live site.
 - Not verifiable here: Fluent Forms Pro uploader, real mail delivery, SEOPress/AIOSEO coexistence, the old Claims address redirect.
+
+## Naming rule carried over from the retired naming policy (26 Nov 2026)
+
+- Code names are `directoryweb_*` / `DIRECTORYWEB_*`; never `aw_`, `dw_` or `aw-` in new code (WordPress.org wants four or more characters). Thin `aw_*` aliases for Kits Core, MailWeb, SourceWeb and InsightWeb live in `includes/legacy-aliases.php`; delete one when its last caller is updated.
+- Stored names are kept, with no migration in 1.x: the `aw_listing` and `aw_claim` post types and their URLs, `aw_*` listing meta (read through `directoryweb_meta_prefix()`), terms, options, the `_dw_claim_*` claim meta and Fluent Forms' `dw_evidence` meta.
+- A data-prefix migration is only documented, not built or scheduled: a `directoryweb_data_prefix` setting with dual reads, a dry-run command, batch copy with no deletes, verification, then a switch. It needs the owner's yes, a seeded-site Playground run before and after, and a stop-and-rerun test. Renaming a post type is a separate decision.
+- Guards: `plugins/directoryweb/tests/no-short-prefix-test.php`.
+
+## Carried over from the acceptance gates (26 Nov 2026)
+
+- Not verifiable without outside systems (class X): claim email delivery through a real transport; anonymous versus logged-in claim submission over HTTP (Playground answers every request as an administrator; both hooks call one handler); the Kits shell Settings Claims row drawn in a browser (payload checked in PHP only); the Fluent Forms Pro uploader; Apache and nginx deny rules for the private evidence folder (documented, untested).
+- CRM events (26 Nov): built. Each native claim change fires `directoryweb_claim_event` and is filed with every active CRM adapter; FluentCRM is built in (transactional contact, one tag for the current state: Claim received, approved, rejected or revoked). Other CRMs and form plugins (WPForms, Fluent Forms, others) attach through the `directoryweb_claim_crm_adapters` filter or the action; none is built because their APIs are untested here. Not tried against a real FluentCRM. Fluent Forms-path claims fire no events (their ids collide with post ids).
+- Deferred: the default preset (waits on Kits Core's preset format).
+- Open owner decision (OD8): Fluent Forms claims keep their own `aw_c_status` meta and screen; native claims use the state table. Recommendation: leave both, never migrate stored claims, new sites use the native form. Revoke and re-open for Fluent Forms claims are not built.

@@ -450,5 +450,12 @@ $ub_dir = sys_get_temp_dir() . '/mailweb-ub-ro-' . getmypid();
 $ub_t( 0 === getmyuid() || ! @mailweb_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
 
+require_once dirname( __DIR__ ) . '/includes/dns-status.php';
+$ub_t( 'valid' === mailweb_spf_status( array( 'google-site-verification=x', 'v=spf1 include:_spf.mail.hostinger.com ~all' ) )['status'], 'spf: the Hostinger include is valid, other TXT records ignored' );
+$ub_t( 'pending' === mailweb_spf_status( array( 'google-site-verification=x' ) )['status'] && 'pending' === mailweb_spf_status( array() )['status'], 'spf: no SPF record is pending' );
+$ub_t( 'mismatch' === mailweb_spf_status( array( 'v=spf1 include:_spf.google.com ~all' ) )['status'], 'spf: a record without Hostinger is a mismatch' );
+$ub_t( 'multiple' === mailweb_spf_status( array( 'v=spf1 a ~all', 'v=spf1 include:_spf.mail.hostinger.com ~all' ) )['status'], 'spf: two SPF records are reported, not accepted' );
+$ub_t( 'valid' === mailweb_spf_status( array( '  V=SPF1 include:_SPF.MAIL.HOSTINGER.COM -all' ) )['status'], 'spf: case and leading space do not matter' );
+
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

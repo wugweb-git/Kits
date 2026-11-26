@@ -106,14 +106,14 @@ aw_t( array( 'config.sections_v2 is missing' ) === sourceweb_retire_policy_probl
 aw_t( '' !== sourceweb_retire_refusal( 3, 4, true ) && '' !== sourceweb_retire_refusal( 2, 3, true ) && '' === sourceweb_retire_refusal( 3, 3, false ) && '' === sourceweb_retire_refusal( 4, 4, true ), 'rollback --phase=1..3 refused while phase 4 is migrated' );
 
 // Keep old until new is proven (owner, 25 Oct 2026): nothing old deleted or changed; old tabs and v1 paths stay, switched.
-$p4_mg  = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-retire.php' );
+$p4_mg  = (string) file_get_contents( dirname( __DIR__ ) . '/includes/lifecycle/sourcing-migrate-retire.php' );
 $p4_mig = substr( $p4_mg, strpos( $p4_mg, "'aw_sourcing_cli_migrate_4'" ), strpos( $p4_mg, "'aw_sourcing_cli_verify_4'" ) - strpos( $p4_mg, "'aw_sourcing_cli_migrate_4'" ) );
 aw_t( ! preg_match( "/(update|delete)_option\(\s*(SOURCEWEB_REL_OPTION|'aw_relevance'|'aw_sources'|'aw_sourcing_dismissed')/", $p4_mig ), 'migrate --phase=4 writes and deletes no old option' );
 aw_t( false === strpos( $p4_mg, 'aw-backups' ) || ! preg_match( '/unlink|wp_delete_file|delete_option\(\s*\$name/', $p4_mg ), 'phase 4 deletes no backup' );
 aw_t( substr_count( $p4_mig, '$save();' ) >= 3 && false !== strpos( $p4_mig, "'aw_sourcing_migrating', 4" ), 'the record is saved before each step and the migrating flag is set' );
-$p4_lists = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-lists.php' );
-$p4_kwa   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-admin.php' );
-$p4_pol   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-policy.php' );
+$p4_lists = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sources/sourcing-lists.php' );
+$p4_kwa   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords/keywords-admin.php' );
+$p4_pol   = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sources/sourcing-policy.php' );
 aw_t( false === strpos( $p4_lists, "\$tabs['categories']" ) && false !== strpos( $p4_lists, "'aw_sources_save_press'," ), 'the old Categories tab is gone; the Press settings still save through sourceweb_sources_sanitize()' );
 aw_t( false !== strpos( $p4_kwa, '$old  = sourceweb_sourcing_phase() < 4;' ), 'the old lists are no longer rebuilt from phase 4 (at phase 3, after a rollback, the next keyword save rebuilds them)' );
 aw_t( false !== strpos( $p4_pol, "if ( sourceweb_sourcing_phase() < 4 || ! function_exists( 'sourceweb_retire_policy' ) ) {" ) && false !== strpos( $p4_lists, "if ( sourceweb_sourcing_phase() >= 4 && function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) { // phase 4: no v1 keys" ), 'the policy drops the v1 keys only from phase 4; the v1 code stays' );

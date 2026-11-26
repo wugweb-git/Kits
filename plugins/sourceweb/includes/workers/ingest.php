@@ -214,9 +214,17 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		}
 	}
 
-	$post_id = wp_insert_post(
+	$place_item = array(
+		'title'       => $title,
+		'summary'     => $summary,
+		'source_url'  => $source_url,
+		'source_name' => (string) $req->get_param( 'source_name' ),
+		'feed'        => (string) $req->get_param( 'feed' ),
+		'kind'        => (string) $req->get_param( 'type' ),
+	);
+	$post_id    = wp_insert_post(
 		array(
-			'post_type'    => $type,
+			'post_type'    => function_exists( 'sourceweb_place_post_type' ) ? sourceweb_place_post_type( $type, $place_item ) : $type, // the place's type; the item's own when no route is set (places/places.php)
 			// Opportunities from approved sources are factual listings (title, organisation, place, deadline, link)
 			// and go live directly (owner's decision, 7 Oct 2026). Everything else waits for review.
 			'post_status'  => 'aw_opportunity' === $type ? 'publish' : 'pending',
@@ -447,6 +455,10 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 			$review = 'held: ' . $hold;
 			update_post_meta( $post_id, 'aw_review', $review );
 		}
+	}
+
+	if ( function_exists( 'sourceweb_place_deliver' ) ) {
+		sourceweb_place_deliver( $type, (int) $post_id, $place_item ); // a plugin, workflow or other place takes it (places/places.php)
 	}
 
 	return new WP_REST_Response(
