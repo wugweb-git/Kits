@@ -35,7 +35,7 @@ The SEO, schema, and sitemap plugin owns:
 - ✅ Image sitemap `/image-sitemap.xml` without Rank Math (`sitemap.php`, `class-rankweb-image-sitemap.php`). **U** `ImageSitemapTest.php`. **B** `/image-sitemap.xml` answers with the image entries and robots.txt lists it. Not in core's `wp-sitemap.xml` index (core's renderer cannot carry image tags); listed in robots.txt.
 - ✅ **B** Rendered in Playground (suite blueprint, WordPress 7.1.5, 26 Nov): the SEO Bar column, the Structured data box in the block editor (meta box area) and the classic editor (a type choice shows its fields), and the RankWeb dashboard box (shows counts once the background count has run; Playground's cron did not fire on its own, so the box stayed on "Counting" until the job was run by hand; on a real site WP-Cron runs it).
 - ⏳ Not seen: Transport against real Yoast, Rank Math and AIOSEO data; the block editor logged unrelated `core/separator` block-validation errors on the sample post (not RankWeb's).
-- ✅ Transport also reads SEOPress and The SEO Framework meta (keys from their documented storage, **unverified (X)** against the real plugins); the classic editor has a "Search engines (RankWeb)" box with the same robots choices (**U** `clean_form`; **B** not seen).
+- ✅ Transport also reads SEOPress and The SEO Framework meta (keys from their documented storage, **unverified (X)** against the real plugins); the classic editor has a "Search engines (RankWeb)" box with the same robots choices (**U** `clean_form`; **B** saved and printed `nofollow, max-snippet:90`).
 - ⏳ Not built: Transport of term and user meta; a Search Console check of the image sitemap (**X**).
 
 ## Open Tasks & Enhancements
