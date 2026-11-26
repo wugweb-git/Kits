@@ -50,3 +50,44 @@ Plugin Check output for any plugin; real-browser rendering of the fallback scree
 2. (Already exists in release-product.yml; removed from this list.)
 3. A CI step that installs each built zip alone and opens each admin screen, failing on "needs Kits Core".
 4. Stop running CI with cancel-in-progress on the main branch.
+
+---
+
+# Second pass, 26 Nov: four independent reviews
+Four read-only reviewers covered Kits Core, the theme and release pipeline, the seven live zips, and everything deleted or reverted. Items marked (verified) were re-checked by the lead by reading or running. The rest are the reviewer's reading and are not re-run.
+
+## F1. Shipped releases
+1. **SourceWeb 0.2.4 loaded held code** (verified). Fixed in 0.2.5 (committed, not released at time of writing).
+2. **PlanWeb 0.3.1 release notes claim a Repeat field "in the Calendar form"** that does not exist (verified: zero "repeat" in `src/index.js` and `build/index.js`). Repeats work only through REST. The readme and CHANGELOG are wrong; the UI was never written.
+3. **Held files ship inside the zips** (MailWeb `tenant-profiles.php`, InsightWeb `telemetry-404.php`). Not loaded, but one loader-list edit turns them on, which is how 3.3.2 and 1.1.2 failed. Fix: exclude HOLD files in `build-dist.py`.
+4. **Kits Core shell bundle looks older than `src/shell`** (13 strings missing; unconfirmed until rebuilt).
+5. Dev files in zips: theme ships `tools/build-tokens.py` and `tokens/` (59 KB); SourceWeb ships ARCHITECTURE.md and WORKERS.md; plugin zips carry WordPress.org banners; MailWeb `vendor/` is 785 files.
+6. Theme: `readme.txt` Stable tag 2.2.1 has no 2.2.1 changelog entry (the version check exempts the theme); "Needs WordPress 6.6" contradicts Requires 7.1; Open Font License text for the bundled Inter font is not shipped; changelog says "Inter Tight" but Inter ships. `directoryweb/assets/img/google-maps.png` has no licence note.
+
+## F2. Release pipeline
+1. **The registry can serve a prerelease as "latest"** (verified by running against live GitHub): `kits-by-wugweb` shows 2.2.0 from tag `kits-suite-2026.11.25-pre.2`, prerelease, no WordPress.org zip, while source is 2.2.1. Any product whose own release is withdrawn falls back to a stale prerelease. `semver()` ignores `-rc` suffixes.
+2. **A release goes public before its assets are checked** (`release.yml:76-98`, `release-product.yml:73-100`). A failed upload leaves a live release with a null download in the registry, and the tag cannot be reused. Fix: create as draft, verify, then publish.
+3. **Script injection** in `release.yml` (`${{ inputs.tag }}` interpolated into shell in a `contents: write` job) and in `release-product.yml` (readme title). Needs workflow-dispatch access to exploit.
+4. Per-product releases never run `verify-dist.py`; the `-wporg.zip` files are never verified anywhere.
+5. Third-party actions pinned by tag only; broad job permissions; dispatch `ref` not restricted; registry sha taken from the same release.
+
+## F3. Kits Core (1.1.0 to 1.3.2)
+1. **Every Fluent Forms submission is copied whole into `wp_aw_form_raw` for 180 days** (verified in code), undisclosed, and removed by neither uninstall nor deactivation.
+2. **Five test files run nothing and exit 0** (verified): content-bindings, ops, presets, site-ops, taxonomy-rename. CI runs them and shows green. With ABSPATH defined, four pass and content-bindings fatals because the deleted Animal Writes site layer is missing.
+3. The setup wizard overwrites the owner's Site Editor styles (`wp_global_styles`) with no backup.
+4. Animal Writes behaviour on every site: admin menu items removed (Rank Math, FluentCRM, Link Whisper, Fluent Forms), a daily error-count email, public `aw/v1/deploy-status` and `aw/v1/thumb-dupes` routes.
+5. Registry checks send the site address to GitHub Pages (default WordPress User-Agent); "Send once now" works with the switch off, contradicting the readme.
+6. Brand colour input accepts text that breaks out of its CSS declaration (admin or imported file only).
+7. Uninstall leaves the check-in job, registry cache, update-channel option and several `aw_` cron jobs.
+
+## F4. Deletions and reverts
+1. **PENDING says "Resolved" over code that is written but not wired**: PlanWeb calendar views (no caller, no JS, nonce never created); MailWeb, InsightWeb and SourceWeb held code.
+2. **Kits Core PENDING is stale the other way:** Layer 3, the wizard option and the Scripts & Pixels capability check are done in code but listed open.
+3. **The Animal Writes site layer was deleted on 22 Nov (238fe14: 161 files, about 33,800 lines)**; plugins still reference its content types 330 times; two test files now skip silently; the same commit changed the theme primary colour `#FFBE1A` to `#C6D2E0`. The only copy is git history.
+4. **The 22 Nov revert lost features never redone:** MailWeb standing down for FluentSMTP / Post SMTP / WP Mail SMTP, PlanWeb The Events Calendar handling, DirectoryWeb's Business Directory Plugin adapter.
+5. About 25 dangling doc paths in 59 files; the specs they cite exist only in git history.
+6. The commit-attribution rule file was deleted; the rule exists only in memory notes.
+7. The never-rename option and table list is missing from PENDING; preset-font gap not recorded; a RankWeb entry is dated 27 Nov.
+
+## G. Not checked by anyone
+Plugin Check output; real browser rendering; live mail, Site Kit and Fluent Forms; the large deleted architecture and roadmap docs (only grepped, not read); whether the Animal Writes site layer survives in another repo; branch protection and secrets settings.
