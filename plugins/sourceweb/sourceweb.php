@@ -153,7 +153,11 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/kits-hub.php'; // a tab an
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-model.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-dashboard.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-pages.php'; // Sources, Keywords, Rules, Workers, Settings
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-pages.php'; // the routes of Sources, Keywords, Rules, Workers, Settings
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-workers.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-sources.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-keywords.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-rules.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-ai.php'; // AI models
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-logs.php'; // Rejected, Relay log, Change log
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-tools.php'; // manual tools: re-check published items

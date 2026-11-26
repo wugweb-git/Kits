@@ -259,7 +259,10 @@ $l = sourceweb_list( $rows, array( 'page' => 99, 'orderby' => 'evil' ), $o );
 aw_t( 2 === $l['page'] && 'd' === $l['rows'][0]['id'], 'list: a page past the end is the last; an unknown sort is ignored' );
 
 // ---- the rebuilt tabs' routes: administrators only, through the one permission check, no key goes out ----
-$pages = file_get_contents( dirname( __DIR__ ) . '/includes/rest/sourceweb-rest-pages.php' );
+$pages = '';
+foreach ( array( 'pages', 'workers', 'sources', 'keywords', 'rules' ) as $part ) { // the routes, and the callbacks split out of the one file
+	$pages .= file_get_contents( dirname( __DIR__ ) . "/includes/rest/sourceweb-rest-$part.php" );
+}
 aw_t( false === strpos( $pages, '__return_true' ), 'page routes: none is open to everyone' );
 aw_t( 1 === substr_count( $pages, "'permission_callback' => sourceweb_rest_can( \$r[1] )" ), 'page routes: every route registers through the one permission check' );
 preg_match_all( "/^\t\t\t'\/[^']+'\s*=> array\(\s*'(GET|POST)',\s*([A-Z_]+),/m", $pages, $m );

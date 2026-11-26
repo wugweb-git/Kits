@@ -73,7 +73,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 - **Step 5 has no home.** Where an item goes should be one `outputs/` folder with a registry of destinations. A destination has a kind (content type, plugin, or workflow), a label, a test for "is it available", and a handler that takes the finished item. Settings choose which kind of item goes to which destination; today's routing is the default. Adding a destination (another plugin, a webhook, a workflow) touches one registration, not the intake. Today the routing is spread across the three files above and assumes a content type.
 - **Step 1 has no list of source types.** Feed, keyword search, API, site-fetched page, manual link, social and pushed candidate are handled in different places. A source-type registry (type, label, which worker or screen runs it) would let Sources show them all in one place.
 - Names: `sourcing-*`, `sourceweb-*` and plain names mix inside folders; `sourcing-basics.php` is loaded first and used everywhere.
-- `rest/sourceweb-rest-pages.php` is 2,100 lines and serves five screens; split it per feature and move each part next to its model.
+- `rest/sourceweb-rest-pages.php` is now the route list; the callbacks are split into `sourceweb-rest-workers/-sources/-keywords/-rules.php`. Moving each next to its model is still open.
 - `rules/` and `keywords/` each hold a model, an admin file and a WP side with overlapping helpers; they could share one small settings layer.
 - The workers repo (`animal-writes-workers`) is separate. `workers/workers-registry.php` mirrors its workflow list by hand and can drift; a generated registry would remove that.
 

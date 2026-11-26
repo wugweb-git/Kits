@@ -37,5 +37,11 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Menu: the code has Overview, Enrichment review, To review and per-tab items; the old plan wanted Dashboard, To review, Settings.
 - `enrichment-front.php` Kits Core calls (`kits_icon`, `kits_date`) are now guarded (26 Nov).
 - The AI model router is on hold (owner).
-- Organisation (26 Nov): `includes/` is now grouped by purpose and `ARCHITECTURE.md` maps the flow, folders, inputs and outputs. Still open: consistent file names, splitting `rest/sourceweb-rest-pages.php` (2,100 lines), a shared settings layer for rules and keywords, and a generated workers registry so it cannot drift from the workers repo.
+- Organisation (26 Nov): `includes/` is now grouped by purpose and `ARCHITECTURE.md` maps the flow, folders, inputs and outputs. Still open: consistent file names, a shared settings layer for rules and keywords, and generating the workers registry (a CI check, tools/ci/workers_registry_check.php, now compares it with the workers repo; it is not gating until the workers repo's chore/retire-eight-workflows is merged).
 - Workflow cleanup (26 Nov 2026): 12 workflows kept, 8 removed from the registry; merge the workers repo branch `chore/retire-eight-workflows`. Not built: the manual Tools task for submit and relevance-existing.
+
+## Built 26 Nov 2026 (branch feat/sourceweb-places-ui)
+
+- Places tab (routes, per-place enhancements, source types, what places say back); AI keys ordered by job (`?job=`) with the paid providers removed; worker union (`workers/union`, `sourceweb_workers` filter); manual re-check tool on Rejected; REST callbacks split by feature.
+- Not verified in a browser: the Places screen and the re-check card (built and linted, never opened).
+- Not built: closed loops that act on the feedback (today it is recorded and shown only); the workers repo does not yet send `job` or call `places/outcome`; the worker union has no screen yet; the standalone edition.
