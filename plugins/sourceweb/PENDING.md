@@ -35,5 +35,5 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 - A standalone `sourceweb_` edition with an external-services registry and a shared `Wugweb\ExternalServices` package: not built. The plugin still uses `AW_SRC_*` constants and `aw/v1` routes (kept by policy).
 - Menu: the code has Overview, Enrichment review, To review and per-tab items; the old plan wanted Dashboard, To review, Settings.
-- `enrichment-front.php` calls `kits_icon()` and `kits_date()` without a guard (lines 85, 91, 214).
+- `enrichment-front.php` Kits Core calls (`kits_icon`, `kits_date`) are now guarded (26 Nov).
 - The AI model router is on hold (owner).

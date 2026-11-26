@@ -15,6 +15,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** An icon from Kits Core when it is active, else nothing (the fact shows without it). */
+function sourceweb_front_icon( string $name ): string {
+	return function_exists( 'kits_icon' ) ? (string) kits_icon( $name ) : '';
+}
+
+/** A date as Kits Core shows it when it is active, else WordPress's own format. */
+function sourceweb_front_date( $value ): string {
+	if ( function_exists( 'kits_date' ) ) {
+		return (string) kits_date( $value );
+	}
+	$time = is_numeric( $value ) ? (int) $value : strtotime( (string) $value );
+	return $time ? wp_date( get_option( 'date_format' ), $time ) : '';
+}
+
 /** Google Places (New) Place Details with reviews: Enterprise + Atmosphere, USD per request. */
 const AW_GLIVE_COST = 0.025;
 
@@ -82,15 +96,15 @@ function sourceweb_enrich_profile_extras( $id ) {
 		if ( $m( 'aw_ig_posts' ) ) {
 			$bits[] = number_format_i18n( (int) $m( 'aw_ig_posts' ) ) . ' posts';
 		}
-		$sig[] = '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . kits_icon( 'instagram' ) . '</span>On Instagram</dt><dd>' . esc_html( implode( ' · ', $bits ) ) . ( $m( 'aw_last_post' ) ? ( $bits ? ' · ' : '' ) . 'latest post ' . kits_date( $m( 'aw_last_post' ) ) : '' ) . '</dd></div>';
+		$sig[] = '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . sourceweb_front_icon( 'instagram' ) . '</span>On Instagram</dt><dd>' . esc_html( implode( ' · ', $bits ) ) . ( $m( 'aw_last_post' ) ? ( $bits ? ' · ' : '' ) . 'latest post ' . sourceweb_front_date( $m( 'aw_last_post' ) ) : '' ) . '</dd></div>';
 	}
 	$news = sourceweb_enrich_news_mentions( $id );
 	if ( $news ) {
 		$li = '';
 		foreach ( $news as $nid ) {
-			$li .= '<li><a href="' . esc_url( get_permalink( $nid ) ) . '">' . esc_html( get_the_title( $nid ) ) . '</a> ' . kits_date( get_the_date( 'Y-m-d', $nid ) ) . '</li>';
+			$li .= '<li><a href="' . esc_url( get_permalink( $nid ) ) . '">' . esc_html( get_the_title( $nid ) ) . '</a> ' . sourceweb_front_date( get_the_date( 'Y-m-d', $nid ) ) . '</li>';
 		}
-		$sig[] = '<div class="aw-org-fact aw-org-fact--wide"><dt><span class="aw-org-fact-ico">' . kits_icon( 'news' ) . '</span>In the news</dt><dd><ul class="aw-org-news">' . $li . '</ul></dd></div>';
+		$sig[] = '<div class="aw-org-fact aw-org-fact--wide"><dt><span class="aw-org-fact-ico">' . sourceweb_front_icon( 'news' ) . '</span>In the news</dt><dd><ul class="aw-org-news">' . $li . '</ul></dd></div>';
 	}
 	if ( $sig ) {
 		$out .= '<h2 class="aw-profile-h">Activity</h2><dl class="aw-org-facts">' . implode( '', $sig ) . '</dl>';
@@ -211,15 +225,15 @@ function sourceweb_glive_html( $d ) {
 		$rows[] = array( 'phone', 'Phone', '<a href="' . esc_url( aw_tel_url( $d['phone'] ) ) . '" data-act="phone">' . esc_html( $d['phone'] ) . '</a>' );
 	}
 	if ( $d['review'] ) {
-		$rows[] = array( 'calendar', 'Latest review', kits_date( $d['review'] ) );
+		$rows[] = array( 'calendar', 'Latest review', sourceweb_front_date( $d['review'] ) );
 	}
 	if ( ! $rows ) {
 		return '';
 	}
 	$facts = '';
 	foreach ( $rows as $r ) {
-		$facts .= '<div class="aw-org-fact' . ( 'Hours' === $r[1] ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . kits_icon( $r[0] ) . '</span>' . esc_html( $r[1] ) . '</dt><dd>' . $r[2] . '</dd></div>';
+		$facts .= '<div class="aw-org-fact' . ( 'Hours' === $r[1] ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . sourceweb_front_icon( $r[0] ) . '</span>' . esc_html( $r[1] ) . '</dt><dd>' . $r[2] . '</dd></div>';
 	}
-	$attr = '<p class="aw-glive-attr">' . ( $d['maps'] ? '<a href="' . esc_url( $d['maps'] ) . '" rel="noopener nofollow" target="_blank">View on Google Maps</a> · ' : '' ) . 'Live from Google Maps, ' . kits_date( (int) $d['fetched'] ) . '</p>';
+	$attr = '<p class="aw-glive-attr">' . ( $d['maps'] ? '<a href="' . esc_url( $d['maps'] ) . '" rel="noopener nofollow" target="_blank">View on Google Maps</a> · ' : '' ) . 'Live from Google Maps, ' . sourceweb_front_date( (int) $d['fetched'] ) . '</p>';
 	return '<section class="aw-glive" aria-label="Live from Google Maps"><h2 class="aw-profile-h">On Google Maps</h2><dl class="aw-org-facts">' . $facts . '</dl>' . $attr . '</section>';
 }
