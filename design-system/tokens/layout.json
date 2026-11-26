@@ -1,0 +1,247 @@
+{
+  "breakpoint": {
+    "xs": {
+      "$value": "480px",
+      "$type": "dimension",
+      "$description": "BREAKPOINTS (documentation only — §3.4) CSS custom properties CANNOT be used inside @media queries. These are source-of-truth constants. Use the literal pixel values in @media rules."
+    },
+    "sm": {
+      "$value": "640px",
+      "$type": "dimension"
+    },
+    "md": {
+      "$value": "768px",
+      "$type": "dimension"
+    },
+    "lg": {
+      "$value": "1024px",
+      "$type": "dimension"
+    },
+    "xl": {
+      "$value": "1200px",
+      "$type": "dimension",
+      "$description": "layout-shell.md desktop canvas — was 1280"
+    },
+    "2xl": {
+      "$value": "1440px",
+      "$type": "dimension"
+    }
+  },
+  "layer": {
+    "background": {
+      "$value": "0",
+      "$type": "dimension",
+      "$description": "Z-index / layers"
+    },
+    "base": {
+      "$value": "1",
+      "$type": "number"
+    },
+    "card": {
+      "$value": "10",
+      "$type": "number"
+    },
+    "popover": {
+      "$value": "50",
+      "$type": "number"
+    },
+    "dropdown": {
+      "$value": "60",
+      "$type": "number"
+    },
+    "modal": {
+      "$value": "100",
+      "$type": "number"
+    },
+    "toast": {
+      "$value": "120",
+      "$type": "number"
+    },
+    "tooltip": {
+      "$value": "130",
+      "$type": "number"
+    },
+    "overlay": {
+      "$value": "140",
+      "$type": "number"
+    },
+    "nav": {
+      "$value": "10",
+      "$type": "number",
+      "$description": "sticky top nav — layout-shell.md"
+    },
+    "cursor": {
+      "$value": "9999",
+      "$type": "number"
+    },
+    "skip-link": {
+      "$value": "9999",
+      "$type": "number",
+      "$description": "The skip link must sit above every page chrome element, because it is the first thing a keyboard user reaches. It was `var(--z-skip-link, 9999)` — and --z-skip-link was never defined anywhere, so the fallback was doing all the work and the token name was fiction."
+    }
+  },
+  "hero": {
+    "overlay": {
+      "$value": "rgba(10, 10, 12, 0.75)",
+      "$type": "color",
+      "$description": "Semantic hero overlay (shared home + about)"
+    },
+    "overlay-mid": {
+      "$value": "rgba(10, 10, 12, 0.5)",
+      "$type": "color"
+    }
+  },
+  "shell": {
+    "gutter": {
+      "$value": "16px",
+      "$type": "dimension",
+      "$description": "Component sizes (documented in kits sizing.md) Section gutter — the single horizontal inset for the whole page. 16 mobile / 32 tablet / 48 desktop, per layout-shell.md. Stepped rather than clamped because the spec gives three discrete values, not a curve."
+    }
+  },
+  "grid": {
+    "gap": {
+      "$value": "16px",
+      "$type": "dimension",
+      "$description": "Column gap — layout guides: 16 mobile (4 cols) / 24 tablet (8) / 32 desktop (12)."
+    }
+  },
+  "nav": {
+    "height": {
+      "$value": "calc({control.size} + 2 * {nav.bar-pad})",
+      "$description": "Header formula (owner, 2026-10-21). The nav bar is fixed; the sticky header is only its wrapper, so its height is derived, never set: button 44 (--control-size) = 10 + 24 line + 10 nav bar 68 = 12 + 44 + 12, every breakpoint header = 68 + 2 x outer spacing: 16 mobile -> 100, 20 tablet+ -> 108 The header is sticky and in flow, so the hero, anchor offsets and blog cover subtract --header-height; deriving it keeps them right per breakpoint."
+    },
+    "link-size": {
+      "$value": "1rem",
+      "$type": "dimension",
+      "$description": "Nav bar contents (owner, 2026-10-21): every button is 44 tall, which leaves 12 above and below it in the 68 bar - the same 12 the bar keeps at its left and right edge. 16px text"
+    },
+    "link-line": {
+      "$value": "1.5",
+      "$type": "number",
+      "$description": "24px line"
+    },
+    "link-pad-block": {
+      "$value": "10px",
+      "$type": "dimension",
+      "$description": "10 + 24 + 10 = 44"
+    },
+    "link-pad-inline": {
+      "$value": "{gap.3}",
+      "$description": "12px"
+    },
+    "item-gap": {
+      "$value": "{gap.3}",
+      "$description": "12px between buttons"
+    },
+    "bar-pad": {
+      "$value": "{gap.3}",
+      "$description": "12px inset inside the bar, every breakpoint"
+    },
+    "logo-height": {
+      "$value": "2.5rem",
+      "$type": "dimension",
+      "$description": "40px"
+    }
+  },
+  "header": {
+    "pad-block": {
+      "$value": "16px",
+      "$type": "dimension"
+    },
+    "height": {
+      "$value": "calc({nav.height} + 2 * {header.pad-block})"
+    }
+  },
+  "article": {
+    "cols": {
+      "$value": "minmax(0, 1fr)",
+      "$description": "Blog post layout (/blog/[slug]), sm/md/lg tokens: sm here, md and lg in the 768 / 1200 blocks below. sm and md are one centred reading column with the cover under the title; lg splits into a sticky cover (5) and the reading column (7). See kits_design_system/docs/blocks/blog-post.md."
+    },
+    "areas": {
+      "$value": "\"hero\" \"cover\" \"body\""
+    },
+    "column": {
+      "$value": "720px",
+      "$type": "dimension"
+    },
+    "cover-ratio": {
+      "$value": "4 / 3"
+    },
+    "cover-height": {
+      "$value": "auto"
+    },
+    "cover-position": {
+      "$value": "static"
+    },
+    "title-size": {
+      "$value": "{t.display}"
+    }
+  },
+  "control": {
+    "size": {
+      "$value": "44px",
+      "$type": "dimension"
+    }
+  },
+  "pillar": {
+    "thumb": {
+      "$value": "88px",
+      "$type": "dimension"
+    },
+    "thumb-sm": {
+      "$value": "62px",
+      "$type": "dimension"
+    }
+  },
+  "thumb": {
+    "min": {
+      "$value": "180px",
+      "$type": "dimension"
+    }
+  },
+  "logo": {
+    "grid-h": {
+      "$value": "32px",
+      "$type": "dimension"
+    }
+  },
+  "author": {
+    "photo": {
+      "$value": "56px",
+      "$type": "dimension"
+    }
+  },
+  "share": {
+    "btn": {
+      "$value": "40px",
+      "$type": "dimension"
+    }
+  },
+  "bento": {
+    "min": {
+      "$value": "180px",
+      "$type": "dimension"
+    }
+  },
+  "culture": {
+    "visual": {
+      "$value": "380px",
+      "$type": "dimension"
+    }
+  },
+  "rail": {
+    "width": {
+      "$value": "min(85vw, 1200px)",
+      "$description": "Rail, signature and line length (owner, 2026-11-17; sizing.md)"
+    },
+    "peek": {
+      "$value": "20%"
+    }
+  },
+  "signature": {
+    "width": {
+      "$value": "2400px",
+      "$type": "dimension"
+    }
+  }
+}

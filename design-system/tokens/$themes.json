@@ -1,0 +1,48 @@
+[
+  {
+    "id": "base",
+    "name": "Base (< 768)",
+    "group": "Viewport",
+    "selectedTokenSets": {
+      "color": "enabled",
+      "effects": "enabled",
+      "layout": "enabled",
+      "motion": "enabled",
+      "radius": "enabled",
+      "spacing": "enabled",
+      "typography": "enabled"
+    }
+  },
+  {
+    "id": "md",
+    "name": "Tablet (768 and up)",
+    "group": "Viewport",
+    "selectedTokenSets": {
+      "color": "enabled",
+      "effects": "enabled",
+      "layout": "enabled",
+      "motion": "enabled",
+      "radius": "enabled",
+      "spacing": "enabled",
+      "typography": "enabled",
+      "modes/md": "enabled"
+    }
+  },
+  {
+    "id": "lg",
+    "name": "Desktop (1200 and up)",
+    "group": "Viewport",
+    "selectedTokenSets": {
+      "color": "enabled",
+      "effects": "enabled",
+      "layout": "enabled",
+      "motion": "enabled",
+      "radius": "enabled",
+      "spacing": "enabled",
+      "typography": "enabled",
+      "modes/md": "enabled",
+      "modes/lg": "enabled",
+      "modes/lg-dvh": "enabled"
+    }
+  }
+]
