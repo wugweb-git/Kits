@@ -226,7 +226,12 @@ add_action(
 			wp_die( esc_html__( 'You are not allowed to do this.', 'rankweb' ), '', array( 'response' => 403 ) );
 		}
 		$remove = isset( $_POST['aw_remove'] );
-		$msg    = rankweb_redirect_htaccess_apply( $remove );
+		if ( ! isset( $_POST['aw_confirm'] ) ) { // The write is confirmed on the screen, with no script needed.
+			set_transient( 'aw_seo_redirect_report_' . get_current_user_id(), array( 'kind' => 'htaccess', 'error' => __( 'Nothing was changed: tick the box to confirm that .htaccess may be edited.', 'rankweb' ), 'ok' => '' ), 5 * MINUTE_IN_SECONDS );
+			wp_safe_redirect( admin_url( 'admin.php?page=aw-redirects' ) );
+			exit;
+		}
+		$msg = rankweb_redirect_htaccess_apply( $remove );
 		set_transient(
 			'aw_seo_redirect_report_' . get_current_user_id(),
 			array(
@@ -361,13 +366,11 @@ function rankweb_redirect_tools_body(): void {
 	submit_button( __( 'Download the .htaccess block', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
 	if ( AW_REDIRECT_HTACCESS && rankweb_redirect_apache() ) {
-		echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block;margin-right:1em"><input type="hidden" name="action" value="aw_redirect_htaccess_write">';
+		echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_redirect_htaccess_write">';
 		wp_nonce_field( 'aw_redirect_htaccess' );
+		echo '<p><label><input type="checkbox" name="aw_confirm" value="1"> ' . esc_html__( 'Yes, edit .htaccess (a backup is made first)', 'rankweb' ) . '</label></p>';
+		echo '<p><label><input type="checkbox" name="aw_remove" value="1"> ' . esc_html__( 'Remove the block instead of writing it', 'rankweb' ) . '</label></p>';
 		submit_button( __( 'Write to .htaccess now', 'rankweb' ), 'delete', 'submit', false );
-		echo '</form>';
-		echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block"><input type="hidden" name="action" value="aw_redirect_htaccess_write"><input type="hidden" name="aw_remove" value="1">';
-		wp_nonce_field( 'aw_redirect_htaccess' );
-		submit_button( __( 'Remove the .htaccess block', 'rankweb' ), 'link', 'submit', false );
 		echo '</form>';
 	} else {
 		echo '<p class="description">' . esc_html__( 'Writing to .htaccess is off, or this server is not Apache or LiteSpeed. Turn it on in RankWeb → Settings → Redirect tools. The downloaded block can be pasted by hand.', 'rankweb' ) . '</p>';
