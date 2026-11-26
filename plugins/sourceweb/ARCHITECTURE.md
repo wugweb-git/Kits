@@ -1,6 +1,24 @@
 # SourceWeb: how it is organised
 
-SourceWeb decides **what the workers fetch**, receives **what they bring**, **gates and reviews** it, and **publishes the result** on the site. `includes/` is grouped by that flow, one folder per purpose. The load order in `sourceweb.php` is unchanged (hooks and tab order depend on it); only the folders are new (26 Nov 2026).
+## What SourceWeb is for (owner, 26 Nov 2026)
+
+1. **Source** things,
+2. **from** defined origins (feeds, publishers, hosts),
+3. **via** workers,
+4. **within** a defined guardrail (relevance and rules),
+5. **to** dedicated places (News, Library, Opportunities, Directory and the other content types), and
+6. **enhance** them so they fit in (attribution, titles, summaries, images, directory facts).
+
+Everything in `includes/` serves one of those six steps, and `includes/` is grouped that way (the load order in `sourceweb.php` is unchanged; hooks and tab order depend on it).
+
+| Step | Folders |
+|---|---|
+| 1 and 2. Source, from origins | `sources/`, `keywords/` (the search terms that steer what is sought) |
+| 3. Via workers | `workers/` (registry, tick, relay, ingest) |
+| 4. Within a guardrail | `rules/`, `review/` (what a person still decides), `ai/` (the models behind relevance) |
+| 5. To dedicated places | no folder of its own yet: the routing is spread over `workers/ingest.php`, `rules/` (section rules) and `output/content-helpers.php` (section lists) |
+| 6. Enhance | `enrichment/`, `output/` |
+| Around all steps | `admin/`, `rest/` (screens and routes), `lifecycle/` (migrations, uninstall), `compat/` |
 
 ## The flow
 
@@ -36,6 +54,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 
 ## Still scattered (next steps, not done)
 
+- **Step 5 has no home.** Where an item lands (which content type, section, status) should be one `places/` folder with one function per place, so adding or changing a destination touches one file. Today it is spread across the three files above.
 - Names: `sourcing-*`, `sourceweb-*` and plain names mix inside folders; `sourcing-basics.php` is loaded first and used everywhere.
 - `rest/sourceweb-rest-pages.php` is 2,100 lines and serves five screens; split it per feature and move each part next to its model.
 - `rules/` and `keywords/` each hold a model, an admin file and a WP side with overlapping helpers; they could share one small settings layer.
