@@ -13,7 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The site of each provider and tool in AW_AI_PROVIDERS and AW_AI_TOOLS. */
 const AW_AI_HOSTS = array(
-	'anthropic'   => 'anthropic.com',
 	'openrouter'  => 'openrouter.ai',
 	'requesty'    => 'requesty.ai',
 	'cline'       => 'cline.bot',
@@ -23,14 +22,8 @@ const AW_AI_HOSTS = array(
 	'huggingface' => 'huggingface.co',
 	'sambanova'   => 'sambanova.ai',
 	'groq'        => 'groq.com',
-	'xai'         => 'x.ai',
 	'gemini'      => 'ai.google.dev',
-	'openai'      => 'openai.com',
-	'deepseek'    => 'deepseek.com',
-	'moonshot'    => 'moonshot.ai',
-	'minimax'     => 'minimax.io',
 	'mistral'     => 'mistral.ai',
-	'together'    => 'together.ai',
 	'cerebras'    => 'cerebras.ai',
 	'firecrawl'   => 'firecrawl.dev',
 	'tinyfish'    => 'tinyfish.ai',

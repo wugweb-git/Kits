@@ -20,7 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * A key whose prefix matches is tried against those providers first, then every other one.
  */
 const AW_AI_PROVIDERS = array(
-	'anthropic'  => array( 'Anthropic (Claude)', array( 'sk-ant-' ), '', array( 'claude-haiku-4-5', 'claude-sonnet-4-5' ) ),
 	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'thinkingmachines/inkling:free' ) ), // free models only, never a paid one (owner, 25 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter; inkling:free replaced laguna-s-2.1:free, which expires 31 Oct 2026
 	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
 	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free' ) ), // free models (22 Oct 2026); minimax-m3.1-flash:free is gone (25 Oct 2026)
@@ -30,14 +29,8 @@ const AW_AI_PROVIDERS = array(
 	'huggingface' => array( 'Hugging Face', array( 'hf_' ), 'https://router.huggingface.co/v1', array( 'openai/gpt-oss-120b', 'meta-llama/Llama-3.3-70B-Instruct', 'Qwen/Qwen3-32B' ) ), // small free credit each month (22 Oct 2026)
 	'sambanova'  => array( 'SambaNova', array(), 'https://api.sambanova.ai/v1', array( 'Meta-Llama-3.3-70B-Instruct', 'DeepSeek-V3.1', 'gpt-oss-120b' ) ), // UUID keys; needs a payment method on file (22 Oct 2026)
 	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
-	'xai'        => array( 'xAI', array( 'xai-' ), 'https://api.x.ai/v1', array( 'grok-3-mini', 'grok-4-fast' ) ),
 	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
-	'openai'     => array( 'OpenAI', array( 'sk-proj-', 'sk-svcacct-', 'sk-' ), 'https://api.openai.com/v1', array( 'gpt-4o-mini', 'gpt-4.1-mini' ) ),
-	'deepseek'   => array( 'DeepSeek', array( 'sk-' ), 'https://api.deepseek.com', array( 'deepseek-chat' ) ),
-	'moonshot'   => array( 'Moonshot', array( 'sk-' ), 'https://api.moonshot.ai/v1', array( 'moonshot-v1-8k', 'kimi-k2-turbo-preview' ) ),
-	'minimax'    => array( 'MiniMax', array( 'sk-api-', 'eyJ' ), 'https://api.minimax.io/v1', array( 'MiniMax-M2' ) ),
 	'mistral'    => array( 'Mistral', array( 'mstr' ), 'https://api.mistral.ai/v1', array( 'mistral-small-latest' ) ),
-	'together'   => array( 'Together', array( 'tgp_' ), 'https://api.together.xyz/v1', array( 'meta-llama/Llama-3.3-70B-Instruct-Turbo' ) ),
 	'cerebras'   => array( 'Cerebras', array( 'csk-' ), 'https://api.cerebras.ai/v1', array( 'gpt-oss-120b', 'llama-3.3-70b' ) ),
 );
 
@@ -70,14 +63,6 @@ const AW_AI_INFO = array(
 	'mistral'     => array( 'quota', 'Summaries: free Experiment plan, low per-minute limit' ),
 	'vercel'      => array( 'card', 'Backup once a card is on file: 3 free models' ),
 	'commandcode' => array( 'card', 'Backup once the Provider plan has credit' ),
-	'anthropic'   => array( 'paid', '—' ),
-	'openai'      => array( 'paid', '—' ),
-	'deepseek'    => array( 'paid', '—' ),
-	'xai'         => array( 'paid', '—' ),
-	'moonshot'    => array( 'paid', '—' ),
-	'minimax'     => array( 'paid', '—' ),
-	'together'    => array( 'paid', '—' ),
-	'haiku'       => array( 'paid', '—' ),
 	'firecrawl'   => array( 'tool', 'Full article text when a news page hides it (Sourcing; 1,000 credits a month)' ),
 	'tinyfish'    => array( 'tool', 'Web agent: not used yet' ),
 );
@@ -265,7 +250,7 @@ function sourceweb_ai_key_for_worker( array $row, string $worker ): bool {
  * @param string $worker Worker ID ('' = all).
  * @return array{rows: array, tools: array}
  */
-function sourceweb_ai_served( string $worker = '' ): array {
+function sourceweb_ai_served( string $worker = '', string $job = '' ): array {
 	$out   = array();
 	$tools = array(); // Firecrawl and the like: the workers pick them out by provider
 	foreach ( sourceweb_ai_rows() as $r ) {
@@ -281,7 +266,10 @@ function sourceweb_ai_served( string $worker = '' ): array {
 		}
 		$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
 	}
-	return array( 'rows' => $out, 'tools' => $tools );
+	if ( '' === $job && '' !== $worker ) {
+		$job = SOURCEWEB_AI_WORKER_JOBS[ $worker ] ?? '';
+	}
+	return array( 'rows' => sourceweb_ai_order_for_job( $out, $job, AW_AI_CAPS ), 'tools' => $tools );
 }
 
 /** "…abcd (Groq, label)" for notices and the change log: never more of the key than its last 4. */
@@ -322,11 +310,7 @@ function sourceweb_ai_prefix_known( string $key ): bool {
 function sourceweb_ai_call( string $provider, string $key, string $model = '', bool $chat = true ): array {
 	$p   = AW_AI_PROVIDERS[ $provider ];
 	$arg = array( 'timeout' => $chat ? 45 : 15 ); // some free models take 20 s or more to answer
-	if ( 'anthropic' === $provider ) {
-		$arg['headers'] = array( 'x-api-key' => $key, 'anthropic-version' => '2023-06-01', 'content-type' => 'application/json' );
-		$url            = 'https://api.anthropic.com/v1/' . ( $chat ? 'messages' : 'models' );
-		$body           = array( 'model' => $model, 'max_tokens' => 5, 'messages' => array( array( 'role' => 'user', 'content' => 'Say ok' ) ) );
-	} elseif ( 'gemini' === $provider ) {
+	if ( 'gemini' === $provider ) {
 		$arg['headers'] = array( 'x-goog-api-key' => $key, 'content-type' => 'application/json' );
 		$url            = 'https://generativelanguage.googleapis.com/v1beta/models' . ( $chat ? '/' . $model . ':generateContent' : '' );
 		$body           = array( 'contents' => array( array( 'parts' => array( array( 'text' => 'Say ok' ) ) ) ) );
@@ -513,10 +497,15 @@ add_action(
 						'type'     => 'string',
 						'required' => false,
 					),
+					// Optional ?job=<id> (relevance, summary, rewrite, titles, search): the keys best suited to it first.
+					'job'    => array(
+						'type'     => 'string',
+						'required' => false,
+					),
 				),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$worker = preg_replace( '/\.ya?ml$/i', '', (string) $req->get_param( 'worker' ) );
-					return new WP_REST_Response( sourceweb_ai_served( sanitize_key( $worker ) ) );
+					return new WP_REST_Response( sourceweb_ai_served( sanitize_key( $worker ), sanitize_key( (string) $req->get_param( 'job' ) ) ) );
 				},
 			)
 		);

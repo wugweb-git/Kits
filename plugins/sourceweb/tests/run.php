@@ -556,5 +556,17 @@ aw_t( 1 === count( $r1 ) && 2 === count( $n1 ), 'rows to routes: bad place and i
 list( $r2 ) = sourceweb_routes_from_rows( array( array( 'place' => 'a', 'op' => 'x', 'keep' => array( 'or', array( 'has', 'title' ) ) ) ), $pl );
 aw_t( array( 'or', array( 'has', 'title' ) ) === $r2[0]['when'], 'rows to routes: a kept custom test is stored unchanged' );
 
+// AI jobs: keys ordered by capability.
+require_once dirname( __DIR__ ) . '/includes/ai/ai-jobs.php';
+$jc = array( 'groq' => array( 'text', 'fast' ), 'nvidia' => array( 'text', 'reasoning', 'slow' ), 'gemini' => array( 'text', 'long', 'search' ) );
+$jr = array( array( 'provider' => 'nvidia' ), array( 'provider' => 'groq' ), array( 'provider' => 'gemini' ) );
+aw_t( 'groq' === sourceweb_ai_order_for_job( $jr, 'relevance', $jc )[0]['provider'], 'ai job: relevance puts the fast key first' );
+$jo = sourceweb_ai_order_for_job( $jr, 'relevance', $jc );
+aw_t( 'nvidia' === end( $jo )['provider'], 'ai job: a slow key goes last for a quick check' );
+aw_t( 'nvidia' === sourceweb_ai_order_for_job( $jr, 'rewrite', $jc )[0]['provider'], 'ai job: rewrite wants reasoning' );
+aw_t( 'gemini' === sourceweb_ai_order_for_job( $jr, 'search', $jc )[0]['provider'], 'ai job: search wants a search-capable key' );
+aw_t( $jr === sourceweb_ai_order_for_job( $jr, 'nope', $jc ), 'ai job: an unknown job keeps the owner order' );
+aw_t( 3 === count( sourceweb_ai_order_for_job( $jr, 'summary', $jc ) ), 'ai job: every key is still offered' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

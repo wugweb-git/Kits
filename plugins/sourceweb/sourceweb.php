@@ -122,6 +122,7 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/rules-admin.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/directory/enrichment-front.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/review/review-queue.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-suggestions.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-jobs.php'; // what each AI job needs (pure)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/site-health.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/relay.php';
