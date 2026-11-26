@@ -251,6 +251,52 @@
 						}
 					),
 					el(
+						ToggleControl,
+						{
+							label: __( 'Do not follow links on this page', 'rankweb' ),
+							checked: '1' === meta._rankweb_nofollow,
+							help: __( 'Adds nofollow: search engines are asked not to follow the links on the page.', 'rankweb' ),
+							onChange: function( on ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_nofollow: on ? '1' : '' } ) } );
+							}
+						}
+					),
+					el(
+						ToggleControl,
+						{
+							label: __( 'Do not show a cached copy', 'rankweb' ),
+							checked: '1' === meta._rankweb_noarchive,
+							help: __( 'Adds noarchive.', 'rankweb' ),
+							onChange: function( on ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_noarchive: on ? '1' : '' } ) } );
+							}
+						}
+					),
+					el(
+						ToggleControl,
+						{
+							label: __( 'Do not show a text snippet', 'rankweb' ),
+							checked: '1' === meta._rankweb_nosnippet,
+							help: __( 'Adds nosnippet. This also overrides the longest snippet below.', 'rankweb' ),
+							onChange: function( on ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_nosnippet: on ? '1' : '' } ) } );
+							}
+						}
+					),
+					el(
+						TextControl,
+						{
+							label: __( 'Longest text snippet (characters)', 'rankweb' ),
+							type: 'number',
+							min: -1,
+							value: meta._rankweb_max_snippet || '',
+							help: __( 'Adds max-snippet. Leave empty for no rule, -1 for no limit.', 'rankweb' ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_max_snippet: v } ) } );
+							}
+						}
+					),
+					el(
 						'div',
 						{ style: { marginTop: '20px' } },
 						el( 'strong', { style: { display: 'block', marginBottom: '8px' } }, __( 'Google SERP Preview', 'rankweb' ) ),

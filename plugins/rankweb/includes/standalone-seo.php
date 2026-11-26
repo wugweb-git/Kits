@@ -269,6 +269,8 @@ add_action(
 	1
 );
 
+require_once __DIR__ . '/class-rankweb-robots.php';
+
 /* ---------- robots: noindex by rule, through core's wp_robots (one robots tag) ---------- */
 
 /** Whether the viewed page should stay out of search results, by a post's own setting or a rule of the page kind. */
@@ -301,6 +303,19 @@ add_filter(
 			$robots['noindex'] = true;
 			$robots['follow']  = true;
 			unset( $robots['max-image-preview'] );
+		}
+		if ( is_singular() && class_exists( 'RankWeb_Robots' ) && ( ! defined( 'RANKWEB_ITEM_ROBOTS' ) || RANKWEB_ITEM_ROBOTS ) ) {
+			$id   = get_queried_object_id();
+			$item = RankWeb_Robots::from_meta(
+				array(
+					'nofollow'    => get_post_meta( $id, '_rankweb_nofollow', true ),
+					'noarchive'   => get_post_meta( $id, '_rankweb_noarchive', true ),
+					'nosnippet'   => get_post_meta( $id, '_rankweb_nosnippet', true ),
+					'max_snippet' => get_post_meta( $id, '_rankweb_max_snippet', true ),
+				),
+				rankweb_post_seo_field( $id, 'robots' )
+			);
+			$robots = RankWeb_Robots::apply( $robots, $item );
 		}
 		return $robots;
 	},

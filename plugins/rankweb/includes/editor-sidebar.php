@@ -16,6 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/class-rankweb-robots.php';
+
 /**
  * Post types the sidebar and its meta are registered for. Default post, page and aw_press; filterable.
  *
@@ -96,6 +98,30 @@ add_action(
 					'single'            => true,
 					'type'              => 'string',
 					'sanitize_callback' => fn( $v ) => '1' === (string) $v ? '1' : '',
+					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+				)
+			);
+			foreach ( array( '_rankweb_nofollow', '_rankweb_noarchive', '_rankweb_nosnippet' ) as $flag_key ) {
+				register_post_meta(
+					$type,
+					$flag_key,
+					array(
+						'show_in_rest'      => true,
+						'single'            => true,
+						'type'              => 'string',
+						'sanitize_callback' => fn( $v ) => '1' === (string) $v ? '1' : '',
+						'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+					)
+				);
+			}
+			register_post_meta(
+				$type,
+				'_rankweb_max_snippet',
+				array(
+					'show_in_rest'      => true,
+					'single'            => true,
+					'type'              => 'string',
+					'sanitize_callback' => fn( $v ) => null === RankWeb_Robots::max_snippet( $v ) ? '' : (string) RankWeb_Robots::max_snippet( $v ),
 					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
 				)
 			);

@@ -69,6 +69,7 @@ function rankweb_seo_modules(): array {
 			'fields' => array(
 				'AW_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
 				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
+				'RANKWEB_ITEM_ROBOTS' => array( 'type' => 'int', 'label' => 'Per-item robots options in the editor (1 on, 0 off)', 'help' => 'Nofollow, noarchive, nosnippet and max-snippet next to "Keep out of search results". Off: items print only the page-kind rules.', 'default' => 1 ),
 				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array() ),
 			),
 		),
