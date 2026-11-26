@@ -17,3 +17,11 @@ The editorial calendar and campaign planning plugin owns:
 2. **Deferred Tasks from 17 Nov Session (`claude/planweb-deferred-1117`)**:
    - Campaign timeline visualization without heavy third-party Gantt chart libraries.
    - Filter calendar entries by author, category, or campaign tag.
+
+## Carried over from docs/org (26 Nov 2026)
+
+Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
+
+- Strip the `aw_team_dates` import before WordPress.org submission (`import.php`, `migrate.php`, `team-dates.php`; `team-dates.php:208` calls a Core function without a guard when the PlanWeb switch is off).
+- Drag-and-drop schedule, filters by author, category or campaign, a Help tab.
+- Screenshots, Plugin Check on a clean WordPress, and the submission itself.

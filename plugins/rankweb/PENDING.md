@@ -48,3 +48,12 @@ The SEO, schema, and sitemap plugin owns:
    - ✅ Word boundaries and skipping inside `<a>`, `<h1>`–`<h6>` and `<pre>` are covered by `LinkerTest.php`.
 
 4. **Services already built and on the branch** (for the record, not open work): `titles.php`, `canonical.php`, `sitemap.php`, `robots.php`, `schema.php`, `schema-custom.php`, `rank-math-schema.php`, `opengraph.php`, `silos.php`, `redirects.php`, `redirect-tools.php`, `programmatic.php`, `media-seo.php`, `video.php`, `faq-data.php`, plus the admin shell screens (`rankweb-ui.php`, `rankweb-dashboard.php`, `rankweb-modules.php`, `rankweb-rest.php`, `rankweb-caps.php`).
+
+## Carried over from docs/org (26 Nov 2026)
+
+Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
+
+- Shell versions for SEO CSV, Internal links, Redirect tools and Images (`bulk-csv.php`, `link-audit.php`, `redirect-tools.php`, `media-seo.php`) and the FAQ list table: they exist only as server-rendered screens, so they cannot be removed before that.
+- Redirect categories: never built. A native redirect list is not planned; redirect tools write to Rank Math's list.
+- Ranking formula: owner decision.
+- Not in this repo: a bundled `rankweb-shell` package (`packages/rankweb-shell` is empty).

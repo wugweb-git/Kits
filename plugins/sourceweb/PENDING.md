@@ -28,3 +28,12 @@ The content ingestion and syndication plugin owns:
 1. **AI Model Router Parity**:
    - Free/open model integration when gated by owner consent.
    - Ongoing evaluation of feed sources against quality thresholds.
+
+## Carried over from docs/org (26 Nov 2026)
+
+Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
+
+- A standalone `sourceweb_` edition with an external-services registry and a shared `Wugweb\ExternalServices` package: not built. The plugin still uses `AW_SRC_*` constants and `aw/v1` routes (kept by policy).
+- Menu: the code has Overview, Enrichment review, To review and per-tab items; the old plan wanted Dashboard, To review, Settings.
+- `enrichment-front.php` calls `kits_icon()` and `kits_date()` without a guard (lines 85, 91, 214).
+- The AI model router is on hold (owner).

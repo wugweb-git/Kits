@@ -40,3 +40,13 @@ The foundational companion plugin owns:
    - **Upload Limits & Granular File Diagnostics (B2)**: Raise limit to 8 MB (`kits_ff_upload()` in `includes/forms/fluentforms.php`), replacing generic errors with specific diagnostics (file size vs unsupported formats like HEIC), displaying selected file name, size indicator, and a Remove button.
    - **Multi-Step Validation Error Summary Banner (B3)**: In `assets/js/forms.js`, when step validation fails on a previous step, display a top-level error summary banner on the active step with direct links that jump to and focus the invalid fields.
    - **About Field Prefill Sanitization (B1)**: Ensure `kits_ff_form()` textarea value population strips raw HTML tags, decodes entities, and converts date markup (`<span class="kit-date">`) into plain text before rendering.
+
+## Carried over from docs/org (26 Nov 2026)
+
+Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
+
+- Translations for the shell (only `kits-core.pot` exists).
+- Shell parts still missing: detail panel, rich text, file and media fields, pair-list editor, row view inside a list, read-only HashList and ServiceRow, FieldReview options.
+- Settings "Features" section with `kits_settings_fields` and `kits_features` filters; a `kits/v1/site-check` route; a `kits/socials` block.
+- Hidden screens: Setup Wizard (saves an option nothing reads, OD2) and Scripts & Pixels (raw save, no `unfiltered_html` check, OD3) wait for owner decisions; Brand Customizer is reachable only through Appearance › Brand Tokens.
+- Deleting the old `aw_keys` option on live is owner-gated (the read fallback is already gone).
