@@ -34,6 +34,8 @@ function rankweb_bulk_link_keywords( int $id ): array {
 	return function_exists( 'rankweb_link_keywords' ) ? rankweb_link_keywords( $id ) : (array) get_post_meta( $id, '_aw_link_keywords', true );
 }
 
+require_once __DIR__ . '/class-rankweb-seo-bar.php';
+
 /* ---------- The column ---------- */
 
 add_action(
@@ -79,13 +81,45 @@ function rankweb_bulk_column_cell( $col, $id ): void {
 	$title = (string) get_post_meta( $id, 'rank_math_title', true );
 	$desc  = (string) get_post_meta( $id, 'rank_math_description', true );
 	$focus = (string) get_post_meta( $id, 'rank_math_focus_keyword', true );
-	$none  = '<span style="color:#b32d2e">' . esc_html__( 'missing', 'rankweb' ) . '</span>';
+	$checks = RankWeb_Seo_Bar::checks(
+		array(
+			'title'       => $title,
+			'post_title'  => (string) get_the_title( $id ),
+			'description' => '' !== $desc ? $desc : (string) get_post_meta( $id, '_rankweb_description', true ),
+			'focus'       => $focus,
+			'noindex'     => rankweb_is_noindex_item( $id ) || '1' === (string) get_post_meta( $id, '_rankweb_noindex', true ),
+			'slug'        => (string) get_post_field( 'post_name', $id ),
+		)
+	);
+	$colors = array(
+		RankWeb_Seo_Bar::GOOD => '#00a32a',
+		RankWeb_Seo_Bar::WARN => '#dba617',
+		RankWeb_Seo_Bar::BAD  => '#d63638',
+	);
+	$words  = array(
+		RankWeb_Seo_Bar::GOOD => __( 'Good', 'rankweb' ),
+		RankWeb_Seo_Bar::WARN => __( 'Check', 'rankweb' ),
+		RankWeb_Seo_Bar::BAD  => __( 'Fix', 'rankweb' ),
+	);
+	$worst  = RankWeb_Seo_Bar::worst( $checks );
 	echo '<div class="aw-seo-col">';
-	echo '<div><strong>' . esc_html__( 'Title', 'rankweb' ) . ':</strong> ' . ( '' !== $title ? esc_html( $title ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
-	echo '<div><strong>' . esc_html__( 'Desc', 'rankweb' ) . ':</strong> ' . ( '' !== $desc ? esc_html( wp_html_excerpt( $desc, 60, '…' ) ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
-	echo '<div><strong>' . esc_html__( 'Focus', 'rankweb' ) . ':</strong> ' . ( '' !== $focus ? esc_html( $focus ) : $none ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $none is a fixed escaped string
-	if ( in_array( 'noindex', rankweb_bulk_robots( $id ), true ) ) {
-		echo '<div><em>' . esc_html__( 'noindex', 'rankweb' ) . '</em></div>';
+	// One segment per check, in colour and, because colour alone is not enough, with the worst status in words.
+	echo '<div style="display:flex;gap:2px;max-width:140px" aria-hidden="true">';
+	foreach ( $checks as $c ) {
+		echo '<span style="flex:1;height:6px;border-radius:3px;background:' . esc_attr( $colors[ $c['status'] ] ) . '"></span>';
+	}
+	echo '</div>';
+	$n = RankWeb_Seo_Bar::counts( $checks );
+	/* translators: 1: checks that pass, 2: checks to look at, 3: checks to fix. */
+	echo '<span class="screen-reader-text">' . esc_html( sprintf( __( 'SEO checks: %1$d good, %2$d to check, %3$d to fix.', 'rankweb' ), $n['good'], $n['warn'], $n['bad'] ) ) . '</span>';
+	echo '<div aria-hidden="true"><strong>' . esc_html( $words[ $worst ] ) . '</strong></div>';
+	$todo = array_filter( $checks, fn( $c ) => RankWeb_Seo_Bar::GOOD !== $c['status'] );
+	if ( $todo ) {
+		echo '<ul style="margin:2px 0 0 1em;list-style:disc" aria-label="' . esc_attr__( 'SEO checks to look at', 'rankweb' ) . '">';
+		foreach ( $todo as $c ) {
+			echo '<li>' . esc_html( $c['label'] ) . '</li>';
+		}
+		echo '</ul>';
 	}
 	echo '<span class="hidden aw-seo-title">' . esc_html( $title ) . '</span>';
 	echo '<span class="hidden aw-seo-desc">' . esc_html( $desc ) . '</span>';
