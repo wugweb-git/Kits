@@ -7,7 +7,7 @@
  *
  * Field kinds: text, longtext, url, date (any date or date-time text strtotime reads; stored ISO 8601), number, lines
  * (one value per line), steps (one instruction per line, written as HowToStep), items (one address per line, written as
- * ListItem), select (options). A spec may also hold 'nest' (types for paths that differ from NEST), 'const' (fixed values) and
+ * ListItem), variants (one product variant per line as name | sku | price | currency | image address, written as Product), select (options). A spec may also hold 'nest' (types for paths that differ from NEST), 'const' (fixed values) and
  * 'any_of'.
  *
  * @package rankweb
@@ -374,6 +374,32 @@ final class RankWeb_Schema_Gallery {
 					array( 'itemListElement', 'Addresses of the pages in the list (one per line, at least two)', 'items', true ),
 				),
 			),
+			'ProductGroup'        => array(
+				'label'  => 'Product with variants',
+				'type'   => 'ProductGroup',
+				'fields' => array(
+					array( 'name', 'Name', 'text', true ),
+					array( 'productGroupID', 'Your ID for the group', 'text', true ),
+					array( 'variesBy', 'What varies (one per line, e.g. https://schema.org/color, https://schema.org/size)', 'lines', true ),
+					array( 'description', 'Description', 'longtext', false ),
+					array( 'brand.name', 'Brand', 'text', false ),
+					array( 'url', 'Address of the product page', 'url', false ),
+					array( 'hasVariant', 'Variants (one per line: name | SKU | price | currency | image address)', 'variants', true ),
+				),
+			),
+			'MemberProgram'       => array(
+				'label'  => 'Loyalty program',
+				'type'   => 'MemberProgram',
+				'fields' => array(
+					array( 'name', 'Name of the program', 'text', true ),
+					array( 'description', 'Description', 'longtext', true ),
+					array( 'url', 'Address of the program page', 'url', false ),
+					array( 'hasTiers.name', 'A tier (e.g. Gold)', 'text', true ),
+					array( 'hasTiers.hasTierBenefit', 'Its benefit', 'select', true, array( '' => '', 'https://schema.org/TierBenefitLoyaltyPoints' => 'Loyalty points', 'https://schema.org/TierBenefitLoyaltyPrice' => 'Member prices', 'https://schema.org/TierBenefitLoyaltyReturns' => 'Better returns', 'https://schema.org/TierBenefitLoyaltyShipping' => 'Better shipping' ) ),
+					array( 'hasTiers.membershipPointsEarned.value', 'Points earned per unit spent', 'number', false ),
+				),
+				'nest'   => array( 'hasTiers' => 'MemberProgramTier', 'hasTiers.membershipPointsEarned' => 'QuantitativeValue' ),
+			),
 			'Review'              => array(
 				'label'  => 'Review',
 				'type'   => 'Review',
@@ -463,6 +489,29 @@ final class RankWeb_Schema_Gallery {
 					$val[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => $u );
 				}
 				if ( count( $val ) < 2 ) {
+					if ( $f[3] ) {
+						$missing[] = $f[1];
+					}
+					continue;
+				}
+			} elseif ( 'variants' === $f[2] ) {
+				$val = array();
+				foreach ( array_filter( array_map( 'trim', preg_split( '/[\r\n]+/', $v ) ) ) as $line ) {
+					$c = array_map( 'trim', explode( '|', $line ) );
+					if ( '' === ( $c[0] ?? '' ) || ! is_numeric( $c[2] ?? '' ) || ! preg_match( '/^[A-Z]{3}$/', strtoupper( $c[3] ?? '' ) ) ) {
+						continue; // a variant needs a name, a price and a three-letter currency
+					}
+					$var = array( '@type' => 'Product', 'name' => $c[0] );
+					if ( '' !== ( $c[1] ?? '' ) ) {
+						$var['sku'] = $c[1];
+					}
+					if ( preg_match( '#^https?://\S+$#i', $c[4] ?? '' ) ) {
+						$var['image'] = $c[4];
+					}
+					$var['offers'] = array( '@type' => 'Offer', 'price' => 0 + $c[2], 'priceCurrency' => strtoupper( $c[3] ) );
+					$val[]         = $var;
+				}
+				if ( ! $val ) {
 					if ( $f[3] ) {
 						$missing[] = $f[1];
 					}

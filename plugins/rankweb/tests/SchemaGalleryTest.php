@@ -124,4 +124,19 @@ final class SchemaGalleryTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 'MonetaryAmount', $r['node']['offers']['shippingDetails']['shippingRate']['@type'] );
 		$this->assertSame( 'MerchantReturnPolicy', $r['node']['offers']['hasMerchantReturnPolicy']['@type'] );
 	}
+
+	public function testProductGroupBuildsVariantsAndSkipsBadLines(): void {
+		$r = $this->node( 'ProductGroup', array( 'name' => 'Collar', 'productGroupID' => 'c1', 'variesBy' => 'https://schema.org/size', 'hasVariant' => "Small | c1-s | 499 | inr | https://example.org/s.jpg\nno price | x | | INR\nLarge | c1-l | 549 | INR" ) );
+		$this->assertSame( 'ProductGroup', $r['node']['@type'] );
+		$this->assertSame( 2, count( $r['node']['hasVariant'] ) );
+		$this->assertSame( 'INR', $r['node']['hasVariant'][0]['offers']['priceCurrency'] );
+		$this->assertSame( 549, $r['node']['hasVariant'][1]['offers']['price'] );
+		$this->assertSame( 'Variants (one per line: name | SKU | price | currency | image address)', $this->node( 'ProductGroup', array( 'name' => 'C', 'productGroupID' => 'c', 'variesBy' => 'x', 'hasVariant' => 'junk' ) )['missing'][0] );
+	}
+
+	public function testLoyaltyProgramNestsItsTier(): void {
+		$r = $this->node( 'MemberProgram', array( 'name' => 'Paws Club', 'description' => 'Earn points', 'hasTiers__name' => 'Gold', 'hasTiers__hasTierBenefit' => 'https://schema.org/TierBenefitLoyaltyPoints', 'hasTiers__membershipPointsEarned__value' => '2' ) );
+		$this->assertSame( 'MemberProgramTier', $r['node']['hasTiers']['@type'] );
+		$this->assertSame( 'QuantitativeValue', $r['node']['hasTiers']['membershipPointsEarned']['@type'] );
+	}
 }
