@@ -1,7 +1,7 @@
 # UX discovery: Kits suite wp-admin information architecture
 
 **Date:** 26 Nov 2026
-**Status:** Draft, for the owner's review. A proposal only: no code was changed, and the owner's rule of 25 Nov (no tabbing or regrouping of InsightWeb and SourceWeb) still stands until the owner lifts it.
+**Status:** Draft, for the owner's review. A proposal only: no code was changed. Owner, 26 Nov: the 25 Nov rule meant InsightWeb and SourceWeb must not be merged into one plugin. Each stays its own standalone plugin and each needs an overhaul, so grouping inside each plugin is allowed.
 **Evidence:** the menu and tab code in `plugins/*` on kits-suite `26797bf`, and `docs/architecture/admin-ia-inventory.md`. No user research or live usage data exists, so every claim about people is marked as an assumption.
 
 ## 1. Problem
@@ -89,5 +89,5 @@ The shell's buttons and lists already set `aria-busy` (`kits-core/src/shell/inde
 ## 10. Next steps
 
 - [ ] Owner: approve the five group names and the order, or change them.
-- [ ] Owner: say whether InsightWeb and SourceWeb may be re-ordered (the 25 Nov "no regrouping" rule).
-- [ ] If yes: re-order the `$order` arrays in `sourceweb-ui.php` and `insightweb-ui.php` and rebuild nothing (labels and order only).
+- [x] Owner (26 Nov): InsightWeb and SourceWeb stay two separate standalone plugins; grouping inside each is allowed.
+- [ ] Re-order the `$order` arrays in `sourceweb-ui.php` and `insightweb-ui.php` and rebuild nothing (labels and order only).
