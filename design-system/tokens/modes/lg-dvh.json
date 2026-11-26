@@ -1,0 +1,7 @@
+{
+  "article": {
+    "cover-height": {
+      "$value": "calc(100dvh - {header.height} - {gap.8})"
+    }
+  }
+}

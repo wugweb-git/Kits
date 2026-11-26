@@ -1,0 +1,60 @@
+{
+  "shell": {
+    "gutter": {
+      "$value": "48px",
+      "$type": "dimension"
+    }
+  },
+  "grid": {
+    "gap": {
+      "$value": "32px",
+      "$type": "dimension"
+    }
+  },
+  "article": {
+    "cols": {
+      "$value": "minmax(0, 5fr) minmax(0, 7fr)"
+    },
+    "areas": {
+      "$value": "\"cover hero\" \"cover body\""
+    },
+    "column": {
+      "$value": "none"
+    },
+    "cover-ratio": {
+      "$value": "auto"
+    },
+    "cover-height": {
+      "$value": "calc(100svh - {header.height} - {gap.8})",
+      "$description": "svh first, dvh where supported (kits shell-safe-areas-and-hero). A custom property takes its last declaration even when the unit is unknown, so the dvh value sits behind @supports instead of a second line here."
+    },
+    "cover-position": {
+      "$value": "sticky"
+    },
+    "title-size": {
+      "$value": "{t.h1}"
+    }
+  },
+  "space": {
+    "section-xs": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-sm": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-md": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-lg": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-xl": {
+      "$value": "96px",
+      "$type": "dimension"
+    }
+  }
+}

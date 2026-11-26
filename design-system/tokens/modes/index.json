@@ -1,0 +1,8 @@
+{
+  "$description": "Mode file -> the CSS at-rules its :root block is wrapped in (outermost first, joined by \" > \").",
+  "modes": {
+    "md": "@media (min-width: 768px)",
+    "lg": "@media (min-width: 1200px)",
+    "lg-dvh": "@media (min-width: 1200px) > @supports (height: 100dvh)"
+  }
+}
