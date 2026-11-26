@@ -33,3 +33,4 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Country filter (53): not built. Site Kit's Search Console call is only known to take a page filter (`gsc.php`), and a filter it ignored would show unfiltered figures as filtered; build it once Site Kit's accepted arguments are verified on a real site.
 - The Step 0 to 9 action plan surface and 404 / internal-search surfacing: unverified.
 - Tabs: 10 flat tabs; grouping inside the plugin is allowed (owner, 26 Nov) and proposed in `docs/ux-discovery/2026-11-26-admin-ia-discovery.md`.
+- `data/links-2026-11-02.php` holds static seeded links: confirm they are never shown as live data.

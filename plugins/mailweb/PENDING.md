@@ -42,3 +42,4 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - IMAP adapter: skeleton only (`providers.php:175`).
 - Multi-tenant sender profiles; a scheduled daily DNS check (the code checks DNS on page view, `smtp.php:261`).
 - Menu order: the plan says Dashboard first, the code opens on Inbox; owner to decide.
+- No tests for the Hostinger API transport, flush and retry, or inbox. A live check needs the Hostinger token and SMTP credentials.

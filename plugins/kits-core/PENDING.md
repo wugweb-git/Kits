@@ -57,3 +57,24 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Tools tab (RankWeb) and Help tab (PlanWeb, MailWeb): wait for the owner's reference list. MailWeb already has a Help card; RankWeb has a Tools card (owner, 14 Nov: no Tools tab).
 - Setup Wizard (`kits-onboarding`) and Scripts & Pixels (`kits-scripts`): registered under Kits but hidden, reachable by URL only. Link them from Kits or retire them (owner decisions OD2, OD3).
 - Kept on purpose, per plugin (independence): `*_simple_table`, `*_rest_can`, `rankweb_seo_api_allowed`, `insightweb_si_api_allowed`.
+
+## Carried over from the owner decisions and the multi-tenant guide (26 Nov 2026)
+
+Tenancy is per installation (Multisite keeps one brand per site), with no network or SaaS-managed branding for now. The theme owns no tenant branding and works without Kits Core. Both WordPress.org and direct distribution come from one source tree.
+
+**Brand layer (Layer 3), not built.** Kits Core has no `wp_theme_json_data_theme` filter. The Brand Customizer prints CSS custom properties in `wp_head` (priority 100) and the block editor, so it wins over Site Editor changes and "Reset styles" does not restore it. Decided shape: merge tenant values into the theme data by slug (list presets are replaced whole, so return the full list), clean the resolved-data cache when tenant values change and when Core is activated or deactivated, and Reset must restore the tenant preset instead of deleting the option (a separate confirmed "clear brand" action removes it).
+
+**Brand Customizer, open:**
+- The three tenant profiles (Modern Tech, Editorial, Eco) are hard-coded; they should come through a filter. Editorial and Eco name fonts the theme does not bundle (only Inter is).
+- No contrast check on tenant colours; the theme's dark mode does not follow tenant colours.
+- `kits_brand_tokens` is not in settings transfer, the uninstall list or the uninstall backup.
+- Setting defaults should be read from the theme's own `theme.json`, and a value equal to its default should not be skipped.
+
+**Owner decisions still open:**
+- OD1 accent colour: theme `primary` is `#C6D2E0` (what renders), the Brand Customizer default is `#FFBE1A`, the admin shell uses `#FFC300`, old docs say `#f59e0b`. Recommendation: `theme.json` is the source of truth; keep `#C6D2E0` unless the brand says otherwise.
+- OD2 Setup Wizard: it has 3 steps and saves `kits_active_style_variation`, which nothing reads; swatches do not match `styles/*.json`; `ink` is listed as a variation and `dark` is missing. Recommendation: repair it to 3 steps that really apply a variation, or remove it. Do not build the 4-step flow.
+- OD3 Scripts & Pixels: raw script text saved under `manage_options`. Recommendation: gate on `unfiltered_html`, keep it raw, correct the docs, add a test.
+- OD4 Cloudflare relay and Foundry: no code exists. Recommendation: drop it from this file unless a date exists.
+- OD6 Update URI: the WordPress.org build omits `Update URI` and the updater file; the direct build keeps them.
+- OD7 commit history naming the reference theme: leave history alone.
+- Shared connector or auth layer across plugins: not decided; each plugin keeps its own credentials today. `packages/shared-php` is unused.

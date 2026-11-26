@@ -25,3 +25,4 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Strip the `aw_team_dates` import before WordPress.org submission (`import.php`, `migrate.php`, `team-dates.php`; the unguarded Core call in the Dates menu is now guarded, 26 Nov).
 - Drag-and-drop schedule, filters by author, category or campaign, a Help tab.
 - Screenshots, Plugin Check on a clean WordPress, and the submission itself.
+- Scheduled jobs (overdue sweep, reminders, repeats, digest): not built. Owner decision first: Action Scheduler (new dependency) or WP-cron. Only the `planweb_counts_build` cron exists.

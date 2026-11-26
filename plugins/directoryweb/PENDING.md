@@ -106,3 +106,4 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 - Not verifiable without outside systems (class X): claim email delivery through a real transport; anonymous versus logged-in claim submission over HTTP (Playground answers every request as an administrator; both hooks call one handler); the Kits shell Settings Claims row drawn in a browser (payload checked in PHP only); the Fluent Forms Pro uploader; Apache and nginx deny rules for the private evidence folder (documented, untested).
 - Deferred: CRM events (no hook consumer yet) and the default preset (waits on Kits Core's preset format).
+- Open owner decision (OD8): Fluent Forms claims keep their own `aw_c_status` meta and screen; native claims use the state table. Recommendation: leave both, never migrate stored claims, new sites use the native form. Revoke and re-open for Fluent Forms claims are not built.
