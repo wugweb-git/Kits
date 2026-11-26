@@ -20,8 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 function rankweb_seo_watched_endpoints() {
 	$out = array(
 		'/sitemap_index.xml' => 'sitemap_index\.xml$',
-		'/llms.txt'          => '^llms\.txt$',
 	);
+	// llms.txt is Rank Math's module: watch it only when that module is switched on (a site that never used it has no such file).
+	$rm_modules = (array) get_option( 'rank_math_modules', array() );
+	if ( array_intersect( array( 'llms', 'llms-txt', 'llms_txt' ), $rm_modules ) ) {
+		$out['/llms.txt'] = '^llms\.txt$';
+	}
 	if ( rankweb_seo_module_on( 'sitemap' ) && post_type_exists( 'aw_listing' ) ) { // no directory, no directory sitemap to watch
 		$out['/directory-sitemap.xml'] = '([^/]+?)-sitemap([0-9]+)?\.xml$'; // Rank Math's rule for every {type}-sitemap.xml
 	}
