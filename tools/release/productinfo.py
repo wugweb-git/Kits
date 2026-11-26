@@ -87,6 +87,17 @@ def info(slug: str) -> dict:
         "external_services": sec.get("external services", ""),
         "installation": sec.get("installation", ""),
         "changelog": sec.get("changelog", ""),
+        "faq": sec.get("frequently asked questions", ""),
+        "credits": sec.get("credits", "") or sec.get("copyright", "") or sec.get("resources", ""),
+        "screenshots": sec.get("screenshots", ""),
+        "upgrade_notice": sec.get("upgrade notice", ""),
+        "contributors": [c.strip() for c in header(rh, "Contributors").split(",") if c.strip()],
+        "donate": header(rh, "Donate link"),
+        "author": header(main, "Author"),
+        "author_uri": header(main, "Author URI"),
+        "text_domain": header(main, "Text Domain"),
+        "domain_path": header(main, "Domain Path"),
+        "license_uri": header(main, "License URI"),
         "changelog_current": changelog_for(rm, version) if rm else "",
     }
 

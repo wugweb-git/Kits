@@ -160,8 +160,32 @@ def esc(s: str) -> str:
     return html.escape(s or "", quote=True)
 
 
-def layout(title: str, body: str, depth: int) -> str:
+def faq_html(body: str) -> str:
+    """readme FAQ ('= Question =' then answer) as accessible disclosure widgets."""
+    out = []
+    for m in re.finditer(r"^=\s*(.+?)\s*=\s*\n(.*?)(?=^=\s|\Z)", body, re.M | re.S):
+        out.append(f"<details class=\"faq\"><summary>{esc(m.group(1))}</summary>{text_to_html(m.group(2))}</details>")
+    return "\n".join(out)
+
+
+def card(title: str, inner: str, ident: str = "") -> str:
+    i = f' id="{ident}"' if ident else ""
+    return f'<section class="card"{i} aria-labelledby="h-{ident or esc(title).lower().replace(" ", "-")}"><h2 id="h-{ident or esc(title).lower().replace(" ", "-")}">{esc(title)}</h2>{inner}</section>'
+
+
+def tile(label: str, value: str, sub: str = "", href: str = "") -> str:
+    v = f'<a href="{esc(href)}">{esc(value)}</a>' if href else esc(value)
+    s = f'<span class="tile-sub">{esc(sub)}</span>' if sub else ""
+    return f'<li class="tile"><span class="tile-label">{esc(label)}</span><span class="tile-value">{v}</span>{s}</li>'
+
+
+def layout(title: str, body: str, depth: int, tabs: list[tuple[str, str]] | None = None, header: str = "") -> str:
     up = "../" * depth
+    nav = ""
+    if tabs:
+        cur = ' aria-current="page"'
+        items = "".join(f'<li><a href="{esc(h)}"{cur if k == 0 else ""}>{esc(t)}</a></li>' for k, (t, h) in enumerate(tabs))
+        nav = f'<nav class="tabs" aria-label="Sections"><ul>{items}</ul></nav>'
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -172,8 +196,9 @@ def layout(title: str, body: str, depth: int) -> str:
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header class="top"><div class="wrap"><a class="brand" href="{up}">Kits by Wugweb</a>
-<nav aria-label="Site"><a href="{up}">Products</a> <a href="{up}registry/index.json">Registry</a> <a href="https://github.com/{pi.GITHUB}">Source</a></nav></div></header>
+<header class="top"><div class="wrap bar"><a class="brand" href="{up}">Kits <span>by Wugweb</span></a>
+<nav aria-label="Site"><a href="{up}">Products</a><a href="{up}registry/index.json">Registry</a><a href="https://github.com/{pi.GITHUB}">Source</a></nav></div></header>
+<div class="appheader"><div class="wrap">{header}{nav}</div></div>
 <main id="main" class="wrap">
 {body}
 </main>
@@ -184,48 +209,72 @@ def layout(title: str, body: str, depth: int) -> str:
 
 
 def product_page(i: dict, rel: dict | None) -> str:
-    rows = [("Version", i["version"]), ("Requires WordPress", i["requires_wp"]), ("Requires PHP", i["requires_php"]), ("Tested up to", i["tested"]), ("Licence", i["license"])]
-    facts = "".join(f"<tr><th scope=\"row\">{esc(k)}</th><td>{esc(v)}</td></tr>" for k, v in rows if v)
-    facts += f'<tr><th scope="row">Source</th><td><a href="{esc(i["source"])}">{esc(i["source"].replace("https://github.com/", ""))}</a></td></tr>'
+    theme = i["type"] == "theme"
+    tiles = [tile("Version", i["version"], "in source")]
     if rel:
-        dl = [f'<p>Release <a href="https://github.com/{pi.GITHUB}/releases/tag/{esc(rel["tag"])}">{esc(rel["tag"])}</a>, published {esc(rel["released_at"][:10])}'
-              + (" (prerelease)" if rel["prerelease"] else "") + f'. Version in that release: <strong>{esc(rel["version"])}</strong>.</p>']
-        dl.append("<ul class=\"dl\">")
+        tiles.append(tile("Released", rel["version"], rel["released_at"][:10] + (" · prerelease" if rel["prerelease"] else ""), f'https://github.com/{pi.GITHUB}/releases/tag/{rel["tag"]}'))
+    else:
+        tiles.append(tile("Released", "Not yet", "no download offered"))
+    tiles += [tile("WordPress", i["requires_wp"] + "+" if i["requires_wp"] else "", f'tested to {i["tested"]}' if i["tested"] else ""), tile("PHP", i["requires_php"] + "+" if i["requires_php"] else "")]
+    tiles = [t for t in tiles if '<span class="tile-value"></span>' not in t]
+    cards = []
+    if rel:
+        dl = ['<ul class="dl">']
         for key, label, note in (("commercial", "Download", "for a site you manage yourself"), ("wporg", "WordPress.org build", "no update header of its own, source included")):
             url = rel["download"].get(key)
             if url:
                 sha = rel["sha256"].get(key)
-                dl.append(f'<li><a href="{esc(url)}">{label}</a> <span class="muted">({note})</span>' + (f'<br><span class="sha">SHA-256 {esc(sha)}</span>' if sha else "") + "</li>")
+                cls = "btn" if key == "commercial" else "btn btn-2"
+                dl.append(f'<li><a class="{cls}" href="{esc(url)}">{label}</a> <span class="muted">{note}</span>' + (f'<br><span class="sha">SHA-256 {esc(sha)}</span>' if sha else "") + "</li>")
         dl.append("</ul>")
-        download = "\n".join(dl)
+        download = "".join(dl)
     else:
         download = "<p>Not released yet. The source is public; no download is offered until a release is published.</p>"
-    sections = [f"<h2>Download</h2>{download}"]
+    cards.append(card("Download", download, "download"))
     if i["description_long"].strip():
-        sections.append("<h2>Description</h2>" + text_to_html(i["description_long"]))
-    if i["external_services"].strip():
-        sections.append("<h2>External services</h2>" + text_to_html(i["external_services"]))
+        cards.append(card("Description", text_to_html(i["description_long"]), "description"))
+    if i["screenshots"].strip():
+        cards.append(card("Screenshots", text_to_html(i["screenshots"]), "screenshots"))
     if i["installation"].strip():
-        sections.append("<h2>Installation</h2>" + text_to_html(i["installation"]))
+        cards.append(card("Installation", text_to_html(i["installation"]), "installation"))
+    if i["faq"].strip():
+        cards.append(card("FAQ", faq_html(i["faq"]), "faq"))
+    if i["external_services"].strip():
+        cards.append(card("External services", text_to_html(i["external_services"]), "external-services"))
     if i["changelog"].strip():
-        sections.append("<h2>Changelog</h2>" + text_to_html(i["changelog"]))
-    body = (f'<p class="kind">{esc(i["type"].capitalize())}</p><h1>{esc(i["name"])}</h1><p class="lead">{esc(i["short_description"])}</p>'
-            f'<table class="facts">{facts}</table>' + "\n".join(sections)
-            + f'<p class="muted">Registry entry: <a href="../../registry/{esc(i["slug"])}.json">registry/{esc(i["slug"])}.json</a></p>')
-    return layout(f'{i["name"]} {i["version"]}', body, 2)
+        cards.append(card("Changelog", text_to_html(i["changelog"]), "changelog"))
+    meta = [("Author", f'<a href="{esc(i["author_uri"])}">{esc(i["author"])}</a>' if i["author_uri"] else esc(i["author"])),
+            ("Licence", f'<a href="{esc(i["license_uri"])}">{esc(i["license"])}</a>' if i["license_uri"] else esc(i["license"])),
+            ("Text domain", f'<code>{esc(i["text_domain"])}</code>' if i["text_domain"] else ""),
+            ("Translations", f'<code>{esc(i["domain_path"])}</code>' if i["domain_path"] else ""),
+            ("Tags", ", ".join(esc(t) for t in i["tags"])),
+            ("Contributors", ", ".join(esc(c) for c in i["contributors"])),
+            ("Source", f'<a href="{esc(i["source"])}">{esc(i["source"].replace("https://github.com/", ""))}</a>'),
+            ("Registry entry", f'<a href="../../registry/{esc(i["slug"])}.json">registry/{esc(i["slug"])}.json</a>')]
+    if i["donate"]:
+        meta.append(("Donate", f'<a href="{esc(i["donate"])}">{esc(i["donate"])}</a>'))
+    rows = "".join(f'<tr><th scope="row">{k}</th><td>{v}</td></tr>' for k, v in meta if v)
+    cards.append(card("Details" if not theme else "Theme details", f'<table class="facts">{rows}</table>', "details"))
+    if i["credits"].strip():
+        cards.append(card("Credits and copyright", text_to_html(i["credits"]), "credits"))
+    tabs = [(t, "#" + h) for t, h, present in (("Download", "download", True), ("Description", "description", bool(i["description_long"].strip())), ("FAQ", "faq", bool(i["faq"].strip())), ("Changelog", "changelog", bool(i["changelog"].strip())), ("Details", "details", True)) if present]
+    header = (f'<div class="ah"><div class="ah-icon" aria-hidden="true">{esc(i["name"][:1])}</div><div><p class="kind">{esc(i["type"].capitalize())}</p>'
+              f'<h1>{esc(i["name"])} <span class="ver">{esc(i["version"])}</span></h1><p class="lead">{esc(i["short_description"])}</p></div></div>')
+    body = f'<ul class="tiles">{"".join(tiles)}</ul>' + "\n".join(cards)
+    return layout(f'{i["name"]} {i["version"]}', body, 2, tabs, header)
 
 
 def index_page(infos: list[dict], facts: dict) -> str:
-    rows = []
+    cards = []
     for i in infos:
         rel = facts.get(i["slug"])
-        status = f'released {esc(rel["version"])}' if rel else "not released yet"
-        rows.append(f'<tr><th scope="row"><a href="{"themes" if i["type"] == "theme" else "plugins"}/{esc(i["slug"])}/">{esc(i["name"])}</a></th>'
-                    f'<td>{esc(i["type"])}</td><td>{esc(i["version"])}</td><td>{status}</td><td>{esc(i["short_description"])}</td></tr>')
-    body = ("<h1>Kits by Wugweb</h1><p class=\"lead\">The theme and the plugins of the Kits suite. Each product has its own version, changelog and release.</p>"
-            '<table class="list"><thead><tr><th>Product</th><th>Type</th><th>In source</th><th>Release</th><th>What it does</th></tr></thead><tbody>'
-            + "".join(rows) + '</tbody></table><p>The machine-readable list is the <a href="registry/index.json">registry</a>.</p>')
-    return layout("Kits by Wugweb: products", body, 0)
+        status = f'Released {esc(rel["version"])}' if rel else "Not released yet"
+        href = f'{"themes" if i["type"] == "theme" else "plugins"}/{esc(i["slug"])}/'
+        cards.append(f'<li class="tile"><span class="tile-label">{esc(i["type"].capitalize())}</span><span class="tile-value"><a href="{href}">{esc(i["name"])}</a></span>'
+                     f'<span class="tile-sub">{status} · source {esc(i["version"])}</span><span class="tile-desc">{esc(i["short_description"])}</span></li>')
+    header = '<div class="ah"><div class="ah-icon" aria-hidden="true">K</div><div><h1>Kits by Wugweb</h1><p class="lead">The theme and the plugins of the Kits suite. Each product has its own version, changelog and release.</p></div></div>'
+    body = f'<ul class="tiles tiles-wide">{"".join(cards)}</ul>' + card("Registry", '<p>The machine-readable list of every product\'s latest release, with download addresses and SHA-256, is the <a href="registry/index.json">registry</a>.</p>', "registry")
+    return layout("Kits by Wugweb: products", body, 0, None, header)
 
 
 def registry_entry(i: dict, rel: dict | None) -> dict:
