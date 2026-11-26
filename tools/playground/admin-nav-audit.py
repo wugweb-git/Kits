@@ -84,6 +84,15 @@ def main() -> int:
         # the DirectoryWeb menu and its submenu
         m = re.search(r'''<li[^>]*id=["']toplevel_page_directoryweb["'].*?</ul>\s*</li>''', body, re.S)
         menu_html = m.group(0) if m else ''
+        if not menu_html:
+            # Folded (Kits Core active): one item under Plugins, the other screens as tabs above the screen.
+            pm = re.search(r'''<li[^>]*id=["']menu-plugins["'].*?</ul>\s*</li>''', body, re.S)
+            if not pm or 'page=directoryweb' not in pm.group(0):
+                bad.append(('menu', 'no DirectoryWeb item under Plugins'))
+                print('FAIL no DirectoryWeb item under Plugins')
+            tm = re.search(r'''<div class="wrap kits-fold-tabs">.*?</nav>''', body, re.S)
+            menu_html = tm.group(0) if tm else ''
+            print('DirectoryWeb is folded under Plugins; reading its tabs')
         menu = sorted(set(re.findall(r'''href=["']([^"']+)["']''', menu_html)))
         menu = [urllib.parse.urljoin(base + '/wp-admin/', h.replace('&amp;', '&')) for h in menu]
         print(f'DirectoryWeb menu entries: {len(menu)}')
