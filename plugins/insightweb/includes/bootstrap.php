@@ -54,10 +54,22 @@ foreach ( array( 'schema', 'runs', 'sitekit', 'keywords', 'gsc', 'compute', 'sco
 // Search Console types (3 Nov 2026): Discover and Google News per page, and URL Inspection index status.
 // Bing crawl (3 Nov 2026): Bing's crawl statistics weekly and keyword volumes monthly.
 // Google Alerts (3 Nov 2026): up to two alert feeds from Settings → Keys, as Mention rows on the Links tab.
-foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'report-email', 'tool-imports', 'openseo-positions', 'telemetry-404' ) as $aw_si_file ) {
+foreach ( array( 'sitesearch', 'ga4', 'psi', 'clarity', 'bing', 'sources', 'pages', 'checklist', 'imports', 'snapshot', 'rankmath', 'links', 'links-seed', 'crawlcheck', 'server', 'visitors', 'selfcheck', 'dashboard', 'referrer-icons', 'gsc-types', 'bing-crawl', 'alerts', 'report-email', 'tool-imports', 'openseo-positions' ) as $aw_si_file ) {
 	require_once __DIR__ . '/search-insights/' . $aw_si_file . '.php';
 }
 unset( $aw_si_file );
+// 404 and search logging is on HOLD (not loaded). Version 1.1.2 loaded it by mistake: remove what it stored (raw 404 paths and visitor search terms), once.
+add_action(
+	'admin_init',
+	function () {
+		if ( get_option( 'insightweb_held_logs_removed' ) ) {
+			return;
+		}
+		delete_option( 'insightweb_404_log' );
+		delete_option( 'insightweb_internal_searches' );
+		update_option( 'insightweb_held_logs_removed', 1, false );
+	}
+);
 
 // The screens on the Kits admin shell: Dashboard, the tabs and Settings.
 require_once INSIGHTWEB_DIR . 'includes/insightweb-dashboard.php';

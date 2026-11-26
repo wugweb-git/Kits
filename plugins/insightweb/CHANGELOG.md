@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.1.3
+
+- Fix: 1.1.2 loaded the 404 and search logging, which is not ready. It is no longer loaded, and the 404 paths and search terms it stored are removed once.
+
 ## 1.1.2
 
 - The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).

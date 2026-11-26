@@ -61,10 +61,10 @@ final class RankWeb_Page_Cache {
 	/**
 	 * Whether the finished page may be stored.
 	 *
-	 * @param array $page status (int), html (string), is_404, is_search, is_preview, is_feed, is_user_logged_in, has_nonce_form (bool).
+	 * @param array $page status (int), html (string), is_404, is_search, is_preview, is_feed, is_user_logged_in, is_dynamic (bool).
 	 */
 	public static function storable_page( array $page ): bool {
-		if ( 200 !== (int) ( $page['status'] ?? 0 ) || ! empty( $page['is_404'] ) || ! empty( $page['is_search'] ) || ! empty( $page['is_preview'] ) || ! empty( $page['is_feed'] ) || ! empty( $page['is_user_logged_in'] ) ) {
+		if ( 200 !== (int) ( $page['status'] ?? 0 ) || ! empty( $page['is_404'] ) || ! empty( $page['is_search'] ) || ! empty( $page['is_preview'] ) || ! empty( $page['is_feed'] ) || ! empty( $page['is_user_logged_in'] ) || ! empty( $page['is_dynamic'] ) ) { // is_dynamic: a cart, checkout or account page, or a page with a form nonce: never stored
 			return false;
 		}
 		$html = (string) ( $page['html'] ?? '' );

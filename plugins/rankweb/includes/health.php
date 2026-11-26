@@ -18,9 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Address => rewrite-rule key Rank Math adds for it. */
 function rankweb_seo_watched_endpoints() {
-	$out = array(
-		'/sitemap_index.xml' => 'sitemap_index\.xml$',
-	);
+	$out = array();
+	if ( defined( 'RANK_MATH_VERSION' ) || class_exists( 'RankMath' ) ) { // /sitemap_index.xml and its rule are Rank Math's: nothing to watch without it
+		$out['/sitemap_index.xml'] = 'sitemap_index\.xml$';
+	}
 	// llms.txt is Rank Math's module: watch it only when that module is switched on (a site that never used it has no such file).
 	$rm_modules = (array) get_option( 'rank_math_modules', array() );
 	if ( array_intersect( array( 'llms', 'llms-txt', 'llms_txt' ), $rm_modules ) ) {

@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.3.3
+
+- Fix: 3.3.2 loaded the sender-profile and retry-queue code, which is not ready. It is no longer loaded, and the failed mail it kept in the database, its schedule and its profiles are removed once.
+
 ## 3.3.2
 
 - The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).

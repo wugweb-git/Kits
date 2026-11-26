@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -77,6 +77,9 @@ RankWeb's link audit and content analysis fetch URLs on your own site only.
 Deleting the plugin deletes no data: settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was.
 
 == Changelog ==
+
+= 2.3.3 =
+* Fix: the page cache never stores a cart, checkout or account page, or any page with a form nonce. The sitemap check watches /sitemap_index.xml only when Rank Math is active, so other sites no longer get a false "not answering" notice.
 
 = 2.3.2 =
 * The "Upgrade to Premium" link is gone from the Plugins screen.

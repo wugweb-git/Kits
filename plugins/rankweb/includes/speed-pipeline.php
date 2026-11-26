@@ -181,7 +181,7 @@ function rankweb_pipeline_output( $html ) {
 		$page = $html; // never break a page for a speed rule
 	}
 	if ( rankweb_speed_on( 'RANKWEB_PAGE_CACHE' ) && RankWeb_Page_Cache::cacheable_request( rankweb_cache_request() )
-		&& RankWeb_Page_Cache::storable_page( array( 'status' => http_response_code() ?: 200, 'html' => $page, 'is_404' => is_404(), 'is_search' => is_search(), 'is_preview' => is_preview(), 'is_feed' => is_feed(), 'is_user_logged_in' => is_user_logged_in() ) ) ) {
+		&& RankWeb_Page_Cache::storable_page( array( 'status' => http_response_code() ?: 200, 'html' => $page, 'is_404' => is_404(), 'is_search' => is_search(), 'is_preview' => is_preview(), 'is_feed' => is_feed(), 'is_user_logged_in' => is_user_logged_in(), 'is_dynamic' => ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() || is_account_page() ) ) || false !== stripos( $page, '_wpnonce' ) ) ) ) {
 		$dir = rankweb_cache_dir();
 		if ( wp_mkdir_p( $dir ) ) {
 			if ( ! file_exists( $dir . 'index.html' ) ) {

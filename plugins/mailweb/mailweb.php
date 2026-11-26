@@ -11,7 +11,7 @@
  * Plugin Name:       MailWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
- * Version:           3.3.2
+ * Version:           3.3.3
  * Update URI:           https://wugweb.com/plugins/mailweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -41,7 +41,7 @@ add_action(
 	1
 );
 
-define( 'MAILWEB_VERSION', '3.3.2' );
+define( 'MAILWEB_VERSION', '3.3.3' );
 define( 'MAILWEB_FILE', __FILE__ );
 define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );
@@ -90,7 +90,20 @@ require_once MAILWEB_DIR . 'includes/smtp.php';
 require_once MAILWEB_DIR . 'includes/mail-cap.php';
 require_once MAILWEB_DIR . 'includes/mailboxes.php';
 require_once MAILWEB_DIR . 'includes/profiles.php';
-require_once MAILWEB_DIR . 'includes/tenant-profiles.php';
+// Sender profiles and the retry queue (includes/tenant-profiles.php) are on HOLD and not loaded. Version 3.3.2 loaded them by mistake:
+// remove the failed mail it kept in the database, its schedule and its profiles, once.
+add_action(
+	'admin_init',
+	function () {
+		if ( get_option( 'mailweb_held_retry_removed' ) ) {
+			return;
+		}
+		wp_clear_scheduled_hook( 'mailweb_retry_queue_tick' );
+		delete_option( 'mailweb_retry_queue' );
+		delete_option( 'mailweb_tenant_profiles' );
+		update_option( 'mailweb_held_retry_removed', 1, false );
+	}
+);
 require_once MAILWEB_DIR . 'includes/utm.php'; // the site's own links in its emails tagged (utm_source=site-email).
 require_once MAILWEB_DIR . 'includes/inbox.php';
 require_once MAILWEB_DIR . 'includes/settings-tab.php';

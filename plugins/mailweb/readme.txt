@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.2
+Stable tag: 3.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -100,6 +100,9 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.3.3 =
+* Fix: 3.3.2 loaded the sender-profile and retry-queue code, which is not ready. It is no longer loaded, and the failed mail it kept in the database, its schedule and its profiles are removed once.
 
 = 3.3.2 =
 * The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).

@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.3.3
+
+- Fix: the page cache never stores a cart, checkout or account page, or any page with a form nonce. The sitemap check watches /sitemap_index.xml only when Rank Math is active, so other sites no longer get a false "not answering" notice.
+
 ## 2.3.2
 
 - The "Upgrade to Premium" link is gone from the Plugins screen.
