@@ -282,7 +282,7 @@ function rankweb_bulk_csv_screen(): void {
 	rankweb_ui_page( 'csv' );
 }
 
-/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+/** The classic page's body, for a site with no Kits Core. The shell screen is native (src/tools/files.js) and uses the routes above. */
 function rankweb_bulk_csv_body(): void {
 	$post = admin_url( 'admin-post.php' );
 	if ( ! rankweb_bulk_types() ) {

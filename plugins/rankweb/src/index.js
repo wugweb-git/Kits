@@ -23,7 +23,6 @@ import {
 	MediaField,
 	MiniChart,
 	Notice,
-	PageParts,
 	RefTable,
 	SectionCard,
 	ServiceList,
@@ -38,6 +37,7 @@ import { ModuleCards } from './modules';
 import { Faq } from './tools/faq';
 import { Links } from './tools/links';
 import { Images, SeoCsv } from './tools/files';
+import { Redirects } from './tools/redirects';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -1166,22 +1166,6 @@ function Settings() {
 	);
 }
 
-/** The working tools (Internal links, Image SEO, SEO CSV, Redirect tools): each one's own output and forms, as page parts. */
-const TOOL_TITLES = {
-	redirects: __( 'Redirect tools', 'rankweb' ),
-};
-
-function Tool( { screen } ) {
-	return (
-		<SectionCard id={ screen } title={ TOOL_TITLES[ screen ] }>
-			<PageParts
-				parts={ app.parts || [] }
-				title={ TOOL_TITLES[ screen ] }
-			/>
-		</SectionCard>
-	);
-}
-
 function App() {
 	return (
 		<AppShell header={ <Header /> }>
@@ -1190,7 +1174,7 @@ function App() {
 			{ 'links' === app.screen && <Links /> }
 			{ 'images' === app.screen && <Images /> }
 			{ 'csv' === app.screen && <SeoCsv /> }
-			{ TOOL_TITLES[ app.screen ] && <Tool screen={ app.screen } /> }
+			{ 'redirects' === app.screen && <Redirects /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />
 			) }

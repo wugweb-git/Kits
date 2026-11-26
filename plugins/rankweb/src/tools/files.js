@@ -11,84 +11,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import {
 	Button,
-	ConfirmButton,
 	ErrorState,
 	Field,
 	LoadingState,
 	Notice,
 	SectionCard,
 } from '@kits/shell'; // eslint-disable-line import/no-unresolved -- Kits Core's shell script (window.kits.shell), mapped in webpack.config.js
-import { Report, errText, num, path } from './common';
-
-/**
- * Run a write that starts as a dry run, and keep its report. `run( apply )` returns the request.
- *
- * @return {Object} { report, busy, error, go( apply ), clear }.
- */
-function useRun() {
-	const [ report, setReport ] = useState( null );
-	const [ busy, setBusy ] = useState( false );
-	const [ error, setError ] = useState( '' );
-	const go = ( request ) => {
-		setBusy( true );
-		setError( '' );
-		return request
-			.then( setReport )
-			.catch( ( e ) => setError( errText( e ) ) )
-			.finally( () => setBusy( false ) );
-	};
-	return { report, busy, error, go, clear: () => setReport( null ) };
-}
-
-/**
- * Dry run, then Apply: the second is a ConfirmButton that names how many items it will change, and shows only after a
- * dry run that found something. A change to the form clears the report, so Apply is never offered for a form that was
- * not the one dry-run.
- *
- * @param {Object}   props
- * @param {Object}   props.run      From useRun().
- * @param {string}   props.noun     What is changed ("attachments", "items").
- * @param {Function} props.start    ( apply ) => request.
- * @param {string}   props.dryText  The dry-run button's words.
- * @param {boolean}  props.disabled The form cannot be run yet.
- */
-function DryThenApply( { run, noun, start, dryText, disabled } ) {
-	const found =
-		run.report &&
-		run.report.dry &&
-		! run.report.error &&
-		run.report.updated > 0;
-	return (
-		<div className="kits-shell-card__actions">
-			<Button
-				variant="primary"
-				busy={ run.busy }
-				disabled={ disabled }
-				onClick={ () => run.go( start( false ) ) }
-			>
-				{ dryText }
-			</Button>
-			{ found && (
-				<ConfirmButton
-					label={ sprintf(
-						/* translators: 1: number, 2: what changes (attachments, items). */
-						__( 'Apply the %1$d %2$s', 'rankweb' ),
-						run.report.updated,
-						noun
-					) }
-					question={ sprintf(
-						/* translators: %s: what changes (attachments, items); %%d is filled with the number. */
-						__( 'This writes the changes to %%d %s.', 'rankweb' ),
-						noun
-					) }
-					count={ run.report.updated }
-					busy={ run.busy }
-					onConfirm={ () => run.go( start( true ) ) }
-				/>
-			) }
-		</div>
-	);
-}
+import { DryThenApply, Report, errText, num, path, useRun } from './common';
 
 /* ---------- Image SEO ---------- */
 

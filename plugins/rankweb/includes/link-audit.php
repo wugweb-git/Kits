@@ -626,7 +626,7 @@ function rankweb_link_audit_page_html(): void {
 	rankweb_ui_page( 'links' );
 }
 
-/** The screen's body: the tabs, the audit line, the findings and the list. The shell draws it through page parts (rankweb_tool_parts()). */
+/** The screen's body: the tabs, the audit line, the findings and the list. The classic page, for a site with no Kits Core; the shell screen is native (src/tools/links.js) and uses the routes above. */
 function rankweb_link_audit_body(): void {
 	$flag   = sanitize_key( wp_unslash( $_GET['flag'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- a filter on a read-only list.
 	$flag   = in_array( $flag, RankWeb_Link_Audit::FLAGS, true ) ? $flag : '';

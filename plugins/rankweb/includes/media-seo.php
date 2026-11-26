@@ -337,7 +337,7 @@ function rankweb_media_screen(): void {
 	rankweb_ui_page( 'images' );
 }
 
-/** The screen's body, drawn by the shell through page parts (rankweb_tool_parts()) or by the plain page. */
+/** The classic page's body, for a site with no Kits Core. The shell screen is native (src/tools/files.js) and uses the routes above. */
 function rankweb_media_body(): void {
 	$post = admin_url( 'admin-post.php' );
 	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'rankweb' ), number_format_i18n( AW_MEDIA_BATCH ) ) ) . '</p>';
