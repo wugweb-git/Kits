@@ -39,4 +39,11 @@ final class TermSeoTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( '1', $m['_rankweb_term_noindex'] );
 		$this->assertSame( '', RankWeb_Term_Seo::clean_form( array() )['_rankweb_term_noindex'] );
 	}
+
+	public function testUserKeys(): void {
+		$m = RankWeb_Term_Seo::clean_form( array( 'title' => 'Asha', 'noindex' => '1' ), RankWeb_Term_Seo::USER_KEYS );
+		$this->assertSame( 'Asha', $m['_rankweb_user_title'] );
+		$this->assertSame( '1', $m['_rankweb_user_noindex'] );
+		$this->assertTrue( ! isset( $m['_rankweb_term_title'] ) );
+	}
 }

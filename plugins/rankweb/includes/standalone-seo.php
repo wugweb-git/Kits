@@ -138,6 +138,12 @@ function rankweb_head_description(): string {
 		}
 		return rankweb_post_description( get_queried_object_id() );
 	}
+	if ( is_author() && function_exists( 'rankweb_user_seo_current' ) ) {
+		$a = rankweb_user_seo_current();
+		if ( $a && '' !== $a['description'] ) {
+			return $a['description'];
+		}
+	}
 	if ( is_front_page() || is_home() ) {
 		return trim( wp_strip_all_tags( (string) get_bloginfo( 'description' ) ) );
 	}
@@ -368,6 +374,10 @@ function rankweb_page_is_noindex(): bool {
 	}
 	$own = function_exists( 'rankweb_term_seo_current' ) ? rankweb_term_seo_current() : null;
 	if ( $own && $own['noindex'] ) {
+		return true;
+	}
+	$author = function_exists( 'rankweb_user_seo_current' ) ? rankweb_user_seo_current() : null;
+	if ( $author && $author['noindex'] ) {
 		return true;
 	}
 	return rankweb_archive_noindex();

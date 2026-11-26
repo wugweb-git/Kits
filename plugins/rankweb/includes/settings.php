@@ -49,6 +49,8 @@ function rankweb_seo_modules(): array {
 			'fields' => array(
 				'AW_SEO_ITEM_TYPES' => array( 'type' => 'list', 'label' => 'Item types', 'help' => 'Post types whose items get titles, descriptions and focus keywords. One per line.', 'default' => array( 'post', 'page' ) ),
 				'AW_SEO_BREAKDOWN' => array( 'type' => 'list', 'label' => 'Directory place breakdown', 'help' => 'Listing types counted in a place\'s description, in this order. One tag slug per line.', 'default' => array() ),
+				'RANKWEB_TITLE_SEPARATOR' => array( 'type' => 'text', 'label' => 'Title separator', 'help' => 'One of - – — | · • » « / ~ :. Empty keeps WordPress\'s own. Used when RankWeb prints the page head.', 'default' => '' ),
+				'RANKWEB_TITLE_PREFIX' => array( 'type' => 'text', 'label' => 'Text before every title', 'help' => 'Up to 40 characters, for example a brand mark. Empty for none.', 'default' => '' ),
 				'AW_SEO_TERM_TITLES' => array( 'type' => 'map', 'label' => 'Category and tag titles', 'help' => 'One per line: taxonomy:slug | title. Others get the rule-based title.', 'default' => array() ),
 			),
 		),

@@ -54,6 +54,20 @@ function rankweb_share_tags( array $d ): string {
 // page head (no Rank Math, Yoast SEO, SEOPress or All in One SEO). The description, Open Graph and Twitter tags of that
 // head are printed once, by standalone-seo.php (rankweb_print_head_tags()).
 if ( function_exists( 'rankweb_prints_head' ) ? rankweb_prints_head() : ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) ) {
+	require_once __DIR__ . '/class-rankweb-title-rules.php';
+	add_filter(
+		'document_title_separator',
+		function ( $sep ) {
+			$own = defined( 'RANKWEB_TITLE_SEPARATOR' ) ? RankWeb_Title_Rules::separator( RANKWEB_TITLE_SEPARATOR ) : '';
+			return '' !== $own ? $own : $sep;
+		}
+	);
+	add_filter(
+		'document_title_parts',
+		function ( $parts ) {
+			return defined( 'RANKWEB_TITLE_PREFIX' ) ? RankWeb_Title_Rules::with_prefix( (array) $parts, RankWeb_Title_Rules::prefix( RANKWEB_TITLE_PREFIX ) ) : $parts;
+		}
+	);
 	add_filter(
 		'pre_get_document_title',
 		function ( $title ) {

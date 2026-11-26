@@ -21,6 +21,13 @@ final class RankWeb_Term_Seo {
 		'noindex'     => '_rankweb_term_noindex',
 	);
 
+	/** Meta keys on a user (the author page). */
+	const USER_KEYS = array(
+		'title'       => '_rankweb_user_title',
+		'description' => '_rankweb_user_description',
+		'noindex'     => '_rankweb_user_noindex',
+	);
+
 	/**
 	 * The values to use for a term.
 	 *
@@ -45,15 +52,16 @@ final class RankWeb_Term_Seo {
 	/**
 	 * The meta to store from a submitted form.
 	 *
-	 * @param array $in title, description, noindex.
+	 * @param array $in   title, description, noindex.
+	 * @param array $keys The meta keys (terms by default; USER_KEYS for a user).
 	 * @return array<string,string> Meta key => value ('' = remove).
 	 */
-	public static function clean_form( array $in ): array {
+	public static function clean_form( array $in, array $keys = self::KEYS ): array {
 		$one = static fn( $v ) => trim( preg_replace( '/\s+/u', ' ', strip_tags( (string) $v ) ) );
 		return array(
-			self::KEYS['title']       => $one( $in['title'] ?? '' ),
-			self::KEYS['description'] => $one( $in['description'] ?? '' ),
-			self::KEYS['noindex']     => ! empty( $in['noindex'] ) ? '1' : '',
+			$keys['title']       => $one( $in['title'] ?? '' ),
+			$keys['description'] => $one( $in['description'] ?? '' ),
+			$keys['noindex']     => ! empty( $in['noindex'] ) ? '1' : '',
 		);
 	}
 }

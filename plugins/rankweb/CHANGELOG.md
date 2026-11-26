@@ -10,6 +10,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 ## 2.2.0
 
 - Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off. The classic editor has the same choices in a "Search engines (RankWeb)" box.
+- A title separator and a text before every title (when RankWeb prints the head), and SEO fields on the user profile for the author page (search title, description, noindex).
 - Social and feeds: the twitter:site tag from the site's X handle, and an "appeared first on" line in feed items. Both off until set.
 - SEO fields on the category and tag screens: a search title, a search description and noindex, printed when RankWeb prints the head. Rank Math's term fields are read when RankWeb's are empty.
 - Per-item share title and description (Open Graph and Twitter), beside the canonical address, 301 redirect and share image address, in the editor sidebar and the classic box.
