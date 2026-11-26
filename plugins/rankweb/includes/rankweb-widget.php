@@ -28,13 +28,20 @@ add_action(
 					echo '<p>' . esc_html__( 'Counting. Come back in a minute.', 'rankweb' ) . '</p>';
 				} else {
 					$n    = rankweb_health_numbers( $c );
+					$to   = function_exists( 'rankweb_ui_url' ) ? rankweb_ui_url( 'dashboard' ) : admin_url( 'admin.php?page=aw-seo-plus' );
+					$gap  = static fn( string $label, int $n ): array => array(
+						'label' => $label,
+						'value' => number_format_i18n( $n ),
+						'href'  => $to,
+						'tone'  => $n ? 'warn' : '',
+					);
 					$rows = array(
-						array( 'label' => __( 'Missing a title', 'rankweb' ), 'value' => number_format_i18n( $n['titles'] ) ),
-						array( 'label' => __( 'Missing a description', 'rankweb' ), 'value' => number_format_i18n( $n['descs'] ) ),
-						array( 'label' => __( 'Missing a focus keyword', 'rankweb' ), 'value' => number_format_i18n( $n['focus'] ) ),
+						$gap( __( 'Missing a title', 'rankweb' ), $n['titles'] ),
+						$gap( __( 'Missing a description', 'rankweb' ), $n['descs'] ),
+						$gap( __( 'Missing a focus keyword', 'rankweb' ), $n['focus'] ),
 					);
 					if ( isset( $n['schema'] ) ) {
-						$rows[] = array( 'label' => __( 'Schema gaps', 'rankweb' ), 'value' => number_format_i18n( $n['schema'] ) );
+						$rows[] = $gap( __( 'Schema gaps', 'rankweb' ), $n['schema'] );
 					}
 					if ( function_exists( 'kits_dash_cards' ) ) {
 						echo kits_dash_cards( $rows ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.

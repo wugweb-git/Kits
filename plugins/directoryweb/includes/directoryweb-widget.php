@@ -28,11 +28,14 @@ add_action(
 					$s    = (array) ( $c['listings']['status'] ?? array() );
 					$cl   = is_array( $c['claims'] ?? null ) ? $c['claims'] : array();
 					$b    = (array) ( $c['badges'] ?? array() );
+					$wait = (int) ( $s['pending'] ?? 0 );
+					$clm  = (int) ( $cl['pending'] ?? 0 );
+					$rech = (int) ( $b['recheck'] ?? 0 );
 					$rows = array(
-						array( 'label' => __( 'Published', 'directoryweb' ), 'value' => number_format_i18n( (int) ( $s['publish'] ?? 0 ) ) ),
-						array( 'label' => __( 'Waiting for review', 'directoryweb' ), 'value' => number_format_i18n( (int) ( $s['pending'] ?? 0 ) ) ),
-						array( 'label' => __( 'Claims waiting', 'directoryweb' ), 'value' => number_format_i18n( (int) ( $cl['pending'] ?? 0 ) ) ),
-						array( 'label' => __( 'Need a re-check', 'directoryweb' ), 'value' => number_format_i18n( (int) ( $b['recheck'] ?? 0 ) ) ),
+						array( 'label' => __( 'Published', 'directoryweb' ), 'value' => number_format_i18n( (int) ( $s['publish'] ?? 0 ) ), 'href' => directoryweb_ui_url( 'listings' ) ),
+						array( 'label' => __( 'Waiting for review', 'directoryweb' ), 'value' => number_format_i18n( $wait ), 'href' => directoryweb_ui_url( 'listings' ), 'tone' => $wait ? 'warn' : '' ),
+						array( 'label' => __( 'Claims waiting', 'directoryweb' ), 'value' => number_format_i18n( $clm ), 'href' => directoryweb_ui_url( 'claims' ), 'tone' => $clm ? 'warn' : '' ),
+						array( 'label' => __( 'Need a re-check', 'directoryweb' ), 'value' => number_format_i18n( $rech ), 'tone' => $rech ? 'warn' : '' ),
 					);
 					if ( function_exists( 'kits_dash_cards' ) ) {
 						echo kits_dash_cards( $rows ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.

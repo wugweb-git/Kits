@@ -5,7 +5,8 @@
  * that says up or down (never colour alone), and the exact figures stay in a table under the chart.
  *
  * kits_dash_cards( $cards ): a row of stat cards. Each card: label, value (already formatted), and optionally
- * delta (number, the change), delta_text (what it is compared with, e.g. "on the 7 days before").
+ * delta (number, the change), delta_text (what it is compared with, e.g. "on the 7 days before"), href (the number
+ * links there), sub (one small line) and tone ('warn' or 'error': "Needs attention" / "Not working", with an icon).
  * kits_dash_bars( $values, $label ): a small bar chart; $values is label => number, oldest first.
  *
  * @package kits-core
@@ -25,7 +26,18 @@ function kits_dash_cards( array $cards ): string {
 	$out = '<ul class="aw-dash-cards">';
 	foreach ( $cards as $c ) {
 		$out .= '<li class="aw-dash-card"><span class="aw-dash-label">' . esc_html( (string) ( $c['label'] ?? '' ) ) . '</span>';
-		$out .= '<span class="aw-dash-value">' . esc_html( (string) ( $c['value'] ?? '' ) ) . '</span>';
+		$val  = esc_html( (string) ( $c['value'] ?? '' ) );
+		if ( ! empty( $c['href'] ) ) {
+			$val = '<a href="' . esc_url( (string) $c['href'] ) . '">' . $val . '</a>'; // the number opens the screen behind it
+		}
+		$out .= '<span class="aw-dash-value">' . $val . '</span>';
+		if ( ! empty( $c['sub'] ) ) {
+			$out .= '<span class="aw-dash-sub">' . esc_html( (string) $c['sub'] ) . '</span>';
+		}
+		if ( in_array( $c['tone'] ?? '', array( 'warn', 'error' ), true ) ) {
+			// A tone is said in words and an icon as well as colour.
+			$out .= '<span class="aw-dash-tone aw-dash-tone--' . esc_attr( $c['tone'] ) . '"><span class="dashicons dashicons-' . ( 'error' === $c['tone'] ? 'dismiss' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( 'error' === $c['tone'] ? __( 'Not working', 'kits-core' ) : __( 'Needs attention', 'kits-core' ) ) . '</span>';
+		}
 		if ( isset( $c['delta'] ) && is_numeric( $c['delta'] ) ) {
 			$d    = (float) $c['delta'];
 			$dir  = $d > 0 ? 'up' : ( $d < 0 ? 'down' : 'flat' );
@@ -113,6 +125,13 @@ add_action(
 				'.aw-dash-card{min-width:0;margin:0;padding:12px;border:1px solid #c3c4c7;border-radius:4px;background:#fff;display:flex;flex-direction:column;gap:2px}',
 				'.aw-dash-label{color:#50575e;font-size:13px;overflow-wrap:anywhere}',
 				'.aw-dash-value{color:#1d2327;font-size:24px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}',
+				'.aw-dash-value a{color:inherit;text-decoration:none}',
+				'.aw-dash-value a:hover,.aw-dash-value a:focus{text-decoration:underline}',
+				'.aw-dash-sub{color:#50575e;font-size:12px}',
+				'.aw-dash-tone{font-size:12px;font-weight:600}',
+				'.aw-dash-tone .dashicons{font-size:14px;width:14px;height:14px;vertical-align:text-bottom}',
+				'.aw-dash-tone--warn{color:#8a5a00}',
+				'.aw-dash-tone--error{color:#b32d2e}',
 				'.aw-dash-delta{font-size:13px}',
 				'.aw-dash-delta--up{color:#007017}',
 				'.aw-dash-delta--down{color:#b32d2e}',
