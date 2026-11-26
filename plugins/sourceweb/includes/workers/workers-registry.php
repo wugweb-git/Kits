@@ -11,8 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /*
  * The workflows: an exact copy of docs/workers.json in wugweb-git/animal-writes-workers. That repository's test fails when a
- * workflow's name, schedule or timeout changes without that file; this repository's Deploy check fails when this copy
- * differs from it (tools/ci/workers_registry_check.php). interval_min: the longest gap between two scheduled runs. runnow: inputs
+ * workflow's name, schedule or timeout changes without that file; tools/ci/workers_registry_check.php fails when this copy
+ * differs from it. interval_min: the longest gap between two scheduled runs. runnow: inputs
  * sent by Run now (none: the workflow's own defaults). late_after_h: hours without a report before the workflow is late
  * (null: never late; owner, 24 Oct 2026). Crons are UTC, as in the workflows.
  */
@@ -103,7 +103,7 @@ const AW_WORKERS = array(
 	),
 	'search-insights.yml'      => array(
 		'name'         => 'Search Insights: rising terms',
-		'what'         => 'Rising terms for Tools → Search Insights → Rising: Trends trending now and Wikipedia daily; autocomplete and Trends related weekly; Trends interest monthly',
+		'what'         => 'Rising terms for Tools → Search Insights → Rising: Trends trending now, Wikipedia and GDELT daily; autocomplete and Trends related weekly; Trends interest monthly',
 		'crons'        => array( '40 2 * * *', '0 3 * * 1', '30 3 1 * *' ),
 		'interval_min' => 1440,
 		'timeout_min'  => 30,

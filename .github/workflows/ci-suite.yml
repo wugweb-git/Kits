@@ -231,6 +231,11 @@ jobs:
           php plugins/sourceweb/tests/run.php
           php plugins/sourceweb/tests/SourceWebStandaloneTest.php
           php plugins/sourceweb/tests/no-aw-functions-test.php
+      - name: SourceWeb workflow list matches the workers repository
+        # Not gating until the workers repo's chore/retire-eight-workflows is merged to its main.
+        continue-on-error: true
+        if: ${{ needs.changes.outputs.sourceweb == 'true' || github.event_name == 'push' }}
+        run: php tools/ci/workers_registry_check.php
 
   package-dist:
     name: Package Distribution Artifacts
