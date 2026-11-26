@@ -82,7 +82,11 @@ foreach ( glob( __DIR__ . '/*Test.php' ) as $file ) {
 			try {
 				$test = new $class();
 				if ( method_exists( $test, 'setUp' ) ) { // PHPUnit calls setUp() (protected) before each test
-					( new \ReflectionMethod( $test, 'setUp' ) )->invoke( $test );
+					$set_up = new \ReflectionMethod( $test, 'setUp' );
+					if ( PHP_VERSION_ID < 80100 ) {
+						$set_up->setAccessible( true ); // PHP 8.0 refuses a protected method through reflection without this (8.1+ needs nothing, 8.5 deprecates it)
+					}
+					$set_up->invoke( $test );
 				}
 				$test->$method();
 			} catch ( \Throwable $e ) {
