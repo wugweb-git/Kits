@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The Sourcing page's tabs. */
-const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' );
+const SOURCEWEB_UI_TABS = array( 'sources', 'keywords', 'rules', 'places', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' );
 
 /**
  * Which screen this request asks for: 'dashboard', 'review', 'enrichment', a tab of SOURCEWEB_UI_TABS or ''. An
@@ -59,6 +59,7 @@ function sourceweb_ui_caps(): array {
 		'sources'    => SOURCEWEB_SRC_CAP,
 		'keywords'   => SOURCEWEB_SRC_CAP,
 		'rules'      => SOURCEWEB_SRC_CAP,
+		'places'     => SOURCEWEB_SRC_CAP,
 		'ai'         => SOURCEWEB_SRC_CAP,
 		'workers'    => SOURCEWEB_SRC_CAP,
 		'rejected'   => SOURCEWEB_SRC_CAP,
@@ -116,6 +117,7 @@ add_action(
 			'sources'    => __( 'Sources', 'sourceweb' ),
 			'keywords'   => __( 'Keywords', 'sourceweb' ),
 			'rules'      => __( 'Rules', 'sourceweb' ),
+			'places'     => __( 'Places', 'sourceweb' ),
 			'ai'         => __( 'AI models', 'sourceweb' ),
 			'workers'    => __( 'Workers', 'sourceweb' ),
 			'rejected'   => __( 'Rejected', 'sourceweb' ),
@@ -174,6 +176,7 @@ function sourceweb_ui_page( string $screen ): void {
 		'sources'    => __( 'Sources', 'sourceweb' ),
 		'keywords'   => __( 'Keywords', 'sourceweb' ),
 		'rules'      => __( 'Rules', 'sourceweb' ),
+		'places'     => __( 'Places', 'sourceweb' ),
 		'ai'         => __( 'AI models', 'sourceweb' ),
 		'workers'    => __( 'Workers', 'sourceweb' ),
 		'rejected'   => __( 'Rejected', 'sourceweb' ),

@@ -7087,6 +7087,234 @@ function ChangeLog() {
 	);
 }
 
+/* ---------- Places ---------- */
+
+const KIND_LABELS = {
+	content_type: __( 'Content type', 'aw-sourcing' ),
+	plugin: __( 'Plugin', 'aw-sourcing' ),
+	workflow: __( 'Workflow', 'aw-sourcing' ),
+	other: __( 'Other', 'aw-sourcing' ),
+};
+
+/**
+ * Places: where an item goes. The routes are tried top to bottom and the first whose test matches wins; an item that
+ * matches none goes to the place of its own type, as it always did.
+ */
+function Places() {
+	const [ data, setData ] = useState( null );
+	const [ rows, setRows ] = useState( [] );
+	const [ error, setError ] = useState( '' );
+	const [ busy, setBusy ] = useState( false );
+	const [ msg, setMsg ] = useState( null );
+	const take = ( d ) => {
+		setData( d );
+		setRows( d.routes );
+	};
+	const load = useCallback( () => {
+		setError( '' );
+		apiFetch( { path: path( 'places' ) } )
+			.then( take )
+			.catch( ( e ) => setError( errText( e ) ) );
+	}, [] );
+	useEffect( load, [ load ] );
+	if ( error ) {
+		return <ErrorState message={ error } onRetry={ load } />;
+	}
+	if ( ! data ) {
+		return (
+			<LoadingState label={ __( 'Loading places…', 'aw-sourcing' ) } />
+		);
+	}
+	const placeOptions = data.places.map( ( p ) => ( {
+		value: p.id,
+		label: `${ p.label } (${ KIND_LABELS[ p.kind ] || p.kind })`,
+	} ) );
+	const opLabels = {
+		always: __( 'Always', 'aw-sourcing' ),
+		eq: __( 'is exactly', 'aw-sourcing' ),
+		contains: __( 'contains', 'aw-sourcing' ),
+		in: __( 'is one of', 'aw-sourcing' ),
+		has: __( 'is not empty', 'aw-sourcing' ),
+	};
+	const set = ( i, part ) =>
+		setRows( rows.map( ( r, n ) => ( n === i ? { ...r, ...part } : r ) ) );
+	const move = ( i, by ) => {
+		const j = i + by;
+		if ( j < 0 || j >= rows.length ) {
+			return;
+		}
+		const next = [ ...rows ];
+		[ next[ i ], next[ j ] ] = [ next[ j ], next[ i ] ];
+		setRows( next );
+	};
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'places' ),
+			method: 'POST',
+			data: { routes: rows },
+		} )
+			.then( ( d ) => {
+				take( d );
+				setMsg( {
+					tone: 'success',
+					text: __( 'Routes saved.', 'aw-sourcing' ),
+				} );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<>
+			{ msg && (
+				<Notice tone={ msg.tone } onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			<SectionCard
+				id="routes"
+				title={ __( 'Routes', 'aw-sourcing' ) }
+				description={ __(
+					'Where an item goes. Routes are tried from the top and the first that matches wins. An item that matches none goes to the place of its own type, as before.',
+					'aw-sourcing'
+				) }
+			>
+				{ 0 === rows.length && (
+					<p>
+						{ __(
+							'No routes: every item goes to the place of its own type.',
+							'aw-sourcing'
+						) }
+					</p>
+				) }
+				{ rows.map( ( r, i ) => (
+					<div key={ i } className="sourceweb-route-row">
+						<strong>{ i + 1 }.</strong>
+						{ r.custom ? (
+							<code>{ r.custom }</code>
+						) : (
+							<>
+								<SelectField
+									label={ __( 'When', 'aw-sourcing' ) }
+									value={ r.op }
+									options={ data.ops.map( ( o ) => ( {
+										value: o,
+										label: opLabels[ o ] || o,
+									} ) ) }
+									onChange={ ( v ) => set( i, { op: v } ) }
+								/>
+								{ 'always' !== r.op && (
+									<SelectField
+										label={ __( 'Field', 'aw-sourcing' ) }
+										value={ r.field || data.fields[ 0 ] }
+										options={ data.fields.map( ( f ) => ( {
+											value: f,
+											label: f,
+										} ) ) }
+										onChange={ ( v ) =>
+											set( i, { field: v } )
+										}
+									/>
+								) }
+								{ 'always' !== r.op && 'has' !== r.op && (
+									<TextField
+										label={ __( 'Value', 'aw-sourcing' ) }
+										value={ r.value }
+										onChange={ ( v ) =>
+											set( i, { value: v } )
+										}
+									/>
+								) }
+							</>
+						) }
+						<SelectField
+							label={ __( 'Send to', 'aw-sourcing' ) }
+							value={ r.place }
+							options={ placeOptions }
+							onChange={ ( v ) => set( i, { place: v } ) }
+						/>
+						<Button
+							onClick={ () => move( i, -1 ) }
+							disabled={ 0 === i }
+						>
+							{ __( 'Up', 'aw-sourcing' ) }
+						</Button>
+						<Button
+							onClick={ () => move( i, 1 ) }
+							disabled={ i === rows.length - 1 }
+						>
+							{ __( 'Down', 'aw-sourcing' ) }
+						</Button>
+						<Button
+							onClick={ () =>
+								setRows( rows.filter( ( _, n ) => n !== i ) )
+							}
+						>
+							{ __( 'Remove', 'aw-sourcing' ) }
+						</Button>
+					</div>
+				) ) }
+				<p>
+					<Button
+						onClick={ () =>
+							setRows( [
+								...rows,
+								{
+									op: 'contains',
+									field: 'title',
+									value: '',
+									place: data.places[ 0 ]?.id || '',
+									keep: null,
+									custom: '',
+								},
+							] )
+						}
+					>
+						{ __( 'Add a route', 'aw-sourcing' ) }
+					</Button>{ ' ' }
+					<Button variant="primary" busy={ busy } onClick={ save }>
+						{ __( 'Save routes', 'aw-sourcing' ) }
+					</Button>
+				</p>
+			</SectionCard>
+			<SectionCard
+				id="places"
+				title={ __( 'Places', 'aw-sourcing' ) }
+				description={ __(
+					'Content types SourceWeb fills, and any place a plugin or workflow registers.',
+					'aw-sourcing'
+				) }
+			>
+				<table className="widefat striped">
+					<thead>
+						<tr>
+							<th>{ __( 'Place', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Kind', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Owner', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Enhancements', 'aw-sourcing' ) }</th>
+						</tr>
+					</thead>
+					<tbody>
+						{ data.places.map( ( p ) => (
+							<tr key={ p.id }>
+								<td>{ p.label }</td>
+								<td>{ KIND_LABELS[ p.kind ] || p.kind }</td>
+								<td>{ p.owner || '—' }</td>
+								<td>
+									{ p.enhance.length
+										? p.enhance.join( ', ' )
+										: '—' }
+								</td>
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			</SectionCard>
+		</>
+	);
+}
+
 const SCREENS = {
 	dashboard: Dashboard,
 	review: Review,
@@ -7096,6 +7324,7 @@ const SCREENS = {
 	sources: Sources,
 	keywords: Keywords,
 	rules: Rules,
+	places: Places,
 	ai: AiModels,
 	rejected: Rejected,
 	'relay-log': RelayLog,

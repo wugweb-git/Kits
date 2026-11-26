@@ -176,3 +176,90 @@ function sourceweb_route( array $item, array $routes, array $places ): string {
 function sourceweb_place_enhancements( array $place, array $available ): array {
 	return array_values( array_intersect( (array) ( $place['enhance'] ?? array() ), $available ) );
 }
+
+/** The item fields a route can test, and the tests a settings row offers. */
+const SOURCEWEB_ROUTE_FIELDS = array( 'type', 'title', 'summary', 'source_url', 'source_name', 'feed', 'kind' );
+const SOURCEWEB_ROUTE_OPS    = array( 'always', 'eq', 'contains', 'in', 'has' );
+
+/**
+ * A settings row (one test, one place) as an expression. null when the row cannot be one.
+ *
+ * @param array $row place, op (one of SOURCEWEB_ROUTE_OPS), field, value (text; for `in`, values separated by commas).
+ * @return array|null The `when` expression ( array() = always ).
+ */
+function sourceweb_route_row_to_expr( array $row ): ?array {
+	$op    = (string) ( $row['op'] ?? 'always' );
+	$field = (string) ( $row['field'] ?? '' );
+	$val   = trim( (string) ( $row['value'] ?? '' ) );
+	if ( 'always' === $op ) {
+		return array();
+	}
+	if ( ! in_array( $op, SOURCEWEB_ROUTE_OPS, true ) || ! in_array( $field, SOURCEWEB_ROUTE_FIELDS, true ) ) {
+		return null;
+	}
+	if ( 'has' === $op ) {
+		return array( 'has', $field );
+	}
+	if ( '' === $val ) {
+		return null;
+	}
+	if ( 'in' === $op ) {
+		$list = array_values( array_filter( array_map( 'trim', explode( ',', $val ) ), 'strlen' ) );
+		return $list ? array( 'in', $field, $list ) : null;
+	}
+	return array( $op, $field, $val );
+}
+
+/**
+ * The row a stored expression shows as, or null when it is more than one simple test (kept as it is, shown read-only).
+ *
+ * @param mixed $expr Stored `when`.
+ * @return array|null op, field, value.
+ */
+function sourceweb_route_expr_to_row( $expr ): ?array {
+	if ( array() === $expr || null === $expr ) {
+		return array( 'op' => 'always', 'field' => '', 'value' => '' );
+	}
+	if ( ! is_array( $expr ) || ! isset( $expr[0] ) ) {
+		return null;
+	}
+	$op = $expr[0];
+	if ( 'has' === $op && 2 === count( $expr ) && in_array( $expr[1], SOURCEWEB_ROUTE_FIELDS, true ) ) {
+		return array( 'op' => 'has', 'field' => $expr[1], 'value' => '' );
+	}
+	if ( in_array( $op, array( 'eq', 'contains' ), true ) && 3 === count( $expr ) && in_array( $expr[1], SOURCEWEB_ROUTE_FIELDS, true ) && is_scalar( $expr[2] ) ) {
+		return array( 'op' => $op, 'field' => $expr[1], 'value' => (string) $expr[2] );
+	}
+	if ( 'in' === $op && 3 === count( $expr ) && in_array( $expr[1], SOURCEWEB_ROUTE_FIELDS, true ) && is_array( $expr[2] ) ) {
+		return array( 'op' => 'in', 'field' => $expr[1], 'value' => implode( ', ', array_map( 'strval', $expr[2] ) ) );
+	}
+	return null;
+}
+
+/**
+ * Settings rows to the routes to store. A row may carry `keep` (its stored expression, for a test the screen cannot
+ * edit). Rows naming a place that does not exist, or with an unreadable test, are returned in the second list.
+ *
+ * @param array $rows   List of rows (place, op, field, value, keep).
+ * @param array $places id => place.
+ * @return array{0:array,1:string[]} Routes, and a note for each row left out.
+ */
+function sourceweb_routes_from_rows( array $rows, array $places ): array {
+	$routes = array();
+	$notes  = array();
+	foreach ( array_values( $rows ) as $i => $row ) {
+		$n     = $i + 1;
+		$place = is_array( $row ) ? (string) ( $row['place'] ?? '' ) : '';
+		if ( ! isset( $places[ $place ] ) ) {
+			$notes[] = "Row $n: no place called '$place'.";
+			continue;
+		}
+		$expr = isset( $row['keep'] ) && is_array( $row['keep'] ) ? $row['keep'] : sourceweb_route_row_to_expr( $row );
+		if ( null === $expr ) {
+			$notes[] = "Row $n: the test is incomplete.";
+			continue;
+		}
+		$routes[] = array( 'when' => $expr, 'place' => $place );
+	}
+	return array( $routes, $notes );
+}

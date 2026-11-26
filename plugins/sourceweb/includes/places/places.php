@@ -75,3 +75,66 @@ function sourceweb_place_deliver( string $type, int $post_id, array $item = arra
 		do_action( 'sourceweb_place_deliver', $p, $item, $post_id );
 	}
 }
+
+// Places: a tab of its own, after Rules (the menu order is in menu-model.php).
+add_filter(
+	'kits_sourcing_tabs',
+	fn( $tabs ) => $tabs + array( 'places' => array( 'Places' ) ),
+	99
+);
+
+/**
+ * The Places screen's data: every place, and the routes as settings rows.
+ *
+ * @return array
+ */
+function sourceweb_places_screen(): array {
+	$places = sourceweb_places();
+	$rows   = array();
+	foreach ( (array) get_option( SOURCEWEB_ROUTES_OPTION, array() ) as $r ) {
+		if ( ! is_array( $r ) ) {
+			continue;
+		}
+		$row    = sourceweb_route_expr_to_row( $r['when'] ?? array() );
+		$rows[] = ( $row ?? array( 'op' => 'always', 'field' => '', 'value' => '' ) ) + array(
+			'place'  => (string) ( $r['place'] ?? '' ),
+			'keep'   => null === $row ? ( $r['when'] ?? array() ) : null,
+			'custom' => null === $row ? wp_json_encode( $r['when'] ?? array() ) : '',
+		);
+	}
+	return array(
+		'places' => array_values( $places ),
+		'routes' => $rows,
+		'fields' => SOURCEWEB_ROUTE_FIELDS,
+		'ops'    => SOURCEWEB_ROUTE_OPS,
+	);
+}
+
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			SOURCEWEB_REST,
+			'/places',
+			array(
+				array(
+					'methods'             => 'GET',
+					'permission_callback' => sourceweb_rest_can( SOURCEWEB_SRC_CAP ),
+					'callback'            => fn() => rest_ensure_response( sourceweb_places_screen() ),
+				),
+				array(
+					'methods'             => 'POST',
+					'permission_callback' => sourceweb_rest_can( SOURCEWEB_SRC_CAP ),
+					'callback'            => function ( WP_REST_Request $req ) {
+						list( $routes, $notes ) = sourceweb_routes_from_rows( (array) $req->get_param( 'routes' ), sourceweb_places() );
+						if ( $notes ) {
+							return new WP_Error( 'sourceweb_routes', implode( ' ', $notes ), array( 'status' => 400 ) );
+						}
+						update_option( SOURCEWEB_ROUTES_OPTION, $routes, false );
+						return rest_ensure_response( sourceweb_places_screen() );
+					},
+				),
+			)
+		);
+	}
+);

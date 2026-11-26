@@ -542,5 +542,19 @@ aw_t( 'post' === sourceweb_route( array( 'type' => 'aw_news', 'title' => 'Other'
 aw_t( 'aw_news' === sourceweb_route( $it, array( array( 'when' => array(), 'place' => 'nowhere' ) ), $all ), 'route: a route to a place that does not exist is skipped' );
 aw_t( array( 'attribution', 'image' ) === sourceweb_place_enhancements( array( 'enhance' => array( 'attribution', 'bogus', 'image' ) ), array( 'image', 'attribution', 'summary' ) ), 'enhance: only the place\'s own enhancements that exist, in its order' );
 
+// Places settings rows <-> expressions.
+aw_t( array() === sourceweb_route_row_to_expr( array( 'op' => 'always' ) ), 'route row: always is an empty test' );
+aw_t( array( 'contains', 'title', 'dog' ) === sourceweb_route_row_to_expr( array( 'op' => 'contains', 'field' => 'title', 'value' => ' dog ' ) ), 'route row: contains' );
+aw_t( array( 'in', 'feed', array( 'a', 'b' ) ) === sourceweb_route_row_to_expr( array( 'op' => 'in', 'field' => 'feed', 'value' => 'a, b,' ) ), 'route row: in splits on commas' );
+aw_t( null === sourceweb_route_row_to_expr( array( 'op' => 'contains', 'field' => 'title', 'value' => '' ) ), 'route row: empty value is incomplete' );
+aw_t( null === sourceweb_route_row_to_expr( array( 'op' => 'eq', 'field' => 'password', 'value' => 'x' ) ), 'route row: unknown field is refused' );
+aw_t( array( 'op' => 'eq', 'field' => 'type', 'value' => 'aw_news' ) === sourceweb_route_expr_to_row( array( 'eq', 'type', 'aw_news' ) ), 'expression to row: eq' );
+aw_t( null === sourceweb_route_expr_to_row( array( 'and', array( 'has', 'title' ), array( 'has', 'feed' ) ) ), 'expression to row: compound stays custom' );
+$pl = array( 'a' => array( 'id' => 'a' ) );
+list( $r1, $n1 ) = sourceweb_routes_from_rows( array( array( 'place' => 'a', 'op' => 'has', 'field' => 'feed' ), array( 'place' => 'zz', 'op' => 'always' ), array( 'place' => 'a', 'op' => 'eq', 'field' => 'type', 'value' => '' ) ), $pl );
+aw_t( 1 === count( $r1 ) && 2 === count( $n1 ), 'rows to routes: bad place and incomplete test are left out with a note' );
+list( $r2 ) = sourceweb_routes_from_rows( array( array( 'place' => 'a', 'op' => 'x', 'keep' => array( 'or', array( 'has', 'title' ) ) ) ), $pl );
+aw_t( array( 'or', array( 'has', 'title' ) ) === $r2[0]['when'], 'rows to routes: a kept custom test is stored unchanged' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );
