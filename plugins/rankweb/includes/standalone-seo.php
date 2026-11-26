@@ -150,6 +150,12 @@ function rankweb_head_description(): string {
 
 /** The share image of the page: the featured image, else the site icon. */
 function rankweb_head_image(): array {
+	if ( is_singular() ) {
+		$own = RankWeb_Post_Overrides::clean_url( get_post_meta( get_queried_object_id(), '_rankweb_og_image', true ) );
+		if ( '' !== $own ) {
+			return array( 'url' => $own, 'width' => 0, 'height' => 0, 'alt' => '' ); // the editor's own share image
+		}
+	}
 	$id = is_singular() ? (int) get_post_thumbnail_id( get_queried_object_id() ) : 0;
 	if ( $id && function_exists( 'rankweb_seo_share_square' ) ) {
 		$sq = rankweb_seo_share_square( $id ); // the 1080 square share copy, when one can be made (helpers.php)
@@ -271,6 +277,37 @@ add_action(
 
 require_once __DIR__ . '/class-rankweb-robots.php';
 require_once __DIR__ . '/class-rankweb-archive-rules.php';
+require_once __DIR__ . '/class-rankweb-post-overrides.php';
+
+// An item's own canonical address (editor sidebar), used by core's rel_canonical and by og:url.
+add_filter(
+	'get_canonical_url',
+	function ( $url, $post ) {
+		if ( ! function_exists( 'rankweb_prints_head' ) || ! rankweb_prints_head() || ! $post instanceof WP_Post ) {
+			return $url;
+		}
+		$own = RankWeb_Post_Overrides::clean_url( get_post_meta( $post->ID, '_rankweb_canonical', true ) );
+		return '' !== $own ? $own : $url;
+	},
+	20,
+	2
+);
+
+// An item's own 301: visitors to it go to the address set in the editor. Never to itself.
+add_action(
+	'template_redirect',
+	function () {
+		if ( ! is_singular() || is_preview() ) {
+			return;
+		}
+		$to = RankWeb_Post_Overrides::redirect_to( (string) get_post_meta( get_queried_object_id(), '_rankweb_redirect', true ), (string) get_permalink() );
+		if ( '' !== $to ) {
+			wp_redirect( $to, 301, 'RankWeb' ); // phpcs:ignore WordPress.Security.SafeRedirect -- an editor chose this address, and it may be another site
+			exit;
+		}
+	},
+	1
+);
 
 /* ---------- robots: noindex by rule, through core's wp_robots (one robots tag) ---------- */
 

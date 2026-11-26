@@ -297,6 +297,42 @@
 						}
 					),
 					el(
+						TextControl,
+						{
+							label: __( 'Canonical address', 'rankweb' ),
+							type: 'url',
+							value: meta._rankweb_canonical || '',
+							help: __( 'Leave empty for the page itself. Use it when this page repeats another.', 'rankweb' ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_canonical: v } ) } );
+							}
+						}
+					),
+					el(
+						TextControl,
+						{
+							label: __( 'Send visitors to (301 redirect)', 'rankweb' ),
+							type: 'url',
+							value: meta._rankweb_redirect || '',
+							help: __( 'Visitors and search engines are sent to this address. Leave empty for none.', 'rankweb' ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_redirect: v } ) } );
+							}
+						}
+					),
+					el(
+						TextControl,
+						{
+							label: __( 'Share image address', 'rankweb' ),
+							type: 'url',
+							value: meta._rankweb_og_image || '',
+							help: __( 'Used when the page is shared. Leave empty for the featured image.', 'rankweb' ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_og_image: v } ) } );
+							}
+						}
+					),
+					el(
 						'div',
 						{ style: { marginTop: '20px' } },
 						el( 'strong', { style: { display: 'block', marginBottom: '8px' } }, __( 'Google SERP Preview', 'rankweb' ) ),

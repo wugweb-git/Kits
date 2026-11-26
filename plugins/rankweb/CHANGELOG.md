@@ -10,6 +10,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 ## 2.2.0
 
 - Per-item robots in the editor sidebar: nofollow, noarchive, nosnippet and max-snippet next to noindex, printed through one robots tag. A setting turns them off. The classic editor has the same choices in a "Search engines (RankWeb)" box.
+- Per-item canonical address, 301 redirect and share image address, in the editor sidebar and the classic box.
 - Archive rules (without Rank Math): keep author archives, date archives, page 2 and later of lists, attachment pages and empty category or tag archives out of search. All off until set.
 - Page speed (Core Web Vitals): defer chosen scripts, Google Fonts shown at once (display=swap), and WebP for new JPEG and PNG uploads. No outside service.
 - Transport (RankWeb → Transport): copy SEO title, description, focus keyword and robots settings from Yoast SEO, Rank Math, All in One SEO, SEOPress or The SEO Framework. A dry run is the default, a filled field is never overwritten, and a title still made of the other plugin's variables is skipped.

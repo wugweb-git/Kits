@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/class-rankweb-robots.php';
+require_once __DIR__ . '/class-rankweb-post-overrides.php';
 
 /**
  * Post types the sidebar and its meta are registered for. Default post, page and aw_press; filterable.
@@ -101,6 +102,19 @@ add_action(
 					'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
 				)
 			);
+			foreach ( RankWeb_Post_Overrides::KEYS as $override_key ) {
+				register_post_meta(
+					$type,
+					$override_key,
+					array(
+						'show_in_rest'      => true,
+						'single'            => true,
+						'type'              => 'string',
+						'sanitize_callback' => array( 'RankWeb_Post_Overrides', 'clean_url' ),
+						'auth_callback'     => fn() => current_user_can( 'edit_posts' ),
+					)
+				);
+			}
 			foreach ( array( '_rankweb_nofollow', '_rankweb_noarchive', '_rankweb_nosnippet' ) as $flag_key ) {
 				register_post_meta(
 					$type,
@@ -210,6 +224,9 @@ function rankweb_robots_box( WP_Post $post ): void {
 		echo '<p><label><input type="checkbox" name="rankweb_robots[' . esc_attr( $key ) . ']" value="1"' . checked( '1', (string) get_post_meta( $id, '_rankweb_' . $key, true ), false ) . ' /> ' . esc_html( $label ) . '</label></p>';
 	}
 	echo '<p><label for="rankweb-max-snippet">' . esc_html__( 'Longest text snippet (characters)', 'rankweb' ) . '</label><br /><input type="number" min="-1" id="rankweb-max-snippet" name="rankweb_robots[max_snippet]" value="' . esc_attr( (string) get_post_meta( $id, '_rankweb_max_snippet', true ) ) . '" aria-describedby="rankweb-max-snippet-help" /></p>';
+	foreach ( array( 'canonical' => __( 'Canonical address (leave empty for the page itself)', 'rankweb' ), 'redirect' => __( 'Send visitors to (301 redirect)', 'rankweb' ), 'og_image' => __( 'Share image address', 'rankweb' ) ) as $field => $label ) {
+		echo '<p><label for="rankweb-' . esc_attr( $field ) . '">' . esc_html( $label ) . '</label><br /><input type="url" class="widefat" id="rankweb-' . esc_attr( $field ) . '" name="rankweb_robots[' . esc_attr( $field ) . ']" value="' . esc_attr( (string) get_post_meta( $id, RankWeb_Post_Overrides::KEYS[ $field ], true ) ) . '" /></p>';
+	}
 	echo '<p class="description" id="rankweb-max-snippet-help">' . esc_html__( 'Leave empty for no rule, -1 for no limit.', 'rankweb' ) . '</p>';
 }
 
@@ -221,7 +238,7 @@ add_action(
 			return;
 		}
 		$form = isset( $_POST['rankweb_robots'] ) && is_array( $_POST['rankweb_robots'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['rankweb_robots'] ) ) : array();
-		foreach ( RankWeb_Robots::clean_form( $form ) as $key => $value ) {
+		foreach ( array_merge( RankWeb_Robots::clean_form( $form ), RankWeb_Post_Overrides::clean_form( $form ) ) as $key => $value ) {
 			if ( '' === $value ) {
 				delete_post_meta( $post_id, $key );
 			} else {
