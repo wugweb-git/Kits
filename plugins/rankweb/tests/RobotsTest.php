@@ -44,6 +44,15 @@ final class RobotsTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( array( 'nosnippet' => true ), $r );
 	}
 
+	public function testClassicFormIsCleaned(): void {
+		$m = RankWeb_Robots::clean_form( array( 'noindex' => 'on', 'nosnippet' => '1', 'max_snippet' => ' 70 ' ) );
+		$this->assertSame( '1', $m['_rankweb_noindex'] );
+		$this->assertSame( '', $m['_rankweb_nofollow'] );
+		$this->assertSame( '1', $m['_rankweb_nosnippet'] );
+		$this->assertSame( '70', $m['_rankweb_max_snippet'] );
+		$this->assertSame( '', RankWeb_Robots::clean_form( array( 'max_snippet' => 'x' ) )['_rankweb_max_snippet'] );
+	}
+
 	public function testMaxSnippetIsCleaned(): void {
 		$this->assertSame( 120, RankWeb_Robots::max_snippet( ' 120 ' ) );
 		$this->assertSame( -1, RankWeb_Robots::max_snippet( '-1' ) );

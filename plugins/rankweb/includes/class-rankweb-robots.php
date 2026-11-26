@@ -74,6 +74,23 @@ final class RankWeb_Robots {
 		return $robots;
 	}
 
+	/**
+	 * The meta to store from a classic-editor form: noindex and the three flags ('1' or ''), and max-snippet ('' or a
+	 * whole number of -1 or more). Keys are the post meta names.
+	 *
+	 * @param array $post The submitted values: noindex, nofollow, noarchive, nosnippet, max_snippet.
+	 * @return array<string,string>
+	 */
+	public static function clean_form( array $post ): array {
+		$out = array();
+		foreach ( array_merge( array( 'noindex' ), self::FLAGS ) as $f ) {
+			$out[ '_rankweb_' . $f ] = ! empty( $post[ $f ] ) ? '1' : '';
+		}
+		$n                            = self::max_snippet( $post['max_snippet'] ?? '' );
+		$out['_rankweb_max_snippet'] = null === $n ? '' : (string) $n;
+		return $out;
+	}
+
 	/** Whether an item asks for anything (a list screen can show a mark). */
 	public static function any( array $item ): bool {
 		return ! empty( $item['nofollow'] ) || ! empty( $item['noarchive'] ) || ! empty( $item['nosnippet'] ) || ( isset( $item['max_snippet'] ) && null !== $item['max_snippet'] );

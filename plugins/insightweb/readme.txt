@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,7 +69,7 @@ InsightWeb connects to external services only when the corresponding integration
 == Changelog ==
 
 
-= 0.3.0 =
+= 1.1.0 =
 * Tabs follow a fixed order; SourceWeb's tab label is translatable.
 * A scheduled report email (weekly or monthly, off by default) with an optional white-label line.
 

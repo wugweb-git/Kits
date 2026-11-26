@@ -27,6 +27,8 @@ final class RankWeb_Transport {
 			'yoast'    => 'Yoast SEO',
 			'rankmath' => 'Rank Math',
 			'aioseo'   => 'All in One SEO',
+			'seopress' => 'SEOPress',
+			'tsf'      => 'The SEO Framework',
 		);
 	}
 
@@ -78,6 +80,23 @@ final class RankWeb_Transport {
 				}
 				$n = RankWeb_Robots::max_snippet( $m( 'row_robots_max_snippet' ) );
 				$out['max_snippet'] = null === $n || 0 === $n ? '' : (string) $n; // AIOSEO stores 0 for "not set"
+			}
+		}
+		if ( 'seopress' === $source ) {
+			$out['title']       = $m( '_seopress_titles_title' );
+			$out['description'] = $m( '_seopress_titles_desc' );
+			$out['focus']       = trim( explode( ',', $m( '_seopress_analysis_target_kw' ) )[0] );
+			// SEOPress stores "yes" when the box is ticked (index = "yes" means noindex).
+			$out['noindex']     = 'yes' === $m( '_seopress_robots_index' ) ? '1' : '';
+			$out['nofollow']    = 'yes' === $m( '_seopress_robots_follow' ) ? '1' : '';
+			$out['noarchive']   = 'yes' === $m( '_seopress_robots_archive' ) ? '1' : '';
+			$out['nosnippet']   = 'yes' === $m( '_seopress_robots_snippet' ) ? '1' : '';
+		} elseif ( 'tsf' === $source ) {
+			// No focus keyword (that is a paid extension of The SEO Framework). A value of 1 is "on", -1 "off", 0 the site default.
+			$out['title']       = $m( '_genesis_title' );
+			$out['description'] = $m( '_genesis_description' );
+			foreach ( array( 'noindex', 'nofollow', 'noarchive' ) as $w ) {
+				$out[ $w ] = '1' === $m( '_genesis_' . $w ) ? '1' : '';
 			}
 		}
 		if ( self::is_template( $out['title'] ) ) {

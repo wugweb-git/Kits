@@ -102,4 +102,20 @@ final class TransportTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 1, $t['fields']['focus'] );
 		$this->assertSame( 1, $t['kept'] );
 	}
+
+	public function testSeoPressAndTheSeoFramework(): void {
+		$s = RankWeb_Transport::read( 'seopress', array( '_seopress_titles_title' => 'SP title', '_seopress_titles_desc' => '%%post_excerpt%%', '_seopress_analysis_target_kw' => 'dog, cat', '_seopress_robots_index' => 'yes', '_seopress_robots_snippet' => 'yes', '_seopress_robots_follow' => '' ) );
+		$this->assertSame( 'SP title', $s['title'] );
+		$this->assertSame( '', $s['description'] );
+		$this->assertSame( 'dog', $s['focus'] );
+		$this->assertSame( '1', $s['noindex'] );
+		$this->assertSame( '1', $s['nosnippet'] );
+		$this->assertSame( '', $s['nofollow'] );
+		$t = RankWeb_Transport::read( 'tsf', array( '_genesis_title' => 'T', '_genesis_noindex' => '1', '_genesis_nofollow' => '-1' ) );
+		$this->assertSame( 'T', $t['title'] );
+		$this->assertSame( '1', $t['noindex'] );
+		$this->assertSame( '', $t['nofollow'] );
+		$this->assertSame( '', $t['focus'] );
+		$this->assertTrue( isset( RankWeb_Transport::sources()['seopress'], RankWeb_Transport::sources()['tsf'] ) );
+	}
 }

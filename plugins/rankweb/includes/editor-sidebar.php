@@ -173,3 +173,60 @@ add_action(
 		);
 	}
 );
+
+/* ---------- Classic editor: the same robots choices as the block editor sidebar, in a meta box ---------- */
+
+add_action(
+	'add_meta_boxes',
+	function ( $post_type, $post = null ) {
+		if ( ! $post instanceof WP_Post || ! in_array( (string) $post_type, rankweb_sidebar_post_types(), true ) || ! current_user_can( 'edit_post', (int) $post->ID ) ) {
+			return;
+		}
+		add_meta_box(
+			'rankweb-robots',
+			__( 'Search engines (RankWeb)', 'rankweb' ),
+			'rankweb_robots_box',
+			$post_type,
+			'side',
+			'default',
+			array( '__back_compat_meta_box' => true ) // the block editor has these in the RankWeb sidebar, so it hides this box
+		);
+	},
+	10,
+	2
+);
+
+/** The classic robots box. */
+function rankweb_robots_box( WP_Post $post ): void {
+	$id = (int) $post->ID;
+	wp_nonce_field( 'rankweb_robots_' . $id, 'rankweb_robots_nonce' );
+	$rows = array(
+		'noindex'   => __( 'Keep out of search results', 'rankweb' ),
+		'nofollow'  => __( 'Do not follow links on this page', 'rankweb' ),
+		'noarchive' => __( 'Do not show a cached copy', 'rankweb' ),
+		'nosnippet' => __( 'Do not show a text snippet', 'rankweb' ),
+	);
+	foreach ( $rows as $key => $label ) {
+		echo '<p><label><input type="checkbox" name="rankweb_robots[' . esc_attr( $key ) . ']" value="1"' . checked( '1', (string) get_post_meta( $id, '_rankweb_' . $key, true ), false ) . ' /> ' . esc_html( $label ) . '</label></p>';
+	}
+	echo '<p><label for="rankweb-max-snippet">' . esc_html__( 'Longest text snippet (characters)', 'rankweb' ) . '</label><br /><input type="number" min="-1" id="rankweb-max-snippet" name="rankweb_robots[max_snippet]" value="' . esc_attr( (string) get_post_meta( $id, '_rankweb_max_snippet', true ) ) . '" aria-describedby="rankweb-max-snippet-help" /></p>';
+	echo '<p class="description" id="rankweb-max-snippet-help">' . esc_html__( 'Leave empty for no rule, -1 for no limit.', 'rankweb' ) . '</p>';
+}
+
+add_action(
+	'save_post',
+	function ( $post_id ) {
+		$post_id = (int) $post_id;
+		if ( wp_is_post_revision( $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || empty( $_POST['rankweb_robots_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['rankweb_robots_nonce'] ) ), 'rankweb_robots_' . $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+		$form = isset( $_POST['rankweb_robots'] ) && is_array( $_POST['rankweb_robots'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['rankweb_robots'] ) ) : array();
+		foreach ( RankWeb_Robots::clean_form( $form ) as $key => $value ) {
+			if ( '' === $value ) {
+				delete_post_meta( $post_id, $key );
+			} else {
+				update_post_meta( $post_id, $key, $value );
+			}
+		}
+	}
+);

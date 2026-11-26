@@ -45,6 +45,8 @@ function rankweb_transport_keys( string $source ): array {
 		'yoast'    => array( '_yoast_wpseo_title', '_yoast_wpseo_metadesc', '_yoast_wpseo_focuskw', '_yoast_wpseo_meta-robots-noindex', '_yoast_wpseo_meta-robots-nofollow', '_yoast_wpseo_meta-robots-adv' ),
 		'rankmath' => array( 'rank_math_robots', 'rank_math_advanced_robots' ),
 		'aioseo'   => array( '_aioseop_title', '_aioseop_description', '_aioseop_keywords' ),
+		'seopress' => array( '_seopress_titles_title', '_seopress_titles_desc', '_seopress_analysis_target_kw', '_seopress_robots_index', '_seopress_robots_follow', '_seopress_robots_archive', '_seopress_robots_snippet' ),
+		'tsf'      => array( '_genesis_title', '_genesis_description', '_genesis_noindex', '_genesis_nofollow', '_genesis_noarchive' ),
 	)[ $source ] ?? array();
 }
 
