@@ -32,12 +32,12 @@ function wp_strip_all_tags( $s ) {
 	return trim( strip_tags( (string) preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s ) ) );
 }
 require dirname( __DIR__, 2 ) . '/insightweb/includes/keyword-model.php';
-require dirname( __DIR__ ) . '/includes/sources-model.php';
-require dirname( __DIR__ ) . '/includes/keywords-model.php';
-require dirname( __DIR__ ) . '/includes/rules-model.php';
-require dirname( __DIR__ ) . '/includes/retire-model.php';
-require dirname( __DIR__ ) . '/includes/autoresolve-model.php';
-require dirname( __DIR__ ) . '/includes/menu-model.php';
+require dirname( __DIR__ ) . '/includes/sources/sources-model.php';
+require dirname( __DIR__ ) . '/includes/keywords/keywords-model.php';
+require dirname( __DIR__ ) . '/includes/rules/rules-model.php';
+require dirname( __DIR__ ) . '/includes/lifecycle/retire-model.php';
+require dirname( __DIR__ ) . '/includes/rules/autoresolve-model.php';
+require dirname( __DIR__ ) . '/includes/admin/menu-model.php';
 
 $fails = 0;
 $count = 0;
@@ -361,14 +361,14 @@ aw_t( 1 === count( sourceweb_kw_searches( $kw_rec, array() ) ), 'migrated spelli
 
 // The old role sync pauses while a phase 2 migration runs or is unfinished (Codex, #75).
 $si_kw = (string) file_get_contents( dirname( __DIR__, 2 ) . '/insightweb/includes/search-insights/keywords.php' );
-$p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+$p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/lifecycle/sourcing-migrate-phase2.php' );
 aw_t( false !== strpos( $si_kw, "get_option( 'aw_sourcing_migrating' )" ) && false !== strpos( $si_kw, "get_option( 'aw_sourcing_phase2_record' )" ), 'role sync checks the migration flag and record' );
 aw_t( substr_count( $p2_mg, "'aw_sourcing_migrating'" ) >= 3, 'migration sets the flag and clears it when done or rolled back' );
 
 // Interrupted runs can roll back: the undo record is saved before rows change; switched-off searches stay off (Codex, #75).
-$p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/sourcing-migrate-phase2.php' );
+$p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/lifecycle/sourcing-migrate-phase2.php' );
 aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
-$kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords-model.php' );
+$kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords/keywords-model.php' );
 aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
 
 // A search address with an upper-case scheme is still an address (Codex, #76).
@@ -379,19 +379,19 @@ aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// searc
 // ---- the SourceWeb screens (owner, 25 Oct 2026: Overview first, Plugins screen links, retired addresses gone; 11 Nov
 // 2026: one item under Plugins, the screens as tabs, the same addresses) ----
 $inc   = dirname( __DIR__ ) . '/includes/';
-$menu  = (string) file_get_contents( $inc . 'admin-menu.php' );
+$menu  = (string) file_get_contents( $inc . 'admin/admin-menu.php' );
 aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
 aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
 aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
 aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb' . \$count, AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page', \$icon, '58.3' );" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'SourceWeb: its own top-level menu (core add_menu_page, at 58.3 in the Wugweb block), with the To review count, opening the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
 aw_t( false === strpos( $menu, 'kits_admin_fold_menu' ) && false !== strpos( $menu, "'separator-wugweb'" ), 'the menu needs no Kits Core: no fold helper, its own separator above the block' );
 aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
-foreach ( array( 'admin-menu.php', 'review-queue.php', 'enrichment-admin.php', 'sourcing-policy.php' ) as $f ) {
+foreach ( array( 'admin/admin-menu.php', 'review/review-queue.php', 'enrichment/enrichment-admin.php', 'sources/sourcing-policy.php' ) as $f ) {
 	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
 }
 aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'review/review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'enrichment/enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
 // Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.
 $tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Press queries', 'categories' => 'Categories', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'relay-log' => 'Relay log', 'settings' => 'Settings', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'log' => 'Change log' );
 aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( sourceweb_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );
@@ -404,7 +404,7 @@ aw_t( array( 'Overview' => 'admin.php?page=aw-sourcing-menu', 'Settings' => 'adm
 aw_t( false !== strpos( $menu, "'plugin_action_links_' . plugin_basename(" ), 'the links are added under SourceWeb on the Plugins screen' );
 // No screen is under Settings or Inbox any more, and no old screen id is used.
 $all_inc = '';
-foreach ( glob( $inc . '*.php' ) as $f ) {
+foreach ( glob( $inc . '*/*.php' ) as $f ) {
 	$all_inc .= (string) file_get_contents( $f );
 }
 aw_t( false === strpos( $all_inc, 'settings_page_aw-sourcing' ), 'no code uses the old screen id' );
@@ -414,16 +414,16 @@ $fn_dup = array_keys( array_filter( array_count_values( array_map( 'strtolower',
 aw_t( array() === $fn_dup, 'every function is declared once (' . implode( ', ', $fn_dup ) . ')' );
 aw_t( false !== strpos( $menu, "\$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings' );" ) && false === strpos( $menu, 'aw_sourcing_own_settings_tab' ), 'Sourcing → Settings is a shell screen (no classic callback)' );
 // One way to draw each screen: no tab registers a classic callback, no ui=classic switch, no screen options.
-aw_t( ! preg_match( '/\$tabs\[[^\]]+\] = array\( \'[^\']+\', /', $all_inc ) && false !== strpos( (string) file_get_contents( $inc . 'rules-admin.php' ), "array( 'rules' => array( 'Rules' ) )" ), 'no tab registers a classic callback' );
+aw_t( ! preg_match( '/\$tabs\[[^\]]+\] = array\( \'[^\']+\', /', $all_inc ) && false !== strpos( (string) file_get_contents( $inc . 'rules/rules-admin.php' ), "array( 'rules' => array( 'Rules' ) )" ), 'no tab registers a classic callback' );
 aw_t( false === strpos( $all_inc, "'classic'" ) && false === strpos( $all_inc, 'ui=classic' ) && false === strpos( $all_inc, "'ui' => 'next'" ), 'no ui=classic or ui=next switch' );
 aw_t( false === strpos( $all_inc, 'add_screen_option(' ) && false === strpos( $all_inc, 'set_screen_option_' ), 'no screen options (the shell has its own)' );
 aw_t( array() === array_filter( array( 'review', 'enrichment', 'sources', 'publishers', 'keywords', 'suggestions', 'sections', 'categories', 'ai-keys', 'simple' ), fn( $t ) => file_exists( $inc . 'class-aw-sourcing-' . $t . '-table.php' ) ) && ! file_exists( $inc . 'class-aw-workers-table.php' ), 'the classic list tables are gone' );
 aw_t( false === strpos( $all_inc, "options-general.php?page=aw-sourcing" ) && false === strpos( $all_inc, 'add_options_page' ), 'no link or page under Settings' );
 aw_t( false === strpos( $all_inc, "add_submenu_page( 'aw-inbox'" ) && false === strpos( $all_inc, 'edit.php?post_type=aw_listing&page=aw-enrich-review' ), 'nothing under Inbox or Directory' );
 // Retired addresses (owner, 25 Oct 2026): the old tab redirects and the old POST tab names are gone; the phase switch stays.
-$sites  = (string) file_get_contents( $inc . 'source-sites.php' );
-$policy = (string) file_get_contents( $inc . 'sourcing-policy.php' );
-$rules  = (string) file_get_contents( $inc . 'rules-admin.php' );
+$sites  = (string) file_get_contents( $inc . 'sources/source-sites.php' );
+$policy = (string) file_get_contents( $inc . 'sources/sourcing-policy.php' );
+$rules  = (string) file_get_contents( $inc . 'rules/rules-admin.php' );
 aw_t( false === strpos( $sites, "'publishers'    => array( 'tab' => 'sources' )" ) && false === strpos( $sites, ', 301 )' ), 'no 301 map for the old Publishers, Feeds, Library, Opportunities and Relay tabs' );
 aw_t( false === strpos( $policy, "array( 'publishers' => 'sources', 'library' => 'feeds', 'opportunities' => 'feeds' )" ), 'no translation of old POST tab names' );
 aw_t( false !== strpos( $rules, 'sourceweb_rules_live()' ) && false !== strpos( $rules, "wp_safe_redirect( sourceweb_rules_url( \$tab, array_map( 'rawurlencode', \$q ) ) ); // 302" ), 'the phase 3 switch (old tabs to Rules, 302) stays' );
@@ -455,8 +455,8 @@ require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
 require __DIR__ . '/sourceweb-tests.php'; // The new screens on the Kits shell .
 require __DIR__ . '/autoresolve-tests.php'; // The review-queue rules (14 Nov 2026)
 
-// Backup before uninstall deletes (includes/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
-require_once dirname( __DIR__ ) . '/includes/uninstall-backup.php';
+// Backup before uninstall deletes (includes/lifecycle/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
+require_once dirname( __DIR__ ) . '/includes/lifecycle/uninstall-backup.php';
 $ub_t = static function ( bool $ok, string $what ): void {
 	aw_t( $ok, $what );
 };

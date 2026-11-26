@@ -352,7 +352,7 @@ $rest_checkers = array(
 		'cap'  => 'manage_planweb',
 	),
 	'sourceweb'    => array(
-		'file' => '/plugins/sourceweb/includes/sourceweb-rest.php',
+		'file' => '/plugins/sourceweb/includes/rest/sourceweb-rest.php',
 		'func' => 'sourceweb_rest_can',
 		'cap'  => 'manage_sourceweb',
 	),

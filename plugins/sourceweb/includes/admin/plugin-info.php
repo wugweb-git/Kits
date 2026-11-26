@@ -19,8 +19,8 @@ function sourceweb_src_plugin_file(): string {
 	if ( defined( 'SOURCEWEB_FILE' ) ) {
 		return SOURCEWEB_FILE;
 	}
-	$new = ( defined( 'SOURCEWEB_SOURCING_DIR' ) ? SOURCEWEB_SOURCING_DIR : plugin_dir_path( __DIR__ ) ) . 'sourceweb.php';
-	return file_exists( $new ) ? $new : ( defined( 'SOURCEWEB_SOURCING_DIR' ) ? SOURCEWEB_SOURCING_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-sourcing.php';
+	$new = ( defined( 'SOURCEWEB_SOURCING_DIR' ) ? SOURCEWEB_SOURCING_DIR : plugin_dir_path( dirname( __DIR__ ) ) ) . 'sourceweb.php';
+	return file_exists( $new ) ? $new : ( defined( 'SOURCEWEB_SOURCING_DIR' ) ? SOURCEWEB_SOURCING_DIR : plugin_dir_path( dirname( __DIR__ ) ) ) . 'aw-sourcing.php';
 }
 
 /**
@@ -53,7 +53,7 @@ function sourceweb_src_plugin_art(): array {
  */
 function sourceweb_src_plugin_update_row( $update, $plugin_data, $plugin_file ) {
 	$main = plugin_basename( sourceweb_src_plugin_file() );
-	if ( $main !== $plugin_file && plugin_basename( ( defined( 'SOURCEWEB_SOURCING_DIR' ) ? SOURCEWEB_SOURCING_DIR : plugin_dir_path( __DIR__ ) ) . 'aw-sourcing.php' ) !== $plugin_file ) {
+	if ( $main !== $plugin_file && plugin_basename( ( defined( 'SOURCEWEB_SOURCING_DIR' ) ? SOURCEWEB_SOURCING_DIR : plugin_dir_path( dirname( __DIR__ ) ) ) . 'aw-sourcing.php' ) !== $plugin_file ) {
 		return $update;
 	}
 	return array_merge(

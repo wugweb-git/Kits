@@ -38,7 +38,7 @@
  *   (SourceWeb's Settings also saves them); the aw_research_citation event (its work is Animal Writes Core's).
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-sourcing-uninstall-<YYYYmmdd-His>.jsonl.gz
- * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
+ * (includes/lifecycle/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
  * every table below (transients are caches and are not kept). If the backup cannot be written, nothing is deleted.
  *
  * Runs for the current site only.
@@ -104,7 +104,7 @@ $aw_src_options = array(
 );
 
 global $wpdb;
-require_once __DIR__ . '/includes/uninstall-backup.php';
+require_once __DIR__ . '/includes/lifecycle/uninstall-backup.php';
 $sourceweb_uninst_slug = file_exists( __DIR__ . '/sourceweb.php' ) ? 'sourceweb' : 'aw-sourcing';
 $sourceweb_uninst_file = file_exists( __DIR__ . '/sourceweb.php' ) ? __DIR__ . '/sourceweb.php' : __DIR__ . '/aw-sourcing.php';
 if ( ! sourceweb_src_uninstall_backup( $sourceweb_uninst_slug, $sourceweb_uninst_file, array_merge( $aw_src_options, array( 'aw_src_delete_data_on_uninstall' ) ), array( 'aw_worker_runs_', 'aw_backup_1_', 'aw_backup_2_', 'aw_backup_3_', 'aw_backup_4_' ), array( $wpdb->prefix . 'aw_enrich' ) ) ) {
