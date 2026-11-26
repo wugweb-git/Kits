@@ -518,5 +518,29 @@ $ub_dir = sys_get_temp_dir() . '/aw-sourcing-ub-ro-' . getmypid();
 $ub_t( 0 === getmyuid() || ! @sourceweb_src_backup_protect( $ub_dir ), 'backup: a folder that cannot be written is refused' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- the warning is the expected failure
 rmdir( $ub_dir ); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the test's own folder
 
+// ---- places, routes and boolean tests (includes/places/places-model.php) ----
+require_once dirname( __DIR__ ) . '/includes/places/places-model.php';
+$pl = sourceweb_places_default( array( 'aw_news', 'aw_listing', 'post' ) );
+aw_t( array( 'aw_news', 'aw_listing', 'post' ) === array_keys( $pl ) && 'content_type' === $pl['aw_news']['kind'] && 'aw_news' === $pl['aw_news']['post_type'], 'places: the content types of today are the default places' );
+aw_t( null === sourceweb_place_clean( array( 'kind' => 'plugin' ) ) && null === sourceweb_place_clean( array( 'id' => 'x', 'kind' => 'bogus' ) ) && null === sourceweb_place_clean( array( 'id' => 'x', 'kind' => 'content_type' ) ), 'places: no id, an unknown kind, or a content type without a type is not a place' );
+$gal = sourceweb_place_clean( array( 'id' => 'Gallery!', 'label' => ' Picture gallery ', 'kind' => 'plugin', 'owner' => 'MyPlugin', 'enhance' => array( 'image', 'Image', 'attribution', '' ) ) );
+aw_t( 'gallery' === $gal['id'] && 'Picture gallery' === $gal['label'] && array( 'image', 'attribution' ) === $gal['enhance'] && 'myplugin' === $gal['owner'], 'places: a plugin place is tidied (id, label, enhancements without repeats)' );
+$all = sourceweb_places_clean( array_merge( array_values( $pl ), array( array( 'id' => 'aw_news', 'label' => 'News', 'kind' => 'content_type', 'post_type' => 'aw_news' ), array( 'id' => 'gallery', 'kind' => 'plugin' ), 'junk' ) ) );
+aw_t( 'News' === $all['aw_news']['label'] && isset( $all['gallery'] ) && 4 === count( $all ), 'places: a later place with the same id replaces the earlier one; junk is dropped' );
+$it = array( 'type' => 'aw_news', 'title' => 'Dog rescued in Pune', 'source_name' => 'The Hindu', 'score' => 80, 'tags' => array( 'dogs' ) );
+aw_t( sourceweb_expr_eval( array(), $it ) && sourceweb_expr_eval( null, $it ), 'expr: no condition is true' );
+aw_t( sourceweb_expr_eval( array( 'eq', 'type', 'aw_news' ), $it ) && ! sourceweb_expr_eval( array( 'eq', 'type', 'post' ), $it ) && ! sourceweb_expr_eval( array( 'eq', 'nope', 'x' ), $it ), 'expr: eq, and a missing field is false' );
+aw_t( sourceweb_expr_eval( array( 'in', 'type', array( 'post', 'aw_news' ) ), $it ) && sourceweb_expr_eval( array( 'contains', 'title', 'PUNE' ), $it ) && ! sourceweb_expr_eval( array( 'contains', 'title', '' ), $it ), 'expr: in, and contains ignores case but never matches empty text' );
+aw_t( sourceweb_expr_eval( array( 'gte', 'score', 80 ), $it ) && ! sourceweb_expr_eval( array( 'gte', 'score', 81 ), $it ) && ! sourceweb_expr_eval( array( 'gte', 'title', 1 ), $it ), 'expr: gte on numbers only' );
+aw_t( sourceweb_expr_eval( array( 'has', 'tags' ), $it ) && ! sourceweb_expr_eval( array( 'has', 'missing' ), $it ) && ! sourceweb_expr_eval( array( 'has', 'title' ), array( 'title' => '' ) ), 'expr: has means present and not empty' );
+aw_t( sourceweb_expr_eval( array( 'and', array( 'eq', 'type', 'aw_news' ), array( 'not', array( 'contains', 'title', 'cat' ) ) ), $it ) && sourceweb_expr_eval( array( 'or', array( 'eq', 'type', 'x' ), array( 'has', 'tags' ) ), $it ) && ! sourceweb_expr_eval( array( 'and' ), $it ), 'expr: and, or, not combine; an empty and is false' );
+aw_t( ! sourceweb_expr_eval( array( 'shell', 'x' ), $it ) && ! sourceweb_expr_eval( 'eq', $it ) && ! sourceweb_expr_eval( array( 'eq', 'type' ), $it ) && ! sourceweb_expr_eval( array( 'not' ), $it ), 'expr: an unknown or malformed expression is false, never a pass' );
+aw_t( 'aw_news' === sourceweb_route( $it, array(), $all ) && '' === sourceweb_route( array( 'type' => 'other' ), array(), $all ), 'route: no routes, the item\'s own type; no such place, none' );
+$routes = array( array( 'when' => array( 'contains', 'title', 'pune' ), 'place' => 'gallery' ), array( 'when' => array(), 'place' => 'post' ) );
+aw_t( 'gallery' === sourceweb_route( $it, $routes, $all ), 'route: the first route that matches wins' );
+aw_t( 'post' === sourceweb_route( array( 'type' => 'aw_news', 'title' => 'Other' ), $routes, $all ), 'route: a later route catches what the first did not' );
+aw_t( 'aw_news' === sourceweb_route( $it, array( array( 'when' => array(), 'place' => 'nowhere' ) ), $all ), 'route: a route to a place that does not exist is skipped' );
+aw_t( array( 'attribution', 'image' ) === sourceweb_place_enhancements( array( 'enhance' => array( 'attribution', 'bogus', 'image' ) ), array( 'image', 'attribution', 'summary' ) ), 'enhance: only the place\'s own enhancements that exist, in its order' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

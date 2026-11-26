@@ -104,6 +104,8 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/library-pdfs.php'; // wh
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/sourcing-lists.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/summary-rules-admin.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/relevance.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/places/places-model.php'; // where an item goes: places, routes, boolean tests (pure)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/places/places.php'; // the registry other plugins add to, and the routes from settings
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/ingest.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/sources/opportunities-site.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/rules/auto-review.php';
