@@ -16,9 +16,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'admin_menu', 'kits_scripts_menu', 25 );
 
 /**
+ * Whether the current user may view and save raw header/footer scripts.
+ */
+function kits_scripts_can_manage(): bool {
+	return current_user_can( 'manage_options' ) && current_user_can( 'unfiltered_html' );
+}
+
+/**
  * Register Scripts page in admin menu.
  */
 function kits_scripts_menu() {
+	if ( ! kits_scripts_can_manage() ) {
+		return;
+	}
 	add_submenu_page(
 		KITS_MENU,
 		__( 'Header & Footer Scripts', 'kits-core' ),
@@ -56,8 +66,8 @@ add_action(
 		if ( ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['kits_scripts_nonce'] ) ), 'kits_scripts_save' ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'kits-core' ) );
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Permission denied.', 'kits-core' ) );
+		if ( ! kits_scripts_can_manage() ) {
+			wp_die( esc_html__( 'Permission denied. Both manage_options and unfiltered_html capabilities are required.', 'kits-core' ) );
 		}
 
 		$header = isset( $_POST['kits_header_scripts'] ) ? wp_unslash( $_POST['kits_header_scripts'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- raw admin script tags allowed for super admin
@@ -77,8 +87,8 @@ add_action(
  * Render Header & Footer Scripts page.
  */
 function kits_scripts_page() {
-	if ( ! current_user_can( 'manage_options' ) ) {
-		return;
+	if ( ! kits_scripts_can_manage() ) {
+		wp_die( esc_html__( 'Sorry, you are not allowed to manage raw scripts.', 'kits-core' ) );
 	}
 
 	$header = get_option( 'kits_header_scripts', '' );

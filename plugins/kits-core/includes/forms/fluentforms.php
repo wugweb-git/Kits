@@ -474,6 +474,9 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 				}
 			}
 			$data = function_exists( 'kits_ff_update_values' ) ? kits_ff_update_values( $data, $form ) : $data; // the update link (volunteers.php)
+			if ( 'textarea' === ( $data['element'] ?? '' ) && is_string( $data['attributes']['value'] ?? null ) && '' !== $data['attributes']['value'] ) {
+				$data['attributes']['value'] = kits_ff_plain_text( $data['attributes']['value'] );
+			}
 			$name = (string) ( $data['attributes']['name'] ?? '' );
 			if ( 'org_name' === $name && 'volunteer' === kits_ff_key( $form ) ) { // the Directory picker (aw.js, org-people.php)
 				kits_ff_style( 'aw-directory' ); // aw.js adds aw-org-host and aw-org-list
@@ -717,6 +720,51 @@ add_action(
 	3
 );
 
+/**
+ * Converts HTML/date-chip prefill markup into plain text for textarea fields (B1).
+ *
+ * @param string $val Raw field value.
+ * @return string
+ */
+function kits_ff_plain_text( string $val ): string {
+	$val = (string) preg_replace( '/<time[^>]*>(.*?)<\/time>/is', '$1', $val );
+	$val = wp_strip_all_tags( $val );
+	$val = html_entity_decode( $val, ENT_QUOTES, 'UTF-8' );
+	return trim( $val );
+}
+
+/**
+ * Standalone upload error diagnostics (8 MB limit, HEIC/type/size checks) when directoryweb is inactive (B2).
+ *
+ * @param array|null $logo The $_FILES entry.
+ * @return string Error message, or '' when valid.
+ */
+function kits_ff_upload_error( $logo ): string {
+	$max_bytes = 8 * ( defined( 'MB_IN_BYTES' ) ? MB_IN_BYTES : 1048576 );
+	$limit     = function_exists( 'size_format' ) ? size_format( $max_bytes, 0 ) : '8 MB';
+	if ( ! is_array( $logo ) || ! isset( $logo['error'] ) || UPLOAD_ERR_NO_FILE === (int) $logo['error'] ) {
+		return 'No file arrived. Choose it again.';
+	}
+	if ( in_array( (int) $logo['error'], array( UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE ), true ) ) {
+		$server_max = function_exists( 'wp_max_upload_size' ) ? min( $max_bytes, wp_max_upload_size() ) : $max_bytes;
+		$fmt        = function_exists( 'size_format' ) ? size_format( $server_max, 0 ) : '8 MB';
+		return 'This file is too large for the server. Use a picture under ' . $fmt . '.';
+	}
+	if ( UPLOAD_ERR_OK !== (int) $logo['error'] || empty( $logo['tmp_name'] ) || ! is_uploaded_file( $logo['tmp_name'] ) ) {
+		return 'The upload did not finish. Check your connection and try again.';
+	}
+	if ( (int) ( $logo['size'] ?? 0 ) > $max_bytes ) {
+		$sz = function_exists( 'size_format' ) ? size_format( (int) $logo['size'], 1 ) : round( (int) $logo['size'] / 1048576, 1 ) . ' MB';
+		return 'This file is ' . $sz . '. The limit is ' . $limit . '.';
+	}
+	$ft = wp_check_filetype_and_ext( $logo['tmp_name'], (string) ( $logo['name'] ?? '' ), array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) );
+	if ( empty( $ft['type'] ) ) {
+		$ext = strtolower( pathinfo( (string) ( $logo['name'] ?? '' ), PATHINFO_EXTENSION ) );
+		return in_array( $ext, array( 'heic', 'heif' ), true ) ? 'This is a HEIC file. Use PNG, JPG or WebP.' : 'This file type is not accepted. Use PNG, JPG or WebP.';
+	}
+	return '';
+}
+
 /** The upload (claim logo and proof): checked like the site's own form, kept in the private folder until sent. */
 function kits_ff_upload() {
 	nocache_headers();
@@ -725,7 +773,7 @@ function kits_ff_upload() {
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
 	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in aw_claim_logo_ok()
-	$why = dw_claim_upload_error( $logo );
+	$why  = function_exists( 'dw_claim_upload_error' ) ? dw_claim_upload_error( $logo ) : kits_ff_upload_error( $logo );
 	if ( '' !== $why ) {
 		wp_send_json_error( $why );
 	}
@@ -735,7 +783,7 @@ function kits_ff_upload() {
 		}
 	}
 	$token = bin2hex( random_bytes( 16 ) );
-	if ( ! aw_claim_logo_store( $logo['tmp_name'], 'tmp-' . $token . '.png' ) ) {
+	if ( ! function_exists( 'aw_claim_logo_store' ) || ! aw_claim_logo_store( $logo['tmp_name'], 'tmp-' . $token . '.png' ) ) {
 		wp_send_json_error( 'We could not read this picture. Try another file, or a smaller one.' );
 	}
 	set_transient( $rl, (int) get_transient( $rl ) + 1, HOUR_IN_SECONDS );

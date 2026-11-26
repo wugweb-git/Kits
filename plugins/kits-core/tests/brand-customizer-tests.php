@@ -119,5 +119,44 @@ if ( is_readable( $theme_file ) ) {
 }
 brand_t( '' === kits_brand_compile_css( array( 'accent' => '#FFBE1A' ), array() ), 'With no resolved defaults, compile_css falls back to the built-in defaults (previous behaviour)' );
 
+// Layer 3 theme.json patch builder tests.
+$base_theme = array(
+	'version'  => 3,
+	'settings' => array(
+		'color'  => array(
+			'palette' => array(
+				array( 'slug' => 'primary', 'name' => 'Accent', 'color' => '#C6D2E0' ),
+				array( 'slug' => 'canvas', 'name' => 'Page', 'color' => '#F4F4F4' ),
+				array( 'slug' => 'surface', 'name' => 'Surface', 'color' => '#EAEAEA' ),
+			),
+		),
+		'border' => array(
+			'radiusSizes' => array(
+				array( 'slug' => 'control', 'name' => 'Control', 'size' => '8px' ),
+				array( 'slug' => 'card', 'name' => 'Card', 'size' => '12px' ),
+			),
+		),
+		'layout' => array(
+			'contentSize' => '1200px',
+			'wideSize'    => '1200px',
+		),
+	),
+);
+$patch = kits_brand_build_theme_json(
+	array(
+		'accent'         => '#2563EB',
+		'radius_control' => '6px',
+		'width_content'  => '760px',
+	),
+	$base_theme
+);
+brand_t( 3 === count( $patch['settings']['color']['palette'] ?? array() ), 'Layer 3 patch preserves full color palette list' );
+brand_t( '#2563EB' === ( $patch['settings']['color']['palette'][0]['color'] ?? '' ), 'Layer 3 patch updates matching palette slug' );
+brand_t( '#EAEAEA' === ( $patch['settings']['color']['palette'][2]['color'] ?? '' ), 'Layer 3 patch keeps untouched palette slugs intact' );
+brand_t( 2 === count( $patch['settings']['border']['radiusSizes'] ?? array() ), 'Layer 3 patch preserves full radiusSizes list' );
+brand_t( '6px' === ( $patch['settings']['border']['radiusSizes'][0]['size'] ?? '' ), 'Layer 3 patch updates matching radius slug' );
+brand_t( '760px' === ( $patch['settings']['layout']['contentSize'] ?? '' ), 'Layer 3 patch updates layout contentSize' );
+brand_t( array() === kits_brand_build_theme_json( array(), $base_theme ), 'Layer 3 patch is empty when no tokens are set' );
+
 echo "\nSummary: $count checks, $fails failures.\n";
 exit( $fails > 0 ? 1 : 0 );

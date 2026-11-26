@@ -14,7 +14,50 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/brand-customizer-model.php';
 
-const KITS_BRAND_OPTION = 'kits_brand_tokens';
+const KITS_BRAND_OPTION        = 'kits_brand_tokens';
+const KITS_BRAND_PRESET_OPTION = 'kits_brand_active_preset';
+const KITS_BRAND_CACHE_KEY     = 'kits_brand_theme_data';
+
+/**
+ * Clears the cached Layer 3 theme.json brand data and WordPress's resolved theme JSON cache.
+ */
+function kits_brand_clear_theme_cache(): void {
+	if ( function_exists( 'delete_transient' ) ) {
+		delete_transient( KITS_BRAND_CACHE_KEY );
+	}
+	if ( class_exists( 'WP_Theme_JSON_Resolver' ) && method_exists( 'WP_Theme_JSON_Resolver', 'clean_cached_data' ) ) {
+		WP_Theme_JSON_Resolver::clean_cached_data();
+	}
+}
+
+add_action( 'add_option_' . KITS_BRAND_OPTION, 'kits_brand_clear_theme_cache' );
+add_action( 'update_option_' . KITS_BRAND_OPTION, 'kits_brand_clear_theme_cache' );
+add_action( 'delete_option_' . KITS_BRAND_OPTION, 'kits_brand_clear_theme_cache' );
+
+/**
+ * Layer 3 (theme) theme.json injection: merges saved tenant brand tokens into the theme data by slug
+ * so Global Styles "Reset styles" restores tenant brand defaults instead of generic theme defaults.
+ */
+add_filter(
+	'wp_theme_json_data_theme',
+	function ( $theme_json ) {
+		if ( ! is_object( $theme_json ) || ! method_exists( $theme_json, 'get_data' ) || ! method_exists( $theme_json, 'update_with' ) ) {
+			return $theme_json;
+		}
+		$tokens = kits_get_brand_tokens();
+		if ( empty( $tokens ) ) {
+			return $theme_json;
+		}
+		$cached = get_transient( KITS_BRAND_CACHE_KEY );
+		if ( is_array( $cached ) ) {
+			return ! empty( $cached ) ? $theme_json->update_with( $cached ) : $theme_json;
+		}
+		$patch = kits_brand_build_theme_json( $tokens, (array) $theme_json->get_data() );
+		set_transient( KITS_BRAND_CACHE_KEY, $patch, DAY_IN_SECONDS );
+		return ! empty( $patch ) ? $theme_json->update_with( $patch ) : $theme_json;
+	},
+	10
+);
 
 /**
  * Returns saved brand tokens.
@@ -121,16 +164,34 @@ function kits_brand_customizer_render_page() {
 		$action = isset( $_POST['kits_brand_action'] ) ? sanitize_text_field( wp_unslash( $_POST['kits_brand_action'] ) ) : 'save';
 
 		if ( 'reset' === $action ) {
-			delete_option( KITS_BRAND_OPTION );
+			$active_preset = (string) get_option( KITS_BRAND_PRESET_OPTION, 'default' );
+			$presets       = kits_brand_presets();
+			$restore       = $presets[ $active_preset ]['tokens'] ?? ( $presets['default']['tokens'] ?? array() );
+			if ( ! empty( $restore ) ) {
+				update_option( KITS_BRAND_OPTION, kits_brand_sanitize_tokens( $restore ) );
+			} else {
+				delete_option( KITS_BRAND_OPTION );
+			}
+			kits_brand_clear_theme_cache();
 			if ( function_exists( 'do_action' ) ) {
 				do_action( 'litespeed_purge_all' );
 			}
-			$notices[] = array( 'type' => 'success', 'msg' => __( 'All brand tokens have been reset to theme defaults.', 'kits-core' ) );
+			$notices[] = array( 'type' => 'success', 'msg' => __( 'Brand tokens restored to the active tenant preset.', 'kits-core' ) );
+		} elseif ( 'clear_brand' === $action ) {
+			delete_option( KITS_BRAND_OPTION );
+			delete_option( KITS_BRAND_PRESET_OPTION );
+			kits_brand_clear_theme_cache();
+			if ( function_exists( 'do_action' ) ) {
+				do_action( 'litespeed_purge_all' );
+			}
+			$notices[] = array( 'type' => 'success', 'msg' => __( 'All tenant brand overrides cleared to theme defaults.', 'kits-core' ) );
 		} elseif ( 'apply_preset' === $action ) {
 			$preset_key = isset( $_POST['preset_key'] ) ? sanitize_key( wp_unslash( $_POST['preset_key'] ) ) : '';
 			$presets    = kits_brand_presets();
 			if ( isset( $presets[ $preset_key ] ) ) {
 				update_option( KITS_BRAND_OPTION, $presets[ $preset_key ]['tokens'] );
+				update_option( KITS_BRAND_PRESET_OPTION, $preset_key );
+				kits_brand_clear_theme_cache();
 				if ( function_exists( 'do_action' ) ) {
 					do_action( 'litespeed_purge_all' );
 				}
@@ -311,6 +372,23 @@ function kits_brand_customizer_render_page() {
 				</button>
 			</p>
 		</form>
+
+		<div style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px;">
+			<form method="post" action="">
+				<?php wp_nonce_field( 'kits_brand_tokens_save', 'kits_brand_nonce' ); ?>
+				<input type="hidden" name="kits_brand_action" value="reset">
+				<button type="submit" class="button button-secondary">
+					<?php esc_html_e( 'Restore Active Preset', 'kits-core' ); ?>
+				</button>
+			</form>
+			<form method="post" action="" onsubmit="return confirm('<?php echo esc_js( __( 'Clear all tenant brand overrides and revert to theme defaults?', 'kits-core' ) ); ?>');">
+				<?php wp_nonce_field( 'kits_brand_tokens_save', 'kits_brand_nonce' ); ?>
+				<input type="hidden" name="kits_brand_action" value="clear_brand">
+				<button type="submit" class="button button-link-delete">
+					<?php esc_html_e( 'Clear Brand', 'kits-core' ); ?>
+				</button>
+			</form>
+		</div>
 
 		<!-- 3. Export / Import / Raw CSS Diagnostics -->
 		<div class="postbox" style="padding: 20px; background: #fff; border-radius: 8px; border: 1px solid #ccd0d4; margin-top: 32px;">

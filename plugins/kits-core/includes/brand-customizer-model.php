@@ -183,7 +183,7 @@ function kits_brand_token_definitions(): array {
  * @return array<string, array{name: string, description: string, tokens: array<string, string>}>
  */
 function kits_brand_presets(): array {
-	return array(
+	$presets = array(
 		'default' => array(
 			'name'        => 'Default (Animal Writes / Neutral Kits)',
 			'description' => 'Signature warm gold, deep slate and clean rounded cards.',
@@ -277,6 +277,10 @@ function kits_brand_presets(): array {
 			),
 		),
 	);
+	if ( function_exists( 'apply_filters' ) ) {
+		$presets = (array) apply_filters( 'kits_brand_presets', $presets );
+	}
+	return $presets;
 }
 
 /**
@@ -402,4 +406,96 @@ function kits_brand_compile_css( array $tokens, ?array $defaults = null ): strin
 	}
 
 	return ":root {\n" . implode( "\n", $css_lines ) . "\n}";
+}
+
+/**
+ * Builds a Layer 3 theme.json patch from saved tenant brand tokens and the theme's base data.
+ *
+ * List presets (color.palette and border.radiusSizes) are replaced whole by WP_Theme_JSON_Data::update_with(),
+ * so the full list is returned with matching slugs updated.
+ *
+ * @param array<string, string> $tokens          Sanitized tenant brand tokens.
+ * @param array<string, mixed>  $base_theme_data Raw data from WP_Theme_JSON_Data::get_data().
+ * @return array<string, mixed> Partial theme.json array suitable for WP_Theme_JSON_Data::update_with().
+ */
+function kits_brand_build_theme_json( array $tokens, array $base_theme_data ): array {
+	if ( empty( $tokens ) ) {
+		return array();
+	}
+
+	$defs     = kits_brand_token_definitions();
+	$settings = isset( $base_theme_data['settings'] ) && is_array( $base_theme_data['settings'] ) ? $base_theme_data['settings'] : array();
+	$patch    = array();
+
+	$color_overrides = array();
+	$radius_overrides = array();
+	foreach ( $defs as $key => $def ) {
+		if ( empty( $tokens[ $key ] ) || 'inherit' === $tokens[ $key ] ) {
+			continue;
+		}
+		$bridge = $def['wp_preset'] ?? '';
+		if ( 0 === strpos( $bridge, '--wp--preset--color--' ) ) {
+			$color_overrides[ substr( $bridge, strlen( '--wp--preset--color--' ) ) ] = $tokens[ $key ];
+		} elseif ( 0 === strpos( $bridge, '--wp--preset--border-radius--' ) ) {
+			$radius_overrides[ substr( $bridge, strlen( '--wp--preset--border-radius--' ) ) ] = $tokens[ $key ];
+		}
+	}
+
+	if ( ! empty( $color_overrides ) ) {
+		$palette = $settings['color']['palette'] ?? array();
+		if ( isset( $palette['theme'] ) && is_array( $palette['theme'] ) ) {
+			$palette = $palette['theme'];
+		}
+		$updated_palette = array();
+		$seen_slugs      = array();
+		foreach ( (array) $palette as $entry ) {
+			if ( ! is_array( $entry ) || empty( $entry['slug'] ) ) {
+				continue;
+			}
+			$slug = (string) $entry['slug'];
+			if ( isset( $color_overrides[ $slug ] ) ) {
+				$entry['color'] = $color_overrides[ $slug ];
+			}
+			$seen_slugs[ $slug ] = true;
+			$updated_palette[]   = $entry;
+		}
+		if ( ! empty( $updated_palette ) ) {
+			$patch['settings']['color']['palette'] = $updated_palette;
+		}
+	}
+
+	if ( ! empty( $radius_overrides ) ) {
+		$radii = $settings['border']['radiusSizes'] ?? array();
+		if ( isset( $radii['theme'] ) && is_array( $radii['theme'] ) ) {
+			$radii = $radii['theme'];
+		}
+		$updated_radii = array();
+		foreach ( (array) $radii as $entry ) {
+			if ( ! is_array( $entry ) || empty( $entry['slug'] ) ) {
+				continue;
+			}
+			$slug = (string) $entry['slug'];
+			if ( isset( $radius_overrides[ $slug ] ) ) {
+				$entry['size'] = $radius_overrides[ $slug ];
+			}
+			$updated_radii[] = $entry;
+		}
+		if ( ! empty( $updated_radii ) ) {
+			$patch['settings']['border']['radiusSizes'] = $updated_radii;
+		}
+	}
+
+	if ( ! empty( $tokens['width_content'] ) ) {
+		$patch['settings']['layout']['contentSize'] = $tokens['width_content'];
+	}
+	if ( ! empty( $tokens['width_wide'] ) ) {
+		$patch['settings']['layout']['wideSize'] = $tokens['width_wide'];
+	}
+
+	if ( empty( $patch ) ) {
+		return array();
+	}
+
+	$patch['version'] = isset( $base_theme_data['version'] ) ? (int) $base_theme_data['version'] : 3;
+	return $patch;
 }

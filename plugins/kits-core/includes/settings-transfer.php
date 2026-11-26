@@ -33,7 +33,7 @@ function kits_settings_transfer_parts(): array {
 
 /** The options that travel with the file. Anything else in a file's "options" is ignored. */
 function kits_settings_transfer_options(): array {
-	$names = (array) apply_filters( 'kits_settings_transfer_options', array( 'kits_page_defaults' ) );
+	$names = (array) apply_filters( 'kits_settings_transfer_options', array( 'kits_page_defaults', 'kits_brand_tokens' ) );
 	return array_values( array_unique( array_filter( array_map( 'strval', $names ) ) ) );
 }
 

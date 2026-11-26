@@ -18,28 +18,24 @@ The foundational companion plugin owns:
    - ✅ Wrapped external site-layer `admin.php` require in `tests/admin-layer-tests.php` with `file_exists()` guard to ensure tests execute cleanly in decoupled monorepo environments without crashing.
    - ✅ Integrated `plugins/kits-core/tests/*-tests.php` into `.github/workflows/ci-suite.yml` path-based PHP matrix.
 
-1. **4-Layer Theme.json Injection**:
-   - Verify tenant brand tokens injected into Layer 3 (`wp_theme_json_data_theme`) so Site Editor "Reset styles" restores tenant brand defaults, not generic core defaults.
-   - Cache merged theme data in transients (`kits_brand_theme_data`) with automatic invalidation on option save.
+1. **4-Layer Theme.json Injection (Resolved 26 Nov 2026)**:
+   - ✅ Added Layer 3 `wp_theme_json_data_theme` filter (`includes/brand-customizer.php`) and `kits_brand_build_theme_json()` (`includes/brand-customizer-model.php`), merging saved tenant brand tokens into the full palette/radius lists and layout settings so Site Editor "Reset styles" restores tenant defaults.
+   - ✅ Cached Layer 3 patch in transient `kits_brand_theme_data` with automatic invalidation (`kits_brand_clear_theme_cache()`) on option add/update/delete and plugin activation/deactivation.
+   - ✅ Made `kits_brand_presets()` filterable via `kits_brand_presets`, separated `Restore Active Preset` vs confirmed `Clear Brand`, and added `kits_brand_tokens` to `settings-transfer.php` and `uninstall.php`.
 
 2. **Cloudflare Worker Two-Way Relay**:
-   - Implement `save_post_wp_block` hook in `Kits Core` dispatching pattern payloads to Cloudflare Worker relay.
-   - Worker validates tenant API key, sanitizes pattern markup, opens GitHub PR in `wugweb-git/kits`, and triggers preview.
-   - Strict zero GitHub token exposure in WordPress plugin code.
+   - Deferred (OD4: no code exists; drop unless a date is set).
 
-3. **Onboarding Wizard Multi-Tenant Flow**:
-   - 4-step wizard: Site Identity $\rightarrow$ Typography Preset $\rightarrow$ Color Palette $\rightarrow$ Telemetry Activation.
-   - Cloudflare Worker key verification check step.
-   - Nonce-protected AJAX / REST endpoints for seamless onboarding step saves.
+3. **Onboarding Wizard Multi-Tenant Flow (Resolved 26 Nov 2026, OD2)**:
+   - ✅ Updated `includes/onboarding-wizard.php` to 3 steps with real `styles/*.json` swatches (`default`, `slate`, `forest`, `dark`, replacing `ink`) and `kits_onboarding_apply_style_variation()` writing to the active theme's `wp_global_styles` record.
 
-4. **Scripts Manager Hardening**:
-   - Ensure header and footer injected tags are sanitized to prevent unclosed tags or invalid HTML.
-   - Capability gate strictly restricted to `manage_options` / `manage_kits`.
+4. **Scripts Manager Hardening (Resolved 26 Nov 2026, OD3)**:
+   - ✅ Gated `includes/header-footer-scripts.php` menu, page render, and POST save on `kits_scripts_can_manage()` (`manage_options` + `unfiltered_html`).
 
-5. **Form Engine Polish & Multi-Step Validation (Forwarded from Tenant Roadmap, 24 Nov 2026)**:
-   - **Upload Limits & Granular File Diagnostics (B2)**: Raise limit to 8 MB (`kits_ff_upload()` in `includes/forms/fluentforms.php`), replacing generic errors with specific diagnostics (file size vs unsupported formats like HEIC), displaying selected file name, size indicator, and a Remove button.
-   - **Multi-Step Validation Error Summary Banner (B3)**: In `assets/js/forms.js`, when step validation fails on a previous step, display a top-level error summary banner on the active step with direct links that jump to and focus the invalid fields.
-   - **About Field Prefill Sanitization (B1)**: Ensure `kits_ff_form()` textarea value population strips raw HTML tags, decodes entities, and converts date markup (`<span class="kit-date">`) into plain text before rendering.
+5. **Form Engine Polish & Multi-Step Validation (Resolved 26 Nov 2026)**:
+   - ✅ **Upload Limits & Granular File Diagnostics (B2)**: `kits_ff_upload()` now falls back to standalone `kits_ff_upload_error()` (8 MB limit, HEIC/type/size diagnostics) when `directoryweb` is inactive, and `assets/js/forms.js` renders selected file name, size, and a Remove button.
+   - ✅ **Multi-Step Validation Error Summary Banner (B3)**: `assets/js/forms.js` renders `.kit-error-summary` on the active and last steps with direct jump-and-focus links.
+   - ✅ **About Field Prefill Sanitization (B1)**: `kits_ff_plain_text()` in `includes/forms/fluentforms.php` strips HTML tags, unwraps `<time>` date chips, and decodes entities on textarea prefill values.
 
 ## Carried over from docs/org (26 Nov 2026)
 

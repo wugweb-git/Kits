@@ -53,6 +53,8 @@ if ( true !== (bool) get_option( 'kits_delete_data_on_uninstall', false ) ) {
 $kits_options = array(
 	'kits_theme_options',
 	'kits_page_defaults',
+	'kits_brand_tokens',
+	'kits_brand_active_preset',
 	'kits_settings_backup',
 	'kits_settings_backup_defaults',
 	'kits_altcha_key',
@@ -99,6 +101,7 @@ foreach ( $kits_options as $kits_option ) {
 global $wpdb;
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'aw_media_merge_data_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: the merge tool's per-group records, once.
 delete_transient( 'aw_thumb_dupes_n' );
+delete_transient( 'kits_brand_theme_data' );
 delete_transient( 'aw_error_count_mailed' ); // includes/ops/error-count.php
 foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_', 'aw_media_reuse_notice_' ) as $kits_prefix ) {
 	foreach ( array( '_transient_', '_transient_timeout_' ) as $kits_kind ) {

@@ -143,6 +143,32 @@
 			if (el.getAttribute('aria-invalid') === 'true' && el.checkValidity()) show(el, ''); // clear as soon as it is valid
 		});
 		form.addEventListener('change', function (e) {
+			if (e.target.type === 'file' && e.target.dataset.maxBytes) {
+				var inp = e.target, wrap = inp.closest('.ff-el-input--content, .kit-field-control') || inp.parentNode;
+				var prev = wrap.querySelector('.kit-file-preview');
+				if (prev) prev.remove();
+				var ok = check(inp, true);
+				if (ok && inp.files && inp.files[0]) {
+					var f = inp.files[0], row = document.createElement('div');
+					row.className = 'kit-file-preview';
+					var info = document.createElement('span');
+					info.className = 'kit-file-meta';
+					info.textContent = f.name + ' (' + mb(f.size) + ')';
+					var rem = document.createElement('button');
+					rem.type = 'button'; rem.className = 'kit-btn kit-btn--secondary kit-file-remove';
+					rem.textContent = 'Remove';
+					rem.addEventListener('click', function () {
+						inp.value = '';
+						var hid = wrap.querySelector('input[type="hidden"]');
+						if (hid) hid.value = '';
+						show(inp, '');
+						row.remove();
+						inp.focus();
+					});
+					row.appendChild(info); row.appendChild(rem);
+					inp.insertAdjacentElement('afterend', row);
+				}
+			}
 			if (submitted && (e.target.type === 'checkbox' || e.target.tagName === 'SELECT')) check(e.target, true);
 			var g = e.target.closest('.kit-check-group');
 			if (g && submitted) groupOk(g, true);

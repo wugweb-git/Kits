@@ -136,10 +136,22 @@ foreach ( array( 'cron-health', 'daily', 'deploy-purge', 'deploy-status', 'keep-
 }
 unset( $kits_ops_file );
 
+register_activation_hook(
+	__FILE__,
+	function () {
+		if ( function_exists( 'kits_brand_clear_theme_cache' ) ) {
+			kits_brand_clear_theme_cache();
+		}
+	}
+);
+
 // Switched off: its scheduled jobs come off too (they are booked again on the next request after it is switched back on).
 register_deactivation_hook(
 	__FILE__,
 	function () {
+		if ( function_exists( 'kits_brand_clear_theme_cache' ) ) {
+			kits_brand_clear_theme_cache();
+		}
 		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
 		wp_unschedule_hook( 'aw_thumb_rebuild' ); // a queued thumbnail map rebuild (thumbs.php)
 		// While it is off the rules may be rebuilt without the preset types and consent items may be published:

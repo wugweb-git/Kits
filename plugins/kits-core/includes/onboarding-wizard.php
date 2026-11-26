@@ -5,7 +5,7 @@
  * Benchmark: Astra, Kadence, GeneratePress, Create Block Theme.
  * Provides a 1-click guided setup flow for:
  * 1. Site Identity (Logo upload via wp.media, Site Title, Tagline).
- * 2. Style Variations & Palettes (default, slate, forest, ink).
+ * 2. Style Variations & Palettes (default, slate, forest, dark).
  * 3. Typography Pairings.
  * 4. Starter Patterns Ingestion & Activation.
  *
@@ -76,7 +76,10 @@ add_action(
 		}
 		if ( isset( $_POST['kits_style_variation'] ) ) {
 			$variation = sanitize_key( wp_unslash( $_POST['kits_style_variation'] ) );
-			update_option( 'kits_active_style_variation', $variation );
+			if ( in_array( $variation, array( 'default', 'slate', 'forest', 'dark' ), true ) ) {
+				update_option( 'kits_active_style_variation', $variation );
+				kits_onboarding_apply_style_variation( $variation );
+			}
 		}
 
 		wp_safe_redirect( add_query_arg( array( 'page' => 'kits-onboarding', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
@@ -101,23 +104,23 @@ function kits_onboarding_page() {
 	$variations = array(
 		'default' => array(
 			'title'       => __( 'Kits Default', 'kits-core' ),
-			'description' => __( 'Clean neutral palette with high-contrast amber accent.', 'kits-core' ),
-			'colors'      => array( '#0F172A', '#1E293B', '#3B82F6', '#F8FAFC' ),
+			'description' => __( 'Clean neutral palette with cool slate-blue accent.', 'kits-core' ),
+			'colors'      => array( '#191919', '#2E2E2E', '#C6D2E0', '#F4F4F4' ),
 		),
 		'slate'   => array(
 			'title'       => __( 'Executive Slate', 'kits-core' ),
-			'description' => __( 'Sophisticated corporate palette for modern editorial publications.', 'kits-core' ),
-			'colors'      => array( '#1E293B', '#334155', '#0EA5E9', '#F1F5F9' ),
+			'description' => __( 'Crisp slate-blue ink and neutral canvas for editorial publications.', 'kits-core' ),
+			'colors'      => array( '#191919', '#334E68', '#C6D2E0', '#F4F4F4' ),
 		),
 		'forest'  => array(
 			'title'       => __( 'Deep Forest', 'kits-core' ),
 			'description' => __( 'Nature and wildlife oriented earthy tones with emerald accents.', 'kits-core' ),
-			'colors'      => array( '#064E3B', '#047857', '#10B981', '#ECFDF5' ),
+			'colors'      => array( '#191919', '#1E6B43', '#A8D5B5', '#F4F4F4' ),
 		),
-		'ink'     => array(
-			'title'       => __( 'High-Contrast Ink', 'kits-core' ),
-			'description' => __( 'Crisp black-and-white print editorial styling with ultra-readable typography.', 'kits-core' ),
-			'colors'      => array( '#000000', '#27272A', '#52525B', '#FFFFFF' ),
+		'dark'    => array(
+			'title'       => __( 'Dark', 'kits-core' ),
+			'description' => __( 'High-contrast dark canvas with bright sky-blue accents.', 'kits-core' ),
+			'colors'      => array( '#0D1117', '#21262D', '#79B8FF', '#F0F6FC' ),
 		),
 	);
 
@@ -238,4 +241,51 @@ function kits_onboarding_page() {
 	wp_register_script( 'kits-onboarding-logo', false, array( 'jquery' ), KITS_CORE_VERSION, true );
 	wp_enqueue_script( 'kits-onboarding-logo' );
 	wp_add_inline_script( 'kits-onboarding-logo', (string) ob_get_clean() );
+}
+
+/**
+ * Applies a theme style variation (default, slate, forest, dark) to the active theme's Global Styles record.
+ *
+ * @param string $slug Variation slug matching styles/<slug>.json, or 'default'.
+ * @return bool Whether Global Styles was updated.
+ */
+function kits_onboarding_apply_style_variation( string $slug ): bool {
+	if ( ! class_exists( 'WP_Theme_JSON_Resolver' ) || ! function_exists( 'wp_get_theme' ) ) {
+		return false;
+	}
+	$post = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( wp_get_theme(), true );
+	if ( empty( $post['ID'] ) ) {
+		return false;
+	}
+
+	$payload = array(
+		'version'                     => class_exists( 'WP_Theme_JSON' ) ? WP_Theme_JSON::LATEST_SCHEMA : 3,
+		'isGlobalStylesUserThemeJSON' => true,
+	);
+
+	if ( 'default' !== $slug ) {
+		$file = get_template_directory() . '/styles/' . sanitize_file_name( $slug ) . '.json';
+		if ( ! is_readable( $file ) ) {
+			return false;
+		}
+		$raw = json_decode( (string) file_get_contents( $file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local theme style variation JSON
+		if ( ! is_array( $raw ) ) {
+			return false;
+		}
+		if ( ! empty( $raw['settings'] ) && is_array( $raw['settings'] ) ) {
+			$payload['settings'] = $raw['settings'];
+		}
+		if ( ! empty( $raw['styles'] ) && is_array( $raw['styles'] ) ) {
+			$payload['styles'] = $raw['styles'];
+		}
+	}
+
+	$res = wp_update_post(
+		array(
+			'ID'           => (int) $post['ID'],
+			'post_content' => wp_json_encode( $payload ),
+		)
+	);
+	WP_Theme_JSON_Resolver::clean_cached_data();
+	return ! is_wp_error( $res ) && $res > 0;
 }
