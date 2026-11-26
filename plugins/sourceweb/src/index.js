@@ -1282,6 +1282,31 @@ function Group( { group, onSaved, onDirty } ) {
 		() => onDirty( group.slug, dirty ),
 		[ group.slug, dirty, onDirty ]
 	);
+	const toggle = ( place, id ) =>
+		setEnh( ( e ) => ( {
+			...e,
+			[ place ]: e[ place ].includes( id )
+				? e[ place ].filter( ( x ) => x !== id )
+				: [ ...e[ place ], id ],
+		} ) );
+	const saveEnhance = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'places/enhance' ),
+			method: 'POST',
+			data: { enhance: enh },
+		} )
+			.then( ( d ) => {
+				take( d );
+				setMsg( {
+					tone: 'success',
+					text: __( 'Enhancements saved.', 'aw-sourcing' ),
+				} );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
 	const save = () => {
 		setBusy( true );
 		setMsg( null );
@@ -7106,9 +7131,13 @@ function Places() {
 	const [ error, setError ] = useState( '' );
 	const [ busy, setBusy ] = useState( false );
 	const [ msg, setMsg ] = useState( null );
+	const [ enh, setEnh ] = useState( {} );
 	const take = ( d ) => {
 		setData( d );
 		setRows( d.routes );
+		setEnh(
+			Object.fromEntries( d.places.map( ( p ) => [ p.id, p.enhance ] ) )
+		);
 	};
 	const load = useCallback( () => {
 		setError( '' );
@@ -7337,6 +7366,56 @@ function Places() {
 						) ) }
 					</tbody>
 				</table>
+				<p>
+					<Button
+						variant="primary"
+						busy={ busy }
+						onClick={ saveEnhance }
+					>
+						{ __( 'Save enhancements', 'aw-sourcing' ) }
+					</Button>
+				</p>
+			</SectionCard>
+			<SectionCard
+				id="feedback"
+				title={ __( 'What the places say back', 'aw-sourcing' ) }
+				description={ __(
+					'Per source: items delivered, and how many a place accepted or rejected. Lowest acceptance first. Places report back with SourceWeb’s places/outcome route.',
+					'aw-sourcing'
+				) }
+			>
+				{ 0 === data.outcomes.length ? (
+					<p>{ __( 'Nothing yet.', 'aw-sourcing' ) }</p>
+				) : (
+					<table className="widefat striped">
+						<thead>
+							<tr>
+								<th>{ __( 'Source', 'aw-sourcing' ) }</th>
+								<th>{ __( 'Delivered', 'aw-sourcing' ) }</th>
+								<th>{ __( 'Accepted', 'aw-sourcing' ) }</th>
+								<th>{ __( 'Rejected', 'aw-sourcing' ) }</th>
+								<th>
+									{ __( 'Accepted share', 'aw-sourcing' ) }
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{ data.outcomes.map( ( o ) => (
+								<tr key={ o.source }>
+									<td>{ o.source }</td>
+									<td>{ o.delivered }</td>
+									<td>{ o.accepted }</td>
+									<td>{ o.rejected }</td>
+									<td>
+										{ null === o.rate
+											? '—'
+											: `${ o.rate }%` }
+									</td>
+								</tr>
+							) ) }
+						</tbody>
+					</table>
+				) }
 			</SectionCard>
 		</>
 	);

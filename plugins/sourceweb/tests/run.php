@@ -576,5 +576,17 @@ aw_t( isset( $st['manual-link'] ) && 'person' === $st['manual-link']['runner'], 
 $more = sourceweb_source_types_clean( array_merge( SOURCEWEB_SOURCE_TYPES, array( array( 'id' => 'gallery-api', 'method' => 'api' ), array( 'id' => '', 'method' => 'api' ), array( 'id' => 'bad', 'method' => 'carrier-pigeon' ), array( 'id' => 'feed', 'label' => 'Replaced', 'method' => 'feed' ) ) ) );
 aw_t( isset( $more['gallery-api'] ) && ! isset( $more['bad'] ) && 'Replaced' === $more['feed']['label'], 'source types: a plugin can add; bad ones are dropped; a later one replaces' );
 
+// Per-place enhancement and the closed loop.
+aw_t( 'One. Two.' === sourceweb_summary_short( 'One. Two. Three is much longer than the rest of them all.', 3 ), 'short summary: whole sentences that fit' );
+aw_t( 'a b c…' === sourceweb_summary_short( 'a b c d e f', 3 ), 'short summary: cut with an ellipsis when one sentence is too long' );
+aw_t( 'Hi there' === sourceweb_summary_short( '<b>Hi</b>  there', 30 ), 'short summary: tags and spaces tidied' );
+$o = sourceweb_outcome_apply( array(), 'BBC', 'delivered' );
+$o = sourceweb_outcome_apply( $o, 'BBC', 'accepted' );
+$o = sourceweb_outcome_apply( $o, 'BBC', 'rejected' );
+$o = sourceweb_outcome_apply( $o, 'BBC', 'accepted' );
+aw_t( array( 'delivered' => 1, 'accepted' => 2, 'rejected' => 1 ) === $o['BBC'], 'outcomes: events are counted per source' );
+aw_t( $o === sourceweb_outcome_apply( $o, '', 'accepted' ) && $o === sourceweb_outcome_apply( $o, 'BBC', 'bogus' ), 'outcomes: an empty source or unknown event changes nothing' );
+aw_t( abs( 2 / 3 - sourceweb_outcome_rate( $o['BBC'] ) ) < 0.0001 && null === sourceweb_outcome_rate( array( 'delivered' => 5 ) ), 'outcomes: acceptance rate, or null with no decisions' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

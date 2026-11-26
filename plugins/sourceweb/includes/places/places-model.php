@@ -263,3 +263,70 @@ function sourceweb_routes_from_rows( array $rows, array $places ): array {
 	}
 	return array( $routes, $notes );
 }
+
+/**
+ * A short form of a summary for a small place (a gallery caption, a card): the whole sentences that fit in $words
+ * words, or the first $words words with an ellipsis when the first sentence is longer.
+ *
+ * @param string $text  Summary.
+ * @param int    $words Most words.
+ */
+function sourceweb_summary_short( string $text, int $words = 30 ): string {
+	$text = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags_safe( $text ) ) );
+	if ( '' === $text || $words < 1 ) {
+		return '';
+	}
+	if ( count( explode( ' ', $text ) ) <= $words ) {
+		return $text;
+	}
+	$out = '';
+	foreach ( preg_split( '/(?<=[.!?])\s+/', $text ) as $sentence ) {
+		$try = '' === $out ? $sentence : $out . ' ' . $sentence;
+		if ( count( explode( ' ', $try ) ) > $words ) {
+			break;
+		}
+		$out = $try;
+	}
+	if ( '' !== $out ) {
+		return $out;
+	}
+	return rtrim( implode( ' ', array_slice( explode( ' ', $text ), 0, $words ) ), ",;:-" ) . '…';
+}
+
+/** strip_tags without WordPress. */
+function wp_strip_all_tags_safe( string $s ): string {
+	return function_exists( 'wp_strip_all_tags' ) ? wp_strip_all_tags( $s ) : strip_tags( $s );
+}
+
+/** What a place can report back about an item it was given (the closed loop). */
+const SOURCEWEB_OUTCOME_EVENTS = array( 'delivered', 'accepted', 'rejected' );
+
+/**
+ * Counts one event against a source.
+ *
+ * @param array  $stats  source => [ delivered, accepted, rejected ].
+ * @param string $source Source name (feed or publisher).
+ * @param string $event  One of SOURCEWEB_OUTCOME_EVENTS.
+ * @return array The new stats; unchanged for an empty source or an unknown event.
+ */
+function sourceweb_outcome_apply( array $stats, string $source, string $event ): array {
+	$source = trim( $source );
+	if ( '' === $source || ! in_array( $event, SOURCEWEB_OUTCOME_EVENTS, true ) ) {
+		return $stats;
+	}
+	$row            = array_merge( array_fill_keys( SOURCEWEB_OUTCOME_EVENTS, 0 ), (array) ( $stats[ $source ] ?? array() ) );
+	$row[ $event ]  = (int) $row[ $event ] + 1;
+	$stats[ $source ] = $row;
+	return $stats;
+}
+
+/**
+ * Of the items a place has decided on, the share it accepted (0 to 1); null when it has decided on none.
+ *
+ * @param array $row delivered, accepted, rejected.
+ */
+function sourceweb_outcome_rate( array $row ): ?float {
+	$a = (int) ( $row['accepted'] ?? 0 );
+	$r = (int) ( $row['rejected'] ?? 0 );
+	return $a + $r > 0 ? $a / ( $a + $r ) : null;
+}
