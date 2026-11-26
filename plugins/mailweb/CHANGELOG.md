@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.3.1
+
+- The direct (non-WordPress.org) build now carries an Update URI header, so the site checks the Kits registry for new versions. The WordPress.org build still omits it.
+
 ## 3.3.0
 
 - Lists: a Status column (New, Read, Replied, Forwarded) in every folder except Sent, and in Website forms. Replied also counts replies sent from webmail or another tool: the sender was written to, from any mailbox, after the message arrived.

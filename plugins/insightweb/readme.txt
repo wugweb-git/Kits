@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,10 @@ InsightWeb connects to external services only when the corresponding integration
 * **Google Alerts RSS (`https://www.google.com/alerts/feeds/`):** Only when alert feed URLs are configured, fetches alert entries for the Links view. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy).
 
 == Changelog ==
+
+= 1.1.1 =
+
+* The direct (non-WordPress.org) build now carries an Update URI header, so the site checks the Kits registry for new versions. The WordPress.org build still omits it.
 
 
 = 1.1.0 =

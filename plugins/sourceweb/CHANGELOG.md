@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.2.2
+
+- The direct (non-WordPress.org) build now carries an Update URI header, so the site checks the Kits registry for new versions. The WordPress.org build still omits it.
+
 ## 0.2.1
 
 - Places: with no place available the Routes card says so and "Add a route" is off, instead of an empty "Send to" list.

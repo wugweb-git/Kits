@@ -16,7 +16,8 @@
  * Plugin Name:       InsightWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/insightweb/
  * Description:       Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
- * Version:           1.1.0
+ * Version:           1.1.1
+ * Update URI:           https://wugweb.com/plugins/insightweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -31,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'INSIGHTWEB_VERSION', '1.1.0' ); // equal to the header's Version.
+define( 'INSIGHTWEB_VERSION', '1.1.1' ); // equal to the header's Version.
 define( 'INSIGHTWEB_FILE', __FILE__ ); // RankWeb's bridge loads Search Insights only while this is not defined.
 if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the request that activates InsightWeb
 	define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );

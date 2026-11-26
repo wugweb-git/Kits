@@ -11,7 +11,8 @@
  * Plugin Name:       PlanWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/planweb/
  * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it.
- * Version:           0.2.0
+ * Version:           0.2.1
+ * Update URI:           https://wugweb.com/plugins/planweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -49,7 +50,7 @@ if ( defined( 'PLANWEB_VERSION' ) ) {
 	return; // Loaded already.
 }
 
-define( 'PLANWEB_VERSION', '0.2.0' );
+define( 'PLANWEB_VERSION', '0.2.1' );
 define( 'PLANWEB_FILE', __FILE__ );
 define( 'PLANWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PLANWEB_URL', plugin_dir_url( __FILE__ ) );
