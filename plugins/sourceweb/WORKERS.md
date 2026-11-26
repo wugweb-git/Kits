@@ -104,7 +104,7 @@ Steps 1 and 2 are small and safe; 3 to 5 change how the Workers and AI screens b
 
 ## 7. The 12 workflows to keep (focus, 26 Nov 2026)
 
-Source: the Workers Union page's 17 Nov audit (19 workflows: six proposed for removal, two moved to a manual Tools task). That cleanup was never merged, so all 20 workflow files still exist. Nothing below is changed yet; retiring a workflow is the owner's call.
+Source: the Workers Union page's 17 Nov audit (19 workflows: six proposed for removal, two moved to a manual Tools task). That cleanup was never merged, so all 20 workflow files still exist. Owner approved the list on 26 Nov 2026 and it is applied: the workers repo branch `chore/retire-eight-workflows` removes the eight workflow files and `docs/workers.json` now lists 12; this plugin's registry matches. The Python modules stay.
 
 **Keep (12)**
 
@@ -127,4 +127,4 @@ Source: the Workers Union page's 17 Nov audit (19 workflows: six proposed for re
 
 **Move to a manual Tools task (2)**: submit (URLs found by hand) and relevance-existing (re-check on demand). Both are person-triggered, not workers.
 
-To do, once approved: delete the eight files in the workers repo, regenerate `docs/workers.json`, and copy it to `AW_WORKERS` (the Deploy check fails if the two differ). The twelfth entry is inferred (11 marked Keep plus the backup worker); confirm it.
+Still to do: merge the workers repo branch, then build the manual Tools task for submit and relevance-existing (not built). The twelfth keeper (backup-offsite) was confirmed with the approval.

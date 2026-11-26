@@ -37,17 +37,9 @@ const AW_WORKER_DEFAULT_GROUP = array(
 	'seo-scores'           => 'seo',
 	'search-insights'      => 'seo',
 	'directory-enrichment' => 'directory',
-	'darpan-import'        => 'directory',
 	'tests'                => 'maintenance',
-	'wp-cron'              => 'maintenance',
 	'keepalive'            => 'maintenance',
 	'backup-offsite'       => 'maintenance',
-	'backfill'             => 'one-off',
-	'submit'               => 'one-off',
-	'press-gnews'          => 'one-off',
-	'relevance-existing'   => 'one-off',
-	'news-title-case'      => 'one-off',
-	'same-story-fold'      => 'one-off',
 );
 
 /** "sourcing.yml" => "sourcing". */
