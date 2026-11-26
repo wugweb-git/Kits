@@ -22,6 +22,9 @@ const RANKWEB_GALLERY_META = '_rankweb_gallery';
 
 /** The post types that get the box (public types; filter `rankweb_gallery_post_types`). */
 function rankweb_gallery_post_types(): array {
+	if ( ! function_exists( 'get_post_types' ) ) {
+		return array();
+	}
 	$types = array_values( array_diff( get_post_types( array( 'public' => true ) ), array( 'attachment' ) ) );
 	$types = apply_filters( 'rankweb_gallery_post_types', $types );
 	return array_values( array_filter( array_map( 'sanitize_key', (array) $types ), 'post_type_exists' ) );
@@ -155,7 +158,7 @@ add_action(
 
 /** The page's node, from the queried item (null when none or incomplete). */
 function rankweb_gallery_page_node(): ?array {
-	if ( ! is_singular( rankweb_gallery_post_types() ) ) {
+	if ( ! function_exists( 'is_singular' ) || ! function_exists( 'get_queried_object_id' ) || ! is_singular() || ! is_singular( rankweb_gallery_post_types() ) ) {
 		return null;
 	}
 	$id = get_queried_object_id();
