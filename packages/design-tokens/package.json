@@ -1,0 +1,28 @@
+{
+  "name": "@wugweb-git/kits-tokens",
+  "version": "1.0.0",
+  "description": "Wugweb Kits design tokens: CSS variables, JS values and the W3C (DTCG) JSON source.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wugweb-git/Kits.git",
+    "directory": "packages/design-tokens"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./variables.css": "./dist/variables.css",
+    "./tokens.js": "./dist/tokens.js",
+    "./tokens/*": "./dist/tokens/*",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "prepack": "node build.mjs"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}

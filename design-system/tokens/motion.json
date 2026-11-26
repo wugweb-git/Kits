@@ -2,7 +2,8 @@
   "duration": {
     "instant": {
       "$value": "100ms",
-      "$type": "duration"
+      "$type": "duration",
+      "$description": "MOTION G-14: Duration tokens (§3.12 Motion section)"
     },
     "fast": {
       "$value": "200ms",
@@ -22,7 +23,8 @@
     },
     "ms-150": {
       "$value": "150ms",
-      "$type": "duration"
+      "$type": "duration",
+      "$description": "Motion — extended durations + easings"
     },
     "ms-500": {
       "$value": "500ms",
@@ -44,7 +46,8 @@
   "easing": {
     "in": {
       "$value": "cubic-bezier(0.4, 0, 1, 1)",
-      "$type": "cubicBezier"
+      "$type": "cubicBezier",
+      "$description": "G-14: Easing tokens (§3.12 Motion section)"
     },
     "out": {
       "$value": "cubic-bezier(0, 0, 0.2, 1)",
@@ -85,7 +88,8 @@
   },
   "ease": {
     "spring": {
-      "$value": "linear(0, 0.0544, 0.1785, 0.3294, 0.4802, 0.6160, 0.7300, 0.8204, 0.8888, 0.9381, 0.9717, 0.9933, 1.0061, 1.0126, 1.0150, 1.0148, 1.0133, 1.0111, 1.0088, 1.0066, 1.0047, 1.0032, 1.0021, 1.0012, 1)"
+      "$value": "linear(0, 0.0544, 0.1785, 0.3294, 0.4802, 0.6160, 0.7300, 0.8204, 0.8888, 0.9381, 0.9717, 0.9933, 1.0061, 1.0126, 1.0150, 1.0148, 1.0133, 1.0111, 1.0088, 1.0066, 1.0047, 1.0032, 1.0021, 1.0012, 1)",
+      "$description": "Framer spring, time-based: 0.4s, bounce 0.2 (damping ratio 0.8), delay 0. CSS has no spring timing function, so this samples the damped-spring curve into linear(): 1.5% overshoot at 58% of the duration, settled by the end. Pair with --duration-spring — the curve is only correct at 400ms."
     }
   },
   "transition": {
@@ -96,7 +100,8 @@
       "$value": "opacity {duration.slow} {easing.smooth}"
     },
     "fast": {
-      "$value": "background-color {duration.fast} {easing.out}, border-color {duration.fast} {easing.out}, color {duration.fast} {easing.out}, box-shadow {duration.fast} {easing.out}, transform {duration.fast} {easing.out}"
+      "$value": "background-color {duration.fast} {easing.out}, border-color {duration.fast} {easing.out}, color {duration.fast} {easing.out}, box-shadow {duration.fast} {easing.out}, transform {duration.fast} {easing.out}",
+      "$description": "Referenced by /contact-us but never defined, so every chip, field, radio and submit button snapped between states with no transition. Properties are listed rather than `all`: these five are the only ones those rules actually change (background, border, colour, shadow, lift)."
     }
   }
 }

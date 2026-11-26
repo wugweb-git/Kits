@@ -2,7 +2,8 @@
   "chip": {
     "size": {
       "$value": "2.25rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "── Index + affordance pair ────────────────────────────────────────── The round `+` chip and the index label that sits opposite it share one box height across the whole site, so a card header row is the same height whether it carries a number, a +, or both. Before this the chip was 2.25rem on the FAQ, 2.25–2.75rem on the tag field and the index was a bare inline span, so no two headers lined up."
     },
     "glyph": {
       "$value": "1rem",
@@ -12,7 +13,8 @@
   "r": {
     "0": {
       "$value": "0",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "BORDER RADIUS G-8: Radius scale (§3.11)"
     },
     "1": {
       "$value": "0.25rem",
@@ -47,7 +49,8 @@
       "$type": "dimension"
     },
     "sm": {
-      "$value": "{r.1}"
+      "$value": "{r.1}",
+      "$description": "Legacy radius aliases (keep until migration)"
     },
     "_": {
       "$value": "{r.2}"
@@ -67,7 +70,8 @@
   },
   "radius": {
     "0": {
-      "$value": "{r.0}"
+      "$value": "{r.0}",
+      "$description": "Radius aliases (§3.11)"
     },
     "1": {
       "$value": "{r.1}"
@@ -91,7 +95,8 @@
       "$value": "{r.8}"
     },
     "none": {
-      "$value": "{r.0}"
+      "$value": "{r.0}",
+      "$description": "Radius aliases (--radius-* → existing --r-*)"
     },
     "xs": {
       "$value": "{r.1}"

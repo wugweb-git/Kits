@@ -14,7 +14,8 @@
   "header": {
     "pad-block": {
       "$value": "20px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "header 108 from tablet up"
     }
   },
   "article": {

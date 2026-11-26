@@ -2,7 +2,8 @@
   "core": {
     "font-family-base": {
       "$value": "'Inter Tight', system-ui, sans-serif",
-      "$type": "fontFamily"
+      "$type": "fontFamily",
+      "$description": "TYPOGRAPHY — Wugweb Kits type hierarchy (design.md §3.1–3.5) Inter Tight only · weights via tokens · fluid clamp for viewport scale"
     },
     "font-family-mono": {
       "$value": "'Fragment Mono', ui-monospace, monospace",
@@ -10,7 +11,8 @@
     },
     "line-height-none": {
       "$value": "1",
-      "$type": "number"
+      "$type": "number",
+      "$description": "Line height scale (Kits §3.3)"
     },
     "line-height-tight": {
       "$value": "1.2",
@@ -45,7 +47,8 @@
     },
     "weight-regular": {
       "$value": "400",
-      "$type": "fontWeight"
+      "$type": "fontWeight",
+      "$description": "Font weight scale — always use tokens, never raw numbers in new CSS"
     },
     "weight-medium": {
       "$value": "500",
@@ -61,97 +64,122 @@
     },
     "weight-extrabold": {
       "$value": "800",
-      "$type": "fontWeight"
+      "$type": "fontWeight",
+      "$description": "Display marketing axis — was wrongly aliased to bold"
     }
   },
   "ts": {
     "display-size": {
       "$value": "4rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "Static type roles (Kits §3.1) 64px"
     },
     "h1-size": {
       "$value": "3rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "48px"
     },
     "h2-size": {
       "$value": "2.25rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "36px"
     },
     "h3-size": {
       "$value": "1.5rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "24px"
     },
     "h4-size": {
       "$value": "1.25rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "20px"
     },
     "body-lg-size": {
       "$value": "1.25rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "20px"
     },
     "body-md-size": {
       "$value": "1rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "16px"
     },
     "body-sm-size": {
       "$value": "0.875rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "14px"
     },
     "label-md-size": {
       "$value": "0.875rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "14px"
     },
     "label-sm-size": {
       "$value": "0.75rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "12px"
     },
     "caption-size": {
       "$value": "0.75rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "12px"
     },
     "code-size": {
       "$value": "0.875rem",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "14px"
     }
   },
   "fluid": {
     "display": {
-      "$value": "clamp(2.5rem, 5.5vw + 0.5rem, 5rem)"
+      "$value": "clamp(2.5rem, 5.5vw + 0.5rem, 5rem)",
+      "$description": "Fluid type scale (Kits §3.5), primary sizes for marketing pages. The values match kits_design_system/docs/tokens/typography.md: fa803be4 reverted the 2026-09-23 re-anchor (which had moved display to 48, h1 to 36 and caption to 12 at the minimum) back to the documented scale. Two tiers differ from the doc on purpose, h5 (not in the doc) and body-lg; their notes say why. Each tier holds at its max past the width lock, so nothing grows past the max width (see :root below). 40→80 · 800"
     },
     "h1": {
-      "$value": "clamp(2rem, 4vw + 0.5rem, 3rem)"
+      "$value": "clamp(2rem, 4vw + 0.5rem, 3rem)",
+      "$description": "32→48 · 700"
     },
     "h2": {
-      "$value": "clamp(1.5rem, 2.5vw + 0.5rem, 2.25rem)"
+      "$value": "clamp(1.5rem, 2.5vw + 0.5rem, 2.25rem)",
+      "$description": "24→36 · 600"
     },
     "h3": {
-      "$value": "clamp(1.25rem, 1.5vw + 0.5rem, 1.75rem)"
+      "$value": "clamp(1.25rem, 1.5vw + 0.5rem, 1.75rem)",
+      "$description": "20→28 · 600"
     },
     "h4": {
-      "$value": "clamp(1.06rem, 1vw + 0.5rem, 1.375rem)"
+      "$value": "clamp(1.06rem, 1vw + 0.5rem, 1.375rem)",
+      "$description": "17→22 · 600"
     },
     "h5": {
-      "$value": "clamp(1rem, 0.6vw + 0.7rem, 1.1875rem)"
+      "$value": "clamp(1rem, 0.6vw + 0.7rem, 1.1875rem)",
+      "$description": "NOT in kits typography.md, which runs display to h4 then straight to body. But --t-h5 has more uses than --t-h4, so the step is real and needed. Curve chosen to stay below h4 at EVERY width: the old code value crossed it (18.89 vs 18.24 at 1024px), which is the same defect that made the previous scale wrong. 16px to 19px. 16→19 · 600"
     },
     "body-lg": {
-      "$value": "clamp(1rem, 0.25vw + 0.9rem, 1.125rem)"
+      "$value": "clamp(1rem, 0.25vw + 0.9rem, 1.125rem)",
+      "$description": "16 to 18px, NOT the documented 16 to 20px. The documented curve crosses --fluid-h4 between roughly 590 and 1250px, so lead body text would render LARGER than a heading (19.1 vs 18.2 at 1024px). A heading must never be smaller than the body text beneath it, and that invariant outranks either specific curve, so the lead size gives way and the heading scale is untouched. Verified below h4 at 320/375/480/592/768/1024/1280/1440/1920px. 16→18 · 400"
     },
     "body-md": {
-      "$value": "clamp(0.9375rem, 0.25vw + 0.875rem, 1rem)"
+      "$value": "clamp(0.9375rem, 0.25vw + 0.875rem, 1rem)",
+      "$description": "15→16 · 400"
     },
     "body-sm": {
-      "$value": "clamp(0.8125rem, 0.1vw + 0.8rem, 0.875rem)"
+      "$value": "clamp(0.8125rem, 0.1vw + 0.8rem, 0.875rem)",
+      "$description": "13→14 · 400"
     },
     "label": {
-      "$value": "clamp(0.75rem, 0.1vw + 0.73rem, 0.875rem)"
+      "$value": "clamp(0.75rem, 0.1vw + 0.73rem, 0.875rem)",
+      "$description": "12→14 · 500"
     },
     "caption": {
-      "$value": "clamp(0.625rem, 0.05vw + 0.62rem, 0.75rem)"
+      "$value": "clamp(0.625rem, 0.05vw + 0.62rem, 0.75rem)",
+      "$description": "10→12 · 400"
     }
   },
   "type": {
     "graphic-l": {
-      "$value": "clamp(4rem, 14cqi, 12rem)"
+      "$value": "clamp(4rem, 14cqi, 12rem)",
+      "$description": "Graphic display tier (UI audit §4.2) — for type used as a graphic, not for reading. Sizes to its CONTAINER (cqi), never to the viewport, so a word inside a narrow block shrinks with the block instead of staying at a viewport-derived size that overflows it. The parent must declare `container-type: inline-size`. Pair with `white-space: nowrap`, tight line-height and negative tracking; never with `overflow-wrap: anywhere`. Not part of the reading hierarchy above — never use these on body copy."
     },
     "graphic-m": {
       "$value": "clamp(2.5rem, 9cqi, 7rem)"
@@ -162,7 +190,8 @@
   },
   "t": {
     "display": {
-      "$value": "{fluid.display}"
+      "$value": "{fluid.display}",
+      "$description": "Legacy aliases used across pages (point at Kits fluid / static)"
     },
     "h1": {
       "$value": "{fluid.h1}"
@@ -204,7 +233,8 @@
   "tracking": {
     "label": {
       "$value": "0.08em",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "Letter-spacing tokens — for eyebrow/label uppercase treatments"
     }
   },
   "lh": {

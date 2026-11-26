@@ -21,20 +21,38 @@ if (!src) { console.error('usage: node scripts/import-css-tokens.mjs <global.css
 const OUT = 'design-system/tokens';
 
 // ---- Parse ---------------------------------------------------------------------------------
-const css = readFileSync(src, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+// Comments become placeholders so their text can travel with the token:
+//   a comment inside the value or after the ";" on the same line -> that token
+//   comment lines above a declaration                           -> the next token
+// Section banners (lines of ═ or ─) are dropped; everything else is kept as $description.
+const notes = [];
+const css = readFileSync(src, 'utf8').replace(/\/\*([\s\S]*?)\*\//g, (_, t) => `\u0000${notes.push(t) - 1}\u0000`);
+const PH = /\u0000(\d+)\u0000/g;
+const noteText = (ids) => ids.map((i) => notes[i].split('\n').map((l) => l.replace(/^\s*\*?\s?/, '').trim()).filter((l) => l && !/^[═─=\-\s]+$/.test(l)).join(' ')).filter(Boolean).join(' ');
+const idsIn = (s) => [...s.matchAll(PH)].map((m) => Number(m[1]));
 const decls = []; const stack = []; let buf = '';
 for (const ch of css) {
-  if (ch === '{') { stack.push(buf.trim()); buf = ''; continue; }
+  if (ch === '{') { stack.push(buf.replace(PH, '').trim()); buf = ''; continue; }
   if (ch === '}') {
     const ctx = [...stack.slice(0, -1)]; const sel = stack.pop();
-    for (const d of buf.split(';')) {
-      const m = d.match(/^\s*(--[\w-]+)\s*:\s*([\s\S]+?)\s*$/);
-      if (m) decls.push({ at: ctx.join(' > '), sel, name: m[1].slice(2), value: m[2].replace(/\s+/g, ' ') });
+    const parts = buf.split(';'); let prev = null;
+    for (const d of parts) {
+      const nl = d.indexOf('\n');
+      const sameLine = nl < 0 ? d : d.slice(0, nl);
+      const declOnSameLine = /--[\w-]+\s*:/.test(sameLine);
+      // Text after the previous ";" up to the line end is the previous token's trailing note.
+      if (prev && !declOnSameLine) prev.note.push(...idsIn(sameLine));
+      const rest = prev && !declOnSameLine && nl >= 0 ? d.slice(nl) : (prev && !declOnSameLine ? '' : d);
+      const m = rest.match(/^([\s\S]*?)(--[\w-]+)\s*:\s*([\s\S]+?)\s*$/);
+      if (!m) { prev = null; continue; }
+      const decl = { at: ctx.join(' > '), sel, name: m[2].slice(2), value: m[3].replace(PH, '').replace(/\s+/g, ' ').trim(), note: [...idsIn(m[1]), ...idsIn(m[3])] };
+      decls.push(decl); prev = decl;
     }
     buf = ''; continue;
   }
   buf += ch;
 }
+for (const d of decls) d.description = noteText(d.note);
 
 // Which at-rule contexts become modes. Anything else (component selectors such as .grid) stays in CSS.
 const MODES = {
@@ -90,6 +108,7 @@ const token = (d) => {
   const t = { $value: toValue(d.value) };
   const type = typeOf(d.name, d.value);
   if (type && !/\{/.test(t.$value)) t.$type = type;
+  if (d.description) t.$description = d.description;
   return t;
 };
 
@@ -113,6 +132,19 @@ for (const [at, mode] of Object.entries(MODES)) {
   writeFileSync(`${OUT}/modes/${mode}.json`, `${JSON.stringify(tree, null, 2)}\n`);
   modeMeta[mode] = at;
 }
+// Tokens Studio (multi-file sync): set order, and one theme per viewport. Each wider theme
+// stacks on the narrower one, as the media queries do in CSS.
+const baseSets = Object.keys(trees).sort();
+const modeSets = Object.keys(modeMeta).map((m) => `modes/${m}`);
+writeFileSync(`${OUT}/$metadata.json`, `${JSON.stringify({ tokenSetOrder: [...baseSets, ...modeSets] }, null, 2)}\n`);
+const enabled = (sets) => Object.fromEntries([...baseSets.map((s) => [s, 'enabled']), ...sets.map((s) => [s, 'enabled'])]);
+const THEMES = [
+  { id: 'base', name: 'Base (< 768)', sets: [] },
+  { id: 'md', name: 'Tablet (768 and up)', sets: ['modes/md'] },
+  { id: 'lg', name: 'Desktop (1200 and up)', sets: ['modes/md', 'modes/lg', 'modes/lg-dvh'] },
+].map((t) => ({ id: t.id, name: t.name, group: 'Viewport', selectedTokenSets: t.sets.length ? enabled(t.sets.filter((s) => modeSets.includes(s))) : Object.fromEntries(baseSets.map((s) => [s, 'enabled'])) }));
+writeFileSync(`${OUT}/$themes.json`, `${JSON.stringify(THEMES, null, 2)}\n`);
+
 writeFileSync(`${OUT}/modes/index.json`, `${JSON.stringify({ $description: 'Mode file -> the CSS at-rules its :root block is wrapped in (outermost first, joined by " > ").', modes: modeMeta }, null, 2)}\n`);
 
 console.log(`Imported ${base.length} base tokens into ${Object.keys(trees).length} files; modes: ${Object.entries(modeMeta).map(([m]) => `${m} (${rootDecls.filter((d) => MODES[d.at] === m).length})`).join(', ')}.`);

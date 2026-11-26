@@ -34,6 +34,21 @@ Writes `design-system/build/css/variables.css` (the `:root` block plus one block
 per mode) and `design-system/build/js/tokens.js` (resolved values). Values are
 copied exactly; nothing is converted.
 
+## Package
+
+`packages/design-tokens` publishes these as `@wugweb-git/kits-tokens` on GitHub
+Packages: `variables.css`, `tokens.js` and the JSON source. Release: bump its
+`version`, merge, push the tag `tokens-v<version>`. See that package's README for
+install (a `read:packages` token is needed to install).
+
+## Tokens Studio
+
+The folder is set up for Tokens Studio's multi-file GitHub sync: `$metadata.json`
+holds the set order, `$themes.json` three viewport themes (Base, Tablet 768+,
+Desktop 1200+, each stacking the narrower one). In the plugin: Sync, GitHub,
+repository `wugweb-git/Kits`, branch `kits-suite` (or a working branch), file path
+`design-system/tokens`. The build ignores the two `$` files.
+
 ## Where the values came from
 
 Imported on 2026-11-26 from the live wugweb.com stylesheet
@@ -46,6 +61,6 @@ node scripts/check-tokens-match-css.mjs ../wugweb_site/src/styles/global.css
 
 The second command checks that the build matches that stylesheet exactly. The
 import is one-way and is not meant to be rerun once these files are edited here.
-Two `--grid-cols` overrides on `.grid` are component CSS and stay in the site.
+CSS comments next to a token are kept as its `$description` and written back as a CSS comment by the build. Two `--grid-cols` overrides on `.grid` are component CSS and stay in the site.
 
 The WordPress theme keeps its own tokens in `themes/kits-by-wugweb/tokens/`.

@@ -38,7 +38,7 @@ The Wugweb design system. **Single source of truth for design documentation, com
 ## Kits pipeline
 
 ### Locked flow
-Figma (Tokens Studio) -> GitHub (`design-system/tokens`, W3C DTCG JSON) -> `npm run ds:tokens:build` -> product apps.
+Figma (Tokens Studio) -> GitHub (`design-system/tokens`, W3C DTCG JSON) -> `npm run ds:tokens:build` -> `@wugweb-git/kits-tokens` on GitHub Packages -> product apps.
 
 Token files, naming and where the values came from: `design-system/docs/tokens.md`.
 

@@ -1,10 +1,12 @@
 {
   "shadow": {
     "nav": {
-      "$value": "0px 5px 10px 0px rgba(0, 0, 0, 0.25)"
+      "$value": "0px 5px 10px 0px rgba(0, 0, 0, 0.25)",
+      "$description": "SHADOWS The shadow scale (xs…2xl) and its aliases live in the EFFECTS block below — this section keeps only the nav shadow, which is referenced by §2.1 and has no equivalent step on that scale. The two Framer-era values that used to sit here (`--shadow`, `--shadow-lg`) were redefined further down anyway, so they never applied. Nav bar shadow (§2.1 — present on every nav variant)"
     },
     "none": {
-      "$value": "none"
+      "$value": "none",
+      "$description": "Shadows — scale"
     },
     "xs": {
       "$value": "0 1px 2px rgba(0, 0, 0, 0.08)"
@@ -28,7 +30,8 @@
       "$value": "inset 0 1px 4px rgba(0, 0, 0, 0.12)"
     },
     "glow-blue": {
-      "$value": "0 0 40px rgba(33, 103, 233, 0.35)"
+      "$value": "0 0 40px rgba(33, 103, 233, 0.35)",
+      "$description": "Shadows — glows"
     },
     "glow-pink": {
       "$value": "0 0 40px rgba(230, 48, 159, 0.35)"
@@ -37,13 +40,15 @@
       "$value": "0 0 40px rgba(9, 226, 192, 0.35)"
     },
     "_": {
-      "$value": "{shadow.sm}"
+      "$value": "{shadow.sm}",
+      "$description": "Legacy shadow alias. `--shadow-lg: var(--shadow-md)` and a repeat of `--shadow-nav` used to follow this line; both were later definitions of tokens already set above, and the --shadow-lg one silently collapsed the scale's lg step onto md for every consumer. Removed 2026-09-23 — only --shadow stays, since the scale has no plain `--shadow` step."
     }
   },
   "opacity": {
     "0": {
       "$value": "0",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "EFFECTS — opacity / blur / shadow / glass / noise / gradient (Wugweb Kits token architecture; see kits_design_system/docs/tokens/) Opacity scale — never hardcode opacity"
     },
     "5": {
       "$value": "0.05",
@@ -90,7 +95,8 @@
       "$type": "number"
     },
     "disabled": {
-      "$value": "{opacity.40}"
+      "$value": "{opacity.40}",
+      "$description": "Opacity — semantic"
     },
     "overlay": {
       "$value": "{opacity.70}"
@@ -114,13 +120,15 @@
       "$value": "{opacity.50}"
     },
     "soft": {
-      "$value": "{opacity.70}"
+      "$value": "{opacity.70}",
+      "$description": "De-emphasis pair. Both were referenced across the site (and documented in src/components/README.md as `--opacity-soft: .7`) but never defined, so every `opacity: var(--opacity-soft)` was invalid at computed-value time and silently rendered at full opacity. Used by: TrustBadges, SiteHeader menu icon, about tile copy, homepage client logos, blog \"last updated\", blog index, work-grid placeholder initials."
     },
     "strong": {
       "$value": "{opacity.90}"
     },
     "muted": {
-      "$value": "{opacity.70}"
+      "$value": "{opacity.70}",
+      "$description": "Same failure mode as the pair above. `--opacity-muted` (de-emphasised label) and `--opacity-subtle` (resting state of a control that brightens on hover/active) were referenced on /services but never defined, so the panel index numbers and the inactive tier tabs rendered at full opacity. Ordered against the interaction ramp: subtle .60 → hover .90 → active 1."
     },
     "subtle": {
       "$value": "{opacity.60}"
@@ -129,7 +137,8 @@
   "stroke": {
     "hairline": {
       "$value": "0.5px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "Stroke / border width"
     },
     "thin": {
       "$value": "1px",
@@ -173,7 +182,8 @@
   "blur": {
     "none": {
       "$value": "0",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "Blur"
     },
     "xs": {
       "$value": "4px",
@@ -206,7 +216,8 @@
   },
   "elevation": {
     "0": {
-      "$value": "none"
+      "$value": "none",
+      "$description": "Elevation — each bundles shadow + z"
     },
     "1": {
       "$value": "{shadow.xs}"
@@ -226,7 +237,8 @@
   },
   "glass": {
     "light": {
-      "$value": "blur({blur.md}) saturate(1.2)"
+      "$value": "blur({blur.md}) saturate(1.2)",
+      "$description": "Glass — blur + border + tint + opacity"
     },
     "medium": {
       "$value": "blur({blur.lg}) saturate(1.3)"
@@ -240,7 +252,8 @@
   },
   "noise": {
     "light": {
-      "$value": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")"
+      "$value": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E\")",
+      "$description": "Noise — inline SVG grain data-URIs (\"Very Wugweb\")"
     },
     "medium": {
       "$value": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E\")"
@@ -254,7 +267,8 @@
   },
   "gradient": {
     "brand": {
-      "$value": "linear-gradient(135deg, #FFBE1A, #E54F30)"
+      "$value": "linear-gradient(135deg, #FFBE1A, #E54F30)",
+      "$description": "Gradients — per service + brand"
     },
     "strategy": {
       "$value": "linear-gradient(135deg, #FA4108, #FF8F66)"
@@ -274,7 +288,8 @@
   },
   "hover": {
     "button": {
-      "$value": "scale 1.02, {shadow.xs}"
+      "$value": "scale 1.02, {shadow.xs}",
+      "$description": "Hover presets"
     },
     "card": {
       "$value": "translateY(-4px), {shadow.md}"
@@ -294,7 +309,8 @@
   },
   "focus": {
     "primary": {
-      "$value": "2px solid {neutral.3}"
+      "$value": "2px solid {neutral.3}",
+      "$description": "Focus"
     },
     "secondary": {
       "$value": "2px solid {color.accent-blue}"
@@ -310,12 +326,14 @@
     },
     "offset": {
       "$value": "2px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "Focus ring offset"
     }
   },
   "cursor": {
     "pointer": {
-      "$value": "pointer"
+      "$value": "pointer",
+      "$description": "Cursor"
     },
     "grab": {
       "$value": "grab"

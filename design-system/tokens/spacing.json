@@ -1,7 +1,8 @@
 {
   "safe": {
     "top": {
-      "$value": "env(safe-area-inset-top, 0px)"
+      "$value": "env(safe-area-inset-top, 0px)",
+      "$description": "Safe-area insets (UI audit §10). The site declares `viewport-fit=cover` plus `black-translucent`, so the viewport extends under the notch and the home indicator — anything pinned to a screen edge must add these or it renders underneath the hardware. Tokenised with a 0px fallback so they are inert on every non-notched device and in headless browsers."
     },
     "right": {
       "$value": "env(safe-area-inset-right, 0px)"
@@ -16,7 +17,8 @@
   "p": {
     "0": {
       "$value": "0",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "SPACING SCALE G-9: Numeric padding / gap ramp (§3.10). Both share one ramp — prefix distinguishes context. (A third --s-* column existed here with the same values as --p-* — zero usages anywhere in src/, confirmed by grep; removed rather than kept as a silently-dead alias.)"
     },
     "1": {
       "$value": "0.25rem",
@@ -121,7 +123,8 @@
       "$type": "dimension"
     },
     "xs": {
-      "$value": "{gap.2}"
+      "$value": "{gap.2}",
+      "$description": "Legacy gap aliases (keep until migration)"
     },
     "sm": {
       "$value": "{gap.3}"
@@ -142,26 +145,32 @@
   "space": {
     "section-xs": {
       "$value": "48px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "G-10: Responsive spacing (§3.6) one section rhythm: 48 / 70 / 96"
     },
     "section-sm": {
       "$value": "48px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "one section rhythm: 48 / 70 / 96"
     },
     "section-md": {
       "$value": "48px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "one section rhythm: 48 / 70 / 96"
     },
     "section-lg": {
       "$value": "48px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "one section rhythm: 48 / 70 / 96"
     },
     "section-xl": {
       "$value": "48px",
-      "$type": "dimension"
+      "$type": "dimension",
+      "$description": "70 tablet / 96 desktop — see the shell steps below"
     },
     "page-head": {
-      "$value": "clamp(4rem, 12vw, 11rem)"
+      "$value": "clamp(4rem, 12vw, 11rem)",
+      "$description": "Clear space above a page title. Measured: our six pages ran 64→126px below the header, and the difference was only whether the page happened to carry an eyebrow — not a decision. The Framer reference gives its title 284px below a 56px nav; ours is 98px, so the same feel needs less. 160px at desktop lands the title in the same place on the fold without pushing it under it."
     },
     "page-xs": {
       "$value": "1rem",

@@ -1,0 +1,46 @@
+# Publishes @wugweb-git/kits-tokens to GitHub Packages.
+#
+# Trigger: push a tag tokens-v<version> whose version matches
+# packages/design-tokens/package.json. Nothing publishes without a tag.
+# Auth: the workflow's own GITHUB_TOKEN (packages: write). No secret to add.
+name: Release tokens
+
+on:
+  push:
+    tags:
+      - 'tokens-v*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@wugweb-git'
+
+      - name: Tag matches package version
+        run: |
+          want="tokens-v$(node -p "require('./packages/design-tokens/package.json').version")"
+          if [ "$GITHUB_REF_NAME" != "$want" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version ($want)."
+            exit 1
+          fi
+
+      - name: Check tokens
+        run: |
+          node scripts/check-token-keys.mjs
+          node scripts/build-design-tokens.mjs
+
+      - name: Publish
+        working-directory: packages/design-tokens
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
