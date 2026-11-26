@@ -93,41 +93,6 @@ if ( ! function_exists( 'rankweb_link_table' ) ) {
 		return 'wp_aw_link_' . $name;
 	}
 }
-if ( ! function_exists( 'get_post' ) ) {
-	function get_post( $id ) {
-		return $id >= 100 && $id < 300 ? new WP_Post( array( 'ID' => $id ) ) : null;
-	}
-}
-if ( ! function_exists( 'is_post_type_viewable' ) ) {
-	function is_post_type_viewable( $t ) {
-		return true;
-	}
-}
-if ( ! function_exists( 'get_the_title' ) ) {
-	function get_the_title( $id ) {
-		return 100 === (int) $id ? '' : 'Title ' . (int) $id;
-	}
-}
-if ( ! function_exists( 'get_permalink' ) ) {
-	function get_permalink( $id ) {
-		return 'https://example.org/library/p' . (int) $id . '/';
-	}
-}
-if ( ! function_exists( 'get_edit_post_link' ) ) {
-	function get_edit_post_link( $id, $ctx = '' ) {
-		return 'https://example.org/wp-admin/post.php?post=' . (int) $id;
-	}
-}
-if ( ! function_exists( 'home_url' ) ) {
-	function home_url( $p = '' ) {
-		return 'https://example.org' . $p;
-	}
-}
-if ( ! function_exists( 'wp_json_encode' ) ) {
-	function wp_json_encode( $d, $o = 0, $depth = 512 ) {
-		return json_encode( $d, $o, $depth );
-	}
-}
 
 require_once dirname( __DIR__ ) . '/includes/link-audit.php';
 require_once dirname( __DIR__ ) . '/includes/link-anchors.php';
@@ -135,6 +100,15 @@ require_once dirname( __DIR__ ) . '/includes/silos.php';
 
 /** The Internal links screen's routes and functions. */
 final class ToolScreensLinksTest extends PHPUnit\Framework\TestCase {
+
+	protected function setUp(): void {
+		$GLOBALS['rw_posts']  = array();
+		foreach ( range( 100, 299 ) as $id ) {
+			$GLOBALS['rw_posts'][ $id ] = new WP_Post( array( 'ID' => $id ) ); // published items with a page
+		}
+		$GLOBALS['rw_titles'] = array( 100 => '' ); // the hub has no title
+		$GLOBALS['rw_meta']   = array();
+	}
 
 	/* The silo data is read once per process (a static memo), so the tests that read it come first and agree on this start: silo 5. */
 

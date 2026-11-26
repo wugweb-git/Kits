@@ -37,6 +37,7 @@ import {
 import { ModuleCards } from './modules';
 import { Faq } from './tools/faq';
 import { Links } from './tools/links';
+import { Images, SeoCsv } from './tools/files';
 
 const app = window.rankwebApp || {};
 const path = ( p ) => `/${ app.rest }/${ p }`;
@@ -1167,8 +1168,6 @@ function Settings() {
 
 /** The working tools (Internal links, Image SEO, SEO CSV, Redirect tools): each one's own output and forms, as page parts. */
 const TOOL_TITLES = {
-	images: __( 'Image SEO', 'rankweb' ),
-	csv: __( 'SEO CSV', 'rankweb' ),
 	redirects: __( 'Redirect tools', 'rankweb' ),
 };
 
@@ -1189,6 +1188,8 @@ function App() {
 			{ 'settings' === app.screen && <Settings /> }
 			{ 'faq' === app.screen && <Faq /> }
 			{ 'links' === app.screen && <Links /> }
+			{ 'images' === app.screen && <Images /> }
+			{ 'csv' === app.screen && <SeoCsv /> }
 			{ TOOL_TITLES[ app.screen ] && <Tool screen={ app.screen } /> }
 			{ [ 'dashboard', 'insights', 'modules' ].includes( app.screen ) && (
 				<Dashboard view={ app.screen } />

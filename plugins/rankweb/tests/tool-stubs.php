@@ -88,6 +88,8 @@ if ( ! class_exists( 'WP_Post' ) ) {
 		public $post_type     = 'page';
 		public $post_password = '';
 		public $post_title    = '';
+		public $post_excerpt  = '';
+		public $post_name     = '';
 		public function __construct( array $f = array() ) {
 			foreach ( $f as $k => $v ) {
 				$this->$k = $v;
@@ -249,6 +251,150 @@ foreach ( array( 'MINUTE_IN_SECONDS' => 60, 'HOUR_IN_SECONDS' => 3600, 'DAY_IN_S
 		define( $rw_const, $rw_val );
 	}
 }
+/* Posts, meta and addresses, all read from globals a test sets in setUp():
+ *   rw_posts  id => WP_Post     rw_ids  what get_posts() returns     rw_meta  id => key => value
+ *   rw_titles id => title (get_the_title falls back to "Title <id>") */
+$GLOBALS['rw_posts']  = $GLOBALS['rw_posts'] ?? array();
+$GLOBALS['rw_ids']    = $GLOBALS['rw_ids'] ?? array();
+$GLOBALS['rw_meta']   = $GLOBALS['rw_meta'] ?? array();
+$GLOBALS['rw_titles'] = $GLOBALS['rw_titles'] ?? array();
+
+if ( ! function_exists( 'get_post' ) ) {
+	function get_post( $id ) {
+		return $GLOBALS['rw_posts'][ (int) $id ] ?? null;
+	}
+}
+if ( ! function_exists( 'get_posts' ) ) {
+	function get_posts( $args = array() ) {
+		return $GLOBALS['rw_ids'];
+	}
+}
+if ( ! function_exists( 'get_post_meta' ) ) {
+	function get_post_meta( $id, $key, $single = false ) {
+		return $GLOBALS['rw_meta'][ $id ][ $key ] ?? '';
+	}
+}
+if ( ! function_exists( 'update_post_meta' ) ) {
+	function update_post_meta( $id, $key, $value ) {
+		$GLOBALS['rw_meta'][ $id ][ $key ] = $value;
+		return true;
+	}
+}
+if ( ! function_exists( 'delete_post_meta' ) ) {
+	function delete_post_meta( $id, $key ) {
+		unset( $GLOBALS['rw_meta'][ $id ][ $key ] );
+		return true;
+	}
+}
+if ( ! function_exists( 'wp_update_post' ) ) {
+	function wp_update_post( $f ) {
+		foreach ( $f as $k => $v ) {
+			if ( 'ID' !== $k ) {
+				$GLOBALS['rw_posts'][ $f['ID'] ]->$k = $v;
+			}
+		}
+		return $f['ID'];
+	}
+}
+if ( ! function_exists( 'get_the_title' ) ) {
+	function get_the_title( $id ) {
+		return $GLOBALS['rw_titles'][ (int) $id ] ?? 'Title ' . (int) $id;
+	}
+}
+if ( ! function_exists( 'get_permalink' ) ) {
+	function get_permalink( $id ) {
+		return 'https://example.org/library/p' . (int) $id . '/';
+	}
+}
+if ( ! function_exists( 'get_edit_post_link' ) ) {
+	function get_edit_post_link( $id, $ctx = '' ) {
+		return 'https://example.org/wp-admin/post.php?post=' . (int) $id;
+	}
+}
+if ( ! function_exists( 'get_edit_term_link' ) ) {
+	function get_edit_term_link( $id ) {
+		return 'https://example.org/wp-admin/term.php?tag_ID=' . (int) $id;
+	}
+}
+if ( ! function_exists( 'get_term_link' ) ) {
+	function get_term_link( $id ) {
+		return 'https://example.org/term/' . (int) $id . '/';
+	}
+}
+if ( ! function_exists( 'home_url' ) ) {
+	function home_url( $p = '' ) {
+		return 'https://example.org' . $p;
+	}
+}
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( $p = '' ) {
+		return 'https://example.org/wp-admin/' . $p;
+	}
+}
+if ( ! function_exists( 'add_query_arg' ) ) {
+	function add_query_arg( $args, $url = '' ) {
+		return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . http_build_query( $args );
+	}
+}
+if ( ! function_exists( 'wp_create_nonce' ) ) {
+	function wp_create_nonce( $a ) {
+		return 'nonce-' . $a;
+	}
+}
+if ( ! function_exists( 'get_bloginfo' ) ) {
+	function get_bloginfo( $what = '' ) {
+		return 'Example Site';
+	}
+}
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	function esc_url_raw( $u ) {
+		return trim( (string) $u );
+	}
+}
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	function wp_json_encode( $d, $o = 0, $depth = 512 ) {
+		return json_encode( $d, $o, $depth );
+	}
+}
+if ( ! function_exists( 'is_post_type_viewable' ) ) {
+	function is_post_type_viewable( $t ) {
+		return true;
+	}
+}
+if ( ! function_exists( 'post_type_exists' ) ) {
+	function post_type_exists( $t ) {
+		return in_array( $t, array( 'post', 'page', 'attachment', 'event' ), true );
+	}
+}
+if ( ! function_exists( 'get_post_type_object' ) ) {
+	function get_post_type_object( $t ) {
+		return (object) array(
+			'labels' => (object) array(
+				'name'          => ucfirst( $t ) . 's',
+				'singular_name' => ucfirst( $t ),
+			),
+		);
+	}
+}
+if ( ! function_exists( 'get_taxonomy' ) ) {
+	function get_taxonomy( $t ) {
+		return (object) array( 'labels' => (object) array( 'singular_name' => ucfirst( $t ) ) );
+	}
+}
+if ( ! function_exists( 'get_post_types' ) ) {
+	function get_post_types( $args = array(), $out = 'names' ) {
+		return array(
+			'post' => (object) array( 'label' => 'Posts' ),
+			'page' => (object) array( 'label' => 'Pages' ),
+		);
+	}
+}
+if ( ! function_exists( 'get_taxonomies' ) ) {
+	function get_taxonomies( $args = array(), $out = 'names' ) {
+		return array( 'category' => (object) array( 'label' => 'Categories' ) );
+	}
+}
+
 if ( ! defined( 'RANKWEB_CAP' ) ) {
 	define( 'RANKWEB_CAP', 'manage_rankweb' );
 }

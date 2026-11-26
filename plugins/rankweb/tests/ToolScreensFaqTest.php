@@ -44,54 +44,6 @@ if ( ! function_exists( 'rankweb_faq_off_types' ) ) {
 		return array( 'page' );
 	}
 }
-if ( ! function_exists( 'post_type_exists' ) ) {
-	function post_type_exists( $t ) {
-		return false;
-	}
-}
-if ( ! function_exists( 'get_taxonomy' ) ) {
-	function get_taxonomy( $t ) {
-		return (object) array( 'labels' => (object) array( 'singular_name' => ucfirst( $t ) ) );
-	}
-}
-if ( ! function_exists( 'get_post_type_object' ) ) {
-	function get_post_type_object( $t ) {
-		return (object) array( 'labels' => (object) array( 'singular_name' => ucfirst( $t ) ) );
-	}
-}
-if ( ! function_exists( 'get_edit_post_link' ) ) {
-	function get_edit_post_link( $id, $ctx = '' ) {
-		return 'https://example.org/wp-admin/post.php?post=' . (int) $id;
-	}
-}
-if ( ! function_exists( 'get_edit_term_link' ) ) {
-	function get_edit_term_link( $id ) {
-		return 'https://example.org/wp-admin/term.php?tag_ID=' . (int) $id;
-	}
-}
-if ( ! function_exists( 'get_term_link' ) ) {
-	function get_term_link( $id ) {
-		return 'https://example.org/term/' . (int) $id . '/';
-	}
-}
-if ( ! function_exists( 'get_permalink' ) ) {
-	function get_permalink( $id ) {
-		return 'https://example.org/p/' . (int) $id . '/';
-	}
-}
-if ( ! function_exists( 'get_post_types' ) ) {
-	function get_post_types( $args = array(), $out = 'names' ) {
-		return array(
-			'post' => (object) array( 'label' => 'Posts' ),
-			'page' => (object) array( 'label' => 'Pages' ),
-		);
-	}
-}
-if ( ! function_exists( 'get_taxonomies' ) ) {
-	function get_taxonomies( $args = array(), $out = 'names' ) {
-		return array( 'category' => (object) array( 'label' => 'Categories' ) );
-	}
-}
 
 require_once dirname( __DIR__ ) . '/includes/faq-overview.php';
 
