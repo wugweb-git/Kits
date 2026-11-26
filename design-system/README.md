@@ -1,7 +1,14 @@
 # Design System Source of Truth
 
 ## Locked flow
-Figma (Tokens Studio) -> GitHub (`design-system/tokens`) -> Style Dictionary -> product apps.
+Figma (Tokens Studio) -> GitHub (`design-system/tokens`, W3C DTCG JSON) -> `npm run ds:tokens:build` -> product apps.
+
+Token files, naming and where the values came from: `design-system/docs/tokens.md`.
+
+Wugweb site design docs (design rules, 23 token references, components, widgets,
+motion and 9 block specs): `design-system/docs/wugweb/`. Copied on 2026-11-26 from
+`wugweb_site/kits_design_system/`; paths such as `src/styles/global.css` inside
+them refer to the wugweb_site repo.
 
 ## Governance
 - Git is the source of truth.

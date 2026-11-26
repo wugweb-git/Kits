@@ -1,48 +1,81 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+#!/usr/bin/env node
+/**
+ * Build design-system/tokens (W3C DTCG JSON) into CSS and JS.
+ *
+ *   npm run ds:tokens:build
+ *
+ * Outputs:
+ *   design-system/build/css/variables.css  :root block, then one block per mode
+ *   design-system/build/js/tokens.js       { base: {name: value}, modes: {mode: {name: value}} }
+ *
+ * Names: a token's path joined with "-" ("_" segments dropped) is its CSS name.
+ * References: {a.b} becomes var(--a-b) in CSS and the resolved value in JS.
+ * Values are written exactly as stored: no unit or colour conversion, so the CSS
+ * matches the source it was imported from.
+ */
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
 
-async function runStyleDictionary() {
-  const module = await import('style-dictionary');
-  const StyleDictionary = module.default;
-  await new StyleDictionary('style-dictionary.config.cjs').buildAllPlatforms();
-  console.log('Design tokens build completed via Style Dictionary.');
-}
+const DIR = 'design-system/tokens';
+const nameOf = (p) => p.filter((s) => s !== '_').join('-');
 
-function runFallbackBuilder() {
-  const color = JSON.parse(readFileSync('design-system/tokens/color.json', 'utf8'));
-  const spacing = JSON.parse(readFileSync('design-system/tokens/spacing.json', 'utf8'));
-  const typography = JSON.parse(readFileSync('design-system/tokens/typography.json', 'utf8'));
-
-  const cssLines = [':root {'];
-  const jsTokens = {};
-
-  const addToken = (key, value) => {
-    cssLines.push(`  --${key}: ${value};`);
-    jsTokens[key] = value;
-  };
-
-  for (const [name, token] of Object.entries(color.color)) addToken(`color-${name}`, token.value);
-  for (const [name, token] of Object.entries(spacing.spacing)) addToken(`spacing-${name}`, token.value);
-  for (const [name, token] of Object.entries(typography.typography.fontSize)) addToken(`font-size-${name}`, token.value);
-  for (const [name, token] of Object.entries(typography.typography.fontWeight)) addToken(`font-weight-${name}`, token.value);
-  for (const [name, token] of Object.entries(typography.typography.lineHeight)) addToken(`line-height-${name}`, token.value);
-  addToken('font-family-base', typography.typography.fontFamily.base.value);
-
-  cssLines.push('}');
-
-  mkdirSync('design-system/build/css', { recursive: true });
-  mkdirSync('design-system/build/js', { recursive: true });
-  writeFileSync('design-system/build/css/variables.css', `${cssLines.join('\n')}\n`);
-  writeFileSync('design-system/build/js/tokens.js', `export const tokens = ${JSON.stringify(jsTokens, null, 2)};\n`);
-
-  console.log('Design tokens build completed via fallback generator (Style Dictionary unavailable).');
-}
-
-try {
-  await runStyleDictionary();
-} catch (error) {
-  if (error && typeof error === 'object' && 'code' in error && error.code === 'ERR_MODULE_NOT_FOUND') {
-    runFallbackBuilder();
-  } else {
-    throw error;
+function flatten(tree, file, prefix = [], out = new Map()) {
+  for (const [k, v] of Object.entries(tree)) {
+    if (k.startsWith('$')) continue;
+    const p = [...prefix, k];
+    if (v && typeof v === 'object' && '$value' in v) {
+      const name = nameOf(p);
+      if (out.has(name)) throw new Error(`--${name} is defined twice (${out.get(name).file}, ${file})`);
+      out.set(name, { value: String(v.$value), file, ref: p.join('.') });
+    } else if (v && typeof v === 'object') flatten(v, file, p, out);
   }
+  return out;
 }
+const readJson = (f) => JSON.parse(readFileSync(f, 'utf8'));
+
+const baseFiles = readdirSync(DIR).filter((f) => f.endsWith('.json')).sort();
+const base = new Map();
+for (const f of baseFiles) for (const [n, t] of flatten(readJson(path.join(DIR, f)), f)) {
+  if (base.has(n)) throw new Error(`--${n} is defined in ${base.get(n).file} and ${f}`);
+  base.set(n, t);
+}
+const byRef = new Map([...base].map(([n, t]) => [t.ref, n]));
+
+const toCss = (v, where) => v.replace(/\{([^}]+)\}/g, (_, r) => {
+  const n = byRef.get(r);
+  if (!n) throw new Error(`${where}: unknown reference {${r}}`);
+  return `var(--${n})`;
+});
+const resolve = (v, seen = []) => v.replace(/\{([^}]+)\}/g, (_, r) => {
+  const n = byRef.get(r);
+  if (seen.includes(n)) throw new Error(`circular reference: ${[...seen, n].join(' -> ')}`);
+  return resolve(base.get(n).value, [...seen, n]);
+});
+
+const modeIndex = existsSync(`${DIR}/modes/index.json`) ? readJson(`${DIR}/modes/index.json`).modes : {};
+const modes = Object.entries(modeIndex).map(([mode, at]) => {
+  const tokens = flatten(readJson(`${DIR}/modes/${mode}.json`), `modes/${mode}.json`);
+  for (const n of tokens.keys()) if (!base.has(n)) throw new Error(`modes/${mode}.json sets --${n}, which has no base token`);
+  return { mode, at: at.split(' > '), tokens };
+});
+
+// ---- CSS -----------------------------------------------------------------------------------
+const block = (tokens, indent) => [...tokens].map(([n, t]) => `${indent}--${n}: ${toCss(t.value, `--${n}`)};`).join('\n');
+let css = `/* Generated by scripts/build-design-tokens.mjs from ${DIR}. Do not edit. */\n:root {\n${block(base, '  ')}\n}\n`;
+for (const m of modes) {
+  const pad = (d) => '  '.repeat(d);
+  let s = ''; m.at.forEach((a, d) => { s += `${pad(d)}${a} {\n`; });
+  s += `${pad(m.at.length)}:root {\n${block(m.tokens, pad(m.at.length + 1))}\n${pad(m.at.length)}}\n`;
+  for (let d = m.at.length - 1; d >= 0; d--) s += `${pad(d)}}\n`;
+  css += `\n${s}`;
+}
+
+// ---- JS ------------------------------------------------------------------------------------
+const flat = (tokens) => Object.fromEntries([...tokens].map(([n, t]) => [n, resolve(t.value)]));
+const js = { base: flat(base), modes: Object.fromEntries(modes.map((m) => [m.mode, { at: m.at.join(' > '), tokens: flat(m.tokens) }])) };
+
+mkdirSync('design-system/build/css', { recursive: true });
+mkdirSync('design-system/build/js', { recursive: true });
+writeFileSync('design-system/build/css/variables.css', css);
+writeFileSync('design-system/build/js/tokens.js', `/* Generated by scripts/build-design-tokens.mjs. Do not edit. */\nexport const tokens = ${JSON.stringify(js, null, 2)};\n`);
+console.log(`Design tokens built: ${base.size} base tokens from ${baseFiles.length} files, ${modes.length} modes (${modes.map((m) => `${m.mode} ${m.tokens.size}`).join(', ')}).`);

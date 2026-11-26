@@ -1,0 +1,121 @@
+{
+  "chip": {
+    "size": {
+      "$value": "2.25rem",
+      "$type": "dimension"
+    },
+    "glyph": {
+      "$value": "1rem",
+      "$type": "dimension"
+    }
+  },
+  "r": {
+    "0": {
+      "$value": "0",
+      "$type": "dimension"
+    },
+    "1": {
+      "$value": "0.25rem",
+      "$type": "dimension"
+    },
+    "2": {
+      "$value": "0.5rem",
+      "$type": "dimension"
+    },
+    "3": {
+      "$value": "0.75rem",
+      "$type": "dimension"
+    },
+    "4": {
+      "$value": "1rem",
+      "$type": "dimension"
+    },
+    "5": {
+      "$value": "1.25rem",
+      "$type": "dimension"
+    },
+    "6": {
+      "$value": "1.5rem",
+      "$type": "dimension"
+    },
+    "8": {
+      "$value": "2rem",
+      "$type": "dimension"
+    },
+    "full": {
+      "$value": "9999px",
+      "$type": "dimension"
+    },
+    "sm": {
+      "$value": "{r.1}"
+    },
+    "_": {
+      "$value": "{r.2}"
+    },
+    "md": {
+      "$value": "{r.3}"
+    },
+    "lg": {
+      "$value": "{r.4}"
+    },
+    "xl": {
+      "$value": "{r.6}"
+    },
+    "pill": {
+      "$value": "{r.full}"
+    }
+  },
+  "radius": {
+    "0": {
+      "$value": "{r.0}"
+    },
+    "1": {
+      "$value": "{r.1}"
+    },
+    "2": {
+      "$value": "{r.2}"
+    },
+    "3": {
+      "$value": "{r.3}"
+    },
+    "4": {
+      "$value": "{r.4}"
+    },
+    "5": {
+      "$value": "{r.5}"
+    },
+    "6": {
+      "$value": "{r.6}"
+    },
+    "8": {
+      "$value": "{r.8}"
+    },
+    "none": {
+      "$value": "{r.0}"
+    },
+    "xs": {
+      "$value": "{r.1}"
+    },
+    "sm": {
+      "$value": "{r.2}"
+    },
+    "md": {
+      "$value": "{r.3}"
+    },
+    "lg": {
+      "$value": "{r.4}"
+    },
+    "xl": {
+      "$value": "{r.5}"
+    },
+    "2xl": {
+      "$value": "{r.6}"
+    },
+    "3xl": {
+      "$value": "{r.8}"
+    },
+    "full": {
+      "$value": "{r.full}"
+    }
+  }
+}

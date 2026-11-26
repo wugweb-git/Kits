@@ -1,0 +1,47 @@
+{
+  "shell": {
+    "gutter": {
+      "$value": "32px",
+      "$type": "dimension"
+    }
+  },
+  "grid": {
+    "gap": {
+      "$value": "24px",
+      "$type": "dimension"
+    }
+  },
+  "header": {
+    "pad-block": {
+      "$value": "20px",
+      "$type": "dimension"
+    }
+  },
+  "article": {
+    "cover-ratio": {
+      "$value": "16 / 9"
+    }
+  },
+  "space": {
+    "section-xs": {
+      "$value": "70px",
+      "$type": "dimension"
+    },
+    "section-sm": {
+      "$value": "70px",
+      "$type": "dimension"
+    },
+    "section-md": {
+      "$value": "70px",
+      "$type": "dimension"
+    },
+    "section-lg": {
+      "$value": "70px",
+      "$type": "dimension"
+    },
+    "section-xl": {
+      "$value": "70px",
+      "$type": "dimension"
+    }
+  }
+}

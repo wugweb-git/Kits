@@ -1,16 +1,19 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 
-const files = [
-  'design-system/tokens/color.json',
-  'design-system/tokens/spacing.json',
-  'design-system/tokens/typography.json',
-];
+// Every token file, including design-system/tokens/modes/*.json.
+const files = readdirSync('design-system/tokens', { recursive: true })
+  .filter((f) => f.endsWith('.json'))
+  .map((f) => `design-system/tokens/${f}`);
 
 const issues = [];
 for (const file of files) {
-  const text = readFileSync(file, 'utf8');
-  const matches = [...text.matchAll(/["']([^"']*\s+[^"']*)["']\s*:/g)].map((m) => m[1]);
-  for (const token of matches) issues.push(`${file}: ${token}`);
+  const walk = (node) => {
+    for (const [key, value] of Object.entries(node)) {
+      if (/\s/.test(key)) issues.push(`${file}: ${key}`);
+      if (value && typeof value === 'object' && !key.startsWith('$')) walk(value);
+    }
+  };
+  walk(JSON.parse(readFileSync(file, 'utf8')));
 }
 
 if (issues.length) {

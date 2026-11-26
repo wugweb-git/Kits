@@ -1,9 +1,192 @@
 {
-  "spacing": {
-    "xs": { "value": "4px" },
-    "sm": { "value": "8px" },
-    "md": { "value": "12px" },
-    "lg": { "value": "16px" },
-    "xl": { "value": "24px" }
+  "safe": {
+    "top": {
+      "$value": "env(safe-area-inset-top, 0px)"
+    },
+    "right": {
+      "$value": "env(safe-area-inset-right, 0px)"
+    },
+    "bottom": {
+      "$value": "env(safe-area-inset-bottom, 0px)"
+    },
+    "left": {
+      "$value": "env(safe-area-inset-left, 0px)"
+    }
+  },
+  "p": {
+    "0": {
+      "$value": "0",
+      "$type": "dimension"
+    },
+    "1": {
+      "$value": "0.25rem",
+      "$type": "dimension"
+    },
+    "2": {
+      "$value": "0.5rem",
+      "$type": "dimension"
+    },
+    "3": {
+      "$value": "0.75rem",
+      "$type": "dimension"
+    },
+    "4": {
+      "$value": "1rem",
+      "$type": "dimension"
+    },
+    "5": {
+      "$value": "1.25rem",
+      "$type": "dimension"
+    },
+    "6": {
+      "$value": "1.5rem",
+      "$type": "dimension"
+    },
+    "7": {
+      "$value": "1.75rem",
+      "$type": "dimension"
+    },
+    "8": {
+      "$value": "2rem",
+      "$type": "dimension"
+    },
+    "9": {
+      "$value": "2.25rem",
+      "$type": "dimension"
+    },
+    "10": {
+      "$value": "2.5rem",
+      "$type": "dimension"
+    },
+    "11": {
+      "$value": "2.75rem",
+      "$type": "dimension"
+    },
+    "12": {
+      "$value": "3rem",
+      "$type": "dimension"
+    }
+  },
+  "gap": {
+    "0": {
+      "$value": "0",
+      "$type": "dimension"
+    },
+    "1": {
+      "$value": "0.25rem",
+      "$type": "dimension"
+    },
+    "2": {
+      "$value": "0.5rem",
+      "$type": "dimension"
+    },
+    "3": {
+      "$value": "0.75rem",
+      "$type": "dimension"
+    },
+    "4": {
+      "$value": "1rem",
+      "$type": "dimension"
+    },
+    "5": {
+      "$value": "1.25rem",
+      "$type": "dimension"
+    },
+    "6": {
+      "$value": "1.5rem",
+      "$type": "dimension"
+    },
+    "7": {
+      "$value": "1.75rem",
+      "$type": "dimension"
+    },
+    "8": {
+      "$value": "2rem",
+      "$type": "dimension"
+    },
+    "9": {
+      "$value": "2.25rem",
+      "$type": "dimension"
+    },
+    "10": {
+      "$value": "2.5rem",
+      "$type": "dimension"
+    },
+    "11": {
+      "$value": "2.75rem",
+      "$type": "dimension"
+    },
+    "12": {
+      "$value": "3rem",
+      "$type": "dimension"
+    },
+    "xs": {
+      "$value": "{gap.2}"
+    },
+    "sm": {
+      "$value": "{gap.3}"
+    },
+    "_": {
+      "$value": "{gap.4}"
+    },
+    "md": {
+      "$value": "{gap.6}"
+    },
+    "lg": {
+      "$value": "{gap.8}"
+    },
+    "xl": {
+      "$value": "{gap.9}"
+    }
+  },
+  "space": {
+    "section-xs": {
+      "$value": "48px",
+      "$type": "dimension"
+    },
+    "section-sm": {
+      "$value": "48px",
+      "$type": "dimension"
+    },
+    "section-md": {
+      "$value": "48px",
+      "$type": "dimension"
+    },
+    "section-lg": {
+      "$value": "48px",
+      "$type": "dimension"
+    },
+    "section-xl": {
+      "$value": "48px",
+      "$type": "dimension"
+    },
+    "page-head": {
+      "$value": "clamp(4rem, 12vw, 11rem)"
+    },
+    "page-xs": {
+      "$value": "1rem",
+      "$type": "dimension"
+    },
+    "page-sm": {
+      "$value": "1.25rem",
+      "$type": "dimension"
+    },
+    "page-md": {
+      "$value": "2rem",
+      "$type": "dimension"
+    },
+    "page-lg": {
+      "$value": "2.5rem",
+      "$type": "dimension"
+    },
+    "page-xl": {
+      "$value": "3rem",
+      "$type": "dimension"
+    }
+  },
+  "section": {
+    "y": {
+      "$value": "{space.section-xl}"
+    }
   }
 }

@@ -1,0 +1,59 @@
+{
+  "shell": {
+    "gutter": {
+      "$value": "48px",
+      "$type": "dimension"
+    }
+  },
+  "grid": {
+    "gap": {
+      "$value": "32px",
+      "$type": "dimension"
+    }
+  },
+  "article": {
+    "cols": {
+      "$value": "minmax(0, 5fr) minmax(0, 7fr)"
+    },
+    "areas": {
+      "$value": "\"cover hero\" \"cover body\""
+    },
+    "column": {
+      "$value": "none"
+    },
+    "cover-ratio": {
+      "$value": "auto"
+    },
+    "cover-height": {
+      "$value": "calc(100svh - {header.height} - {gap.8})"
+    },
+    "cover-position": {
+      "$value": "sticky"
+    },
+    "title-size": {
+      "$value": "{t.h1}"
+    }
+  },
+  "space": {
+    "section-xs": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-sm": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-md": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-lg": {
+      "$value": "96px",
+      "$type": "dimension"
+    },
+    "section-xl": {
+      "$value": "96px",
+      "$type": "dimension"
+    }
+  }
+}
