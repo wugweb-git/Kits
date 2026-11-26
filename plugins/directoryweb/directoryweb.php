@@ -72,6 +72,7 @@ $directoryweb_includes = array(
 	'claim-crm', // claim events for a CRM: an action for any listener, and FluentCRM contacts and tags when it is active
 	'directoryweb-shape',
 	'directoryweb-dashboard',
+	'directoryweb-widget',
 	'directoryweb-rest',
 	'schema/schema-model', // canonical listing fields and listing types (pure)
 	'schema/integrations-model', // form provider adapter contract and field mapping (pure)
