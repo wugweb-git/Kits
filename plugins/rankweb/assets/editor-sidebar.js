@@ -144,6 +144,8 @@
 		const slug = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'slug' ) || '' );
 		const featuredId = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'featured_media' ) || 0 );
 		const featured = useSelect( ( select ) => ( featuredId ? select( 'core' ).getMedia( featuredId ) : null ), [ featuredId ] );
+		const categoryIds = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'categories' ) || [] );
+		const categories = useSelect( ( select ) => ( categoryIds.length > 1 ? select( 'core' ).getEntityRecords( 'taxonomy', 'category', { include: categoryIds, per_page: 100 } ) : null ), [ categoryIds.join( ',' ) ] );
 		const { editPost } = useDispatch( 'core/editor' );
 
 		const [ previewMode, setPreviewMode ] = useState( 'desktop' );
@@ -351,6 +353,18 @@
 							help: __( 'Used in Open Graph and Twitter tags. Leave empty for the description.', 'rankweb' ),
 							onChange: function( v ) {
 								editPost( { meta: Object.assign( {}, meta, { _rankweb_og_description: v } ) } );
+							}
+						}
+					),
+					data.postType === 'post' && categories && categories.length > 1 && el(
+						SelectControl,
+						{
+							label: __( 'Primary category', 'rankweb' ),
+							value: meta._rankweb_primary_category || '',
+							help: __( 'Used in the address and the breadcrumbs.', 'rankweb' ),
+							options: [ { label: __( 'Automatic', 'rankweb' ), value: '' } ].concat( categories.map( function( c ) { return { label: c.name, value: String( c.id ) }; } ) ),
+							onChange: function( v ) {
+								editPost( { meta: Object.assign( {}, meta, { _rankweb_primary_category: v } ) } );
 							}
 						}
 					),

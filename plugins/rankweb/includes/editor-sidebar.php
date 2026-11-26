@@ -243,6 +243,7 @@ function rankweb_robots_box( WP_Post $post ): void {
 	foreach ( array( 'canonical' => __( 'Canonical address (leave empty for the page itself)', 'rankweb' ), 'redirect' => __( 'Send visitors to (301 redirect)', 'rankweb' ), 'og_image' => __( 'Share image address', 'rankweb' ) ) as $field => $label ) {
 		echo '<p><label for="rankweb-' . esc_attr( $field ) . '">' . esc_html( $label ) . '</label><br /><input type="url" class="widefat" id="rankweb-' . esc_attr( $field ) . '" name="rankweb_robots[' . esc_attr( $field ) . ']" value="' . esc_attr( (string) get_post_meta( $id, RankWeb_Post_Overrides::KEYS[ $field ], true ) ) . '" /></p>';
 	}
+	do_action( 'rankweb_robots_box_after', $post );
 	echo '<p class="description" id="rankweb-max-snippet-help">' . esc_html__( 'Leave empty for no rule, -1 for no limit.', 'rankweb' ) . '</p>';
 }
 

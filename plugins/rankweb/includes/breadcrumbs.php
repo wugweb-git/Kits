@@ -78,7 +78,10 @@ function rankweb_seo_breadcrumb_trail() {
 		$type    = get_post_type( $id );
 		$obj     = get_post_type_object( $type );
 		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
-		$cat     = in_array( $type, array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
+		$cat     = function_exists( 'rankweb_primary_category' ) && 'post' === $type ? rankweb_primary_category( $id ) : null; // the editor's choice first
+		if ( ! $cat ) {
+			$cat = in_array( $type, array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
+		}
 		if ( $cat ) { // every item (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
 			$n       = function_exists( 'rankweb_seo_filtered_count' ) ? rankweb_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
 			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : rankweb_seo_term_url( $cat ) );
