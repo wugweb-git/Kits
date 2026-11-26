@@ -61,6 +61,7 @@ function rankweb_module_where(): array {
 		'llms'             => $general,
 		'breadcrumbs'      => $general,
 		'redirects'        => array( $rm( __( 'Rank Math → Redirections', 'rankweb' ), 'rank-math-redirections' ) ),
+		'speed'            => array( array( 'text' => __( 'RankWeb → Settings → Page speed', 'rankweb' ) ) ),
 		'transport'        => array( array( 'text' => __( 'RankWeb → Transport', 'rankweb' ) ) ),
 		'redirect-tools'   => array( $rm( __( 'Rank Math → Redirections', 'rankweb' ), 'rank-math-redirections' ) ),
 		'schema'           => array( array( 'text' => __( 'Each item’s Rank Math Schema tab (read-only for these types)', 'rankweb' ) ) ),

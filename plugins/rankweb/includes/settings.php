@@ -103,6 +103,17 @@ function rankweb_seo_modules(): array {
 				'AW_REDIRECT_HTACCESS' => array( 'type' => 'int', 'label' => 'Allow writing redirects to .htaccess (1 on, 0 off)', 'help' => 'Off by default. Apache or LiteSpeed only; a backup is written first. The download works whether this is on or off.', 'default' => 0 ),
 			),
 		),
+		'speed' => array(
+			'label'  => 'Page speed',
+			'switch' => true,
+			'files'  => array( 'speed' ),
+			'desc'   => 'Core Web Vitals helpers: defer chosen scripts, Google Fonts shown at once, WebP for new uploads. Nothing calls an outside service.',
+			'fields' => array(
+				'RANKWEB_DEFER_SCRIPTS' => array( 'type' => 'list', 'label' => 'Scripts to defer', 'help' => 'Script handles, one per line (a handle is in the script tag\'s id, without -js). A script that other scripts wait for may break: test the page after adding one.', 'default' => array() ),
+				'RANKWEB_FONT_SWAP'     => array( 'type' => 'int', 'label' => 'Google Fonts: show text at once (1 on, 0 off)', 'help' => 'Adds display=swap to Google Fonts addresses that have none, so text shows in a fallback font while the font loads.', 'default' => 1 ),
+				'RANKWEB_WEBP_UPLOADS'  => array( 'type' => 'int', 'label' => 'Save new JPEG and PNG uploads as WebP (1 on, 0 off)', 'help' => 'Only when the server can write WebP. Images already uploaded are not changed.', 'default' => 0 ),
+			),
+		),
 		'transport' => array(
 			'label'  => 'Transport',
 			'switch' => true,
@@ -415,7 +426,7 @@ function rankweb_seo_setting_tabs(): array {
 		),
 		'indexing'        => array(
 			'label'   => 'Indexing',
-			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'redirect-tools', 'health', 'video' ),
+			'modules' => array( 'canonical', 'robots', 'filtered', 'sitemap', 'redirects', 'redirect-tools', 'speed', 'health', 'video' ),
 		),
 		'schema'          => array(
 			'label'   => 'Schema and FAQ',

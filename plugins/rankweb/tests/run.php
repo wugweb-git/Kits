@@ -164,7 +164,7 @@ foreach ( rankweb_seo_modules() as $key => $mod ) {
 		rw_check( $back === $f['default'], "default round trip {$key}.{$const}" );
 	}
 }
-rw_check( 63 === $fields, "63 fields found ({$fields})" ); // 5 site tags (verification codes, crawlers kept out), 31, 7 Internal links, 3 audit, 6 anchor mix, 3 silos, 1 noindex-protected, 1 video (C), 1 custom schema (D), 1 bulk + 1 media (E), 1 redirect (F), 1 agent writes (H, 17 Nov), 1 per-item robots
+rw_check( 66 === $fields, "66 fields found ({$fields})" ); // 5 site tags (verification codes, crawlers kept out), 31, 7 Internal links, 3 audit, 6 anchor mix, 3 silos, 1 noindex-protected, 1 video (C), 1 custom schema (D), 1 bulk + 1 media (E), 1 redirect (F), 1 agent writes (H, 17 Nov), 1 per-item robots, 3 page speed
 
 $tabs = array_keys( array_filter( rankweb_seo_setting_tabs(), fn( $t ) => empty( $t['hidden'] ) ) );
 rw_check( 8 === count( $tabs ), 'eight groups (Internal links added 14 Nov 2026): ' . implode( ', ', $tabs ) );
