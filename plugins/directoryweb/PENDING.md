@@ -94,3 +94,11 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 - Default preset (`directoryweb-default`) and a CRM adapter: `claim-native.php` fires `directoryweb_claim_created` and `directoryweb_claim_transitioned`, but nothing consumes them.
 - District pages for helpline titles print no `kit-section-desc`, so an intro would not show (`directory.php:268-275`); confirm on the live site.
 - Not verifiable here: Fluent Forms Pro uploader, real mail delivery, SEOPress/AIOSEO coexistence, the old Claims address redirect.
+
+## Naming rule carried over from the retired naming policy (26 Nov 2026)
+
+- Code names are `directoryweb_*` / `DIRECTORYWEB_*`; never `aw_`, `dw_` or `aw-` in new code (WordPress.org wants four or more characters). Thin `aw_*` aliases for Kits Core, MailWeb, SourceWeb and InsightWeb live in `includes/legacy-aliases.php`; delete one when its last caller is updated.
+- Stored names are kept, with no migration in 1.x: the `aw_listing` and `aw_claim` post types and their URLs, `aw_*` listing meta (read through `directoryweb_meta_prefix()`), terms, options, the `_dw_claim_*` claim meta and Fluent Forms' `dw_evidence` meta.
+- A data-prefix migration is only documented, not built or scheduled: a `directoryweb_data_prefix` setting with dual reads, a dry-run command, batch copy with no deletes, verification, then a switch. It needs the owner's yes, a seeded-site Playground run before and after, and a stop-and-rerun test. Renaming a post type is a separate decision.
+- Guards: `plugins/directoryweb/tests/no-short-prefix-test.php`.
+
