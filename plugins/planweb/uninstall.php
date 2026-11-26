@@ -7,9 +7,12 @@
  * (planweb_delete_data_on_uninstall is true) does it delete PlanWeb's own data, exactly this:
  *
  * Options: planweb_on, planweb_setup, planweb_import_done, planweb_import_lock, planweb_import_result,
- *   planweb_import_tried, planweb_delete_data_on_uninstall.
+ *   planweb_import_tried, planweb_feed_key, planweb_site_types, planweb_site_on, the planweb_migrate_1114 pair, the scheduled jobs'
+ *   settings (planweb_jobs_overdue, planweb_jobs_repeats, planweb_reminders_on, planweb_reminder_days, planweb_digest_on,
+ *   planweb_digest_brand) and their dedupe lists (planweb_jobs_sent, planweb_digest_sent), planweb_delete_data_on_uninstall.
  * Transients (they expire anyway): planweb_counts and those starting planweb_draft_.
- * Scheduled events (all, whatever their arguments): planweb_counts_build.
+ * Scheduled events (all, whatever their arguments): planweb_counts_build, planweb_job_overdue, planweb_job_repeats,
+ *   planweb_job_reminders, planweb_job_digest (the scheduled jobs, jobs.php).
  * Tables: none of its own.
  *
  * Never deleted, even when ticked:
@@ -35,7 +38,7 @@ if ( true !== (bool) get_option( 'planweb_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
 }
 
-$planweb_options = array( 'planweb_on', 'planweb_setup', 'planweb_import_done', 'planweb_import_lock', 'planweb_import_result', 'planweb_import_tried', 'planweb_feed_key', 'planweb_site_types', 'planweb_site_on', 'planweb_migrate_1114', 'planweb_migrate_1114_lock' );
+$planweb_options = array( 'planweb_on', 'planweb_setup', 'planweb_import_done', 'planweb_import_lock', 'planweb_import_result', 'planweb_import_tried', 'planweb_feed_key', 'planweb_site_types', 'planweb_site_on', 'planweb_migrate_1114', 'planweb_migrate_1114_lock', 'planweb_jobs_overdue', 'planweb_jobs_repeats', 'planweb_reminders_on', 'planweb_reminder_days', 'planweb_digest_on', 'planweb_digest_brand', 'planweb_jobs_sent', 'planweb_digest_sent' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! planweb_uninstall_backup( 'planweb', __DIR__ . '/planweb.php', array_merge( $planweb_options, array( 'planweb_delete_data_on_uninstall' ) ), array(), array() ) ) {
@@ -53,5 +56,8 @@ foreach ( array( '_transient_planweb_draft_', '_transient_timeout_planweb_draft_
 }
 
 wp_unschedule_hook( 'planweb_counts_build' );
+foreach ( array( 'planweb_job_overdue', 'planweb_job_repeats', 'planweb_job_reminders', 'planweb_job_digest' ) as $planweb_hook ) {
+	wp_unschedule_hook( $planweb_hook );
+}
 
 delete_option( 'planweb_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

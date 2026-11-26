@@ -150,6 +150,7 @@ function planweb_screen() {
 	$messages = array(
 		'saved'  => __( 'Entry saved.', 'planweb' ),
 		'import' => __( 'Import run.', 'planweb' ),
+		'jobs'   => __( 'Scheduled jobs saved.', 'planweb' ),
 	);
 	if ( isset( $messages[ $done ] ) ) {
 		wp_admin_notice(
@@ -169,7 +170,7 @@ function planweb_screen() {
 			)
 		);
 	}
-	echo '<p class="description">' . esc_html__( 'Nothing on this calendar is posted or sent: it is the team\'s plan. Approved and Sent are set by an administrator.', 'planweb' ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Nothing on this calendar is posted to any social network: it is the team\'s plan. Approved and Sent are set by an administrator.', 'planweb' ) . '</p>';
 
 	planweb_calendar_filter_form( $month, $week, $f );
 	if ( '' !== $week ) {
@@ -190,6 +191,7 @@ function planweb_screen() {
 	planweb_form( $edit, $month );
 	if ( current_user_can( 'manage_options' ) ) {
 		planweb_import_panel();
+		planweb_jobs_panel();
 	}
 	echo '</div>';
 }
@@ -384,6 +386,7 @@ function planweb_form( $e, string $month ) {
 		'owner'    => '',
 		'status'   => 'idea',
 		'link'     => '',
+		'repeat'   => 'none',
 	);
 	$off = array( 'due' );
 	if ( ! current_user_can( 'planweb_approve' ) ) {
@@ -401,6 +404,7 @@ function planweb_form( $e, string $month ) {
 		'channel' => array( __( 'Channels', 'planweb' ), planweb_channel_boxes( (array) ( $e['channels'] ?? array( $e['channel'] ) ) ) ),
 		'owner'   => array( __( 'Owner', 'planweb' ), planweb_select( 'owner', PLANWEB_OWNERS, $e['owner'], __( '—', 'planweb' ) ) ),
 		'status'  => array( __( 'Status', 'planweb' ), planweb_select( 'status', PLANWEB_STATUSES, $e['status'], '', $off ) ),
+		'repeat'  => array( __( 'Repeat', 'planweb' ), planweb_select( 'repeat', planweb_repeat_labels(), (string) ( $e['repeat'] ?? 'none' ) ) . '<p class="description">' . esc_html__( 'Once the date has passed, PlanWeb makes the next one, a week or a month later, if "Repeats" is switched on under Scheduled jobs in Settings. It is made once and the old entry is left as it is.', 'planweb' ) . '</p>' ),
 		'link'    => array( __( 'Link', 'planweb' ), '<input type="url" name="link" id="planweb-link" class="regular-text" value="' . esc_attr( $e['link'] ) . '"><p class="description">' . esc_html__( 'A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Bluesky, Reddit or WhatsApp channel address.', 'planweb' ) . '</p>' ),
 	);
 	foreach ( $rows as $k => $r ) {
@@ -432,6 +436,9 @@ function planweb_clean_form( array $raw ): array {
 	// Channels: a list (several allowed); a request that sends only channel keeps working.
 	$f['channels'] = array_map( 'sanitize_key', planweb_channel_list( array_key_exists( 'channels', $raw ) ? $raw['channels'] : ( $raw['channel'] ?? '' ) ) );
 	$f['channel']  = $f['channels'][0] ?? '';
+	if ( array_key_exists( 'repeat', $raw ) ) {
+		$f['repeat'] = is_scalar( $raw['repeat'] ) ? sanitize_key( (string) $raw['repeat'] ) : ''; // planweb_check_fields() refuses an unknown one.
+	}
 	$f['link']     = esc_url_raw( is_scalar( $raw['link'] ?? '' ) ? (string) ( $raw['link'] ?? '' ) : '' );
 	$f['note']     = sanitize_textarea_field( is_scalar( $raw['note'] ?? '' ) ? (string) ( $raw['note'] ?? '' ) : '' );
 	return $f;

@@ -56,6 +56,13 @@ const PLANWEB_STATUSES = array(
 	'done'     => 'Done',
 );
 
+/** Repeat rules: slug => label. none is the default; the repeat job (jobs.php) makes the next entry once the date has passed. */
+const PLANWEB_REPEATS = array(
+	'none'    => 'Does not repeat',
+	'weekly'  => 'Every week',
+	'monthly' => 'Every month',
+);
+
 /** Statuses only administrators may set (capability planweb_approve): the owner's yes. */
 const PLANWEB_APPROVE_STATUSES = array( 'approved', 'sent' );
 

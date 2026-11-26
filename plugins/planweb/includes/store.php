@@ -90,8 +90,8 @@ add_action(
 				'description' => 'Link: this site or a social URL (checked on save).',
 			),
 			'planweb_repeat'       => array(
-				'description' => 'Repeat (used by the scheduler).',
-				'enum'        => array( 'none', 'weekly', 'monthly', 'yearly' ),
+				'description' => 'Repeat: none, weekly or monthly (the repeat job, jobs.php, makes the next entry once the date has passed).',
+				'enum'        => array_keys( PLANWEB_REPEATS ),
 				'default'     => 'none',
 			),
 			'planweb_repeat_until' => array(
@@ -116,7 +116,7 @@ add_action(
 			register_post_meta( PLANWEB_TYPE, $key, $args );
 		}
 		// Set by the scheduler (phase 3) and the import only: readable over REST, never writable there.
-		foreach ( array( 'planweb_flag', 'planweb_source', 'planweb_source_key' ) as $key ) {
+		foreach ( array( 'planweb_flag', 'planweb_repeated_to', 'planweb_source', 'planweb_source_key' ) as $key ) {
 			register_post_meta(
 				PLANWEB_TYPE,
 				$key,
@@ -125,7 +125,7 @@ add_action(
 					'single'        => true,
 					'default'       => '',
 					'auth_callback' => '__return_false',
-					'show_in_rest'  => 'planweb_flag' === $key,
+					'show_in_rest'  => in_array( $key, array( 'planweb_flag', 'planweb_repeated_to' ), true ),
 				)
 			);
 		}
@@ -166,6 +166,9 @@ function planweb_check_fields( array $f, int $post_id = 0, bool $people = true )
 		if ( 'due' === $status && 'due' !== $was ) {
 			return new WP_Error( 'planweb_due', __( 'Due is set by the scheduler on the day; pick Approved.', 'planweb' ), array( 'status' => 400 ) );
 		}
+	}
+	if ( array_key_exists( 'repeat', $f ) && null === planweb_repeat_clean( $f['repeat'] ) ) {
+		return new WP_Error( 'planweb_repeat', __( 'Pick how it repeats: not at all, every week or every month.', 'planweb' ), array( 'status' => 400 ) );
 	}
 	if ( array_key_exists( 'link', $f ) ) {
 		$why = planweb_link_problem( (string) $f['link'], (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
@@ -218,6 +221,7 @@ add_filter(
 			'planweb_time'   => 'time',
 			'planweb_status' => 'status',
 			'planweb_link'   => 'link',
+			'planweb_repeat' => 'repeat',
 		);
 		foreach ( $map as $key => $name ) {
 			if ( array_key_exists( $key, $meta ) ) {
@@ -308,7 +312,8 @@ add_filter(
  *
  * @param WP_Post|int $post Entry.
  * @return array{id: int, date: string, time: string, title: string, note: string, type: string, channel: string,
- *               channels: string[], owner: string, status: string, link: string, flag: string, modified: string}|null
+ *               channels: string[], owner: string, status: string, link: string, flag: string, repeat: string,
+ *               repeat_until: string, repeated_to: string, modified: string}|null
  *               modified is post_modified_gmt (Y-m-d H:i:s). channel is the
  *               first of channels (an entry may have several, 14 Nov 2026).
  */
@@ -327,19 +332,22 @@ function planweb_entry( $post ) {
 	// The list's order, not the database's, so "X, LinkedIn" reads the same everywhere.
 	$channels = array_merge( array_values( array_intersect( array_keys( PLANWEB_CHANNELS ), $channels ) ), array_values( array_diff( $channels, array_keys( PLANWEB_CHANNELS ) ) ) );
 	return array(
-		'id'       => (int) $post->ID,
-		'date'     => (string) get_post_meta( $post->ID, 'planweb_date', true ),
-		'time'     => (string) get_post_meta( $post->ID, 'planweb_time', true ),
-		'title'    => (string) $post->post_title,
-		'note'     => (string) $post->post_content,
-		'type'     => $term( 'planweb_type' ),
-		'channel'  => $channels[0] ?? '',
-		'channels' => $channels,
-		'owner'    => $term( 'planweb_owner' ),
-		'status'   => '' === $status ? 'idea' : $status,
-		'link'     => (string) get_post_meta( $post->ID, 'planweb_link', true ),
-		'flag'     => (string) get_post_meta( $post->ID, 'planweb_flag', true ),
-		'modified' => (string) $post->post_modified_gmt,
+		'id'           => (int) $post->ID,
+		'date'         => (string) get_post_meta( $post->ID, 'planweb_date', true ),
+		'time'         => (string) get_post_meta( $post->ID, 'planweb_time', true ),
+		'title'        => (string) $post->post_title,
+		'note'         => (string) $post->post_content,
+		'type'         => $term( 'planweb_type' ),
+		'channel'      => $channels[0] ?? '',
+		'channels'     => $channels,
+		'owner'        => $term( 'planweb_owner' ),
+		'status'       => '' === $status ? 'idea' : $status,
+		'link'         => (string) get_post_meta( $post->ID, 'planweb_link', true ),
+		'flag'         => (string) get_post_meta( $post->ID, 'planweb_flag', true ),
+		'repeat'       => planweb_repeat_clean( (string) get_post_meta( $post->ID, 'planweb_repeat', true ) ) ?? 'none',
+		'repeat_until' => (string) get_post_meta( $post->ID, 'planweb_repeat_until', true ),
+		'repeated_to'  => (string) get_post_meta( $post->ID, 'planweb_repeated_to', true ),
+		'modified'     => (string) $post->post_modified_gmt,
 	);
 }
 
@@ -410,8 +418,10 @@ function planweb_next() {
 /**
  * Save an entry from the screen's form (the REST API saves through core). Checks first.
  *
- * @param array $f      Fields: title, note, date, time, type, channels (or channel), owner, status, link. channels is
- *                      a list of slugs (several allowed); without it, channel is one slug.
+ * @param array $f      Fields: title, note, date, time, type, channels (or channel), owner, status, link, repeat
+ *                      (none, weekly or monthly; left as it is when missing), repeat_until (Y-m-d or '', only when
+ *                      sent) and author (user ID, new entries only). channels is a list of slugs (several allowed);
+ *                      without it, channel is one slug.
  * @param int   $id     Entry to update (0 for new).
  * @param bool  $people Run the personal-data check.
  * @return int|WP_Error Entry ID.
@@ -438,6 +448,8 @@ function planweb_save_entry( array $f, int $id = 0, bool $people = true ) {
 	);
 	if ( $id ) {
 		$post['ID'] = $id;
+	} elseif ( ! empty( $f['author'] ) ) {
+		$post['post_author'] = (int) $f['author']; // The repeat job gives the next entry the same owner.
 	}
 	$id = $id ? wp_update_post( wp_slash( $post ), true ) : wp_insert_post( wp_slash( $post ), true );
 	if ( is_wp_error( $id ) ) {
@@ -447,6 +459,15 @@ function planweb_save_entry( array $f, int $id = 0, bool $people = true ) {
 	update_post_meta( $id, 'planweb_time', (string) ( $f['time'] ?? '' ) );
 	update_post_meta( $id, 'planweb_status', (string) ( $f['status'] ?? 'idea' ) );
 	update_post_meta( $id, 'planweb_link', esc_url_raw( (string) ( $f['link'] ?? '' ) ) );
+	if ( array_key_exists( 'repeat', $f ) ) {
+		update_post_meta( $id, 'planweb_repeat', planweb_repeat_clean( $f['repeat'] ) ?? 'none' );
+	}
+	if ( array_key_exists( 'repeat_until', $f ) ) {
+		update_post_meta( $id, 'planweb_repeat_until', planweb_is_date( $f['repeat_until'] ) ? (string) $f['repeat_until'] : '' );
+	}
+	if ( 'overdue' === (string) get_post_meta( $id, 'planweb_flag', true ) ) {
+		delete_post_meta( $id, 'planweb_flag' ); // Edited: the next sweep flags it again if it is still overdue.
+	}
 	foreach ( array(
 		'planweb_type'  => 'type',
 		'planweb_owner' => 'owner',

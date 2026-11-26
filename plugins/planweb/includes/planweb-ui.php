@@ -146,5 +146,8 @@ function planweb_ui_page(): bool {
 		'settings'  => __( 'PlanWeb settings', 'planweb' ),
 	);
 	kits_shell_mount( 'planweb-app', $titles[ $screen ] );
+	if ( 'settings' === $screen ) {
+		planweb_jobs_panel( true ); // The scheduled jobs' settings, server-rendered under the shell's groups.
+	}
 	return true;
 }

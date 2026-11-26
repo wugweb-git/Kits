@@ -265,7 +265,8 @@ if ( function_exists( 'add_action' ) ) {
 			$date    = isset( $_POST['date'] ) ? sanitize_text_field( wp_unslash( $_POST['date'] ) ) : '';
 			$time    = isset( $_POST['time'] ) ? sanitize_text_field( wp_unslash( $_POST['time'] ) ) : '';
 
-			if ( $post_id <= 0 || ! current_user_can( 'edit_post', $post_id ) ) {
+			// Only a PlanWeb entry can be moved: without this a user could write a date onto any post they can edit.
+			if ( $post_id <= 0 || PLANWEB_TYPE !== get_post_type( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
 				wp_send_json_error( array( 'message' => __( 'Permission denied.', 'planweb' ) ), 403 );
 			}
 			if ( ! planweb_is_date( $date ) || ! planweb_is_time( $time ) ) {

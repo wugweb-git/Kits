@@ -16,6 +16,8 @@
  *   GET  services                  manage_options        the services the plan names, with their state
  *   POST settings/feed             manage_options        the calendar feed's key: action new (make a new key; the old
  *                                                        address stops working) or off (no key: no feed)
+ *   POST settings/jobs             manage_options        the scheduled jobs' switches, the reminder days and the digest's
+ *                                                        first line (jobs.php); each only when sent, a bad value is refused
  *   POST settings/site             manage_options        the site schedule's switch and which parts of it show (site-schedule.php)
  *   GET  calendar.ics?key=…        the feed key          the read-only calendar feed (feed.php); no sign-in
  *
@@ -97,6 +99,10 @@ add_action(
 			'owner'    => $text(),
 			'status'   => $text(),
 			'link'     => $text(),
+			'repeat'   => array(
+				'type' => 'string',
+				'enum' => array_keys( PLANWEB_REPEATS ),
+			),
 		);
 		$routes = array(
 			'/dashboard'                 => array( 'GET', 'edit_planweb_entries', 'planweb_rest_dashboard', array() ),
@@ -116,6 +122,19 @@ add_action(
 						'type'    => 'boolean',
 						'default' => false,
 					),
+				),
+			),
+			'/settings/jobs'             => array(
+				'POST',
+				'manage_options',
+				'planweb_rest_jobs',
+				array(
+					'overdue'   => array( 'type' => 'boolean' ),
+					'repeats'   => array( 'type' => 'boolean' ),
+					'reminders' => array( 'type' => 'boolean' ),
+					'days'      => array( 'type' => 'integer' ),
+					'digest'    => array( 'type' => 'boolean' ),
+					'brand'     => array( 'type' => 'string' ),
 				),
 			),
 			'/import'                    => array( 'POST', 'manage_options', 'planweb_rest_import', array() ),
@@ -658,6 +677,7 @@ function planweb_settings_payload(): array {
 		'import' => planweb_import_payload(),
 		'feed'   => planweb_feed_payload(),
 		'site'   => planweb_site_payload(),
+		'jobs'   => planweb_jobs_settings(),
 	);
 }
 

@@ -10,8 +10,8 @@
  * @wordpress-plugin
  * Plugin Name:       PlanWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/planweb/
- * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Nothing is posted or sent from it.
- * Version:           0.2.1
+ * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Posts nothing to social networks; emails site users only if you switch reminders or the digest on.
+ * Version:           0.3.0
  * Update URI:           https://wugweb.com/plugins/planweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -50,7 +50,7 @@ if ( defined( 'PLANWEB_VERSION' ) ) {
 	return; // Loaded already.
 }
 
-define( 'PLANWEB_VERSION', '0.2.1' );
+define( 'PLANWEB_VERSION', '0.3.0' );
 define( 'PLANWEB_FILE', __FILE__ );
 define( 'PLANWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PLANWEB_URL', plugin_dir_url( __FILE__ ) );
@@ -68,6 +68,8 @@ require_once PLANWEB_DIR . 'includes/dashboard.php';
 require_once PLANWEB_DIR . 'includes/kits-hub.php';
 require_once PLANWEB_DIR . 'includes/planweb-dashboard.php';
 require_once PLANWEB_DIR . 'includes/planweb-rest.php';
+require_once PLANWEB_DIR . 'includes/jobs-model.php';
+require_once PLANWEB_DIR . 'includes/jobs.php';
 require_once PLANWEB_DIR . 'includes/site-schedule.php';
 require_once PLANWEB_DIR . 'includes/feed-model.php';
 require_once PLANWEB_DIR . 'includes/feed.php';

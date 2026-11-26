@@ -4,21 +4,22 @@ Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.1
+Stable tag: 0.3.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A team calendar inside WordPress: content, social, email and campaign dates with an owner, channels and a status. Nothing posts or sends.
+A team calendar inside WordPress: content, social, email and campaign dates. Posts nothing; emails only site users, and only if switched on.
 
 == Description ==
 
-PlanWeb keeps the team's dates and plans: content, social, email, campaign and reminder entries, each with one or more channels, an owner and a status (idea, draft, approved, due, sent, done). Nothing in it posts, schedules out or sends anything.
+PlanWeb keeps the team's dates and plans: content, social, email, campaign and reminder entries, each with one or more channels, an owner and a status (idea, draft, approved, due, sent, done). PlanWeb posts nothing to any social network and schedules nothing out. It sends email only through this site's own wp_mail(), only when you switch a reminder or the weekly digest on in PlanWeb Settings, and only to people with an account on this site: never to an outside address.
 
 * PlanWeb → Calendar: a month grid, a list with filters, and a form to add or edit an entry.
 * A Dashboard box with the next 7 days.
 * Entries are a private post type in the REST API (`/wp/v2/planweb-entries`), readable only by people who work with them.
 * Links may point only to this site or to social sites; titles and notes may hold no email address or phone number.
 * Only administrators set Approved or Sent. Done closes an entry that was finished but never sent: it is not overdue and not counted as sent.
+* Scheduled jobs, each off until you switch it on in PlanWeb Settings: an overdue sweep, repeating entries (every week or month), email reminders to the entry's owner, and a weekly digest to the site administrator.
 * A read-only calendar feed (iCalendar) for Google Calendar, Apple Calendar or Outlook, at `/wp-json/planweb/v1/calendar.ics?key=…`. The key is made in PlanWeb → Settings → Calendar feed; there are filters by type (`type=marketing`) and status (`status=open`). The feed holds date, time, title, type, channels, status and link, never the note.
 
 On a site with the earlier Dates list (option `aw_team_dates`), switching PlanWeb on copies every date once and leaves the list unchanged. `wp planweb verify` compares the two one for one.
@@ -39,7 +40,11 @@ On activation PlanWeb registers the private `planweb_entry` post type and grants
 
 = Does PlanWeb post or send anything? =
 
-No. PlanWeb only plans and holds entries. It never publishes posts, schedules anything out, or sends email.
+It posts nothing to any social network and never publishes or schedules a post. It does send email in two cases, and both are off until you switch them on in PlanWeb → Settings → Scheduled jobs: a daily reminder to a site user about their entries that are due soon and not finished, and a weekly digest (the next 7 days and what is overdue) to the site administrator address. The emails go only to people with an account on this site, through this site's own email (wp_mail), never to an outside address. A site can stop any of them with the planweb_job_email filter.
+
+= What are the scheduled jobs? =
+
+Four small jobs on WP-Cron, all off by default. The overdue sweep marks open entries whose date has passed. Repeats makes one next entry (a week or a month later) for an entry set to repeat, once its date has passed, and never repeats the same entry twice. Reminders emails each site user their entries due within 1 to 14 days (you choose). The weekly digest emails the administrator address on Monday morning, with an optional first line of your own. No job changes an entry's date or deletes anything. Deleting the plugin with "Delete this plugin's data" ticked stops and removes them.
 
 = Does it need another plugin? =
 
@@ -60,6 +65,14 @@ PlanWeb does not connect to, call, or send any data to an external service, and 
 The iCalendar feed it serves is read by your own calendar app (Google, Apple or Outlook) pulling from this site; the plugin itself never contacts those apps. Any social tools named elsewhere in PlanWeb (for example Meta Business Suite or Buffer) are used by the team outside the plugin — nothing is sent to them from PlanWeb.
 
 == Changelog ==
+
+= 0.3.0 =
+
+* Four scheduled jobs on WP-Cron, all off until you switch them on in PlanWeb Settings: an overdue sweep (marks open entries whose date has passed; dates are never changed and nothing is deleted), repeats (an entry can repeat every week or month; once its date has passed PlanWeb makes one next entry and never repeats the same one twice), email reminders (one plain-text email a day to the site user who owns an entry that is due in the next 1 to 14 days and not finished) and a weekly digest (the next 7 days and what is overdue, to the site administrator address on Monday morning).
+* New Repeat field on an entry, in the Calendar form and in the REST API.
+* Email goes only to site users, through this site's own wp_mail(), only when you switch a reminder or the digest on. PlanWeb posts nothing to any social network and makes no outside connection.
+* Filters: planweb_job_email (return false to stop any email) and planweb_repeat_entry (return false to skip an entry).
+* Delete data now also removes the jobs' settings and schedules.
 
 = 0.2.1 =
 

@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
 require dirname( __DIR__ ) . '/includes/model.php';
 require dirname( __DIR__ ) . '/includes/feed-model.php';
+require_once dirname( __DIR__ ) . '/includes/ui-model.php';
+require_once dirname( __DIR__ ) . '/includes/jobs-model.php'; // its functions run after the translation stand-ins below
 
 $fails = 0;
 $count = 0;
@@ -152,7 +154,7 @@ check( 1 === $cmp['differs'] && 1 === $cmp['missing'] && 1 === $cmp['extra'] && 
 
 // The new screens (includes/ui-model.php): the counts, the tiles, the list's arguments, the switch. WordPress's
 // translation and number functions are stood in for.
-require dirname( __DIR__ ) . '/includes/ui-model.php';
+require_once dirname( __DIR__ ) . '/includes/ui-model.php';
 if ( ! function_exists( '__' ) ) {
 	/**
 	 * Stand-in.
@@ -541,6 +543,127 @@ check( 7 === count( $wk['days'] ) && 1 === count( $wk['days'][0]['entries'] ), '
 $tl = planweb_campaign_timeline_data( $cal_entries );
 check( 8 === $tl['span_days'] && 0.0 === $tl['bars'][0]['left_pct'] && 75.0 === $tl['bars'][0]['width_pct'], 'campaign timeline: percentage bars computed without Gantt lib' );
 check( false !== strpos( planweb_render_campaign_timeline( $cal_entries ), 'planweb-timeline-bar' ), 'campaign timeline: renders HTML bar markup' );
+
+// Scheduled jobs (includes/jobs-model.php).
+// Cleaners reject bad input.
+check( 1 === planweb_jobs_clean_flag( '1' ) && 1 === planweb_jobs_clean_flag( true ) && 0 === planweb_jobs_clean_flag( '0' ) && 0 === planweb_jobs_clean_flag( '' ), 'jobs: switches read 1 and 0' );
+check( null === planweb_jobs_clean_flag( 'maybe' ) && null === planweb_jobs_clean_flag( array( 1 ) ) && null === planweb_jobs_clean_flag( 2 ), 'jobs: a switch refuses anything else' );
+check( 1 === planweb_jobs_clean_days( 1 ) && 14 === planweb_jobs_clean_days( '14' ) && 7 === planweb_jobs_clean_days( ' 7 ' ), 'jobs: reminder days 1 to 14 are taken' );
+check( null === planweb_jobs_clean_days( 0 ) && null === planweb_jobs_clean_days( '15' ) && null === planweb_jobs_clean_days( '-1' ) && null === planweb_jobs_clean_days( 'abc' ) && null === planweb_jobs_clean_days( '2.5' ) && null === planweb_jobs_clean_days( 3.0 ) && null === planweb_jobs_clean_days( array() ), 'jobs: reminder days refuse 0, 15, negatives, words and fractions' );
+check( 'Acme Studio' === planweb_jobs_clean_brand( '  <b>Acme</b>   Studio ' ) && '' === planweb_jobs_clean_brand( '' ) && '' === planweb_jobs_clean_brand( null ), 'jobs: the digest line is plain text on one line' );
+check( null === planweb_jobs_clean_brand( str_repeat( 'a', 121 ) ) && null === planweb_jobs_clean_brand( array( 'x' ) ) && null === planweb_jobs_clean_brand( 12 ), 'jobs: the digest line refuses too long and not text' );
+check( 'none' === planweb_repeat_clean( '' ) && 'weekly' === planweb_repeat_clean( 'weekly' ) && 'monthly' === planweb_repeat_clean( 'monthly' ), 'repeat: none, weekly, monthly' );
+check( null === planweb_repeat_clean( 'yearly' ) && null === planweb_repeat_clean( 'daily' ) && null === planweb_repeat_clean( array() ), 'repeat: refuses anything else' );
+
+// Overdue: today is not overdue, closed entries are not, nothing is changed but the flag.
+$od = array(
+	array( 'id' => 1, 'date' => '2026-11-25', 'status' => 'draft', 'flag' => '' ),
+	array( 'id' => 2, 'date' => '2026-11-26', 'status' => 'draft', 'flag' => '' ),
+	array( 'id' => 3, 'date' => '2026-11-20', 'status' => 'sent', 'flag' => '' ),
+	array( 'id' => 4, 'date' => '2026-11-20', 'status' => 'done', 'flag' => 'overdue' ),
+	array( 'id' => 5, 'date' => '2026-11-10', 'status' => 'idea', 'flag' => 'overdue' ),
+	array( 'id' => 6, 'date' => '2026-11-27', 'status' => 'approved', 'flag' => 'overdue' ),
+	array( 'id' => 7, 'date' => '', 'status' => 'idea', 'flag' => '' ),
+	array( 'id' => 8, 'date' => '2026-11-01', 'status' => 'due', 'flag' => '' ),
+);
+$op = planweb_overdue_plan( $od, '2026-11-26' );
+check( array( 1, 8 ) === $op['set'], 'overdue: past and open is flagged; today, future, closed and dateless are not' );
+check( array( 4, 6 ) === $op['clear'], 'overdue: a flag on a finished or future entry is let go; a still overdue one stays' );
+check( ! planweb_is_overdue( array( 'date' => '2026-11-20', 'status' => 'done', 'flag' => 'overdue' ), '2026-11-26' ) && planweb_is_overdue( array( 'date' => '2026-11-20', 'status' => 'idea', 'flag' => '' ), '2026-11-26' ), 'overdue: a stale flag does not make a done entry overdue' );
+$cnt = planweb_count_entries( $od, '2026-11-26' );
+check( 4 === $cnt['overdue']['total'] && '2026-11-01' === $cnt['overdue']['oldest'], 'overdue: the Dashboard count uses the same rule' );
+
+// Repeats.
+check( '2027-02-28' === planweb_repeat_next( '2027-01-31', 'monthly' ), 'repeat: 31 Jan becomes 28 Feb (not a leap year)' );
+check( '2028-02-29' === planweb_repeat_next( '2028-01-31', 'monthly' ), 'repeat: 31 Jan becomes 29 Feb in a leap year' );
+check( '2026-12-30' === planweb_repeat_next( '2026-11-30', 'monthly' ) && '2027-01-15' === planweb_repeat_next( '2026-12-15', 'monthly' ), 'repeat: monthly keeps the day and crosses a year end' );
+check( '2026-12-03' === planweb_repeat_next( '2026-11-26', 'weekly' ) && '2027-01-01' === planweb_repeat_next( '2026-12-25', 'weekly' ), 'repeat: weekly adds 7 days' );
+check( '2027-03-31' === planweb_repeat_next( '2027-01-31', 'monthly', '2027-03-01' ), 'repeat: a long-past monthly entry returns to its own day, the 31st' );
+check( '' === planweb_repeat_next( '2026-02-30', 'weekly' ) && '' === planweb_repeat_next( '2026-11-26', 'none' ), 'repeat: a bad date or rule gives nothing' );
+$rp = array(
+	array( 'id' => 1, 'date' => '2026-11-25', 'time' => '09:30', 'title' => 'Weekly post', 'type' => 'social', 'channels' => array( 'x', 'linkedin' ), 'owner' => 'team', 'status' => 'sent', 'repeat' => 'weekly', 'repeat_until' => '', 'repeated_to' => '' ),
+	array( 'id' => 2, 'date' => '2026-11-25', 'title' => 'Done already', 'repeat' => 'weekly', 'repeated_to' => '77' ),
+	array( 'id' => 3, 'date' => '2026-11-26', 'title' => 'Today', 'repeat' => 'weekly', 'repeated_to' => '' ),
+	array( 'id' => 4, 'date' => '2026-11-20', 'title' => 'Never', 'repeat' => 'none', 'repeated_to' => '' ),
+	array( 'id' => 5, 'date' => '2026-11-20', 'title' => 'Ends', 'repeat' => 'weekly', 'repeat_until' => '2026-11-25', 'repeated_to' => '' ),
+	array( 'id' => 6, 'date' => '2026-10-31', 'title' => 'Month end', 'repeat' => 'monthly', 'repeated_to' => '' ),
+);
+$pl = planweb_repeat_plan( $rp, '2026-11-26' );
+check( array( 1, 6 ) === array_map( fn( $p ) => $p['source']['id'], $pl ), 'repeat: only past entries that repeat, have not repeated and are not past their end' );
+check( '2026-12-02' === $pl[0]['fields']['date'] && 'idea' === $pl[0]['fields']['status'] && 'Weekly post' === $pl[0]['fields']['title'] && 'social' === $pl[0]['fields']['type'] && array( 'x', 'linkedin' ) === $pl[0]['fields']['channels'] && 'team' === $pl[0]['fields']['owner'] && 'weekly' === $pl[0]['fields']['repeat'], 'repeat: the new entry keeps title, type, channels, owner and rule, resets status, moves the date' );
+check( '2026-11-30' === $pl[1]['fields']['date'], 'repeat: monthly from 31 Oct, a month on is 30 Nov' );
+$again = array_map( fn( $e ) => 1 === $e['id'] ? $e + array() : $e, $rp );
+$again[0]['repeated_to'] = '90';
+check( array( 6 ) === array_map( fn( $p ) => $p['source']['id'], planweb_repeat_plan( $again, '2026-11-26' ) ), 'repeat: once marked repeated_to, an entry is never planned again (idempotent)' );
+
+// Reminders: grouping per user, window, dedupe, no outside addresses.
+$users = array(
+	10 => array( 'email' => 'ann@example.org', 'name' => 'Ann' ),
+	11 => array( 'email' => 'not-an-address', 'name' => 'Bad' ),
+	12 => array( 'email' => 'raj@example.org', 'name' => 'Raj' ),
+);
+$re = array(
+	array( 'id' => 1, 'date' => '2026-11-27', 'time' => '', 'title' => 'B entry', 'status' => 'draft', 'author' => 10 ),
+	array( 'id' => 2, 'date' => '2026-11-26', 'time' => '10:00', 'title' => 'A entry', 'status' => 'approved', 'author' => 10 ),
+	array( 'id' => 3, 'date' => '2026-11-27', 'time' => '', 'title' => 'Raj', 'status' => 'idea', 'author' => 12 ),
+	array( 'id' => 4, 'date' => '2026-11-27', 'time' => '', 'title' => 'Finished', 'status' => 'done', 'author' => 10 ),
+	array( 'id' => 5, 'date' => '2026-11-29', 'time' => '', 'title' => 'Too far', 'status' => 'draft', 'author' => 10 ),
+	array( 'id' => 6, 'date' => '2026-11-27', 'time' => '', 'title' => 'Bad email owner', 'status' => 'draft', 'author' => 11 ),
+	array( 'id' => 7, 'date' => '2026-11-27', 'time' => '', 'title' => 'No owner', 'status' => 'draft', 'author' => 0 ),
+	array( 'id' => 8, 'date' => '2026-11-27', 'time' => '', 'title' => 'Unknown user', 'status' => 'draft', 'author' => 99 ),
+	array( 'id' => 9, 'date' => '2026-11-25', 'time' => '', 'title' => 'Yesterday', 'status' => 'draft', 'author' => 10 ),
+);
+$gr = planweb_reminder_groups( $re, '2026-11-26', 1, $users, array() );
+check( 2 === count( $gr ) && 10 === $gr[0]['user'] && 12 === $gr[1]['user'], 'reminders: one group per user, nobody without a valid user or address' );
+check( array( 2, 1 ) === array_column( $gr[0]['entries'], 'id' ) && array( '1|2026-11-27', '2|2026-11-26' ) === $gr[0]['keys'], 'reminders: a user\'s entries by date, only open ones inside the window' );
+$gr7 = planweb_reminder_groups( $re, '2026-11-26', 3, $users, array() );
+check( in_array( 5, array_column( $gr7[0]['entries'], 'id' ), true ), 'reminders: a wider window takes in later entries' );
+$gd = planweb_reminder_groups( $re, '2026-11-26', 1, $users, array( '1|2026-11-27' => '2026-11-26', '2|2026-11-26' => '2026-11-26' ) );
+check( 1 === count( $gd ) && 12 === $gd[0]['user'], 'reminders: entries already mailed (entry and date) are left out' );
+$gd2 = planweb_reminder_groups( array( array( 'id' => 1, 'date' => '2026-11-28', 'time' => '', 'title' => 'Moved', 'status' => 'draft', 'author' => 10 ) ), '2026-11-27', 1, $users, array( '1|2026-11-27' => '2026-11-26' ) );
+check( 1 === count( $gd2 ), 'reminders: the same entry on a new date is mailed again' );
+$mail = planweb_reminder_build( $gr[0], 'My Site', 'https://example.org/wp-admin/admin.php?page=planweb', 1, '2026-11-26' );
+check( 'ann@example.org' === $mail['to'] && 'reminder' === $mail['kind'] && false !== strpos( $mail['body'], '- today 10:00: A entry (Approved)' ) && false !== strpos( $mail['body'], '- 27 Nov 2026: B entry (Draft)' ) && false !== strpos( $mail['body'], 'Hello Ann,' ) && $mail['body'] === strip_tags( $mail['body'] ), 'reminders: the email is plain text with one line per entry' );
+check( false !== strpos( $mail['subject'], 'My Site' ) && false !== strpos( $mail['subject'], '2' ), 'reminders: the subject names the site and the count' );
+$pruned = planweb_jobs_sent_prune( array( '1|2026-11-27' => 'x', '2|2026-09-01' => 'x', 'junk' => 'x' ), '2026-11-26' );
+check( array( '1|2026-11-27' ) === array_keys( $pruned ), 'dedupe: old keys are dropped' );
+
+// Digest.
+$dg = array(
+	array( 'id' => 1, 'date' => '2026-11-28', 'time' => '09:00', 'title' => 'Launch', 'status' => 'approved', 'flag' => '' ),
+	array( 'id' => 2, 'date' => '2026-12-02', 'time' => '', 'title' => 'Day seven', 'status' => 'draft', 'flag' => '' ),
+	array( 'id' => 3, 'date' => '2026-12-03', 'time' => '', 'title' => 'Too far', 'status' => 'draft', 'flag' => '' ),
+	array( 'id' => 4, 'date' => '2026-11-20', 'time' => '', 'title' => 'Late one', 'status' => 'draft', 'flag' => '' ),
+	array( 'id' => 5, 'date' => '2026-11-30', 'time' => '', 'title' => 'Finished', 'status' => 'done', 'flag' => '' ),
+);
+$d = planweb_digest_build( $dg, '2026-11-26', 'My Site', 'admin@example.org', 'Acme Studio', 'https://example.org/cal' );
+check( 'admin@example.org' === $d['to'] && 'digest' === $d['kind'] && 0 === strpos( $d['body'], "Acme Studio\n" ), 'digest: to the administrator, the brand line first' );
+check( false !== strpos( $d['body'], 'Launch' ) && false !== strpos( $d['body'], 'Day seven' ) && false === strpos( $d['body'], 'Too far' ) && false === strpos( $d['body'], 'Finished' ) && false !== strpos( $d['body'], '- 20 Nov 2026: Late one (Draft)' ), 'digest: the next 7 days, then overdue; not later and not finished entries' );
+$d2 = planweb_digest_build( $dg, '2026-11-26', 'My Site', 'admin@example.org', '', 'https://example.org/cal' );
+check( 0 === strpos( $d2['body'], 'The week ahead on My Site' ), 'digest: no brand line when none is set' );
+check( null === planweb_digest_build( array(), '2026-11-26', 'My Site', 'admin@example.org', '', 'x' ), 'digest: nothing to say, nothing to send' );
+
+// Opt-out filter and delivery.
+$sent_to = array();
+$send    = function ( $m ) use ( &$sent_to ) {
+	$sent_to[] = $m['to'];
+	return true;
+};
+check( false === planweb_job_deliver( $mail, fn( $m ) => false, $send ) && array() === $sent_to, 'email: the filter returning false stops the send' );
+check( true === planweb_job_deliver( $mail, fn( $m ) => $m, $send ) && array( 'ann@example.org' ) === $sent_to, 'email: sent when the filter lets it through' );
+$sent_to = array();
+planweb_job_deliver( $mail, fn( $m ) => array_merge( $m, array( 'to' => 'someone@outside.example' ) ), $send );
+check( array( 'ann@example.org' ) === $sent_to, 'email: the filter cannot change who it goes to' );
+check( false === planweb_job_deliver( $mail, fn( $m ) => $m, fn( $m ) => false ), 'email: a failed wp_mail() is not a send (so no dedupe is written)' );
+check( false === planweb_job_deliver( array_merge( $mail, array( 'to' => 'nope' ) ), fn( $m ) => $m, $send ), 'email: no send to a bad address' );
+
+// When a job runs.
+$tz = new DateTimeZone( 'Asia/Kolkata' );
+check( ( new DateTimeImmutable( '2026-11-26 08:00', $tz ) )->getTimestamp() === planweb_job_next_run( new DateTimeImmutable( '2026-11-26 07:00', $tz ), '08:00' ), 'schedule: today at 08:00 when it is still ahead' );
+check( ( new DateTimeImmutable( '2026-11-27 08:00', $tz ) )->getTimestamp() === planweb_job_next_run( new DateTimeImmutable( '2026-11-26 08:00', $tz ), '08:00' ), 'schedule: tomorrow once 08:00 has come' );
+check( ( new DateTimeImmutable( '2026-11-30 08:30', $tz ) )->getTimestamp() === planweb_job_next_run( new DateTimeImmutable( '2026-11-26 12:00', $tz ), '08:30', 1 ), 'schedule: the next Monday 08:30' );
+check( ( new DateTimeImmutable( '2026-12-07 08:30', $tz ) )->getTimestamp() === planweb_job_next_run( new DateTimeImmutable( '2026-11-30 09:00', $tz ), '08:30', 1 ), 'schedule: a week on when Monday 08:30 has passed' );
+
 
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );

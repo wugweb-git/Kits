@@ -51,11 +51,12 @@ function planweb_add_days( string $ymd, int $days ): string {
  * @param string $today Y-m-d.
  */
 function planweb_is_overdue( array $e, string $today ): bool {
+	$open = in_array( (string) ( $e['status'] ?? 'idea' ), PLANWEB_OPEN_STATUSES, true );
 	if ( 'overdue' === (string) ( $e['flag'] ?? '' ) ) {
-		return true;
+		return $open; // A flag left from the sweep does not make a finished entry overdue.
 	}
 	$date = (string) ( $e['date'] ?? '' );
-	return '' !== $date && $date < $today && in_array( (string) ( $e['status'] ?? 'idea' ), PLANWEB_OPEN_STATUSES, true );
+	return '' !== $date && $date < $today && $open;
 }
 
 /**

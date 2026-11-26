@@ -29,6 +29,9 @@ function planweb_activate() {
  */
 function planweb_deactivate() {
 	update_option( 'planweb_on', '', true );
+	if ( function_exists( 'planweb_jobs_unschedule' ) ) {
+		planweb_jobs_unschedule(); // The scheduled jobs (jobs.php); their settings are kept.
+	}
 }
 
 // Switching off (Kits → Modules or deactivation): the capabilities come off the roles, and setup runs again next time.
@@ -77,7 +80,7 @@ add_action(
 			'planweb_module',
 			__( 'PlanWeb', 'planweb' ),
 			function () {
-				echo '<p>' . esc_html__( 'The team\'s calendar as its own plugin. Nothing is posted or sent from it.', 'planweb' ) . '</p>';
+				echo '<p>' . esc_html__( 'The team\'s calendar as its own plugin. Nothing is posted to any social network; email goes out only if you switch a reminder or the digest on in PlanWeb, Settings.', 'planweb' ) . '</p>';
 			},
 			'aw-modules'
 		);
