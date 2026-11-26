@@ -59,3 +59,53 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 - `rest/sourceweb-rest-pages.php` is 2,100 lines and serves five screens; split it per feature and move each part next to its model.
 - `rules/` and `keywords/` each hold a model, an admin file and a WP side with overlapping helpers; they could share one small settings layer.
 - The workers repo (`animal-writes-workers`) is separate. `workers/workers-registry.php` mirrors its workflow list by hand and can drift; a generated registry would remove that.
+
+## Information architecture today, against the six steps (26 Nov 2026)
+
+Read from `menu-model.php`, `sourceweb-ui.php`, the settings payload and `src/index.js` (7,100 lines, one script).
+
+**Menu:** Overview, To review, Enrichment review, then nine tabs of one page: Sources, Keywords, Rules, AI models, Workers, Rejected, Relay log, Change log, Settings. Twelve items, flat.
+
+| Screen | Sections inside it | Steps it really serves |
+|---|---|---|
+| Overview | Pipeline and trends, Worker runs, Reports, Commands | all (monitoring) |
+| To review | To review list, Add by link, Proposed details, Listing details | 4 (a person decides); **Add by link is step 1** |
+| Enrichment review | Waiting values per listing, Listing details | 6 (review of an enhancement) |
+| Sources | Sources (hosts), Feeds (per host) | 1 and 2 |
+| Keywords | Keyword check, Press discovery, Test a headline, the keyword list (Roles, Categories, Sections), Suggestions from Search Insights, Auto-approve rules | 2 (what to look for), 4 (keyword check is a gate), plus InsightWeb input |
+| Rules | Section rules (allowed categories and tags per content type), Tag rules, Summary rules, Directory enrichment (field rules, trust order), Review-queue rules | **4, 5 and 6 in one tab** |
+| AI models | At a glance, Daily caps, Keys by group, Keys, Used by, Keys overview | infrastructure for 4 (relevance) and 6 (summaries, enrichment) |
+| Workers | Workers, Run now log, Keys | 3 (its Keys block repeats AI models) |
+| Rejected / Relay log / Change log | read-only reports | 4 / 3 / all |
+| Settings | Workers use these lists, Directory enrichment live cap, Social posts, Connected services, Backfill, links to the other screens | 3, 6, **5 (Social posts is a destination)**, and a drawer of leftovers |
+
+### What does not fit
+
+1. **Rules mixes three steps.** Section rules decide where an item lands (step 5), Summary rules and Directory enrichment shape it (step 6), Review-queue rules and Tag rules guard it (step 4). Someone changing how summaries read must open the same tab as someone changing what is rejected.
+2. **Settings is a drawer.** It holds one switch for workers, one cap for enrichment, a destination (Social posts), connected services and Backfill. None belongs to "settings of the plugin" except Backfill-style switches.
+3. **Step 5 has no screen.** Destinations appear only as "Section rules" and as the Social posts switch. There is nowhere to see or choose where each kind of item goes, or to add a destination that another plugin provides.
+4. **Reports are scattered.** Rejected (the guardrail's output) and Relay log (the workers' output) are top-level tabs beside settings, and the Overview has a fourth reports block.
+5. **Two review screens** (To review, Enrichment review) do one job for two kinds of item.
+6. **Add by link** (a manual source) is inside To review.
+7. **Keywords** is both a sourcing list and an SEO tool (suggestions from InsightWeb, headline test).
+8. **Keys appear twice** (AI models and Workers).
+9. **Twelve flat items** with no grouping by what the person is doing.
+
+### Proposed layout (one place per step)
+
+| Tab | Holds | Moves from |
+|---|---|---|
+| Overview | Pipeline, worker runs, what needs attention | as now |
+| Sources (1, 2) | Hosts, Feeds, Keywords and Press discovery, **Add by link** | Sources, Keywords, To review |
+| Workers (3) | Workers, runs, relay and its log, the "workers use these lists" switch, worker keys | Workers, Relay log, Settings |
+| Guardrails (4) | Keyword check, Review-queue rules, Tag rules, Rejected log, relevance model choice | Keywords, Rules, Rejected |
+| Places (5) | Each destination (News, Library, Opportunities, Directory, Social, any plugin's) with its section rules and allowed categories and tags | Rules (Section rules), Settings (Social posts) |
+| Enhance (6) | Summary rules, titles, images, Directory enrichment rules, trust order, live cap | Rules, Settings |
+| Review | One queue for items and enrichment values, filter by kind | To review, Enrichment review |
+| Settings and logs | Backfill, connected services, AI keys and caps, change log | Settings, AI models, Change log |
+
+Eight items instead of twelve, and each answers one question: what do we look for, who fetches, what is allowed, where does it go, how is it improved, what needs a person.
+
+### What stays put
+
+Addresses (`admin.php?page=aw-sourcing&tab=…`), capabilities, option names and routes are live and used by the Plugins screen links and the workers, so the regroup is done in the screens first and the old addresses redirect. Nothing in this section is built yet; it needs the shell script rebuilt (`npm run build`) and a browser check of each moved block.
