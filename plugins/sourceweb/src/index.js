@@ -7413,8 +7413,17 @@ function Places() {
 						</Button>
 					</div>
 				) ) }
+				{ 0 === data.places.length && (
+					<p>
+						{ __(
+							'No places yet. Turn on a plugin that adds one (DirectoryWeb adds its listing types), or a site can add its own, then routes can be made.',
+							'aw-sourcing'
+						) }
+					</p>
+				) }
 				<p>
 					<Button
+						disabled={ 0 === data.places.length }
 						onClick={ () =>
 							setRows( [
 								...rows,

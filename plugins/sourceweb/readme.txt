@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,6 +59,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 
 == Changelog ==
 
+
+= 0.2.1 =
+* Places: with no place available the Routes card says so and "Add a route" is off, instead of an empty "Send to" list.
 
 = 0.2.0 =
 * Places tab: routes (a boolean expression sends an item to a place, first match wins), per-place enhancements, a source-type registry, and a read-out of what each place says back.

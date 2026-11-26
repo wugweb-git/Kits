@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.2.1
+
+- Places: with no place available the Routes card says so and "Add a route" is off, instead of an empty "Send to" list.
+
 ## 0.2.0
 
 - Places tab: routes (a boolean expression sends an item to a place, first match wins), per-place enhancements, a source-type registry, and a read-out of what each place says back.
