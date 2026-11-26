@@ -7279,6 +7279,33 @@ function Places() {
 				</p>
 			</SectionCard>
 			<SectionCard
+				id="sources"
+				title={ __( 'Where items come from', 'aw-sourcing' ) }
+				description={ __(
+					'Every way an item can enter SourceWeb. Plugins can add their own.',
+					'aw-sourcing'
+				) }
+			>
+				<table className="widefat striped">
+					<thead>
+						<tr>
+							<th>{ __( 'Source', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Method', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Run by', 'aw-sourcing' ) }</th>
+						</tr>
+					</thead>
+					<tbody>
+						{ data.sources.map( ( t ) => (
+							<tr key={ t.id }>
+								<td>{ t.label }</td>
+								<td>{ t.method }</td>
+								<td>{ t.runner || '—' }</td>
+							</tr>
+						) ) }
+					</tbody>
+				</table>
+			</SectionCard>
+			<SectionCard
 				id="places"
 				title={ __( 'Places', 'aw-sourcing' ) }
 				description={ __(

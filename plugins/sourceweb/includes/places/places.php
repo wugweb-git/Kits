@@ -84,6 +84,16 @@ add_filter(
 );
 
 /**
+ * Every way an item can enter SourceWeb: the built-in types, then whatever plugins add through `sourceweb_source_types`.
+ *
+ * @return array<string, array>
+ */
+function sourceweb_source_types(): array {
+	$more = apply_filters( 'sourceweb_source_types', SOURCEWEB_SOURCE_TYPES );
+	return sourceweb_source_types_clean( is_array( $more ) ? $more : SOURCEWEB_SOURCE_TYPES );
+}
+
+/**
  * The Places screen's data: every place, and the routes as settings rows.
  *
  * @return array
@@ -105,6 +115,7 @@ function sourceweb_places_screen(): array {
 	return array(
 		'places' => array_values( $places ),
 		'routes' => $rows,
+		'sources' => array_values( sourceweb_source_types() ),
 		'fields' => SOURCEWEB_ROUTE_FIELDS,
 		'ops'    => SOURCEWEB_ROUTE_OPS,
 	);

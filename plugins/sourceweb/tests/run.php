@@ -568,5 +568,13 @@ aw_t( 'gemini' === sourceweb_ai_order_for_job( $jr, 'search', $jc )[0]['provider
 aw_t( $jr === sourceweb_ai_order_for_job( $jr, 'nope', $jc ), 'ai job: an unknown job keeps the owner order' );
 aw_t( 3 === count( sourceweb_ai_order_for_job( $jr, 'summary', $jc ) ), 'ai job: every key is still offered' );
 
+// Source types.
+require_once dirname( __DIR__ ) . '/includes/sources/source-types-model.php';
+$st = sourceweb_source_types_clean( SOURCEWEB_SOURCE_TYPES );
+aw_t( count( SOURCEWEB_SOURCE_TYPES ) === count( $st ), 'source types: every built-in type is valid' );
+aw_t( isset( $st['manual-link'] ) && 'person' === $st['manual-link']['runner'], 'source types: Add by link is run by a person' );
+$more = sourceweb_source_types_clean( array_merge( SOURCEWEB_SOURCE_TYPES, array( array( 'id' => 'gallery-api', 'method' => 'api' ), array( 'id' => '', 'method' => 'api' ), array( 'id' => 'bad', 'method' => 'carrier-pigeon' ), array( 'id' => 'feed', 'label' => 'Replaced', 'method' => 'feed' ) ) ) );
+aw_t( isset( $more['gallery-api'] ) && ! isset( $more['bad'] ) && 'Replaced' === $more['feed']['label'], 'source types: a plugin can add; bad ones are dropped; a later one replaces' );
+
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );
