@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class RankWeb_Redirects {
 
 	/** The CSV columns, in order. */
-	const COLUMNS = array( 'source', 'target', 'code', 'comparison' );
+	const COLUMNS = array( 'source', 'target', 'code', 'comparison', 'category' );
 
 	/** The status codes a redirect may carry. */
 	const CODES = array( 301, 302, 307, 308, 410, 451 );
@@ -109,7 +109,7 @@ final class RankWeb_Redirects {
 	 * Check and tidy one row. Returns source, target, code (int), comparison, and error ('' when it is good).
 	 *
 	 * @param array $row A row from from_csv().
-	 * @return array{source: string, target: string, code: int, comparison: string, error: string}
+	 * @return array{source: string, target: string, code: int, comparison: string, category: string, error: string}
 	 */
 	public static function validate( array $row ): array {
 		$source     = trim( (string) ( $row['source'] ?? '' ) );
@@ -122,6 +122,7 @@ final class RankWeb_Redirects {
 			'target'     => $target,
 			'code'       => $code,
 			'comparison' => $comparison,
+			'category'   => mb_substr( trim( preg_replace( '/\s+/', ' ', strip_tags( (string) ( $row['category'] ?? '' ) ) ) ), 0, 40 ),
 			'error'      => '',
 		);
 		if ( '' === $source ) {

@@ -46,6 +46,15 @@ final class RedirectsTest extends PHPUnit\Framework\TestCase {
 		$this->assertSame( '/campaigns/$1/', $back['rows'][1]['target'] );
 	}
 
+	public function testCategoryColumnIsKeptAndTidied(): void {
+		$back = RankWeb_Redirects::from_csv( "source,target,category\n/a/,/b/,\"  Old   <b>campaign</b> \"\n" );
+		$v    = RankWeb_Redirects::validate( $back['rows'][0] );
+		$this->assertSame( 'Old campaign', $v['category'] );
+		$this->assertSame( '', RankWeb_Redirects::validate( array( 'source' => '/a/', 'target' => '/b/' ) )['category'] );
+		$this->assertSame( 40, mb_strlen( RankWeb_Redirects::validate( array( 'source' => '/a/', 'target' => '/b/', 'category' => str_repeat( 'x', 90 ) ) )['category'] ) );
+		$this->assertTrue( str_ends_with( strtok( RankWeb_Redirects::to_csv( array() ), "\n" ), ',category' ) );
+	}
+
 	public function testFromCsvNeedsASourceColumnAndKeepsKnownColumns(): void {
 		$this->assertNotSame( '', RankWeb_Redirects::from_csv( "target,code\n/x/,301\n" )['error'] );
 		$back = RankWeb_Redirects::from_csv( "source,target,note\n/a/,/b/,hello\n" );

@@ -45,10 +45,47 @@ function rankweb_redirect_rows(): array {
 				'target'     => (string) $r['url_to'],
 				'code'       => (string) (int) $r['header_code'],
 				'comparison' => (string) ( $src['comparison'] ?? 'exact' ),
+				'category'   => rankweb_redirect_category_of( (string) ( $src['pattern'] ?? '' ), (string) ( $src['comparison'] ?? 'exact' ) ),
 			);
 		}
 	}
 	return $out;
+}
+
+/*
+ * Categories. Rank Math's list has no category field and every redirect stays in that one list, so RankWeb keeps only a
+ * label per source here (option rankweb_redirect_categories, keyed by comparison and source). It is a tag on the CSV and
+ * on this screen: deleting the redirect in Rank Math leaves a harmless label behind, and nothing reads it at request time.
+ */
+
+/** The key of a redirect's label: its comparison and its source without slashes at the ends. */
+function rankweb_redirect_category_key( string $source, string $comparison ): string {
+	return md5( ( 'regex' === $comparison ? 'regex' : 'exact' ) . '|' . ( 'regex' === $comparison ? $source : trim( $source, '/' ) ) );
+}
+
+/** A redirect's category, or ''. */
+function rankweb_redirect_category_of( string $source, string $comparison ): string {
+	$map = (array) get_option( 'rankweb_redirect_categories', array() );
+	return (string) ( $map[ rankweb_redirect_category_key( $source, $comparison ) ] ?? '' );
+}
+
+/** Set (or, with '', clear) a redirect's category. */
+function rankweb_redirect_category_set( string $source, string $comparison, string $category ): void {
+	$map = (array) get_option( 'rankweb_redirect_categories', array() );
+	$key = rankweb_redirect_category_key( $source, $comparison );
+	if ( '' === $category ) {
+		unset( $map[ $key ] );
+	} else {
+		$map[ $key ] = $category;
+	}
+	update_option( 'rankweb_redirect_categories', $map, false );
+}
+
+/** The labels in use with how many redirects carry each, for the screen. */
+function rankweb_redirect_category_counts(): array {
+	$counts = array_count_values( array_filter( array_map( 'strval', array_values( (array) get_option( 'rankweb_redirect_categories', array() ) ) ) ) );
+	ksort( $counts );
+	return $counts;
 }
 
 add_action(
@@ -123,6 +160,9 @@ add_action(
 						$pattern = 'regex' === $v['comparison'] ? $v['source'] : trim( $v['source'], '/' );
 						$id      = rankweb_rank_math_redirect( $pattern, $target, $v['comparison'], $v['code'] );
 						if ( $id ) {
+							if ( '' !== $v['category'] ) {
+								rankweb_redirect_category_set( $pattern, $v['comparison'], $v['category'] );
+							}
 							++$report['added'];
 						} else {
 							/* translators: %d: row number. */
@@ -340,6 +380,14 @@ function rankweb_redirect_tools_body(): void {
 		rankweb_redirect_report( $report );
 	}
 
+	$cats = rankweb_redirect_category_counts();
+	if ( $cats ) {
+		$line = array();
+		foreach ( $cats as $name => $n ) {
+			$line[] = $name . ' (' . number_format_i18n( $n ) . ')';
+		}
+		echo '<p>' . esc_html__( 'Categories in the CSV:', 'rankweb' ) . ' ' . esc_html( implode( ', ', $line ) ) . '</p>';
+	}
 	echo '<h2>' . esc_html__( 'Export and import', 'rankweb' ) . '</h2>';
 	echo '<form method="post" action="' . esc_url( $post ) . '" style="display:inline-block;margin-right:1em"><input type="hidden" name="action" value="aw_redirect_export">';
 	wp_nonce_field( 'aw_redirect_export' );
@@ -349,7 +397,7 @@ function rankweb_redirect_tools_body(): void {
 	wp_nonce_field( 'aw_redirect_404export' );
 	submit_button( __( 'Export 404 log CSV', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
-	echo '<p>' . esc_html__( 'Import a CSV with a "source" column, and target, code (301, 302, 307, 308, 410, 451) and comparison (exact or regex). The dry run reports what would be added and writes nothing.', 'rankweb' ) . '</p>';
+	echo '<p>' . esc_html__( 'Import a CSV with a "source" column, and target, code (301, 302, 307, 308, 410, 451), comparison (exact or regex) and category (a label of your own; it stays in RankWeb; the Rank Math list is not changed). The dry run reports what would be added and writes nothing.', 'rankweb' ) . '</p>';
 	echo '<form method="post" enctype="multipart/form-data" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_redirect_import">';
 	wp_nonce_field( 'aw_redirect_import' );
 	echo '<p><input type="file" name="aw_csv" accept=".csv,text/csv" required></p>';
