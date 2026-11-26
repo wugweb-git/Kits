@@ -98,6 +98,9 @@ function kits_onboarding_page() {
 	$logo_id   = (int) get_theme_mod( 'custom_logo' );
 	$logo_url  = $logo_id ? wp_get_attachment_image_url( $logo_id, 'full' ) : '';
 	$active_v  = get_option( 'kits_active_style_variation', 'default' );
+	if ( 'ink' === $active_v ) {
+		$active_v = 'dark'; // The variation was called ink before 1.3.0.
+	}
 	$site_name = get_option( 'blogname' );
 	$site_desc = get_option( 'blogdescription' );
 
@@ -283,7 +286,7 @@ function kits_onboarding_apply_style_variation( string $slug ): bool {
 	$res = wp_update_post(
 		array(
 			'ID'           => (int) $post['ID'],
-			'post_content' => wp_json_encode( $payload ),
+			'post_content' => wp_slash( wp_json_encode( $payload ) ), // wp_update_post() expects slashed data; without it a backslash in the JSON is lost.
 		)
 	);
 	WP_Theme_JSON_Resolver::clean_cached_data();

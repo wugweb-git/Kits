@@ -19,17 +19,36 @@ const KITS_BRAND_PRESET_OPTION = 'kits_brand_active_preset';
 const KITS_BRAND_CACHE_KEY     = 'kits_brand_theme_data';
 
 /**
+ * The cache key of the Layer 3 patch: one per active theme and theme version, so a theme switch or update never reads
+ * the previous theme's palette.
+ */
+function kits_brand_cache_key(): string {
+	$theme = function_exists( 'wp_get_theme' ) ? wp_get_theme() : null;
+	return KITS_BRAND_CACHE_KEY . '_' . substr( md5( ( $theme ? $theme->get_stylesheet() . '|' . $theme->get( 'Version' ) : '' ) ), 0, 12 );
+}
+
+/**
  * Clears the cached Layer 3 theme.json brand data and WordPress's resolved theme JSON cache.
  */
 function kits_brand_clear_theme_cache(): void {
 	if ( function_exists( 'delete_transient' ) ) {
-		delete_transient( KITS_BRAND_CACHE_KEY );
+		delete_transient( kits_brand_cache_key() );
 	}
 	if ( class_exists( 'WP_Theme_JSON_Resolver' ) && method_exists( 'WP_Theme_JSON_Resolver', 'clean_cached_data' ) ) {
 		WP_Theme_JSON_Resolver::clean_cached_data();
 	}
 }
 
+// An imported file's brand tokens are cleaned the way the form's are (colours, font stacks and sizes only).
+add_filter(
+	'kits_settings_transfer_import_value',
+	function ( $value, $name ) {
+		return ( KITS_BRAND_OPTION === $name && is_array( $value ) ) ? kits_brand_sanitize_tokens( $value ) : $value;
+	},
+	10,
+	2
+);
+add_action( 'switch_theme', 'kits_brand_clear_theme_cache' );
 add_action( 'add_option_' . KITS_BRAND_OPTION, 'kits_brand_clear_theme_cache' );
 add_action( 'update_option_' . KITS_BRAND_OPTION, 'kits_brand_clear_theme_cache' );
 add_action( 'delete_option_' . KITS_BRAND_OPTION, 'kits_brand_clear_theme_cache' );
@@ -48,12 +67,12 @@ add_filter(
 		if ( empty( $tokens ) ) {
 			return $theme_json;
 		}
-		$cached = get_transient( KITS_BRAND_CACHE_KEY );
+		$cached = get_transient( kits_brand_cache_key() );
 		if ( is_array( $cached ) ) {
 			return ! empty( $cached ) ? $theme_json->update_with( $cached ) : $theme_json;
 		}
 		$patch = kits_brand_build_theme_json( $tokens, (array) $theme_json->get_data() );
-		set_transient( KITS_BRAND_CACHE_KEY, $patch, DAY_IN_SECONDS );
+		set_transient( kits_brand_cache_key(), $patch, DAY_IN_SECONDS );
 		return ! empty( $patch ) ? $theme_json->update_with( $patch ) : $theme_json;
 	},
 	10
@@ -164,9 +183,9 @@ function kits_brand_customizer_render_page() {
 		$action = isset( $_POST['kits_brand_action'] ) ? sanitize_text_field( wp_unslash( $_POST['kits_brand_action'] ) ) : 'save';
 
 		if ( 'reset' === $action ) {
-			$active_preset = (string) get_option( KITS_BRAND_PRESET_OPTION, 'default' );
+			$active_preset = (string) get_option( KITS_BRAND_PRESET_OPTION, '' ); // None chosen: Reset goes back to the theme's own values, as it did before 1.3.0.
 			$presets       = kits_brand_presets();
-			$restore       = $presets[ $active_preset ]['tokens'] ?? ( $presets['default']['tokens'] ?? array() );
+			$restore       = '' !== $active_preset ? ( $presets[ $active_preset ]['tokens'] ?? array() ) : array();
 			if ( ! empty( $restore ) ) {
 				update_option( KITS_BRAND_OPTION, kits_brand_sanitize_tokens( $restore ) );
 			} else {
