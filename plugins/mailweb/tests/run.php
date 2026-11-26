@@ -457,5 +457,12 @@ $ub_t( 'mismatch' === mailweb_spf_status( array( 'v=spf1 include:_spf.google.com
 $ub_t( 'multiple' === mailweb_spf_status( array( 'v=spf1 a ~all', 'v=spf1 include:_spf.mail.hostinger.com ~all' ) )['status'], 'spf: two SPF records are reported, not accepted' );
 $ub_t( 'valid' === mailweb_spf_status( array( '  V=SPF1 include:_SPF.MAIL.HOSTINGER.COM -all' ) )['status'], 'spf: case and leading space do not matter' );
 
+require_once dirname( __DIR__ ) . '/includes/tenant-profiles.php';
+$p_alerts = mailweb_normalize_sender_profile( 'Alerts', array( 'from_email' => 'alerts@tenant.com', 'from_name' => 'Tenant Alerts', 'daily_limit' => 500 ) );
+$ub_t( 'alerts' === $p_alerts['slug'] && 'alerts@tenant.com' === $p_alerts['from_email'] && 500 === $p_alerts['daily_limit'], 'tenant profile: normalized slug, email, limit' );
+$applied = mailweb_apply_sender_profile_to_args( array( 'headers' => array( 'X-Mailweb-Profile: alerts', 'From: old@example.com' ) ), $p_alerts );
+$ub_t( in_array( 'From: Tenant Alerts <alerts@tenant.com>', $applied['headers'], true ) && ! in_array( 'X-Mailweb-Profile: alerts', $applied['headers'], true ), 'tenant profile: From header replaced and routing header stripped' );
+$ub_t( 300 === mailweb_retry_backoff_seconds( 0 ) && 900 === mailweb_retry_backoff_seconds( 1 ) && 3600 === mailweb_retry_backoff_seconds( 2 ), 'retry backoff: 5m, 15m, 60m progression' );
+
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

@@ -28,11 +28,11 @@ The email and delivery management plugin owns:
 
 ---
 
-## Open Tasks & Enhancements
+## Open Tasks & Enhancements (Resolved 26 Nov 2026)
 
 1. **Multi-Tenant Mail Sending**:
-   - Allow tenants to define separate sender profiles (e.g. `alerts@tenant.com` vs `newsletter@tenant.com`).
-   - Rate limiting and retry queue in database for failed outbound emails.
+   - ✅ Added tenant sender profiles (`includes/tenant-profiles.php`, `mailweb_tenant_sender_profiles()`, `X-Mailweb-Profile` routing, `/mailweb/v1/services/sender-profiles`).
+   - ✅ Added per-profile daily rate limiting (`mailweb_tenant_rate_allow()`) and outbound retry queue with exponential backoff (`mailweb_retry_queue_push()`, `mailweb_retry_queue_process()`, `/mailweb/v1/services/retry-queue`).
 
 ## Carried over from docs/org (26 Nov 2026)
 

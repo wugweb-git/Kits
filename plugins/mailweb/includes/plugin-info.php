@@ -14,6 +14,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 add_filter( 'update_plugins_wugweb.com', 'mailweb_plugin_update_row', 10, 3 );
 add_filter( 'plugins_api', 'mailweb_plugin_details', 10, 3 );
+add_filter( 'plugin_row_meta', 'mailweb_plugin_row_meta', 10, 2 );
+add_action( 'admin_enqueue_scripts', fn( $hook ) => 'plugins.php' === $hook ? add_thickbox() : null );
+
+/**
+ * Adds FAQ, Rate, View details, Support, More, and Upgrade to Premium links on the Plugins screen.
+ *
+ * @param array<int, string> $links Existing row meta links.
+ * @param string             $file  Plugin file basename.
+ * @return array<int, string>
+ */
+function mailweb_plugin_row_meta( array $links, string $file ): array {
+	if ( plugin_basename( MAILWEB_FILE ) !== $file ) {
+		return $links;
+	}
+	$details = admin_url( 'plugin-install.php?tab=plugin-information&plugin=mailweb&TB_iframe=true&width=772&height=650' );
+	$faq     = admin_url( 'plugin-install.php?tab=plugin-information&plugin=mailweb&section=faq&TB_iframe=true&width=772&height=650' );
+	return array_merge(
+		$links,
+		array(
+			'<a href="' . esc_url( $faq ) . '" class="thickbox open-plugin-details-modal">' . esc_html__( 'FAQ', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/plugins/mailweb/reviews/#new-post' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Rate MailWeb', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( $details ) . '" class="thickbox open-plugin-details-modal">' . esc_html__( 'View details', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/support/?product=mailweb' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Support', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/plugins/' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'More', 'mailweb' ) . '</a>',
+			'<a href="' . esc_url( 'https://wugweb.com/pricing/?product=mailweb' ) . '" target="_blank" rel="noopener noreferrer" style="font-weight:600;color:#1d4ed8;">' . esc_html__( 'Upgrade to Premium', 'mailweb' ) . '</a>',
+		)
+	);
+}
 
 /**
  * MailWeb's icon and banner addresses.
@@ -99,6 +127,7 @@ function mailweb_plugin_details( $result, $action, $args ) {
 		'sections'      => array_filter(
 			array(
 				'description' => $parts['description'] ?? esc_html( (string) $head['Description'] ),
+				'faq'         => $parts['frequently asked questions'] ?? '',
 				'changelog'   => $parts['changelog'] ?? '',
 			)
 		),
