@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.8
+Stable tag: 0.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ SourceWeb operates standalone with no mandatory plugin dependencies, and optiona
 
 **How items arrive.** SourceWeb does not fetch feeds inside WordPress. The list of sources you keep here is read by external workers (scripts run outside your site, for example GitHub Actions), and they send each item to this site's ingest routes (`/wp-json/aw/v1/ingest`, also at `/wp-json/sourceweb/v1/worker-api/ingest`) with an application password.  Without workers, no items arrive. The workers themselves are not part of this plugin.
 
-**What needs Kits Core.** Without Kits Core you get plain WordPress screens for Sources (list, add, turn on or off, remove), AI models (add and remove keys), To review, Rules (domain overrides and feed tag filters) and Settings. Keywords, Places, Workers, Rejected, Relay log, and Change log need Kits Core; without it they show a notice and the Overview counts.
+**What needs Kits Core.** Nothing is needed to open a screen: without Kits Core every SourceWeb screen is a plain WordPress screen (a table or a list with forms; nothing is drawn by JavaScript). Sources, AI models, To review, Enrichment review, Keywords, Rules, Places, Workers, Rejected, Relay log, Change log and Settings all open and save. What they cannot do without Kits Core or another plugin is said on the screen: Run now on Workers needs Kits Core's GitHub connection; Enrichment review needs DirectoryWeb's listings; Search suggestions under Keywords need InsightWeb's Search Insights; Rules does not have the summary rules, the enrichment field rules or the review-queue rules for enrichment values (Kits Core's screens set those). With Kits Core active the screens are the Kits ones, as before.
 
 **Who may push items, and what goes live.** The worker routes need the SourceWeb capability (`manage_sourceweb`, held by administrators and by roles that can edit others' posts), or administrator rights; Authors and Contributors cannot use them. Change it with the `sourceweb_ingest_capability` filter. Every item arrives as Pending and waits in To review: nothing is published without a person unless an administrator ticks **Publishing** in SourceWeb → Settings (or a site returns true from the `sourceweb_allow_publish` filter).
 
@@ -73,6 +73,12 @@ SourceWeb may connect to external services only when the corresponding feature o
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
 == Changelog ==
+
+= 0.3.0 =
+* Without Kits Core, nine more screens work as plain WordPress screens instead of showing a notice: To review (publish or reject one, ticked, or every item of a view), Enrichment review (approve, reject or undo a proposed value), Keywords (the check's switches, the four keyword lists or the keyword table, Press settings, a headline test), Rules (domain trust, feed tags to leave out, tag rules, section rules), Places (routes, enhancements, how each source did), Workers (list, runs, add, change and delete a planned worker), Rejected, Relay log and Change log (search, view, sort, pages).
+* Every change on these screens is a POST with a capability check and a nonce; reading is by GET and changes nothing. Notices are kept in a short-lived per-user transient, not in the address.
+* The old To review table on the fallback page approved and rejected through a link (a change by GET). It is replaced by forms.
+* Not on these screens without Kits Core or another plugin: Run now (needs Kits Core's GitHub dispatch), Search suggestions (InsightWeb), summary rules, enrichment field rules and the review-queue rules for enrichment values (the Kits screens), and the AI keys attached to a worker (set on AI models).
 
 = 0.2.8 =
 * The text domain is `sourceweb` everywhere, including the screens built in JavaScript (about 760 strings still said `aw-sourcing`), and the translation template is now `languages/sourceweb.pot`. No behaviour changes.

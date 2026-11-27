@@ -295,7 +295,7 @@ function sourceweb_summary_short( string $text, int $words = 30 ): string {
 
 /** strip_tags without WordPress. */
 function wp_strip_all_tags_safe( string $s ): string {
-	return function_exists( 'wp_strip_all_tags' ) ? wp_strip_all_tags( $s ) : strip_tags( $s );
+	return function_exists( 'wp_strip_all_tags' ) ? wp_strip_all_tags( $s ) : wp_strip_all_tags( $s );
 }
 
 /** What a place can report back about an item it was given (the closed loop). */

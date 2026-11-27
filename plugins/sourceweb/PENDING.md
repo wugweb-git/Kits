@@ -8,7 +8,20 @@ Checked line by line against the code on 27 Nov 2026.
 - DEAD CODE: feed retry backoff (`sourceweb_feed_*_backoff` in `ingest.php`) is called only by tests; the readme no longer promises it (0.2.7).
 - The 'Resolved 26 Nov' line for the open-model consent gate contradicts the HOLD section: the code is held and unloaded.
 - Partial: summary routes use their own check (`aw_worker` or `manage_options` plus application password), not `sourceweb_ingest_can`; the 'quiet' alert in `relevance.php` has no heartbeat guard; a 'paid' AI tier still exists in the code.
-- 0.2.6 (route capability, publishing switch, Animal Writes switch, standalone screens, masked keys) has no automated test.
+- 0.2.6 (route capability, publishing switch, Animal Writes switch, standalone screens, masked keys) has no automated test of its own. 0.3.0 adds `tests/SourceWebStandaloneScreensTest.php`, which covers the nine screens added in 0.3.0 (not the two of 0.2.6).
+
+## Standalone screens, 0.3.0 (27 Nov 2026)
+
+Nine screens that only said "needs Kits Core" are plain WordPress screens now: To review, Enrichment review, Keywords, Rules, Places, Workers, Rejected, Relay log, Change log (`includes/admin/sourceweb-standalone-screens.php`, `sourceweb-standalone-config.php`). Reads are GET, every change is a nonce-checked POST. With Kits Core the shell screens are untouched. What each screen cannot do without Kits Core or another plugin, and is therefore NOT BUILT standalone:
+
+- Workers: Run now (needs Kits Core's `kits_dispatch_workflow` and the GitHub token); attaching AI keys to a worker (done on AI models); the "All workers" union table.
+- Enrichment review: needs DirectoryWeb's `aw_listing` content type; without it the screen says so and shows nothing. Not exercised against real proposals in a browser (no listings exist in the Playground blueprint).
+- Keywords: Search suggestions and their auto-approve rules need InsightWeb's Search Insights data; the keyword table (roles, categories, spellings, languages) is only edited when InsightWeb has made it, and only add and remove are offered (no edit form for one keyword, no bulk actions, no category mapping). Without InsightWeb the four lists are edited as text; if the site once ran phase 2 the screen warns that InsightWeb rewrites them when switched on again.
+- Rules: summary rules, Directory enrichment field rules and trust order, and the review-queue (auto-resolve) rules are not here; they need the phase 3 migration and the Kits shell. The workers use their built-in defaults for them. Section rules show every public content type (`sourceweb_rules_sections( true )`) and list at most 500 tags to tick.
+- Places: no "Add place" (places come from content types and the `sourceweb_places` filter), no custom boolean tests (a test of several parts is kept as stored and shown read-only); routes are reordered by an order number, not drag and drop.
+- Not done: a "Publish all" is offered for To review but not for Enrichment review (the shell's "approve all high" and per-listing bulk actions are not here); lists have no per-page option; no help tabs on these screens.
+- `languages/sourceweb.pot` was not regenerated, so the new strings are not in it yet.
+- CI does not run the new test: add `php plugins/sourceweb/tests/SourceWebStandaloneScreensTest.php` next to the existing SourceWeb line in `.github/workflows/ci-suite.yml` and to `tests/standalone-matrix-test.php` (outside this plugin's folder).
 
 ## Active Scope & Responsibilities
 The content ingestion and syndication plugin owns:

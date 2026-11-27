@@ -203,7 +203,7 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 	echo '<h1>' . esc_html( $title ) . '</h1>';
 
 	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running without Kits Core. Sources and AI models have a plain screen here; Keywords, Rules, Places, Workers, Rejected, Relay log and Change log need Kits Core. SourceWeb does not fetch feeds inside WordPress: external workers read your sources and push the items to this site.', 'sourceweb' ) . '</p></div>';
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running without Kits Core, so its screens are plain WordPress screens. SourceWeb does not fetch feeds inside WordPress: external workers read your sources and push the items to this site.', 'sourceweb' ) . '</p></div>';
 	} else {
 		wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'sourceweb' ), array( 'type' => 'error' ) );
 	}
@@ -234,110 +234,8 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 			sourceweb_reset_form( 'uninstall' );
 		}
 		echo '</div>';
-	} elseif ( 'review' === $screen ) {
-		$items = function_exists( 'sourceweb_review_items' ) ? sourceweb_review_items() : array();
-		if ( empty( $items ) ) {
-			echo '<div class="notice notice-info inline" style="margin:20px 0; padding:12px 16px;">';
-			echo '<p><strong>' . esc_html__( 'Review queue is clear.', 'sourceweb' ) . '</strong> ' . esc_html__( 'There are currently no pending or held items waiting for editorial review.', 'sourceweb' ) . '</p>';
-			echo '</div>';
-		} else {
-			/* translators: %d: number of items waiting for review. */
-			echo '<p style="margin:16px 0;">' . sprintf( esc_html__( '%d items waiting for review.', 'sourceweb' ), count( $items ) ) . '</p>';
-			echo '<table class="widefat striped" style="margin-top:10px;">';
-			echo '<thead><tr>';
-			echo '<th>' . esc_html__( 'Title', 'sourceweb' ) . '</th>';
-			echo '<th>' . esc_html__( 'Type', 'sourceweb' ) . '</th>';
-			echo '<th>' . esc_html__( 'Source', 'sourceweb' ) . '</th>';
-			echo '<th>' . esc_html__( 'Date', 'sourceweb' ) . '</th>';
-			echo '<th>' . esc_html__( 'Hold Reason', 'sourceweb' ) . '</th>';
-			echo '<th>' . esc_html__( 'Actions', 'sourceweb' ) . '</th>';
-			echo '</tr></thead><tbody>';
-			foreach ( $items as $p ) {
-				$url    = get_post_meta( $p->ID, 'aw_source_url', true );
-				$reason = get_post_meta( $p->ID, 'aw_review', true );
-				$pub_url = wp_nonce_url( admin_url( 'admin-post.php?action=aw_review_item&item_id=' . $p->ID . '&review_action=publish' ), 'aw_review_' . $p->ID );
-				$rej_url = wp_nonce_url( admin_url( 'admin-post.php?action=aw_review_item&item_id=' . $p->ID . '&review_action=reject' ), 'aw_review_' . $p->ID );
-				echo '<tr>';
-				echo '<td><strong><a href="' . esc_url( get_edit_post_link( $p->ID ) ) . '">' . esc_html( $p->post_title ? $p->post_title : '(no title)' ) . '</a></strong></td>';
-				echo '<td>' . esc_html( $p->post_type ) . '</td>';
-				echo '<td>' . ( $url ? '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener">' . esc_html( function_exists( 'sourceweb_host' ) ? sourceweb_host( $url ) : wp_parse_url( $url, PHP_URL_HOST ) ) . '</a>' : '–' ) . '</td>';
-				echo '<td>' . esc_html( substr( $p->post_date, 0, 16 ) ) . '</td>';
-				echo '<td>' . esc_html( $reason ? $reason : 'Pending' ) . '</td>';
-				echo '<td>';
-				echo '<a href="' . esc_url( $pub_url ) . '" class="button button-small button-primary">' . esc_html__( 'Approve', 'sourceweb' ) . '</a> ';
-				echo '<a href="' . esc_url( $rej_url ) . '" class="button button-small">' . esc_html__( 'Reject', 'sourceweb' ) . '</a>';
-				echo '</td>';
-				echo '</tr>';
-			}
-			echo '</tbody></table>';
-		}
-	} elseif ( 'rules' === $screen && current_user_can( 'manage_options' ) ) {
-		$overrides = function_exists( 'sourceweb_rules_domain_overrides' ) ? sourceweb_rules_domain_overrides() : array();
-		$excluded  = function_exists( 'sourceweb_rules_feed_excluded_tags' ) ? sourceweb_rules_feed_excluded_tags() : array();
-
-		echo '<div style="display:flex; gap:24px; margin-top:20px; flex-wrap:wrap;">';
-
-		// Column 1: Domain Trust Overrides
-		echo '<div class="card" style="flex:1; min-width:320px; padding:20px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Domain Trust Overrides', 'sourceweb' ) . '</h2>';
-		echo '<p class="description">' . esc_html__( 'Configure domain-level trust rules to auto-approve, hold for review, or discard incoming content from specific publishers.', 'sourceweb' ) . '</p>';
-
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
-		wp_nonce_field( 'aw_rules_domain_override' );
-		echo '<input type="hidden" name="action" value="aw_domain_override">';
-		echo '<table class="form-table" style="margin-top:0;">';
-		echo '<tr><th scope="row"><label for="override_host">' . esc_html__( 'Domain Host', 'sourceweb' ) . '</label></th>';
-		echo '<td><input type="text" id="override_host" name="host" class="regular-text" placeholder="example.com" required></td></tr>';
-		echo '<tr><th scope="row"><label for="override_status">' . esc_html__( 'Trust Policy', 'sourceweb' ) . '</label></th>';
-		echo '<td><select id="override_status" name="status">';
-		echo '<option value="allow">' . esc_html__( 'Allow (Auto-approve if checks pass)', 'sourceweb' ) . '</option>';
-		echo '<option value="neutral">' . esc_html__( 'Require Review (Hold in Review Queue)', 'sourceweb' ) . '</option>';
-		echo '<option value="block">' . esc_html__( 'Discard (Block and Reject)', 'sourceweb' ) . '</option>';
-		echo '</select></td></tr>';
-		echo '<tr><th scope="row"><label for="override_name">' . esc_html__( 'Publisher Name', 'sourceweb' ) . '</label></th>';
-		echo '<td><input type="text" id="override_name" name="name" class="regular-text" placeholder="Optional label"></td></tr>';
-		echo '</table>';
-		submit_button( __( 'Save Domain Override', 'sourceweb' ), 'secondary', 'submit', false );
-		echo '</form>';
-
-		if ( ! empty( $overrides ) ) {
-			echo '<hr style="margin:20px 0;">';
-			echo '<table class="widefat striped">';
-			echo '<thead><tr><th>' . esc_html__( 'Domain', 'sourceweb' ) . '</th><th>' . esc_html__( 'Policy', 'sourceweb' ) . '</th><th>' . esc_html__( 'Action', 'sourceweb' ) . '</th></tr></thead><tbody>';
-			foreach ( $overrides as $h => $ov ) {
-				echo '<tr>';
-				echo '<td><strong>' . esc_html( $h ) . '</strong>' . ( ! empty( $ov['name'] ) && $ov['name'] !== $h ? ' (' . esc_html( $ov['name'] ) . ')' : '' ) . '</td>';
-				echo '<td><span class="badge">' . esc_html( ucfirst( $ov['status'] ) ) . '</span></td>';
-				echo '<td>';
-				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:inline;">';
-				wp_nonce_field( 'aw_rules_domain_override' );
-				echo '<input type="hidden" name="action" value="aw_domain_override">';
-				echo '<input type="hidden" name="aw_delete" value="1">';
-				echo '<input type="hidden" name="host" value="' . esc_attr( $h ) . '">';
-				echo '<button type="submit" class="button button-small button-link-delete">' . esc_html__( 'Reset', 'sourceweb' ) . '</button>';
-				echo '</form>';
-				echo '</td>';
-				echo '</tr>';
-			}
-			echo '</tbody></table>';
-		}
-		echo '</div>';
-
-		// Column 2: Excluded Category & Tag Filters
-		echo '<div class="card" style="flex:1; min-width:320px; padding:20px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Feed Category & Tag Filters', 'sourceweb' ) . '</h2>';
-		echo '<p class="description">' . esc_html__( 'Specify category or topic tag slugs to exclude from feed ingestion. Matching feed stories will be automatically flagged or held.', 'sourceweb' ) . '</p>';
-
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:16px;">';
-		wp_nonce_field( 'aw_rules_feed_filter' );
-		echo '<input type="hidden" name="action" value="aw_feed_filter">';
-		echo '<p><textarea name="excluded_tags" rows="6" class="large-text code" placeholder="politics, gossip, sports">' . esc_textarea( implode( "\n", $excluded ) ) . '</textarea></p>';
-		echo '<p class="description">' . esc_html__( 'Enter tag or category slugs, one per line or separated by commas.', 'sourceweb' ) . '</p>';
-		submit_button( __( 'Save Feed Filters', 'sourceweb' ), 'secondary', 'submit', false );
-		echo '</form>';
-		echo '</div>';
-
-		echo '</div>';
+	} elseif ( function_exists( 'sourceweb_sa_render' ) && sourceweb_sa_render( $screen ) ) {
+		// Drawn: To review, Enrichment review, Keywords, Rules, Places, Workers, Rejected, Relay log and Change log (sourceweb-standalone-screens.php, sourceweb-standalone-config.php).
 	} else {
 		$cfg = function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array();
 		$num_sources = count( (array) ( $cfg['sources'] ?? array() ) );

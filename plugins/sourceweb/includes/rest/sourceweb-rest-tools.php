@@ -47,7 +47,6 @@ function sourceweb_recheck_published( int $limit = 300 ): array {
 			'posts_per_page'   => $limit,
 			'orderby'          => 'date',
 			'order'            => 'DESC',
-			'suppress_filters' => true,
 		)
 	);
 	$flagged = array();

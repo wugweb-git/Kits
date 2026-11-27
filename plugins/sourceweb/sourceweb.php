@@ -3,7 +3,7 @@
  * Plugin Name: SourceWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/sourceweb/
  * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Enhanced by Kits Core, DirectoryWeb and InsightWeb.
- * Version: 0.2.8
+ * Version: 0.3.0
  * Update URI: https://wugweb.com/plugins/sourceweb/
  * Requires at least: 7.1
  * Requires PHP: 8.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.2.8' ); // keep equal to the Version header above
+defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.3.0' ); // keep equal to the Version header above
 // Core loads this file; if it is also active on its own, the second load stops here.
 if ( defined( 'SOURCEWEB_SOURCING_LOADED' ) ) {
 	return;
@@ -168,3 +168,5 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/compat/worker-routes-model.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/compat/worker-routes.php'; // the workers' routes also at sourceweb/v1/worker-api
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-ui.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-standalone.php'; // Sources and AI models as plain admin screens, for a site without Kits Core
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-standalone-screens.php'; // To review, Enrichment review, Rejected, Relay log and Change log as plain admin screens (0.3.0)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-standalone-config.php'; // Keywords, Rules, Places and Workers as plain admin screens (0.3.0)
