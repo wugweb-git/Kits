@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.3.4
+Stable tag: 2.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,10 @@ By default, deleting the plugin deletes no data: settings, FAQ records, focus ke
 Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Modules) and deleting the plugin removes its settings, stored scores and counts, link tables, scheduled jobs, the manage_rankweb capability, the page cache folder (wp-content/cache/rankweb) and the local font folder (wp-content/uploads/rankweb-fonts). A backup of the options and tables is first written to wp-content/uploads/wugweb-backups/; if it cannot be written, nothing is deleted. Posts, pages, post meta, Rank Math's data and the .webp copies in your media library are never deleted.
 
 == Changelog ==
+
+= 2.3.5 =
+* /news-sitemap.xml is answered only on a site that has News items (aw_news); on any other site with Rank Math active it no longer returns an empty sitemap.
+* The readme changelog entry for 2.2.0 listed fewer Transport sources and gallery types than CHANGELOG.md; CHANGELOG.md is the accurate list (five SEO plugins; 24 gallery types).
 
 = 2.3.4 =
 * robots.txt: the Content-Signal AI line is now off by default and is added only when RankWeb prints the page head (no other SEO plugin does) and the new setting is on. The news sitemap line is added only under the same rule, with its own setting, and only on sites that have News items; the /news-sitemap.xml address no longer answers on other sites.

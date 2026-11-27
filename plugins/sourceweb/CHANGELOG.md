@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.2.7
+
+- Corrects the readme: it listed 'retry backoff state' and 'worker/feed retry backoff', but the backoff code is not called, so there is no retry backoff. No behaviour changes.
+
 ## 0.2.6
 
 - The worker routes (ingest, relevance, same story, relay, summaries, sourcing policy, heartbeat, AI usage) now need the SourceWeb capability or administrator rights instead of `edit_posts`. Routes that required an application password still do.
@@ -41,4 +45,4 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 ## 0.1.0
 
-- Standalone release with native admin UI fallback, worker/feed retry backoff, domain trust overrides, and feed tag exclusions.
+- Standalone release with native admin UI fallback, domain trust overrides, and feed tag exclusions. (Corrected in 0.2.7: 'worker/feed retry backoff' was listed here but nothing calls the backoff code.)

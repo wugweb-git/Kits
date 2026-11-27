@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.6
+Stable tag: 0.2.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ SourceWeb decides what comes into your site and lets your editorial team review 
 * **Sources:** Manage publisher hosts with trust status (allowed, neutral, or blocked), feeds, optional relay settings, and locally cached site icons.
 * **Keywords & Rules:** Configure include, context, and exclude keyword lists alongside per-section rules, domain trust overrides, and feed tag exclusions.
 * **Review Queues:** Approve, publish, or reject incoming items and enrichment proposals in To review and Enrichment review.
-* **Reports & Jobs:** Monitor worker heartbeats, retry backoff state, rejected items, relay logs, and change logs.
+* **Reports & Jobs:** Monitor worker heartbeats, rejected items, relay logs, and change logs.
 * **Optional AI & Worker Endpoints:** Configure optional AI provider keys with daily caps and REST endpoints for ingestion, relay, relevance, same-story grouping, summaries, and enrichment.
 
 SourceWeb operates standalone with no mandatory plugin dependencies, and optionally integrates with Kits Core, DirectoryWeb, and InsightWeb when active.
@@ -74,6 +74,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 
 == Changelog ==
 
+= 0.2.7 =
+* Corrects the readme: it listed 'retry backoff state' and 'worker/feed retry backoff', but the backoff code is not called, so there is no retry backoff. No behaviour changes.
+
 = 0.2.6 =
 * The worker routes (ingest, relevance, same story, relay, summaries, sourcing policy, heartbeat, AI usage) now need the SourceWeb capability or administrator rights instead of `edit_posts`. The routes that required an application password still do.
 * Nothing is published without a person unless **Publishing** is ticked in SourceWeb → Settings (off by default). This includes opportunities, backfill items and auto-review. Sites that relied on auto-publishing must tick it.
@@ -108,7 +111,7 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 * A CI check compares the workers registry with the workers repository.
 
 = 0.1.0 =
-* Standalone release with native admin UI fallback, worker/feed retry backoff, domain trust overrides, and feed tag exclusions.
+* Standalone release with native admin UI fallback, domain trust overrides, and feed tag exclusions. (Corrected in 0.2.7: this entry also said 'worker/feed retry backoff'. The backoff code exists but nothing calls it, so there is no retry backoff.)
 
 == Upgrade Notice ==
 

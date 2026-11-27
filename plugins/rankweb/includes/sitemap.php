@@ -259,7 +259,7 @@ if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_r
 add_action(
 	'parse_request',
 	function ( $wp ) {
-		if ( 'news' !== ( $wp->query_vars['sitemap'] ?? '' ) ) {
+		if ( 'news' !== ( $wp->query_vars['sitemap'] ?? '' ) || ! post_type_exists( 'aw_news' ) ) {
 			return;
 		}
 		do_action( 'litespeed_control_set_ttl', 900 ); // LiteSpeed keeps it 15 minutes at most

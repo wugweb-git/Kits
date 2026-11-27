@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.4
+Stable tag: 3.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,12 +103,11 @@ MailWeb connects to external services only when configured by the site administr
 * **Configured SMTP Server:** When SMTP credentials are configured under **Mail → Settings → Site sending**, delivers site emails via that SMTP host (Hostinger Mail by default). The SMTP presets for Hostinger, Gmail, Outlook, SendGrid, Mailgun, Postmark, Amazon SES and a custom server are only a list of host names and ports offered in the settings; MailWeb connects to a preset's host only if you save that host with a password. Sent email, including recipients and text, goes to that server. Terms and privacy are those of the provider you choose.
 * **DNS lookups (your DNS resolver):** The Site sending screen and a daily job look up the DKIM (`hostingermail1._domainkey`) and SPF TXT records of the site's mail domain, through the server's own DNS resolver, to warn when email authentication is not set up. No data about your visitors or email is sent; the lookups name the domain only.
 * **FluentCRM and Fluent Forms (local WordPress plugins, optional):** When active (and, for the mailbox feed, enabled in settings), MailWeb writes contact notes, tags and list changes in your own site's FluentCRM and shows form entries in the Inbox. Nothing leaves the site.
-* **Failure Alert Webhook (optional):** When an administrator configures a webhook URL (Slack, Discord, Telegram, or custom endpoint), sends throttled pause/failure notifications to that URL.
 
 == Upgrade Notice ==
 
 = 3.3.0 =
-Adds Site Health email sending check, per-user pause notice dismissal, email logging & resend, fallback SMTP configuration, failure alert webhooks, and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`).
+Adds a Site Health email sending check and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`). Corrected in 3.3.5: this note once also listed per-user pause dismissal, email logging and resend, fallback SMTP and failure alert webhooks. Those are not working yet (see the 3.3.5 changelog).
 
 == Bundled libraries ==
 
@@ -121,6 +120,10 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.3.5 =
+* Corrects release notes that described work not yet built: the Status column in lists (3.3.0), email logging for real mail (only test emails are logged), the fallback SMTP connection (saved but not used to send), failure alert webhooks (the setting exists, nothing sends an alert), the per-user pause-notice dismissal (no button), and a resend control. The Failure Alert Webhook entry is removed from External services because MailWeb never calls it.
+* Nothing else changes.
 
 = 3.3.4 =
 * Activating MailWeb no longer takes over the site's email. Forcing the From address, the daily limit and queue, and keeping the text of sent emails are separate switches in Mail → Settings → Site sending, off on a new install. A site that already had MailWeb settings keeps the From address and limit on; the text of sent emails is kept only if you turn that on, for 1 to 365 days (default 30), and a daily job deletes older text.
@@ -142,7 +145,7 @@ Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each pack
 * The direct (non-WordPress.org) build now carries an Update URI header, so the site checks the Kits registry for new versions. The WordPress.org build still omits it.
 
 = 3.3.0 =
-* Lists: a Status column (New, Read, Replied, Forwarded) in every folder except Sent, and in Website forms. Replied also counts replies sent from webmail or another tool: the sender was written to, from any mailbox, after the message arrived.
+* Lists: a Status column (New, Read, Replied, Forwarded) was announced here. It was never built; see 3.3.5.
 
 = 3.2.1 =
 * Shown as MailWeb (was Mailweb). The folder, text domain, settings, webhook address and everything saved stay the same.

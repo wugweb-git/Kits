@@ -2,6 +2,11 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.3.5
+
+- /news-sitemap.xml is answered only on a site that has News items (aw_news); on any other site with Rank Math active it no longer returns an empty sitemap.
+- The readme changelog entry for 2.2.0 listed fewer Transport sources and gallery types than CHANGELOG.md; CHANGELOG.md is the accurate list (five SEO plugins; 24 gallery types).
+
 ## 2.3.4
 
 - robots.txt: the Content-Signal AI line is off by default and is added only when RankWeb prints the page head (no other SEO plugin does) and the new setting (Settings → Robots rules) is on. The news sitemap line follows the same rule with its own setting, and only on sites that have News items; `/news-sitemap.xml` no longer answers on sites without them.

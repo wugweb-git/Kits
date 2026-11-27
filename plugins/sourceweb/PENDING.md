@@ -1,5 +1,15 @@
 # SourceWeb: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- NOT BUILT, although marked done on 22 Nov: canonical-URL enforcement linking to the original (`attribution.php` has chips, favicons and slugs only); author attribution cards and syndication notices; rate limiting of external fetches (no `wp_safe_remote_get` and no rate code in `ingest.php`). Auto keyword tagging is partial: tags come from the worker, SourceWeb only serves the allowed list.
+- DEAD CODE: feed retry backoff (`sourceweb_feed_*_backoff` in `ingest.php`) is called only by tests; the readme no longer promises it (0.2.7).
+- The 'Resolved 26 Nov' line for the open-model consent gate contradicts the HOLD section: the code is held and unloaded.
+- Partial: summary routes use their own check (`aw_worker` or `manage_options` plus application password), not `sourceweb_ingest_can`; the 'quiet' alert in `relevance.php` has no heartbeat guard; a 'paid' AI tier still exists in the code.
+- 0.2.6 (route capability, publishing switch, Animal Writes switch, standalone screens, masked keys) has no automated test.
+
 ## Active Scope & Responsibilities
 The content ingestion and syndication plugin owns:
 - Feed ingestion (RSS, Atom, JSON feeds).

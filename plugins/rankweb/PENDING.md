@@ -1,5 +1,12 @@
 # RankWeb: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- Not tested: robots.txt extras, uninstall, `is_dynamic` page-cache exclusion. 2.3.1 has no changelog entry. 'Robots rules for archives' is built; only 404 is open. '94 settings checks' is now 123.
+- Fixed in 2.3.5: `/news-sitemap.xml` answered on any Rank Math site; it now needs `aw_news`.
+
 Status as of 26 Nov 2026 on `feat/rankweb-native-screens` (earlier sections: 25 Nov on `feat/directoryweb-completion`). Evidence: U unit, H headless Playground, B browser, X external. See `docs/audit/acceptance-gates.md`.
 
 ## Active Scope & Responsibilities

@@ -1,5 +1,14 @@
 # InsightWeb: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- DEAD (held, not loaded): 404 and internal-search logging and `insightweb_keyword_movers()`; the earlier 'done' marks are wrong. No UI or REST route reaches them.
+- Not tested: 'Tiles and MiniCharts safe when tables are empty' (no test covers empty tables); 1.1.3 cleanup; 1.1.4 native screens.
+- Incomplete: neutral wording (Animal Writes strings remain in `links-seed.php` and the brand patterns in `keyword-model.php`). The overview boxes retry is manual (a 'Try again' button).
+- The 'Tabs: 10 flat tabs' and '404 surfacing: unverified' notes are outdated.
+
 ## Active Scope & Responsibilities
 The analytics, telemetry, and search metrics plugin owns:
 - Minimalist admin dashboard with inline SVG MiniCharts (zero external JS chart dependencies).

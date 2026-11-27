@@ -91,3 +91,28 @@ Four read-only reviewers covered Kits Core, the theme and release pipeline, the 
 
 ## G. Not checked by anyone
 Plugin Check output; real browser rendering; live mail, Site Kit and Fluent Forms; the large deleted architecture and roadmap docs (only grepped, not read); whether the Animal Writes site layer survives in another repo; branch protection and secrets settings.
+
+---
+
+# Third pass, 27 Nov: every "done" claim checked against code
+Four read-only reviewers checked every claim of completed work since 21 Nov (PENDING marks, changelogs, readme changelogs, commit messages) in all seven plugins: about 190 claims. Each plugin's PENDING.md now begins with a "Verified status, 27 Nov 2026" section that overrides older marks.
+
+## Claimed done, not built (customers or HQ were told it existed)
+1. **MailWeb 3.3.0: Status column (New / Read / Replied / Forwarded) in lists.** Not built; the data is stored, no screen reads it. Shipped in readme and changelog for 3.3.0 to 3.3.4. Corrected in 3.3.5.
+2. **MailWeb: email logging of real mail, fallback SMTP connection, failure alert webhooks, per-user pause dismiss, resend.** Settings or routes exist, nothing uses them (only test emails are logged). Listed in the 3.3.0 Upgrade Notice and External services. Corrected in 3.3.5.
+3. **SourceWeb, marked done 22 Nov: canonical-URL enforcement, author and syndication cards, rate limiting of external fetches.** No code. Auto keyword tagging is partial. Feed retry backoff is dead code and was in the readme. Corrected in 0.2.7 (readme) and PENDING.
+4. **PlanWeb, marked done: campaign timeline and author / category / tag filters.** Live only in a file that is not loaded.
+5. **DirectoryWeb, PENDING: template swap to status and people blocks; "0 slow MySQL queries on 7,700+ entries".** No code or test in the repo.
+6. **MailWeb tenant profiles and retry queue, InsightWeb 404 and search logging, SourceWeb consent gate: marked "Resolved" while held and unloaded.**
+
+## Partial or overstated
+- DirectoryWeb neutral wording is incomplete (hard-coded in `listing-meta.php`, `claims-review.php`, `listing-profile.php`).
+- InsightWeb neutral wording incomplete (`links-seed.php`, `keyword-model.php`).
+- RankWeb `/news-sitemap.xml` answered on any Rank Math site (fixed in 2.3.5); the readme 2.2.0 entry lists fewer sources than CHANGELOG.md; 2.3.1 has no entry.
+- Kits Core 1.3.3 changelog says "four" options (five) and "five tests print a count" (three do not); "only place products promote each other" is wrong; no 1.3.1 entry.
+
+## No tests exist for (all new in 1.3.3 to 3.3.4)
+Kits Core form copy, wizard backup, uninstall and carry-over; DirectoryWeb 1.2.3 standalone screens (about 660 lines); SourceWeb 0.2.6 (capability, publishing, Animal Writes switch, masked keys); InsightWeb 1.1.4 native screens and tracking switch; MailWeb 3.3.4 cron, uninstall and screens; PlanWeb job cron and the Animal Writes switch; RankWeb robots extras, uninstall and page-cache exclusion.
+
+## Credit where it held up
+All 0.2.6 SourceWeb behaviour, InsightWeb 1.1.x, Kits Core blocks, registry updates and check-in, all PlanWeb 0.3.x jobs and 0.3.2 fixes, RankWeb 2.2.0 to 2.3.4 features (29 settings traced, none dead), and most DirectoryWeb 1.2.0 features (claim flow, schema, CSV, evidence store) were found in code.

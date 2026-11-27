@@ -1,5 +1,14 @@
 # DirectoryWeb: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- NOT FOUND: swapping `single-aw_listing.html` to `directoryweb/status` and `people`, and the `find-help` pattern (no such template exists in this repo); '0 slow MySQL queries on 7,700+ entries' (no benchmark or test).
+- Partial: neutral wording (still fixed in `listing-meta.php:81,88`, `claims-review.php:37,50`, `listing-profile.php:297`); the Animal Writes site layer restores only two labels (now three).
+- Stale: CRM events are built (`claim-crm.php`, 12 tests); the schema test count is 30; the header branch note is old.
+- Not tested: 1.2.3 standalone screens (about 660 lines), labels, near bounds, PIN gating, deactivation.
+
 Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U unit, H headless Playground, B browser, X external. See `docs/audit/acceptance-gates.md` and `docs/audit/master-matrix.md`.
 
 ## Active Scope & Responsibilities

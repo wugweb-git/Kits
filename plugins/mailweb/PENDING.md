@@ -1,5 +1,14 @@
 # MailWeb: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- NOT BUILT, although earlier notes said done: the Status column in lists (New / Read / Replied / Forwarded; `answered` and `forwarded` are stored but nothing reads them, and nothing compares the Sent folder); email logging of real mail (`mailweb_log_record` is called only by the test send); the fallback SMTP connection (saved, never used to send); failure alert webhooks (`mailweb_send_failure_alert` has no caller); the per-user pause-notice dismiss (route exists, no button); email resend (no UI); SMTP presets (REST route only, no UI). The Hostinger 'fallback to wp_mail / SMTP 465' is in fact a fallback to the Mail API over `wp_remote_request`.
+- The block headed 'Resolved' for tenant profiles, rate limits and the retry queue is wrong: that code is HELD and not loaded. See the HOLD section.
+- Open bug: the log form says recipients and subject are kept only when body logging is on; the test-send log keeps them always.
+- Not tested: hooks, cron, screens (only pure helpers are covered).
+
 ## Active Scope & Responsibilities
 The email and delivery management plugin owns:
 - Transactional and outbound email routing.

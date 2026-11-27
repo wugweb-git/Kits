@@ -1,5 +1,14 @@
 # Kits Core: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- Stale: 'Layer 3 not built / no `wp_theme_json_data_theme` filter' (built, `brand-customizer.php`); the wizard 'saves an option nothing reads' and Scripts 'no unfiltered_html check' (both fixed); OD4 duplicates open task 2.
+- Still open: translations beyond the .pot, `kits_features` and `kits_settings_fields` filters, the `kits/v1/site-check` route, the `kits/socials` block, a test for the Scripts gate.
+- Wording corrections: 1.3.3 says the carry-over turns on 'four' options (it is five); it says five tests 'print a check count' (three do not); 'More from Wugweb is the only place products promote each other' (a Plugins-screen 'More' link remains); there is no 1.3.1 entry (1.3.1 was never tagged).
+- Not tested: form copy, wizard backup / restore, uninstall, carry-over, brand Reset / Clear, SHA-256 check, block renderers. The admin-layer test skips its site-layer assertions silently because `themes/kits-by-wugweb/assets/site` was deleted.
+
 ## Active Scope & Responsibilities
 The foundational companion plugin owns:
 - Multi-tenant Brand Customizer (`Appearance > Brand Tokens` / `admin.php?page=kits-brand`).

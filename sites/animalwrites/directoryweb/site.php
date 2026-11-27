@@ -18,6 +18,7 @@ add_filter(
 			array(
 				'animals'     => 'Animals helped',
 				'awbi_number' => 'AWBI number',
+				'registry_id' => 'NGO Darpan ID',
 			)
 		);
 	}

@@ -1,5 +1,13 @@
 # PlanWeb: Pending & Roadmap
 
+## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
+
+Checked line by line against the code on 27 Nov 2026.
+
+- DEAD (file written, not loaded): the campaign timeline and the author / category / campaign-tag filters live in `calendar-views.php`, which `planweb.php` no longer loads. Their earlier 'done' marks are wrong; the file's own notes say no entry has those fields.
+- Stale: 'Help tab: not built' (it exists: `help-tab.php`); 'the shell entry form has no Repeat field' (added in 0.3.2).
+- Not tested: the cron run functions, saving, uninstall, the Animal Writes switch.
+
 ## Active Scope & Responsibilities
 The editorial calendar and campaign planning plugin owns:
 - Editorial planning calendar and post-status workflow.

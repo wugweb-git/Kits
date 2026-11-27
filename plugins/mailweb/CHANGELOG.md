@@ -2,6 +2,11 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.3.5
+
+- Corrects release notes that described work not yet built: the Status column in lists (3.3.0), email logging for real mail (only test emails are logged), the fallback SMTP connection (saved but not used to send), failure alert webhooks (the setting exists, nothing sends an alert), the per-user pause-notice dismissal (no button), and a resend control. The Failure Alert Webhook entry is removed from External services because MailWeb never calls it.
+- Nothing else changes.
+
 ## 3.3.4
 
 - Activating MailWeb no longer takes over the site's email. Forcing the From address, the daily limit and queue, and keeping the text of sent emails are separate switches in Mail → Settings → Site sending, off on a new install. A site that already had MailWeb settings keeps the From address and limit on; the text of sent emails is kept only if you turn that on, for 1 to 365 days (default 30), and a daily job deletes older text.
@@ -26,7 +31,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 ## 3.3.0
 
-- Lists: a Status column (New, Read, Replied, Forwarded) in every folder except Sent, and in Website forms. Replied also counts replies sent from webmail or another tool: the sender was written to, from any mailbox, after the message arrived.
+- Lists: a Status column (New, Read, Replied, Forwarded) was announced here. It was never built; see 3.3.5.
 
 ## 3.2.1
 
