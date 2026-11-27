@@ -51,7 +51,12 @@ def fetch(url: str) -> bytes:
 
 
 def semver(v: str):
-    return tuple(int(x) if x.isdigit() else 0 for x in re.split(r"[.\-]", v)[:4])
+    """(major, minor, patch, is_final, pre-number): 1.2.3-rc.1 sorts below 1.2.3."""
+    core, _, pre = v.partition("-")
+    nums = [int(x) if x.isdigit() else 0 for x in core.split(".")[:3]]
+    nums += [0] * (3 - len(nums))
+    pre_n = [int(x) for x in re.findall(r"\d+", pre)][:2]
+    return tuple(nums) + (0 if pre else 1,) + tuple(pre_n + [0] * (2 - len(pre_n)))
 
 
 def release_facts(offline: bool) -> dict[str, dict]:
@@ -89,6 +94,8 @@ def release_facts(offline: bool) -> dict[str, dict]:
             continue
         s, v = m.group(1), m.group(2)
         if s in found and semver(found[s]["version"]) > semver(v):
+            continue
+        if s in found and not found[s]["prerelease"] and r["prerelease"]:
             continue
         if s in found and found[s].get("channel") == "product" and semver(found[s]["version"]) >= semver(v):
             continue

@@ -34,9 +34,14 @@ jobs:
           tools: composer
 
       - name: Working tree is clean and the tag matches the blueprints
+        env:
+          TAG: ${{ inputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
+          printf '%s' "$TAG" | grep -Eq '^kits-suite-[0-9]{4}\.[0-9]{2}\.[0-9]{2}(-pre\.[0-9]+)?$' || { echo "Tag must look like kits-suite-YYYY.MM.DD or kits-suite-YYYY.MM.DD-pre.N"; exit 1; }
+          if printf '%s' "$TAG" | grep -q -- '-pre' && [ "$PRERELEASE" != "true" ]; then echo "A -pre tag must be a prerelease."; exit 1; fi
           test -z "$(git status --porcelain)"
-          grep -q "RELEASE_TAG = \"${{ inputs.tag }}\"" tools/playground/build-blueprints.py
+          grep -qF "RELEASE_TAG = \"$TAG\"" tools/playground/build-blueprints.py
           python3 tools/playground/build-blueprints.py --check
 
       - name: Require a successful CI run for this exact commit
@@ -76,23 +81,32 @@ jobs:
           """.replace('\n          ', '\n'))
           PY
 
-      - name: Publish release
+      - name: Create the release as a draft
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          COMMIT: ${{ github.sha }}
         run: |
           flags=""
-          if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
-          gh release create "${{ inputs.tag }}" ${flags} --target "${{ github.sha }}" \
-            --title "Kits Suite ${{ inputs.tag }}" --notes-file dist/NOTES.md \
+          if [ "$PRERELEASE" = "true" ]; then flags="--prerelease"; fi
+          gh release create "$TAG" --draft ${flags} --target "$COMMIT" \
+            --title "Kits Suite $TAG" --notes-file dist/NOTES.md \
             dist/*.zip dist/SHA256SUMS dist/release-manifest.json
 
-      - name: Verify every release asset downloads and matches its checksum
+      - name: Verify every draft asset downloads and matches its checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
         run: |
           mkdir -p verify && cd verify
-          base="https://github.com/${{ github.repository }}/releases/download/${{ inputs.tag }}"
-          while read -r sum file; do
-            curl -fsSL --retry 3 -o "$file" "$base/$file"
-            echo "$sum  $file" | sha256sum -c -
-          done < ../dist/SHA256SUMS
-          curl -fsSL --retry 3 -o release-manifest.json "$base/release-manifest.json"
-          curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
+          gh release download "$TAG" --repo "${{ github.repository }}" --pattern '*'
+          test -s SHA256SUMS
+          sha256sum -c SHA256SUMS
+          test -s release-manifest.json
+
+      - name: Publish the verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: gh release edit "$TAG" --draft=false

@@ -61,39 +61,59 @@ jobs:
 
       - name: Build this product and verify its files
         id: build
+        env:
+          PRODUCT: ${{ inputs.product }}
+          COMMIT: ${{ github.sha }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          python3 tools/release/release-product.py "${{ inputs.product }}" --out dist-release --commit "${{ github.sha }}" | tee build.log
-          echo "tag=$(sed -n 's/^tag=//p' build.log)" >> "$GITHUB_OUTPUT"
-          echo "title=$(sed -n 's/^title=//p' build.log)" >> "$GITHUB_OUTPUT"
+          python3 tools/release/release-product.py "$PRODUCT" --out dist-release --commit "$COMMIT" | tee build.log
+          tag=$(sed -n 's/^tag=//p' build.log)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          sed -n 's/^title=//p' build.log > release-title.txt
+          # a stable release must have a plain x.y.z version
+          if [ "$PRERELEASE" != "true" ] && ! printf '%s' "$tag" | grep -Eq -- '-v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Tag $tag is not a plain x.y.z version, so it cannot be a stable release."; exit 1
+          fi
 
       - name: A published version is final
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.build.outputs.tag }}
         run: |
-          if gh release view "${{ steps.build.outputs.tag }}" >/dev/null 2>&1; then
-            echo "Release ${{ steps.build.outputs.tag }} already exists. Raise the product's version to release again."
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists. Raise the product's version to release again."
             exit 1
           fi
 
-      - name: Publish release
+      - name: Create the release as a draft
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.build.outputs.tag }}
+          PRERELEASE: ${{ inputs.prerelease }}
+          COMMIT: ${{ github.sha }}
         run: |
           flags=""
-          if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
-          gh release create "${{ steps.build.outputs.tag }}" ${flags} --target "${{ github.sha }}" \
-            --title "${{ steps.build.outputs.title }}" --notes-file dist-release/NOTES.md \
+          if [ "$PRERELEASE" = "true" ]; then flags="--prerelease"; fi
+          gh release create "$TAG" --draft ${flags} --target "$COMMIT" \
+            --title "$(cat release-title.txt)" --notes-file dist-release/NOTES.md \
             dist-release/*.zip dist-release/SHA256SUMS dist-release/*-release.json
 
-      - name: Verify every asset downloads and matches its checksum
+      - name: Verify every draft asset downloads and matches its checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.build.outputs.tag }}
         run: |
           mkdir -p verify && cd verify
-          base="https://github.com/${{ github.repository }}/releases/download/${{ steps.build.outputs.tag }}"
-          curl -fsSL --retry 3 -o SHA256SUMS "$base/SHA256SUMS"
-          while read -r sum file; do
-            curl -fsSL --retry 3 -o "$file" "$base/$file"
-            echo "$sum  $file" | sha256sum -c -
-          done < SHA256SUMS
+          gh release download "$TAG" --repo "${{ github.repository }}" --pattern '*'
+          test -s SHA256SUMS
+          sha256sum -c SHA256SUMS
+          for z in *.zip; do unzip -tq "$z"; done
+
+      - name: Publish the verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.build.outputs.tag }}
+        run: gh release edit "$TAG" --draft=false
 
       - name: Refresh the product pages and registry
         env:

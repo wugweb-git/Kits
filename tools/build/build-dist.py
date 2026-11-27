@@ -120,6 +120,21 @@ SRC_EXCLUDE = [
 ]
 
 
+def held_files(src: pathlib.Path) -> list[str]:
+    """Paths a plugin's PENDING.md lists in a '## HOLD' section ('Code is on kits-suite (`includes/x.php`, ...)'): never packaged."""
+    pending = src / "PENDING.md"
+    if not pending.is_file():
+        return []
+    out: list[str] = []
+    for section in re.split(r"(?m)^## ", pending.read_text(encoding="utf-8", errors="ignore")):
+        if not section.startswith("HOLD"):
+            continue
+        m = re.search(r"Code is on kits-suite \(([^)]*)\)", section)
+        if m:
+            out += re.findall(r"`([\w./-]+\.php)`", m.group(1))
+    return out
+
+
 def excluded(rel_path: str, patterns: list[str]) -> bool:
     posix_path = pathlib.PurePosixPath(rel_path)
     # Check top-level src exclusion specifically:
@@ -231,6 +246,7 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
     # The source tree's vendor/ is never copied (it may hold dev dependencies, and is gitignored);
     # bundled targets get a fresh `composer install --no-dev` below.
     patterns.extend(["vendor", "vendor/*"])
+    patterns.extend(held_files(src))
 
     count = 0
     for path in sorted(src.rglob("*")):
