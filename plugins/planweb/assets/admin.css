@@ -91,3 +91,4 @@
 .planweb-timeline-mark:focus { outline: 2px solid #2271b1; outline-offset: 2px; }
 .planweb-timeline-list { margin-bottom: 16px; }
 @media (max-width: 600px) { .planweb-timeline-label { flex-basis: 80px; } }
+

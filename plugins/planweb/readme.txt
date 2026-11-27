@@ -4,7 +4,7 @@ Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.4.0
+Stable tag: 0.4.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ PlanWeb does not connect to, call, or send any data to an external service, and 
 The iCalendar feed it serves is read by your own calendar app (Google, Apple or Outlook) pulling from this site; the plugin itself never contacts those apps. Any social tools named elsewhere in PlanWeb (for example Meta Business Suite or Buffer) are used by the team outside the plugin — nothing is sent to them from PlanWeb.
 
 == Changelog ==
+
+= 0.4.1 =
+* The shell calendar's disabled "Today" button is readable (#646970 on white, 5.7:1, was 3.03:1). The control is drawn by Kits Core and fixed there (Kits Core 1.3.4).
+* Checked: no visible "Animal Writes" text outside the team-dates data for the live site, which stays as it was.
 
 = 0.4.0 =
 * New Timeline view on the Calendar page: a lane for each entry type, each entry a marker placed along the chosen date range, with a plain list of the same entries below. It only reads; nothing is changed or sent.

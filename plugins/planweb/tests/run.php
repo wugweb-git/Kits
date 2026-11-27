@@ -702,5 +702,18 @@ check( ( new DateTimeImmutable( '2026-11-30 08:30', $tz ) )->getTimestamp() === 
 check( ( new DateTimeImmutable( '2026-12-07 08:30', $tz ) )->getTimestamp() === planweb_job_next_run( new DateTimeImmutable( '2026-11-30 09:00', $tz ), '08:30', 1 ), 'schedule: a week on when Monday 08:30 has passed' );
 
 
+// 0.4.1: no visible "Animal Writes" outside the gated team dates. (The calendar Today button colour is Kits Core's: kits-core 1.3.4.)
+$visible = 0;
+foreach ( glob( dirname( __DIR__ ) . '/includes/*.php' ) as $f ) {
+	foreach ( explode( "\n", (string) file_get_contents( $f ) ) as $line ) {
+		$t = ltrim( $line );
+		if ( '' === $t || in_array( $t[0], array( '*', '/' ), true ) ) {
+			continue;
+		}
+		$visible += (int) ( preg_match( "/(__|_e|esc_html__|esc_attr__)\(\s*'[^']*Animal Writes/", $t ) );
+	}
+}
+check( 0 === $visible, 'no translatable string names Animal Writes' );
+
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );

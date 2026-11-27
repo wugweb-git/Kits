@@ -122,6 +122,7 @@ add_action(
 						admin_url( 'admin.php' )
 					),
 					'webmail'    => MAILWEB_WEBMAIL,
+					'provider'   => mailweb_provider_name(),
 					'oldSending' => mailweb_settings_url( 'sending', array(), 'cap' ),
 					'features'   => 'dashboard' === $screen && function_exists( 'mailweb_home_parts' ) ? mailweb_home_parts() : array(),
 				),
@@ -152,7 +153,7 @@ function mailweb_ui_page( string $screen ): bool {
 	}
 	$titles = array(
 		'dashboard' => __( 'MailWeb', 'mailweb' ),
-		'inbox'     => __( 'MailWeb inbox', 'mailweb' ),
+		'inbox'     => __( 'MailWeb', 'mailweb' ), // the plugin name, like the other plugins' h1; the Inbox view has its own h2
 		'settings'  => __( 'MailWeb settings', 'mailweb' ),
 	);
 	if ( 'inbox' === $screen && function_exists( 'mailweb_notice' ) ) {

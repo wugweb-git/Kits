@@ -2,6 +2,13 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.4.1
+
+- FluentCRM: the Reply-To name, the `{{aw.*}}` smart-code group name and the `wp aw crm-setup` sender and business name come from the site name (`mailweb_fcrm_site_name()`, safe for a header) instead of the fixed text "Animal Writes". Option, hook, function and smart-code names are unchanged.
+- Inbox: the "In step with Hostinger webmail" line names the provider only when the active provider is the Hostinger one (`mailweb_provider_name()`, passed as `provider`); otherwise "In step with your webmail".
+- Inbox: an empty list says "No messages yet." and the reading pane's "Choose a message to read it." shows only when there are messages.
+- Inbox page heading: h1 "MailWeb" (as the other plugins), with a visually hidden h2 "Inbox". Rebuilt `build/`.
+
 ## 3.4.0
 
 - New, all off on a clean install (Mail → Settings → Site sending → "Delivery log, fallback and alerts"):

@@ -209,3 +209,11 @@ function mailweb_provider(): Mailweb_Provider {
 	}
 	return $provider;
 }
+
+/**
+ * The webmail brand the configured mailbox belongs to, for words shown to the user: "Hostinger" when the active
+ * provider is the Hostinger adapter, '' otherwise (the screens then say "your webmail").
+ */
+function mailweb_provider_name(): string {
+	return mailweb_provider() instanceof Mailweb_Hostinger_Provider ? 'Hostinger' : '';
+}

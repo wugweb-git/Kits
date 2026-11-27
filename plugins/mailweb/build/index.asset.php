@@ -1,8 +1,4 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-return array(
+<?php return array(
 	'dependencies' => array(
 		'kits-shell',
 		'react-jsx-runtime',
@@ -10,5 +6,5 @@ return array(
 		'wp-element',
 		'wp-i18n'
 	),
-	'version' => '19466b20ea3eb7fe3c92'
+	'version' => '938e10b79cf223041703'
 );

@@ -138,10 +138,19 @@ function Folders( { data, st, go } ) {
 				) ) }
 			</ul>
 			<p className="mailweb-mail__webmail">
-				{ __(
-					'In step with Hostinger webmail: what you read, move or send here shows there too.',
-					'mailweb'
-				) }
+				{ app.provider
+					? sprintf(
+							/* translators: %s: the webmail provider's name, e.g. Hostinger. */
+							__(
+								'In step with %s webmail: what you read, move or send here shows there too.',
+								'mailweb'
+							),
+							app.provider
+					  )
+					: __(
+							'In step with your webmail: what you read, move or send here shows there too.',
+							'mailweb'
+					  ) }
 			</p>
 		</nav>
 	);
@@ -171,6 +180,7 @@ function Reader( {
 	onMove,
 	onShow,
 	busy,
+	hasMessages = true,
 } ) {
 	const head = useRef( null );
 	useEffect( () => {
@@ -211,6 +221,10 @@ function Reader( {
 		);
 	}
 	if ( ! msg ) {
+		// With no messages the list already says so; the hint would contradict it.
+		if ( ! hasMessages ) {
+			return null;
+		}
 		return (
 			<EmptyState
 				title={ __( 'Choose a message to read it.', 'mailweb' ) }
@@ -547,7 +561,7 @@ export default function Inbox() {
 	const [ words, setWords ] = useState( st.search );
 	useEffect( () => setWords( st.search ), [ st.search ] );
 
-	let emptyTitle = __( 'No messages.', 'mailweb' );
+	let emptyTitle = __( 'No messages yet.', 'mailweb' );
 	if ( data?.failed ) {
 		emptyTitle = __(
 			'The mailbox could not be read just now. Try again in a minute.',
@@ -677,6 +691,7 @@ export default function Inbox() {
 
 	return (
 		<div className="mailweb-mail" data-pane={ open ? 'read' : 'list' }>
+			<h2 className="screen-reader-text">{ __( 'Inbox', 'mailweb' ) }</h2>
 			<Folders data={ data } st={ st } go={ go } />
 			<section
 				className="mailweb-mail__list"
@@ -813,6 +828,7 @@ export default function Inbox() {
 					onMove={ ( to ) => move( [ open ], to ) }
 					onShow={ () => setImages( true ) }
 					busy={ busy }
+					hasMessages={ rows.length > 0 }
 				/>
 			</section>
 		</div>

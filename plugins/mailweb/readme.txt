@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.4.0
+Stable tag: 3.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,9 @@ MailWeb connects to external services only when configured by the site administr
 
 == Upgrade Notice ==
 
+= 3.4.1 =
+Wording fixes only: the sender name in FluentCRM emails and setup is the site's name, the Inbox names Hostinger only on a Hostinger mailbox, and an empty Inbox no longer asks you to choose a message.
+
 = 3.4.0 =
 Adds a delivery log, a fallback SMTP connection and failure alerts by email, all off until you switch them on, and a dismiss link on the paused notice. Failure alerts are by email only; the unused webhook alert code is gone.
 
@@ -131,6 +134,12 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.4.1 =
+* The FluentCRM Reply-To name, the {{aw.*}} smart-code group name and the `wp aw crm-setup` sender and business name use the site's name instead of a fixed one (a site called Animal Writes reads exactly as before).
+* The Inbox line "In step with Hostinger webmail" names Hostinger only when the mailbox is Hostinger's; otherwise it reads "In step with your webmail".
+* An empty Inbox says "No messages yet." and no longer also says "Choose a message to read it.".
+* The Inbox page heading is "MailWeb", with "Inbox" as a section heading under it.
 
 = 3.4.0 =
 * New, all off on a clean install (Mail → Settings → Site sending → "Delivery log, fallback and alerts"): a delivery log with a Status column in Mail → Email Logs (accepted by the mail server, failed, accepted by the fallback, held in the queue; never the text), a fallback SMTP connection used once when the primary send fails, and failure alerts by email to the site administrator (at most one an hour, no recipient or text).

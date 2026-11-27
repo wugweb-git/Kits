@@ -2,6 +2,11 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.4.1
+
+- The shell calendar's disabled "Today" button was #949494 on white (3.03:1); Kits Core 1.3.4 sets it to #646970 (5.7:1, WCAG 1.4.3) in `src/shell/calendar.js` and `more.css`; PlanWeb itself has no override.
+- Audit: no visible "Animal Writes" string outside the team-dates data in `includes/team-dates.php`, which is gated by `aw_team_dates_context()` and stays for the live site.
+
 ## 0.4.0
 
 - New Timeline view on the Calendar page (the one used without Kits Core): a lane for each entry type, each entry a marker placed by its date along the range, plus a plain list of the same entries. Default range is eight weeks from this week's Monday; at most one year. Read-only.

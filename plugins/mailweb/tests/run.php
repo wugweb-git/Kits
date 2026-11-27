@@ -464,5 +464,25 @@ $applied = mailweb_apply_sender_profile_to_args( array( 'headers' => array( 'X-M
 $ub_t( in_array( 'From: Tenant Alerts <alerts@tenant.com>', $applied['headers'], true ) && ! in_array( 'X-Mailweb-Profile: alerts', $applied['headers'], true ), 'tenant profile: From header replaced and routing header stripped' );
 $ub_t( 300 === mailweb_retry_backoff_seconds( 0 ) && 900 === mailweb_retry_backoff_seconds( 1 ) && 3600 === mailweb_retry_backoff_seconds( 2 ), 'retry backoff: 5m, 15m, 60m progression' );
 
+// 3.4.1: no site's name in visible text; the inbox words follow the real provider and the real list.
+$src = static fn( string $f ): string => (string) file_get_contents( dirname( __DIR__ ) . '/' . $f );
+$aw_literals = 0;
+foreach ( array( 'includes/fluentcrm.php' ) as $f ) {
+	foreach ( explode( "\n", $src( $f ) ) as $line ) {
+		$code = trim( $line );
+		if ( '' === $code || 0 === strpos( $code, '*' ) || 0 === strpos( $code, '/*' ) || 0 === strpos( $code, '//' ) ) {
+			continue;
+		}
+		$aw_literals += preg_match( "/'[^']*Animal Writes[^']*'/", $code );
+	}
+}
+$ub_t( 0 === $aw_literals, 'fluentcrm.php: no "Animal Writes" string literal (Reply-To, smart code, setup names use the site name)' );
+$ub_t( false !== strpos( $src( 'includes/fluentcrm.php' ), 'function mailweb_fcrm_site_name' ), 'fluentcrm.php: the sender name comes from the site name' );
+$ub_t( false !== strpos( $src( 'includes/providers.php' ), 'function mailweb_provider_name' ) && false !== strpos( $src( 'includes/mailweb-ui.php' ), "'provider'   => mailweb_provider_name()" ), 'inbox: the provider name is handed to the screen' );
+$ub_t( 1 === preg_match( "/app\.provider\s*\?\s*sprintf/", $src( 'src/inbox.js' ) ) && false !== strpos( $src( 'src/inbox.js' ), 'In step with your webmail' ), 'inbox: "Hostinger" only when the provider is Hostinger, otherwise "your webmail"' );
+$ub_t( false !== strpos( $src( 'src/inbox.js' ), "'No messages yet.'" ) && false !== strpos( $src( 'src/inbox.js' ), 'if ( ! hasMessages )' ), 'inbox: empty list says "No messages yet." and drops the "Choose a message" hint' );
+$ub_t( false !== strpos( $src( 'includes/mailweb-ui.php' ), "'inbox'     => __( 'MailWeb', 'mailweb' )" ) && false !== strpos( $src( 'src/inbox.js' ), "<h2 className=\"screen-reader-text\">{ __( 'Inbox'" ), 'inbox: page h1 is "MailWeb", the section is an h2' );
+$ub_t( false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/build/index.js' ), 'No messages yet.' ), 'build: index.js was rebuilt from src' );
+
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

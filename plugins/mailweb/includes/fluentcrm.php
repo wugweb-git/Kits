@@ -328,7 +328,7 @@ add_filter(
 			return $headers;
 		}
 		$headers   = array_values( array_filter( (array) $headers, fn( $h ) => ! preg_match( '/^(Reply-To|List-Unsubscribe(-Post)?)\s*:/i', (string) $h ) ) );
-		$headers[] = 'Reply-To: Animal Writes <' . mailweb_fcrm_reply_to( $subscriber ? $subscriber->email : '' ) . '>';
+		$headers[] = 'Reply-To: ' . mailweb_fcrm_site_name() . ' <' . mailweb_fcrm_reply_to( $subscriber ? $subscriber->email : '' ) . '>';
 		$headers[] = 'X-AW-Priority: 0';
 		return $headers;
 	},
@@ -448,7 +448,7 @@ add_action(
 		if ( mailweb_fcrm_on() ) {
 			FluentCrmApi( 'extender' )->addSmartCode(
 				'aw',
-				'Animal Writes',
+				get_bloginfo( 'name' ),
 				array( 'update_link' => 'Volunteer update link (30 days)' ),
 				fn( $code, $key, $default, $subscriber ) => 'update_link' === $key && $subscriber ? mailweb_fcrm_update_link( $subscriber ) : $default,
 				array( 'level' => 'credential' ) // like the unsubscribe link: only in an email to that contact
@@ -669,6 +669,12 @@ add_action(
 	2
 );
 
+/** The site's name as a sender name: no quotes, angle brackets, commas or line breaks (it goes into a header). */
+function mailweb_fcrm_site_name(): string {
+	$n = trim( preg_replace( '/[\r\n"<>,]+/', ' ', wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) ) );
+	return '' !== $n ? $n : 'WordPress';
+}
+
 /* ---------- Setup commands (send nothing) ---------- */
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -681,12 +687,12 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			$all = (array) get_option( 'fluentcrm-global-settings', array() );
 			$em  = \FluentCrm\App\Services\Helper::getGlobalEmailSettings();
-			$em['from_name']         = 'Animal Writes';
+			$em['from_name']         = mailweb_fcrm_site_name();
 			$em['from_email']        = function_exists( 'mailweb_smtp_settings' ) ? mailweb_smtp_settings()['user'] : get_option( 'admin_email' );
 			$em['emails_per_second'] = 4; // the lowest FluentCRM accepts; the filter in mail-cap.php lowers it to 1
 			$all['email_settings']   = $em;
 			$biz                     = (array) ( $all['business_settings'] ?? array() );
-			$biz['business_name']    = 'Animal Writes';
+			$biz['business_name']    = mailweb_fcrm_site_name();
 			$all['business_settings'] = $biz;
 			update_option( 'fluentcrm-global-settings', $all );
 			foreach ( MAILWEB_FCRM_TAG_TITLES as $slug => $title ) { // the tags' visible names
