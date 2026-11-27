@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.2.4
+
+- Delete data on uninstall now also removes the three settings options added in 1.2.0 (the field, listing type and form mapping settings). They were left behind before. The backup written before deleting includes them.
+
 ## 1.2.3
 
 - Without Kits Core, Listing Types, Schema & Fields, Form Integrations, Import / Export and the Claims list are plain WordPress screens (tables and forms, nonce and capability checked) instead of a "needs Kits Core" notice. The Claims list there has no live filtering; Import / Export takes a file or pasted text. (`includes/standalone-screens.php`)

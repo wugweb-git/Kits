@@ -134,7 +134,7 @@ function Dashboard() {
 				setNote(
 					__(
 						'A count is running in the background. The numbers change when it is done (about a minute).',
-						'aw-sourcing'
+						'sourceweb'
 					)
 				);
 			} )
@@ -148,7 +148,7 @@ function Dashboard() {
 	if ( ! data ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the counts…', 'aw-sourcing' ) }
+				label={ __( 'Loading the counts…', 'sourceweb' ) }
 			/>
 		);
 	}
@@ -165,7 +165,7 @@ function Dashboard() {
 		const d = t.raw - old;
 		return sprintf(
 			/* translators: 1: change (+3 or -2), 2: number of days. */
-			__( '%1$s in %2$d days', 'aw-sourcing' ),
+			__( '%1$s in %2$d days', 'sourceweb' ),
 			( d > 0 ? '+' : '' ) + d.toLocaleString(),
 			days
 		);
@@ -173,10 +173,10 @@ function Dashboard() {
 	let after = data.atText
 		? sprintf(
 				/* translators: %s: date and time. */
-				__( 'Counted %s.', 'aw-sourcing' ),
+				__( 'Counted %s.', 'sourceweb' ),
 				data.atText
 			)
-		: __( 'Counting for the first time…', 'aw-sourcing' );
+		: __( 'Counting for the first time…', 'sourceweb' );
 	if ( data.atText && ! before ) {
 		after +=
 			' ' +
@@ -184,7 +184,7 @@ function Dashboard() {
 				/* translators: %d: number of days. */
 				__(
 					'No count from %d days ago yet, so no change is shown.',
-					'aw-sourcing'
+					'sourceweb'
 				),
 				days
 			);
@@ -194,20 +194,20 @@ function Dashboard() {
 			' ' +
 			__(
 				'The count is taking longer than usual; reload this page later.',
-				'aw-sourcing'
+				'sourceweb'
 			);
 	}
 
 	return (
 		<>
 			<ChipRow
-				label={ __( 'Compare with', 'aw-sourcing' ) }
+				label={ __( 'Compare with', 'sourceweb' ) }
 				value={ days }
 				onChange={ setDays }
 				chips={ RANGES.map( ( n ) => ( {
 					value: n,
 					/* translators: %d: number of days. */
-					label: sprintf( __( 'Last %d days', 'aw-sourcing' ), n ),
+					label: sprintf( __( 'Last %d days', 'sourceweb' ), n ),
 				} ) ) }
 				after={
 					<>
@@ -217,7 +217,7 @@ function Dashboard() {
 							busy={ busy }
 							onClick={ countNow }
 						>
-							{ __( 'Count now', 'aw-sourcing' ) }
+							{ __( 'Count now', 'sourceweb' ) }
 						</Button>
 					</>
 				}
@@ -229,7 +229,7 @@ function Dashboard() {
 			) }
 			{ attention.length > 0 && (
 				<Notice tone="warning">
-					<strong>{ __( 'Needs attention', 'aw-sourcing' ) }</strong>
+					<strong>{ __( 'Needs attention', 'sourceweb' ) }</strong>
 					<ul>
 						{ attention.map( ( t ) => (
 							<li key={ t.key }>
@@ -239,7 +239,7 @@ function Dashboard() {
 					</ul>
 				</Notice>
 			) }
-			<TileGrid label={ __( 'SourceWeb at a glance', 'aw-sourcing' ) }>
+			<TileGrid label={ __( 'SourceWeb at a glance', 'sourceweb' ) }>
 				{ data.tiles.map( ( t ) => (
 					<Tile
 						key={ t.key }
@@ -256,19 +256,19 @@ function Dashboard() {
 			{ data.charts && (
 				<SectionCard
 					id="pipeline"
-					title={ __( 'Pipeline and trends', 'aw-sourcing' ) }
+					title={ __( 'Pipeline and trends', 'sourceweb' ) }
 					description={ __(
 						'The last 28 days of the pipeline, and 14-day daily trends. Ingested: items fetched. Reviewed: those that passed the relevance gate into the queue. Approved: published. The last bar is the most recent day.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				>
 					<MiniChart
 						label={ __(
 							'Pipeline, last 28 days: ingested to reviewed to approved',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						points={ data.charts.funnel || [] }
-						unit={ __( 'items', 'aw-sourcing' ) }
+						unit={ __( 'items', 'sourceweb' ) }
 					/>
 					<div
 						style={ {
@@ -281,23 +281,23 @@ function Dashboard() {
 						<MiniChart
 							label={ __(
 								'Feed throughput: items fetched per day',
-								'aw-sourcing'
+								'sourceweb'
 							) }
 							points={ data.charts.throughput || [] }
-							unit={ __( 'items', 'aw-sourcing' ) }
+							unit={ __( 'items', 'sourceweb' ) }
 						/>
 						<MiniChart
 							label={ __(
 								'Near-duplicates folded per day',
-								'aw-sourcing'
+								'sourceweb'
 							) }
 							points={ data.charts.dupes || [] }
-							unit={ __( 'items', 'aw-sourcing' ) }
+							unit={ __( 'items', 'sourceweb' ) }
 						/>
 						<MiniChart
-							label={ __( 'Review-queue size', 'aw-sourcing' ) }
+							label={ __( 'Review-queue size', 'sourceweb' ) }
 							points={ data.charts.queue || [] }
-							unit={ __( 'waiting', 'aw-sourcing' ) }
+							unit={ __( 'waiting', 'sourceweb' ) }
 						/>
 					</div>
 				</SectionCard>
@@ -305,31 +305,31 @@ function Dashboard() {
 			{ data.runs.length > 0 && (
 				<SectionCard
 					id="runs"
-					title={ __( 'Worker runs', 'aw-sourcing' ) }
+					title={ __( 'Worker runs', 'sourceweb' ) }
 					description={ __(
 						'Each workflow’s last report and when it runs next.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				>
 					<DataList
-						label={ __( 'Worker runs', 'aw-sourcing' ) }
+						label={ __( 'Worker runs', 'sourceweb' ) }
 						columns={ [
 							{
 								key: 'title',
-								label: __( 'Worker', 'aw-sourcing' ),
+								label: __( 'Worker', 'sourceweb' ),
 								primary: true,
 							},
 							{
 								key: 'last',
-								label: __( 'Last report', 'aw-sourcing' ),
+								label: __( 'Last report', 'sourceweb' ),
 							},
 							{
 								key: 'result',
-								label: __( 'Result', 'aw-sourcing' ),
+								label: __( 'Result', 'sourceweb' ),
 							},
 							{
 								key: 'next',
-								label: __( 'Next due', 'aw-sourcing' ),
+								label: __( 'Next due', 'sourceweb' ),
 							},
 						] }
 						rows={ data.runs }
@@ -340,17 +340,17 @@ function Dashboard() {
 			{ data.reports.length > 0 && (
 				<SectionCard
 					id="reports"
-					title={ __( 'Reports', 'aw-sourcing' ) }
+					title={ __( 'Reports', 'sourceweb' ) }
 					description={ __(
 						'Read-only logs, on the current screens for now.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				>
 					<RefTable
-						caption={ __( 'Reports', 'aw-sourcing' ) }
+						caption={ __( 'Reports', 'sourceweb' ) }
 						head={ [
-							__( 'Report', 'aw-sourcing' ),
-							__( 'What it lists', 'aw-sourcing' ),
+							__( 'Report', 'sourceweb' ),
+							__( 'What it lists', 'sourceweb' ),
 						] }
 						rows={ data.reports.map( ( r ) => [
 							<a key="a" href={ r.url }>
@@ -363,17 +363,17 @@ function Dashboard() {
 			) }
 			<SectionCard
 				id="commands"
-				title={ __( 'Commands', 'aw-sourcing' ) }
+				title={ __( 'Commands', 'sourceweb' ) }
 				description={ __(
 					'WP-CLI on the server. Each lists its options with --help.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<RefTable
-					caption={ __( 'Commands', 'aw-sourcing' ) }
+					caption={ __( 'Commands', 'sourceweb' ) }
 					head={ [
-						__( 'Command', 'aw-sourcing' ),
-						__( 'What it does', 'aw-sourcing' ),
+						__( 'Command', 'sourceweb' ),
+						__( 'What it does', 'sourceweb' ),
 					] }
 					rows={ data.commands.map( ( c ) => [
 						<code key="c">{ c[ 0 ] }</code>,
@@ -408,7 +408,7 @@ function ExtraParts( { id, title } ) {
 			) &&
 			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
 			! window.confirm(
-				__( 'Reset this section to its defaults?', 'aw-sourcing' )
+				__( 'Reset this section to its defaults?', 'sourceweb' )
 			)
 		) {
 			e.preventDefault();
@@ -471,7 +471,7 @@ function Review() {
 						'Publish %d item in this view?',
 						'Publish all %d items in this view?',
 						n,
-						'aw-sourcing'
+						'sourceweb'
 					),
 					n
 				)
@@ -494,17 +494,17 @@ function Review() {
 		<>
 			<SectionCard
 				id="review"
-				title={ __( 'To review', 'aw-sourcing' ) }
+				title={ __( 'To review', 'sourceweb' ) }
 				description={ __(
 					'Items that came in automatically and need a person, with why each was held. Publish puts it live; Reject moves it to Drafts (nothing is deleted).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				actions={
 					data && data.count > 0 ? (
 						<Button onClick={ publishAll }>
 							{ sprintf(
 								/* translators: %d: number of items. */
-								__( 'Publish all %d', 'aw-sourcing' ),
+								__( 'Publish all %d', 'sourceweb' ),
 								data.count
 							) }
 						</Button>
@@ -520,17 +520,17 @@ function Review() {
 					</Notice>
 				) }
 				<DataList
-					label={ __( 'Items waiting for review', 'aw-sourcing' ) }
+					label={ __( 'Items waiting for review', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'date',
-							label: __( 'Received', 'aw-sourcing' ),
+							label: __( 'Received', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => r.dateText,
 						},
 						{
 							key: 'title',
-							label: __( 'Item', 'aw-sourcing' ),
+							label: __( 'Item', 'sourceweb' ),
 							sortable: true,
 							primary: true,
 							render: ( r ) => (
@@ -549,18 +549,18 @@ function Review() {
 						},
 						{
 							key: 'type',
-							label: __( 'Type', 'aw-sourcing' ),
+							label: __( 'Type', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => r.typeLabel,
 						},
 						{
 							key: 'host',
-							label: __( 'Source', 'aw-sourcing' ),
+							label: __( 'Source', 'sourceweb' ),
 							render: ( r ) => r.host || '—',
 						},
 						{
 							key: 'why',
-							label: __( 'Why it is waiting', 'aw-sourcing' ),
+							label: __( 'Why it is waiting', 'sourceweb' ),
 						},
 					] }
 					rows={ rows }
@@ -570,20 +570,20 @@ function Review() {
 					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 					search={ q.search }
 					onSearch={ ( search ) => set( { search } ) }
-					searchLabel={ __( 'Search items', 'aw-sourcing' ) }
+					searchLabel={ __( 'Search items', 'sourceweb' ) }
 					views={ data?.views || [] }
 					view={ q.type }
 					onView={ ( type ) => set( { type, source: '', why: '' } ) }
 					filters={ [
 						{
 							key: 'source',
-							label: __( 'Source', 'aw-sourcing' ),
+							label: __( 'Source', 'sourceweb' ),
 							options: data?.filters?.source || [],
 							value: q.source,
 						},
 						{
 							key: 'why',
-							label: __( 'Why', 'aw-sourcing' ),
+							label: __( 'Why', 'sourceweb' ),
 							options: data?.filters?.why || [],
 							value: q.why,
 						},
@@ -594,13 +594,13 @@ function Review() {
 					bulkActions={ [
 						{
 							value: 'publish',
-							label: __( 'Publish', 'aw-sourcing' ),
+							label: __( 'Publish', 'sourceweb' ),
 						},
 						{
 							value: 'reject',
 							label: __(
 								'Reject (move to Drafts)',
-								'aw-sourcing'
+								'sourceweb'
 							),
 						},
 					] }
@@ -608,29 +608,29 @@ function Review() {
 					rowActions={ ( r ) => [
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							href: r.editUrl,
 						},
 						...( r.url
 							? [
 									{
-										label: __( 'Source', 'aw-sourcing' ),
+										label: __( 'Source', 'sourceweb' ),
 										href: r.url,
 									},
 								]
 							: [] ),
 						{
 							icon: 'success',
-							label: __( 'Publish', 'aw-sourcing' ),
+							label: __( 'Publish', 'sourceweb' ),
 							onClick: () => decide( 'publish', [ r.id ] ),
 							disabled: r.noPublish,
 							why: r.noPublish
-								? __( 'Needs its summary first', 'aw-sourcing' )
+								? __( 'Needs its summary first', 'sourceweb' )
 								: '',
 						},
 						{
 							icon: 'cancel',
-							label: __( 'Reject', 'aw-sourcing' ),
+							label: __( 'Reject', 'sourceweb' ),
 							tone: 'error',
 							onClick: () => decide( 'reject', [ r.id ] ),
 						},
@@ -638,12 +638,12 @@ function Review() {
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'Nothing is waiting.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'Nothing is waiting.', 'sourceweb' ) }
 					empty={
 						<p>
 							{ __(
 								'New items that pass the checks go live on their own.',
-								'aw-sourcing'
+								'sourceweb'
 							) }
 						</p>
 					}
@@ -651,7 +651,7 @@ function Review() {
 			</SectionCard>
 			<ExtraParts
 				id="review-intake"
-				title={ __( 'Add by link', 'aw-sourcing' ) }
+				title={ __( 'Add by link', 'sourceweb' ) }
 			/>
 		</>
 	);
@@ -676,7 +676,7 @@ const bulkUndo = ( status ) =>
 		: [
 				{
 					value: 'undo',
-					label: __( 'Undo every applied value', 'aw-sourcing' ),
+					label: __( 'Undo every applied value', 'sourceweb' ),
 				},
 			];
 
@@ -716,7 +716,7 @@ function FieldValue( { text, pics, href, links, label } ) {
 				<>
 					{ hasValue( text, pics ) && <br /> }
 					<small>
-						{ __( 'From', 'aw-sourcing' ) }{ ' ' }
+						{ __( 'From', 'sourceweb' ) }{ ' ' }
 						{ links.map( ( l, i ) => (
 							<span key={ l.url }>
 								{ i > 0 && ', ' }
@@ -775,7 +775,7 @@ function WaitingEdit( { fields, onChanged } ) {
 	return (
 		<details>
 			<summary>
-				{ __( 'Edit or delete a waiting value', 'aw-sourcing' ) }
+				{ __( 'Edit or delete a waiting value', 'sourceweb' ) }
 			</summary>
 			{ rows.map( ( f ) => (
 				<div key={ f.key }>
@@ -797,7 +797,7 @@ function WaitingEdit( { fields, onChanged } ) {
 								} )
 							}
 						>
-							{ __( 'Save value', 'aw-sourcing' ) }
+							{ __( 'Save value', 'sourceweb' ) }
 						</Button>{ ' ' }
 						<Button
 							busy={ busy }
@@ -807,7 +807,7 @@ function WaitingEdit( { fields, onChanged } ) {
 									! window.confirm(
 										__(
 											'Delete this waiting value? Nothing on the listing changes.',
-											'aw-sourcing'
+											'sourceweb'
 										)
 									)
 								) {
@@ -816,7 +816,7 @@ function WaitingEdit( { fields, onChanged } ) {
 								send( 'enrichment/delete', { id: f.key } );
 							} }
 						>
-							{ __( 'Delete', 'aw-sourcing' ) }
+							{ __( 'Delete', 'sourceweb' ) }
 						</Button>
 					</p>
 				</div>
@@ -885,7 +885,7 @@ function Enrichment() {
 					/* translators: 1: field name, 2: the value. */
 					__(
 						'Reject %1$s "%2$s" for good? An applied value is undone first, and later checks will not add it again.',
-						'aw-sourcing'
+						'sourceweb'
 					),
 					f.label,
 					f.proposed
@@ -901,7 +901,7 @@ function Enrichment() {
 			window.confirm(
 				__(
 					'Approve every waiting high-confidence value in this filter? Merges are left for one by one.',
-					'aw-sourcing'
+					'sourceweb'
 				)
 			)
 		) {
@@ -937,7 +937,7 @@ function Enrichment() {
 						listing.sources &&
 							sprintf(
 								/* translators: %s: source names. */
-								__( 'From %s', 'aw-sourcing' ),
+								__( 'From %s', 'sourceweb' ),
 								listing.sources
 							),
 					]
@@ -945,7 +945,7 @@ function Enrichment() {
 						.join( '. ' ) }
 					actions={
 						<Button variant="link" onClick={ () => setOpen( 0 ) }>
-							{ __( 'Close', 'aw-sourcing' ) }
+							{ __( 'Close', 'sourceweb' ) }
 						</Button>
 					}
 				>
@@ -954,7 +954,7 @@ function Enrichment() {
 							key={ listing.fields
 								.map( ( f ) => f.key + f.status )
 								.join() }
-							title={ __( 'Proposed details', 'aw-sourcing' ) }
+							title={ __( 'Proposed details', 'sourceweb' ) }
 							fields={ listing.fields.map( ( f ) => ( {
 								...f,
 								rejectForGood:
@@ -971,7 +971,7 @@ function Enrichment() {
 										pics={ f.currentPics }
 										label={ sprintf(
 											/* translators: %s: field name. */
-											__( '%s now', 'aw-sourcing' ),
+											__( '%s now', 'sourceweb' ),
 											f.label
 										) }
 									/>
@@ -987,7 +987,7 @@ function Enrichment() {
 										links={ f.links }
 										label={ sprintf(
 											/* translators: %s: field name. */
-											__( '%s proposed', 'aw-sourcing' ),
+											__( '%s proposed', 'sourceweb' ),
 											f.label
 										) }
 									/>
@@ -1029,7 +1029,7 @@ function Enrichment() {
 												>
 													{ __(
 														'Reject every waiting value',
-														'aw-sourcing'
+														'sourceweb'
 													) }
 												</Button>
 											</p>
@@ -1042,17 +1042,17 @@ function Enrichment() {
 						<EmptyState
 							title={ __(
 								'Nothing waiting or applied in this view.',
-								'aw-sourcing'
+								'sourceweb'
 							) }
 						/>
 					) }
 					{ listing.others.length > 0 && (
 						<RefTable
-							caption={ __( 'Other decisions', 'aw-sourcing' ) }
+							caption={ __( 'Other decisions', 'sourceweb' ) }
 							head={ [
-								__( 'Field', 'aw-sourcing' ),
-								__( 'What happened', 'aw-sourcing' ),
-								__( 'Action', 'aw-sourcing' ),
+								__( 'Field', 'sourceweb' ),
+								__( 'What happened', 'sourceweb' ),
+								__( 'Action', 'sourceweb' ),
 							] }
 							rows={ listing.others.map( ( f ) => [
 								f.label,
@@ -1065,7 +1065,7 @@ function Enrichment() {
 										busy={ busy }
 										onClick={ () => rejectForGood( f ) }
 									>
-										{ __( 'Reject', 'aw-sourcing' ) }
+										{ __( 'Reject', 'sourceweb' ) }
 									</Button>
 								) : (
 									'–'
@@ -1077,14 +1077,14 @@ function Enrichment() {
 			) }
 			<SectionCard
 				id="enrichment"
-				title={ __( 'Listing details', 'aw-sourcing' ) }
+				title={ __( 'Listing details', 'sourceweb' ) }
 				description={
 					progress
 						? sprintf(
 								/* translators: 1: listings checked, 2: listings, 3: proposals waiting. */
 								__(
 									'%1$d of %2$d listings checked · %3$d proposals waiting. High-confidence values for empty fields of unclaimed listings are applied on their own and listed under Applied, with Undo.',
-									'aw-sourcing'
+									'sourceweb'
 								),
 								progress.checked,
 								progress.total,
@@ -1097,7 +1097,7 @@ function Enrichment() {
 						<Button busy={ busy } onClick={ approveHigh }>
 							{ __(
 								'Approve all high (this filter)',
-								'aw-sourcing'
+								'sourceweb'
 							) }
 						</Button>
 					) : null
@@ -1105,7 +1105,7 @@ function Enrichment() {
 			>
 				{ q.listing > 0 && (
 					<Notice tone="info">
-						{ __( 'One listing only.', 'aw-sourcing' ) }{ ' ' }
+						{ __( 'One listing only.', 'sourceweb' ) }{ ' ' }
 						<Button
 							variant="link"
 							onClick={ () => {
@@ -1119,40 +1119,40 @@ function Enrichment() {
 								set( { listing: 0 } );
 							} }
 						>
-							{ __( 'Show every listing', 'aw-sourcing' ) }
+							{ __( 'Show every listing', 'sourceweb' ) }
 						</Button>
 					</Notice>
 				) }
 				<DataList
-					label={ __( 'Listings with proposals', 'aw-sourcing' ) }
+					label={ __( 'Listings with proposals', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Listing', 'aw-sourcing' ),
+							label: __( 'Listing', 'sourceweb' ),
 							primary: true,
 							render: ( r ) => <strong>{ r.title }</strong>,
 						},
 						{
 							key: 'waiting',
-							label: __( 'Waiting', 'aw-sourcing' ),
+							label: __( 'Waiting', 'sourceweb' ),
 						},
 						{
 							key: 'applied',
-							label: __( 'Applied', 'aw-sourcing' ),
+							label: __( 'Applied', 'sourceweb' ),
 						},
 						{
 							key: 'confidence',
-							label: __( 'Confidence', 'aw-sourcing' ),
+							label: __( 'Confidence', 'sourceweb' ),
 							render: ( r ) => r.confidence.join( ', ' ) || '–',
 						},
 						{
 							key: 'sources',
-							label: __( 'Source', 'aw-sourcing' ),
+							label: __( 'Source', 'sourceweb' ),
 							render: ( r ) => r.sources || '–',
 						},
 						{
 							key: 'flags',
-							label: __( 'Flags', 'aw-sourcing' ),
+							label: __( 'Flags', 'sourceweb' ),
 							render: ( r ) => r.flags.join( ' · ' ) || '–',
 						},
 					] }
@@ -1163,7 +1163,7 @@ function Enrichment() {
 					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 					search={ q.search }
 					onSearch={ ( search ) => set( { search } ) }
-					searchLabel={ __( 'Search listings', 'aw-sourcing' ) }
+					searchLabel={ __( 'Search listings', 'sourceweb' ) }
 					views={ data?.views || [] }
 					view={ q.status }
 					onView={ ( status ) => set( { status } ) }
@@ -1176,14 +1176,14 @@ function Enrichment() {
 										value: 'approve',
 										label: __(
 											'Approve every waiting value',
-											'aw-sourcing'
+											'sourceweb'
 										),
 									},
 									{
 										value: 'reject',
 										label: __(
 											'Reject every waiting value',
-											'aw-sourcing'
+											'sourceweb'
 										),
 									},
 								]
@@ -1200,7 +1200,7 @@ function Enrichment() {
 										'Undo every applied value of %d listing? The values before them come back.',
 										'Undo every applied value of %d listings? The values before them come back.',
 										ids.length,
-										'aw-sourcing'
+										'sourceweb'
 									),
 									ids.length
 								)
@@ -1214,8 +1214,8 @@ function Enrichment() {
 						{
 							label:
 								open === r.id
-									? __( 'Close', 'aw-sourcing' )
-									: __( 'Review', 'aw-sourcing' ),
+									? __( 'Close', 'sourceweb' )
+									: __( 'Review', 'sourceweb' ),
 							onClick: () => {
 								setOpen( open === r.id ? 0 : r.id );
 								window.scrollTo( 0, 0 );
@@ -1223,19 +1223,19 @@ function Enrichment() {
 						},
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							href: r.editUrl,
 						},
 						{
 							icon: 'view',
-							label: __( 'View', 'aw-sourcing' ),
+							label: __( 'View', 'sourceweb' ),
 							href: r.viewUrl,
 						},
 					] }
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'Nothing here.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'Nothing here.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 		</>
@@ -1301,7 +1301,7 @@ function Group( { group, onSaved, onDirty } ) {
 		if (
 			// eslint-disable-next-line no-alert -- a plain browser confirm before a reset, as core's list tables do
 			! window.confirm(
-				__( 'Reset this section to its defaults?', 'aw-sourcing' )
+				__( 'Reset this section to its defaults?', 'sourceweb' )
 			)
 		) {
 			return;
@@ -1333,11 +1333,11 @@ function Group( { group, onSaved, onDirty } ) {
 						disabled={ ! dirty }
 						onClick={ save }
 					>
-						{ __( 'Save changes', 'aw-sourcing' ) }
+						{ __( 'Save changes', 'sourceweb' ) }
 					</Button>
 					{ group.reset && (
 						<Button busy={ busy } onClick={ restore }>
-							{ __( 'Reset this section', 'aw-sourcing' ) }
+							{ __( 'Reset this section', 'sourceweb' ) }
 						</Button>
 					) }
 					<span aria-live="polite">
@@ -1423,23 +1423,23 @@ function SourceEdit( { s, onSaved } ) {
 	return (
 		<>
 			<Switch
-				label={ __( 'On', 'aw-sourcing' ) }
+				label={ __( 'On', 'sourceweb' ) }
 				help={ s.help }
 				checked={ on }
 				onChange={ setOn }
 			/>
 			{ s.key && (
 				<Field
-					label={ __( 'Google Places key', 'aw-sourcing' ) }
+					label={ __( 'Google Places key', 'sourceweb' ) }
 					help={
 						s.key.set
 							? __(
 									'A key is set. Type a new one to replace it; leave it empty to keep it. The key is never shown.',
-									'aw-sourcing'
+									'sourceweb'
 								)
 							: __(
 									'Not set: the live Google block is hidden. Restrict the key to the Places API.',
-									'aw-sourcing'
+									'sourceweb'
 								)
 					}
 					render={ ( id, helpId ) => (
@@ -1464,7 +1464,7 @@ function SourceEdit( { s, onSaved } ) {
 						} )
 					}
 				>
-					{ __( 'Save', 'aw-sourcing' ) }
+					{ __( 'Save', 'sourceweb' ) }
 				</Button>{ ' ' }
 				{ s.key && (
 					<Button
@@ -1474,7 +1474,7 @@ function SourceEdit( { s, onSaved } ) {
 							send( 'settings/google-key', { key: key.trim() } )
 						}
 					>
-						{ __( 'Save key', 'aw-sourcing' ) }
+						{ __( 'Save key', 'sourceweb' ) }
 					</Button>
 				) }{ ' ' }
 				<span aria-live="polite">
@@ -1501,20 +1501,20 @@ function Services( { list, onSaved } ) {
 	if ( ! list.length ) {
 		return (
 			<EmptyState
-				title={ __( 'No connected services.', 'aw-sourcing' ) }
+				title={ __( 'No connected services.', 'sourceweb' ) }
 			/>
 		);
 	}
 	return (
 		<SectionCard
 			id={ `sourceweb-group-${ SERVICES }` }
-			title={ __( 'Connected services', 'aw-sourcing' ) }
+			title={ __( 'Connected services', 'sourceweb' ) }
 			description={ __(
 				'Each source and service SourceWeb works with. Keys are never sent to this page: a row says only whether one is set.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 		>
-			<ServiceList label={ __( 'Connected services', 'aw-sourcing' ) }>
+			<ServiceList label={ __( 'Connected services', 'sourceweb' ) }>
 				{ list.map( ( s ) => (
 					<ServiceRow
 						key={ s.slug }
@@ -1525,7 +1525,7 @@ function Services( { list, onSaved } ) {
 						editLabel={
 							s.source
 								? undefined
-								: __( 'Details', 'aw-sourcing' )
+								: __( 'Details', 'sourceweb' )
 						}
 					>
 						{ s.source ? (
@@ -1592,14 +1592,14 @@ function Settings() {
 	if ( ! data ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the settings…', 'aw-sourcing' ) }
+				label={ __( 'Loading the settings…', 'sourceweb' ) }
 			/>
 		);
 	}
 	const chips = [
 		{
 			value: SERVICES,
-			label: __( 'Connected services', 'aw-sourcing' ),
+			label: __( 'Connected services', 'sourceweb' ),
 			href: `#${ SERVICES }`,
 		},
 		...data.groups.map( ( g ) => ( {
@@ -1611,7 +1611,7 @@ function Settings() {
 	return (
 		<>
 			<ChipRow
-				label={ __( 'Settings groups', 'aw-sourcing' ) }
+				label={ __( 'Settings groups', 'sourceweb' ) }
 				chips={ chips }
 				value={ open }
 				onChange={ setOpen }
@@ -1630,14 +1630,14 @@ function Settings() {
 			) ) }
 			<ExtraParts
 				id="backfill"
-				title={ __( 'Backfill', 'aw-sourcing' ) }
+				title={ __( 'Backfill', 'sourceweb' ) }
 			/>
 			<SectionCard
 				id="elsewhere"
-				title={ __( 'On the current screens', 'aw-sourcing' ) }
+				title={ __( 'On the current screens', 'sourceweb' ) }
 				description={ __(
 					'These lists keep their own screens for now.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<p>
@@ -1780,28 +1780,28 @@ function WorkerUnion() {
 	return (
 		<SectionCard
 			id="union"
-			title={ __( 'All workers', 'aw-sourcing' ) }
+			title={ __( 'All workers', 'sourceweb' ) }
 			description={ __(
 				'Each worker’s step, where it runs, how it starts, what a person can change and the AI job it uses.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 		>
 			{ error && <Notice tone="error">{ error }</Notice> }
 			{ ! rows && ! error && (
 				<LoadingState
-					label={ __( 'Loading workers…', 'aw-sourcing' ) }
+					label={ __( 'Loading workers…', 'sourceweb' ) }
 				/>
 			) }
 			{ rows && (
 				<table className="widefat striped">
 					<thead>
 						<tr>
-							<th>{ __( 'Worker', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Step', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Runs as', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Starts', 'aw-sourcing' ) }</th>
-							<th>{ __( 'A person can', 'aw-sourcing' ) }</th>
-							<th>{ __( 'AI job', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Worker', 'sourceweb' ) }</th>
+							<th>{ __( 'Step', 'sourceweb' ) }</th>
+							<th>{ __( 'Runs as', 'sourceweb' ) }</th>
+							<th>{ __( 'Starts', 'sourceweb' ) }</th>
+							<th>{ __( 'A person can', 'sourceweb' ) }</th>
+							<th>{ __( 'AI job', 'sourceweb' ) }</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -1856,7 +1856,7 @@ function WorkerList( { go, msg, setMsg } ) {
 			window.confirm(
 				sprintf(
 					/* translators: %s: worker name. */
-					__( 'Delete the planned worker "%s"?', 'aw-sourcing' ),
+					__( 'Delete the planned worker "%s"?', 'sourceweb' ),
 					r.title
 				)
 			)
@@ -1868,10 +1868,10 @@ function WorkerList( { go, msg, setMsg } ) {
 		<>
 			<SectionCard
 				id="workers"
-				title={ __( 'Workers', 'aw-sourcing' ) }
+				title={ __( 'Workers', 'sourceweb' ) }
 				description={ __(
 					'One worker per workflow of the workers repository, which reports its start and end here. Schedules are changed in the workflows; names, groups and late limits here. A problem is emailed to the owner once. Planned workers never raise an alert.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				actions={
 					<a
@@ -1879,7 +1879,7 @@ function WorkerList( { go, msg, setMsg } ) {
 						href={ subHref( { edit: 'new' } ) }
 						onClick={ inPlace( go, { edit: 'new' } ) }
 					>
-						{ __( 'Add New Worker', 'aw-sourcing' ) }
+						{ __( 'Add New Worker', 'sourceweb' ) }
 					</a>
 				}
 			>
@@ -1887,7 +1887,7 @@ function WorkerList( { go, msg, setMsg } ) {
 					<Notice tone="warning">
 						{ __(
 							'Run now is off: AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php (a fine-grained GitHub token for the workers repository only, Actions read and write).',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 					</Notice>
 				) }
@@ -1900,11 +1900,11 @@ function WorkerList( { go, msg, setMsg } ) {
 					</Notice>
 				) }
 				<DataList
-					label={ __( 'Workers', 'aw-sourcing' ) }
+					label={ __( 'Workers', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Worker', 'aw-sourcing' ),
+							label: __( 'Worker', 'sourceweb' ),
 							sortable: true,
 							primary: true,
 							render: ( r ) => (
@@ -1938,13 +1938,13 @@ function WorkerList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'group',
-							label: __( 'Group', 'aw-sourcing' ),
+							label: __( 'Group', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => r.groupLabel,
 						},
 						{
 							key: 'file',
-							label: __( 'Workflow file', 'aw-sourcing' ),
+							label: __( 'Workflow file', 'sourceweb' ),
 							render: ( r ) =>
 								r.fileUrl ? (
 									<a href={ r.fileUrl }>
@@ -1956,7 +1956,7 @@ function WorkerList( { go, msg, setMsg } ) {
 										<span className="kits-shell-field__help">
 											{ __(
 												'Not built yet',
-												'aw-sourcing'
+												'sourceweb'
 											) }
 										</span>
 									</>
@@ -1964,7 +1964,7 @@ function WorkerList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'schedule',
-							label: __( 'Schedule (IST)', 'aw-sourcing' ),
+							label: __( 'Schedule (IST)', 'sourceweb' ),
 							render: ( r ) => (
 								<>
 									{ r.schedule || '—' }
@@ -1979,13 +1979,13 @@ function WorkerList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'last_run',
-							label: __( 'Last run', 'aw-sourcing' ),
+							label: __( 'Last run', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => {
 								if ( ! r.last ) {
 									return r.planned
 										? '—'
-										: __( 'No report yet', 'aw-sourcing' );
+										: __( 'No report yet', 'sourceweb' );
 								}
 								return (
 									<>
@@ -2009,7 +2009,7 @@ function WorkerList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'status',
-							label: __( 'Status', 'aw-sourcing' ),
+							label: __( 'Status', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => (
 								<>
@@ -2034,7 +2034,7 @@ function WorkerList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'keys',
-							label: __( 'Keys', 'aw-sourcing' ),
+							label: __( 'Keys', 'sourceweb' ),
 						},
 					] }
 					rows={ data?.rows || [] }
@@ -2044,7 +2044,7 @@ function WorkerList( { go, msg, setMsg } ) {
 					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 					search={ q.search }
 					onSearch={ ( search ) => set( { search } ) }
-					searchLabel={ __( 'Search workers', 'aw-sourcing' ) }
+					searchLabel={ __( 'Search workers', 'sourceweb' ) }
 					views={ data?.views || [] }
 					view={ q.view }
 					onView={ ( view ) => set( { view } ) }
@@ -2053,14 +2053,14 @@ function WorkerList( { go, msg, setMsg } ) {
 					rowActions={ ( r ) => [
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							onClick: () => go( { edit: r.id } ),
 						},
 						...( r.planned
 							? []
 							: [
 									{
-										label: __( 'Run now', 'aw-sourcing' ),
+										label: __( 'Run now', 'sourceweb' ),
 										onClick: () =>
 											send( 'workers/run', r.id ),
 										disabled: ! r.canRun,
@@ -2068,19 +2068,19 @@ function WorkerList( { go, msg, setMsg } ) {
 											? ''
 											: __(
 													'Needs input or the dispatch token',
-													'aw-sourcing'
+													'sourceweb'
 												),
 									},
 								] ),
 						{
-							label: __( 'View runs', 'aw-sourcing' ),
+							label: __( 'View runs', 'sourceweb' ),
 							onClick: () => go( { runs: r.id } ),
 						},
 						...( r.planned
 							? [
 									{
 										icon: 'delete',
-										label: __( 'Delete', 'aw-sourcing' ),
+										label: __( 'Delete', 'sourceweb' ),
 										tone: 'error',
 										onClick: () => remove( r ),
 									},
@@ -2090,30 +2090,30 @@ function WorkerList( { go, msg, setMsg } ) {
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'No workers found.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'No workers found.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 			<SectionCard
 				id="run-now-log"
-				title={ __( 'Run now log', 'aw-sourcing' ) }
+				title={ __( 'Run now log', 'sourceweb' ) }
 				description={ __(
 					'The last 50 times Run now was used.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				{ data && data.log.length ? (
 					<RefTable
-						caption={ __( 'Run now log', 'aw-sourcing' ) }
+						caption={ __( 'Run now log', 'sourceweb' ) }
 						head={ [
-							__( 'When', 'aw-sourcing' ),
-							__( 'Who', 'aw-sourcing' ),
-							__( 'Worker', 'aw-sourcing' ),
-							__( 'Result', 'aw-sourcing' ),
+							__( 'When', 'sourceweb' ),
+							__( 'Who', 'sourceweb' ),
+							__( 'Worker', 'sourceweb' ),
+							__( 'Result', 'sourceweb' ),
 						] }
 						rows={ data.log }
 					/>
 				) : (
-					<p>{ __( 'None yet.', 'aw-sourcing' ) }</p>
+					<p>{ __( 'None yet.', 'sourceweb' ) }</p>
 				) }
 			</SectionCard>
 		</>
@@ -2232,7 +2232,7 @@ function WorkerForm( { id, onDone } ) {
 	if ( ! w || ! v ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the worker…', 'aw-sourcing' ) }
+				label={ __( 'Loading the worker…', 'sourceweb' ) }
 			/>
 		);
 	}
@@ -2271,10 +2271,10 @@ function WorkerForm( { id, onDone } ) {
 			id="worker-form"
 			title={
 				w.new
-					? __( 'Add New Worker', 'aw-sourcing' )
+					? __( 'Add New Worker', 'sourceweb' )
 					: sprintf(
 							/* translators: %s: worker name. */
-							__( 'Edit %s', 'aw-sourcing' ),
+							__( 'Edit %s', 'sourceweb' ),
 							w.name
 						)
 			}
@@ -2282,7 +2282,7 @@ function WorkerForm( { id, onDone } ) {
 				w.new
 					? __(
 							'A planned worker: the ID is the file name its workflow will have, without .yml. It shows "Not built yet" until a workflow with that ID reports a run, and never raises an alert.',
-							'aw-sourcing'
+							'sourceweb'
 						)
 					: ''
 			}
@@ -2290,11 +2290,11 @@ function WorkerForm( { id, onDone } ) {
 				<>
 					<Button variant="primary" busy={ busy } onClick={ save }>
 						{ w.new
-							? __( 'Add worker', 'aw-sourcing' )
-							: __( 'Save changes', 'aw-sourcing' ) }
+							? __( 'Add worker', 'sourceweb' )
+							: __( 'Save changes', 'sourceweb' ) }
 					</Button>{ ' ' }
 					<Button onClick={ () => onDone() }>
-						{ __( 'Cancel', 'aw-sourcing' ) }
+						{ __( 'Cancel', 'sourceweb' ) }
 					</Button>
 				</>
 			}
@@ -2306,10 +2306,10 @@ function WorkerForm( { id, onDone } ) {
 			) }
 			{ w.new ? (
 				<TextField
-					label={ __( 'ID', 'aw-sourcing' ) }
+					label={ __( 'ID', 'sourceweb' ) }
 					help={ __(
 						'e.g. press-news for press-news.yml. Lowercase letters, digits and hyphens. It never changes.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ v.id }
 					onChange={ put( 'id' ) }
@@ -2317,32 +2317,32 @@ function WorkerForm( { id, onDone } ) {
 				/>
 			) : (
 				<RefTable
-					caption={ __( 'The worker', 'aw-sourcing' ) }
+					caption={ __( 'The worker', 'sourceweb' ) }
 					head={ [
-						__( 'Item', 'aw-sourcing' ),
-						__( 'Value', 'aw-sourcing' ),
+						__( 'Item', 'sourceweb' ),
+						__( 'Value', 'sourceweb' ),
 					] }
 					rows={ [
 						[
-							__( 'ID', 'aw-sourcing' ),
+							__( 'ID', 'sourceweb' ),
 							<>
 								<code>{ w.id }</code>{ ' ' }
-								{ __( '(IDs never change)', 'aw-sourcing' ) }
+								{ __( '(IDs never change)', 'sourceweb' ) }
 							</>,
 						],
 						...( reg
 							? [
 									[
-										__( 'Workflow', 'aw-sourcing' ),
+										__( 'Workflow', 'sourceweb' ),
 										<a key="f" href={ reg.fileUrl }>
 											<code>{ reg.file }</code>
 										</a>,
 									],
 									[
-										__( 'Schedule (IST)', 'aw-sourcing' ),
+										__( 'Schedule (IST)', 'sourceweb' ),
 										`${ reg.schedule } ${ __(
 											'(changed in the workflow)',
-											'aw-sourcing'
+											'sourceweb'
 										) }`,
 									],
 								]
@@ -2351,14 +2351,14 @@ function WorkerForm( { id, onDone } ) {
 				/>
 			) }
 			<TextField
-				label={ __( 'Name', 'aw-sourcing' ) }
+				label={ __( 'Name', 'sourceweb' ) }
 				help={
 					reg
 						? sprintf(
 								/* translators: %s: name in the workflow. */
 								__(
 									'In the workflow: %s. Leave empty for that name.',
-									'aw-sourcing'
+									'sourceweb'
 								),
 								reg.name
 							)
@@ -2368,12 +2368,12 @@ function WorkerForm( { id, onDone } ) {
 				onChange={ put( 'name' ) }
 			/>
 			<TextField
-				label={ __( 'What it does', 'aw-sourcing' ) }
+				label={ __( 'What it does', 'sourceweb' ) }
 				help={
 					reg
 						? __(
 								"Leave empty for the registry's description.",
-								'aw-sourcing'
+								'sourceweb'
 							)
 						: ''
 				}
@@ -2382,33 +2382,33 @@ function WorkerForm( { id, onDone } ) {
 				input={ { rows: 3 } }
 			/>
 			<SelectField
-				label={ __( 'Group', 'aw-sourcing' ) }
+				label={ __( 'Group', 'sourceweb' ) }
 				value={ v.group }
 				options={ w.groups }
 				onChange={ put( 'group' ) }
 			/>
 			<TextField
-				label={ __( 'Or a new group', 'aw-sourcing' ) }
+				label={ __( 'Or a new group', 'sourceweb' ) }
 				help={ __(
 					'A new group is added to the list (with a generic icon).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ v.group_new }
 				onChange={ put( 'group_new' ) }
 			/>
 			<TextField
-				label={ __( 'Late after (hours)', 'aw-sourcing' ) }
+				label={ __( 'Late after (hours)', 'sourceweb' ) }
 				help={
 					w.planned
 						? __(
 								'Blank: never late. Planned workers never raise an alert; this applies once the workflow is in the registry.',
-								'aw-sourcing'
+								'sourceweb'
 							)
 						: sprintf(
 								/* translators: %s: late limit in the registry. */
 								__(
 									'Blank: never late (no alert). In the registry: %s.',
-									'aw-sourcing'
+									'sourceweb'
 								),
 								reg?.late || ''
 							)
@@ -2419,26 +2419,26 @@ function WorkerForm( { id, onDone } ) {
 			/>
 			{ w.planned && (
 				<TextField
-					label={ __( 'Schedule wanted', 'aw-sourcing' ) }
+					label={ __( 'Schedule wanted', 'sourceweb' ) }
 					help={ __(
 						'In words, for whoever builds the workflow (e.g. daily at 06:00 IST).',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ v.schedule }
 					onChange={ put( 'schedule' ) }
 				/>
 			) }
 			<SettingsBlock
-				title={ __( 'Keys', 'aw-sourcing' ) }
+				title={ __( 'Keys', 'sourceweb' ) }
 				description={ __(
 					'Ticked: this worker may use the key. Unticking a key that is for all workers makes it for every other worker. Keys show only their last 4 characters.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				{ w.keys.length ? (
 					<fieldset className="kits-shell-checks">
 						<legend className="screen-reader-text">
-							{ __( 'Keys', 'aw-sourcing' ) }
+							{ __( 'Keys', 'sourceweb' ) }
 						</legend>
 						{ w.keys.map( ( k ) => (
 							<label key={ k.id } htmlFor={ `sw-key-${ k.id }` }>
@@ -2459,9 +2459,9 @@ function WorkerForm( { id, onDone } ) {
 					</fieldset>
 				) : (
 					<p>
-						{ __( 'No keys saved.', 'aw-sourcing' ) }{ ' ' }
+						{ __( 'No keys saved.', 'sourceweb' ) }{ ' ' }
 						<a href={ w.addKey }>
-							{ __( 'Add New Key', 'aw-sourcing' ) }
+							{ __( 'Add New Key', 'sourceweb' ) }
 						</a>
 					</p>
 				) }
@@ -2494,7 +2494,7 @@ function WorkerRuns( { id, onBack } ) {
 	}
 	if ( ! data ) {
 		return (
-			<LoadingState label={ __( 'Loading the runs…', 'aw-sourcing' ) } />
+			<LoadingState label={ __( 'Loading the runs…', 'sourceweb' ) } />
 		);
 	}
 	return (
@@ -2502,37 +2502,37 @@ function WorkerRuns( { id, onBack } ) {
 			id="worker-runs"
 			title={ sprintf(
 				/* translators: %s: worker name. */
-				__( 'Runs: %s', 'aw-sourcing' ),
+				__( 'Runs: %s', 'sourceweb' ),
 				data.name
 			) }
 			description={ sprintf(
 				/* translators: %d: number of runs kept. */
 				__(
 					'The last %d runs the workflow reported (start and end), newest first.',
-					'aw-sourcing'
+					'sourceweb'
 				),
 				data.keep
 			) }
 			actions={
 				<>
 					<Button onClick={ onBack }>
-						{ __( 'Back to the workers', 'aw-sourcing' ) }
+						{ __( 'Back to the workers', 'sourceweb' ) }
 					</Button>
 					{ data.githubUrl && (
 						<a className="kits-shell-link" href={ data.githubUrl }>
-							{ __( 'Runs on GitHub', 'aw-sourcing' ) }
+							{ __( 'Runs on GitHub', 'sourceweb' ) }
 						</a>
 					) }
 				</>
 			}
 		>
 			<DataList
-				label={ __( 'Runs', 'aw-sourcing' ) }
+				label={ __( 'Runs', 'sourceweb' ) }
 				rowTitle="id"
 				columns={ [
 					{
 						key: 'id',
-						label: __( 'Run', 'aw-sourcing' ),
+						label: __( 'Run', 'sourceweb' ),
 						primary: true,
 						render: ( r ) => (
 							<>
@@ -2544,7 +2544,7 @@ function WorkerRuns( { id, onBack } ) {
 								{ r.attempt > 1
 									? ` ${ sprintf(
 											/* translators: %d: attempt number. */
-											__( '(attempt %d)', 'aw-sourcing' ),
+											__( '(attempt %d)', 'sourceweb' ),
 											r.attempt
 										) }`
 									: '' }
@@ -2553,33 +2553,33 @@ function WorkerRuns( { id, onBack } ) {
 					},
 					{
 						key: 'when',
-						label: __( 'Started', 'aw-sourcing' ),
+						label: __( 'Started', 'sourceweb' ),
 						render: ( r ) => r.when || '—',
 					},
 					{
 						key: 'took',
-						label: __( 'Took', 'aw-sourcing' ),
+						label: __( 'Took', 'sourceweb' ),
 						render: ( r ) => r.took || '—',
 					},
 					{
 						key: 'label',
-						label: __( 'Result', 'aw-sourcing' ),
+						label: __( 'Result', 'sourceweb' ),
 						render: ( r ) => (
 							<Status tone={ r.tone } label={ r.label } />
 						),
 					},
 					{
 						key: 'event',
-						label: __( 'Started by', 'aw-sourcing' ),
+						label: __( 'Started by', 'sourceweb' ),
 					},
 					{
 						key: 'counts',
-						label: __( 'Counts', 'aw-sourcing' ),
+						label: __( 'Counts', 'sourceweb' ),
 						render: ( r ) => r.counts || '—',
 					},
 					{
 						key: 'commit',
-						label: __( 'Commit', 'aw-sourcing' ),
+						label: __( 'Commit', 'sourceweb' ),
 						render: ( r ) =>
 							r.commit ? (
 								<a href={ r.commitUrl }>
@@ -2594,8 +2594,8 @@ function WorkerRuns( { id, onBack } ) {
 				total={ data.rows.length }
 				emptyTitle={
 					data.planned
-						? __( 'Not built yet: no runs.', 'aw-sourcing' )
-						: __( 'No runs reported yet.', 'aw-sourcing' )
+						? __( 'Not built yet: no runs.', 'sourceweb' )
+						: __( 'No runs reported yet.', 'sourceweb' )
 				}
 			/>
 		</SectionCard>
@@ -2605,13 +2605,13 @@ function WorkerRuns( { id, onBack } ) {
 /* ---------- Sources ---------- */
 
 const SOURCE_ACTIONS = {
-	allow: __( 'Change to Allowed', 'aw-sourcing' ),
-	neutral: __( 'Change to Neutral', 'aw-sourcing' ),
-	block: __( 'Change to Blocked', 'aw-sourcing' ),
-	press_add: __( 'Search here for coverage', 'aw-sourcing' ),
-	press_remove: __( 'Stop searching here', 'aw-sourcing' ),
-	relay_on: __( 'Relay on (fetch through this site)', 'aw-sourcing' ),
-	relay_off: __( 'Relay off', 'aw-sourcing' ),
+	allow: __( 'Change to Allowed', 'sourceweb' ),
+	neutral: __( 'Change to Neutral', 'sourceweb' ),
+	block: __( 'Change to Blocked', 'sourceweb' ),
+	press_add: __( 'Search here for coverage', 'sourceweb' ),
+	press_remove: __( 'Stop searching here', 'sourceweb' ),
+	relay_on: __( 'Relay on (fetch through this site)', 'sourceweb' ),
+	relay_off: __( 'Relay off', 'sourceweb' ),
 };
 
 function Sources() {
@@ -2629,8 +2629,8 @@ function Sources() {
 				id="feed"
 				title={
 					'new' === sub.feed
-						? __( 'Add New Feed', 'aw-sourcing' )
-						: __( 'Edit Feed', 'aw-sourcing' )
+						? __( 'Add New Feed', 'sourceweb' )
+						: __( 'Edit Feed', 'sourceweb' )
 				}
 				actions={
 					<Button
@@ -2641,14 +2641,14 @@ function Sources() {
 						}
 					>
 						{ sub.host
-							? __( 'Back to the source', 'aw-sourcing' )
-							: __( 'Back to Feeds', 'aw-sourcing' ) }
+							? __( 'Back to the source', 'sourceweb' )
+							: __( 'Back to Feeds', 'sourceweb' ) }
 					</Button>
 				}
 			>
 				<PageParts
 					parts={ app.feed.filter( ( p ) => 'heading' !== p.type ) }
-					title={ __( 'Feed', 'aw-sourcing' ) }
+					title={ __( 'Feed', 'sourceweb' ) }
 				/>
 			</SectionCard>
 		);
@@ -2666,14 +2666,14 @@ function Sources() {
 		return (
 			<SectionCard
 				id="feeds"
-				title={ __( 'Feeds', 'aw-sourcing' ) }
+				title={ __( 'Feeds', 'sourceweb' ) }
 				description={ __(
 					'Every feed and source read by code (News, Library and Opportunity), with the site each belongs to.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				actions={
 					<Button onClick={ () => back() }>
-						{ __( 'Back to Sources', 'aw-sourcing' ) }
+						{ __( 'Back to Sources', 'sourceweb' ) }
 					</Button>
 				}
 			>
@@ -2737,7 +2737,7 @@ function SourceList( { go, msg, setMsg } ) {
 					/* translators: %s: host. */
 					__(
 						'Delete the source %s? This cannot be undone.',
-						'aw-sourcing'
+						'sourceweb'
 					),
 					r.id
 				)
@@ -2761,7 +2761,7 @@ function SourceList( { go, msg, setMsg } ) {
 			? [
 					{
 						value: '__feeds',
-						label: __( 'Feeds', 'aw-sourcing' ),
+						label: __( 'Feeds', 'sourceweb' ),
 						count: data.feedCount,
 					},
 				]
@@ -2770,10 +2770,10 @@ function SourceList( { go, msg, setMsg } ) {
 	return (
 		<SectionCard
 			id="sources"
-			title={ __( 'Sources', 'aw-sourcing' ) }
+			title={ __( 'Sources', 'sourceweb' ) }
 			description={ __(
 				'Every host the workers have sent, and every site a feed or a source read by code comes from. Blocked publishers are refused; Neutral is the default for new hosts; Allowed publishers skip the keyword check. Short name: what cards show on the source chip.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 			actions={
 				<>
@@ -2784,14 +2784,14 @@ function SourceList( { go, msg, setMsg } ) {
 							send( 'sources/short', { short: shorts } )
 						}
 					>
-						{ __( 'Save short names', 'aw-sourcing' ) }
+						{ __( 'Save short names', 'sourceweb' ) }
 					</Button>
 					<a
 						className="kits-shell-button is-primary"
 						href={ subHref( { edit: 'new' } ) }
 						onClick={ inPlace( go, { edit: 'new' } ) }
 					>
-						{ __( 'Add New Source', 'aw-sourcing' ) }
+						{ __( 'Add New Source', 'sourceweb' ) }
 					</a>
 				</>
 			}
@@ -2805,16 +2805,16 @@ function SourceList( { go, msg, setMsg } ) {
 				<Notice tone="info">
 					{ __(
 						'Search value: Search Console has not run within 28 days, so there are no figures for this window.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				</Notice>
 			) }
 			<DataList
-				label={ __( 'Sources', 'aw-sourcing' ) }
+				label={ __( 'Sources', 'sourceweb' ) }
 				columns={ [
 					{
 						key: 'title',
-						label: __( 'Site', 'aw-sourcing' ),
+						label: __( 'Site', 'sourceweb' ),
 						sortable: true,
 						primary: true,
 						render: ( r ) => (
@@ -2858,7 +2858,7 @@ function SourceList( { go, msg, setMsg } ) {
 												tone="error"
 												label={ __(
 													'Blocked: new items from it are refused. Items already on the site are unchanged.',
-													'aw-sourcing'
+													'sourceweb'
 												) }
 											/>
 										</span>
@@ -2869,7 +2869,7 @@ function SourceList( { go, msg, setMsg } ) {
 					},
 					{
 						key: 'short',
-						label: __( 'Short name', 'aw-sourcing' ),
+						label: __( 'Short name', 'sourceweb' ),
 						render: ( r ) =>
 							r.pub ? (
 								<input
@@ -2880,7 +2880,7 @@ function SourceList( { go, msg, setMsg } ) {
 										/* translators: %s: host. */
 										__(
 											'Short name for %s',
-											'aw-sourcing'
+											'sourceweb'
 										),
 										r.id
 									) }
@@ -2898,7 +2898,7 @@ function SourceList( { go, msg, setMsg } ) {
 					},
 					{
 						key: 'status',
-						label: __( 'Status', 'aw-sourcing' ),
+						label: __( 'Status', 'sourceweb' ),
 						sortable: true,
 						render: ( r ) => (
 							<>
@@ -2922,7 +2922,7 @@ function SourceList( { go, msg, setMsg } ) {
 										{ ' ' }
 										{ __(
 											'Searched for coverage',
-											'aw-sourcing'
+											'sourceweb'
 										) }
 									</span>
 								) }
@@ -2931,7 +2931,7 @@ function SourceList( { go, msg, setMsg } ) {
 					},
 					{
 						key: 'rating',
-						label: __( 'Rating', 'aw-sourcing' ),
+						label: __( 'Rating', 'sourceweb' ),
 						render: ( r ) => {
 							if ( ! r.rating ) {
 								return '–';
@@ -2945,7 +2945,7 @@ function SourceList( { go, msg, setMsg } ) {
 					},
 					{
 						key: 'dr',
-						label: __( 'Domain Rating', 'aw-sourcing' ),
+						label: __( 'Domain Rating', 'sourceweb' ),
 						sortable: true,
 						render: ( r ) =>
 							null === r.dr ? (
@@ -2964,7 +2964,7 @@ function SourceList( { go, msg, setMsg } ) {
 					},
 					{
 						key: 'feeds',
-						label: __( 'Feeds', 'aw-sourcing' ),
+						label: __( 'Feeds', 'sourceweb' ),
 						sortable: true,
 						render: ( r ) =>
 							r.feeds ? (
@@ -2980,14 +2980,14 @@ function SourceList( { go, msg, setMsg } ) {
 					},
 					{
 						key: 'relay',
-						label: __( 'Relay', 'aw-sourcing' ),
+						label: __( 'Relay', 'sourceweb' ),
 						render: ( r ) => {
 							if ( ! r.relay ) {
 								return '—';
 							}
 							return (
 								<>
-									{ __( 'On', 'aw-sourcing' ) }
+									{ __( 'On', 'sourceweb' ) }
 									<span className="kits-shell-field__help">
 										{ ' ' }
 										{ r.relayLast
@@ -2995,13 +2995,13 @@ function SourceList( { go, msg, setMsg } ) {
 													/* translators: %s: last result. */
 													__(
 														'Last: %s',
-														'aw-sourcing'
+														'sourceweb'
 													),
 													r.relayLast
 												)
 											: __(
 													'Not used yet',
-													'aw-sourcing'
+													'sourceweb'
 												) }
 									</span>
 								</>
@@ -3012,19 +3012,19 @@ function SourceList( { go, msg, setMsg } ) {
 						key: 'items',
 						label: __(
 							'Items (30 days / published)',
-							'aw-sourcing'
+							'sourceweb'
 						),
 						sortable: true,
 					},
 					{
 						key: 'search',
-						label: __( 'Search value', 'aw-sourcing' ),
+						label: __( 'Search value', 'sourceweb' ),
 						sortable: true,
 						render: ( r ) => r.search || '—',
 					},
 					{
 						key: 'seo',
-						label: __( 'SEO', 'aw-sourcing' ),
+						label: __( 'SEO', 'sourceweb' ),
 						render: ( r ) =>
 							r.seoAt ? (
 								<>
@@ -3041,12 +3041,12 @@ function SourceList( { go, msg, setMsg } ) {
 									</span>
 								</>
 							) : (
-								__( 'Not checked yet', 'aw-sourcing' )
+								__( 'Not checked yet', 'sourceweb' )
 							),
 					},
 					{
 						key: 'last',
-						label: __( 'Last seen', 'aw-sourcing' ),
+						label: __( 'Last seen', 'sourceweb' ),
 						sortable: true,
 						render: ( r ) => r.last || '—',
 					},
@@ -3058,7 +3058,7 @@ function SourceList( { go, msg, setMsg } ) {
 				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 				search={ q.search }
 				onSearch={ ( search ) => set( { search } ) }
-				searchLabel={ __( 'Search sources', 'aw-sourcing' ) }
+				searchLabel={ __( 'Search sources', 'sourceweb' ) }
 				views={ views }
 				view={ q.view }
 				onView={ ( view ) =>
@@ -3073,7 +3073,7 @@ function SourceList( { go, msg, setMsg } ) {
 				rowActions={ ( r ) => [
 					{
 						icon: 'edit',
-						label: __( 'Edit', 'aw-sourcing' ),
+						label: __( 'Edit', 'sourceweb' ),
 						onClick: () => go( { edit: r.id } ),
 					},
 					...( r.pub
@@ -3081,9 +3081,9 @@ function SourceList( { go, msg, setMsg } ) {
 								.filter( ( st ) => st !== r.status )
 								.map( ( st ) => ( {
 									label: {
-										allow: __( 'Allow', 'aw-sourcing' ),
-										neutral: __( 'Neutral', 'aw-sourcing' ),
-										block: __( 'Block', 'aw-sourcing' ),
+										allow: __( 'Allow', 'sourceweb' ),
+										neutral: __( 'Neutral', 'sourceweb' ),
+										block: __( 'Block', 'sourceweb' ),
 									}[ st ],
 									tone: 'block' === st ? 'error' : '',
 									onClick: () => decide( st, [ r.id ] ),
@@ -3109,8 +3109,8 @@ function SourceList( { go, msg, setMsg } ) {
 						? [
 								{
 									label: r.relayOwn
-										? __( 'Relay off', 'aw-sourcing' )
-										: __( 'Relay on', 'aw-sourcing' ),
+										? __( 'Relay off', 'sourceweb' )
+										: __( 'Relay on', 'sourceweb' ),
 									onClick: () =>
 										decide(
 											r.relayOwn
@@ -3125,7 +3125,7 @@ function SourceList( { go, msg, setMsg } ) {
 						? [
 								{
 									icon: 'delete',
-									label: __( 'Delete', 'aw-sourcing' ),
+									label: __( 'Delete', 'sourceweb' ),
 									tone: 'error',
 									onClick: () => remove( r ),
 								},
@@ -3135,7 +3135,7 @@ function SourceList( { go, msg, setMsg } ) {
 				loading={ loading }
 				error={ error }
 				onRetry={ load }
-				emptyTitle={ __( 'No sources.', 'aw-sourcing' ) }
+				emptyTitle={ __( 'No sources.', 'sourceweb' ) }
 			/>
 		</SectionCard>
 	);
@@ -3178,7 +3178,7 @@ function SourceForm( { host, onDone, go } ) {
 	if ( ! s || ! v ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the source…', 'aw-sourcing' ) }
+				label={ __( 'Loading the source…', 'sourceweb' ) }
 			/>
 		);
 	}
@@ -3204,10 +3204,10 @@ function SourceForm( { host, onDone, go } ) {
 				id="source-form"
 				title={
 					s.new
-						? __( 'Add New Source', 'aw-sourcing' )
+						? __( 'Add New Source', 'sourceweb' )
 						: sprintf(
 								/* translators: %s: host. */
-								__( 'Edit Source: %s', 'aw-sourcing' ),
+								__( 'Edit Source: %s', 'sourceweb' ),
 								s.host
 							)
 				}
@@ -3219,11 +3219,11 @@ function SourceForm( { host, onDone, go } ) {
 							onClick={ save }
 						>
 							{ s.new
-								? __( 'Add Source', 'aw-sourcing' )
-								: __( 'Update', 'aw-sourcing' ) }
+								? __( 'Add Source', 'sourceweb' )
+								: __( 'Update', 'sourceweb' ) }
 						</Button>{ ' ' }
 						<Button onClick={ () => onDone() }>
-							{ __( 'Cancel', 'aw-sourcing' ) }
+							{ __( 'Cancel', 'sourceweb' ) }
 						</Button>
 					</>
 				}
@@ -3238,10 +3238,10 @@ function SourceForm( { host, onDone, go } ) {
 				) }
 				{ s.new ? (
 					<TextField
-						label={ __( 'Host', 'aw-sourcing' ) }
+						label={ __( 'Host', 'sourceweb' ) }
 						help={ __(
 							"The site's host or any address on it (https://www.example.com/news/ becomes example.com).",
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						value={ v.host }
 						onChange={ put( 'host' ) }
@@ -3251,34 +3251,34 @@ function SourceForm( { host, onDone, go } ) {
 					<p>
 						<strong>{ s.host }</strong>{ ' ' }
 						<a href={ `https://${ s.host }/` }>
-							{ __( 'Visit site', 'aw-sourcing' ) }
+							{ __( 'Visit site', 'sourceweb' ) }
 						</a>
 					</p>
 				) }
 				<TextField
-					label={ __( 'Name', 'aw-sourcing' ) }
+					label={ __( 'Name', 'sourceweb' ) }
 					help={ __(
 						"The publisher's name, shown on item pages. Kept on publisher records only.",
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ v.name }
 					onChange={ put( 'name' ) }
 				/>
 				<TextField
-					label={ __( 'Short name', 'aw-sourcing' ) }
+					label={ __( 'Short name', 'sourceweb' ) }
 					help={ __(
 						'What cards show on the source chip (e.g. TOI, PIB, Sentinel).',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ v.short }
 					onChange={ put( 'short' ) }
 					input={ { maxLength: 24 } }
 				/>
 				<SelectField
-					label={ __( 'Status', 'aw-sourcing' ) }
+					label={ __( 'Status', 'sourceweb' ) }
 					help={ __(
 						'Blocked publishers are refused when the workers send their items. Neutral is the default for new hosts the workers find. Allowed publishers skip the keyword check.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ v.status }
 					options={ s.options }
@@ -3288,11 +3288,11 @@ function SourceForm( { host, onDone, go } ) {
 					<Switch
 						label={ __(
 							'Search here for coverage',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						help={ __(
 							'The press queries also run on this site.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						checked={ v.press }
 						onChange={ put( 'press' ) }
@@ -3302,12 +3302,12 @@ function SourceForm( { host, onDone, go } ) {
 					<Switch
 						label={ __(
 							'Fetch through this site (relay)',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						help={
 							__(
 								"When this site refuses the workers (GitHub's servers) with 403, they ask this site to fetch the feed or page. Its subdomains are included.",
-								'aw-sourcing'
+								'sourceweb'
 							) +
 							( s.relayLast
 								? ' ' +
@@ -3315,7 +3315,7 @@ function SourceForm( { host, onDone, go } ) {
 										/* translators: %s: last result. */
 										__(
 											'Last relay result: %s.',
-											'aw-sourcing'
+											'sourceweb'
 										),
 										s.relayLast
 									)
@@ -3329,10 +3329,10 @@ function SourceForm( { host, onDone, go } ) {
 			{ ! s.new && (
 				<SectionCard
 					id="source-feeds"
-					title={ __( 'Feeds', 'aw-sourcing' ) }
+					title={ __( 'Feeds', 'sourceweb' ) }
 					description={ __(
 						"This site's feeds and sources read by code.",
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				>
 					<Feeds host={ s.host } go={ go } />
@@ -3398,7 +3398,7 @@ function Feeds( { host, go } ) {
 					/* translators: %s: feed name. */
 					__(
 						'Delete the feed "%s"? This cannot be undone.',
-						'aw-sourcing'
+						'sourceweb'
 					),
 					r.title
 				)
@@ -3417,16 +3417,16 @@ function Feeds( { host, go } ) {
 			{ data && (
 				<p>
 					<a href={ data.addUrl }>
-						{ __( 'Add New Feed', 'aw-sourcing' ) }
+						{ __( 'Add New Feed', 'sourceweb' ) }
 					</a>
 				</p>
 			) }
 			<DataList
-				label={ __( 'Feeds', 'aw-sourcing' ) }
+				label={ __( 'Feeds', 'sourceweb' ) }
 				columns={ [
 					{
 						key: 'title',
-						label: __( 'Name', 'aw-sourcing' ),
+						label: __( 'Name', 'sourceweb' ),
 						primary: true,
 						render: ( r ) => (
 							<a href={ r.editUrl }>
@@ -3436,11 +3436,11 @@ function Feeds( { host, go } ) {
 					},
 					{
 						key: 'typeText',
-						label: __( 'Type', 'aw-sourcing' ),
+						label: __( 'Type', 'sourceweb' ),
 					},
 					{
 						key: 'address',
-						label: __( 'Address', 'aw-sourcing' ),
+						label: __( 'Address', 'sourceweb' ),
 						render: ( r ) => (
 							<>
 								<code>{ r.address }</code>
@@ -3458,7 +3458,7 @@ function Feeds( { host, go } ) {
 						: [
 								{
 									key: 'host',
-									label: __( 'Publisher', 'aw-sourcing' ),
+									label: __( 'Publisher', 'sourceweb' ),
 									render: ( r ) =>
 										r.host ? (
 											<a
@@ -3478,23 +3478,23 @@ function Feeds( { host, go } ) {
 							] ),
 					{
 						key: 'on',
-						label: __( 'On', 'aw-sourcing' ),
+						label: __( 'On', 'sourceweb' ),
 						render: ( r ) =>
 							r.on ? (
 								<Status
 									tone="success"
-									label={ __( 'On', 'aw-sourcing' ) }
+									label={ __( 'On', 'sourceweb' ) }
 								/>
 							) : (
 								<Status
 									tone="info"
-									label={ __( 'Off', 'aw-sourcing' ) }
+									label={ __( 'Off', 'sourceweb' ) }
 								/>
 							),
 					},
 					{
 						key: 'filter',
-						label: __( 'Keyword check', 'aw-sourcing' ),
+						label: __( 'Keyword check', 'sourceweb' ),
 					},
 				] }
 				rows={ data?.rows || [] }
@@ -3504,33 +3504,33 @@ function Feeds( { host, go } ) {
 				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 				search={ q.search }
 				onSearch={ host ? undefined : ( search ) => set( { search } ) }
-				searchLabel={ __( 'Search feeds', 'aw-sourcing' ) }
+				searchLabel={ __( 'Search feeds', 'sourceweb' ) }
 				views={ host ? [] : data?.views || [] }
 				view={ q.view }
 				onView={ ( view ) => set( { view } ) }
 				bulkActions={ [
-					{ value: 'on', label: __( 'Turn on', 'aw-sourcing' ) },
-					{ value: 'off', label: __( 'Turn off', 'aw-sourcing' ) },
+					{ value: 'on', label: __( 'Turn on', 'sourceweb' ) },
+					{ value: 'off', label: __( 'Turn off', 'sourceweb' ) },
 					{
 						value: 'filter_on',
-						label: __( 'Keyword check on', 'aw-sourcing' ),
+						label: __( 'Keyword check on', 'sourceweb' ),
 					},
 					{
 						value: 'filter_off',
-						label: __( 'Keyword check off', 'aw-sourcing' ),
+						label: __( 'Keyword check off', 'sourceweb' ),
 					},
 				] }
 				onBulk={ op }
 				rowActions={ ( r ) => [
 					{
 						icon: 'edit',
-						label: __( 'Edit', 'aw-sourcing' ),
+						label: __( 'Edit', 'sourceweb' ),
 						href: r.editUrl,
 					},
 					{
 						label: r.on
-							? __( 'Turn off', 'aw-sourcing' )
-							: __( 'Turn on', 'aw-sourcing' ),
+							? __( 'Turn off', 'sourceweb' )
+							: __( 'Turn on', 'sourceweb' ),
 						onClick: () => op( r.on ? 'off' : 'on', [ r.id ] ),
 					},
 					...( r.rss
@@ -3539,11 +3539,11 @@ function Feeds( { host, go } ) {
 									label: r.filterOn
 										? __(
 												'Keyword check off',
-												'aw-sourcing'
+												'sourceweb'
 											)
 										: __(
 												'Keyword check on',
-												'aw-sourcing'
+												'sourceweb'
 											),
 									onClick: () =>
 										op(
@@ -3555,7 +3555,7 @@ function Feeds( { host, go } ) {
 								},
 								{
 									icon: 'delete',
-									label: __( 'Delete', 'aw-sourcing' ),
+									label: __( 'Delete', 'sourceweb' ),
 									tone: 'error',
 									onClick: () => remove( r ),
 								},
@@ -3565,7 +3565,7 @@ function Feeds( { host, go } ) {
 				loading={ loading }
 				error={ error }
 				onRetry={ load }
-				emptyTitle={ __( 'No feeds.', 'aw-sourcing' ) }
+				emptyTitle={ __( 'No feeds.', 'sourceweb' ) }
 			/>
 		</>
 	);
@@ -3682,7 +3682,7 @@ function KeywordSettings( { settings, press, onSaved } ) {
 	return (
 		<SettingsGroup
 			id="keyword-switches"
-			title={ __( 'Keyword check', 'aw-sourcing' ) }
+			title={ __( 'Keyword check', 'sourceweb' ) }
 			footer={
 				<Button
 					variant="primary"
@@ -3690,7 +3690,7 @@ function KeywordSettings( { settings, press, onSaved } ) {
 					disabled={ ! dirty }
 					onClick={ save }
 				>
-					{ __( 'Save changes', 'aw-sourcing' ) }
+					{ __( 'Save changes', 'sourceweb' ) }
 				</Button>
 			}
 		>
@@ -3700,10 +3700,10 @@ function KeywordSettings( { settings, press, onSaved } ) {
 				</Notice>
 			) }
 			<Switch
-				label={ __( 'Relevance filter', 'aw-sourcing' ) }
+				label={ __( 'Relevance filter', 'sourceweb' ) }
 				help={ __(
 					'Off: every item from a non-blocked publisher is kept.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				checked={ v.enabled }
 				onChange={ ( on ) => setV( { ...v, enabled: on } ) }
@@ -3711,32 +3711,32 @@ function KeywordSettings( { settings, press, onSaved } ) {
 			<Switch
 				label={ __(
 					'Aggregator feeds: only allowed publishers',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				help={ __(
 					'Google News, Apple News and similar: items from Neutral publishers are refused. Keep off unless the allow list is complete.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				checked={ v.gnews_allow_only }
 				onChange={ ( on ) => setV( { ...v, gnews_allow_only: on } ) }
 			/>
 			{ press && (
 				<SettingsBlock
-					title={ __( 'Press discovery', 'aw-sourcing' ) }
+					title={ __( 'Press discovery', 'sourceweb' ) }
 					description={ __(
 						'The queries are the Press keywords below: Google News and Google Search for coverage of Animal Writes.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				>
 					<Switch
-						label={ __( 'Press discovery', 'aw-sourcing' ) }
+						label={ __( 'Press discovery', 'sourceweb' ) }
 						checked={ v.press.enabled }
 						onChange={ ( on ) =>
 							setV( { ...v, press: { ...v.press, enabled: on } } )
 						}
 					/>
 					<TextField
-						label={ __( 'Every (days)', 'aw-sourcing' ) }
+						label={ __( 'Every (days)', 'sourceweb' ) }
 						value={ String( v.press.every_days ) }
 						onChange={ ( d ) =>
 							setV( {
@@ -3772,23 +3772,23 @@ function HeadlineTest() {
 	return (
 		<SettingsGroup
 			id="keyword-test"
-			title={ __( 'Test a headline', 'aw-sourcing' ) }
+			title={ __( 'Test a headline', 'sourceweb' ) }
 			footer={
 				<Button
 					busy={ busy }
 					disabled={ '' === text.trim() }
 					onClick={ test }
 				>
-					{ __( 'Test', 'aw-sourcing' ) }
+					{ __( 'Test', 'sourceweb' ) }
 				</Button>
 			}
 		>
 			<TextField
-				label={ __( 'Headline', 'aw-sourcing' ) }
+				label={ __( 'Headline', 'sourceweb' ) }
 				value={ text }
 				onChange={ setText }
 				input={ {
-					placeholder: __( 'Paste a headline', 'aw-sourcing' ),
+					placeholder: __( 'Paste a headline', 'sourceweb' ),
 				} }
 			/>
 			{ res &&
@@ -3800,8 +3800,8 @@ function HeadlineTest() {
 							tone={ res.kept ? 'success' : 'error' }
 							label={
 								res.kept
-									? __( 'Kept', 'aw-sourcing' )
-									: __( 'Dropped', 'aw-sourcing' )
+									? __( 'Kept', 'sourceweb' )
+									: __( 'Dropped', 'sourceweb' )
 							}
 						/>{ ' ' }
 						({ res.why })
@@ -3862,7 +3862,7 @@ function KeywordList( { go, msg, setMsg } ) {
 							/* translators: %s: keyword. */
 							__(
 								'Remove "%s" from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.',
-								'aw-sourcing'
+								'sourceweb'
 							),
 							label
 						)
@@ -3872,7 +3872,7 @@ function KeywordList( { go, msg, setMsg } ) {
 								'Remove %d keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.',
 								'Remove %d keywords from sourcing? Their Sourcing and Press roles go; Search Insights keeps the records.',
 								ids.length,
-								'aw-sourcing'
+								'sourceweb'
 							),
 							ids.length
 						)
@@ -3887,7 +3887,7 @@ function KeywordList( { go, msg, setMsg } ) {
 			value: `add_${ r.value }`,
 			label: sprintf(
 				/* translators: %s: role. */
-				__( 'Add role: %s', 'aw-sourcing' ),
+				__( 'Add role: %s', 'sourceweb' ),
 				r.label
 			),
 		} ) ),
@@ -3895,7 +3895,7 @@ function KeywordList( { go, msg, setMsg } ) {
 			value: `remove_${ r.value }`,
 			label: sprintf(
 				/* translators: %s: role. */
-				__( 'Remove role: %s', 'aw-sourcing' ),
+				__( 'Remove role: %s', 'sourceweb' ),
 				r.label
 			),
 		} ) ),
@@ -3903,11 +3903,11 @@ function KeywordList( { go, msg, setMsg } ) {
 			value: `cat_${ c.value }`,
 			label: sprintf(
 				/* translators: %s: category. */
-				__( 'Map to category: %s', 'aw-sourcing' ),
+				__( 'Map to category: %s', 'sourceweb' ),
 				c.label
 			),
 		} ) ),
-		{ value: 'delete', label: __( 'Delete from sourcing', 'aw-sourcing' ) },
+		{ value: 'delete', label: __( 'Delete from sourcing', 'sourceweb' ) },
 	];
 	const views = [
 		...( data?.views || [] ),
@@ -3917,7 +3917,7 @@ function KeywordList( { go, msg, setMsg } ) {
 						value: '__suggestions',
 						label: __(
 							'Suggestions from Search Insights',
-							'aw-sourcing'
+							'sourceweb'
 						),
 					},
 				]
@@ -3938,10 +3938,10 @@ function KeywordList( { go, msg, setMsg } ) {
 			) }
 			<SectionCard
 				id="keywords"
-				title={ __( 'Keywords', 'aw-sourcing' ) }
+				title={ __( 'Keywords', 'sourceweb' ) }
 				description={ __(
 					'Every keyword with a Sourcing or Press role. English only for Sourcing and Press. Plurals and dots do not matter: "dogs" adds to "dog". Include and Exclude cannot go together.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				actions={
 					<a
@@ -3949,7 +3949,7 @@ function KeywordList( { go, msg, setMsg } ) {
 						href={ subHref( addNew ) }
 						onClick={ inPlace( go, addNew ) }
 					>
-						{ __( 'Add New Keyword', 'aw-sourcing' ) }
+						{ __( 'Add New Keyword', 'sourceweb' ) }
 					</a>
 				}
 			>
@@ -3965,20 +3965,20 @@ function KeywordList( { go, msg, setMsg } ) {
 					<Notice tone="info">
 						{ sprintf(
 							/* translators: %s: category. */
-							__( 'Category: %s.', 'aw-sourcing' ),
+							__( 'Category: %s.', 'sourceweb' ),
 							catName || q.cat
 						) }{ ' ' }
 						<Button onClick={ () => set( { cat: '' } ) }>
-							{ __( 'Show every category', 'aw-sourcing' ) }
+							{ __( 'Show every category', 'sourceweb' ) }
 						</Button>
 					</Notice>
 				) }
 				<DataList
-					label={ __( 'Keywords', 'aw-sourcing' ) }
+					label={ __( 'Keywords', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Keyword', 'aw-sourcing' ),
+							label: __( 'Keyword', 'sourceweb' ),
 							sortable: true,
 							primary: true,
 							render: ( r ) => (
@@ -4002,16 +4002,16 @@ function KeywordList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'spellings',
-							label: __( 'Other spellings', 'aw-sourcing' ),
+							label: __( 'Other spellings', 'sourceweb' ),
 						},
 						{
 							key: 'rolesText',
-							label: __( 'Roles', 'aw-sourcing' ),
+							label: __( 'Roles', 'sourceweb' ),
 							render: ( r ) => r.rolesText || '—',
 						},
 						{
 							key: 'categories',
-							label: __( 'Categories', 'aw-sourcing' ),
+							label: __( 'Categories', 'sourceweb' ),
 							render: ( r ) =>
 								r.categories.length
 									? r.categories.map( ( c, i ) => (
@@ -4034,16 +4034,16 @@ function KeywordList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'search',
-							label: __( 'Google News search', 'aw-sourcing' ),
+							label: __( 'Google News search', 'sourceweb' ),
 						},
 						{
 							key: 'items',
-							label: __( 'Items (30 days)', 'aw-sourcing' ),
+							label: __( 'Items (30 days)', 'sourceweb' ),
 							sortable: true,
 						},
 						{
 							key: 'impr',
-							label: __( 'Impressions (28 days)', 'aw-sourcing' ),
+							label: __( 'Impressions (28 days)', 'sourceweb' ),
 							sortable: true,
 						},
 					] }
@@ -4054,7 +4054,7 @@ function KeywordList( { go, msg, setMsg } ) {
 					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 					search={ q.search }
 					onSearch={ ( search ) => set( { search } ) }
-					searchLabel={ __( 'Search keywords', 'aw-sourcing' ) }
+					searchLabel={ __( 'Search keywords', 'sourceweb' ) }
 					views={ views }
 					view={ q.view }
 					onView={ ( view ) =>
@@ -4071,7 +4071,7 @@ function KeywordList( { go, msg, setMsg } ) {
 					rowActions={ ( r ) => [
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							onClick: () => go( { edit: r.id } ),
 						},
 						...( 'en' === r.lang
@@ -4091,7 +4091,7 @@ function KeywordList( { go, msg, setMsg } ) {
 															/* translators: %s: role. */
 															__(
 																'Remove %s',
-																'aw-sourcing'
+																'sourceweb'
 															),
 															x.label
 														)
@@ -4099,7 +4099,7 @@ function KeywordList( { go, msg, setMsg } ) {
 															/* translators: %s: role. */
 															__(
 																'Add %s',
-																'aw-sourcing'
+																'sourceweb'
 															),
 															x.label
 														),
@@ -4116,7 +4116,7 @@ function KeywordList( { go, msg, setMsg } ) {
 										} ),
 									{
 										icon: 'delete',
-										label: __( 'Delete', 'aw-sourcing' ),
+										label: __( 'Delete', 'sourceweb' ),
 										tone: 'error',
 										onClick: () =>
 											remove( [ r.id ], r.title ),
@@ -4127,7 +4127,7 @@ function KeywordList( { go, msg, setMsg } ) {
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'No keywords.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'No keywords.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 			<HeadlineTest />
@@ -4181,7 +4181,7 @@ function KeywordForm( { id, onDone, go } ) {
 	if ( ! k || ! v ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the keyword…', 'aw-sourcing' ) }
+				label={ __( 'Loading the keyword…', 'sourceweb' ) }
 			/>
 		);
 	}
@@ -4214,7 +4214,7 @@ function KeywordForm( { id, onDone, go } ) {
 			window.confirm(
 				__(
 					'Remove this keyword from sourcing? Its Sourcing and Press roles go; Search Insights keeps the record.',
-					'aw-sourcing'
+					'sourceweb'
 				)
 			)
 		) {
@@ -4222,9 +4222,9 @@ function KeywordForm( { id, onDone, go } ) {
 		}
 	};
 	const langs = [
-		{ value: 'en', label: __( 'English', 'aw-sourcing' ) },
-		{ value: 'hinglish', label: __( 'Hinglish', 'aw-sourcing' ) },
-		{ value: 'hi', label: __( 'Hindi', 'aw-sourcing' ) },
+		{ value: 'en', label: __( 'English', 'sourceweb' ) },
+		{ value: 'hinglish', label: __( 'Hinglish', 'sourceweb' ) },
+		{ value: 'hi', label: __( 'Hindi', 'sourceweb' ) },
 	];
 	return (
 		<SettingsGroup
@@ -4233,10 +4233,10 @@ function KeywordForm( { id, onDone, go } ) {
 				id
 					? sprintf(
 							/* translators: %s: keyword. */
-							__( 'Edit keyword: %s', 'aw-sourcing' ),
+							__( 'Edit keyword: %s', 'sourceweb' ),
 							k.label
 						)
-					: __( 'Add New Keyword', 'aw-sourcing' )
+					: __( 'Add New Keyword', 'sourceweb' )
 			}
 			footer={
 				<>
@@ -4246,18 +4246,18 @@ function KeywordForm( { id, onDone, go } ) {
 						onClick={ () => send() }
 					>
 						{ id
-							? __( 'Update', 'aw-sourcing' )
-							: __( 'Add New Keyword', 'aw-sourcing' ) }
+							? __( 'Update', 'sourceweb' )
+							: __( 'Add New Keyword', 'sourceweb' ) }
 					</Button>{ ' ' }
 					{ id > 0 && (
 						<>
 							<Button disabled={ busy } onClick={ del }>
-								{ __( 'Delete', 'aw-sourcing' ) }
+								{ __( 'Delete', 'sourceweb' ) }
 							</Button>{ ' ' }
 						</>
 					) }
 					<Button onClick={ () => onDone() }>
-						{ __( 'Cancel', 'aw-sourcing' ) }
+						{ __( 'Cancel', 'sourceweb' ) }
 					</Button>
 				</>
 			}
@@ -4269,30 +4269,30 @@ function KeywordForm( { id, onDone, go } ) {
 			) }
 			{ id ? (
 				<RefTable
-					caption={ __( 'The keyword', 'aw-sourcing' ) }
+					caption={ __( 'The keyword', 'sourceweb' ) }
 					head={ [
-						__( 'Item', 'aw-sourcing' ),
-						__( 'Value', 'aw-sourcing' ),
+						__( 'Item', 'sourceweb' ),
+						__( 'Value', 'sourceweb' ),
 					] }
 					rows={ [
 						[
-							__( 'Keyword', 'aw-sourcing' ),
+							__( 'Keyword', 'sourceweb' ),
 							<>
 								<strong>{ k.label }</strong>{ ' ' }
 								<code>{ k.norm }</code>{ ' ' }
 								<span className="kits-shell-field__help">
 									{ __(
 										'Fixed once saved: it is the record Search Insights keeps its figures on. Add other spellings below.',
-										'aw-sourcing'
+										'sourceweb'
 									) }
 								</span>
 							</>,
 						],
 						[
-							__( 'Search Insights roles', 'aw-sourcing' ),
+							__( 'Search Insights roles', 'sourceweb' ),
 							sprintf(
 								/* translators: %s: roles. */
-								__( '%s (not changed here)', 'aw-sourcing' ),
+								__( '%s (not changed here)', 'sourceweb' ),
 								k.otherRoles
 							),
 						],
@@ -4300,10 +4300,10 @@ function KeywordForm( { id, onDone, go } ) {
 				/>
 			) : (
 				<TextField
-					label={ __( 'Keyword', 'aw-sourcing' ) }
+					label={ __( 'Keyword', 'sourceweb' ) }
 					help={ __(
 						'English only for Sourcing and Press. Plurals and dots do not matter: "dogs" adds to "dog".',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ v.label }
 					onChange={ put( 'label' ) }
@@ -4311,65 +4311,65 @@ function KeywordForm( { id, onDone, go } ) {
 				/>
 			) }
 			<TextField
-				label={ __( 'Other spellings', 'aw-sourcing' ) }
+				label={ __( 'Other spellings', 'sourceweb' ) }
 				help={ __(
 					'One per line. Every spelling counts for every role. A trailing * matches the start of a word (steriliz* matches sterilized and sterilization).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ v.variants }
 				onChange={ put( 'variants' ) }
 				input={ { rows: 4 } }
 			/>
 			<SelectField
-				label={ __( 'Language', 'aw-sourcing' ) }
+				label={ __( 'Language', 'sourceweb' ) }
 				help={ __(
 					'Detected automatically; correct it when an English phrase was taken for Hinglish. Sourcing and Press roles are for English keywords only.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ v.lang }
 				options={ langs }
 				onChange={ put( 'lang' ) }
 			/>
 			<SettingsBlock
-				title={ __( 'Roles', 'aw-sourcing' ) }
+				title={ __( 'Roles', 'sourceweb' ) }
 				description={ __(
 					'Include and Exclude cannot go together.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<Checks
 					id="sw-kw-role"
-					legend={ __( 'Roles', 'aw-sourcing' ) }
+					legend={ __( 'Roles', 'sourceweb' ) }
 					options={ k.choices.roles }
 					value={ v.roles }
 					onChange={ put( 'roles' ) }
 				/>
 			</SettingsBlock>
 			<SettingsBlock
-				title={ __( 'Categories', 'aw-sourcing' ) }
+				title={ __( 'Categories', 'sourceweb' ) }
 				description={ __(
 					"With the Category word role, an item that has this keyword gets these categories (the section's rule still limits them). An item a search of this keyword found gets them too.",
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<Checks
 					id="sw-kw-cat"
-					legend={ __( 'Categories', 'aw-sourcing' ) }
+					legend={ __( 'Categories', 'sourceweb' ) }
 					options={ k.choices.categories }
 					value={ v.categories }
 					onChange={ put( 'categories' ) }
 				/>
 			</SettingsBlock>
 			<SettingsBlock
-				title={ __( 'Sections', 'aw-sourcing' ) }
+				title={ __( 'Sections', 'sourceweb' ) }
 				description={ __(
 					'Where items its search finds go (News for a keyword search; Media & PR files them as press).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<Checks
 					id="sw-kw-sec"
-					legend={ __( 'Sections', 'aw-sourcing' ) }
+					legend={ __( 'Sections', 'sourceweb' ) }
 					options={ k.choices.sections }
 					value={ v.sections }
 					onChange={ put( 'sections' ) }
@@ -4378,12 +4378,12 @@ function KeywordForm( { id, onDone, go } ) {
 			{ id > 0 && (
 				<>
 					<Switch
-						label={ __( 'Google News search', 'aw-sourcing' ) }
+						label={ __( 'Google News search', 'sourceweb' ) }
 						help={ sprintf(
 							/* translators: %s: feed ids. */
 							__(
 								'An English Include or Search keyword is searched every run. Searches: %s.',
-								'aw-sourcing'
+								'sourceweb'
 							),
 							k.searches
 						) }
@@ -4391,12 +4391,12 @@ function KeywordForm( { id, onDone, go } ) {
 						onChange={ put( 'search_on' ) }
 					/>
 					<TextField
-						label={ __( 'Search query', 'aw-sourcing' ) }
+						label={ __( 'Search query', 'sourceweb' ) }
 						help={ sprintf(
 							/* translators: %s: feed id. */
 							__(
 								'For the Search role: the words searched (the keyword itself when empty), or a whole Google News search address. Feed id: %s (fixed, so the items it found stay counted).',
-								'aw-sourcing'
+								'sourceweb'
 							),
 							k.feedId
 						) }
@@ -4455,12 +4455,12 @@ function Suggestions( { onBack } ) {
 			.finally( load );
 	};
 	const ops = {
-		route: __( 'Approve (auto-route)', 'aw-sourcing' ),
-		include: __( 'Add as Include', 'aw-sourcing' ),
-		exclude: __( 'Add as Exclude', 'aw-sourcing' ),
-		search: __( 'Add as Search', 'aw-sourcing' ),
-		dismiss: __( 'Dismiss', 'aw-sourcing' ),
-		restore: __( 'Show again', 'aw-sourcing' ),
+		route: __( 'Approve (auto-route)', 'sourceweb' ),
+		include: __( 'Add as Include', 'sourceweb' ),
+		exclude: __( 'Add as Exclude', 'sourceweb' ),
+		search: __( 'Add as Search', 'sourceweb' ),
+		dismiss: __( 'Dismiss', 'sourceweb' ),
+		restore: __( 'Show again', 'sourceweb' ),
 	};
 	const dismissed = 'dismissed' === q.view;
 	const bulk = Object.keys( ops )
@@ -4468,9 +4468,9 @@ function Suggestions( { onBack } ) {
 		.map( ( k ) => ( { value: k, label: ops[ k ] } ) );
 	const typeLabel = ( t ) =>
 		( {
-			news: __( 'News', 'aw-sourcing' ),
-			library: __( 'Library', 'aw-sourcing' ),
-			campaign: __( 'Campaign', 'aw-sourcing' ),
+			news: __( 'News', 'sourceweb' ),
+			library: __( 'Library', 'sourceweb' ),
+			campaign: __( 'Campaign', 'sourceweb' ),
 		} )[ t ] || '—';
 	// The two auto-approve rules (both off by default); the owner toggles them.
 	const [ aa, setAa ] = useState( null );
@@ -4514,14 +4514,14 @@ function Suggestions( { onBack } ) {
 	return (
 		<SectionCard
 			id="suggestions"
-			title={ __( 'Suggestions from Search Insights', 'aw-sourcing' ) }
+			title={ __( 'Suggestions from Search Insights', 'sourceweb' ) }
 			description={ __(
 				'Searches people made (20 impressions or more in 28 days) that no keyword covers yet, plus keyword candidates Search Insights scored and pushed here. Approve one (routed to its section, role and category) or dismiss it. Nothing is added by itself.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 			actions={
 				<Button onClick={ onBack }>
-					{ __( 'Back to Keywords', 'aw-sourcing' ) }
+					{ __( 'Back to Keywords', 'sourceweb' ) }
 				</Button>
 			}
 		>
@@ -4534,23 +4534,23 @@ function Suggestions( { onBack } ) {
 				<Notice tone="info">
 					{ __(
 						'Search Insights has no search data yet.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				</Notice>
 			) }
 			{ aa && (
 				<SettingsGroup
-					title={ __( 'Auto-approve rules', 'aw-sourcing' ) }
+					title={ __( 'Auto-approve rules', 'sourceweb' ) }
 					description={ __(
 						'Off by default: every candidate waits for you here. Turn one on to route matching pushed candidates automatically.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 				>
 					<Switch
-						label={ __( 'Auto-approve by score', 'aw-sourcing' ) }
+						label={ __( 'Auto-approve by score', 'sourceweb' ) }
 						help={ __(
 							'Approve pushed candidates whose Score is at least the number below.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						checked={ !! aa.on_score }
 						onChange={ ( on ) =>
@@ -4558,7 +4558,7 @@ function Suggestions( { onBack } ) {
 						}
 					/>
 					<Field
-						label={ __( 'Minimum score', 'aw-sourcing' ) }
+						label={ __( 'Minimum score', 'sourceweb' ) }
 						render={ ( id ) => (
 							<input
 								id={ id }
@@ -4580,11 +4580,11 @@ function Suggestions( { onBack } ) {
 					<Field
 						label={ __(
 							'Only these recommended types',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						help={ __(
 							'Leave all off to allow any type.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						render={ () =>
 							[ 'news', 'library', 'campaign' ].map( ( t ) => (
@@ -4614,11 +4614,11 @@ function Suggestions( { onBack } ) {
 					<Switch
 						label={ __(
 							'Auto-approve proven focus keyphrases',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						help={ __(
 							'Approve candidates the site already ranks for, up to the rank below.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						checked={ !! aa.on_proven }
 						onChange={ ( on ) =>
@@ -4626,7 +4626,7 @@ function Suggestions( { onBack } ) {
 						}
 					/>
 					<Field
-						label={ __( 'Up to rank', 'aw-sourcing' ) }
+						label={ __( 'Up to rank', 'sourceweb' ) }
 						render={ ( id ) => (
 							<input
 								id={ id }
@@ -4651,16 +4651,16 @@ function Suggestions( { onBack } ) {
 						isBusy={ savingAa }
 						disabled={ savingAa }
 					>
-						{ __( 'Save auto-approve rules', 'aw-sourcing' ) }
+						{ __( 'Save auto-approve rules', 'sourceweb' ) }
 					</Button>
 				</SettingsGroup>
 			) }
 			<DataList
-				label={ __( 'Suggestions', 'aw-sourcing' ) }
+				label={ __( 'Suggestions', 'sourceweb' ) }
 				columns={ [
 					{
 						key: 'title',
-						label: __( 'Search', 'aw-sourcing' ),
+						label: __( 'Search', 'sourceweb' ),
 						sortable: true,
 						primary: true,
 						render: ( r ) => (
@@ -4677,20 +4677,20 @@ function Suggestions( { onBack } ) {
 													/* translators: %d: search rank. */
 													__(
 														'Proven (focus keyphrase, ranks #%d)',
-														'aw-sourcing'
+														'sourceweb'
 													),
 													r.rank
 												)
 											: __(
 													'Proven (focus keyphrase)',
-													'aw-sourcing'
+													'sourceweb'
 												) }
 									</span>
 								) }
 								{ ! r.proven && r.rising && (
 									<span className="kits-shell-field__help">
 										{ ' ' }
-										{ __( 'Rising', 'aw-sourcing' ) }
+										{ __( 'Rising', 'sourceweb' ) }
 									</span>
 								) }
 							</>
@@ -4698,34 +4698,34 @@ function Suggestions( { onBack } ) {
 					},
 					{
 						key: 'score',
-						label: __( 'Score', 'aw-sourcing' ),
+						label: __( 'Score', 'sourceweb' ),
 						sortable: true,
 						render: ( r ) => ( r.pushed ? r.score : '—' ),
 					},
 					{
 						key: 'type',
-						label: __( 'Recommended type', 'aw-sourcing' ),
+						label: __( 'Recommended type', 'sourceweb' ),
 						render: ( r ) =>
 							r.pushed ? typeLabel( r.type ) : '—',
 					},
 					{
 						key: 'topic',
-						label: __( 'Topic', 'aw-sourcing' ),
+						label: __( 'Topic', 'sourceweb' ),
 						render: ( r ) => r.topic || '—',
 					},
 					{
 						key: 'impr',
-						label: __( 'Impressions (28 days)', 'aw-sourcing' ),
+						label: __( 'Impressions (28 days)', 'sourceweb' ),
 						sortable: true,
 					},
 					{
 						key: 'clicks',
-						label: __( 'Clicks', 'aw-sourcing' ),
+						label: __( 'Clicks', 'sourceweb' ),
 						sortable: true,
 					},
 					{
 						key: 'pos',
-						label: __( 'Position', 'aw-sourcing' ),
+						label: __( 'Position', 'sourceweb' ),
 						sortable: true,
 					},
 				] }
@@ -4736,7 +4736,7 @@ function Suggestions( { onBack } ) {
 				onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 				search={ q.search }
 				onSearch={ ( search ) => set( { search } ) }
-				searchLabel={ __( 'Search suggestions', 'aw-sourcing' ) }
+				searchLabel={ __( 'Search suggestions', 'sourceweb' ) }
 				views={ data?.views || [] }
 				view={ q.view }
 				onView={ ( view ) => set( { view } ) }
@@ -4755,7 +4755,7 @@ function Suggestions( { onBack } ) {
 				loading={ loading }
 				error={ error }
 				onRetry={ load }
-				emptyTitle={ __( 'No suggestions.', 'aw-sourcing' ) }
+				emptyTitle={ __( 'No suggestions.', 'sourceweb' ) }
 			/>
 		</SectionCard>
 	);
@@ -4764,12 +4764,12 @@ function Suggestions( { onBack } ) {
 /* ---------- Rules ---------- */
 
 const RULE_PARTS = [
-	{ value: 'sections', label: __( 'Section rules', 'aw-sourcing' ) },
-	{ value: 'summary', label: __( 'Summary rules', 'aw-sourcing' ) },
-	{ value: 'enrich', label: __( 'Directory enrichment', 'aw-sourcing' ) },
+	{ value: 'sections', label: __( 'Section rules', 'sourceweb' ) },
+	{ value: 'summary', label: __( 'Summary rules', 'sourceweb' ) },
+	{ value: 'enrich', label: __( 'Directory enrichment', 'sourceweb' ) },
 	{
 		value: 'autoresolve',
-		label: __( 'Review-queue rules', 'aw-sourcing' ),
+		label: __( 'Review-queue rules', 'sourceweb' ),
 	},
 ];
 
@@ -4823,7 +4823,7 @@ function Rules() {
 	}
 	const parts = (
 		<ChipRow
-			label={ __( 'Rules', 'aw-sourcing' ) }
+			label={ __( 'Rules', 'sourceweb' ) }
 			chips={ RULE_PARTS }
 			value={ part }
 			onChange={ ( p ) => {
@@ -4883,7 +4883,7 @@ function SectionRules( { go } ) {
 					/* translators: %s: tag. */
 					__(
 						'Delete the tag rule for %s? The tag itself stays; items keep the tags they have.',
-						'aw-sourcing'
+						'sourceweb'
 					),
 					r.title
 				)
@@ -4905,18 +4905,18 @@ function SectionRules( { go } ) {
 		<>
 			<SectionCard
 				id="sections"
-				title={ __( 'Section rules', 'aw-sourcing' ) }
+				title={ __( 'Section rules', 'sourceweb' ) }
 				description={ __(
 					"Which categories and tags each section uses. The workers pick only from these, and each section's filters show only these. A section with no category ticked uses every category.",
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<DataList
-					label={ __( 'Sections', 'aw-sourcing' ) }
+					label={ __( 'Sections', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Section', 'aw-sourcing' ),
+							label: __( 'Section', 'sourceweb' ),
 							primary: true,
 							render: ( r ) => (
 								<>
@@ -4934,7 +4934,7 @@ function SectionRules( { go } ) {
 											{ ' ' }
 											{ __(
 												'No rule saved yet: every category, no tags.',
-												'aw-sourcing'
+												'sourceweb'
 											) }
 										</span>
 									) }
@@ -4943,19 +4943,19 @@ function SectionRules( { go } ) {
 						},
 						{
 							key: 'categories',
-							label: __( 'Allowed categories', 'aw-sourcing' ),
+							label: __( 'Allowed categories', 'sourceweb' ),
 						},
 						{
 							key: 'tags',
-							label: __( 'Allowed tags', 'aw-sourcing' ),
+							label: __( 'Allowed tags', 'sourceweb' ),
 						},
 						{
 							key: 'worker',
-							label: __( 'Workers file', 'aw-sourcing' ),
+							label: __( 'Workers file', 'sourceweb' ),
 						},
 						{
 							key: 'summary',
-							label: __( 'Summary rule', 'aw-sourcing' ),
+							label: __( 'Summary rule', 'sourceweb' ),
 						},
 					] }
 					rows={ data?.sections || [] }
@@ -4966,22 +4966,22 @@ function SectionRules( { go } ) {
 					rowActions={ ( r ) => [
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							onClick: () => go( { edit: r.id } ),
 						},
 					] }
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'No sections.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'No sections.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 			<SectionCard
 				id="tag-rules"
-				title={ __( 'Tag rules', 'aw-sourcing' ) }
+				title={ __( 'Tag rules', 'sourceweb' ) }
 				description={ __(
 					'An item gets the tag when its title or text has one of the phrases, in a section that allows the tag. An item that also matches a "Hold when" pattern, and has none of the "Unless" words, waits for a person with the hold reason.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				actions={
 					<a
@@ -4989,7 +4989,7 @@ function SectionRules( { go } ) {
 						href={ subHref( { tagrule: 'new' } ) }
 						onClick={ inPlace( go, { tagrule: 'new' } ) }
 					>
-						{ __( 'Add New Rule', 'aw-sourcing' ) }
+						{ __( 'Add New Rule', 'sourceweb' ) }
 					</a>
 				}
 			>
@@ -5002,11 +5002,11 @@ function SectionRules( { go } ) {
 					</Notice>
 				) }
 				<DataList
-					label={ __( 'Tag rules', 'aw-sourcing' ) }
+					label={ __( 'Tag rules', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Tag', 'aw-sourcing' ),
+							label: __( 'Tag', 'sourceweb' ),
 							primary: true,
 							render: ( r ) => (
 								<>
@@ -5022,10 +5022,10 @@ function SectionRules( { go } ) {
 								</>
 							),
 						},
-						{ key: 'any', label: __( 'Phrases', 'aw-sourcing' ) },
+						{ key: 'any', label: __( 'Phrases', 'sourceweb' ) },
 						{
 							key: 'hold',
-							label: __( 'Hold when', 'aw-sourcing' ),
+							label: __( 'Hold when', 'sourceweb' ),
 							render: ( r ) =>
 								r.hold.length
 									? r.hold.map( ( h, i ) => (
@@ -5036,16 +5036,16 @@ function SectionRules( { go } ) {
 										) )
 									: '—',
 						},
-						{ key: 'unless', label: __( 'Unless', 'aw-sourcing' ) },
+						{ key: 'unless', label: __( 'Unless', 'sourceweb' ) },
 						{
 							key: 'reason',
-							label: __( 'Hold reason', 'aw-sourcing' ),
+							label: __( 'Hold reason', 'sourceweb' ),
 						},
 						{
 							key: 'sections',
 							label: __(
 								'Sections that may give it',
-								'aw-sourcing'
+								'sourceweb'
 							),
 						},
 					] }
@@ -5057,12 +5057,12 @@ function SectionRules( { go } ) {
 					rowActions={ ( r ) => [
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							onClick: () => go( { tagrule: r.id } ),
 						},
 						{
 							icon: 'delete',
-							label: __( 'Delete', 'aw-sourcing' ),
+							label: __( 'Delete', 'sourceweb' ),
 							tone: 'error',
 							onClick: () => del( r ),
 						},
@@ -5070,7 +5070,7 @@ function SectionRules( { go } ) {
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'No tag rules yet.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'No tag rules yet.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 		</>
@@ -5093,7 +5093,7 @@ function FormButtons( { label, busy, onSave, onDone } ) {
 				{ label }
 			</Button>{ ' ' }
 			<Button onClick={ () => onDone() }>
-				{ __( 'Cancel', 'aw-sourcing' ) }
+				{ __( 'Cancel', 'sourceweb' ) }
 			</Button>
 		</>
 	);
@@ -5148,7 +5148,7 @@ function SectionForm( { type, onDone } ) {
 	if ( ! f.data || ! f.v ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the section…', 'aw-sourcing' ) }
+				label={ __( 'Loading the section…', 'sourceweb' ) }
 			/>
 		);
 	}
@@ -5160,12 +5160,12 @@ function SectionForm( { type, onDone } ) {
 				'categories' === k
 					? sprintf(
 							/* translators: %s: slug. */
-							__( '%s (no such category)', 'aw-sourcing' ),
+							__( '%s (no such category)', 'sourceweb' ),
 							decodeURIComponent( slug )
 						)
 					: sprintf(
 							/* translators: %s: slug. */
-							__( '%s (no such tag)', 'aw-sourcing' ),
+							__( '%s (no such tag)', 'sourceweb' ),
 							decodeURIComponent( slug )
 						),
 		} ) );
@@ -5189,12 +5189,12 @@ function SectionForm( { type, onDone } ) {
 			id="section-form"
 			title={ sprintf(
 				/* translators: %s: section. */
-				__( 'Edit section: %s', 'aw-sourcing' ),
+				__( 'Edit section: %s', 'sourceweb' ),
 				d.label
 			) }
 			footer={
 				<FormButtons
-					label={ __( 'Save section', 'aw-sourcing' ) }
+					label={ __( 'Save section', 'sourceweb' ) }
 					busy={ f.busy }
 					onSave={ () =>
 						f.send( 'rules/section/save', { type, ...f.v }, onDone )
@@ -5205,15 +5205,15 @@ function SectionForm( { type, onDone } ) {
 		>
 			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
 			<SettingsBlock
-				title={ __( 'Allowed categories', 'aw-sourcing' ) }
+				title={ __( 'Allowed categories', 'sourceweb' ) }
 				description={ __(
 					'None ticked: every category.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<Checks
 					id="sw-sec-cat"
-					legend={ __( 'Allowed categories', 'aw-sourcing' ) }
+					legend={ __( 'Allowed categories', 'sourceweb' ) }
 					options={ [
 						...d.choices.categories,
 						...gone( 'categories' ),
@@ -5223,15 +5223,15 @@ function SectionForm( { type, onDone } ) {
 				/>
 			</SettingsBlock>
 			<SettingsBlock
-				title={ __( 'Allowed tags', 'aw-sourcing' ) }
+				title={ __( 'Allowed tags', 'sourceweb' ) }
 				description={ __(
 					"The tags the workers may give this section's items, and its filters show.",
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<Checks
 					id="sw-sec-tag"
-					legend={ __( 'Allowed tags', 'aw-sourcing' ) }
+					legend={ __( 'Allowed tags', 'sourceweb' ) }
 					options={ [ ...d.choices.tags, ...gone( 'tags' ) ] }
 					value={ ticked( 'tags' ) }
 					onChange={ tick( 'tags' ) }
@@ -5261,7 +5261,7 @@ function TagRuleForm( { tag, onDone } ) {
 	}
 	if ( ! f.data || ! f.v ) {
 		return (
-			<LoadingState label={ __( 'Loading the rule…', 'aw-sourcing' ) } />
+			<LoadingState label={ __( 'Loading the rule…', 'sourceweb' ) } />
 		);
 	}
 	const put = ( k ) => ( val ) => f.setV( { ...f.v, [ k ]: val } );
@@ -5272,17 +5272,17 @@ function TagRuleForm( { tag, onDone } ) {
 				tag
 					? sprintf(
 							/* translators: %s: tag. */
-							__( 'Edit tag rule: %s', 'aw-sourcing' ),
+							__( 'Edit tag rule: %s', 'sourceweb' ),
 							decodeURIComponent( tag )
 						)
-					: __( 'Add New Rule', 'aw-sourcing' )
+					: __( 'Add New Rule', 'sourceweb' )
 			}
 			footer={
 				<FormButtons
 					label={
 						tag
-							? __( 'Update', 'aw-sourcing' )
-							: __( 'Add New Rule', 'aw-sourcing' )
+							? __( 'Update', 'sourceweb' )
+							: __( 'Add New Rule', 'sourceweb' )
 					}
 					busy={ f.busy }
 					onSave={ () =>
@@ -5298,10 +5298,10 @@ function TagRuleForm( { tag, onDone } ) {
 		>
 			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
 			<SelectField
-				label={ __( 'Tag', 'aw-sourcing' ) }
+				label={ __( 'Tag', 'sourceweb' ) }
 				help={ __(
 					'The tag an item gets when its title or text has one of the phrases (only in a section that allows the tag).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.tag }
 				options={ [
@@ -5310,7 +5310,7 @@ function TagRuleForm( { tag, onDone } ) {
 						: [
 								{
 									value: '',
-									label: __( 'Choose a tag', 'aw-sourcing' ),
+									label: __( 'Choose a tag', 'sourceweb' ),
 								},
 							] ),
 					...f.data.choices,
@@ -5318,40 +5318,40 @@ function TagRuleForm( { tag, onDone } ) {
 				onChange={ put( 'tag' ) }
 			/>
 			<TextField
-				label={ __( 'Phrases', 'aw-sourcing' ) }
+				label={ __( 'Phrases', 'sourceweb' ) }
 				help={ __(
 					'One per line. An item with any of them gets the tag.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.any }
 				onChange={ put( 'any' ) }
 				input={ { rows: 5 } }
 			/>
 			<TextField
-				label={ __( 'Hold when', 'aw-sourcing' ) }
+				label={ __( 'Hold when', 'sourceweb' ) }
 				help={ __(
 					'One regular expression per line (case does not matter). An item that also matches one waits for a person.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.hold }
 				onChange={ put( 'hold' ) }
 				input={ { rows: 2 } }
 			/>
 			<TextField
-				label={ __( 'Unless', 'aw-sourcing' ) }
+				label={ __( 'Unless', 'sourceweb' ) }
 				help={ __(
 					'One per line. An item with any of these words is not held.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.unless }
 				onChange={ put( 'unless' ) }
 				input={ { rows: 3 } }
 			/>
 			<TextField
-				label={ __( 'Hold reason', 'aw-sourcing' ) }
+				label={ __( 'Hold reason', 'sourceweb' ) }
 				help={ __(
 					'What the person checking a held item should look at.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.hold_reason }
 				onChange={ put( 'hold_reason' ) }
@@ -5390,7 +5390,7 @@ function AutoRules( { go } ) {
 					/* translators: 1: field, 2: condition. */
 					__(
 						'Delete the rule for %1$s: when %2$s? Waiting values it decided will wait for a person.',
-						'aw-sourcing'
+						'sourceweb'
 					),
 					r.field_label,
 					r.cond_label
@@ -5407,7 +5407,7 @@ function AutoRules( { go } ) {
 			! window.confirm(
 				__(
 					'Put the built-in rules back? Your added and edited rules are dropped (the Change log keeps them).',
-					'aw-sourcing'
+					'sourceweb'
 				)
 			)
 		) {
@@ -5429,7 +5429,7 @@ function AutoRules( { go } ) {
 						/* translators: 1: rows looked at, 2: applied, 3: rejected, 4: left. */
 						__(
 							'Dry run on %1$d waiting values: %2$d would be applied, %3$d rejected, %4$d left for a person. Nothing was changed.',
-							'aw-sourcing'
+							'sourceweb'
 						),
 						r.rows,
 						r.approve,
@@ -5445,10 +5445,10 @@ function AutoRules( { go } ) {
 	return (
 		<SectionCard
 			id="review-queue-rules"
-			title={ __( 'Review-queue rules', 'aw-sourcing' ) }
+			title={ __( 'Review-queue rules', 'sourceweb' ) }
 			description={ __(
 				'What happens to a waiting value for a field that already holds one. A rule says: for this field, when this holds, do this. The rules are tried in order and the first one that holds decides; a value no rule decides waits for a person. Never on a claimed or verified listing, and an imported list always waits for a person.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 			actions={
 				<>
@@ -5463,13 +5463,13 @@ function AutoRules( { go } ) {
 							autorule: 'new',
 						} ) }
 					>
-						{ __( 'Add New Rule', 'aw-sourcing' ) }
+						{ __( 'Add New Rule', 'sourceweb' ) }
 					</a>{ ' ' }
 					<Button onClick={ tryRules } disabled={ busy }>
-						{ __( 'Try on waiting values', 'aw-sourcing' ) }
+						{ __( 'Try on waiting values', 'sourceweb' ) }
 					</Button>{ ' ' }
 					<Button onClick={ reset } disabled={ busy }>
-						{ __( 'Back to the built-in rules', 'aw-sourcing' ) }
+						{ __( 'Back to the built-in rules', 'sourceweb' ) }
 					</Button>
 				</>
 			}
@@ -5483,11 +5483,11 @@ function AutoRules( { go } ) {
 				<Switch
 					label={ __(
 						'The rules decide waiting values',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					help={ __(
 						'Off: every value waits for a person, as before the rules.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					checked={ !! data.on }
 					onChange={ ( on ) =>
@@ -5496,11 +5496,11 @@ function AutoRules( { go } ) {
 				/>
 			) }
 			<DataList
-				label={ __( 'Review-queue rules', 'aw-sourcing' ) }
+				label={ __( 'Review-queue rules', 'sourceweb' ) }
 				columns={ [
 					{
 						key: 'field_label',
-						label: __( 'Field', 'aw-sourcing' ),
+						label: __( 'Field', 'sourceweb' ),
 						primary: true,
 						render: ( r ) => (
 							<a
@@ -5517,18 +5517,18 @@ function AutoRules( { go } ) {
 							</a>
 						),
 					},
-					{ key: 'cond_label', label: __( 'When', 'aw-sourcing' ) },
+					{ key: 'cond_label', label: __( 'When', 'sourceweb' ) },
 					{
 						key: 'action_label',
-						label: __( 'Then', 'aw-sourcing' ),
+						label: __( 'Then', 'sourceweb' ),
 					},
 					{
 						key: 'on',
-						label: __( 'On', 'aw-sourcing' ),
+						label: __( 'On', 'sourceweb' ),
 						render: ( r ) =>
 							r.on
-								? __( 'Yes', 'aw-sourcing' )
-								: __( 'No', 'aw-sourcing' ),
+								? __( 'Yes', 'sourceweb' )
+								: __( 'No', 'sourceweb' ),
 					},
 				] }
 				rows={ data?.rows || [] }
@@ -5539,12 +5539,12 @@ function AutoRules( { go } ) {
 				rowActions={ ( r ) => [
 					{
 						icon: 'edit',
-						label: __( 'Edit', 'aw-sourcing' ),
+						label: __( 'Edit', 'sourceweb' ),
 						onClick: () =>
 							go( { part: 'autoresolve', autorule: r.id } ),
 					},
 					{
-						label: __( 'Move earlier', 'aw-sourcing' ),
+						label: __( 'Move earlier', 'sourceweb' ),
 						onClick: () =>
 							post( 'rules/autoresolve/move', {
 								id: r.id,
@@ -5552,7 +5552,7 @@ function AutoRules( { go } ) {
 							} ),
 					},
 					{
-						label: __( 'Move later', 'aw-sourcing' ),
+						label: __( 'Move later', 'sourceweb' ),
 						onClick: () =>
 							post( 'rules/autoresolve/move', {
 								id: r.id,
@@ -5561,7 +5561,7 @@ function AutoRules( { go } ) {
 					},
 					{
 						icon: 'delete',
-						label: __( 'Delete', 'aw-sourcing' ),
+						label: __( 'Delete', 'sourceweb' ),
 						tone: 'error',
 						onClick: () => del( r ),
 					},
@@ -5571,7 +5571,7 @@ function AutoRules( { go } ) {
 				onRetry={ load }
 				emptyTitle={ __(
 					'No rules: every waiting value waits for a person.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			/>
 		</SectionCard>
@@ -5606,7 +5606,7 @@ function AutoRuleForm( { id, onDone } ) {
 	}
 	if ( ! f.data || ! f.v ) {
 		return (
-			<LoadingState label={ __( 'Loading the rule…', 'aw-sourcing' ) } />
+			<LoadingState label={ __( 'Loading the rule…', 'sourceweb' ) } />
 		);
 	}
 	const put = ( k ) => ( val ) => f.setV( { ...f.v, [ k ]: val } );
@@ -5631,15 +5631,15 @@ function AutoRuleForm( { id, onDone } ) {
 			id="auto-rule-form"
 			title={
 				id
-					? __( 'Edit review-queue rule', 'aw-sourcing' )
-					: __( 'Add New Rule', 'aw-sourcing' )
+					? __( 'Edit review-queue rule', 'sourceweb' )
+					: __( 'Add New Rule', 'sourceweb' )
 			}
 			footer={
 				<FormButtons
 					label={
 						id
-							? __( 'Update', 'aw-sourcing' )
-							: __( 'Add New Rule', 'aw-sourcing' )
+							? __( 'Update', 'sourceweb' )
+							: __( 'Add New Rule', 'sourceweb' )
 					}
 					busy={ f.busy }
 					onSave={ () =>
@@ -5655,33 +5655,33 @@ function AutoRuleForm( { id, onDone } ) {
 		>
 			{ f.msg && <Notice tone={ f.msg.tone }>{ f.msg.text }</Notice> }
 			<SelectField
-				label={ __( 'Field', 'aw-sourcing' ) }
+				label={ __( 'Field', 'sourceweb' ) }
 				help={ __(
 					'The field the waiting value is for. The social group covers Facebook, Instagram, X, LinkedIn and YouTube.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.field }
 				options={ f.data.fields }
 				onChange={ setField }
 			/>
 			<SelectField
-				label={ __( 'When', 'aw-sourcing' ) }
+				label={ __( 'When', 'sourceweb' ) }
 				help={ __(
 					'Rules of a field are tried in order; the first one that holds decides.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.cond }
 				options={ conds }
 				onChange={ put( 'cond' ) }
 			/>
 			<SelectField
-				label={ __( 'Then', 'aw-sourcing' ) }
+				label={ __( 'Then', 'sourceweb' ) }
 				value={ f.v.action }
 				options={ f.data.actions }
 				onChange={ put( 'action' ) }
 			/>
 			<Switch
-				label={ __( 'On', 'aw-sourcing' ) }
+				label={ __( 'On', 'sourceweb' ) }
 				checked={ !! f.v.on }
 				onChange={ put( 'on' ) }
 			/>
@@ -5714,7 +5714,7 @@ function SummaryRules() {
 	if ( ! f.data || ! f.v ) {
 		return (
 			<LoadingState
-				label={ __( 'Loading the summary rules…', 'aw-sourcing' ) }
+				label={ __( 'Loading the summary rules…', 'sourceweb' ) }
 			/>
 		);
 	}
@@ -5735,7 +5735,7 @@ function SummaryRules() {
 			! window.confirm(
 				__(
 					'Go back to the default summary rules? Every rule on this form is replaced.',
-					'aw-sourcing'
+					'sourceweb'
 				)
 			)
 		) {
@@ -5760,14 +5760,14 @@ function SummaryRules() {
 	return (
 		<SettingsGroup
 			id="summary-rules"
-			title={ __( 'Summary rules', 'aw-sourcing' ) }
+			title={ __( 'Summary rules', 'sourceweb' ) }
 			description={ __(
 				'One rule set for every summary on the site: the workers write and check new summaries and same-story rewrites from these rules, and the site holds a News, Library or research item whose summary is over the maximum or not plain text in To review. A short summary is never held. A summary is never shorter than the search description, which is its lead sentence.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 			footer={
 				<Button variant="primary" busy={ f.busy } onClick={ save }>
-					{ __( 'Save summary rules', 'aw-sourcing' ) }
+					{ __( 'Save summary rules', 'sourceweb' ) }
 				</Button>
 			}
 		>
@@ -5782,17 +5782,17 @@ function SummaryRules() {
 					{ ( f.msg || done ).text }
 				</Notice>
 			) }
-			<SettingsBlock title={ __( 'Length per section', 'aw-sourcing' ) }>
+			<SettingsBlock title={ __( 'Length per section', 'sourceweb' ) }>
 				<RefTable
-					caption={ __( 'Length per section', 'aw-sourcing' ) }
+					caption={ __( 'Length per section', 'sourceweb' ) }
 					head={ [
-						__( 'Section', 'aw-sourcing' ),
-						__( 'Minimum words', 'aw-sourcing' ),
-						__( 'Maximum words', 'aw-sourcing' ),
-						__( 'Rule', 'aw-sourcing' ),
+						__( 'Section', 'sourceweb' ),
+						__( 'Minimum words', 'sourceweb' ),
+						__( 'Maximum words', 'sourceweb' ),
+						__( 'Rule', 'sourceweb' ),
 						__(
 							'Published summaries below the minimum',
-							'aw-sourcing'
+							'sourceweb'
 						),
 					] }
 					rows={ d.sections.map( ( s ) => {
@@ -5806,7 +5806,7 @@ function SummaryRules() {
 								putSec( s.type, 'min_words' ),
 								`${ s.label } ${ __(
 									'minimum words',
-									'aw-sourcing'
+									'sourceweb'
 								) }`
 							),
 							num(
@@ -5814,11 +5814,11 @@ function SummaryRules() {
 								putSec( s.type, 'max_words' ),
 								`${ s.label } ${ __(
 									'maximum words',
-									'aw-sourcing'
+									'sourceweb'
 								) }`
 							),
 							s.own ? (
-								__( 'Its own', 'aw-sourcing' )
+								__( 'Its own', 'sourceweb' )
 							) : (
 								<label htmlFor={ `sw-sr-inh-${ s.type }` }>
 									<input
@@ -5832,7 +5832,7 @@ function SummaryRules() {
 											)( e.target.checked )
 										}
 									/>{ ' ' }
-									{ __( 'Inherits News', 'aw-sourcing' ) }
+									{ __( 'Inherits News', 'sourceweb' ) }
 								</label>
 							),
 							s.below,
@@ -5840,7 +5840,7 @@ function SummaryRules() {
 					} ) }
 				/>
 			</SettingsBlock>
-			<SettingsBlock title={ __( 'Quotes and the lead', 'aw-sourcing' ) }>
+			<SettingsBlock title={ __( 'Quotes and the lead', 'sourceweb' ) }>
 				{ Object.keys( d.fields.numbers ).map( ( k ) => (
 					<TextField
 						key={ k }
@@ -5865,7 +5865,7 @@ function SummaryRules() {
 									/* translators: %s: section. */
 									__(
 										'%s (inherits News: these fields apply once it has its own rule)',
-										'aw-sourcing'
+										'sourceweb'
 									),
 									s.label
 								)
@@ -5873,20 +5873,20 @@ function SummaryRules() {
 					}
 				>
 					<TextField
-						label={ __( 'Structure', 'aw-sourcing' ) }
+						label={ __( 'Structure', 'sourceweb' ) }
 						value={ f.v.sections[ s.type ].structure }
 						onChange={ putSec( s.type, 'structure' ) }
 						input={ { rows: 4 } }
 					/>
 					<TextField
-						label={ __( 'Attribution', 'aw-sourcing' ) }
+						label={ __( 'Attribution', 'sourceweb' ) }
 						value={ f.v.sections[ s.type ].attribution }
 						onChange={ putSec( s.type, 'attribution' ) }
 						input={ { rows: 3 } }
 					/>
 				</SettingsBlock>
 			) ) }
-			<SettingsBlock title={ __( 'Every summary', 'aw-sourcing' ) }>
+			<SettingsBlock title={ __( 'Every summary', 'sourceweb' ) }>
 				{ Object.keys( d.fields.lists ).map( ( k ) => (
 					<TextField
 						key={ k }
@@ -5908,10 +5908,10 @@ function SummaryRules() {
 				) ) }
 			</SettingsBlock>
 			<Switch
-				label={ __( 'Go back to the default rules', 'aw-sourcing' ) }
+				label={ __( 'Go back to the default rules', 'sourceweb' ) }
 				help={ __(
 					'On Save, every rule on this form goes back to its default.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				checked={ !! f.v._reset }
 				onChange={ put( '_reset' ) }
@@ -5959,23 +5959,23 @@ function EnrichRules( { go } ) {
 				<Notice tone="info">
 					{ __(
 						'The sources, the Google key and the monthly cap are on Settings, under Connected services.',
-						'aw-sourcing'
+						'sourceweb'
 					) }{ ' ' }
 					<a href={ settings.url }>
-						{ __( 'Open Settings', 'aw-sourcing' ) }
+						{ __( 'Open Settings', 'sourceweb' ) }
 					</a>
 				</Notice>
 			) }
 			<SettingsGroup
 				id="trust-order"
-				title={ __( 'Trust order', 'aw-sourcing' ) }
+				title={ __( 'Trust order', 'sourceweb' ) }
 				description={ __(
 					"When sources give different values for a field, the organisation's own claim wins first, then the value most sources agree on, then the source higher in this order. 1 is trusted most. Leave a source empty to rank it after every numbered one.",
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				footer={
 					<Button busy={ busy } onClick={ saveOrder }>
-						{ __( 'Save trust order', 'aw-sourcing' ) }
+						{ __( 'Save trust order', 'sourceweb' ) }
 					</Button>
 				}
 			>
@@ -5989,7 +5989,7 @@ function EnrichRules( { go } ) {
 				) }
 				{ ! data && (
 					<LoadingState
-						label={ __( 'Loading the rules…', 'aw-sourcing' ) }
+						label={ __( 'Loading the rules…', 'sourceweb' ) }
 					/>
 				) }
 				{ ( data?.priority || [] ).map( ( p ) => (
@@ -6007,18 +6007,18 @@ function EnrichRules( { go } ) {
 			</SettingsGroup>
 			<SectionCard
 				id="field-rules"
-				title={ __( 'Field rules', 'aw-sourcing' ) }
+				title={ __( 'Field rules', 'sourceweb' ) }
 				description={ __(
 					'Every listing field: the enrichment fields and the fields of the listing field group. A claimed or verified listing is never changed, and a low-confidence value always waits for review; otherwise each field follows its Apply rule.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<DataList
-					label={ __( 'Field rules', 'aw-sourcing' ) }
+					label={ __( 'Field rules', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Field', 'aw-sourcing' ),
+							label: __( 'Field', 'sourceweb' ),
 							primary: true,
 							render: ( r ) => (
 								<>
@@ -6044,30 +6044,30 @@ function EnrichRules( { go } ) {
 								</>
 							),
 						},
-						{ key: 'group', label: __( 'Group', 'aw-sourcing' ) },
+						{ key: 'group', label: __( 'Group', 'sourceweb' ) },
 						{
 							key: 'store',
-							label: __( 'Stored in', 'aw-sourcing' ),
+							label: __( 'Stored in', 'sourceweb' ),
 						},
-						{ key: 'on', label: __( 'On', 'aw-sourcing' ) },
+						{ key: 'on', label: __( 'On', 'sourceweb' ) },
 						{
 							key: 'sources',
-							label: __( 'May be filled by', 'aw-sourcing' ),
+							label: __( 'May be filled by', 'sourceweb' ),
 						},
-						{ key: 'multi', label: __( 'Values', 'aw-sourcing' ) },
+						{ key: 'multi', label: __( 'Values', 'sourceweb' ) },
 						{
 							key: 'official',
-							label: __( 'Official source', 'aw-sourcing' ),
+							label: __( 'Official source', 'sourceweb' ),
 						},
 						{
 							key: 'ai',
-							label: __( 'Read by the AI', 'aw-sourcing' ),
+							label: __( 'Read by the AI', 'sourceweb' ),
 						},
 						{
 							key: 'invite',
-							label: __( 'Invite to claim', 'aw-sourcing' ),
+							label: __( 'Invite to claim', 'sourceweb' ),
 						},
-						{ key: 'apply', label: __( 'Apply', 'aw-sourcing' ) },
+						{ key: 'apply', label: __( 'Apply', 'sourceweb' ) },
 					] }
 					rows={ data?.fields || [] }
 					total={ data?.fields?.length || 0 }
@@ -6077,7 +6077,7 @@ function EnrichRules( { go } ) {
 					rowActions={ ( r ) => [
 						{
 							icon: 'edit',
-							label: __( 'Edit', 'aw-sourcing' ),
+							label: __( 'Edit', 'sourceweb' ),
 							onClick: () =>
 								go( { part: 'enrich', field: r.id } ),
 						},
@@ -6087,7 +6087,7 @@ function EnrichRules( { go } ) {
 										icon: 'delete',
 										label: __(
 											'Back to the built-in rule',
-											'aw-sourcing'
+											'sourceweb'
 										),
 										tone: 'error',
 										onClick: () => {
@@ -6098,7 +6098,7 @@ function EnrichRules( { go } ) {
 														/* translators: %s: field. */
 														__(
 															'Put the rule for %s back to the built-in one? Your saved rule is dropped (the Change log keeps it).',
-															'aw-sourcing'
+															'sourceweb'
 														),
 														r.title
 													)
@@ -6131,7 +6131,7 @@ function EnrichRules( { go } ) {
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'No fields.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'No fields.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 		</>
@@ -6155,7 +6155,7 @@ function FieldRuleForm( { field, onDone } ) {
 	}
 	if ( ! f.data || ! f.v ) {
 		return (
-			<LoadingState label={ __( 'Loading the field…', 'aw-sourcing' ) } />
+			<LoadingState label={ __( 'Loading the field…', 'sourceweb' ) } />
 		);
 	}
 	const d = f.data;
@@ -6165,13 +6165,13 @@ function FieldRuleForm( { field, onDone } ) {
 			id="field-rule-form"
 			title={ sprintf(
 				/* translators: %s: field. */
-				__( 'Edit field rule: %s', 'aw-sourcing' ),
+				__( 'Edit field rule: %s', 'sourceweb' ),
 				d.label
 			) }
 			description={ `${ d.field } · ${ d.group } · ${ d.store }` }
 			footer={
 				<FormButtons
-					label={ __( 'Update', 'aw-sourcing' ) }
+					label={ __( 'Update', 'sourceweb' ) }
 					busy={ f.busy }
 					onSave={ () =>
 						f.send(
@@ -6188,7 +6188,7 @@ function FieldRuleForm( { field, onDone } ) {
 			<Switch
 				label={ __(
 					'The worker may propose values for this field',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				help={ d.why }
 				checked={ !! f.v.on && ! d.why }
@@ -6196,72 +6196,72 @@ function FieldRuleForm( { field, onDone } ) {
 				onChange={ put( 'on' ) }
 			/>
 			<SettingsBlock
-				title={ __( 'May be filled by', 'aw-sourcing' ) }
-				description={ __( 'None ticked: any source.', 'aw-sourcing' ) }
+				title={ __( 'May be filled by', 'sourceweb' ) }
+				description={ __( 'None ticked: any source.', 'sourceweb' ) }
 			>
 				<Checks
 					id="sw-fr-src"
-					legend={ __( 'May be filled by', 'aw-sourcing' ) }
+					legend={ __( 'May be filled by', 'sourceweb' ) }
 					options={ d.choices.sources }
 					value={ f.v.sources }
 					onChange={ put( 'sources' ) }
 				/>
 			</SettingsBlock>
 			<TextField
-				label={ __( 'Values', 'aw-sourcing' ) }
+				label={ __( 'Values', 'sourceweb' ) }
 				help={ __(
 					'0: one value, and sources that disagree make it low confidence. A number: up to that many different values, never low for disagreeing (phone numbers).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.multi }
 				onChange={ put( 'multi' ) }
 				input={ { type: 'number', min: '0', max: '5' } }
 			/>
 			<SelectField
-				label={ __( 'Official source', 'aw-sourcing' ) }
+				label={ __( 'Official source', 'sourceweb' ) }
 				help={ __(
 					'Its value alone is high confidence (the AWBI list for the address and PIN code).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.official }
 				options={ [
-					{ value: '', label: __( 'None', 'aw-sourcing' ) },
+					{ value: '', label: __( 'None', 'sourceweb' ) },
 					...d.choices.sources,
 				] }
 				onChange={ put( 'official' ) }
 			/>
 			<Switch
-				label={ __( 'Read by the AI', 'aw-sourcing' ) }
+				label={ __( 'Read by the AI', 'sourceweb' ) }
 				help={ __(
 					'Values the AI reads from pages: at most medium confidence unless the organisation said so.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				checked={ !! f.v.ai }
 				onChange={ put( 'ai' ) }
 			/>
 			<Switch
-				label={ __( 'Invite to claim', 'aw-sourcing' ) }
+				label={ __( 'Invite to claim', 'sourceweb' ) }
 				help={ __(
 					'When only Google has it, the listing is flagged "Invite to claim".',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				checked={ !! f.v.invite }
 				onChange={ put( 'invite' ) }
 			/>
 			<Switch
-				label={ __( 'Profile link', 'aw-sourcing' ) }
+				label={ __( 'Profile link', 'sourceweb' ) }
 				help={ __(
 					'A social profile: the website linking to it and the page preview count as one source.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				checked={ !! f.v.social }
 				onChange={ put( 'social' ) }
 			/>
 			<SelectField
-				label={ __( 'Apply', 'aw-sourcing' ) }
+				label={ __( 'Apply', 'sourceweb' ) }
 				help={ __(
 					'Claimed and verified listings, and low-confidence values, always wait for review.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ f.v.apply }
 				options={ d.choices.apply }
@@ -6299,19 +6299,19 @@ function AiGlance() {
 		return <ErrorState message={ error } onRetry={ load } />;
 	}
 	if ( loading && ! data ) {
-		return <LoadingState label={ __( 'Loading…', 'aw-sourcing' ) } />;
+		return <LoadingState label={ __( 'Loading…', 'sourceweb' ) } />;
 	}
 	return (
 		<>
 			<SectionCard
 				id="ai-glance"
-				title={ __( 'At a glance', 'aw-sourcing' ) }
+				title={ __( 'At a glance', 'sourceweb' ) }
 			>
 				<RefTable
-					caption={ __( 'At a glance', 'aw-sourcing' ) }
+					caption={ __( 'At a glance', 'sourceweb' ) }
 					head={ [
-						__( 'What', 'aw-sourcing' ),
-						__( 'Now', 'aw-sourcing' ),
+						__( 'What', 'sourceweb' ),
+						__( 'Now', 'sourceweb' ),
 					] }
 					rows={ data.glance }
 				/>
@@ -6321,17 +6321,17 @@ function AiGlance() {
 							/* translators: %d: number of workers. */
 							__(
 								'The %d workers and the keys each can use',
-								'aw-sourcing'
+								'sourceweb'
 							),
 							data.workers.length
 						) }
 					</summary>
 					<RefTable
-						caption={ __( 'Workers', 'aw-sourcing' ) }
+						caption={ __( 'Workers', 'sourceweb' ) }
 						head={ [
-							__( 'Worker', 'aw-sourcing' ),
-							__( 'Keys it can use', 'aw-sourcing' ),
-							__( 'Used AI in the last 24 h', 'aw-sourcing' ),
+							__( 'Worker', 'sourceweb' ),
+							__( 'Keys it can use', 'sourceweb' ),
+							__( 'Used AI in the last 24 h', 'sourceweb' ),
 						] }
 						rows={ data.workers }
 					/>
@@ -6339,23 +6339,23 @@ function AiGlance() {
 			</SectionCard>
 			<SectionCard
 				id="ai-caps"
-				title={ __( 'Daily caps on free models', 'aw-sourcing' ) }
+				title={ __( 'Daily caps on free models', 'sourceweb' ) }
 				description={ __(
 					'Free models have a daily limit per account, not per key: OpenRouter allows 50 free requests a day per account (1,000 once the account has 10 credits), however many keys it has. The news workers share each account’s requests out over the day and stop calling an account once it reaches the limit. The limit resets at 05:30 IST (00:00 UTC).',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				{ data.caps.length ? (
 					<RefTable
-						caption={ __( 'Daily caps', 'aw-sourcing' ) }
+						caption={ __( 'Daily caps', 'sourceweb' ) }
 						head={ [
-							__( 'Account', 'aw-sourcing' ),
-							__( 'Daily limit', 'aw-sourcing' ),
-							__( 'Left today', 'aw-sourcing' ),
-							__( 'Last run could use', 'aw-sourcing' ),
-							__( 'Last run used', 'aw-sourcing' ),
-							__( 'Keys', 'aw-sourcing' ),
-							__( 'Last run', 'aw-sourcing' ),
+							__( 'Account', 'sourceweb' ),
+							__( 'Daily limit', 'sourceweb' ),
+							__( 'Left today', 'sourceweb' ),
+							__( 'Last run could use', 'sourceweb' ),
+							__( 'Last run used', 'sourceweb' ),
+							__( 'Keys', 'sourceweb' ),
+							__( 'Last run', 'sourceweb' ),
 						] }
 						rows={ data.caps }
 					/>
@@ -6363,27 +6363,27 @@ function AiGlance() {
 					<p>
 						{ __(
 							'No worker run has reported yet.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 					</p>
 				) }
 			</SectionCard>
 			<SectionCard
 				id="ai-groups"
-				title={ __( 'Keys by group', 'aw-sourcing' ) }
+				title={ __( 'Keys by group', 'sourceweb' ) }
 			>
 				{ data.groups.length ? (
 					<RefTable
-						caption={ __( 'Keys by group', 'aw-sourcing' ) }
+						caption={ __( 'Keys by group', 'sourceweb' ) }
 						head={ [
-							__( 'Group', 'aw-sourcing' ),
-							__( 'What it means', 'aw-sourcing' ),
-							__( 'Providers (working / saved)', 'aw-sourcing' ),
+							__( 'Group', 'sourceweb' ),
+							__( 'What it means', 'sourceweb' ),
+							__( 'Providers (working / saved)', 'sourceweb' ),
 						] }
 						rows={ data.groups }
 					/>
 				) : (
-					<p>{ __( 'No keys yet.', 'aw-sourcing' ) }</p>
+					<p>{ __( 'No keys yet.', 'sourceweb' ) }</p>
 				) }
 			</SectionCard>
 		</>
@@ -6429,7 +6429,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 							/* translators: %s: last 4 characters of a key. */
 							__(
 								'Remove key …%s? This takes effect straight away.',
-								'aw-sourcing'
+								'sourceweb'
 							),
 							last4
 						)
@@ -6439,7 +6439,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 								'Remove %d key? This takes effect straight away.',
 								'Remove %d keys? This takes effect straight away.',
 								ids.length,
-								'aw-sourcing'
+								'sourceweb'
 							),
 							ids.length
 						)
@@ -6464,10 +6464,10 @@ function AiKeyList( { go, msg, setMsg } ) {
 			<AiGlance />
 			<SectionCard
 				id="ai-keys"
-				title={ __( 'Keys', 'aw-sourcing' ) }
+				title={ __( 'Keys', 'sourceweb' ) }
 				description={ __(
 					'All keys in one list: the ones saved here, in the order the workers try them (top first), then the ones in the workers’ GitHub secrets (changed in GitHub; they cannot be attached to workers). Each key is for every worker unless it is attached to some. Every key is tested again twice a day.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				actions={
 					<>
@@ -6476,14 +6476,14 @@ function AiKeyList( { go, msg, setMsg } ) {
 							href={ subHref( newKey ) }
 							onClick={ inPlace( go, newKey ) }
 						>
-							{ __( 'Add New Key', 'aw-sourcing' ) }
+							{ __( 'Add New Key', 'sourceweb' ) }
 						</a>{ ' ' }
 						<a
 							className="kits-shell-button is-secondary"
 							href={ subHref( { overview: 1 } ) }
 							onClick={ inPlace( go, { overview: 1 } ) }
 						>
-							{ __( 'Keys overview', 'aw-sourcing' ) }
+							{ __( 'Keys overview', 'sourceweb' ) }
 						</a>
 					</>
 				}
@@ -6499,17 +6499,17 @@ function AiKeyList( { go, msg, setMsg } ) {
 				<SelectField
 					label={ __(
 						'Worker for Attach and Detach',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					help={ __(
 						'Choose the worker first, then tick keys and use the bulk action Attach to worker or Detach from worker.',
-						'aw-sourcing'
+						'sourceweb'
 					) }
 					value={ worker }
 					options={ [
 						{
 							value: '',
-							label: __( '— Choose a worker —', 'aw-sourcing' ),
+							label: __( '— Choose a worker —', 'sourceweb' ),
 						},
 						...( data?.workers || [] ).map( ( w ) => ( {
 							value: w.value,
@@ -6519,11 +6519,11 @@ function AiKeyList( { go, msg, setMsg } ) {
 					onChange={ setWorker }
 				/>
 				<DataList
-					label={ __( 'Keys', 'aw-sourcing' ) }
+					label={ __( 'Keys', 'sourceweb' ) }
 					columns={ [
 						{
 							key: 'title',
-							label: __( 'Key', 'aw-sourcing' ),
+							label: __( 'Key', 'sourceweb' ),
 							primary: true,
 							render: ( r ) => (
 								<>
@@ -6544,7 +6544,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 											{ ' — ' }
 											{ __(
 												'GitHub secret: change it in GitHub',
-												'aw-sourcing'
+												'sourceweb'
 											) }
 										</span>
 									) }
@@ -6558,29 +6558,29 @@ function AiKeyList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'provider',
-							label: __( 'Provider', 'aw-sourcing' ),
+							label: __( 'Provider', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => r.providerLabel,
 						},
 						{
 							key: 'model',
-							label: __( 'Model', 'aw-sourcing' ),
+							label: __( 'Model', 'sourceweb' ),
 							render: ( r ) => <code>{ r.model }</code>,
 						},
 						{
 							key: 'usedBy',
-							label: __( 'Used by', 'aw-sourcing' ),
+							label: __( 'Used by', 'sourceweb' ),
 						},
 						{
 							key: 'label',
-							label: __( 'Label', 'aw-sourcing' ),
+							label: __( 'Label', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => r.label || '—',
 						},
-						{ key: 'group', label: __( 'Group', 'aw-sourcing' ) },
+						{ key: 'group', label: __( 'Group', 'sourceweb' ) },
 						{
 							key: 'caps',
-							label: __( 'Good for', 'aw-sourcing' ),
+							label: __( 'Good for', 'sourceweb' ),
 							render: ( r ) => (
 								<>
 									{ r.caps }
@@ -6595,7 +6595,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'status',
-							label: __( 'Status', 'aw-sourcing' ),
+							label: __( 'Status', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => (
 								<>
@@ -6608,7 +6608,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 											{ ' — ' }
 											{ __(
 												'Being checked again',
-												'aw-sourcing'
+												'sourceweb'
 											) }
 										</span>
 									) }
@@ -6617,21 +6617,21 @@ function AiKeyList( { go, msg, setMsg } ) {
 						},
 						{
 							key: 'last_ok',
-							label: __( 'Last worked', 'aw-sourcing' ),
+							label: __( 'Last worked', 'sourceweb' ),
 							sortable: true,
 							render: ( r ) => r.lastOk,
 						},
 						{
 							key: 'limits',
-							label: __( 'Limit / cooldown', 'aw-sourcing' ),
+							label: __( 'Limit / cooldown', 'sourceweb' ),
 						},
 						{
 							key: 'usage',
-							label: __( 'Work in the last run', 'aw-sourcing' ),
+							label: __( 'Work in the last run', 'sourceweb' ),
 						},
 						{
 							key: 'checked',
-							label: __( 'Checked', 'aw-sourcing' ),
+							label: __( 'Checked', 'sourceweb' ),
 							sortable: true,
 						},
 					] }
@@ -6642,7 +6642,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 					onPage={ ( page ) => setQ( ( o ) => ( { ...o, page } ) ) }
 					search={ q.search }
 					onSearch={ ( search ) => set( { search } ) }
-					searchLabel={ __( 'Search keys', 'aw-sourcing' ) }
+					searchLabel={ __( 'Search keys', 'sourceweb' ) }
 					views={ data?.views || [] }
 					view={ q.view }
 					onView={ ( view ) => set( { view } ) }
@@ -6651,19 +6651,19 @@ function AiKeyList( { go, msg, setMsg } ) {
 					bulkActions={ [
 						{
 							value: 'attach',
-							label: __( 'Attach to worker', 'aw-sourcing' ),
+							label: __( 'Attach to worker', 'sourceweb' ),
 						},
 						{
 							value: 'detach',
-							label: __( 'Detach from worker', 'aw-sourcing' ),
+							label: __( 'Detach from worker', 'sourceweb' ),
 						},
 						{
 							value: 'recheck',
-							label: __( 'Check again', 'aw-sourcing' ),
+							label: __( 'Check again', 'sourceweb' ),
 						},
 						{
 							value: 'remove',
-							label: __( 'Remove', 'aw-sourcing' ),
+							label: __( 'Remove', 'sourceweb' ),
 						},
 					] }
 					onBulk={ onBulk }
@@ -6673,7 +6673,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 							: [
 									{
 										icon: 'edit',
-										label: __( 'Edit', 'aw-sourcing' ),
+										label: __( 'Edit', 'sourceweb' ),
 										onClick: () => go( { edit: r.id } ),
 									},
 									...( data?.plain
@@ -6681,7 +6681,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 												{
 													label: __(
 														'Move up',
-														'aw-sourcing'
+														'sourceweb'
 													),
 													onClick: () =>
 														decide( 'up', [
@@ -6691,7 +6691,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 												{
 													label: __(
 														'Move down',
-														'aw-sourcing'
+														'sourceweb'
 													),
 													onClick: () =>
 														decide( 'down', [
@@ -6703,14 +6703,14 @@ function AiKeyList( { go, msg, setMsg } ) {
 									{
 										label: __(
 											'Check again',
-											'aw-sourcing'
+											'sourceweb'
 										),
 										onClick: () =>
 											decide( 'recheck', [ r.id ] ),
 									},
 									{
 										icon: 'delete',
-										label: __( 'Remove', 'aw-sourcing' ),
+										label: __( 'Remove', 'sourceweb' ),
 										tone: 'error',
 										onClick: () =>
 											remove( [ r.id ], r.last4 ),
@@ -6720,7 +6720,7 @@ function AiKeyList( { go, msg, setMsg } ) {
 					loading={ loading }
 					error={ error }
 					onRetry={ load }
-					emptyTitle={ __( 'No keys yet.', 'aw-sourcing' ) }
+					emptyTitle={ __( 'No keys yet.', 'sourceweb' ) }
 				/>
 			</SectionCard>
 		</>
@@ -6746,7 +6746,7 @@ function AiKeyForm( { id, onDone } ) {
 	}
 	if ( ! data || ! v ) {
 		return (
-			<LoadingState label={ __( 'Loading the key…', 'aw-sourcing' ) } />
+			<LoadingState label={ __( 'Loading the key…', 'sourceweb' ) } />
 		);
 	}
 	const put = ( k ) => ( val ) => setV( { ...v, [ k ]: val } );
@@ -6771,10 +6771,10 @@ function AiKeyForm( { id, onDone } ) {
 			id="ai-key-form"
 			title={
 				data.new
-					? __( 'Add New Key', 'aw-sourcing' )
+					? __( 'Add New Key', 'sourceweb' )
 					: sprintf(
 							/* translators: %s: last 4 characters of a key. */
-							__( 'Edit key …%s', 'aw-sourcing' ),
+							__( 'Edit key …%s', 'sourceweb' ),
 							data.last4
 						)
 			}
@@ -6782,8 +6782,8 @@ function AiKeyForm( { id, onDone } ) {
 				<FormButtons
 					label={
 						data.new
-							? __( 'Add key', 'aw-sourcing' )
-							: __( 'Save changes', 'aw-sourcing' )
+							? __( 'Add key', 'sourceweb' )
+							: __( 'Save changes', 'sourceweb' )
 					}
 					busy={ busy }
 					onSave={ save }
@@ -6795,10 +6795,10 @@ function AiKeyForm( { id, onDone } ) {
 			{ data.new ? (
 				<>
 					<TextField
-						label={ __( 'Key', 'aw-sourcing' ) }
+						label={ __( 'Key', 'sourceweb' ) }
 						help={ __(
 							'The provider and a model that answers are worked out in the background after you save. The key is never shown again: only its last 4 characters.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						value={ v.keys }
 						onChange={ put( 'keys' ) }
@@ -6809,10 +6809,10 @@ function AiKeyForm( { id, onDone } ) {
 						} }
 					/>
 					<TextField
-						label={ __( 'Or several keys', 'aw-sourcing' ) }
+						label={ __( 'Or several keys', 'sourceweb' ) }
 						help={ __(
 							'One per line. They get the same label and workers.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 						value={ v.many }
 						onChange={ put( 'many' ) }
@@ -6821,62 +6821,62 @@ function AiKeyForm( { id, onDone } ) {
 				</>
 			) : (
 				<RefTable
-					caption={ __( 'The key', 'aw-sourcing' ) }
+					caption={ __( 'The key', 'sourceweb' ) }
 					head={ [
-						__( 'Field', 'aw-sourcing' ),
-						__( 'Value', 'aw-sourcing' ),
+						__( 'Field', 'sourceweb' ),
+						__( 'Value', 'sourceweb' ),
 					] }
 					rows={ [
 						[
-							__( 'Key', 'aw-sourcing' ),
+							__( 'Key', 'sourceweb' ),
 							<span key="k">
 								<code>…{ data.last4 }</code>{ ' ' }
 								{ __(
 									'To change the key itself, remove it and add the new one.',
-									'aw-sourcing'
+									'sourceweb'
 								) }
 							</span>,
 						],
 						[
-							__( 'Provider', 'aw-sourcing' ),
+							__( 'Provider', 'sourceweb' ),
 							`${ data.providerLabel } (${ data.group })`,
 						],
 						[
-							__( 'Model', 'aw-sourcing' ),
+							__( 'Model', 'sourceweb' ),
 							<code key="m">{ data.model }</code>,
 						],
 						[
-							__( 'Status', 'aw-sourcing' ),
+							__( 'Status', 'sourceweb' ),
 							<Status
 								key="s"
 								tone={ KEY_TONE[ data.tone ] }
 								label={ data.statusLabel }
 							/>,
 						],
-						[ __( 'Last check', 'aw-sourcing' ), data.checked ],
+						[ __( 'Last check', 'sourceweb' ), data.checked ],
 					] }
 				/>
 			) }
 			<TextField
-				label={ __( 'Label', 'aw-sourcing' ) }
+				label={ __( 'Label', 'sourceweb' ) }
 				help={ __(
 					'Optional: a note for you, e.g. which account the key is from.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 				value={ v.label }
 				onChange={ put( 'label' ) }
 				input={ { maxLength: 80 } }
 			/>
 			<SettingsBlock
-				title={ __( 'Used by', 'aw-sourcing' ) }
+				title={ __( 'Used by', 'sourceweb' ) }
 				description={ __(
 					'None ticked: every worker, also workers added later.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<Checks
 					id="ai-key-workers"
-					legend={ __( 'Used by', 'aw-sourcing' ) }
+					legend={ __( 'Used by', 'sourceweb' ) }
 					options={ data.choices }
 					value={ v.workers }
 					onChange={ put( 'workers' ) }
@@ -6898,41 +6898,41 @@ function AiOverview( { onBack } ) {
 		return <ErrorState message={ error } onRetry={ load } />;
 	}
 	if ( loading && ! data ) {
-		return <LoadingState label={ __( 'Loading…', 'aw-sourcing' ) } />;
+		return <LoadingState label={ __( 'Loading…', 'sourceweb' ) } />;
 	}
 	return (
 		<SectionCard
 			id="ai-overview"
-			title={ __( 'Keys overview', 'aw-sourcing' ) }
+			title={ __( 'Keys overview', 'sourceweb' ) }
 			description={ __(
 				'Read-only. Keys show only their last 4 characters. All workers means the key is attached to none, so every worker may use it, also workers added later. Usable keys: AI keys that work or are rate-limited for now, from free or free-tier providers (paid ones are never served), plus tool keys.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 			actions={
 				<Button onClick={ onBack }>
-					{ __( 'Back to the keys', 'aw-sourcing' ) }
+					{ __( 'Back to the keys', 'sourceweb' ) }
 				</Button>
 			}
 		>
 			{ data.keys.length ? (
 				<RefTable
-					caption={ __( 'Keys', 'aw-sourcing' ) }
+					caption={ __( 'Keys', 'sourceweb' ) }
 					head={ [
-						__( 'Key', 'aw-sourcing' ),
-						__( 'Status', 'aw-sourcing' ),
-						__( 'Attached to', 'aw-sourcing' ),
+						__( 'Key', 'sourceweb' ),
+						__( 'Status', 'sourceweb' ),
+						__( 'Attached to', 'sourceweb' ),
 					] }
 					rows={ data.keys }
 				/>
 			) : (
-				<p>{ __( 'No keys saved yet.', 'aw-sourcing' ) }</p>
+				<p>{ __( 'No keys saved yet.', 'sourceweb' ) }</p>
 			) }
 			<RefTable
-				caption={ __( 'Usable keys per worker', 'aw-sourcing' ) }
+				caption={ __( 'Usable keys per worker', 'sourceweb' ) }
 				head={ [
-					__( 'Worker', 'aw-sourcing' ),
-					__( 'Usable AI keys', 'aw-sourcing' ),
-					__( 'Tool keys', 'aw-sourcing' ),
+					__( 'Worker', 'sourceweb' ),
+					__( 'Usable AI keys', 'sourceweb' ),
+					__( 'Tool keys', 'sourceweb' ),
 				] }
 				rows={ data.workers }
 			/>
@@ -7015,16 +7015,16 @@ function Recheck() {
 			id="recheck"
 			title={ __(
 				'Check published items against the rules',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 			description={ __(
 				'Looks at the newest 300 published news items and lists those the current rules would refuse (archive or tag pages, job vacancies). Nothing is changed.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
 		>
 			<p>
 				<Button busy={ busy } onClick={ run }>
-					{ __( 'Check now', 'aw-sourcing' ) }
+					{ __( 'Check now', 'sourceweb' ) }
 				</Button>
 			</p>
 			{ error && <Notice tone="error">{ error }</Notice> }
@@ -7034,7 +7034,7 @@ function Recheck() {
 						/* translators: %d: items looked at. */
 						__(
 							'Checked %d items: none would be refused.',
-							'aw-sourcing'
+							'sourceweb'
 						),
 						data.checked
 					) }
@@ -7071,17 +7071,17 @@ function RejectedList() {
 	return (
 		<Report
 			route="rejected"
-			title={ __( 'Rejected', 'aw-sourcing' ) }
+			title={ __( 'Rejected', 'sourceweb' ) }
 			description={ __(
 				'Items the relevance check refused, with the reason. They were never created. An item from an allowed publisher is rarely refused: worth a look.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
-			searchLabel={ __( 'Search rejected items', 'aw-sourcing' ) }
-			emptyTitle={ __( 'Nothing rejected.', 'aw-sourcing' ) }
+			searchLabel={ __( 'Search rejected items', 'sourceweb' ) }
+			emptyTitle={ __( 'Nothing rejected.', 'sourceweb' ) }
 			columns={ [
 				{
 					key: 'title',
-					label: __( 'Item', 'aw-sourcing' ),
+					label: __( 'Item', 'sourceweb' ),
 					primary: true,
 					render: ( r ) => (
 						<>
@@ -7104,18 +7104,18 @@ function RejectedList() {
 				},
 				{
 					key: 'type',
-					label: __( 'Type', 'aw-sourcing' ),
+					label: __( 'Type', 'sourceweb' ),
 					sortable: true,
 				},
 				{
 					key: 'found',
-					label: __( 'Found by', 'aw-sourcing' ),
+					label: __( 'Found by', 'sourceweb' ),
 					sortable: true,
 				},
-				{ key: 'reason', label: __( 'Reason', 'aw-sourcing' ) },
+				{ key: 'reason', label: __( 'Reason', 'sourceweb' ) },
 				{
 					key: 'at',
-					label: __( 'Date', 'aw-sourcing' ),
+					label: __( 'Date', 'sourceweb' ),
 					sortable: true,
 				},
 			] }
@@ -7127,30 +7127,30 @@ function RelayLog() {
 	return (
 		<Report
 			route="relay-log"
-			title={ __( 'Relay log', 'aw-sourcing' ) }
+			title={ __( 'Relay log', 'sourceweb' ) }
 			description={ __(
 				'Every request the workers made through this site for a publisher that refuses GitHub (the last 200). Each source has its relay switch on Sources.',
-				'aw-sourcing'
+				'sourceweb'
 			) }
-			searchLabel={ __( 'Search requests', 'aw-sourcing' ) }
-			emptyTitle={ __( 'None yet.', 'aw-sourcing' ) }
+			searchLabel={ __( 'Search requests', 'sourceweb' ) }
+			emptyTitle={ __( 'None yet.', 'sourceweb' ) }
 			columns={ [
 				{
 					key: 'at',
-					label: __( 'Time', 'aw-sourcing' ),
+					label: __( 'Time', 'sourceweb' ),
 					sortable: true,
 					primary: true,
 					render: ( r ) => r.when,
 				},
 				{
 					key: 'host',
-					label: __( 'Host', 'aw-sourcing' ),
+					label: __( 'Host', 'sourceweb' ),
 					sortable: true,
 				},
-				{ key: 'path', label: __( 'Path', 'aw-sourcing' ) },
+				{ key: 'path', label: __( 'Path', 'sourceweb' ) },
 				{
 					key: 'status',
-					label: __( 'Result', 'aw-sourcing' ),
+					label: __( 'Result', 'sourceweb' ),
 					sortable: true,
 					render: ( r ) => (
 						<Status
@@ -7161,17 +7161,17 @@ function RelayLog() {
 				},
 				{
 					key: 'bytes',
-					label: __( 'Size', 'aw-sourcing' ),
+					label: __( 'Size', 'sourceweb' ),
 					sortable: true,
 					render: ( r ) => r.size,
 				},
 				{
 					key: 'ms',
-					label: __( 'Time taken', 'aw-sourcing' ),
+					label: __( 'Time taken', 'sourceweb' ),
 					sortable: true,
 					render: ( r ) => `${ r.ms } ms`,
 				},
-				{ key: 'note', label: __( 'Note', 'aw-sourcing' ) },
+				{ key: 'note', label: __( 'Note', 'sourceweb' ) },
 			] }
 		/>
 	);
@@ -7181,34 +7181,34 @@ function ChangeLog() {
 	return (
 		<Report
 			route="changes"
-			title={ __( 'Change log', 'aw-sourcing' ) }
+			title={ __( 'Change log', 'sourceweb' ) }
 			description={ __(
 				'Who changed what on these screens and when, with the value before and after (newest first, the last 1,000).',
-				'aw-sourcing'
+				'sourceweb'
 			) }
-			searchLabel={ __( 'Search changes', 'aw-sourcing' ) }
-			emptyTitle={ __( 'No changes yet.', 'aw-sourcing' ) }
+			searchLabel={ __( 'Search changes', 'sourceweb' ) }
+			emptyTitle={ __( 'No changes yet.', 'sourceweb' ) }
 			columns={ [
 				{
 					key: 'at',
-					label: __( 'When', 'aw-sourcing' ),
+					label: __( 'When', 'sourceweb' ),
 					sortable: true,
 					primary: true,
 				},
 				{
 					key: 'user',
-					label: __( 'Who', 'aw-sourcing' ),
+					label: __( 'Who', 'sourceweb' ),
 					sortable: true,
 				},
 				{
 					key: 'tab',
-					label: __( 'Tab', 'aw-sourcing' ),
+					label: __( 'Tab', 'sourceweb' ),
 					sortable: true,
 				},
-				{ key: 'what', label: __( 'What changed', 'aw-sourcing' ) },
+				{ key: 'what', label: __( 'What changed', 'sourceweb' ) },
 				{
 					key: 'change',
-					label: __( 'Old → new', 'aw-sourcing' ),
+					label: __( 'Old → new', 'sourceweb' ),
 					render: ( r ) => r.change || '—',
 				},
 			] }
@@ -7219,10 +7219,10 @@ function ChangeLog() {
 /* ---------- Places ---------- */
 
 const KIND_LABELS = {
-	content_type: __( 'Content type', 'aw-sourcing' ),
-	plugin: __( 'Plugin', 'aw-sourcing' ),
-	workflow: __( 'Workflow', 'aw-sourcing' ),
-	other: __( 'Other', 'aw-sourcing' ),
+	content_type: __( 'Content type', 'sourceweb' ),
+	plugin: __( 'Plugin', 'sourceweb' ),
+	workflow: __( 'Workflow', 'sourceweb' ),
+	other: __( 'Other', 'sourceweb' ),
 };
 
 /**
@@ -7255,7 +7255,7 @@ function Places() {
 	}
 	if ( ! data ) {
 		return (
-			<LoadingState label={ __( 'Loading places…', 'aw-sourcing' ) } />
+			<LoadingState label={ __( 'Loading places…', 'sourceweb' ) } />
 		);
 	}
 	const placeOptions = data.places.map( ( p ) => ( {
@@ -7263,11 +7263,11 @@ function Places() {
 		label: `${ p.label } (${ KIND_LABELS[ p.kind ] || p.kind })`,
 	} ) );
 	const opLabels = {
-		always: __( 'Always', 'aw-sourcing' ),
-		eq: __( 'is exactly', 'aw-sourcing' ),
-		contains: __( 'contains', 'aw-sourcing' ),
-		in: __( 'is one of', 'aw-sourcing' ),
-		has: __( 'is not empty', 'aw-sourcing' ),
+		always: __( 'Always', 'sourceweb' ),
+		eq: __( 'is exactly', 'sourceweb' ),
+		contains: __( 'contains', 'sourceweb' ),
+		in: __( 'is one of', 'sourceweb' ),
+		has: __( 'is not empty', 'sourceweb' ),
 	};
 	const set = ( i, part ) =>
 		setRows( rows.map( ( r, n ) => ( n === i ? { ...r, ...part } : r ) ) );
@@ -7299,7 +7299,7 @@ function Places() {
 				take( d );
 				setMsg( {
 					tone: 'success',
-					text: __( 'Enhancements saved.', 'aw-sourcing' ),
+					text: __( 'Enhancements saved.', 'sourceweb' ),
 				} );
 			} )
 			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
@@ -7317,7 +7317,7 @@ function Places() {
 				take( d );
 				setMsg( {
 					tone: 'success',
-					text: __( 'Routes saved.', 'aw-sourcing' ),
+					text: __( 'Routes saved.', 'sourceweb' ),
 				} );
 			} )
 			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
@@ -7332,17 +7332,17 @@ function Places() {
 			) }
 			<SectionCard
 				id="routes"
-				title={ __( 'Routes', 'aw-sourcing' ) }
+				title={ __( 'Routes', 'sourceweb' ) }
 				description={ __(
 					'Where an item goes. Routes are tried from the top and the first that matches wins. An item that matches none goes to the place of its own type, as before.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				{ 0 === rows.length && (
 					<p>
 						{ __(
 							'No routes: every item goes to the place of its own type.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 					</p>
 				) }
@@ -7354,7 +7354,7 @@ function Places() {
 						) : (
 							<>
 								<SelectField
-									label={ __( 'When', 'aw-sourcing' ) }
+									label={ __( 'When', 'sourceweb' ) }
 									value={ r.op }
 									options={ data.ops.map( ( o ) => ( {
 										value: o,
@@ -7364,7 +7364,7 @@ function Places() {
 								/>
 								{ 'always' !== r.op && (
 									<SelectField
-										label={ __( 'Field', 'aw-sourcing' ) }
+										label={ __( 'Field', 'sourceweb' ) }
 										value={ r.field || data.fields[ 0 ] }
 										options={ data.fields.map( ( f ) => ( {
 											value: f,
@@ -7377,7 +7377,7 @@ function Places() {
 								) }
 								{ 'always' !== r.op && 'has' !== r.op && (
 									<TextField
-										label={ __( 'Value', 'aw-sourcing' ) }
+										label={ __( 'Value', 'sourceweb' ) }
 										value={ r.value }
 										onChange={ ( v ) =>
 											set( i, { value: v } )
@@ -7387,7 +7387,7 @@ function Places() {
 							</>
 						) }
 						<SelectField
-							label={ __( 'Send to', 'aw-sourcing' ) }
+							label={ __( 'Send to', 'sourceweb' ) }
 							value={ r.place }
 							options={ placeOptions }
 							onChange={ ( v ) => set( i, { place: v } ) }
@@ -7396,20 +7396,20 @@ function Places() {
 							onClick={ () => move( i, -1 ) }
 							disabled={ 0 === i }
 						>
-							{ __( 'Up', 'aw-sourcing' ) }
+							{ __( 'Up', 'sourceweb' ) }
 						</Button>
 						<Button
 							onClick={ () => move( i, 1 ) }
 							disabled={ i === rows.length - 1 }
 						>
-							{ __( 'Down', 'aw-sourcing' ) }
+							{ __( 'Down', 'sourceweb' ) }
 						</Button>
 						<Button
 							onClick={ () =>
 								setRows( rows.filter( ( _, n ) => n !== i ) )
 							}
 						>
-							{ __( 'Remove', 'aw-sourcing' ) }
+							{ __( 'Remove', 'sourceweb' ) }
 						</Button>
 					</div>
 				) ) }
@@ -7417,7 +7417,7 @@ function Places() {
 					<p>
 						{ __(
 							'No places yet. Turn on a plugin that adds one (DirectoryWeb adds its listing types), or a site can add its own, then routes can be made.',
-							'aw-sourcing'
+							'sourceweb'
 						) }
 					</p>
 				) }
@@ -7438,27 +7438,27 @@ function Places() {
 							] )
 						}
 					>
-						{ __( 'Add a route', 'aw-sourcing' ) }
+						{ __( 'Add a route', 'sourceweb' ) }
 					</Button>{ ' ' }
 					<Button variant="primary" busy={ busy } onClick={ save }>
-						{ __( 'Save routes', 'aw-sourcing' ) }
+						{ __( 'Save routes', 'sourceweb' ) }
 					</Button>
 				</p>
 			</SectionCard>
 			<SectionCard
 				id="sources"
-				title={ __( 'Where items come from', 'aw-sourcing' ) }
+				title={ __( 'Where items come from', 'sourceweb' ) }
 				description={ __(
 					'Every way an item can enter SourceWeb. Plugins can add their own.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<table className="widefat striped">
 					<thead>
 						<tr>
-							<th>{ __( 'Source', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Method', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Run by', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Source', 'sourceweb' ) }</th>
+							<th>{ __( 'Method', 'sourceweb' ) }</th>
+							<th>{ __( 'Run by', 'sourceweb' ) }</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -7474,19 +7474,19 @@ function Places() {
 			</SectionCard>
 			<SectionCard
 				id="places"
-				title={ __( 'Places', 'aw-sourcing' ) }
+				title={ __( 'Places', 'sourceweb' ) }
 				description={ __(
 					'Content types SourceWeb fills, and any place a plugin or workflow registers.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				<table className="widefat striped">
 					<thead>
 						<tr>
-							<th>{ __( 'Place', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Kind', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Owner', 'aw-sourcing' ) }</th>
-							<th>{ __( 'Enhancements', 'aw-sourcing' ) }</th>
+							<th>{ __( 'Place', 'sourceweb' ) }</th>
+							<th>{ __( 'Kind', 'sourceweb' ) }</th>
+							<th>{ __( 'Owner', 'sourceweb' ) }</th>
+							<th>{ __( 'Enhancements', 'sourceweb' ) }</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -7524,30 +7524,30 @@ function Places() {
 						busy={ busy }
 						onClick={ saveEnhance }
 					>
-						{ __( 'Save enhancements', 'aw-sourcing' ) }
+						{ __( 'Save enhancements', 'sourceweb' ) }
 					</Button>
 				</p>
 			</SectionCard>
 			<SectionCard
 				id="feedback"
-				title={ __( 'What the places say back', 'aw-sourcing' ) }
+				title={ __( 'What the places say back', 'sourceweb' ) }
 				description={ __(
 					'Per source: items delivered, and how many a place accepted or rejected. Lowest acceptance first. Places report back with SourceWeb’s places/outcome route.',
-					'aw-sourcing'
+					'sourceweb'
 				) }
 			>
 				{ 0 === data.outcomes.length ? (
-					<p>{ __( 'Nothing yet.', 'aw-sourcing' ) }</p>
+					<p>{ __( 'Nothing yet.', 'sourceweb' ) }</p>
 				) : (
 					<table className="widefat striped">
 						<thead>
 							<tr>
-								<th>{ __( 'Source', 'aw-sourcing' ) }</th>
-								<th>{ __( 'Delivered', 'aw-sourcing' ) }</th>
-								<th>{ __( 'Accepted', 'aw-sourcing' ) }</th>
-								<th>{ __( 'Rejected', 'aw-sourcing' ) }</th>
+								<th>{ __( 'Source', 'sourceweb' ) }</th>
+								<th>{ __( 'Delivered', 'sourceweb' ) }</th>
+								<th>{ __( 'Accepted', 'sourceweb' ) }</th>
+								<th>{ __( 'Rejected', 'sourceweb' ) }</th>
 								<th>
-									{ __( 'Accepted share', 'aw-sourcing' ) }
+									{ __( 'Accepted share', 'sourceweb' ) }
 								</th>
 							</tr>
 						</thead>
@@ -7562,7 +7562,7 @@ function Places() {
 												<strong>
 													{ __(
 														'Review this source',
-														'aw-sourcing'
+														'sourceweb'
 													) }
 												</strong>
 											</>

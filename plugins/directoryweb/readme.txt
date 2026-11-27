@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ Links shown in the admin and on listings to government and other registers (for 
 By default, deleting the plugin removes nothing: listings, places, claims, settings and every option stay, so reinstalling finds everything as it was. Only if the option `directoryweb_delete_data_on_uninstall` is true does uninstall delete DirectoryWeb's own bookkeeping options (`directoryweb_caps`, `directoryweb_rewrite_ver`), its two cached counts and its scheduled count job, after writing a backup to `wp-content/uploads/wugweb-backups/`. It never deletes listings, claims, uploads, users, terms or any post, term or user meta. Deactivating the plugin unschedules the hourly count job and flushes the rewrite rules, and deletes nothing.
 
 == Changelog ==
+
+= 1.2.4 =
+* Delete data on uninstall now also removes the three settings options added in 1.2.0 (the field, listing type and form mapping settings). They were left behind before. The backup written before deleting includes them.
 
 = 1.2.3 =
 * Without Kits Core, Listing Types, Schema & Fields, Form Integrations, Import / Export and the Claims list are plain WordPress screens (tables and forms, with a nonce and a capability check) instead of a "needs Kits Core" notice. The Claims list there has no live filtering; Import / Export takes a file or pasted text.

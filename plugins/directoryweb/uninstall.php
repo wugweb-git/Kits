@@ -6,7 +6,7 @@
  * Only when the option directoryweb_delete_data_on_uninstall is true does it delete DirectoryWeb's own bookkeeping,
  * exactly this:
  *
- * Options: directoryweb_caps, directoryweb_rewrite_ver, directoryweb_delete_data_on_uninstall.
+ * Options: directoryweb_caps, directoryweb_rewrite_ver, directoryweb_fields, directoryweb_listing_types, directoryweb_form_mappings, directoryweb_delete_data_on_uninstall.
  * Transients (they expire anyway): directoryweb_stats, directoryweb_claim_rows.
  * Scheduled events (all, whatever their arguments): directoryweb_stats_build.
  * Tables: none of its own.
@@ -34,7 +34,7 @@ if ( true !== (bool) get_option( 'directoryweb_delete_data_on_uninstall', false 
 	return; // The default: keep everything.
 }
 
-$directoryweb_options = array( 'directoryweb_caps', 'directoryweb_rewrite_ver' );
+$directoryweb_options = array( 'directoryweb_caps', 'directoryweb_rewrite_ver', 'directoryweb_fields', 'directoryweb_listing_types', 'directoryweb_form_mappings' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! directoryweb_uninstall_backup( 'directoryweb', __DIR__ . '/directoryweb.php', array_merge( $directoryweb_options, array( 'directoryweb_delete_data_on_uninstall' ) ), array(), array() ) ) {

@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.7
+Stable tag: 0.2.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ SourceWeb may connect to external services only when the corresponding feature o
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
 == Changelog ==
+
+= 0.2.8 =
+* The text domain is `sourceweb` everywhere, including the screens built in JavaScript (about 760 strings still said `aw-sourcing`), and the translation template is now `languages/sourceweb.pot`. No behaviour changes.
 
 = 0.2.7 =
 * Corrects the readme: it listed 'retry backoff state' and 'worker/feed retry backoff', but the backoff code is not called, so there is no retry backoff. No behaviour changes.

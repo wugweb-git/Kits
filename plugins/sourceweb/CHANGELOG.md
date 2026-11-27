@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.2.8
+
+- The text domain is `sourceweb` everywhere, including the screens built in JavaScript (about 760 strings still said `aw-sourcing`), and the translation template is now `languages/sourceweb.pot`. No behaviour changes.
+
 ## 0.2.7
 
 - Corrects the readme: it listed 'retry backoff state' and 'worker/feed retry backoff', but the backoff code is not called, so there is no retry backoff. No behaviour changes.
