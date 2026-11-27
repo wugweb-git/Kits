@@ -2,12 +2,27 @@
 
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
-Checked line by line against the code on 27 Nov 2026.
+Checked line by line against the code on 27 Nov 2026. Updated for 3.4.0 the same day.
 
-- NOT BUILT, although earlier notes said done: the Status column in lists (New / Read / Replied / Forwarded; `answered` and `forwarded` are stored but nothing reads them, and nothing compares the Sent folder); email logging of real mail (`mailweb_log_record` is called only by the test send); the fallback SMTP connection (saved, never used to send); failure alert webhooks (`mailweb_send_failure_alert` has no caller); the per-user pause-notice dismiss (route exists, no button); email resend (no UI); SMTP presets (REST route only, no UI). The Hostinger 'fallback to wp_mail / SMTP 465' is in fact a fallback to the Mail API over `wp_remote_request`.
+### Built in 3.4.0 (all off on a clean install; code in `includes/mail-delivery.php`, `includes/mail-fallback-mailer.php`, `includes/mailweb-fluentsmtp.php`)
+- Real-mail logging: with the switch "Keep a log line for every email" on (Site sending → Delivery log, fallback and alerts), one line per `wp_mail()` is kept in option `mailweb_email_logs`: time, recipients, subject, status, sent-through, error. Never the text. Status is what `wp_mail_succeeded` / `wp_mail_failed` reported: accepted by the mail server (not "delivered"), failed, accepted by the fallback, or held in the queue (`queued`, from `mail-cap.php`). The last 200 lines, cut to the retention days. The test email is logged the same way, only when the switch is on (this closes the open bug that the test send always kept recipient and subject).
+- Status column in the Email Logs screen (Mail → Email Logs, `manage_mailweb`): the words above, plus the way it was sent. A notice says when logging is off.
+- Fallback SMTP: a second SMTP connection (server, port, mailbox, password stored encrypted and never printed back, "remove saved password" box). When the primary send fails, the same message is sent once through it (`MailWeb_Fallback_Mailer`, a PHPMailer subclass swapped in before `wp_mail()` uses it); the primary settings are restored after. The message leaves from the fallback mailbox with the original From as Reply-To. Not used while FluentSMTP, Post SMTP or WP Mail SMTP is active, or when another plugin has already put its own PHPMailer in place.
+- Failure alerts: with the switch on, an email to the site administrator (or an address set in the form) when an email cannot be sent, at most one an hour; later failures are counted and reported in the next one. No recipient or text in it. Sent past MailWeb's limit and pause; a failing alert raises no alert. The old webhook alert (`mailweb_send_failure_alert`, option `mailweb_alert_webhook`) is removed; there is no Slack/Discord/Telegram/webhook alert.
+- Pause notice dismiss: a "Dismiss for me" link on the paused notice (nonce, `manage_mailweb`), stored per user in `mailweb_pause_dismissed`; hides that pause only, a new pause shows the notice again. Sending stays paused; Resume is unchanged.
+- Tests: `php plugins/mailweb/tests/delivery.php` (stub PHPMailer and WordPress functions), plus `tests/run.php` and `tests/sending-mode.php`.
+
+### Still NOT BUILT
+- The Status column in the Inbox and other lists (New / Read / Replied / Forwarded). `answered` and `forwarded` are stored but nothing reads them, and nothing compares the Sent folder. 3.4.0's Status column is only in the Email Logs screen.
+- Email resend: `mailweb_resend_email()` and `POST /mailweb/v1/queue/resend` exist, no screen button calls them.
+- SMTP presets: REST route only, no UI.
+- Webhook alerts (Slack, Discord, Telegram, custom URL): removed on purpose; alerts are email only.
+- The fallback has no live check: it is tested with a stub PHPMailer only. It needs a real second SMTP account and a forced failure of the primary to confirm. It does not apply when another plugin's PHPMailer is already in use, and it does not retry mail another plugin short-circuits with `pre_wp_mail`. When the fallback sends, the From address is the fallback mailbox.
+- Not logged: an email another plugin short-circuits with `pre_wp_mail`; a message accepted by the server is not proof of inbox delivery (no bounce handling).
+- Alerts depend on mail: if every route (primary and fallback) is down the alert cannot go out either; there is no second channel.
+- Not tested: the admin forms and notices in a browser, the `wp_mail` hooks inside WordPress, cron and the screens (only the pure helpers, the mailer retry logic and the form's HTML are covered by `tests/delivery.php`).
+- The Hostinger 'fallback to wp_mail / SMTP 465' is in fact a fallback to the Mail API over `wp_remote_request`.
 - The block headed 'Resolved' for tenant profiles, rate limits and the retry queue is wrong: that code is HELD and not loaded. See the HOLD section.
-- Open bug: the log form says recipients and subject are kept only when body logging is on; the test-send log keeps them always.
-- Not tested: hooks, cron, screens (only pure helpers are covered).
 
 ## Active Scope & Responsibilities
 The email and delivery management plugin owns:
@@ -30,10 +45,8 @@ The email and delivery management plugin owns:
    - ✅ Background cron (`mailweb_daily_dns_check`) checking DKIM records every 24 hours, alerting administrators if DNS verification fails.
 
 3. **FluentSMTP-Parity Enhancements & Plan Completion (25 Nov 2026)**:
-   - ✅ Site Health direct test (`mailweb_email_sending`), per-user `mailweb_pause_dismissed` meta + REST route.
-   - ✅ Email logging + queue resend (`mailweb-fluentsmtp.php`, `GET /mailweb/v1/logs`, `POST /mailweb/v1/queue/resend`).
-   - ✅ Fallback SMTP connection (`mailweb_smtp_fallback`, encrypted password, `/mailweb/v1/services/smtp-fallback`).
-   - ✅ Throttled failure alert webhooks (`/mailweb/v1/services/alerts`) and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`).
+   - ✅ Site Health direct test (`mailweb_email_sending`) and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`).
+   - Pause dismiss, email logging, the fallback SMTP connection and failure alerts were marked done here in error: they are built in 3.4.0 (see the top of this file). The queue resend UI and webhook alerts are not built.
 
 ---
 

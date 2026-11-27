@@ -293,8 +293,8 @@ add_filter(
 	function ( $pre, $atts ) {
 		$p = mailweb_priority();
 		unset( $GLOBALS['mailweb_next_priority'], $GLOBALS['mailweb_direct_id'], $GLOBALS['mailweb_last_error'] ); // for this email only
-		if ( null !== $pre || ! empty( $GLOBALS['mailweb_flushing'] ) || mailweb_defer_to_external_smtp() ) {
-			return $pre; // another filter decided, this is the queue sending, or another SMTP plugin sends
+		if ( null !== $pre || ! empty( $GLOBALS['mailweb_flushing'] ) || ! empty( $GLOBALS['mailweb_bypass_cap'] ) || mailweb_defer_to_external_smtp() ) {
+			return $pre; // another filter decided, this is the queue sending, a failure alert (past the limit and pause), or another SMTP plugin sends
 		}
 		global $wpdb;
 		$now    = gmdate( 'Y-m-d H:i:s' );
@@ -341,6 +341,7 @@ add_filter(
 			return null; // could not queue: send rather than lose it
 		}
 		mailweb_stat( 'queued' );
+		do_action( 'mailweb_mail_queued', $atts ); // the delivery log records it (mail-delivery.php)
 		return true;
 	},
 	20,
@@ -665,11 +666,14 @@ add_action(
 		if ( ! $pause || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+		if ( function_exists( 'mailweb_is_pause_dismissed_for_user' ) && mailweb_is_pause_dismissed_for_user( (array) $pause ) ) {
+			return; // this user dismissed this pause; a new pause shows the notice again
+		}
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		$id     = $screen ? (string) $screen->id : '';
 		$always = in_array( $id, array( 'dashboard', 'toplevel_page_mailweb' ), true ) || str_ends_with( $id, '_page_mailweb-settings' ) || (bool) apply_filters( 'mailweb_pause_notice_always', false, $id );
 		if ( ! $always ) {
-			return; // there is no dismiss button, so the notice is not shown on every admin screen
+			return; // only the Dashboard and the MailWeb screens
 		}
 		wp_admin_notice(
 			'<strong>' . esc_html__( 'Email sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(
@@ -682,7 +686,7 @@ add_action(
 				/* translators: %s: link to MailWeb → Settings → Site sending */
 				esc_html__( '%s to resume once the mailbox works.', 'mailweb' ),
 				'<a href="' . esc_url( mailweb_settings_url( 'sending', array(), 'cap' ) ) . '">' . esc_html__( 'Open Plugins → MailWeb → Settings → Site sending', 'mailweb' ) . '</a>'
-			),
+			) . ( function_exists( 'mailweb_dismiss_pause_url' ) && current_user_can( MAILWEB_CAP ) ? ' <a href="' . esc_url( mailweb_dismiss_pause_url() ) . '">' . esc_html__( 'Dismiss for me', 'mailweb' ) . '</a>' : '' ),
 			array( 'type' => 'error' )
 		);
 	}

@@ -2,6 +2,16 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.4.0
+
+- New, all off on a clean install (Mail → Settings → Site sending → "Delivery log, fallback and alerts"):
+  - Delivery log: one line per email (time, recipients, subject, status, error; never the text) with the status WordPress reported: accepted by the mail server (not "delivered"), failed, accepted by the fallback, or held in the queue. The Email Logs screen has a Status column. The test email is logged the same way, and only when the switch is on.
+  - Fallback SMTP: a second SMTP connection (password stored encrypted, never shown again). When the primary send fails, the message is sent once through it. Not used while another SMTP plugin is active.
+  - Failure alerts: an email to the site administrator (or an address you set) when an email cannot be sent, at most one an hour, with the count and the last error but no recipient or text.
+- The "Email sending is paused" notice has a "Dismiss for me" link (per user, until the next pause). Sending stays paused.
+- The webhook alert code (never called) is removed; alerts are email only.
+- Still not built: the Status column in the Inbox lists (New / Read / Replied / Forwarded), a resend button, an SMTP presets screen.
+
 ## 3.3.6
 
 - The 'Email sending is paused' notice now shows only on the Dashboard and the MailWeb screens. It used to show on every admin screen with no way to dismiss it.

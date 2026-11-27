@@ -3,9 +3,9 @@
  * MailWeb FluentSMTP-parity enhancements & remaining plan items:
  * - Site Health test ("Email sending")
  * - Per-user pause notice dismissal (mailweb_pause_dismissed)
- * - Email logging + resend (mailweb_email_logs + mailweb_resend_email)
- * - Fallback SMTP connection (mailweb_smtp_fallback)
- * - Failure webhook alerts (Slack/Discord/Telegram/custom)
+ * - Email log storage (mailweb_email_logs; what is logged and when is in mail-delivery.php) and the Email Logs screen
+ * - Fallback SMTP connection settings (mailweb_smtp_fallback; the sending is in mail-delivery.php)
+ * - A queue-row requeue helper (no screen uses it yet)
  * - WP-CLI commands (test, health, stats, prune-logs)
  *
  * @package mailweb
@@ -81,7 +81,11 @@ function mailweb_dismiss_pause_notice(): bool {
 	if ( ! $pause || ! $uid ) {
 		return false;
 	}
-	return (bool) update_user_meta( $uid, 'mailweb_pause_dismissed', (string) ( $pause['at'] ?? '' ) );
+	$at = (string) ( $pause['at'] ?? '' );
+	if ( (string) get_user_meta( $uid, 'mailweb_pause_dismissed', true ) === $at ) {
+		return true; // already dismissed; update_user_meta() would report false for an unchanged value
+	}
+	return (bool) update_user_meta( $uid, 'mailweb_pause_dismissed', $at );
 }
 
 /**
@@ -101,9 +105,10 @@ function mailweb_is_pause_dismissed_for_user( array $pause ): bool {
 /* ---------- 3. Email Logging + Resend ---------- */
 
 /**
- * Record a sanitized email log entry (no message body stored).
+ * Record a sanitized email log entry (no message body stored). Callers decide whether to log at all (the switch in
+ * mail-delivery.php); this only writes.
  *
- * @param array $entry Log entry fields: to, subject, status, provider, error, queue_id.
+ * @param array $entry Log entry fields: to, subject, status (sent, failed, fallback, queued), provider, error, queue_id.
  */
 function mailweb_log_record( array $entry ): void {
 	$logs   = get_option( 'mailweb_email_logs', array() );
@@ -112,9 +117,9 @@ function mailweb_log_record( array $entry ): void {
 		'at'       => gmdate( 'Y-m-d H:i:s' ),
 		'to'       => sanitize_text_field( (string) ( $entry['to'] ?? '' ) ),
 		'subject'  => mb_substr( sanitize_text_field( (string) ( $entry['subject'] ?? '' ) ), 0, 140 ),
-		'status'   => in_array( (string) ( $entry['status'] ?? '' ), array( 'sent', 'failed', 'fallback' ), true ) ? (string) $entry['status'] : 'sent',
+		'status'   => in_array( (string) ( $entry['status'] ?? '' ), array( 'sent', 'failed', 'fallback', 'queued' ), true ) ? (string) $entry['status'] : 'failed', // an unknown status is never reported as sent
 		'provider' => sanitize_key( (string) ( $entry['provider'] ?? 'primary' ) ),
-		'error'    => mb_substr( sanitize_text_field( (string) ( $entry['error'] ?? '' ) ), 0, 200 ),
+		'error'    => mb_substr( function_exists( 'mailweb_clean_error' ) ? mailweb_clean_error( (string) ( $entry['error'] ?? '' ) ) : sanitize_text_field( (string) ( $entry['error'] ?? '' ) ), 0, 200 ),
 		'queue_id' => absint( $entry['queue_id'] ?? 0 ),
 	);
 	if ( count( $logs ) > 200 ) {
@@ -187,7 +192,19 @@ function mailweb_prune_logs( int $days = 30 ): int {
 /* ---------- 4. Fallback SMTP Connection ---------- */
 
 /**
- * Return decrypted fallback SMTP settings.
+ * A server name from a form: letters, digits, dots and hyphens only (a scheme, port or path is cut off).
+ *
+ * @param string $host Raw input.
+ */
+function mailweb_smtp_fallback_clean_host( string $host ): string {
+	$host = preg_replace( '#^[a-z]+://#i', '', trim( $host ) );
+	$host = strtolower( (string) preg_split( '#[/:\s?]#', (string) $host )[0] ); // up to a port, path or space
+	$host = preg_replace( '/[^a-z0-9.\-]/', '', $host );
+	return trim( (string) $host, '.-' );
+}
+
+/**
+ * Return decrypted fallback SMTP settings. Callers must never print 'pass'.
  *
  * @return array<string, mixed>
  */
@@ -196,30 +213,35 @@ function mailweb_smtp_fallback_settings(): array {
 	$saved = is_array( $saved ) ? $saved : array();
 	return array(
 		'enabled' => ! empty( $saved['enabled'] ),
-		'host'    => sanitize_text_field( (string) ( $saved['host'] ?? '' ) ),
-		'port'    => absint( $saved['port'] ?? 465 ) ?: 465,
+		'host'    => mailweb_smtp_fallback_clean_host( (string) ( $saved['host'] ?? '' ) ),
+		'port'    => absint( $saved['port'] ?? 465 ) ? min( 65535, absint( $saved['port'] ?? 465 ) ) : 465,
 		'user'    => sanitize_email( (string) ( $saved['user'] ?? '' ) ),
 		'pass'    => function_exists( 'mailweb_decrypt' ) ? mailweb_decrypt( (string) ( $saved['pass'] ?? '' ) ) : '',
 	);
 }
 
 /**
- * Save fallback SMTP settings (encrypting password).
+ * Save fallback SMTP settings. The password is encrypted; empty input keeps the saved one, and 'clear_pass' removes it.
+ * Without the crypto helper a password is not stored at all.
  *
- * @param array $in Input fields.
- * @return array<string, mixed>
+ * @param array $in enabled, host, port, user, pass, clear_pass.
+ * @return array<string, mixed> The stored option (the password still encrypted).
  */
 function mailweb_smtp_fallback_save( array $in ): array {
 	$prev = get_option( 'mailweb_smtp_fallback', array() );
 	$prev = is_array( $prev ) ? $prev : array();
-	$pass = isset( $in['pass'] ) && '' !== (string) $in['pass']
-		? ( function_exists( 'mailweb_encrypt' ) ? mailweb_encrypt( (string) $in['pass'] ) : (string) $in['pass'] )
-		: (string) ( $prev['pass'] ?? '' );
-
+	if ( ! empty( $in['clear_pass'] ) ) {
+		$pass = '';
+	} elseif ( isset( $in['pass'] ) && '' !== (string) $in['pass'] ) {
+		$pass = function_exists( 'mailweb_encrypt' ) ? mailweb_encrypt( (string) $in['pass'] ) : '';
+	} else {
+		$pass = (string) ( $prev['pass'] ?? '' );
+	}
+	$port = absint( $in['port'] ?? 465 );
 	$next = array(
 		'enabled' => ! empty( $in['enabled'] ),
-		'host'    => sanitize_text_field( (string) ( $in['host'] ?? '' ) ),
-		'port'    => max( 1, min( 65535, absint( $in['port'] ?? 465 ) ) ),
+		'host'    => mailweb_smtp_fallback_clean_host( (string) ( $in['host'] ?? '' ) ),
+		'port'    => $port ? min( 65535, $port ) : 465,
 		'user'    => sanitize_email( (string) ( $in['user'] ?? '' ) ),
 		'pass'    => $pass,
 	);
@@ -227,46 +249,9 @@ function mailweb_smtp_fallback_save( array $in ): array {
 	return $next;
 }
 
-/* ---------- 5. Failure Alerts (Webhook: Slack / Discord / Telegram / Custom) ---------- */
-
-/**
- * Send a throttled webhook alert when sending fails or pauses.
- *
- * @param string $reason  Failure reason.
- * @param array  $context Optional context.
- * @return bool
- */
-function mailweb_send_failure_alert( string $reason, array $context = array() ): bool {
-	$url = (string) get_option( 'mailweb_alert_webhook', '' );
-	if ( '' === $url || ! wp_http_validate_url( $url ) ) {
-		return false;
-	}
-	if ( get_transient( 'mailweb_alert_throttled' ) ) {
-		return false;
-	}
-	set_transient( 'mailweb_alert_throttled', 1, 15 * MINUTE_IN_SECONDS );
-
-	$site    = (string) get_bloginfo( 'name' );
-	$message = sprintf( '[%s] MailWeb Alert: %s', $site, sanitize_text_field( $reason ) );
-	$body    = array(
-		'text'    => $message,
-		'content' => $message,
-		'site'    => home_url(),
-		'reason'  => sanitize_text_field( $reason ),
-		'context' => $context,
-	);
-	$res = wp_safe_remote_post(
-		$url,
-		array(
-			'timeout' => 8,
-			'headers' => array( 'Content-Type' => 'application/json' ),
-			'body'    => wp_json_encode( $body ),
-		)
-	);
-	return ! is_wp_error( $res ) && wp_remote_retrieve_response_code( $res ) < 300;
-}
-
 /* ---------- 6. REST Routes for Pause Dismiss, Logs, Resend, Fallback & Alerts ---------- */
+
+// (The failure alert is an email to the site administrator, see mail-delivery.php; the old webhook alert never ran and is gone.)
 
 add_action(
 	'rest_api_init',
@@ -350,15 +335,15 @@ add_action(
 				array(
 					'methods'             => 'GET',
 					'permission_callback' => $admin,
-					'callback'            => fn() => rest_ensure_response( array( 'configured' => '' !== (string) get_option( 'mailweb_alert_webhook', '' ) ) ),
+					'callback'            => fn() => rest_ensure_response( mailweb_delivery_settings() ),
 				),
 				array(
 					'methods'             => 'POST',
 					'permission_callback' => $admin,
 					'callback'            => function ( WP_REST_Request $r ) {
-						$url = esc_url_raw( trim( (string) $r->get_param( 'webhook_url' ) ) );
-						update_option( 'mailweb_alert_webhook', $url, false );
-						return rest_ensure_response( array( 'configured' => '' !== $url ) );
+						$next = mailweb_delivery_clean( array_merge( mailweb_delivery_settings(), (array) $r->get_json_params() ) );
+						update_option( MAILWEB_DELIVERY_OPTION, $next, false );
+						return rest_ensure_response( $next );
 					},
 				),
 			)
@@ -414,7 +399,7 @@ function mailweb_smtp_presets(): array {
 }
 
 /**
- * Send a diagnostic test email and return structured status.
+ * Send a diagnostic test email and return structured status (accepted by the server, or the error).
  *
  * @param string $to   Recipient email.
  * @param bool   $html Send as HTML.
@@ -426,19 +411,18 @@ function mailweb_test_send( string $to, bool $html = true ): array {
 	$body    = $html
 		? '<p>' . esc_html__( 'This is a MailWeb test email confirming your outgoing mail configuration is working.', 'mailweb' ) . '</p>'
 		: __( 'This is a MailWeb test email confirming your outgoing mail configuration is working.', 'mailweb' );
-	$ok      = wp_mail( $to, $subject, $body, $headers );
-	mailweb_log_record(
-		array(
-			'to'       => $to,
-			'subject'  => $subject,
-			'status'   => $ok ? 'sent' : 'failed',
-			'provider' => 'test',
-		)
-	);
+	$err     = '';
+	$cb      = function ( $e ) use ( &$err ) {
+		$err = mailweb_delivery_error( is_wp_error( $e ) ? $e->get_error_message() : 'Send failed' );
+	};
+	add_action( 'wp_mail_failed', $cb );
+	$ok = wp_mail( $to, $subject, $body, $headers );
+	remove_action( 'wp_mail_failed', $cb );
+	// The test is logged like any other email, by the delivery log (only when its switch is on).
 	return array(
 		'sent'    => (bool) $ok,
 		'to'      => $to,
-		'message' => $ok ? __( 'Test email dispatched.', 'mailweb' ) : __( 'Test email failed to send.', 'mailweb' ),
+		'message' => $ok ? __( 'Test email accepted by the mail server.', 'mailweb' ) : sprintf( /* translators: %s: the error. */ __( 'Test email failed to send: %s', 'mailweb' ), '' !== $err ? $err : __( 'unknown error', 'mailweb' ) ),
 	);
 }
 
@@ -451,7 +435,7 @@ add_action(
 			'mailweb',
 			__( 'Email Logs & Test', 'mailweb' ),
 			__( 'Email Logs', 'mailweb' ),
-			'manage_options',
+			MAILWEB_CAP,
 			'mailweb-logs',
 			'mailweb_render_logs_screen'
 		);
@@ -460,23 +444,31 @@ add_action(
 );
 
 /**
- * Render the Email Logs, Resend, Fallback & Test Email screen.
+ * Render the Email Logs screen: one line per email, newest first, with the status WordPress reported.
  */
 function mailweb_render_logs_screen(): void {
-	if ( ! current_user_can( 'manage_options' ) ) {
+	if ( ! current_user_can( MAILWEB_CAP ) ) {
 		wp_die( esc_html__( 'You are not allowed to access this page.', 'mailweb' ), 403 );
 	}
 	$logs = mailweb_logs_list( 50 );
 	$fb   = mailweb_smtp_fallback_settings();
 	echo '<div class="wrap">';
-	echo '<h1>' . esc_html__( 'MailWeb — Email Logs & Diagnostics', 'mailweb' ) . '</h1>';
-	echo '<p>' . esc_html( sprintf( /* translators: %s: fallback status */ __( 'Fallback SMTP: %s', 'mailweb' ), $fb['enabled'] ? ( $fb['host'] . ':' . $fb['port'] ) : __( 'Not enabled', 'mailweb' ) ) ) . '</p>';
+	echo '<h1>' . esc_html__( 'MailWeb: Email Logs', 'mailweb' ) . '</h1>';
+	if ( ! mailweb_delivery_on( 'log_mail' ) ) {
+		wp_admin_notice(
+			esc_html__( 'The delivery log is off, so nothing new is recorded here. Turn it on under Site sending → Delivery log, fallback and alerts.', 'mailweb' ),
+			array( 'type' => 'info', 'additional_classes' => array( 'inline' ) )
+		);
+	}
+	/* translators: %s: fallback status */
+	echo '<p>' . esc_html( sprintf( __( 'Fallback SMTP: %s', 'mailweb' ), mailweb_fallback_active() ? $fb['host'] . ':' . $fb['port'] : __( 'not in use', 'mailweb' ) ) ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'Accepted means the mail server took the message; it does not say the message reached the inbox. The text of an email is never logged here.', 'mailweb' ) . '</p>';
 	echo '<table class="widefat striped mailweb-table"><thead><tr>';
 	echo '<th>' . esc_html__( 'Time (UTC)', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'To', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'Subject', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'Status', 'mailweb' ) . '</th>';
-	echo '<th>' . esc_html__( 'Provider', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'Sent through', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'Error', 'mailweb' ) . '</th>';
 	echo '</tr></thead><tbody>';
 	if ( empty( $logs ) ) {
@@ -487,7 +479,7 @@ function mailweb_render_logs_screen(): void {
 			echo '<td>' . esc_html( (string) ( $row['at'] ?? '' ) ) . '</td>';
 			echo '<td>' . esc_html( (string) ( $row['to'] ?? '' ) ) . '</td>';
 			echo '<td>' . esc_html( (string) ( $row['subject'] ?? '' ) ) . '</td>';
-			echo '<td><strong>' . esc_html( (string) ( $row['status'] ?? '' ) ) . '</strong></td>';
+			echo '<td><strong>' . esc_html( mailweb_log_status_label( (string) ( $row['status'] ?? '' ) ) ) . '</strong></td>';
 			echo '<td>' . esc_html( (string) ( $row['provider'] ?? '' ) ) . '</td>';
 			echo '<td>' . esc_html( (string) ( $row['error'] ?? '' ) ) . '</td>';
 			echo '</tr>';

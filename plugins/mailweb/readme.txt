@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.6
+Stable tag: 3.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,6 +36,12 @@ MailWeb puts a site's Hostinger mailboxes inside WordPress, so the team reads an
 * With a mailbox password saved, the site's own email (notices, confirmations, newsletters) is sent through that SMTP mailbox, with the sender name and a default Reply-To. Until a password is saved, WordPress sends the default way. A test email can be sent from the settings.
 * MailWeb stands down while FluentSMTP, Post SMTP or WP Mail SMTP is active: it does not change the From address, send through its own SMTP settings, limit or queue. Developers can change this with the filter `mailweb_defer_to_external_smtp`.
 * The daily sending limit with a queue (off until you switch it on), for mailboxes that allow a fixed number of emails a day: priorities, retries, a pause when the mail server refuses mail, and pacing for FluentCRM campaigns. While it is on, an email over the limit waits in the queue table with its text until it can be sent.
+* Delivery log, fallback SMTP and failure alerts (Mail → Settings → Site sending → "Delivery log, fallback and alerts"), each a switch that is off on a new install:
+  * Delivery log: one line per email with its recipients, subject, status and error (never the text), shown in Mail → Email Logs. The status is what WordPress reported: accepted by the mail server (not the same as delivered to the inbox), failed, accepted by the fallback, or held in MailWeb's queue.
+  * Fallback SMTP: a second SMTP mailbox. If the primary send fails, the same email is sent once through it, from the fallback mailbox with your usual From address as Reply-To. The password is stored encrypted and never shown again. Not used while another SMTP plugin is active.
+  * Failure alerts: an email to the site administrator (or an address you choose) when an email cannot be sent, at most one an hour, with a count and the last error but no recipient or text. It goes out through the same mail system, so it cannot report a total outage of every route.
+* The "Email sending is paused" notice can be dismissed per user ("Dismiss for me"); sending stays paused until you resume it.
+* Not built yet: a Status column (New, Read, Replied, Forwarded) in the Inbox lists, and a resend button.
 * All mail settings in one place: Mail, then Settings.
 
 = Without Kits Core =
@@ -53,7 +59,8 @@ Administrators only: reading, replying to and deleting (to Trash) the site's mai
 
 = What MailWeb keeps in the database =
 
-* Always: settings, the profiles, a log row for each email the site sends (time, priority, status, error; no recipient, subject or text) and a list of the last 200 test emails sent from the settings (recipient and subject), trimmed to the retention below.
+* Always: settings, the profiles and, in the queue table, a row for each email the site sends (time, priority, status, error; no recipient, subject or text).
+* Only while "Keep a log line for every email" (delivery log) is on: a list of the last 200 emails with recipients, subject, status and error (never the text), trimmed to the retention below. Emails sent from the settings as tests are in it too, only while it is on.
 * Only while "Keep the text of sent emails" is on: the recipients, subject and text of each sent email, for the number of days you choose (1 to 365, default 30), then deleted by a daily job. Password reset links are among the emails. A held email that never went out loses its text after the same time. With the daily limit on, an email that is waiting or being retried keeps its text until it is sent, then it is cleared.
 * Messages in the mailboxes are not copied; they are read live.
 
@@ -77,7 +84,7 @@ The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified
 
 = Does it store my email in WordPress? =
 
-No. Messages are read live from the mailboxes. For the site's own outgoing emails MailWeb keeps metadata only (time, priority, status, error), unless you switch on "Keep the text of sent emails" (then also recipients, subject and text, for the days you set), and an email waits in a queue table with its text while the daily limit is on and reached.
+No. Messages are read live from the mailboxes. For the site's own outgoing emails MailWeb keeps metadata only (time, priority, status, error) in its queue table, plus a recipient and subject log only if you switch on the delivery log, unless you switch on "Keep the text of sent emails" (then also recipients, subject and text, for the days you set), and an email waits in a queue table with its text while the daily limit is on and reached.
 
 = Will it take over my site's email when I activate it? =
 
@@ -101,13 +108,17 @@ MailWeb connects to external services only when configured by the site administr
 
 * **Hostinger Mail API (`https://api.mail.hostinger.com`):** When a Hostinger Mail API token is configured, reads mailbox folders/messages and sends replies/outbound mail through your Hostinger mailboxes. Terms & Privacy: [https://www.hostinger.com/privacy-policy](https://www.hostinger.com/privacy-policy).
 * **Configured SMTP Server:** When SMTP credentials are configured under **Mail → Settings → Site sending**, delivers site emails via that SMTP host (Hostinger Mail by default). The SMTP presets for Hostinger, Gmail, Outlook, SendGrid, Mailgun, Postmark, Amazon SES and a custom server are only a list of host names and ports offered in the settings; MailWeb connects to a preset's host only if you save that host with a password. Sent email, including recipients and text, goes to that server. Terms and privacy are those of the provider you choose.
+* **Fallback SMTP Server:** Only when you switch on the fallback and save a server, mailbox and password under **Mail → Settings → Site sending**. If the primary send fails, the email, including recipients and text, is sent to that server. Terms and privacy are those of the provider you choose. Failure alerts and the delivery log send nothing outside the site: the alert is an ordinary WordPress email.
 * **DNS lookups (your DNS resolver):** The Site sending screen and a daily job look up the DKIM (`hostingermail1._domainkey`) and SPF TXT records of the site's mail domain, through the server's own DNS resolver, to warn when email authentication is not set up. No data about your visitors or email is sent; the lookups name the domain only.
 * **FluentCRM and Fluent Forms (local WordPress plugins, optional):** When active (and, for the mailbox feed, enabled in settings), MailWeb writes contact notes, tags and list changes in your own site's FluentCRM and shows form entries in the Inbox. Nothing leaves the site.
 
 == Upgrade Notice ==
 
+= 3.4.0 =
+Adds a delivery log, a fallback SMTP connection and failure alerts by email, all off until you switch them on, and a dismiss link on the paused notice. Failure alerts are by email only; the unused webhook alert code is gone.
+
 = 3.3.0 =
-Adds a Site Health email sending check and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`). Corrected in 3.3.5: this note once also listed per-user pause dismissal, email logging and resend, fallback SMTP and failure alert webhooks. Those are not working yet (see the 3.3.5 changelog).
+Adds a Site Health email sending check and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`). Corrected in 3.3.5: this note once also listed per-user pause dismissal, email logging and resend, fallback SMTP and failure alert webhooks. Those were not working then; logging, fallback, alerts and the dismiss link arrived in 3.4.0.
 
 == Bundled libraries ==
 
@@ -120,6 +131,12 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.4.0 =
+* New, all off on a clean install (Mail → Settings → Site sending → "Delivery log, fallback and alerts"): a delivery log with a Status column in Mail → Email Logs (accepted by the mail server, failed, accepted by the fallback, held in the queue; never the text), a fallback SMTP connection used once when the primary send fails, and failure alerts by email to the site administrator (at most one an hour, no recipient or text).
+* The "Email sending is paused" notice has a "Dismiss for me" link (per user, until the next pause).
+* The webhook alert code, which was never called, is removed; alerts are email only.
+* Still not built: the Status column in the Inbox lists (New, Read, Replied, Forwarded), a resend button and an SMTP presets screen.
 
 = 3.3.6 =
 * The 'Email sending is paused' notice now shows only on the Dashboard and the MailWeb screens. It used to show on every admin screen with no way to dismiss it.

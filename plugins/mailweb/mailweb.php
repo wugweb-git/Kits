@@ -11,7 +11,7 @@
  * Plugin Name:       MailWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
- * Version:           3.3.6
+ * Version:           3.4.0
  * Update URI:           https://wugweb.com/plugins/mailweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -41,7 +41,7 @@ add_action(
 	1
 );
 
-define( 'MAILWEB_VERSION', '3.3.6' );
+define( 'MAILWEB_VERSION', '3.4.0' );
 define( 'MAILWEB_FILE', __FILE__ );
 define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );
@@ -130,6 +130,7 @@ require_once MAILWEB_DIR . 'includes/native-screens.php'; // the same screens dr
 require_once MAILWEB_DIR . 'includes/mailweb-rest.php';
 require_once MAILWEB_DIR . 'includes/mailweb-dashboard.php';
 require_once MAILWEB_DIR . 'includes/mailweb-fluentsmtp.php';
+require_once MAILWEB_DIR . 'includes/mail-delivery.php'; // the delivery log, the fallback SMTP connection, failure alerts, the pause-notice dismiss.
 require_once MAILWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 
 // Deactivation stops MailWeb's scheduled jobs; settings, the queue and the mailboxes are left as they are. Deleting

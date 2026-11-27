@@ -14,14 +14,14 @@
  *   mailweb_box_ids, mailweb_stats, mailweb_send_log, mailweb_dashboard_log, mailweb_last, mailweb_last_error,
  *   mailweb_crm_done, mailweb_queue_db, mailweb_pause, mailweb_overview_last_<mailbox>, mailweb_delete_data,
  *   mailweb_sending (the three switches and the retention), mailweb_email_logs, mailweb_smtp_fallback,
- *   mailweb_alert_webhook, mailweb_caps, mailweb_held_retry_removed, mailweb_retry_queue, mailweb_tenant_profiles
+ *   mailweb_delivery (log, alert and alert address switches), mailweb_alert_webhook (no longer used; removed if an older version saved it), mailweb_caps, mailweb_held_retry_removed, mailweb_retry_queue, mailweb_tenant_profiles
  * User meta:
  *   mailweb_pause_dismissed (every user)
  * Capability:
  *   manage_mailweb, taken from every role
  * Transients (and their timeouts):
  *   mailweb_dashboard, mailweb_box_ids_wait, mailweb_flush_lock, mailweb_pause_seen, mailweb_smtp_error,
- *   mailweb_dns_status_warning, mailweb_alert_throttled, mailweb_imap_notice_shown,
+ *   mailweb_dns_status_warning, mailweb_alert_throttled, mailweb_alert_count, mailweb_imap_notice_shown,
  *   mailweb_folders_<mailbox>, mailweb_overview_<mailbox>, mailweb_overview_down_<mailbox>
  * Scheduled events:
  *   mailweb_flush, mailweb_crm_sync, mailweb_dashboard_build, mailweb_daily_dns_check, mailweb_purge_log,
@@ -48,7 +48,7 @@ if ( ! get_option( 'mailweb_delete_data', 0 ) ) {
 
 global $wpdb;
 
-$mailweb_options = array( 'mailweb_cap', 'mailweb_mailboxes', 'mailweb_default_from', 'mailweb_aliases', 'mailweb_profiles', 'mailweb_crm', 'mailweb_smtp', 'mailweb_api_token', 'mailweb_box_addresses', 'mailweb_box_ids', 'mailweb_stats', 'mailweb_send_log', 'mailweb_dashboard_log', 'mailweb_last', 'mailweb_last_error', 'mailweb_crm_done', 'mailweb_queue_db', 'mailweb_pause', 'mailweb_delete_data', 'mailweb_sending', 'mailweb_email_logs', 'mailweb_smtp_fallback', 'mailweb_alert_webhook', 'mailweb_caps', 'mailweb_held_retry_removed', 'mailweb_retry_queue', 'mailweb_tenant_profiles' );
+$mailweb_options = array( 'mailweb_cap', 'mailweb_mailboxes', 'mailweb_default_from', 'mailweb_aliases', 'mailweb_profiles', 'mailweb_crm', 'mailweb_smtp', 'mailweb_api_token', 'mailweb_box_addresses', 'mailweb_box_ids', 'mailweb_stats', 'mailweb_send_log', 'mailweb_dashboard_log', 'mailweb_last', 'mailweb_last_error', 'mailweb_crm_done', 'mailweb_queue_db', 'mailweb_pause', 'mailweb_delete_data', 'mailweb_sending', 'mailweb_email_logs', 'mailweb_smtp_fallback', 'mailweb_delivery', 'mailweb_alert_webhook', 'mailweb_caps', 'mailweb_held_retry_removed', 'mailweb_retry_queue', 'mailweb_tenant_profiles' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 if ( ! mailweb_uninstall_backup( 'mailweb', __DIR__ . '/mailweb.php', $mailweb_options, array( 'mailweb_secret_', 'mailweb_overview_last_' ), array( $wpdb->prefix . 'mailweb_queue' ) ) ) {
@@ -68,7 +68,7 @@ foreach ( array_merge( $mailweb_options, $mailweb_secrets ) as $mailweb_option )
 }
 unset( $mailweb_secrets, $mailweb_option, $mailweb_options );
 
-foreach ( array( 'mailweb_dashboard', 'mailweb_box_ids_wait', 'mailweb_flush_lock', 'mailweb_pause_seen', 'mailweb_smtp_error', 'mailweb_dns_status_warning', 'mailweb_alert_throttled', 'mailweb_imap_notice_shown' ) as $mailweb_transient ) {
+foreach ( array( 'mailweb_dashboard', 'mailweb_box_ids_wait', 'mailweb_flush_lock', 'mailweb_pause_seen', 'mailweb_smtp_error', 'mailweb_dns_status_warning', 'mailweb_alert_throttled', 'mailweb_alert_count', 'mailweb_imap_notice_shown' ) as $mailweb_transient ) {
 	delete_transient( $mailweb_transient );
 }
 unset( $mailweb_transient );

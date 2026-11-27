@@ -203,7 +203,7 @@ function mailweb_sending_mode_form(): void {
 	$rows = array(
 		'force_from'  => array( __( 'Force the From address', 'mailweb' ), __( 'Every email leaves as the mailbox and sender name above. Off: WordPress and other plugins choose the From address (with a saved mailbox password, mail is still sent through that mailbox).', 'mailweb' ) ),
 		'cap'         => array( __( 'Daily sending limit and queue', 'mailweb' ), __( 'Keep under the limit below; anything over waits in a queue table (with its text) until it can be sent, and a refusal by the mail server pauses sending. Off: emails are sent at once.', 'mailweb' ) ),
-		'log_body'    => array( __( 'Keep the text of sent emails', 'mailweb' ), __( 'Off: the log keeps metadata only (time, priority, status). On: the recipients, subject and text of sent emails stay in the database for the days below, then are cleared. Password reset links are among them.', 'mailweb' ) ),
+		'log_body'    => array( __( 'Keep the text of sent emails', 'mailweb' ), __( 'Off: the queue table keeps metadata only (time, priority, status); recipients and subject are logged only by the separate Delivery log switch below. On: the recipients, subject and text of sent emails stay in the queue table for the days below, then are cleared. Password reset links are among them.', 'mailweb' ) ),
 		'delete_data' => array( __( 'Delete MailWeb\'s data when the plugin is deleted', 'mailweb' ), __( 'A backup file is written to wp-content/uploads/wugweb-backups first. Mailbox contents are never touched.', 'mailweb' ) ),
 	);
 	foreach ( $rows as $key => $r ) {
