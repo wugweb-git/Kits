@@ -36,7 +36,7 @@ final class RankWeb_Speed {
 
 	/** A Google Fonts address with display=swap, so text shows in a fallback font while the font loads. Other addresses are unchanged. */
 	public static function font_display( string $url ): string {
-		$host = (string) parse_url( $url, PHP_URL_HOST );
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
 		if ( 'fonts.googleapis.com' !== strtolower( $host ) || preg_match( '/[?&](?:amp;|#038;)?display=/', $url ) ) {
 			return $url;
 		}

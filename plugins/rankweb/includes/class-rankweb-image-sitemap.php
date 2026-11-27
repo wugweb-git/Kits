@@ -40,7 +40,7 @@ final class RankWeb_Image_Sitemap {
 				continue;
 			}
 			if ( 0 === strpos( $src, '//' ) ) {
-				$src = ( (string) parse_url( $base, PHP_URL_SCHEME ) ?: 'https' ) . ':' . $src;
+				$src = ( (string) wp_parse_url( $base, PHP_URL_SCHEME ) ?: 'https' ) . ':' . $src;
 			} elseif ( 0 === strpos( $src, '/' ) ) {
 				$src = $base . $src;
 			} elseif ( ! preg_match( '#^https?://#i', $src ) ) {

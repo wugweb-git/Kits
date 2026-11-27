@@ -57,7 +57,7 @@ final class RankWeb_Term_Seo {
 	 * @return array<string,string> Meta key => value ('' = remove).
 	 */
 	public static function clean_form( array $in, array $keys = self::KEYS ): array {
-		$one = static fn( $v ) => trim( preg_replace( '/\s+/u', ' ', strip_tags( (string) $v ) ) );
+		$one = static fn( $v ) => trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $v ) ) );
 		return array(
 			$keys['title']       => $one( $in['title'] ?? '' ),
 			$keys['description'] => $one( $in['description'] ?? '' ),

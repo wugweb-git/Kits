@@ -13,6 +13,9 @@ if ( 'cli' !== PHP_SAPI ) {
 	exit;
 }
 define( 'ABSPATH', __DIR__ . '/' );
+if ( ! function_exists( 'wp_strip_all_tags' ) ) {
+	function wp_strip_all_tags( $t ) { return trim( strip_tags( (string) $t ) ); }
+}
 require dirname( __DIR__ ) . '/includes/blocks-model.php';
 
 $fails = 0;

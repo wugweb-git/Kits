@@ -122,7 +122,7 @@ final class RankWeb_Redirects {
 			'target'     => $target,
 			'code'       => $code,
 			'comparison' => $comparison,
-			'category'   => mb_substr( trim( preg_replace( '/\s+/', ' ', strip_tags( (string) ( $row['category'] ?? '' ) ) ) ), 0, 40 ),
+			'category'   => mb_substr( trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( (string) ( $row['category'] ?? '' ) ) ) ), 0, 40 ),
 			'error'      => '',
 		);
 		if ( '' === $source ) {

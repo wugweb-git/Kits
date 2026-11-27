@@ -239,7 +239,7 @@ function rankweb_transport_run_other( string $kind, string $source, bool $apply,
 	if ( 'terms' === $kind && 'aioseo' === $source && $ids ) {
 		$table = $wpdb->prefix . 'aioseo_terms';
 		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			foreach ( (array) $wpdb->get_results( "SELECT term_id, title, description, robots_default, robots_noindex FROM $table WHERE term_id IN (" . implode( ',', array_map( 'intval', $ids ) ) . ')', ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integer ids, another plugin's table
+			foreach ( (array) $wpdb->get_results( "SELECT term_id, title, description, robots_default, robots_noindex FROM $table WHERE term_id IN (" . implode( ',', array_map( 'intval', $ids ) ) . ')', ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- integer ids, another plugin's table
 				$rows[ (int) $r['term_id'] ] = $r;
 			}
 		}

@@ -29,12 +29,12 @@ final class RankWeb_Post_Overrides {
 
 	/** Text cleaned to one line, no tags. */
 	public static function clean_text( $v ): string {
-		return trim( preg_replace( '/\s+/u', ' ', strip_tags( (string) $v ) ) );
+		return trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $v ) ) );
 	}
 
 	/** An address cleaned: http or https with a host, no spaces or script, else ''. */
 	public static function clean_url( $v ): string {
-		$v = trim( strip_tags( (string) $v ) );
+		$v = trim( wp_strip_all_tags( (string) $v ) );
 		if ( '' === $v || preg_match( '/\s/', $v ) || ! preg_match( '#^https?://[^/\s]+#i', $v ) || false === filter_var( $v, FILTER_VALIDATE_URL ) ) {
 			return '';
 		}
@@ -43,7 +43,7 @@ final class RankWeb_Post_Overrides {
 
 	/** The same address in a comparable form (lower-case scheme and host, no trailing slash, no fragment). */
 	public static function normal( string $url ): string {
-		$p = parse_url( $url );
+		$p = wp_parse_url( $url );
 		if ( ! $p || empty( $p['host'] ) ) {
 			return $url;
 		}

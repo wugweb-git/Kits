@@ -231,6 +231,7 @@ function rankweb_pipeline_fonts( string $page ): string {
 	foreach ( RankWeb_Html_Rules::google_font_links( $page ) as $tag => $href ) {
 		$local = rankweb_local_font_css( $href );
 		if ( '' !== $local ) {
+			// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet -- rewrites a stylesheet link already in the page output.
 			$page = str_replace( $tag, '<link rel="stylesheet" href="' . esc_url( $local ) . '" />', $page );
 		}
 	}

@@ -430,7 +430,7 @@ final class RankWeb_Schema_Gallery {
 		foreach ( $spec['fields'] as $f ) {
 			$path = $f[0];
 			$raw  = $values[ self::key( $path ) ] ?? ( $values[ $path ] ?? '' );
-			$raw  = is_string( $raw ) ? trim( strip_tags( $raw ) ) : '';
+			$raw  = is_string( $raw ) ? trim( wp_strip_all_tags( $raw ) ) : '';
 			switch ( $f[2] ) {
 				case 'url':
 					$raw = filter_var( $raw, FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $raw ) ? $raw : '';

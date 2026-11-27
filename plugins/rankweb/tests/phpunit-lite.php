@@ -13,6 +13,8 @@
 
 namespace PHPUnit\Framework;
 
+require_once __DIR__ . '/wp-shims.php';
+
 if ( ! defined( 'ABSPATH' ) && 'cli' === PHP_SAPI ) {
 	define( 'ABSPATH', __DIR__ . '/' );
 }

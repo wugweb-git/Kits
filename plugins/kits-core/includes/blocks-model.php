@@ -95,5 +95,5 @@ function kits_sponsored_clean( array $items ): array {
  * @param string $s Text.
  */
 function wp_strip_all_tags_kits( string $s ): string {
-	return trim( preg_replace( '/\s+/', ' ', strip_tags( $s ) ) );
+	return trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( $s ) ) );
 }

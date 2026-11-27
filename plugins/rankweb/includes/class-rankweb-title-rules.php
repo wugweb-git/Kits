@@ -24,7 +24,7 @@ final class RankWeb_Title_Rules {
 
 	/** A prefix cleaned to one short line of plain text, up to 40 characters. */
 	public static function prefix( $v ): string {
-		$v = trim( preg_replace( '/\s+/u', ' ', strip_tags( (string) $v ) ) );
+		$v = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $v ) ) );
 		return function_exists( 'mb_substr' ) ? mb_substr( $v, 0, 40 ) : substr( $v, 0, 40 );
 	}
 

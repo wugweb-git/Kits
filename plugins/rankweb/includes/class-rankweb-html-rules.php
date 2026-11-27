@@ -220,7 +220,7 @@ final class RankWeb_Html_Rules {
 
 	/** A file name for a font address: a hash and the original extension. */
 	public static function font_name( string $url ): string {
-		$ext = strtolower( pathinfo( (string) parse_url( $url, PHP_URL_PATH ), PATHINFO_EXTENSION ) );
+		$ext = strtolower( pathinfo( (string) wp_parse_url( $url, PHP_URL_PATH ), PATHINFO_EXTENSION ) );
 		return sha1( $url ) . '.' . ( preg_match( '/^(woff2?|ttf|otf)$/', $ext ) ? $ext : 'woff2' );
 	}
 
