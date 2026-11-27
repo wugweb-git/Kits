@@ -11,7 +11,7 @@
  * Plugin Name:       RankWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/rankweb/
  * Description:       Complete SEO suite for WordPress: structured schema, canonicals, robots directives, sitemaps, breadcrumbs, internal links, media optimization, and content analysis. Integrates with Rank Math when active.
- * Version:           2.3.5
+ * Version:           2.3.6
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'RANKWEB_VERSION' ) || define( 'RANKWEB_VERSION', '2.3.5' ); // keep equal to the Version header above
+defined( 'RANKWEB_VERSION' ) || define( 'RANKWEB_VERSION', '2.3.6' ); // keep equal to the Version header above
 
 if ( ! defined( 'RANKWEB_DIR' ) ) {
 	define( 'RANKWEB_DIR', plugin_dir_path( __FILE__ ) );
@@ -45,6 +45,7 @@ require_once RANKWEB_DIR . 'includes/breadcrumbs-render.php'; // the visible tra
 require_once RANKWEB_DIR . 'includes/media-autofill.php'; // new image uploads: empty name, alt, caption, description, image context and keyphrase filled, with or without Rank Math.
 require_once RANKWEB_DIR . 'includes/media-columns.php'; // Media Library columns: slug, SEO fields, where each file is used, optimisation; with or without Rank Math.
 require_once RANKWEB_DIR . 'includes/reprint.php'; // Reprint, Content Syndication & Canonical Attribution engine (Reprint benchmark).
+require_once RANKWEB_DIR . 'includes/import-columns.php'; // SEO columns another system stores under its own keys are copied into the SEO plugin's fields (sites opt in by prefix).
 require_once RANKWEB_DIR . 'includes/editor-sidebar.php'; // Gutenberg Block Editor Sidebar & Live 0-100 Score Engine (Rank Math/Yoast benchmark).
 
 /** Whether Rank Math is active (it loads after this plugin, so this is asked on plugins_loaded). */

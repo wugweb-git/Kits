@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.3.6
+
+- Import columns: a site that keeps SEO values in its own meta keys (a Notion sync, a script) lists its prefixes with the `rankweb_import_prefixes` filter, and the title, description, focus keyword, canonical address, share image and noindex it stores are copied into the SEO plugin's fields when saved. The source keys are never deleted. Does nothing until a site opts in.
+
 ## 2.3.5
 
 - /news-sitemap.xml is answered only on a site that has News items (aw_news); on any other site with Rank Math active it no longer returns an empty sitemap.
