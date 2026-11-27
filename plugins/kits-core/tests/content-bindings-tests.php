@@ -117,7 +117,8 @@ class WP_Block {
 $root = dirname( __DIR__, 2 );
 require $root . '/kits-core/includes/primitives.php';
 require $root . '/kits-core/includes/bindings.php';
-require $root . '/kits-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK / KITS_MEDIA_GROUP, which systems.php reads (Kits Core loads it first)
+defined( 'KITS_CAMPAIGN_LINK' ) || define( 'KITS_CAMPAIGN_LINK', 'kits_campaign_link' ); // which systems.php reads (a site defines them)
+defined( 'KITS_MEDIA_GROUP' ) || define( 'KITS_MEDIA_GROUP', 'kits_media_group' );
 $site       = dirname( $root ) . '/themes/kits-by-wugweb/assets/site/'; // the site layer: the content files moved here from animal-writes-core on 19 Nov 2026
 $site_layer = is_file( $site . 'content/systems.php' ) && is_file( $site . 'content/bindings.php' ) && is_file( $site . 'content/scf.php' );
 function kits_site_path( $f ) {

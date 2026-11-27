@@ -41,18 +41,9 @@ function directoryweb_meta_schema(): array {
 	if ( null !== $schema ) {
 		return $schema;
 	}
-	$acc  = directoryweb_label( 'accreditor' );
-	$list = directoryweb_label( 'accreditor_list' );
-	$reg  = directoryweb_label( 'registry_name' );
 	$fields = array(
 		'verified'              => array( 'boolean', 'Verified' ),
 		'verified_on'           => array( 'string', 'Last verified date (Y-m-d)' ),
-		'awbi_recognised'       => array( 'string', $acc . ' recognised on (Y-m-d)' ),
-		'awbi_renewed'          => array( 'string', $acc . ' renewed on (Y-m-d)' ),
-		'awbi_valid'            => array( 'string', $acc . ' recognition valid until (Y-m-d)' ),
-		'awbi_code'             => array( 'string', $acc . ' recognition code (from the ' . $list . '; read only)' ),
-		'awbi_dropped'          => array( 'string', 'Date of the current ' . $list . ' the code is missing from (Y-m-d): recognition may have lapsed' ),
-		'awbi_list_on'          => array( 'string', 'Date of the ' . $list . ' the code comes from (Y-m-d; empty = ' . directoryweb_label( 'accreditor_first_list' ) . ')' ),
 		'needs_reverify'        => array( 'boolean', 'Flagged for re-verification' ),
 		'gov_verified_on'       => array( 'string', 'Verified: date of the government document (Y-m-d; set by code, gov-verified.php)' ),
 		'gov_verified_by'       => array( 'string', 'Verified: the government sources (set by code)' ),
@@ -79,21 +70,21 @@ function directoryweb_meta_schema(): array {
 		'founded'               => array( 'string', 'Year established' ),
 		'head'                  => array( 'string', 'Head of the organisation (name and role, as the organisation publishes it)' ),
 		'registration'          => array( 'string', 'Registration (Trust/Society number)' ),
-		'reg_12a'               => array( 'string', directoryweb_label( 'tax_12a_help' ) ),
-		'reg_80g'               => array( 'string', directoryweb_label( 'tax_80g_help' ) ),
-		'darpan_id'             => array( 'string', directoryweb_label( 'registry_id' ) ),
-		'darpan_blacklisted_by' => array( 'string', 'Blacklisted on ' . $reg . ' by (as ' . $reg . ' lists it)' ),
-		'darpan_blacklisted_on' => array( 'string', 'Blacklisted on ' . $reg . ' from (Y-m-d)' ),
-		'reg_authority'         => array( 'string', 'Registration authority (from ' . $reg . '; admin only)' ),
-		'reg_act'               => array( 'string', 'Registered under (Act; from ' . $reg . '; admin only)' ),
-		'reg_date'              => array( 'string', 'Registration date (Y-m-d; from ' . $reg . '; admin only)' ),
-		'sectors'               => array( 'string', 'Sectors of work as ' . $reg . ' lists them (comma separated; admin only)' ),
+		'reg_date'              => array( 'string', 'Registration date (Y-m-d)' ),
 		'animals'               => array( 'string', directoryweb_label( 'animals' ) . ' (comma separated)' ),
 		'languages'             => array( 'string', 'Languages spoken (comma separated)' ),
 		'donate_url'            => array( 'string', 'Donate link' ),
 		'volunteer_url'         => array( 'string', 'Volunteer link' ),
 		'rel_nofollow'          => array( 'string', 'Links marked nofollow (1)' ),
 	);
+	/**
+	 * Filters the listing meta fields before they are keyed: name (without the prefix) => [ type, description ]. A site adds
+	 * its own (registration or accreditation numbers, dates, registry IDs) here; the stored keys are the prefix plus the name.
+	 * Nothing is added by default.
+	 *
+	 * @param array $fields Name => [ type, description ].
+	 */
+	$fields = (array) apply_filters( 'directoryweb_meta_fields', $fields );
 	$schema = array();
 	foreach ( $fields as $name => $def ) {
 		$schema[ directoryweb_meta_prefix() . $name ] = array( $def[0], array( directoryweb_post_type() ), $def[1] );
@@ -115,7 +106,12 @@ function directoryweb_sanitize_meta( $value, $key ) {
 	if ( in_array( $name, array( 'website', 'maps_url', 'g_profile', 'instagram', 'facebook', 'x', 'youtube', 'donate_url', 'volunteer_url', 'ngobase_url' ), true ) ) {
 		return esc_url_raw( (string) $value );
 	}
-	if ( in_array( $name, array( 'verified_on', 'awbi_recognised', 'awbi_renewed', 'awbi_valid', 'services_on' ), true ) ) {
+	/**
+	 * Filters the meta names (without the prefix) that hold a date, kept only as Y-m-d.
+	 *
+	 * @param string[] $names Names.
+	 */
+	if ( in_array( $name, (array) apply_filters( 'directoryweb_date_meta_names', array( 'verified_on', 'services_on' ) ), true ) ) {
 		$value = (string) $value;
 		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ? $value : '';
 	}
@@ -142,7 +138,8 @@ function directoryweb_sanitize_meta( $value, $key ) {
 
 /**
  * Listing meta that records a decision, not a description: the Verified mark and its dates, the re-verify flag, the
- * government-source and registry fields, the AWBI/Darpan values. Code sets these (claim approval, imports, the registry
+ * government-source field and the registration date. A site adds its own (accreditation or registry values) with the
+ * `directoryweb_protected_meta_names` filter. Code sets these (claim approval, imports, the registry
  * commands) with update_post_meta(), which does not pass through auth_callback; over REST or the editor only a
  * DirectoryWeb manager may change them. Everyone who can edit the listing keeps the descriptive fields.
  *
@@ -152,9 +149,7 @@ function directoryweb_protected_meta_names(): array {
 	return (array) apply_filters(
 		'directoryweb_protected_meta_names',
 		array(
-			'verified', 'verified_on', 'needs_reverify', 'gov_verified_on', 'gov_verified_by',
-			'awbi_recognised', 'awbi_renewed', 'awbi_valid', 'awbi_code', 'awbi_dropped', 'awbi_list_on',
-			'darpan_id', 'darpan_blacklisted_by', 'darpan_blacklisted_on', 'reg_authority', 'reg_act', 'reg_date', 'sectors',
+			'verified', 'verified_on', 'needs_reverify', 'gov_verified_on', 'gov_verified_by', 'reg_date',
 		)
 	);
 }
@@ -215,15 +210,16 @@ add_filter(
 
 /**
  * Listing meta that is for the team only: it is never in a REST response to anyone without the DirectoryWeb capability.
- * Registry and government-source working fields and the re-verify flag. (Values the listing page itself prints, such as
- * the Verified date, the registration date and the 12A/80G numbers, are public content and stay readable.)
+ * The government-source working field and the re-verify flag; a site adds its own registry fields with the
+ * `directoryweb_private_meta_names` filter. (Values the listing page itself prints, such as the Verified date and the
+ * registration date, are public content and stay readable.)
  *
  * @return string[] Meta names without the prefix.
  */
 function directoryweb_private_meta_names(): array {
 	return (array) apply_filters(
 		'directoryweb_private_meta_names',
-		array( 'needs_reverify', 'gov_verified_by', 'darpan_blacklisted_by', 'darpan_blacklisted_on', 'reg_authority', 'reg_act', 'sectors', 'awbi_list_on' )
+		array( 'needs_reverify', 'gov_verified_by' )
 	);
 }
 
@@ -569,8 +565,8 @@ function directoryweb_hours_rows_spec( $rows ) {
 }
 
 /**
- * Daily: Claimed listings last checked more than AW_REVERIFY_DAYS ago, and AWBI recognition past its "valid until",
- * are flagged for re-checking (the badge and trust line say so). Runs on Core's daily event (aw_daily), as before.
+ * Daily: Claimed listings last checked more than AW_REVERIFY_DAYS ago, and listings whose accreditation date has passed
+ * (the meta names a site gives in `directoryweb_expiry_meta_names`; none by default), are flagged for re-checking (the badge and trust line say so). Runs on Core's daily event (aw_daily), as before.
  */
 function directoryweb_flag_reverify() {
 	$p      = directoryweb_meta_prefix();
@@ -602,24 +598,32 @@ function directoryweb_flag_reverify() {
 		update_post_meta( $id, $p . 'needs_reverify', true );
 	}
 
-	$lapsed = get_posts(
-		array(
-			'post_type'      => directoryweb_post_type(),
-			'post_status'    => 'publish',
-			'fields'         => 'ids',
-			'posts_per_page' => -1,
-			'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- once a day, on cron
-				array(
-		'key'     => $p . 'awbi_valid',
-		'value'   => $today,
-		'compare' => '<',
-		'type'    => 'DATE',
-			),
-			),
-		)
-	);
-	foreach ( $lapsed as $id ) {
-		update_post_meta( $id, $p . 'needs_reverify', true );
+	/**
+	 * Filters the date meta names (without the prefix) that flag a listing for re-checking once the date has passed,
+	 * for example an accreditation's "valid until". None by default.
+	 *
+	 * @param string[] $names Names.
+	 */
+	foreach ( (array) apply_filters( 'directoryweb_expiry_meta_names', array() ) as $name ) {
+		$lapsed = get_posts(
+			array(
+				'post_type'      => directoryweb_post_type(),
+				'post_status'    => 'publish',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+				'meta_query'     => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- once a day, on cron
+					array(
+						'key'     => $p . sanitize_key( (string) $name ),
+						'value'   => $today,
+						'compare' => '<',
+						'type'    => 'DATE',
+					),
+				),
+			)
+		);
+		foreach ( $lapsed as $id ) {
+			update_post_meta( $id, $p . 'needs_reverify', true );
+		}
 	}
 }
 add_action( 'aw_daily', 'directoryweb_flag_reverify' );

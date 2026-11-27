@@ -1,5 +1,25 @@
 # DirectoryWeb: Pending & Roadmap
 
+## 1.4.0 (27 Nov 2026): registration fields and India places data out of the plugin
+
+Moved to `sites/animalwrites/directoryweb/` (not packaged): the registration fields AWBI (`aw_awbi_*`), NGO Darpan (`aw_darpan_id`, `aw_darpan_blacklisted_*`, `aw_reg_authority`, `aw_reg_act`, `aw_sectors`), 12A (`aw_reg_12a`), 80G (`aw_reg_80g`) and FCRA (`aw_fcra`) with their words, claim rows, listing rows, editor field group (`acf-json/group_aw_listing_registrations_in.json`) and the daily expiry flag; `data/lgd.json` and `data/district-centroids.json`. They come back through DirectoryWeb's filters (`includes/registrations.php`); stored keys are unchanged. A tenant (Wugweb, iKAN) defines its own fields in Schema & Fields or with the same filters.
+
+Moved earlier in 1.3.0: Find help, district helplines, local cards, Verified from government lists, Featured in, the PIN lookup, vet types, services, data sources, Directory and claim wording, India geocoding.
+
+Still animal welfare or India-specific in the plugin, honestly not done:
+- The `aw_` meta prefix, the `aw_listing` post type and the `aw_*` names (`directoryweb_meta_prefix()` has no filter; `directoryweb_post_type()` has one but several files still write `aw_listing`); `legacy-aliases.php` (old `aw_*` function names, including `aw_lgd`).
+- `aw_ngobase_url` (ngobase.org profile) in `listing-meta.php` and `acf-json/group_aw_listing_online.json`; `aw_animals` ("Who is helped" by default); `aw_gov_verified_on` and `aw_gov_verified_by` (the government source, set by the site layer's `gov-verified.php`); the `aw_needs_reverify` re-verify flag is generic.
+- The place model in `places.php`, `place-intros.php`, `directory.php`, `places-admin.php` is the Local Government Directory's shape (state and district codes, the `directoryweb_lgd()` function name) and `AW_DISTRICT_COMMON_NAMES` lists display names of Odisha, Jharkhand, Andhra Pradesh and Madhya Pradesh districts. Another country's places file must use the same shape. The data is no longer shipped.
+- `listing-terms.php` still notes 1962 in a comment.
+- Kits Core's `KITS_FF_DATES` and its claim-form field list still name `l_awbi_*`; DirectoryWeb adds the site's through `directoryweb_ff_dates`. RankWeb's `includes/analysis.php` still lists `aw_reg_12a`, `aw_reg_80g`, `aw_darpan_id` (not in this plugin's scope).
+- The Settings screen of Kits Core's React build has no row for the site layer; the `directoryweb_settings_services` filter adds one.
+- `languages/directoryweb.pot` still lists strings of the removed code; regenerate it.
+- The 1.2.6 plan (a switch and a carry-over) was dropped by the owner; there is no option and no carry-over code.
+
+## 1.3.0 (27 Nov 2026): Animal Writes code out of the plugin
+
+Moved to `sites/animalwrites/directoryweb/`: see 1.4.0 above for what is still not neutral; the 1.3.0 list of leftovers is closed except as noted there.
+
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
 Checked line by line against the code on 27 Nov 2026.

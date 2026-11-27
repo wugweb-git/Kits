@@ -1,0 +1,17 @@
+/* The campaign letters Dashboard box (#aw_cl_widget): the card look Kits Core gives the other Dashboard boxes. */
+#aw_cl_widget{border:1px solid #e6e6e6;border-radius:14px;box-shadow:none;background:#fff;overflow:hidden}
+#aw_cl_widget .postbox-header{border-bottom:1px solid #efefef}
+#aw_cl_widget .postbox-header .hndle{font-size:14px;font-weight:700;color:#0a0a0a;letter-spacing:-.01em;padding:12px 16px}
+#aw_cl_widget .inside{margin:0;padding:16px;color:#2b2b2b}
+#aw_cl_widget a{color:#0a0a0a;text-decoration:underline;text-underline-offset:2px}
+#aw_cl_widget a:hover,#aw_cl_widget a:focus{color:#000;text-decoration-thickness:2px}
+#aw_cl_widget table.widefat{border:0;box-shadow:none;background:transparent}
+#aw_cl_widget table.widefat th{color:#6b6b6b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #e6e6e6;padding:8px 4px}
+#aw_cl_widget table.widefat td{padding:9px 4px;border-bottom:1px solid #f1f1f1}
+#aw_cl_widget table.widefat tbody th{text-transform:none;font-size:13px;font-weight:500;color:#0a0a0a;letter-spacing:0;border-bottom:1px solid #f1f1f1;padding:9px 4px}
+#aw_cl_widget table.widefat tr:last-child td{border-bottom:0}
+#aw_cl_widget table.widefat.striped>tbody>:nth-child(odd){background:transparent}
+#aw_cl_widget details>summary{cursor:pointer;font-weight:600;color:#0a0a0a;margin:0 0 8px}
+#aw_cl_widget .description{color:#6b6b6b}
+#aw_cl_widget .button,#aw_cl_widget .button-primary{background:#0a0a0a;border-color:#0a0a0a;color:#fff;border-radius:8px;box-shadow:none}
+#aw_cl_widget .button:hover{background:#2b2b2b;border-color:#2b2b2b;color:#fff}

@@ -26,7 +26,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_RELEVANCE_TYPES   = array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_press' );
+/**
+ * The types the relevance check covers: the news, library, opportunity and press types of the site, and post.
+ *
+ * @return string[]
+ */
+function sourceweb_relevance_types(): array {
+	return sourceweb_types_with( array( 'news', 'library', 'opportunity', 'press' ), array( 'post' ) );
+}
+
 const AW_RELEVANCE_LOG     = 'aw_relevance_rejected';
 const AW_RELEVANCE_LOG_MAX = 500;
 
@@ -132,19 +140,20 @@ function sourceweb_relevance_sections() {
 /** Directory organisations (animal-welfare organisations, ABC centres, wildlife rescue): published names. */
 function sourceweb_relevance_directory() {
 	global $wpdb;
+	$is_l = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) ); // 1=0 without a listing type
 	return $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		"SELECT DISTINCT p.post_title FROM {$wpdb->posts} p
 		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('animal-welfare-organisation','abc-centre','wildlife-rescue')
-		 WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'"
+		 WHERE {$is_l} AND p.post_status = 'publish'"
 	);
 }
 
 /** One item for the classifier. */
 function sourceweb_relevance_row( WP_Post $p ) {
 	$id      = $p->ID;
-	$press   = 'aw_press' === $p->post_type;
+	$press   = sourceweb_is_type( $p->post_type, 'press' );
 	$text    = $p->post_excerpt ? $p->post_excerpt : wp_trim_words( wp_strip_all_tags( strip_shortcodes( $p->post_content ) ), 150 );
 	$issuer  = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 	$verdict = (string) get_post_meta( $id, 'aw_relevance', true );
@@ -159,8 +168,8 @@ function sourceweb_relevance_row( WP_Post $p ) {
 		'source_name' => (string) get_post_meta( $id, $press ? 'aw_press_publisher' : 'aw_source_name', true ),
 		'issuer'      => $issuer ? $issuer->name : '',
 		'resource_types' => $rtypes, // the Resource type tags (research, guide ...)
-		'tags'           => 'aw_press' === $p->post_type ? array() : wp_list_pluck( sourceweb_item_tags( $id ), 'slug' ),
-		'categories'     => 'aw_press' === $p->post_type ? array() : wp_get_post_terms( $id, 'category', array( 'fields' => 'slugs' ) ),
+		'tags'           => $press ? array() : wp_list_pluck( sourceweb_item_tags( $id ), 'slug' ),
+		'categories'     => $press ? array() : wp_get_post_terms( $id, 'category', array( 'fields' => 'slugs' ) ),
 		'verdict'     => $verdict ? json_decode( $verdict, true ) : null,
 	);
 	return $row;
@@ -168,9 +177,13 @@ function sourceweb_relevance_row( WP_Post $p ) {
 
 /** Titles of News published or waiting from the last 4 days: the workers ask the AI whether a new item is one of these stories. */
 function sourceweb_relevance_recent_titles(): array {
+	$types = sourceweb_types( array( 'news', 'library' ) );
+	if ( ! $types ) {
+		return array(); // an empty post_type would query WordPress's own posts
+	}
 	$ids = get_posts(
 		array(
-			'post_type'      => array( 'aw_news', 'aw_legal' ), // court reports in the Library repeat each other too (owner, 14 Oct 2026)
+			'post_type'      => $types, // court reports in the Library repeat each other too (owner, 14 Oct 2026)
 			'post_status'    => array( 'publish', 'pending', 'draft', 'future' ),
 			'date_query'     => array( array( 'after' => '4 days ago' ) ),
 			'posts_per_page' => 400,
@@ -183,9 +196,13 @@ function sourceweb_relevance_recent_titles(): array {
 
 /** The same stories with their IDs, so the workers can add a later report's facts to the first one (same-story.php). */
 function sourceweb_relevance_recent_items(): array {
+	$types = sourceweb_types( array( 'news', 'library' ) );
+	if ( ! $types ) {
+		return array();
+	}
 	$ids = get_posts(
 		array(
-			'post_type'      => array( 'aw_news', 'aw_legal' ),
+			'post_type'      => $types,
 			'post_status'    => array( 'publish', 'pending', 'draft', 'future' ),
 			'date_query'     => array( array( 'after' => '4 days ago' ) ),
 			'posts_per_page' => 400,
@@ -217,7 +234,7 @@ add_action(
 				'permission_callback' => $can,
 				'callback'            => function ( WP_REST_Request $req ) {
 					$args = array(
-						'post_type'      => AW_RELEVANCE_TYPES,
+						'post_type'      => sourceweb_relevance_types(),
 						'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future' ),
 						'posts_per_page' => max( 1, min( 200, (int) ( $req->get_param( 'per_page' ) ?: 100 ) ) ),
 						'paged'          => max( 1, (int) $req->get_param( 'page' ) ),
@@ -248,7 +265,7 @@ add_action(
 					$n = 0;
 					foreach ( (array) $req->get_param( 'verdicts' ) as $v ) {
 						$id = (int) ( $v['id'] ?? 0 );
-						if ( ! is_array( $v ) || ! $id || ! in_array( get_post_type( $id ), AW_RELEVANCE_TYPES, true ) ) {
+						if ( ! is_array( $v ) || ! $id || ! in_array( get_post_type( $id ), sourceweb_relevance_types(), true ) ) {
 							continue;
 						}
 						update_post_meta( $id, 'aw_relevance', wp_slash( sourceweb_relevance_clean( $v ) ) ); // meta only: status untouched
@@ -258,8 +275,8 @@ add_action(
 				},
 			)
 		);
-		// The workers' check could not run (no AI service answered): items were held back, so the owner gets an email
-		// (owner, 12 Oct 2026). At most one email per 6 hours; the count adds up in between.
+		// The workers' check could not run (no AI service answered): items were held back. A dashboard notice is stored;
+		// a site may add an email through the sourceweb_relevance_alert filter.
 		register_rest_route(
 			'aw/v1',
 			'/relevance-alert',
@@ -276,24 +293,16 @@ add_action(
 					}
 					$prev = (array) get_option( 'aw_relevance_alert_notice', array() );
 					update_option( 'aw_relevance_alert_notice', array( 'held' => $n + (int) ( $prev['held'] ?? 0 ), 'since' => $prev['since'] ?? current_time( 'j M Y, g:i a' ), 'run' => $link ), false );
-					if ( ! sourceweb_animal_writes_context() ) { // the email is an Animal Writes extra; the dashboard notice above stays
-						return new WP_REST_Response( array( 'status' => 'email off', 'held' => $n ) );
-					}
-					$total = $n + (int) get_option( 'aw_relevance_alert_pending', 0 );
-					if ( get_transient( 'aw_relevance_alert_sent' ) ) {
-						update_option( 'aw_relevance_alert_pending', $total, false );
-						return new WP_REST_Response( array( 'status' => 'queued', 'held' => $total ) );
-					}
-					$sent = wp_mail(
-						get_option( 'admin_email' ),
-						wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': ' . $total . ' item(s) held — the relevance check could not run',
-						"The workers found {$total} new item(s) but no AI service answered the relevance check, so nothing was created for them. They are tried again on the next run (every 6 hours).\n\nRun: {$run}\n" . ( $link ? "Details: {$link}\n" : '' ) . "\nUsually this means the free daily limit of the AI keys is used up. Adding credit to a key (OpenRouter, OpenAI, DeepSeek …) clears it."
-					);
-					if ( $sent ) {
-						set_transient( 'aw_relevance_alert_sent', 1, 6 * HOUR_IN_SECONDS );
-						delete_option( 'aw_relevance_alert_pending' );
-					}
-					return new WP_REST_Response( array( 'status' => $sent ? 'sent' : 'mail failed', 'held' => $total ) );
+					/**
+					 * The relevance check could not run for $n new items. The dashboard notice above is already stored.
+					 * A site that wants an email hooks this and returns the REST response data.
+					 *
+					 * @param array  $response The data returned to the worker.
+					 * @param int    $n        Items held in this run.
+					 * @param string $run      The run's id.
+					 * @param string $link     The run's link.
+					 */
+					return new WP_REST_Response( apply_filters( 'sourceweb_relevance_alert', array( 'status' => 'noted', 'held' => $n ), $n, $run, $link ) );
 				},
 			)
 		);
@@ -333,9 +342,8 @@ add_action(
 
 /**
  * Why an incoming item is not News (owner, 20 Oct 2026), '' when it may be: an archive or tag page of a news site
- * ("Read all latest updates on and about …", "Latest news on …"), or a job vacancy from a source that is not an
- * opportunity source ("… vacancy at …", "… recruitment 2026 - apply offline", /job-updates/ addresses). The same rules
- * as the workers' sources.not_an_article(); a story about vacancies ("flags 63.81% vacancies in …") passes.
+ * ("Read all latest updates on and about …", "Latest news on …"). The workers' sources.not_an_article() has the same
+ * rule. A site adds its own (the job-vacancy rule is the Animal Writes site layer's: filter sourceweb_not_news_reason).
  *
  * @param string $title Headline.
  * @param string $url   Source URL.
@@ -345,18 +353,13 @@ add_action(
 function sourceweb_not_news_reason( $title, $url, $type ) {
 	$title = (string) $title;
 	$path  = (string) wp_parse_url( (string) $url, PHP_URL_PATH ) . '/';
-	$host  = strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) );
 	if ( preg_match( '#/(?:tags?|topics?|category|categories|author|authors|search|section)/#i', $path )
 		|| preg_match( '/^\s*(?:read\s+)?(?:all\s+)?(?:the\s+)?latest\s+(?:news|updates|stories|headlines|articles)\b(?:\s*(?:,|and|&)\s*\w+){0,3}\s+(?:on|about|from|for|of)\b|\blatest\s+news\s*,\s*(?:photos|videos|updates)\b|^\s*(?:all\s+)?(?:news|updates)\s+(?:on\s+and\s+)?about\b/i', $title ) ) {
 		return 'an archive or tag page of a news site, not a news report';
 	}
-	if ( 'aw_opportunity' !== $type && (
-		preg_match( '/(?:^|\.)(?:freejobalert|sarkariresult|sarkarinaukri\w*|employmentnews|naukri|indeed|freshersworld|jobsarkari|govtjobsalert\w*)\.(?:com|in|co\.in|gov\.in|org)$/i', $host )
-		|| preg_match( '#/(?:jobs?|job-updates?|careers?|recruitments?|vacanc(?:y|ies))(?:/|-)#i', $path )
-		|| preg_match( '/\bvacancy\s+(?:at|in|for|with)\b|\bvacancies\s+(?:at|in|for|with)\b.{0,80}\b(?:apply|recruitment|notification|last\s+date)\b|\brecruitment\s+20\d\d\b|\b(?:apply|applications?)\s+(?:online|offline|now|invited)\b|\bwalk[- ]in\s+interview\b|\b(?:job|career)\s+(?:opening|openings|alert|notification|vacancy)\b|\bnow\s+hiring\b|\bis\s+hiring\b/i', $title ) ) ) {
-		return 'a job vacancy, not a news report (jobs come from the opportunity sources)';
-	}
-	return '';
+	// Filter sourceweb_not_news_reason( string $reason, string $title, string $url, string $type ): a site adds rules of its
+	// own for what is not a news report (for example a job vacancy, when it files jobs under an opportunity type).
+	return (string) apply_filters( 'sourceweb_not_news_reason', '', $title, (string) $url, (string) $type );
 }
 
 /** Add one entry to the Rejected log (Sourcing → Rejected), as the relevance-rejected endpoint does. */
@@ -443,10 +446,10 @@ add_action(
 /*
  * Ingestion heartbeat and watchdog (owner, 12 Oct 2026; no new News 10-12 Oct went unnoticed).
  * - Every worker run reports what it did: items created and published, sources tried and failed (POST ingest-heartbeat).
- * - An hourly check on the site itself (event sourceweb_ingest_watchdog, and after every heartbeat) emails the owner and shows
- *   a dashboard notice when: no News has been published for 12 hours; no worker run has reported for 8 hours (Actions
+ * - An hourly check on the site itself (event sourceweb_ingest_watchdog, and after every heartbeat) checks
+ *   and a dashboard notice shows when: no News has been published for 12 hours; no worker run has reported for 8 hours (Actions
  *   stopped, a run crashed or timed out, login refused); or half the sources failed in the last run.
- * One email per 12 hours for the same problems; a new kind of problem is emailed at once.
+ * It sends no email itself: a site hooks the action sourceweb_ingest_problems.
  */
 
 /**
@@ -457,10 +460,14 @@ add_action(
  */
 function sourceweb_newest_published_news() {
 	global $wpdb;
-	// Straight from the table: the News lists' pre_get_posts (display.php) re-sorts every front-end aw_news query by
+	// Straight from the table: the News lists' pre_get_posts (display.php) re-sorts every front-end News query by
 	// source date, so get_posts() returned yesterday-dated items added last night after older ones, and the watchdog
 	// e-mailed "no News for 12 hours" while 13 items had gone live overnight (24 Oct 2026).
-	$ids  = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_news' AND post_status = 'publish' ORDER BY ID DESC LIMIT 5" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$news = sourceweb_type( 'news' );
+	if ( '' === $news ) {
+		return 0; // no News type on this site
+	}
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_status = 'publish' ORDER BY ID DESC LIMIT 5", $news ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$best = 0;
 	foreach ( $ids as $id ) {
 		$best = max( $best, (int) get_post_time( 'U', true, $id ), (int) get_post_modified_time( 'U', true, $id ) );
@@ -499,28 +506,21 @@ function sourceweb_ingest_problems( $now = null ) {
 	return $out;
 }
 
-/** Email the owner about ingestion problems (hourly event, and after every heartbeat). */
+/**
+ * Check ingestion (hourly event, and after every heartbeat): stores the result and fires the action
+ * `sourceweb_ingest_problems` with the problems (an empty array when all is well). SourceWeb sends no email itself; a
+ * site that wants one hooks the action.
+ */
 function sourceweb_ingest_watchdog() {
 	update_option( 'aw_ingest_watchdog_at', time(), true );
 	$problems = sourceweb_ingest_problems();
 	update_option( 'aw_ingest_watchdog_last', array( 'at' => time(), 'problems' => $problems ), false );
-	if ( ! $problems ) {
-		delete_transient( 'aw_ingest_alert_mailed' );
-		return;
-	}
-	if ( ! sourceweb_animal_writes_context() ) {
-		return; // alert emails are an Animal Writes extra: never sent unless that is switched on (sourceweb-context.php)
-	}
-	$kinds = implode( ',', array_keys( $problems ) );
-	$sent  = (string) get_transient( 'aw_ingest_alert_mailed' );
-	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
-		return; // the same problems were emailed in the last 12 hours
-	}
-	$hb   = (array) get_option( 'aw_ingest_heartbeat', array() );
-	$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " ingestion needs attention:\n\n- " . implode( "\n- ", $problems ) . "\n\n" . ( ! empty( $hb['last_link'] ) ? 'Last run: ' . $hb['last_link'] . "\n" : '' ) . "Runs: https://github.com/wugweb-git/animal-writes-workers/actions\n";
-	if ( wp_mail( get_option( 'admin_email' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': ingestion problem — ' . reset( $problems ), $body ) ) {
-		set_transient( 'aw_ingest_alert_mailed', $kinds, 12 * HOUR_IN_SECONDS );
-	}
+	/**
+	 * Ingestion was checked.
+	 *
+	 * @param array<string,string> $problems Kind => sentence; empty when nothing is wrong.
+	 */
+	do_action( 'sourceweb_ingest_problems', $problems );
 }
 add_action( 'aw_ingest_watchdog', 'sourceweb_ingest_watchdog' );
 // The check must not depend on what it watches (cron, GitHub): any request that reaches PHP also runs it when the last

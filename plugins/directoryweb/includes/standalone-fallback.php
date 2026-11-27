@@ -24,7 +24,7 @@ if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL' ) ) {
 }
 
 if ( ! defined( 'DIRECTORYWEB_FF_DATES' ) ) {
-	define( 'DIRECTORYWEB_FF_DATES', defined( 'KITS_FF_DATES' ) ? KITS_FF_DATES : array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' ) );
+	define( 'DIRECTORYWEB_FF_DATES', defined( 'KITS_FF_DATES' ) ? KITS_FF_DATES : array( 'l_reg_date' ) );
 }
 
 if ( ! defined( 'DIRECTORYWEB_FF_SOCIAL_HOSTS' ) ) {
@@ -58,9 +58,10 @@ if ( ! function_exists( 'directoryweb_ff_ticked' ) ) {
 }
 
 if ( ! function_exists( 'directoryweb_ff_dates' ) ) {
-	/** The claim form fields that hold a date (shown as "j M Y", stored as Y-m-d). */
+	/** The claim form fields that hold a date (shown as "j M Y", stored as Y-m-d); a site adds its own with the `directoryweb_ff_dates` filter. */
 	function directoryweb_ff_dates(): array {
-		return defined( 'KITS_FF_DATES' ) ? KITS_FF_DATES : array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
+		$dates = apply_filters( 'directoryweb_ff_dates', defined( 'KITS_FF_DATES' ) ? KITS_FF_DATES : array( 'l_reg_date' ) );
+		return is_array( $dates ) ? $dates : array( 'l_reg_date' );
 	}
 }
 

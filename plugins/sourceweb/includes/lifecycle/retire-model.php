@@ -20,7 +20,7 @@
  * The migration refuses while a word of an old list has no keyword record with that role (apart from the Hindi and
  * Hinglish words the standing rule keeps without a Sourcing role) or a dismissed search no dismissed record, so nothing
  * only the old lists hold stops being used unnoticed. Pure functions (no database), tested in tests/retire-tests.php;
- * the WP-CLI steps are in sourcing-migrate-retire.php.
+ * the WP-CLI steps are in the Animal Writes site layer (sites/animalwrites/sourceweb/).
  *
  * @package aw-sourcing
  */

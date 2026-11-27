@@ -25,7 +25,7 @@
  *   mailweb_folders_<mailbox>, mailweb_overview_<mailbox>, mailweb_overview_down_<mailbox>
  * Scheduled events:
  *   mailweb_flush, mailweb_crm_sync, mailweb_dashboard_build, mailweb_daily_dns_check, mailweb_purge_log,
- *   aw_nl_ff_phone_sync (Fluent Forms newsletter), mailweb_retry_queue_tick — every event of these hooks, whatever its arguments
+ *   mailweb_retry_queue_tick — every event of these hooks, whatever its arguments
  * (Deactivation, with or without the tick, already stops the scheduled jobs; it deletes no data.)
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/mailweb-uninstall-<YYYYmmdd-His>.jsonl.gz
@@ -57,7 +57,7 @@ if ( ! mailweb_uninstall_backup( 'mailweb', __DIR__ . '/mailweb.php', $mailweb_o
 
 $wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'mailweb_queue' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table name.
 
-foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build', 'mailweb_daily_dns_check', 'mailweb_purge_log', 'aw_nl_ff_phone_sync', 'mailweb_retry_queue_tick' ) as $mailweb_hook ) {
+foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build', 'mailweb_daily_dns_check', 'mailweb_purge_log', 'mailweb_retry_queue_tick' ) as $mailweb_hook ) {
 	wp_unschedule_hook( $mailweb_hook );
 }
 unset( $mailweb_hook );

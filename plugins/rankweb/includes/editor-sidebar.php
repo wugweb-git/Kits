@@ -20,12 +20,12 @@ require_once __DIR__ . '/class-rankweb-robots.php';
 require_once __DIR__ . '/class-rankweb-post-overrides.php';
 
 /**
- * Post types the sidebar and its meta are registered for. Default post, page and aw_press; filterable.
+ * Post types the sidebar and its meta are registered for. Default post, page and the press type; filterable.
  *
  * @return string[]
  */
 function rankweb_sidebar_post_types(): array {
-	return array_values( array_filter( array_map( 'sanitize_key', (array) apply_filters( 'rankweb_sidebar_post_types', array( 'post', 'page', 'aw_press' ) ) ) ) );
+	return array_values( array_filter( array_map( 'sanitize_key', (array) apply_filters( 'rankweb_sidebar_post_types', rankweb_types_with( array( 'press' ), array( 'post', 'page' ) ) ) ) ) );
 }
 
 /**

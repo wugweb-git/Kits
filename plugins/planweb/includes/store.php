@@ -406,7 +406,7 @@ function planweb_entries( string $from = '', string $to = '', array $args = arra
 }
 
 /**
- * The next entry from today, for Kits → Site: Animal Writes ("Next: …").
+ * The next entry from today, for the Kits → Site row ("Next: …").
  *
  * @return array{0: string, 1: string}|null Date and title.
  */

@@ -1,7 +1,7 @@
 <?php
 /**
  * The keyword table (owner's decision 3, 25 Oct 2026): wp_aw_si_keywords, the same table and name Search Insights
- * created. Installed by Animal Writes Core from 25 Oct, by Kits Core from 12 Nov, and by InsightWeb from 18 Nov 2026
+ * created. Installed by the earlier Core plugin from 25 Oct, by Kits Core from 12 Nov, and by InsightWeb from 18 Nov 2026
  * (same table, option and functions; no data moved). One record per normalised keyword with its roles
  * (keyword-model.php); Search Insights adds its own columns' figures, SourceWeb its roles, other spellings, search and
  * category mapping. Loaded once by keywords.php.

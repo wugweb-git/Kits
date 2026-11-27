@@ -825,10 +825,14 @@ function insightweb_si_box_campaigns(): void {
 		echo '<p>' . esc_html__( 'Nothing yet.', 'insightweb' ) . '</p>';
 		return;
 	}
+	if ( '' === insightweb_type( 'campaign' ) ) { // this site has no campaign content type
+		echo '<p>' . esc_html__( 'No published campaigns.', 'insightweb' ) . '</p>';
+		return;
+	}
 	$slugs = array();
 	foreach ( get_posts(
 		array(
-			'post_type'      => 'aw_campaign',
+			'post_type'      => insightweb_type( 'campaign' ),
 			'post_status'    => 'publish',
 			'posts_per_page' => 100,
 			'orderby'        => 'date',

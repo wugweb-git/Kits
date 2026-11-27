@@ -5,15 +5,11 @@
  * auto-code-YYYY-MM-DD.tar.gz; only files with the auto- prefix are ever removed by the rotation.
  * Last run and size show on Kits → Home → Backup. Restoring: docs/rollback.md (not in this repo).
  *
- * Moved whole from Animal Writes Core (18 Nov 2026): the option aw_backup_last, the cron hook aw_daily_backup and the
- * REST route aw/v1/backup/(db|code) keep their names (the workers repository's off-server copy calls the route). The
- * old aw_ functions stay at the end of this file as thin wrappers until nothing calls them.
+ * The option aw_backup_last, the cron hook aw_daily_backup and the REST route aw/v1/backup/(db|code) keep their names
+ * (an off-server copy calls the route).
  *
- * Off unless the site turns it on (owner, 18 Nov 2026): Kits → Settings → Backup (option kits_daily_backup) or the
- * filter kits_daily_backup. A site where this backup already ran (option aw_backup_last, or the event aw_daily_backup
- * booked) is switched on once, by itself, the first time this file loads there, so Animal Writes keeps its backup with
- * no manual step. When off: nothing is booked or written, the download route is not registered, and an event booked
- * earlier is taken off. Backup files already in ~/backups are never touched by switching it off.
+ * Off unless the site turns it on: Kits → Settings → Backup (option kits_daily_backup) or the filter kits_daily_backup.
+ * When off: nothing is booked or written, the download route is not registered, and an event booked earlier is taken off. Backup files already in ~/backups are never touched by switching it off.
  * The UpdraftPlus alert at the end of this file only reads UpdraftPlus's own options and is not part of the switch.
  *
  * @package kits-core
@@ -35,15 +31,15 @@ const KITS_DAILY_BACKUP_OPTION = 'kits_daily_backup';
 
 /**
  * Whether the daily backup runs on this site. Off by default. The first time it is asked on a site that has no
- * choice stored yet, it stores one: on where this backup already ran (aw_backup_last) or is booked (aw_daily_backup),
- * off everywhere else. A site can force it with the filter kits_daily_backup.
+ * choice stored yet, it stores one, off. A site can force it with the filter kits_daily_backup, and a site layer can
+ * store its own first choice before then with the filter kits_daily_backup_first_choice.
  *
  * @return bool
  */
 function kits_daily_backup_on(): bool {
 	$stored = get_option( KITS_DAILY_BACKUP_OPTION, null );
 	if ( null === $stored ) {
-		$stored = ( get_option( 'aw_backup_last' ) || wp_next_scheduled( 'aw_daily_backup' ) ) ? '1' : '0';
+		$stored = (string) apply_filters( 'kits_daily_backup_first_choice', '0' );
 		add_option( KITS_DAILY_BACKUP_OPTION, $stored ); // autoloaded: read on every request, so no extra query.
 	}
 	return (bool) apply_filters( 'kits_daily_backup', '1' === (string) $stored );
@@ -307,51 +303,4 @@ function kits_backup_problem( $now = null ) {
 		return sprintf( 'The last UpdraftPlus backup run (%s) ended with errors%s', wp_date( 'j M, g:i a', (int) ( $run['backup_time'] ?? 0 ) ), ! empty( $run['errors'] ) && is_array( $run['errors'] ) ? ': ' . mb_substr( wp_strip_all_tags( (string) reset( $run['errors'] ) ), 0, 160 ) : '.' );
 	}
 	return '';
-}
-
-/*
- * The old names (Animal Writes Core), kept as thin wrappers until nothing calls them.
- */
-if ( ! function_exists( 'aw_backup_dir' ) ) {
-	/** Old name of kits_daily_backup_dir(). */
-	function aw_backup_dir() {
-		return kits_daily_backup_dir();
-	}
-}
-if ( ! function_exists( 'aw_run_backup' ) ) {
-	/**
-	 * Old name of kits_daily_backup_run().
-	 *
-	 * @return array What was written.
-	 */
-	function aw_run_backup() {
-		return kits_daily_backup_run();
-	}
-}
-if ( ! function_exists( 'aw_backup_site_check' ) ) {
-	/** Old name of kits_daily_backup_site_check(). */
-	function aw_backup_site_check() {
-		kits_daily_backup_site_check();
-	}
-}
-if ( ! function_exists( 'aw_backup_remote_last' ) ) {
-	/**
-	 * Old name of kits_backup_remote_last().
-	 *
-	 * @return int
-	 */
-	function aw_backup_remote_last() {
-		return kits_backup_remote_last();
-	}
-}
-if ( ! function_exists( 'aw_backup_problem' ) ) {
-	/**
-	 * Old name of kits_backup_problem().
-	 *
-	 * @param int|null $now Unix time (tests).
-	 * @return string
-	 */
-	function aw_backup_problem( $now = null ) {
-		return kits_backup_problem( $now );
-	}
 }

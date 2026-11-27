@@ -6,7 +6,8 @@ Checked line by line against the code on 27 Nov 2026.
 
 - DEAD (held, not loaded): 404 and internal-search logging and `insightweb_keyword_movers()`; the earlier 'done' marks are wrong. No UI or REST route reaches them.
 - Not tested: 'Tiles and MiniCharts safe when tables are empty' (no test covers empty tables); 1.1.3 cleanup; 1.1.4 native screens.
-- Incomplete: neutral wording (Animal Writes strings remain in `links-seed.php` and the brand patterns in `keyword-model.php`). The overview boxes retry is manual (a 'Try again' button).
+- 1.2.1 (27 Nov 2026): content-type slugs are gone from the plugin (roles through `insightweb_post_type_roles`, fed by the site layer). The path-based page class still names `/library/`, `/directory/` paths, and `aw_si_*` aliases stay for Kits Core, RankWeb and DirectoryWeb.
+- 1.2.0 (27 Nov 2026): the links seed, the visitor-counting carry-over, the brand regex and the Rising/species word lists are out of the plugin (the site layer is `sites/animalwrites/insightweb/`). Still open for neutral behaviour: the scoring ladder (`score.php`), the crawl check (`crawlcheck.php`), the indexing request order (`gsc-types.php`), the PageSpeed sample (`psi.php`) and the keyword spike SQL (`rising.php`) name the `aw_news`, `aw_legal`, `aw_campaign`, `aw_opportunity` and `aw_listing` post types; they are inert on a site without those types but are not yet configurable. `insightweb_keys_copy()` still reads the old shared Kits vault option. `CHANGELOG`/`readme` history and `languages/insightweb.pot` (stale) still mention the earlier names. The overview boxes retry is manual (a 'Try again' button).
 - The 'Tabs: 10 flat tabs' and '404 surfacing: unverified' notes are outdated.
 
 ## Active Scope & Responsibilities

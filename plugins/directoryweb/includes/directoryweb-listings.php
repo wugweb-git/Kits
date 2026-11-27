@@ -364,12 +364,20 @@ function directoryweb_rest_listing_detail( WP_REST_Request $r ) {
 			)
 		)
 	);
+	/**
+	 * Filters the label and value pairs of the reading panel's Registration group: [ label, value ]. A site adds its own
+	 * accreditation or registry numbers here. The plugin has the one registration number.
+	 *
+	 * @param array $pairs Pairs.
+	 * @param int   $id    Listing ID.
+	 */
 	$registration = $named(
-		array(
-			array( __( 'Registration', 'directoryweb' ), $meta( 'aw_registration' ) ),
-			array( directoryweb_label( 'tax_12a' ), $meta( 'aw_reg_12a' ) ),
-			array( directoryweb_label( 'tax_80g' ), $meta( 'aw_reg_80g' ) ),
-			array( directoryweb_label( 'registry_id' ), $meta( 'aw_darpan_id' ) ),
+		(array) apply_filters(
+			'directoryweb_listing_registration_pairs',
+			array(
+				array( __( 'Registration', 'directoryweb' ), $meta( 'aw_registration' ) ),
+			),
+			$id
 		)
 	);
 	$about = $named(

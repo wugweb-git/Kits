@@ -644,7 +644,7 @@ function rankweb_rest_save_keep_listings( WP_REST_Request $request ) {
 		if ( ! $id || in_array( $id, $ids, true ) ) {
 			continue;
 		}
-		if ( in_array( $id, $now, true ) || 'aw_listing' === get_post_type( $id ) ) {
+		if ( in_array( $id, $now, true ) || rankweb_is_type( get_post_type( $id ), 'listing' ) ) {
 			$ids[] = $id;
 		} else {
 			++$skipped;

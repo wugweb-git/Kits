@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.4.1
+Stable tag: 3.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -114,6 +114,9 @@ MailWeb connects to external services only when configured by the site administr
 
 == Upgrade Notice ==
 
+= 3.5.0 =
+Site-specific code left the plugin. A site that relied on it (website forms in the Inbox, the newsletter shortcode, volunteer fields, `wp aw crm-setup`) needs its own site layer loaded; nothing changes for other sites.
+
 = 3.4.1 =
 Wording fixes only: the sender name in FluentCRM emails and setup is the site's name, the Inbox names Hostinger only on a Hostinger mailbox, and an empty Inbox no longer asks you to choose a message.
 
@@ -134,6 +137,12 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.5.0 =
+* MailWeb no longer carries anything for one site. The code that served only the Animal Writes site is removed from the plugin and kept in that site's own layer (`sites/animalwrites/mailweb/`, outside the plugin package): the Website forms folder and its Fluent Forms entries, the `[aw_newsletter]` shortcode and old list links, the volunteer fields, update link and `{{aw.*}}` smart code, the contact-form and claim notes, `wp aw crm-setup`, a block list of junk addresses, the old `aw_*` function names and the `AW_HOSTINGER_MAIL_TOKEN` bridge.
+* The generic FluentCRM helpers stay (`includes/fluentcrm.php`): the Newsletter list, tags, subscribing a person, a contact for an address, UTM tags on campaign links and the dashboard tidy-up. The block list is empty by default and is added through the filter `mailweb_fcrm_blocked_emails`; tag titles come from `mailweb_fcrm_tag_titles` (DirectoryWeb's two organisation tags are built in).
+* The `mailweb_forms_source` filter is unchanged, so any site can still add a Website forms folder.
+* Needs the Animal Writes site layer on that site: MailWeb 3.5.0 alone does not restore the above there. The sending switches, delivery log, fallback SMTP and alerts are untouched.
 
 = 3.4.1 =
 * The FluentCRM Reply-To name, the {{aw.*}} smart-code group name and the `wp aw crm-setup` sender and business name use the site's name instead of a fixed one (a site called Animal Writes reads exactly as before).
@@ -158,7 +167,7 @@ Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each pack
 * Activating MailWeb no longer takes over the site's email. Forcing the From address, the daily limit and queue, and keeping the text of sent emails are separate switches in Mail → Settings → Site sending, off on a new install. A site that already had MailWeb settings keeps the From address and limit on; the text of sent emails is kept only if you turn that on, for 1 to 365 days (default 30), and a daily job deletes older text.
 * MailWeb stands down while FluentSMTP, Post SMTP or WP Mail SMTP is active (filter `mailweb_defer_to_external_smtp`).
 * Without Kits Core the Dashboard, Inbox and Settings are drawn by WordPress itself instead of showing an error.
-* The FluentCRM, Fluent Forms and newsletter code loads only when FluentCRM or Fluent Forms is active, and the "New form entries" notice on every admin screen is gone (the Mail menu badge still counts them).
+* The FluentCRM helpers load only when FluentCRM or Fluent Forms is active, and the "New form entries" notice on every admin screen is gone (the Mail menu badge still counts them).
 * Only administrators can read the mailboxes; editors need the filter `mailweb_caps_from`. Editors who had access lose it on this update unless the filter is set.
 * Uninstall with "delete data" ticked now also removes the sending switches, email log, fallback SMTP and alert webhook settings, the capability, the pause marker and every scheduled job; deactivation stops all jobs. The readme now matches the code on uninstall, logging and who can read mailboxes, and lists the SMTP presets and DNS lookups under External services.
 * Admin screens use style sheets instead of inline styles and script.

@@ -105,7 +105,7 @@ function sourceweb_src_host_in( $host, array $list ) {
  * The relay allow list of before phase 1: aw_sources.relay_hosts when it was saved, else the built-in list.
  *
  * @param array    $sources_option aw_sources.
- * @param string[] $default        The built-in list (AW_RELAY_DEFAULT).
+ * @param string[] $default        The built-in list (sourceweb_relay_default_hosts()).
  * @return string[]
  */
 function sourceweb_src_relay_legacy( array $sources_option, array $default ) {

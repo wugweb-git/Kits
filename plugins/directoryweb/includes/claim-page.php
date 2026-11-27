@@ -141,22 +141,44 @@ function directoryweb_claim_stepper( $current_step = 1 ) {
 }
 
 /**
+ * The wording of /claim/ that depends on the kind of organisation: neutral by default. A site rewrites any key with the
+ * `directoryweb_claim_copy` filter (keys: hero_desc, placeholder, benefits (list of title, text and icon), manage_text,
+ * missing_text). The benefits are the cards under "Why claim your organisation listing?".
+ *
+ * @return array
+ */
+function directoryweb_claim_copy(): array {
+	$copy = array(
+		'hero_desc'    => 'Search by organisation name to take ownership of your listing.',
+		'placeholder'  => 'Organisation name',
+		'benefits'     => array(
+			array( 'icon' => 'check', 'title' => 'Verified Organisation Mark', 'text' => 'Establish trust with supporters and local authorities through a verified organisation badge.' ),
+			array( 'icon' => 'sliders', 'title' => 'Complete Profile Control', 'text' => 'Manage your services, operating hours, official logo, and website links.' ),
+		),
+		'missing_text' => 'If your organisation does not appear in search results, submit a request to create a new directory listing.',
+	);
+	$out = apply_filters( 'directoryweb_claim_copy', $copy );
+	return is_array( $out ) ? array_merge( $copy, $out ) : $copy;
+}
+
+/**
  * /claim/ opened on its own (owner, 12 Oct 2026: a page to register a claim): find your organisation by name, then claim it.
  * Results link to /claim/?listing=ID, which shows the claim form. Not listed yet → add it through the Contact form.
  */
 function directoryweb_claim_finder() {
 	$q    = sanitize_text_field( wp_unslash( $_GET['org'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$copy = directoryweb_claim_copy();
 	$html = '<div class="aw-claim-find-box">'
 		. '<div class="aw-claim-hero">'
 		. '<h2 class="aw-claim-hero-title">Find your organisation to claim</h2>'
-		. '<p class="aw-claim-hero-desc">Search by organisation name, shelter, veterinary clinic, or trust to take ownership of your listing.</p>'
+		. '<p class="aw-claim-hero-desc">' . esc_html( $copy['hero_desc'] ) . '</p>'
 		. '</div>'
 		. '<form class="kit-form aw-claim-find" method="get" action="' . esc_url( home_url( '/claim/' ) ) . '" role="search">'
 		. '<div class="kit-field aw-claim-search-field">'
 		. '<label for="aw-claim-org" class="screen-reader-text">Organisation name</label>'
 		. '<div class="kit-field-control aw-claim-input-wrap">'
 		. '<span class="kit-ico kit-ico--search aw-claim-search-ico" aria-hidden="true"></span>'
-		. '<input id="aw-claim-org" type="search" name="org" value="' . esc_attr( $q ) . '" required minlength="3" placeholder="e.g. Friendicoes, CUPA, Sanjay Gandhi Animal Care..." autocomplete="organization">'
+		. '<input id="aw-claim-org" type="search" name="org" value="' . esc_attr( $q ) . '" required minlength="3" placeholder="' . esc_attr( $copy['placeholder'] ) . '" autocomplete="organization">'
 		. '<button class="kit-btn kit-btn--primary aw-claim-search-submit" type="submit">Search organisation</button>'
 		. '</div>'
 		. '</div>'
@@ -217,21 +239,13 @@ function directoryweb_claim_finder() {
 		$html .= '<div class="aw-claim-onboarding">'
 			. '<h3 class="aw-claim-onboarding-title">Why claim your organisation listing?</h3>'
 			. '<div class="aw-claim-benefits-grid">'
-			. '<div class="aw-claim-benefit-card kit-card">'
-			. '<div class="aw-benefit-icon"><span class="kit-ico kit-ico--phone" aria-hidden="true"></span></div>'
-			. '<h4>Direct Emergency Helpline</h4>'
-			. '<p>Ensure citizens in distress can reach your active emergency phone and WhatsApp numbers without delay.</p>'
-			. '</div>'
-			. '<div class="aw-claim-benefit-card kit-card">'
-			. '<div class="aw-benefit-icon"><span class="kit-ico kit-ico--check" aria-hidden="true"></span></div>'
-			. '<h4>Verified Organisation Mark</h4>'
-			. '<p>Establish trust with donors, volunteers, and local authorities through a verified organisation badge.</p>'
-			. '</div>'
-			. '<div class="aw-claim-benefit-card kit-card">'
-			. '<div class="aw-benefit-icon"><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span></div>'
-			. '<h4>Complete Profile Control</h4>'
-			. '<p>Manage your services, animal categories helped, operating hours, official logo, and website links.</p>'
-			. '</div>'
+			. implode(
+				'',
+				array_map(
+					fn( $b ) => '<div class="aw-claim-benefit-card kit-card"><div class="aw-benefit-icon"><span class="kit-ico kit-ico--' . esc_attr( (string) ( $b['icon'] ?? 'check' ) ) . '" aria-hidden="true"></span></div><h4>' . esc_html( (string) ( $b['title'] ?? '' ) ) . '</h4><p>' . esc_html( (string) ( $b['text'] ?? '' ) ) . '</p></div>',
+					(array) $copy['benefits']
+				)
+			)
 			. '</div>'
 			. '</div>';
 	}
@@ -239,7 +253,7 @@ function directoryweb_claim_finder() {
 	return $html . '<div class="aw-claim-footer-cta kit-card">'
 		. '<div class="aw-claim-footer-cta-text">'
 		. '<h3>Not listed in our directory yet?</h3>'
-		. '<p>If your shelter, clinic, or animal NGO does not appear in search results, submit a request to create a new directory listing.</p>'
+		. '<p>' . esc_html( $copy['missing_text'] ) . '</p>'
 		. '</div>'
 		. '<a class="kit-btn kit-btn--secondary" href="' . esc_url( home_url( '/contact/?about=listing' ) ) . '">Add your organisation</a>'
 		. '</div>';

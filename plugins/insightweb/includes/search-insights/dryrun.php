@@ -109,7 +109,7 @@ function insightweb_si_dry_report( string $day ): array {
 	);
 
 	// Rank Math focus keyphrases (items without listings, and terms).
-	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_listing' ) ) ) : array( 'post', 'page' );
+	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, insightweb_types( array( 'listing' ) ) ) ) : array( 'post', 'page' );
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per type.
 	$posts = (array) $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_status = 'publish' AND p.post_type IN ({$in}) AND m.meta_value <> ''", $types ) );
@@ -237,7 +237,7 @@ function insightweb_si_dry_report( string $day ): array {
 	);
 
 	// Listings: entities among the records.
-	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE " . insightweb_sql_in_types( 'p.post_type', insightweb_types( array( 'listing' ) ) ) . " AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( (array) $names as $name ) {
 		$n = insightweb_si_norm( insightweb_si_focus_parts( (string) $name )[0] );
 		if ( isset( $rec[ $n ] ) ) {

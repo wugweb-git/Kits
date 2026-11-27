@@ -34,7 +34,7 @@ function sourceweb_sourcing_kw_on() {
 function sourceweb_sourcing_kw_roles() {
 	return array(
 		SOURCEWEB_KW_ROLE_INCLUDE  => 'Include',
-		SOURCEWEB_KW_ROLE_ANIMAL   => 'Animal',
+		SOURCEWEB_KW_ROLE_ANIMAL   => 'Topic',
 		SOURCEWEB_KW_ROLE_CONTEXT  => 'Context',
 		SOURCEWEB_KW_ROLE_EXCLUDE  => 'Exclude',
 		SOURCEWEB_KW_ROLE_SEARCH   => 'Search',
@@ -48,7 +48,7 @@ function sourceweb_sourcing_kw_role_help() {
 	return array(
 		SOURCEWEB_KW_ROLE_INCLUDE  => 'Keeps an item on its own. An English one is also a Google News search every run (unless its search is off).',
 		SOURCEWEB_KW_ROLE_ANIMAL   => 'Keeps an item together with a Context word.',
-		SOURCEWEB_KW_ROLE_CONTEXT  => 'Keeps an item together with an Animal word.',
+		SOURCEWEB_KW_ROLE_CONTEXT  => 'Keeps an item together with a Topic word.',
 		SOURCEWEB_KW_ROLE_EXCLUDE  => 'Drops an item, whatever else it has (always, also with the relevance filter off).',
 		SOURCEWEB_KW_ROLE_SEARCH   => 'Its own Google News search every run (its query, or the keyword itself).',
 		SOURCEWEB_KW_ROLE_PRESS    => 'A weekly press-discovery query (coverage of this site): Google News and Google Search.',
@@ -174,8 +174,11 @@ function sourceweb_sourcing_kw_sections() {
 		$o           = get_post_type_object( $t );
 		$out[ $t ] = $o ? $o->labels->name : $t;
 	}
-	$o                = get_post_type_object( 'aw_press' );
-	$out['aw_press'] = $o ? $o->labels->name : 'Media & PR';
+	$press = sourceweb_type( 'press' );
+	if ( '' !== $press ) {
+		$o           = get_post_type_object( $press );
+		$out[ $press ] = $o ? $o->labels->name : 'Media & PR';
+	}
 	return $out;
 }
 
@@ -323,7 +326,7 @@ function sourceweb_sourcing_kw_add( $label, array $set ) {
 function sourceweb_sourcing_kw_views() {
 	return array(
 		'include'  => array( 'Include', SOURCEWEB_KW_ROLE_INCLUDE ),
-		'animal'   => array( 'Animal', SOURCEWEB_KW_ROLE_ANIMAL ),
+		'animal'   => array( 'Topic', SOURCEWEB_KW_ROLE_ANIMAL ),
 		'context'  => array( 'Context', SOURCEWEB_KW_ROLE_CONTEXT ),
 		'exclude'  => array( 'Exclude', SOURCEWEB_KW_ROLE_EXCLUDE ),
 		'search'   => array( 'Search', SOURCEWEB_KW_ROLE_SEARCH ),
@@ -453,7 +456,7 @@ add_action(
 			array(
 				'id'      => 'aw-kw-overview',
 				'title'   => 'Overview',
-				'content' => '<p>An item from an <strong>allowed</strong> publisher goes live when it has an Include keyword (or an Animal keyword with a Context keyword) and no Exclude keyword; otherwise it waits in review. Blocked publishers are refused. Exclude always applies.</p>'
+				'content' => '<p>An item from an <strong>allowed</strong> publisher goes live when it has an Include keyword (or a Topic keyword with a Context keyword) and no Exclude keyword; otherwise it waits in review. Blocked publishers are refused. Exclude always applies.</p>'
 					. '<p>Every keyword is one record in the keyword table, which Search Insights shares (its figures show here: impressions in 28 days). Only records with a Sourcing or Press role, in English, go to the workers. Deleting a keyword here removes those roles; the record stays for Search Insights.</p>'
 					. '<p>Hindi and Hinglish keywords never get a Sourcing role (no Hindi content); they show in the Hindi view.</p>',
 			)

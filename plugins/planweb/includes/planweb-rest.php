@@ -608,6 +608,7 @@ function planweb_import_payload(): array {
 	$r = (array) get_option( 'planweb_import_result', array() );
 	$v = planweb_verify();
 	return array(
+		'enabled'  => '' !== planweb_import_source()['option'],
 		'ran'      => ! empty( $r ),
 		'atText'   => ! empty( $r['time'] ) ? wp_date( 'j M Y, g:i a', (int) $r['time'] ) : '',
 		'stored'   => (int) ( $r['stored'] ?? 0 ),
@@ -706,7 +707,7 @@ function planweb_rest_switch( WP_REST_Request $request ) {
 	}
 	$data = null !== $request['delete_data'] && planweb_delete_data_save( (bool) $request['delete_data'] );
 	if ( null !== $new ) {
-		$message = planweb_on() ? __( 'Saved. PlanWeb is on.', 'planweb' ) : __( 'Saved. PlanWeb is off: Kits → Dates is back, and the entries are kept.', 'planweb' );
+		$message = planweb_on() ? __( 'Saved. PlanWeb is on.', 'planweb' ) : __( 'Saved. PlanWeb is off, and the entries are kept.', 'planweb' );
 	} else {
 		$message = $data ? __( 'Saved.', 'planweb' ) : __( 'Nothing changed.', 'planweb' );
 	}
@@ -818,7 +819,7 @@ function planweb_site_payload(): array {
 			'slug'  => $slug,
 			'label' => $label,
 			'on'    => in_array( $slug, $on, true ),
-			'bulk'  => in_array( $slug, PLANWEB_SITE_SKIP, true ),
+			'bulk'  => in_array( $slug, planweb_site_skip_types(), true ),
 		);
 	}
 	return array(

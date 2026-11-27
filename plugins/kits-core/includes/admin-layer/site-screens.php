@@ -1,7 +1,6 @@
 <?php
 /**
- * The site's rows on the Kits screens (moved from Animal Writes Core's admin-home.php, 18 Nov 2026; owner, 25 Oct,
- * 10 Nov and 11 Nov 2026; docs/design-system/admin-ui-spec.md §B, §C, §E3). There is no site tab or menu item: the site's parts join
+ * The site's rows on the Kits screens (docs/design-system/admin-ui-spec.md §B, §C, §E3). There is no site tab or menu item: the site's parts join
  * the Kits screens through Kits' own filters.
  * - Home: Page check, Deployed commit, Joined files, Email sending (each only when the part that prints it is loaded;
  *   Thumbnails and Pictures are added by Kits Core's thumbs.php and SourceWeb's cc0-images.php themselves); Dates is linked from Home and keeps its address (aw-dates) until PlanWeb has it.
@@ -10,7 +9,7 @@
  *   Edit screens and Theme parts (Developer).
  * - The site's screens that keep their own address (kits_site_screens: Dates, Keys, Modules …) sit after every Kits
  *   screen, in that order, and light the Kits tab they are linked from.
- * The old addresses (animal-writes, aw-site-check, aw-elsewhere, aw-edit-screens, aw-theme-parts) redirect there.
+ * The old addresses (aw-site-check, aw-elsewhere, aw-edit-screens, aw-theme-parts) redirect there; a site layer adds its own.
  * Core WordPress only.
  *
  * @package kits-core
@@ -27,13 +26,13 @@ function kits_site_menu_parent(): string {
 
 /**
  * The site's screens in menu order: slug => [label, capability]. Dates leaves once PlanWeb is on (11 Nov 2026).
- * The first one is the Overview's old address (admin.php?page=animal-writes, now Kits → Help → Docs).
+ * The first one is the Overview (admin.php?page=kits-overview, now Kits → Help → Docs).
  *
  * @param bool $all Include Dates even when PlanWeb has it, so menu positions stay fixed.
  */
 function kits_site_screens( bool $all = false ): array {
 	$screens = array(
-		'animal-writes'   => array( 'Overview', 'edit_posts' ),
+		'kits-overview'   => array( 'Overview', 'edit_posts' ),
 		'aw-dates'        => array( 'Dates', defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts' ),
 		'aw-site-check'   => array( 'Check site', 'manage_options' ),
 		'aw-elsewhere'    => array( 'Contact links', 'edit_pages' ),
@@ -96,7 +95,6 @@ add_filter(
 	fn( $map ) => array_merge(
 		(array) $map,
 		array(
-			'animal-writes'   => KITS_MENU,
 			'aw-site-check'   => KITS_MENU . '#page-check',
 			'aw-elsewhere'    => 'kits-options#socials',
 			'aw-edit-screens' => 'kits-help#developer/edit-screens',
@@ -342,7 +340,7 @@ function kits_site_overview_page() {
 		return;
 	}
 	echo '<div class="wrap"><h1>' . esc_html( $o['title'] ) . '</h1>';
-	kits_site_screen_nav( 'animal-writes' );
+	kits_site_screen_nav( 'kits-overview' );
 	if ( '' !== $o['intro'] ) {
 		echo '<p>' . esc_html( $o['intro'] ) . '</p>';
 	}

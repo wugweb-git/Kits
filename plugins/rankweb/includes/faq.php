@@ -154,7 +154,9 @@ function rankweb_faq_hub_pages() {
 }
 
 /** Post types whose FAQ heading can name a subject of its own (the FAQ box's Subject field): pages, posts and campaigns. */
-const AW_FAQ_SUBJECT_TYPES = array( 'page', 'post', 'aw_campaign' );
+function rankweb_faq_subject_types(): array {
+	return rankweb_types_with( array( 'campaign' ), array( 'page', 'post' ) );
+}
 
 /** Taxonomies whose FAQ heading can name a subject of its own (term meta rankweb_faq_subject; else the term's name). */
 const AW_FAQ_SUBJECT_TAXONOMIES = array( 'post_tag' );
@@ -178,7 +180,7 @@ function rankweb_faq_term_subject( $term ) {
  * @return array [ subject, 'meta' | 'map' | 'front' | 'title' ]
  */
 function rankweb_faq_subject( $post ) {
-	$meta = in_array( $post->post_type, AW_FAQ_SUBJECT_TYPES, true ) ? rankweb_faq_plain( (string) get_post_meta( $post->ID, 'rankweb_faq_subject', true ) ) : '';
+	$meta = in_array( $post->post_type, rankweb_faq_subject_types(), true ) ? rankweb_faq_plain( (string) get_post_meta( $post->ID, 'rankweb_faq_subject', true ) ) : '';
 	if ( '' !== $meta ) {
 		return array( $meta, 'meta' );
 	}
@@ -245,13 +247,13 @@ function rankweb_faq_heading( $subject ) {
 }
 
 /**
- * The page the FAQ head's "see all" link points to: a page at /resources/animal-welfare-faqs/ when the site has one, else ''
- * (no link, rather than a link to a missing page). A site can set another address with the rankweb_faq_head_parts filter.
+ * The page the FAQ head's "see all" link points to: the address a site gives with the filter rankweb_faq_all_url, else ''
+ * (no link). A site can also set it with the rankweb_faq_head_parts filter.
  *
  * @return string
  */
 function rankweb_faq_all_url() {
-	return get_page_by_path( 'resources/animal-welfare-faqs' ) instanceof WP_Post ? home_url( '/resources/animal-welfare-faqs/' ) : '';
+	return (string) apply_filters( 'rankweb_faq_all_url', '' );
 }
 
 /**
@@ -270,7 +272,7 @@ function rankweb_faq_head_parts() {
 add_action(
 	'init',
 	function () {
-		foreach ( AW_FAQ_SUBJECT_TYPES as $pt ) {
+		foreach ( rankweb_faq_subject_types() as $pt ) {
 			register_post_meta(
 				$pt,
 				'rankweb_faq_subject',
@@ -381,8 +383,8 @@ function rankweb_faq_context( $obj = null ) {
 			'about'           => $url . '#webpage',
 			'subject'         => $subject[0],
 			'head'            => rankweb_faq_heading( $subject[0] ),
-			'line'            => in_array( $obj->post_type, AW_FAQ_SUBJECT_TYPES, true ) ? rankweb_faq_plain( (string) get_post_meta( $obj->ID, 'aw_faq_line', true ) ) : '',
-			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, AW_FAQ_SUBJECT_TYPES, true ),
+			'line'            => in_array( $obj->post_type, rankweb_faq_subject_types(), true ) ? rankweb_faq_plain( (string) get_post_meta( $obj->ID, 'aw_faq_line', true ) ) : '',
+			'subject_missing' => 'title' === $subject[1] && in_array( $obj->post_type, rankweb_faq_subject_types(), true ),
 		);
 		if ( isset( $hubs[ (int) $obj->ID ] ) ) { // a hub page by the map, whatever its Subject field says
 			$ctx['kind']   = 'hub';
@@ -733,7 +735,7 @@ function rankweb_faq_schema() {
 		'@id'        => $faq['ctx']['url'] . '#faq',
 		'url'        => $faq['ctx']['url'],
 		'name'       => $faq['ctx']['head'],
-		'inLanguage' => 'en-IN',
+		'inLanguage' => rankweb_language(),
 		'isPartOf'   => array( '@id' => $faq['ctx']['page_id'] ),
 		'about'      => array( '@id' => $faq['ctx']['about'] ),
 		'mainEntity' => array_map( fn( $x ) => array( '@type' => 'Question', 'name' => $x['q'], 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $x['a'] ) ), $qa ),
@@ -809,7 +811,7 @@ add_filter(
 		$class = 'hub' === $ctx['kind'] ? 'aw-hub-faq alignwide' : ( 'constrained' === ( $block['attrs']['layout']['type'] ?? '' ) ? 'aw-hub-faq' : 'aw-hub-faq has-global-padding is-layout-constrained' );
 		// A campaign page with a next-steps section: the FAQ goes right after it, before the next section (Campaign
 		// Content Standard v1.0, Post order: next-steps, faq, partners). Else it follows the content.
-		if ( 'aw_campaign' === get_post_type( $ctx['id'] ) && preg_match( '/<section\b[^>]*\bid="next-steps"[^>]*>/', $html, $m, PREG_OFFSET_CAPTURE )
+		if ( rankweb_is_type( get_post_type( $ctx['id'] ), 'campaign' ) && preg_match( '/<section\b[^>]*\bid="next-steps"[^>]*>/', $html, $m, PREG_OFFSET_CAPTURE )
 			&& preg_match( '/<section\b[^>]*\bclass="[^"]*\baw-camp-section\b/', $html, $n, PREG_OFFSET_CAPTURE, $m[0][1] + strlen( $m[0][0] ) ) ) {
 			return substr_replace( $html, '<div class="aw-hub-faq aw-camp-faq">' . $faq . '</div>', $n[0][1], 0 );
 		}
@@ -858,7 +860,7 @@ function rankweb_faq_editor( $ctx ) {
 	$r    = rankweb_faq_rows( $ctx, false );
 	$rows = $r['rows'];
 	wp_nonce_field( 'rankweb_faq_items', 'aw_faq_items_nonce' );
-	if ( 'post' === $ctx['store'] && in_array( $ctx['type'], AW_FAQ_SUBJECT_TYPES, true ) ) { // the field only where the heading uses it
+	if ( 'post' === $ctx['store'] && in_array( $ctx['type'], rankweb_faq_subject_types(), true ) ) { // the field only where the heading uses it
 		$own  = (string) get_post_meta( $ctx['id'], 'rankweb_faq_subject', true );
 		$fall = '' === $own ? (string) ( $ctx['subject'] ?? '' ) : ''; // the subject the heading uses now (after the rankweb_faq_context filters)
 		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “' . esc_html( rankweb_faq_heading( 'Subject' ) ) . '”; a long subject gets a plain heading)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="rankweb_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( $fall ) . '"></p>';
@@ -1047,7 +1049,7 @@ add_action(
 		if ( absint( wp_unslash( $_POST['post_ID'] ?? 0 ) ) !== (int) $post_id || ! current_user_can( 'edit_post', $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 			return; // only the post whose edit screen sent the box (not another post saved in the same request)
 		}
-		if ( isset( $_POST['rankweb_faq_subject'] ) && in_array( $post->post_type, AW_FAQ_SUBJECT_TYPES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
+		if ( isset( $_POST['rankweb_faq_subject'] ) && in_array( $post->post_type, rankweb_faq_subject_types(), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 			$subject = sanitize_text_field( wp_unslash( $_POST['rankweb_faq_subject'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 			if ( '' === $subject ) {
 				delete_post_meta( $post_id, 'rankweb_faq_subject' );
@@ -1055,7 +1057,7 @@ add_action(
 				update_post_meta( $post_id, 'rankweb_faq_subject', $subject );
 			}
 		}
-		if ( isset( $_POST['aw_faq_line'] ) && in_array( $post->post_type, AW_FAQ_SUBJECT_TYPES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
+		if ( isset( $_POST['aw_faq_line'] ) && in_array( $post->post_type, rankweb_faq_subject_types(), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 			$line = sanitize_text_field( wp_unslash( $_POST['aw_faq_line'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 			if ( '' === $line ) {
 				delete_post_meta( $post_id, 'aw_faq_line' );
@@ -1081,7 +1083,7 @@ add_action(
 add_action(
 	'admin_init',
 	function () {
-		foreach ( array_intersect( AW_FAQ_SUBJECT_TYPES, rankweb_faq_post_types() ) as $pt ) {
+		foreach ( array_intersect( rankweb_faq_subject_types(), rankweb_faq_post_types() ) as $pt ) {
 			add_filter( "manage_{$pt}_posts_columns", fn( $cols ) => array_merge( $cols, array( 'rankweb_faq_subject' => 'FAQ subject' ) ) );
 			add_action(
 				"manage_{$pt}_posts_custom_column",

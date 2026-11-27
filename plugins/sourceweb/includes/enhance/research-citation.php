@@ -10,9 +10,9 @@
  *   without authors gets them from doi.org (CSL-JSON) in the background (aw_research_citation).
  * - The one-off fill of older research posts (aw_research_citation_backfill) ran and was removed (25 Oct 2026).
  *
- * Moved from Animal Writes Core (19 Nov 2026): SourceWeb's ingest writes these fields and reads them back, RankWeb's
+ * Moved from the site core plugin (19 Nov 2026): SourceWeb's ingest writes these fields and reads them back, RankWeb's
  * schema reads the study title. The sourceweb_ names are the real ones; the aw_research_* wrappers at the end are for
- * Animal Writes Core's item-head.php until that file moves.
+ * the site core plugin's item-head.php until that file moves.
  *
  * @package aw-sourcing
  */
@@ -144,4 +144,4 @@ function sourceweb_research_search_study_title( $search, $q ) {
 }
 add_filter( 'posts_search', 'sourceweb_research_search_study_title', 10, 2 );
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals -- the older names, kept for Animal Writes Core's item-head.php.
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals -- the older names, kept for the site core plugin's item-head.php.

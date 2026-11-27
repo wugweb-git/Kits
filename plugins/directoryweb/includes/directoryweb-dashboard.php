@@ -177,14 +177,15 @@ function directoryweb_count_places(): ?array {
 }
 
 /**
- * The place file's source and version (data/lgd.json).
+ * The place file's source and version (`directoryweb_places_file`).
  *
  * @return array [ 'source' => …, 'version' => … ].
  */
 function directoryweb_lgd_head(): array {
 	static $head = null;
 	if ( null === $head ) {
-		$raw  = is_readable( DIRECTORYWEB_DIR . 'data/lgd.json' ) ? json_decode( (string) file_get_contents( DIRECTORYWEB_DIR . 'data/lgd.json' ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions -- a bundled file
+		$file = function_exists( 'directoryweb_places_file' ) ? directoryweb_places_file() : '';
+		$raw  = '' !== $file ? json_decode( (string) file_get_contents( $file ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions -- the site's places file
 		$head = array(
 			'source'  => (string) ( $raw['source'] ?? '' ),
 			'version' => (string) ( $raw['version'] ?? '' ),

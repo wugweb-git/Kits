@@ -144,9 +144,11 @@ function insightweb_si_install(): void {
 	);
 	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
 	add_option( 'aw_si_installed', time(), '', false );
-	if ( function_exists( 'insightweb_si_links_seed' ) ) {
-		insightweb_si_links_seed(); // Once (option aw_si_links_seeded); a repeat only moves dates.
-	}
+	/**
+	 * Fires after Search Insights' tables are installed or checked. A site's own code can add starter rows here (for
+	 * example a links list it already knows); the plugin ships none.
+	 */
+	do_action( 'insightweb_si_links_seed' );
 }
 add_action( 'admin_init', 'insightweb_si_install', 1 ); // Also called by the cron and WP-CLI; there are no REST routes yet.
 
@@ -157,7 +159,7 @@ function insightweb_si_ready(): bool {
 
 /**
  * Drop Search Insights' tables and options, and switch Search Insights off so the daily run does not rebuild them. The
- * keyword table is not dropped (it is Animal Writes Core's): records the owner gave a Sourcing, Press or Tracked role
+ * keyword table is not dropped (it is the earlier Core plugin's): records the owner gave a Sourcing, Press or Tracked role
  * stay (sourcing phase 2, plan §10), the rest are deleted.
  * Only from the owner's typed confirmation (admin.php) or `wp aw-si delete-data --yes`. "Run the daily update" (or
  * `wp aw-si run`) switches it on again.
@@ -170,7 +172,7 @@ function insightweb_si_drop_all(): void {
 	if ( function_exists( 'insightweb_si_vis_off' ) ) {
 		insightweb_si_vis_off(); // visitor counting: its table, lookup files and schedule go, and it stays off.
 	}
-	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
+	// The keyword table is the earlier Core plugin's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
 	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
 	$k = insightweb_si_table( 'keywords' );
 	$m = insightweb_si_table( 'kw_map' );
@@ -184,7 +186,7 @@ function insightweb_si_drop_all(): void {
 	if ( insightweb_kw_ready() ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE kw_id NOT IN (SELECT id FROM %i)', $m, $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_links_seeded', 'aw_si_links_seeded_20261102', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports', 'insightweb_report_on', 'insightweb_report_freq', 'insightweb_report_brand', 'insightweb_report_sent' ) as $opt ) {
+	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports', 'insightweb_report_on', 'insightweb_report_freq', 'insightweb_report_brand', 'insightweb_report_sent' ) as $opt ) {
 		delete_option( $opt );
 	}
 	foreach ( array( 'aw_si_redirects', 'aw_si_redirects_rx', 'aw_si_rm_scores' ) as $tr ) {
@@ -193,6 +195,7 @@ function insightweb_si_drop_all(): void {
 	// Per-key caches (Bing keyword volumes, live-check and import results): every transient named aw_si_….
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_si_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_si_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
 	update_option( 'aw_si_off', time(), false );
+	do_action( 'insightweb_si_dropped' ); // a site layer that seeded its own rows clears its markers here.
 	foreach ( insightweb_si_cron_hooks() as $hook ) {
 		wp_clear_scheduled_hook( $hook );
 	}

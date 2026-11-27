@@ -64,14 +64,14 @@ function insightweb_si_crawl_pages(): array {
 	);
 	$extra = array();
 	$kinds = array(
-		'listing'     => 'aw_listing',
-		'news'        => 'aw_news',
-		'library'     => 'aw_legal',
+		'listing'     => insightweb_type( 'listing' ),
+		'news'        => insightweb_type( 'news' ),
+		'library'     => insightweb_type( 'library' ),
 		'resource'    => 'post',
-		'opportunity' => 'aw_opportunity',
+		'opportunity' => insightweb_type( 'opportunity' ),
 	);
 	foreach ( $kinds as $kind => $type ) {
-		if ( ! post_type_exists( $type ) ) {
+		if ( '' === $type || ! post_type_exists( $type ) ) {
 			continue;
 		}
 		$urls = array();

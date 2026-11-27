@@ -4,13 +4,13 @@
  * Nominatim, one request a second, cached; PIN code or district centre as fallback, marked approximate).
  *
  * For each published listing without coordinates:
- * 1. Its address (aw_address, else the AWBI or import address, with the PIN code and "India") → Nominatim. A street or
+ * 1. Its address (aw_address, else the import address, with the postal code and the site's country, if it has one) → Nominatim. A street or
  *    building match (place_rank 26+) within 60 km of the listing's district centre is "address"; a coarser match
  *    (locality) in the same range is approximate ("locality").
  * 2. Else the locality named in the address (its last part that is not a PIN, district or state, without "P.O.",
  *    "Tehsil" and the like) with the district and state → Nominatim, approximate (locality).
  * 3. Else its PIN code (the PIN field, or one in the address) → Nominatim postal code search, approximate (pin).
- * 4. Else its district centre (data/district-centroids.json), approximate (district).
+ * 4. Else its district centre (the `directoryweb_district_centroids_file` filter), approximate (district).
  * Found points go to aw_geo_lat / aw_geo_lng with aw_geo_precision. aw_lat / aw_lng stay for the listing's own Google
  * Maps location (enrichment), which wins wherever it exists; geocoded points never show in the listing's schema.
  * Everything but "address" is labelled "approximate" on the map.
@@ -87,16 +87,39 @@ function directoryweb_geo_km( $lat1, $lng1, $lat2, $lng2 ) {
 	return 12742 * asin( min( 1, sqrt( $h ) ) );
 }
 
+/**
+ * What geocoding assumes about a country, neutral by default. A site that covers one country gives it with the
+ * `directoryweb_geocode_profile` filter: country (name added to every query), address_keys (the listing meta that holds
+ * an address, in order), postcode_field (regex a stored postal code must match), postcode_in_text (regex with two groups
+ * that finds a postal code in an address), postcode_strip (regex that removes one from an address part), noise (regex
+ * fragments for words that are not a locality: "post", "district" and the like).
+ *
+ * @return array
+ */
+function directoryweb_geo_profile(): array {
+	$profile = array(
+		'country'         => '',
+		'address_keys'    => array( 'aw_address', 'aw_import_address' ),
+		'postcode_field'  => '/^[A-Za-z0-9][A-Za-z0-9 -]{1,11}$/',
+		'postcode_in_text' => '',
+		'postcode_strip'  => '',
+		'noise'           => array( 'p\.?\s?o\.?', 'post', 'dist\.?', 'district', 'via', 'near', 'opp\.?' ),
+	);
+	$out = apply_filters( 'directoryweb_geocode_profile', $profile );
+	return is_array( $out ) ? array_merge( $profile, $out ) : $profile;
+}
+
 /** A listing's address for geocoding ('' when it has none). */
 function directoryweb_geo_address( $id ) {
-	foreach ( array( 'aw_address', 'aw_awbi_address', 'aw_import_address' ) as $k ) {
+	$p = directoryweb_geo_profile();
+	foreach ( (array) $p['address_keys'] as $k ) {
 		$a = trim( preg_replace( '/\s+/', ' ', (string) get_post_meta( $id, $k, true ) ) );
 		if ( strlen( $a ) >= 8 ) {
 			$pin = (string) get_post_meta( $id, 'aw_pincode', true );
-			if ( preg_match( '/^\d{6}$/', $pin ) && false === strpos( $a, $pin ) ) {
+			if ( preg_match( $p['postcode_field'], $pin ) && false === strpos( $a, $pin ) ) {
 				$a .= ', ' . $pin;
 			}
-			return false === stripos( $a, 'india' ) ? $a . ', India' : $a;
+			return '' === $p['country'] || false !== stripos( $a, $p['country'] ) ? $a : $a . ', ' . $p['country'];
 		}
 	}
 	return '';
@@ -104,11 +127,12 @@ function directoryweb_geo_address( $id ) {
 
 /** The listing's PIN code: the PIN field, else a 6-digit number in its address ('' when none). */
 function directoryweb_geo_pin( $id ) {
+	$p   = directoryweb_geo_profile();
 	$pin = (string) get_post_meta( $id, 'aw_pincode', true );
-	if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
+	if ( preg_match( $p['postcode_field'], $pin ) ) {
 		return $pin;
 	}
-	return preg_match( '/\b([1-9]\d{2})\s?(\d{3})\b/', directoryweb_geo_address( $id ), $m ) ? $m[1] . $m[2] : '';
+	return '' !== $p['postcode_in_text'] && preg_match( $p['postcode_in_text'], directoryweb_geo_address( $id ), $m ) ? $m[1] . $m[2] : '';
 }
 
 /**
@@ -120,9 +144,14 @@ function directoryweb_geo_pin( $id ) {
  */
 function directoryweb_geo_locality( $addr, $skip ) {
 	$parts = array_reverse( array_map( 'trim', explode( ',', $addr ) ) );
+	$p     = directoryweb_geo_profile();
+	$noise = $p['noise'];
+	if ( '' !== $p['country'] ) {
+		$noise[] = preg_quote( strtolower( $p['country'] ), '/' );
+	}
 	foreach ( $parts as $part ) {
-		$x = preg_replace( '/\b[1-9]\d{2}\s?\d{3}\b/', '', $part );
-		$x = preg_replace( '/\b(p\.?\s?o\.?|post|tehsil|teh\.?|tel\.?|tq\.?|taluk|taluka|mandal|block|dist\.?|district|via|near|opp\.?|india)\b\.?/i', '', $x );
+		$x = '' !== $p['postcode_strip'] ? preg_replace( $p['postcode_strip'], '', $part ) : $part;
+		$x = preg_replace( '/\b(' . implode( '|', $noise ) . ')\b\.?/i', '', $x );
 		$x = trim( preg_replace( '/\s+/', ' ', $x ), " .-–" );
 		if ( strlen( $x ) < 3 || preg_match( '/\d/', $x ) || in_array( strtolower( $x ), $skip, true ) ) {
 			continue;
@@ -189,14 +218,15 @@ function directoryweb_geocode_listing( $id, $redo_approx = false ) {
 	$dname                 = trim( preg_replace( '/\s*\(.*?\)/', '', $dname ) );
 	$loc                   = '' !== $addr ? directoryweb_geo_locality( $addr, array_filter( array( strtolower( $dname ), strtolower( $sname ) ) ) ) : '';
 	if ( '' !== $loc && '' !== $sname ) {
-		$p = directoryweb_geo_nominatim( array( 'q' => implode( ', ', array_filter( array( $loc, $dname, $sname, 'India' ) ) ) ) );
+		$p = directoryweb_geo_nominatim( array( 'q' => implode( ', ', array_filter( array( $loc, $dname, $sname, directoryweb_geo_profile()['country'] ) ) ) ) );
 		if ( $p && $near( $p ) ) {
 			return $save( $p[0], $p[1], 'locality' );
 		}
 	}
 	$pin = directoryweb_geo_pin( $id );
 	if ( '' !== $pin ) {
-		$p = directoryweb_geo_nominatim( array( 'postalcode' => $pin, 'country' => 'India' ) );
+		$country = directoryweb_geo_profile()['country'];
+		$p       = directoryweb_geo_nominatim( '' !== $country ? array( 'postalcode' => $pin, 'country' => $country ) : array( 'postalcode' => $pin ) );
 		if ( $p && $near( $p ) ) {
 			return $save( $p[0], $p[1], 'pin' );
 		}
@@ -236,7 +266,7 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 	add_action(
 		$aw_geo_hook,
 		function ( $mid, $id, $key ) {
-			if ( in_array( $key, array( 'aw_address', 'aw_awbi_address', 'aw_import_address', 'aw_pincode', 'aw_district_code' ), true ) ) {
+			if ( in_array( $key, array_merge( (array) directoryweb_geo_profile()['address_keys'], array( 'aw_pincode', 'aw_district_code' ) ), true ) ) {
 				directoryweb_geo_queue( (int) $id );
 			}
 		},

@@ -5,7 +5,8 @@
 Checked line by line against the code on 27 Nov 2026.
 
 - Not tested: robots.txt extras, uninstall, `is_dynamic` page-cache exclusion. 2.3.1 has no changelog entry. 'Robots rules for archives' is built; only 404 is open. '94 settings checks' is now 123.
-- Fixed in 2.3.5: `/news-sitemap.xml` answered on any Rank Math site; it now needs `aw_news`.
+- 2.4.1 (27 Nov 2026): content-type slugs are gone from the plugin (roles through `rankweb_post_type_roles`, fed by the site layer) and the `aw_*` aliases moved to `sites/animalwrites/rankweb/legacy-aliases.php`. Still open: the per-type title, description, schema (Legislation, Article, Event), sitemap and robots rules are still written in the plugin, keyed by role and inactive when a role has no type; moving each rule body into the site layer is not done. They still call `aw_hub_*`, `aw_primary_category`, `aw_legal_kinds`, `kits_*` when present.
+- 2.4.0 (27 Nov 2026): one site's code left the plugin: news sitemap, Content-Signal line, `faq-data.php`, hub and press schema, listing recognition code and schema map, Directory wording (site layer: `sites/animalwrites/rankweb/`). Still open for neutral behaviour: the item title, description and schema rules in `titles.php`, `helpers.php`, `schema.php`, `sitemap.php` (HTML sitemap), `canonical.php`, `breadcrumbs.php`, `keyphrase-model.php`, `rank-math-schema.php` are written for the `aw_news`, `aw_legal`, `aw_campaign`, `aw_opportunity`, `aw_listing`, `aw_press` types and call `aw_hub_*`/`aw_primary_category` when present; inert without them, not yet configurable. The legacy `aw_*` aliases stay while SourceWeb calls them (SourceWeb should call `rankweb_*` directly, then the file can go). Not rebuilt: `build/` (no `src/` change).
 
 Status as of 26 Nov 2026 on `feat/rankweb-native-screens` (earlier sections: 25 Nov on `feat/directoryweb-completion`). Evidence: U unit, H headless Playground, B browser, X external. See `docs/audit/acceptance-gates.md`.
 

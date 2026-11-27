@@ -9,7 +9,6 @@
  * - both from one provider class (RankWeb_Rank_Math_Sitemap); this module's switch turns both off.
  * - no post-type archive links (the sections are Pages, listed in the page sitemap).
  * - Rank Math's stored sitemaps are cleared after saves through the REST API and WP-CLI too.
- * - a Google News sitemap (news-sitemap.xml): News items from the last 48 hours, listed in the index and robots.txt.
  * - an HTML sitemap for people and crawlers: [aw_html_sitemap] on the /sitemap/ page (made once), linked from the footer.
  * Items kept out of the index by a rule of their state are left out of every sitemap by robots.php, whether this
  * module is on or not.
@@ -185,67 +184,15 @@ add_action(
 	2
 );
 
-/* ---------- Google News sitemap: /news-sitemap.xml (owner, 12 Nov 2026; Rank Math's own is Pro-only) ---------- */
-
-/** Hours a News item stays in the Google News sitemap (Google reads the last two days only). */
-const AW_NEWS_SITEMAP_HOURS = 48;
-
-/**
- * News items from the last 48 hours, newest first: [url, title, date]. The date is the one the item's NewsArticle
- * node prints (schema.php, rankweb_article_nodes(): the day the story was reported when stored, else the publish date), so
- * the two never disagree. Read with $wpdb: front-end News queries are re-sorted by source date.
- *
- * @return array List of ['loc', 'title', 'date' (ISO 8601)].
- */
-function rankweb_news_sitemap_items() {
-	global $wpdb;
-	$since = gmdate( 'Y-m-d H:i:s', time() - ( AW_NEWS_SITEMAP_HOURS + 24 ) * HOUR_IN_SECONDS ); // a day more: the source date can be later than the publish date
-	$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_news' AND post_status = 'publish' AND post_password = '' AND post_date_gmt >= %s ORDER BY post_date_gmt DESC LIMIT 1000", $since ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$cut   = time() - AW_NEWS_SITEMAP_HOURS * HOUR_IN_SECONDS;
-	$out   = array();
-	foreach ( array_map( 'intval', $ids ) as $id ) {
-		if ( function_exists( 'kits_preview_only_ids' ) && in_array( $id, (array) kits_preview_only_ids(), true ) ) {
-			continue; // preview-only items are never listed
-		}
-		$src  = (string) get_post_meta( $id, 'aw_source_date', true );
-		$date = '' !== $src && function_exists( 'rankweb_schema_date' ) && rankweb_schema_date( $src ) ? rankweb_schema_date( $src ) : get_the_date( 'c', $id );
-		$ts   = strtotime( (string) $date );
-		if ( ! $ts || $ts < $cut || $ts > time() + HOUR_IN_SECONDS ) {
-			continue;
-		}
-		$out[] = array( 'loc' => get_permalink( $id ), 'title' => rankweb_plain_text( get_the_title( $id ) ), 'date' => (string) $date, 'ts' => $ts );
-	}
-	usort( $out, fn( $a, $b ) => $b['ts'] <=> $a['ts'] );
-	return $out;
-}
-
-/** The Google News sitemap XML. */
-function rankweb_news_sitemap_xml() {
-	$x = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">' . "\n";
-	foreach ( rankweb_news_sitemap_items() as $r ) {
-		$x .= "\t<url>\n\t\t<loc>" . esc_xml( $r['loc'] ) . "</loc>\n\t\t<news:news>\n\t\t\t<news:publication>\n\t\t\t\t<news:name>" . esc_xml( (string) apply_filters( 'rankweb_news_publication_name', rankweb_site_name() ) ) . "</news:name>\n\t\t\t\t<news:language>en</news:language>\n\t\t\t</news:publication>\n"
-			. "\t\t\t<news:publication_date>" . esc_xml( $r['date'] ) . "</news:publication_date>\n\t\t\t<news:title>" . esc_xml( $r['title'] ) . "</news:title>\n\t\t</news:news>\n\t</url>\n";
-	}
-	return $x . '</urlset>' . "\n";
-}
-
-/** The sitemap's address. */
-function rankweb_news_sitemap_url() {
-	return home_url( '/news-sitemap.xml' );
-}
-
-// Without Rank Math nothing maps /news-sitemap.xml or /video-sitemap.xml to a request, so the two addresses robots.txt
-// lists would be 404. Mapped here to the same sitemap=news and sitemap=video the handlers below and in video.php answer.
+// Without Rank Math nothing maps /video-sitemap.xml or /image-sitemap.xml to a request, so the addresses robots.txt
+// lists would be 404. Mapped here to the same sitemap=video and sitemap=image the handlers below and in video.php answer.
 if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_rank_math() ) {
 	add_action(
 		'parse_request',
 		function ( $wp ) {
 			$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$home = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
-			foreach ( array( 'news', 'video', 'image' ) as $kind ) {
-				if ( 'news' === $kind && ! post_type_exists( 'aw_news' ) ) {
-					continue; // no News items on this site: the address stays a 404 instead of an empty sitemap.
-				}
+			foreach ( array( 'video', 'image' ) as $kind ) {
 				if ( $home . '/' . $kind . '-sitemap.xml' === $path ) {
 					$wp->query_vars['sitemap'] = $kind;
 				}
@@ -254,50 +201,6 @@ if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_r
 		-1
 	);
 }
-
-// Rank Math's rule sends /news-sitemap.xml to WordPress as sitemap=news; it is answered here, before Rank Math (parse_query).
-add_action(
-	'parse_request',
-	function ( $wp ) {
-		if ( 'news' !== ( $wp->query_vars['sitemap'] ?? '' ) || ! post_type_exists( 'aw_news' ) ) {
-			return;
-		}
-		do_action( 'litespeed_control_set_ttl', 900 ); // LiteSpeed keeps it 15 minutes at most
-		if ( ! headers_sent() ) {
-			status_header( 200 );
-			header( 'Content-Type: application/xml; charset=UTF-8' );
-			header( 'X-Robots-Tag: noindex, follow' );
-			header( 'Cache-Control: public, max-age=900' );
-		}
-		echo rankweb_news_sitemap_xml(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped per value in rankweb_news_sitemap_xml()
-		exit;
-	},
-	0
-);
-
-// Listed in sitemap_index.xml (Rank Math's own filter for extra index entries, as its Local SEO sitemap does).
-add_filter(
-	'rank_math/sitemap/index',
-	function ( $xml ) {
-		$items = rankweb_news_sitemap_items();
-		$mod   = $items ? gmdate( 'c', $items[0]['ts'] ) : '';
-		return $xml . "\t<sitemap>\n\t\t<loc>" . esc_xml( rankweb_news_sitemap_url() ) . "</loc>\n" . ( $mod ? "\t\t<lastmod>" . esc_xml( $mod ) . "</lastmod>\n" : '' ) . "\t</sitemap>\n";
-	}
-);
-
-// And in robots.txt, after the site's own Sitemap line. Only when RankWeb is the SEO owner, the setting is on and the site
-// has News items (the aw_news type): on any other site the news sitemap would be empty and another plugin owns robots.txt.
-add_filter(
-	'robots_txt',
-	function ( $txt ) {
-		if ( ! post_type_exists( 'aw_news' ) || ! function_exists( 'rankweb_robots_txt_extras_on' ) || ! rankweb_robots_txt_extras_on( 'RANKWEB_ROBOTS_NEWS_SITEMAP' ) ) {
-			return $txt;
-		}
-		$line = 'Sitemap: ' . rankweb_news_sitemap_url();
-		return false !== strpos( (string) $txt, $line ) ? $txt : rtrim( (string) $txt ) . "\n" . $line . "\n";
-	},
-	60
-);
 
 /* ---------- Image sitemap: /image-sitemap.xml, only when RankWeb prints the head (Rank Math's own sitemap lists images) ---------- */
 
@@ -419,7 +322,7 @@ function rankweb_html_sitemap() {
 		$ids = array_values( array_diff( array_map( 'intval', $ids ), function_exists( 'rankweb_seo_preview_ids' ) ? array_map( 'intval', (array) rankweb_seo_preview_ids() ) : array() ) );
 		$out = array();
 		foreach ( $ids as $id ) {
-			if ( $noidx( $id ) || ( 'aw_opportunity' === $type && function_exists( 'kits_retention_state' ) && kits_retention_state( get_post( $id ) ) ) ) {
+			if ( $noidx( $id ) || ( rankweb_is_type( $type, 'opportunity' ) && function_exists( 'kits_retention_state' ) && kits_retention_state( get_post( $id ) ) ) ) {
 				continue;
 			}
 			$out[] = array( get_permalink( $id ), $title( $id ) );
@@ -445,13 +348,13 @@ function rankweb_html_sitemap() {
 		return '<h2 class="aw-more-head has-x-large-font-size" id="aw-sitemap-' . esc_attr( $id ) . '">' . $h . '</h2>';
 	};
 	$hub_title = function ( $type ) use ( $title ) {
-		$p = defined( 'AW_HUBS' ) && isset( AW_HUBS[ $type ] ) ? get_page_by_path( AW_HUBS[ $type ][0] ) : null;
+		$p = isset( rankweb_hubs()[ $type ] ) ? get_page_by_path( rankweb_hubs()[ $type ][0] ) : null;
 		return $p ? array( get_permalink( $p ), $title( $p ) ) : array( '', '' );
 	};
 
 	$html = '';
 	// The site's own pages (not the sections, which follow, nor pages kept out of search).
-	$hubs  = defined( 'AW_HUBS' ) ? array_column( AW_HUBS, 0 ) : array();
+	$hubs  = array_column( rankweb_hubs(), 0 );
 	$skip  = array_merge( $hubs, array( 'home', AW_HTML_SITEMAP_SLUG, 'thank-you', 'search', 'claim', 'update' ) );
 	$pages = array();
 	foreach ( get_pages( array( 'post_status' => 'publish', 'sort_column' => 'post_title' ) ) as $p ) {
@@ -462,23 +365,23 @@ function rankweb_html_sitemap() {
 	$home  = get_option( 'page_on_front' ) ? $title( (int) get_option( 'page_on_front' ) ) : get_bloginfo( 'name' );
 	$html .= '<section class="aw-more-group" aria-labelledby="aw-sitemap-pages">' . $head( 'pages', $home, home_url( '/' ) ) . $list( $pages ) . '</section>';
 
-	foreach ( array( 'aw_news', 'post', 'aw_legal', 'aw_campaign', 'aw_opportunity', 'aw_press' ) as $type ) {
+	foreach ( rankweb_types_with( array( 'news', 'library', 'campaign', 'opportunity', 'press' ), array( 'post' ) ) as $type ) {
 		list( $url, $name ) = $hub_title( $type );
 		if ( ! $url ) {
 			continue;
 		}
 		$body = $list( $cats( $type ), true );
-		if ( 'aw_legal' === $type && function_exists( 'aw_law_index_html' ) ) {
+		if ( rankweb_is_type( $type, 'library' ) && function_exists( 'aw_law_index_html' ) ) {
 			$body .= aw_law_index_html();
 		}
-		if ( in_array( $type, array( 'post', 'aw_legal', 'aw_campaign', 'aw_opportunity' ), true ) ) {
+		if ( in_array( $type, rankweb_types_with( array( 'library', 'campaign', 'opportunity' ), array( 'post' ) ), true ) ) {
 			$body .= $list( $items( $type ) );
 		}
 		$html .= '<section class="aw-more-group" aria-labelledby="aw-sitemap-' . esc_attr( $type ) . '">' . $head( $type, $name, $url ) . $body . '</section>';
 	}
 
 	// Directory: every state, then its districts with listings.
-	list( $url, $name ) = $hub_title( 'aw_listing' );
+	list( $url, $name ) = $hub_title( rankweb_type( 'listing' ) );
 	if ( $url && function_exists( 'rankweb_seo_dir_children' ) ) {
 		$body   = '';
 		$states = rankweb_seo_dir_children( null );
@@ -493,7 +396,7 @@ function rankweb_html_sitemap() {
 			}
 			$body .= '<h3 id="aw-sitemap-dir-' . esc_attr( $state->slug ) . '"><a href="' . esc_url( directoryweb_directory_url( $state->slug ) ) . '">' . esc_html( $state->name . ' (' . number_format_i18n( $s[1] ) . ')' ) . '</a></h3>' . $list( $links, true );
 		}
-		$html .= '<section class="aw-more-group" aria-labelledby="aw-sitemap-aw_listing">' . $head( 'aw_listing', $name, $url ) . $body . '</section>';
+		$html .= '<section class="aw-more-group" aria-labelledby="aw-sitemap-' . esc_attr( rankweb_type( 'listing' ) ) . '">' . $head( rankweb_type( 'listing' ), $name, $url ) . $body . '</section>';
 	}
 
 	set_transient( 'aw_html_sitemap', $html, 12 * HOUR_IN_SECONDS );

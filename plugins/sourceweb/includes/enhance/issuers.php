@@ -22,7 +22,6 @@ function sourceweb_issuers() {
 		'supreme-court'           => 'Supreme Court',
 		'high-court'              => 'High Court',
 		'national-green-tribunal' => 'National Green Tribunal',
-		'awbi'                    => 'Animal Welfare Board of India',
 		'central-ministry'        => 'Central Ministry',
 		'state-government'        => 'State Government',
 		'municipal-body'          => 'Municipal Body',
@@ -32,6 +31,8 @@ function sourceweb_issuers() {
 		'report'                  => 'Report',
 		'research-journal'        => 'Research Journal',
 	);
+	/** A site adds its own issuers (slug => name) here, e.g. a regulator that is not in the list above. */
+	$base = (array) apply_filters( 'sourceweb_issuers_base', $base );
 	return array_merge( $base, (array) get_option( 'aw_issuers_added', array() ) );
 }
 
@@ -41,7 +42,7 @@ function sourceweb_issuers() {
  */
 function sourceweb_issuer_short( $slug ) {
 	$short = array_merge(
-		array( 'national-green-tribunal' => 'NGT', 'awbi' => 'AWBI', 'pib' => 'PIB', 'gazette' => 'Gazette', 'central-ministry' => 'Ministry', 'state-government' => 'State govt', 'municipal-body' => 'Municipal', 'research-journal' => 'Journal' ),
+		(array) apply_filters( 'sourceweb_issuer_short_defaults', array( 'national-green-tribunal' => 'NGT', 'pib' => 'PIB', 'gazette' => 'Gazette', 'central-ministry' => 'Ministry', 'state-government' => 'State govt', 'municipal-body' => 'Municipal', 'research-journal' => 'Journal' ) ),
 		(array) get_option( 'aw_issuer_short', array() )
 	);
 	if ( isset( $short[ $slug ] ) && '' !== $short[ $slug ] ) {
@@ -86,7 +87,7 @@ function sourceweb_issuer_box( $post ) {
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( ! in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) || ! isset( $_POST['aw_issuer_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_issuer_nonce'] ), 'aw_issuer_save' ) || ! current_user_can( 'edit_post', $id ) ) {
+		if ( ! ( 'post' === $post->post_type || sourceweb_is_type( $post->post_type, 'library' ) ) || ! isset( $_POST['aw_issuer_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_issuer_nonce'] ), 'aw_issuer_save' ) || ! current_user_can( 'edit_post', $id ) ) {
 			return;
 		}
 		$new = sanitize_text_field( wp_unslash( $_POST['aw_issuer_new'] ?? '' ) );

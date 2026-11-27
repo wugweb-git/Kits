@@ -17,7 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Publishers whose items count as legal sources for Legal Watch. */
-const AW_LEGAL_HOSTS = array( 'livelaw.in', 'barandbench.com', 'scobserver.in', 'pib.gov.in', 'awbi.gov.in', 'sci.gov.in', 'indiankanoon.org', 'egazette.gov.in' );
+/** The publishers whose Library items count as legal sources: none built in; a site adds them with the filter `sourceweb_legal_hosts`. */
+function sourceweb_legal_hosts(): array {
+	return array_values( array_filter( (array) apply_filters( 'sourceweb_legal_hosts', array() ), 'is_string' ) );
+}
 
 /**
  * Words of a title that carry meaning (for near-duplicate checks).
@@ -179,13 +182,13 @@ function sourceweb_review_reason( $id ) {
 	if ( ! $ai && function_exists( 'sourceweb_relevance_verdict' ) ) {
 		list( $ok, $why ) = sourceweb_relevance_verdict( $post->post_title . ' ' . $post->post_excerpt );
 		if ( ! $ok ) {
-			return 'not clearly about animal welfare (' . $why . ')';
+			return 'not clearly about this site\'s subject (' . $why . ')';
 		}
 	}
 	// 4. Legal Watch: a legal or government source.
-	if ( 'aw_legal' === $type ) {
+	if ( sourceweb_is_type( $type, 'library' ) ) {
 		$legal = function_exists( 'sourceweb_item_issuer' ) && sourceweb_item_issuer( $id ); // issuers.php (Core)
-		foreach ( AW_LEGAL_HOSTS as $h ) {
+		foreach ( sourceweb_legal_hosts() as $h ) {
 			$legal = $legal || $host === $h || str_ends_with( (string) $host, '.' . $h );
 		}
 		if ( ! $legal ) {
@@ -237,7 +240,7 @@ function sourceweb_record_match( $id ) {
  * @return string 'published' or the reason it is held.
  */
 function sourceweb_auto_review( $id ) {
-	if ( ! in_array( get_post_type( $id ), array( 'aw_news', 'aw_legal' ), true ) || 'pending' !== get_post_status( $id ) ) {
+	if ( ! sourceweb_is_any_type( get_post_type( $id ), array( 'news', 'library' ) ) || 'pending' !== get_post_status( $id ) ) {
 		return '';
 	}
 	sourceweb_record_match( $id );
@@ -269,20 +272,26 @@ function sourceweb_auto_review( $id ) {
 }
 
 // Admin list: why an item is waiting (Resources too: a held research paper shows its reason; 24 Oct 2026).
-foreach ( array( 'aw_news', 'aw_legal', 'post' ) as $aw_rt ) {
-	add_filter( "manage_{$aw_rt}_posts_columns", fn( $c ) => $c + array( 'aw_review' => 'Review' ) );
-	add_action(
-		"manage_{$aw_rt}_posts_custom_column",
-		function ( $col, $id ) {
-			if ( 'aw_review' === $col ) {
-				echo esc_html( (string) get_post_meta( $id, 'aw_review', true ) );
-				$m = (string) get_post_meta( $id, 'aw_match', true );
-				if ( '' !== $m ) {
-					echo '<br><small>' . esc_html( $m ) . '</small>';
-				}
-			}
-		},
-		10,
-		2
-	);
-}
+add_action(
+	'init',
+	function () {
+		foreach ( sourceweb_types_with( array( 'news', 'library' ), array( 'post' ) ) as $aw_rt ) {
+			add_filter( "manage_{$aw_rt}_posts_columns", fn( $c ) => $c + array( 'aw_review' => 'Review' ) );
+			add_action(
+				"manage_{$aw_rt}_posts_custom_column",
+				function ( $col, $id ) {
+					if ( 'aw_review' === $col ) {
+						echo esc_html( (string) get_post_meta( $id, 'aw_review', true ) );
+						$m = (string) get_post_meta( $id, 'aw_match', true );
+						if ( '' !== $m ) {
+							echo '<br><small>' . esc_html( $m ) . '</small>';
+						}
+					}
+				},
+				10,
+				2
+			);
+		}
+	},
+	20
+);

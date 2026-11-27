@@ -37,8 +37,9 @@ wp_set_current_user(1);
 chk('an administrator can manage_mailweb', current_user_can('manage_mailweb') || current_user_can('manage_options'));
 """,
     'directoryweb': r"""
-chk('India PIN lookup: off by default', function_exists('directoryweb_pin_lookup_enabled') && false === directoryweb_pin_lookup_enabled());
-chk('neutral label for animals', function_exists('directoryweb_labels') && 'Animals helped' !== (directoryweb_labels()['animals'] ?? ''));
+chk('no India PIN lookup code in the plugin', !function_exists('directoryweb_pin_lookup_enabled') && !shortcode_exists('directoryweb_find_help') && !has_action('wp_ajax_aw_pin_lookup'));
+chk('no Find help / helpline blocks registered', !WP_Block_Type_Registry::get_instance()->is_registered('directoryweb/helplines'));
+chk('neutral directory heading', false === stripos(wp_json_encode(apply_filters('directoryweb_claim_copy', array())), 'helpline'));
 foreach (array('directoryweb_fields','directoryweb_listing_types','directoryweb_form_mappings') as $o) { update_option($o, array('x' => 1)); }
 update_option('directoryweb_delete_data_on_uninstall', true);
 define('WP_UNINSTALL_PLUGIN', 'directoryweb/directoryweb.php');
@@ -51,8 +52,10 @@ global $wpdb; $t = function_exists('insightweb_si_vis_table') ? insightweb_si_vi
 chk('no visitor table on a clean install', $t && $wpdb->get_var("SHOW TABLES LIKE '" . esc_sql($t) . "'") !== $t);
 """,
     'planweb': r"""
-chk('Animal Writes dates: off on another site', function_exists('aw_team_dates_context') && false === aw_team_dates_context());
+chk('no Animal Writes team dates code in the plugin', !function_exists('aw_team_dates_context') && !function_exists('aw_team_dates'));
 chk('no Animal Writes dates stored', empty(get_option('aw_team_dates')));
+chk('no import source on a clean site', '' === (string) apply_filters('planweb_import_source', ''));
+chk('no site-skipped types by default', array() === planweb_site_skip_types());
 """,
     'rankweb': r"""
 $txt = apply_filters('robots_txt', "User-agent: *\nDisallow: /wp-admin/\n", true);
@@ -76,9 +79,8 @@ chk('an author may not push items (ingest)', function_exists('sourceweb_ingest_c
 wp_set_current_user(1);
 chk('an administrator may push items', function_exists('sourceweb_ingest_can') && true === sourceweb_ingest_can());
 chk('publishing without review: off', function_exists('sourceweb_publish_allowed') && false === sourceweb_publish_allowed());
-chk('Animal Writes extras: off', function_exists('sourceweb_animal_writes_context') && false === sourceweb_animal_writes_context());
 chk('no starter source list stored', empty(get_option('aw_sources')), json_encode(get_option('aw_sources')));
-chk('no Animal Writes dashboard box', !isset($GLOBALS['wp_meta_boxes']['dashboard']['normal']['core']['aw_sourcing_health']) );
+chk('no starter sources offered', empty(apply_filters('sourceweb_starter_sources', array())));
 """,
 }
 

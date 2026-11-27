@@ -581,7 +581,7 @@ function directoryweb_claim_row( array $r ): array {
 /**
  * Label of a claim field.
  *
- * @param string $key DIRECTORYWEB_CLAIM_L key, logo or photos.
+ * @param string $key directoryweb_claim_fields() key, logo or photos.
  */
 function directoryweb_field_label( string $key ): string {
 	if ( 'logo' === $key ) {
@@ -590,7 +590,7 @@ function directoryweb_field_label( string $key ): string {
 	if ( 'photos' === $key ) {
 		return __( 'Photos (added before the current ones, 6 at most)', 'directoryweb' );
 	}
-	return defined( 'DIRECTORYWEB_CLAIM_L' ) && isset( DIRECTORYWEB_CLAIM_L[ $key ] ) ? directoryweb_claim_label( $key, (string) DIRECTORYWEB_CLAIM_L[ $key ][0] ) : $key;
+	return function_exists( 'directoryweb_claim_fields' ) && isset( directoryweb_claim_fields()[ $key ] ) ? directoryweb_claim_label( $key, (string) directoryweb_claim_fields()[ $key ][0] ) : $key;
 }
 
 /**
@@ -601,7 +601,7 @@ function directoryweb_field_label( string $key ): string {
  * @return array|null [ 'id', 'status' ].
  */
 function directoryweb_claim_log_row( array $c, string $key ): ?array {
-	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! defined( 'DIRECTORYWEB_CLAIM_L' ) ) {
+	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! function_exists( 'directoryweb_claim_fields' ) ) {
 		return null;
 	}
 	global $wpdb;
@@ -611,7 +611,7 @@ function directoryweb_claim_log_row( array $c, string $key ): ?array {
 			aw_enrich_table(),
 			(int) $c['listing'],
 			'claim-' . (int) $c['id'],
-			directoryweb_enrich_field( $key, DIRECTORYWEB_CLAIM_L )
+			directoryweb_enrich_field( $key, directoryweb_claim_fields() )
 		),
 		ARRAY_A
 	);
@@ -832,22 +832,11 @@ function directoryweb_settings_payload(): array {
 			'slug'    => 'places',
 			'name'    => __( 'Place source', 'directoryweb' ),
 			/* translators: %s: file version. */
-			'status'  => sprintf( __( 'LGD, %s', 'directoryweb' ), $head['version'] ),
+			'status'  => '' !== $head['version'] ? sprintf( __( 'File version %s', 'directoryweb' ), $head['version'] ) : __( 'No places file', 'directoryweb' ),
 			'tone'    => '',
 			/* translators: 1: states, 2: districts, 3: source. */
-			'summary' => sprintf( __( '%1$s states / %2$s districts, from %3$s. A data file in the plugin; another country ships its own file.', 'directoryweb' ), $num( count( (array) ( $lgd['states'] ?? array() ) ) ), $num( count( (array) ( $lgd['districts'] ?? array() ) ) ), $head['source'] ),
+			'summary' => sprintf( __( '%1$s states / %2$s districts, from %3$s. A data file the site supplies (the directoryweb_places_file filter); the plugin ships none.', 'directoryweb' ), $num( count( (array) ( $lgd['states'] ?? array() ) ) ), $num( count( (array) ( $lgd['districts'] ?? array() ) ) ), $head['source'] ),
 			'file'    => true,
-		),
-		array(
-			'slug'    => 'pin',
-			'name'    => __( 'PIN code lookup', 'directoryweb' ),
-			'status'  => directoryweb_pin_lookup_enabled() ? __( 'India Post, on', 'directoryweb' ) : __( 'Off', 'directoryweb' ),
-			'tone'    => '',
-			'summary' => directoryweb_pin_lookup_enabled() ? __( 'Answers are kept for a week.', 'directoryweb' ) : __( 'Off by default: no PIN code is sent anywhere. Return true from the directoryweb_pin_lookup_enabled filter to turn it on.', 'directoryweb' ),
-			'facts'   => array(
-				directoryweb_fact( __( 'Service', 'directoryweb' ), 'api.postalpincode.in' ),
-				directoryweb_fact( __( 'PIN pattern', 'directoryweb' ), '^[1-9]\d{5}$' ),
-			),
 		),
 		array(
 			'slug'    => 'geocoder',
@@ -857,7 +846,7 @@ function directoryweb_settings_payload(): array {
 			/* translators: %s: date and time. */
 			'summary' => $geo > 0 ? sprintf( __( 'Last request %s.', 'directoryweb' ), wp_date( 'j M Y, g:i a', (int) $geo ) ) : __( 'No request yet.', 'directoryweb' ),
 			'facts'   => array(
-				directoryweb_fact( __( 'Country', 'directoryweb' ), 'in' ),
+				directoryweb_fact( __( 'Country', 'directoryweb' ), directoryweb_geo_profile()['country'] ?: __( 'Any', 'directoryweb' ) ),
 				/* translators: %s: number of days. */
 				directoryweb_fact( __( 'Answers kept', 'directoryweb' ), defined( 'AW_GEO_CACHE' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( AW_GEO_CACHE / DAY_IN_SECONDS ) ) : '' ),
 				directoryweb_fact( __( 'Contact sent with each request', 'directoryweb' ), function_exists( 'directoryweb_geo_user_agent' ) ? directoryweb_geo_user_agent() : '' ),
@@ -960,7 +949,7 @@ function directoryweb_settings_payload(): array {
 			'description' => __( 'The Directory’s tags that are not services. They come from the sourcing lists (SourceWeb → Sources).', 'directoryweb' ),
 			'facts'       => array(
 				directoryweb_fact( __( 'Types', 'directoryweb' ), implode( ', ', $types ), __( 'Set in the sourcing lists', 'directoryweb' ) ),
-				directoryweb_fact( __( 'Veterinary as one filter', 'directoryweb' ), defined( 'AW_VET_TYPES' ) ? implode( ', ', AW_VET_TYPES ) : '' ),
+				...array_map( fn( $key, $g ) => directoryweb_fact( sprintf( /* translators: %s: group name. */ __( '%s as one filter', 'directoryweb' ), (string) ( $g['name'] ?? $key ) ), implode( ', ', (array) ( $g['types'] ?? array() ) ) ), array_keys( directoryweb_type_groups() ), directoryweb_type_groups() ),
 			),
 		),
 		array(
@@ -993,8 +982,10 @@ function directoryweb_settings_payload(): array {
 			'description' => __( 'Claimed is set by an approved claim. Verified comes from government records.', 'directoryweb' ),
 			'facts'       => array(
 				directoryweb_fact( __( 'Claimed label', 'directoryweb' ), __( 'Claimed', 'directoryweb' ) ),
-				directoryweb_fact( __( 'Verified sources', 'directoryweb' ), defined( 'AW_GOV_SOURCES' ) ? implode( ', ', AW_GOV_SOURCES ) : '' ),
-				directoryweb_fact( __( 'Verified', 'directoryweb' ), get_option( 'aw_gov_verified_live' ) ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), $where( 'wp aw gov-verify' ) ),
+				...( defined( 'AW_GOV_SOURCES' ) ? array(
+					directoryweb_fact( __( 'Verified sources', 'directoryweb' ), defined( 'AW_GOV_SOURCES' ) ? implode( ', ', AW_GOV_SOURCES ) : '' ),
+					directoryweb_fact( __( 'Verified', 'directoryweb' ), get_option( 'aw_gov_verified_live' ) ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), $where( 'wp aw gov-verify' ) ),
+				) : array() ), // government-list verification comes from the site layer
 				/* translators: %s: number. */
 				directoryweb_fact( __( 'Phone numbers never published', 'directoryweb' ), sprintf( __( '%s kept as fingerprints only', 'directoryweb' ), $num( count( (array) apply_filters( 'directoryweb_never_publish_phones', (array) apply_filters( 'directoryweb_never_publish_phones', DIRECTORYWEB_NEVER_PUBLISH_PHONES ) ) ) ) ) ),
 			),
@@ -1012,26 +1003,18 @@ function directoryweb_settings_payload(): array {
 			'facts'       => array(),
 		),
 		array(
-			'slug'        => 'findhelp',
-			'label'       => __( 'Find help', 'directoryweb' ),
-			'description' => '',
-			'facts'       => array(
-				directoryweb_fact( __( 'Places shown at most', 'directoryweb' ), defined( 'AW_FINDHELP_MAX' ) ? $num( AW_FINDHELP_MAX ) : '' ),
-				directoryweb_fact( __( 'States found in one text at most', 'directoryweb' ), defined( 'AW_PLACE_DETECT_MAX_STATES' ) ? $num( AW_PLACE_DETECT_MAX_STATES ) : '' ),
-			),
-		),
-		array(
 			'slug'        => 'copy',
 			'label'       => __( 'Directory copy', 'directoryweb' ),
-			'description' => __( 'Titles, the intro and the helpline cards are written in the Directory’s code for now.', 'directoryweb' ),
+			'description' => __( 'Titles and the intro are neutral by default; a site rewrites them with filters.', 'directoryweb' ),
 			'facts'       => array(
 				/* translators: %s: number. */
 				directoryweb_fact( __( 'Search aliases', 'directoryweb' ), defined( 'AW_SEARCH_NAME_ALIASES' ) ? implode( ', ', array_map( fn( $k, $v ) => $k . ' → ' . $v, array_keys( AW_SEARCH_NAME_ALIASES ), AW_SEARCH_NAME_ALIASES ) ) : '' ),
 			),
 		),
 	);
+	$services = apply_filters( 'directoryweb_settings_services', $services ); // a site adds its own rows (the Animal Writes layer: the PIN lookup)
 	return array(
-		'services' => $services,
+		'services' => is_array( $services ) ? $services : array(),
 		'groups'   => $groups,
 	);
 }

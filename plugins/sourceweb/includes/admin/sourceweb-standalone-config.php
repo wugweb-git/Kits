@@ -44,7 +44,7 @@ function sourceweb_sa_post_lines( string $key ): string {
 function sourceweb_sa_kw_list_defs(): array {
 	return array(
 		'strong'  => __( 'Include', 'sourceweb' ),
-		'animal'  => __( 'Animal', 'sourceweb' ),
+		'animal'  => __( 'Topic', 'sourceweb' ),
 		'context' => __( 'Context', 'sourceweb' ),
 		'exclude' => __( 'Exclude', 'sourceweb' ),
 	);
@@ -65,7 +65,7 @@ function sourceweb_sa_screen_keywords(): void {
 	$cfg   = (array) sourceweb_sources_config();
 	$press = (array) ( $cfg['press'] ?? array() );
 
-	echo '<p>' . esc_html__( 'The words the workers and this site use to decide whether an item is about your subject. An item is kept when it has an Include word, or an Animal word together with a Context word, and no Exclude word. Exclude words always apply.', 'sourceweb' ) . '</p>';
+	echo '<p>' . esc_html__( 'The words the workers and this site use to decide whether an item is about your subject. An item is kept when it has an Include word, or a Topic word together with a Context word, and no Exclude word. Exclude words always apply.', 'sourceweb' ) . '</p>';
 
 	echo '<h2>' . esc_html__( 'The check', 'sourceweb' ) . '</h2>';
 	sourceweb_sa_form( 'sourceweb_sa_kw_switches' );
@@ -132,7 +132,7 @@ function sourceweb_sa_kw_lists_part( array $rel ): void {
 	$help = array(
 		'strong'  => __( 'Keeps an item on its own. Each English one is also searched on Google News every run.', 'sourceweb' ),
 		'animal'  => __( 'Keeps an item together with a Context word.', 'sourceweb' ),
-		'context' => __( 'Keeps an item together with an Animal word.', 'sourceweb' ),
+		'context' => __( 'Keeps an item together with a Topic word.', 'sourceweb' ),
 		'exclude' => __( 'Drops an item, whatever else it has.', 'sourceweb' ),
 	);
 	foreach ( sourceweb_sa_kw_list_defs() as $k => $label ) {

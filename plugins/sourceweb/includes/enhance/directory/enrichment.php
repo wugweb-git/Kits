@@ -13,7 +13,7 @@
  * - Google Places is a locator and a check only: the listing keeps its place ID and Maps link; Google's phone, hours,
  *   rating and status are never stored here (shown live, enrichment-front.php). A field whose only source is Google is
  *   flagged "Invite to claim". Google reporting the place permanently closed: the listing stays in search and
- *   carries a "Reported closed" note (owner, 21 Oct 2026); logged, nothing to review. Two listings with the same place ID or Darpan ID: "Possible duplicate" (never merged).
+ *   carries a "Reported closed" note (owner, 21 Oct 2026); logged, nothing to review. Two listings with the same place ID (or another identifier a site adds): "Possible duplicate" (never merged).
  * - List fields (services, animals helped, areas served; owner, 24 Oct 2026): a proposal is the union of what the
  *   listing has and what was found, so a value is never dropped; when it adds something it is applied like a second
  *   phone (claimed, verified and low-confidence still wait for review).
@@ -21,8 +21,8 @@
  *   organisation the listing is), the queue leaves the listing out and its proposals are dropped.
  *
  * REST (Editor's Application Password, like the ingest):
- *   GET  aw/v1/enrich/queue    the next listings to check (new or claimed first, then AWBI address-only, then the
- *                              rest, then any not checked for 90 days), with what they hold now.
+ *   GET  aw/v1/enrich/queue    the next listings to check (new or claimed first, then the rest, then any not checked
+ *                              for 90 days; a site may add its own steps), with what they hold now.
  *   POST aw/v1/enrich/results  one listing's findings; the site applies the rules above.
  *   GET  aw/v1/enrich/config   which sources are switched on, and Google spend this month.
  *
@@ -43,18 +43,19 @@ const AW_ENRICH_REFRESH_DAYS = 90;
  * A new source is one module in the worker and one row here.
  */
 function sourceweb_enrich_sources() {
-	return array(
+	$sources = array(
 		'claim'         => array( 'The organisation (claim)', '', true, 'Values the organisation sent with the claim or update form (highest trust)' ),
 		'website'       => array( 'The organisation\'s website', '', true, 'Home, contact, about, donate, volunteer and adopt pages (up to 8)' ),
 		'social'        => array( 'Instagram / Facebook', 'instagram.com', true, 'Public page: bio, contact, followers, posts, last post' ),
-		'darpan'        => array( 'NGO Darpan', 'ngodarpan.gov.in', true, 'Legal details (only where the page can be read without a CAPTCHA)' ),
 		'osm'           => array( 'OpenStreetMap', 'openstreetmap.org', true, 'Coordinates and tagged hours (ODbL)' ),
 		'wikidata'      => array( 'Wikidata', 'wikidata.org', true, 'Larger organisations: founded, website, social profiles' ),
-		'awbi'          => array( 'AWBI', 'awbi.gov.in', true, 'The AWBI address already on the listing' ),
 		'listing'       => array( 'The listing\'s own details', '', true, 'Clean-up pass: the address, PIN code and place already on the listing, and same-name listings in the same district' ),
 		'india_post'    => array( 'India Post (PIN codes)', 'postalpincode.in', true, 'Clean-up pass: the district and state of the listing\'s own PIN code' ),
 		'google_places' => array( 'Google Maps', 'google.com', true, 'Locator and check only: place ID, Maps link and website lead are kept' ),
 	);
+	// Filter sourceweb_enrich_sources: a site adds (or changes) the sources of its own, key => same row shape as above.
+	$filtered = apply_filters( 'sourceweb_enrich_sources', $sources );
+	return is_array( $filtered ) ? $filtered : $sources;
 }
 
 /** Switched-on sources (Sourcing → Directory enrichment). */
@@ -73,7 +74,7 @@ function sourceweb_enrich_sources_on() {
  * logo (featured image), photos (aw_gallery, sideloaded).
  */
 function sourceweb_enrich_fields() {
-	return array(
+	$fields = array(
 		'phone'          => array( 'Phone', 'phones', 'Contact' ),
 		'whatsapp'       => array( 'WhatsApp', 'phones', 'Contact' ),
 		'emergency'      => array( 'Emergency / ambulance', 'phones', 'Contact' ),
@@ -92,7 +93,6 @@ function sourceweb_enrich_fields() {
 		'founded'        => array( 'Year established', 'aw_founded', 'Identity' ),
 		'reg_type'       => array( 'Registered as', 'aw_reg_type', 'Legal' ),
 		'registration'   => array( 'Registration number', 'aw_registration', 'Legal' ),
-		'darpan_id'      => array( 'NGO Darpan ID', 'aw_darpan_id', 'Legal' ),
 		'reg_80g'        => array( '80G', 'aw_reg_80g', 'Legal' ),
 		'reg_12a'        => array( '12A', 'aw_reg_12a', 'Legal' ),
 		'fcra'           => array( 'FCRA', 'aw_fcra', 'Legal' ),
@@ -117,6 +117,9 @@ function sourceweb_enrich_fields() {
 		'place'          => array( 'State and district', 'place', 'Location' ),
 		'merge_into'     => array( 'Duplicate: merge into', 'merge', 'Identity' ),
 	);
+	// Filter sourceweb_enrich_fields: a site adds the fields its own sources fill, key => [label, store, group].
+	$filtered = apply_filters( 'sourceweb_enrich_fields', $fields );
+	return is_array( $filtered ) ? $filtered : $fields;
 }
 
 /** The table. */
@@ -162,6 +165,10 @@ add_action( 'rest_api_init', 'sourceweb_enrich_install', 1 );
 add_action(
 	'init',
 	function () {
+		$listing_type = sourceweb_type( 'listing' );
+		if ( '' === $listing_type ) {
+			return; // no listing type on this site
+		}
 		$new = array(
 			'aw_address'       => 'Full address (from the organisation or a named source)',
 			'aw_reg_type'      => 'Registered as (Trust, Society, Section 8 company)',
@@ -177,7 +184,7 @@ add_action(
 		);
 		foreach ( $new as $key => $desc ) {
 			register_post_meta(
-				'aw_listing',
+				$listing_type,
 				$key,
 				array(
 					'type'              => 'string',
@@ -262,7 +269,7 @@ function sourceweb_enrich_current( $lid, $field ) {
  * snapshot, Undo and labels.
  */
 function sourceweb_enrich_claim_fields() {
-	return array(
+	$fields = array(
 		'area'            => array( 'Area or landmark', 'aw_area', 'Location' ),
 		'about'           => array( 'About', 'content', 'Identity' ),
 		'aliases'         => array( 'Also known as', 'aw_aliases', 'Identity' ),
@@ -270,11 +277,10 @@ function sourceweb_enrich_claim_fields() {
 		'reg_authority'   => array( 'Registration authority', 'aw_reg_authority', 'Legal' ),
 		'reg_act'         => array( 'Registration act', 'aw_reg_act', 'Legal' ),
 		'reg_date'        => array( 'Date of registration', 'aw_reg_date', 'Legal' ),
-		'awbi_code'       => array( 'AWBI code', 'aw_awbi_code', 'Legal' ),
-		'awbi_recognised' => array( 'AWBI recognised on', 'aw_awbi_recognised', 'Legal' ),
-		'awbi_renewed'    => array( 'AWBI renewed on', 'aw_awbi_renewed', 'Legal' ),
-		'awbi_valid'      => array( 'AWBI valid until', 'aw_awbi_valid', 'Legal' ),
 	);
+	// Filter sourceweb_enrich_claim_fields: a site adds the claim-only fields of its own, key => [label, store, group].
+	$filtered = apply_filters( 'sourceweb_enrich_claim_fields', $fields );
+	return is_array( $filtered ) ? $filtered : $fields;
 }
 
 /** A field's definition for the change log: the enrichment fields, then the claim-only fields. */
@@ -1103,15 +1109,16 @@ function sourceweb_enrich_rest_config() {
 /** How far the worker has got: listings checked / total, and pending reviews. */
 function sourceweb_enrich_progress() {
 	global $wpdb;
-	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB
-	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
+	$is_l    = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) ); // 1=0 without a listing type
+	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p WHERE {$is_l} AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
+	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE {$is_l} AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
 	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", sourceweb_enrich_table() ) ) : 0; // phpcs:ignore WordPress.DB
 	return array( 'total' => $total, 'checked' => $checked, 'pending' => $pending );
 }
 
 /**
  * GET enrich/index?state=Haryana&page=1: the published listings of one state (id, name, district, whether they have any
- * contact), for matching an outside list (NGO Darpan CSV) to listings. 1,000 a page.
+ * contact), for matching an outside list to listings (a site may add an identifier: filter sourceweb_enrich_index_item). 1,000 a page.
  */
 function sourceweb_enrich_rest_index( WP_REST_Request $req ) {
 	global $wpdb;
@@ -1127,25 +1134,25 @@ function sourceweb_enrich_rest_index( WP_REST_Request $req ) {
 	if ( ! $code ) {
 		return array( 'items' => array(), 'state' => (string) $req['state'] );
 	}
-	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB
+	$is_l = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) );
+	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE {$is_l} AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB
 	foreach ( $ids as $id ) {
 		$pl    = function_exists( 'aw_listing_place' ) ? aw_listing_place( (int) $id ) : array( '', '' );
-		$out[] = array(
+		$out[] = (array) apply_filters( 'sourceweb_enrich_index_item', array(
 			'id'        => (int) $id,
 			'name'      => html_entity_decode( get_the_title( (int) $id ), ENT_QUOTES ),
 			'district'  => (string) ( $pl[1] ?? '' ),
 			'state'     => (string) ( $pl[0] ?? '' ),
 			'contact'   => (bool) ( ( function_exists( 'directoryweb_listing_phones' ) && directoryweb_listing_phones( (int) $id ) ) || get_post_meta( $id, 'aw_email', true ) || get_post_meta( $id, 'aw_website', true ) || get_post_meta( $id, 'aw_facebook', true ) ),
-			'darpan_id' => (string) get_post_meta( $id, 'aw_darpan_id', true ),
-		);
+		), (int) $id );
 	}
 	return array( 'items' => $out, 'state' => (string) $req['state'], 'page' => $page );
 }
 
 /**
- * GET enrich/queue?limit=50&ids=1,2&group=awbi-bare. Order: published or claimed in the last 24 hours and not checked
- * since; never checked AWBI listings with no phone, email or website; every other never-checked listing; then those
- * last checked more than 90 days ago.
+ * GET enrich/queue?limit=50&ids=1,2&group=name. Order: published or claimed in the last 24 hours and not checked
+ * since; never checked listings with no way to reach them; every other never-checked listing; then those last checked
+ * more than 90 days ago. A site may add steps or a named group: filter sourceweb_enrich_queue_steps.
  */
 function sourceweb_enrich_rest_queue( WP_REST_Request $req ) {
 	global $wpdb;
@@ -1156,26 +1163,27 @@ function sourceweb_enrich_rest_queue( WP_REST_Request $req ) {
 	if ( ! $ids ) {
 		$p      = $wpdb->posts;
 		$m      = $wpdb->postmeta;
-		$base   = "FROM {$p} p LEFT JOIN {$m} c ON c.post_id = p.ID AND c.meta_key = 'aw_enrich_checked' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish'"
+		$base   = "FROM {$p} p LEFT JOIN {$m} c ON c.post_id = p.ID AND c.meta_key = 'aw_enrich_checked' WHERE " . sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) ) . " AND p.post_status = 'publish'"
 			. " AND NOT EXISTS (SELECT 1 FROM {$m} f WHERE f.post_id = p.ID AND f.meta_key = 'aw_enrich_flags' AND f.meta_value LIKE '%\"identity\"%')"; // Identity unresolved: left out.
-		$bare   = "EXISTS (SELECT 1 FROM {$m} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_awbi_code' AND a.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key IN ('aw_email','aw_website') AND x.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key = 'aw_phones' AND x.meta_value > 0)";
 		// No way to reach them at all (no phone, email, website or Facebook): these go first after new and claimed listings
 		// (SEO, 24 Oct 2026: such profiles are not indexed until a contact is added).
 		$none   = "NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key IN ('aw_email','aw_website','aw_facebook') AND x.meta_value <> '') AND NOT EXISTS (SELECT 1 FROM {$m} x WHERE x.post_id = p.ID AND x.meta_key = 'aw_phones' AND x.meta_value > 0)";
 		$gpend  = "c.meta_value IS NOT NULL AND p.ID IN (SELECT post_id FROM {$m} WHERE meta_key = 'aw_enrich_google_pending' AND meta_value = '1')"; // checked while Google was off
 		$since  = wp_date( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS );
 		$claims = "SELECT a.meta_value FROM {$m} a JOIN {$m} s ON s.post_id = a.post_id AND s.meta_key = 'aw_c_status' AND s.meta_value = 'approved' JOIN {$p} cp ON cp.ID = a.post_id AND cp.post_modified >= '{$since}' WHERE a.meta_key = 'aw_c_listing'";
-		$steps  = 'awbi-bare' === $group
-			? array( "c.meta_value IS NULL AND {$bare}" )
-			: array(
-				"c.meta_value IS NULL AND p.post_date >= '{$since}'",
-				"p.ID IN ({$claims}) AND (c.meta_value IS NULL OR c.meta_value < '{$since}')",
-				"c.meta_value IS NULL AND {$none}",
-				"c.meta_value IS NULL AND {$bare}",
-				...( $google ? array( "{$gpend} AND {$none}", $gpend ) : array() ),
-				'c.meta_value IS NULL',
-				"c.meta_value < '" . wp_date( 'Y-m-d H:i:s', time() - AW_ENRICH_REFRESH_DAYS * DAY_IN_SECONDS ) . "'",
-			);
+		$steps  = array(
+			"c.meta_value IS NULL AND p.post_date >= '{$since}'",
+			"p.ID IN ({$claims}) AND (c.meta_value IS NULL OR c.meta_value < '{$since}')",
+			"c.meta_value IS NULL AND {$none}",
+			...( $google ? array( "{$gpend} AND {$none}", $gpend ) : array() ),
+			'c.meta_value IS NULL',
+			"c.meta_value < '" . wp_date( 'Y-m-d H:i:s', time() - AW_ENRICH_REFRESH_DAYS * DAY_IN_SECONDS ) . "'",
+		);
+		// Filter sourceweb_enrich_queue_steps( string[] $steps, string $group, array $ctx ): SQL conditions tried in order
+		// (c = the checked meta, p = the post, $ctx['m'] the postmeta table, ['none'] the "no way to reach them" test). A
+		// site adds a step of its own, or answers its own named group with the steps for it alone. Fixed fragments only.
+		$filtered = apply_filters( 'sourceweb_enrich_queue_steps', $steps, $group, array( 'm' => $m, 'p' => $p, 'since' => $since, 'none' => $none, 'google' => $google ) );
+		$steps    = is_array( $filtered ) ? array_values( array_filter( $filtered, 'is_string' ) ) : $steps;
 		foreach ( $steps as $where ) {
 			if ( count( $ids ) >= $limit ) {
 				break;
@@ -1186,7 +1194,7 @@ function sourceweb_enrich_rest_queue( WP_REST_Request $req ) {
 	}
 	$items = array();
 	foreach ( array_slice( $ids, 0, $limit ) as $id ) {
-		if ( 'aw_listing' === get_post_type( $id ) ) {
+		if ( sourceweb_is_type( get_post_type( $id ), 'listing' ) ) {
 			$items[] = sourceweb_enrich_listing_payload( $id );
 		}
 	}
@@ -1208,21 +1216,19 @@ function sourceweb_enrich_listing_payload( $id ) {
 	foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT a.post_id FROM {$wpdb->postmeta} a JOIN {$wpdb->postmeta} s ON s.post_id = a.post_id AND s.meta_key = 'aw_c_status' AND s.meta_value = 'approved' WHERE a.meta_key = 'aw_c_listing' AND a.meta_value = %d", $id ) ) as $cid ) { // phpcs:ignore WordPress.DB
 		$claim = array_merge( $claim, (array) get_post_meta( (int) $cid, 'aw_c_proposed', true ) );
 	}
-	return array(
+	return (array) apply_filters( 'sourceweb_enrich_listing_payload', array(
 		'id'           => $id,
 		'name'         => html_entity_decode( get_the_title( $id ), ENT_QUOTES ),
 		'url'          => get_permalink( $id ),
 		'state'        => $state,
 		'district'     => $district,
-		'awbi_code'    => (string) get_post_meta( $id, 'aw_awbi_code', true ),
-		'awbi_address' => (string) get_post_meta( $id, 'aw_awbi_address', true ),
 		'area'         => (string) get_post_meta( $id, 'aw_area', true ),
 		'types'        => function_exists( 'directoryweb_listing_types' ) ? wp_list_pluck( directoryweb_listing_types( $id ), 'slug' ) : array(),
 		'protected'    => sourceweb_enrich_is_protected( $id ),
 		'checked'      => (string) get_post_meta( $id, 'aw_enrich_checked', true ),
 		'now'          => $now,
 		'claim'        => $claim,
-	);
+	), $id ); // filter sourceweb_enrich_listing_payload( array $payload, int $id ): a site adds what its own sources need
 }
 
 /**
@@ -1233,7 +1239,7 @@ function sourceweb_enrich_rest_results( WP_REST_Request $req ) {
 	sourceweb_enrich_install();
 	$b   = (array) $req->get_json_params();
 	$lid = (int) ( $b['listing_id'] ?? 0 );
-	if ( 'aw_listing' !== get_post_type( $lid ) ) {
+	if ( ! sourceweb_is_type( get_post_type( $lid ), 'listing' ) ) {
 		return new WP_Error( 'aw_enrich', 'Not a listing', array( 'status' => 400 ) );
 	}
 	$run       = sanitize_text_field( (string) ( $b['run'] ?? '' ) );
@@ -1309,7 +1315,7 @@ function sourceweb_enrich_rest_results( WP_REST_Request $req ) {
 			$out['skipped'][] = $field;
 			continue;
 		}
-		$mode = ! empty( $b['force_review'] ) ? 'queue' : sourceweb_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list (Darpan CSV) always goes to review
+		$mode = ! empty( $b['force_review'] ) ? 'queue' : sourceweb_enrich_mode( $lid, $field, $conf, $protected, $value ); // an outside list always goes to review
 		if ( 'queue' !== $mode ) {
 			$snap = sourceweb_enrich_snapshot( $lid, $field );
 			if ( sourceweb_enrich_write( $lid, $field, $value, $mode, $srcs ) ) {
@@ -1385,18 +1391,19 @@ function sourceweb_enrich_last_applied( $lid ) {
 	return (string) $wpdb->get_var( $wpdb->prepare( "SELECT MAX( COALESCE( decided_at, created ) ) FROM %i WHERE listing_id = %d AND status IN ('auto-applied','approved')", sourceweb_enrich_table(), $lid ) ); // phpcs:ignore WordPress.DB
 }
 
-/** Another listing with the same place ID or Darpan ID (stored or waiting in the queue): flag both, never merge. */
+/** Another listing with the same place ID, or the same value of an identifier a site adds (filter sourceweb_enrich_duplicate_keys; stored or waiting in the queue): flag both, never merge. */
 function sourceweb_enrich_duplicates( $lid ) {
 	global $wpdb;
 	$dups = array();
-	foreach ( array( 'place_id' => 'aw_place_id', 'darpan_id' => 'aw_darpan_id' ) as $field => $key ) {
+	$keys = apply_filters( 'sourceweb_enrich_duplicate_keys', array( 'place_id' => 'aw_place_id' ) ); // field => meta key
+	foreach ( is_array( $keys ) ? $keys : array() as $field => $key ) {
 		$vals = array_filter( array( (string) get_post_meta( $lid, $key, true ) ) );
 		foreach ( $wpdb->get_col( $wpdb->prepare( "SELECT value FROM %i WHERE listing_id = %d AND field = %s AND status = 'pending'", sourceweb_enrich_table(), $lid, $field ) ) as $v ) { // phpcs:ignore WordPress.DB
 			$vals[] = (string) json_decode( $v, true );
 		}
 		foreach ( array_unique( array_filter( $vals ) ) as $v ) {
 			$other = array_merge(
-				$wpdb->get_col( $wpdb->prepare( "SELECT m.post_id FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = 'aw_listing' AND p.post_status <> 'trash' WHERE m.meta_key = %s AND m.meta_value = %s AND m.post_id <> %d", $key, $v, $lid ) ), // phpcs:ignore WordPress.DB
+				$wpdb->get_col( $wpdb->prepare( "SELECT m.post_id FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = %s AND p.post_status <> 'trash' WHERE m.meta_key = %s AND m.meta_value = %s AND m.post_id <> %d", sourceweb_type( 'listing' ), $key, $v, $lid ) ), // phpcs:ignore WordPress.DB
 				$wpdb->get_col( $wpdb->prepare( "SELECT listing_id FROM %i WHERE field = %s AND value = %s AND status = 'pending' AND listing_id <> %d", sourceweb_enrich_table(), $field, wp_json_encode( $v ), $lid ) ) // phpcs:ignore WordPress.DB
 			);
 			foreach ( array_unique( array_map( 'intval', $other ) ) as $o ) {

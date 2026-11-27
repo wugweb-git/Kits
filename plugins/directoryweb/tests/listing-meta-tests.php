@@ -63,9 +63,9 @@ function check( $ok, $name ) {
 	}
 }
 
-// Schema: 48 listing keys, all aw_ on aw_listing; Core's whole schema still lists them; aw_website on both types.
+// Schema: 34 listing keys, all aw_ on aw_listing; Core's whole schema still lists them; aw_website on both types.
 $dw = directoryweb_meta_schema();
-check( 48 === count( $dw ), '48 listing keys' );
+check( 34 === count( $dw ), '34 listing keys (no accreditation, registry or tax-number keys: a site adds its own)' );
 check( array() === array_filter( array_keys( $dw ), fn( $k ) => 0 !== strpos( $k, 'aw_' ) ), 'every key keeps aw_' );
 
 if ( ! $has_site_meta ) {

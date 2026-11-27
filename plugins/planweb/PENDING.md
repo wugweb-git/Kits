@@ -8,7 +8,8 @@ Checked line by line against the code on 27 Nov 2026.
 - Not built: the Timeline and a custom date range in the shell (React) screens (Entries has date presets only; it needs `src/index.js` and a build); drag-and-drop rescheduling; campaign bars spanning dates (an entry has one date). Not run on a live WordPress.
 - DEAD (file written, not loaded, not held): `calendar-views.php`, which `planweb.php` does not load. Its campaign-timeline and author / category / campaign-tag filters have no data (no entry has those fields); the timeline and date filter now live in `model.php` and `admin.php` instead. Its earlier 'done' marks are wrong.
 - Stale: 'Help tab: not built' (it exists: `help-tab.php`); 'the shell entry form has no Repeat field' (added in 0.3.2).
-- Not tested: the cron run functions, saving, uninstall, the Animal Writes switch.
+- Not tested: the cron run functions, saving, uninstall, the switch.
+- 0.5.0 (27 Nov 2026): all Animal Writes-only code left the plugin (see CHANGELOG). The site layer at `sites/animalwrites/planweb/` must be deployed with it on the live site; not run on a live WordPress.
 
 ## Active Scope & Responsibilities
 The editorial calendar and campaign planning plugin owns:
@@ -31,7 +32,7 @@ The editorial calendar and campaign planning plugin owns:
 
 Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
 
-- Strip the `aw_team_dates` import before WordPress.org submission (`import.php`, `migrate.php`, `team-dates.php`; the unguarded Core call in the Dates menu is now guarded, 26 Nov).
+- Done in 0.5.0: `team-dates.php` and the `aw_team_dates` name left the plugin; `import.php` keeps a generic, off-by-default import from a source named by the filter `planweb_import_source`. Remaining before WordPress.org submission: decide whether to drop the generic import too. `migrate.php` (the 14 Nov one-time channel and Done move, with Animal Writes entry IDs 25181 to 25187) moved to the site layer too.
 - Drag-and-drop schedule: not built (the Help tab exists). The classic Calendar (used without Kits Core) now has filters by type, status, owner and channel and a week view (26 Nov), and from 0.4.0 a Timeline and a From / To date range; the shell's Entries list filters by the same four plus date presets. No entry has an author, category or campaign field, so those filters do not exist.
 - Screenshots, Plugin Check on a clean WordPress, and the submission itself.
 - Scheduled jobs: built in 0.3.0 on WP-cron (no Action Scheduler, no new dependency), all off by default, switched in PlanWeb Settings (`includes/jobs.php`, pure rules in `includes/jobs-model.php`, covered by `tests/run.php`).

@@ -14,7 +14,7 @@ if os.path.exists(ap):
         l = l.split('#')[0].strip()
         if l:
             allow.add(l)
-pat = re.compile(r"""(['"])((?:(?!\1).)*Animal Writes(?:(?!\1).)*)\1""")
+pat = re.compile(r"""(['"])((?:(?!\1).)*(?:Animal Writes|AWBI|NGO Darpan|animalwrites)(?:(?!\1).)*)\1""")
 bad = []
 for plug in sorted(os.listdir(os.path.join(ROOT, 'plugins'))):
     base = os.path.join(ROOT, 'plugins', plug)

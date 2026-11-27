@@ -37,9 +37,9 @@ function insightweb_si_psi_pages(): array {
 		}
 	}
 	// Every published campaign (a handful), so each campaign page gets LCP and TBT figures.
-	$camps = get_posts(
+	$camps = ! insightweb_type( 'campaign' ) ? array() : get_posts(
 		array(
-			'post_type'      => 'aw_campaign',
+			'post_type'      => insightweb_type( 'campaign' ),
 			'post_status'    => 'publish',
 			'posts_per_page' => 20,
 			'fields'         => 'ids',
@@ -50,7 +50,7 @@ function insightweb_si_psi_pages(): array {
 	foreach ( $camps as $id ) {
 		$paths[] = insightweb_si_object_path( 'post', (int) $id );
 	}
-	foreach ( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity', 'aw_listing' ) as $type ) {
+	foreach ( insightweb_types_with( array( 'news', 'library', 'opportunity', 'listing' ), array( 'post' ) ) as $type ) {
 		$ids = get_posts(
 			array(
 				'post_type'      => $type,

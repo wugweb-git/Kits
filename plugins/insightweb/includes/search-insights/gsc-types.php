@@ -582,7 +582,12 @@ add_action(
 
 /** Type order for the Request indexing list: guides, Library, campaigns, then the rest, listings last. */
 function insightweb_si_request_type_rank( int $id ): int {
-	$rank = array( 'post' => 0, 'aw_legal' => 1, 'aw_campaign' => 2, 'page' => 3, 'aw_news' => 4, 'aw_opportunity' => 5, 'aw_listing' => 9 );
+	$rank = array( 'post' => 0, 'page' => 3 );
+	foreach ( array( 'library' => 1, 'campaign' => 2, 'news' => 4, 'opportunity' => 5, 'listing' => 9 ) as $role => $n ) {
+		if ( '' !== insightweb_type( $role ) ) {
+			$rank[ insightweb_type( $role ) ] = $n;
+		}
+	}
 	return $id ? ( $rank[ (string) get_post_type( $id ) ] ?? 6 ) : 7;
 }
 

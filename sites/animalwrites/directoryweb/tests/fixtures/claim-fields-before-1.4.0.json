@@ -1,0 +1,212 @@
+{
+ "l_email": [
+  "Listing email",
+  "aw_email",
+  "email",
+  true
+ ],
+ "phones": [
+  "Phone numbers",
+  "phones",
+  "phone",
+  true
+ ],
+ "l_area": [
+  "Area or landmark",
+  "aw_area",
+  "area",
+  true
+ ],
+ "l_address": [
+  "Full address",
+  "aw_address",
+  "address",
+  true
+ ],
+ "l_maps": [
+  "Google Maps link",
+  "aw_maps_url",
+  "maps_url",
+  true
+ ],
+ "l_hours": [
+  "Opening hours",
+  "hours",
+  "",
+  true
+ ],
+ "l_about": [
+  "About",
+  "about",
+  "about",
+  true
+ ],
+ "l_aliases": [
+  "Also known as",
+  "aw_aliases",
+  "aliases",
+  true
+ ],
+ "l_founded": [
+  "Year established",
+  "aw_founded",
+  "founded",
+  true
+ ],
+ "l_head": [
+  "Head of the organisation",
+  "aw_head",
+  "head",
+  true
+ ],
+ "l_animals": [
+  "Animals helped",
+  "aw_animals",
+  "animals",
+  true
+ ],
+ "l_areas": [
+  "Areas served",
+  "aw_areas_served",
+  "areas_served",
+  true
+ ],
+ "l_services": [
+  "Services",
+  "services",
+  "services",
+  true
+ ],
+ "l_languages": [
+  "Languages",
+  "aw_languages",
+  "languages",
+  true
+ ],
+ "l_website": [
+  "Website",
+  "aw_website",
+  "website",
+  true
+ ],
+ "l_instagram": [
+  "Instagram",
+  "aw_instagram",
+  "instagram",
+  true
+ ],
+ "l_facebook": [
+  "Facebook",
+  "aw_facebook",
+  "facebook",
+  true
+ ],
+ "l_x": [
+  "X",
+  "aw_x",
+  "x",
+  true
+ ],
+ "l_youtube": [
+  "YouTube",
+  "aw_youtube",
+  "youtube",
+  true
+ ],
+ "l_linkedin": [
+  "LinkedIn",
+  "aw_linkedin",
+  "linkedin",
+  true
+ ],
+ "l_reg": [
+  "Registration no.",
+  "aw_registration",
+  "registration",
+  true
+ ],
+ "l_12a": [
+  "12A",
+  "aw_reg_12a",
+  "reg_12a",
+  true
+ ],
+ "l_80g": [
+  "80G",
+  "aw_reg_80g",
+  "reg_80g",
+  true
+ ],
+ "l_darpan": [
+  "NGO Darpan ID",
+  "aw_darpan_id",
+  "darpan_id",
+  true
+ ],
+ "l_reg_type": [
+  "Registered as",
+  "aw_reg_type",
+  "reg_type",
+  true
+ ],
+ "l_reg_auth": [
+  "Registration authority",
+  "aw_reg_authority",
+  "reg_authority",
+  false
+ ],
+ "l_reg_act": [
+  "Registration act",
+  "aw_reg_act",
+  "reg_act",
+  false
+ ],
+ "l_reg_date": [
+  "Date of registration",
+  "aw_reg_date",
+  "reg_date",
+  true
+ ],
+ "l_fcra": [
+  "FCRA",
+  "aw_fcra",
+  "fcra",
+  true
+ ],
+ "l_awbi_code": [
+  "AWBI code",
+  "aw_awbi_code",
+  "awbi_code",
+  true
+ ],
+ "l_awbi_rec": [
+  "AWBI recognised on",
+  "aw_awbi_recognised",
+  "awbi_recognised",
+  true
+ ],
+ "l_awbi_ren": [
+  "AWBI renewed on",
+  "aw_awbi_renewed",
+  "awbi_renewed",
+  true
+ ],
+ "l_awbi_valid": [
+  "AWBI valid until",
+  "aw_awbi_valid",
+  "awbi_valid",
+  true
+ ],
+ "l_volunteer": [
+  "Volunteer link",
+  "aw_volunteer_url",
+  "volunteer_url",
+  true
+ ],
+ "l_adopt": [
+  "Adopt link",
+  "aw_adopt_url",
+  "adopt_url",
+  true
+ ]
+}

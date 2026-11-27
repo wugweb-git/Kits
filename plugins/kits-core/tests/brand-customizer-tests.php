@@ -179,9 +179,8 @@ brand_t( 1 === preg_match( '/<input type="color"\s+id="color_picker_[^\n]*\n\s*a
 brand_t( false !== strpos( $screen, 'static $printed' ), 'Brand Tokens: the screen prints once per request' );
 $calendar_css = (string) file_get_contents( dirname( __DIR__ ) . '/src/shell/more.css' );
 brand_t( 1 === preg_match( '/kits-shell-cal__today[^{]*:disabled[^{]*\{[^}]*color: #646970;[^}]*opacity: 1;/s', $calendar_css ), 'Shell calendar: disabled Today is #646970 at full opacity' );
-foreach ( array( 'campaign-letters.php', 'forms/form-pages.php', 'forms/fluentforms.php', 'backups.php', 'admin-layer/edit-screens.php', 'brand-customizer-model.php' ) as $f ) {
+foreach ( array( 'forms/fluentforms.php', 'backups.php', 'error-pages.php', 'media-groups.php', 'ops/not-found.php', 'admin-layer/edit-screens.php', 'brand-customizer-model.php' ) as $f ) {
 	$code = preg_replace( '#^\s*(//|\*|/\*).*$#m', '', (string) file_get_contents( dirname( __DIR__ ) . '/includes/' . $f ) );
-	$code = str_replace( "'Animal Writes core'", '', $code ); // the map's own plugin name in kits_edit_screen_own_plugins(): a match key for existing data
 	brand_t( false === strpos( $code, 'Animal Writes' ), "$f: no fixed 'Animal Writes' outside comments" );
 }
 

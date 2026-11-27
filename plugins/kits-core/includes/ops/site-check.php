@@ -19,8 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * The pages checked: label => path. Generic default: Home, Search and the sitemap, one page of each public post type
- * and one category. A site names its own list with the filter kits_site_check_urls (Animal Writes: the theme's site
- * layer, assets/site/ops.php).
+ * and one category. A site names its own list with the filter kits_site_check_urls.
  *
  * @return array<string,string>
  */

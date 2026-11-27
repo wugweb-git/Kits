@@ -1,6 +1,6 @@
 <?php
 /**
- * WP-CLI, one root: wp aw-si status | dry-run | run | fetch <source> [--dry] | links <seed|add> | rising [top] | crawl [--dry-run]
+ * WP-CLI, one root: wp aw-si status | dry-run | run | fetch <source> [--dry] | links add | rising [top] | crawl [--dry-run]
  * | rollup | keyphrase-guard | delete-data --yes. The older `wp aw-si-rising` and `wp aw-si-crawl` still work (aliases).
  *
  * `dry-run` writes nothing: it reads the seed, Rank Math, Sourcing and one day of Search Console (through Site Kit, as
@@ -151,11 +151,10 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 
 			/**
-			 * Links tab rows: `seed` adds the 25–26 Oct lists (once; --force runs it again, which only moves dates);
-			 * `add` adds one link, e.g. from the monthly Search Console Links read.
+			 * Links tab rows: `add` adds one link, e.g. from the monthly Search Console Links read.
 			 *
 			 * <what>
-			 * : seed or add.
+			 * : add.
 			 *
 			 * [--from=<url>]
 			 * : add: the linking page.
@@ -185,13 +184,9 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 * [--note=<text>]
 			 * : add: a note.
 			 *
-			 * [--force]
-			 * : seed: run again.
-			 *
 			 * ## EXAMPLES
 			 *
-			 *     wp aw-si links seed
-			 *     wp aw-si links add --from=https://example.org/post/ --to=/campaigns/lab-animals-rules-2026/ --anchor="Animal Writes" --type=press
+			 *     wp aw-si links add --from=https://example.org/post/ --to=/about/ --anchor="Example site" --type=press
 			 *
 			 * @param array $args  Positional arguments.
 			 * @param array $assoc Named arguments.
@@ -199,13 +194,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			public function links( $args, $assoc ) {
 				insightweb_si_install();
 				$what = (string) ( $args[0] ?? '' );
-				if ( 'seed' === $what ) {
-					$out = insightweb_si_links_seed( ! empty( $assoc['force'] ) );
-					WP_CLI::log( $out ? (string) wp_json_encode( $out ) : 'Already seeded (add --force to run again).' );
-					return;
-				}
 				if ( 'add' !== $what ) {
-					WP_CLI::error( 'Say seed or add.' );
+					WP_CLI::error( 'Say add.' );
 				}
 				$to = (string) ( $assoc['to'] ?? '' );
 				if ( '' !== $to && 0 === strpos( $to, '/' ) ) {
@@ -348,7 +338,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					$r = aw_seo_kp_replay( $kw['pages'] );
 					++$prevented;
 					$refused += count( $r['refused'] );
-					$news    += count( array_filter( $r['refused'], fn( $x ) => 'aw_news' === $x['type'] ) );
+					$news    += count( array_filter( $r['refused'], fn( $x ) => insightweb_is_type( $x['type'], 'news' ) ) );
 					if ( ! empty( $assoc['list'] ) ) {
 						WP_CLI::log( sprintf( '%s (%d impr): keep %s %d; refuse %s', $kw['label'], $kw['impr'], $r['keep']['type'], $r['keep']['id'], implode( ', ', array_map( fn( $x ) => $x['type'] . ' ' . $x['id'], $r['refused'] ) ) ) );
 					}

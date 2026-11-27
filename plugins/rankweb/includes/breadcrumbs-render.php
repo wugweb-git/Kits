@@ -4,7 +4,7 @@
  * breadcrumbs.php, which also gives it to search engines as the one BreadcrumbList); this file only reads and shows it.
  *
  * Loaded on every request, outside the Rank Math check and the Breadcrumbs module switch: with the module off the trail
- * is Rank Math's own; with Rank Math off there is no trail and nothing is shown. Animal Writes Core loads this file
+ * is Rank Math's own; with Rank Math off there is no trail and nothing is shown. the earlier Core plugin loads this file
  * too when RankWeb is not active (its breadcrumbs.php), so its section, hub and form bands keep their trail.
  *
  * Organisation:      Home › Directory › State › District
@@ -119,7 +119,7 @@ function rankweb_breadcrumbs_prepend( $html ) {
 }
 
 /**
- * The Breadcrumbs block's output (rankweb/breadcrumbs, and Animal Writes Core's earlier animal-writes/breadcrumb): the
+ * The Breadcrumbs block's output (rankweb/breadcrumbs, and the earlier Core plugin's earlier block): the
  * trail, once per page. In the editor preview (a REST request) it is this page's own trail from its parent pages, since
  * Rank Math builds its trail only on the front end.
  *
@@ -153,8 +153,8 @@ function rankweb_breadcrumbs_legacy_block() {
 	return (string) apply_filters( 'rankweb_breadcrumbs_legacy_block', '' );
 }
 
-// The earlier block name (on the Animal Writes site, animal-writes/breadcrumb) is stored in the content of 7 hub pages (8811, 8935, 8937, 8939,
-// 8941, 8943, 8945) and in any template saved in the Site Editor. RankWeb owns it (Animal Writes Core registered it
+// The earlier block name (on one site) is stored in the content of 7 hub pages (8811, 8935, 8937, 8939,
+// 8941, 8943, 8945) and in any template saved in the Site Editor. RankWeb owns it (the earlier Core plugin registered it
 // until 18 Nov 2026): an alias with the same output, so those pages need no edit. Registered only when nothing else
 // registered the name. Hidden from the inserter: new pages use rankweb/breadcrumbs.
 add_action(

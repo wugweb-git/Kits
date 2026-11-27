@@ -121,7 +121,7 @@ add_filter(
 function sourceweb_ar_fill_pin( $lid ) {
 	static $busy = false;
 	$lid = (int) $lid;
-	if ( $busy || 'aw_listing' !== get_post_type( $lid ) || sourceweb_enrich_is_protected( $lid ) || '' !== trim( (string) get_post_meta( $lid, 'aw_pincode', true ) ) ) {
+	if ( $busy || ! sourceweb_is_type( get_post_type( $lid ), 'listing' ) || sourceweb_enrich_is_protected( $lid ) || '' !== trim( (string) get_post_meta( $lid, 'aw_pincode', true ) ) ) {
 		return false;
 	}
 	$pin = sourceweb_ar_pin( (string) get_post_meta( $lid, 'aw_address', true ) );
@@ -173,8 +173,9 @@ function sourceweb_ar_rest_sweep( WP_REST_Request $req ) {
 		$seen[ $d['act'] ][] = $id;
 	}
 	$pins = 0;
-	if ( ! $dry ) {
-		foreach ( (array) $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_address' LEFT JOIN {$wpdb->postmeta} c ON c.post_id = p.ID AND c.meta_key = 'aw_pincode' WHERE p.post_type = 'aw_listing' AND p.post_status IN ( 'publish', 'pending' ) AND ( c.meta_value IS NULL OR c.meta_value = '' ) AND a.meta_value REGEXP '[1-9][0-9]{2} ?[0-9]{3}' LIMIT 500" ) as $lid ) { // phpcs:ignore WordPress.DB
+	if ( ! $dry && '' !== sourceweb_type( 'listing' ) ) {
+		$is_l = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) );
+		foreach ( (array) $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} a ON a.post_id = p.ID AND a.meta_key = 'aw_address' LEFT JOIN {$wpdb->postmeta} c ON c.post_id = p.ID AND c.meta_key = 'aw_pincode' WHERE {$is_l} AND p.post_status IN ( 'publish', 'pending' ) AND ( c.meta_value IS NULL OR c.meta_value = '' ) AND a.meta_value REGEXP '[1-9][0-9]{2} ?[0-9]{3}' LIMIT 500" ) as $lid ) { // phpcs:ignore WordPress.DB
 			$pins += sourceweb_ar_fill_pin( (int) $lid ) ? 1 : 0;
 		}
 	}

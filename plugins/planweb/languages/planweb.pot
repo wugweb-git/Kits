@@ -428,7 +428,7 @@ msgid "Active, %s"
 msgstr ""
 
 #: includes/kits-hub.php:60
-msgid "Switched off (Appearance → Kits → Modules); Appearance → Kits → Dates is in use."
+msgid "Switched off (Appearance → Kits → Modules)."
 msgstr ""
 
 #. translators: %d: number of dates that do not match.
@@ -514,7 +514,7 @@ msgid "Saved. PlanWeb is on."
 msgstr ""
 
 #: includes/planweb-rest.php:682
-msgid "Saved. PlanWeb is off: Kits → Dates is back, and the entries are kept."
+msgid "Saved. PlanWeb is off, and the entries are kept."
 msgstr ""
 
 #: includes/planweb-rest.php:684
@@ -676,7 +676,7 @@ msgid "Calendar in PlanWeb"
 msgstr ""
 
 #: includes/switch.php:91
-msgid "On: Appearance → Kits → Dates moves to Plugins → PlanWeb → Calendar, and every date in Dates is copied there once (the Dates list itself is kept unchanged as a backup). Off: Appearance → Kits → Dates as before; entries are kept."
+msgid "On: the calendar is Plugins → PlanWeb → Calendar. Off: the PlanWeb screens are hidden; entries are kept."
 msgstr ""
 
 #: includes/switch.php:100
@@ -1049,7 +1049,7 @@ msgid "What PlanWeb will read or work with, and the tools used by hand outside i
 msgstr ""
 
 #: src/index.js:1235
-msgid "Switch PlanWeb off? Kits → Dates comes back and these screens go; the entries are kept."
+msgid "Switch PlanWeb off? These screens go; the entries are kept."
 msgstr ""
 
 #: src/index.js:1249
@@ -1070,7 +1070,7 @@ msgid "Reset this section"
 msgstr ""
 
 #: src/index.js:1291
-msgid "On: Kits → Dates moves to PlanWeb, and every date in Dates is copied here once (Dates itself is kept unchanged). Off: Kits → Dates as before; entries are kept."
+msgid "On: the calendar is PlanWeb → Calendar. Off: the PlanWeb screens are hidden; entries are kept."
 msgstr ""
 
 #: src/index.js:1335

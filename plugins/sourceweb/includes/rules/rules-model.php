@@ -4,13 +4,13 @@
  * with no WordPress calls, so tests/run.php checks them without WordPress (owner rule: no local WordPress or MySQL).
  *
  * - Sections are the site's content types: every registered public post type except page and attachment, plus the
- *   ones that opt in with add_post_type_support( $type, 'aw-section' ) (aw_press). A new content type is a new section
+ *   ones that opt in with add_post_type_support( $type, 'aw-section' ) (the press role's type). A new content type is a new section
  *   by itself: its section rule is empty (every category) and its summary rule inherits News.
  * - Section rules stay in aw_sources['sections'] (post type => categories, tags); the migration adds the missing types
  *   with empty lists. Tag rules stay in aw_sources['topic_tags'] (tag slug => any, hold, unless, hold_reason).
- * - Summary rules: sourceweb_summary_rules['sections'] is keyed by post type from phase 3 (aw_news, aw_legal, post), each
+ * - Summary rules: sourceweb_summary_rules['sections'] is keyed by post type from phase 3 (the news and library types, post), each
  *   with its old name as alias (news, library, research), so sourceweb_summary_rules() and the workers' v1 reader see the same
- *   rules. A section without a row of its own inherits News (inherit: aw_news).
+ *   rules. A section without a row of its own inherits News (inherit: the news type).
  * - Directory enrichment field rules: option sourceweb_enrich_field_rules {priority: [source keys], fields: {field: rule}},
  *   seeded from the workers' constants (aw_workers/directory/merge.py), which tests/fixtures/enrich_field_rules_seed.json
  *   holds in both repositories. A field rule: on, sources (which may fill it; [] = any), multi (0 = one value; n = up
@@ -25,24 +25,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Summary rule sections of before phase 3, by the post type that now holds them. */
-const AW_RULES_SUMMARY_ALIAS = array(
-	'aw_news'  => 'news',
-	'aw_legal' => 'library',
-	'post'     => 'research',
-);
+require_once dirname( __DIR__ ) . '/compat/post-type-roles.php'; // which post type plays which role (the site says, through a filter)
 
-/** The post type a section without its own summary rule inherits from. */
-const AW_RULES_SUMMARY_INHERIT = 'aw_news';
+/**
+ * Summary rule sections of before phase 3, by the post type that now holds them: post type => the old section name.
+ * Built from the site's type roles; a role with no type has no section. WordPress's own post is always research.
+ *
+ * @return array<string,string>
+ */
+function sourceweb_rules_summary_alias(): array {
+	$out = array();
+	foreach ( array( 'news' => 'news', 'library' => 'library' ) as $role => $alias ) {
+		$type = sourceweb_type( $role );
+		if ( '' !== $type ) {
+			$out[ $type ] = $alias;
+		}
+	}
+	$out['post'] = 'research';
+	return $out;
+}
 
-/** The workers' item type for each post type they file items into (sources.py SITE_TYPES; aw_press: "file as press"). */
-const AW_RULES_WORKER_TYPES = array(
-	'aw_news'        => 'news',
-	'aw_legal'       => 'legal',
-	'post'           => 'research',
-	'aw_opportunity' => 'opportunity',
-	'aw_press'       => 'press',
-);
+/**
+ * The post type a section without its own summary rule inherits from: the news type (post when the site has none).
+ *
+ * @return string
+ */
+function sourceweb_rules_summary_inherit(): string {
+	$type = sourceweb_type( 'news' );
+	return '' !== $type ? $type : 'post';
+}
+
+/**
+ * The workers' item type for each post type they file items into (sources.py SITE_TYPES; press: "file as press").
+ *
+ * @return array<string,string>
+ */
+function sourceweb_rules_worker_types(): array {
+	$out = array();
+	foreach ( array( 'news' => 'news', 'library' => 'legal', 'opportunity' => 'opportunity', 'press' => 'press' ) as $role => $worker ) {
+		$type = sourceweb_type( $role );
+		if ( '' !== $type ) {
+			$out[ $type ] = $worker;
+		}
+	}
+	$out['post'] = 'research';
+	return $out;
+}
 
 /** Post types that are never sections, even when public. */
 const AW_RULES_NOT_SECTIONS = array( 'page', 'attachment' );
@@ -174,7 +202,7 @@ function sourceweb_rules_section_types( array $public, array $opt_in, array $ord
  * @return array
  */
 function sourceweb_rules_summary_by_post_type( array $sections ) {
-	$by_alias = array_flip( AW_RULES_SUMMARY_ALIAS );
+	$by_alias = array_flip( sourceweb_rules_summary_alias() );
 	$out      = array();
 	foreach ( $sections as $name => $sec ) {
 		if ( isset( $by_alias[ $name ] ) && is_array( $sec ) && ! isset( $sections[ $by_alias[ $name ] ] ) ) {
@@ -194,13 +222,14 @@ function sourceweb_rules_summary_by_post_type( array $sections ) {
  * @return array
  */
 function sourceweb_rules_summary_legacy( array $sections ) {
-	$out = array();
+	$out   = array();
+	$alias = sourceweb_rules_summary_alias();
 	foreach ( $sections as $name => $sec ) {
-		if ( is_array( $sec ) && isset( $sec['alias'] ) && isset( AW_RULES_SUMMARY_ALIAS[ $name ] ) ) {
-			$alias = (string) $sec['alias'];
+		if ( is_array( $sec ) && isset( $sec['alias'] ) && isset( $alias[ $name ] ) ) {
+			$old = (string) $sec['alias'];
 			unset( $sec['alias'] );
-			$out[ $alias ] = $sec;
-		} elseif ( ! isset( AW_RULES_SUMMARY_ALIAS[ $name ] ) && in_array( $name, AW_RULES_SUMMARY_ALIAS, true ) ) {
+			$out[ $old ] = $sec;
+		} elseif ( ! isset( $alias[ $name ] ) && in_array( $name, $alias, true ) ) {
 			$out[ $name ] = $sec; // still a legacy key
 		}
 	}
@@ -217,15 +246,17 @@ function sourceweb_rules_summary_legacy( array $sections ) {
  * @return array post type => {label, min_words, max_words, structure, attribution, alias?|inherit?}
  */
 function sourceweb_rules_summary_resolve( array $v1, array $stored, array $labels ) {
-	$out  = array();
-	$base = $v1[ AW_RULES_SUMMARY_ALIAS[ AW_RULES_SUMMARY_INHERIT ] ] ?? array();
+	$out     = array();
+	$alias   = sourceweb_rules_summary_alias();
+	$inherit = sourceweb_rules_summary_inherit();
+	$base    = $v1[ $alias[ $inherit ] ?? 'news' ] ?? array(); // the News rule in force (the old name 'news' when the site has no news type)
 	foreach ( $labels as $pt => $label ) {
-		if ( isset( AW_RULES_SUMMARY_ALIAS[ $pt ] ) && isset( $v1[ AW_RULES_SUMMARY_ALIAS[ $pt ] ] ) ) {
-			$out[ $pt ] = sourceweb_rules_summary_fields( $v1[ AW_RULES_SUMMARY_ALIAS[ $pt ] ] ) + array( 'alias' => AW_RULES_SUMMARY_ALIAS[ $pt ] );
+		if ( isset( $alias[ $pt ] ) && isset( $v1[ $alias[ $pt ] ] ) ) {
+			$out[ $pt ] = sourceweb_rules_summary_fields( $v1[ $alias[ $pt ] ] ) + array( 'alias' => $alias[ $pt ] );
 			continue;
 		}
 		$own = is_array( $stored[ $pt ] ?? null ) ? $stored[ $pt ] : array();
-		if ( $own && '' === (string) ( $own['inherit'] ?? AW_RULES_SUMMARY_INHERIT ) ) {
+		if ( $own && '' === (string) ( $own['inherit'] ?? $inherit ) ) {
 			$rule          = sourceweb_rules_summary_fields( array_merge( $base, array_filter( $own, fn( $x ) => '' !== $x && array() !== $x ) ) );
 			$rule['label'] = (string) ( $own['label'] ?? $label );
 			$out[ $pt ]    = $rule + array( 'inherit' => '' );
@@ -235,7 +266,7 @@ function sourceweb_rules_summary_resolve( array $v1, array $stored, array $label
 			sourceweb_rules_summary_fields( $base ),
 			array(
 				'label'   => (string) $label,
-				'inherit' => AW_RULES_SUMMARY_INHERIT,
+				'inherit' => $inherit,
 			)
 		);
 	}
@@ -455,7 +486,7 @@ function sourceweb_enrich_listing_groups_fields( array $groups, $prefix ) {
  * @param array  $acf_fields The groups' fields (sourceweb_enrich_listing_groups_fields): name, label, type, sub_fields.
  * @param array  $enrich     sourceweb_enrich_fields(): key => [label, store, group].
  * @param string $group      Field group key.
- * @param array  $types      Listing types (tag slugs allowed for aw_listing).
+ * @param array  $types      Listing types (tag slugs allowed for the listing type).
  * @param array  $services   Service slug => name.
  * @return array
  */
@@ -639,7 +670,7 @@ function sourceweb_rules_phase3_plan( array $sources_opt, $summary_opt, $rules_o
 	$rekeyed                 = array();
 	if ( is_array( $summary_opt ) && isset( $summary_opt['sections'] ) && is_array( $summary_opt['sections'] ) ) {
 		$by = sourceweb_rules_summary_by_post_type( $summary_opt['sections'] );
-		foreach ( AW_RULES_SUMMARY_ALIAS as $pt => $alias ) {
+		foreach ( sourceweb_rules_summary_alias() as $pt => $alias ) {
 			if ( isset( $summary_opt['sections'][ $alias ] ) && isset( $by[ $pt ] ) ) {
 				$rekeyed[ $alias ] = $pt;
 			}
@@ -709,7 +740,7 @@ function sourceweb_rules_phase3_compare( array $old_sources, $old_summary, array
 		if ( $legacy !== $old_summary['sections'] ) {
 			$diffs[] = 'summary rules: the sections read by their old names differ from the backup';
 		} else {
-			$planned[] = 'summary rules keyed by post type (' . implode( ', ', array_map( fn( $a, $p ) => "$a → $p", AW_RULES_SUMMARY_ALIAS, array_keys( AW_RULES_SUMMARY_ALIAS ) ) ) . '), every value kept';
+			$planned[] = 'summary rules keyed by post type (' . implode( ', ', array_map( fn( $a, $p ) => "$a → $p", sourceweb_rules_summary_alias(), array_keys( sourceweb_rules_summary_alias() ) ) ) . '), every value kept';
 		}
 		$go = $old_summary;
 		$gn = is_array( $new_summary ) ? $new_summary : array();

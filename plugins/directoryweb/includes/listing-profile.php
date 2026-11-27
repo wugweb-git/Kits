@@ -17,6 +17,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The fields in the box: group => [ key => [label, input type, hint] ]. */
 function directoryweb_listing_fields() {
+	/**
+	 * Filters the fields in the box: group => [ key => [ label, input type, hint ] ]. A site adds its own (registration or
+	 * accreditation numbers) here, in the group it belongs to.
+	 *
+	 * @param array $fields Fields.
+	 */
+	return apply_filters( 'directoryweb_listing_fields', directoryweb_listing_fields_base() );
+}
+
+/** The plugin's own fields in the box (directoryweb_listing_fields() before the filter). */
+function directoryweb_listing_fields_base() {
 	return array(
 		'Contact' => array(
 			'aw_email'    => array( 'Email', 'email', '' ),
@@ -41,9 +52,6 @@ function directoryweb_listing_fields() {
 			'aw_founded'      => array( 'Year established', 'text', 'e.g. 2014' ),
 			'aw_head'         => array( 'Head of the organisation', 'text', 'Name and role, as the organisation publishes it' ),
 			'aw_registration' => array( 'Registration', 'text', 'Trust/Society registration number' ),
-			'aw_reg_12a'      => array( directoryweb_label( 'tax_12a' ), 'text', directoryweb_label( 'tax_12a_help' ) ),
-			'aw_reg_80g'      => array( directoryweb_label( 'tax_80g' ), 'text', directoryweb_label( 'tax_80g_help' ) ),
-			'aw_darpan_id'    => array( directoryweb_label( 'registry_id' ), 'text', '' ),
 			'aw_animals'      => array( directoryweb_label( 'animals' ), 'text', directoryweb_label( 'animals_help' ) ),
 			'aw_services'     => array( 'Services', 'text', 'Comma separated, as the organisation states them' ),
 			'aw_languages'    => array( 'Languages', 'text', 'Comma separated' ),
@@ -293,8 +301,18 @@ function directoryweb_block_org_details( $a, $id ) {
 	foreach ( $contact as $k => $c ) {
 		$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . directoryweb_icon( $c[0] ) . '</span>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';
 	}
-	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_fcra' => 'research', 'aw_reg_type' => 'research', 'aw_areas_served' => 'map-pin', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
-	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => directoryweb_label( 'animals' ), 'aw_area' => 'Location', 'aw_areas_served' => 'Areas served', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_reg_type' => 'Registered as', 'aw_registration' => 'Registration', 'aw_reg_12a' => directoryweb_label( 'tax_12a' ), 'aw_reg_80g' => directoryweb_label( 'tax_80g' ), 'aw_fcra' => directoryweb_label( 'foreign_funding' ), 'aw_darpan_id' => directoryweb_label( 'registry_id' ), 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_type' => 'research', 'aw_areas_served' => 'map-pin', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
+	$rows  = array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => directoryweb_label( 'animals' ), 'aw_area' => 'Location', 'aw_areas_served' => 'Areas served', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_reg_type' => 'Registered as', 'aw_registration' => 'Registration', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' );
+	/**
+	 * Filters the organisation facts printed on the listing: meta key => label, in order (a key with no icon below uses
+	 * the research icon). A site adds its own registration or accreditation rows here; the value is the meta's.
+	 *
+	 * @param array $rows Meta key => label.
+	 * @param int   $id   Listing ID.
+	 */
+	$rows = (array) apply_filters( 'directoryweb_org_facts', $rows, $id );
+	foreach ( $rows as $k => $label ) {
+		$icons[ $k ] = $icons[ $k ] ?? 'research';
 		if ( 'aw_hours' === $k ) { // the hours table, from the list only
 			$facts .= '<div class="aw-org-fact' . ( $hours ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . directoryweb_icon( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . ( $hours ? $hours : $missing( $k ) ) . '</dd></div>';
 		} elseif ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {

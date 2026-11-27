@@ -2,6 +2,25 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.2.1
+
+The Animal Writes site layer must be deployed alongside InsightWeb 1.2.1 (it maps the content types).
+
+- The plugin no longer names any content type of one site. The scoring ladder's page class, the crawl check, the Request indexing order, the PageSpeed sample, the keyword and Rising title searches and the campaign box ask for a role (news, library, campaign, opportunity, listing) through `includes/post-type-roles.php`; the site says which type plays which role with the new filter `insightweb_post_type_roles` (default: none, so a type-specific step is skipped). The listing role comes from DirectoryWeb's `directoryweb_post_type()` when it is loaded.
+- The Animal Writes slugs are supplied from `sites/animalwrites/insightweb/site.php`. The path-based page class (`/library/`, `/directory/`, `/news/`) is unchanged.
+- Not rebuilt: `build/` (no `src/` change).
+
+## 1.2.0
+
+Code that existed for one site (Animal Writes) is out of the plugin; it lives in `sites/animalwrites/insightweb/`, which must be deployed alongside InsightWeb 1.2.0 on that site.
+
+- Moved out, unchanged: `includes/search-insights/links-seed.php` and `data/links-2026-11-02.php` (the known-links seed, run through the new action `insightweb_si_links_seed`; markers cleared on the new action `insightweb_si_dropped`); `insightweb_si_vis_migrate()` (the carry-over that kept visitor counting on where the table had rows); the brand regex `AW_SI_BRAND` (now the filter `insightweb_brand_pattern`); the Rising and species word lists and the GitHub repository link for PHP errors (now filters).
+- Removed: the `wp aw-si links seed` subcommand (a site layer registers `wp aw-si-links seed`); the hard-coded one-host cache note on the Server tab.
+- Neutral defaults: brand pattern from the site name and host; Rising lists, species list and anchor topic empty; the "animal welfare = 100" wording is "the anchor topic = 100".
+- Behaviour change: a site that relied on the 1.1.4 carry-over and has no stored choice now starts with counting off. The Animal Writes site layer restores the rule.
+- Kept on purpose: the Kits → Keys vault copy (`insightweb_keys_copy()`, it names the shared Kits vault, not one site); the earlier `aw_si_*` function names (Kits Core, RankWeb and DirectoryWeb call them); content classes keyed on `aw_*` post types in scoring and the crawl check (inert where the types do not exist).
+- Test fixtures no longer use the Animal Writes name or domain.
+
 ## 1.1.6
 
 - The links seed uses the site name (`get_bloginfo('name')`) for the anchor and note text it writes. Seeding and gating are unchanged.

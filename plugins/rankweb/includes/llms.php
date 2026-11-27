@@ -4,7 +4,7 @@
  * (General → Edit llms.txt) choose the post types, taxonomies, limit and the summary under the title. This file only
  * adds what those settings cannot express:
  *
- * - The file starts with its "# Animal Writes" title (no credit line above it, as the llms.txt format expects).
+ * - The file starts with its "# {Site name}" title (no credit line above it, as the llms.txt format expects).
  * - Each item is described by its Rank Math description (the same words as its search snippet), else its excerpt.
  * - Each section hub's line ends with its live count and the date (no stale "995 stories" copy).
  * - Pages come in the site's order: the hubs, then About and the policies, then the forms.
@@ -50,10 +50,10 @@ add_filter(
  * @return string
  */
 function rankweb_llms_hub_count( $post, $desc ) {
-	if ( 'page' !== $post->post_type || $post->post_parent || ! function_exists( 'aw_hub_count_label' ) || ! defined( 'AW_HUBS' ) ) {
+	if ( 'page' !== $post->post_type || $post->post_parent || ! function_exists( 'aw_hub_count_label' ) || ! rankweb_hubs() ) {
 		return $desc;
 	}
-	foreach ( AW_HUBS as $type => $h ) {
+	foreach ( rankweb_hubs() as $type => $h ) {
 		if ( $h[0] === $post->post_name ) {
 			$label = aw_hub_count_label( $type );
 			return '' !== $label ? rtrim( (string) $desc ) . ' ' . rankweb_llms_ucfirst( $label ) . ' on ' . wp_date( 'j M Y' ) . '.' : $desc;

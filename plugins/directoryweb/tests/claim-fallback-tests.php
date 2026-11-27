@@ -31,7 +31,9 @@ define( 'HOUR_IN_SECONDS', 3600 );
 define( 'DIRECTORYWEB_VERSION', '1.1.0' );
 define( 'MINUTE_IN_SECONDS', 60 );
 const DIRECTORYWEB_CLAIM_ROLES = array( '' => 'Choose', 'founder' => 'Founder' );
-const DIRECTORYWEB_SERVICES = array();
+function directoryweb_services() {
+	return array();
+}
 function add_action( ...$a ) {}
 function add_filter( ...$a ) {}
 function add_shortcode( ...$a ) {}

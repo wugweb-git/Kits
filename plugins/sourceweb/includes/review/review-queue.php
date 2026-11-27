@@ -14,20 +14,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Who reviews: the To review screen and its Publish and Reject. */
 const AW_REVIEW_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
 
-/** Types in the queue: post type => label. */
-const AW_REVIEW_TYPES = array(
-	'aw_news'        => 'News',
-	'aw_legal'       => 'Library',
-	'aw_opportunity' => 'Opportunity',
-	'aw_press'       => 'Press',
-	'aw_social'      => 'Social post', // Social posts (the site layer's social-posts.php), only while that module is on
-	'post'           => 'Research', // research papers only (Resources tagged research): a held one shows why (24 Oct 2026)
-);
+/**
+ * Types in the queue: post type => label. Built from the site's type roles (sourceweb_post_type_roles); a role with no
+ * type is left out. WordPress's own post is always there (research papers only: Resources tagged research, a held one
+ * shows why, 24 Oct 2026). The social role is the site layer's social posts, only while that module is on.
+ *
+ * @return array<string,string>
+ */
+function sourceweb_review_types(): array {
+	$labels = array(
+		'news'        => 'News',
+		'library'     => 'Library',
+		'opportunity' => 'Opportunity',
+		'press'       => 'Press',
+		'social'      => 'Social post',
+	);
+	$out    = array();
+	foreach ( $labels as $role => $label ) {
+		$type = sourceweb_type( $role );
+		if ( '' !== $type ) {
+			$out[ $type ] = $label;
+		}
+	}
+	$out['post'] = 'Research';
+	return $out;
+}
 
 /** A review item: any of the types above, but of Resources only research papers (guides are never reviewed here). */
 function sourceweb_review_is_item( $p ) {
 	// A type switched off (Social posts) is left out; its records are kept.
-	return $p && isset( AW_REVIEW_TYPES[ $p->post_type ] ) && post_type_exists( $p->post_type ) && ( 'post' !== $p->post_type || has_term( 'research', 'post_tag', $p ) );
+	return $p && isset( sourceweb_review_types()[ $p->post_type ] ) && post_type_exists( $p->post_type ) && ( 'post' !== $p->post_type || has_term( 'research', 'post_tag', $p ) );
 }
 
 /**
@@ -37,7 +53,8 @@ function sourceweb_review_is_item( $p ) {
  * @return WP_Post[]
  */
 function sourceweb_review_items( $type = '' ) {
-	$types   = $type && isset( AW_REVIEW_TYPES[ $type ] ) ? array( $type ) : array_keys( AW_REVIEW_TYPES );
+	$labels  = sourceweb_review_types();
+	$types   = $type && isset( $labels[ $type ] ) ? array( $type ) : array_keys( $labels );
 	$pending = get_posts( array( 'post_type' => $types, 'post_status' => 'pending', 'numberposts' => 300, 'orderby' => 'date', 'order' => 'DESC' ) );
 	$held    = get_posts(
 		array(
@@ -77,7 +94,7 @@ function sourceweb_review_count_flush() {
 add_action(
 	'transition_post_status',
 	function ( $new, $old, $post ) {
-		if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'aw_opportunity', 'aw_press', 'aw_social' ), true ) ) {
+		if ( sourceweb_is_any_type( $post->post_type, array( 'news', 'library', 'opportunity', 'press', 'social' ) ) ) {
 			sourceweb_review_count_flush();
 		}
 	},
@@ -153,27 +170,33 @@ function sourceweb_review_page() {
 
 /* ---------- News and Library lists (edit.php): bulk Publish / Approve on every ticked item, and "Publish all" ---------- */
 
-foreach ( array_diff( array_keys( AW_REVIEW_TYPES ), array( 'post' ) ) as $aw_rt ) { // not on the Resources list (guides)
-	add_filter( 'bulk_actions-edit-' . $aw_rt, fn( $a ) => array( 'aw_publish' => 'Publish (approve)' ) + $a );
-	add_filter(
-		'handle_bulk_actions-edit-' . $aw_rt,
-		function ( $back, $action, $ids ) {
-			if ( 'aw_publish' !== $action ) {
-				return $back;
-			}
-			return add_query_arg( 'aw_published', sourceweb_review_apply( (array) $ids, 'publish' ), $back );
-		},
-		10,
-		3
-	);
-}
+add_action(
+	'init',
+	function () {
+		foreach ( array_diff( array_keys( sourceweb_review_types() ), array( 'post' ) ) as $aw_rt ) { // not on the Resources list (guides)
+			add_filter( 'bulk_actions-edit-' . $aw_rt, fn( $a ) => array( 'aw_publish' => 'Publish (approve)' ) + $a );
+			add_filter(
+				'handle_bulk_actions-edit-' . $aw_rt,
+				function ( $back, $action, $ids ) {
+					if ( 'aw_publish' !== $action ) {
+						return $back;
+					}
+					return add_query_arg( 'aw_published', sourceweb_review_apply( (array) $ids, 'publish' ), $back );
+				},
+				10,
+				3
+			);
+		}
+	},
+	20
+);
 
 // "Publish all N in this view" on the Pending and Draft views (every page, not only the one on screen).
 add_action(
 	'restrict_manage_posts',
 	function ( $type, $which ) {
 		$status = sanitize_key( $_GET['post_status'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-		if ( 'top' !== $which || ! isset( AW_REVIEW_TYPES[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+		if ( 'top' !== $which || ! isset( sourceweb_review_types()[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
 			return;
 		}
 		$n = (int) ( wp_count_posts( $type )->$status ?? 0 );
@@ -190,7 +213,7 @@ add_action(
 	function () {
 		$type   = sanitize_key( $_GET['post_type'] ?? '' );
 		$status = sanitize_key( $_GET['status'] ?? '' );
-		if ( ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( AW_REVIEW_TYPES[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+		if ( ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( sourceweb_review_types()[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$ids = get_posts( array( 'post_type' => $type, 'post_status' => $status, 'fields' => 'ids', 'numberposts' => -1 ) );

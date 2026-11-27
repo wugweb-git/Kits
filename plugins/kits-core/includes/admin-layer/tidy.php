@@ -1,7 +1,6 @@
 <?php
 /**
- * Admin menu tidy (moved from Animal Writes Core's admin-tidy.php, 18 Nov 2026; owner, 25 Oct 2026, from the admin
- * screenshots): links that nobody here uses come out of the menus
+ * Admin menu tidy (from the admin screenshots): links that nobody here uses come out of the menus
  * and the admin bar, so what is left is what the team works with. Only the links go: every screen still opens at its
  * address, nothing is uninstalled and no plugin's own code is changed.
  *

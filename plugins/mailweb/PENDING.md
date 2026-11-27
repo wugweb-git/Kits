@@ -4,6 +4,10 @@
 
 Checked line by line against the code on 27 Nov 2026. Updated for 3.4.0 the same day.
 
+### 3.5.0 (27 Nov 2026): Animal Writes code out of the plugin
+- Moved unchanged to `sites/animalwrites/mailweb/` (see its README and CHANGELOG 3.5.0): website forms, newsletter shortcode and old list, compat names, and the Animal Writes part of `fluentcrm.php`. It must be deployed with 3.5.0 on the live site; not run on a live WordPress, only parsed and string-checked (`sites/animalwrites/mailweb/tests/site-tests.php`).
+- Open: `mailweb_fcrm_contact_for()` and `mailweb_fcrm_subscribe()` remain in the plugin but only the site layer's forms and DirectoryWeb call them; the FluentCRM dashboard tidy-up (hides the Pro card and Quick Links) is still on for every site and may deserve a switch. Kits Core in the site layer and DirectoryWeb call `mailweb_fcrm_*` by function name; DirectoryWeb uses only `mailweb_fcrm_on()` and `mailweb_fcrm_tag_ids()`, which stay.
+
 ### Built in 3.4.0 (all off on a clean install; code in `includes/mail-delivery.php`, `includes/mail-fallback-mailer.php`, `includes/mailweb-fluentsmtp.php`)
 - Real-mail logging: with the switch "Keep a log line for every email" on (Site sending → Delivery log, fallback and alerts), one line per `wp_mail()` is kept in option `mailweb_email_logs`: time, recipients, subject, status, sent-through, error. Never the text. Status is what `wp_mail_succeeded` / `wp_mail_failed` reported: accepted by the mail server (not "delivered"), failed, accepted by the fallback, or held in the queue (`queued`, from `mail-cap.php`). The last 200 lines, cut to the retention days. The test email is logged the same way, only when the switch is on (this closes the open bug that the test send always kept recipient and subject).
 - Status column in the Email Logs screen (Mail → Email Logs, `manage_mailweb`): the words above, plus the way it was sent. A notice says when logging is off.

@@ -41,7 +41,7 @@ if ( ! function_exists( 'aw_directory_url' ) ) {
 if ( ! function_exists( 'aw_featured_names' ) ) {
 	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
 	function aw_featured_names( ...$args ) {
-		return directoryweb_featured_names( ...$args );
+		return function_exists( 'directoryweb_featured_names' ) ? directoryweb_featured_names( ...$args ) : array(); // the Animal Writes site layer defines it
 	}
 }
 

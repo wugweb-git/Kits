@@ -52,22 +52,22 @@ check( planweb_is_time( '' ) && planweb_is_time( '09:30' ) && planweb_is_time( '
 check( ! planweb_is_time( '24:00' ) && ! planweb_is_time( '9:30' ) && ! planweb_is_time( '09:30:00' ), 'no other times' );
 
 // Links: this site and social sites only.
-$site = 'animalwrites.in';
+$site = 'example.org';
 check( '' === planweb_link_problem( '', $site ), 'empty link is fine' );
-check( '' === planweb_link_problem( 'https://animalwrites.in/campaigns/x/', $site ), 'own page' );
-check( '' === planweb_link_problem( 'https://www.animalwrites.in/', $site ), 'own page with www' );
-check( '' === planweb_link_problem( 'https://x.com/animal_writes_/status/1', $site ), 'X' );
-check( '' === planweb_link_problem( 'https://www.linkedin.com/company/animalwrites', $site ), 'LinkedIn with www' );
-check( '' === planweb_link_problem( 'https://in.linkedin.com/company/animalwrites', $site ), 'LinkedIn subdomain' );
+check( '' === planweb_link_problem( 'https://example.org/campaigns/x/', $site ), 'own page' );
+check( '' === planweb_link_problem( 'https://www.example.org/', $site ), 'own page with www' );
+check( '' === planweb_link_problem( 'https://x.com/example_org/status/1', $site ), 'X' );
+check( '' === planweb_link_problem( 'https://www.linkedin.com/company/example-org', $site ), 'LinkedIn with www' );
+check( '' === planweb_link_problem( 'https://in.linkedin.com/company/example-org', $site ), 'LinkedIn subdomain' );
 check( '' === planweb_link_problem( 'https://www.whatsapp.com/channel/abc', $site ), 'WhatsApp channel' );
 check( '' !== planweb_link_problem( 'https://wa.me/919999999999', $site ), 'no wa.me' );
 check( '' !== planweb_link_problem( 'https://api.whatsapp.com/send?phone=919999999999', $site ), 'no WhatsApp send link' );
 check( '' !== planweb_link_problem( 'tel:+919999999999', $site ), 'no tel:' );
 check( '' !== planweb_link_problem( 'mailto:someone@example.com', $site ), 'no mailto:' );
 check( '' !== planweb_link_problem( 'https://example.com/', $site ), 'no other site' );
-check( '' !== planweb_link_problem( 'https://animalwrites.in.example.com/', $site ), 'no look-alike host' );
+check( '' !== planweb_link_problem( 'https://example.org.example.com/', $site ), 'no look-alike host' );
 check( '' !== planweb_link_problem( 'https://notx.com/', $site ), 'no host ending in x.com' );
-check( '' !== planweb_link_problem( 'https://user@animalwrites.in/', $site ), 'no user in the address' );
+check( '' !== planweb_link_problem( 'https://user@example.org/', $site ), 'no user in the address' );
 check( '' !== planweb_link_problem( 'javascript:alert(1)', $site ), 'no javascript:' );
 
 // No personal data; the real Dates entries pass.
@@ -80,9 +80,9 @@ $live = array(
 	'Supreme Court cause list (advance and daily lists for 17 Nov 2026) and case status, diary no. 41706/2025. Repeat on 13 and 14 Nov.',
 	'Scheduled tasks at 10:00 (Directory indexing against the 20 Oct baseline) and 11:00 (8 tracked keywords).',
 	'Search Insights → Pages: the campaign, the explainer and the Library judgment of 19 May 2026, impressions, clicks and position for 17 Nov–14 Dec against the 1 Nov baseline.',
-	'help-now guides 28-day checkpoint: 1962 (13798), who-to-call (9031), injured-animal (126) and dog-bite (17307)',
-	'Campaign form #10: 8,089 entries (8,079 yesterday)',
-	'Supreme Court stray-dog case: High Court compliance reports due (19 May 2026 judgment)',
+	'help-now guides 28-day checkpoint: 1962 (13798), who-to-call (9031), first-aid (126) and safety (17307)',
+	'Form #10: 8,089 entries (8,079 yesterday)',
+	'Court case: High Court compliance reports due (19 May 2026 judgment)',
 );
 check( '' === planweb_personal_data_problem( 'Recheck 2026-11-13 2026-11-14' ), 'two Y-m-d dates are not a phone' );
 check( '' !== planweb_personal_data_problem( 'On 2026-11-13 call 98765 43210' ), 'phone next to a date still refused' );
@@ -417,7 +417,7 @@ check( array( 'x', 'linkedin' ) === planweb_channel_list( 'x, LinkedIn,,x' ), 'c
 check( array( 'x' ) === planweb_channel_list( array( 'x', '', 'x' ) ), 'channel list from an array' );
 check( array() === planweb_channel_list( array( '' ) ), 'channel list: the form\'s empty box clears' );
 check( isset( PLANWEB_CHANNELS['threads'], PLANWEB_CHANNELS['bluesky'], PLANWEB_STATUSES['done'] ), 'Threads, Bluesky and Done are on the lists' );
-check( '' === planweb_link_problem( 'https://bsky.app/profile/x', 'animalwrites.in' ), 'Bluesky link allowed' );
+check( '' === planweb_link_problem( 'https://bsky.app/profile/x', 'example.org' ), 'Bluesky link allowed' );
 
 // The calendar feed.
 check( array( 'social', 'email', 'campaign', 'content', 'site' ) === planweb_feed_list( 'marketing', PLANWEB_TYPES, PLANWEB_FEED_TYPE_GROUPS ), 'feed: marketing types' );
@@ -465,9 +465,9 @@ check( array( 1, 3 ) === array_column( planweb_feed_pick( $fe, array(), PLANWEB_
 $ics       = planweb_ics(
 	$fe,
 	array(
-		'name'     => 'Animal Writes: PlanWeb',
+		'name'     => 'Example: PlanWeb',
 		'version'  => '0.2.0',
-		'host'     => 'animalwrites.in',
+		'host'     => 'example.org',
 		'stamp'    => '20261114T120000Z',
 		'types'    => PLANWEB_TYPES,
 		'channels' => PLANWEB_CHANNELS,
@@ -487,7 +487,7 @@ check( str_contains( $ics_un, 'DESCRIPTION:Type: Social\nChannels: X\, LinkedIn\
 check( false === strpos( $ics_un, 'SECRET NOTE' ), 'ics: never the note' );
 check( false === strpos( $ics_un, '98765' ) && str_contains( $ics_un, 'SUMMARY:Entry 2 (title not shown' ), 'ics: a title with a phone number is not shown' );
 check( false === strpos( $ics_un, 'evil.example' ), 'ics: a link to another site is left out' );
-check( str_contains( $ics_un, 'UID:planweb-1@animalwrites.in' ) && str_contains( $ics_un, 'DTSTAMP:20261114T120000Z' ), 'ics: UID and DTSTAMP' );
+check( str_contains( $ics_un, 'UID:planweb-1@example.org' ) && str_contains( $ics_un, 'DTSTAMP:20261114T120000Z' ), 'ics: UID and DTSTAMP' );
 check( str_contains( $ics_un, 'Status: Done' ), 'ics: Done status' );
 $site_ics = planweb_ics(
 	array(
@@ -508,14 +508,14 @@ $site_ics = planweb_ics(
 	array(
 		'name'     => 'N',
 		'version'  => '0.2.0',
-		'host'     => 'animalwrites.in',
+		'host'     => 'example.org',
 		'stamp'    => '20261114T120000Z',
 		'types'    => PLANWEB_TYPES,
 		'channels' => PLANWEB_CHANNELS,
 		'statuses' => PLANWEB_STATUSES,
 	)
 );
-check( str_contains( $site_ics, 'UID:planweb-site-post-77@animalwrites.in' ) && str_contains( $site_ics, 'Type: Resource' ) && str_contains( $site_ics, 'Status: Scheduled' ), 'ics: a site post with its own kind and status' );
+check( str_contains( $site_ics, 'UID:planweb-site-post-77@example.org' ) && str_contains( $site_ics, 'Type: Resource' ) && str_contains( $site_ics, 'Status: Scheduled' ), 'ics: a site post with its own kind and status' );
 check( array( 'site' ) === planweb_feed_list( 'site', PLANWEB_TYPES + PLANWEB_FEED_EXTRA_TYPES, PLANWEB_FEED_TYPE_GROUPS ) && in_array( 'site', PLANWEB_FEED_TYPE_GROUPS['marketing'], true ), 'feed: site type, in marketing' );
 check( str_contains( $ics_un, 'LAST-MODIFIED:20261114T063000Z' ) && 1 === substr_count( $ics_un, 'LAST-MODIFIED' ), 'ics: LAST-MODIFIED when the entry has one' );
 
@@ -702,18 +702,12 @@ check( ( new DateTimeImmutable( '2026-11-30 08:30', $tz ) )->getTimestamp() === 
 check( ( new DateTimeImmutable( '2026-12-07 08:30', $tz ) )->getTimestamp() === planweb_job_next_run( new DateTimeImmutable( '2026-11-30 09:00', $tz ), '08:30', 1 ), 'schedule: a week on when Monday 08:30 has passed' );
 
 
-// 0.4.1: no visible "Animal Writes" outside the gated team dates. (The calendar Today button colour is Kits Core's: kits-core 1.3.4.)
-$visible = 0;
-foreach ( glob( dirname( __DIR__ ) . '/includes/*.php' ) as $f ) {
-	foreach ( explode( "\n", (string) file_get_contents( $f ) ) as $line ) {
-		$t = ltrim( $line );
-		if ( '' === $t || in_array( $t[0], array( '*', '/' ), true ) ) {
-			continue;
-		}
-		$visible += (int) ( preg_match( "/(__|_e|esc_html__|esc_attr__)\(\s*'[^']*Animal Writes/", $t ) );
-	}
+// 0.5.0: no site-specific name anywhere in the plugin's PHP or React source (those live in sites/<site>/planweb/).
+$named = 0;
+foreach ( array_merge( glob( dirname( __DIR__ ) . '/includes/*.php' ), array( dirname( __DIR__ ) . '/planweb.php', dirname( __DIR__ ) . '/uninstall.php', dirname( __DIR__ ) . '/src/index.js' ) ) as $f ) {
+	$named += (int) preg_match( '/animal\s*writes|animalwrites|aw_team_dates/i', (string) file_get_contents( $f ) );
 }
-check( 0 === $visible, 'no translatable string names Animal Writes' );
+check( 0 === $named, 'no Animal Writes name or aw_team_dates in the plugin source' );
 
 echo $fails ? "$fails of $count checks failed.\n" : "All $count checks passed.\n";
 exit( $fails ? 1 : 0 );

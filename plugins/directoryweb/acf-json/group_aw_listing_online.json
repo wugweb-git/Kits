@@ -224,7 +224,7 @@
             "name": "aw_g_category",
             "aria-label": "",
             "type": "text",
-            "instructions": "As on the Google profile, e.g. Animal shelter.",
+            "instructions": "As on the Google profile, e.g. Community centre.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {

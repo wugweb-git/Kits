@@ -409,7 +409,7 @@ function sourceweb_sa_screen_review(): void {
 	);
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	$items = array_map( 'sourceweb_review_row', sourceweb_review_items() );
-	$res   = sourceweb_review_list( $items, $q, AW_REVIEW_TYPES );
+	$res   = sourceweb_review_list( $items, $q, sourceweb_review_types() );
 	$type  = (string) $res['type'];
 	$view  = array_map(
 		static fn( $v ) => array(
@@ -526,7 +526,7 @@ function sourceweb_sa_handle_review(): void {
 	sourceweb_sa_guard( 'sourceweb_sa_review', AW_REVIEW_CAP );
 	list( $act, $ids ) = sourceweb_sa_review_choice( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- the nonce was checked by sourceweb_sa_guard(); each value is sanitized in the function.
 	$type = isset( $_POST['sw_type'] ) ? sanitize_key( wp_unslash( $_POST['sw_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked above.
-	$args = isset( AW_REVIEW_TYPES[ $type ] ) ? array( 'sw_view' => $type ) : array();
+	$args = isset( sourceweb_review_types()[ $type ] ) ? array( 'sw_view' => $type ) : array();
 	if ( '' === $act || ! $ids ) {
 		sourceweb_sa_back( 'review', 'warning', __( 'Nothing was chosen. Tick items first, or use a row\'s button.', 'sourceweb' ), $args );
 	}
@@ -546,7 +546,7 @@ function sourceweb_sa_handle_review_all(): void {
 	sourceweb_sa_guard( 'sourceweb_sa_review_all', AW_REVIEW_CAP );
 	$type  = isset( $_POST['sw_type'] ) ? sanitize_key( wp_unslash( $_POST['sw_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
 	$count = isset( $_POST['sw_count'] ) ? absint( wp_unslash( $_POST['sw_count'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
-	$type  = isset( AW_REVIEW_TYPES[ $type ] ) ? $type : '';
+	$type  = isset( sourceweb_review_types()[ $type ] ) ? $type : '';
 	$args  = '' !== $type ? array( 'sw_view' => $type ) : array();
 	$items = sourceweb_review_items( $type );
 	if ( count( $items ) !== $count ) {
@@ -566,8 +566,8 @@ function sourceweb_sa_handle_review_all(): void {
  */
 function sourceweb_sa_screen_enrichment(): void {
 	echo '<p>' . esc_html__( 'Details the enrichment worker found for Directory listings (phones, hours, website, logo and so on), for a person to approve. A claimed or verified listing is never changed.', 'sourceweb' ) . '</p>';
-	if ( ! post_type_exists( 'aw_listing' ) ) {
-		sourceweb_sa_limit( __( 'This site has no Directory listings (the aw_listing content type comes with DirectoryWeb), so the enrichment worker has nothing to propose and nothing can be applied here. Install and activate DirectoryWeb to use this screen.', 'sourceweb' ) );
+	if ( '' === sourceweb_type( 'listing' ) || ! post_type_exists( sourceweb_type( 'listing' ) ) ) {
+		sourceweb_sa_limit( __( 'This site has no Directory listings (the listing content type comes with DirectoryWeb), so the enrichment worker has nothing to propose and nothing can be applied here. Install and activate DirectoryWeb to use this screen.', 'sourceweb' ) );
 		return;
 	}
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- list filters only; nothing is saved.

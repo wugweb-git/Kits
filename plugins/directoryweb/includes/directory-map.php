@@ -7,8 +7,8 @@
  *   OpenFreeMap: no key, no Google), clustered, one marker per listing with its type icon, a popup with name, type,
  *   district and a link. Points: the listing's own Google Maps location (aw_lat / aw_lng), else the geocoded point
  *   (geocode.php), shown as approximate unless it was a street match. Listings with no point are counted, not shown.
- * - Near me: the visitor's location (asked only when they press the button) or a PIN code (PIN → district through
- *   directoryweb_pin_lookup; the district centre is the starting point) → listings within 5 / 10 / 25 / 50 km, nearest first.
+ * - Near me: the visitor's location (asked only when they press the button) or, where a site supports it, a postal code
+ *   (the filters directoryweb_near_from_code and directoryweb_near_code_input; the district centre is the starting point) → listings within 5 / 10 / 25 / 50 km, nearest first.
  *   Only street, locality and PIN points are ranked (locality and PIN distances shown as "~N km"); listings placed
  *   only at their district's centre are never ranked: they follow as "In your district (location approximate)". The
  *   nearest district's Directory page is always offered.
@@ -27,8 +27,8 @@ const AW_DIR_MAP_LIB = 'assets/vendor/maplibre-gl-4.7.1/'; // MapLibre GL, serve
 const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
- * A district's centre [lat, lng] by LGD district code, from this plugin's data/district-centroids.json (OpenStreetMap
- * Nominatim, 20 Oct 2026). The same as Core's aw_district_centroid(), which read this file too.
+ * A district's centre [lat, lng] by LGD district code, from the file the `directoryweb_district_centroids_file`
+ * filter names (JSON code => [lat, lng]; the plugin ships none). The same as Core's aw_district_centroid(), which read this file too.
  *
  * @param int|string $code LGD district code.
  * @return array|null
@@ -36,8 +36,8 @@ const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 function directoryweb_district_centroid( $code ) {
 	static $c = null;
 	if ( null === $c ) {
-		$f = DIRECTORYWEB_DIR . 'data/district-centroids.json';
-		$c = is_readable( $f ) ? (array) json_decode( (string) file_get_contents( $f ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$f = apply_filters( 'directoryweb_district_centroids_file', '' ); // the plugin ships none; a site gives its own
+		$c = is_string( $f ) && '' !== $f && is_readable( $f ) ? (array) json_decode( (string) file_get_contents( $f ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	}
 	return $c[ (string) (int) $code ] ?? null;
 }
@@ -113,7 +113,11 @@ add_action( 'save_post_aw_listing', fn() => delete_transient( 'aw_dir_points' ) 
 function directoryweb_dir_points_filter( WP_REST_Request $r ) {
 	$place    = directoryweb_place_by_slug( sanitize_title( (string) $r->get_param( 'place' ) ) );
 	$types    = array_filter( array_map( 'sanitize_title', explode( ',', (string) $r->get_param( 'type' ) ) ) );
-	$types    = in_array( 'veterinary', $types, true ) ? array_merge( array_diff( $types, array( 'veterinary' ) ), AW_VET_TYPES ) : $types;
+	foreach ( directoryweb_type_groups() as $group => $g ) { // a type group stands for all its types
+		if ( in_array( $group, $types, true ) ) {
+			$types = array_merge( array_diff( $types, array( $group ) ), (array) $g['types'] );
+		}
+	}
 	$services = array_filter( array_map( 'sanitize_title', explode( ',', (string) $r->get_param( 'service' ) ) ) );
 	$verified = (bool) $r->get_param( 'verified' );
 	$gov      = (bool) $r->get_param( 'gov' );
@@ -221,25 +225,34 @@ add_action(
 /** GET /aw/v1/dir-near: the nearest listings to a point or a PIN code. */
 function directoryweb_dir_near( WP_REST_Request $r ) {
 	$km     = in_array( (int) $r->get_param( 'km' ), array( 5, 10, 25, 50 ), true ) ? (int) $r->get_param( 'km' ) : 10;
-	$pin    = preg_replace( '/\D/', '', (string) $r->get_param( 'pin' ) );
+	$pin    = trim( sanitize_text_field( (string) $r->get_param( 'pin' ) ) );
 	$lat    = (float) $r->get_param( 'lat' );
 	$lng    = (float) $r->get_param( 'lng' );
 	$origin = '';
+	$pin_district = 0;
 	if ( '' !== $pin ) {
-		if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
-			return new WP_Error( 'aw_pin', 'Enter a 6-digit PIN code.', array( 'status' => 400 ) );
+		/**
+		 * A site that knows its postal codes turns one into a point: array( 'lat' => , 'lng' => , 'origin' => text, 'district' => code ),
+		 * a WP_Error, or null when postal codes are not supported (the default).
+		 *
+		 * @param array|WP_Error|null $found Answer.
+		 * @param string              $pin   The code as sent.
+		 */
+		$found = apply_filters( 'directoryweb_near_from_code', null, $pin );
+		if ( is_wp_error( $found ) ) {
+			return $found;
 		}
-		$found = function_exists( 'directoryweb_pin_lookup' ) ? directoryweb_pin_lookup( $pin ) : 'unavailable';
-		$cent  = is_array( $found ) && ! empty( $found['district'] ) ? directoryweb_district_centroid( (int) $found['district'] ) : null;
-		if ( ! $cent ) {
-			return new WP_Error( 'aw_pin', 'That PIN code was not found.', array( 'status' => 404 ) );
+		if ( ! is_array( $found ) ) {
+			return new WP_Error( 'aw_pin', 'Search by postal code is not available.', array( 'status' => 400 ) );
 		}
-		list( $lat, $lng ) = $cent;
-		$origin            = 'PIN ' . $pin . ' (' . $found['district_name'] . ' district)';
+		$lat          = (float) $found['lat'];
+		$lng          = (float) $found['lng'];
+		$origin       = (string) $found['origin'];
+		$pin_district = (int) ( $found['district'] ?? 0 );
 	} else {
 		/**
 		 * The area Near me accepts, as [ min lat, max lat, min lng, max lng ]. The default is the whole world; a site
-		 * that covers one country narrows it (animalwrites.in: array( 6, 37.5, 68, 97.5 ) for India).
+		 * that covers one country narrows it (for example array( 6, 37.5, 68, 97.5 ) for India).
 		 *
 		 * @param array $bounds Bounds.
 		 */
@@ -251,8 +264,8 @@ function directoryweb_dir_near( WP_REST_Request $r ) {
 	}
 	// The nearest district (by centre): the PIN's own district, else the closest centre to the point.
 	$best = null;
-	if ( '' !== $pin && ! empty( $found['district'] ) ) {
-		$best = array( 0, directoryweb_place_district( (int) $found['district'] ) );
+	if ( '' !== $pin && $pin_district ) {
+		$best = array( 0, directoryweb_place_district( $pin_district ) );
 	} else {
 		foreach ( directoryweb_place_states() as $s ) {
 			foreach ( directoryweb_place_districts( $s->code ) as $dist ) {
@@ -341,8 +354,7 @@ function directoryweb_dir_panels_html() {
 	}
 	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
 		. '<form class="aw-near-form"><button type="button" class="kit-btn aw-near-locate">Use my location</button>'
-		. ( directoryweb_pin_lookup_enabled() ? '<span class="aw-near-or">or</span>'
-		. '<label class="screen-reader-text" for="aw-near-pin">PIN code</label><input id="aw-near-pin" class="aw-near-pin" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="PIN code" autocomplete="postal-code">' : '' )
+		. (string) apply_filters( 'directoryweb_near_code_input', '' )
 		. '<label class="screen-reader-text" for="aw-near-km">Distance</label><select id="aw-near-km" class="aw-near-km"><option value="5">Within 5 km</option><option value="10" selected>Within 10 km</option><option value="25">Within 25 km</option><option value="50">Within 50 km</option></select>'
 		. '<button type="submit" class="kit-btn kit-btn--brand">Find</button></form>'
 		. '<p class="aw-near-note">Your location is used only to sort this list, in your browser and on this request; it is not stored.</p>'

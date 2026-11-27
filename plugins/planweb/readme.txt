@@ -4,7 +4,7 @@ Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.4.1
+Stable tag: 0.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ PlanWeb keeps the team's dates and plans: content, social, email, campaign and r
 * Scheduled jobs, each off until you switch it on in PlanWeb Settings: an overdue sweep, repeating entries (every week or month), email reminders to the entry's owner, and a weekly digest to the site administrator.
 * A read-only calendar feed (iCalendar) for Google Calendar, Apple Calendar or Outlook, at `/wp-json/planweb/v1/calendar.ics?key=…`. The key is made in PlanWeb → Settings → Calendar feed; there are filters by type (`type=marketing`) and status (`status=open`). The feed holds date, time, title, type, channels, status and link, never the note.
 
-On a site with the earlier Dates list (option `aw_team_dates`), switching PlanWeb on copies every date once and leaves the list unchanged. `wp planweb verify` compares the two one for one.
+A site that kept its dates in an option can name it through the filter `planweb_import_source`; switching PlanWeb on then copies every date once and leaves the list unchanged, and `wp planweb verify` compares the two one for one. With no source named (the default) there is no import and no import screen.
 
 = Source code =
 
@@ -65,6 +65,13 @@ PlanWeb does not connect to, call, or send any data to an external service, and 
 The iCalendar feed it serves is read by your own calendar app (Google, Apple or Outlook) pulling from this site; the plugin itself never contacts those apps. Any social tools named elsewhere in PlanWeb (for example Meta Business Suite or Buffer) are used by the team outside the plugin — nothing is sent to them from PlanWeb.
 
 == Changelog ==
+
+= 0.5.0 =
+* PlanWeb no longer carries anything for one site. The team's Dates calendar (`includes/team-dates.php`, `aw_team_dates()`, the seeded and campaign dates, their migrations, the one-time 14 Nov entry move and the Kits → Dates screen) is removed from the plugin and kept for the Animal Writes site in its own site layer, `sites/animalwrites/planweb/`, outside the plugin package.
+* The import from an earlier Dates list is now generic: the option is named through the filter `planweb_import_source` and is empty by default, so a site without one has no import, no Import settings group and no import status row. The stored `planweb_source` value on entries already imported is unchanged.
+* The site schedule no longer leaves two post types out by default (the default is none); a site lists bulk-imported types through the filter `planweb_site_skip_types`. The settings now send `import.enabled`.
+* Wording that pointed to Kits → Dates (switch description, off notice, confirm) is neutral.
+* Needs the Animal Writes site layer on that site: PlanWeb 0.5.0 alone does not restore the old Dates screen there.
 
 = 0.4.1 =
 * The shell calendar's disabled "Today" button is readable (#646970 on white, 5.7:1, was 3.03:1). The control is drawn by Kits Core and fixed there (Kits Core 1.3.4).

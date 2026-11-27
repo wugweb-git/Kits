@@ -4,9 +4,6 @@
  * "Latest Form Submissions" box with cards (unread, new in 7 days) and one table: form, unread, last 7 days, total,
  * each form linking to its entries in Fluent Forms. Read-only: counts from Fluent Forms' own submissions table.
  *
- * Moved from Animal Writes Core `includes/dashboard-forms.php` (18 Nov 2026); options, meta keys, tags, hooks and
- * slugs are unchanged, and the old function names still work (back-compat wrappers).
- *
  * @package kits-core
  */
 

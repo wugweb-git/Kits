@@ -4,11 +4,11 @@
  *
  * - Name: a file or camera name (IMG_2034, DSC00012) becomes plain words, at most 100 characters, never ending in a stop word.
  * - Alternative Text: the name, up to 160 characters.
- * - Caption = SEO title (up to 100 characters): the name, or "host favicon | Animal Writes" / "host logo | Animal Writes".
+ * - Caption = SEO title (up to 100 characters): the name, or "host favicon | {Site}" / "host logo | {Site}".
  * - Description = SEO description: at least 100 and up to 160 characters, written for favicons, logos, source images and any other image.
  * - Image context (kits_image_context): the page the file is attached to or later used on (featured or source image), up to 160 characters.
  * - Focus keyphrase (kits_image_keyphrase): that page's Rank Math focus keyword (the first one).
- * No admin screen, no options, no CSS. Moved from Animal Writes Core on 18 Nov 2026; loaded with or without Rank Math.
+ * No admin screen, no options, no CSS. Moved from the earlier Core plugin on 18 Nov 2026; loaded with or without Rank Math.
  *
  * @package rankweb
  */

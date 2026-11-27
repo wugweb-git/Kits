@@ -1,6 +1,8 @@
 <?php
 /**
- * Import from Dates (plan 2.3). Once PlanWeb is on, every element of the option aw_team_dates (as stored) becomes one
+ * Import from an earlier Dates list (plan 2.3). A site that kept its dates in an option can name it through the filter
+ * planweb_import_source (see planweb_import_source()); with no source named, which is the default, nothing here runs.
+ * Once PlanWeb is on, every element of that option (as stored) becomes one
  * entry: date, title and note copied as they are, Type reminder, Status idea. Keyed by date, title, note and copy
  * number, so identical elements stay separate and a second run adds nothing. The option is never written.
  * planweb_verify() compares the two one for one (PlanWeb → Calendar → Import, and wp planweb verify).
@@ -12,6 +14,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Where an earlier Dates list lives. Default: nothing, so a site without one never imports and shows no import screen.
+ *
+ * @return array{option: string, source: string, wait: string} option: the option holding a list of {date, title, note};
+ *               source: the value written to the planweb_source meta of each imported entry; wait: an option that must
+ *               be set before the first automatic run ('' for none).
+ */
+function planweb_import_source(): array {
+	/**
+	 * Name the option an earlier Dates list is stored in.
+	 *
+	 * @param array $source option, source and wait (all empty by default).
+	 */
+	$s = (array) apply_filters(
+		'planweb_import_source',
+		array(
+			'option' => '',
+			'source' => '',
+			'wait'   => '',
+		)
+	);
+	return array(
+		'option' => (string) ( $s['option'] ?? '' ),
+		'source' => (string) ( $s['source'] ?? '' ),
+		'wait'   => (string) ( $s['wait'] ?? '' ),
+	);
+}
+
 // An administrator's first admin page after PlanWeb is switched on (never Ajax, heartbeat or another role). Waits
 // for Dates' 11 Nov note rename, so the notes copied are the renamed ones (or runs at once when there is no Dates
 // list at all). It tries once: if a row fails, the result shows it and the Import button (or wp planweb import)
@@ -19,13 +49,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'admin_init',
 	function () {
-		if ( ! planweb_on() || get_option( 'planweb_import_done' ) || get_option( 'planweb_import_tried' ) || ! post_type_exists( PLANWEB_TYPE ) ) {
+		$src = planweb_import_source();
+		if ( '' === $src['option'] || ! planweb_on() || get_option( 'planweb_import_done' ) || get_option( 'planweb_import_tried' ) || ! post_type_exists( PLANWEB_TYPE ) ) {
 			return;
 		}
 		if ( wp_doing_ajax() || wp_doing_cron() || ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		if ( is_array( get_option( 'aw_team_dates', null ) ) && ! get_option( 'aw_team_dates_links_note_1111' ) ) {
+		if ( is_array( get_option( $src['option'], null ) ) && '' !== $src['wait'] && ! get_option( $src['wait'] ) ) {
 			return;
 		}
 		update_option( 'planweb_import_tried', time(), false );
@@ -40,6 +71,10 @@ add_action(
  * @return array The result, also stored in the option planweb_import_result.
  */
 function planweb_import(): array {
+	$src = planweb_import_source();
+	if ( '' === $src['option'] ) {
+		return array(); // No earlier Dates list is named: nothing to import.
+	}
 	if ( ! add_option( 'planweb_import_lock', time(), '', false ) ) {
 		$held = (int) get_option( 'planweb_import_lock' );
 		if ( $held > time() - 5 * MINUTE_IN_SECONDS ) {
@@ -47,7 +82,7 @@ function planweb_import(): array {
 		}
 		update_option( 'planweb_import_lock', time(), false ); // A run that died long ago.
 	}
-	$stored = get_option( 'aw_team_dates', null );
+	$stored = get_option( $src['option'], null );
 	$map    = planweb_map_dates( $stored );
 	$have   = array();
 	$q      = new WP_Query(
@@ -58,7 +93,7 @@ function planweb_import(): array {
 			'fields'         => 'ids',
 			'no_found_rows'  => true,
 			'meta_key'       => 'planweb_source', // phpcs:ignore WordPress.DB.SlowDBQuery -- once.
-			'meta_value'     => 'aw_team_dates', // phpcs:ignore WordPress.DB.SlowDBQuery -- once.
+			'meta_value'     => $src['source'], // phpcs:ignore WordPress.DB.SlowDBQuery -- once.
 		)
 	);
 	foreach ( $q->posts as $id ) {
@@ -95,7 +130,7 @@ function planweb_import(): array {
 		update_post_meta( $id, 'planweb_date', $r['date'] );
 		update_post_meta( $id, 'planweb_status', 'idea' );
 		update_post_meta( $id, 'planweb_repeat', 'none' );
-		update_post_meta( $id, 'planweb_source', 'aw_team_dates' );
+		update_post_meta( $id, 'planweb_source', $src['source'] );
 		update_post_meta( $id, 'planweb_source_key', $r['key'] );
 		wp_set_object_terms( $id, array( 'reminder' ), 'planweb_type' );
 		if ( '' !== planweb_personal_data_problem( $r['title'] . "\n" . $r['note'] ) ) {
@@ -131,7 +166,8 @@ function planweb_import(): array {
  */
 function planweb_imported_entries(): array {
 	$out = array();
-	if ( ! post_type_exists( PLANWEB_TYPE ) ) {
+	$src = planweb_import_source();
+	if ( '' === $src['option'] || ! post_type_exists( PLANWEB_TYPE ) ) {
 		return $out;
 	}
 	$q = new WP_Query(
@@ -141,7 +177,7 @@ function planweb_imported_entries(): array {
 			'posts_per_page' => -1,
 			'no_found_rows'  => true,
 			'meta_key'       => 'planweb_source', // phpcs:ignore WordPress.DB.SlowDBQuery -- a check screen.
-			'meta_value'     => 'aw_team_dates', // phpcs:ignore WordPress.DB.SlowDBQuery -- a check screen.
+			'meta_value'     => $src['source'], // phpcs:ignore WordPress.DB.SlowDBQuery -- a check screen.
 		)
 	);
 	foreach ( $q->posts as $p ) {
@@ -156,11 +192,12 @@ function planweb_imported_entries(): array {
 }
 
 /**
- * The one-for-one check: the Dates option as stored against the imported entries. Reads only.
+ * The one-for-one check: the earlier Dates option as stored against the imported entries. Reads only.
  *
  * @return array planweb_compare() plus invalid (elements the import cannot take).
  */
 function planweb_verify(): array {
-	$map = planweb_map_dates( get_option( 'aw_team_dates', null ) );
+	$src = planweb_import_source();
+	$map = planweb_map_dates( '' === $src['option'] ? null : get_option( $src['option'], null ) );
 	return planweb_compare( $map['rows'], planweb_imported_entries() ) + array( 'invalid' => $map['invalid'] );
 }

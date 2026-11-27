@@ -123,8 +123,8 @@ function sourceweb_same_story_retire( $dup, $keep ) {
 	if ( function_exists( 'sourceweb_dupe_bump' ) ) {
 		sourceweb_dupe_bump(); // one more "same story" duplicate today, for the dashboard near-duplicates chart
 	}
-	if ( function_exists( 'aw_redirect_add' ) && $path && '/' !== $path ) {
-		aw_redirect_add( $path, $keep );
+	if ( function_exists( 'rankweb_redirect_add' ) && $path && '/' !== $path ) {
+		rankweb_redirect_add( $path, $keep );
 	}
 }
 
@@ -132,7 +132,7 @@ function sourceweb_same_story_retire( $dup, $keep ) {
 function sourceweb_same_story_get( WP_REST_Request $req ) {
 	$id = (int) $req->get_param( 'id' );
 	$p  = get_post( $id );
-	if ( ! $p || ! in_array( $p->post_type, SOURCEWEB_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
+	if ( ! $p || ! in_array( $p->post_type, sourceweb_same_story_types(), true ) || 'trash' === $p->post_status ) {
 		return new WP_Error( 'aw_not_found', 'No such story', array( 'status' => 404 ) );
 	}
 	return new WP_REST_Response(
@@ -158,11 +158,11 @@ function sourceweb_same_story_get( WP_REST_Request $req ) {
 function sourceweb_same_story_post( WP_REST_Request $req ) {
 	$keep = (int) $req->get_param( 'keep_id' );
 	$p    = get_post( $keep );
-	if ( ! $p || ! in_array( $p->post_type, SOURCEWEB_SAME_STORY_TYPES, true ) || 'trash' === $p->post_status ) {
+	if ( ! $p || ! in_array( $p->post_type, sourceweb_same_story_types(), true ) || 'trash' === $p->post_status ) {
 		return new WP_Error( 'aw_not_found', 'No such story', array( 'status' => 404 ) );
 	}
 	$dup = (int) $req->get_param( 'dup_id' );
-	if ( $dup && ( $dup === $keep || ! in_array( get_post_type( $dup ), SOURCEWEB_SAME_STORY_TYPES, true ) ) ) {
+	if ( $dup && ( $dup === $keep || ! in_array( get_post_type( $dup ), sourceweb_same_story_types(), true ) ) ) {
 		return new WP_Error( 'aw_bad_dup', 'Bad duplicate', array( 'status' => 400 ) );
 	}
 	$res = sourceweb_same_story_fold( $keep, (string) $req->get_param( 'source_url' ), (string) $req->get_param( 'publisher' ), (string) $req->get_param( 'added_text' ), (string) $req->get_param( 'model' ), (string) $req->get_param( 'summary' ) );

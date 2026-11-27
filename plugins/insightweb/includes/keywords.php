@@ -4,7 +4,7 @@
  * Search Insights and SourceWeb's Keywords, policy and workers share them; RankWeb reads them when they are there.
  * Moved from Kits Core on 18 Nov 2026 with the same table, option and function names.
  *
- * Reached from insightweb.php, from the bootstrap (when Animal Writes Core or RankWeb's bridge loads Search Insights
+ * Reached from insightweb.php, from the bootstrap (when the earlier Core plugin or RankWeb's bridge loads Search Insights
  * without the InsightWeb plugin) and from SourceWeb's main file. The guard stops a second load from another path.
  *
  * @package insightweb

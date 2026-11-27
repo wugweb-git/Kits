@@ -2,7 +2,7 @@
 /**
  * Search Insights, phase 3: rising terms (plan §3 `rising`, §5.3, §5.5, §7–8; owner, 24 Oct 2026).
  *
- * - REST route aw/v1/search-insights for the workers' search-insights job (animal-writes-workers,
+ * - REST route aw/v1/search-insights for the workers' search-insights job (the workers plugin,
  *   aw_workers/search_insights.py), signed in as the ingest user (insightweb_si_api_allowed()):
  *   GET gives the job its lists (English keywords, topics, species, watchlists, seeds); POST takes one source's rising
  *   terms and figures and records that source's run (Trends trending now, Wikipedia, GDELT daily; autocomplete and
@@ -67,7 +67,7 @@ function insightweb_si_rising_sources(): array {
 			'worker' => true,
 		),
 		'trends_interest' => array(
-			'label'  => __( 'Trends interest (animal welfare = 100)', 'insightweb' ),
+			'label'  => __( 'Trends interest (anchor topic = 100)', 'insightweb' ),
 			'every'  => 31 * DAY_IN_SECONDS,
 			'worker' => true,
 		),
@@ -214,10 +214,10 @@ add_filter(
 	}
 );
 
-/** Animal names counted in the Sourcing spikes and sent to the worker's Trends filter (singular; plurals fold). Words that are
- * mostly something else (bat, python, kite, bull, shark) are left out. */
+/** Topic words counted in the Sourcing spikes and sent to the worker's Trends filter (singular; plurals fold). None by default: a
+ * site lists its own with the filter aw_si_species. */
 function insightweb_si_species(): array {
-	$list = array( 'dog', 'puppy', 'cat', 'kitten', 'cow', 'cattle', 'buffalo', 'calf', 'goat', 'sheep', 'pig', 'horse', 'donkey', 'mule', 'camel', 'monkey', 'macaque', 'langur', 'elephant', 'tiger', 'leopard', 'lion', 'cheetah', 'bear', 'deer', 'blackbuck', 'peacock', 'peafowl', 'pigeon', 'parrot', 'bird', 'vulture', 'eagle', 'owl', 'crow', 'snake', 'cobra', 'crocodile', 'turtle', 'tortoise', 'dolphin', 'whale', 'shark', 'pangolin', 'rhino', 'rhinoceros', 'wolf', 'jackal', 'hyena', 'boar', 'squirrel', 'rabbit', 'chicken', 'hen', 'poultry' );
+	$list = array();
 	return array_values( array_unique( array_map( 'strval', (array) apply_filters( 'aw_si_species', $list ) ) ) );
 }
 
@@ -246,15 +246,14 @@ function insightweb_si_rising_lists(): array {
 		'keywords'       => array_values( array_filter( array_map( 'strval', (array) $keywords ), fn( $s ) => ! insightweb_si_is_brand( $s ) ) ),
 		'topics'         => array_values( array_map( 'strval', (array) $topics ) ),
 		'species'        => insightweb_si_species(),
-		'wikipedia'      => array( 'Rabies', 'Free-ranging dog', 'Indian pariah dog', 'Animal Welfare Board of India', 'Prevention of Cruelty to Animals Act, 1960', 'Wild Life (Protection) Act, 1972', 'Goshala', 'Cattle slaughter in India', 'Cow protection movement', 'Cow vigilante violence in India', 'Animal welfare and rights in India', 'Human–wildlife conflict', 'Project Tiger', 'Dog bite' ), // Canonical titles: redirects count apart.
-		'gdelt'          => array( 'stray dogs', 'dog bite', 'rabies', 'animal cruelty', 'gaushala', 'cow vigilante', 'human wildlife conflict', 'leopard attack', 'elephant death', 'animal welfare board' ),
-		'autocomplete'   => array_values( array_unique( array_merge( array( 'stray dogs', 'street dogs', 'dog bite', 'rabies', 'animal welfare', 'animal cruelty', 'animal rescue', 'animal shelter', 'gaushala', 'veterinary hospital', 'pet adoption', 'abc rules', 'pca act', 'feeding stray dogs', 'wildlife rescue' ), array_slice( (array) $interest, 0, 15 ) ) ) ),
-		'trends_related' => array( 'stray dogs', 'animal welfare', 'rabies', 'animal cruelty', 'gaushala' ),
+		'wikipedia'      => array(), // Canonical page titles: redirects count apart.
+		'gdelt'          => array(),
+		'autocomplete'   => array_values( array_unique( array_slice( (array) $interest, 0, 15 ) ) ),
+		'trends_related' => array(),
 		'interest'       => array_values( array_map( 'strval', (array) $interest ) ),
-		'anchor'         => 'animal welfare',
-		// Terms with these words are dropped by the worker: an anime called Bungo Stray Dogs fills the "stray dogs"
-		// related searches (dry run, 24 Oct 2026), films and songs the trending list.
-		'exclude'        => array( 'anime', 'manga', 'bungo', 'movie', 'film', 'song', 'lyrics', 'season', 'episode', 'cast', 'trailer', 'netflix', 'web series', 'ott', 'box office', 'game', 'meme', 'wallpaper', 'cartoon', 'meaning in', 'cricket', 'ipl', 'vs', 'odi', 't20', 'match', 'score', 'shroff' ),
+		'anchor'         => '', // the comparison topic for Trends interest (= 100); a site sets its own with the filter
+		// Terms with these words are dropped by the worker: films, songs and shows fill the trending list. A site adds its own with the filter.
+		'exclude'        => array( 'anime', 'manga', 'movie', 'film', 'song', 'lyrics', 'season', 'episode', 'cast', 'trailer', 'netflix', 'web series', 'box office', 'game', 'meme', 'wallpaper', 'cartoon' ),
 	);
 	return (array) apply_filters( 'aw_si_rising_lists', $lists );
 }
@@ -297,7 +296,7 @@ function insightweb_si_rising_match( string $norm, string $term, bool $look_up_p
 	if ( '' === $page && $look_up_posts && mb_strlen( $term ) >= 4 ) {
 		// A title search (a scan of published posts' titles): only for a term seen for the first time.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$post = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('page', 'post', 'aw_legal', 'aw_campaign', 'aw_news') AND post_title LIKE %s ORDER BY post_type = 'aw_news', post_date DESC LIMIT 1", '%' . $wpdb->esc_like( $term ) . '%' ) );
+		$post = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ( " . insightweb_sql_list( insightweb_types_with( array( 'library', 'campaign', 'news' ), array( 'page', 'post' ) ) ) . " ) AND post_title LIKE %s ORDER BY " . insightweb_sql_in_types( 'post_type', insightweb_types( array( 'news' ) ) ) . ", post_date DESC LIMIT 1", '%' . $wpdb->esc_like( $term ) . '%' ) );
 		if ( $post ) {
 			$page = insightweb_si_path( (string) get_permalink( (int) $post ) );
 		}
@@ -808,7 +807,7 @@ function insightweb_si_rising_paste_form(): void {
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'What it is', 'insightweb' ) . '</th><td><fieldset>';
 	echo '<label><input type="radio" name="kind" value="related" checked> ' . esc_html__( 'Rising related searches: the search, then its rise (+250% or Breakout)', 'insightweb' ) . '</label><br>';
-	echo '<label><input type="radio" name="kind" value="interest"> ' . esc_html__( 'Interest over 12 months: the keyword, then its average with "animal welfare" in the same comparison scaled to 100', 'insightweb' ) . '</label>';
+	echo '<label><input type="radio" name="kind" value="interest"> ' . esc_html__( 'Interest over 12 months: the keyword, then its average with the anchor topic in the same comparison scaled to 100', 'insightweb' ) . '</label>';
 	foreach ( insightweb_si_rising_paste_kinds() as $key => $label ) {
 		/* translators: %s: where it was read, such as X or Google News. */
 		echo '<br><label><input type="radio" name="kind" value="' . esc_attr( $key ) . '"> ' . esc_html( sprintf( __( 'Read on %s: the topic, then the link it was read at (never Trends figures)', 'insightweb' ), $label ) ) . '</label>';
@@ -948,7 +947,7 @@ add_action(
 					substr( $today, 0, 8 ) . '01',
 					array(
 						'value' => (float) $v,
-						'txt'   => 'animal welfare = 100 (pasted)',
+						'txt'   => 'anchor topic = 100 (pasted)',
 					)
 				);
 			} else {

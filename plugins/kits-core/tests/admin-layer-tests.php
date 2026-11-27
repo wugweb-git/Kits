@@ -255,8 +255,8 @@ kits_t( 'aw_legal' === kits_library_post_type(), 'Animal Writes: Library type' )
 /* ---------- The site's screens and their menu positions ---------- */
 
 $screens = kits_site_screens( true );
-kits_t( array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens' ) === array_keys( $screens ), 'site screens in the same order, without the retired Keys' );
-kits_t( array( 20, 21, 22, 23, 24, 25, 29 ) === array_map( 'kits_site_menu_priority', array( 'animal-writes', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens', 'unknown' ) ), 'menu positions 20 to 25, unknown 29' );
+kits_t( array( 'kits-overview', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens' ) === array_keys( $screens ), 'site screens in the same order, without the retired Keys' );
+kits_t( array( 20, 21, 22, 23, 24, 25, 29 ) === array_map( 'kits_site_menu_priority', array( 'kits-overview', 'aw-dates', 'aw-site-check', 'aw-elsewhere', 'aw-modules', 'aw-edit-screens', 'unknown' ) ), 'menu positions 20 to 25, unknown 29' );
 kits_t( 'manage_options' === kits_site_screen_cap( 'aw-modules' ) && 'edit_pages' === kits_site_screen_cap( 'aw-elsewhere' ) && 'edit_others_posts' === kits_site_screen_cap( 'aw-dates' ), 'capabilities as before' );
 kits_t( 'kits' === kits_site_menu_parent(), 'the menu parent is Kits' );
 kits_t( 24 === kits_site_menu_priority( 'aw-modules' ), 'the Modules screen position' );
@@ -289,7 +289,7 @@ $GLOBALS['kits_test_options']['aw_district_helplines'] = $h;
 $GLOBALS['kits_test_errors']                           = array();
 kits_t( kits_site_options_helplines_clean( "123 | | 0100\n" ) === $h && 1 === count( $GLOBALS['kits_test_errors'] ), 'helplines: a bad line keeps the saved list and says which line' );
 kits_t( kits_site_options_helplines_clean( '' ) === $h, 'helplines: an empty box keeps the saved list' );
-kits_t( array( 'awbi' => 'AWBI' ) === kits_site_options_short_clean( "awbi = AWBI\nbad line\n = x" ), 'issuer short names: slug = short' );
+kits_t( array( 'acme' => 'ACME' ) === kits_site_options_short_clean( "acme = ACME\nbad line\n = x" ), 'issuer short names: slug = short' );
 kits_t( array( 3, 12 ) === kits_site_options_ids( '3, 12, 3, x' ), 'sample listing IDs' );
 kits_t( isset( KITS_FOLLOW_EXTRA['aw_follow_reddit'] ), 'Follow us accounts' );
 kits_t( array( 'aw_cdn', 'aw_modules_social', 'aw_modules_forms' ) === array_keys( kits_site_reset_sections() ), 'Reset this section: the Kits sections' );
@@ -336,10 +336,7 @@ require dirname( __DIR__ ) . '/includes/admin-kits-frame.php';
 $joined = array(
 	'includes/media-webp.php'          => array( 'aw-media-webp', 'manage_options', 'kits-tools' ),
 	'includes/tools/media-merge.php'   => array( 'aw-media-duplicates', 'manage_options', 'kits-tools' ),
-	'includes/tools/media-reuse.php'   => array( 'aw-media-reuse', 'manage_options', 'kits-tools' ),
-	'includes/campaign-letters.php'    => array( 'aw-letter-report', 'edit_posts', '' ),
 	'../../themes/kits-by-wugweb/assets/site/includes/social-posts.php' => array( 'aw-modules', 'manage_options', 'kits-settings' ), // moved to the site layer, 19 Nov 2026
-	'includes/taxonomy-rename.php'     => array( 'kits-taxonomy-rename', 'manage_options', 'kits-tools' ),
 );
 foreach ( $joined as $file => $def ) {
 	$src = (string) file_get_contents( dirname( __DIR__ ) . '/' . $file );

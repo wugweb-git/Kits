@@ -10,7 +10,7 @@
  *   photo, the site icon, and the source a favicon or logo belongs to. Sorting still goes through the core parent order.
  * - Optimisation: size, format and what is missing (no resized copies, over 300 KB, under 64 px).
  * Core list-table columns only: no custom CSS, no scripts. Read only; nothing is saved by this file.
- * Moved from Animal Writes Core on 18 Nov 2026; loaded with or without Rank Math. Column keys (aw_file, aw_slug …) are
+ * Moved from the earlier Core plugin on 18 Nov 2026; loaded with or without Rank Math. Column keys (aw_file, aw_slug …) are
  * unchanged, so each user's hidden columns stay as they were.
  *
  * @package rankweb

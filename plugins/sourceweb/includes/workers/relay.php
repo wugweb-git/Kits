@@ -19,7 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_RELAY_MAX_BYTES = 5 * MB_IN_BYTES;
 const AW_RELAY_TIMEOUT   = 40; // GDELT takes 12–17 s (31 Oct 2026); was 20
 const AW_RELAY_RATE      = 30; // requests per host per 10 minutes
-const AW_RELAY_DEFAULT   = array( 'substack.com', 'zoomtventertainment.com', 'awbi.gov.in', 'ccsea.gov.in', 'egazette.gov.in' );
+/** The built-in relay allow list: empty. A site adds hosts on the Sources screen, or through the filter `sourceweb_relay_default_hosts`. */
+function sourceweb_relay_default_hosts(): array {
+	return array_values( array_filter( (array) apply_filters( 'sourceweb_relay_default_hosts', array() ), 'is_string' ) );
+}
 
 /**
  * Allowed hosts (a host or any of its subdomains): once phase 1 is migrated, the hosts whose relay switch is on
@@ -34,7 +37,7 @@ function sourceweb_relay_hosts() {
 
 /** The allow list of before phase 1: aw_sources.relay_hosts when it was saved, else the built-in list. */
 function sourceweb_relay_hosts_legacy() {
-	return sourceweb_src_relay_legacy( function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array(), AW_RELAY_DEFAULT );
+	return sourceweb_src_relay_legacy( function_exists( 'sourceweb_sources_config' ) ? sourceweb_sources_config() : array(), sourceweb_relay_default_hosts() );
 }
 
 /** True when the host is on the allow list. */

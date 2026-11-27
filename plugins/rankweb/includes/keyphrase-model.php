@@ -15,7 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Content types whose pages answer a question for good (a News item reports one day's story). */
-const AW_SEO_KP_EVERGREEN = array( 'post', 'aw_legal', 'aw_campaign', 'page', 'aw_listing', 'term' );
+function rankweb_seo_kp_evergreen_types(): array {
+	return rankweb_types_with( array( 'library', 'campaign', 'listing' ), array( 'post', 'page', 'term' ) );
+}
 
 /**
  * Whether a content type is evergreen.
@@ -23,7 +25,7 @@ const AW_SEO_KP_EVERGREEN = array( 'post', 'aw_legal', 'aw_campaign', 'page', 'a
  * @param string $type Post type, or 'term'.
  */
 function rankweb_seo_kp_evergreen( string $type ): bool {
-	return in_array( $type, AW_SEO_KP_EVERGREEN, true );
+	return in_array( $type, rankweb_seo_kp_evergreen_types(), true );
 }
 
 /**
@@ -42,7 +44,7 @@ function rankweb_seo_kp_refusal( string $type, array $owners ): string {
 	usort( $owners, fn( $a, $b ) => (int) rankweb_seo_kp_evergreen( (string) $b['type'] ) - (int) rankweb_seo_kp_evergreen( (string) $a['type'] ) );
 	$o    = $owners[0];
 	$name = (string) $o['type'] . ' ' . (int) $o['id'];
-	if ( 'aw_news' === $type && rankweb_seo_kp_evergreen( (string) $o['type'] ) ) {
+	if ( rankweb_is_type( $type, 'news' ) && rankweb_seo_kp_evergreen( (string) $o['type'] ) ) {
 		return 'an evergreen page owns this keyphrase: ' . $name;
 	}
 	return 'another page owns this keyphrase: ' . $name;

@@ -9,6 +9,17 @@ Checked line by line against the code on 27 Nov 2026.
 - Wording corrections: 1.3.3 says the carry-over turns on 'four' options (it is five); it says five tests 'print a check count' (three do not); 'More from Wugweb is the only place products promote each other' (a Plugins-screen 'More' link remains); there is no 1.3.1 entry (1.3.1 was never tagged).
 - Not tested: form copy, wizard backup / restore, uninstall, carry-over, brand Reset / Clear, SHA-256 check, block renderers. The admin-layer test skips its site-layer assertions silently because `themes/kits-by-wugweb/assets/site` was deleted.
 
+## Update, 27 Nov 2026 (Kits Core 1.4.0, site-only code out of the plugin)
+
+- Done: everything that only made sense for Animal Writes moved, unchanged, to `sites/animalwrites/kits-core/` (see CHANGELOG 1.4.0 for the file list). The plugin keeps neutral defaults and filters; `tests/neutral-core-tests.php` guards it.
+- Open, owner: deploy the site layer (`sites/animalwrites/kits-core/`, as a must-use plugin, README there) before or with Kits Core 1.4.0 on the live site. Kits Core 1.4.0 alone leaves that site without campaign letters, volunteer and report forms, thumbnails, error pages and the old `aw_` names. Not tested on a live WordPress here: the load order was checked with stub tests only (`sites/animalwrites/kits-core/tests/`).
+- Open, owner: the live `wp-content/php-error.php` and `maintenance.php` keep the marker `Animal Writes error page`; the site layer keeps it through `kits_error_page_marker`. Change both together if the marker is ever changed.
+- Open: `KITS_FF_DATES` still lists the three `l_awbi_*` claim field names (stored in existing Fluent Forms forms; DirectoryWeb reads the constant). Make it a filter in DirectoryWeb first, then here.
+- Open: `includes/admin-layer/edit-fields.php` keeps the opt-in Library "Dated" (`aw_legal_dated`) and campaign Metrics (`aw_campaign_metrics`) fields. They do nothing unless a site names those types; move them to the site layer if the owner wants zero `aw_legal` strings in the plugin (`tests/neutral-core-tests.php` allows them).
+- Open: `tools/validate/visible-brand-allow.txt` still lists `plugins/kits-core/includes/error-pages.php` (the marker constant is now neutral, so the line can go), `media-groups.php`, `edit-screens.php` and the two drop-ins under the old `plugins/kits-core/assets/site/` path (they now sit in `sites/animalwrites/kits-core/`). Not changed here (outside this folder).
+- Still skipped: the site-layer assertions at the end of `tests/admin-layer-tests.php` (they load the deleted theme `assets/site/admin.php`); the Overview slug there is updated to `kits-overview` but nothing runs it.
+- The 'Verified status' notes above that say the carry-over turns on options and that `tests/ops-tests.php` covers the carry-over are out of date: the carry-over is the site layer's now (`sites/animalwrites/kits-core/includes/site-filters.php`, tested in `site-layer-tests.php`).
+
 ## Active Scope & Responsibilities
 The foundational companion plugin owns:
 - Multi-tenant Brand Customizer (`Appearance > Brand Tokens` / `admin.php?page=kits-brand`).

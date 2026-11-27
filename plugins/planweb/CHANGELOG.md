@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.5.0
+
+- Removed all Animal Writes-only code. `includes/team-dates.php` (`aw_team_dates*`, `aw_team_dates_context()`, the seeded and campaign dates, their one-off migrations, the Kits → Dates screen and Dashboard box) moved unchanged to `sites/animalwrites/planweb/team-dates.php`, loaded by `sites/animalwrites/planweb/site.php`. `includes/migrate.php` (the 14 Nov 2026 one-time move, which names Animal Writes entry IDs 25181 to 25187) moved the same way. `planweb.php` requires neither.
+- Import from an earlier Dates list is generic: `planweb_import_source()` and the filter `planweb_import_source` (option, source, wait). Default empty: no automatic run, no Import group (REST `import.enabled`, `src/index.js` hides the chip), no Import panel, no Kits status "import" wording. Stored `planweb_source` values and option keys are not renamed.
+- `PLANWEB_SITE_SKIP` is now empty; `planweb_site_skip_types()` reads the filter `planweb_site_skip_types`. The site layer restores `aw_news` and `aw_listing`.
+- Neutral wording where it named Kits → Dates (`switch.php`, `kits-hub.php`, `planweb-rest.php`, `src/index.js`, `languages/planweb.pot`); build rebuilt.
+- `tests/run.php`: Animal Writes host, handles and live texts replaced by neutral ones; the originals are in `sites/animalwrites/planweb/tests/site-tests.php`; a check that the plugin source names no site.
+
 ## 0.4.1
 
 - The shell calendar's disabled "Today" button was #949494 on white (3.03:1); Kits Core 1.3.4 sets it to #646970 (5.7:1, WCAG 1.4.3) in `src/shell/calendar.js` and `more.css`; PlanWeb itself has no override.

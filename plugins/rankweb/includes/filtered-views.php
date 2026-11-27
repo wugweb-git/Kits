@@ -37,7 +37,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Title shapes of a filtered view per section (words from the hub titles), longest first; %s is the category name.
- * No colon or comma: the only separator in a title is the " – " before Animal Writes (owner, 15 Oct 2026).
+ * No colon or comma: the only separator in a title is the " – " before the site name (owner, 15 Oct 2026).
  */
 // AW_FILTERED_TITLE_WORDS: RankWeb → Settings (settings.php).
 
@@ -45,16 +45,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 // AW_FILTERED_STATE_NOINDEX: RankWeb → Settings (settings.php).
 
 /** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
-const AW_FILTERED_PLACE_TITLE_WORDS = array(
-	'state'     => array(
-		'aw_news'        => array( 'Animal Welfare News from %s', '%s Animal Welfare News', '%s News' ),
-		'aw_legal'       => array( 'Animal Laws and Court Orders in %s', 'Animal Laws in %s', '%s Animal Laws' ),
-		'aw_opportunity' => array( 'Animal Welfare Volunteer Roles and Jobs in %s', 'Animal Welfare Opportunities in %s', '%s Opportunities' ),
-	),
-	'publisher' => array(
-		'aw_news' => array( 'Animal Welfare News from %s', '%s Animal Welfare News', '%s News' ),
-	),
-);
+function rankweb_filtered_place_title_words(): array {
+	return (array) apply_filters(
+		'rankweb_filtered_place_title_words',
+		array() // none by default: a site supplies the words (state => type => shapes, publisher => type => shapes)
+	);
+}
 
 /**
  * Name and item count of a ?state= or ?publisher= view on a hub, counted with the hub's own filter clauses (open
@@ -114,7 +110,7 @@ function rankweb_seo_filtered_count( $type, $key, $slug ) {
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
 				'no_found_rows'  => false,
-				'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => 'aw_listing' === $type && function_exists( 'directoryweb_listing_type_query' ) ? explode( ',', directoryweb_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+				'tax_query'      => array( array( 'taxonomy' => 'tag' === $key ? 'post_tag' : 'category', 'field' => 'slug', 'terms' => rankweb_is_type( $type, 'listing' ) && function_exists( 'directoryweb_listing_type_query' ) ? explode( ',', directoryweb_listing_type_query( $slug ) ) : array( $slug ), 'include_children' => true ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 			);
 			return (int) ( new WP_Query( rankweb_seo_hub_rules( $type, $v ) ) )->found_posts;
 		}
@@ -142,7 +138,7 @@ function rankweb_seo_filtered_view() {
 	}
 	$view  = array( 'type' => $type, 'key' => '', 'slug' => '', 'name' => '', 'n' => 0, 'index' => false, 'canonical' => '' );
 	$key   = (string) array_key_first( $params );
-	$own   = 'aw_listing' === $type ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( defined( 'AW_LIST_FILTERS' ) ? ( AW_LIST_FILTERS[ $type ] ?? array() ) : array(), 0 );
+	$own   = rankweb_is_type( $type, 'listing' ) ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( defined( 'AW_LIST_FILTERS' ) ? ( AW_LIST_FILTERS[ $type ] ?? array() ) : array(), 0 );
 	$value = (string) $params[ $key ];
 	if ( count( $params ) > 1 || ! in_array( $key, $own, true ) || preg_match( '/,|%2C|\[\]/i', $value ) ) {
 		return $view; // several filters, several values, or not a filter of this hub: noindex
@@ -150,7 +146,7 @@ function rankweb_seo_filtered_view() {
 	if ( 'q' === $key ) {
 		return $view; // a search inside the list: noindex, follow
 	}
-	if ( isset( AW_FILTERED_PLACE_TITLE_WORDS[ $key ][ $type ] ) ) { // ?state=, ?publisher=: as a category view
+	if ( isset( rankweb_filtered_place_title_words()[ $key ][ $type ] ) ) { // ?state=, ?publisher=: as a category view
 		$slug = sanitize_title( $value );
 		list( $name, $n ) = rankweb_seo_filtered_place( $type, $key, $slug );
 		if ( '' === $name ) {
@@ -170,7 +166,7 @@ function rankweb_seo_filtered_view() {
 	}
 	$slug = sanitize_title( $value );
 	$term = get_term_by( 'slug', $slug, 'tag' === $key ? 'post_tag' : 'category' );
-	$name = $term ? $term->name : ( 'aw_listing' === $type && 'tag' === $key && function_exists( 'directoryweb_listing_type_name' ) ? directoryweb_listing_type_name( $slug ) : '' );
+	$name = $term ? $term->name : ( rankweb_is_type( $type, 'listing' ) && 'tag' === $key && function_exists( 'directoryweb_listing_type_name' ) ? directoryweb_listing_type_name( $slug ) : '' );
 	if ( '' === $name ) {
 		return $view; // no such category or tag
 	}
@@ -204,7 +200,7 @@ function rankweb_seo_filtered_named() {
 }
 
 /**
- * "Wildlife News from India – Animal Writes": the longest shape that fits 60 characters, skipping shapes that repeat a
+ * "Wildlife News from India – {Site}": the longest shape that fits 60 characters, skipping shapes that repeat a
  * word of the category name ("Laws and Rules Laws and Court Orders").
  */
 function rankweb_seo_filtered_title() {
@@ -216,12 +212,12 @@ function rankweb_seo_filtered_title() {
 		return rankweb_seo_title_with_page( rankweb_seo_term_title( $term ) ); // the tag page's own title (its canonical, or the same list)
 	}
 	$name = str_replace( ' & ', ' and ', $v['name'] );
-	if ( isset( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] ) ) { // a state or publisher
+	if ( isset( rankweb_filtered_place_title_words()[ $v['key'] ][ $v['type'] ] ) ) { // a state or publisher
 		$tries = array();
-		foreach ( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] as $shape ) {
+		foreach ( rankweb_filtered_place_title_words()[ $v['key'] ][ $v['type'] ] as $shape ) {
 			$tries[] = rankweb_seo_branded( sprintf( $shape, $name ) );
 		}
-		foreach ( AW_FILTERED_PLACE_TITLE_WORDS[ $v['key'] ][ $v['type'] ] as $shape ) {
+		foreach ( rankweb_filtered_place_title_words()[ $v['key'] ][ $v['type'] ] as $shape ) {
 			$tries[] = sprintf( $shape, $name );
 		}
 		return rankweb_seo_title_with_page( rankweb_seo_fit( $tries, 60 - mb_strlen( rankweb_seo_page_suffix() ) ) );
@@ -281,7 +277,7 @@ add_filter(
 	'rank_math/frontend/title',
 	function ( $title ) {
 		$v    = rankweb_seo_filtered_view();
-		$ours = $v && 'aw_listing' !== $v['type'] ? rankweb_seo_filtered_title() : '';
+		$ours = $v && ! rankweb_is_type( $v['type'], 'listing' ) ? rankweb_seo_filtered_title() : '';
 		return '' !== $ours ? $ours : $title;
 	},
 	25
@@ -290,7 +286,7 @@ add_filter(
 	'rank_math/frontend/description',
 	function ( $desc ) {
 		$v    = rankweb_seo_filtered_view();
-		$ours = $v && 'aw_listing' !== $v['type'] ? rankweb_seo_filtered_description() : '';
+		$ours = $v && ! rankweb_is_type( $v['type'], 'listing' ) ? rankweb_seo_filtered_description() : '';
 		return '' !== $ours ? $ours : $desc;
 	},
 	25
@@ -306,7 +302,7 @@ add_filter(
  */
 function rankweb_sitemap_filtered_build() {
 	$urls = array();
-	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (Animal Writes Core) are not loaded
+	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (the earlier Core plugin) are not loaded
 		return $urls;
 	}
 	foreach ( AW_FILTERED_CATEGORY_HUBS as $type ) {
@@ -317,7 +313,7 @@ function rankweb_sitemap_filtered_build() {
 			}
 		}
 	}
-	foreach ( AW_FILTERED_PLACE_TITLE_WORDS as $key => $types ) { // ?state= and ?publisher= views from 3 items (17 Oct 2026)
+	foreach ( rankweb_filtered_place_title_words() as $key => $types ) { // ?state= and ?publisher= views from 3 items (17 Oct 2026)
 		foreach ( array_keys( $types ) as $type ) {
 			if ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) {
 				continue; // noindex (owner, 24 Oct 2026)

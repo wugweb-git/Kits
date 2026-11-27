@@ -1,7 +1,7 @@
 <?php
 /**
  * PlanWeb's rules that need no WordPress: the fixed lists, the field checks (link, time, no personal data), and the
- * mapping from Dates (option aw_team_dates) to entries with its one-for-one comparison. tests/run.php covers them.
+ * mapping from an earlier Dates list (an option, see import.php) to entries with its one-for-one comparison. tests/run.php covers them.
  *
  * @package planweb
  */
@@ -158,7 +158,7 @@ function planweb_source_key( array $d, int $n ): string {
 /**
  * The stored Dates list mapped to the entries an import makes, in stored order.
  *
- * @param mixed $stored get_option( 'aw_team_dates' ) as stored.
+ * @param mixed $stored the earlier Dates option as stored.
  * @return array{rows: array<int, array>, invalid: array<int, array>} rows: key, date, title, note, index; invalid:
  *               index and the element as text.
  */

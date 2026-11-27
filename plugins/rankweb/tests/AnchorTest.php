@@ -26,7 +26,7 @@ final class AnchorTest extends PHPUnit\Framework\TestCase {
 	private function ctx( array $more = array() ): array {
 		return $more + array(
 			'keywords'   => array( 'stray dogs', 'street dog care' ),
-			'brand'      => RankWeb_Anchor::normalize_list( array( 'Animal Writes' ) ),
+			'brand'      => RankWeb_Anchor::normalize_list( array( 'Example Site' ) ),
 			'generic'    => RankWeb_Anchor::normalize_list( array( 'click here', 'Read more', 'this page' ) ),
 			'long_words' => 6,
 		);
@@ -51,8 +51,8 @@ final class AnchorTest extends PHPUnit\Framework\TestCase {
 	}
 
 	public function testBrandedMatchesTheBrandAsWholeWords(): void {
-		$this->assertSame( 'branded', RankWeb_Anchor::type( 'Animal Writes guide', $this->ctx() ) );
-		$this->assertSame( 'other', RankWeb_Anchor::type( 'animal writesy', $this->ctx() ) );
+		$this->assertSame( 'branded', RankWeb_Anchor::type( 'Example Site guide', $this->ctx() ) );
+		$this->assertSame( 'other', RankWeb_Anchor::type( 'example sitey', $this->ctx() ) );
 	}
 
 	public function testGenericIsAnEditableList(): void {

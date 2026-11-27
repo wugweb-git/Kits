@@ -198,25 +198,19 @@ function sourceweb_workers_problems( $now = null ) {
 	return $out;
 }
 
-/** Email the owner about worker problems, once per new set (hourly event, and after every end report). */
+/**
+ * Check the workers (hourly event, and after every end report): fires the action `sourceweb_workers_problems` with the
+ * problems (an empty array when all is well). SourceWeb sends no email itself; a site that wants one hooks the action.
+ */
 function sourceweb_workers_watchdog() {
 	update_option( 'aw_workers_watchdog_at', time(), true );
 	$problems = sourceweb_workers_problems();
-	if ( ! $problems ) {
-		delete_transient( 'aw_workers_alert_mailed' );
-		return;
-	}
-	if ( ! sourceweb_animal_writes_context() ) {
-		return; // alert emails are an Animal Writes extra: never sent unless that is switched on (sourceweb-context.php)
-	}
-	$sent = (string) get_transient( 'aw_workers_alert_mailed' );
-	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
-		return; // the same problems were emailed in the last 12 hours
-	}
-	$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " workers need attention:\n\n- " . implode( "\n- ", $problems ) . "\n\nWorkers: " . admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) . "\nRuns: https://github.com/wugweb-git/animal-writes-workers/actions\n";
-	if ( wp_mail( get_option( 'admin_email' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': worker problem — ' . reset( $problems ), $body ) ) {
-		set_transient( 'aw_workers_alert_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
-	}
+	/**
+	 * The workers were checked.
+	 *
+	 * @param array<string,string> $problems Kind => sentence; empty when nothing is wrong.
+	 */
+	do_action( 'sourceweb_workers_problems', $problems );
 }
 add_action( 'aw_workers_watchdog', fn() => sourceweb_workers_watchdog() ); // the "report" argument only keeps the one-off event apart
 // Like the ingestion watchdog: any request that reaches PHP also checks when the last check is an hour old, so a late

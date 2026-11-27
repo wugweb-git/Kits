@@ -1,7 +1,7 @@
 <?php
 /**
  * The switch (Kits → Modules → PlanWeb) and the one-time setup once it is on: capabilities and the fixed list values.
- * Turning PlanWeb off hides it again and brings back Kits → Dates; entries and the Dates option are kept either way.
+ * Turning PlanWeb off hides it again; entries (and any earlier Dates option) are kept either way.
  *
  * @package planweb
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Whether PlanWeb is switched on (Kits → Modules → PlanWeb, or activating the plugin on its own). Off: PlanWeb adds
- * only its switch, and Kits → Dates works as before. On: the calendar moves here, and Dates is imported once.
+ * only its switch. On: the calendar is here (and an earlier Dates list, when a site names one, is imported once).
  */
 function planweb_on(): bool {
 	return '1' === (string) get_option( 'planweb_on', '' );
@@ -24,8 +24,8 @@ function planweb_activate() {
 }
 
 /**
- * Deactivating PlanWeb switches it off. Animal Writes Core still loads it, so without this the calendar would stay on
- * and Kits → Dates hidden. Entries and the Dates option are kept.
+ * Deactivating PlanWeb switches it off, so a host that still loads it does not keep the calendar on. Entries and any
+ * earlier Dates option are kept.
  */
 function planweb_deactivate() {
 	update_option( 'planweb_on', '', true );
@@ -49,7 +49,7 @@ add_action(
 /** Bump when the capabilities or the list values change, so planweb_setup() runs again. */
 const PLANWEB_SETUP = '2'; // 2: Threads and Bluesky channels (14 Nov 2026).
 
-// Kits → Modules (Animal Writes Core's Settings API screen), when it is there.
+// Kits → Modules (Kits Core's Settings API screen), when it is there.
 add_action(
 	'admin_init',
 	function () {
@@ -91,7 +91,7 @@ add_action(
 				printf(
 					'<input type="checkbox" id="planweb_on" name="planweb_on" value="1"%1$s> <span class="description">%2$s</span>',
 					checked( '1', (string) get_option( 'planweb_on', '' ), false ),
-					esc_html__( 'On: Appearance → Kits → Dates moves to Plugins → PlanWeb → Calendar, and every date in Dates is copied there once (the Dates list itself is kept unchanged as a backup). Off: Appearance → Kits → Dates as before; entries are kept.', 'planweb' )
+					esc_html__( 'On: the calendar is Plugins → PlanWeb → Calendar. Off: the PlanWeb screens are hidden; entries are kept.', 'planweb' )
 				);
 			},
 			'aw-modules',

@@ -9,6 +9,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * A link into the workers' GitHub repository, or '' when the site names none. The repository ("owner/name") comes from
+ * the filter `sourceweb_workers_repo`; there is no default.
+ *
+ * @param string $path Path inside the repository, starting with a slash.
+ */
+function sourceweb_workers_repo_url( string $path ): string {
+	$repo = trim( (string) apply_filters( 'sourceweb_workers_repo', '' ), '/' );
+	return '' === $repo ? '' : 'https://github.com/' . $repo . $path;
+}
+
 /* ---------- Workers ---------- */
 
 /** Worker status => label. */
@@ -82,7 +93,7 @@ function sourceweb_worker_row( array $r ): array {
 		'group'       => $r['group'],
 		'groupLabel'  => (string) ( $groups[ $r['group'] ][0] ?? $r['group'] ),
 		'file'        => $r['file'],
-		'fileUrl'     => $r['planned'] ? '' : 'https://github.com/wugweb-git/animal-writes-workers/blob/main/.github/workflows/' . rawurlencode( $r['file'] ),
+		'fileUrl'     => $r['planned'] ? '' : sourceweb_workers_repo_url( '/blob/main/.github/workflows/' . rawurlencode( $r['file'] ) ),
 		'planned'     => (bool) $r['planned'],
 		'schedule'    => $r['planned'] ? ( '' !== $r['schedule'] ? 'Wanted: ' . $r['schedule'] : '' ) : sourceweb_workers_schedule( $r['registry'] + array( 'file' => $r['file'] ) ),
 		'late'        => $r['planned'] ? '' : sourceweb_workers_late_words( $r ),
@@ -197,7 +208,7 @@ function sourceweb_rest_worker( WP_REST_Request $request ) {
 				'late'     => null === $reg['late_after_h'] ? 'never' : $reg['late_after_h'] . ' h',
 				'schedule' => sourceweb_workers_schedule( $reg + array( 'file' => $w['file'] ) ),
 				'file'     => $w['file'],
-				'fileUrl'  => 'https://github.com/wugweb-git/animal-writes-workers/blob/main/.github/workflows/' . rawurlencode( $w['file'] ),
+				'fileUrl'  => sourceweb_workers_repo_url( '/blob/main/.github/workflows/' . rawurlencode( $w['file'] ) ),
 			) : null,
 			'groups'   => sourceweb_worker_groups(),
 			'keys'     => $keys,
@@ -239,7 +250,7 @@ function sourceweb_rest_worker_runs( WP_REST_Request $request ) {
 			'event'   => (string) ( $ev[ $r['event'] ?? '' ] ?? ( $r['event'] ?? '' ) ),
 			'counts'  => $t['counts'],
 			'commit'  => '' !== $sha ? substr( $sha, 0, 7 ) : '',
-			'commitUrl' => '' !== $sha ? 'https://github.com/wugweb-git/animal-writes-workers/commit/' . rawurlencode( $sha ) : '',
+			'commitUrl' => '' !== $sha ? sourceweb_workers_repo_url( '/commit/' . rawurlencode( $sha ) ) : '',
 		);
 	}
 	return rest_ensure_response(
@@ -248,7 +259,7 @@ function sourceweb_rest_worker_runs( WP_REST_Request $request ) {
 			'name'      => $w['name'],
 			'planned'   => (bool) $w['planned'],
 			'keep'      => (int) AW_WORKERS_KEEP,
-			'githubUrl' => $w['planned'] ? '' : 'https://github.com/wugweb-git/animal-writes-workers/actions/workflows/' . rawurlencode( $w['file'] ),
+			'githubUrl' => $w['planned'] ? '' : sourceweb_workers_repo_url( '/actions/workflows/' . rawurlencode( $w['file'] ) ),
 			'rows'      => $rows,
 		)
 	);

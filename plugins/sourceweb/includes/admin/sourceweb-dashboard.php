@@ -45,7 +45,7 @@ function sourceweb_count_today(): array {
 	$start_gmt   = (int) strtotime( get_gmt_from_date( wp_date( 'Y-m-d' ) . ' 00:00:00' ) . ' +0000' );
 	$start_local = wp_date( 'Y-m-d' ) . ' 00:00:00';
 	$new         = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE meta_key = 'aw_ingested_at' AND CAST( meta_value AS UNSIGNED ) >= %d", $start_gmt ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- hourly background count
-	$types       = defined( 'AW_REVIEW_TYPES' ) ? array_keys( AW_REVIEW_TYPES ) : array( 'aw_news', 'aw_legal' );
+	$types       = function_exists( 'sourceweb_review_types' ) ? array_keys( sourceweb_review_types() ) : array( 'post' );
 	$place       = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders only; hourly background count
 	$published   = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_date >= %s AND post_type IN ( $place )", array_merge( array( $start_local ), $types ) ) );
@@ -100,7 +100,7 @@ function sourceweb_dashboard_build( $why = '' ) {
 			'cap'    => (int) get_option( 'aw_enrich_live_cap', '20' ),
 			'key'    => '' !== (string) get_option( 'aw_enrich_google_key', '' ),
 		),
-		// Tiles another plugin fills (Animal Writes Core: Picture pipeline, Thumbnails): [ { key, label, value, sub, href, tone } ].
+		// Tiles another plugin fills (a site plugin: Picture pipeline, Thumbnails): [ { key, label, value, sub, href, tone } ].
 		'extra'   => array_values( array_filter( (array) apply_filters( 'aw_sourcing_dashboard_tiles', array() ), 'is_array' ) ),
 	);
 	set_transient( SOURCEWEB_DASH, $c, 3 * HOUR_IN_SECONDS );

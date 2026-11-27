@@ -1,0 +1,338 @@
+{
+ "aw_verified": [
+  "boolean",
+  [
+   "aw_listing"
+  ],
+  "Verified"
+ ],
+ "aw_verified_on": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Last verified date (Y-m-d)"
+ ],
+ "aw_awbi_recognised": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "AWBI recognised on (Y-m-d)"
+ ],
+ "aw_awbi_renewed": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "AWBI renewed on (Y-m-d)"
+ ],
+ "aw_awbi_valid": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "AWBI recognition valid until (Y-m-d)"
+ ],
+ "aw_awbi_code": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "AWBI recognition code (from the AWBI list; read only)"
+ ],
+ "aw_awbi_dropped": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Date of the current AWBI list the code is missing from (Y-m-d): recognition may have lapsed"
+ ],
+ "aw_awbi_list_on": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Date of the AWBI list the code comes from (Y-m-d; empty = 31 May 2026 list)"
+ ],
+ "aw_needs_reverify": [
+  "boolean",
+  [
+   "aw_listing"
+  ],
+  "Flagged for re-verification"
+ ],
+ "aw_gov_verified_on": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Verified: date of the government document (Y-m-d; set by code, gov-verified.php)"
+ ],
+ "aw_gov_verified_by": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Verified: the government sources (set by code)"
+ ],
+ "aw_email": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Email"
+ ],
+ "aw_website": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Website"
+ ],
+ "aw_area": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Area / locality (no full address)"
+ ],
+ "aw_services": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Services offered, as stated by the organisation or a named list (comma separated)"
+ ],
+ "aw_services_source": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Who stated the services (e.g. \"the organisation\", or the list name)"
+ ],
+ "aw_services_on": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Date the services were stated (YYYY-MM-DD)"
+ ],
+ "aw_maps_url": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Google Maps link"
+ ],
+ "aw_lat": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Latitude (from Google Maps)"
+ ],
+ "aw_lng": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Longitude (from Google Maps)"
+ ],
+ "aw_place_id": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Google place ID"
+ ],
+ "aw_g_rating": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Google rating (out of 5)"
+ ],
+ "aw_g_reviews": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Number of Google reviews"
+ ],
+ "aw_g_category": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Google category (e.g. Animal shelter)"
+ ],
+ "aw_g_profile": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Google Business Profile link"
+ ],
+ "aw_instagram": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Instagram"
+ ],
+ "aw_facebook": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Facebook"
+ ],
+ "aw_ngobase_url": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "ngobase.org profile"
+ ],
+ "aw_x": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "X (Twitter)"
+ ],
+ "aw_youtube": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "YouTube"
+ ],
+ "aw_gallery": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Photos: up to 6 media IDs, comma separated"
+ ],
+ "aw_founded": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Year established"
+ ],
+ "aw_head": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Head of the organisation (name and role, as the organisation publishes it)"
+ ],
+ "aw_registration": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Registration (Trust/Society number)"
+ ],
+ "aw_reg_12a": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "12A registration number"
+ ],
+ "aw_reg_80g": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "80G registration number"
+ ],
+ "aw_darpan_id": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "NGO Darpan ID"
+ ],
+ "aw_darpan_blacklisted_by": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Blacklisted on NGO Darpan by (as NGO Darpan lists it)"
+ ],
+ "aw_darpan_blacklisted_on": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Blacklisted on NGO Darpan from (Y-m-d)"
+ ],
+ "aw_reg_authority": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Registration authority (from NGO Darpan; admin only)"
+ ],
+ "aw_reg_act": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Registered under (Act; from NGO Darpan; admin only)"
+ ],
+ "aw_reg_date": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Registration date (Y-m-d; from NGO Darpan; admin only)"
+ ],
+ "aw_sectors": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Sectors of work as NGO Darpan lists them (comma separated; admin only)"
+ ],
+ "aw_animals": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Animals helped (comma separated)"
+ ],
+ "aw_languages": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Languages spoken (comma separated)"
+ ],
+ "aw_donate_url": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Donate link"
+ ],
+ "aw_volunteer_url": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Volunteer link"
+ ],
+ "aw_rel_nofollow": [
+  "string",
+  [
+   "aw_listing"
+  ],
+  "Links marked nofollow (1)"
+ ]
+}

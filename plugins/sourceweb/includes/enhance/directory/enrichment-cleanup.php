@@ -111,7 +111,7 @@ function sourceweb_enrich_merge_skip( $key ) {
  */
 function sourceweb_enrich_merge( $from, $into, $rid ) {
 	global $wpdb;
-	if ( 'aw_listing' !== get_post_type( $from ) || 'aw_listing' !== get_post_type( $into ) || $from === $into ) {
+	if ( ! sourceweb_is_type( get_post_type( $from ), 'listing' ) || ! sourceweb_is_type( get_post_type( $into ), 'listing' ) || $from === $into ) {
 		return 'not two listings';
 	}
 	if ( 'publish' !== get_post_status( $from ) || 'publish' !== get_post_status( $into ) ) {
@@ -173,7 +173,7 @@ function sourceweb_enrich_merge( $from, $into, $rid ) {
 			$log( $field, $value, $snap, $mode );
 		}
 	}
-	// Other details the kept listing lacks (AWBI code and dates, import address, source...): copied, not replaced.
+	// Other details the kept listing lacks (registration details, import address, source...): copied, not replaced.
 	$fields = array_filter( array_map( fn( $d ) => $d[1], sourceweb_enrich_fields() ), fn( $k ) => 0 === strpos( $k, 'aw_' ) );
 	foreach ( get_post_meta( $from ) as $key => $vals ) {
 		if ( sourceweb_enrich_merge_skip( $key ) || in_array( $key, $fields, true ) || ! metadata_exists( 'post', $from, $key ) ) {
@@ -218,9 +218,9 @@ function sourceweb_enrich_merge( $from, $into, $rid ) {
 	}
 	wp_trash_post( $from ); // owner, 25 Oct 2026: merged duplicates go to the trash (WordPress empties it after 30 days; Undo works until then)
 	update_post_meta( $from, 'aw_merged_into', $into );
-	if ( function_exists( 'aw_rank_math_redirect' ) ) {
+	if ( function_exists( 'rankweb_rank_math_redirect' ) ) {
 		$path             = trim( (string) wp_parse_url( $undo['old_url'], PHP_URL_PATH ), '/' );
-		$undo['redirect'] = '' !== $path ? aw_rank_math_redirect( rawurldecode( $path ), $to ) : 0;
+		$undo['redirect'] = '' !== $path ? rankweb_rank_math_redirect( rawurldecode( $path ), $to ) : 0;
 	}
 	sourceweb_enrich_after_change( $into );
 	sourceweb_enrich_after_change( $from );
@@ -294,14 +294,14 @@ function sourceweb_enrich_unmerge( $from, $u ) {
 function sourceweb_enrich_rest_cleanup( WP_REST_Request $req ) {
 	global $wpdb;
 	$page  = max( 1, (int) ( $req['page'] ?? 1 ) );
-	$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ids   = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => 1000, 'offset' => ( $page - 1 ) * 1000, 'orderby' => 'ID', 'order' => 'ASC', 'fields' => 'ids' ) );
+	$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE " . sourceweb_sql_in_types( 'post_type', array( sourceweb_type( 'listing' ) ) ) . " AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- the type comes from sourceweb_type() and is escaped
+	$ids   = ! sourceweb_type( 'listing' ) ? array() : get_posts( array( 'post_type' => sourceweb_type( 'listing' ), 'post_status' => 'publish', 'numberposts' => 1000, 'offset' => ( $page - 1 ) * 1000, 'orderby' => 'ID', 'order' => 'ASC', 'fields' => 'ids' ) );
 	update_meta_cache( 'post', $ids );
 	$m     = fn( $id, $k ) => (string) get_post_meta( $id, $k, true );
 	$items = array();
 	foreach ( $ids as $id ) {
 		list( $states, $districts ) = aw_item_codes( $id );
-		$items[] = array(
+		$items[] = (array) apply_filters( 'sourceweb_enrich_cleanup_item', array(
 			'id'             => (int) $id,
 			'name'           => html_entity_decode( get_the_title( $id ), ENT_QUOTES ),
 			'url'            => get_permalink( $id ),
@@ -312,7 +312,6 @@ function sourceweb_enrich_rest_cleanup( WP_REST_Request $req ) {
 			'city'           => $m( $id, 'aw_place_city' ),
 			'address'        => $m( $id, 'aw_address' ),
 			'import_address' => $m( $id, 'aw_import_address' ),
-			'awbi_address'   => $m( $id, 'aw_awbi_address' ),
 			'phones'         => function_exists( 'directoryweb_listing_phones' ) ? wp_list_pluck( directoryweb_listing_phones( $id ), 'number' ) : array(),
 			'email'          => $m( $id, 'aw_email' ),
 			'email_alt'      => $m( $id, 'aw_email_alt' ),
@@ -320,13 +319,11 @@ function sourceweb_enrich_rest_cleanup( WP_REST_Request $req ) {
 			'website_alt'    => $m( $id, 'aw_website_alt' ),
 			'facebook'       => $m( $id, 'aw_facebook' ),
 			'instagram'      => $m( $id, 'aw_instagram' ),
-			'awbi_code'      => $m( $id, 'aw_awbi_code' ),
-			'darpan_id'      => $m( $id, 'aw_darpan_id' ),
 			'source_name'    => $m( $id, 'aw_source_name' ),
 			'types'          => wp_get_post_terms( $id, 'post_tag', array( 'fields' => 'slugs' ) ),
 			'has_excerpt'    => '' !== trim( (string) get_post_field( 'post_excerpt', $id ) ),
 			'protected'      => sourceweb_enrich_is_protected( $id ),
-		);
+		), (int) $id ); // filter sourceweb_enrich_cleanup_item( array $item, int $id ): a site adds the values it keeps for its own sources
 	}
 	$out = array( 'items' => $items, 'page' => $page, 'pages' => max( 1, (int) ceil( $total / 1000 ) ), 'total' => $total );
 	if ( 1 === $page && function_exists( 'aw_lgd' ) ) {

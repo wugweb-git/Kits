@@ -51,7 +51,7 @@ function rankweb_prints_head(): bool {
 }
 
 /**
- * A site-level default that is generic here and can be set by the site. Animal Writes' own values live in
+ * A site-level default that is generic here and can be set by the site. The site's own values live in
  * the site layer (sites/{site}/rankweb/, a must-use plugin) and reach RankWeb through these filters.
  *
  * Keys: alt_names (list), same_as (list), email, language (BCP 47), country (ISO code), country_name, languages (list), founded.
@@ -131,7 +131,7 @@ function rankweb_head_description(): string {
 	if ( is_singular() ) {
 		$pt = (string) get_post_type();
 		if ( 0 === strpos( $pt, 'aw_' ) && function_exists( 'rankweb_seo_description' ) ) {
-			$d = rankweb_seo_description(); // Animal Writes content types keep their own descriptions
+			$d = rankweb_seo_description(); // Item types keep their own descriptions
 			if ( '' !== trim( (string) $d ) ) {
 				return rankweb_plain_text( $d );
 			}

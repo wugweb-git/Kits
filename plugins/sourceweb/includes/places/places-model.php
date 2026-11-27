@@ -54,7 +54,7 @@ function sourceweb_place_clean( array $p ): ?array {
 /**
  * The places that exist today: one content type place per post type SourceWeb fills, with the id equal to the type.
  *
- * @param string[] $post_types e.g. aw_news, aw_legal, post, aw_opportunity, aw_listing.
+ * @param string[] $post_types the site's content types (news, library, opportunity, listing) and post.
  * @return array<string, array> id => place.
  */
 function sourceweb_places_default( array $post_types ): array {

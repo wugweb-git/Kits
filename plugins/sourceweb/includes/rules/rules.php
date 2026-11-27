@@ -3,7 +3,7 @@
  * Sourcing restructure, phase 3 (Rules; owner, 25 Oct 2026): the WordPress side of the Rules model (rules-model.php).
  *
  * - Sections come from WordPress: the registered public post types (not page or attachment) and the ones that opt in
- *   with add_post_type_support( $type, 'aw-section' ). Media & PR (aw_press, not public) opts in here (decision 12).
+ *   with add_post_type_support( $type, 'aw-section' ). Media & PR (the press type, not public) opts in here (decision 12).
  * - The sourcing policy gains sections_v2 (one entry per section: post type, label, the workers' item type, allowed
  *   categories and tags, the tag rules it may use, the summary rule it follows) and schema.rules = 2.
  * - GET aw/v1/summary-rules gains by_type; GET aw/v1/enrich/config gains schema, priority and field_rules.
@@ -27,8 +27,9 @@ const AW_ENRICH_LISTING_GROUP = 'group_aw_listing';
 add_action(
 	'init',
 	function () {
-		if ( post_type_exists( 'aw_press' ) ) {
-			add_post_type_support( 'aw_press', 'aw-section' );
+		$press = sourceweb_type( 'press' );
+		if ( '' !== $press && post_type_exists( $press ) ) {
+			add_post_type_support( $press, 'aw-section' );
 		}
 	},
 	20
@@ -60,7 +61,7 @@ function sourceweb_rules_sections( $from_types = false ) {
 		$own       = function_exists( 'aw_post_types' ) ? ( aw_post_types()[ $t ][1] ?? '' ) : '';
 		$out[ $t ] = array(
 			'label'       => '' !== $own ? $own : ( $obj ? (string) $obj->labels->name : $t ),
-			'worker_type' => (string) ( AW_RULES_WORKER_TYPES[ $t ] ?? '' ),
+			'worker_type' => (string) ( sourceweb_rules_worker_types()[ $t ] ?? '' ),
 		);
 	}
 	if ( did_action( 'init' ) ) {
@@ -168,7 +169,7 @@ function sourceweb_enrich_field_rule( $field ) {
 }
 
 /**
- * The listing's fields across its field groups (group_aw_listing, group_aw_listing_address, …; one box each), in
+ * The listing's fields across its field groups (the first group and its address, … groups; one box each), in
  * menu_order: from ACF (Secure Custom Fields) when it is active, so a field added in wp-admin is there; else from the
  * groups' local JSON.
  *
@@ -206,7 +207,8 @@ function sourceweb_enrich_schema() {
 		return $memo;
 	}
 	$secs  = function_exists( 'sourceweb_sources_config' ) ? (array) ( sourceweb_sources_config()['sections'] ?? array() ) : array();
-	$types = (array) ( $secs['aw_listing']['tags'] ?? array() );
+	$listing = sourceweb_type( 'listing' );
+	$types   = '' !== $listing ? (array) ( $secs[ $listing ]['tags'] ?? array() ) : array();
 	$out   = sourceweb_enrich_schema_build( sourceweb_enrich_listing_acf_fields(), sourceweb_enrich_fields(), AW_ENRICH_LISTING_GROUP, $types, defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
 	if ( did_action( 'init' ) ) {
 		$memo = $out;

@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.3.4
+ * Version: 1.4.0
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.3.4' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.4.0' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
@@ -50,11 +50,10 @@ require_once KITS_CORE_DIR . 'includes/plugin-info.php';
 require_once KITS_CORE_DIR . 'includes/altcha.php';
 require_once KITS_CORE_DIR . 'includes/forms.php';
 require_once KITS_CORE_DIR . 'includes/form-kit.php';
-require_once KITS_CORE_DIR . 'includes/private-dir.php'; // kits_private_dir(): the private upload folder for claim logos (moved from Animal Writes Core's campaigns.php)
-// The site's forms on Fluent Forms: the custom fields, checks and look, the form and thank-you pages, Report a mistake,
-// the volunteer form, the Campaign form with the raw copy of every send, and the Dashboard box (moved from Animal Writes
-// Core, 18 Nov 2026). compat.php keeps the old function names working.
-foreach ( array( 'fluentforms', 'form-pages', 'reports', 'volunteers', 'campaign-form', 'dashboard-forms', 'compat' ) as $kits_forms_file ) {
+require_once KITS_CORE_DIR . 'includes/private-dir.php'; // kits_private_dir(): the private upload folder for claim logos and proofs
+// The Fluent Forms integration: the custom fields, checks and look, and the Dashboard box. A site adds its own forms
+// (volunteer, report, campaign sign-up …) from its site layer.
+foreach ( array( 'fluentforms', 'dashboard-forms' ) as $kits_forms_file ) {
 	require_once KITS_CORE_DIR . 'includes/forms/' . $kits_forms_file . '.php';
 }
 unset( $kits_forms_file );
@@ -71,21 +70,16 @@ require_once KITS_CORE_DIR . 'includes/sections.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
 require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js
 require_once KITS_CORE_DIR . 'includes/image-context.php';
-require_once KITS_CORE_DIR . 'includes/taxonomy-rename.php'; // aw_campaign_link / aw_media_group → kits_ names (moved from Animal Writes Core, 19 Nov 2026): KITS_CAMPAIGN_LINK, KITS_MEDIA_GROUP, kits_taxonomy_current(), Tools → Taxonomy rename
-require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST (moved from Animal Writes Core, 18 Nov 2026)
-require_once KITS_CORE_DIR . 'includes/category-images.php'; // category and tag photos (term meta aw_category_image) and the category banner
-require_once KITS_CORE_DIR . 'includes/thumbs.php'; // card pictures never repeat: option aw_thumb_map, GET /aw/v1/thumb-dupes (the deploy gate)
-require_once KITS_CORE_DIR . 'includes/card-images.php'; // card images: the item's own picture, the category photo, the placard fallback
+require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST
 require_once KITS_CORE_DIR . 'includes/media-webp.php'; // resized copies of JPEG and PNG uploads as WebP; Media → Make WebP with Undo
 require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools: Media → Duplicate files (one-off clean-up, Undo, never deletes)
-require_once KITS_CORE_DIR . 'includes/tools/media-reuse.php'; // Kits → Tools: Media → Reuse pictures (recycle, never delete)
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
 require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page)
 require_once KITS_CORE_DIR . 'includes/preview.php';
 // The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
-// InsightWeb's (moved out on 18 Nov 2026 with the same names, option, tables, shortcode and scheduled event).
+// InsightWeb's.
 require_once KITS_CORE_DIR . 'includes/theme-updates.php';
 require_once KITS_CORE_DIR . 'includes/registry-updates.php';
 require_once KITS_CORE_DIR . 'includes/site-checkin.php';
@@ -108,7 +102,7 @@ require_once KITS_CORE_DIR . 'includes/admin-kits-frame.php'; // Kits → Home, 
 require_once KITS_CORE_DIR . 'includes/admin-app-global-styles.php';
 require_once KITS_CORE_DIR . 'includes/button-hover.php';
 require_once KITS_CORE_DIR . 'includes/admin-app-cards.php';
-// The admin layer (moved from Animal Writes Core, 18 Nov 2026): menu arrangement and tidy, the site's rows on the Kits
+// The admin layer: menu arrangement and tidy, the site's rows on the Kits
 // screens, the edit-screens map, edit fields and the Modules settings. The site's own values come through filters.
 require_once KITS_CORE_DIR . 'includes/admin-layer/arrange.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/tidy.php';
@@ -119,21 +113,13 @@ require_once KITS_CORE_DIR . 'includes/admin-layer/edit-fields.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/site-options.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
-require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert (moved from Animal Writes Core, 18 Nov 2026)
-require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content (moved from Animal Writes Core, 18 Nov 2026)
-// Campaign engines (moved from Animal Writes Core, 19 Nov 2026; names and data unchanged): the campaign link taxonomy and
-// the letter tool's statistics (campaign-letters.php is a site module, see its header). The short links, press coverage,
-// social posts, sponsored blocks and the Library document viewer are the theme's site layer (assets/site/includes/), as
-// are the campaign pages and Home.
-foreach ( array( 'campaign-links', 'campaign-letters' ) as $kits_engine_file ) {
-	require_once KITS_CORE_DIR . 'includes/' . $kits_engine_file . '.php';
-}
-unset( $kits_engine_file );
-// Site operations (moved from Animal Writes Core, 19 Nov 2026): scheduled-task health and Run now, the daily event, deploy purge
-// and status, technical saves keeping the modified date, CDN cache times, Check site, the PHP error count, the 404 page and
-// retention. The site's own values (page lists, sections, repository) come through filters from the theme's site layer.
-require_once KITS_CORE_DIR . 'includes/dashboard-activity.php'; // the Dashboard Activity box, off unless the site switches it on (moved from Animal Writes Core, 19 Nov 2026)
-foreach ( array( 'cron-health', 'daily', 'deploy-purge', 'deploy-status', 'keep-modified', 'cdn-cache', 'site-check', 'error-count', 'not-found', 'retention', 'compat' ) as $kits_ops_file ) {
+require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert
+require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content
+// Site operations: scheduled-task health and Run now, the daily event, deploy purge and status, technical saves keeping
+// the modified date, CDN cache times, Check site, the PHP error count and the 404 page. A site's own values (page lists,
+// sections, repository) come through filters.
+require_once KITS_CORE_DIR . 'includes/dashboard-activity.php'; // the Dashboard Activity box, off unless the site switches it on
+foreach ( array( 'cron-health', 'daily', 'deploy-purge', 'deploy-status', 'keep-modified', 'cdn-cache', 'site-check', 'error-count', 'not-found' ) as $kits_ops_file ) {
 	require_once KITS_CORE_DIR . 'includes/ops/' . $kits_ops_file . '.php';
 }
 unset( $kits_ops_file );
@@ -155,11 +141,11 @@ register_deactivation_hook(
 			kits_brand_clear_theme_cache();
 		}
 		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
-		wp_unschedule_hook( 'aw_thumb_rebuild' ); // a queued thumbnail map rebuild (thumbs.php)
 		wp_unschedule_hook( 'kits_checkin_weekly' ); // the optional site check-in (includes/site-checkin.php)
-		foreach ( array( 'aw_daily', 'aw_error_count_daily', 'aw_daily_backup', 'aw_raw_prune' ) as $kits_hook ) {
+		foreach ( array( 'aw_daily', 'aw_error_count_daily', 'aw_daily_backup' ) as $kits_hook ) {
 			wp_unschedule_hook( $kits_hook ); // booked again on the next request after it is switched back on, where its switch is on
 		}
+		do_action( 'kits_core_deactivated' ); // a site layer unschedules its own events here
 		// While it is off the rules may be rebuilt without the preset types and consent items may be published:
 		// rebuild the rules and recheck consent when it is back on (includes/presets.php).
 		delete_option( 'kits_presets_rewrite' );

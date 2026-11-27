@@ -40,8 +40,8 @@ check( r.checks.find( ( c ) => /external links/.test( c.text ) ).pass, 'a differ
 r = score( 'Dog care', '<h2>Unrelated heading</h2><p>dog ' + words( 650 ) + '</p>', 'dog' );
 check( ! r.checks.find( ( c ) => /subheading/.test( c.text ) ).pass, 'keyword only in body text does not satisfy the subheading check (was loose before)' );
 
-r = score( 'x', '<p>' + words( 10 ) + ' <a href="https://animalwrites.in/a">a</a></p>', 'zzz' );
-check( r.checks.find( ( c ) => /external link/.test( c.text ) ).pass === true, 'animalwrites.in is just another external host now (no site name hard-coded)' );
+r = score( 'x', '<p>' + words( 10 ) + ' <a href="https://examplesite.test/a">a</a></p>', 'zzz' );
+check( r.checks.find( ( c ) => /external link/.test( c.text ) ).pass === true, 'examplesite.test is just another external host now (no site name hard-coded)' );
 check( r.score >= 0 && r.score <= 100, 'score stays within 0-100' );
 
 console.log( `\n${ pass } passed, ${ fail } failed` );

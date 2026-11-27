@@ -4,11 +4,11 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.5
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-A directory of organisations in WordPress: listings, places, a map, Near me, claims from the organisations and "Find help near you".
+A directory of organisations in WordPress: listings, places, a map, Near me and claims from the organisations.
 
 == Description ==
 
@@ -17,7 +17,7 @@ DirectoryWeb adds a directory of listings, places and claims to a WordPress site
 = Listings, places and types =
 
 * The listing post type, its fields (eight field groups), types and services.
-* States and districts from a bundled list of local government places (the bundled list is of India), with counts and old address redirects. The Indian PIN code lookup is off until a site turns it on (see External services).
+* States and districts from a places file your site supplies (the plugin ships none; a site can use a local government directory's export), with counts and old address redirects.
 * Directory pages for the whole list, a place, and a place and type.
 * A map with Near me, and an admin map beside the latitude and longitude fields.
 * Coordinates from an address (one request a second) and phone, hours and registration helpers.
@@ -28,14 +28,10 @@ DirectoryWeb adds a directory of listings, places and claims to a WordPress site
 * Claimed and Verified marks (government records) and unverified values.
 * The people of an organisation from FluentCRM.
 
-= Find help =
-
-* "Find help near you" on a page, and "Featured in": News, Library, Resources and Press items that mention an organisation.
-
 = For the team =
 
 * DirectoryWeb in the admin menu: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Claims, Import / Export, Settings and Place intros. With Kits Core active (and its build) they use the Kits admin shell. Without it every one of them is a plain WordPress screen: Dashboard, Listings, Settings and Place intros as before, and Listing Types, Schema & Fields, Form Integrations, Import / Export and the Claims list as plain tables and forms. The plain Claims list shows the status tabs and 20 rows a page, without the shell's live filtering; the plain Import / Export takes a file or pasted text instead of a drop box.
-* Wording written for an animal welfare site ("Animals helped", "AWBI number", "NGO Darpan ID") is neutral by default ("Who is helped", "Accreditation number", "Registry ID"). To bring the old words back: `add_filter( 'directoryweb_labels', fn( $l ) => array_merge( $l, array( 'animals' => 'Animals helped', 'awbi_number' => 'AWBI number', 'registry_id' => 'NGO Darpan ID' ) ) );` The keys are animals, animals_help, awbi_number, awbi_not_on_list, awbi_code, awbi_recognised, awbi_renewed, awbi_valid and registry_id.
+* Wording that was written for one site is neutral by default and goes through filters: `directoryweb_labels` (field and registration labels), `directoryweb_directory_h1`, `directoryweb_directory_intro` and `directoryweb_archive_place_title` (Directory titles), `directoryweb_claim_copy` (the /claim/ wording), `directoryweb_services`, `directoryweb_service_type_slugs` and `directoryweb_type_services` (the services a listing can offer; none by default), `directoryweb_type_groups` (types shown as one choice), the data source filters (`directoryweb_data_sources`, `directoryweb_listing_source_slugs`, `directoryweb_listing_source`, `directoryweb_source_hosts`), and `directoryweb_geocode_profile` (country, address fields and postal code rules for geocoding: none by default).
 * Near me accepts any place on Earth by default; narrow it with the `directoryweb_near_bounds` filter (array of min latitude, max latitude, min longitude, max longitude).
 * A "Directory filter" block (`directoryweb/collection-filter`) that puts the directory's filters on any page.
 
@@ -80,18 +76,31 @@ With no form plugin the plugin shows its own claim form, which also accepts the 
 
 DirectoryWeb calls the outside services below, only for the tasks named. Nothing is sent when you do not use these features. The plugin makes no other outside request: its scripts (MapLibre GL and Leaflet) are served from the plugin folder, not from a CDN.
 
-* **Postal PIN code lookup (`https://api.postalpincode.in/`, India Post data):** off by default. Only when a site turns it on (`add_filter( 'directoryweb_pin_lookup_enabled', '__return_true' );`), and then when a visitor or an editor enters a 6-digit Indian PIN code to find a district. The PIN code they typed is sent; the answer is kept for a week in a WordPress transient. Service site: [https://www.postalpincode.in/](https://www.postalpincode.in/)
-* **OpenStreetMap Nominatim (`https://nominatim.openstreetmap.org/`):** when a listing with an address is saved or its address changes, a background task about a minute later (and the geocode tool) looks up the listing's map position. The address, PIN code or place names are sent, with your site address in the User-Agent header. A contact email is sent only if your site adds one through the `directoryweb_geocode_contact` filter. Usage policy: [https://operations.osmfoundation.org/policies/nominatim/](https://operations.osmfoundation.org/policies/nominatim/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
+* **OpenStreetMap Nominatim (`https://nominatim.openstreetmap.org/`):** when a listing with an address is saved or its address changes, a background task about a minute later (and the geocode tool) looks up the listing's map position. The address, postal code or place names are sent, with your site address in the User-Agent header. A contact email is sent only if your site adds one through the `directoryweb_geocode_contact` filter. Usage policy: [https://operations.osmfoundation.org/policies/nominatim/](https://operations.osmfoundation.org/policies/nominatim/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
 * **OpenFreeMap map tiles (`https://tiles.openfreemap.org/`):** when a visitor opens the directory map on the public Directory pages, their browser loads the map style, fonts and vector tiles from this host. The visitor's IP address and browser details reach that host, and the map area being viewed is requested. Nothing is sent from your server. Service site: [https://openfreemap.org/](https://openfreemap.org/). Privacy: [https://openfreemap.org/privacy/](https://openfreemap.org/privacy/)
 * **OpenStreetMap map tiles (`https://tile.openstreetmap.org/`):** when an editor opens the map beside the latitude and longitude fields of a listing, their browser loads map tile images from this host. The editor's IP address and browser details reach that host. Nothing is sent from your server. Tile usage policy: [https://operations.osmfoundation.org/policies/tiles/](https://operations.osmfoundation.org/policies/tiles/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
 
-Links shown in the admin and on listings to government and other registers (for example awbi.gov.in, ngodarpan.gov.in) are plain links the reader may click; the plugin does not call them.
+Links shown in the admin and on listings to registers a site configures are plain links the reader may click; the plugin does not call them.
 
 == Uninstall ==
 
 By default, deleting the plugin removes nothing: listings, places, claims, settings and every option stay, so reinstalling finds everything as it was. Only if the option `directoryweb_delete_data_on_uninstall` is true does uninstall delete DirectoryWeb's own bookkeeping options (`directoryweb_caps`, `directoryweb_rewrite_ver`), its two cached counts and its scheduled count job, after writing a backup to `wp-content/uploads/wugweb-backups/`. It never deletes listings, claims, uploads, users, terms or any post, term or user meta. Deactivating the plugin unschedules the hourly count job and flushes the rewrite rules, and deletes nothing.
 
 == Changelog ==
+
+= 1.4.0 =
+* The India and animal welfare registration fields are out of the plugin: AWBI recognition (code, dates, the lapsed mark), NGO Darpan (ID, blacklist, authority, Act, sectors), 12A, 80G and FCRA, with their words, their claim form rows, their rows on the listing page and in the admin list, their editor field group and the daily check of the "valid until" date. The stored meta keys (`aw_awbi_*`, `aw_darpan_*`, `aw_reg_12a`, `aw_reg_80g`, `aw_fcra`, `aw_reg_authority`, `aw_reg_act`, `aw_sectors`) are unchanged: a site that had them keeps its data and puts the fields back with the filters below. The plugin keeps one neutral registration number, registration type and registration date.
+* New filters, all with an empty default: `directoryweb_meta_fields` (add listing fields), `directoryweb_protected_meta_names`, `directoryweb_private_meta_names`, `directoryweb_date_meta_names`, `directoryweb_expiry_meta_names` (a date that, once passed, flags the listing for re-checking), `directoryweb_claim_fields` (claim form rows; the table is read through `directoryweb_claim_fields()`), `directoryweb_claim_date_meta_keys`, `directoryweb_ff_dates`, `directoryweb_listing_fields` (the profile box), `directoryweb_org_facts`, `directoryweb_listing_registration_rows` (the Registrations group on the listing page), `directoryweb_listing_registration_pairs` (the admin reading panel) and `directoryweb_listing_template_intro_prefixes`. Any tenant can also define its own fields in Schema & Fields.
+* The places file (`data/lgd.json`) and the district centres file (`data/district-centroids.json`) are no longer shipped. A site gives its own with the `directoryweb_places_file` and `directoryweb_district_centroids_file` filters; with none, the place lists are empty and the Place source row says "No places file".
+* The default wording is shorter: the labels for AWBI, accreditation, registry, 12A, 80G and foreign funding are gone from `directoryweb_labels` (keys animals, animals_help and category_example remain). The field groups no longer name animals or an example of an animal shelter.
+* Tests: new `tests/no-india-registration-test.php` (none of these names in the runtime code or a bundled data file); `meta-authorization-tests.php` checks that a site's own protected, team-only and date fields work through the filters; the Animal Writes half is in `sites/animalwrites/directoryweb/tests/registrations-tests.php`.
+
+= 1.3.0 =
+* DirectoryWeb is a generic directory: everything that was only for the Animal Writes site is removed from the plugin and moved, unchanged, to that site's own layer (`sites/animalwrites/directoryweb/`, not part of this plugin; it must be deployed alongside DirectoryWeb 1.3.0). Removed from the plugin: the Find help block and its links on item and campaign pages with place detection in News, Library and guides, the district helpline cards and row (112, the 1962 Mobile Veterinary Unit card), the small-district local card, the three blocks `directoryweb/find-help`, `directoryweb/helplines` and `directoryweb/local-card`, Verified from government lists (and its `wp aw gov-verify` command), the Featured in lists, the Indian PIN code lookup (India Post), the veterinary one-choice type filter and the fixed animal welfare services list.
+* New neutral defaults with filters for what a site used to get from that code: type groups (`directoryweb_type_groups`), services (`directoryweb_services`), Directory title and intro (`directoryweb_directory_h1`, `directoryweb_directory_intro`), the /claim/ wording (`directoryweb_claim_copy`), the data sources, and geocoding (`directoryweb_geocode_profile`: no country is added to an address unless the site says so). A postal code field is stored as any 2 to 12 letters, digits, spaces or hyphens (`directoryweb_postal_code_valid` narrows it). Without the site layer, a Directory place page reads "Listings in {place}" and the Settings screen has no PIN row.
+* Search by postal code and the Near me postal code box are off until a site answers `directoryweb_search_place_from_code`, `directoryweb_near_from_code` and `directoryweb_near_code_input`.
+* Still in the plugin by design, with neutral labels: the listing field names that began as the Animal Writes records (`aw_awbi_*`, `aw_darpan_id`, `aw_reg_12a`, `aw_reg_80g`, `aw_fcra`) and their claim form rows. They are stored keys and the schema reads them; they are not shown with any site's wording unless the site gives it.
+* Tests: `tests/generic-defaults-tests.php` (the moved files are gone, no Animal Writes token in the runtime code, neutral defaults); the Animal Writes tests moved to `sites/animalwrites/directoryweb/tests/`.
 
 = 1.2.5 =
 * The rest of the animal welfare and India-specific wording on the listing screens is neutral by default and goes through the `directoryweb_labels` filter: the 12A, 80G and foreign funding (FCRA) labels, the registry and accreditation names in the claim form and the field descriptions (the REST schema), and the Google category example. New label keys: registry_name, accreditor, accreditor_list, accreditor_first_list, tax_12a, tax_12a_help, tax_80g, tax_80g_help, foreign_funding, category_example. Stored keys are unchanged. The Animal Writes site layer restores the exact old words.

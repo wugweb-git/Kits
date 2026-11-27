@@ -13,26 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * The services a listing can offer: slug => name. The same list as Core's AW_SERVICES (model.php). "wildlife-rescue"
- * and "emergency-rescue" are also listing types, and count as types (directoryweb_service_slugs()).
+ * The services a listing can offer: slug => name. None by default (a generic directory has no fixed list); a site gives its
+ * own with the `directoryweb_services` filter.
+ *
+ * @return array<string,string>
  */
-const DIRECTORYWEB_SERVICES = array(
-	'rescue'           => 'Rescue Work',
-	'treatment'        => 'Treatment and Vet Care',
-	'shelter'          => 'Sheltering',
-	'adoption'         => 'Adoption Service',
-	'feeding'          => 'Feeding',
-	'sterilisation'    => 'Sterilisation (ABC)',
-	'vaccination'      => 'Vaccination',
-	'ambulance'        => 'Ambulance Service',
-	'boarding-foster'  => 'Boarding and Fostering',
-	'wildlife-rescue'  => 'Wildlife Rescue',
-	'legal-help'       => 'Legal Help',
-	'cattle-care'      => 'Cattle Care',
-	'animal-welfare'   => 'Animal Welfare',
-	'bird-treatment'   => 'Bird Treatment',
-	'emergency-rescue' => 'Emergency Rescue',
-);
+function directoryweb_services(): array {
+	$services = apply_filters( 'directoryweb_services', array() );
+	return is_array( $services ) ? $services : array();
+}
 
 /**
  * The Directory's tag slugs, from the sourcing lists (option aw_sources, section aw_listing): SourceWeb's
@@ -47,12 +36,13 @@ function directoryweb_section_tags(): array {
 }
 
 /**
- * Service slugs (the fixed list, without the two that are listing types).
+ * Service slugs (the services list, without the ones that are also listing types: filter directoryweb_service_type_slugs).
  *
  * @return string[]
  */
 function directoryweb_service_slugs(): array {
-	return array_values( array_diff( array_keys( DIRECTORYWEB_SERVICES ), array( 'wildlife-rescue', 'emergency-rescue' ) ) );
+	$also_types = (array) apply_filters( 'directoryweb_service_type_slugs', array() ); // services that are also listing types
+	return array_values( array_diff( array_keys( directoryweb_services() ), $also_types ) );
 }
 
 /**

@@ -1,5 +1,26 @@
 # SourceWeb: Pending & Roadmap
 
+## 0.4.1: post types by role, AWBI and Darpan enrichment moved out (27 Nov 2026)
+
+Done: see CHANGELOG.md 0.4.1. Still to do from the 0.4.0 list below: `AW_WORKERS`, the India edition of Google News and IST, the Indian place-name scoring in `cc0-images.php`, the Indian hosts and "india" stop words in `library-pdfs.php` and `auto-review.php`, the India Post source and the `animals` field in `enrichment.php` and `src/index.js`, and the `awbi` and `darpan` keys in the `rules-model.php` trust-order seed (kept: the workers' constants and the seed fixture hold them). The AWBI and NGO Darpan sources, fields and queue group are no longer in that list: they are in the site layer.
+
+Also still Animal Writes shaped, found while removing the types: the Indian place matching in `ingest.php` (`aw_places_from_text`, the LGD files), the Gazette notification number check (`sourceweb_legal_by_number`), the "about India" verdict in `sourceweb_ai_passed()`, and the `aw_post_types()` and `aw_section_*` calls that read Kits Core. `includes/compat/legacy-aliases.php` is not site-only (callers outside the plugin use those names), so it stays until they call the `sourceweb_` functions.
+
+The ACF group key `group_aw_listing` (`AW_ENRICH_LISTING_GROUP`, `rules.php`) is the one place the plugin still spells a listing name: it is the key of DirectoryWeb's field group file; it should come from a DirectoryWeb accessor.
+
+## 0.4.0: site-specific code removed (27 Nov 2026)
+
+Done: see CHANGELOG.md 0.4.0. The Animal Writes extras live in `sites/animalwrites/sourceweb/` (not in the zip; deploy it with 0.4.0 or the starter list, alert emails, Dashboard box, relay and legal hosts, AWBI issuer, workers links and the CLI migrations are gone from that site).
+
+Not done, still site-shaped, to decide:
+
+- `AW_WORKERS` (`includes/workers/workers-registry.php`) is the Animal Writes workers repository's workflow list, including "Research (India, ...)" and "Finds new Indian animal-welfare papers". The workers repository's test compares it with its `docs/workers.json`, so changing the wording means changing both. It needs to become a filter with an empty default.
+- Google News is searched in the India edition (`hl=en-IN&gl=IN`, " India" appended in `keywords-model.php`), and the Workers screen shows schedules in IST. Both should follow a setting or the site's locale and timezone.
+- `cc0-images.php` scores photos higher for Indian place names; `library-pdfs.php` and `auto-review.php`'s stop words name Indian government hosts and "india"; `enrichment.php` has AWBI and India Post sources and `aw_awbi_*` fields; `rules-model.php` lists `awbi` and `darpan` in the enrichment trust order; `src/index.js` lists the DirectoryWeb field `animals`. These are Directory-enrichment and Library features written for Indian animal welfare; each needs a filter or to move to the site layer.
+- (Done in 0.4.1: the content-type names are no longer in the plugin; see the roles in CHANGELOG.md.)
+- The site layer has no test against a running WordPress; its test (`sites/animalwrites/sourceweb/tests/run.php`) only checks the files, the seed and the hooks. Check the alert emails once on the live site after deploying (an ingestion problem, a worker problem, a held-items run).
+- The `sourceweb_default_relevance` keyword lists seeded on a new site are now empty; the Animal Writes lists are not carried because that site's option is already stored.
+
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
 Checked line by line against the code on 27 Nov 2026.
@@ -8,7 +29,7 @@ Checked line by line against the code on 27 Nov 2026.
 - DEAD CODE: feed retry backoff (`sourceweb_feed_*_backoff` in `ingest.php`) is called only by tests; the readme no longer promises it (0.2.7).
 - The 'Resolved 26 Nov' line for the open-model consent gate contradicts the HOLD section: the code is held and unloaded.
 - Partial: summary routes use their own check (`aw_worker` or `manage_options` plus application password), not `sourceweb_ingest_can`; the 'quiet' alert in `relevance.php` has no heartbeat guard; a 'paid' AI tier still exists in the code.
-- 0.2.6 (route capability, publishing switch, Animal Writes switch, standalone screens, masked keys) has no automated test of its own. 0.3.0 adds `tests/SourceWebStandaloneScreensTest.php`, which covers the nine screens added in 0.3.0 (not the two of 0.2.6).
+- 0.2.6 (route capability, publishing switch, site-extras switch (removed in 0.4.0), standalone screens, masked keys) has no automated test of its own. 0.3.0 adds `tests/SourceWebStandaloneScreensTest.php`, which covers the nine screens added in 0.3.0 (not the two of 0.2.6).
 
 ## Standalone screens, 0.3.0 (27 Nov 2026)
 

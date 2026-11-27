@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * A phone number as schema.org wants it, in E.164 ("+919962998886"): the digits with the country code and no spaces,
- * dashes or trunk 0 (directoryweb_normalise_phone in animal-writes-core). A short helpline code such as 1962 is left as it is.
+ * dashes or trunk 0 (directoryweb_normalise_phone in the earlier Core plugin). A short helpline code such as 1962 is left as it is.
  *
  * @param string $raw The number as stored ("+91 99629 98886", "0471-2467700", "1962").
  * @return string '' when the number has no digits.
@@ -57,31 +57,11 @@ function rankweb_listing_schema( $id ) {
 	}
 	list( $state, $district ) = directoryweb_listing_place( $id );
 	$m    = fn( $k ) => trim( (string) get_post_meta( $id, $k, true ) );
-	// schema.org type by listing type; a listing with several types gets several (@type as a list).
-	$map   = array(
-		'VeterinaryCare'         => array( 'veterinary-hospital', 'veterinary-clinic', 'veterinary-dispensary', 'bird-hospital', 'mobile-veterinary-unit' ),
-		'AnimalShelter'          => array( 'animal-shelter', 'gaushala', 'sanctuary' ),
-		'GovernmentOffice'       => array( 'veterinary-office', 'mobile-veterinary-unit' ), // a government office the public visits
-	);
-	$stype = array();
-	foreach ( $map as $t => $slugs ) {
-		if ( has_term( $slugs, 'post_tag', $id ) ) {
-			$stype[] = $t;
-		}
-	}
-	if ( in_array( 'VeterinaryCare', $stype, true ) && ! in_array( 'GovernmentOffice', $stype, true ) && array_intersect( array( 'gov', 'gujforest' ), wp_list_pluck( directoryweb_listing_sources( $id ), 0 ) ) ) {
-		$stype[] = 'GovernmentOffice'; // a government vet (from a government list)
-	}
-	$srcs = wp_list_pluck( directoryweb_listing_sources( $id ), 0 );
-	if ( has_term( 'legal-aid', 'post_tag', $id ) && in_array( 'nalsa', $srcs, true ) ) {
-		$stype[] = 'GovernmentOffice'; // a District Legal Services Authority: a government office, not an NGO
-	}
-	$ngo = array( 'animal-welfare-organisation', 'abc-centre', 'rescue-group', 'adoption-network', 'feeder-network', 'emergency-rescue', 'wildlife-rescue', 'animal-ambulance' );
-	if ( ! in_array( 'nalsa', $srcs, true ) ) {
-		$ngo[] = 'legal-aid';
-	}
-	if ( ! $stype || has_term( $ngo, 'post_tag', $id ) ) {
-		array_unshift( $stype, 'NGO' );
+	// schema.org type by listing type; a listing with several types gets several (@type as a list). RankWeb has no
+	// list of its own: a site maps its listing types with the filter rankweb_listing_schema_types ($types, $id); none: NGO.
+	$stype = (array) apply_filters( 'rankweb_listing_schema_types', array(), $id );
+	if ( ! $stype ) {
+		$stype[] = 'NGO';
 	}
 	$stype = array_values( array_unique( $stype ) );
 	$site  = $m( 'aw_website' );
@@ -104,7 +84,7 @@ function rankweb_listing_schema( $id ) {
 		if ( '' === trim( preg_replace( '/[\s,.\-–]+/u', '', $rest ) ) ) {
 			$street = ''; // only repeats the district and state
 		}
-		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => 'IN' ) );
+		$org['address'] = array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $district, 'addressRegion' => $state, 'postalCode' => $m( 'aw_pincode' ), 'addressCountry' => rankweb_country_code() ) );
 		$org['areaServed'] = array_values( array_filter( array( $district ? array( '@type' => 'AdministrativeArea', 'name' => $district ) : null, $state ? array( '@type' => 'State', 'name' => $state ) : null ) ) );
 		foreach ( array_filter( array_map( 'trim', explode( ',', $m( 'aw_areas_served' ) ) ) ) as $area ) { // as the organisation states them
 			if ( ! in_array( $area, array( $district, $state ), true ) ) {
@@ -197,15 +177,10 @@ function rankweb_listing_schema( $id ) {
 	if ( $types ) {
 		$org['keywords'] = implode( ', ', array_filter( array_merge( wp_list_pluck( $types, 'name' ), array( $m( 'aw_g_category' ) ) ) ) ); // additionalType must be a URL; the type names (and Google's category) go here
 	}
-	$code = $m( 'aw_awbi_code' );
-	if ( $code ) {
-		$org['identifier'] = array( '@type' => 'PropertyValue', 'propertyID' => 'AWBI recognition code', 'value' => $code );
-		if ( $m( 'aw_awbi_dropped' ) ) { // on an older AWBI list only
-			$org['identifier']['description'] = 'Not on the AWBI list of ' . wp_date( 'j M Y', strtotime( $m( 'aw_awbi_dropped' ) ) ) . '; recognition may have lapsed';
-		}
-	}
+	$org = (array) apply_filters( 'rankweb_listing_schema_node', $org, $id ); // a site's own identifiers and properties
 	$ids = isset( $org['identifier'] ) ? array( $org['identifier'] ) : array();
-	foreach ( array( 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_fcra' => 'FCRA', 'aw_darpan_id' => 'NGO Darpan ID' ) as $k => $pid ) {
+	// Registration numbers the listing states: meta key => propertyID. A site adds its country's registers with the filter.
+	foreach ( (array) apply_filters( 'rankweb_listing_identifier_fields', array( 'aw_registration' => 'Registration' ) ) as $k => $pid ) {
 		if ( $m( $k ) ) { // as the organisation states them; words without a number are a note, not an identifier
 			$ids[] = preg_match( '/\d/', $m( $k ) ) ? array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'value' => $m( $k ) ) : array( '@type' => 'PropertyValue', 'propertyID' => $pid, 'description' => $m( $k ) );
 		}
@@ -409,7 +384,7 @@ function rankweb_schema_place( $id ) {
 	return array(
 		'@type'   => 'Place',
 		'name'    => implode( ', ', array_filter( array( $district, $state ) ) ),
-		'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district, 'addressRegion' => $state, 'addressCountry' => 'IN' ) ),
+		'address' => array_filter( array( '@type' => 'PostalAddress', 'addressLocality' => $district, 'addressRegion' => $state, 'addressCountry' => rankweb_country_code() ) ),
 	);
 }
 
@@ -454,14 +429,14 @@ function rankweb_article_nodes( $id ) {
 	$type     = get_post_type( $id );
 	$url      = get_permalink( $id );
 	$title    = rankweb_plain_text( get_the_title( $id ) );
-	$kind     = 'aw_legal' === $type && function_exists( 'aw_legal_kinds' ) ? ( aw_legal_kinds( $id )[0] ?? null ) : null; // the Library type tag (never a label such as a campaign tag)
+	$kind     = rankweb_is_type( $type, 'library' ) && function_exists( 'aw_legal_kinds' ) ? ( aw_legal_kinds( $id )[0] ?? null ) : null; // the Library type tag (never a label such as a campaign tag)
 	$ks       = $kind ? $kind->slug : '';
 	$src_url  = (string) get_post_meta( $id, 'aw_source_url', true );
 	$src_name = rankweb_plain_text( (string) get_post_meta( $id, 'aw_source_name', true ) );
 	$src_date = rankweb_schema_date( (string) get_post_meta( $id, 'aw_source_date', true ) );
 	$reviewed = (string) get_post_meta( $id, 'kits_last_reviewed', true ); // crisis guides: the date they were last checked
-	$issuer   = 'aw_legal' === $type ? rankweb_schema_issuer( $id ) : null;
-	$pdf      = 'aw_legal' === $type ? rankweb_schema_pdf( $id ) : null;
+	$issuer   = rankweb_is_type( $type, 'library' ) ? rankweb_schema_issuer( $id ) : null;
+	$pdf      = rankweb_is_type( $type, 'library' ) ? rankweb_schema_pdf( $id ) : null;
 	$us       = array( '@id' => home_url( '/#organization' ) );
 	$base     = array(
 		'mainEntityOfPage' => $url,
@@ -476,7 +451,7 @@ function rankweb_article_nodes( $id ) {
 	$article = array_merge( array( '@type' => 'Article', '@id' => $url . '#article', 'headline' => $title ), $base, array( 'author' => $us, 'publisher' => $us ) );
 	$nodes   = array();
 
-	if ( 'aw_news' === $type ) {
+	if ( rankweb_is_type( $type, 'news' ) ) {
 		$node = array_merge( $article, array( '@type' => 'NewsArticle' ) );
 		if ( $src_date ) {
 			$node['datePublished'] = $src_date; // the day the story was reported
@@ -512,10 +487,13 @@ function rankweb_article_nodes( $id ) {
 				'@id'                     => $url . '#legislation',
 				'name'                    => $title,
 				'legislationType'         => rankweb_plain_text( $kind->name ),
-				'legislationJurisdiction' => 'IN',
+				'legislationJurisdiction' => rankweb_country_code(),
 			),
 			$base
 		);
+		if ( '' === (string) $node['legislationJurisdiction'] ) {
+			unset( $node['legislationJurisdiction'] ); // no country set for the site
+		}
 		if ( preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) get_post_meta( $id, 'aw_source_date', true ) ) ) {
 			$node['legislationDate'] = (string) get_post_meta( $id, 'aw_source_date', true ); // the date of the text, as stored
 		}
@@ -531,13 +509,13 @@ function rankweb_article_nodes( $id ) {
 		$node['sourceOrganization'] = $issuer; // the body whose copy this is (it may not be the law-maker)
 		$node['isBasedOn']          = $src_url ? array_filter( array( '@type' => 'CreativeWork', 'url' => $src_url, 'publisher' => $issuer ) ) : null;
 		$nodes[]                    = $node;
-	} elseif ( 'aw_legal' === $type && 'template' === $ks ) {
+	} elseif ( rankweb_is_type( $type, 'library' ) && 'template' === $ks ) {
 		$nodes[] = array_merge(
 			array( '@type' => 'DigitalDocument', '@id' => $url . '#document', 'name' => $title, 'genre' => rankweb_plain_text( $kind->name ), 'encodingFormat' => 'text/html' ),
 			$base,
 			array( 'author' => $us, 'publisher' => $us )
 		);
-	} elseif ( 'aw_legal' === $type ) {
+	} elseif ( rankweb_is_type( $type, 'library' ) ) {
 		$court = $issuer && function_exists( 'aw_item_issuer' ) && defined( 'AW_COURT_ISSUERS' ) && in_array( aw_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
 		$doc   = array_filter(
 			array(
@@ -606,7 +584,7 @@ function rankweb_court_document_url( $id ) {
 
 /**
  * A campaign: an Event when its day and its place are stored (aw_event_date, Y-m-d; aw_event_place), organised by
- * its organiser or Animal Writes; otherwise (no day, or no place) a CreativeWork by the organiser. The stored day is the whole event (one day:
+ * its organiser or the site; otherwise (no day, or no place) a CreativeWork by the organiser. The stored day is the whole event (one day:
  * endDate the same). No offers (only when the campaign states free participation; none does), no performer.
  * A finished campaign (Post) is a CreativeWork like the other campaigns, with its day as temporalCoverage: no Event
  * with an InStock offer for a day that has passed (owner, 10 Nov 2026).
@@ -641,10 +619,10 @@ function rankweb_campaign_schema( $id ) {
 				array( '@type' => 'Event', '@id' => get_permalink( $id ) . '#event', 'startDate' => $day, 'endDate' => $day, 'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode', 'eventStatus' => 'https://schema.org/EventScheduled' ),
 				$common,
 				array(
-					'location'  => array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => 'IN' ) ),
+					'location'  => array( '@type' => 'Place', 'name' => $place, 'address' => array( '@type' => 'PostalAddress', 'addressCountry' => rankweb_country_code() ) ),
 					'organizer' => $by,
 					'performer' => $by, // the organiser runs the day (Search Console asks for a performer)
-					'offers'    => array( '@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'INR', 'availability' => 'https://schema.org/InStock', 'url' => get_permalink( $id ) ), // free to take part
+					'offers'    => '' === (string) apply_filters( 'rankweb_currency', '' ) ? null : array( '@type' => 'Offer', 'price' => '0', 'priceCurrency' => (string) apply_filters( 'rankweb_currency', '' ), 'availability' => 'https://schema.org/InStock', 'url' => get_permalink( $id ) ), // free to take part
 				)
 			)
 		);
@@ -705,7 +683,7 @@ function rankweb_campaign_list_nodes( $id ) {
 /**
  * A campaign in its Post state (campaign-record.php): its page is a retrospective, an Article about the campaign's own
  * node (Event or CreativeWork) and about the Library records the page lists (the campaign's campaign-* tag on
- * aw_legal items), each by the @id of its own node. Nothing before Post.
+ * library items), each by the @id of its own node. Nothing before Post.
  *
  * @param int $id Post ID.
  * @return array
@@ -719,7 +697,7 @@ function rankweb_campaign_record_schema( $id ) {
 	$about = array( array( '@id' => (string) ( $own['@id'] ?? $url . '#campaign' ) ) );
 	$tags  = function_exists( 'aw_campaign_links' ) ? wp_list_pluck( aw_campaign_links( $id ), 'term_id' ) : array(); // the campaign's own link (campaign-links.php)
 	if ( $tags && function_exists( 'rankweb_article_nodes' ) ) {
-		$docs = get_posts( array( 'post_type' => 'aw_legal', 'post_status' => 'publish', 'numberposts' => 20, 'tax_query' => array( array( 'taxonomy' => ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : '' ), 'terms' => array( (int) $tags[0] ) ) ), 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$docs = get_posts( array( 'post_type' => rankweb_type( 'library' ), 'post_status' => 'publish', 'numberposts' => 20, 'tax_query' => array( array( 'taxonomy' => ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : '' ), 'terms' => array( (int) $tags[0] ) ) ), 'orderby' => 'date', 'order' => 'DESC', 'fields' => 'ids' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		foreach ( $docs as $d ) {
 			$n = rankweb_article_nodes( $d );
 			if ( ! empty( $n[0]['@id'] ) ) {
@@ -872,7 +850,7 @@ function rankweb_job_schema( $id ) {
 					'addressLocality' => $p && 'district' === $p->kind ? $p->name : ( $p ? null : trim( (string) get_post_meta( $id, 'aw_place_city', true ) ) ),
 					'addressRegion'   => $state ? $state->name : null,
 					'postalCode'      => 1 === count( $places ) ? $pin : '',
-					'addressCountry'  => 'IN', // without a stored place, only the country
+					'addressCountry'  => rankweb_country_code(), // without a stored place, only the country
 				)
 			),
 		);
@@ -949,7 +927,7 @@ function rankweb_opportunity_org_address( $id, $org_id ) {
 		$street = trim( preg_replace( '/(\s*,\s*)+/', ', ', str_ireplace( array_filter( array( $p->name, $state ? $state->name : '', (string) apply_filters( 'rankweb_country_name', '' ) ) ), '', (string) get_post_meta( $org_id, 'aw_area', true ) ) ), " ,\t\n" );
 		$pin    = $pin ? $pin : (string) get_post_meta( $org_id, 'aw_pincode', true );
 	}
-	return array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $p && 'district' === $p->kind ? $p->name : null, 'addressRegion' => $state ? $state->name : null, 'postalCode' => $pin, 'addressCountry' => 'IN' ) );
+	return array_filter( array( '@type' => 'PostalAddress', 'streetAddress' => $street, 'addressLocality' => $p && 'district' === $p->kind ? $p->name : null, 'addressRegion' => $state ? $state->name : null, 'postalCode' => $pin, 'addressCountry' => rankweb_country_code() ) );
 }
 
 /**
@@ -1015,7 +993,7 @@ function rankweb_opportunity_schema( $id ) {
 					'@id'                 => get_permalink( $id ) . '#event',
 					'startDate'           => $start ? $start->format( 'c' ) : $day,
 					'endDate'             => $end ? $end->format( 'c' ) : $day, // a stated day is one day
-					'eventSchedule'       => $repeat ? array( '@type' => 'Schedule', 'repeatFrequency' => 'P1M', 'byDay' => 'https://schema.org/' . $repeat[4], 'byMonthWeek' => $repeat[3], 'startTime' => $repeat[1] . ':00', 'endTime' => $repeat[2] . ':00', 'scheduleTimezone' => 'Asia/Kolkata' ) : null,
+					'eventSchedule'       => $repeat ? array( '@type' => 'Schedule', 'repeatFrequency' => 'P1M', 'byDay' => 'https://schema.org/' . $repeat[4], 'byMonthWeek' => $repeat[3], 'startTime' => $repeat[1] . ':00', 'endTime' => $repeat[2] . ':00', 'scheduleTimezone' => (string) apply_filters( 'rankweb_schedule_timezone', wp_timezone_string() ) ) : null,
 					'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
 					'eventStatus'         => 'https://schema.org/EventScheduled',
 					'location'            => array_filter( array( '@type' => 'Place', 'name' => $org ? $org['name'] : null, 'address' => $addr ) ),
@@ -1113,13 +1091,13 @@ function rankweb_schema_nodes() {
 	if ( is_404() ) {
 		return $nodes;
 	}
-	if ( is_singular( array( 'aw_news', 'aw_legal', 'post' ) ) ) {
+	if ( rankweb_is_singular( array( 'news', 'library' ), array( 'post' ) ) ) {
 		$nodes = function_exists( 'rankweb_apply_schema_type' ) ? rankweb_apply_schema_type( rankweb_article_nodes( get_queried_object_id() ), get_queried_object_id() ) : rankweb_article_nodes( get_queried_object_id() );
-	} elseif ( is_singular( 'aw_listing' ) ) {
+	} elseif ( rankweb_is_singular( array( 'listing' ) ) ) {
 		$nodes[] = rankweb_listing_schema( get_queried_object_id() );
-	} elseif ( is_singular( 'aw_opportunity' ) ) {
+	} elseif ( rankweb_is_singular( array( 'opportunity' ) ) ) {
 		$nodes[] = rankweb_opportunity_schema( get_queried_object_id() ); // JobPosting, Event, programme, grant or course
-	} elseif ( is_singular( 'aw_campaign' ) ) {
+	} elseif ( rankweb_is_singular( array( 'campaign' ) ) ) {
 		$nodes[] = rankweb_campaign_schema( get_queried_object_id() );
 		$nodes   = array_merge( $nodes, rankweb_campaign_list_nodes( get_queried_object_id() ) );
 		$story   = rankweb_campaign_record_schema( get_queried_object_id() );
@@ -1179,22 +1157,14 @@ function rankweb_schema_nodes() {
 		$nodes[] = array( '@type' => 'AboutPage', '@id' => get_permalink() . '#webpage', 'url' => get_permalink(), 'name' => rankweb_plain_text( get_the_title() ), 'inLanguage' => rankweb_language(), 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'mainEntity' => array( '@id' => home_url( '/#organization' ) ) );
 	} elseif ( is_page( 'categories' ) ) {
 		$nodes = array_merge( $nodes, rankweb_categories_schema() );
-	} elseif ( is_page( array( 'press-coverage', 'media' ) ) && function_exists( 'rankweb_press_schema' ) && function_exists( 'aw_press_list' ) ) { // the press list (Animal Writes Core)
-		$nodes[] = rankweb_press_schema();
-	} elseif ( function_exists( 'rankweb_hub_schema_nodes' ) && rankweb_hub_schema_nodes() ) {
-		$nodes = array_merge( $nodes, rankweb_hub_schema_nodes() ); // hubs and directory places: CollectionPage + ItemList (hubs.php)
+	} elseif ( ( $collection = (array) apply_filters( 'rankweb_collection_page_nodes', array() ) ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition
+		$nodes = array_merge( $nodes, $collection ); // a site's own list pages (section hubs, a press list): CollectionPage + ItemList. None by default.
 	} elseif ( is_page() && 'page-hub' === get_page_template_slug( get_queried_object_id() ) ) {
 		$nodes = array_merge( $nodes, rankweb_page_lists_schema_nodes( get_queried_object_id() ) ); // a section page of several lists (Adoption)
 	} elseif ( rankweb_seo_is_category_page() || is_tag() ) { // a category or tag page: the same CollectionPage + ItemList
 		$nodes = array_merge( $nodes, rankweb_category_schema_nodes() );
 	}
-	if ( $nodes && is_singular( array( 'aw_news', 'aw_legal', 'post', 'aw_campaign' ) ) && function_exists( 'directoryweb_featured_mentions_schema' ) ) {
-		$mentions = directoryweb_featured_mentions_schema( get_queried_object_id() ); // the organisations it features (featured.php)
-		if ( $mentions ) {
-			$nodes[0]['mentions'] = array_merge( (array) ( $nodes[0]['mentions'] ?? array() ), $mentions );
-		}
-	}
-	return array_values( array_filter( $nodes ) );
+	return array_values( array_filter( (array) apply_filters( 'rankweb_page_schema_nodes', $nodes ) ) ); // a site's own additions to the page's nodes
 }
 
 /**
@@ -1306,171 +1276,6 @@ function rankweb_page_lists_schema_nodes( $page_id ) {
 	return $nodes;
 }
 
-/**
- * CollectionPage + ItemList of a hub's current page (put in the page's one graph below). Empty off a hub.
- *
- * @return array
- */
-function rankweb_hub_schema_nodes() {
-	static $nodes = null;
-	if ( null !== $nodes ) {
-		return $nodes;
-	}
-	if ( ! function_exists( 'aw_hub_type' ) || ! function_exists( 'aw_hub_posts' ) || ! defined( 'AW_HUBS' ) ) { // the hubs (Animal Writes Core) are not loaded
-		return $nodes = array();
-	}
-	$type = aw_hub_type();
-	if ( ! $type || is_404() || 'aw_press' === $type ) {
-		return $nodes = array(); // Media & PR has its own (rankweb_press_schema)
-	}
-	$url   = strtok( aw_hub_base_url(), '?' );
-	$view  = function_exists( 'rankweb_seo_filtered_named' ) && rankweb_seo_filtered_named() ? rankweb_seo_filtered_view() : null;
-	if ( $view ) { // a hub filtered by one category or tag is its own collection (filtered-views.php)
-		$url = add_query_arg( $view['key'], rawurlencode( $view['slug'] ), strtok( aw_hub_base_url(), '?' ) );
-	}
-	// Kept until the next post change (rankweb_seo_cached): the plain list and its named filtered views, per page. Any
-	// other filtered request is built each time, so query strings cannot fill the cache.
-	$plain = ! function_exists( 'rankweb_seo_filter_params' ) || ! rankweb_seo_filter_params();
-	if ( $plain || $view ) {
-		$path  = (string) wp_parse_url( add_query_arg( array() ), PHP_URL_PATH ); // the request's own path (Directory places and types)
-		$sort  = sanitize_key( wp_unslash( $_GET['sort'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- an order, read only
-		$nodes = rankweb_seo_cached( 'hub_schema|' . $type . '|' . $url . '|' . $path . '|' . $sort . '|' . aw_hub_page() . '|' . get_queried_object_id(), fn() => rankweb_hub_schema_build( $type, $url, $view ) );
-		return $nodes;
-	}
-	$nodes = rankweb_hub_schema_build( $type, $url, $view );
-	return $nodes;
-}
-
-/**
- * The CollectionPage + ItemList of a hub list (rankweb_hub_schema_nodes()).
- *
- * @param string     $type Post type of the hub.
- * @param string     $url  The list's own address.
- * @param array|null $view Its named filtered view, if any.
- * @return array
- */
-function rankweb_hub_schema_build( $type, $url, $view ) {
-	$items = array();
-	$start = ( aw_hub_page() - 1 ) * AW_HUBS[ $type ][2];
-	$posts = aw_hub_posts( $type );
-	$extra = 0;
-	if ( 'aw_campaign' === $type && 1 === aw_hub_page() ) {
-		$lead = get_page_by_path( 'india-writes-for-its-community-dogs', OBJECT, 'aw_campaign' ); // shown above the list as its own story (hubs.php)
-		if ( $lead && 'publish' === $lead->post_status ) {
-			array_unshift( $posts, $lead );
-			$extra = 1;
-		}
-	}
-	foreach ( $posts as $i => $p ) {
-		if ( rankweb_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, rankweb_seo_preview_ids(), true ) ) {
-			continue; // not indexed (or preview only), so not listed
-		}
-		$item_data = array(
-			'@type'    => 'ListItem',
-			'position' => $start + $i + 1,
-			'url'      => get_permalink( $p ),
-			'name'     => rankweb_plain_text( get_the_title( $p ) ),
-		);
-		if ( 'aw_listing' === $type ) {
-			$place = function_exists( 'directoryweb_listing_place' ) ? array_filter( array_reverse( (array) directoryweb_listing_place( $p->ID ) ) ) : array();
-			$phone = function_exists( 'directoryweb_listing_first_phone' ) ? directoryweb_listing_first_phone( $p->ID ) : '';
-			$ngo   = array(
-				'@type' => 'NGO',
-				'@id'   => get_permalink( $p ) . '#organization',
-				'name'  => rankweb_plain_text( get_the_title( $p ) ),
-				'url'   => get_permalink( $p ),
-			);
-			if ( $place ) {
-				$ngo['address'] = array(
-					'@type'           => 'PostalAddress',
-					'addressCountry'  => 'IN',
-					'addressRegion'   => $place[1] ?? ( $place[0] ?? '' ),
-					'addressLocality' => $place[0] ?? '',
-				);
-			}
-			if ( $phone ) {
-				$ngo['telephone'] = $phone;
-			}
-			if ( has_post_thumbnail( $p->ID ) ) {
-				$thumb = get_the_post_thumbnail_url( $p->ID, 'thumbnail' );
-				if ( $thumb ) {
-					$ngo['image'] = $thumb;
-				}
-			}
-			$item_data['item'] = $ngo;
-		}
-		$items[] = $item_data;
-	}
-	$name  = 'aw_listing' === $type && function_exists( 'directoryweb_directory_h1' ) ? directoryweb_directory_h1() : get_the_title( get_queried_object_id() );
-	$name  = $view && 'aw_listing' !== $type ? $view['name'] . ' – ' . get_the_title( get_queried_object_id() ) : $name; // "Wildlife – News"
-	if ( ! $items ) { // an empty list: the collection page alone
-		return array( array( '@type' => 'CollectionPage', '@id' => $url . '#page', 'url' => $url, 'name' => rankweb_plain_text( $name ), 'description' => rankweb_seo_description(), 'inLanguage' => rankweb_language(), 'isPartOf' => array( '@id' => home_url( '/#website' ) ), 'publisher' => array( '@id' => home_url( '/#organization' ) ) ) );
-	}
-	return array(
-		array(
-			'@type'       => 'CollectionPage',
-			'@id'         => $url . '#page',
-			'url'         => $url,
-			'name'        => rankweb_plain_text( $name ),
-			'description' => rankweb_seo_description(),
-			'inLanguage'  => rankweb_language(),
-			'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
-			'publisher'   => array( '@id' => home_url( '/#organization' ) ),
-			'mainEntity'  => array( '@id' => $url . '#list' ),
-		),
-		array(
-			'@type'           => 'ItemList',
-			'@id'             => $url . '#list',
-			'numberOfItems'   => (int) aw_hub_total( $type ) + $extra,
-			'itemListElement' => $items,
-		),
-	);
-}
-
-/** ImageObject of a press item: its stored thumbnail, else the stored publisher logo (null when neither exists). */
-function rankweb_press_image_schema( $id ) {
-	foreach ( array( (int) get_post_thumbnail_id( $id ), (int) get_post_meta( $id, 'aw_press_logo', true ) ) as $att ) {
-		$img = $att ? rankweb_schema_safe_image( rankweb_seo_attachment( $att ) ) : null;
-		if ( $img ) {
-			return array_filter( array( '@type' => 'ImageObject', 'url' => $img['url'], 'width' => $img['width'], 'height' => $img['height'] ) );
-		}
-	}
-	return null;
-}
-
-/** Media & PR page schema: CollectionPage + ItemList. */
-function rankweb_press_schema() {
-	$list = array();
-	foreach ( aw_press_list() as $i => $p ) {
-		$list[] = array(
-			'@type'    => 'ListItem',
-			'position' => $i + 1,
-			'item'     => array_filter(
-				array(
-					'@type'         => 'Article', // coverage of the site, at the outlet's address
-					'headline'      => rankweb_plain_text( get_the_title( $p ) ),
-					'about'         => array( '@id' => home_url( '/#organization' ) ),
-					'name'          => rankweb_plain_text( get_the_title( $p ) ),
-					'url'           => (string) get_post_meta( $p->ID, 'aw_press_url', true ),
-					'datePublished' => rankweb_schema_date( (string) get_post_meta( $p->ID, 'aw_press_date', true ) ),
-					'publisher'     => get_post_meta( $p->ID, 'aw_press_publisher', true ) ? array( '@type' => 'Organization', 'name' => (string) get_post_meta( $p->ID, 'aw_press_publisher', true ) ) : null,
-					'image'         => rankweb_press_image_schema( $p->ID ),
-				)
-			),
-		);
-	}
-	return array_filter( array(
-		'@type'       => 'CollectionPage',
-		'@id'         => get_permalink() . '#page',
-		'url'         => get_permalink(),
-		'name'        => rankweb_plain_text( get_the_title() ),
-		'description' => rankweb_plain_text( rankweb_seo_description() ),
-		'inLanguage'  => rankweb_language(),
-		'isPartOf'    => array( '@id' => home_url( '/#website' ) ),
-		'mainEntity'  => array( '@type' => 'ItemList', 'itemListElement' => $list ),
-	) );
-}
-
 // With Rank Math: its one graph carries ours. Our publisher and site replace its defaults (same @id); our item nodes
 // replace its automatic article; our breadcrumb trail is the one people see; a page that is itself a collection or a
 // contact page replaces Rank Math's plain WebPage. Schemas an editor adds in Rank Math are kept.
@@ -1485,7 +1290,7 @@ add_filter(
 		$data['WebSite']   = rankweb_website_schema();
 		unset( $data['ProfilePage'] ); // authors are not shown on this site
 		$nodes = rankweb_schema_nodes();
-		if ( $nodes || is_singular( array( 'aw_news', 'aw_legal', 'post', 'aw_listing', 'aw_opportunity', 'aw_campaign' ) ) ) {
+		if ( $nodes || rankweb_is_singular( array( 'news', 'library', 'listing', 'opportunity', 'campaign' ), array( 'post' ) ) ) {
 			unset( $data['richSnippet'] ); // Rank Math's type default (Titles & Meta) is filled here; a closed opportunity has none
 		}
 		foreach ( $nodes as $node ) {
@@ -1511,7 +1316,7 @@ add_filter(
 			}
 			$data[ 'aw_node_' . $i ] = $node;
 		}
-		$faq = function_exists( 'rankweb_faq_schema' ) ? rankweb_faq_schema() : null; // parsed from the page's own FAQ accordion (animal-writes-core faq.php)
+		$faq = function_exists( 'rankweb_faq_schema' ) ? rankweb_faq_schema() : null; // parsed from the page's own FAQ accordion (the earlier Core plugin faq.php)
 		if ( $faq ) {
 			// Every page type has the FAQ now (31 Oct 2026): link it to a node this graph has, else to the page's own node.
 			$ids  = array();

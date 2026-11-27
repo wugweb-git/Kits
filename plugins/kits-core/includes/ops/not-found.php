@@ -1,6 +1,6 @@
 <?php
 /**
- * The page for a missing address (owner, 26 Oct 2026; moved from Animal Writes Core, 19 Nov 2026).
+ * The page for a missing address.
  *
  * - A trashed item of a section that asks for it answers 410 Gone, not 404, so search engines drop the address sooner.
  *   It says so ("This item was removed") and lists the newest items of that section. A draft, a private item or an
@@ -8,8 +8,8 @@
  * - Every 404 fills the search field with the words of the missing address (/news/stray-dog-protest/ → "stray dog
  *   protest") and, under a section's address, lists that section's three newest items.
  *
- * The site names its sections with the filter kits_not_found_sections (Animal Writes: the theme's site layer,
- * assets/site/ops.php). [kits_not_found] (also [aw_not_found], the name pages and templates carry) prints the page.
+ * The site names its sections with the filter kits_not_found_sections. [kits_not_found] (also [aw_not_found], the name
+ * pages and templates carry) prints the page.
  *
  * @package kits-core
  */
@@ -28,7 +28,7 @@ function kits_not_found_sections(): array {
 	return (array) apply_filters( 'kits_not_found_sections', array() );
 }
 
-/** The section (post type => label) a missing address is under, e.g. array( 'aw_news', 'News' ), or null. */
+/** The section (post type => label) a missing address is under, e.g. array( 'news', 'News' ), or null. */
 function kits_not_found_section() {
 	$parts = kits_not_found_parts();
 	if ( count( $parts ) < 2 ) {
@@ -145,18 +145,22 @@ add_shortcode( 'kits_not_found', 'kits_not_found_html' );
 add_shortcode( 'aw_not_found', 'kits_not_found_html' ); // the name the 404 template and stored pages carry
 
 /**
- * An error page's photo (owner, 2 Nov 2026: the animals blended into the page, reference 7). Files in assets/site/error/:
- * {name}-wide.webp (16:9, 2400 × 1350: from 768px it fills the section behind the text, so its left half is a plain
- * wall and the animals sit bottom right) and {name}-phone.webp (4:3, 1200 × 900: on phones, after the lead, animals
- * in the middle). Either file alone is used at every width. '' with neither: the page keeps its one text column.
+ * An error page's photo, from the folder a site names with the filter kits_error_picture_source (array of 'dir' and
+ * 'url', both with a trailing slash; none by default): {name}-wide.webp (16:9, 2400 × 1350: from 768px it fills the
+ * section behind the text) and {name}-phone.webp (4:3, 1200 × 900: on phones, after the lead). Either file alone is used
+ * at every width. '' with neither: the page keeps its one text column.
  * Decorative (empty alt): the words say everything.
  *
  * @param string $name 404, 500 or 503.
  * @return string
  */
 function kits_error_picture( $name ) {
-	$dir   = KITS_CORE_DIR . 'assets/site/error/'; // the site's photos (left out of Kits builds, like the other assets/site/ files)
-	$url   = plugins_url( 'assets/site/error/', KITS_CORE_DIR . 'kits-core.php' );
+	$src   = (array) apply_filters( 'kits_error_picture_source', array( 'dir' => '', 'url' => '' ) );
+	$dir   = (string) ( $src['dir'] ?? '' );
+	$url   = (string) ( $src['url'] ?? '' );
+	if ( '' === $dir || '' === $url ) {
+		return '';
+	}
 	$wide  = is_readable( $dir . $name . '-wide.webp' ) ? $url . $name . '-wide.webp' : '';
 	$phone = is_readable( $dir . $name . '-phone.webp' ) ? $url . $name . '-phone.webp' : '';
 	if ( '' === $wide && '' === $phone ) {

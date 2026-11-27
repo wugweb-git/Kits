@@ -66,7 +66,7 @@ $list  = '<div class="notice notice-success inline"><p>Priority saved.</p></div>
 	. '<th scope="col" id="label" class="manage-column column-label column-primary sorted asc"><a href="admin.php?page=aw-search-insights&amp;tab=keywords&amp;orderby=label&amp;order=desc"><span>Keyword</span><span class="sorting-indicators"></span><span class="screen-reader-text">Sort descending.</span></a></th>'
 	. '<th scope="col" id="page" class="manage-column column-page">Page</th></tr></thead>'
 	. '<tbody id="the-list"><tr><th scope="row" class="check-column"><input type="checkbox" name="kw[]" value="41"></th><td class="label column-label has-row-actions column-primary" data-colname="Keyword">stray dogs<div class="row-actions"><span class="p1"><a href="admin.php?page=aw-search-insights&amp;tab=keywords&amp;aw_si_kw=override_p1&amp;kw%5B0%5D=41&amp;_wpnonce=abc123">Set P1</a> | </span><span><a href="javascript:void(0)">Bad</a></span></div><button type="button" class="toggle-row"><span class="screen-reader-text">Show more details</span></button></td>'
-	. '<td class="page column-page" data-colname="Page"><a href="https://animalwrites.in/news/x/" target="_blank">/news/x/</a></td></tr>'
+	. '<td class="page column-page" data-colname="Page"><a href="https://example.org/news/x/" target="_blank">/news/x/</a></td></tr>'
 	. '<tr><th scope="row" class="check-column"></th><td class="label column-label column-primary">dogs (all)</td><td class="page column-page">—</td></tr></tbody></table></form><script>alert(1)</script>';
 $p     = kits_shell_html_parts( $list );
 $types = array_column( $p, 'type' );
@@ -89,12 +89,12 @@ kits_parts_check( 'get' === $t['method'] && in_array( array( '_wpnonce', 'abc123
 kits_parts_check( array( 'label', 'page' ) === array_column( $t['columns'], 'key' ) && 'Keyword' === $t['columns'][0]['label'] && 'asc' === $t['columns'][0]['sorted'] && $t['columns'][0]['primary'] && ! isset( $t['columns'][1]['sortHref'] ), 'columns: key, label without screen-reader words, sort' );
 kits_parts_check( '41' === $t['rows'][0]['pick'] && 'stray dogs' === $t['rows'][0]['cells']['label']['text'] && ! isset( $t['rows'][0]['cells']['label']['href'] ), 'row: tick box value, cell text without row actions' );
 kits_parts_check( 1 === count( $t['rows'][0]['actions'] ) && 'Set P1' === $t['rows'][0]['actions'][0]['label'] && false !== strpos( $t['rows'][0]['actions'][0]['href'], 'aw_si_kw=override_p1' ), 'row actions: safe links only' );
-kits_parts_check( 'https://animalwrites.in/news/x/' === $t['rows'][0]['cells']['page']['href'] && $t['rows'][0]['cells']['page']['external'], 'cell link' );
+kits_parts_check( 'https://example.org/news/x/' === $t['rows'][0]['cells']['page']['href'] && $t['rows'][0]['cells']['page']['external'], 'cell link' );
 kits_parts_check( '' === $t['rows'][1]['pick'], 'a row without a tick box cannot be picked' );
 kits_parts_check( false === strpos( json_encode( $p ), 'alert' ) && false === strpos( json_encode( $p ), 'javascript' ) && false === strpos( json_encode( $p ), '<' ), 'no script or markup from a tab' );
 
 $f = kits_shell_html_parts(
-	'<h2>Notes</h2><form method="post" action="https://animalwrites.in/wp-admin/admin-post.php"><input type="hidden" name="action" value="aw_si_note"><input type="hidden" name="_wpnonce" value="n1">'
+	'<h2>Notes</h2><form method="post" action="https://example.org/wp-admin/admin-post.php"><input type="hidden" name="action" value="aw_si_note"><input type="hidden" name="_wpnonce" value="n1">'
 	. '<p>Add a word.</p><table class="form-table"><tr><th><label for="w">Word</label></th><td><input type="text" id="w" name="word" value="cat" required><p class="description">One per line.</p></td></tr>'
 	. '<tr><th>Kind</th><td><label><input type="radio" name="kind" value="a" checked> A</label><label><input type="radio" name="kind" value="b"> B</label></td></tr></table>'
 	. '<textarea name="notes" rows="4">x</textarea><select name="src"><option value="1">One</option><option value="2" selected>Two</option></select><label><input type="checkbox" name="on" value="1" checked> Turn on</label><label><input type="checkbox" name="off" value="1" disabled> Locked</label>'
@@ -115,8 +115,8 @@ kits_parts_check( array( 'Add a word.' ) === array_column( $g['blocks'], 'text' 
 
 $st = kits_shell_html_parts(
 	'<table class="form-table" role="presentation"><tbody><tr><th scope="row">Schedule</th><td><p>Daily at 07:10.</p></td></tr>'
-	. '<tr><th scope="row">Import</th><td><form method="post" enctype="multipart/form-data" action="https://animalwrites.in/wp-admin/admin-post.php"><input type="hidden" name="action" value="aw_si_import"><p><label for="f">CSV file</label> <input type="file" id="f" name="file" accept=".csv"></p><input type="submit" class="button" value="Import"></form></td></tr>'
-	. '<tr><th scope="row"><label for="c">Delete data</label></th><td><form method="post" action="https://animalwrites.in/wp-admin/admin-post.php"><input type="text" id="c" name="confirm"><input type="submit" class="button delete" value="Delete data"></form></td></tr></tbody></table>'
+	. '<tr><th scope="row">Import</th><td><form method="post" enctype="multipart/form-data" action="https://example.org/wp-admin/admin-post.php"><input type="hidden" name="action" value="aw_si_import"><p><label for="f">CSV file</label> <input type="file" id="f" name="file" accept=".csv"></p><input type="submit" class="button" value="Import"></form></td></tr>'
+	. '<tr><th scope="row"><label for="c">Delete data</label></th><td><form method="post" action="https://example.org/wp-admin/admin-post.php"><input type="text" id="c" name="confirm"><input type="submit" class="button delete" value="Delete data"></form></td></tr></tbody></table>'
 );
 kits_parts_check( array( 'heading', 'p', 'heading', 'form', 'heading', 'form' ) === array_column( $st, 'type' ), 'settings table: each row a heading, then its words and forms: ' . implode( ', ', array_column( $st, 'type' ) ) );
 kits_parts_check( 'multipart/form-data' === $st[3]['enctype'] && 'file' === $st[3]['fields'][0]['type'] && '.csv' === $st[3]['fields'][0]['accept'] && 'CSV file' === $st[3]['fields'][0]['label'], 'an upload form keeps its file field and encoding' );

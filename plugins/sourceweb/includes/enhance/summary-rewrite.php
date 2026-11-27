@@ -106,10 +106,15 @@ function sourceweb_summary_rw_short_due( array $m, $section, $now ) {
 	return ( ! $last || $now - $last >= AW_SUMMARY_RW_RECHECK_DAYS * DAY_IN_SECONDS ) ? 'recheck' : '';
 }
 
+/** SQL: the post type column is a type that carries a summary (news, library, post). */
+function sourceweb_summary_types_sql( $column ) {
+	return sourceweb_sql_in_types( $column, sourceweb_types_with( array( 'news', 'library' ), array( 'post' ) ) );
+}
+
 /** GET ?short=1: the short items due another try, oldest first (the day they were judged or re-read). */
 function sourceweb_summary_rw_short_list( $per ) {
 	global $wpdb;
-	$rows = $wpdb->get_results( "SELECT p.ID, p.post_type, p.post_title, p.post_excerpt, p.post_date, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_summary_rw' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post') AND m.meta_value LIKE '%short%'" ); // phpcs:ignore WordPress.DB
+	$rows = $wpdb->get_results( "SELECT p.ID, p.post_type, p.post_title, p.post_excerpt, p.post_date, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_summary_rw' WHERE p.post_status = 'publish' AND " . sourceweb_summary_types_sql( 'p.post_type' ) . " AND m.meta_value LIKE '%short%'" ); // phpcs:ignore WordPress.DB
 	$now  = strtotime( current_time( 'mysql' ) ); // the meta's times are local, as current_time( 'mysql' )
 	$due  = array();
 	foreach ( $rows as $r ) {
@@ -183,7 +188,7 @@ function sourceweb_summary_rw_list( WP_REST_Request $req ) {
 	}
 	$skip = max( 0, (int) $req->get_param( 'skip' ) );
 	$only = array_map( 'intval', (array) $req->get_param( 'ids' ) );
-	$rows = $wpdb->get_results( "SELECT ID, post_type, post_title, post_excerpt, post_date FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_news','aw_legal','post')" . ( $only ? ' AND ID IN (' . implode( ',', array_map( 'intval', $only ) ) . ')' : '' ) . ' ORDER BY post_date DESC, ID DESC' ); // phpcs:ignore WordPress.DB
+	$rows = $wpdb->get_results( "SELECT ID, post_type, post_title, post_excerpt, post_date FROM {$wpdb->posts} WHERE post_status = 'publish' AND " . sourceweb_summary_types_sql( 'post_type' ) . ( $only ? ' AND ID IN (' . implode( ',', array_map( 'intval', $only ) ) . ')' : '' ) . ' ORDER BY post_date DESC, ID DESC' ); // phpcs:ignore WordPress.DB
 	$out  = array();
 	$at   = $skip;
 	$n    = count( $rows );
@@ -229,7 +234,7 @@ function sourceweb_summary_rw_list( WP_REST_Request $req ) {
 
 function sourceweb_summary_rw_progress() {
 	global $wpdb;
-	$rows  = $wpdb->get_results( "SELECT ID, post_type, post_excerpt FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_news','aw_legal','post')" ); // phpcs:ignore WordPress.DB
+	$rows  = $wpdb->get_results( "SELECT ID, post_type, post_excerpt FROM {$wpdb->posts} WHERE post_status = 'publish' AND " . sourceweb_summary_types_sql( 'post_type' ) ); // phpcs:ignore WordPress.DB
 	$count = array();
 	$list  = array();
 	foreach ( $rows as $r ) {
@@ -342,7 +347,7 @@ function sourceweb_summary_rw_post( WP_REST_Request $req ) {
 	}
 	foreach ( (array) $req->get_param( 'also' ) as $a ) {
 		$url = esc_url_raw( (string) ( $a['url'] ?? '' ) );
-		if ( '' === $url || ! in_array( $p->post_type, array( 'aw_news', 'aw_legal' ), true ) ) {
+		if ( '' === $url || ! sourceweb_is_any_type( $p->post_type, array( 'news', 'library' ) ) ) {
 			continue;
 		}
 		$also = array_values( array_filter( (array) get_post_meta( $id, 'aw_also_reported', true ) ) );
@@ -359,10 +364,10 @@ function sourceweb_summary_rw_post( WP_REST_Request $req ) {
 	}
 	// The search description is the new lead (Rank Math), unless an editor typed a different one.
 	$desc = '';
-	if ( function_exists( 'aw_seo_item_description' ) ) {
+	if ( function_exists( 'rankweb_seo_item_description' ) ) {
 		$have = trim( (string) get_post_meta( $id, 'rank_math_description', true ) );
 		$auto = (array) json_decode( (string) get_post_meta( $id, '_aw_seo_auto', true ), true );
-		$desc = aw_seo_item_description( $id );
+		$desc = rankweb_seo_item_description( $id );
 		if ( '' !== $desc && ( '' === $have || $have === $old_desc || $have === ( $auto['description'] ?? null ) || $have === $desc ) ) {
 			update_post_meta( $id, 'rank_math_description', wp_slash( $desc ) );
 			$auto['description'] = $desc;

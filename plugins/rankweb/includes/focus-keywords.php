@@ -1,10 +1,10 @@
 <?php
 /**
  * Focus keywords (Rank Math's rank_math_focus_keyword). Listings get their name when they are published (titles.php).
- * Other items get a short search phrase from the workers' focus-keyword job (animal-writes-workers,
+ * Other items get a short search phrase from the workers' focus-keyword job (the workers plugin,
  * aw_workers/focus_keywords.py), which reads and writes through this API:
  *
- * GET  /wp-json/aw/v1/seo-items?type=aw_news&page=1&per_page=100&missing=1
+ * GET  /wp-json/aw/v1/seo-items?type=<post type>&page=1&per_page=100&missing=1
  *      → {items: [{id, title, seo_title, excerpt, focus, has_focus, in_title}], total, pages}
  * POST /wp-json/aw/v1/seo-focus {items: [{id, keyword}], replace: false}
  *      → writes the keyword where the field is empty and it passes rankweb_seo_clean_keyword() and is a phrase of the item's
@@ -12,7 +12,7 @@
  *        A keyphrase another published page already has (its focus keyphrase, or the owner of the keyword record in
  *        Search Insights) is refused, and a News item never takes one an evergreen page owns (keyphrase-model.php).
  *        An item with clear: true takes its `keyword` off the item instead (the item's other keyphrases stay).
- *        Press coverage (aw_press) has no Rank Math box, so an administrator can write and clear its keyphrase here:
+ *        Press coverage (the press type) has no Rank Math box, so an administrator can write and clear its keyphrase here:
  *        an empty `keyword` on a press item clears the whole field (the old value goes to _aw_focus_history).
  *        With dry: true, nothing is written and `written` counts what would be.
  *        {written, skipped: [{id, why, owner?}], dry}
@@ -37,7 +37,7 @@ require_once __DIR__ . '/keyphrase-model.php';
 /**
  * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable:
  * - not 2 to 4 words, or over 60 characters;
- * - the site's own name, unless the item's title names the site itself (a campaign or press item about Animal Writes);
+ * - the site's own name, unless the item's title names the site itself (a campaign or press item about the site);
  * - ending on a connector ("india writes for", "rescued in");
  * - only generic words ("save animals", "animal welfare");
  * - sharing no word with the item's title or its own text (excerpt or first paragraph).
@@ -238,7 +238,7 @@ add_action(
 					foreach ( array_slice( (array) $req->get_param( 'items' ), 0, 200 ) as $it ) {
 						$id   = absint( $it['id'] ?? 0 );
 						$post = $id ? get_post( $id ) : null;
-						$is_press = $post && 'aw_press' === $post->post_type; // no Rank Math box: this route is the only way to edit it
+						$is_press = $post && rankweb_is_type( $post->post_type, 'press' ); // no Rank Math box: this route is the only way to edit it
 						if ( $is_press && ! current_user_can( 'manage_options' ) ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'press items: administrators only' );
 							continue;

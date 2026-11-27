@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
 function rankweb_hub_canonical() {
-	if ( ! function_exists( 'aw_hub_base_url' ) || ! function_exists( 'aw_hub_page' ) ) { // the hubs (Animal Writes Core) are not loaded
+	if ( ! function_exists( 'aw_hub_base_url' ) || ! function_exists( 'aw_hub_page' ) ) { // the hubs (the earlier Core plugin) are not loaded
 		return rankweb_list_canonical();
 	}
 	return strtok( aw_hub_base_url(), '?' ) . ( aw_hub_page() > 1 ? 'page/' . aw_hub_page() . '/' : '' );
@@ -60,7 +60,7 @@ function rankweb_list_canonical() {
 /** The listing a /claim/?listing=ID page is for (0 elsewhere). */
 function rankweb_claim_listing() {
 	$id = is_page( 'claim' ) ? absint( $_GET['listing'] ?? 0 ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
-	return ( $id && 'aw_listing' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) ? $id : 0;
+	return ( $id && rankweb_is_type( get_post_type( $id ), 'listing' ) && 'publish' === get_post_status( $id ) ) ? $id : 0;
 }
 
 /**

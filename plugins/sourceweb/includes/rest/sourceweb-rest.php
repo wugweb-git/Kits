@@ -228,7 +228,7 @@ function sourceweb_dashboard_payload(): array {
 	$tiles = array();
 
 	$r       = (array) ( $c['review'] ?? array() );
-	$types   = defined( 'AW_REVIEW_TYPES' ) ? AW_REVIEW_TYPES : array();
+	$types   = function_exists( 'sourceweb_review_types' ) ? sourceweb_review_types() : array();
 	$top     = ! empty( $r['by'] ) ? (string) array_key_first( (array) $r['by'] ) : '';
 	$old     = (int) ( $r['oldest'] ?? 0 );
 	$tiles[] = array(
@@ -439,7 +439,7 @@ function sourceweb_review_row( WP_Post $p ): array {
 		'id'        => (int) $p->ID,
 		'title'     => '' !== $title ? $title : __( '(no title)', 'sourceweb' ),
 		'type'      => $p->post_type,
-		'typeLabel' => AW_REVIEW_TYPES[ $p->post_type ] ?? $p->post_type,
+		'typeLabel' => sourceweb_review_types()[ $p->post_type ] ?? $p->post_type,
 		'date'      => (string) $p->post_date,
 		'dateText'  => (string) get_the_date( 'j M Y', $p ),
 		'host'      => $url ? preg_replace( '/^www\./', '', strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ) ) : '',
@@ -459,7 +459,7 @@ function sourceweb_review_row( WP_Post $p ): array {
  */
 function sourceweb_rest_review( WP_REST_Request $request ) {
 	$items = array_map( 'sourceweb_review_row', sourceweb_review_items() );
-	$out   = sourceweb_review_list( $items, $request->get_params(), AW_REVIEW_TYPES );
+	$out   = sourceweb_review_list( $items, $request->get_params(), sourceweb_review_types() );
 	return rest_ensure_response( $out );
 }
 
@@ -491,7 +491,7 @@ function sourceweb_rest_review_decide( WP_REST_Request $request ) {
  */
 function sourceweb_rest_review_publish_all( WP_REST_Request $request ) {
 	$type  = sanitize_key( (string) $request['type'] );
-	$items = sourceweb_review_items( isset( AW_REVIEW_TYPES[ $type ] ) ? $type : '' );
+	$items = sourceweb_review_items( isset( sourceweb_review_types()[ $type ] ) ? $type : '' );
 	if ( count( $items ) !== (int) $request['count'] ) {
 		return new WP_Error(
 			'sourceweb_count_changed',
@@ -815,7 +815,8 @@ function sourceweb_enrich_search( string $where, array $args, WP_REST_Request $r
 	global $wpdb;
 	$words = trim( sanitize_text_field( (string) $request['search'] ) );
 	if ( '' !== $words ) {
-		$where .= " AND e.listing_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = 'aw_listing' AND post_title LIKE %s )";
+		$where .= " AND e.listing_id IN ( SELECT ID FROM {$wpdb->posts} WHERE post_type = %s AND post_title LIKE %s )"; // an empty listing type matches nothing
+		$args[] = sourceweb_type( 'listing' );
 		$args[] = '%' . $wpdb->esc_like( $words ) . '%';
 	}
 	return array( $where, $args );
@@ -967,7 +968,7 @@ function sourceweb_services(): array {
 	if ( function_exists( 'sourceweb_sourcing_phase' ) && sourceweb_sourcing_phase() >= 1 ) {
 		$relay = count( (array) sourceweb_src_relay_hosts_from_pubs( function_exists( 'sourceweb_publishers' ) ? sourceweb_publishers() : array() ) );
 	} else {
-		$relay = count( (array) sourceweb_src_relay_legacy( is_array( $stored ) ? $stored : array(), AW_RELAY_DEFAULT ) );
+		$relay = count( (array) sourceweb_src_relay_legacy( is_array( $stored ) ? $stored : array(), sourceweb_relay_default_hosts() ) );
 	}
 	$out[] = array(
 		'slug'    => 'relay',

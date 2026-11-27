@@ -1,13 +1,12 @@
 <?php
 // No ABSPATH guard: this is a command-line runner that defines ABSPATH itself.
 /**
- * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the ops pieces moved from Animal Writes Core
- * on 18 Nov 2026. The error pages (includes/error-pages.php) install a missing drop-in, update ours, leave a current
- * one and never replace a file without the marker; the site's drop-ins carry the marker and sit in the site folder
- * (assets/site/dropins/, left out of Kits builds), and nothing installs without them. The daily backup
- * (includes/backups.php) is off unless switched on, is switched on once by itself where it already ran, keeps its cron
- * hook, option and REST route names, and the UpdraftPlus alert reads the newest remote backup. The old aw_ names still
- * answer.
+ * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the ops pieces. The error pages
+ * (includes/error-pages.php) install a missing drop-in, update ours, leave a current one and never replace a file without
+ * the marker; the plugin ships none (a site names its pages folder and its older marker with filters), and nothing installs
+ * without them. The daily backup (includes/backups.php) is off unless switched on (a site layer can store its own first
+ * choice with a filter), keeps its cron hook, option and REST route names, and the UpdraftPlus alert reads the newest
+ * remote backup. The Animal Writes site layer's own checks are in sites/animalwrites/kits-core/tests/.
  *
  * Usage: php plugins/kits-core/tests/ops-tests.php
  *
@@ -40,6 +39,9 @@ function add_filter( $hook, $cb, $prio = 10, $args = 1 ) {
 }
 function apply_filters( $hook, $value, ...$rest ) {
 	return array_key_exists( $hook, $GLOBALS['t_filters'] ) ? $GLOBALS['t_filters'][ $hook ] : $value;
+}
+function trailingslashit( $s ) {
+	return rtrim( (string) $s, '/\\' ) . '/';
 }
 function get_option( $name, $default = false ) {
 	return array_key_exists( $name, $GLOBALS['t_options'] ) ? $GLOBALS['t_options'][ $name ] : $default;
@@ -104,50 +106,52 @@ function check( $label, $ok ) {
 require KITS_CORE_DIR . 'includes/error-pages.php';
 require KITS_CORE_DIR . 'includes/backups.php';
 
-// The site's drop-ins carry the marker (or the sync would report no-source and never install them).
-check( 'the error pages live in the site folder Kits builds leave out', 'assets/site/dropins/' === substr( KITS_ERROR_PAGE_DIR, strlen( KITS_CORE_DIR ) ) && ! is_dir( KITS_CORE_DIR . 'dropins' ) );
-check( 'this site has its error pages', kits_error_pages_here() );
-foreach ( KITS_ERROR_PAGE_FILES as $name ) {
-	$src = (string) file_get_contents( KITS_ERROR_PAGE_DIR . $name );
-	check( "assets/site/dropins/$name carries the marker", false !== strpos( $src, KITS_ERROR_PAGE_MARKER ) );
-	check( "assets/site/dropins/$name looks for its pictures in the site folder", false !== strpos( $src, "'/plugins/kits-core/assets/site/dropins/'" ) && false === strpos( $src, '/plugins/animal-writes-core/assets' ) && false === strpos( $src, "'/plugins/kits-core/assets/error/'" ) );
-}
+// The plugin ships no error pages: a site names its folder (kits_error_pages_dir) and, when pages are already installed with an older marker, that marker (kits_error_page_marker).
+check( 'the plugin ships no error pages', ! is_dir( KITS_CORE_DIR . 'assets/site' ) && ! kits_error_pages_here() );
+check( 'without pages: nothing is copied', array() === kits_error_pages_sync() && false === get_option( 'aw_error_pages' ) );
 $pages_src = (string) file_get_contents( KITS_CORE_DIR . 'includes/error-pages.php' );
-check( 'without the site folder: no copy, no option, no hourly check, no notice', false !== strpos( $pages_src, "if ( ! kits_error_pages_here() ) {\n\t\treturn array();" ) && false !== strpos( $pages_src, "wp_doing_ajax() || ! kits_error_pages_here()" ) && false !== strpos( $pages_src, "current_user_can( 'manage_options' ) || ! kits_error_pages_here()" ) );
-check( 'the marker is unchanged, so the drop-ins already installed stay ours', 'Animal Writes error page' === KITS_ERROR_PAGE_MARKER );
+check( 'without a pages folder: no copy, no option, no hourly check, no notice', false !== strpos( $pages_src, "if ( ! kits_error_pages_here() ) {\n\t\treturn array();" ) && false !== strpos( $pages_src, "wp_doing_ajax() || ! kits_error_pages_here()" ) && false !== strpos( $pages_src, "current_user_can( 'manage_options' ) || ! kits_error_pages_here()" ) );
+check( 'the default marker is neutral', 'Kits error page' === KITS_ERROR_PAGE_MARKER && KITS_ERROR_PAGE_MARKER === kits_error_page_marker() && 0 === preg_match( '/animal/i', KITS_ERROR_PAGE_MARKER ) );
+$GLOBALS['t_filters']['kits_error_page_marker'] = 'Older site error page';
+check( 'a site can keep an older marker, so installed pages stay ours', 'Older site error page' === kits_error_page_marker() );
+unset( $GLOBALS['t_filters']['kits_error_page_marker'] );
+$GLOBALS['t_filters']['kits_error_pages_dir'] = sys_get_temp_dir() . '/kits-pages-dir';
+check( 'a site can name its pages folder', sys_get_temp_dir() . '/kits-pages-dir/' === kits_error_pages_dir() );
+unset( $GLOBALS['t_filters']['kits_error_pages_dir'] );
 
 // One drop-in through every state.
 $dir = sys_get_temp_dir() . '/kits-ops-tests-' . getmypid();
 @mkdir( $dir );
 $src = $dir . '/src.php';
 $dst = $dir . '/php-error.php';
-file_put_contents( $src, "<?php // Animal Writes error page v1\n" );
+file_put_contents( $src, "<?php // Kits error page v1\n" );
 check( 'missing drop-in is installed', 'installed' === kits_error_page_sync_one( $src, $dst ) && file_get_contents( $dst ) === file_get_contents( $src ) );
 check( 'same drop-in is current', 'current' === kits_error_page_sync_one( $src, $dst ) );
-file_put_contents( $src, "<?php // Animal Writes error page v2\n" );
+file_put_contents( $src, "<?php // Kits error page v2\n" );
 check( 'our older drop-in is updated', 'updated' === kits_error_page_sync_one( $src, $dst ) && false !== strpos( file_get_contents( $dst ), 'v2' ) );
 file_put_contents( $dst, "<?php // someone else's page\n" );
 check( 'a drop-in without the marker is never replaced', 'foreign' === kits_error_page_sync_one( $src, $dst ) && false !== strpos( file_get_contents( $dst ), 'someone else' ) );
 file_put_contents( $src, "<?php // no marker\n" );
 check( 'a source without the marker is not copied', 'no-source' === kits_error_page_sync_one( $src, $dst ) );
 check( 'no temporary files are left behind', array() === glob( $dir . '/.*.tmp' ) );
-check( 'old name aw_error_page_sync_one() still answers', 'no-source' === aw_error_page_sync_one( $src, $dst ) );
 array_map( 'unlink', glob( $dir . '/*' ) );
 @rmdir( $dir );
 
-// The switch: off by default, on once by itself where the backup already ran (live keeps it with no manual step).
+// The switch: off by default; a site layer can store its own first choice (kits_daily_backup_first_choice).
 check( 'a new site: off, stored once as off', false === kits_daily_backup_on() && '0' === get_option( 'kits_daily_backup' ) );
 t_init();
 check( 'off: nothing is booked', false === wp_next_scheduled( 'aw_daily_backup' ) );
 check( 'off: a booked run writes nothing', array( 'error' => 'off' ) === kits_daily_backup_run() );
 $GLOBALS['t_options'] = array( 'aw_backup_last' => array( 'at' => '2026-11-18 03:30:18' ) );
-check( 'where the backup already ran (aw_backup_last): switched on once', true === kits_daily_backup_on() && '1' === get_option( 'kits_daily_backup' ) );
+check( 'old evidence alone no longer switches it on', false === kits_daily_backup_on() && '0' === get_option( 'kits_daily_backup' ) );
+$GLOBALS['t_options'] = array();
+$GLOBALS['t_filters']['kits_daily_backup_first_choice'] = '1';
+check( 'a site layer can store its own first choice: on, stored once', true === kits_daily_backup_on() && '1' === get_option( 'kits_daily_backup' ) );
+unset( $GLOBALS['t_filters']['kits_daily_backup_first_choice'] );
 t_init();
 check( 'on: the daily run is booked', false !== wp_next_scheduled( 'aw_daily_backup' ) );
-$GLOBALS['t_options'] = array();
-check( 'where a run is booked but none ran yet: switched on once', true === kits_daily_backup_on() && '1' === get_option( 'kits_daily_backup' ) );
 $GLOBALS['t_options'] = array( 'kits_daily_backup' => '0', 'aw_backup_last' => array( 'at' => 'x' ) );
-check( 'a stored off wins over the old evidence (asked once only)', false === kits_daily_backup_on() );
+check( 'a stored choice wins over the first-choice filter (asked once only)', false === kits_daily_backup_on() );
 t_init();
 check( 'switched off: the booked run is taken off', false === wp_next_scheduled( 'aw_daily_backup' ) );
 $GLOBALS['t_filters']['kits_daily_backup'] = true;
@@ -163,7 +167,7 @@ check( 'the error pages sync after a deploy', in_array( 'kits_error_pages_sync',
 $backups_src = (string) file_get_contents( KITS_CORE_DIR . 'includes/backups.php' );
 check( 'REST route aw/v1/backup/(db|code) kept', false !== strpos( $backups_src, "'aw/v1'," ) && false !== strpos( $backups_src, "'/backup/(?P<kind>db|code)'" ) );
 check( 'option aw_backup_last kept', false !== strpos( $backups_src, "update_option( 'aw_backup_last'" ) );
-check( 'backups go to ~/backups, three levels above the web root', dirname( untrailingslashit( ABSPATH ), 3 ) . '/backups' === kits_daily_backup_dir() && kits_daily_backup_dir() === aw_backup_dir() );
+check( 'backups go to ~/backups, three levels above the web root', dirname( untrailingslashit( ABSPATH ), 3 ) . '/backups' === kits_daily_backup_dir());
 check( 'kept 14 days', 14 === KITS_BACKUP_KEEP_DAYS );
 
 // UpdraftPlus alert.
@@ -175,7 +179,7 @@ $GLOBALS['t_options']['updraft_backup_history'] = array(
 	$now - 10 * HOUR_IN_SECONDS => array( 'service' => array( 'googledrive' ), 'db' => 'x' ),
 );
 check( 'the newest remote backup counts, a local-only one does not', $now - 10 * HOUR_IN_SECONDS === kits_backup_remote_last() );
-check( 'a 10-hour-old remote backup is fine', '' === kits_backup_problem( $now ) && '' === aw_backup_problem( $now ) );
+check( 'a 10-hour-old remote backup is fine', '' === kits_backup_problem( $now ) );
 check( 'a 40-hour-old remote backup is a problem', false !== strpos( kits_backup_problem( $now + 30 * HOUR_IN_SECONDS ), '40 hours' ) );
 $GLOBALS['t_options']['updraft_last_backup'] = array( 'success' => 0, 'errors' => array( '<b>Drive</b> quota' ), 'backup_time' => $now );
 check( 'a run with errors is a problem', false !== strpos( kits_backup_problem( $now ), 'Drive quota' ) );

@@ -243,7 +243,7 @@ check( 'fluentcrm: unchanged Save with the option absent writes nothing', ! mail
 check( 'fluentcrm: switching off is written', mailweb_save_changed( 'mailweb_crm', $crm, array( 'on' => false ), $cc ) && false === get_option( 'mailweb_crm' )['on'] );
 $smtp = array(
 	'user' => 'noreply@example.in',
-	'name' => 'Animal Writes',
+	'name' => 'Example Site',
 	'host' => 'smtp.hostinger.com',
 	'port' => 465,
 );
@@ -483,6 +483,16 @@ $ub_t( 1 === preg_match( "/app\.provider\s*\?\s*sprintf/", $src( 'src/inbox.js' 
 $ub_t( false !== strpos( $src( 'src/inbox.js' ), "'No messages yet.'" ) && false !== strpos( $src( 'src/inbox.js' ), 'if ( ! hasMessages )' ), 'inbox: empty list says "No messages yet." and drops the "Choose a message" hint' );
 $ub_t( false !== strpos( $src( 'includes/mailweb-ui.php' ), "'inbox'     => __( 'MailWeb', 'mailweb' )" ) && false !== strpos( $src( 'src/inbox.js' ), "<h2 className=\"screen-reader-text\">{ __( 'Inbox'" ), 'inbox: page h1 is "MailWeb", the section is an h2' );
 $ub_t( false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/build/index.js' ), 'No messages yet.' ), 'build: index.js was rebuilt from src' );
+
+// 3.5.0: nothing site-specific left in the plugin (it lives in sites/<site>/mailweb/).
+$named = array();
+foreach ( array_merge( glob( dirname( __DIR__ ) . '/includes/*.php' ), array( dirname( __DIR__ ) . '/mailweb.php', dirname( __DIR__ ) . '/uninstall.php' ) ) as $f ) {
+	if ( preg_match( '/animal\s*writes|animalwrites|\bAW_[A-Z]|\baw_[a-z]|\{\{aw\.|wp aw |X-AW-/i', (string) file_get_contents( $f ), $m ) ) {
+		$named[] = basename( $f ) . ': ' . $m[0];
+	}
+}
+$ub_t( array() === $named, 'no Animal Writes name, aw_ name or X-AW header in the plugin PHP' . ( $named ? ' (' . implode( '; ', $named ) . ')' : '' ) );
+$ub_t( ! file_exists( dirname( __DIR__ ) . '/includes/website-forms.php' ) && ! file_exists( dirname( __DIR__ ) . '/includes/newsletter.php' ) && ! file_exists( dirname( __DIR__ ) . '/includes/fluentcrm-compat.php' ), 'the Animal Writes files are not in the plugin' );
 
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

@@ -19,7 +19,7 @@
  * the entry Rank Math would print as a separate node is removed (one graph, no duplicates). When an editor changes
  * the entry in Rank Math's Schema tab, the changed properties are put on the page's node (the editor wins); an entry
  * the editor deleted is not added back. Entries are written when a Page is saved and in bulk with
- * `wp aw-seo rank-math-schema [--dry-run] [--type=page,aw_legal,post,aw_campaign,aw_news,aw_opportunity,aw_listing]
+ * `wp aw-seo rank-math-schema [--dry-run] [--type=<post types>]
  * [--offset=N] [--limit=N]` (the Directory is written in batches).
  *
  * An item that already holds a schema entry added in Rank Math by an editor (not this plugin's) gets none from here:
@@ -91,17 +91,17 @@ function rankweb_rm_schema_type( $id ) {
 	if ( 'page' === $type ) {
 		return rankweb_rm_page_schema_type( $id );
 	}
-	if ( in_array( $type, array( 'aw_legal', 'post', 'aw_news' ), true ) && function_exists( 'rankweb_article_nodes' ) ) {
+	if ( in_array( $type, rankweb_types_with( array( 'library', 'news' ), array( 'post' ) ), true ) && function_exists( 'rankweb_article_nodes' ) ) {
 		$nodes = rankweb_article_nodes( $id );
 		return (string) ( $nodes[0]['@type'] ?? '' );
 	}
-	if ( 'aw_campaign' === $type && function_exists( 'rankweb_campaign_schema' ) ) {
+	if ( rankweb_is_type( $type, 'campaign' ) && function_exists( 'rankweb_campaign_schema' ) ) {
 		return (string) ( rankweb_campaign_schema( $id )['@type'] ?? '' );
 	}
-	if ( 'aw_opportunity' === $type && function_exists( 'rankweb_opportunity_schema' ) ) {
+	if ( rankweb_is_type( $type, 'opportunity' ) && function_exists( 'rankweb_opportunity_schema' ) ) {
 		return (string) ( rankweb_opportunity_schema( $id )['@type'] ?? '' ); // '' once closed, or for a kind without a node
 	}
-	if ( 'aw_listing' === $type && function_exists( 'rankweb_listing_schema' ) ) {
+	if ( rankweb_is_type( $type, 'listing' ) && function_exists( 'rankweb_listing_schema' ) ) {
 		$t = rankweb_listing_schema( $id )['@type'] ?? '';
 		return is_array( $t ) ? ( 1 === count( $t ) ? (string) $t[0] : array_values( $t ) ) : (string) $t;
 	}
@@ -214,7 +214,7 @@ function rankweb_rm_schema_sync( $id, $dry = false ) {
 		return 'kept: removed by an editor';
 	}
 	if ( '' === $type ) {
-		if ( 'aw_opportunity' !== get_post_type( $id ) ) {
+		if ( ! rankweb_is_type( get_post_type( $id ), 'opportunity' ) ) {
 			return $own ? 'kept: entry present on a page without one' : 'none';
 		}
 		// A closed Opportunity (or one that is not a job): no posting in Rank Math's screens either.

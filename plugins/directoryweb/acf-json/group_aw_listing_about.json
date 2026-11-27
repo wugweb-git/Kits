@@ -64,11 +64,11 @@
         },
         {
             "key": "field_aw_listing_animals",
-            "label": "Animals helped",
+            "label": "Who is helped",
             "name": "aw_animals",
             "aria-label": "",
             "type": "text",
-            "instructions": "Comma separated, e.g. dogs, cats, cattle, birds.",
+            "instructions": "Comma separated.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {

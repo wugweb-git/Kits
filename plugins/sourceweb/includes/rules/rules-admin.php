@@ -7,7 +7,7 @@
  *   (aw_sources['topic_tags']).
  * - Summary rules (&part=summary): summary-rules-admin.php, one rule per section.
  * - Directory enrichment (&part=enrich): the trust order and Field rules, one per enrichment field and per listing
- *   field (the ACF groups group_aw_listing*).
+ *   field (the listing's ACF field groups).
  *
  * The screen is the Kits shell's (sourceweb-ui.php; its routes in sourceweb-rest-pages.php). This file has the saves
  * those routes call, the old tabs' redirect and the help tabs. Every add, edit and delete is in the Change log with its

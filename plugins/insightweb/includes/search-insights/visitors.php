@@ -5,8 +5,7 @@
  *
  * OFF by default since 1.1.4. Nothing is counted, no table is made and nothing is downloaded until an administrator turns
  * it on under Settings → Visitor counting (option insightweb_visitor_tracking). Turning it off, and uninstalling the
- * plugin, delete the table, the lookup files and the schedule. A site that already held counted rows when 1.1.4 was
- * installed keeps counting (insightweb_si_vis_migrate()) and can turn it off the same way.
+ * plugin, delete the table, the lookup files and the schedule.
  *
  * - Counted: front-end requests (not logged in; not wp-admin, the REST API, cron, AJAX or WP-CLI). Pages the CDN or the
  *   server's LiteSpeed page cache answer from a stored copy never reach WordPress, so these are the requests the server itself answered.
@@ -28,28 +27,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_VIS_DB      = '1'; // Table version.
 const AW_SI_VIS_IP_DAYS = 30;
 const AW_SI_GEO_CRON    = 'aw_si_geo_refresh';
-const AW_SI_VIS_OPTION  = 'insightweb_visitor_tracking'; // 1 on, 0 off; absent until chosen or migrated.
+const AW_SI_VIS_OPTION  = 'insightweb_visitor_tracking'; // 1 on, 0 off; absent until chosen.
 
 /** Whether visitor counting is on. Absent means off: nothing is counted until an administrator turns it on. */
 function insightweb_si_vis_enabled(): bool {
 	return 1 === (int) get_option( AW_SI_VIS_OPTION, 0 );
 }
-
-/**
- * Once, on a site that has no choice stored: keep counting only when the table already holds rows (a site that
- * counted before 1.1.4); every other site starts off.
- */
-function insightweb_si_vis_migrate(): void {
-	if ( false !== get_option( AW_SI_VIS_OPTION, false ) ) {
-		return;
-	}
-	global $wpdb;
-	$t        = insightweb_si_vis_table();
-	$has      = $t === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one check, once
-	$has_rows = $has && (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i LIMIT 1', $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one check, once
-	update_option( AW_SI_VIS_OPTION, $has_rows ? 1 : 0, true );
-}
-add_action( 'admin_init', 'insightweb_si_vis_migrate', 5 );
 
 /** Turn counting on (the table is made on the next admin request or daily run). */
 function insightweb_si_vis_on(): void {
@@ -204,7 +187,6 @@ add_action( 'shutdown', 'insightweb_si_vis_count', 0 );
 
 /** The daily step: the table in place, shortened addresses older than 30 days deleted, the lookup files refreshed when a month old. */
 function insightweb_si_vis_daily(): void {
-	insightweb_si_vis_migrate();
 	if ( ! insightweb_si_vis_enabled() ) {
 		return;
 	}

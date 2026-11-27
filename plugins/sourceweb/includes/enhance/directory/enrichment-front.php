@@ -50,7 +50,7 @@ add_filter(
 				}
 				continue;
 			}
-			if ( 'awbi' === $key && in_array( 'awbi', $have, true ) ) {
+			if ( in_array( $key, $have, true ) ) { // a source the site already shows under its own id (for example one its site layer adds)
 				continue;
 			}
 			if ( 'claim' === $key ) {
@@ -118,10 +118,13 @@ function sourceweb_enrich_news_mentions( $id ) {
 	if ( str_word_count( $name ) < 2 || strlen( $name ) < 10 ) {
 		return array();
 	}
+	if ( '' === sourceweb_type( 'news' ) ) {
+		return array(); // no News type on this site
+	}
 	$key = 'aw_newsm_' . $id;
 	$ids = get_transient( $key );
 	if ( false === $ids ) {
-		$ids = get_posts( array( 'post_type' => 'aw_news', 'post_status' => 'publish', 's' => $name, 'sentence' => true, 'posts_per_page' => 3, 'fields' => 'ids', 'no_found_rows' => true, 'orderby' => 'date' ) );
+		$ids = get_posts( array( 'post_type' => sourceweb_type( 'news' ), 'post_status' => 'publish', 's' => $name, 'sentence' => true, 'posts_per_page' => 3, 'fields' => 'ids', 'no_found_rows' => true, 'orderby' => 'date' ) );
 		set_transient( $key, $ids, DAY_IN_SECONDS );
 	}
 	return (array) $ids;
@@ -146,7 +149,7 @@ add_action(
 				'permission_callback' => '__return_true',
 				'callback'            => function ( WP_REST_Request $req ) {
 					$id = (int) $req['id'];
-					if ( 'aw_listing' !== get_post_type( $id ) || 'publish' !== get_post_status( $id ) ) {
+					if ( ! sourceweb_is_type( get_post_type( $id ), 'listing' ) || 'publish' !== get_post_status( $id ) ) {
 						return array( 'html' => '' );
 					}
 					$data = sourceweb_glive_data( (string) get_post_meta( $id, 'aw_place_id', true ) );

@@ -45,21 +45,27 @@ const DIRECTORYWEB_CLAIM_L = array(
 	'l_youtube'    => array( 'YouTube', 'aw_youtube', 'youtube', true ),
 	'l_linkedin'   => array( 'LinkedIn', 'aw_linkedin', 'linkedin', true ),
 	'l_reg'        => array( 'Registration no.', 'aw_registration', 'registration', true ),
-	'l_12a'        => array( 'Tax exemption number', 'aw_reg_12a', 'reg_12a', true ),
-	'l_80g'        => array( 'Donor tax relief number', 'aw_reg_80g', 'reg_80g', true ),
-	'l_darpan'     => array( 'Registry ID', 'aw_darpan_id', 'darpan_id', true ),
 	'l_reg_type'   => array( 'Registered as', 'aw_reg_type', 'reg_type', true ),
-	'l_reg_auth'   => array( 'Registration authority', 'aw_reg_authority', 'reg_authority', false ),
-	'l_reg_act'    => array( 'Registration act', 'aw_reg_act', 'reg_act', false ),
 	'l_reg_date'   => array( 'Date of registration', 'aw_reg_date', 'reg_date', true ),
-	'l_fcra'       => array( 'Foreign funding registration', 'aw_fcra', 'fcra', true ),
-	'l_awbi_code'  => array( 'Accreditation code', 'aw_awbi_code', 'awbi_code', true ),
-	'l_awbi_rec'   => array( 'Accredited on', 'aw_awbi_recognised', 'awbi_recognised', true ),
-	'l_awbi_ren'   => array( 'Accreditation renewed on', 'aw_awbi_renewed', 'awbi_renewed', true ),
-	'l_awbi_valid' => array( 'Accreditation valid until', 'aw_awbi_valid', 'awbi_valid', true ),
 	'l_volunteer'  => array( 'Volunteer link', 'aw_volunteer_url', 'volunteer_url', true ),
 	'l_adopt'      => array( 'Adopt link', 'aw_adopt_url', 'adopt_url', true ),
 );
+
+/**
+ * The claim form's listing fields: DIRECTORYWEB_CLAIM_L, and whatever a site adds with the `directoryweb_claim_fields`
+ * filter (its own registration, accreditation or registry rows, each: label, meta key, change-log field, public).
+ * Every place that reads the table reads it here.
+ *
+ * @return array<string,array>
+ */
+function directoryweb_claim_fields(): array {
+	static $fields = null;
+	if ( null === $fields ) {
+		$more   = apply_filters( 'directoryweb_claim_fields', DIRECTORYWEB_CLAIM_L );
+		$fields = is_array( $more ) ? $more : DIRECTORYWEB_CLAIM_L;
+	}
+	return $fields;
+}
 
 /** The claim form's Fluent Forms ID (0 when it is not set up). */
 function directoryweb_claim_ff_id() {
@@ -81,7 +87,7 @@ function directoryweb_claim_hours_text( $lid ) {
 
 /** The listing's service tags (slugs) from the claim form's list, sorted. */
 function directoryweb_claim_service_slugs( $lid ) {
-	$slugs = array_values( array_intersect( (array) wp_get_object_terms( $lid, 'post_tag', array( 'fields' => 'slugs' ) ), array_keys( DIRECTORYWEB_SERVICES ) ) );
+	$slugs = array_values( array_intersect( (array) wp_get_object_terms( $lid, 'post_tag', array( 'fields' => 'slugs' ) ), array_keys( directoryweb_services() ) ) );
 	sort( $slugs );
 	return $slugs;
 }
@@ -112,12 +118,12 @@ function directoryweb_claim_about( $lid ) {
  * slugs joined with a comma).
  *
  * @param int    $lid    Listing ID.
- * @param string $key    DIRECTORYWEB_CLAIM_L key.
+ * @param string $key    directoryweb_claim_fields() key.
  * @param bool   $public True: '' for fields kept for the team only (the form is a public page).
  * @return string
  */
 function directoryweb_claim_now( $lid, $key, $public = true ) {
-	$def = DIRECTORYWEB_CLAIM_L[ $key ] ?? null;
+	$def = directoryweb_claim_fields()[ $key ] ?? null;
 	if ( ! $def || ( $public && ! $def[3] ) ) {
 		return '';
 	}
@@ -171,7 +177,7 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_ch
 				$data['attributes']['value'] = directoryweb_claim_service_slugs( $lid );
 				return $data;
 			}
-			if ( isset( DIRECTORYWEB_CLAIM_L[ $field ] ) ) {
+			if ( isset( directoryweb_claim_fields()[ $field ] ) ) {
 				$now = directoryweb_claim_now( $lid, $field, true );
 				if ( isset( directoryweb_ff_social_map()[ $field ] ) && '' !== directoryweb_ff_social_user( $field, $now ) ) {
 					$now = directoryweb_ff_social_user( $field, $now ); // the username after the link shown in front of the box
@@ -248,7 +254,7 @@ add_action(
 );
 
 /**
- * One claim entry: its data, what it proposes for the listing (DIRECTORYWEB_CLAIM_L keys => text), the person, uploads, status.
+ * One claim entry: its data, what it proposes for the listing (directoryweb_claim_fields() keys => text), the person, uploads, status.
  * Entries from the earlier form (aw_phone, aw_whatsapp, aw_email, aw_website, aw_area, aw_services) are read too.
  *
  * @param int $entry_id Fluent Forms entry ID.
@@ -276,7 +282,7 @@ function directoryweb_claim_entry( $entry_id ) {
 			}
 		}
 		if ( '' !== $s( 'aw_services' ) ) {
-			$sv = array_intersect( explode( ',', $s( 'aw_services' ) ), array_keys( DIRECTORYWEB_SERVICES ) );
+			$sv = array_intersect( explode( ',', $s( 'aw_services' ) ), array_keys( directoryweb_services() ) );
 			sort( $sv );
 			$propose['l_services'] = implode( ',', $sv );
 		}
@@ -289,7 +295,7 @@ function directoryweb_claim_entry( $entry_id ) {
 			$propose['phones'] = implode( "\n", array_map( fn( $r ) => $r['number'] . ( '' !== $r['label'] ? ' | ' . $r['label'] : '' ) . ( $r['whatsapp'] ? ' | WhatsApp' : '' ), $rows ) );
 		}
 	} else {
-		foreach ( DIRECTORYWEB_CLAIM_L as $key => $def ) {
+		foreach ( directoryweb_claim_fields() as $key => $def ) {
 			if ( 'phones' === $key ) {
 				$lines = array();
 				for ( $i = 1; $i <= 3; $i++ ) {
@@ -306,7 +312,7 @@ function directoryweb_claim_entry( $entry_id ) {
 				continue;
 			}
 			if ( 'l_services' === $key ) {
-				$sv = array_intersect( (array) ( $d['l_services'] ?? array() ), array_keys( DIRECTORYWEB_SERVICES ) );
+				$sv = array_intersect( (array) ( $d['l_services'] ?? array() ), array_keys( directoryweb_services() ) );
 				sort( $sv );
 				$propose[ $key ] = implode( ',', $sv );
 				continue;
@@ -360,9 +366,9 @@ function directoryweb_claim_changes( $c ) {
 			$now = directoryweb_ff_social_user( $key, $now ); // the link and its username are the same thing
 			$new = directoryweb_ff_social_user( $key, $new );
 		}
-		$loose = 'l_email' === $key || ( 0 === strpos( DIRECTORYWEB_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', DIRECTORYWEB_CLAIM_L[ $key ][1] ) );
+		$loose = 'l_email' === $key || ( 0 === strpos( directoryweb_claim_fields()[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', directoryweb_claim_fields()[ $key ][1] ) );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
-			$out[ $key ] = array( directoryweb_claim_label( $key, DIRECTORYWEB_CLAIM_L[ $key ][0] ), $now, $new );
+			$out[ $key ] = array( directoryweb_claim_label( $key, directoryweb_claim_fields()[ $key ][0] ), $now, $new );
 		}
 	}
 	return $out;
@@ -593,11 +599,11 @@ function directoryweb_claim_clean( $meta_key, $v ) {
 		case 'aw_founded':
 			return preg_match( '/^(18|19|20)\d{2}$/', $v ) ? $v : '';
 		case 'aw_reg_date':
-		case 'aw_awbi_recognised':
-		case 'aw_awbi_renewed':
-		case 'aw_awbi_valid':
 			return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $v ) ? $v : '';
 		default:
+			if ( in_array( $meta_key, (array) apply_filters( 'directoryweb_claim_date_meta_keys', array() ), true ) ) {
+				return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $v ) ? $v : ''; // a date a site's own claim field holds
+			}
 			return sanitize_text_field( $v );
 	}
 }
@@ -639,7 +645,7 @@ function directoryweb_claim_sideload( $file, $lid, $title ) {
  * Write one approved field to the listing, logged first in the enrichment change log (with what was there, for Undo).
  *
  * @param array  $c   directoryweb_claim_entry().
- * @param string $key DIRECTORYWEB_CLAIM_L key, logo or photos.
+ * @param string $key directoryweb_claim_fields() key, logo or photos.
  * @return bool
  */
 function directoryweb_claim_apply_field( $c, $key ) {
@@ -679,7 +685,7 @@ function directoryweb_claim_apply_field( $c, $key ) {
 		$log( 'photos', 'claim upload', $old );
 		return true;
 	}
-	$def = DIRECTORYWEB_CLAIM_L[ $key ] ?? null;
+	$def = directoryweb_claim_fields()[ $key ] ?? null;
 	if ( ! $def || 'l_hours' === $key || ! array_key_exists( $key, $c['propose'] ) ) {
 		return false;
 	}

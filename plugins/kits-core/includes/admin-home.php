@@ -106,7 +106,7 @@ function kits_overview_tables() {
 	$colours   = WP_Block_Styles_Registry::get_instance()->get_registered_styles_for_block( 'core/post-content' );
 	$templates = get_block_templates( array(), 'wp_template' );
 	$parts     = get_block_templates( array(), 'wp_template_part' );
-	$patterns  = array_filter( WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn( $p ) => array_intersect( (array) ( $p['categories'] ?? array() ), array( 'animal-writes', 'kits-components', 'kits-lists' ) ) );
+	$patterns  = array_filter( WP_Block_Patterns_Registry::get_instance()->get_all_registered(), fn( $p ) => array_intersect( (array) ( $p['categories'] ?? array() ), (array) apply_filters( 'kits_overview_pattern_categories', array( 'kits-components', 'kits-lists' ) ) ) );
 	$variants  = class_exists( 'WP_Theme_JSON_Resolver' ) ? WP_Theme_JSON_Resolver::get_style_variations() : array();
 	$registry  = function_exists( 'kits_registry' ) ? kits_registry() : array();
 	$reg_items = is_array( $registry ) ? count( (array) ( $registry['items'] ?? array() ) ) : 0;

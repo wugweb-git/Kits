@@ -1,6 +1,6 @@
 <?php
 /**
- * Kits → Help → Developer: edit screens (moved from Animal Writes Core's edit-screens.php, 18 Nov 2026; owner, 1 Nov
+ * Kits → Help → Developer: edit screens (owner, 1 Nov
  * 2026): every box on every edit screen, the keys it stores and where each key is used on the site. Read-only: nothing
  * here writes an option, meta or post.
  *
@@ -41,7 +41,7 @@ function kits_edit_screen_map_data(): array {
 }
 
 /**
- * Every known box: id => title, source (WordPress / plugin name / Animal Writes core), file, screen (post|term|admin),
+ * Every known box: id => title, source (WordPress / plugin name / the site's own code), file, screen (post|term|admin),
  * types (empty: any type), runtime (live, scf, fallback, edit-screen-only, always, map-only), notes, match (term screens), page (admin pages).
  */
 function kits_edit_screen_boxes(): array {
@@ -142,7 +142,7 @@ function kits_edit_screen_callback( $cb ): string {
 }
 
 /**
- * Source label from a callback location: WordPress, Animal Writes (plugin folder) or the plugin's folder name.
+ * Source label from a callback location: WordPress, the site's own (plugin folder) or the plugin's folder name.
  *
  * @param string $where kits_edit_screen_callback() result.
  */
@@ -154,7 +154,7 @@ function kits_edit_screen_source_from( string $where ): string {
 		return 'WordPress';
 	}
 	if ( preg_match( '~/(?:plugins|mu-plugins)/([^/]+)/~', $where, $m ) ) {
-		$ours = array( 'aw-seo-extras', 'aw-sourcing', 'rankweb', 'sourceweb', 'kits-core', 'mailweb', 'directoryweb', 'insightweb', 'planweb' );
+		$ours = (array) apply_filters( 'kits_edit_screen_own_folders', array( 'rankweb', 'sourceweb', 'kits-core', 'mailweb', 'directoryweb', 'insightweb', 'planweb' ) ); // a site adds the folders of its own plugins
 		return in_array( $m[1], $ours, true ) ? get_bloginfo( 'name' ) . ' (' . $m[1] . ')' : $m[1];
 	}
 	return 'Theme or other';
@@ -820,11 +820,11 @@ function kits_edit_screen_map_only_note(): string {
 }
 
 /**
- * Plugins mapped as ours on the Mapping tab; every other plugin's boxes are on "Third-party boxes". AW Sourcing,
- * AW SEO Plus and Mailweb are treated like third-party plugins there (owner, 1 Nov 2026).
+ * Plugins mapped as ours on the Mapping tab; every other plugin's boxes are on "Third-party boxes". A site names its own
+ * code (the "source" its map data uses) with the filter kits_edit_screen_own_plugins.
  */
 function kits_edit_screen_own_plugins(): array {
-	return array( 'Animal Writes core', 'Kits Core', 'DirectoryWeb' );
+	return (array) apply_filters( 'kits_edit_screen_own_plugins', array( 'Kits Core', 'DirectoryWeb' ) );
 }
 
 /**

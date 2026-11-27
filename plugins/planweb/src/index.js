@@ -1261,7 +1261,7 @@ function SwitchGroup( { group, onSaved } ) {
 			// eslint-disable-next-line no-alert -- a plain browser confirm before switching the plugin off
 			! window.confirm(
 				__(
-					'Switch PlanWeb off? Kits → Dates comes back and these screens go; the entries are kept.',
+					'Switch PlanWeb off? These screens go; the entries are kept.',
 					'planweb'
 				)
 			)
@@ -1317,7 +1317,7 @@ function SwitchGroup( { group, onSaved } ) {
 				checked={ on }
 				onChange={ setOn }
 				help={ __(
-					'On: Kits → Dates moves to PlanWeb, and every date in Dates is copied here once (Dates itself is kept unchanged). Off: Kits → Dates as before; entries are kept.',
+					'On: the calendar is PlanWeb → Calendar. Off: the PlanWeb screens are hidden; entries are kept.',
 					'planweb'
 				) }
 			/>
@@ -1786,10 +1786,14 @@ function Settings() {
 		<>
 			<ChipRow
 				label={ __( 'Settings groups', 'planweb' ) }
-				chips={ GROUPS().map( ( g ) => ( {
-					...g,
-					href: `#${ g.value }`,
-				} ) ) }
+				chips={ GROUPS()
+					.filter(
+						( g ) => 'import' !== g.value || data.import?.enabled
+					)
+					.map( ( g ) => ( {
+						...g,
+						href: `#${ g.value }`,
+					} ) ) }
 				value={ open }
 				onChange={ setOpen }
 			/>

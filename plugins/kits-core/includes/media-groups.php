@@ -6,8 +6,8 @@
  *   (/wp/v2/media-groups).
  * - The taxonomy is never public: no rewrite, no query var, not in menus.
  * - A new upload gets a group from its title, file name, type and parent, once; an existing assignment is never changed.
- * Moved from Animal Writes Core on 18 Nov 2026. The taxonomy name is KITS_MEDIA_GROUP when the site defines it (Tools →
- * Taxonomy rename), else aw_media_group, the name it has on the live site.
+ * The taxonomy name is KITS_MEDIA_GROUP when the site defines it, else kits_media_group. A site adds its own groups with the
+ * filter kits_media_group_for.
  *
  * @package kits-core
  */
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Name of the Media group taxonomy: KITS_MEDIA_GROUP when defined, else the active name (kits_media_group since the rename ran on live, 18 Nov 2026). */
+/** Name of the Media group taxonomy: KITS_MEDIA_GROUP when defined, else kits_media_group (or the name a site's taxonomy rename left active). */
 function kits_media_group_taxonomy() {
 	if ( defined( 'KITS_MEDIA_GROUP' ) ) {
 		return (string) KITS_MEDIA_GROUP;
@@ -75,28 +75,25 @@ function kits_media_group_for( $title, $file, $mime, $parent_type ) {
 	if ( '-source' === substr( $base, -7 ) ) {
 		return 'News image';
 	}
-	if ( 'aw_listing' === $parent_type ) {
-		return 'Listing photo';
-	}
-	if ( 'aw_legal' === $parent_type ) {
-		return 'Library document';
-	}
-	if ( 'aw_press' === $parent_type ) {
-		return 'Press image';
-	}
-	if ( preg_match( '/^Animal Writes campaign photo/i', $title ) || 0 === strpos( $base, 'aw1-im' ) ) {
-		return 'Campaign photo';
-	}
+	$name = 'Other';
 	if ( 0 === strpos( $base, 'photo-' ) || preg_match( '/^\d\d_/', $base ) ) {
-		return 'Stock photo';
+		$name = 'Stock photo';
+	} elseif ( 'application/pdf' === $mime ) {
+		$name = 'Document';
+	} elseif ( 'post' === $parent_type || 'page' === $parent_type ) {
+		$name = 'Guide image';
 	}
-	if ( 'application/pdf' === $mime ) {
-		return 'Document';
-	}
-	if ( 'post' === $parent_type || 'page' === $parent_type ) {
-		return 'Guide image';
-	}
-	return 'Other';
+	/**
+	 * Filters the group of a file that none of the generic rules above claimed first. A site names its own groups here
+	 * (for example by the post type of the parent).
+	 *
+	 * @param string $name        Group name so far ('Stock photo', 'Document', 'Guide image' or 'Other').
+	 * @param string $title       Attachment title.
+	 * @param string $base        File name without extension.
+	 * @param string $mime        MIME type.
+	 * @param string $parent_type Post type of the parent, or an empty string.
+	 */
+	return (string) apply_filters( 'kits_media_group_for', $name, $title, $base, (string) $mime, (string) $parent_type );
 }
 
 /**

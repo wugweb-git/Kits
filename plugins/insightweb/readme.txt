@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.6
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,7 +34,7 @@ InsightWeb measures how your site performs in search. It reads telemetry data an
 
 * **Visitor counting is off by default** (since 1.1.4). Turn it on under InsightWeb → Settings → Visitor counting. While it is off nothing about visitors is stored, no table is made, and the country file below is not downloaded.
 * When on, each front-end request that reaches WordPress (not logged-in users, wp-admin, REST, AJAX, cron or WP-CLI) adds one to a daily count for its country and for its shortened IP address: IPv4 with the last number set to 0, IPv6 cut to its first 48 bits. No full IP address, user agent or cookie is stored. Table: `{prefix}aw_si_visits`. Shortened addresses are deleted after 30 days by the daily job; country counts are kept until you turn the setting off or delete the plugin.
-* Turning the setting off deletes the table, the country file and its schedule. Deleting the plugin does the same, whatever the "Delete data" setting says. A site that already held counted rows when it updated to 1.1.4 keeps counting until you turn it off.
+* Turning the setting off deletes the table, the country file and its schedule. Deleting the plugin does the same, whatever the "Delete data" setting says. From 1.2.0 a site that had counted rows under 1.1.x and has not yet chosen must switch counting on under Settings.
 * The country comes from the CDN's country header when one is sent, otherwise from a free DB-IP Lite file saved in `wp-content/uploads/aw-geo/` (see External services). The look-up happens on your server; no address is sent anywhere.
 * Not switched by that setting: the Server tab's per-day counts of named crawlers and of 4xx/5xx answers (path only, no query string, no address or user agent), and counts of searches made on your own site (daily counts per search term; terms that look like an email address or a phone number are dropped). These are kept as daily aggregates.
 
@@ -81,6 +81,17 @@ InsightWeb connects to external services only when the corresponding integration
 InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt and a few key pages, some with AI-crawler user-agent names) to check that crawlers can reach them. These calls stay on your own domain.
 
 == Changelog ==
+
+= 1.2.1 =
+* The plugin no longer names any content type of one site. The scoring ladder's page class, the crawl check, the Request indexing order, the PageSpeed sample, the keyword and Rising title searches and the campaign box ask for a role (news, library, campaign, opportunity, listing) through `includes/post-type-roles.php`; the site says which type plays which role with the new filter `insightweb_post_type_roles` (default: none, so a type-specific step is skipped). The listing role comes from DirectoryWeb's `directoryweb_post_type()` when it is loaded.
+* The Animal Writes slugs are supplied from `sites/animalwrites/insightweb/site.php`. The path-based page class (`/library/`, `/directory/`, `/news/`) is unchanged.
+
+= 1.2.0 =
+* Site-only code moved out. The links seed (one site's known links) and its data file are no longer in the plugin; the starter rows a site wants are added through the action `insightweb_si_links_seed`. `wp aw-si links seed` is gone with it.
+* Visitor counting: the one-time rule that kept counting on for a site that already held counted rows is gone. Counting is off until it is switched on under Settings → Visitor counting; a site that relied on the old rule must switch it on once.
+* Brand searches are the site's name and host name (and anything the `insightweb_brand_pattern` filter adds), no longer a fixed pattern.
+* The Rising lists (Wikipedia pages, news terms, autocomplete seeds, related searches, the comparison topic), the topic words counted in spikes and the Server tab's links to a public repository are empty until a site sets them (`aw_si_rising_lists`, `aw_si_species`, `aw_si_srv_repo_dirs`, `aw_si_srv_repo_url`). The Server tab's cache note no longer names one host's tools.
+* Wording says "the anchor topic" where it said "animal welfare".
 
 = 1.1.6 =
 * The links seed uses the site's own name for the anchor and note text it writes, instead of a fixed name. Seeding and its gating are unchanged.

@@ -20,9 +20,9 @@ require_once dirname( __DIR__ ) . '/includes/class-rankweb-social.php';
 final class SocialTest extends PHPUnit\Framework\TestCase {
 
 	public function testHandleForms(): void {
-		$this->assertSame( '@animalwrites', RankWeb_Social::handle( 'animalwrites' ) );
-		$this->assertSame( '@animalwrites', RankWeb_Social::handle( ' @animalwrites ' ) );
-		$this->assertSame( '@animal_w', RankWeb_Social::handle( 'https://x.com/animal_w/' ) );
+		$this->assertSame( '@examplesite', RankWeb_Social::handle( 'examplesite' ) );
+		$this->assertSame( '@examplesite', RankWeb_Social::handle( ' @examplesite ' ) );
+		$this->assertSame( '@example_s', RankWeb_Social::handle( 'https://x.com/example_s/' ) );
 		$this->assertSame( '@name', RankWeb_Social::handle( 'https://twitter.com/name' ) );
 		$this->assertSame( '', RankWeb_Social::handle( 'not a handle' ) );
 		$this->assertSame( '', RankWeb_Social::handle( 'waytoolonghandlenamehere' ) );

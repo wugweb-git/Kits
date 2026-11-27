@@ -1,7 +1,6 @@
 <?php
 /**
- * Kits → Modules → Forms and sample listings: options that only WP-CLI could change before (moved from Animal Writes
- * Core's site-options.php, 18 Nov 2026; 12 Nov 2026). Core Settings API on the Modules screen (the site prints it with
+ * Kits → Modules → Forms and sample listings: options that only WP-CLI could change before. Core Settings API on the Modules screen (the site prints it with
  * kits_modules_sections()); each value keeps its option name and stored shape.
  *
  * - aw_ff_send_email: '1' sends the emails a Fluent Forms submission makes; '0' (default) drops them (forms-fluentforms.php).
@@ -13,8 +12,6 @@
  * - aw_follow_reddit, aw_follow_discord: our Reddit and Discord addresses for "Follow us" on the page Share sections
  *   (campaign-tools.php, aw_follow_accounts). Empty: no icon (never a dead link). Only an https address on the
  *   network's own host is kept.
- *
- * Animal Writes Core's own "Delete this plugin's data" box joins the same form from that plugin.
  *
  * "Reset this section" (kits_site_reset_sections()): the section's registered settings back to their defaults.
  *
@@ -269,7 +266,7 @@ function kits_site_options_short(): void {
 	printf(
 		'<textarea class="large-text code" rows="4" spellcheck="false" id="aw_issuer_short" name="aw_issuer_short" aria-describedby="aw_issuer_short-help">%1$s</textarea><p class="description" id="aw_issuer_short-help">%2$s</p>',
 		esc_textarea( implode( "\n", $lines ) ),
-		esc_html( 'One per line: issuer slug = short name for the card chip (e.g. awbi = AWBI). Empty: the built-in short names. Issuers: ' . $slugs . '.' )
+		esc_html( 'One per line: issuer slug = short name for the card chip (e.g. acme = ACME). Empty: the built-in short names. Issuers: ' . $slugs . '.' )
 	);
 }
 

@@ -3,7 +3,7 @@
  * Plugin Name: SourceWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/sourceweb/
  * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Enhanced by Kits Core, DirectoryWeb and InsightWeb.
- * Version: 0.3.1
+ * Version: 0.4.1
  * Update URI: https://wugweb.com/plugins/sourceweb/
  * Requires at least: 7.1
  * Requires PHP: 8.0
@@ -14,7 +14,7 @@
  * Text Domain: sourceweb
  * Domain Path: /languages
  *
- * Moved out of Animal Writes Core and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
+ * Moved out of a site core plugin and Kits Core on 24 Oct 2026 with no change in behaviour: the same option keys,
  * REST routes, cron hooks, admin pages and actions. Core keeps the content types and templates.
  *
  * This file only defines and includes (no functions): it may be reached twice, from Core and as an active plugin.
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.3.1' ); // keep equal to the Version header above
+defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.4.1' ); // keep equal to the Version header above
 // Core loads this file; if it is also active on its own, the second load stops here.
 if ( defined( 'SOURCEWEB_SOURCING_LOADED' ) ) {
 	return;
@@ -73,6 +73,8 @@ if ( ! defined( 'SOURCEWEB_KW_ROLE_INCLUDE' ) ) {
 	define( 'SOURCEWEB_KW_WORKER_ROLES', SOURCEWEB_KW_SOURCING_ROLES | SOURCEWEB_KW_ROLE_PRESS );
 }
 
+// Which content type plays which role (news, library, campaign, opportunity, listing, press): the site answers through a filter, never named here.
+require_once __DIR__ . '/includes/compat/post-type-roles.php';
 // The host and publisher helpers first, before the check: the site layer and other plugins call sourceweb_host() and sourceweb_publishers().
 require_once __DIR__ . '/includes/sources/sourcing-basics.php';
 // The issuer label too (no dependency): the site layer's Library item box and card chips call sourceweb_issuer_short() and sourceweb_issuer_box().
@@ -84,7 +86,7 @@ if ( ! defined( 'SOURCEWEB_SOURCING_DIR' ) ) {
 }
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
-require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-context.php'; // who may push items in, whether items may go live unreviewed, the Animal Writes switch (all off by default)
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-context.php'; // who may push items in, whether items may go live unreviewed, the publishing switch (off by default)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
@@ -130,10 +132,6 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-jobs.php'; // what each AI
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/site-health.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/relay.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate.php'; // WP-CLI only: backup, migrate, verify, rollback
-require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate-phase2.php'; // WP-CLI only: the same for phase 2 (Keywords)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate-rules.php'; // WP-CLI only: phase 3 (Rules)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/sourcing-migrate-retire.php'; // WP-CLI only: phase 4 (Retire: archive, stop using the old lists)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-stats.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/search-insights-tab.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers.php';
@@ -150,8 +148,7 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/workers-admin.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-provider-icons.php';
 // The Sourcing menu, its Overview and the Plugins screen links (owner, 25 Oct 2026).
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/admin-menu.php';
-require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/dashboard.php'; // the Dashboard box "Sourcing" (owner, 3 Nov 2026)
-require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/dashboard.php'; // helpers for the Overview and for a site's own Dashboard box
 // The screens, on the Kits admin shell (sourceweb-ui.php), and their sourceweb/v1 routes.
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-model.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-dashboard.php';

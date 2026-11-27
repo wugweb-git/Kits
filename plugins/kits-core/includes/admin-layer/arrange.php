@@ -1,6 +1,6 @@
 <?php
 /**
- * WP Admin arrangement (moved from Animal Writes Core's admin-ia.php, 18 Nov 2026; Phase 11 J). Nothing is deleted:
+ * WP Admin arrangement. Nothing is deleted:
  * menus move and labels match the site. The site's own values (its content menus, labels, retired types and
  * shortcodes, and comments off) come from the tenant through the filters below. Without them this file changes only
  * the shared Classification menu and the menu order of what exists.

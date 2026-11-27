@@ -7,19 +7,19 @@
  * They are written when an item is published or saved, and only where the field is empty or still holds the value
  * written automatically last time (_aw_seo_auto); a value typed in Rank Math is never replaced.
  *   - News: over 60 characters the headline is cut at a word (no "…", no site name); shorter ones get
- *     " – Animal Writes". A publisher's name appended to the headline and separators joining its parts are dropped.
- *   - The only separator in any title is the " – " before "Animal Writes" (owner, 15 Oct 2026): no colons, pipes,
+ *     " – {Site}". A publisher's name appended to the headline and separators joining its parts are dropped.
+ *   - The only separator in any title is the " – " before "{Site}" (owner, 15 Oct 2026): no colons, pipes,
  *     other dashes, or commas and brackets used as separators (rankweb_seo_unseparate); later list pages add " Page N"
  *     before the site name.
  *   - Library and Resources: rankweb_seo_resource_title() (Title Case, the kind added to short ones, never cut inside).
- *   - Listings: "{Name} in {District} – Animal Writes" ("{Name} in {State}" without a district); over 60 characters
- *     without " – Animal Writes", and the name itself is never cut.
- *   - Opportunities: "{Title} – Animal Writes"; over 60 characters the title alone (the role and organisation are
+ *   - Listings: "{Name} in {District} – {Site}" ("{Name} in {State}" without a district); over 60 characters
+ *     without " – {Site}", and the name itself is never cut.
+ *   - Opportunities: "{Title} – {Site}"; over 60 characters the title alone (the role and organisation are
  *     never cut).
- *   - Home and About: fixed titles. Everything else: "{Title} – Animal Writes".
+ *   - Home and About: fixed titles. Everything else: "{Title} – {Site}".
  *   - Description: the excerpt, else the first real paragraph; listings without one get a line of their facts.
  *
- *   - Directory places (18 Nov 2026, option B): "Animal NGOs and Helpline Numbers in {District}, {State} – Animal Writes"
+ *   - Directory places (18 Nov 2026, option B): "Animal NGOs and Helpline Numbers in {District}, {State} – {Site}"
  *     (then without the site name, then without the state) where the district has a listing with a phone or an official
  *     number; "Animal Welfare NGOs and Helpline Numbers in {State}" where any listing in the state has a phone; where the
  *     name is too long for these, "Animal Helpline Numbers in …" (the earlier titles) is the last fallback. The earlier
@@ -46,10 +46,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Whether a post is a section hub Page (a list, not an item). */
 function rankweb_seo_is_hub_page( $post ) {
 	$post = get_post( $post );
-	if ( ! $post || 'page' !== $post->post_type || $post->post_parent || ! defined( 'AW_HUBS' ) ) { // AW_HUBS: Animal Writes Core's hubs
+	if ( ! $post || 'page' !== $post->post_type || $post->post_parent || ! rankweb_hubs() ) { // the site's section hubs (rankweb_hubs())
 		return false;
 	}
-	foreach ( AW_HUBS as $h ) {
+	foreach ( rankweb_hubs() as $h ) {
 		if ( $h[0] === $post->post_name ) {
 			return true;
 		}
@@ -66,7 +66,7 @@ function rankweb_seo_is_hub_page( $post ) {
 function rankweb_seo_item_title( $post ) {
 	$post = get_post( $post );
 	$t    = rankweb_seo_item_title_rules( $post );
-	return $post && 'aw_listing' === $post->post_type ? $t : rankweb_seo_no_hyphens_title( $t ); // no hyphens in any title, except organisation names (owner, 18 Oct 2026)
+	return $post && rankweb_is_type( $post->post_type, 'listing' ) ? $t : rankweb_seo_no_hyphens_title( $t ); // no hyphens in any title, except organisation names (owner, 18 Oct 2026)
 }
 
 /** The title by the rules of its type, before hyphens are removed (see rankweb_seo_item_title). */
@@ -82,17 +82,17 @@ function rankweb_seo_item_title_rules( $post ) {
 		}
 		return trim( rankweb_site_name() . ( '' !== trim( (string) get_bloginfo( 'description' ) ) ? ' – ' . trim( (string) get_bloginfo( 'description' ) ) : '' ) );
 	}
-	if ( in_array( $post->post_type, array( 'aw_legal', 'post' ), true ) ) {
+	if ( in_array( $post->post_type, rankweb_types_with( array( 'library' ), array( 'post' ) ), true ) ) {
 		return rankweb_seo_resource_title( $post ); // Library and Resources (helpers.php)
 	}
-	if ( 'aw_news' === $post->post_type ) {
+	if ( rankweb_is_type( $post->post_type, 'news' ) ) {
 		return rankweb_seo_headline_title( rankweb_seo_unseparate( rankweb_plain_text( $post->post_title ), rankweb_plain_text( (string) get_post_meta( $post->ID, 'aw_source_name', true ) ) ) );
 	}
-	if ( 'aw_listing' === $post->post_type ) {
+	if ( rankweb_is_type( $post->post_type, 'listing' ) ) {
 		$name = rankweb_seo_listing_name( $post->ID );
 		return mb_strlen( rankweb_seo_branded( $name ) ) <= 60 ? rankweb_seo_branded( $name ) : $name; // over 60: no site name (Google shows it beside the result); the name is never cut (owner, 15 Oct 2026)
 	}
-	if ( 'aw_opportunity' === $post->post_type ) {
+	if ( rankweb_is_type( $post->post_type, 'opportunity' ) ) {
 		$t = rankweb_seo_unseparate( rankweb_plain_text( wptexturize( $post->post_title ) ) );
 		return mb_strlen( rankweb_seo_branded( $t ) ) <= 60 ? rankweb_seo_branded( $t ) : $t; // over 60: no site name; the role and organisation are never cut (owner, 15 Oct 2026)
 	}
@@ -118,13 +118,12 @@ function rankweb_seo_item_description( $post ) {
 		return '';
 	}
 	$desc = has_excerpt( $post ) ? $post->post_excerpt : rankweb_seo_intro( $post );
-	if ( 'aw_listing' === $post->post_type ) {
+	if ( rankweb_is_type( $post->post_type, 'listing' ) ) {
 		if ( '' === trim( wp_strip_all_tags( (string) $desc ) ) ) {
 			$desc = rankweb_listing_fact_description( $post->ID ); // no description of its own: one from its facts
 		}
-		$awbi = rankweb_seo_awbi_description( $post->ID, $desc );
-		$desc = '' !== $awbi ? $awbi : $desc;
-	} elseif ( 'aw_legal' === $post->post_type && mb_strlen( rankweb_plain_text( $desc ) ) < 60 ) { // a one-line note: the intro says more
+		$desc = (string) apply_filters( 'rankweb_listing_description', $desc, $post->ID ); // a site's own line (none by default)
+	} elseif ( rankweb_is_type( $post->post_type, 'library' ) && mb_strlen( rankweb_plain_text( $desc ) ) < 60 ) { // a one-line note: the intro says more
 		$better = rankweb_seo_intro( $post );
 		$desc   = mb_strlen( rankweb_plain_text( $better ) ) >= 60 ? $better : $desc;
 	}
@@ -172,7 +171,7 @@ function rankweb_seo_fill_post( $post_id ) {
 		$auto[ $field ]  = $value;
 		$wrote[ $field ] = $value;
 	}
-	if ( 'aw_listing' === $post->post_type && '' === trim( (string) get_post_meta( $post->ID, 'rank_math_focus_keyword', true ) ) ) {
+	if ( rankweb_is_type( $post->post_type, 'listing' ) && '' === trim( (string) get_post_meta( $post->ID, 'rank_math_focus_keyword', true ) ) ) {
 		$kw = rankweb_seo_listing_keyword( $post );
 		if ( '' !== $kw ) {
 			update_post_meta( $post->ID, 'rank_math_focus_keyword', wp_slash( $kw ) );
@@ -248,7 +247,7 @@ function rankweb_seo_var_post( $args = null ) {
 	return $post ? $post : ( is_singular() ? get_queried_object() : null );
 }
 
-/** %aw_title%: the item's title by the rules above; a hub or an untitled draft: "{Title} – Animal Writes". */
+/** %aw_title%: the item's title by the rules above; a hub or an untitled draft: "{Title} – {Site}". */
 function rankweb_seo_var_title( $var_args = '', $args = null ) {
 	$post  = rankweb_seo_var_post( $args );
 	$title = $post ? rankweb_seo_item_title( $post ) : '';
@@ -302,8 +301,10 @@ function rankweb_seo_list_title() {
 	if ( is_404() || is_search() ) {
 		return '';
 	}
-	$hub = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
-	if ( 'aw_listing' === $hub && function_exists( 'directoryweb_current_place' ) ) { // the Directory's titles need DirectoryWeb
+	$hub  = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
+	$adj  = rankweb_wording( 'dir_adjective' ); // a site's word before the Directory's nouns (none by default)
+	$adjl = rankweb_wording( 'dir_adjective_long' );
+	if ( rankweb_is_type( $hub, 'listing' ) && function_exists( 'directoryweb_current_place' ) ) { // the Directory's titles need DirectoryWeb
 		$place = directoryweb_current_place();
 		$typed = rankweb_seo_dir_title(); // district × type pages and lists filtered by type (programmatic.php)
 		if ( '' !== $typed ) {
@@ -313,24 +314,24 @@ function rankweb_seo_list_title() {
 			return ''; // name searches and other filtered lists keep their own titles
 		}
 		if ( ! $place ) {
-			return rankweb_seo_fit( array_filter( array( AW_HUB_TITLES['aw_listing'] ?? '' ) ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
+			return rankweb_seo_fit( array_filter( array( AW_HUB_TITLES[ rankweb_type( 'listing' ) ] ?? '' ) ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . directoryweb_place_parent_state( $place )->name;
-			// "Animal NGOs and Helpline Numbers in {District}, {State} – Animal Writes" where the district has a number of its own
+			// "Animal NGOs and Helpline Numbers in {District}, {State} – {Site}" where the district has a number of its own
 			// (18 Nov 2026: option B); searched as "animal helpline number {city}" and "animal ngo in {district}".
 			// "Animal Helpline Numbers in …" (1 Nov 2026: option A) stays as the last fallback for long names.
-			$help  = rankweb_seo_place_has_helpline( $place ) ? array( rankweb_seo_branded( 'Animal NGOs and Helpline Numbers in ' . $where ), 'Animal NGOs and Helpline Numbers in ' . $where, rankweb_seo_branded( 'Animal NGOs and Helpline Numbers in ' . $place->name ), 'Animal NGOs and Helpline Numbers in ' . $place->name, rankweb_seo_branded( 'Animal Helpline Numbers in ' . $where ), 'Animal Helpline Numbers in ' . $where, rankweb_seo_branded( 'Animal Helpline Numbers in ' . $place->name ), 'Animal Helpline Numbers in ' . $place->name ) : array();
-			$phone = rankweb_seo_has_numbers( $place ) ? array( 'Animal Rescue and NGO Contact Numbers in ' . $where, 'Animal Rescue and NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
+			$help  = rankweb_seo_place_has_helpline( $place ) ? array( rankweb_seo_branded( $adj . 'NGOs and Helpline Numbers in ' . $where ), $adj . 'NGOs and Helpline Numbers in ' . $where, rankweb_seo_branded( $adj . 'NGOs and Helpline Numbers in ' . $place->name ), $adj . 'NGOs and Helpline Numbers in ' . $place->name, rankweb_seo_branded( $adj . 'Helpline Numbers in ' . $where ), $adj . 'Helpline Numbers in ' . $where, rankweb_seo_branded( $adj . 'Helpline Numbers in ' . $place->name ), $adj . 'Helpline Numbers in ' . $place->name ) : array();
+			$phone = rankweb_seo_has_numbers( $place ) ? array( $adj . 'Rescue and NGO Contact Numbers in ' . $where, $adj . 'Rescue and NGO Contact Numbers in ' . $place->name ) : array(); // searched as "animal rescue {district} contact number"
 			return rankweb_seo_fit(
 				array_merge(
 					$help,
 					$phone,
 					array(
-						'Animal Welfare NGOs Shelters and Vets in ' . $where,
-						'Animal Welfare NGOs and Vets in ' . $where,
-						'Animal Welfare NGOs in ' . $where,
-						'Animal Welfare NGOs in ' . $place->name,
+						$adjl . 'NGOs Shelters and Vets in ' . $where,
+						$adjl . 'NGOs and Vets in ' . $where,
+						$adjl . 'NGOs in ' . $where,
+						$adjl . 'NGOs in ' . $place->name,
 					)
 				),
 				60 - mb_strlen( rankweb_seo_page_suffix() )
@@ -344,19 +345,19 @@ function rankweb_seo_list_title() {
 		$more  = count( $types ) > 2 ? ' and More' : '';
 		$try   = array();
 		if ( rankweb_seo_place_has_helpline( $place ) ) { // 18 Nov 2026 (option B): a state with any listing that has a phone
-			$try[] = rankweb_seo_branded( 'Animal Welfare NGOs and Helpline Numbers' . $in );
-			$try[] = 'Animal Welfare NGOs and Helpline Numbers' . $in;
-			$try[] = rankweb_seo_branded( 'Animal Helpline Numbers' . $in ); // the earlier title, kept for long names (Arunachal Pradesh, Jammu and Kashmir)
+			$try[] = rankweb_seo_branded( $adjl . 'NGOs and Helpline Numbers' . $in );
+			$try[] = $adjl . 'NGOs and Helpline Numbers' . $in;
+			$try[] = rankweb_seo_branded( $adj . 'Helpline Numbers' . $in ); // the earlier title, kept for long names (Arunachal Pradesh, Jammu and Kashmir)
 		}
 		if ( count( $types ) > 1 ) {
-			$try[] = 'Animal Welfare ' . $first . ' and ' . $types[1] . $in;
+			$try[] = $adjl . $first . ' and ' . $types[1] . $in;
 		}
 		if ( $more ) {
-			$try[] = 'Animal Welfare ' . $first . $more . $in;
+			$try[] = $adjl . $first . $more . $in;
 		}
-		$try[] = 'Animal Welfare ' . $first . $in;
-		$try[] = 'Animal Welfare NGOs' . $in;
-		$try[] = 'Animal Welfare in ' . preg_replace( '/^The /', '', $place->name ); // a long name ("The Dadra and Nagar Haveli and Daman and Diu"): never cut inside it
+		$try[] = $adjl . $first . $in;
+		$try[] = $adjl . 'NGOs' . $in;
+		$try[] = ( '' !== $adjl ? $adjl : 'Organisations ' ) . 'in ' . preg_replace( '/^The /', '', $place->name ); // a long name ("The Dadra and Nagar Haveli and Daman and Diu"): never cut inside it
 		return rankweb_seo_fit( array_unique( $try ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
 	}
 	if ( ( is_tag() || rankweb_seo_is_category_page() ) && function_exists( 'rankweb_seo_term_title' ) ) { // a tag or category page: its written title (programmatic.php)
@@ -425,10 +426,10 @@ function rankweb_seo_building_title( $set = null ) {
  */
 function rankweb_seo_sync_hubs() {
 	$out = array();
-	if ( ! defined( 'AW_HUBS' ) ) { // the hubs (Animal Writes Core) are not loaded
+	if ( ! rankweb_hubs() ) { // the site has no section hubs
 		return $out;
 	}
-	foreach ( AW_HUBS as $h ) {
+	foreach ( rankweb_hubs() as $h ) {
 		$page = get_page_by_path( $h[0] );
 		if ( ! $page || 'publish' !== $page->post_status ) {
 			continue;
@@ -463,7 +464,7 @@ add_action( 'aw_seo_fill_daily', 'rankweb_seo_sync_hubs', 20 );
 /**
  * Directory views that no title rule above names (a name search in a place, "/directory/rajasthan/?q=cow"): the
  * document title is the page's own heading, directoryweb_directory_title() ("Animal welfare directory: Rajasthan"). Moved here
- * from animal-writes-core (SEO ground rule G1, 16 Oct 2026); titles are unchanged.
+ * from the earlier Core plugin (SEO ground rule G1, 16 Oct 2026); titles are unchanged.
  *
  * @param array $parts Title parts.
  * @return array
@@ -515,7 +516,8 @@ add_filter(
 
 /** The description of the current list view. */
 function rankweb_seo_list_description() {
-	$desc = '';
+	$desc    = '';
+	$adjl_lc = mb_strtolower( rankweb_wording( 'dir_adjective_long' ) ); // a site's word before the Directory's nouns (none by default)
 	$hub  = function_exists( 'aw_hub_type' ) ? aw_hub_type() : '';
 	if ( is_singular() ) { // a hub Page: its excerpt or intro, then the rules below
 		$post = get_queried_object();
@@ -532,16 +534,16 @@ function rankweb_seo_list_description() {
 	if ( function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() && ! get_query_var( 'aw_dir_type' ) && empty( $_GET['tag'] ) && empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$desc = directoryweb_directory_intro();
 	}
-	$built = 'aw_listing' === $hub ? rankweb_seo_dir_description() : ''; // places, district × type pages, lists filtered by type (programmatic.php)
+	$built = rankweb_is_type( $hub, 'listing' ) ? rankweb_seo_dir_description() : ''; // places, district × type pages, lists filtered by type (programmatic.php)
 	if ( '' !== $built ) {
 		$desc = $built;
-	} elseif ( 'aw_listing' === $hub && ! is_404() && function_exists( 'directoryweb_current_place' ) ) {
+	} elseif ( rankweb_is_type( $hub, 'listing' ) && ! is_404() && function_exists( 'directoryweb_current_place' ) ) {
 		$place = directoryweb_current_place();
 		$slug  = (string) get_query_var( 'aw_type_slug' );
-		$n     = number_format_i18n( aw_hub_total( 'aw_listing' ) );
+		$n     = number_format_i18n( aw_hub_total( rankweb_type( 'listing' ) ) );
 		$state = $place ? directoryweb_place_parent_state( $place ) : null;
 		if ( ! $place ) {
-			$desc = ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS['aw_listing'] ?? '%s', $n ); // phpcs:ignore WordPress.Security.NonceVerification
+			$desc = ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS[ rankweb_type( 'listing' ) ] ?? '%s', $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
 			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . rankweb_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
@@ -552,14 +554,14 @@ function rankweb_seo_list_description() {
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
 			$desc = '1' === $n
-				? sprintf( 'One animal welfare organisation listed in %1$s, %2$s, with its phone, address and services, in the %3$s Directory%4$s.', $place->name, $state->name, rankweb_site_name(), rankweb_seo_dir_scope() )
-				: sprintf( '%1$s animal welfare NGOs, rescue groups, shelters, Gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
+				? sprintf( 'One ' . $adjl_lc . 'organisation listed in %1$s, %2$s, with its phone, address and services, in the %3$s Directory%4$s.', $place->name, $state->name, rankweb_site_name(), rankweb_seo_dir_scope() )
+				: sprintf( '%1$s ' . $adjl_lc . 'NGOs, rescue groups, shelters, Gaushalas and vets in %2$s, %3$s. Phone, address and services of each.', $n, $place->name, $state->name );
 		} else {
-			$desc = sprintf( '%1$s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
+			$desc = sprintf( '%1$s ' . $adjl_lc . 'NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
 		}
-	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) && 'aw_listing' !== $hub ) { // the Directory's has a count to fill in (above)
+	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) && ! rankweb_is_type( $hub, 'listing' ) ) { // the Directory's has a count to fill in (above)
 		$desc = AW_HUB_DESCRIPTIONS[ $hub ];
-	} elseif ( in_array( $hub, array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
+	} elseif ( in_array( $hub, rankweb_types_with( array( 'news', 'library' ), array( 'post' ) ), true ) ) {
 		$desc = rankweb_seo_hub_intro_description( $hub );
 	}
 	if ( '' === trim( (string) $desc ) ) {
@@ -631,7 +633,7 @@ add_filter(
  */
 /** A printed title without hyphens, except in the Directory (organisation and place names are official names, owner 18 Oct 2026). */
 function rankweb_seo_printed_title( $t ) {
-	$dir = is_singular( 'aw_listing' ) || ( function_exists( 'aw_hub_type' ) && 'aw_listing' === aw_hub_type() ) || ( function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() );
+	$dir = rankweb_is_singular( array( 'listing' ) ) || ( function_exists( 'aw_hub_type' ) && rankweb_is_type( aw_hub_type(), 'listing' ) ) || ( function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() );
 	return $dir ? $t : rankweb_seo_no_hyphens_title( $t );
 }
 add_filter( 'rank_math/frontend/title', fn( $t ) => rankweb_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 ); // and no hyphen joining two words (owner, 18 Oct 2026)
@@ -639,7 +641,7 @@ add_filter( 'rank_math/opengraph/facebook/og_title', fn( $t ) => rankweb_seo_pri
 add_filter( 'rank_math/opengraph/twitter/twitter_title', fn( $t ) => rankweb_seo_printed_title( html_entity_decode( (string) $t, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 9999 );
 
 /*
- * Yearly SEO titles (owner, 21 Oct 2026: "World Animal Day 2026 Date, Theme, History – Animal Writes", the year
+ * Yearly SEO titles (owner, 21 Oct 2026: "World Animal Day 2026 Date, Theme, History – {Site}", the year
  * updated each year; the slug has no year). A post with meta aw_seo_title_yearly = 1 gets the year in its Rank Math
  * title moved to the current one, checked once a day by the daily event (never on a page view). A plain number in the
  * stored field, never a %variable%.
@@ -659,7 +661,7 @@ add_action(
 	50
 );
 
-// Titles and descriptions are printed in the one date format (owner, 17 Oct 2026); aw_heading_dates() is in animal-writes-core.
+// Titles and descriptions are printed in the one date format (owner, 17 Oct 2026); aw_heading_dates() is in the earlier Core plugin.
 foreach ( array( 'rank_math/frontend/title', 'rank_math/frontend/description' ) as $aw_hook ) {
 	add_filter( $aw_hook, fn( $text ) => function_exists( 'aw_heading_dates' ) ? aw_heading_dates( $text ) : $text, 20 );
 }

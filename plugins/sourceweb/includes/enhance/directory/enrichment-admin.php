@@ -113,7 +113,7 @@ add_action(
 	'acf/render_field',
 	function ( $field ) {
 		global $post;
-		if ( ! $post || 'aw_listing' !== $post->post_type ) {
+		if ( ! $post || ! sourceweb_is_type( $post->post_type, 'listing' ) ) {
 			return;
 		}
 		$map = sourceweb_enrich_meta_fields();
@@ -130,7 +130,7 @@ add_action(
 	'acf/render_field/key=field_aw_listing_msg_provenance',
 	function () {
 		$post = get_post();
-		if ( $post && 'aw_listing' === $post->post_type ) {
+		if ( $post && sourceweb_is_type( $post->post_type, 'listing' ) ) {
 			sourceweb_enrich_prov_box( $post );
 		}
 	}
@@ -158,9 +158,9 @@ function sourceweb_enrich_prov_box( $post ) {
 
 // Save the Identity unresolved box (the date it was ticked is kept as its detail).
 add_action(
-	'save_post_aw_listing',
+	'save_post',
 	function ( $id ) {
-		if ( ! isset( $_POST['aw_enrich_identity_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_enrich_identity_nonce'] ), 'aw_enrich_identity' ) || ! current_user_can( 'edit_post', $id ) || wp_is_post_revision( $id ) ) {
+		if ( ! sourceweb_is_type( get_post_type( $id ), 'listing' ) || ! isset( $_POST['aw_enrich_identity_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_enrich_identity_nonce'] ), 'aw_enrich_identity' ) || ! current_user_can( 'edit_post', $id ) || wp_is_post_revision( $id ) ) {
 			return;
 		}
 		$on  = ! empty( $_POST['aw_enrich_identity'] );

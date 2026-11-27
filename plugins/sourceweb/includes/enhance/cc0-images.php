@@ -21,7 +21,7 @@
  * Openverse: no key, a descriptive User-Agent, one request per 2 s, at most SOURCEWEB_CC0_DAILY_REQUESTS a day; result
  * pages are cached for a week. Counts and the log: Kits → Home → Pictures.
  *
- * Moved from Animal Writes Core on 18 Nov 2026: options, meta keys, the aw_cc0_run event and the aw_15min schedule are
+ * Moved from the site core plugin on 18 Nov 2026: options, meta keys, the aw_cc0_run event and the aw_15min schedule are
  * unchanged.
  *
  * @package aw-sourcing
@@ -82,7 +82,7 @@ function sourceweb_cc0_items_sql() {
 		JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value <> ''
 		LEFT JOIN {$wpdb->postmeta} fi ON fi.post_id = p.ID AND fi.meta_key = 'aw_file_id'
 		LEFT JOIN {$wpdb->postmeta} dp ON dp.post_id = p.ID AND dp.meta_key = 'aw_doc_preview'
-		WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post')
+		WHERE p.post_status = 'publish' AND " . sourceweb_sql_in_types( 'p.post_type', sourceweb_types_with( array( 'news', 'library' ), array( 'post' ) ) ) . "
 		AND ( fi.meta_value IS NULL OR fi.meta_value IN ('','0') ) AND ( dp.meta_value IS NULL OR dp.meta_value IN ('','0') )";
 }
 
@@ -104,7 +104,7 @@ function sourceweb_cc0_run() {
 	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
 	$local = sourceweb_source_localise_run( 25, 60 );
 	// 0c. Documents whose source is a PDF: the first page as their picture.
-	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND p.post_type IN ('aw_legal','post','aw_news') AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
+	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND " . sourceweb_sql_in_types( 'p.post_type', sourceweb_types_with( array( 'library', 'news' ), array( 'post' ) ) ) . " AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
 		update_post_meta( $pid, 'aw_pdf_cover_tried', current_time( 'mysql', true ) );
 		sourceweb_source_pdf_cover( (int) $pid );
 	}
@@ -320,7 +320,7 @@ function sourceweb_source_og_run( $limit = 40 ) {
 			JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE 'http%%'
 			LEFT JOIN {$wpdb->postmeta} si ON si.post_id = p.ID AND si.meta_key = 'aw_source_image'
 			LEFT JOIN {$wpdb->postmeta} ok ON ok.post_id = p.ID AND ok.meta_key = 'aw_source_image_ok'
-			WHERE p.post_status = 'publish' AND p.post_type IN ('aw_news','aw_legal','post','aw_opportunity')
+			WHERE p.post_status = 'publish' AND " . sourceweb_sql_in_types( 'p.post_type', sourceweb_item_types() ) . "
 			AND ( si.meta_value IS NULL OR si.meta_value = '' OR ok.meta_value = '0' )
 			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = 'aw_source_og_tried')
 			AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
@@ -379,8 +379,8 @@ function sourceweb_source_also_image( $post_id ) {
  */
 function sourceweb_source_pdf_cover( $post_id ) {
 	$src = (string) get_post_meta( $post_id, 'aw_source_url', true );
-	if ( ! in_array( get_post_type( $post_id ), array( 'aw_legal', 'post', 'aw_news' ), true ) ) {
-		return 0; // documents only: a Directory listing's source PDF (the AWBI list) is not its picture
+	if ( ! in_array( get_post_type( $post_id ), sourceweb_types_with( array( 'library', 'news' ), array( 'post' ) ), true ) ) {
+		return 0; // documents only: a Directory listing's source PDF (an official register's list) is not its picture
 	}
 	if ( ! preg_match( '~^https?://[^?#]+\.pdf(\?|$)~i', $src ) || get_post_meta( $post_id, 'aw_file_id', true ) || get_post_meta( $post_id, 'aw_doc_preview', true ) || get_post_meta( $post_id, 'aw_cover_reused', true ) || ! class_exists( 'Imagick' ) ) {
 		return 0;
@@ -967,7 +967,7 @@ function sourceweb_cc0_counts() {
 	return array_map( 'intval', (array) $row );
 }
 
-/** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. Registered here, not by Animal Writes Core, since 18 Nov 2026. */
+/** Kits → Home → Pictures (until the SourceWeb dashboard has it): publisher images and CC0 photos. Registered here, not by the site core plugin, since 18 Nov 2026. */
 function sourceweb_cc0_site_check() {
 	$c = sourceweb_cc0_counts();
 	echo '<p>On News, Library and research items:</p><table class="form-table" role="presentation"><tbody>';
@@ -1014,7 +1014,7 @@ add_filter(
 add_action(
 	'init',
 	function () {
-		foreach ( array( 'aw_news', 'aw_legal', 'post' ) as $type ) {
+		foreach ( sourceweb_types_with( array( 'news', 'library' ), array( 'post' ) ) as $type ) {
 			register_post_meta(
 				$type,
 				'aw_source_image_off',

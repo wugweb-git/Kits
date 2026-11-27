@@ -1,11 +1,10 @@
 <?php
 // No ABSPATH guard: this is a command-line runner that defines ABSPATH itself.
 /**
- * Tests that need no WordPress: the site operations moved from Animal Writes Core on 19 Nov 2026 (includes/ops/).
- * The scheduled-task statistics and the trigger it names, the 404 page's section and search words, the deployed
- * commit read from a git folder, retention's closed opportunities, the modified date kept by a technical save, the
- * old aw_ names that still answer, and that every function and constant defined in ops/ is a kits_ name (the old
- * names are only in compat.php and daily.php has none).
+ * Tests that need no WordPress: the site operations (includes/ops/). The scheduled-task statistics and the trigger it
+ * names, the 404 page's section and search words, the deployed commit read from a git folder, the modified date kept by
+ * a technical save, and that every function and constant defined in ops/ is a kits_ name. Retention and the older aw_
+ * names belong to the Animal Writes site layer (sites/animalwrites/kits-core/tests/site-ops-tests.php).
  *
  * Usage: php plugins/kits-core/tests/site-ops-tests.php
  *
@@ -90,12 +89,9 @@ function check( $what, $ok ) {
 
 $ops = dirname( __DIR__ ) . '/includes/ops/';
 
-// Every function and constant defined in ops/ is a kits_ name; only compat.php carries the old aw_ ones.
+// Every function and constant defined in ops/ is a kits_ name.
 $bad = array();
 foreach ( glob( $ops . '*.php' ) as $f ) {
-	if ( 'compat.php' === basename( $f ) ) {
-		continue;
-	}
 	preg_match_all( '/^\s*function\s+&?([A-Za-z0-9_]+)|^\s*const\s+([A-Za-z0-9_]+)/m', file_get_contents( $f ), $m );
 	foreach ( array_filter( array_merge( $m[1], $m[2] ) ) as $name ) {
 		if ( 0 !== strpos( $name, 'kits_' ) && 0 !== strpos( $name, 'KITS_' ) ) {
@@ -107,10 +103,8 @@ check( 'every function and constant in ops/ has a kits_ name (found: ' . implode
 
 require $ops . 'cron-health.php';
 require $ops . 'not-found.php';
-require $ops . 'retention.php';
 require $ops . 'keep-modified.php';
 require $ops . 'deploy-purge.php';
-require $ops . 'compat.php';
 
 /* ---------- Scheduled tasks ---------- */
 
@@ -167,17 +161,6 @@ file_put_contents( $git . '/HEAD', "junk\n" );
 $GLOBALS['t_actions'] = array();
 check( 'an unreadable head purges nothing and keeps the stored commit', false === kits_deploy_purge_if_new() && array() === $GLOBALS['t_actions'] && $sha2 === $GLOBALS['t_options']['aw_deployed_head'] );
 
-/* ---------- Retention ---------- */
-
-$GLOBALS['t_posts'] = array( 1 => (object) array( 'ID' => 1, 'post_type' => 'aw_opportunity' ), 2 => (object) array( 'ID' => 2, 'post_type' => 'aw_news' ) );
-$GLOBALS['t_meta'][1]['aw_deadline'] = '2026-11-01';
-check( 'an opportunity past its deadline is closed', 'closed' === kits_retention_state( 1 ) );
-$GLOBALS['t_meta'][1]['aw_deadline'] = '2026-12-01';
-check( 'an open opportunity is normal', '' === kits_retention_state( 1 ) );
-$GLOBALS['t_meta'][1] = array( 'aw_review_until' => '2026-11-18' );
-check( 'with no deadline the review date decides', 'closed' === kits_retention_state( 1 ) );
-check( 'news is never closed', '' === kits_retention_state( 2 ) );
-
 /* ---------- Modified date kept ---------- */
 
 check( 'no flag, no request: the date moves', ! kits_keep_modified_requested() );
@@ -187,12 +170,6 @@ $ret  = kits_keep_modified( function () use ( &$seen ) {
 	return 'saved';
 } );
 check( 'a save inside kits_keep_modified keeps the date, returns its value, and clears the flag after', true === $seen && 'saved' === $ret && ! kits_keep_modified_requested() );
-
-/* ---------- The old names still answer ---------- */
-
-check( 'old names: aw_retention_state and aw_keep_modified forward', 'closed' === aw_retention_state( 1 ) && 'x' === aw_keep_modified( fn() => 'x' ) );
-check( 'old names: aw_cron_span forwards', '5 min' === aw_cron_span( 300 ) );
-check( 'old name: aw_dispatch_workflow exists for the server\'s cron line', function_exists( 'aw_dispatch_workflow' ) && function_exists( 'aw_cron_last' ) && function_exists( 'aw_core_simple_table' ) );
 
 foreach ( array( $git . '/refs/heads/main', $git . '/refs/heads/packed', $git . '/HEAD', $git . '/packed-refs' ) as $f ) {
 	@unlink( $f );

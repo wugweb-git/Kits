@@ -11,7 +11,7 @@
  * Plugin Name:       RankWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/rankweb/
  * Description:       Complete SEO suite for WordPress: structured schema, canonicals, robots directives, sitemaps, breadcrumbs, internal links, media optimization, and content analysis. Integrates with Rank Math when active.
- * Version:           2.3.7
+ * Version:           2.4.1
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'RANKWEB_VERSION' ) || define( 'RANKWEB_VERSION', '2.3.7' ); // keep equal to the Version header above
+defined( 'RANKWEB_VERSION' ) || define( 'RANKWEB_VERSION', '2.4.1' ); // keep equal to the Version header above
 
 if ( ! defined( 'RANKWEB_DIR' ) ) {
 	define( 'RANKWEB_DIR', plugin_dir_path( __FILE__ ) );
@@ -36,7 +36,7 @@ if ( ! defined( 'RANKWEB_FILE' ) ) {
 	define( 'RANKWEB_FILE', __FILE__ );
 }
 
-require_once RANKWEB_DIR . 'includes/legacy-aliases.php'; // the old aw_* function and constant names, for other plugins that still call them.
+require_once RANKWEB_DIR . 'includes/post-type-roles.php'; // which content type plays news, library, campaign, opportunity, listing, press (the site says; filter rankweb_post_type_roles).
 require_once RANKWEB_DIR . 'includes/text.php'; // rankweb_plain_text(), used by every file.
 require_once RANKWEB_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).
 require_once RANKWEB_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen, with or without Rank Math.
@@ -60,7 +60,7 @@ add_action(
 		require_once RANKWEB_DIR . 'includes/standalone-seo.php'; // who prints the head, site defaults (language, profiles), standalone tags: needs nothing else
 		require_once RANKWEB_DIR . 'includes/settings.php'; // first: the modules, their settings and switches
 		$off = rankweb_seo_files_off();
-		foreach ( array( 'helpers', 'overview', 'faq', 'faq-data', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'schema-gallery', 'site-tags', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'transport', 'speed', 'speed-pipeline', 'webp-convert', 'social', 'term-seo', 'user-seo', 'primary-term', 'agent-tools', 'rankweb-dashboard', 'rankweb-widget', 'rankweb-rest', 'rankweb-ui', 'rankweb-native-admin', 'rankweb-modules', 'help-tab' ) as $file ) {
+		foreach ( array( 'helpers', 'overview', 'faq', 'hub-fallbacks', 'titles', 'canonical', 'filtered-views', 'robots', 'schema', 'rank-math-schema', 'opengraph', 'standalone-head', 'sitemap', 'redirects', 'breadcrumbs', 'focus-keywords', 'health', 'llms', 'markdown', 'analysis', 'content-advice', 'internal-links', 'link-audit', 'link-anchors', 'silos', 'video', 'schema-custom', 'schema-gallery', 'site-tags', 'bulk-edit', 'bulk-csv', 'media-seo', 'redirect-tools', 'transport', 'speed', 'speed-pipeline', 'webp-convert', 'social', 'term-seo', 'user-seo', 'primary-term', 'agent-tools', 'rankweb-dashboard', 'rankweb-widget', 'rankweb-rest', 'rankweb-ui', 'rankweb-native-admin', 'rankweb-modules', 'help-tab' ) as $file ) {
 			if ( 'rank-math-schema' === $file && ! rankweb_seo_extras_rank_math() ) {
 				continue; // Rank Math schema bridge is only loaded when Rank Math is active.
 			}

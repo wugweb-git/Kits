@@ -152,18 +152,18 @@ aw_t( '' === $by2['aw_campaign']['inherit'] && 80 === $by2['aw_campaign']['max_w
 $orders = array_map( fn( $g ) => (int) $g['menu_order'], $acf_gs );
 sort( $orders );
 aw_t( 8 === count( $acf_gs ) && range( 0, 7 ) === $orders && $acf['fields'] === sourceweb_enrich_listing_groups_fields( array_reverse( $acf_gs ), 'group_aw_listing' ), 'listing fields: 8 groups, read in menu_order whatever the file order' );
-aw_t( 'aw_email' === $acf['fields'][0]['name'] && 'field_aw_listing_msg_gov_state' === end( $acf['fields'] )['key'] && 66 === count( $acf['fields'] ), 'listing fields: Contact first, the government records message last, 61 fields and 5 messages' );
+aw_t( 'aw_email' === $acf['fields'][0]['name'] && 'field_aw_listing_msg_gov_state' === end( $acf['fields'] )['key'] && 54 === count( $acf['fields'] ), 'listing fields: Contact first, the government records message last, 54 fields and messages (DirectoryWeb 1.4.0 holds no registration fields)' );
 aw_t( array( 'x' ) === array_column( sourceweb_enrich_listing_groups_fields( array( array( 'key' => 'group_aw_news', 'fields' => array( array( 'name' => 'n' ) ) ), array( 'key' => 'group_aw_listing_b', 'menu_order' => 1, 'fields' => array( array( 'name' => 'x' ) ) ) ), 'group_aw_listing' ), 'name' ), 'listing fields: other groups left out' );
 $schema = sourceweb_enrich_schema_build( $acf['fields'], $p3['enrich_fields'], 'group_aw_listing', $p3['sections']['aw_listing']['tags'], array( 'rescue' => 'Rescue' ) );
 $mapped = array_filter( $schema['fields'], fn( $f ) => (bool) $f['enrich'] );
 $direct = array_filter( $p3['enrich_fields'], fn( $e ) => in_array( $e[1], array_column( $schema['fields'], 'name' ), true ) );
-aw_t( 30 === count( $direct ) && 12 === count( $schema['special'] ), 'schema: 30 of the 42 enrichment fields stored in an ACF field, 12 in a special store' );
-aw_t( 33 === count( $mapped ) && array( 'phone', 'whatsapp', 'emergency' ) === array_column( $schema['fields'], 'enrich', 'name' )['aw_phones'], 'the special stores Phone numbers, Opening hours and Photos are their listing fields too' );
-aw_t( array( 'phone', 'whatsapp', 'emergency', 'pincode', 'hours', 'logo', 'photos', 'description', 'services', 'closed', 'place', 'merge_into' ) === array_column( $schema['special'], 'field' ), 'the 12 kept by code' );
+aw_t( 26 === count( $direct ) && 16 === count( $schema['special'] ), 'schema: 26 of the 42 enrichment fields stored in an ACF field, 16 in a special store (the four registration fields have no ACF field in the plugin)' );
+aw_t( 29 === count( $mapped ) && array( 'phone', 'whatsapp', 'emergency' ) === array_column( $schema['fields'], 'enrich', 'name' )['aw_phones'], 'the special stores Phone numbers, Opening hours and Photos are their listing fields too' );
+aw_t( array( 'phone', 'whatsapp', 'emergency', 'pincode', 'hours', 'logo', 'photos', 'description', 'darpan_id', 'reg_80g', 'reg_12a', 'fcra', 'services', 'closed', 'place', 'merge_into' ) === array_column( $schema['special'], 'field' ), 'the 16 kept by code' );
 aw_t( 29 === count( $schema['listing_types'] ) && ! in_array( 'tab', array_column( $schema['fields'], 'type' ), true ), 'listing types; tabs and messages left out' );
 $rows = sourceweb_enrich_field_rule_rows( $schema, $p3['enrich_fields'], $plan['field_rules']['fields'] );
 $only = array_filter( $rows, fn( $r ) => 'Listing field' === $r['group'] );
-aw_t( 42 + count( $only ) === count( $rows ) && count( $only ) === count( $schema['fields'] ) - 33, 'field rules: 42 enrichment fields plus every listing field no enrichment fills (' . count( $only ) . ')' );
+aw_t( 42 + count( $only ) === count( $rows ) && count( $only ) === count( $schema['fields'] ) - 29, 'field rules: 42 enrichment fields plus every listing field no enrichment fills (' . count( $only ) . ')' );
 aw_t( ! array_filter( $only, fn( $r ) => $r['rule']['on'] || $r['set'] ), 'listing fields without an enrichment field: rule off, not set' );
 $acf2   = $acf['fields'];
 $acf2[] = array(

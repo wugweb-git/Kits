@@ -55,7 +55,7 @@ function sourceweb_why_key( string $why ): string {
  *
  * @param array $items  [ { id, title, type, typeLabel, date, host, why, excerpt, url } ].
  * @param array $q      { type, search, source, why, orderby: date|title|type, order: asc|desc, page }.
- * @param array $labels Type => label (AW_REVIEW_TYPES).
+ * @param array $labels Type => label (sourceweb_review_types()).
  * @param int   $per    Rows per page.
  * @return array { rows, total, page, pages, views, filters, count }.
  */

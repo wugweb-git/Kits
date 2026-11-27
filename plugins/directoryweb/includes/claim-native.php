@@ -30,7 +30,7 @@ const DIRECTORYWEB_CLAIM_TRANSITIONS = array(
 	'withdrawn' => array(),
 );
 
-/** Claim field => the DIRECTORYWEB_CLAIM_L key it maps to (what directoryweb_claim_apply_field() understands). */
+/** Claim field => the directoryweb_claim_fields() key it maps to (what directoryweb_claim_apply_field() understands). */
 const DIRECTORYWEB_CLAIM_NATIVE_MAP = array(
 	'phone'    => 'phones',
 	'email'    => 'l_email',
@@ -109,7 +109,7 @@ function directoryweb_claim_validate( array $in ): array {
 		}
 		$propose[ $f ] = $val;
 	}
-	$services = array_intersect( array_map( 'sanitize_key', (array) ( $in['l_services'] ?? array() ) ), array_keys( DIRECTORYWEB_SERVICES ) );
+	$services = array_intersect( array_map( 'sanitize_key', (array) ( $in['l_services'] ?? array() ) ), array_keys( directoryweb_services() ) );
 	if ( $services ) {
 		sort( $services );
 		$propose['services'] = implode( ',', $services );
@@ -373,7 +373,7 @@ function directoryweb_claim_native_form( int $listing ): string {
 	$out .= '<fieldset><legend>' . esc_html__( 'What should the listing say?', 'directoryweb' ) . '</legend>';
 	$out .= $field( 'l_phone', __( 'Phone', 'directoryweb' ), 'tel' ) . $field( 'l_email', __( 'Public email', 'directoryweb' ), 'email' ) . $field( 'l_website', __( 'Website', 'directoryweb' ), 'url' ) . $field( 'l_area', __( 'Area or locality', 'directoryweb' ) );
 	$out .= '<p><label>' . esc_html__( 'About', 'directoryweb' ) . '<textarea name="l_about" rows="4" maxlength="2000">' . esc_textarea( $val( 'l_about' ) ) . '</textarea></label></p>';
-	foreach ( DIRECTORYWEB_SERVICES as $slug => $label ) {
+	foreach ( directoryweb_services() as $slug => $label ) {
 		$out .= '<label class="aw-claim-svc"><input type="checkbox" name="l_services[]" value="' . esc_attr( $slug ) . '"' . checked( in_array( $slug, (array) ( $old['l_services'] ?? array() ), true ), true, false ) . '> ' . esc_html( is_array( $label ) ? ( $label[0] ?? $slug ) : $label ) . '</label> ';
 	}
 	$out .= '</fieldset>';
@@ -504,7 +504,7 @@ function directoryweb_claim_metabox( $post ): void {
 	echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Field', 'directoryweb' ) . '</th><th>' . esc_html__( 'Now', 'directoryweb' ) . '</th><th>' . esc_html__( 'Proposed', 'directoryweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $c['propose'] as $f => $v ) {
 		$now = isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ) ? directoryweb_claim_now( $c['listing'], DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ], false ) : '';
-		echo '<tr><td>' . esc_html( isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ) && isset( DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ] ) ? directoryweb_claim_label( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ], DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ][0] ) : $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
+		echo '<tr><td>' . esc_html( isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ) && isset( directoryweb_claim_fields()[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ] ) ? directoryweb_claim_label( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ], DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ][0] ) : $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 	if ( function_exists( 'directoryweb_evidence_review_html' ) ) {

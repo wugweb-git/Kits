@@ -87,6 +87,8 @@ function wp_list_pluck( $items, $key ) {
 	return array_map( fn( $x ) => $x[ $key ], $items );
 }
 
+require dirname( __DIR__ ) . '/includes/post-type-roles.php';
+$GLOBALS['iw_filters']['insightweb_post_type_roles'] = array( 'news' => 'aw_news', 'library' => 'aw_legal', 'campaign' => 'aw_campaign', 'opportunity' => 'aw_opportunity', 'listing' => 'aw_listing' ); // what the site layer feeds
 require dirname( __DIR__ ) . '/includes/settings.php';
 require dirname( __DIR__ ) . '/includes/insightweb-rest.php';
 
@@ -391,24 +393,24 @@ function wp_parse_url( $url, $component = -1 ) {
 }
 require dirname( __DIR__ ) . '/includes/search-insights/imports.php';
 require dirname( __DIR__ ) . '/includes/search-insights/links-import.php';
-$home = 'https://animalwrites.in/';
+$home = 'https://ownsite.example/';
 $src  = 'Search Console Links, read 12 Nov 2026';
-$ls   = insightweb_si_links_import_parse( "\xEF\xBB\xBFSite,Linking pages,Target pages\nexample.org,\"1,204\",3\nwww.News.example.in,2,1\nnot a domain,1,1\nanimalwrites.in,9,9\n", $home, $src, '2026-11-12', '2026-11-12' );
+$ls   = insightweb_si_links_import_parse( "\xEF\xBB\xBFSite,Linking pages,Target pages\nexample.org,\"1,204\",3\nwww.News.example.in,2,1\nnot a domain,1,1\nownsite.example,9,9\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'sites' === $ls['kind'] && 2 === count( $ls['rows'] ) && 2 === $ls['skipped'], 'top linking sites: two sites kept; a bad name and our own site skipped' );
 iw_check( 'example.org' === $ls['rows'][0]['domain'] && 1204 === $ls['rows'][0]['links'] && $home === $ls['rows'][0]['linked_url'] && false !== strpos( $ls['rows'][0]['note'], '3 of our pages' ) && 'news.example.in' === $ls['rows'][1]['domain'], 'top linking sites: domain without www, links, home page with a note' );
 iw_check( '2026-11-12' === $ls['rows'][0]['last_seen'] && $src === $ls['rows'][0]['source'], 'top linking sites: the day read and the source' );
-$lp = insightweb_si_links_import_parse( "Target page,Incoming links,Linking sites\nhttps://animalwrites.in/campaigns/x/,40,7\nhttps://other.example/,5,1\n", $home, $src, '2026-11-12', '2026-11-12' );
-iw_check( 'pages' === $lp['kind'] && array() === $lp['rows'] && array( array( 'https://animalwrites.in/campaigns/x/', 40, 7 ) ) === $lp['pages'] && 1 === $lp['skipped'], 'top linked pages: a summary of our pages, no link rows' );
+$lp = insightweb_si_links_import_parse( "Target page,Incoming links,Linking sites\nhttps://ownsite.example/campaigns/x/,40,7\nhttps://other.example/,5,1\n", $home, $src, '2026-11-12', '2026-11-12' );
+iw_check( 'pages' === $lp['kind'] && array() === $lp['rows'] && array( array( 'https://ownsite.example/campaigns/x/', 40, 7 ) ) === $lp['pages'] && 1 === $lp['skipped'], 'top linked pages: a summary of our pages, no link rows' );
 $ll = insightweb_si_links_import_parse( "Linking page,Last crawled\nhttps://blog.example.com/post/,2026-11-02\nhttps://blog.example.com/b/,2027-01-01\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'latest' === $ll['kind'] && '2026-11-02' === $ll['rows'][0]['last_seen'] && '2026-11-12' === $ll['rows'][1]['last_seen'] && 'https://blog.example.com/post/' === $ll['rows'][0]['from_url'], 'latest links: last crawled as last seen; a date in the future falls back to the day read' );
-$lx = insightweb_si_links_import_parse( "Linking page\tLinked page\tAnchor\tDR\nhttps://a.example.org/x\thttps://animalwrites.in/about/\tAnimal Writes\t54\nhttps://b.example.org/\thttps://evil.example/\tx\t20\nhttps://c.example.org/\t\t\t140\n", $home, 'Pasted list, read 12 Nov 2026', '2026-11-12', '2026-11-12' );
-iw_check( 'list' === $lx['kind'] && 2 === count( $lx['rows'] ) && 1 === $lx['skipped'] && 'https://animalwrites.in/about/' === $lx['rows'][0]['linked_url'] && 'Animal Writes' === $lx['rows'][0]['anchor'], 'list: tab separated; a linked page not ours is skipped' );
+$lx = insightweb_si_links_import_parse( "Linking page\tLinked page\tAnchor\tDR\nhttps://a.example.org/x\thttps://ownsite.example/about/\tExample Site\t54\nhttps://b.example.org/\thttps://evil.example/\tx\t20\nhttps://c.example.org/\t\t\t140\n", $home, 'Pasted list, read 12 Nov 2026', '2026-11-12', '2026-11-12' );
+iw_check( 'list' === $lx['kind'] && 2 === count( $lx['rows'] ) && 1 === $lx['skipped'] && 'https://ownsite.example/about/' === $lx['rows'][0]['linked_url'] && 'Example Site' === $lx['rows'][0]['anchor'], 'list: tab separated; a linked page not ours is skipped' );
 iw_check( array( 'a.example.org' => 54 ) === $lx['dr'], 'list: DR kept per domain, only 0–100' );
 iw_check( '' !== insightweb_si_links_import_parse( "Keyword,Volume\ndog,10\n", $home, $src, '2026-11-12', '2026-11-12' )['error'] && '' !== insightweb_si_links_import_parse( 'just text', $home, $src, '2026-11-12', '2026-11-12' )['error'], 'unknown columns or no header: an error, nothing stored' );
 iw_check( 'Search Console Links' === insightweb_si_link_source_key( 'Search Console Links, read 2 Nov 2026' ) && 'Bing Webmaster' === insightweb_si_link_source_key( 'Bing Webmaster' ), 'reads group by source without the read date' );
-$l1 = insightweb_si_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nanimalwrites.in\n", $home, $src, '2026-11-12', '2026-11-12' );
+$l1 = insightweb_si_links_import_parse( "Site\nexample.org\nwww.xn--p1ai.xn--p1ai\nownsite.example\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'list' === $l1['kind'] && 2 === count( $l1['rows'] ) && 'xn--p1ai.xn--p1ai' === $l1['rows'][1]['domain'] && 1 === $l1['skipped'], 'one-column list; an IDN (punycode) domain is a domain' );
-$lr = insightweb_si_links_import_parse( "\"Linking page\",\"Last crawled\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://www.animalwrites.in/x/\",\"Nov 3, 2026\"\r\n", $home, $src, '2026-11-12', '2026-11-12' );
+$lr = insightweb_si_links_import_parse( "\"Linking page\",\"Last crawled\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://blog.example.com/post/\",\"Nov 2, 2026\"\r\n\"https://www.ownsite.example/x/\",\"Nov 3, 2026\"\r\n", $home, $src, '2026-11-12', '2026-11-12' );
 iw_check( 'latest' === $lr['kind'] && 2 === count( $lr['rows'] ) && '2026-11-02' === $lr['rows'][0]['last_seen'] && 1 === $lr['skipped'], 'a real Latest links export: quoted, CRLF, US dates; our own site with www skipped; a repeated row stays one link (same key in insightweb_si_link_put)' );
 iw_check( '2026-11-02' === insightweb_si_links_import_date( '2 Nov 2026', '2026-11-12' ) && '' === insightweb_si_links_import_date( '1999-12-31', '2026-11-12' ) && '' === insightweb_si_links_import_date( 'soon', '2026-11-12' ), 'import dates: read, too old, not a date' );
 iw_check( 'example.org' === insightweb_si_link_domain( 'https://WWW.Example.org/x' ) && '' === insightweb_si_links_import_host( 'not a domain' ), 'one domain rule for links and the import' );
@@ -586,6 +588,7 @@ iw_check( 'poor-rank' === insightweb_si_focus_health( true, false ) && 'should-b
 iw_check( insightweb_si_is_focus_candidate( 60, 12.0, true ) && ! insightweb_si_is_focus_candidate( 40, 12.0, true ) && ! insightweb_si_is_focus_candidate( 60, 2.0, true ) && ! insightweb_si_is_focus_candidate( 60, 12.0, false ), 'focus candidate: strong score + winnable position + a page' );
 
 iw_check( 'evergreen' === insightweb_si_query_intent( 'rabies symptoms' ) && 'dated' === insightweb_si_query_intent( 'dog attack 2024' ) && 'local' === insightweb_si_query_intent( 'animal shelter near me' ) && 'campaign' === insightweb_si_query_intent( 'donate to animals' ), 'query intent: evergreen / dated / local / campaign' );
+iw_check( '' === insightweb_type( 'press' ) && ! insightweb_is_type( '', 'press' ) && array( 'post' ) === insightweb_types_with( array( 'press' ), array( 'post' ) ) && '1=0' === insightweb_sql_in_types( 'p.post_type', array() ), 'an unfilled role never matches and drops out of lists' );
 iw_check( 'library' === insightweb_si_page_class( '/x/', 'aw_legal' ) && 'resource' === insightweb_si_page_class( '/resources/y/', 'page' ) && 'news' === insightweb_si_page_class( '/news/z/', '' ) && 'directory' === insightweb_si_page_class( '/d/', 'aw_listing' ), 'page class from post type and path' );
 
 $own = insightweb_si_canonical_owner(
@@ -789,5 +792,22 @@ $movers = insightweb_keyword_movers(
 	)
 );
 iw_check( 'rising term' === ( $movers['rising'][0]['keyword'] ?? '' ) && 'dropping term' === ( $movers['declining'][0]['keyword'] ?? '' ), 'telemetry: keyword movers split rising and declining queries' );
+
+// No runtime file names the content types of one site (they come from the filter insightweb_post_type_roles).
+$iw_named = array();
+foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( dirname( __DIR__ ) . '/includes' ) ) as $iw_f ) {
+	if ( 'php' === $iw_f->getExtension() ) {
+		$iw_code = '';
+		foreach ( token_get_all( (string) file_get_contents( $iw_f->getPathname() ) ) as $iw_t ) {
+			if ( ! is_array( $iw_t ) || ! in_array( $iw_t[0], array( T_COMMENT, T_DOC_COMMENT ), true ) ) {
+				$iw_code .= is_array( $iw_t ) ? $iw_t[1] : $iw_t;
+			}
+		}
+		if ( preg_match( '/aw_(news|legal|campaign|opportunity|listing|press)\b/', $iw_code, $iw_m ) ) {
+			$iw_named[] = basename( $iw_f->getPathname() ) . ' ' . $iw_m[0];
+		}
+	}
+}
+iw_check( ! $iw_named, 'no runtime file names the site content types ' . implode( '; ', $iw_named ) );
 
 exit( $GLOBALS['iw_fail'] );

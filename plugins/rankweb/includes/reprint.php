@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'add_meta_boxes',
 	function () {
-		$screens = array( 'post', 'page', 'aw_press' );
+		$screens = rankweb_types_with( array( 'press' ), array( 'post', 'page' ) );
 		foreach ( $screens as $screen ) {
 			add_meta_box(
 				'rankweb_reprint_meta',

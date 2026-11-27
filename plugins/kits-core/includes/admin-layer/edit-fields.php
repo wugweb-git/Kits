@@ -1,7 +1,6 @@
 <?php
 /**
- * Edit fields for values that only WP-CLI could change before (moved from Animal Writes Core's edit-fields.php, 18 Nov
- * 2026; 12 Nov 2026). Core form tables and meta box markup, no custom CSS; each value keeps its key and stored shape,
+ * Edit fields for values that only WP-CLI could change before. Core form tables and meta box markup, no custom CSS; each value keeps its key and stored shape,
  * and a Save with no change writes nothing. The Library and Campaign types are the site's (kits_library_post_type,
  * kits_campaign_post_type); without them those two fields are not added.
  *

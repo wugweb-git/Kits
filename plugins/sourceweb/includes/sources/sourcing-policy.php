@@ -135,7 +135,7 @@ function sourceweb_relevance() {
 	return is_array( $r ) ? $r : array( 'enabled' => false, 'gnews_allow_only' => false, 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array() );
 }
 
-/** Seed once: the two blocks you asked for, the proposed allow list (inactive until the switch is on), the proposed keyword lists (filter off). */
+/** Seed once: empty relevance lists (filter off), and the publisher lists a site supplies through filters; the hosts already in the content are counted. */
 add_action(
 	'init',
 	function () {
@@ -144,10 +144,11 @@ add_action(
 		}
 		$now  = current_time( 'Y-m-d' );
 		$pubs = array();
-		foreach ( array( 'bollyspice.com', 'storyboard18.com' ) as $h ) {
+		// No publishers are blocked or allowed to start with; a site supplies its own starting lists with these filters.
+		foreach ( (array) apply_filters( 'sourceweb_default_blocked_publishers', array() ) as $h ) {
 			$pubs[ $h ] = array( 'status' => 'block', 'name' => '', 'count' => 0, 'first' => $now, 'last' => '' );
 		}
-		foreach ( array( 'thehindu.com', 'indianexpress.com', 'hindustantimes.com', 'timesofindia.indiatimes.com', 'ndtv.com', 'theprint.in', 'scroll.in', 'thewire.in', 'newindianexpress.com', 'deccanherald.com', 'indiatoday.in', 'news18.com', 'aninews.in', 'ptinews.com', 'wionews.com', 'mid-day.com', 'thenewsmill.com', 'kashmirobserver.net', 'downtoearth.org.in', 'news.mongabay.com', 'livelaw.in', 'barandbench.com', 'scobserver.in', 'pib.gov.in', 'awbi.gov.in', 'petaindia.com' ) as $h ) {
+		foreach ( (array) apply_filters( 'sourceweb_default_allowed_publishers', array() ) as $h ) {
 			$pubs[ $h ] = array( 'status' => 'allow', 'name' => '', 'count' => 0, 'first' => $now, 'last' => '' );
 		}
 		// Hosts already in the content, with their counts.
@@ -171,10 +172,10 @@ add_action(
 			array(
 				'enabled'          => false,
 				'gnews_allow_only' => false,
-				'strong'           => array( 'animal welfare', 'animal cruelty', 'cruelty to animals', 'stray dog', 'street dog', 'community dog', 'animal birth control', 'ABC Rules', 'PCA Act', 'Prevention of Cruelty', 'AWBI', 'Animal Welfare Board', 'gaushala', 'rabies', 'animal rescue', 'animal shelter', 'wildlife crime', 'poaching', 'पशु क्रूरता', 'रेबीज' ),
-				'animal'           => array( 'animal', 'animals', 'dog', 'dogs', 'cat', 'cats', 'cattle', 'cow', 'cows', 'bull', 'buffalo', 'horse', 'donkey', 'elephant', 'leopard', 'tiger', 'monkey', 'bird', 'birds', 'wildlife', 'livestock', 'पशु', 'जानवर', 'कुत्ता', 'गाय' ),
-				'context'          => array( 'court', 'judgment', 'rules', 'law', 'police', 'FIR', 'arrested', 'municipal', 'ministry', 'minister', 'policy', 'rescue', 'shelter', 'veterinary', 'vet', 'hospital', 'sterilisation', 'vaccination', 'feeding', 'attack', 'bite', 'cruelty', 'adoption', 'smuggling', 'slaughter', 'transport' ),
-				'exclude'          => array( 'party animal', 'bull market', 'bear market', 'cattle class', 'dog-whistle', 'top dog', 'underdog', 'celebrity pet', 'pet project', 'brand campaign', 'IPO', 'box office' ),
+				'strong'           => array(),
+				'animal'           => array(),
+				'context'          => array(),
+				'exclude'          => array(),
 			),
 			false
 		);

@@ -20,9 +20,6 @@
  *   their submit handlers were removed, so a missing form shows nothing to visitors and a short note to administrators.
  * - Emails: none since 21 Oct 2026 (owner): nothing is sent when a Fluent Forms form is submitted (kits_ff_mail_off).
  *
- * Moved from Animal Writes Core `includes/forms-fluentforms.php` (18 Nov 2026); options, meta keys, tags, hooks and
- * slugs are unchanged, and the old function names still work (back-compat wrappers).
- *
  * @package kits-core
  */
 
@@ -81,8 +78,8 @@ const KITS_FF_SOCIAL = array(
 	'l_linkedin'  => array( 'aw_linkedin', 'https://www.linkedin.com/company/%s' ),
 );
 
-/** Claim form dates: typed and shown in the site's format ("8 Oct 2026"), saved as Y-m-d. */
-const KITS_FF_DATES = array( 'l_reg_date', 'l_awbi_rec', 'l_awbi_ren', 'l_awbi_valid' );
+/** Claim form dates: typed and shown in the site's format ("8 Oct 2026"), saved as Y-m-d. The keys are the field names stored in existing Fluent Forms claim forms (registration date and the three accreditation dates), so they are not renamed. */
+const KITS_FF_DATES = array( 'l_reg_date' );
 
 /** An Indian number's 10 digits ('' when it is not one): +91, 91 or 0 before it, spaces and dashes allowed. */
 if ( ! function_exists( 'kits_ff_phone10' ) ) {
@@ -333,7 +330,7 @@ add_action(
 				private $cb;
 				public function __construct( $key, $title, $cb ) {
 					$this->cb = $cb;
-					parent::__construct( $key, $title, array( 'animal writes' ), 'advanced' );
+					parent::__construct( $key, $title, array( 'kits' ), 'advanced' );
 				}
 				public function pushFormInputType( $types ) {
 					return $types; // posts its own inputs (see KITS_FF_EXTRA); not an entry column of its own
@@ -574,14 +571,15 @@ function kits_ff_keep_upload( $token ) {
 	return rename( kits_private_dir() . '/' . $file, kits_private_dir() . '/' . $final ) ? $final : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- a rename inside our own private folder; WP_Filesystem::move() may need FTP credentials here.
 }
 
-/** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (AW-12, AW-C-3 …). */
+/** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (FF-12, FF-C-3 …). */
 function kits_ff_ref( $key, $entry_id ) {
-	$prefix = array( 'contact' => 'AW-', 'volunteer' => 'AW-V-', 'claim' => 'AW-C-', 'report' => 'AW-R-' );
+	/** Reference prefixes per form; a site changes them with kits_ff_ref_prefixes. */
+	$prefix = (array) apply_filters( 'kits_ff_ref_prefixes', array( 'contact' => 'FF-', 'volunteer' => 'FF-V-', 'claim' => 'FF-C-', 'report' => 'FF-R-' ) );
 	if ( ! class_exists( '\FluentForm\App\Models\Submission' ) ) {
 		return ''; // Fluent Forms is off: no serial number to give
 	}
 	$serial = (int) \FluentForm\App\Models\Submission::where( 'id', (int) $entry_id )->value( 'serial_number' );
-	return $serial ? ( $prefix[ $key ] ?? 'AW-' ) . $serial : '';
+	return $serial ? ( $prefix[ $key ] ?? 'FF-' ) . $serial : '';
 }
 
 /**
@@ -591,7 +589,7 @@ function kits_ff_ref( $key, $entry_id ) {
 function kits_ff_errors( $key, $data ) {
 	$errors = array();
 	if ( 'volunteer' === $key ) {
-		$errors = array_intersect_key( kits_volunteer_errors( kits_volunteer_values( $data ) ), array_flip( array( 'state', 'district', 'pincode' ) ) );
+		$errors = array_intersect_key( function_exists( 'kits_volunteer_errors' ) ? kits_volunteer_errors( kits_volunteer_values( $data ) ) : array(), array_flip( array( 'state', 'district', 'pincode' ) ) );
 	}
 	$lid  = 'claim' === $key ? absint( $data['listing'] ?? 0 ) : 0;
 	$have = $lid && function_exists( 'aw_listing_phones' ) ? array_map( fn( $r ) => preg_replace( '/\D+/', '', $r['number'] ), aw_listing_phones( $lid ) ) : array();
@@ -606,7 +604,7 @@ function kits_ff_errors( $key, $data ) {
 			$v = trim( (string) ( $data[ $k ] ?? '' ) );
 			$own = (bool) preg_match( '#^(?:https?://)?(?:[a-z]+\.)?' . KITS_FF_SOCIAL_HOSTS[ $k ][0] . '/#i', $v ); // a link of this platform the box cannot reduce (a channel, an /in/ profile) is kept
 			if ( '' !== $v && '' === kits_ff_social_user( $k, $v ) && ! $own ) {
-				$errors[ $k ] = 'Enter the username only, like animalwrites.';
+				$errors[ $k ] = 'Enter the username only, like yourname.';
 			}
 		}
 		foreach ( KITS_FF_DATES as $k ) {
@@ -696,7 +694,7 @@ add_action(
 	function () {
 		$file = basename( sanitize_file_name( wp_unslash( $_GET['f'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- administrators only, read only
 		$path = kits_private_dir() . '/' . $file;
-		if ( ! current_user_can( 'edit_aw_volunteers' ) || ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', $file ) || ! is_file( $path ) ) {
+		if ( ! current_user_can( (string) apply_filters( 'kits_ff_file_capability', 'manage_options' ) ) || ! preg_match( '/^[A-Za-z0-9]{20}\.png$/', $file ) || ! is_file( $path ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		nocache_headers();
@@ -817,5 +815,5 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 // shows unstyled (kits-core performance.php).
 add_filter(
 	'kits_page_has_form',
-	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page|volunteer_update|thank_you)|wp:animal-writes\/volunteer/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
+	fn( $has ) => $has || ( is_singular() && preg_match( '/\[aw_(contact_form|claim_page|report_page|volunteer_update|thank_you)/', (string) get_post_field( 'post_content', get_queried_object_id() ) ) )
 );

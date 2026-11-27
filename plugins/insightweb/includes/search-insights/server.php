@@ -212,9 +212,10 @@ function insightweb_si_srv_msg_html( string $msg ): string {
 	if ( ! preg_match( '#(wp-content/(plugins|themes)/([^/\s]+)/\S+?\.php)(?: on line |:)(\d+)#', $msg, $m ) ) {
 		return esc_html( $msg );
 	}
-	$own  = (array) apply_filters( 'aw_si_srv_repo_dirs', array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb', 'animal-writes', 'kits-by-wugweb' ) );
+	$own  = (array) apply_filters( 'aw_si_srv_repo_dirs', array() ); // folder names that have a public repository
+	$base = (string) apply_filters( 'aw_si_srv_repo_url', '' ); // e.g. https://github.com/owner/repo/blob/main/ (with the trailing slash)
 	$file = $m[1] . ':' . $m[4];
-	$link = in_array( $m[3], $own, true ) ? 'https://github.com/wugweb-git/animalwrites/blob/wordpress/' . substr( $m[1], strlen( 'wp-content/' ) ) . '#L' . $m[4] : '';
+	$link = '' !== $base && in_array( $m[3], $own, true ) ? $base . substr( $m[1], strlen( 'wp-content/' ) ) . '#L' . $m[4] : '';
 	return esc_html( $msg ) . ' (' . ( '' !== $link ? '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener">' . esc_html( $file ) . '</a>' : esc_html( $file ) ) . ')';
 }
 
@@ -415,7 +416,7 @@ add_action(
 		);
 		// 12 Nov 2026: Googlebot showed 2,099 requests in 30 days because cached hits never reach PHP. There is no access
 		// log on this host to read instead (only PHP error logs), so the table says what it leaves out.
-		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by the server\'s page cache (LiteSpeed) or the Hostinger CDN; those requests never reach PHP, so they are not counted here. hPanel shows the full traffic. Letting crawlers past the caches is step C of docs/cdn.md:', 'insightweb' ) . ' <a href="' . esc_url( 'https://github.com/wugweb-git/animalwrites/blob/wordpress/docs/cdn.md#c-let-ai-agents-and-crawlers-past-the-caches-3-nov-2026' ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'docs/cdn.md, C. Let AI agents and crawlers past the caches', 'insightweb' ) . '</a>.</p>';
+		echo '<p class="description">' . esc_html__( 'These are lower bounds. Most crawler hits are answered from a stored copy by a page cache or CDN in front of WordPress; those requests never reach PHP, so they are not counted here. Your host\'s own traffic report shows the full figure.', 'insightweb' ) . '</p>';
 		insightweb_si_srv_weeks_table( $days );
 
 		if ( function_exists( 'insightweb_si_vis_section' ) ) {

@@ -87,7 +87,7 @@ function kits_share_types() {
  * campaign's own script (window.awCampShare, campaign-tools.php) alike.
  *
  * Filter kits_share_args fills it in: 'text' (the share line: a campaign's share line, else the page's og:description;
- * the title when nothing fills it), 'hashtags' (#AnimalWrites first, then the campaign's own), 'image' (the page's
+ * the title when nothing fills it), 'hashtags' (the site's own tag first, then the campaign's own), 'image' (the page's
  * 1080x1080 share square on our own server, for the share sheet; never a third-party picture), 'url' (the address to
  * hand out in place of $url: a campaign's short link). 'post_id' names the post the share is for (0: the current view).
  *
@@ -96,14 +96,14 @@ function kits_share_types() {
  * @param string $campaign utm_campaign of the shared address (campaign slug, post type or 'term').
  * @param array  $args     See kits_share_html().
  * @return array{url:string,title:string,text:string,hashtags:string[],hash:string,message:string,image:string,campaign:string,args:array}
- *               'url' untagged (kits_share_tagged_url() tags it per network); 'hash' " #AnimalWrites #Tag";
+ *               'url' untagged (kits_share_tagged_url() tags it per network); 'hash' " #SiteTag #Tag";
  *               'message' the line with its hashtags.
  */
 function kits_share_payload( $url, $title, $campaign = '', $args = array() ) {
 	$args = (array) apply_filters( 'kits_share_args', array_merge( array( 'text' => '', 'hashtags' => array(), 'image' => '', 'url' => '', 'post_id' => 0, 'follow' => array(), 'button' => '', 'order' => false ), (array) $args ), $url, $campaign );
 	$text = '' !== trim( (string) $args['text'] ) ? trim( (string) $args['text'] ) : $title;
 	$tags = array_values( array_unique( array_filter( array_map( fn( $t ) => preg_replace( '/[^A-Za-z0-9_]/', '', (string) $t ), (array) $args['hashtags'] ), 'strlen' ) ) );
-	$hash = $tags ? ' ' . implode( ' ', array_map( fn( $t ) => '#' . $t, $tags ) ) : ''; // "#AnimalWrites #Tag" after the line
+	$hash = $tags ? ' ' . implode( ' ', array_map( fn( $t ) => '#' . $t, $tags ) ) : ''; // "#SiteTag #Tag" after the line
 	return array(
 		'url'      => '' !== (string) $args['url'] ? (string) $args['url'] : (string) $url,
 		'title'    => (string) $title,

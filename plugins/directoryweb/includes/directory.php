@@ -29,13 +29,40 @@ function directoryweb_dir_place( $slug ) {
 	return directoryweb_place_by_slug( $slug );
 }
 
-/** "Veterinary" is one filter for people; the listings keep their separate veterinary types. Bird Hospital is its own
- * choice (owner, 18 Oct 2026). */
-const AW_VET_TYPES = array( 'veterinary-hospital', 'veterinary-dispensary', 'veterinary-clinic', 'mobile-veterinary-unit', 'veterinary-office' );
+/**
+ * Listing types that people pick as one choice (a group), by group slug: array( 'slug' => array( 'name' => 'Label', 'types' => array( type slugs ) ) ).
+ * None by default; a site adds its own with the `directoryweb_type_groups` filter.
+ *
+ * @return array<string,array{name:string,types:string[]}>
+ */
+function directoryweb_type_groups() {
+	$groups = apply_filters( 'directoryweb_type_groups', array() );
+	return is_array( $groups ) ? $groups : array();
+}
 
-/** A listing-type slug from a URL or filter: a real type (a Directory tag that is not a service), or "veterinary". */
+/** The group a type slug belongs to (its group slug), or ''. */
+function directoryweb_type_group_of( $slug ) {
+	foreach ( directoryweb_type_groups() as $key => $g ) {
+		if ( in_array( $slug, (array) ( $g['types'] ?? array() ), true ) ) {
+			return (string) $key;
+		}
+	}
+	return '';
+}
+
+/** The group whose types, comma-joined, are this query value, or ''. */
+function directoryweb_type_group_by_query( $list ) {
+	foreach ( directoryweb_type_groups() as $key => $g ) {
+		if ( implode( ',', (array) ( $g['types'] ?? array() ) ) === $list ) {
+			return (string) $key;
+		}
+	}
+	return '';
+}
+
+/** A listing-type slug from a URL or filter: a real type (a Directory tag that is not a service), or a type group. */
 function directoryweb_listing_type_ok( $slug ) {
-	return 'veterinary' === $slug || in_array( $slug, directoryweb_listing_type_slugs(), true );
+	return isset( directoryweb_type_groups()[ $slug ] ) || in_array( $slug, directoryweb_listing_type_slugs(), true );
 }
 
 /** The ?tag= values on this request (tag=a,b or tag[]=a&tag[]=b). */
@@ -44,7 +71,7 @@ function directoryweb_request_tags() {
 	return array_values( array_unique( array_filter( array_map( 'sanitize_title', is_array( $raw ) ? $raw : explode( ',', (string) $raw ) ) ) ) );
 }
 
-/** The listing type chosen by ?tag= (the first one that is a type, or "veterinary"), or ''. */
+/** The listing type chosen by ?tag= (the first one that is a type or a type group), or ''. */
 function directoryweb_request_type() {
 	foreach ( directoryweb_request_tags() as $t ) {
 		if ( directoryweb_listing_type_ok( $t ) ) {
@@ -59,15 +86,17 @@ function directoryweb_request_services() {
 	return array_values( array_intersect( directoryweb_request_tags(), directoryweb_service_slugs() ) );
 }
 
-/** What to query for a type slug: the type itself, or every veterinary type. */
+/** What to query for a type slug: the type itself, or every type of its group. */
 function directoryweb_listing_type_query( $slug ) {
-	return 'veterinary' === $slug ? implode( ',', AW_VET_TYPES ) : $slug;
+	$groups = directoryweb_type_groups();
+	return isset( $groups[ $slug ] ) ? implode( ',', (array) $groups[ $slug ]['types'] ) : $slug;
 }
 
 /** Display name of a type slug. */
 function directoryweb_listing_type_name( $slug ) {
-	if ( 'veterinary' === $slug ) {
-		return 'Veterinary';
+	$groups = directoryweb_type_groups();
+	if ( isset( $groups[ $slug ] ) ) {
+		return (string) ( $groups[ $slug ]['name'] ?? '' );
 	}
 	$t = get_term_by( 'slug', $slug, 'post_tag' );
 	return $t ? $t->name : '';
@@ -79,7 +108,11 @@ function directoryweb_current_type_name() {
 	if ( '' === $slug ) {
 		$slug = directoryweb_request_type();
 	}
-	return false !== strpos( $slug, ',' ) ? 'Veterinary' : ( $slug ? directoryweb_listing_type_name( $slug ) : '' );
+	if ( false !== strpos( $slug, ',' ) ) {
+		$group = directoryweb_type_group_by_query( $slug );
+		return '' !== $group ? directoryweb_listing_type_name( $group ) : '';
+	}
+	return $slug ? directoryweb_listing_type_name( $slug ) : '';
 }
 
 /** Turn /directory/... into a listing query, or send older URL shapes to the new one. */
@@ -224,12 +257,9 @@ function directoryweb_is_directory_view() {
 }
 
 /**
- * H1 of the Directory view: "Directory"; "Animal NGOs and Helpline Numbers in Ernakulam" or "Animal Welfare NGOs and Helpline
- * Numbers in Kerala" where the place's title says so (a listing with a phone or an official number: filter
- * directoryweb_place_has_helpline, answered by RankWeb; 18 Nov 2026, option B), with the title's fallback "Animal Helpline
- * Numbers in …" where that form passes 60 characters; else "Animal NGOs in Ernakulam" or "Animal Welfare NGOs in Kerala";
- * "Animal Shelter Contact Numbers in Gandhinagar" where its listings have a number (filter directoryweb_place_h1, answered by RankWeb; owner, 5 Nov 2026),
- * else "Gaushala in Ernakulam" or the type.
+ * H1 of the Directory view: "Directory" (the page's title) with no place and no type; "{Type} in {place}" or "{Type}";
+ * "Listings in {place}". A site rewrites it with the `directoryweb_directory_h1` filter (title, place, type name).
+ * With a type, the filter `directoryweb_place_h1` (RankWeb) may answer a "… Contact Numbers in {place}" title.
  */
 function directoryweb_directory_h1() {
 	$city  = directoryweb_current_place();
@@ -240,16 +270,15 @@ function directoryweb_directory_h1() {
 	if ( $tname ) {
 		$numbers = $city ? (string) apply_filters( 'directoryweb_place_h1', '' ) : ''; // RankWeb answers: "… Contact Numbers in {place}" where listings have a number
 		if ( '' !== $numbers ) {
-			return $numbers;
+			$h1 = $numbers;
+		} else {
+			$h1 = $city ? $tname . ' in ' . $city->name : $tname;
 		}
-		return $city ? $tname . ' in ' . $city->name : $tname;
+	} else {
+		/* translators: %s: place name. */
+		$h1 = sprintf( __( 'Listings in %s', 'directoryweb' ), $city->name );
 	}
-	if ( apply_filters( 'directoryweb_place_has_helpline', false, $city ) ) { // RankWeb answers
-		// Same fallback as the page-1 title (rankweb_seo_fit, 60): "Animal Helpline Numbers in …" where the NGO form is too long.
-		$ngo = $city->parent ? 'Animal NGOs and Helpline Numbers in ' : 'Animal Welfare NGOs and Helpline Numbers in ';
-		return ( mb_strlen( $ngo . $city->name ) <= 60 ? $ngo : 'Animal Helpline Numbers in ' ) . $city->name;
-	}
-	return ( $city->parent ? 'Animal NGOs in ' : 'Animal Welfare NGOs in ' ) . $city->name;
+	return (string) apply_filters( 'directoryweb_directory_h1', $h1, $city, $tname );
 }
 
 // The Directory Page's H1 and intro follow the place and type.
@@ -270,7 +299,8 @@ add_filter(
 		if ( ! directoryweb_is_directory_view() || false === strpos( $html, 'kit-section-desc' ) || ! directoryweb_current_place() ) {
 			return $html;
 		}
-		$html = preg_replace( '#(<p[^>]*kit-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( directoryweb_directory_intro() ) . '$3', $html, 1 );
+		$intro = directoryweb_directory_intro();
+		$html  = '' !== $intro ? preg_replace( '#(<p[^>]*kit-section-desc[^>]*>)(.*?)(</p>)#s', '$1' . esc_html( $intro ) . '$3', $html, 1 ) : $html;
 		return function_exists( 'directoryweb_place_intro_html' ) ? $html . directoryweb_place_intro_html() : $html; // the place's own intro, when it has one (place-intros.php)
 	}
 );
@@ -309,7 +339,7 @@ function directoryweb_directory_title( $title ) {
 	}
 	if ( $city ) {
 		/* translators: %s: city. */
-		return sprintf( __( 'Animal welfare directory: %s', 'directoryweb' ), $city->name );
+		return (string) apply_filters( 'directoryweb_archive_place_title', sprintf( __( 'Directory: %s', 'directoryweb' ), $city->name ), $city );
 	}
 	if ( $tname ) {
 		return $tname;
@@ -368,23 +398,15 @@ add_action(
 				$g[ $k ] = is_array( $g[ $k ] ) ? (string) current( array_filter( $g[ $k ], 'is_string' ) ? array_filter( $g[ $k ], 'is_string' ) : array( '' ) ) : '';
 			}
 		}
-		// A 6-digit PIN code in the search box opens that PIN's district (or state) list; when India Post does not know
-		// the PIN, the district of the listings that store it (or the nearest PIN prefix) is used.
-		$pin = preg_replace( '/\s/', '', (string) ( $g['q'] ?? '' ) );
-		if ( preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
-			$r = directoryweb_pin_lookup( $pin );
-			if ( ! is_array( $r ) || empty( $r['district_slug'] ) ) {
-				$near = directoryweb_pin_nearest_district( $pin );
-				if ( $near ) {
-					$r = array( 'state_slug' => directoryweb_place_parent_state( $near )->slug, 'district_slug' => $near->slug );
-				}
-			}
-			if ( is_array( $r ) ) {
-				$g['state']     = $r['state_slug'];
-				$g['district']  = $r['district_slug'];
-				$g['q']         = '';
-				$g['aw_filter'] = 1;
-			}
+		// A postal code in the search box can open that code's district (or state) list: a site that knows its postal codes
+		// answers the `directoryweb_search_place_from_code` filter with array( 'state_slug' => ..., 'district_slug' => ... ).
+		$code  = preg_replace( '/\s/', '', (string) ( $g['q'] ?? '' ) );
+		$found = '' !== $code ? apply_filters( 'directoryweb_search_place_from_code', null, $code ) : null;
+		if ( is_array( $found ) ) {
+			$g['state']     = $found['state_slug'];
+			$g['district']  = $found['district_slug'];
+			$g['q']         = '';
+			$g['aw_filter'] = 1;
 		} elseif ( '' === sanitize_title( $g['state'] ?? '' ) && '' === sanitize_title( $g['district'] ?? '' ) ) {
 			// A name typed another way ("bluecross", "blue-cross") is searched as the name the listings carry.
 			$alias = directoryweb_search_name_alias( (string) ( $g['q'] ?? '' ) );
@@ -476,34 +498,6 @@ function directoryweb_search_place( $text ) {
 	return $d ? $d : directoryweb_place_state_by_name( $text );
 }
 
-/**
- * The district most of the published listings with a PIN code store: the exact PIN first, then the PINs that share
- * its first three digits (India Post's sorting district). Null when no listing stores such a PIN.
- *
- * @param string $pin 6-digit PIN code.
- * @return object|null
- */
-function directoryweb_pin_nearest_district( $pin ) {
-	global $wpdb;
-	$pin = preg_replace( '/\D/', '', (string) $pin );
-	if ( 6 !== strlen( $pin ) ) {
-		return null;
-	}
-	foreach ( array( $pin, substr( $pin, 0, 3 ) . '___' ) as $like ) {
-		$code = $wpdb->get_var( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			$wpdb->prepare(
-				"SELECT d.meta_value FROM {$wpdb->postmeta} pc JOIN {$wpdb->posts} p ON p.ID = pc.post_id AND p.post_type = 'aw_listing' AND p.post_status = 'publish' JOIN {$wpdb->postmeta} d ON d.post_id = p.ID AND d.meta_key = 'aw_district_code' WHERE pc.meta_key = 'aw_pincode' AND pc.meta_value LIKE %s GROUP BY d.meta_value ORDER BY COUNT(*) DESC LIMIT 1",
-				$like
-			)
-		);
-		$d    = $code ? directoryweb_place_district( (int) $code ) : null;
-		if ( $d ) {
-			return $d;
-		}
-	}
-	return null;
-}
-
 /** Published listings shown to visitors (preview-only ones, such as the sample listing, left out). */
 function directoryweb_listing_public_count() {
 	$hidden = function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array();
@@ -575,8 +569,8 @@ function directoryweb_dir_search_controls( $args ) {
 			'prefix'      => 'aw-dir',
 			'cls'         => 'aw-dir-',
 			'show_labels' => true,
-			'q_label'     => 'Name or PIN code',
-			'placeholder' => 'Search by name or PIN code',
+			'q_label'     => (string) apply_filters( 'directoryweb_search_label', 'Name' ),
+			'placeholder' => (string) apply_filters( 'directoryweb_search_placeholder', 'Search by name' ),
 			'state_label' => 'State',
 			'q'           => '',
 			'state'       => '',
@@ -637,19 +631,20 @@ function directoryweb_directory_filter( $type = '' ) {
 			$d_opts .= '</optgroup>';
 		}
 	}
-	// Types that have listings, with counts; the veterinary types are one "Veterinary" choice (cached transient).
+	// Types that have listings, with counts; a type group is one choice (cached transient).
 	$opts = get_transient( 'directoryweb_facet_types' );
 	if ( false === $opts || ! is_array( $opts ) ) {
 		$opts = array();
 		foreach ( get_terms( array( 'taxonomy' => 'post_tag', 'slug' => directoryweb_listing_type_slugs(), 'hide_empty' => true, 'orderby' => 'name' ) ) as $t ) {
-			$key             = in_array( $t->slug, AW_VET_TYPES, true ) ? 'veterinary' : $t->slug;
-			$opts[ $key ][0] = 'veterinary' === $key ? 'Veterinary' : $t->name;
+			$key             = directoryweb_type_group_of( $t->slug );
+			$key             = '' !== $key ? $key : $t->slug;
+			$opts[ $key ][0] = isset( directoryweb_type_groups()[ $key ] ) ? directoryweb_listing_type_name( $key ) : $t->name;
 			$opts[ $key ][1] = ( $opts[ $key ][1] ?? 0 ) + (int) $t->count;
 		}
 		uasort( $opts, fn( $a, $b ) => strcmp( $a[0], $b[0] ) );
 		set_transient( 'directoryweb_facet_types', $opts, 12 * HOUR_IN_SECONDS );
 	}
-	$cur_type = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : ( false !== strpos( $cur_type, ',' ) ? 'veterinary' : $cur_type ) );
+	$cur_type = (string) ( get_query_var( 'aw_type_slug' ) ? get_query_var( 'aw_type_slug' ) : ( false !== strpos( $cur_type, ',' ) ? ( directoryweb_type_group_by_query( $cur_type ) ?: $cur_type ) : $cur_type ) );
 	$t_opts   = '<option value="">All types</option>';
 	foreach ( $opts as $slug => $o ) {
 		$t_opts .= '<option value="' . esc_attr( $slug ) . '"' . selected( $cur_type, $slug, false ) . '>' . esc_html( $o[0] . ' (' . number_format_i18n( $o[1] ) . ')' ) . '</option>';
@@ -795,22 +790,14 @@ function directoryweb_state_count( $state ) {
 
 
 /**
- * The Directory's intro line for the current view: hub, "… in {State}." or "… in {District}, {State}." (copy of 8 Oct 2026).
- * On place pages the meta and share description come from rankweb_seo_dir_description() (RankWeb), not from this line.
+ * The Directory's intro line for the current view. Empty by default (the page keeps its own text); a site gives one with the
+ * `directoryweb_directory_intro` filter (line, place: null for the hub).
  */
 function directoryweb_directory_intro() {
-	$city = directoryweb_current_place();
-	if ( ! $city ) {
-		return 'Animal welfare organisations, Gaushalas and government vets across India.';
-	}
-	if ( $city->parent ) {
-		$state = directoryweb_place_parent_state( $city );
-		return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %1$s, %2$s, with phone numbers where they have one.', $city->name, $state->name );
-	}
-	return sprintf( 'Animal NGOs, shelters, Gaushalas and government vets in %s, with phone numbers where they have one.', $city->name );
+	return (string) apply_filters( 'directoryweb_directory_intro', '', directoryweb_current_place() );
 }
 
-// A–Z with names that start with a digit last (owner, 12 Oct 2026: the 1962 units were filling the top of the Directory).
+// A–Z with names that start with a digit last (names such as "112 helpline" otherwise fill the top of the Directory).
 add_filter(
 	'posts_orderby',
 	function ( $orderby, $q ) {

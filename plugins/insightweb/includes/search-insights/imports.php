@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function insightweb_si_import_kinds(): array {
 	$kinds = array(
 		'kp'     => __( 'Keyword Planner (CSV export: Keyword, Avg. monthly searches)', 'insightweb' ),
-		'trends' => __( 'Google Trends averages (paste: keyword, value; "animal welfare" = 100)', 'insightweb' ),
+		'trends' => __( 'Google Trends averages (paste: keyword, value; the anchor topic = 100)', 'insightweb' ),
 		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'insightweb' ),
 	);
 	return (array) apply_filters( 'aw_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.

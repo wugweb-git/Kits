@@ -109,7 +109,7 @@ function kits_admin_tabs( string $current ): void {
 
 /**
  * The icon of a Kits product as a data: address, or '' when it has none. Read from disk, so it shows however the
- * plugin is loaded (Animal Writes Core loads SourceWeb from outside wp-content/plugins, where it has no web address).
+ * plugin is loaded (a site layer may load a plugin from outside wp-content/plugins, where it has no web address).
  * The Kits theme keeps the suite's icon in assets/images/kits-icon.svg; each plugin keeps its own in assets/icon.svg
  * (docs/brand/plugin-icons/README.md).
  *

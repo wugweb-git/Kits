@@ -22,6 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once dirname( __DIR__ ) . '/compat/post-type-roles.php'; // which post type plays which role (the site says, through a filter)
+
 /** The old lists and the role each gives: list key => [role bit, where it lives, label]. */
 const AW_KW_LISTS = array(
 	'strong'  => array( SOURCEWEB_KW_ROLE_INCLUDE, 'sourceweb_relevance.strong', 'Include' ),
@@ -290,8 +292,8 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 		$recs[ $n ]['feed_id']   = $id;
 		$recs[ $n ]['query']     = (string) $src['url'];
 		$recs[ $n ]['search_on'] = array_key_exists( 'on', (array) $src ) && empty( $src['on'] ) ? 0 : 1; // a search the owner switched off stays off (Codex)
-		$section               = 'press' === ( $src['file_as'] ?? '' ) ? 'aw_press' : ( 'legal' === ( $src['type'] ?? '' ) ? 'aw_legal' : 'aw_news' );
-		if ( ! in_array( $section, $recs[ $n ]['sections'], true ) ) {
+		$section               = sourceweb_type( 'press' === ( $src['file_as'] ?? '' ) ? 'press' : ( 'legal' === ( $src['type'] ?? '' ) ? 'library' : 'news' ) );
+		if ( '' !== $section && ! in_array( $section, $recs[ $n ]['sections'], true ) ) {
 			$recs[ $n ]['sections'][] = $section;
 		}
 		$searches[ $id ] = $n;
@@ -301,8 +303,8 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 		$put( $n, 'search', count( $searches ), $t, SOURCEWEB_KW_ROLE_SEARCH );
 		$recs[ $n ]['feed_id'] = sourceweb_kw_feed_id( $t );
 		$recs[ $n ]['query']   = $t;
-		if ( ! in_array( 'aw_news', $recs[ $n ]['sections'], true ) ) {
-			$recs[ $n ]['sections'][] = 'aw_news';
+		if ( '' !== sourceweb_type( 'news' ) && ! in_array( sourceweb_type( 'news' ), $recs[ $n ]['sections'], true ) ) {
+			$recs[ $n ]['sections'][] = sourceweb_type( 'news' );
 		}
 		$searches[ sourceweb_kw_feed_id( $t ) ] = $n;
 	}
@@ -354,8 +356,8 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 			}
 		}
 		$r['variants'] = insightweb_kw_variants_list( $r['variants'] );
-		if ( ( $r['roles'] & SOURCEWEB_KW_ROLE_INCLUDE ) && ! in_array( 'aw_news', $r['sections'], true ) ) {
-			$r['sections'][] = 'aw_news'; // a keyword search files items as News, as every keyword search does today
+		if ( ( $r['roles'] & SOURCEWEB_KW_ROLE_INCLUDE ) && '' !== sourceweb_type( 'news' ) && ! in_array( sourceweb_type( 'news' ), $r['sections'], true ) ) {
+			$r['sections'][] = sourceweb_type( 'news' ); // a keyword search files items as News, as every keyword search does today
 		}
 		if ( in_array( $n, $dis, true ) ) {
 			$r['dismissed'] = 1;

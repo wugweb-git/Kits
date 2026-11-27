@@ -13,7 +13,9 @@ define( 'DIRECTORYWEB_CAP', 'manage_directoryweb' );
 define( 'HOUR_IN_SECONDS', 3600 );
 
 const DIRECTORYWEB_CLAIM_ROLES      = array( '' => 'Choose one', 'founder' => 'Founder', 'staff' => 'Staff', 'volunteer' => 'Volunteer', 'other' => 'Other' );
-const DIRECTORYWEB_SERVICES = array( 'adoption' => 'Adoption', 'rescue' => 'Rescue', 'vet' => 'Vet care' );
+function directoryweb_services() {
+	return array( 'adoption' => 'Adoption', 'rescue' => 'Rescue', 'vet' => 'Vet care' );
+}
 
 class WP_Error {
 	public $code; public $message; public $data;

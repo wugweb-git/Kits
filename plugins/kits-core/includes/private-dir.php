@@ -1,7 +1,7 @@
 <?php
 /**
  * The private upload folder: uploads/aw-private, blocked from the web. Claim logos wait here between the form and the
- * review (forms/fluentforms.php, DirectoryWeb claims). Moved from Animal Writes Core's campaigns.php (aw_private_dir()),
+ * review (forms/fluentforms.php, DirectoryWeb claims). Formerly aw_private_dir(),
  * which is being retired; the folder name stays, so nothing already in it moves.
  *
  * @package kits-core

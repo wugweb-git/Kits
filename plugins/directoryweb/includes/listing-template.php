@@ -4,7 +4,7 @@
  * (breadcrumb, meta row, Sources, Share, ad slots, More) and these groups, each printed only when it has data:
  *
  *   animal-writes/listing-about          logo (featured image) left, the description right; no logo: full width
- *   animal-writes/listing-registrations  AWBI, registration, 12A, 80G, FCRA, NGO Darpan: number, valid until / expired
+ *   animal-writes/listing-registrations  the registration number, and any rows a site adds (`directoryweb_listing_registration_rows`)
  *   animal-writes/listing-contact        Call, WhatsApp, Email, Website, Directions; other numbers
  *   animal-writes/listing-location       address, district, opening hours
  *   animal-writes/listing-services       services, animals helped, areas served, languages
@@ -14,7 +14,7 @@
  *   animal-writes/listing-photos         the organisation's own photos (never stock or CC images)
  *
  * Rows are "Label: value" (definition lists). Critical details the listing lacks (phone, email, website, address, opening
- * hours, services, registration, AWBI number) are never hidden: "Data not yet available" with a link to suggest an update. Separators between parts of a value are CSS, never typed. Expiry is
+ * hours, services, registration) are never hidden: "Data not yet available" with a link to suggest an update. Separators between parts of a value are CSS, never typed. Expiry is
  * worked out at render time from today's date in India, not stored. docs/listing-template.md (not in this repo) describes each block.
  *
  * @package directoryweb
@@ -76,7 +76,7 @@ function directoryweb_listing_parts( $parts ) {
 /**
  * A critical detail the listing does not have yet (owner, 20 Oct 2026: never hide it): "Data not yet available" and a
  * link to suggest an update (the Report form). Used for phone, email, website, address, opening hours, services,
- * registration and the AWBI number.
+ * registration.
  */
 function directoryweb_listing_na( $id, $field = '' ) {
 	return '<span class="aw-facts-na">' . esc_html__( 'Data not yet available', 'directoryweb' ) . '</span>'
@@ -99,8 +99,8 @@ function directoryweb_listing_validity( $date ) {
 
 /**
  * The body is only the line a directory import wrote (tools/directory/build_*.py, awo_held.py): one paragraph saying
- * which list the organisation is in ("… It is listed in <list>.") or that AWBI recognises it ("Recognised by the Animal
- * Welfare Board of India (AWBI code …"). The Sources block says the same, so an enriched description replaces it.
+ * which list the organisation is in ("… It is listed in <list>."). A site adds its own import lines with the
+ * `directoryweb_listing_template_intro_prefixes` filter. The Sources block says the same, so an enriched description replaces it.
  *
  * @param string $body Post content.
  * @return bool
@@ -110,7 +110,23 @@ function directoryweb_listing_is_template_intro( $body ) {
 		return false;
 	}
 	$t = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( $body ) ) );
-	return '' !== $t && ( false !== strpos( $t, '. It is listed in ' ) || 0 === strpos( $t, 'Recognised by the Animal Welfare Board of India (AWBI code' ) );
+	if ( '' === $t ) {
+		return false;
+	}
+	if ( false !== strpos( $t, '. It is listed in ' ) ) {
+		return true;
+	}
+	/**
+	 * Filters the opening words of an import's one-line intro that count as a template intro.
+	 *
+	 * @param string[] $prefixes Opening words.
+	 */
+	foreach ( (array) apply_filters( 'directoryweb_listing_template_intro_prefixes', array() ) as $prefix ) {
+		if ( '' !== (string) $prefix && 0 === strpos( $t, (string) $prefix ) ) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function directoryweb_block_listing_about( $a, $id ) {
@@ -138,20 +154,22 @@ function directoryweb_listing_issuer_icon( $slug, $id, $fallback ) {
 
 function directoryweb_block_listing_registrations( $a, $id ) {
 	if ( ! directoryweb_listing_here( $id ) ) {
-		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Registrations: ' . implode( ', ', array( directoryweb_label( 'awbi_number' ), 'registration', directoryweb_label( 'tax_12a' ), directoryweb_label( 'tax_80g' ), directoryweb_label( 'foreign_funding' ), directoryweb_label( 'registry_id' ) ) ) ) : '';
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Registrations: registration' ) : '';
 	}
-	$awbi = directoryweb_lf( $id, 'aw_awbi_code' );
-	$drop = directoryweb_lf( $id, 'aw_awbi_dropped' );
 	$type = directoryweb_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( directoryweb_label( 'awbi_number' ), $awbi ? directoryweb_listing_parts( array( esc_html( $awbi ), directoryweb_listing_validity( directoryweb_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html( directoryweb_label( 'awbi_not_on_list' ) ) . ' ' . directoryweb_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : directoryweb_listing_na( $id ) , directoryweb_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'directoryweb' ), $type ) : __( 'Registration', 'directoryweb' ), directoryweb_lf( $id, 'aw_registration' ) ? esc_html( directoryweb_lf( $id, 'aw_registration' ) ) : directoryweb_listing_na( $id ), 'file' ),
-		array( directoryweb_label( 'tax_12a' ), esc_html( directoryweb_lf( $id, 'aw_reg_12a' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
-		array( directoryweb_label( 'tax_80g' ), esc_html( directoryweb_lf( $id, 'aw_reg_80g' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
-		array( directoryweb_label( 'foreign_funding' ), esc_html( directoryweb_lf( $id, 'aw_fcra' ) ), directoryweb_listing_issuer_icon( 'mha', $id, 'legal' ) ),
-		array( directoryweb_label( 'registry_id' ), esc_html( directoryweb_lf( $id, 'aw_darpan_id' ) ), directoryweb_listing_issuer_icon( 'darpan', $id, 'legal' ) ),
 	);
+	/**
+	 * Filters the rows of the Registrations group: each [ label, value HTML (already escaped; '' hides the row), icon slug or
+	 * logo HTML ]. A site adds its own accreditation and registry rows, using directoryweb_lf(), directoryweb_listing_parts(),
+	 * directoryweb_listing_validity() and directoryweb_listing_na(). The plugin has the one registration row.
+	 *
+	 * @param array $rows Rows.
+	 * @param int   $id   Listing ID.
+	 */
+	$rows = (array) apply_filters( 'directoryweb_listing_registration_rows', $rows, $id );
 	return directoryweb_listing_group( 'registrations', __( 'Registrations', 'directoryweb' ), directoryweb_listing_dl( $rows ) );
 }
 
@@ -256,37 +274,24 @@ function directoryweb_block_listing_services( $a, $id ) {
 }
 
 /**
- * Services implied by a listing's type (owner, 20 Oct 2026; Notion "Page templates: items and listings" §3): shown,
- * marked "Based on type", only when the listing states no services. Type slug => service tag slugs.
+ * Services implied by a listing's type: shown, marked "Based on type", only when the listing states no services.
+ * Type slug => service tag slugs. None by default; a site gives them with the `directoryweb_type_services` filter.
+ *
+ * @return array<string,string[]>
  */
-const AW_TYPE_SERVICES = array(
-	'animal-welfare-organisation' => array( 'animal-welfare' ),
-	'animal-shelter'              => array( 'shelter' ),
-	'rescue-group'                => array( 'rescue' ),
-	'emergency-rescue'            => array( 'emergency-rescue' ),
-	'animal-ambulance'            => array( 'ambulance' ),
-	'abc-centre'                  => array( 'sterilisation' ),
-	'gaushala'                    => array( 'cattle-care', 'shelter' ),
-	'sanctuary'                   => array( 'shelter' ),
-	'wildlife-rescue'             => array( 'wildlife-rescue' ),
-	'bird-hospital'               => array( 'bird-treatment' ),
-	'veterinary-hospital'         => array( 'treatment', 'vaccination', 'sterilisation' ),
-	'veterinary-dispensary'       => array( 'treatment', 'vaccination' ),
-	'veterinary-clinic'           => array( 'treatment', 'vaccination' ),
-	'veterinary-office'           => array( 'vaccination' ),
-	'mobile-veterinary-unit'      => array( 'treatment', 'ambulance' ),
-	'legal-aid'                   => array( 'legal-help' ),
-	'adoption-network'            => array( 'adoption' ),
-	'feeder-network'              => array( 'feeding' ),
-);
+function directoryweb_type_services_map(): array {
+	$map = apply_filters( 'directoryweb_type_services', array() );
+	return is_array( $map ) ? $map : array();
+}
 
 /** The service names a listing's types imply, combined and without repeats, in the tags' current names. */
 function directoryweb_listing_type_services( $id ) {
 	$out = array();
+	$map = directoryweb_type_services_map();
 	foreach ( directoryweb_listing_types( $id ) as $t ) {
-		foreach ( AW_TYPE_SERVICES[ $t->slug ] ?? array() as $svc ) {
+		foreach ( $map[ $t->slug ] ?? array() as $svc ) {
 			$term         = get_term_by( 'slug', $svc, 'post_tag' );
-			$out[ $svc ] = $term ? $term->name : ( DIRECTORYWEB_SERVICES[ $svc ] ?? $svc );
+			$out[ $svc ] = $term ? $term->name : ( directoryweb_services()[ $svc ] ?? $svc );
 		}
 	}
 	return array_values( $out );
@@ -300,7 +305,7 @@ function directoryweb_block_listing_organisation( $a, $id ) {
 	}
 	$rows = array(
 		array( __( 'Established', 'directoryweb' ), esc_html( directoryweb_lf( $id, 'aw_founded' ) ), 'calendar' ),
-		array( __( 'Incorporated', 'directoryweb' ), directoryweb_lf( $id, 'aw_reg_date' ) && strtotime( directoryweb_lf( $id, 'aw_reg_date' ) ) ? directoryweb_date( directoryweb_lf( $id, 'aw_reg_date' ), null, 'aw-date' ) : '', 'legal' ), // the registration date as NGO Darpan lists it (owner, 20 Oct 2026)
+		array( __( 'Incorporated', 'directoryweb' ), directoryweb_lf( $id, 'aw_reg_date' ) && strtotime( directoryweb_lf( $id, 'aw_reg_date' ) ) ? directoryweb_date( directoryweb_lf( $id, 'aw_reg_date' ), null, 'aw-date' ) : '', 'legal' ), // the registration date (owner, 20 Oct 2026)
 		array( __( 'Head of the organisation', 'directoryweb' ), esc_html( directoryweb_lf( $id, 'aw_head' ) ), 'user' ),
 	);
 	return directoryweb_listing_group( 'organisation', __( 'Organisation', 'directoryweb' ), directoryweb_listing_dl( $rows ) );

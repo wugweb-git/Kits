@@ -31,6 +31,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 function wp_strip_all_tags( $s ) {
 	return trim( strip_tags( (string) preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s ) ) );
 }
+/**
+ * The site layer's role map (sites/animalwrites/sourceweb/site.php), the one filter the plugin asks: SourceWeb names no
+ * site's post types, so the tests that run its models on Animal Writes data register the same map.
+ *
+ * @param string $tag   Filter name.
+ * @param mixed  $value Value.
+ */
+function apply_filters( $tag, $value = null ) {
+	if ( 'sourceweb_post_type_roles' === $tag ) {
+		return $GLOBALS['sw_test_roles'] ?? array(
+			'news'        => 'aw_news',
+			'library'     => 'aw_legal',
+			'campaign'    => 'aw_campaign',
+			'opportunity' => 'aw_opportunity',
+			'listing'     => 'aw_listing',
+			'press'       => 'aw_press',
+			'social'      => 'aw_social',
+		);
+	}
+	return $value;
+}
 require dirname( __DIR__, 2 ) . '/insightweb/includes/keyword-model.php';
 require dirname( __DIR__ ) . '/includes/sources/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords/keywords-model.php';
@@ -361,13 +382,9 @@ aw_t( 1 === count( sourceweb_kw_searches( $kw_rec, array() ) ), 'migrated spelli
 
 // The old role sync pauses while a phase 2 migration runs or is unfinished (Codex, #75).
 $si_kw = (string) file_get_contents( dirname( __DIR__, 2 ) . '/insightweb/includes/search-insights/keywords.php' );
-$p2_mg = (string) file_get_contents( dirname( __DIR__ ) . '/includes/lifecycle/sourcing-migrate-phase2.php' );
 aw_t( false !== strpos( $si_kw, "get_option( 'aw_sourcing_migrating' )" ) && false !== strpos( $si_kw, "get_option( 'aw_sourcing_phase2_record' )" ), 'role sync checks the migration flag and record' );
-aw_t( substr_count( $p2_mg, "'aw_sourcing_migrating'" ) >= 3, 'migration sets the flag and clears it when done or rolled back' );
 
 // Interrupted runs can roll back: the undo record is saved before rows change; switched-off searches stay off (Codex, #75).
-$p2_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/lifecycle/sourcing-migrate-phase2.php' );
-aw_t( substr_count( $p2_src, '$save();' ) >= 5, 'phase 2 saves its undo record before each change' );
 $kwm_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/keywords/keywords-model.php' );
 aw_t( false !== strpos( $kwm_src, "['search_on'] = array_key_exists( 'on'" ), 'a switched-off open-web search keeps search_on 0' );
 
@@ -437,18 +454,6 @@ aw_t( '' === sourceweb_src_pib_prid( 'https://example.com/PressReleasePage.aspx?
 aw_t( '' === sourceweb_src_pib_prid( 'https://notpib.gov.in/x?PRID=2320896' ), 'a look-alike host gives no PRID' );
 aw_t( '' === sourceweb_src_pib_prid( 'https://www.pib.gov.in/allRel.aspx' ), 'a PIB page without PRID gives none' );
 aw_t( '' === sourceweb_src_pib_prid( 'https://www.pib.gov.in/x.aspx?PRID=12a' ), 'a PRID that is not a number gives none' );
-
-// ---- one page per keyphrase (aw-seo-extras keyphrase-model.php) ----
-require file_exists( dirname( __DIR__, 2 ) . '/rankweb/includes/keyphrase-model.php' ) ? dirname( __DIR__, 2 ) . '/rankweb/includes/keyphrase-model.php' : dirname( __DIR__, 2 ) . '/aw-seo-extras/includes/keyphrase-model.php';
-aw_t( '' === aw_seo_kp_refusal( 'aw_news', array() ), 'a keyphrase nobody has is allowed' );
-aw_t( 0 === strpos( aw_seo_kp_refusal( 'aw_news', array( array( 'type' => 'post', 'id' => 7 ) ) ), 'an evergreen page owns' ), 'News never takes a phrase a guide owns' );
-aw_t( false !== strpos( aw_seo_kp_refusal( 'aw_news', array( array( 'type' => 'aw_news', 'id' => 3 ), array( 'type' => 'aw_legal', 'id' => 9 ) ) ), 'aw_legal 9' ), 'the reason names the evergreen owner before a News item' );
-aw_t( 0 === strpos( aw_seo_kp_refusal( 'post', array( array( 'type' => 'aw_news', 'id' => 3 ) ) ), 'another page owns' ), 'a guide is refused a phrase a News item has' );
-aw_t( '' === aw_seo_kp_refusal( 'post', array( array( 'type' => 'post', 'id' => 0 ) ) ), 'an owner without an ID is ignored' );
-$kp = aw_seo_kp_replay( array( array( 'type' => 'aw_news', 'id' => 1, 'date' => '2026-01-01' ), array( 'type' => 'post', 'id' => 2, 'date' => '2026-05-01' ), array( 'type' => 'aw_news', 'id' => 3, 'date' => '2026-02-01' ) ) );
-aw_t( 2 === $kp['keep']['id'] && 2 === count( $kp['refused'] ), 'the replay keeps the guide over older News items' );
-$kp = aw_seo_kp_replay( array( array( 'type' => 'aw_news', 'id' => 5, 'date' => '2026-03-01' ), array( 'type' => 'aw_news', 'id' => 4, 'date' => '2026-02-01' ) ) );
-aw_t( 4 === $kp['keep']['id'] && 5 === $kp['refused'][0]['id'], 'between News items the oldest keeps it' );
 
 require __DIR__ . '/rules-tests.php'; // phase 3 (Rules)
 require __DIR__ . '/retire-tests.php'; // phase 4 (Retire)
@@ -626,6 +631,31 @@ $q_good = sourceweb_evaluate_source_quality( array( 'fetched' => 20, 'accepted' 
 $q_bad  = sourceweb_evaluate_source_quality( array( 'fetched' => 20, 'accepted' => 1, 'duplicates' => 12, 'rejected' => 14, 'errors' => 3 ) );
 aw_t( true === $q_good['passes'] && 'healthy' === $q_good['grade'], 'source quality: healthy feed passes threshold' );
 aw_t( false === $q_bad['passes'] && 'poor' === $q_bad['grade'] && ! empty( $q_bad['reasons'] ), 'source quality: poor feed fails with reasons' );
+
+// ---- post type roles (includes/compat/post-type-roles.php): the site names its types, the plugin asks by role ----
+aw_t( 'aw_news' === sourceweb_type( 'news' ) && 'aw_legal' === sourceweb_type( 'library' ) && '' === sourceweb_type( 'nonsense' ), 'roles: a role gives the site\'s type, an unknown role gives \'\'' );
+aw_t( sourceweb_is_type( 'aw_legal', 'library' ) && ! sourceweb_is_type( 'aw_news', 'library' ), 'roles: sourceweb_is_type matches only the role\'s own type' );
+aw_t( array( 'aw_news', 'aw_legal', 'post' ) === sourceweb_types_with( array( 'news', 'library', 'news' ), array( 'post' ) ), 'roles: types are de-duplicated, with plain types after' );
+aw_t( "p.post_type IN ('aw_news','aw_legal')" === sourceweb_sql_in_types( 'p.post_type', sourceweb_types( array( 'news', 'library' ) ) ), 'roles: the SQL list is quoted' );
+aw_t( array( 'aw_news' => 'news', 'aw_legal' => 'library', 'post' => 'research' ) === sourceweb_rules_summary_alias() && 'aw_news' === sourceweb_rules_summary_inherit(), 'roles: the summary aliases follow the map' );
+$GLOBALS['sw_test_roles'] = array();
+aw_t( '' === sourceweb_type( 'news' ) && ! sourceweb_is_type( '', 'news' ) && ! sourceweb_is_type( 'aw_news', 'news' ), 'roles: with no map a role is \'\' and \'\' never matches \'\'' );
+aw_t( array() === sourceweb_types( array( 'news', 'library' ) ) && '1=0' === sourceweb_sql_in_types( 'post_type', array() ), 'roles: no types gives no list and SQL that matches nothing (never IN ())' );
+aw_t( array( 'post' => 'research' ) === sourceweb_rules_summary_alias() && 'post' === sourceweb_rules_summary_inherit() && array( 'post' => 'research' ) === sourceweb_rules_worker_types(), 'roles: without a map only WordPress\'s own post has summary rules' );
+aw_t( array( 'post' ) === sourceweb_item_types(), 'roles: without a map the item types are post alone' );
+$GLOBALS['sw_test_roles'] = array( 'news' => '', 'library' => 'doc', 'listing' => 5 );
+aw_t( array( 'library' => 'doc' ) === sourceweb_post_type_roles(), 'roles: empty and non-text slugs are dropped' );
+unset( $GLOBALS['sw_test_roles'] );
+// The plugin names none of the site's six types (stored keys such as the ACF group key are listed in the changelog).
+$named = array();
+foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( dirname( __DIR__ ) . '/includes', FilesystemIterator::SKIP_DOTS ) ) as $f ) {
+	if ( preg_match( '/\.php$/', (string) $f ) && preg_match( '/aw_(news|legal|campaign|opportunity|listing|press)\b/', (string) file_get_contents( (string) $f ) ) ) {
+		$named[] = basename( (string) $f );
+	}
+}
+aw_t( array( 'rules.php' ) === $named, 'the plugin code names none of the six post types (only the ACF group key in rules.php): ' . implode( ', ', $named ) );
+$p_ds = (string) file_get_contents( dirname( __DIR__ ) . '/includes/enhance/directory/enrichment.php' ) . (string) file_get_contents( dirname( __DIR__ ) . '/includes/enhance/directory/enrichment-cleanup.php' );
+aw_t( false === strpos( $p_ds, 'AWBI' ) && false === strpos( $p_ds, 'Darpan' ), 'the plugin\'s enrichment names no AWBI or NGO Darpan (they are the site layer\'s)' );
 
 echo ( $fails ? "FAILED: $fails of $count\n" : "OK: $count checks\n" );
 exit( $fails ? 1 : 0 );

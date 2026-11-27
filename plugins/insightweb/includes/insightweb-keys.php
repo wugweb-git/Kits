@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const INSIGHTWEB_KEYS_OPTION = 'insightweb_keys';
 
-/** The old shared vault's option (Animal Writes Core's includes/keys.php), read only, until it is retired. */
+/** The old shared vault's option (the earlier Core plugin's includes/keys.php), read only, until it is retired. */
 const INSIGHTWEB_KEYS_OLD_OPTION = 'aw_keys';
 
 /** InsightWeb's key names (the wp-config.php constants), as insightweb_key_fields() lists them. */
@@ -95,7 +95,7 @@ function insightweb_key_where( string $name ): string {
 
 /**
  * A key's value: the wp-config.php constant, else InsightWeb's own, else the old Kits → Keys one, else ''. The old
- * place is read directly, also when Animal Writes Core is off, so a key saved there keeps working until it is copied.
+ * place is read directly, also when the earlier Core plugin is off, so a key saved there keeps working until it is copied.
  *
  * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
  */

@@ -105,14 +105,14 @@ function sourceweb_sourcing_keyword_stats( $days = 30 ) {
 			JOIN {$wpdb->postmeta} u ON u.post_id = p.ID AND u.meta_key = 'aw_source_url'
 			LEFT JOIN {$wpdb->postmeta} f ON f.post_id = p.ID AND f.meta_key = 'aw_feed'
 			LEFT JOIN {$wpdb->postmeta} i ON i.post_id = p.ID AND i.meta_key = 'aw_ingested_at'
-			WHERE p.post_type IN ('aw_news', 'aw_legal') AND p.post_status NOT IN ('auto-draft', 'inherit')
+			WHERE " . sourceweb_sql_in_types( 'p.post_type', sourceweb_types( array( 'news', 'library' ) ) ) . " AND p.post_status NOT IN ('auto-draft', 'inherit')
 			AND ( CAST(i.meta_value AS UNSIGNED) >= %d OR ( i.meta_value IS NULL AND p.post_date >= %s ) )", // post_date: pending items have no GMT date
 			$since,
 			wp_date( 'Y-m-d H:i:s', $since )
 		)
 	);
 	foreach ( (array) $items as $it ) {
-		$side = 'aw_legal' === $it->post_type ? 'legal' : 'news';
+		$side = sourceweb_is_type( $it->post_type, 'library' ) ? 'legal' : 'news';
 		$pub  = 'publish' === $it->post_status;
 		$hits = array();
 		if ( null !== $it->ingested ) { // since 24 Oct 2026: exactly the search that brought it in, if any

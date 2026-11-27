@@ -1,8 +1,1 @@
-# Files allowed to hold the visible text "Animal Writes" in a string literal, each with the reason.
-plugins/kits-core/includes/media-groups.php        # regex that matches titles of existing Animal Writes media; data match, not shown wording
-plugins/kits-core/includes/error-pages.php         # KITS_ERROR_PAGE_MARKER: recognises drop-ins already installed on live sites; changing it orphans them
-plugins/kits-core/includes/admin-layer/edit-screens.php  # match key against the edit-screen map data; to become a site-layer filter
-plugins/kits-core/assets/site/dropins/maintenance.php    # site layer, runs before WordPress loads (no get_bloginfo)
-plugins/kits-core/assets/site/dropins/php-error.php      # site layer, runs before WordPress loads (no get_bloginfo)
-plugins/sourceweb/includes/admin/kits-hub.php            # shown only when SourceWeb is loaded by the Animal Writes Core plugin
-plugins/sourceweb/includes/lifecycle/sourcing-migrate-retire.php  # WP-CLI error naming the Animal Writes Core migration
+# Files allowed to hold the visible text in a string literal, each with the reason. Empty on purpose: tenant wording lives in sites/<tenant>/.

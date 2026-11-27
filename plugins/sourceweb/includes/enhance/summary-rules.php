@@ -42,7 +42,7 @@ function sourceweb_summary_rules() {
 	foreach ( $saved as $k => $v ) {
 		if ( 'sections' === $k && is_array( $v ) ) {
 			foreach ( $v as $name => $sec ) {
-				// From the sourcing restructure's phase 3 the sections are stored by post type (aw_news, aw_legal, post)
+				// From the sourcing restructure's phase 3 the sections are stored by post type (the news and library types, post)
 				// with their old name as alias (news, library, research): read by that name, so every reader sees the
 				// same rules. A section of another post type (its own rule, or inherit) is read by aw-sourcing's Rules.
 				$name = is_array( $sec ) && ! isset( $out['sections'][ $name ] ) ? (string) ( $sec['alias'] ?? '' ) : $name;
@@ -67,10 +67,10 @@ function sourceweb_summary_section( $post ) {
 	if ( ! $post ) {
 		return '';
 	}
-	if ( 'aw_news' === $post->post_type ) {
+	if ( sourceweb_is_type( $post->post_type, 'news' ) ) {
 		return 'news';
 	}
-	if ( 'aw_legal' === $post->post_type ) {
+	if ( sourceweb_is_type( $post->post_type, 'library' ) ) {
 		return 'library';
 	}
 	if ( 'post' === $post->post_type && ( has_term( 'research', 'post_tag', $post ) || ( taxonomy_exists( 'aw_resource_type' ) && has_term( 'research', 'aw_resource_type', $post ) ) ) ) { // research is a tag since 15 Oct 2026
@@ -136,7 +136,7 @@ function sourceweb_summary_description( $text, $max = 0 ) {
 		}
 		$out = $next;
 	}
-	return '' !== $out ? $out : ( function_exists( 'aw_seo_cut' ) ? aw_seo_cut( $text, $max ) : mb_substr( $text, 0, $max ) );
+	return '' !== $out ? $out : ( function_exists( 'rankweb_seo_cut' ) ? rankweb_seo_cut( $text, $max ) : mb_substr( $text, 0, $max ) );
 }
 
 /* ---------- Linkable entities (internal linking, Phase 7) ---------- */
@@ -162,7 +162,8 @@ function sourceweb_summary_names( $text, $phrase ) {
 /** A published page titled with an entity's name (Library first, then the Directory): [post type, ID] or null. */
 function sourceweb_summary_entity_page( $name ) {
 	global $wpdb;
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID, post_type FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ('aw_legal','aw_listing') AND (post_title = %s OR post_title = %s OR post_title LIKE %s OR post_title LIKE %s OR post_title LIKE %s) ORDER BY post_type = 'aw_legal' DESC, LENGTH(post_title) ASC LIMIT 1", $name, 'The ' . $name, $wpdb->esc_like( $name ) . ' (%', 'The ' . $wpdb->esc_like( $name ) . ' (%', '% - ' . $wpdb->esc_like( $name ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$in  = sourceweb_sql_in_types( 'post_type', sourceweb_types( array( 'library', 'listing' ) ) ); // 1=0 when the site has neither
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID, post_type FROM {$wpdb->posts} WHERE post_status = 'publish' AND {$in} AND (post_title = %s OR post_title = %s OR post_title LIKE %s OR post_title LIKE %s OR post_title LIKE %s) ORDER BY post_type = %s DESC, LENGTH(post_title) ASC LIMIT 1", $name, 'The ' . $name, $wpdb->esc_like( $name ) . ' (%', 'The ' . $wpdb->esc_like( $name ) . ' (%', '% - ' . $wpdb->esc_like( $name ), sourceweb_type( 'library' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	return $row ? array( $row->post_type, (int) $row->ID ) : null;
 }
 
@@ -187,7 +188,7 @@ function sourceweb_summary_entities( $text ) {
 		if ( ! $page ) {
 			$out['other'][] = array( 'name' => $parts[0] );
 		} else {
-			$out[ 'aw_legal' === $page[0] ? 'laws' : 'organisations' ][] = array( 'name' => $parts[0], 'id' => $page[1] );
+			$out[ sourceweb_is_type( $page[0], 'library' ) ? 'laws' : 'organisations' ][] = array( 'name' => $parts[0], 'id' => $page[1] );
 		}
 	}
 	if ( function_exists( 'aw_lgd' ) ) {
@@ -218,7 +219,7 @@ function sourceweb_summary_entities( $text ) {
 
 /** Store the entities an item's summary names (meta aw_entities, JSON). */
 function sourceweb_summary_store_entities( $post_id ) {
-	if ( ! in_array( get_post_type( $post_id ), array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
+	if ( ! sourceweb_is_any_type( get_post_type( $post_id ), array( 'news', 'library' ) ) && 'post' !== get_post_type( $post_id ) ) {
 		return;
 	}
 	$found = sourceweb_summary_entities( wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $post_id, 'raw' ) ) );
@@ -228,7 +229,7 @@ function sourceweb_summary_store_entities( $post_id ) {
 add_action(
 	'wp_after_insert_post',
 	function ( $post_id, $post ) {
-		if ( in_array( $post->post_type, array( 'aw_news', 'aw_legal', 'post' ), true ) && 'trash' !== $post->post_status && ! wp_is_post_revision( $post_id ) ) {
+		if ( ( 'post' === $post->post_type || sourceweb_is_any_type( $post->post_type, array( 'news', 'library' ) ) ) && 'trash' !== $post->post_status && ! wp_is_post_revision( $post_id ) ) {
 			sourceweb_summary_store_entities( $post_id );
 		}
 	},

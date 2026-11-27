@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Plain text of a title or name: tags removed, entities decoded, spaces collapsed. The same as Animal Writes Core's
+ * Plain text of a title or name: tags removed, entities decoded, spaces collapsed. The same as the earlier Core plugin's
  * aw_seo_plain(), which RankWeb used before 18 Nov 2026.
  *
  * @param string $text Text or HTML.

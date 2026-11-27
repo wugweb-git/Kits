@@ -253,7 +253,7 @@ function kits_preview_page() {
 	wp_nonce_field( 'kits_preview_ips', 'kits_preview_nonce' );
 	echo '<h2 class="title"><label for="kits-preview-ips">Preview IP addresses</label></h2><p class="description" id="kits-preview-ips-note">One per line. IPv4: exact address. IPv6: the whole /64 network (e.g. 2401:db8:1:2::/64). Requests from these addresses see preview-only items. Your address now: <code>' . esc_html( kits_client_ip() ) . '</code></p>';
 	echo '<textarea id="kits-preview-ips" name="kits_preview_ips" rows="4" class="large-text code" aria-describedby="kits-preview-ips-note">' . esc_textarea( (string) get_option( 'kits_preview_ips', '' ) ) . '</textarea>';
-	kits_submit_button( __( 'Save Changes' ), 'kits-save-preview' );
+	kits_submit_button( __( 'Save Changes', 'kits-core' ), 'kits-save-preview' );
 	echo '</form>';
 	kits_preview_devices_screen();
 	echo '</div>';

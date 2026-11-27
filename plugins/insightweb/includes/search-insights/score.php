@@ -243,16 +243,16 @@ function insightweb_si_focus_health( bool $in_a, bool $in_b ): string {
  * Used by the canonical-owner ladder.
  *
  * @param string $path      Page path (e.g. /resources/rabies/).
- * @param string $post_type Post type (aw_legal, aw_campaign, aw_news, aw_listing, page, post…).
+ * @param string $post_type Post type (page, post, or a type the site maps with insightweb_post_type_roles).
  * @return string
  */
 function insightweb_si_page_class( string $path, string $post_type ): string {
-	$map = array(
-		'aw_legal'    => 'library',
-		'aw_campaign' => 'campaign',
-		'aw_news'     => 'news',
-		'aw_listing'  => 'directory',
-	);
+	$map = array();
+	foreach ( array( 'library' => 'library', 'campaign' => 'campaign', 'news' => 'news', 'listing' => 'directory' ) as $role => $class ) {
+		if ( '' !== insightweb_type( $role ) ) {
+			$map[ insightweb_type( $role ) ] = $class;
+		}
+	}
 	if ( isset( $map[ $post_type ] ) ) {
 		return $map[ $post_type ];
 	}

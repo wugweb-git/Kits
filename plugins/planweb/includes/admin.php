@@ -574,6 +574,9 @@ add_action(
 
 /** Import from Dates: what the import did, and the one-for-one check (administrators). */
 function planweb_import_panel() {
+	if ( '' === planweb_import_source()['option'] ) {
+		return; // No earlier Dates list is named (filter planweb_import_source).
+	}
 	$r = (array) get_option( 'planweb_import_result', array() );
 	$v = planweb_verify();
 	echo '<h2 id="planweb-import">' . esc_html__( 'Import from Dates', 'planweb' ) . '</h2>';

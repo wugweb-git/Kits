@@ -11,7 +11,7 @@
  * Sections not built in the app yet (Colours, Typography, Buttons, Cards, Display per type, Socials, Share bar) show
  * today's fields under their names: kits_admin_app_legacy() prints them on the page, the app moves each into its
  * section, and each saves with its own button through options.php as before. So no field is out of reach. A site adds
- * to a section through the kits_options_legacy_section action (Animal Writes: Contact links under Socials).
+ * to a section through the kits_options_legacy_section action (a site's Contact links under Socials, for example).
  *
  * @package kits-core
  */

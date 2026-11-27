@@ -38,7 +38,7 @@ function sourceweb_find_by_source( $post_type, $url ) {
 	$ids = get_posts(
 		array(
 			// Every section, not just $post_type: an item moved from Legal Watch to News must not come back as a new Legal item.
-			'post_type'      => 'aw_listing' === $post_type ? $post_type : array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ),
+			'post_type'      => sourceweb_is_type( $post_type, 'listing' ) ? $post_type : sourceweb_item_types(),
 			// Trash included (12 Oct 2026): a trashed item must not come back as new if the workers' memory is lost.
 			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ),
 			'meta_key'       => 'aw_source_url',
@@ -53,12 +53,12 @@ function sourceweb_find_by_source( $post_type, $url ) {
 	}
 	// PIB: the same release under another address (PressReleasePage / PressReleaseDetail, reg and lang) is a duplicate.
 	$prid = function_exists( 'sourceweb_src_pib_prid' ) ? sourceweb_src_pib_prid( $url ) : '';
-	if ( '' === $prid || 'aw_listing' === $post_type ) {
+	if ( '' === $prid || sourceweb_is_type( $post_type, 'listing' ) ) {
 		return 0;
 	}
 	$ids = get_posts(
 		array(
-			'post_type'      => array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ),
+			'post_type'      => sourceweb_item_types(),
 			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ),
 			'meta_key'       => 'aw_source_url',
 			'meta_value'     => '^https?://([a-z0-9-]+\\.)*pib\\.gov\\.in/.*[?&][Pp][Rr][Ii][Dd]=' . $prid . '([^0-9]|$)',
@@ -114,7 +114,10 @@ function sourceweb_legal_by_number( $number ) {
 	if ( ! preg_match( '/\d/', $key ) || ! preg_match( '/(\d+)/', $key, $d ) ) {
 		return 0;
 	}
-	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = 'aw_legal' AND p.post_status <> 'trash' WHERE m.meta_key = 'aw_legal_number' AND m.meta_value LIKE %s", '%' . $wpdb->esc_like( $d[1] ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	if ( '' === sourceweb_type( 'library' ) ) {
+		return 0; // no Library type on this site
+	}
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT m.post_id, m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id AND p.post_type = %s AND p.post_status <> 'trash' WHERE m.meta_key = 'aw_legal_number' AND m.meta_value LIKE %s", sourceweb_type( 'library' ), '%' . $wpdb->esc_like( $d[1] ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( (array) $rows as $r ) {
 		if ( strtoupper( preg_replace( '/[^0-9A-Z]/i', '', (string) $r->meta_value ) ) === $key ) {
 			return (int) $r->post_id;
@@ -131,30 +134,35 @@ function sourceweb_legal_by_number( $number ) {
  */
 function sourceweb_ingest( WP_REST_Request $req ) {
 	if ( 'press' === $req->get_param( 'type' ) && function_exists( 'aw_press_ingest' ) ) {
-		return aw_press_ingest( $req ); // coverage of Animal Writes found by the press-discovery worker: drafts to review
+		return aw_press_ingest( $req ); // coverage of the site found by the press-discovery worker: drafts to review
 	}
-	$map = array(
-		'news'     => 'aw_news',
-		'legal'    => 'aw_legal',
-		'research' => 'post', // Resources; tagged Research below
-		'listing'  => 'aw_listing',
-		'opportunity' => 'aw_opportunity',
+	// The worker's kind of item => the role the site gives a content type (post-type-roles.php); research is WordPress's own post.
+	$roles = array(
+		'news'        => 'news',
+		'legal'       => 'library',
+		'listing'     => 'listing',
+		'opportunity' => 'opportunity',
 	);
-	$type = $map[ $req->get_param( 'type' ) ] ?? '';
-	if ( ! $type ) {
+	$kind  = (string) $req->get_param( 'type' );
+	if ( ! isset( $roles[ $kind ] ) && 'research' !== $kind ) {
 		return new WP_Error( 'aw_bad_type', 'type must be news, legal, research, listing or opportunity', array( 'status' => 400 ) );
 	}
-	// This plugin does not register aw_news, aw_legal, aw_listing or aw_opportunity (Animal Writes Core or DirectoryWeb do): a site without the type gets a clear answer, not an insert into a type that is not there.
-	if ( ! post_type_exists( $type ) ) {
-		return new WP_Error( 'aw_type_missing', 'This site has no content type "' . $type . '" for that kind of item.', array( 'status' => 422 ) );
+	$type = 'research' === $kind ? 'post' : sourceweb_type( $roles[ $kind ] ); // Resources; tagged Research below
+	// This plugin does not register the News, Library, Directory or Opportunity types (the site's core plugin or DirectoryWeb do): a site without the type gets a clear answer, not an insert into a type that is not there.
+	if ( '' === $type || ! post_type_exists( $type ) ) {
+		return new WP_Error( 'aw_type_missing', 'This site has no content type for that kind of item (' . $kind . ').', array( 'status' => 422 ) );
 	}
+	$is_listing     = sourceweb_is_type( $type, 'listing' );
+	$is_library     = sourceweb_is_type( $type, 'library' );
+	$is_opportunity = sourceweb_is_type( $type, 'opportunity' );
+	$is_news        = sourceweb_is_type( $type, 'news' );
 
 	$title      = sanitize_text_field( (string) $req->get_param( 'title' ) );
 	$summary    = sanitize_textarea_field( (string) $req->get_param( 'summary' ) );
 	// The workers mark legal summaries "[Needs legal review]": an internal flag, never part of the published text.
 	$legal_flag = false !== strpos( $summary, '[Needs legal review]' );
 	$summary    = trim( str_replace( '[Needs legal review]', '', $summary ) );
-	if ( in_array( $type, array( 'aw_news', 'aw_legal', 'post' ), true ) ) {
+	if ( 'post' === $type || $is_news || $is_library ) {
 		$summary = sourceweb_whole_sentences( $summary ); // never a tail cut off mid-sentence (content-helpers.php)
 	}
 	$source_url = esc_url_raw( (string) $req->get_param( 'source_url' ) );
@@ -162,7 +170,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 	if ( '' === $title ) {
 		return new WP_Error( 'aw_no_title', 'title is required', array( 'status' => 400 ) );
 	}
-	if ( 'aw_listing' !== $type && '' === $source_url ) {
+	if ( ! $is_listing && '' === $source_url ) {
 		return new WP_Error( 'aw_no_source', 'source_url is required for cards', array( 'status' => 400 ) );
 	}
 
@@ -173,15 +181,15 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 	// A Gazette notification we already hold under the same number (G.S.R. / S.O. ...(E)), whatever its title or source
 	// (owner, 16 Oct 2026: the draft lab animal rules came in twice, from the Gazette and from CCSEA).
 	$number = sanitize_text_field( (string) $req->get_param( 'legal_number' ) );
-	if ( 'aw_legal' === $type && '' !== $number ) {
+	if ( $is_library && '' !== $number ) {
 		$held = sourceweb_legal_by_number( $number );
 		if ( $held ) {
 			return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $held ), 200 );
 		}
 	}
 	// Same story: the same normalised title dated within a day either side, drafts included (relevance.php).
-	if ( 'aw_listing' !== $type && function_exists( 'sourceweb_find_by_title' ) ) {
-		$existing = sourceweb_find_by_title( array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), $title, (string) $req->get_param( 'source_date' ) );
+	if ( ! $is_listing && function_exists( 'sourceweb_find_by_title' ) ) {
+		$existing = sourceweb_find_by_title( sourceweb_item_types(), $title, (string) $req->get_param( 'source_date' ) );
 		if ( $existing ) {
 			return new WP_REST_Response( array( 'status' => 'duplicate', 'id' => $existing ), 200 );
 		}
@@ -197,14 +205,14 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 
 	// Not News (owner, 20 Oct 2026): archive or tag pages, and job vacancies from sources that are not opportunity
 	// sources, are never created; they go to the Rejected log (relevance.php).
-	if ( 'aw_listing' !== $type && function_exists( 'sourceweb_not_news_reason' ) ) {
+	if ( ! $is_listing && function_exists( 'sourceweb_not_news_reason' ) ) {
 		$why = sourceweb_not_news_reason( $title, $source_url, $type );
 		if ( $why ) {
 			sourceweb_relevance_log_one( $title, $source_url, $why, (string) $req->get_param( 'type' ), (string) $req->get_param( 'feed' ) );
 			return new WP_REST_Response( array( 'status' => 'filtered', 'reason' => $why ), 200 );
 		}
 	}
-	if ( 'aw_news' === $type && function_exists( 'sourceweb_news_title_tail' ) ) {
+	if ( $is_news && function_exists( 'sourceweb_news_title_tail' ) ) {
 		$title = sourceweb_news_title_tail( $title, (string) $req->get_param( 'source_name' ) ); // no "| India News", "- Blog" tail
 	}
 
@@ -213,7 +221,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 	if ( $backfill ) {
 		$floor = (string) get_option( 'aw_backfill_floor', '2025-11-01' );
 		$day   = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
-		if ( 'aw_opportunity' === $type || ( $day && $day < $floor ) ) {
+		if ( $is_opportunity || ( $day && $day < $floor ) ) {
 			return new WP_REST_Response( array( 'status' => 'filtered' ), 200 );
 		}
 	}
@@ -235,12 +243,12 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 			'post_type'    => $target_type,
 			// Opportunities from approved sources are factual listings (title, organisation, place, deadline, link)
 			// and go live directly (owner's decision, 7 Oct 2026). Everything else waits for review.
-			'post_status'  => 'aw_opportunity' === $type && sourceweb_publish_allowed() ? 'publish' : 'pending', // everything waits for review unless publishing is switched on (sourceweb-context.php)
+			'post_status'  => $is_opportunity && sourceweb_publish_allowed() ? 'publish' : 'pending', // everything waits for review unless publishing is switched on (sourceweb-context.php)
 			'post_title'   => $title,
 			// A research paper's short keyword slug from its headline (research_titles.py, owner 20 Oct 2026).
 			'post_name'    => 'research' === $req->get_param( 'type' ) ? sanitize_title( (string) $req->get_param( 'slug' ) ) : '',
 			'post_excerpt' => $summary,
-			'post_content' => 'aw_opportunity' === $type ? '<!-- wp:paragraph --><p>' . esc_html( $summary ) . '</p><!-- /wp:paragraph -->' : '',
+			'post_content' => $is_opportunity ? '<!-- wp:paragraph --><p>' . esc_html( $summary ) . '</p><!-- /wp:paragraph -->' : '',
 		),
 		true
 	);
@@ -286,7 +294,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 			$source_date = $titled;
 		}
 	}
-	if ( '' === $source_date && 'aw_news' === $type ) {
+	if ( '' === $source_date && $is_news ) {
 		// Every News item carries a sort date (audit item 2, owner 25 Oct 2026): no date from the source = the day it came in.
 		$source_date = wp_date( 'Y-m-d' );
 	}
@@ -308,13 +316,13 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		sourceweb_assign_existing_terms( $post_id, array_values( array_intersect( $cats, $allowed ) ), 'category', $ignored );
 	}
 	$tags = array_filter( (array) $req->get_param( 'tags' ), 'is_scalar' );
-	if ( $req->get_param( 'source_type' ) && 'aw_legal' === $type ) {
+	if ( $req->get_param( 'source_type' ) && $is_library ) {
 		if ( ! function_exists( 'sourceweb_set_issuer' ) || ! sourceweb_set_issuer( $post_id, (string) $req->get_param( 'source_type' ) ) ) { // issuer: a label (issuers.php, Core)
 			$ignored[] = 'issuer: ' . sanitize_text_field( (string) $req->get_param( 'source_type' ) );
 		}
 	}
 	// Library documents: what it is (judgment, order, notification...) and, for judgments, the court.
-	if ( 'aw_legal' === $type ) {
+	if ( $is_library ) {
 		// The Library type is a tag; with none from the worker, a government press release (PIB) is an Official release.
 		$kind = ( array_intersect( array_map( 'sanitize_title', $tags ), array_keys( SOURCEWEB_LEGAL_KINDS ) ) ? '' : ( 'pib' === $req->get_param( 'source_type' ) ? 'official-release' : '' ) );
 		foreach ( array_merge( $kind ? array( $kind ) : array(), array_intersect( array_map( 'sanitize_title', $tags ), array_keys( SOURCEWEB_LEGAL_KINDS ) ) ) as $k ) {
@@ -331,7 +339,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		}
 	}
 	// Place: names are matched to the LGD file (places.php); an unknown name is ignored, never added.
-	if ( $req->get_param( 'city' ) && in_array( $type, array( 'aw_listing', 'aw_news' ), true ) ) {
+	if ( $req->get_param( 'city' ) && ( $is_listing || $is_news ) ) {
 		$places = aw_places_from_text( (string) $req->get_param( 'city' ) );
 		if ( $places ) {
 			aw_set_item_places( $post_id, $places );
@@ -340,7 +348,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		}
 	}
 
-	if ( 'aw_opportunity' === $type ) {
+	if ( $is_opportunity ) {
 		update_post_meta( $post_id, 'aw_org_name', sanitize_text_field( (string) $req->get_param( 'org_name' ) ) );
 		sourceweb_link_opportunity_org( $post_id );
 		update_post_meta( $post_id, 'aw_apply_url', $source_url );
@@ -360,7 +368,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		}
 	}
 
-	if ( 'aw_listing' === $type ) {
+	if ( $is_listing ) {
 		$l = (array) $req->get_param( 'listing' );
 		foreach ( array( 'email', 'website', 'area', 'services' ) as $f ) {
 			if ( isset( $l[ $f ] ) ) {
@@ -381,7 +389,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_verified', false ); // Imports are never verified.
 	}
 
-	if ( 'aw_legal' === $type && function_exists( 'sourceweb_mirror_gov_pdf' ) ) {
+	if ( $is_library && function_exists( 'sourceweb_mirror_gov_pdf' ) ) {
 		$doc_url = esc_url_raw( (string) $req->get_param( 'document_url' ) ); // the PDF, when the source page is not the PDF itself
 		sourceweb_mirror_gov_pdf( $post_id, $doc_url ? $doc_url : $source_url );
 	}
@@ -433,10 +441,10 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 			update_post_meta( $post_id, 'rank_math_focus_keyword', $kw );
 		}
 	}
-	if ( 'aw_legal' === $type && '' !== $number ) {
+	if ( $is_library && '' !== $number ) {
 		update_post_meta( $post_id, 'aw_legal_number', $number );
 	}
-	if ( 'aw_legal' === $type && $req->get_param( 'draft' ) ) { // a draft published for objections, not rules in force
+	if ( $is_library && $req->get_param( 'draft' ) ) { // a draft published for objections, not rules in force
 		$t = get_term_by( 'slug', 'draft', 'post_tag' );
 		$t = $t ? (int) $t->term_id : (int) ( wp_insert_term( 'Draft', 'post_tag', array( 'slug' => 'draft' ) )['term_id'] ?? 0 );
 		if ( $t ) {
@@ -621,7 +629,10 @@ function sourceweb_link_opportunity_org( $post_id ) {
 	if ( '' === $name || get_post_meta( $post_id, 'aw_organisation', true ) ) {
 		return;
 	}
-	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'title' => $name, 'numberposts' => 2, 'fields' => 'ids' ) );
+	if ( '' === sourceweb_type( 'listing' ) ) {
+		return; // no Directory on this site
+	}
+	$ids = get_posts( array( 'post_type' => sourceweb_type( 'listing' ), 'post_status' => 'publish', 'title' => $name, 'numberposts' => 2, 'fields' => 'ids' ) );
 	if ( 1 === count( $ids ) ) {
 		add_post_meta( $post_id, 'aw_organisation', (int) $ids[0] );
 	}

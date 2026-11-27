@@ -21,14 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_ROLE_SOURCING = 1;    // Include: keeps an item on its own; an English one is also a Google News search.
 const AW_SI_ROLE_FOCUS    = 2;    // A Rank Math focus keyphrase (primary or secondary) on a post or term.
 const AW_SI_ROLE_TRACKED  = 4;    // Keyword map target, demand gap or the monthly check list.
-const AW_SI_ROLE_BRAND    = 8;    // Matches AW_SI_BRAND.
+const AW_SI_ROLE_BRAND    = 8;    // Matches insightweb_si_brand_pattern().
 const AW_SI_ROLE_SEARCHED = 16;   // Seen in Search Console.
 const SOURCEWEB_KW_ROLE_INCLUDE  = 1;    // The same bit as AW_SI_ROLE_SOURCING.
 const SOURCEWEB_KW_ROLE_ANIMAL   = 32;   // An animal word: keeps an item together with a context word.
 const SOURCEWEB_KW_ROLE_CONTEXT  = 64;   // A context word: keeps an item together with an animal word.
 const SOURCEWEB_KW_ROLE_EXCLUDE  = 128;  // Drops an item, whatever else it has (always, on the site as in the workers).
 const SOURCEWEB_KW_ROLE_SEARCH   = 256;  // Its own Google News search, besides (or instead of) Include.
-const SOURCEWEB_KW_ROLE_PRESS    = 512;  // A press-discovery query (coverage of Animal Writes).
+const SOURCEWEB_KW_ROLE_PRESS    = 512;  // A press-discovery query (coverage of the site).
 const SOURCEWEB_KW_ROLE_CATEGORY = 1024; // Files items into the categories it is mapped to.
 
 /** The Sourcing roles (the ones the workers read, English only). */
@@ -84,9 +84,6 @@ function insightweb_si_reset_sql( $keep ) {
 	return implode( ', ', $out );
 }
 
-// Brand searches: Animal Writes in any spelling, and the old animalrights.in name.
-const AW_SI_BRAND = '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i';
-
 // Words ending in s that are not plurals: never folded ("news" must not become "new").
 const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
 
@@ -124,12 +121,38 @@ function insightweb_kw_roles_to_slugs( $roles ) {
 }
 
 /**
- * Whether a phrase is a brand search (AW_SI_BRAND).
+ * The pattern that marks a brand search: the site's name and its host name, with or without spaces or hyphens. A site
+ * with other spellings or earlier names adds them with the filter insightweb_brand_pattern (a full regular expression,
+ * or '' to match nothing).
+ */
+function insightweb_si_brand_pattern(): string {
+	static $cache = null;
+	if ( null !== $cache && ! has_filter( 'insightweb_brand_pattern' ) ) {
+		return $cache;
+	}
+	$names = array();
+	$name  = trim( wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES ) );
+	$host  = preg_replace( '/^www\./', '', (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+	foreach ( array( $name, $host ) as $n ) {
+		$n = preg_replace( '/[^\p{L}\p{N}]+/u', '', strtolower( $n ) );
+		if ( strlen( $n ) >= 4 ) {
+			$names[] = implode( '[\s\-.]*', array_map( fn( $c ) => preg_quote( $c, '/' ), preg_split( '//u', $n, -1, PREG_SPLIT_NO_EMPTY ) ) );
+		}
+	}
+	$pattern = $names ? '/' . implode( '|', array_unique( $names ) ) . '/iu' : '';
+	$pattern = (string) apply_filters( 'insightweb_brand_pattern', $pattern );
+	$cache   = $pattern;
+	return $pattern;
+}
+
+/**
+ * Whether a phrase is a brand search (insightweb_si_brand_pattern()).
  *
  * @param string $s Phrase.
  */
 function insightweb_si_is_brand( string $s ): bool {
-	return (bool) preg_match( AW_SI_BRAND, $s );
+	$p = insightweb_si_brand_pattern();
+	return '' !== $p && (bool) preg_match( $p, $s );
 }
 
 /**

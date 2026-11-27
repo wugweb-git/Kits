@@ -9,7 +9,7 @@
  *   alt text: the picture's own alt text, else the page's title (never the focus keyword).
  * - Category pages: the category photo, stored in Rank Math's own share-image fields (programmatic.php), which Rank
  *   Math prints. A Directory type's tag page: the share card typed as a URL in Rank Math (which Rank Math does not
- *   print for a term), with the alt text "<focus keyphrase> in India – Animal Writes".
+ *   print for a term), with the alt text "<focus keyphrase> in India – {Site}".
  * - One share picture size on every page (owner, 13 Nov 2026: "the image size keep it same"): og:image,
  *   og:image:secure_url and twitter:image, whichever picture they come from (chosen in Rank Math, a campaign's share
  *   picture, a category photo, or picked here), are its 1080x1080 square (rankweb_seo_share_square: centre-cropped from the
@@ -87,9 +87,9 @@ add_filter( 'rank_math/opengraph/facebook/og_image_height', fn( $h ) => ! empty(
 
 add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
 add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( AW_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );
-add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => 'en_IN' );
+add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => str_replace( '-', '_', rankweb_language() ) ); // the site's language (rankweb_language())
 
-/** A term's share picture alt text: "<focus keyphrase> in India – Animal Writes" (owner, 20 Oct 2026), else its name. */
+/** A term's share picture alt text: "<focus keyphrase> in India – {Site}" (owner, 20 Oct 2026), else its name. */
 function rankweb_term_share_alt( $term ) {
 	$kw = trim( explode( ',', (string) get_term_meta( $term->term_id, 'rank_math_focus_keyword', true ) )[0] );
 	return (string) apply_filters( 'rankweb_term_share_alt', ( '' !== $kw ? $kw : rankweb_plain_text( $term->name ) ) . ' – ' . get_bloginfo( 'name' ), $term, $kw );

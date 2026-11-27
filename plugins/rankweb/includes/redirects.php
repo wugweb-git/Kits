@@ -168,7 +168,7 @@ add_action(
 add_action(
 	'template_redirect',
 	function () {
-		if ( ( isset( $_GET['lang'] ) || isset( $_GET['issuer'] ) || isset( $_GET['court'] ) ) && is_post_type_archive( 'aw_legal' ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		if ( ( isset( $_GET['lang'] ) || isset( $_GET['issuer'] ) || isset( $_GET['court'] ) ) && '' !== rankweb_type( 'library' ) && is_post_type_archive( rankweb_type( 'library' ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			wp_safe_redirect( remove_query_arg( array( 'lang', 'issuer', 'court' ) ), 301 );
 			exit;
 		}
@@ -220,4 +220,4 @@ add_action(
 	}
 );
 
-// Old archive addresses (/?cat=N of a Resource type, /directory-type/…, /opportunity-type/…): animal-writes-core tags.php.
+// Old archive addresses (/?cat=N of a Resource type, /directory-type/…, /opportunity-type/…): the earlier Core plugin tags.php.

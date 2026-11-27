@@ -10,6 +10,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * The site's section hubs: type => [page slug, ..., items per page], as the site supplies them with the filter
+ * rankweb_hubs. None by default (a site with no hub pages).
+ *
+ * @return array
+ */
+function rankweb_hubs() {
+	return (array) apply_filters( 'rankweb_hubs', array() );
+}
+
+/**
+ * A piece of wording a site may set for its own subject, with a neutral default (none unless the site's code supplies it
+ * through the filter rankweb_wording).
+ *
+ * @param string $key     What the wording is for (e.g. dir_adjective).
+ * @param string $default Used when the site gives none.
+ */
+function rankweb_wording( string $key, string $default = '' ): string {
+	return (string) apply_filters( 'rankweb_wording', $default, $key );
+}
+
+/**
+ * The two-letter country code the site's addresses and legislation use in structured data ('' when the site sets none;
+ * the properties are then left out). A site sets it with the filter rankweb_country_code.
+ */
+function rankweb_country_code(): string {
+	return (string) apply_filters( 'rankweb_country_code', '' );
+}
+
+/**
  * A term's address, '' for a WP_Error (RankWeb's own; Kits Core has rankweb_seo_term_url()).
  *
  * @param WP_Term|int|string $term     Term.
@@ -61,7 +90,7 @@ function rankweb_seo_page_suffix() {
 }
 
 /**
- * A title with its page number on later pages: " Page N" before " – Animal Writes" (the only separator a title has),
+ * A title with its page number on later pages: " Page N" before " – {Site}" (the only separator a title has),
  * else at the end; unchanged when it already names the page.
  */
 function rankweb_seo_title_with_page( $text ) {
@@ -75,7 +104,7 @@ function rankweb_seo_title_with_page( $text ) {
 
 /**
  * A title without separators of its own (owner, 15 Oct 2026: the only separator in a search title is the " – " before
- * "Animal Writes"): a publisher's name appended to a headline is dropped; " | ", spaced dashes, a colon or semicolon
+ * "{Site}"): a publisher's name appended to a headline is dropped; " | ", spaced dashes, a colon or semicolon
  * joining two parts become a space; brackets are opened ("Representative (AWBI)" → "Representative AWBI"). Hyphens
  * inside words, times (10:30) and commas inside a headline or a number (Rs 5,000) are kept.
  *
@@ -145,7 +174,7 @@ function rankweb_seo_no_hyphens( $text, $case = true ) {
 	return $back( trim( (string) preg_replace( '/\s+/u', ' ', $t ) ) );
 }
 
-/** A title (with or without " – Animal Writes" at the end) without hyphens; the separator before the site name stays. */
+/** A title (with or without " – {Site}" at the end) without hyphens; the separator before the site name stays. */
 function rankweb_seo_no_hyphens_title( $title, $case = true ) {
 	$brand = ' – ' . get_bloginfo( 'name' );
 	$title = (string) $title;
@@ -265,7 +294,7 @@ function rankweb_seo_preview_ids() {
  * @return array
  */
 function rankweb_seo_hub_rules( $type, array $v ) {
-	if ( 'aw_opportunity' === $type && function_exists( 'kits_open_opportunities_meta_query' ) ) {
+	if ( rankweb_is_type( $type, 'opportunity' ) && function_exists( 'kits_open_opportunities_meta_query' ) ) {
 		$v['meta_query']   = (array) ( $v['meta_query'] ?? array() ); // phpcs:ignore WordPress.DB.SlowDBQuery
 		$v['meta_query'][] = kits_open_opportunities_meta_query();
 	}
@@ -387,7 +416,7 @@ function rankweb_seo_cut_title( $text, $max = 60 ) {
 }
 
 /**
- * One rule for news, Library and Resources headlines, kept within 60 characters: "{Headline} – Animal Writes" when
+ * One rule for news, Library and Resources headlines, kept within 60 characters: "{Headline} – {Site}" when
  * that fits, the headline alone when only it fits, else the headline cut at a whole phrase (rankweb_seo_cut_title).
  */
 function rankweb_seo_headline_title( $title ) {
@@ -421,7 +450,7 @@ function rankweb_seo_headline_case( $text ) {
 
 /**
  * The search title of a Library item or a Resource, built from its own title (owner, 15 Oct 2026): Title Case, a
- * trailing "dated …" date dropped (the date is on the page), " – Animal Writes" when the whole fits within 60.
+ * trailing "dated …" date dropped (the date is on the page), " – {Site}" when the whole fits within 60.
  * - Under 50 characters with the site name: the item's kind is added when that still fits ("… Circular",
  *   "… Research Summary"), without a separator.
  * - Over 60: the headline alone; then its first part (before ":", " – " or ";") when that part has at least 30
@@ -510,7 +539,7 @@ function rankweb_seo_listing_name( $id ) {
 // AW_ARCHIVE_DESCRIPTIONS: RankWeb → Settings (settings.php).
 
 /**
- * A listing type's name from Animal Writes Core, or the slug in words when Core is not active.
+ * A listing type's name from the earlier Core plugin, or the slug in words when Core is not active.
  *
  * @param string $slug The listing type's slug.
  */
@@ -519,7 +548,7 @@ function rankweb_seo_listing_type_name( $slug ) {
 }
 
 /**
- * An item's state and district names from Animal Writes Core, or two empty names when Core is not active.
+ * An item's state and district names from the earlier Core plugin, or two empty names when Core is not active.
  *
  * @param int $id The item.
  * @return array{0: string, 1: string}
@@ -591,24 +620,6 @@ function rankweb_seo_hub_intro_description( $type ) {
 		$best = $line;
 	}
 	return $best;
-}
-
-/** AWBI-recognised listing without a description of its own: one line of its facts ('' when it does not apply). */
-function rankweb_seo_awbi_description( $id, $desc ) {
-	$code = trim( (string) get_post_meta( $id, 'aw_awbi_code', true ) );
-	if ( '' === $code || get_post_meta( $id, 'aw_awbi_dropped', true ) || has_excerpt( $id ) || ( '' !== trim( (string) $desc ) && ! preg_match( '/^Recognised by the Animal Welfare Board of India/i', trim( wp_strip_all_tags( (string) $desc ) ) ) ) ) {
-		return '';
-	}
-	$types = function_exists( 'directoryweb_listing_types' ) ? directoryweb_listing_types( $id ) : array();
-	if ( $types && count( $types ) > 1 ) { // the specific type (gaushala) before the general one
-		usort( $types, fn( $a, $b ) => (int) ( 'animal-welfare-organisation' === $a->slug ) - (int) ( 'animal-welfare-organisation' === $b->slug ) );
-	}
-	$type  = $types ? implode( ' ', array_map( fn( $w ) => preg_match( '/^[A-Z]{2,}$/', $w ) || 0 === stripos( $w, 'gaushala' ) ? ucfirst( $w ) : mb_strtolower( $w ), explode( ' ', trim( preg_replace( '/\s*\(.*?\)/', '', $types[0]->name ) ) ) ) ) : 'organisation';
-	list( $state, $district ) = rankweb_seo_item_place_names( $id );
-	$where = implode( ', ', array_unique( array_filter( array( $district, $state ) ) ) ); // Chandigarh, Delhi: the district and state share a name
-	$name  = preg_replace( '/[\s,;:]+$/u', '', rankweb_plain_text( get_post_field( 'post_title', $id ) ) );
-	$line  = sprintf( '%1$s is an AWBI-recognised %2$s%3$s (AWBI code %4$s).', $name, $type, $where ? ' in ' . $where : '', $code );
-	return mb_strlen( $line ) <= 120 ? $line . ' Address, contact and how to help.' : $line; // whole sentences only
 }
 
 /** "{Listing type} in {District}, {State}. {Services}. Contact details, location and how to help." ('' without type or place). */
@@ -881,7 +892,7 @@ function rankweb_seo_default_image() {
 	return rankweb_seo_attachment( (int) get_option( 'aw_default_share_image' ), 'full' ); // shared as its 1080x1080 square (rankweb_seo_share_square)
 }
 
-/** Share image of a listing without a logo of its own (owner, 15 Oct 2026): banner-aw_listing-wide.webp, the Directory band picture. */
+/** Share image of a listing without a logo of its own (owner, 15 Oct 2026): the listing-wide banner, the Directory band picture. */
 // AW_SEO_LISTING_SHARE_IMAGE: RankWeb → Settings (settings.php).
 
 /** Post types whose share image is the publisher's own image, linked (News, Library, research, Opportunities). */
@@ -914,7 +925,7 @@ function rankweb_seo_item_image( $id ) {
 		}
 	}
 	$cands = array( (int) get_post_thumbnail_id( $id ) );
-	if ( 'aw_legal' === $type ) {
+	if ( rankweb_is_type( $type, 'library' ) ) {
 		$cands[] = (int) get_post_meta( $id, 'aw_file_id', true );
 		$cands[] = (int) get_post_meta( $id, 'aw_doc_preview', true );
 	}
@@ -955,7 +966,7 @@ function rankweb_seo_image() {
 		return $img;
 	}
 	$img = is_singular() ? rankweb_seo_item_image( get_queried_object_id() ) : rankweb_seo_term_image();
-	if ( ! $img && is_singular( 'aw_listing' ) ) {
+	if ( ! $img && rankweb_is_singular( array( 'listing' ) ) ) {
 		$img = rankweb_seo_attachment( AW_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
 	}
 	if ( ! $img ) {

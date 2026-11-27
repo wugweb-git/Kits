@@ -47,7 +47,7 @@ def problems(url, status, final, body):
     wrap = re.search(r'<div class="wrap.*?<div id="wpfooter"', body, re.S)
     text = re.sub(r'<[^>]+>', ' ', wrap.group(0)) if wrap else ''
     text = re.sub(r'\s+', ' ', text).strip()
-    if wrap and NEEDS_CORE.search(text) and len(text) < 400:
+    if wrap and NEEDS_CORE.search(text) and len(text) < 400 and 'plain version' not in text:
         out.append('only says it needs Kits Core')
     if wrap and len(text) < 40:
         out.append('empty screen')

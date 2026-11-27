@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// The role constants, AW_SI_BRAND, AW_SI_NOT_PLURAL, insightweb_si_roles(), insightweb_si_is_brand(), insightweb_si_norm() and insightweb_si_lang() moved
+// The role constants, insightweb_si_brand_pattern(), AW_SI_NOT_PLURAL, insightweb_si_roles(), insightweb_si_is_brand(), insightweb_si_norm() and insightweb_si_lang() moved
 // out with the keyword table (owner's decision 3, 25 Oct 2026); since 18 Nov 2026 they are in InsightWeb's
 // includes/keyword-model.php and keyword-table.php, loaded by includes/keywords.php before Search Insights itself.
 
@@ -440,7 +440,7 @@ function insightweb_si_focus_parts( string $field ): array {
  *   matching records as entities (their names are not added one by one: plan, fixed decisions);
  * - sourcing: SourceWeb's Include list (sourceweb_relevance()['strong']), when SourceWeb is active and before its phase 2
  *   (from phase 2 the owner sets Include on the record and this leaves it alone);
- * - brand: AW_SI_BRAND.
+ * - brand: insightweb_si_brand_pattern().
  *
  * @return array Counts.
  */
@@ -448,7 +448,7 @@ function insightweb_si_sync_roles(): array {
 	global $wpdb;
 	$k     = insightweb_si_table( 'keywords' );
 	$p     = insightweb_si_table( 'kw_pages' );
-	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_listing' ) ) ) : array( 'post', 'page' );
+	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, insightweb_types( array( 'listing' ) ) ) ) : array( 'post', 'page' );
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_status = 'publish' AND p.post_type IN ({$in}) AND m.meta_value <> ''", $types ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per type.
 	$terms = $wpdb->get_results( "SELECT t.term_id AS ID, m.meta_value FROM {$wpdb->terms} t JOIN {$wpdb->termmeta} m ON m.term_id = t.term_id AND m.meta_key = 'rank_math_focus_keyword' WHERE m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -497,7 +497,7 @@ function insightweb_si_sync_roles(): array {
 	}
 
 	// Listings: mark existing records (from Search Console or the map) whose phrase is a listing's name.
-	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE " . insightweb_sql_in_types( 'p.post_type', insightweb_types( array( 'listing' ) ) ) . " AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$read  = '' === $wpdb->last_error; // the flags are rebuilt only from a list that was read
 	$map   = insightweb_si_kw_map();
 	$ent   = array();

@@ -263,7 +263,7 @@ final class LinkerTest extends PHPUnit\Framework\TestCase {
 
 	public function test_normalize(): void {
 		$this->assertSame( 'stray dogs', RankWeb_Linker::normalize( '  Stray   DOGS ' ) );
-		$this->assertSame( 'prevention of cruelty to animals act 1960', RankWeb_Linker::normalize( 'Prevention of Cruelty to Animals Act, 1960' ) );
+		$this->assertSame( 'consumer protection act 1960', RankWeb_Linker::normalize( 'Consumer Protection Act, 1960' ) );
 		$this->assertSame( '', RankWeb_Linker::normalize( ' -- ' ) );
 	}
 

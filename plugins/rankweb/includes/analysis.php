@@ -163,7 +163,7 @@ add_action(
 
 /*
  * Stored scores for new items, every day (owner, 17 Oct 2026). Rank Math works its score out only in a browser, so the
- * workers (animal-writes-workers, seo-scores workflow, after the daily focus keywords) do what its "Update SEO Scores"
+ * workers (the workers plugin, seo-scores workflow, after the daily focus keywords) do what its "Update SEO Scores"
  * tool does, unattended: they read the analyzer values below (built by Rank Math's own Update_Score tool, so with the
  * rendered <main> from the filter above, and each item's own test list), run Rank Math's bundled analyzer.js on them
  * and send the numbers back. Only published items with a focus keyword and no stored score; Media & PR items have no
@@ -173,7 +173,7 @@ add_action(
 /** Published items with a page and a focus keyword but no stored Rank Math score (newest first). */
 function rankweb_seo_unscored_ids( $limit ) {
 	global $wpdb;
-	$types = array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_press' ) ) );
+	$types = array_values( array_diff( rankweb_item_types(), rankweb_types( array( 'press' ) ) ) );
 	$in    = implode( ', ', array_fill( 0, count( $types ), '%s' ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQLPlaceholders, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	return array_map( 'intval', $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} k ON k.post_id = p.ID AND k.meta_key = 'rank_math_focus_keyword' AND k.meta_value <> '' LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'rank_math_seo_score' WHERE p.post_status = 'publish' AND p.post_type IN ($in) GROUP BY p.ID HAVING COALESCE( MAX( s.meta_value ), '' ) = '' ORDER BY p.ID DESC LIMIT %d", ...array_merge( $types, array( (int) $limit ) ) ) ) );
@@ -203,7 +203,7 @@ function rankweb_seo_score_values( $ids ) {
 	$json = (array) $ref->getValue( rank_math()->json );
 	$rm   = array_intersect_key( (array) ( $json['rankMath'] ?? array() ), array_flip( array( 'assessor', 'links', 'localeFull', 'noFollowDomains', 'noFollowExcludeDomains', 'noFollowExternalLinks', 'parentDomain', 'objectType', 'postType' ) ) );
 	$only = function ( $q ) use ( $ids ) {
-		$q->set( 'post_type', array_values( array_diff( AW_SEO_ITEM_TYPES, array( 'aw_press' ) ) ) );
+		$q->set( 'post_type', array_values( array_diff( rankweb_item_types(), rankweb_types( array( 'press' ) ) ) ) );
 		$q->set( 'post__in', $ids );
 		$q->set( 'posts_per_page', count( $ids ) );
 		$q->set( 'offset', 0 );
@@ -276,7 +276,9 @@ add_filter(
 			array_unique(
 				array_merge(
 					(array) ( $config['names'] ?? array() ),
-					array( 'aw_lat', 'aw_lng', 'aw_place_id', 'aw_g_rating', 'aw_g_reviews', 'aw_registration', 'aw_reg_12a', 'aw_reg_80g', 'aw_darpan_id', 'aw_awbi_code', 'aw_publisher', 'aw_source_url', 'aw_source_name', 'aw_maps_url', 'aw_g_profile', 'aw_ngobase_url', 'aw_founded', 'aw_legal_number', 'aw_services_source' )
+					// A site adds its own stored identifier fields with the filter rankweb_analysis_excluded_fields (none by default).
+					(array) apply_filters( 'rankweb_analysis_excluded_fields', array() ),
+					array( 'aw_lat', 'aw_lng', 'aw_place_id', 'aw_g_rating', 'aw_g_reviews', 'aw_registration', 'aw_publisher', 'aw_source_url', 'aw_source_name', 'aw_maps_url', 'aw_g_profile', 'aw_founded', 'aw_legal_number', 'aw_services_source' )
 				)
 			)
 		);

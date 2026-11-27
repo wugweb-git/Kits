@@ -10,10 +10,6 @@
  * - Directory profiles with no contact at all, unless they have Search Console impressions: noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Every RSS/Atom feed (posts, News, Opportunities, Library, comments): X-Robots-Tag noindex, links followed (owner, 25 Oct 2026).
- * - robots.txt: a Content-Signal line (search=yes, ai-input=yes, ai-train=no; owner, 3 Nov 2026) under User-agent: *.
- *   Off by default (RankWeb → Settings → Robots rules). Only added when RankWeb is the SEO owner (rankweb_seo_owner() is
- *   'none': Rank Math, Yoast, SEOPress and All in One SEO keep their own robots.txt policy) and the setting is on; every
- *   saved rule and the Sitemap line stay as they are.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
  * - Rank Math's sitemaps leave out what these rules keep out of the index: closed opportunities, profiles with no
@@ -75,7 +71,7 @@ function rankweb_is_thin_directory_page() {
  */
 function rankweb_listing_unreachable( $id ) {
 	$id = (int) $id;
-	if ( 'aw_listing' !== get_post_type( $id ) || in_array( $id, array_map( 'intval', (array) get_option( 'aw_seo_keep_listings', array() ) ), true ) ) {
+	if ( ! rankweb_is_type( get_post_type( $id ), 'listing' ) || in_array( $id, array_map( 'intval', (array) get_option( 'aw_seo_keep_listings', array() ) ), true ) ) {
 		return false;
 	}
 	$score = get_post_meta( $id, 'directoryweb_contact_score', true );
@@ -107,7 +103,7 @@ function rankweb_seo_fill_contact_scores() {
 		return;
 	}
 	global $wpdb;
-	$ids = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'directoryweb_contact_score' WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND s.meta_id IS NULL LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ids = $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'directoryweb_contact_score' WHERE p.post_type = '" . esc_sql( rankweb_type( 'listing' ) ) . "' AND p.post_status = 'publish' AND s.meta_id IS NULL LIMIT 1000" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	foreach ( $ids as $id ) {
 		update_post_meta( (int) $id, 'directoryweb_contact_score', directoryweb_contact_score( (int) $id ) );
 	}
@@ -122,13 +118,13 @@ function rankweb_seo_noindex_rule() {
 			return true; // a password-protected item: its content is hidden, so keep it out of the index
 		}
 	}
-	if ( is_singular( 'aw_opportunity' ) && function_exists( 'kits_retention_state' ) && kits_retention_state( get_queried_object() ) ) {
+	if ( rankweb_is_singular( array( 'opportunity' ) ) && function_exists( 'kits_retention_state' ) && kits_retention_state( get_queried_object() ) ) {
 		return true; // closed opportunity
 	}
 	if ( is_post_type_archive( 'web-story' ) && ! (int) ( wp_count_posts( 'web-story' )->publish ?? 0 ) ) {
 		return true; // the Web Stories archive while it has no published story (it is also out of the sitemap: Rank Math)
 	}
-	if ( is_singular( 'aw_listing' ) && rankweb_listing_unreachable( get_queried_object_id() ) ) {
+	if ( rankweb_is_singular( array( 'listing' ) ) && rankweb_listing_unreachable( get_queried_object_id() ) ) {
 		return true; // a profile with no contact (also out of the sitemap: sitemap.php)
 	}
 	return rankweb_is_thin_directory_page();
@@ -169,12 +165,12 @@ add_filter(
 /* A listing reported closed stays in search (owner, 21 Oct 2026): it only carries the "Reported closed" note on its page. */
 
 // "?press=all" lists every item on the profile: the same page, kept out of the index.
-add_filter( 'rank_math/frontend/robots', fn( $r ) => is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification
+add_filter( 'rank_math/frontend/robots', fn( $r ) => rankweb_is_singular( array( 'listing' ) ) && isset( $_GET['press'] ) ? array_merge( (array) $r, array( 'index' => 'noindex', 'follow' => 'follow' ) ) : $r ); // phpcs:ignore WordPress.Security.NonceVerification
 
 add_filter(
 	'wp_robots',
 	function ( array $robots ) {
-		if ( rankweb_seo_noindex_rule() || ( is_singular( 'aw_listing' ) && isset( $_GET['press'] ) ) ) {
+		if ( rankweb_seo_noindex_rule() || ( rankweb_is_singular( array( 'listing' ) ) && isset( $_GET['press'] ) ) ) {
 			$robots['noindex'] = true;
 		}
 		return $robots;
@@ -184,43 +180,6 @@ add_filter(
 
 // Feeds stay out of the index (owner, 25 Oct 2026): a header, as a feed has no <head>.
 add_action( 'template_redirect', fn() => is_feed() && ! headers_sent() ? header( 'X-Robots-Tag: noindex, follow' ) : null, 0 );
-
-/**
- * Whether RankWeb may add its own lines to robots.txt: RankWeb is the SEO owner (no other SEO plugin prints the head) and
- * the named setting (a constant defined from RankWeb → Settings → Robots rules) is on.
- *
- * @param string $const The setting's constant.
- */
-function rankweb_robots_txt_extras_on( string $const ): bool {
-	if ( ! function_exists( 'rankweb_seo_owner' ) || 'none' !== rankweb_seo_owner() ) {
-		return false;
-	}
-	return defined( $const ) && (bool) constant( $const );
-}
-
-/**
- * The robots.txt Content-Signal (owner, 3 Nov 2026): one line under the first User-agent: * group. The rest of the file is
- * Rank Math's saved text, unchanged. Runs after Rank Math (10) and before the staging copy's block-all (99).
- *
- * @param string $txt robots.txt text.
- */
-function rankweb_seo_robots_content_signal( $txt ) {
-	$txt = (string) $txt;
-	if ( ! rankweb_robots_txt_extras_on( 'RANKWEB_ROBOTS_CONTENT_SIGNAL' ) ) {
-		return $txt; // another SEO plugin owns robots.txt, or the setting is off (the default).
-	}
-	$signal = (string) apply_filters( 'aw_seo_content_signal', 'search=yes, ai-input=yes, ai-train=no' );
-	if ( '' === $signal || preg_match( '/^\s*Content-Signal\s*:/mi', $txt ) ) {
-		return $txt;
-	}
-	$line = 'Content-Signal: ' . $signal;
-	if ( preg_match( '/^User-agent:\s*\*\s*$/mi', $txt, $m, PREG_OFFSET_CAPTURE ) ) {
-		$at = $m[0][1] + strlen( $m[0][0] );
-		return substr( $txt, 0, $at ) . "\n" . $line . substr( $txt, $at );
-	}
-	return "User-agent: *\n" . $line . "\n\n" . $txt;
-}
-add_filter( 'robots_txt', 'rankweb_seo_robots_content_signal', 50 );
 
 /* ---------- Sitemaps: what a rule above keeps out of the index stays out of Rank Math's sitemaps ---------- */
 
@@ -240,7 +199,7 @@ function rankweb_sitemap_unreachable_listings() {
 		$wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
 			LEFT JOIN {$wpdb->postmeta} s ON s.post_id = p.ID AND s.meta_key = 'directoryweb_contact_score'
-			WHERE p.post_type = 'aw_listing' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
+			WHERE p.post_type = '" . esc_sql( rankweb_type( 'listing' ) ) . "' AND p.post_status = 'publish' AND ( s.meta_value IS NULL OR s.meta_value = '' OR s.meta_value = '0' )
 			AND NOT EXISTS ( SELECT 1 FROM {$wpdb->postmeta} m WHERE m.post_id = p.ID AND m.meta_key IN ( " . implode( ', ', array_fill( 0, count( $keys ), '%s' ) ) . " ) AND TRIM( m.meta_value ) <> '' )",
 			$keys
 		)
@@ -262,9 +221,9 @@ add_filter(
 		if ( ! $obj instanceof WP_Post ) {
 			return $url;
 		}
-		$closed      = 'aw_opportunity' === $obj->post_type && function_exists( 'kits_retention_state' ) && kits_retention_state( $obj );
+		$closed      = rankweb_is_type( $obj->post_type, 'opportunity' ) && function_exists( 'kits_retention_state' ) && kits_retention_state( $obj );
 		$merged      = (int) get_post_meta( $obj->ID, 'aw_merged_into', true ) > 0; // a same-story duplicate (normally private already)
-		$unreachable = 'aw_listing' === $obj->post_type && isset( rankweb_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
+		$unreachable = rankweb_is_type( $obj->post_type, 'listing' ) && isset( rankweb_sitemap_unreachable_listings()[ (int) $obj->ID ] ); // noindex (above)
 		if ( '' === (string) $obj->post_name || $closed || $merged || $unreachable || in_array( (int) $obj->ID, rankweb_seo_preview_ids(), true ) ) {
 			return false;
 		}
@@ -282,13 +241,13 @@ add_filter(
 add_filter(
 	'rank_math/sitemap/exclude_post_type',
 	function ( $exclude, $type ) {
-		if ( $exclude || 'aw_opportunity' !== $type || ! function_exists( 'kits_retention_state' ) || ! function_exists( 'rankweb_seo_cached' ) ) {
+		if ( $exclude || ! rankweb_is_type( $type, 'opportunity' ) || ! function_exists( 'kits_retention_state' ) || ! function_exists( 'rankweb_seo_cached' ) ) {
 			return $exclude;
 		}
 		$open = rankweb_seo_cached(
 			'sitemap_open_opportunities|' . wp_date( 'Y-m-d' ), // closing is by date: counted again each day
 			function () {
-				$ids = get_posts( array( 'post_type' => 'aw_opportunity', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
+				$ids = get_posts( array( 'post_type' => rankweb_type( 'opportunity' ), 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
 				foreach ( $ids as $id ) {
 					if ( ! kits_retention_state( $id ) ) {
 						return 1;

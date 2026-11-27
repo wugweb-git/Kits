@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.3.7
+Stable tag: 2.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -83,6 +83,20 @@ Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Mo
 
 == Changelog ==
 
+= 2.4.1 =
+* The plugin no longer names any content type of one site. It asks for a role (news, library, campaign, opportunity, listing, press) through `includes/post-type-roles.php` (`rankweb_type()`, `rankweb_is_type()`, `rankweb_types_with()`, `rankweb_is_singular()`, `rankweb_sql_in_types()`); the site says which type plays which role with the new filter `rankweb_post_type_roles` (default: no roles, so every per-type rule is inactive). The listing role comes from DirectoryWeb's `directoryweb_post_type()` when it is loaded. The per-type rules (title, description, schema, sitemap, robots, breadcrumb) are still written in the plugin and now keyed by role; they were not moved into the site layer.
+* The Animal Writes slugs are supplied from `sites/animalwrites/rankweb/site.php`. The filtered-view title words (state and publisher shapes) are no longer defaulted in code; the site layer already supplies them.
+* `includes/legacy-aliases.php` (the earlier `aw_*` function names and `AW_SEO_EXTRAS_DIR`) moved to `sites/animalwrites/rankweb/legacy-aliases.php`; the plugin has no `aw_` aliases. SourceWeb 0.4.1 calls the `rankweb_*` functions.
+* New neutral filters: `rankweb_post_type_roles`, `rankweb_listing_identifier_fields` (registration numbers as schema identifiers; default only the general registration number) and `rankweb_analysis_excluded_fields` (stored identifier fields the analyzer ignores; default empty). The India register fields (12A, 80G, FCRA, NGO Darpan ID, AWBI code, NGO Base URL) left the plugin's lists; the site layer re-adds them.
+* Constants that held type lists (`AW_FAQ_SUBJECT_TYPES`, `AW_SEO_KP_EVERGREEN`) are now functions (`rankweb_faq_subject_types()`, `rankweb_seo_kp_evergreen_types()`).
+
+= 2.4.0 =
+* Site-only code moved out. Code that existed for one site is no longer in the plugin: the Google News sitemap (`/news-sitemap.xml`) and its robots.txt line, the robots.txt Content-Signal line, the FAQ questions built from one site's content, the section-hub and press-list schema, a listing's recognition code and listing-type schema map, and the one site's Directory wording. A site that wants them supplies them through filters (`rankweb_hubs`, `rankweb_wording`, `rankweb_listing_schema_types`, `rankweb_listing_schema_node`, `rankweb_listing_description`, `rankweb_collection_page_nodes`, `rankweb_page_schema_nodes`, `rankweb_filtered_place_title_words`, `rankweb_faq_all_url`, `rankweb_country_code`, `rankweb_currency`, `rankweb_schedule_timezone`).
+* Settings → Robots rules no longer has the two switches for the Content-Signal line and the news sitemap line (84 settings fields, was 86). A saved value of either is ignored and is dropped the next time the Robots tab is saved.
+* No India defaults: the Open Graph locale follows the site language; the country code in addresses and legislation, the currency of free events and the time zone of monthly events are left out until a site sets them with the filters above.
+* The FAQ module no longer loads a second file (`faq-data.php`); without a site's questions it asks for none.
+* Only wording and notes touched in the rest; titles, descriptions and structured data of other sites are unchanged.
+
 = 2.3.7 =
 - Wording only: a code note in the press-list schema no longer names a particular site. No change to the output.
 
@@ -132,7 +146,7 @@ Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Mo
 * The block editor sidebar now changes what is printed: meta description, noindex and a schema type RankWeb can write (Article, BlogPosting, NewsArticle, WebPage).
 * Overview, Modules, Settings, FAQ and Insights screens work without Kits Core.
 * Another SEO plugin (Yoast SEO, SEOPress, All in One SEO) is detected and RankWeb leaves the page head to it.
-* No site-specific values: the site's own name, language and profiles are used. Animal Writes values load only when Animal Writes Core is active.
+* No site-specific values: the site's own name, language and profiles are used. Values for one particular site belong in that site's own code, which feeds them in through RankWeb's filters.
 * Fixed: the site tagline was copied into the description of every short post.
 
 = 2.1.0 =

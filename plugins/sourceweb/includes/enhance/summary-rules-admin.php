@@ -48,11 +48,12 @@ function sourceweb_summary_below_counts() {
 	}
 	$rules = sourceweb_summary_rules();
 	$c     = array();
-	$sets  = array(
-		'news'     => array( 'post_type' => 'aw_news' ),
-		'library'  => array( 'post_type' => 'aw_legal' ),
-		'research' => array( 'post_type' => 'post', 'tag' => 'research' ),
-	);
+	$sets  = array( 'research' => array( 'post_type' => 'post', 'tag' => 'research' ) );
+	foreach ( array( 'news' => 'news', 'library' => 'library' ) as $name => $role ) {
+		if ( '' !== sourceweb_type( $role ) ) { // a role with no type on this site has no count
+			$sets[ $name ] = array( 'post_type' => sourceweb_type( $role ) );
+		}
+	}
 	foreach ( $sets as $name => $args ) {
 		$ids  = get_posts( $args + array( 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
 		$min  = (int) $rules['sections'][ $name ]['min_words'];
@@ -99,8 +100,8 @@ function sourceweb_summary_rules_sanitize( $in ) {
 			if ( ! isset( $types[ $name ] ) || ! is_array( $sec ) ) {
 				continue;
 			}
-			if ( isset( AW_RULES_SUMMARY_ALIAS[ $name ] ) ) {
-				$new['sections'][ $name ]['alias'] = AW_RULES_SUMMARY_ALIAS[ $name ];
+			if ( isset( sourceweb_rules_summary_alias()[ $name ] ) ) {
+				$new['sections'][ $name ]['alias'] = sourceweb_rules_summary_alias()[ $name ];
 			} elseif ( ! empty( $sec['inherit'] ) ) {
 				continue; // inherits News: no rule of its own is stored
 			} else {

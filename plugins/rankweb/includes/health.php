@@ -27,7 +27,7 @@ function rankweb_seo_watched_endpoints() {
 	if ( array_intersect( array( 'llms', 'llms-txt', 'llms_txt' ), $rm_modules ) ) {
 		$out['/llms.txt'] = '^llms\.txt$';
 	}
-	if ( rankweb_seo_module_on( 'sitemap' ) && post_type_exists( 'aw_listing' ) ) { // no directory, no directory sitemap to watch
+	if ( rankweb_seo_module_on( 'sitemap' ) && '' !== rankweb_type( 'listing' ) && post_type_exists( rankweb_type( 'listing' ) ) ) { // no directory, no directory sitemap to watch
 		$out['/directory-sitemap.xml'] = '([^/]+?)-sitemap([0-9]+)?\.xml$'; // Rank Math's rule for every {type}-sitemap.xml
 	}
 	return $out;

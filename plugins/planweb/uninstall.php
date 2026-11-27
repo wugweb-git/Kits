@@ -18,7 +18,7 @@
  * Never deleted, even when ticked:
  * - The calendar entries (posts), their list values (terms), users, attachments and any post meta.
  * - The capabilities PlanWeb gave to roles (they are part of the users' roles; switching PlanWeb off removes them).
- * - Animal Writes Core's Kits → Dates list (aw_team_dates and aw_team_dates_links_note_1111), which PlanWeb only
+ * - An earlier Dates list that a site names through the filter planweb_import_source (its option), which PlanWeb only
  *   reads when it imports.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/planweb-uninstall-<YYYYmmdd-His>.jsonl.gz

@@ -10,8 +10,30 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// The earlier aw_* function names (they moved here from the plugin; each calls the rankweb_* function when it runs).
+require_once __DIR__ . '/legacy-aliases.php';
+
+// Which content type plays which role for RankWeb: the plugin names none of them.
+add_filter(
+	'rankweb_post_type_roles',
+	fn() => array(
+		'news'        => 'aw_news',
+		'library'     => 'aw_legal',
+		'campaign'    => 'aw_campaign',
+		'opportunity' => 'aw_opportunity',
+		'listing'     => 'aw_listing',
+		'press'       => 'aw_press',
+	)
+);
+
 // Defined before RankWeb loads (plugins_loaded 5), so the plugin's stand-ins step aside.
 require_once __DIR__ . '/programmatic.php';
+
+// What RankWeb 2.3.7 carried for this site and 2.4.0 no longer does (each file says where it came from).
+require_once __DIR__ . '/listings.php';          // listing schema types and AWBI, hubs, Directory wording, country code.
+require_once __DIR__ . '/schema-hubs.php';       // section-hub and Media & PR list schema, "mentions" on articles.
+require_once __DIR__ . '/news-and-robots.php';   // /news-sitemap.xml, its robots.txt line, the Content-Signal line.
+require_once __DIR__ . '/faq-data.php';          // the FAQ module's questions and rules for this site's content.
 
 // Defaults the plugin no longer ships: content types, hub and term titles, directory index list, brand words.
 add_filter(
@@ -33,6 +55,8 @@ add_filter( 'rankweb_contact_email', fn() => 'contact@animalwrites.in' );
 add_filter( 'rankweb_news_publication_name', fn() => 'Animal Writes' );
 add_filter( 'rankweb_own_hosts', fn( $h ) => array_merge( $h, array( 'animalwrites.in' ) ) );
 add_filter( 'rankweb_country_name', fn() => 'India' );
+add_filter( 'rankweb_currency', fn() => 'INR' ); // free events: priceCurrency
+add_filter( 'rankweb_schedule_timezone', fn() => 'Asia/Kolkata' ); // monthly events' scheduleTimezone
 add_filter( 'rankweb_remote_job_country', fn() => 'India' );
 add_filter( 'rankweb_front_page_title', fn() => 'Animal Writes – Animal welfare news, law and help in India' );
 add_filter( 'rankweb_about_page_title', fn() => 'About Animal Writes' );

@@ -2,7 +2,7 @@
 /**
  * Library PDFs: which government documents we may host, the mirror that copies a gov.in / nic.in PDF (or one from the
  * open judgment datasets) into the Media Library, the refetch when the owner allows hosting (aw_doc_host_ok), and
- * egazette.gov.in's missing certificates. Moved here from Animal Writes Core (includes/media.php) on 18 Nov 2026: it is
+ * egazette.gov.in's missing certificates. Moved here from the site core plugin (includes/media.php) on 18 Nov 2026: it is
  * sourcing. The viewer and preview on the item's page are the site layer's (assets/site/includes/library-documents.php).
  * Meta keys (aw_file_id, aw_file_archived, aw_doc_host_ok, aw_source_url) are unchanged.
  *
@@ -69,7 +69,7 @@ function sourceweb_doc_refetch( $post_id ) {
 
 /** Setting aw_doc_host_ok to 1 (REST or the edit screen) fetches the PDF at once. */
 function sourceweb_doc_host_ok_changed( $meta_id, $post_id, $key, $value ) {
-	if ( 'aw_doc_host_ok' === $key && '1' === (string) $value && 'aw_legal' === get_post_type( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+	if ( 'aw_doc_host_ok' === $key && '1' === (string) $value && sourceweb_is_type( get_post_type( $post_id ), 'library' ) && current_user_can( 'edit_post', $post_id ) ) {
 		sourceweb_doc_refetch( (int) $post_id );
 	}
 }

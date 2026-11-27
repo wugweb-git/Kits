@@ -4,13 +4,12 @@
  * called from outside by more than one trigger, and the first to arrive does the work (WordPress locks the run):
  * - hostinger: the server cron in hPanel, every 5 minutes (/usr/bin/php .../public_html/wp-cron.php, PHP from the shell)
  * - github: the workers repository's "WordPress cron" workflow, every 15 minutes, often late (adds ?aw_tick=)
- * - uptimerobot / cron-job.org: an outside monitor calling https://animalwrites.in/wp-cron.php
+ * - uptimerobot / cron-job.org: an outside monitor calling https://example.com/wp-cron.php
  * Each call is recorded per trigger (last 48 hours). No run for 30 minutes is an ingestion-watchdog problem
  * (relevance.php), checked by any request that reaches PHP, so the alert does not depend on cron or GitHub. A dashboard
  * box shows each trigger's last run, runs in 24 hours and longest gap.
  *
- * Moved from Animal Writes Core (19 Nov 2026) with new kits_ names; the options (aw_cron_runs, aw_dispatch_log), the
- * dashboard box id and the ?aw_tick= flag keep their names. The old aw_ functions are thin wrappers in ops/compat.php.
+ * The options (aw_cron_runs, aw_dispatch_log), the dashboard box id and the ?aw_tick= flag keep their names.
  *
  * @package kits-core
  */
@@ -186,13 +185,13 @@ add_action(
 );
 
 /*
- * Sourcing on time (owner, 20 Oct 2026): GitHub's own schedule runs late (6–8 of 8 runs a day, gaps up to 6.5 hours),
- * so Hostinger's server cron starts the workers through GitHub's API every 3 hours:
- *   cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp eval 'kits_dispatch_workflow("sourcing.yml", array("dry_run" => "false"));'
- * A run started this way begins at once. GitHub's schedule stays as the backup; the workflow's concurrency group keeps
- * runs from overlapping. Since 31 Oct 2026 `wp aw workers-tick` (aw-sourcing workers-tick.php) starts every scheduled
- * workflow this way, replacing the sourcing-only job above. The token is a fine-grained GitHub token for wugweb-git/animal-writes-workers only, with
- * Actions read and write, kept in wp-config.php as AW_GITHUB_DISPATCH_TOKEN (never in a repository).
+ * Starting scheduled workflows on time: GitHub's own schedule can run late, so a server cron may start a workflow
+ * through GitHub's API instead:
+ *   wp eval 'kits_dispatch_workflow("sourcing.yml", array("dry_run" => "false"));'
+ * A run started this way begins at once; GitHub's schedule stays as the backup, and the workflow's concurrency group
+ * keeps runs from overlapping. The repository comes from the filter kits_dispatch_repo. The token is a fine-grained
+ * GitHub token for that repository only, with Actions read and write, kept in wp-config.php as AW_GITHUB_DISPATCH_TOKEN
+ * (never in a repository).
  */
 
 /**
@@ -204,7 +203,7 @@ add_action(
  */
 function kits_dispatch_workflow( $file, $inputs = array() ) {
 	$token = defined( 'KITS_GITHUB_DISPATCH_TOKEN' ) ? (string) KITS_GITHUB_DISPATCH_TOKEN : ( defined( 'AW_GITHUB_DISPATCH_TOKEN' ) ? (string) AW_GITHUB_DISPATCH_TOKEN : '' ); // the constant the site already has in wp-config.php keeps working
-	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started (Animal Writes: assets/site/ops.php)
+	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started
 	$file  = sanitize_file_name( $file );
 	if ( '' === $token ) {
 		$res = new WP_Error( 'aw_dispatch_token', 'AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php' );

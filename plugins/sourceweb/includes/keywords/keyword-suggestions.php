@@ -151,7 +151,7 @@ function sourceweb_sourcing_suggest_apply( $op, array $qs ) {
 				$bit = array( 'include' => SOURCEWEB_KW_ROLE_INCLUDE, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH )[ $op ];
 				$id  = insightweb_kw_id_by_norm( insightweb_si_norm( $q ) );
 				$was = $id ? (int) insightweb_kw_get( $id )['roles'] : 0;
-				$r   = sourceweb_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => SOURCEWEB_KW_ROLE_EXCLUDE === $bit ? array() : array( 'aw_news' ) ) );
+				$r   = sourceweb_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => SOURCEWEB_KW_ROLE_EXCLUDE === $bit ? array() : sourceweb_types( array( 'news' ) ) ) );
 				if ( ! is_wp_error( $r ) && ! ( $was & $bit ) ) {
 					++$n;
 					sourceweb_src_log( 'keywords', $q . ': ' . ucfirst( $op ) . ' (suggested by Search Insights)', '', ucfirst( $op ) );

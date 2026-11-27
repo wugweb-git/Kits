@@ -2,13 +2,12 @@
 /**
  * Places from the Local Government Directory (LGD), not from a WordPress list (8 Oct 2026).
  *
- * - Reference: data/lgd.json, a read-only copy of the LGD export (states and districts with their codes). Nobody edits
- *   it on the site; when LGD changes the file is replaced (tools/lgd/build_lgd.py) and tools/lgd/check.php lists items
+ * - Reference: the places file (the `directoryweb_places_file` filter; the plugin ships none), a read-only copy of the LGD export (states and districts with their codes). Nobody edits
+ *   it on the site; when LGD changes the file is replaced and tools/lgd/check.php lists items
  *   whose codes no longer exist. Items are never changed silently.
  * - Each item stores codes, not names: aw_state_code, aw_district_code (an opportunity may have more than one of each),
  *   optional aw_pincode and aw_place_city (free text, display only, never a page).
- * - Entering a place: a PIN code fills State and District (India Post, matched to LGD names, with a spelling map);
- *   without a PIN, State → District dropdowns built from the file. Codes that are not in the file are not saved.
+ * - Entering a place: State → District dropdowns built from the file (a site can add a postal code lookup). Codes that are not in the file are not saved.
  * - Directory pages /directory/{state}/{district}/ read the slug from the file; URL names are the ones the WordPress
  *   location list had, so every URL stays the same. Counts are stored and recalculated when an item is saved.
  * - The WordPress location list (taxonomy aw_city) was copied into the codes once and is no longer registered;
@@ -49,13 +48,27 @@ const AW_DISTRICT_COMMON_NAMES = array(
 
 /* ---------- Reference data ---------- */
 
-/** The LGD file, indexed. */
+/**
+ * The places data file: states and districts with their codes (the Local Government Directory's export, for India), as
+ * JSON { source, version, aliases, states: [ {code, id, name, slug, lgd, ut} ], districts: [ {code, id, state, name, slug,
+ * lgd} ] }. The plugin ships none: a site gives its own path with the `directoryweb_places_file` filter, and with no file the
+ * place lists are empty. Another country ships its own file.
+ *
+ * @return string Absolute path, or '' when there is none.
+ */
+function directoryweb_places_file(): string {
+	$f = apply_filters( 'directoryweb_places_file', '' );
+	return is_string( $f ) && '' !== $f && is_readable( $f ) ? $f : '';
+}
+
+/** The places file, indexed. */
 function directoryweb_lgd() {
 	static $d = null;
 	if ( null !== $d ) {
 		return $d;
 	}
-	$raw = json_decode( (string) file_get_contents( DIRECTORYWEB_DIR . 'data/lgd.json' ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+	$file = directoryweb_places_file();
+	$raw  = '' !== $file ? json_decode( (string) file_get_contents( $file ), true ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
 	$d   = array( 'states' => array(), 'districts' => array(), 'slugs' => array(), 'ids' => array(), 'by_state' => array(), 'aliases' => $raw['aliases'] ?? array(), 'version' => $raw['version'] ?? '' );
 	foreach ( (array) ( $raw['states'] ?? array() ) as $s ) {
 		$p = (object) array( 'term_id' => (int) ( $s['id'] ? $s['id'] : 900000 + $s['code'] ), 'code' => (int) $s['code'], 'slug' => $s['slug'], 'name' => $s['name'], 'lgd' => $s['lgd'], 'parent' => 0, 'state' => (int) $s['code'], 'kind' => 'state', 'taxonomy' => 'aw_place' );
@@ -200,10 +213,20 @@ function directoryweb_item_place_names( $id ) {
  *
  * @param int    $id      Post ID.
  * @param array  $places  List of [state, district].
- * @param string $pincode Optional 6-digit PIN code ('' to clear, null to leave as is).
+ * @param string $pincode Optional postal code ('' to clear, null to leave as is; see directoryweb_postal_code_valid()).
  * @param string $city    Optional free-text city (null to leave as is).
  * @return bool
  */
+/**
+ * Whether a postal code may be stored: letters, digits, spaces and hyphens, 2 to 12 characters. A country's own rule
+ * (a site that covers one country) comes through the `directoryweb_postal_code_valid` filter.
+ *
+ * @param string $code Postal code.
+ */
+function directoryweb_postal_code_valid( $code ): bool {
+	return (bool) apply_filters( 'directoryweb_postal_code_valid', (bool) preg_match( '/^[A-Za-z0-9][A-Za-z0-9 -]{1,11}$/', (string) $code ), (string) $code );
+}
+
 function directoryweb_set_item_places( $id, $places, $pincode = null, $city = null ) {
 	$states    = array();
 	$districts = array();
@@ -221,7 +244,7 @@ function directoryweb_set_item_places( $id, $places, $pincode = null, $city = nu
 			$districts[ $d->code ] = $d->code;
 		}
 	}
-	if ( null !== $pincode && '' !== $pincode && ! preg_match( '/^[1-9]\d{5}$/', $pincode ) ) {
+	if ( null !== $pincode && '' !== $pincode && ! directoryweb_postal_code_valid( $pincode ) ) {
 		return false;
 	}
 	delete_post_meta( $id, 'aw_state_code' );
@@ -456,73 +479,6 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$fail ? WP_CLI::error( $msg ) : WP_CLI::success( $msg );
 		}
 	);
-}
-
-/* ---------- PIN code → State and District (India Post, matched to LGD) ---------- */
-
-/**
- * Whether the outside PIN code lookup (India Post, api.postalpincode.in) may be called. Off by default: a generic
- * directory has no use for Indian PIN codes and sends nothing to that service. A site that wants it (animalwrites.in)
- * returns true from the `directoryweb_pin_lookup_enabled` filter.
- */
-function directoryweb_pin_lookup_enabled(): bool {
-	return (bool) apply_filters( 'directoryweb_pin_lookup_enabled', false );
-}
-
-/**
- * Look up a PIN code: India Post gives the post office's district and state names; they are matched to the LGD file.
- * Returns [state, district, state_slug, district_slug, state_name, district_name, note] or an error message.
- *
- * @param string $pin PIN code.
- * @return array|string
- */
-function directoryweb_pin_lookup( $pin ) {
-	$pin = preg_replace( '/\D/', '', (string) $pin );
-	if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
-		return 'Enter a 6-digit PIN code, like 682011';
-	}
-	if ( ! directoryweb_pin_lookup_enabled() ) {
-		return 'PIN code lookup is not switched on for this site. Choose your state and district instead.';
-	}
-	$data = get_transient( 'aw_pin_' . $pin );
-	if ( false === $data ) {
-		$r = wp_remote_get( 'https://api.postalpincode.in/pincode/' . $pin, array( 'timeout' => 8 ) );
-		if ( is_wp_error( $r ) || 200 !== wp_remote_retrieve_response_code( $r ) ) {
-			return 'Couldn\'t find this PIN. Choose your state and district instead.';
-		}
-		$data = json_decode( wp_remote_retrieve_body( $r ), true );
-		set_transient( 'aw_pin_' . $pin, $data, WEEK_IN_SECONDS );
-	}
-	$po       = $data[0]['PostOffice'][0] ?? null;
-	$state    = $po ? directoryweb_place_state_by_name( (string) ( $po['State'] ?? '' ) ) : null;
-	$district = $state ? directoryweb_place_district_by_name( (string) ( $po['District'] ?? '' ), $state ) : null;
-	if ( ! $state ) {
-		return 'Couldn\'t find this PIN. Choose your state and district instead.';
-	}
-	return array(
-		'state'         => $state->code,
-		'district'      => $district ? $district->code : 0,
-		'state_slug'    => $state->slug,
-		'district_slug' => $district ? $district->slug : '',
-		'state_name'    => $state->name,
-		'district_name' => $district ? $district->name : '',
-		'note'          => $district ? '' : 'Choose your district.',
-	);
-}
-
-// The same lookup for public forms (volunteer, claim): no login, a few per minute per visitor.
-add_action( 'wp_ajax_nopriv_aw_pin', 'directoryweb_pin_public' );
-add_action( 'wp_ajax_aw_pin', 'directoryweb_pin_public' );
-function directoryweb_pin_public() {
-	nocache_headers();
-	$key = 'aw_pin_rl_' . md5( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-	$n   = (int) get_transient( $key );
-	if ( $n >= 30 ) {
-		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
-	}
-	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
-	$r = directoryweb_pin_lookup( sanitize_text_field( (string) wp_unslash( $_GET['pin'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	is_array( $r ) ? wp_send_json_success( $r ) : wp_send_json_error( $r );
 }
 
 /* ---------- Display ---------- */

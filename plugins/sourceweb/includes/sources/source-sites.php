@@ -428,7 +428,7 @@ add_action(
 			array(
 				'id'      => 'aw-sources-feeds',
 				'title'   => 'Feeds',
-				'content' => '<p>News: RSS feeds and Google News searches. Library: where Library documents and legal news come from (Gazette, AWBI and court-judgment sources need code to read; only their name and on/off can change here). Opportunity: where opportunities come from (only name and on/off; new kinds of site need code).</p>'
+				'content' => '<p>News: RSS feeds and Google News searches. Library: where Library documents and legal news come from (government gazette, official body and court-judgment sources need code to read; only their name and on/off can change here). Opportunity: where opportunities come from (only name and on/off; new kinds of site need code).</p>'
 					. '<p>"Keyword check" keeps only items with a word from the Keywords tab (an include word or an animal word). A feed can be deleted; a source read by code cannot (it needs code), but it can be turned off.</p>',
 			)
 		);

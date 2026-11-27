@@ -3,19 +3,19 @@
  * Branded server error pages: the PHP fatal error page (500) and the update maintenance page (503).
  *
  * WordPress only reads these as drop-ins in wp-content (php-error.php and maintenance.php), which is outside what a
- * deploy updates, so the sources live in this plugin's site folder assets/site/dropins/ and are copied there. A copy is made when the
- * file is missing or differs from the plugin's version, on the first web request after a deploy (when the deployed
- * commit changes, see deploy-purge.php) and on admin screens. A file at that path without the marker
- * "Animal Writes error page" belongs to something else and is never replaced. Nothing here can stop a request: if
- * wp-content is not writable the copy is skipped and the result is kept in the option aw_error_pages.
+ * deploy updates, so a site's own pages live in a folder of its own (the filter kits_error_pages_dir names it) and are
+ * copied there. A copy is made when the file is missing or differs from the source, on the first web request after a
+ * deploy (when the deployed commit changes, see deploy-purge.php) and on admin screens. A file at that path without the
+ * marker belongs to something else and is never replaced. Nothing here can stop a request: if wp-content is not
+ * writable the copy is skipped and the result is kept in the option aw_error_pages.
  *
- * Moved from Animal Writes Core (18 Nov 2026) with the dropins/ folder: the marker, the option aw_error_pages and the
- * transient aw_error_pages_checked keep their names, so the pages already in wp-content stay recognised as ours and
- * are updated in place. The old aw_ functions stay at the end of this file as thin wrappers until nothing calls them.
+ * The marker is a compatibility key: pages already installed carry it and are recognised as ours by it. It is
+ * KITS_ERROR_PAGE_MARKER unless a site names its own with the filter kits_error_page_marker, so pages that carry an
+ * older marker keep being updated in place. The option aw_error_pages and the transient aw_error_pages_checked keep
+ * their names.
  *
- * Site-only (owner, 18 Nov 2026): the Animal Writes pages and pictures are in assets/site/, which tools/build-dist.py
- * leaves out of every Kits zip. Where that folder is not there, nothing is copied, no option is written and no notice
- * shows: other sites keep WordPress's own error pages.
+ * Without a pages folder (the plugin ships none), nothing is copied, no option is written and no notice shows: the
+ * site keeps WordPress's own error pages.
  *
  * @package kits-core
  */
@@ -24,23 +24,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Marker that every page in dropins/ carries; only files with it are replaced. */
-const KITS_ERROR_PAGE_MARKER = 'Animal Writes error page';
+/** Default marker that every drop-in carries; only files with it are replaced (see kits_error_page_marker()). */
+const KITS_ERROR_PAGE_MARKER = 'Kits error page';
 
-/** Drop-in file names (the same in assets/site/dropins/ and wp-content/). */
+/** Drop-in file names (the same in the site's pages folder and wp-content/). */
 const KITS_ERROR_PAGE_FILES = array( 'php-error.php', 'maintenance.php' );
 
-/** The site folder that holds this site's error pages (left out of Kits builds). */
+/** Default folder of a site's error pages: none ships with the plugin (see kits_error_pages_dir()). */
 const KITS_ERROR_PAGE_DIR = KITS_CORE_DIR . 'assets/site/dropins/';
 
+/** The marker the drop-ins carry: KITS_ERROR_PAGE_MARKER, or the one a site names (an older marker keeps installed pages ours). */
+function kits_error_page_marker(): string {
+	$m = (string) apply_filters( 'kits_error_page_marker', KITS_ERROR_PAGE_MARKER );
+	return '' !== $m ? $m : KITS_ERROR_PAGE_MARKER;
+}
+
+/** The folder that holds this site's error pages (with a trailing slash): KITS_ERROR_PAGE_DIR, or the one a site names. */
+function kits_error_pages_dir(): string {
+	return trailingslashit( (string) apply_filters( 'kits_error_pages_dir', KITS_ERROR_PAGE_DIR ) );
+}
+
 /**
- * Whether this site has its own error pages (the site folder with at least one of the drop-ins).
+ * Whether this site has its own error pages (its pages folder with at least one of the drop-ins).
  *
  * @return bool
  */
 function kits_error_pages_here(): bool {
 	foreach ( KITS_ERROR_PAGE_FILES as $name ) {
-		if ( is_readable( KITS_ERROR_PAGE_DIR . $name ) ) {
+		if ( is_readable( kits_error_pages_dir() . $name ) ) {
 			return true;
 		}
 	}
@@ -58,7 +69,7 @@ function kits_error_pages_sync() {
 	}
 	$status = array();
 	foreach ( KITS_ERROR_PAGE_FILES as $name ) {
-		$status[ $name ] = kits_error_page_sync_one( KITS_ERROR_PAGE_DIR . $name, WP_CONTENT_DIR . '/' . $name );
+		$status[ $name ] = kits_error_page_sync_one( kits_error_pages_dir() . $name, WP_CONTENT_DIR . '/' . $name );
 	}
 	if ( get_option( 'aw_error_pages' ) !== $status ) {
 		update_option( 'aw_error_pages', $status, false );
@@ -75,7 +86,7 @@ function kits_error_pages_sync() {
  */
 function kits_error_page_sync_one( $src, $dst ) {
 	$new = is_readable( $src ) ? (string) file_get_contents( $src ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
-	if ( '' === $new || false === strpos( $new, KITS_ERROR_PAGE_MARKER ) ) {
+	if ( '' === $new || false === strpos( $new, kits_error_page_marker() ) ) {
 		return 'no-source';
 	}
 	$exists = file_exists( $dst );
@@ -84,7 +95,7 @@ function kits_error_page_sync_one( $src, $dst ) {
 		if ( $old === $new ) {
 			return 'current';
 		}
-		if ( false === strpos( $old, KITS_ERROR_PAGE_MARKER ) ) {
+		if ( false === strpos( $old, kits_error_page_marker() ) ) {
 			return 'foreign'; // another plugin's or a person's drop-in: leave it alone.
 		}
 	}
@@ -139,29 +150,3 @@ add_action(
 		}
 	}
 );
-
-/*
- * The old names (Animal Writes Core), kept as thin wrappers until nothing calls them.
- */
-if ( ! function_exists( 'aw_error_pages_sync' ) ) {
-	/**
-	 * Old name of kits_error_pages_sync().
-	 *
-	 * @return array<string,string>
-	 */
-	function aw_error_pages_sync() {
-		return kits_error_pages_sync();
-	}
-}
-if ( ! function_exists( 'aw_error_page_sync_one' ) ) {
-	/**
-	 * Old name of kits_error_page_sync_one().
-	 *
-	 * @param string $src Source file in the plugin.
-	 * @param string $dst Drop-in path in wp-content.
-	 * @return string
-	 */
-	function aw_error_page_sync_one( $src, $dst ) {
-		return kits_error_page_sync_one( $src, $dst );
-	}
-}

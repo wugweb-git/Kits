@@ -32,10 +32,10 @@
  *   library) and any post meta.
  * - The AI model rows and keys (aw_ai_models, aw_ai_keys): keys are removed only by hand.
  * - Data other plugins read: the sourcing lists aw_sources and the publishers sourceweb_publishers (SourceWeb's since
- *   18 Nov 2026; Animal Writes Core, DirectoryWeb and InsightWeb read them), sourceweb_relevance, the keyword tables
+ *   18 Nov 2026; the site core plugin, DirectoryWeb and InsightWeb read them), sourceweb_relevance, the keyword tables
  *   ({prefix}aw_si_keywords, {prefix}insightweb_si_kw_map) and aw_kw_db (InsightWeb's), and the hourly aw_fetch_favicons event
- *   (taken off when SourceWeb is deactivated; InsightWeb books it too); Animal Writes Core's aw_social_on and aw_social_show
- *   (SourceWeb's Settings also saves them); the aw_research_citation event (its work is Animal Writes Core's).
+ *   (taken off when SourceWeb is deactivated; InsightWeb books it too); the site core plugin's aw_social_on and aw_social_show
+ *   (SourceWeb's Settings also saves them); the aw_research_citation event (its work is the site core plugin's).
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/aw-sourcing-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (includes/lifecycle/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of

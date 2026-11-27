@@ -269,5 +269,5 @@ function sourceweb_news_type() {
 	return (string) reset( $t );
 }
 
-/* ---------- The old names (Animal Writes Core, InsightWeb and SourceWeb's own files still call them) ---------- */
+/* ---------- The old names (the site core plugin, InsightWeb and SourceWeb's own files still call them) ---------- */
 

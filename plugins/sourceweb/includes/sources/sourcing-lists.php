@@ -6,7 +6,7 @@
  * (sourceweb-ui.php).
  *
  * The lists live in the option aw_sources, in the same shape as the workers' sources.yaml (defaults, keywords,
- * sources, categories, press), seeded once from it (data/sources-seed.json). The workers read them at the start of every
+ * sources, categories, press), empty until a site supplies a starter list (filter sourceweb_starter_sources). The workers read them at the start of every
  * run from the private, authenticated policy endpoint (aw/v1/sourcing-policy) once "Workers use these lists" is on;
  * until then, and whenever the site cannot be reached, they use sources.yaml. API keys stay in GitHub secrets.
  *
@@ -16,58 +16,6 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-/** Seed (once): blocked publishers from the owner's list (S3.5). */
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_sourcing_seed_s35' ) || ! function_exists( 'sourceweb_publishers' ) || ! sourceweb_animal_writes_context() ) { // Animal Writes' own list: only when that is switched on
-			return;
-		}
-		$pubs = sourceweb_publishers();
-		foreach ( array( 'bollyspice.com', 'storyboard18.com', 'in.eventfaqs.com' ) as $h ) {
-			$pubs[ $h ] = array_merge( array( 'name' => '', 'count' => 0, 'first' => current_time( 'Y-m-d' ), 'last' => '' ), $pubs[ $h ] ?? array(), array( 'status' => 'block' ) );
-		}
-		update_option( SOURCEWEB_PUB_OPTION, $pubs, false );
-		sourceweb_sources_config();
-		update_option( 'aw_sourcing_seed_s35', '1', false );
-	}
-);
-
-/**
- * Seed (once): the High Court judgments source (owner, 25 Oct 2026). The seed file is read only when the lists do not
- * exist yet, so the live lists get it here: added after the Supreme Court source, off, for the owner to turn on in
- * Feeds after checking the workers' dry run. A list that already has it is left as it is.
- */
-add_action(
-	'init',
-	function () {
-		if ( '1' === get_option( 'aw_sourcing_seed_hc' ) || ! function_exists( 'sourceweb_sources_config' ) || ! sourceweb_animal_writes_context() ) { // Animal Writes' own list: only when that is switched on
-			return;
-		}
-		$c       = sourceweb_sources_config();
-		$sources = array_values( (array) ( $c['sources'] ?? array() ) );
-		$ids     = array_column( $sources, 'id' );
-		if ( ! in_array( 'judgments-high-courts', $ids, true ) ) {
-			$hc  = array(
-				'id'            => 'judgments-high-courts',
-				'name'          => 'High Court judgments (open dataset, CC BY 4.0)',
-				'kind'          => 'judgments-hc',
-				'type'          => 'legal',
-				'url'           => 'https://indian-high-court-judgments.s3.ap-south-1.amazonaws.com/', // phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- a source's address to read, not a file the page loads
-				'lookback_days' => 60,
-				'on'            => false,
-				'filter'        => false,
-			);
-			$at  = array_search( 'judgments-supreme-court', $ids, true );
-			$pos = false === $at ? count( $sources ) : $at + 1;
-			array_splice( $sources, $pos, 0, array( $hc ) );
-			$c['sources'] = $sources;
-			update_option( 'aw_sources', $c, false );
-		}
-		update_option( 'aw_sourcing_seed_hc', '1', false );
-	}
-);
 
 /** Google News RSS URL for a search query (India, English). */
 function sourceweb_gnews_url( $query ) {

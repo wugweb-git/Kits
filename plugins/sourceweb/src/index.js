@@ -2334,9 +2334,13 @@ function WorkerForm( { id, onDone } ) {
 							? [
 									[
 										__( 'Workflow', 'sourceweb' ),
-										<a key="f" href={ reg.fileUrl }>
-											<code>{ reg.file }</code>
-										</a>,
+										reg.fileUrl ? (
+											<a key="f" href={ reg.fileUrl }>
+												<code>{ reg.file }</code>
+											</a>
+										) : (
+											<code key="f">{ reg.file }</code>
+										),
 									],
 									[
 										__( 'Schedule (IST)', 'sourceweb' ),
@@ -2581,10 +2585,12 @@ function WorkerRuns( { id, onBack } ) {
 						key: 'commit',
 						label: __( 'Commit', 'sourceweb' ),
 						render: ( r ) =>
-							r.commit ? (
+							r.commit && r.commitUrl ? (
 								<a href={ r.commitUrl }>
 									<code>{ r.commit }</code>
 								</a>
+							) : r.commit ? (
+								<code>{ r.commit }</code>
 							) : (
 								'—'
 							),
@@ -3617,7 +3623,7 @@ function Checks( { id, legend, options, value, onChange } ) {
 /** The view's role, ticked first on Add New Keyword. */
 const VIEW_ROLE = {
 	include: 'Include',
-	animal: 'Animal',
+	animal: 'Topic',
 	context: 'Context',
 	exclude: 'Exclude',
 	search: 'Search',
@@ -6220,7 +6226,7 @@ function FieldRuleForm( { field, onDone } ) {
 			<SelectField
 				label={ __( 'Official source', 'sourceweb' ) }
 				help={ __(
-					'Its value alone is high confidence (the AWBI list for the address and PIN code).',
+					'Its value alone is high confidence (for example an official register that lists the address and PIN code).',
 					'sourceweb'
 				) }
 				value={ f.v.official }

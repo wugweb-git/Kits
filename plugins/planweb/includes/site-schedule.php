@@ -28,8 +28,8 @@ const PLANWEB_SITE_ON = 'planweb_site_on';
 /** Option: the sources that show (post type slugs and "fluentcrm"). Not set: the defaults. */
 const PLANWEB_SITE_TYPES = 'planweb_site_types';
 
-/** Off by default: imported in bulk (hundreds or thousands a month), they would bury the plan. */
-const PLANWEB_SITE_SKIP = array( 'aw_news', 'aw_listing' );
+/** Off by default: none. A site that imports a post type in bulk (hundreds or thousands a month) lists it through the filter planweb_site_skip_types. */
+const PLANWEB_SITE_SKIP = array();
 
 /** The FluentCRM source's slug in the option. */
 const PLANWEB_SITE_FLUENT = 'fluentcrm';
@@ -97,6 +97,20 @@ function planweb_site_choices(): array {
 }
 
 /**
+ * Post types left out of the site schedule by default (before the admin picks any).
+ *
+ * @return string[]
+ */
+function planweb_site_skip_types(): array {
+	/**
+	 * Post types left out of the site schedule by default. Default: PLANWEB_SITE_SKIP (none).
+	 *
+	 * @param string[] $skip Post-type slugs to skip.
+	 */
+	return array_map( 'strval', (array) apply_filters( 'planweb_site_skip_types', PLANWEB_SITE_SKIP ) );
+}
+
+/**
  * The sources that show.
  *
  * @return string[]
@@ -104,14 +118,8 @@ function planweb_site_choices(): array {
 function planweb_site_types(): array {
 	$choices = planweb_site_choices();
 	$stored  = get_option( PLANWEB_SITE_TYPES, null );
-	/**
-	 * Post types left out of the site schedule by default (before the admin picks any).
-	 * Default: PLANWEB_SITE_SKIP. A generic site can tune this without the Animal Writes bulk types.
-	 *
-	 * @param string[] $skip Post-type slugs to skip.
-	 */
-	$skip   = array_map( 'strval', (array) apply_filters( 'planweb_site_skip_types', PLANWEB_SITE_SKIP ) );
-	$picked = is_array( $stored ) ? array_map( 'strval', $stored ) : array_diff( array_keys( $choices ), $skip );
+	$skip    = planweb_site_skip_types();
+	$picked  = is_array( $stored ) ? array_map( 'strval', $stored ) : array_diff( array_keys( $choices ), $skip );
 	return array_values( array_intersect( array_keys( $choices ), $picked ) );
 }
 

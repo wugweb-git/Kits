@@ -34,7 +34,7 @@ const DIRECTORYWEB_CLAIM_FIELDS = array(
 	'aw_email'    => array( 'Public email', 'email' ),
 	'aw_website'  => array( 'Website', 'url' ),
 	'aw_area'     => array( 'Area or locality', 'max:120' ),
-	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (DIRECTORYWEB_SERVICES); saved as service tags
+	'aw_services' => array( 'Services', 'max:300' ), // ticked from the fixed list (directoryweb_services()); saved as service tags
 );
 
 if ( ! defined( 'MB_IN_BYTES' ) ) {

@@ -5,7 +5,7 @@
  * the next scheduled ones. Covers posts, pages and the public custom post types. Read-only: counts and rows straight
  * from the posts table. No comments part: comments are off on this site.
  *
- * Moved from Animal Writes Core (19 Nov 2026); off unless the site switches it on (kits_dashboard_activity).
+ * Off unless the site switches it on (kits_dashboard_activity).
  *
  * @package kits-core
  */
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Whether this site swaps WordPress's Activity box for this one. Off unless the site turns it on with the filter
- * kits_dashboard_activity (Animal Writes: the theme's site layer, assets/site/ops.php).
+ * kits_dashboard_activity.
  */
 function kits_dashboard_activity_on(): bool {
 	return (bool) apply_filters( 'kits_dashboard_activity', false );

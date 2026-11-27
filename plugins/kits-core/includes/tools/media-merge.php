@@ -2,7 +2,7 @@
 /**
  * Media → Duplicate files: merges the duplicate copies of a file that the Media Library audit found.
  *
- * Trash is off on this site (MEDIA_TRASH), so deleting an attachment would be permanent. The retired copies get no trash
+ * Where trash is off (MEDIA_TRASH), deleting an attachment would be permanent. The retired copies get no trash
  * time on purpose: WordPress's daily clean-up removes trash older than 30 days by that time, and this tool never deletes. This tool never deletes: for each
  * group it repoints every reference from the extra copies to one kept copy, checks that nothing still points at them, and
  * retires the extras by giving them the Trash status (files stay on disk). Every change is saved with its old value before
@@ -11,8 +11,8 @@
  *
  * A group is blocked, with the reason shown, when an extra is the featured image of a post, a hosted file or document
  * preview, a category or tag photo, the site icon, named in an option, or the two files differ. Only the source image,
- * social image and share image of a post (with the matching Rank Math address), a campaign's share images, a listing's
- * photo list, and the image addresses and block image IDs written in post content, are repointed.
+ * social image and share image of a post (with the matching Rank Math address), the keys a site adds with
+ * kits_media_merge_meta_keys, a listing's photo list, and the image addresses and block image IDs written in post content, are repointed.
  * Admin screen: core list table and core notices only (no CSS, no scripts).
  *
  * @package kits-core
@@ -24,12 +24,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Post meta keys that hold an attachment ID and may be repointed (the same picture; nothing is "used once"). */
 function kits_media_merge_meta_keys() {
-	return array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image', 'aw_campaign_share_image', 'aw_campaign_share_story', 'aw_campaign_share_post' );
+	return (array) apply_filters( 'kits_media_merge_meta_keys', array( 'aw_source_image_att', 'rank_math_facebook_image_id', 'rank_math_twitter_image_id', 'kits_og_image' ) ); // a site adds its own keys (share images, …)
 }
 
 /** Post meta keys known to hold an attachment ID (the Media columns' list, kept here so the check needs no other plugin). */
 function kits_media_merge_known_keys() {
-	return array( '_thumbnail_id', 'aw_source_image_att', 'aw_doc_preview', 'aw_file_id', 'aw_press_logo', 'aw_org_logo', 'aw_c_logo', 'aw_claim_logo', 'aw_banner_image', 'rank_math_facebook_image_id', 'kits_og_image' );
+	return (array) apply_filters( 'kits_media_merge_known_keys', array( '_thumbnail_id', 'aw_source_image_att', 'aw_org_logo', 'aw_claim_logo', 'rank_math_facebook_image_id', 'kits_og_image' ) ); // a site adds its own keys
 }
 
 /** Post meta keys that hold the address of the picture next to an ID key above (repointed with it). */
@@ -37,11 +37,11 @@ function kits_media_merge_url_keys() {
 	return array( 'rank_math_facebook_image', 'rank_math_twitter_image' );
 }
 
-/** The groups to merge: keep ID => extra IDs. */
+/** The groups to merge: keep ID => extra IDs. None ship with the plugin: a site supplies the groups its Media Library audit found with the filter kits_media_merge_groups. */
 function kits_media_merge_groups() {
 	static $groups = null;
 	if ( null === $groups ) {
-		$groups = (array) require __DIR__ . '/data/media-duplicate-groups.php';
+		$groups = (array) apply_filters( 'kits_media_merge_groups', array() );
 	}
 	return $groups;
 }

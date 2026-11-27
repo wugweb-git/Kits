@@ -66,7 +66,7 @@ function kits_cdn_ttl() {
 	if ( is_page( kits_cdn_excluded_slugs() ) || ( is_singular() && false !== stripos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'fluentform' ) ) ) {
 		return 0;
 	}
-	if ( is_singular() && in_array( get_queried_object_id(), array_map( 'intval', (array) apply_filters( 'kits_cdn_excluded_ids', array() ) ), true ) ) { // the site's never-cached pages (Animal Writes: the crisis guides, assets/site/ops.php)
+	if ( is_singular() && in_array( get_queried_object_id(), array_map( 'intval', (array) apply_filters( 'kits_cdn_excluded_ids', array() ) ), true ) ) { // the site's never-cached pages (a site's crisis guides, for example)
 		return 0;
 	}
 	if ( headers_sent() || preg_grep( '/^set-cookie:/i', headers_list() ) ) {
@@ -81,7 +81,7 @@ function kits_cdn_ttl() {
 
 /** Whether this page changes rarely: a Directory listing, a Library item or a Resource (not a hub, not a crisis guide). */
 function kits_cdn_is_long_lived() {
-	return is_singular( (array) apply_filters( 'kits_cdn_long_lived_types', array( 'post' ) ) ); // Animal Writes adds listings and Library items (assets/site/ops.php)
+	return is_singular( (array) apply_filters( 'kits_cdn_long_lived_types', array( 'post' ) ) ); // a site adds its listings and Library items
 }
 
 add_action(
@@ -188,7 +188,7 @@ function kits_cdn_settings_box() {
 	echo '<li>' . esc_html( 'Public pages: ' ) . ( $short ? '<code>Cache-Control: ' . esc_html( $short ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '</ul>';
-	kits_submit_button( __( 'Save Changes' ), 'kits-save-cdn' );
+	kits_submit_button( __( 'Save Changes', 'kits-core' ), 'kits-save-cdn' );
 	kits_site_reset_button( 'aw_cdn' ); // "Reset this section" (site-options.php)
 	echo '</form>';
 	kits_site_reset_form( 'aw_cdn' );

@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.5.0
+
+- Removed all Animal Writes-only code from the plugin. Moved unchanged to `sites/animalwrites/mailweb/`: `includes/website-forms.php`, `includes/newsletter.php`, `includes/fluentcrm-compat.php`, and the Animal Writes part of `includes/fluentcrm.php` (now `fluentcrm-aw.php` there: junk-address block list, tag titles, volunteer and form fields, update link and `{{aw.*}}` smart code, Contact and Claim notes, unticked-box handling, campaign signer, Pro one-off email headers and retry, unsubscribe sync, `wp aw crm-setup`, the Fluent Forms submission hook). `site.php` there loads them at `plugins_loaded` 6.
+- `mailweb.php` loads only `includes/fluentcrm.php` (generic) when FluentCRM or Fluent Forms is active; `aw_nl_ff_phone_sync` is no longer unscheduled on deactivation or uninstall (it lives with the site layer).
+- `includes/fluentcrm.php`: the block list is the filter `mailweb_fcrm_blocked_emails` (default empty; `mailweb_fcrm_blocked_hashes()`); tag titles are `mailweb_fcrm_tag_titles()` with the filter of the same name (defaults: the two organisation tags DirectoryWeb uses). Kept as they were: `mailweb_fcrm_on()`, `mailweb_fcrm_list_id()`, `mailweb_fcrm_tag_ids()`, `mailweb_fcrm_subscribe()`, `mailweb_fcrm_contact_for()`, `mailweb_fcrm_reply_to()`, `mailweb_fcrm_site_name()`, the campaign UTM tags, the Fluent Forms feed guard for blocked addresses, the dashboard tidy-up.
+- Kept deliberately: the sending switches, the daily-limit grandfathering for sites set up before 3.3.4 (`mailweb_is_configured_site()`), the default limit 90, the Hostinger defaults, the `mailweb_forms_source` filter.
+- Tests: `tests/run.php` neutral names and a check that the plugin PHP names no site; the site layer's own check is `sites/animalwrites/mailweb/tests/site-tests.php`.
+
 ## 3.4.1
 
 - FluentCRM: the Reply-To name, the `{{aw.*}}` smart-code group name and the `wp aw crm-setup` sender and business name come from the site name (`mailweb_fcrm_site_name()`, safe for a header) instead of the fixed text "Animal Writes". Option, hook, function and smart-code names are unchanged.

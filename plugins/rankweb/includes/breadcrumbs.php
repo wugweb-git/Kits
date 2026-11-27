@@ -46,7 +46,7 @@ function rankweb_seo_breadcrumb_trail() {
 		return $trail;
 	}
 	$trail = array();
-	if ( is_404() || is_front_page() || ! function_exists( 'directoryweb_post_types' ) || ! function_exists( 'aw_hub_url' ) ) { // the content types and hubs (Animal Writes Core)
+	if ( is_404() || is_front_page() || ! function_exists( 'directoryweb_post_types' ) || ! function_exists( 'aw_hub_url' ) ) { // the content types and hubs (the earlier Core plugin)
 		return $trail;
 	}
 	$dir   = array( 'Directory', home_url( '/directory/' ) );
@@ -65,7 +65,7 @@ function rankweb_seo_breadcrumb_trail() {
 		return $out;
 	};
 
-	if ( is_singular( 'aw_listing' ) ) {
+	if ( rankweb_is_singular( array( 'listing' ) ) ) {
 		$id    = get_queried_object_id();
 		$best  = function_exists( 'directoryweb_item_place' ) ? directoryweb_item_place( $id ) : null; // the district if there is one, else the state
 		// Owner, 20 Oct 2026: the trail ends at the organisation's place (its district, else its state), like an item's ends at its category.
@@ -80,7 +80,7 @@ function rankweb_seo_breadcrumb_trail() {
 		$trail[] = array( $obj->labels->name, aw_hub_url( $type ) );
 		$cat     = function_exists( 'rankweb_primary_category' ) && 'post' === $type ? rankweb_primary_category( $id ) : null; // the editor's choice first
 		if ( ! $cat ) {
-			$cat = in_array( $type, array( 'aw_news', 'aw_legal', 'post', 'aw_opportunity' ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
+			$cat = in_array( $type, rankweb_types_with( array( 'news', 'library', 'opportunity' ), array( 'post' ) ), true ) && function_exists( 'aw_primary_category' ) ? aw_primary_category( $id ) : null;
 		}
 		if ( $cat ) { // every item (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
 			$n       = function_exists( 'rankweb_seo_filtered_count' ) ? rankweb_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;

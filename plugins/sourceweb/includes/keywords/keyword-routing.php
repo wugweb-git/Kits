@@ -4,7 +4,7 @@
  * pushed (or an owner-set auto-approve rule fires), its recommended use and topic become a real keyword with the right
  * Section, Role, Category and search on/off, using the EXISTING Section rules (aw_sources['sections']).
  *
- * - recommended_type → Section (post type): news → aw_news, library → aw_legal, campaign → aw_campaign.
+ * - recommended_type → Section (post type): the type the site gives the role of the same name (news, library, campaign).
  * - topic → Category: the category whose slug or name matches the topic (if any), which adds the Category-word role.
  * - Role: Include (keeps the item and, in English, runs its own Google News search); search on.
  * - Two auto-approve rules, BOTH OFF by default (option sourceweb_sourcing_push_autoapprove), the owner toggles them:
@@ -21,12 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const AW_SOURCING_PUSH_AUTOAPPROVE = 'aw_sourcing_push_autoapprove';
 
-/** recommended_type => the section (post type) it routes to. */
-const AW_SOURCING_PUSH_SECTION = array(
-	'news'     => 'aw_news',
-	'library'  => 'aw_legal',
-	'campaign' => 'aw_campaign',
-);
+/**
+ * The section (post type) a recommended_type routes to: news, library and campaign are role names
+ * (post-type-roles.php); '' for any other value or a role the site has no type for.
+ *
+ * @param string $type recommended_type.
+ * @return string
+ */
+function sourceweb_sourcing_push_section( $type ) {
+	return in_array( $type, AW_SOURCING_PUSHED_TYPES, true ) ? sourceweb_type( (string) $type ) : '';
+}
 
 /** The auto-approve settings, both rules off by default. */
 function sourceweb_sourcing_push_autoapprove() {
@@ -72,8 +76,9 @@ function sourceweb_sourcing_push_routing( array $cand ) {
 	$roles    = defined( 'SOURCEWEB_KW_ROLE_INCLUDE' ) ? SOURCEWEB_KW_ROLE_INCLUDE : 1;
 	$sections = array();
 	$type     = (string) ( $cand['recommended_type'] ?? '' );
-	if ( isset( AW_SOURCING_PUSH_SECTION[ $type ] ) && post_type_exists( AW_SOURCING_PUSH_SECTION[ $type ] ) ) {
-		$sections[] = AW_SOURCING_PUSH_SECTION[ $type ];
+	$section  = sourceweb_sourcing_push_section( $type );
+	if ( '' !== $section && post_type_exists( $section ) ) {
+		$sections[] = $section;
 	}
 	$categories = array();
 	$topic      = trim( (string) ( $cand['topic'] ?? '' ) );

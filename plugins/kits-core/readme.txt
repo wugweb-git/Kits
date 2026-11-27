@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.3.4
+Stable tag: 1.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,7 +28,7 @@ The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified
 
 == Uninstall ==
 
-By default, deleting the plugin deletes nothing — theme options, form settings and saved keys all stay (the publisher records and keyword tables are SourceWeb's and InsightWeb's since 18 Nov 2026), so reinstalling finds everything as it was. Scheduled events (aw_daily, aw_error_count_daily, aw_daily_backup, aw_raw_prune, kits_checkin_weekly) are always unscheduled. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients (including kits_active_style_variation, kits_update_channel, kits_global_styles_backup and the kits_registry transient) and drop the optional form copy table, after first writing a backup of the options to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails; the form copy table holds submitted personal data and is dropped without being written to the backup). Shared data and anything belonging to another plugin are never touched. Items of the content types are posts: they are never deleted, also when a type is switched off.
+By default, deleting the plugin deletes nothing — theme options, form settings and saved keys all stay (the publisher records and keyword tables are SourceWeb's and InsightWeb's since 18 Nov 2026), so reinstalling finds everything as it was. Scheduled events (aw_daily, aw_error_count_daily, aw_daily_backup, kits_checkin_weekly) are always unscheduled. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients (including kits_active_style_variation, kits_update_channel, kits_global_styles_backup and the kits_registry transient) after first writing a backup of the options to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails). A site layer can list its own options, events and tables through the filter kits_core_uninstall_options and the actions kits_core_uninstall and kits_core_uninstall_data. Shared data and anything belonging to another plugin are never touched. Items of the content types are posts: they are never deleted, also when a type is switched off.
 
 == External services ==
 
@@ -42,14 +42,20 @@ Each of these loads only when you turn it on; none runs by default.
 
 == Data stored ==
 
-* Form copy (optional, off by default; Kits &rarr; Settings &rarr; Form copies). When you switch it on, each Fluent Forms submission is copied into the table wp_aw_form_raw the moment it arrives, before any check: the time, the form ID, whether it was refused, saved or a repeat, the e-mail address, and every submitted field except those whose name contains pass, card, cvv, ssn or token. Copies are deleted after the retention days (default 30; 1 to 365). Switching it off keeps copies already stored until you press "Delete stored copies" (needs the manage_options capability). Deleting the plugin with the Uninstall option ticked drops the table. Sites that had this table from an earlier version keep it, but nothing new is copied until you switch it on.
 * Global Styles backup: the setup wizard stores one previous copy of your Styles in the option kits_global_styles_backup before it replaces them, so the Restore button can put them back.
-* Admin tidy, the daily error-count e-mail and the aw_daily event are off unless switched on (options or filters kits_tidy_menus, kits_error_count_daily, kits_daily_event). The REST routes aw/v1/deploy-status and aw/v1/thumb-dupes need the manage_options capability unless kits_public_gate_routes is turned on. A site that already had the aw_error_count_daily schedule keeps all of these on (one-time carry-over).
+* Admin tidy, the daily error-count e-mail and the aw_daily event are off unless switched on (options or filters kits_tidy_menus, kits_error_count_daily, kits_daily_event). The REST route aw/v1/deploy-status needs the manage_options capability unless kits_public_gate_routes is turned on.
 * Update checks send the User-Agent "Kits-registry/1", with no site address.
 
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
+
+= 1.4.0 =
+* Neutral for every site: everything that only made sense for one site was taken out of the plugin and moved, unchanged, to that site's own layer (outside this plugin). Gone from Kits Core: the campaign letters and Campaign form (with its raw copy of every send and the Form copies settings), the volunteer and Report a mistake forms and their blocks and pages, the campaign link taxonomy, Tools → Taxonomy rename, the thumbnail map and category photos, the placard card images, Tools → Reuse pictures, opportunity retention, the older aw_ function names, the branded error pages and their pictures, the duplicate-file groups of Tools → Duplicate files, and the one-time carry-over that kept features on for the site that was running them.
+* Where the plugin still needs a site's values it asks through filters, with neutral defaults: kits_error_pages_dir, kits_error_page_marker and kits_error_picture_source, kits_ff_ref_prefixes and kits_ff_file_capability, kits_media_group_for, kits_media_merge_groups, kits_media_merge_meta_keys and kits_media_merge_known_keys, kits_daily_backup_first_choice, kits_edit_screen_own_plugins and kits_edit_screen_own_folders, kits_overview_pattern_categories, and the uninstall and deactivation hooks kits_core_uninstall_options, kits_core_uninstall, kits_core_uninstall_data and kits_core_deactivated.
+* Changed defaults: form references read FF-, FF-V-, FF-C- and FF-R- (were AW-…); the Media group rules name only the generic groups; the error page marker constant is "Kits error page" (a site keeps an older marker with the filter, so pages already installed are still recognised and updated); Media → Duplicate files starts with no groups; the daily backup is off on a new site with no evidence to turn it on (a site layer can store its own first choice); the Overview screen's address is kits-overview (the older animal-writes address redirects only where a site layer adds it); Dashboard card styling no longer names the campaign letters box.
+* Stored data, option names, meta keys, hooks, REST routes and slugs are unchanged: nothing was renamed. A site that used the moved features must load its site layer next to Kits Core 1.4.0 (see sites/animalwrites/kits-core/README.md in the repository); the layer does nothing with an older Kits Core.
+* Tests: a new neutral-core test sweeps the plugin for site-specific wording, and the site-specific tests moved to the site layer.
 
 = 1.3.4 =
 * No fixed site name in what visitors and admins read: the newsletter thank-you, the campaign consent line, the backup header and the form placeholder use the site's name (the Default brand preset is "Default (Neutral Kits)"; saved settings are unaffected).

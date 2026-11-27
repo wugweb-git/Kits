@@ -4,7 +4,7 @@
  * source, in wp_aw_si_links: first seen, last seen, how many links, and a type the owner sets (press, organisation,
  * social, directory, copy, spam). Spam is hidden, never deleted; it shows only in the Spam view.
  *
- * Rows come from the one-time seed (links-seed.php), the monthly Bing Webmaster run (bing.php) and
+ * Rows come from a site's own seed (action insightweb_si_links_seed), the monthly Bing Webmaster run (bing.php) and
  * `wp aw-si links add`, and the Search Console Links exports imported on the tab (links-import.php).
  *
  * @package insightweb
@@ -120,8 +120,8 @@ function insightweb_si_link_actions(): array {
 
 /** Before output: screen options, and Hide / Unhide / Set type (then redirect). */
 function insightweb_si_links_load(): void {
-	if ( insightweb_si_ready() && function_exists( 'insightweb_si_links_seed' ) ) {
-		insightweb_si_links_seed(); // One option read once seeded.
+	if ( insightweb_si_ready() ) {
+		do_action( 'insightweb_si_links_seed' ); // a site's own starter rows, if it has any; the plugin ships none.
 	}
 	add_screen_option(
 		'per_page',

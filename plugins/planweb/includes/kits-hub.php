@@ -42,7 +42,11 @@ function planweb_kits_status_row( $rows ) {
 	/* translators: %s: plugin version. */
 	$text = sprintf( __( 'Active, %s', 'planweb' ), PLANWEB_VERSION );
 	if ( ! planweb_on() ) {
-		$rows[] = array( __( 'PlanWeb', 'planweb' ), esc_html( $text . '. ' . __( 'Switched off (Appearance → Kits → Modules); Appearance → Kits → Dates is in use.', 'planweb' ) ) );
+		$rows[] = array( __( 'PlanWeb', 'planweb' ), esc_html( $text . '. ' . __( 'Switched off (Appearance → Kits → Modules).', 'planweb' ) ) );
+		return $rows;
+	}
+	if ( '' === planweb_import_source()['option'] ) {
+		$rows[] = array( __( 'PlanWeb', 'planweb' ), esc_html( $text ) );
 		return $rows;
 	}
 	$v    = planweb_verify();
