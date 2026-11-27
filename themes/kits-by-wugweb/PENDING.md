@@ -49,4 +49,4 @@ From the marketplace plan and the reverse-engineering matrix; the full text is i
 
 ## Before the next theme release (review of 26 Nov 2026)
 
-`inc/theme-info.php` (commit 0e982c3) adds an "Upgrade to Premium" link to the theme details; WordPress.org theme review forbids upsell links in the theme UI, so keep it out of the WordPress.org build. The theme has no CHANGELOG.md and its readme Stable tag is still 2.2.0 (the stacked card, info modal and translated labels are unreleased).
+`inc/theme-info.php` (commit 0e982c3) added an "Upgrade to Premium" link to the theme details; it was removed on 27 Nov 2026 (WordPress.org theme review forbids upsell links in the theme UI). It was missed when the same link was removed from the plugins on 26 Nov. The theme has no CHANGELOG.md and its readme Stable tag is still 2.2.0 (the stacked card, info modal and translated labels are unreleased).
