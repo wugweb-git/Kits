@@ -262,6 +262,8 @@ jobs:
         run: python3 tools/validate/check-versions.py
       - name: No file held in a PENDING.md is loaded
         run: python3 tools/validate/check-held-code.py
+      - name: No visible Animal Writes text in plugin code
+        run: python3 tools/validate/check-visible-brand.py
       - name: Site and registry build (offline)
         run: python3 tools/release/build-site.py --out _site --offline
       - name: Build Distribution Packages
