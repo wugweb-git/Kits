@@ -11,8 +11,8 @@ The editorial calendar and campaign planning plugin owns:
 ## Open Tasks & Enhancements (Resolved 26 Nov 2026)
 
 1. **Editorial Calendar Flow**:
-   - ✅ Added monthly and weekly calendar grid builders (`includes/calendar-views.php`: `planweb_calendar_month_grid()`, `planweb_calendar_week_grid()`).
-   - ✅ Added nonce-verified drag-and-drop schedule adjustment AJAX handler (`wp_ajax_planweb_reschedule_entry`).
+   - Written, not wired (the file is not loaded and no script calls it): monthly and weekly calendar grid builders (`includes/calendar-views.php`: `planweb_calendar_month_grid()`, `planweb_calendar_week_grid()`).
+   - Written, not wired (calendar-views.php is not loaded, no drag-and-drop script exists): nonce-verified schedule adjustment AJAX handler (`wp_ajax_planweb_reschedule_entry`).
 
 2. **Deferred Tasks from 17 Nov Session (`claude/planweb-deferred-1117`)**:
    - ✅ Added zero-dependency HTML/CSS campaign timeline visualization (`planweb_campaign_timeline_data()`, `planweb_render_campaign_timeline()`).

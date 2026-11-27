@@ -15,8 +15,7 @@ add_action(
 	'plugins_loaded',
 	function () {
 		if ( ! function_exists( 'kits_admin_tabs' ) ) {
-			add_action( 'admin_notices', 'planweb_no_kits_notice' );
-			return;
+			return; // Without Kits Core PlanWeb is simply not listed under Kits; no notice.
 		}
 		add_filter( 'kits_status_rows', 'planweb_kits_status_row' );
 		add_filter( 'kits_settings_transfer_options', 'planweb_kits_export' );
@@ -32,20 +31,6 @@ add_action(
 function planweb_kits_export( $names ) {
 	$names[] = 'planweb_on';
 	return $names;
-}
-
-/** Without Kits Core: one notice, on PlanWeb's own screen only. */
-function planweb_no_kits_notice() {
-	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-	if ( $screen && 'toplevel_page_' . PLANWEB_MENU === $screen->id ) {
-		wp_admin_notice(
-			esc_html__( 'PlanWeb is a Kits plugin: Kits Core is not loaded, so it is not listed under Kits.', 'planweb' ),
-			array(
-				'type'        => 'warning',
-				'dismissible' => true,
-			)
-		);
-	}
 }
 
 /**

@@ -534,6 +534,7 @@ const BLANK = {
 	owner: '',
 	status: 'idea',
 	link: '',
+	repeat: 'none',
 };
 
 /**
@@ -579,8 +580,18 @@ function EntryForm( { entry, onSaved, onClose } ) {
 	const save = () => {
 		setBusy( true );
 		setError( '' );
-		const { date, time, title, note, type, channels, owner, status, link } =
-			f;
+		const {
+			date,
+			time,
+			title,
+			note,
+			type,
+			channels,
+			owner,
+			status,
+			link,
+			repeat,
+		} = f;
 		apiFetch( {
 			path: path( f.id ? `entries/${ f.id }` : 'entries' ),
 			method: 'POST',
@@ -594,6 +605,7 @@ function EntryForm( { entry, onSaved, onClose } ) {
 				owner,
 				status,
 				link,
+				repeat,
 			},
 		} )
 			.then( ( r ) => onSaved( r ) )
@@ -745,6 +757,22 @@ function EntryForm( { entry, onSaved, onClose } ) {
 							} ) ) }
 							value={ f.status }
 							onChange={ set( 'status' ) }
+						/>
+					) }
+				/>
+				<FormField
+					label={ __( 'Repeat', 'planweb' ) }
+					help={ __(
+						'Once the date has passed, PlanWeb makes the next one, a week or a month later, if "Repeats" is switched on under Scheduled jobs in Settings. It is made once and the old entry is left as it is.',
+						'planweb'
+					) }
+					render={ ( id, helpId ) => (
+						<Select
+							id={ id }
+							aria-describedby={ helpId }
+							options={ lists.repeats || [] }
+							value={ f.repeat || 'none' }
+							onChange={ set( 'repeat' ) }
 						/>
 					) }
 				/>

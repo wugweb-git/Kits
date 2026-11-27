@@ -416,7 +416,7 @@ add_action(
 			'brand'     => isset( $_POST['brand'] ) ? sanitize_text_field( wp_unslash( $_POST['brand'] ) ) : '',
 		);
 		$saved = planweb_jobs_save( $in );
-		$back  = function_exists( 'kits_shell_app' ) ? planweb_ui_url( 'settings' ) : planweb_url();
+		$back  = function_exists( 'kits_shell_app' ) || 'settings' === ( isset( $_POST['back'] ) ? sanitize_key( wp_unslash( $_POST['back'] ) ) : '' ) ? planweb_ui_url( 'settings' ) : planweb_url(); // Nonce checked above.
 		if ( is_wp_error( $saved ) ) {
 			wp_safe_redirect( add_query_arg( 'error', rawurlencode( $saved->get_error_message() ), $back ) . '#planweb-jobs' );
 			exit;
@@ -431,7 +431,7 @@ add_action(
  *
  * @param bool $wrap Draw inside a wrap of its own (the shell's page has none left open).
  */
-function planweb_jobs_panel( bool $wrap = false ) {
+function planweb_jobs_panel( bool $wrap = false, string $back = '' ) {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
@@ -451,6 +451,9 @@ function planweb_jobs_panel( bool $wrap = false ) {
 	echo '<p>' . esc_html__( 'Four small jobs that run once a day or once a week, all off until you switch them on. Nothing is posted to any social network. The two emails go only to people with an account on this site, sent by this site\'s own email (wp_mail), and only when switched on here.', 'planweb' ) . '</p>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="planweb_jobs_save">';
 	wp_nonce_field( 'planweb_jobs_save' );
+	if ( '' !== $back ) {
+		echo '<input type="hidden" name="back" value="' . esc_attr( $back ) . '">';
+	}
 	echo '<table class="form-table" role="presentation"><tbody>';
 	$rows = array(
 		'overdue'   => array( __( 'Overdue sweep', 'planweb' ), __( 'Every day at 06:00 (site time), mark entries whose date has passed and that are still open (idea, draft, approved or due) as overdue, so the Calendar and Dashboard show them. Dates are never changed and nothing is deleted.', 'planweb' ) ),

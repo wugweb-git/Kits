@@ -23,8 +23,22 @@ function aw_team_dates_moved(): bool {
 	return function_exists( 'planweb_on' ) && planweb_on();
 }
 
-/** The dates that start the calendar (seeded once; docs/pending.md lists the same ones). */
+/**
+ * Whether this is an Animal Writes site, the only place the sample and campaign dates below make sense. On when Animal
+ * Writes Core is loaded, or the option planweb_animal_writes_context is '1', or the filter planweb_animal_writes_context
+ * says so. Off everywhere else: nothing is seeded or added to the aw_team_dates option, and the old Dates box is not shown.
+ * Dates already stored are never touched by this switch.
+ */
+function aw_team_dates_context(): bool {
+	$on = function_exists( 'aw_modules_screen' ) || '1' === (string) get_option( 'planweb_animal_writes_context', '' );
+	return (bool) apply_filters( 'planweb_animal_writes_context', $on );
+}
+
+/** The dates that start the calendar (seeded once; docs/pending.md lists the same ones). Empty outside Animal Writes. */
 function aw_team_dates_seed() {
+	if ( ! aw_team_dates_context() ) {
+		return array();
+	}
 	return array(
 		array( 'date' => '2026-11-05', 'title' => 'Lab rules objections close', 'note' => 'Campaign 13848. The countdown on the home page and the campaign page ends today.' ),
 		array( 'date' => '2026-11-17', 'title' => 'Directory thin-page re-check and keyword positions', 'note' => 'Scheduled tasks at 10:00 (Directory indexing against the 20 Oct baseline) and 11:00 (8 tracked keywords).' ),
@@ -39,7 +53,9 @@ function aw_team_dates() {
 			return array(); // PlanWeb holds the calendar; nothing is seeded any more.
 		}
 		$dates = aw_team_dates_seed();
-		add_option( 'aw_team_dates', $dates, '', false );
+		if ( $dates ) {
+			add_option( 'aw_team_dates', $dates, '', false ); // Only on an Animal Writes site; elsewhere nothing is written.
+		}
 	}
 	$dates = array_values( array_filter( $dates, fn( $d ) => is_array( $d ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) ( $d['date'] ?? '' ) ) ) );
 	usort( $dates, fn( $a, $b ) => strcmp( $a['date'], $b['date'] ) );
@@ -51,7 +67,7 @@ function aw_team_dates() {
  * next 12 months are added once (flag aw_team_dates_links_read); each can be removed like any other date.
  */
 function aw_team_dates_add_links_read() {
-	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_links_read' ) ) {
+	if ( aw_team_dates_moved() || ! aw_team_dates_context() || get_option( 'aw_team_dates_links_read' ) ) {
 		return;
 	}
 	$title = 'Search Console Links read (Claude Code session)';
@@ -79,8 +95,8 @@ add_action( 'admin_init', 'aw_team_dates_add_links_read' );
  */
 function aw_team_dates_links_note_rename() {
 	// Runs even with PlanWeb on: PlanWeb's import (admin_init 30) waits for this flag, so the renamed notes are copied.
-	if ( get_option( 'aw_team_dates_links_note_1111' ) ) {
-		return;
+	if ( get_option( 'aw_team_dates_links_note_1111' ) || ( ! aw_team_dates_context() && ! is_array( get_option( 'aw_team_dates', null ) ) ) ) {
+		return; // Nothing to rename, and no Animal Writes site: write nothing.
 	}
 	$all     = get_option( 'aw_team_dates', array() ); // As stored: aw_team_dates() filters and sorts.
 	$all     = is_array( $all ) ? $all : array();
@@ -107,7 +123,7 @@ add_action( 'admin_init', 'aw_team_dates_links_note_rename' );
  * the same title is not added again; each can be removed like any other date.
  */
 function aw_team_dates_add_1101() {
-	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_1101' ) ) {
+	if ( aw_team_dates_moved() || ! aw_team_dates_context() || get_option( 'aw_team_dates_1101' ) ) {
 		return;
 	}
 	$add  = array(
@@ -137,7 +153,7 @@ add_action( 'admin_init', 'aw_team_dates_add_1101' );
  * 25 Nov; the stray-dog pages' 28-day checkpoint on 15 Dec. A date already on the calendar under the same title is not added again.
  */
 function aw_team_dates_add_1101b() {
-	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_1101b' ) ) {
+	if ( aw_team_dates_moved() || ! aw_team_dates_context() || get_option( 'aw_team_dates_1101b' ) ) {
 		return;
 	}
 	$all = aw_team_dates();
@@ -170,7 +186,7 @@ add_action( 'admin_init', 'aw_team_dates_add_1101b' );
  * aw_team_dates_faq_holdout_off).
  */
 function aw_team_dates_drop_faq_holdout() {
-	if ( aw_team_dates_moved() || get_option( 'aw_team_dates_faq_holdout_off' ) ) {
+	if ( aw_team_dates_moved() || ( ! aw_team_dates_context() && ! is_array( get_option( 'aw_team_dates', null ) ) ) || get_option( 'aw_team_dates_faq_holdout_off' ) ) {
 		return;
 	}
 	$all  = aw_team_dates();
@@ -318,8 +334,8 @@ add_action(
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( aw_team_dates_moved() || ! current_user_can( AW_DATES_CAP ) ) {
-			return; // With PlanWeb on, its own box (Next 7 days) replaces this one.
+		if ( aw_team_dates_moved() || ! aw_team_dates_context() || ! current_user_can( AW_DATES_CAP ) ) {
+			return; // With PlanWeb on, its own box (Next 7 days) replaces this one; off Animal Writes there is no Dates box (stored dates are kept).
 		}
 		wp_add_dashboard_widget(
 			'aw_team_dates',

@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.3.2
+
+- The Calendar menu page no longer says "needs Kits Core" when Kits Core is missing: it shows a plain WordPress page with the upcoming entries and the add-entry form, and Settings holds the calendar feed key and the scheduled jobs.
+- The Repeat field (none, weekly, monthly) is now in the entry form of the Dashboard and Entries screens, bound to the existing Repeat setting.
+- The Animal Writes sample and campaign dates are only added on an Animal Writes site (Animal Writes Core loaded, the planweb_animal_writes_context option set to 1, or the planweb_animal_writes_context filter). Elsewhere nothing is written to options and the old Dates dashboard box is not shown. Dates already stored are kept.
+- The "Kits Core is not loaded" notice on PlanWeb's own screen is gone.
+- An unused calendar-grid file (calendar-views.php) is no longer loaded.
+
 ## 0.3.1
 
 - The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).

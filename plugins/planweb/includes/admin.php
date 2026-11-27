@@ -131,9 +131,7 @@ function planweb_screen() {
 		if ( ! current_user_can( planweb_ui_cap( $screen ) ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'planweb' ), 403 );
 		}
-		echo '<div class="wrap"><h1>' . esc_html__( 'PlanWeb', 'planweb' ) . '</h1>';
-		wp_admin_notice( esc_html__( 'PlanWeb needs Kits Core (active, with its build) to show this screen.', 'planweb' ), array( 'type' => 'error' ) );
-		echo '</div>';
+		planweb_standalone_screen( $screen ); // Native screens with core markup, no Kits Core needed (standalone-fallback.php).
 		return;
 	}
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- filters and messages only; every change is a nonce-checked admin-post.

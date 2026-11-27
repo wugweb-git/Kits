@@ -121,6 +121,7 @@ add_action(
 						'channels' => $list( PLANWEB_CHANNELS ),
 						'owners'   => $list( PLANWEB_OWNERS ),
 						'statuses' => $list( PLANWEB_STATUSES ),
+						'repeats'  => $list( planweb_repeat_labels() ),
 					),
 					'approveOnly' => PLANWEB_APPROVE_STATUSES,
 				),
