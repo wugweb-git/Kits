@@ -108,7 +108,7 @@ function planweb_jobs_clean_brand( $v ): ?string {
 	if ( ! is_string( $v ) ) {
 		return null;
 	}
-	$v = trim( (string) preg_replace( '/\s+/u', ' ', strip_tags( $v ) ) );
+	$v = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $v ) ) );
 	if ( 1 === preg_match( '/[\x00-\x1F\x7F]/', $v ) || mb_strlen( $v ) > PLANWEB_DIGEST_BRAND_MAX ) {
 		return null;
 	}
@@ -305,7 +305,7 @@ function planweb_jobs_date_label( string $ymd ): string {
  * @param string $today Y-m-d, to say "today" and "overdue".
  */
 function planweb_jobs_line( array $e, string $today ): string {
-	$title  = trim( (string) preg_replace( '/\s+/u', ' ', strip_tags( (string) ( $e['title'] ?? '' ) ) ) );
+	$title  = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) ( $e['title'] ?? '' ) ) ) );
 	$status = PLANWEB_STATUSES[ $e['status'] ?? '' ] ?? (string) ( $e['status'] ?? '' );
 	$date   = planweb_jobs_date_label( (string) $e['date'] );
 	$when   = $e['date'] === $today ? __( 'today', 'planweb' ) : $date;
@@ -401,7 +401,7 @@ function planweb_digest_build( array $entries, string $today, string $site, stri
 	$lines[] = __( 'Overdue (past their date and not finished)', 'planweb' ) . ':';
 	if ( $late ) {
 		foreach ( $late as $e ) {
-			$lines[] = '- ' . planweb_jobs_date_label( $e['date'] ) . ': ' . trim( (string) preg_replace( '/\s+/u', ' ', strip_tags( (string) $e['title'] ) ) ) . ' (' . ( PLANWEB_STATUSES[ $e['status'] ?? '' ] ?? (string) ( $e['status'] ?? '' ) ) . ')';
+			$lines[] = '- ' . planweb_jobs_date_label( $e['date'] ) . ': ' . trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( (string) $e['title'] ) ) ) . ' (' . ( PLANWEB_STATUSES[ $e['status'] ?? '' ] ?? (string) ( $e['status'] ?? '' ) ) . ')';
 		}
 	} else {
 		$lines[] = __( 'Nothing overdue.', 'planweb' );

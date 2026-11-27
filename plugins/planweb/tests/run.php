@@ -17,6 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput -- a command-line test runner.
+if ( ! function_exists( 'wp_strip_all_tags' ) ) {
+	function wp_strip_all_tags( $t ) { return trim( strip_tags( (string) $t ) ); }
+}
 require dirname( __DIR__ ) . '/includes/model.php';
 require dirname( __DIR__ ) . '/includes/feed-model.php';
 require_once dirname( __DIR__ ) . '/includes/ui-model.php';
@@ -527,6 +530,40 @@ check( array( 1, 3 ) === array_column( planweb_calendar_filter( $cf, array( 'own
 check( array( 1, 3 ) === array_column( planweb_calendar_filter( $cf, array( 'channel' => 'email' ) ), 'id' ), 'calendar filter: by channel, an entry may have several' );
 check( array( 1, 2 ) === array_column( planweb_calendar_filter( $cf, array( 'status' => 'approved' ) ), 'id' ), 'calendar filter: Approved also lists Due' );
 check( array( 1 ) === array_column( planweb_calendar_filter( $cf, array( 'type' => 'post', 'status' => 'approved' ) ), 'id' ), 'calendar filter: filters combine' );
+check( array( 2, 3 ) === array_column( planweb_calendar_filter( array( array( 'id' => 1, 'date' => '2026-11-01' ), array( 'id' => 2, 'date' => '2026-11-10' ), array( 'id' => 3, 'date' => '2026-11-20' ) ), array( 'from' => '2026-11-10' ) ), 'id' ), 'calendar filter: a From date alone, inclusive' );
+check( array( 2 ) === array_column( planweb_calendar_filter( array( array( 'id' => 1, 'date' => '2026-11-01' ), array( 'id' => 2, 'date' => '2026-11-10' ), array( 'id' => 3, 'date' => '2026-11-20' ) ), array( 'from' => '2026-11-02', 'to' => '2026-11-10' ) ), 'id' ), 'calendar filter: a date range, both ends inclusive' );
+check( array( 1 ) === array_column( planweb_calendar_filter( array( array( 'id' => 1, 'date' => '2026-11-01', 'type' => 'post' ), array( 'id' => 2, 'date' => '2026-11-10', 'type' => 'email' ) ), array( 'to' => '2026-11-05', 'type' => 'post' ) ), 'id' ), 'calendar filter: the date range combines with the others' );
+
+// Timeline.
+$tr = planweb_timeline_range( '', '', '2026-11-26' );
+check( '2026-11-23' === $tr['from'] && '2027-01-17' === $tr['to'] && 56 === $tr['days'], 'timeline range: no ends gives eight weeks from this Monday' );
+$tr = planweb_timeline_range( '2026-12-10', '2026-12-01', '2026-11-26' );
+check( '2026-12-01' === $tr['from'] && '2026-12-10' === $tr['to'] && 10 === $tr['days'], 'timeline range: reversed ends are swapped' );
+$tr = planweb_timeline_range( '2026-01-01', '', '2026-11-26' );
+check( '2026-01-01' === $tr['from'] && '2026-02-25' === $tr['to'], 'timeline range: only a start runs eight weeks on' );
+$tr = planweb_timeline_range( '', '2026-03-01', '2026-11-26' );
+check( '2026-01-05' === $tr['from'] && '2026-03-01' === $tr['to'], 'timeline range: only an end runs eight weeks back' );
+$tr = planweb_timeline_range( '2026-01-01', '2028-01-01', '2026-11-26' );
+check( 366 === $tr['days'] && '2027-01-01' === $tr['to'], 'timeline range: cut to a year' );
+$tr = planweb_timeline_range( 'nonsense', '2026-02-30', '2026-11-26' );
+check( '2026-11-23' === $tr['from'], 'timeline range: bad dates are ignored' );
+$tl = planweb_timeline_lanes(
+	array(
+		array( 'id' => 1, 'type' => 'social', 'date' => '2026-11-12', 'time' => '', 'title' => 'B' ),
+		array( 'id' => 2, 'type' => 'content', 'date' => '2026-11-11', 'time' => '', 'title' => 'A' ),
+		array( 'id' => 3, 'type' => 'social', 'date' => '2026-11-11', 'time' => '', 'title' => 'C' ),
+		array( 'id' => 4, 'type' => 'social', 'date' => '2026-12-01', 'time' => '', 'title' => 'Outside' ),
+		array( 'id' => 5, 'type' => 'social', 'date' => 'bad', 'time' => '', 'title' => 'No date' ),
+		array( 'id' => 6, 'type' => 'unknown', 'date' => '2026-11-10', 'time' => '', 'title' => 'Odd type' ),
+	),
+	'2026-11-10',
+	'2026-11-19'
+);
+check( array( 'content', 'social', 'reminder' ) === array_keys( $tl ), 'timeline lanes: Type order, empty lanes left out, unknown type in Reminder' );
+check( array( 3, 1 ) === array_column( $tl['social'], 'id' ), 'timeline lanes: by date, then title; out-of-range and dateless entries left out' );
+check( 15.0 === $tl['content'][0]['left_pct'] && 5.0 === $tl['reminder'][0]['left_pct'], 'timeline lanes: marker at the middle of its day (10 days: day 1 = 15%, day 0 = 5%)' );
+check( array() === planweb_timeline_lanes( array(), '2026-11-10', '2026-11-19' ), 'timeline lanes: none for no entries' );
+
 check( '2026-11-23' === planweb_week_start( '2026-11-26' ) && '2026-11-23' === planweb_week_start( '2026-11-23' ) && '2026-11-23' === planweb_week_start( '2026-11-29' ), 'week start: Monday of the week, Sunday belongs to the week before' );
 check( '2026-12-28' === planweb_week_start( '2027-01-01' ), 'week start: across a year end' );
 

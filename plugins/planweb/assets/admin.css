@@ -76,3 +76,18 @@
 	overflow: hidden;
 	max-width: 100%;
 }
+
+/* The Calendar's Timeline: a lane for each Type, an entry a marker placed by its date (a list of the same entries follows). */
+.planweb-filters label { margin-inline-start: 4px; }
+.planweb-timeline { margin: 12px 0 16px; border: 1px solid #c3c4c7; background: #fff; padding: 8px 12px; }
+.planweb-timeline-row { display: flex; align-items: center; gap: 12px; min-height: 32px; }
+.planweb-timeline-label { flex: 0 0 110px; }
+.planweb-timeline-track { position: relative; flex: 1 1 auto; height: 24px; border-bottom: 1px solid #dcdcde; }
+.planweb-timeline-axis .planweb-timeline-track { height: 18px; }
+.planweb-timeline-tick { position: absolute; top: 0; padding-inline-start: 3px; border-inline-start: 1px solid #c3c4c7; font-size: 11px; line-height: 18px; color: #50575e; white-space: nowrap; }
+.planweb-timeline-mark { position: absolute; top: 6px; width: 12px; height: 12px; margin-inline-start: -6px; border: 2px solid #2271b1; border-radius: 50%; background: #fff; box-sizing: border-box; }
+.planweb-timeline-mark.planweb-status--idea, .planweb-timeline-mark.planweb-status--draft { border-style: dashed; }
+.planweb-timeline-mark.planweb-status--sent, .planweb-timeline-mark.planweb-status--done { background: #50575e; border-color: #50575e; }
+.planweb-timeline-mark:focus { outline: 2px solid #2271b1; outline-offset: 2px; }
+.planweb-timeline-list { margin-bottom: 16px; }
+@media (max-width: 600px) { .planweb-timeline-label { flex-basis: 80px; } }

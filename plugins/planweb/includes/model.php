@@ -287,7 +287,7 @@ function planweb_channel_list( $v ): array {
  * everything. "Approved" also lists Due (an approved entry on its day), as the Entries list does.
  *
  * @param array[] $entries planweb_entry() arrays.
- * @param array   $f       type, status, owner, channel (slugs, '' for any).
+ * @param array   $f       type, status, owner, channel (slugs, '' for any), from and to (Y-m-d, '' for open).
  * @return array[]
  */
 function planweb_calendar_filter( array $entries, array $f ): array {
@@ -296,12 +296,18 @@ function planweb_calendar_filter( array $entries, array $f ): array {
 		'status'  => '',
 		'owner'   => '',
 		'channel' => '',
+		'from'    => '',
+		'to'      => '',
 	);
 	return array_values(
 		array_filter(
 			$entries,
 			static function ( $e ) use ( $f ) {
 				if ( '' !== $f['type'] && ( $e['type'] ?? '' ) !== $f['type'] ) {
+					return false;
+				}
+				// A date range (both ends inclusive, either end may be open). Y-m-d strings compare as text.
+				if ( ( '' !== $f['from'] && (string) ( $e['date'] ?? '' ) < $f['from'] ) || ( '' !== $f['to'] && (string) ( $e['date'] ?? '' ) > $f['to'] ) ) {
 					return false;
 				}
 				if ( '' !== $f['owner'] && ( $e['owner'] ?? '' ) !== $f['owner'] ) {
@@ -331,4 +337,86 @@ function planweb_calendar_filter( array $entries, array $f ): array {
 function planweb_week_start( string $ymd ): string {
 	$t = strtotime( $ymd . ' 12:00:00 UTC' );
 	return gmdate( 'Y-m-d', $t - ( (int) gmdate( 'N', $t ) - 1 ) * 86400 );
+}
+
+/** The longest range the Timeline draws, in days (a year; a longer range is cut to it). */
+const PLANWEB_TIMELINE_MAX_DAYS = 366;
+
+/** The Timeline's range when none is given: eight weeks from the Monday of the current week. */
+const PLANWEB_TIMELINE_DEFAULT_DAYS = 56;
+
+/**
+ * The Timeline's first and last day. Pure. A missing end is filled in (no start: the Monday of this week; no end: eight
+ * weeks after the start), reversed ends are swapped and a range over a year is cut to a year.
+ *
+ * @param string $from  Y-m-d or ''.
+ * @param string $to    Y-m-d or ''.
+ * @param string $today Y-m-d.
+ * @return array{from: string, to: string, days: int}
+ */
+function planweb_timeline_range( string $from, string $to, string $today ): array {
+	$from = planweb_is_date( $from ) ? $from : '';
+	$to   = planweb_is_date( $to ) ? $to : '';
+	if ( '' === $from && '' === $to ) {
+		$from = planweb_week_start( $today );
+	}
+	if ( '' === $from ) {
+		$from = gmdate( 'Y-m-d', strtotime( $to . ' 12:00:00 UTC' ) - ( PLANWEB_TIMELINE_DEFAULT_DAYS - 1 ) * 86400 );
+	}
+	if ( '' === $to ) {
+		$to = gmdate( 'Y-m-d', strtotime( $from . ' 12:00:00 UTC' ) + ( PLANWEB_TIMELINE_DEFAULT_DAYS - 1 ) * 86400 );
+	}
+	if ( $to < $from ) {
+		list( $from, $to ) = array( $to, $from );
+	}
+	$days = (int) round( ( strtotime( $to . ' 12:00:00 UTC' ) - strtotime( $from . ' 12:00:00 UTC' ) ) / 86400 ) + 1;
+	if ( $days > PLANWEB_TIMELINE_MAX_DAYS ) {
+		$days = PLANWEB_TIMELINE_MAX_DAYS;
+		$to   = gmdate( 'Y-m-d', strtotime( $from . ' 12:00:00 UTC' ) + ( $days - 1 ) * 86400 );
+	}
+	return array(
+		'from' => $from,
+		'to'   => $to,
+		'days' => $days,
+	);
+}
+
+/**
+ * The Timeline's lanes: one lane for each Type that has an entry in the range, each entry placed along the range as a
+ * percentage (the middle of its day). Pure: no query. An entry has one date, so it is a marker, not a span. Entries
+ * outside the range or without a real date are left out; lanes follow the Types' order, entries in each lane the
+ * date, then time, then title.
+ *
+ * @param array[] $entries planweb_entry() arrays.
+ * @param string  $from    First day, Y-m-d.
+ * @param string  $to      Last day, Y-m-d.
+ * @return array<string, array<int, array<string, mixed>>> Type slug => entries, each with a left_pct added.
+ */
+function planweb_timeline_lanes( array $entries, string $from, string $to ): array {
+	$range = planweb_timeline_range( $from, $to, $from );
+	$start = strtotime( $range['from'] . ' 12:00:00 UTC' );
+	$lanes = array();
+	foreach ( $entries as $e ) {
+		$d = (string) ( $e['date'] ?? '' );
+		if ( ! planweb_is_date( $d ) || $d < $range['from'] || $d > $range['to'] ) {
+			continue;
+		}
+		$type  = isset( PLANWEB_TYPES[ $e['type'] ?? '' ] ) ? $e['type'] : 'reminder';
+		$day   = (int) round( ( strtotime( $d . ' 12:00:00 UTC' ) - $start ) / 86400 );
+		$lanes[ $type ][] = $e + array(
+			'left_pct' => round( ( ( $day + 0.5 ) / $range['days'] ) * 100, 2 ),
+		);
+	}
+	$out = array();
+	foreach ( array_keys( PLANWEB_TYPES ) as $slug ) {
+		if ( empty( $lanes[ $slug ] ) ) {
+			continue;
+		}
+		usort(
+			$lanes[ $slug ],
+			static fn( $a, $b ) => array( $a['date'], $a['time'] ?? '', $a['title'] ?? '' ) <=> array( $b['date'], $b['time'] ?? '', $b['title'] ?? '' )
+		);
+		$out[ $slug ] = $lanes[ $slug ];
+	}
+	return $out;
 }

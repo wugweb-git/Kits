@@ -4,7 +4,7 @@ Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.3.2
+Stable tag: 0.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ A team calendar inside WordPress: content, social, email and campaign dates. Pos
 
 PlanWeb keeps the team's dates and plans: content, social, email, campaign and reminder entries, each with one or more channels, an owner and a status (idea, draft, approved, due, sent, done). PlanWeb posts nothing to any social network and schedules nothing out. It sends email only through this site's own wp_mail(), only when you switch a reminder or the weekly digest on in PlanWeb Settings, and only to people with an account on this site: never to an outside address.
 
-* PlanWeb → Calendar: a month grid, a list with filters, and a form to add or edit an entry.
+* PlanWeb → Calendar (the page used without Kits Core): a month grid, a week view and a Timeline, filters by type, status, owner, channel and a From / To date range, and a form to add or edit an entry. The Timeline draws a lane for each type with every entry as a marker placed by its date (default: eight weeks from this week's Monday, at most a year), and lists the same entries below it. Each entry has one date, so there are no spans or campaign bars. Changing a date by drag and drop is not built.
 * A Dashboard box with the next 7 days.
 * Entries are a private post type in the REST API (`/wp/v2/planweb-entries`), readable only by people who work with them.
 * Links may point only to this site or to social sites; titles and notes may hold no email address or phone number.
@@ -65,6 +65,11 @@ PlanWeb does not connect to, call, or send any data to an external service, and 
 The iCalendar feed it serves is read by your own calendar app (Google, Apple or Outlook) pulling from this site; the plugin itself never contacts those apps. Any social tools named elsewhere in PlanWeb (for example Meta Business Suite or Buffer) are used by the team outside the plugin — nothing is sent to them from PlanWeb.
 
 == Changelog ==
+
+= 0.4.0 =
+* New Timeline view on the Calendar page: a lane for each entry type, each entry a marker placed along the chosen date range, with a plain list of the same entries below. It only reads; nothing is changed or sent.
+* New From / To date-range filter on the Calendar page (month, week and Timeline), combining with the type, status, owner and channel filters.
+* Not built: the Timeline and date range in the Kits shell (React) screens, drag-and-drop rescheduling, and author, category or campaign-tag filters (no entry has those fields).
 
 = 0.3.2 =
 * The Calendar menu page no longer says "needs Kits Core" when Kits Core is missing: it shows a plain WordPress page with the upcoming entries and the add-entry form, and Settings holds the calendar feed key and the scheduled jobs.

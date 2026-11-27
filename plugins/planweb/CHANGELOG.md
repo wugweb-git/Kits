@@ -2,6 +2,12 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.4.0
+
+- New Timeline view on the Calendar page (the one used without Kits Core): a lane for each entry type, each entry a marker placed by its date along the range, plus a plain list of the same entries. Default range is eight weeks from this week's Monday; at most one year. Read-only.
+- New From / To date-range filter on the Calendar page (month, week and Timeline views), combined with the existing type, status, owner and channel filters. Pure helpers `planweb_timeline_range()` and `planweb_timeline_lanes()` and the From / To keys of `planweb_calendar_filter()` are in `includes/model.php`, covered by `tests/run.php`.
+- Not built: the Timeline and a custom date range in the shell (React) Entries screen (it has date presets only), drag-and-drop rescheduling, author / category / campaign-tag filters. `includes/calendar-views.php` stays unloaded.
+
 ## 0.3.2
 
 - The Calendar menu page no longer says "needs Kits Core" when Kits Core is missing: it shows a plain WordPress page with the upcoming entries and the add-entry form, and Settings holds the calendar feed key and the scheduled jobs.

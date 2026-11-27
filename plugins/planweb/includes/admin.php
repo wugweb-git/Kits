@@ -141,6 +141,7 @@ function planweb_screen() {
 	$done  = isset( $_GET['done'] ) ? sanitize_key( $_GET['done'] ) : '';
 	$week  = isset( $_GET['w'] ) && planweb_is_date( sanitize_text_field( wp_unslash( $_GET['w'] ) ) ) ? planweb_week_start( sanitize_text_field( wp_unslash( $_GET['w'] ) ) ) : '';
 	$f     = planweb_calendar_filters_arg( $_GET ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- each value is checked against its list.
+	$line  = isset( $_GET['view'] ) && 'timeline' === sanitize_key( wp_unslash( $_GET['view'] ) );
 	$error = isset( $_GET['error'] ) ? sanitize_text_field( wp_unslash( $_GET['error'] ) ) : '';
 	// phpcs:enable
 
@@ -170,8 +171,10 @@ function planweb_screen() {
 	}
 	echo '<p class="description">' . esc_html__( 'Nothing on this calendar is posted to any social network: it is the team\'s plan. Approved and Sent are set by an administrator.', 'planweb' ) . '</p>';
 
-	planweb_calendar_filter_form( $month, $week, $f );
-	if ( '' !== $week ) {
+	planweb_calendar_filter_form( $month, $week, $f, $line );
+	if ( $line ) {
+		planweb_timeline_view( $f );
+	} elseif ( '' !== $week ) {
 		planweb_week_view( $week, $f );
 	} else {
 		planweb_month_grid( $month, $f );
@@ -248,18 +251,29 @@ function planweb_month_grid( string $month, array $f = array() ) {
  * The Calendar's filters from the address: each must be a known slug, anything else is ignored.
  *
  * @param array $get The query string.
- * @return array{type: string, status: string, owner: string, channel: string}
+ * @return array{type: string, status: string, owner: string, channel: string, from: string, to: string}
  */
 function planweb_calendar_filters_arg( array $get ): array {
 	$pick = static function ( string $key, array $allowed ) use ( $get ): string {
 		$v = isset( $get[ $key ] ) && is_string( $get[ $key ] ) ? sanitize_key( wp_unslash( $get[ $key ] ) ) : '';
 		return isset( $allowed[ $v ] ) ? $v : '';
 	};
+	$date = static function ( string $key ) use ( $get ): string {
+		$v = isset( $get[ $key ] ) && is_string( $get[ $key ] ) ? sanitize_text_field( wp_unslash( $get[ $key ] ) ) : '';
+		return planweb_is_date( $v ) ? $v : '';
+	};
+	$from = $date( 'from' );
+	$to   = $date( 'to' );
+	if ( '' !== $from && '' !== $to && $to < $from ) {
+		list( $from, $to ) = array( $to, $from );
+	}
 	return array(
 		'type'    => $pick( 'type', PLANWEB_TYPES ),
 		'status'  => $pick( 'status', PLANWEB_STATUSES ),
 		'owner'   => $pick( 'owner', PLANWEB_OWNERS ),
 		'channel' => $pick( 'channel', PLANWEB_CHANNELS ),
+		'from'    => $from,
+		'to'      => $to,
 	);
 }
 
@@ -269,8 +283,9 @@ function planweb_calendar_filters_arg( array $get ): array {
  * @param string $month Y-m.
  * @param string $week  Monday of the shown week, or '' for the month.
  * @param array  $f     Current filters.
+ * @param bool   $line  Whether the Timeline is shown.
  */
-function planweb_calendar_filter_form( string $month, string $week, array $f ) {
+function planweb_calendar_filter_form( string $month, string $week, array $f, bool $line = false ) {
 	$any = array(
 		'type'    => __( 'Any type', 'planweb' ),
 		'status'  => __( 'Any status', 'planweb' ),
@@ -285,20 +300,85 @@ function planweb_calendar_filter_form( string $month, string $week, array $f ) {
 	);
 	echo '<form method="get" class="planweb-filters"><input type="hidden" name="page" value="' . esc_attr( PLANWEB_MENU ) . '">';
 	echo '<input type="hidden" name="m" value="' . esc_attr( $month ) . '">';
-	if ( '' !== $week ) {
+	if ( '' !== $week && ! $line ) {
 		echo '<input type="hidden" name="w" value="' . esc_attr( $week ) . '">';
+	}
+	if ( $line ) {
+		echo '<input type="hidden" name="view" value="timeline">';
 	}
 	foreach ( $lists as $key => $values ) {
 		echo '<label class="screen-reader-text" for="planweb-' . esc_attr( $key ) . '">' . esc_html( $any[ $key ] ) . '</label>' . planweb_select( $key, $values, $f[ $key ], $any[ $key ] ) . ' '; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- planweb_select() escapes.
 	}
+	echo '<label for="planweb-from">' . esc_html__( 'From', 'planweb' ) . '</label> <input type="date" name="from" id="planweb-from" value="' . esc_attr( $f['from'] ) . '"> ';
+	echo '<label for="planweb-to">' . esc_html__( 'To', 'planweb' ) . '</label> <input type="date" name="to" id="planweb-to" value="' . esc_attr( $f['to'] ) . '"> ';
 	echo '<button class="button">' . esc_html__( 'Filter', 'planweb' ) . '</button> ';
 	if ( array_filter( $f ) ) {
-		echo '<a href="' . esc_url( planweb_url( array_filter( array( 'm' => $month, 'w' => $week ) ) ) ) . '">' . esc_html__( 'Clear filters', 'planweb' ) . '</a> ';
+		echo '<a href="' . esc_url( planweb_url( array_filter( array( 'm' => $month, 'w' => $line ? '' : $week, 'view' => $line ? 'timeline' : '' ) ) ) ) . '">' . esc_html__( 'Clear filters', 'planweb' ) . '</a> ';
 	}
-	$other = '' === $week
-		? '<a class="button" href="' . esc_url( planweb_url( array( 'm' => $month, 'w' => planweb_week_start( $month === wp_date( 'Y-m' ) ? wp_date( 'Y-m-d' ) : $month . '-01' ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Week view', 'planweb' ) . '</a>'
-		: '<a class="button" href="' . esc_url( planweb_url( array( 'm' => substr( $week, 0, 7 ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Month view', 'planweb' ) . '</a>';
-	echo $other . '</form>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above with esc_url / esc_html__.
+	$keep  = array_filter( $f );
+	$views = array(
+		'month'    => array( __( 'Month view', 'planweb' ), array( 'm' => $line ? $month : substr( '' !== $week ? $week : $month, 0, 7 ) ) ),
+		'week'     => array( __( 'Week view', 'planweb' ), array( 'm' => $month, 'w' => planweb_week_start( $month === wp_date( 'Y-m' ) ? wp_date( 'Y-m-d' ) : $month . '-01' ) ) ),
+		'timeline' => array( __( 'Timeline', 'planweb' ), array( 'm' => $month, 'view' => 'timeline' ) ),
+	);
+	$now = $line ? 'timeline' : ( '' !== $week ? 'week' : 'month' );
+	foreach ( $views as $key => $v ) {
+		if ( $key !== $now ) {
+			echo '<a class="button" href="' . esc_url( planweb_url( $v[1] + $keep ) ) . '">' . esc_html( $v[0] ) . '</a> ';
+		}
+	}
+	echo '</form>';
+}
+
+/**
+ * The Timeline: one lane for each Type, each entry a marker placed by its date along the range (the From and To
+ * filters; without them eight weeks from this week's Monday). Every entry is also listed below, in date order, so the
+ * picture is never the only way to read it. Nothing here changes an entry.
+ *
+ * @param array $f Filters (the range is its from and to).
+ */
+function planweb_timeline_view( array $f ) {
+	$today = wp_date( 'Y-m-d' );
+	$r     = planweb_timeline_range( $f['from'] ?? '', $f['to'] ?? '', $today );
+	$rest  = array_filter( array_diff_key( $f, array( 'from' => 1, 'to' => 1 ) ) );
+	$all   = planweb_calendar_filter( planweb_entries( $r['from'], $r['to'] ), $f );
+	$lanes = planweb_timeline_lanes( $all, $r['from'], $r['to'] );
+	$step  = $r['days'] * DAY_IN_SECONDS;
+	$at    = strtotime( $r['from'] . ' 12:00:00 UTC' );
+	$link  = static function ( int $from_ts, string $label ) use ( $r, $rest ) {
+		return '<a class="button" href="' . esc_url( planweb_url( array( 'view' => 'timeline', 'from' => gmdate( 'Y-m-d', $from_ts ), 'to' => gmdate( 'Y-m-d', $from_ts + ( $r['days'] - 1 ) * DAY_IN_SECONDS ) ) + $rest ) ) . '">' . esc_html( $label ) . '</a>';
+	};
+	echo '<p class="planweb-nav">' . $link( $at - $step, '‹ ' . __( 'Earlier', 'planweb' ) ) . ' <strong>' . esc_html( planweb_date_label( $r['from'] ) . ' – ' . planweb_date_label( $r['to'] ) ) . '</strong> ' . $link( $at + $step, __( 'Later', 'planweb' ) . ' ›' ) . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $link() escapes.
+	if ( ! $lanes ) {
+		echo '<p>' . esc_html__( 'No entries in this range.', 'planweb' ) . '</p>';
+		return;
+	}
+	// Axis ticks: a mark each Monday in the range, so the weeks can be counted.
+	$ticks = '';
+	for ( $t = strtotime( planweb_week_start( $r['from'] ) . ' 12:00:00 UTC' ); $t <= strtotime( $r['to'] . ' 12:00:00 UTC' ); $t += 7 * DAY_IN_SECONDS ) {
+		$day = (int) round( ( $t - $at ) / DAY_IN_SECONDS );
+		if ( $day < 0 ) {
+			continue;
+		}
+		$ticks .= '<span class="planweb-timeline-tick" style="left:' . esc_attr( (string) round( ( $day / $r['days'] ) * 100, 2 ) ) . '%">' . esc_html( wp_date( 'j M', $t ) ) . '</span>';
+	}
+	echo '<div class="planweb-timeline"><div class="planweb-timeline-row planweb-timeline-axis"><span class="planweb-timeline-label"></span><div class="planweb-timeline-track" aria-hidden="true">' . $ticks . '</div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built above with esc_attr / esc_html.
+	foreach ( $lanes as $slug => $rows ) {
+		echo '<div class="planweb-timeline-row"><span class="planweb-timeline-label">' . planweb_type_badge( $slug ) . '</span><div class="planweb-timeline-track">'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the badge escapes its parts.
+		foreach ( $rows as $e ) {
+			$href  = planweb_url( array( 'm' => substr( $e['date'], 0, 7 ), 'edit' => $e['id'] ) ) . '#planweb-form';
+			$title = planweb_date_label( $e['date'] ) . ': ' . $e['title'];
+			echo '<a class="planweb-timeline-mark planweb-status--' . esc_attr( $e['status'] ) . '" style="left:' . esc_attr( (string) $e['left_pct'] ) . '%" href="' . esc_url( $href ) . '" title="' . esc_attr( $title ) . '"><span class="screen-reader-text">' . esc_html( $title ) . '</span></a>';
+		}
+		echo '</div></div>';
+	}
+	echo '</div>';
+	echo '<table class="widefat striped planweb-timeline-list"><caption class="screen-reader-text">' . esc_html__( 'Entries in this range', 'planweb' ) . '</caption><tbody>';
+	foreach ( $all as $e ) {
+		$href = planweb_url( array( 'm' => substr( $e['date'], 0, 7 ), 'edit' => $e['id'] ) ) . '#planweb-form';
+		echo '<tr><th scope="row">' . esc_html( planweb_date_label( $e['date'] ) . ( '' !== $e['time'] ? ' ' . $e['time'] : '' ) ) . '</th><td>' . planweb_type_badge( $e['type'] ) . ' <a href="' . esc_url( $href ) . '">' . esc_html( $e['title'] ) . '</a> ' . planweb_status_badge( $e['status'] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the badges escape their parts.
+	}
+	echo '</tbody></table>';
 }
 
 /**

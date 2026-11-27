@@ -4,7 +4,9 @@
 
 Checked line by line against the code on 27 Nov 2026.
 
-- DEAD (file written, not loaded): the campaign timeline and the author / category / campaign-tag filters live in `calendar-views.php`, which `planweb.php` no longer loads. Their earlier 'done' marks are wrong; the file's own notes say no entry has those fields.
+- Built in 0.4.0 (27 Nov 2026): a Timeline view and a From / To date-range filter on the classic Calendar page (`planweb_timeline_view()` in `admin.php`; pure `planweb_timeline_range()`, `planweb_timeline_lanes()` and the date keys of `planweb_calendar_filter()` in `model.php`; tested in `tests/run.php`). Type, status, owner and channel filters already existed there.
+- Not built: the Timeline and a custom date range in the shell (React) screens (Entries has date presets only; it needs `src/index.js` and a build); drag-and-drop rescheduling; campaign bars spanning dates (an entry has one date). Not run on a live WordPress.
+- DEAD (file written, not loaded, not held): `calendar-views.php`, which `planweb.php` does not load. Its campaign-timeline and author / category / campaign-tag filters have no data (no entry has those fields); the timeline and date filter now live in `model.php` and `admin.php` instead. Its earlier 'done' marks are wrong.
 - Stale: 'Help tab: not built' (it exists: `help-tab.php`); 'the shell entry form has no Repeat field' (added in 0.3.2).
 - Not tested: the cron run functions, saving, uninstall, the Animal Writes switch.
 
@@ -23,15 +25,14 @@ The editorial calendar and campaign planning plugin owns:
    - Written, not wired (calendar-views.php is not loaded, no drag-and-drop script exists): nonce-verified schedule adjustment AJAX handler (`wp_ajax_planweb_reschedule_entry`).
 
 2. **Deferred Tasks from 17 Nov Session (`claude/planweb-deferred-1117`)**:
-   - ✅ Added zero-dependency HTML/CSS campaign timeline visualization (`planweb_campaign_timeline_data()`, `planweb_render_campaign_timeline()`).
-   - ✅ Added calendar entry filtering by author, category, campaign tag, type, and status (`planweb_calendar_filter_entries()`).
+   - Superseded: those two functions sit in the unloaded `calendar-views.php`, so those 'added' marks never applied. What exists is in 0.4.0: a Timeline (lane per type, marker per entry) and filters by type, status, owner, channel and From / To date on the classic Calendar.
 
 ## Carried over from docs/org (26 Nov 2026)
 
 Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
 
 - Strip the `aw_team_dates` import before WordPress.org submission (`import.php`, `migrate.php`, `team-dates.php`; the unguarded Core call in the Dates menu is now guarded, 26 Nov).
-- Drag-and-drop schedule and a Help tab: not built. The classic Calendar (used without Kits Core) now has filters by type, status, owner and channel and a week view (26 Nov); the shell's Entries list already filtered by the same four. No entry has an author, category or campaign field, so those filters do not exist.
+- Drag-and-drop schedule: not built (the Help tab exists). The classic Calendar (used without Kits Core) now has filters by type, status, owner and channel and a week view (26 Nov), and from 0.4.0 a Timeline and a From / To date range; the shell's Entries list filters by the same four plus date presets. No entry has an author, category or campaign field, so those filters do not exist.
 - Screenshots, Plugin Check on a clean WordPress, and the submission itself.
 - Scheduled jobs: built in 0.3.0 on WP-cron (no Action Scheduler, no new dependency), all off by default, switched in PlanWeb Settings (`includes/jobs.php`, pure rules in `includes/jobs-model.php`, covered by `tests/run.php`).
   - Built: overdue sweep (daily 06:00, sets the `planweb_flag` = overdue on open past entries), repeats (daily 06:15, weekly/monthly, one next entry, `planweb_repeated_to` marks the source, 50 a run), email reminders (daily 08:00, one email per site user, deduped by entry ID and date), weekly digest (Monday 08:30, to `admin_email`, optional first line). Filters `planweb_job_email`, `planweb_repeat_entry`, `planweb_reminder_user`. Cron hooks and options are removed by Delete data.

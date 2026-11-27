@@ -11,7 +11,7 @@
  * Plugin Name:       PlanWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/planweb/
  * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Posts nothing to social networks; emails site users only if you switch reminders or the digest on.
- * Version:           0.3.2
+ * Version:           0.4.0
  * Update URI:           https://wugweb.com/plugins/planweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -50,7 +50,7 @@ if ( defined( 'PLANWEB_VERSION' ) ) {
 	return; // Loaded already.
 }
 
-define( 'PLANWEB_VERSION', '0.3.2' );
+define( 'PLANWEB_VERSION', '0.4.0' );
 define( 'PLANWEB_FILE', __FILE__ );
 define( 'PLANWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PLANWEB_URL', plugin_dir_url( __FILE__ ) );
@@ -75,7 +75,7 @@ require_once PLANWEB_DIR . 'includes/feed-model.php';
 require_once PLANWEB_DIR . 'includes/feed.php';
 require_once PLANWEB_DIR . 'includes/migrate.php';
 require_once PLANWEB_DIR . 'includes/team-dates.php'; // the team's Dates calendar and aw_team_dates(), the fallback while PlanWeb is off (moved from Animal Writes Core, 19 Nov 2026)
-// includes/calendar-views.php is written but not wired (no caller, no script): not loaded.
+// includes/calendar-views.php is written but not wired (no caller, no script; its author/category/tag fields exist on no entry): not loaded. The Timeline and date-range filter are in model.php and admin.php.
 require_once PLANWEB_DIR . 'includes/planweb-ui.php';
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	require_once PLANWEB_DIR . 'includes/class-planweb-cli.php';
