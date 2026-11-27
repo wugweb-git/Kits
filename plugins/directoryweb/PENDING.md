@@ -5,9 +5,9 @@
 Checked line by line against the code on 27 Nov 2026.
 
 - NOT FOUND: swapping `single-aw_listing.html` to `directoryweb/status` and `people`, and the `find-help` pattern (no such template exists in this repo); '0 slow MySQL queries on 7,700+ entries' (no benchmark or test).
-- Partial: neutral wording (still fixed in `listing-meta.php:81,88`, `claims-review.php:37,50`, `listing-profile.php:297`); the Animal Writes site layer restores only two labels (now three).
+- Partial: neutral wording. 1.2.5 moved the label and field-description wording of `listing-meta.php`, `claims-review.php`, `listing-profile.php`, `listing-template.php` and `directoryweb-listings.php` into `labels.php` (tested in `tests/labels-tests.php`). Still animal welfare or India-specific by design, not routed through labels: the directory page titles and descriptions (`directory.php`), the claim page copy (`claim-page.php`), the Find help and district helpline pages (`find-help.php`, `directoryweb-find-help.php`, `district-helplines.php`, Mobile Veterinary Unit 1962), local cards (`local-cards.php`, `directoryweb-local-card.php`), service and type names (`listing-terms.php`, `listing-template.php`), data source names (`data-sources.php`), geocoding that appends India (`geocode.php`) and the PIN box text (`places-admin.php`).
 - Stale: CRM events are built (`claim-crm.php`, 12 tests); the schema test count is 30; the header branch note is old.
-- Not tested: 1.2.3 standalone screens (about 660 lines), labels, near bounds, PIN gating, deactivation.
+- Not tested: 1.2.3 standalone screens (about 660 lines), near bounds, PIN gating, deactivation.
 
 Status as of 25 Nov 2026 on `feat/directoryweb-completion`. Evidence classes: U unit, H headless Playground, B browser, X external. See `docs/audit/acceptance-gates.md` and `docs/audit/master-matrix.md`.
 

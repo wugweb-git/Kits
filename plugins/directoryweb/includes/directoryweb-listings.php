@@ -367,8 +367,8 @@ function directoryweb_rest_listing_detail( WP_REST_Request $r ) {
 	$registration = $named(
 		array(
 			array( __( 'Registration', 'directoryweb' ), $meta( 'aw_registration' ) ),
-			array( __( '12A', 'directoryweb' ), $meta( 'aw_reg_12a' ) ),
-			array( __( '80G', 'directoryweb' ), $meta( 'aw_reg_80g' ) ),
+			array( directoryweb_label( 'tax_12a' ), $meta( 'aw_reg_12a' ) ),
+			array( directoryweb_label( 'tax_80g' ), $meta( 'aw_reg_80g' ) ),
 			array( directoryweb_label( 'registry_id' ), $meta( 'aw_darpan_id' ) ),
 		)
 	);

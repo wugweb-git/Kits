@@ -40,6 +40,10 @@ function register_post_meta( $t, $k, $a ) { global $reg; $reg[ $k ] = $a; }
 
 class WP_REST_Response { public $d; function __construct( $d = null ) { $this->d = $d; } function get_data() { return $this->d; } function set_data( $d ) { $this->d = $d; } }
 const DIRECTORYWEB_CAP = 'manage_directoryweb';
+if ( ! function_exists( '__' ) ) {
+	function __( $t ) { return $t; }
+}
+require dirname( __DIR__ ) . '/includes/labels.php';
 require dirname( __DIR__ ) . '/includes/listing-meta.php';
 
 $fails = 0;

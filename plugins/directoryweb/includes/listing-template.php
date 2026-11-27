@@ -138,7 +138,7 @@ function directoryweb_listing_issuer_icon( $slug, $id, $fallback ) {
 
 function directoryweb_block_listing_registrations( $a, $id ) {
 	if ( ! directoryweb_listing_here( $id ) ) {
-		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Registrations: AWBI, registration, 12A, 80G, FCRA, NGO Darpan' ) : '';
+		return function_exists( 'aw_item_editor_preview' ) ? aw_item_editor_preview( 'Registrations: ' . implode( ', ', array( directoryweb_label( 'awbi_number' ), 'registration', directoryweb_label( 'tax_12a' ), directoryweb_label( 'tax_80g' ), directoryweb_label( 'foreign_funding' ), directoryweb_label( 'registry_id' ) ) ) ) : '';
 	}
 	$awbi = directoryweb_lf( $id, 'aw_awbi_code' );
 	$drop = directoryweb_lf( $id, 'aw_awbi_dropped' );
@@ -147,9 +147,9 @@ function directoryweb_block_listing_registrations( $a, $id ) {
 		array( directoryweb_label( 'awbi_number' ), $awbi ? directoryweb_listing_parts( array( esc_html( $awbi ), directoryweb_listing_validity( directoryweb_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html( directoryweb_label( 'awbi_not_on_list' ) ) . ' ' . directoryweb_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : directoryweb_listing_na( $id ) , directoryweb_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'directoryweb' ), $type ) : __( 'Registration', 'directoryweb' ), directoryweb_lf( $id, 'aw_registration' ) ? esc_html( directoryweb_lf( $id, 'aw_registration' ) ) : directoryweb_listing_na( $id ), 'file' ),
-		array( '12A', esc_html( directoryweb_lf( $id, 'aw_reg_12a' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
-		array( '80G', esc_html( directoryweb_lf( $id, 'aw_reg_80g' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
-		array( 'FCRA', esc_html( directoryweb_lf( $id, 'aw_fcra' ) ), directoryweb_listing_issuer_icon( 'mha', $id, 'legal' ) ),
+		array( directoryweb_label( 'tax_12a' ), esc_html( directoryweb_lf( $id, 'aw_reg_12a' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
+		array( directoryweb_label( 'tax_80g' ), esc_html( directoryweb_lf( $id, 'aw_reg_80g' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
+		array( directoryweb_label( 'foreign_funding' ), esc_html( directoryweb_lf( $id, 'aw_fcra' ) ), directoryweb_listing_issuer_icon( 'mha', $id, 'legal' ) ),
 		array( directoryweb_label( 'registry_id' ), esc_html( directoryweb_lf( $id, 'aw_darpan_id' ) ), directoryweb_listing_issuer_icon( 'darpan', $id, 'legal' ) ),
 	);
 	return directoryweb_listing_group( 'registrations', __( 'Registrations', 'directoryweb' ), directoryweb_listing_dl( $rows ) );

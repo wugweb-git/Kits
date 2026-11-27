@@ -40,6 +40,10 @@ function update_post_meta( $id, $k, $v ) { global $meta; $meta[ $id ][ $k ] = $v
 function delete_post_meta( $id, $k ) { global $meta; unset( $meta[ $id ][ $k ] ); }
 function register_post_meta( $t, $k, $a ) { global $reg; $reg[] = $t . '|' . $k . '|' . $a['type']; }
 
+if ( ! function_exists( '__' ) ) {
+	function __( $t ) { return $t; }
+}
+require dirname( __DIR__ ) . '/includes/labels.php';
 require dirname( __DIR__ ) . '/includes/listing-meta.php';
 require dirname( __DIR__ ) . '/includes/listing-terms.php'; // directoryweb_normalise_phone()
 $site_meta_file = dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/content/meta.php';

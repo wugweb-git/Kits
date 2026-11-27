@@ -34,7 +34,6 @@ function directoryweb_export_csv( string $type ): ?string {
 			'posts_per_page'   => 5000,
 			'orderby'          => 'ID',
 			'order'            => 'ASC',
-			'suppress_filters' => true,
 		)
 	);
 	$rows   = array();

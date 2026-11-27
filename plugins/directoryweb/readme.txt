@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ Links shown in the admin and on listings to government and other registers (for 
 By default, deleting the plugin removes nothing: listings, places, claims, settings and every option stay, so reinstalling finds everything as it was. Only if the option `directoryweb_delete_data_on_uninstall` is true does uninstall delete DirectoryWeb's own bookkeeping options (`directoryweb_caps`, `directoryweb_rewrite_ver`), its two cached counts and its scheduled count job, after writing a backup to `wp-content/uploads/wugweb-backups/`. It never deletes listings, claims, uploads, users, terms or any post, term or user meta. Deactivating the plugin unschedules the hourly count job and flushes the rewrite rules, and deletes nothing.
 
 == Changelog ==
+
+= 1.2.5 =
+* The rest of the animal welfare and India-specific wording on the listing screens is neutral by default and goes through the `directoryweb_labels` filter: the 12A, 80G and foreign funding (FCRA) labels, the registry and accreditation names in the claim form and the field descriptions (the REST schema), and the Google category example. New label keys: registry_name, accreditor, accreditor_list, accreditor_first_list, tax_12a, tax_12a_help, tax_80g, tax_80g_help, foreign_funding, category_example. Stored keys are unchanged. The Animal Writes site layer restores the exact old words.
 
 = 1.2.4 =
 * Delete data on uninstall now also removes the three settings options added in 1.2.0 (the field, listing type and form mapping settings). They were left behind before. The backup written before deleting includes them.

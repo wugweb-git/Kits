@@ -2,6 +2,11 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.2.5
+
+- The rest of the animal welfare and India-specific wording on the listing screens is neutral by default and goes through the `directoryweb_labels` filter: the 12A, 80G and foreign funding (FCRA) labels, the registry and accreditation names in the claim form and the field descriptions (the REST schema), and the Google category example. New label keys: registry_name, accreditor, accreditor_list, accreditor_first_list, tax_12a, tax_12a_help, tax_80g, tax_80g_help, foreign_funding, category_example. Stored keys are unchanged. The Animal Writes site layer restores the exact old words.
+- Tests: `tests/labels-tests.php` checks that no default names the animal or India-specific wording and that the Animal Writes layer returns the old words; `listing-meta-tests.php` and `meta-authorization-tests.php` load `labels.php`.
+
 ## 1.2.4
 
 - Delete data on uninstall now also removes the three settings options added in 1.2.0 (the field, listing type and form mapping settings). They were left behind before. The backup written before deleting includes them.

@@ -16,9 +16,25 @@ add_filter(
 		return array_merge(
 			(array) $labels,
 			array(
-				'animals'     => 'Animals helped',
-				'awbi_number' => 'AWBI number',
-				'registry_id' => 'NGO Darpan ID',
+				'animals'               => 'Animals helped',
+				'animals_help'          => 'Comma separated, e.g. dogs, cats, cattle, birds',
+				'awbi_number'           => 'AWBI number',
+				'awbi_not_on_list'      => 'Not on the current AWBI list',
+				'awbi_code'             => 'AWBI code',
+				'awbi_recognised'       => 'AWBI recognised on',
+				'awbi_renewed'          => 'AWBI renewed on',
+				'awbi_valid'            => 'AWBI valid until',
+				'registry_id'           => 'NGO Darpan ID',
+				'registry_name'         => 'NGO Darpan',
+				'accreditor'            => 'AWBI',
+				'accreditor_list'       => 'AWBI list',
+				'accreditor_first_list' => '31 May 2026 list',
+				'tax_12a'               => '12A',
+				'tax_12a_help'          => '12A registration number',
+				'tax_80g'               => '80G',
+				'tax_80g_help'          => '80G registration number',
+				'foreign_funding'       => 'FCRA',
+				'category_example'      => 'Animal shelter',
 			)
 		);
 	}
