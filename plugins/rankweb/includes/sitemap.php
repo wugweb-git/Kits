@@ -243,6 +243,9 @@ if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_r
 			$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$home = rtrim( (string) wp_parse_url( home_url( '/' ), PHP_URL_PATH ), '/' );
 			foreach ( array( 'news', 'video', 'image' ) as $kind ) {
+				if ( 'news' === $kind && ! post_type_exists( 'aw_news' ) ) {
+					continue; // no News items on this site: the address stays a 404 instead of an empty sitemap.
+				}
 				if ( $home . '/' . $kind . '-sitemap.xml' === $path ) {
 					$wp->query_vars['sitemap'] = $kind;
 				}
@@ -282,10 +285,14 @@ add_filter(
 	}
 );
 
-// And in robots.txt, after the site's own Sitemap line.
+// And in robots.txt, after the site's own Sitemap line. Only when RankWeb is the SEO owner, the setting is on and the site
+// has News items (the aw_news type): on any other site the news sitemap would be empty and another plugin owns robots.txt.
 add_filter(
 	'robots_txt',
 	function ( $txt ) {
+		if ( ! post_type_exists( 'aw_news' ) || ! function_exists( 'rankweb_robots_txt_extras_on' ) || ! rankweb_robots_txt_extras_on( 'RANKWEB_ROBOTS_NEWS_SITEMAP' ) ) {
+			return $txt;
+		}
 		$line = 'Sitemap: ' . rankweb_news_sitemap_url();
 		return false !== strpos( (string) $txt, $line ) ? $txt : rtrim( (string) $txt ) . "\n" . $line . "\n";
 	},

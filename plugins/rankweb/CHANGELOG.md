@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.3.4
+
+- robots.txt: the Content-Signal AI line is off by default and is added only when RankWeb prints the page head (no other SEO plugin does) and the new setting (Settings → Robots rules) is on. The news sitemap line follows the same rule with its own setting, and only on sites that have News items; `/news-sitemap.xml` no longer answers on sites without them.
+- Redirect tools (classic and Kits screens, import error text, readme): they say that RankWeb has no redirect list of its own and do nothing without Rank Math's Redirections module.
+- readme External services: adds the opt-in Google Fonts download (fonts.googleapis.com, fonts.gstatic.com), the YouTube thumbnail host named in video data, and which requests stay on your own site.
+- Uninstall with the delete-data setting ticked also removes the page cache folder, the local font folder, the `manage_rankweb` capability, `rankweb_caps`, `rankweb_redirect_categories` and more transients. Deactivation also unschedules `aw_faq_index_build`.
+- The FAQ head's link label is "All FAQs" instead of "Animal welfare FAQ", and the link is shown only when a /resources/animal-welfare-faqs/ page exists.
+
 ## 2.3.3
 
 - Fix: the page cache never stores a cart, checkout or account page, or any page with a form nonce. The sitemap check watches /sitemap_index.xml only when Rank Math is active, so other sites no longer get a false "not answering" notice.

@@ -138,7 +138,7 @@ function rankweb_redirect_import_file( ?array $file, bool $apply, ?callable $is_
 	);
 	$tmp       = is_array( $file ) ? (string) ( $file['tmp_name'] ?? '' ) : '';
 	if ( ! rankweb_redirect_ready() ) {
-		$report['error'] = __( 'Rank Math\'s Redirections module is off.', 'rankweb' );
+		$report['error'] = __( 'Rank Math is not active, or its Redirections module is off. Nothing was imported: RankWeb keeps no redirect list of its own.', 'rankweb' );
 		return $report;
 	}
 	if ( '' === $tmp || ( isset( $file['error'] ) && UPLOAD_ERR_OK !== (int) $file['error'] ) || ! $is_upload( $tmp ) ) {
@@ -543,7 +543,7 @@ function rankweb_redirect_tools_body(): void {
 	$post = admin_url( 'admin-post.php' );
 	echo '<p>' . esc_html__( 'Redirects live in Rank Math → Redirections. These tools read and write that one list.', 'rankweb' ) . '</p>';
 	if ( ! rankweb_redirect_ready() ) {
-		wp_admin_notice( esc_html__( 'Rank Math\'s Redirections module is off, so these tools do nothing.', 'rankweb' ), array( 'type' => 'warning' ) );
+		wp_admin_notice( esc_html__( 'Redirects need Rank Math with its Redirections module on. RankWeb keeps no redirect list of its own, so on this site importing, the .htaccess block and the 404 log do nothing, and no redirect is made.', 'rankweb' ), array( 'type' => 'warning' ) );
 	}
 	$report = get_transient( 'aw_seo_redirect_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {

@@ -20,6 +20,11 @@
  * Scheduled events:
  *   aw_seo_fill_daily, aw_seo_endpoints_watchdog, aw_seo_sitemap_daily, aw_faq_index_build, rankweb_health_build and
  *   rankweb_link_index_build (both with and without their 'now' argument)
+ * Also removed: option rankweb_caps and rankweb_redirect_categories (the redirect labels; in the backup), the transients
+ *   rankweb_image_sitemap, rankweb_font_fail_*, rankweb_schema_note_*, aw_faq_* , aw_silo_error_* and aw_link_audit_lock, the capability
+ *   manage_rankweb on every role, the page cache folder wp-content/cache/rankweb/ and the local font folder
+ *   wp-content/uploads/rankweb-fonts/ (both rebuilt from the site when a speed option is on; not in the backup).
+ *   Kept: the .webp copies the WebP conversion made next to the media files (they are ordinary files in the media library).
  * Custom tables: {prefix}rankweb_link_keywords, {prefix}aw_links, {prefix}aw_link_audit, {prefix}aw_silos and {prefix}aw_silo_items (Internal links), dropped. Rank Math's tables are Rank Math's.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/rankweb-uninstall-<YYYYmmdd-His>.jsonl.gz
@@ -41,7 +46,7 @@ if ( ! get_option( 'aw_seo_delete_data', 0 ) ) {
 	return; // The default: keep everything.
 }
 
-$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_page_version', 'aw_link_index_built', 'aw_link_audit_db', 'aw_silo_db', 'aw_link_audit_state', 'rankweb_link_audit_summary', 'aw_link_audit_checks', 'aw_seo_delete_data' );
+$aw_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_default_share_image', 'aw_seo_endpoints_last', 'aw_seo_cache_gen', 'aw_seo_press_kw_1103', 'aw_seed_redirects_version', 'aw_sitemap_filtered', 'aw_html_sitemap_page', 'aw_faq_experiment', 'rankweb_health_log', 'rankweb_health_schema', 'aw_link_db', 'aw_link_index_version', 'aw_link_page_version', 'aw_link_index_built', 'aw_link_audit_db', 'aw_silo_db', 'aw_link_audit_state', 'rankweb_link_audit_summary', 'aw_link_audit_checks', 'rankweb_caps', 'rankweb_redirect_categories', 'aw_seo_delete_data' );
 
 require_once __DIR__ . '/includes/uninstall-backup.php';
 $rankweb_uninst_slug = file_exists( __DIR__ . '/rankweb.php' ) ? 'rankweb' : 'aw-seo-extras';
@@ -68,6 +73,37 @@ foreach ( array( 'rankweb_health', 'aw_faq_counts', 'aw_faq_index', 'aw_html_sit
 global $wpdb;
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_aw_seo_' ) . '%', $wpdb->esc_like( '_transient_timeout_aw_seo_' ) . '%' ) );
+foreach ( array( 'rankweb_', 'aw_faq_', 'aw_silo_error_', 'aw_link_audit_lock' ) as $aw_seo_prefix ) {
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes transients by prefix.
+	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s", $wpdb->esc_like( '_transient_' . $aw_seo_prefix ) . '%', $wpdb->esc_like( '_transient_timeout_' . $aw_seo_prefix ) . '%' ) );
+}
+unset( $aw_seo_prefix );
+
+// The capability RankWeb added (rankweb-caps.php): taken off every role.
+if ( function_exists( 'wp_roles' ) ) {
+	foreach ( wp_roles()->role_objects as $aw_seo_role ) {
+		if ( $aw_seo_role->has_cap( 'manage_rankweb' ) ) {
+			$aw_seo_role->remove_cap( 'manage_rankweb' );
+		}
+	}
+	unset( $aw_seo_role );
+}
+
+// Cache and font files (speed-pipeline.php): only RankWeb's own two folders, and only when they are where RankWeb puts them.
+require_once ABSPATH . 'wp-admin/includes/file.php';
+$aw_seo_upload  = wp_get_upload_dir();
+$aw_seo_folders = array( trailingslashit( WP_CONTENT_DIR ) . 'cache/rankweb', trailingslashit( (string) $aw_seo_upload['basedir'] ) . 'rankweb-fonts' );
+if ( WP_Filesystem() ) {
+	global $wp_filesystem;
+	foreach ( $aw_seo_folders as $aw_seo_folder ) {
+		if ( 'rankweb' === basename( $aw_seo_folder ) || 'rankweb-fonts' === basename( $aw_seo_folder ) ) {
+			if ( $wp_filesystem->is_dir( $aw_seo_folder ) ) {
+				$wp_filesystem->delete( $aw_seo_folder, true );
+			}
+		}
+	}
+}
+unset( $aw_seo_upload, $aw_seo_folders, $aw_seo_folder );
 
 foreach ( array( 'aw_seo_fill_daily', 'aw_seo_endpoints_watchdog', 'aw_seo_sitemap_daily', 'aw_faq_index_build', 'rankweb_health_build', 'aw_link_index_build', 'aw_link_audit', 'rankweb_video_sync' ) as $aw_seo_hook ) {
 	wp_clear_scheduled_hook( $aw_seo_hook );

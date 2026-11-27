@@ -10,8 +10,10 @@
  * - Directory profiles with no contact at all, unless they have Search Console impressions: noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Every RSS/Atom feed (posts, News, Opportunities, Library, comments): X-Robots-Tag noindex, links followed (owner, 25 Oct 2026).
- * - robots.txt: a Content-Signal line (search=yes, ai-input=yes, ai-train=no; owner, 3 Nov 2026) under User-agent: *,
- *   added to the text Rank Math writes; every saved rule and the Sitemap line stay as they are.
+ * - robots.txt: a Content-Signal line (search=yes, ai-input=yes, ai-train=no; owner, 3 Nov 2026) under User-agent: *.
+ *   Off by default (RankWeb → Settings → Robots rules). Only added when RankWeb is the SEO owner (rankweb_seo_owner() is
+ *   'none': Rank Math, Yoast, SEOPress and All in One SEO keep their own robots.txt policy) and the setting is on; every
+ *   saved rule and the Sitemap line stay as they are.
  * - Any wp_robots rule another plugin adds (e.g. a staging copy's noindex): Rank Math removes every wp_robots filter,
  *   so a copy of them is kept before it starts and asked here.
  * - Rank Math's sitemaps leave out what these rules keep out of the index: closed opportunities, profiles with no
@@ -184,13 +186,29 @@ add_filter(
 add_action( 'template_redirect', fn() => is_feed() && ! headers_sent() ? header( 'X-Robots-Tag: noindex, follow' ) : null, 0 );
 
 /**
+ * Whether RankWeb may add its own lines to robots.txt: RankWeb is the SEO owner (no other SEO plugin prints the head) and
+ * the named setting (a constant defined from RankWeb → Settings → Robots rules) is on.
+ *
+ * @param string $const The setting's constant.
+ */
+function rankweb_robots_txt_extras_on( string $const ): bool {
+	if ( ! function_exists( 'rankweb_seo_owner' ) || 'none' !== rankweb_seo_owner() ) {
+		return false;
+	}
+	return defined( $const ) && (bool) constant( $const );
+}
+
+/**
  * The robots.txt Content-Signal (owner, 3 Nov 2026): one line under the first User-agent: * group. The rest of the file is
  * Rank Math's saved text, unchanged. Runs after Rank Math (10) and before the staging copy's block-all (99).
  *
  * @param string $txt robots.txt text.
  */
 function rankweb_seo_robots_content_signal( $txt ) {
-	$txt    = (string) $txt;
+	$txt = (string) $txt;
+	if ( ! rankweb_robots_txt_extras_on( 'RANKWEB_ROBOTS_CONTENT_SIGNAL' ) ) {
+		return $txt; // another SEO plugin owns robots.txt, or the setting is off (the default).
+	}
 	$signal = (string) apply_filters( 'aw_seo_content_signal', 'search=yes, ai-input=yes, ai-train=no' );
 	if ( '' === $signal || preg_match( '/^\s*Content-Signal\s*:/mi', $txt ) ) {
 		return $txt;

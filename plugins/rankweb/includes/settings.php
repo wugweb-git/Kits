@@ -69,6 +69,8 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'robots' ),
 			'desc'   => 'Noindex rules that depend on an item\'s state or a list\'s size.',
 			'fields' => array(
+				'RANKWEB_ROBOTS_CONTENT_SIGNAL' => array( 'type' => 'int', 'label' => 'robots.txt Content-Signal line (1 on, 0 off)', 'help' => 'Adds "Content-Signal: search=yes, ai-input=yes, ai-train=no" under User-agent: *. Off by default. Only used when RankWeb prints the page head (no other SEO plugin does). It states a preference for AI crawlers; a crawler can ignore it.', 'default' => 0 ),
+				'RANKWEB_ROBOTS_NEWS_SITEMAP' => array( 'type' => 'int', 'label' => 'List the news sitemap in robots.txt (1 on, 0 off)', 'help' => 'Adds a Sitemap line for /news-sitemap.xml. Only used when RankWeb prints the page head and the site has News items.', 'default' => 1 ),
 				'RANKWEB_NOINDEX_AUTHOR'     => array( 'type' => 'int', 'label' => 'Keep author archives out of search (1 on, 0 off)', 'help' => 'Without Rank Math, RankWeb adds noindex to author archive pages.', 'default' => 0 ),
 				'RANKWEB_NOINDEX_DATE'       => array( 'type' => 'int', 'label' => 'Keep date archives out of search (1 on, 0 off)', 'help' => 'Year, month and day archives.', 'default' => 0 ),
 				'RANKWEB_NOINDEX_PAGED'      => array( 'type' => 'int', 'label' => 'Keep page 2 and later of lists out of search (1 on, 0 off)', 'help' => 'The first page stays indexed.', 'default' => 0 ),

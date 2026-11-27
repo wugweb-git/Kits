@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,7 +28,7 @@ RankWeb works on its own, and next to Rank Math (free) when that is active. It i
 * Video SEO: YouTube and Vimeo detection from content, a VideoObject in the schema, and a video sitemap.
 * Custom schema: a per-item JSON-LD box, Speakable, about and mentions, import from a URL, and a Rich Results Test link.
 * Bulk work: SEO columns and filters on the list screens, Quick Edit and Bulk Edit, and a CSV export and import of the SEO fields. Image find-and-replace across alt, title and caption, and fill missing captions.
-* Redirect tools: CSV export and import of Rank Math's redirect list, a 404-log export, and an Apache .htaccess block (these need Rank Math's Redirections).
+* Redirect tools: CSV export and import of Rank Math's redirect list, a 404-log export, and an Apache .htaccess block. RankWeb has no redirect list of its own: these tools work only with Rank Math's Redirections module on, and on any other site they do nothing and say so on the screen.
 * Agent tools: RankWeb's work as WordPress abilities (the Abilities API) for AI agents through the MCP adapter; reads by default, writes opt-in.
 * A password-protected item is kept out of search.
 * llms.txt, Open Graph details, share images and a watchdog for the sitemap.
@@ -60,7 +60,7 @@ RankWeb → Overview says: RankWeb, Rank Math, or another plugin (Yoast SEO, SEO
 
 = Does it send my data anywhere? =
 
-Only as described under "External services" below, and only for the features that use them. There is no tracking or phone-home.
+Only as described under "External services" below, and only for the features that use them. Most of RankWeb makes no outside call. There is no tracking or phone-home.
 
 == External services ==
 
@@ -70,13 +70,25 @@ RankWeb contacts these third-party services, only when the matching feature is u
 * Google Rich Results Test — the Custom schema box shows a link to https://search.google.com/test/rich-results for the current item. It is a link the editor clicks; RankWeb makes no automatic request. https://policies.google.com/terms , https://policies.google.com/privacy .
 * Import schema from a URL — when an editor uses "Import from a URL" in the Custom schema box, RankWeb fetches that editor-supplied URL to read its JSON-LD. No request is made unless the editor enters a URL and clicks Import.
 
-RankWeb's link audit and content analysis fetch URLs on your own site only.
+* Google Fonts, local copy (off until switched on: RankWeb → Settings → Page speed, "Serve Google Fonts from this site") — when a page links a Google Fonts stylesheet, the server downloads that stylesheet from https://fonts.googleapis.com and its font files from https://fonts.gstatic.com once, and saves them in wp-content/uploads/rankweb-fonts/. The request carries the stylesheet address and the server's IP address; no visitor data is sent. https://policies.google.com/terms , https://policies.google.com/privacy . With the option off, RankWeb makes no request to these hosts. (The separate "show text at once" option only adds display=swap to a Google Fonts address in the page; visitors' browsers then load the font from Google exactly as the theme already asked.)
+* Video thumbnails — a YouTube video's structured data names its thumbnail on https://i.ytimg.com. The server does not fetch it; it is only written into the page's JSON-LD and the video sitemap.
+
+RankWeb's link audit, content analysis, sitemap check and llms.txt check request URLs on your own site only. No other host is contacted by the plugin code. The scripts and styles it loads in the admin are in the plugin folder.
 
 == Uninstall ==
 
-Deleting the plugin deletes no data: settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was.
+By default, deleting the plugin deletes no data: settings, FAQ records, focus keywords and the scores it has stored stay, so reinstalling finds everything as it was. Deactivating the plugin always removes its scheduled jobs.
+
+Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Modules) and deleting the plugin removes its settings, stored scores and counts, link tables, scheduled jobs, the manage_rankweb capability, the page cache folder (wp-content/cache/rankweb) and the local font folder (wp-content/uploads/rankweb-fonts). A backup of the options and tables is first written to wp-content/uploads/wugweb-backups/; if it cannot be written, nothing is deleted. Posts, pages, post meta, Rank Math's data and the .webp copies in your media library are never deleted.
 
 == Changelog ==
+
+= 2.3.4 =
+* robots.txt: the Content-Signal AI line is now off by default and is added only when RankWeb prints the page head (no other SEO plugin does) and the new setting is on. The news sitemap line is added only under the same rule, with its own setting, and only on sites that have News items; the /news-sitemap.xml address no longer answers on other sites.
+* Redirect tools say plainly when Rank Math is missing or its Redirections module is off: RankWeb keeps no redirect list of its own, so nothing is imported or redirected.
+* The readme's External services now lists the Google Fonts download (opt-in) and the hosts RankWeb names or contacts.
+* Uninstall (with the delete-data setting ticked) also removes the page cache folder, the local font folder, the manage_rankweb capability, more stored options and transients. Deactivation also unschedules the FAQ index job.
+* The FAQ box's "see all" link no longer says "Animal welfare FAQ" and points to a page only when the site has one.
 
 = 2.3.3 =
 * Fix: the page cache never stores a cart, checkout or account page, or any page with a form nonce. The sitemap check watches /sitemap_index.xml only when Rank Math is active, so other sites no longer get a false "not answering" notice.

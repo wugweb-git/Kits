@@ -286,7 +286,7 @@ export function Redirects() {
 			{ ! info.ready && (
 				<Notice tone="warning">
 					{ __(
-						'Rank Math’s Redirections module is off, so these tools do nothing.',
+						'Redirects need Rank Math with its Redirections module on. RankWeb keeps no redirect list of its own, so on this site importing, the .htaccess block and the 404 log do nothing, and no redirect is made.',
 						'rankweb'
 					) }
 				</Notice>

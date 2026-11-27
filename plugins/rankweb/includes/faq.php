@@ -209,10 +209,10 @@ const AW_FAQ_HEAD_MAX = 40;
  */
 function rankweb_faq_head_styles() {
 	return array(
-		'subject' => array( '%s FAQs', 'FAQs', '', 'Animal welfare FAQ' ), // "{Site name} FAQs", "Directory FAQs"
-		'plain'   => array( '', 'FAQs', '', 'Animal welfare FAQ' ), // "FAQs" everywhere
+		'subject' => array( '%s FAQs', 'FAQs', '', 'All FAQs' ), // "{Site name} FAQs", "Directory FAQs"
+		'plain'   => array( '', 'FAQs', '', 'All FAQs' ), // "FAQs" everywhere
 		'common'  => array( '', 'Common questions', '', 'More questions' ),
-		'about'   => array( 'Questions about %s', 'Questions', '', 'Animal welfare FAQ' ), // "Questions about the Directory"
+		'about'   => array( 'Questions about %s', 'Questions', '', 'All FAQs' ), // "Questions about the Directory"
 	);
 }
 
@@ -245,6 +245,16 @@ function rankweb_faq_heading( $subject ) {
 }
 
 /**
+ * The page the FAQ head's "see all" link points to: a page at /resources/animal-welfare-faqs/ when the site has one, else ''
+ * (no link, rather than a link to a missing page). A site can set another address with the rankweb_faq_head_parts filter.
+ *
+ * @return string
+ */
+function rankweb_faq_all_url() {
+	return get_page_by_path( 'resources/animal-welfare-faqs' ) instanceof WP_Post ? home_url( '/resources/animal-welfare-faqs/' ) : '';
+}
+
+/**
  * The FAQ head's default supporting line and its "see all" link (filter rankweb_faq_head_parts): [ line, url, label ], from
  * the head style. Both are left out on the page the link points to. A page's own line (rankweb_faq_context() 'line': the FAQ
  * box's Subtitle field, or the site's default for its kind) replaces the default line and shows on every page.
@@ -253,7 +263,7 @@ function rankweb_faq_heading( $subject ) {
  */
 function rankweb_faq_head_parts() {
 	$style = rankweb_faq_head_style();
-	return array_values( (array) apply_filters( 'rankweb_faq_head_parts', array( $style[2], home_url( '/resources/animal-welfare-faqs/' ), $style[3] ) ) );
+	return array_values( (array) apply_filters( 'rankweb_faq_head_parts', array( $style[2], rankweb_faq_all_url(), $style[3] ) ) );
 }
 
 // The FAQ subject (FAQ box → Subject): a plain line, editable by whoever may edit the page or post.
