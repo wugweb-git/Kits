@@ -200,6 +200,7 @@ jobs:
           php plugins/directoryweb/tests/no-short-prefix-test.php
           php plugins/directoryweb/tests/collection-filter-tests.php
           php plugins/directoryweb/tests/directoryweb-scf-fallback-test.php
+          php plugins/directoryweb/tests/labels-tests.php
 
       - name: Test InsightWeb
         if: ${{ needs.changes.outputs.insightweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -220,6 +221,8 @@ jobs:
         if: ${{ needs.changes.outputs.mailweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/mailweb/tests/run.php
+          php plugins/mailweb/tests/sending-mode.php
+          php plugins/mailweb/tests/delivery.php
 
       - name: Test PlanWeb
         if: ${{ needs.changes.outputs.planweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -231,6 +234,7 @@ jobs:
         run: |
           php plugins/sourceweb/tests/run.php
           php plugins/sourceweb/tests/SourceWebStandaloneTest.php
+          php plugins/sourceweb/tests/SourceWebStandaloneScreensTest.php
           php plugins/sourceweb/tests/no-aw-functions-test.php
       - name: SourceWeb workflow list matches the workers repository
         # Not gating until the workers repo's chore/retire-eight-workflows is merged to its main.

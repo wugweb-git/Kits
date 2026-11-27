@@ -59,6 +59,16 @@ $txt = apply_filters('robots_txt', "User-agent: *\nDisallow: /wp-admin/\n", true
 chk('robots.txt: no Content-Signal line by default', false === stripos($txt, 'Content-Signal'), $txt);
 chk('robots.txt: no news sitemap line on a site without News', false === stripos($txt, 'news-sitemap'), $txt);
 """,
+    'kits-core': r"""
+chk('form copy: off on a new install', function_exists('kits_raw_capture_on') && false === kits_raw_capture_on());
+global $wpdb; $t = function_exists('kits_raw_table') ? kits_raw_table() : '';
+chk('no form copy table on a new install', $t && $wpdb->get_var("SHOW TABLES LIKE '" . esc_sql($t) . "'") !== $t);
+chk('no Animal Writes carry-over flag on a new site', empty(get_option('aw_form_raw_db')));
+$o = function_exists('kits_brand_sanitize_tokens') ? kits_brand_sanitize_tokens(array('primary' => '#123456; } body { display:none')) : array('x' => 1);
+chk('brand colour with CSS injection is rejected', empty($o['primary']) || '#123456' === $o['primary'] || false === strpos(json_encode($o), 'display'), json_encode($o));
+update_option('kits_form_raw_capture', '1'); do_action('init');
+chk('form copy: turning it on creates the table', $wpdb->get_var("SHOW TABLES LIKE '" . esc_sql($t) . "'") === $t);
+""",
     'sourceweb': r"""
 $au = wp_insert_user(array('user_login' => 'au', 'user_pass' => wp_generate_password(), 'user_email' => 'au@example.test', 'role' => 'author'));
 wp_set_current_user($au);
@@ -76,7 +86,7 @@ chk('no Animal Writes dashboard box', !isset($GLOBALS['wp_meta_boxes']['dashboar
 def run(plugin: str, port: int, dist: pathlib.Path) -> list:
     base = f'http://127.0.0.1:{port}'
     work = pathlib.Path(tempfile.mkdtemp(prefix=f'beh-{plugin}-'))
-    bp, mounts = smoke.prepare(smoke.HERE / f'blueprints/{plugin}.json', dist, work)
+    bp, mounts = smoke.prepare(smoke.HERE / f'blueprints/{"suite" if plugin == "kits-core" else plugin}.json', dist, work)
     bp['steps'] = [s for s in bp['steps'] if not (s['step'] == 'runPHP' and 'Smoke check failed' in json.dumps(s))]
     bp['steps'].append({'step': 'runPHP', 'code': PRELUDE + CHECKS[plugin] + EPILOGUE})
     bpf = work / 'bp.json'
