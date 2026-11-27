@@ -322,7 +322,7 @@ function directoryweb_claim_entry( $entry_id ) {
 	$meta = class_exists( '\FluentForm\App\Helpers\Helper' ) ? \FluentForm\App\Helpers\Helper::getSubmissionMeta( (int) $row['id'], 'aw_claim_review', '' ) : '';
 	return array(
 		'id'      => (int) $row['id'],
-		'ref'     => function_exists( 'kits_ff_ref' ) ? kits_ff_ref( 'claim', (int) $row['id'] ) : ( (int) $row['serial_number'] ? 'AW-C-' . (int) $row['serial_number'] : '' ),
+		'ref'     => function_exists( 'kits_ff_ref' ) ? kits_ff_ref( 'claim', (int) $row['id'] ) : ( (int) $row['serial_number'] ? 'DW-C-' . (int) $row['serial_number'] : '' ),
 		'sent'    => (string) $row['created_at'],
 		'listing' => $lid,
 		'name'    => $s( 'name' ),
@@ -362,7 +362,7 @@ function directoryweb_claim_changes( $c ) {
 		}
 		$loose = 'l_email' === $key || ( 0 === strpos( DIRECTORYWEB_CLAIM_L[ $key ][1], 'aw_' ) && preg_match( '/url|website|instagram|facebook|_x$|youtube|linkedin/', DIRECTORYWEB_CLAIM_L[ $key ][1] ) );
 		if ( $norm( $now, $loose ) !== $norm( $new, $loose ) ) {
-			$out[ $key ] = array( DIRECTORYWEB_CLAIM_L[ $key ][0], $now, $new );
+			$out[ $key ] = array( directoryweb_claim_label( $key, DIRECTORYWEB_CLAIM_L[ $key ][0] ), $now, $new );
 		}
 	}
 	return $out;
@@ -454,7 +454,7 @@ function directoryweb_claims_screen() {
 	if ( ! $entry && '' === $done ) {
 		// The list is only on the shell screen, which could not be drawn.
 		if ( function_exists( 'directoryweb_missing_page' ) ) {
-			directoryweb_missing_page( __( 'Claims', 'directoryweb' ) );
+			directoryweb_missing_page( __( 'Claims', 'directoryweb' ), 'claims' );
 		} else {
 			echo '<div class="wrap"><h1>' . esc_html__( 'Claims', 'directoryweb' ) . '</h1>';
 			wp_admin_notice( esc_html__( 'DirectoryWeb needs Kits Core (active, with its build) to show this screen.', 'directoryweb' ), array( 'type' => 'error' ) );
@@ -465,7 +465,7 @@ function directoryweb_claims_screen() {
 	echo '<div class="wrap">';
 	if ( ! directoryweb_claim_ff_id() ) {
 		echo '<h1>Claims</h1>';
-		wp_admin_notice( 'The claim form is not set up (Fluent Forms off, or <code>wp aw ff-form claim &lt;ID&gt;</code>).', array( 'type' => 'warning' ) );
+		wp_admin_notice( esc_html__( 'The Fluent Forms claim form is not set up. Choose it under DirectoryWeb → Settings, or use the built-in claim form.', 'directoryweb' ), array( 'type' => 'warning' ) );
 		echo '</div>';
 		return;
 	}

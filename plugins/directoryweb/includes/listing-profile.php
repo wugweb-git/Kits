@@ -43,8 +43,8 @@ function directoryweb_listing_fields() {
 			'aw_registration' => array( 'Registration', 'text', 'Trust/Society registration number' ),
 			'aw_reg_12a'      => array( '12A', 'text', '12A registration number' ),
 			'aw_reg_80g'      => array( '80G', 'text', '80G registration number' ),
-			'aw_darpan_id'    => array( 'NGO Darpan ID', 'text', 'e.g. KL/2017/0123456' ),
-			'aw_animals'      => array( 'Animals helped', 'text', 'Comma separated, e.g. dogs, cats, cattle, birds' ),
+			'aw_darpan_id'    => array( directoryweb_label( 'registry_id' ), 'text', '' ),
+			'aw_animals'      => array( directoryweb_label( 'animals' ), 'text', directoryweb_label( 'animals_help' ) ),
 			'aw_services'     => array( 'Services', 'text', 'Comma separated, as the organisation states them' ),
 			'aw_languages'    => array( 'Languages', 'text', 'Comma separated' ),
 		),
@@ -294,7 +294,7 @@ function directoryweb_block_org_details( $a, $id ) {
 		$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . directoryweb_icon( $c[0] ) . '</span>' . esc_html( $c[1] ) . '</dt><dd>' . ( '' !== $c[2] ? $c[2] : $missing( $k ) ) . '</dd></div>';
 	}
 	$icons = array( 'aw_g_rating' => 'star', 'aw_services' => 'check', 'aw_animals' => 'heart', 'aw_area' => 'map-pin', 'aw_founded' => 'calendar', 'aw_head' => 'name', 'aw_registration' => 'research', 'aw_reg_12a' => 'research', 'aw_reg_80g' => 'research', 'aw_darpan_id' => 'research', 'aw_fcra' => 'research', 'aw_reg_type' => 'research', 'aw_areas_served' => 'map-pin', 'aw_hours' => 'clock', 'aw_languages' => 'world' );
-	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => 'Animals helped', 'aw_area' => 'Location', 'aw_areas_served' => 'Areas served', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_reg_type' => 'Registered as', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_fcra' => 'FCRA', 'aw_darpan_id' => 'NGO Darpan ID', 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
+	foreach ( array( 'aw_g_rating' => 'On Google', 'aw_services' => 'Services', 'aw_animals' => directoryweb_label( 'animals' ), 'aw_area' => 'Location', 'aw_areas_served' => 'Areas served', 'aw_founded' => 'Established', 'aw_head' => 'Head of the organisation', 'aw_reg_type' => 'Registered as', 'aw_registration' => 'Registration', 'aw_reg_12a' => '12A', 'aw_reg_80g' => '80G', 'aw_fcra' => 'FCRA', 'aw_darpan_id' => directoryweb_label( 'registry_id' ), 'aw_hours' => 'Opening hours', 'aw_languages' => 'Languages' ) as $k => $label ) {
 		if ( 'aw_hours' === $k ) { // the hours table, from the list only
 			$facts .= '<div class="aw-org-fact' . ( $hours ? ' aw-org-fact--wide' : '' ) . '"><dt><span class="aw-org-fact-ico">' . directoryweb_icon( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . ( $hours ? $hours : $missing( $k ) ) . '</dd></div>';
 		} elseif ( $m( $k ) || ( 'aw_services' === $k && $svc ) ) {

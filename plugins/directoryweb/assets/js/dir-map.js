@@ -187,7 +187,9 @@
 	var openBtn = tools.querySelector( '.aw-near-open' );
 	var form = near.querySelector( '.aw-near-form' );
 	var out = near.querySelector( '.aw-near-results' );
-	var pin = near.querySelector( '.aw-near-pin' );
+	var realPin = near.querySelector( '.aw-near-pin' ); // absent unless the site turned the PIN code lookup on
+	var pin = realPin || { value: '', focus: function () {} };
+	var pinHint = realPin ? ' Enter a PIN code instead.' : '';
 	var km = near.querySelector( '.aw-near-km' );
 	var last = null;
 
@@ -262,14 +264,14 @@
 		if ( handed.lat && handed.lng ) {
 			ask( { lat: String( handed.lat ), lng: String( handed.lng ) } );
 		} else {
-			out.textContent = 'Location not shared. Enter a PIN code instead.';
+			out.textContent = 'Location not shared.' + pinHint;
 			pin.focus();
 		}
 	}
 
 	near.querySelector( '.aw-near-locate' ).addEventListener( 'click', function () {
 		if ( ! navigator.geolocation ) {
-			out.textContent = 'Your browser cannot share your location. Enter a PIN code instead.';
+			out.textContent = 'Your browser cannot share your location.' + pinHint;
 			return;
 		}
 		var btn = this;
@@ -280,7 +282,7 @@
 			ask( { lat: pos.coords.latitude.toFixed( 4 ), lng: pos.coords.longitude.toFixed( 4 ) } );
 		}, function () {
 			btn.removeAttribute( 'aria-busy' );
-			out.textContent = 'Location not shared. Enter a PIN code instead.';
+			out.textContent = 'Location not shared.' + pinHint;
 			pin.focus();
 		}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 } );
 	} );
@@ -293,7 +295,7 @@
 		} else if ( last ) {
 			ask( last );
 		} else {
-			out.textContent = 'Enter a 6-digit PIN code, or use your location.';
+			out.textContent = realPin ? 'Enter a 6-digit PIN code, or use your location.' : 'Use your location.';
 			pin.focus();
 		}
 	} );

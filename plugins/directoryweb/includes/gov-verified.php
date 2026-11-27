@@ -205,7 +205,7 @@ function directoryweb_gov_state_lines( $id ) {
 		}
 	}
 	if ( '' !== $m( 'aw_awbi_dropped' ) ) {
-		$lines[] = __( 'Not on the current AWBI list', 'directoryweb' ) . ' ' . $day( $m( 'aw_awbi_dropped' ) ); // as the Registrations section
+		$lines[] = directoryweb_label( 'awbi_not_on_list' ) . ' ' . $day( $m( 'aw_awbi_dropped' ) ); // as the Registrations section
 	}
 	if ( '' !== $m( 'aw_awbi_list_on' ) && isset( $srcs['awbi'] ) && ! in_array( $srcs['awbi'], $lines, true ) ) {
 		$lines[] = $srcs['awbi']; // the older AWBI list the code comes from

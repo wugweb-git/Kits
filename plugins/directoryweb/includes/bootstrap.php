@@ -61,7 +61,8 @@ function directoryweb_activate(): void {
 	update_option( 'directoryweb_rewrite_ver', DIRECTORYWEB_VERSION, false );
 }
 
-/** Deactivation: only the rewrite rules are flushed; nothing is deleted. */
+/** Deactivation: the hourly count job is unscheduled and the rewrite rules are flushed; nothing is deleted. */
 function directoryweb_deactivate(): void {
+	wp_unschedule_hook( 'directoryweb_stats_build' ); // the hourly count and any waiting "count now"; the next admin visit after reactivation schedules it again
 	flush_rewrite_rules();
 }

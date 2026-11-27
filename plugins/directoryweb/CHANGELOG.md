@@ -2,6 +2,15 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.2.3
+
+- Without Kits Core, Listing Types, Schema & Fields, Form Integrations, Import / Export and the Claims list are plain WordPress screens (tables and forms, nonce and capability checked) instead of a "needs Kits Core" notice. The Claims list there has no live filtering; Import / Export takes a file or pasted text. (`includes/standalone-screens.php`)
+- Animal welfare and India-specific wording is neutral by default (Who is helped, Accreditation number, Registry ID); the old words come back through the `directoryweb_labels` filter. Stored keys (`aw_animals`, `aw_awbi_*`, `aw_darpan_id`) are unchanged. (`includes/labels.php`)
+- Near me accepts any place by default; the India-only limit is the `directoryweb_near_bounds` filter. The Indian PIN code lookup is off until a site returns true from `directoryweb_pin_lookup_enabled`; with it off nothing goes to India Post and the PIN box is hidden.
+- Claim references read DW-C-<number> where they read AW-C-<number> (Fluent Forms serial); the setup hint no longer names a `wp aw` command.
+- readme: External services lists the map tile hosts and says the scripts are bundled; the uninstall default is documented; the Kits Core claims are exact.
+- Deactivating the plugin unschedules the hourly count job.
+
 ## 1.2.2
 
 - The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).

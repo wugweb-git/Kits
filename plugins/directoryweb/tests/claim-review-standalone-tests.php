@@ -100,7 +100,7 @@ check( 7 === directoryweb_claim_ff_id(), 'the claim form id comes from Directory
 $c = directoryweb_claim_entry( 41 );
 check( is_array( $c ), 'the entry is read' );
 check( 12 === $c['listing'] && 'asha@example.org' === $c['email'] && 'Founder' === $c['role'], 'listing, email and role' );
-check( 'AW-C-5' === $c['ref'], 'reference from the submission serial number' );
+check( 'DW-C-5' === $c['ref'], 'reference from the submission serial number' );
 check( isset( $c['propose']['phones'] ) && false !== strpos( $c['propose']['phones'], '+91 98765 43210' ) && false !== strpos( $c['propose']['phones'], '| Office' ), 'phone stored as +91 with its label' );
 check( isset( $c['propose']['phones'] ) && false !== strpos( $c['propose']['phones'], '| WhatsApp' ), 'the WhatsApp tick is kept' );
 check( false !== strpos( (string) ( $c['propose']['l_instagram'] ?? '' ), 'shelter_blr' ), 'a social link is carried through (reducing it to a username at submit time is Kits Core\'s form layer, not the review\'s)' );

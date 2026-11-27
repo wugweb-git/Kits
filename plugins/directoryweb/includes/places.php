@@ -461,6 +461,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 /* ---------- PIN code → State and District (India Post, matched to LGD) ---------- */
 
 /**
+ * Whether the outside PIN code lookup (India Post, api.postalpincode.in) may be called. Off by default: a generic
+ * directory has no use for Indian PIN codes and sends nothing to that service. A site that wants it (animalwrites.in)
+ * returns true from the `directoryweb_pin_lookup_enabled` filter.
+ */
+function directoryweb_pin_lookup_enabled(): bool {
+	return (bool) apply_filters( 'directoryweb_pin_lookup_enabled', false );
+}
+
+/**
  * Look up a PIN code: India Post gives the post office's district and state names; they are matched to the LGD file.
  * Returns [state, district, state_slug, district_slug, state_name, district_name, note] or an error message.
  *
@@ -471,6 +480,9 @@ function directoryweb_pin_lookup( $pin ) {
 	$pin = preg_replace( '/\D/', '', (string) $pin );
 	if ( ! preg_match( '/^[1-9]\d{5}$/', $pin ) ) {
 		return 'Enter a 6-digit PIN code, like 682011';
+	}
+	if ( ! directoryweb_pin_lookup_enabled() ) {
+		return 'PIN code lookup is not switched on for this site. Choose your state and district instead.';
 	}
 	$data = get_transient( 'aw_pin_' . $pin );
 	if ( false === $data ) {

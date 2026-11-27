@@ -144,13 +144,13 @@ function directoryweb_block_listing_registrations( $a, $id ) {
 	$drop = directoryweb_lf( $id, 'aw_awbi_dropped' );
 	$type = directoryweb_lf( $id, 'aw_reg_type' );
 	$rows = array(
-		array( __( 'AWBI number', 'directoryweb' ), $awbi ? directoryweb_listing_parts( array( esc_html( $awbi ), directoryweb_listing_validity( directoryweb_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html__( 'Not on the current AWBI list', 'directoryweb' ) . ' ' . directoryweb_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : directoryweb_listing_na( $id ) , directoryweb_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
+		array( directoryweb_label( 'awbi_number' ), $awbi ? directoryweb_listing_parts( array( esc_html( $awbi ), directoryweb_listing_validity( directoryweb_lf( $id, 'aw_awbi_valid' ) ), $drop ? '<span class="kit-tag kit-tag--warning aw-facts-expired">' . esc_html( directoryweb_label( 'awbi_not_on_list' ) ) . ' ' . directoryweb_date( $drop, null, 'aw-date' ) . '</span>' : '' ) ) : directoryweb_listing_na( $id ) , directoryweb_listing_issuer_icon( 'awbi', $id, 'legal' ) ),
 		/* translators: %s: registration type, e.g. Trust. */
 		array( $type ? sprintf( __( 'Registration (%s)', 'directoryweb' ), $type ) : __( 'Registration', 'directoryweb' ), directoryweb_lf( $id, 'aw_registration' ) ? esc_html( directoryweb_lf( $id, 'aw_registration' ) ) : directoryweb_listing_na( $id ), 'file' ),
 		array( '12A', esc_html( directoryweb_lf( $id, 'aw_reg_12a' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
 		array( '80G', esc_html( directoryweb_lf( $id, 'aw_reg_80g' ) ), directoryweb_listing_issuer_icon( 'incometax', $id, 'legal' ) ),
 		array( 'FCRA', esc_html( directoryweb_lf( $id, 'aw_fcra' ) ), directoryweb_listing_issuer_icon( 'mha', $id, 'legal' ) ),
-		array( __( 'NGO Darpan ID', 'directoryweb' ), esc_html( directoryweb_lf( $id, 'aw_darpan_id' ) ), directoryweb_listing_issuer_icon( 'darpan', $id, 'legal' ) ),
+		array( directoryweb_label( 'registry_id' ), esc_html( directoryweb_lf( $id, 'aw_darpan_id' ) ), directoryweb_listing_issuer_icon( 'darpan', $id, 'legal' ) ),
 	);
 	return directoryweb_listing_group( 'registrations', __( 'Registrations', 'directoryweb' ), directoryweb_listing_dl( $rows ) );
 }
@@ -248,7 +248,7 @@ function directoryweb_block_listing_services( $a, $id ) {
 	}
 	$rows = array(
 		array( __( 'Services', 'directoryweb' ), '' !== $svc ? $svc : directoryweb_listing_na( $id ), 'check' ),
-		array( __( 'Animals helped', 'directoryweb' ), esc_html( directoryweb_lf( $id, 'aw_animals' ) ), 'heart' ),
+		array( directoryweb_label( 'animals' ), esc_html( directoryweb_lf( $id, 'aw_animals' ) ), 'heart' ),
 		array( __( 'Areas served', 'directoryweb' ), esc_html( directoryweb_lf( $id, 'aw_areas_served' ) ), 'map-pin' ),
 		array( __( 'Languages', 'directoryweb' ), esc_html( directoryweb_lf( $id, 'aw_languages' ) ), 'world' ),
 	);

@@ -236,8 +236,18 @@ function directoryweb_dir_near( WP_REST_Request $r ) {
 		}
 		list( $lat, $lng ) = $cent;
 		$origin            = 'PIN ' . $pin . ' (' . $found['district_name'] . ' district)';
-	} elseif ( $lat < 6 || $lat > 37.5 || $lng < 68 || $lng > 97.5 ) {
-		return new WP_Error( 'aw_where', 'That location is outside India.', array( 'status' => 400 ) );
+	} else {
+		/**
+		 * The area Near me accepts, as [ min lat, max lat, min lng, max lng ]. The default is the whole world; a site
+		 * that covers one country narrows it (animalwrites.in: array( 6, 37.5, 68, 97.5 ) for India).
+		 *
+		 * @param array $bounds Bounds.
+		 */
+		$b = apply_filters( 'directoryweb_near_bounds', array( -90, 90, -180, 180 ) );
+		$b = is_array( $b ) && 4 === count( $b ) ? array_map( 'floatval', array_values( $b ) ) : array( -90.0, 90.0, -180.0, 180.0 );
+		if ( $lat < $b[0] || $lat > $b[1] || $lng < $b[2] || $lng > $b[3] || ( 0.0 === $lat && 0.0 === $lng ) ) {
+			return new WP_Error( 'aw_where', 'That location is outside the area this directory covers.', array( 'status' => 400 ) );
+		}
 	}
 	// The nearest district (by centre): the PIN's own district, else the closest centre to the point.
 	$best = null;
@@ -331,8 +341,8 @@ function directoryweb_dir_panels_html() {
 	}
 	return '<section id="aw-near" class="aw-near" hidden aria-label="Near me">'
 		. '<form class="aw-near-form"><button type="button" class="kit-btn aw-near-locate">Use my location</button>'
-		. '<span class="aw-near-or">or</span>'
-		. '<label class="screen-reader-text" for="aw-near-pin">PIN code</label><input id="aw-near-pin" class="aw-near-pin" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="PIN code" autocomplete="postal-code">'
+		. ( directoryweb_pin_lookup_enabled() ? '<span class="aw-near-or">or</span>'
+		. '<label class="screen-reader-text" for="aw-near-pin">PIN code</label><input id="aw-near-pin" class="aw-near-pin" inputmode="numeric" maxlength="6" pattern="[1-9][0-9]{5}" placeholder="PIN code" autocomplete="postal-code">' : '' )
 		. '<label class="screen-reader-text" for="aw-near-km">Distance</label><select id="aw-near-km" class="aw-near-km"><option value="5">Within 5 km</option><option value="10" selected>Within 10 km</option><option value="25">Within 25 km</option><option value="50">Within 50 km</option></select>'
 		. '<button type="submit" class="kit-btn kit-btn--brand">Find</button></form>'
 		. '<p class="aw-near-note">Your location is used only to sort this list, in your browser and on this request; it is not stored.</p>'

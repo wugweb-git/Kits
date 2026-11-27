@@ -504,7 +504,7 @@ function directoryweb_claim_metabox( $post ): void {
 	echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Field', 'directoryweb' ) . '</th><th>' . esc_html__( 'Now', 'directoryweb' ) . '</th><th>' . esc_html__( 'Proposed', 'directoryweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $c['propose'] as $f => $v ) {
 		$now = isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ) ? directoryweb_claim_now( $c['listing'], DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ], false ) : '';
-		echo '<tr><td>' . esc_html( isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ) && isset( DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ] ) ? DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ][0] : $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
+		echo '<tr><td>' . esc_html( isset( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ) && isset( DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ] ) ? directoryweb_claim_label( DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ], DIRECTORYWEB_CLAIM_L[ DIRECTORYWEB_CLAIM_NATIVE_MAP[ $f ] ][0] ) : $f ) . '</td><td>' . esc_html( (string) $now ) . '</td><td>' . esc_html( (string) $v ) . '</td></tr>';
 	}
 	echo '</tbody></table>';
 	if ( function_exists( 'directoryweb_evidence_review_html' ) ) {

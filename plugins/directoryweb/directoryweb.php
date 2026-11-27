@@ -11,7 +11,7 @@
  * Plugin Name:       DirectoryWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/directoryweb/
  * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks, and "Find help near you". Enhanced by Kits Core.
- * Version:           1.2.2
+ * Version:           1.2.3
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -45,13 +45,14 @@ add_action(
 );
 
 define( 'DIRECTORYWEB_LOADED', '1.1.0' );
-define( 'DIRECTORYWEB_VERSION', '1.2.2' );
+define( 'DIRECTORYWEB_VERSION', '1.2.3' );
 define( 'DIRECTORYWEB_FILE', __FILE__ );
 define( 'DIRECTORYWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );
 
 // Kept in this order, so hooks added at the same priority keep their order.
 $directoryweb_includes = array(
+	'labels', // neutral wording, filterable (directoryweb_labels)
 	'listing-meta', // the listing's meta, phones, hours and never-publish list (from Core's meta.php, 18 Nov 2026)
 	'listing-terms', // a listing's types and services, and tel: links (from Core's tags.php and bindings.php, 18 Nov 2026)
 	'data-sources', // where a listing's details come from (from Core, 18 Nov 2026)
@@ -82,6 +83,7 @@ $directoryweb_includes = array(
 	'directoryweb-caps',
 	'schema/csv', // listing CSV import and export through the schema
 	'directoryweb-ui',
+	'standalone-screens', // plain admin screens for the five that otherwise need Kits Core's shell
 	'place-intros',
 	'unverified',
 	'featured',

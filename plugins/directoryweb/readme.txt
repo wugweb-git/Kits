@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ DirectoryWeb adds a directory of listings, places and claims to a WordPress site
 = Listings, places and types =
 
 * The listing post type, its fields (eight field groups), types and services.
-* States and districts from a bundled list of local government places, with counts, PIN code lookup and old address redirects.
+* States and districts from a bundled list of local government places (the bundled list is of India), with counts and old address redirects. The Indian PIN code lookup is off until a site turns it on (see External services).
 * Directory pages for the whole list, a place, and a place and type.
 * A map with Near me, and an admin map beside the latitude and longitude fields.
 * Coordinates from an address (one request a second) and phone, hours and registration helpers.
@@ -34,12 +34,14 @@ DirectoryWeb adds a directory of listings, places and claims to a WordPress site
 
 = For the team =
 
-* DirectoryWeb in the admin menu: Dashboard, Claims, Settings and Place intros. With Kits Core active they use the Kits admin shell; without it they are plain WordPress screens.
+* DirectoryWeb in the admin menu: Dashboard, Listings, Listing Types, Schema & Fields, Form Integrations, Claims, Import / Export, Settings and Place intros. With Kits Core active (and its build) they use the Kits admin shell. Without it every one of them is a plain WordPress screen: Dashboard, Listings, Settings and Place intros as before, and Listing Types, Schema & Fields, Form Integrations, Import / Export and the Claims list as plain tables and forms. The plain Claims list shows the status tabs and 20 rows a page, without the shell's live filtering; the plain Import / Export takes a file or pasted text instead of a drop box.
+* Wording written for an animal welfare site ("Animals helped", "AWBI number", "NGO Darpan ID") is neutral by default ("Who is helped", "Accreditation number", "Registry ID"). To bring the old words back: `add_filter( 'directoryweb_labels', fn( $l ) => array_merge( $l, array( 'animals' => 'Animals helped', 'awbi_number' => 'AWBI number', 'registry_id' => 'NGO Darpan ID' ) ) );` The keys are animals, animals_help, awbi_number, awbi_not_on_list, awbi_code, awbi_recognised, awbi_renewed, awbi_valid and registry_id.
+* Near me accepts any place on Earth by default; narrow it with the `directoryweb_near_bounds` filter (array of min latitude, max latitude, min longitude, max longitude).
 * A "Directory filter" block (`directoryweb/collection-filter`) that puts the directory's filters on any page.
 
 = Works with =
 
-* Kits Core (optional: gives the admin the Kits shell, list tables, icons and dates; DirectoryWeb runs without it).
+* Kits Core (optional: gives the admin the Kits shell, list tables, icons and dates). Without Kits Core the admin screens are plain WordPress ones, as described above; no DirectoryWeb screen is blocked.
 * RankWeb and SourceWeb (optional companions: RankWeb reads the Directory for titles, schema and the sitemap; SourceWeb adds listings and keeps the change log).
 
 = Source code =
@@ -76,12 +78,28 @@ With no form plugin the plugin shows its own claim form, which also accepts the 
 
 == External services ==
 
-DirectoryWeb calls two outside services, only for the tasks below. Nothing is sent when you do not use these features.
+DirectoryWeb calls the outside services below, only for the tasks named. Nothing is sent when you do not use these features. The plugin makes no other outside request: its scripts (MapLibre GL and Leaflet) are served from the plugin folder, not from a CDN.
 
-* **Postal PIN code lookup (`https://api.postalpincode.in/`):** when a visitor or an editor enters a 6-digit Indian PIN code to find a district. The PIN code they typed is sent; the answer is kept for a while in a WordPress transient. Service site: [https://www.postalpincode.in/](https://www.postalpincode.in/)
+* **Postal PIN code lookup (`https://api.postalpincode.in/`, India Post data):** off by default. Only when a site turns it on (`add_filter( 'directoryweb_pin_lookup_enabled', '__return_true' );`), and then when a visitor or an editor enters a 6-digit Indian PIN code to find a district. The PIN code they typed is sent; the answer is kept for a week in a WordPress transient. Service site: [https://www.postalpincode.in/](https://www.postalpincode.in/)
 * **OpenStreetMap Nominatim (`https://nominatim.openstreetmap.org/`):** when a listing with an address is saved or its address changes, a background task about a minute later (and the geocode tool) looks up the listing's map position. The address, PIN code or place names are sent, with your site address in the User-Agent header. A contact email is sent only if your site adds one through the `directoryweb_geocode_contact` filter. Usage policy: [https://operations.osmfoundation.org/policies/nominatim/](https://operations.osmfoundation.org/policies/nominatim/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
+* **OpenFreeMap map tiles (`https://tiles.openfreemap.org/`):** when a visitor opens the directory map on the public Directory pages, their browser loads the map style, fonts and vector tiles from this host. The visitor's IP address and browser details reach that host, and the map area being viewed is requested. Nothing is sent from your server. Service site: [https://openfreemap.org/](https://openfreemap.org/). Privacy: [https://openfreemap.org/privacy/](https://openfreemap.org/privacy/)
+* **OpenStreetMap map tiles (`https://tile.openstreetmap.org/`):** when an editor opens the map beside the latitude and longitude fields of a listing, their browser loads map tile images from this host. The editor's IP address and browser details reach that host. Nothing is sent from your server. Tile usage policy: [https://operations.osmfoundation.org/policies/tiles/](https://operations.osmfoundation.org/policies/tiles/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
+
+Links shown in the admin and on listings to government and other registers (for example awbi.gov.in, ngodarpan.gov.in) are plain links the reader may click; the plugin does not call them.
+
+== Uninstall ==
+
+By default, deleting the plugin removes nothing: listings, places, claims, settings and every option stay, so reinstalling finds everything as it was. Only if the option `directoryweb_delete_data_on_uninstall` is true does uninstall delete DirectoryWeb's own bookkeeping options (`directoryweb_caps`, `directoryweb_rewrite_ver`), its two cached counts and its scheduled count job, after writing a backup to `wp-content/uploads/wugweb-backups/`. It never deletes listings, claims, uploads, users, terms or any post, term or user meta. Deactivating the plugin unschedules the hourly count job and flushes the rewrite rules, and deletes nothing.
 
 == Changelog ==
+
+= 1.2.3 =
+* Without Kits Core, Listing Types, Schema & Fields, Form Integrations, Import / Export and the Claims list are plain WordPress screens (tables and forms, with a nonce and a capability check) instead of a "needs Kits Core" notice. The Claims list there has no live filtering; Import / Export takes a file or pasted text.
+* Animal welfare and India-specific wording is neutral by default (Who is helped, Accreditation number, Registry ID); the old words come back through the `directoryweb_labels` filter.
+* Near me accepts any place by default (the India-only limit is now the `directoryweb_near_bounds` filter), and the Indian PIN code lookup is off until a site turns it on with the `directoryweb_pin_lookup_enabled` filter. With it off, no PIN code is sent to India Post and the PIN box is not shown.
+* Claim references read DW-C-<number> where they read AW-C-<number>; the setup hint no longer names a `wp aw` command.
+* External services lists the map tile hosts (tiles.openfreemap.org, tile.openstreetmap.org); the uninstall default is documented.
+* Deactivating the plugin unschedules the hourly count job.
 
 = 1.2.2 =
 * The "Upgrade to Premium" link is gone from the Plugins screen (there is no premium product).

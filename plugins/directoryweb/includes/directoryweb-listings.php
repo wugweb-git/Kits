@@ -369,14 +369,14 @@ function directoryweb_rest_listing_detail( WP_REST_Request $r ) {
 			array( __( 'Registration', 'directoryweb' ), $meta( 'aw_registration' ) ),
 			array( __( '12A', 'directoryweb' ), $meta( 'aw_reg_12a' ) ),
 			array( __( '80G', 'directoryweb' ), $meta( 'aw_reg_80g' ) ),
-			array( __( 'NGO Darpan ID', 'directoryweb' ), $meta( 'aw_darpan_id' ) ),
+			array( directoryweb_label( 'registry_id' ), $meta( 'aw_darpan_id' ) ),
 		)
 	);
 	$about = $named(
 		array(
 			array( __( 'Year established', 'directoryweb' ), $meta( 'aw_founded' ) ),
 			array( __( 'Head of the organisation', 'directoryweb' ), $meta( 'aw_head' ) ),
-			array( __( 'Animals helped', 'directoryweb' ), $meta( 'aw_animals' ) ),
+			array( directoryweb_label( 'animals' ), $meta( 'aw_animals' ) ),
 			array( __( 'Languages', 'directoryweb' ), $meta( 'aw_languages' ) ),
 		)
 	);

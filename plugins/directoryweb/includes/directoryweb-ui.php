@@ -121,7 +121,7 @@ add_action(
 					if ( directoryweb_ui_page( $directoryweb_screen ) ) {
 						return;
 					}
-					directoryweb_missing_page( $directoryweb_item[1] );
+					directoryweb_missing_page( $directoryweb_item[1], $directoryweb_screen );
 				}
 			);
 		}
@@ -275,11 +275,20 @@ function directoryweb_ui_page( string $screen ): bool {
 }
 
 /**
- * The page when the screen cannot be drawn (Kits Core or the build missing): its name and one notice.
+ * The page when the shell screen cannot be drawn (Kits Core or the build missing): the plain screen for the five that have one, else a notice.
  *
- * @param string $title Heading.
+ * @param string $title  Heading.
+ * @param string $screen types, schema, forms, transfer or claims; empty for none.
  */
-function directoryweb_missing_page( string $title ): void {
+function directoryweb_missing_page( string $title, string $screen = '' ): void {
+	if ( '' !== $screen && function_exists( 'directoryweb_native_screens' ) && isset( directoryweb_native_screens()[ $screen ] ) ) {
+		directoryweb_native_screen( $screen ); // plain WordPress screen, no Kits Core needed
+		return;
+	}
+	if ( 'claims' === $screen && function_exists( 'directoryweb_native_claims_list' ) ) {
+		directoryweb_native_claims_list();
+		return;
+	}
 	echo '<div class="wrap"><h1>' . esc_html( $title ) . '</h1>';
 	wp_admin_notice( esc_html__( 'DirectoryWeb needs Kits Core (active, with its build) to show this screen.', 'directoryweb' ), array( 'type' => 'error' ) );
 	echo '</div>';

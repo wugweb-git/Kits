@@ -590,7 +590,7 @@ function directoryweb_field_label( string $key ): string {
 	if ( 'photos' === $key ) {
 		return __( 'Photos (added before the current ones, 6 at most)', 'directoryweb' );
 	}
-	return defined( 'DIRECTORYWEB_CLAIM_L' ) && isset( DIRECTORYWEB_CLAIM_L[ $key ] ) ? (string) DIRECTORYWEB_CLAIM_L[ $key ][0] : $key;
+	return defined( 'DIRECTORYWEB_CLAIM_L' ) && isset( DIRECTORYWEB_CLAIM_L[ $key ] ) ? directoryweb_claim_label( $key, (string) DIRECTORYWEB_CLAIM_L[ $key ][0] ) : $key;
 }
 
 /**
@@ -841,9 +841,9 @@ function directoryweb_settings_payload(): array {
 		array(
 			'slug'    => 'pin',
 			'name'    => __( 'PIN code lookup', 'directoryweb' ),
-			'status'  => __( 'India Post, on', 'directoryweb' ),
+			'status'  => directoryweb_pin_lookup_enabled() ? __( 'India Post, on', 'directoryweb' ) : __( 'Off', 'directoryweb' ),
 			'tone'    => '',
-			'summary' => __( 'Answers are kept for a week.', 'directoryweb' ),
+			'summary' => directoryweb_pin_lookup_enabled() ? __( 'Answers are kept for a week.', 'directoryweb' ) : __( 'Off by default: no PIN code is sent anywhere. Return true from the directoryweb_pin_lookup_enabled filter to turn it on.', 'directoryweb' ),
 			'facts'   => array(
 				directoryweb_fact( __( 'Service', 'directoryweb' ), 'api.postalpincode.in' ),
 				directoryweb_fact( __( 'PIN pattern', 'directoryweb' ), '^[1-9]\d{5}$' ),
@@ -1037,7 +1037,7 @@ function directoryweb_settings_payload(): array {
 }
 
 /**
- * POST settings/claim-form: the claim form, saved in aw_ff_forms as `wp aw ff-form claim <ID>` does. Nothing is written
+ * POST settings/claim-form: the claim form, saved in aw_ff_forms. Nothing is written
  * when the form is the same.
  *
  * @param WP_REST_Request $request Request.
