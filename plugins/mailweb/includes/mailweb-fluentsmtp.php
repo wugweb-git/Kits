@@ -271,7 +271,7 @@ function mailweb_send_failure_alert( string $reason, array $context = array() ):
 add_action(
 	'rest_api_init',
 	function () {
-		$cap   = function_exists( 'mailweb_rest_can' ) ? mailweb_rest_can( MAILWEB_CAP ) : fn() => current_user_can( 'edit_others_posts' );
+		$cap   = function_exists( 'mailweb_rest_can' ) ? mailweb_rest_can( MAILWEB_CAP ) : fn() => current_user_can( 'manage_options' );
 		$admin = function_exists( 'mailweb_rest_can' ) ? mailweb_rest_can( 'manage_options' ) : fn() => current_user_can( 'manage_options' );
 
 		register_rest_route(
@@ -471,7 +471,7 @@ function mailweb_render_logs_screen(): void {
 	echo '<div class="wrap">';
 	echo '<h1>' . esc_html__( 'MailWeb — Email Logs & Diagnostics', 'mailweb' ) . '</h1>';
 	echo '<p>' . esc_html( sprintf( /* translators: %s: fallback status */ __( 'Fallback SMTP: %s', 'mailweb' ), $fb['enabled'] ? ( $fb['host'] . ':' . $fb['port'] ) : __( 'Not enabled', 'mailweb' ) ) ) . '</p>';
-	echo '<table class="widefat striped" style="margin-top:16px;"><thead><tr>';
+	echo '<table class="widefat striped mailweb-table"><thead><tr>';
 	echo '<th>' . esc_html__( 'Time (UTC)', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'To', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'Subject', 'mailweb' ) . '</th>';

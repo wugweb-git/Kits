@@ -11,7 +11,7 @@
  * Plugin Name:       MailWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
- * Version:           3.3.3
+ * Version:           3.3.4
  * Update URI:           https://wugweb.com/plugins/mailweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -41,7 +41,7 @@ add_action(
 	1
 );
 
-define( 'MAILWEB_VERSION', '3.3.3' );
+define( 'MAILWEB_VERSION', '3.3.4' );
 define( 'MAILWEB_FILE', __FILE__ );
 define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );
@@ -73,9 +73,9 @@ add_action(
 	}
 );
 
-// Website forms in the Inbox, the old webhook address and the API token from AW_HOSTINGER_MAIL_TOKEN (first: the token
-// constant is set before anything reads it).
-require_once MAILWEB_DIR . 'includes/website-forms.php';
+// How far MailWeb takes over the site's email, and standing down for another SMTP plugin (first: smtp.php and
+// mail-cap.php ask it on every email).
+require_once MAILWEB_DIR . 'includes/sending-mode.php';
 require_once MAILWEB_DIR . 'includes/mailweb-caps.php'; // MailWeb's own capability, MAILWEB_CAP = manage_mailweb (granted from edit_others_posts).
 require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/help-tab.php';
@@ -108,22 +108,36 @@ require_once MAILWEB_DIR . 'includes/utm.php'; // the site's own links in its em
 require_once MAILWEB_DIR . 'includes/inbox.php';
 require_once MAILWEB_DIR . 'includes/settings-tab.php';
 require_once MAILWEB_DIR . 'includes/crm-sync.php';
-require_once MAILWEB_DIR . 'includes/fluentcrm.php'; // the site's FluentCRM: Newsletter list, tags, notes, volunteer fields, update link, UTM tags.
-require_once MAILWEB_DIR . 'includes/newsletter.php'; // [aw_newsletter] (Fluent Forms) and the old list's confirm and unsubscribe links.
-require_once MAILWEB_DIR . 'includes/fluentcrm-compat.php'; // the old aw_ names of the three files above.
+// The Fluent code (website forms in the Inbox, the FluentCRM list and notes, the newsletter shortcode and the old aw_
+// names) is loaded only on a site where FluentCRM or Fluent Forms is active, on plugins_loaded once those have loaded.
+add_action(
+	'plugins_loaded',
+	function () {
+		if ( ! defined( 'FLUENTCRM' ) && ! defined( 'FLUENTFORM' ) && ! function_exists( 'FluentCrmApi' ) && ! function_exists( 'wpFluent' ) ) {
+			return;
+		}
+		require_once MAILWEB_DIR . 'includes/website-forms.php'; // Website forms in the Inbox, the old webhook address, the API token from AW_HOSTINGER_MAIL_TOKEN.
+		require_once MAILWEB_DIR . 'includes/fluentcrm.php'; // FluentCRM: Newsletter list, tags, notes, volunteer fields, update link, UTM tags.
+		require_once MAILWEB_DIR . 'includes/newsletter.php'; // [aw_newsletter] (Fluent Forms) and the old list's confirm and unsubscribe links.
+		require_once MAILWEB_DIR . 'includes/fluentcrm-compat.php'; // the old aw_ names of the three files above.
+	},
+	5
+);
 require_once MAILWEB_DIR . 'includes/overview.php';
 require_once MAILWEB_DIR . 'includes/home.php';
 require_once MAILWEB_DIR . 'includes/mailweb-ui.php'; // the screens on the Kits shell.
+require_once MAILWEB_DIR . 'includes/native-screens.php'; // the same screens drawn by WordPress alone, without Kits Core.
 require_once MAILWEB_DIR . 'includes/mailweb-rest.php';
 require_once MAILWEB_DIR . 'includes/mailweb-dashboard.php';
 require_once MAILWEB_DIR . 'includes/mailweb-fluentsmtp.php';
 require_once MAILWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 
-// Deactivation stops MailWeb's scheduled jobs; settings, the queue and the mailboxes are left as they are.
+// Deactivation stops MailWeb's scheduled jobs; settings, the queue and the mailboxes are left as they are. Deleting
+// the plugin with "Delete MailWeb's data" ticked removes the data too (uninstall.php).
 register_deactivation_hook(
 	__FILE__,
 	function () {
-		foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build' ) as $hook ) {
+		foreach ( array( 'mailweb_flush', 'mailweb_crm_sync', 'mailweb_dashboard_build', 'mailweb_daily_dns_check', 'mailweb_purge_log', 'aw_nl_ff_phone_sync' ) as $hook ) {
 			wp_unschedule_hook( $hook ); // Every event of the hook, with or without arguments.
 		}
 	}

@@ -2,6 +2,16 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.3.4
+
+- Activating MailWeb no longer takes over the site's email. Forcing the From address, the daily limit and queue, and keeping the text of sent emails are separate switches in Mail → Settings → Site sending, off on a new install. A site that already had MailWeb settings keeps the From address and limit on; the text of sent emails is kept only if you turn that on, for 1 to 365 days (default 30), and a daily job deletes older text.
+- MailWeb stands down while FluentSMTP, Post SMTP or WP Mail SMTP is active (filter `mailweb_defer_to_external_smtp`).
+- Without Kits Core the Dashboard, Inbox and Settings are drawn by WordPress itself instead of showing an error.
+- The FluentCRM, Fluent Forms and newsletter code loads only when FluentCRM or Fluent Forms is active, and the "New form entries" notice on every admin screen is gone (the Mail menu badge still counts them).
+- Only administrators can read the mailboxes; editors need the filter `mailweb_caps_from`. Editors who had access lose it on this update unless the filter is set.
+- Uninstall with "delete data" ticked now also removes the sending switches, email log, fallback SMTP and alert webhook settings, the capability, the pause marker and every scheduled job; deactivation stops all jobs. The readme now matches the code on uninstall, logging and who can read mailboxes, and lists the SMTP presets and DNS lookups under External services.
+- Admin screens use style sheets instead of inline styles and script.
+
 ## 3.3.3
 
 - Fix: 3.3.2 loaded the sender-profile and retry-queue code, which is not ready. It is no longer loaded, and the failed mail it kept in the database, its schedule and its profiles are removed once.

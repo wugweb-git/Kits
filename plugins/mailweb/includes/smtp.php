@@ -51,13 +51,17 @@ function mailweb_smtp_settings() {
 	return $s;
 }
 
-// Every message leaves as the site's mailbox (never wordpress@), with the site's name.
-add_filter( 'wp_mail_from', fn() => mailweb_smtp_settings()['user'] );
-add_filter( 'wp_mail_from_name', fn() => mailweb_smtp_settings()['name'] );
+// With "Force the From address" on (Site sending; off for a new install), every message leaves as the site's mailbox,
+// with the site's name. Not while another SMTP plugin is active (sending-mode.php).
+add_filter( 'wp_mail_from', fn( $from ) => mailweb_sending_on( 'force_from' ) ? mailweb_smtp_settings()['user'] : $from );
+add_filter( 'wp_mail_from_name', fn( $name ) => mailweb_sending_on( 'force_from' ) ? mailweb_smtp_settings()['name'] : $name );
 
 add_action(
 	'phpmailer_init',
 	function ( $mailer ) {
+		if ( mailweb_defer_to_external_smtp() ) {
+			return; // another SMTP plugin sends the site's email
+		}
 		$s = mailweb_smtp_settings();
 		// A site-wide Reply-To (mailweb_smtp_reply_to filter), unless the message sets its own.
 		$reply = (string) apply_filters( 'mailweb_smtp_reply_to', '' );
@@ -121,10 +125,10 @@ function mailweb_smtp_screen() {
 
 	// 1. Hostinger Mail Server Connectivity Configuration.
 	$servers = mailweb_server_protocols();
-	echo '<div class="card" style="max-width: 100%; margin-top: 24px; padding: 18px 20px;">';
-	echo '<h3 style="margin-top: 0;">' . esc_html__( 'Hostinger Mail Server Connectivity (IMAP, SMTP, POP3)', 'mailweb' ) . '</h3>';
+	echo '<div class="card mailweb-card">';
+	echo '<h3>' . esc_html__( 'Hostinger Mail Server Connectivity (IMAP, SMTP, POP3)', 'mailweb' ) . '</h3>';
 	echo '<p class="description">' . esc_html__( 'Standard protocol endpoints and ports for incoming and outgoing mailbox synchronization.', 'mailweb' ) . '</p>';
-	echo '<table class="widefat striped" style="margin-top: 12px;">';
+	echo '<table class="widefat striped mailweb-table">';
 	echo '<thead><tr><th>' . esc_html__( 'Protocol', 'mailweb' ) . '</th><th>' . esc_html__( 'Hostname', 'mailweb' ) . '</th><th>' . esc_html__( 'Port', 'mailweb' ) . '</th><th>' . esc_html__( 'TLS/SSL', 'mailweb' ) . '</th><th>' . esc_html__( 'Status / Recommendation', 'mailweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $servers as $srv ) {
 		echo '<tr>';
@@ -132,7 +136,7 @@ function mailweb_smtp_screen() {
 		echo '<td><code>' . esc_html( $srv['hostname'] ) . '</code></td>';
 		echo '<td><strong>' . esc_html( $srv['port'] ) . '</strong></td>';
 		echo '<td>' . esc_html( $srv['security'] ) . '</td>';
-		echo '<td style="font-size:12px; color:' . ( ! empty( $srv['warning'] ) ? '#b45309' : '#15803d' ) . ';">' . esc_html( $srv['note'] ) . '</td>';
+		echo '<td class="mailweb-note' . ( ! empty( $srv['warning'] ) ? ' mailweb-warn' : ' mailweb-ok' ) . '">' . esc_html( $srv['note'] ) . '</td>';
 		echo '</tr>';
 	}
 	echo '</tbody></table></div>';
@@ -145,26 +149,27 @@ function mailweb_smtp_screen() {
 		'SPF'  => mailweb_verify_spf(),
 	) as $mailweb_name => $mailweb_res ) {
 		$badge .= 'valid' === $mailweb_res['status']
-			? '<span style="color:#15803d; font-weight:600;">✓ ' . esc_html( $mailweb_name . ': ' . $mailweb_res['message'] ) . '</span> '
-			: '<span style="color:#b45309; font-weight:600;">⚠ ' . esc_html( $mailweb_name . ': ' . $mailweb_res['message'] ) . '</span> ';
+			? '<span class="mailweb-ok mailweb-strong">✓ ' . esc_html( $mailweb_name . ': ' . $mailweb_res['message'] ) . '</span> '
+			: '<span class="mailweb-warn mailweb-strong">⚠ ' . esc_html( $mailweb_name . ': ' . $mailweb_res['message'] ) . '</span> ';
 	}
 	unset( $mailweb_name, $mailweb_res );
 
-	echo '<div class="card" style="max-width: 100%; margin-top: 24px; padding: 18px 20px;">';
-	echo '<h3 style="margin-top: 0;">' . esc_html__( 'DNS & Deliverability Records (DKIM, SPF)', 'mailweb' ) . '</h3>';
+	echo '<div class="card mailweb-card">';
+	echo '<h3>' . esc_html__( 'DNS & Deliverability Records (DKIM, SPF)', 'mailweb' ) . '</h3>';
 	echo '<p>' . esc_html__( 'Add these DNS records to your domain DNS provider to ensure maximum inbox delivery and prevent spoofing.', 'mailweb' ) . ' ' . $badge . '</p>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	echo '<table class="widefat striped" style="margin-top: 12px;">';
+	echo '<table class="widefat striped mailweb-table">';
 	echo '<thead><tr><th>' . esc_html__( 'Record Type', 'mailweb' ) . '</th><th>' . esc_html__( 'Host / Name', 'mailweb' ) . '</th><th>' . esc_html__( 'Value', 'mailweb' ) . '</th><th>' . esc_html__( 'Notes', 'mailweb' ) . '</th></tr></thead><tbody>';
 	foreach ( $dns as $rec ) {
 		echo '<tr>';
 		echo '<td><strong>' . esc_html( $rec['type'] ) . '</strong></td>';
 		echo '<td><code>' . esc_html( $rec['host'] ) . '</code></td>';
-		echo '<td><textarea readonly rows="2" style="width:100%; font-family:monospace; font-size:11px;" onclick="this.select();">' . esc_textarea( $rec['value'] ) . '</textarea></td>';
-		echo '<td style="font-size:12px; color:#64748b;">' . esc_html( $rec['note'] ) . '</td>';
+		echo '<td><textarea readonly rows="2" class="mailweb-dns-value">' . esc_textarea( $rec['value'] ) . '</textarea></td>';
+		echo '<td class="mailweb-note">' . esc_html( $rec['note'] ) . '</td>';
 		echo '</tr>';
 	}
 	echo '</tbody></table></div>';
 
+	mailweb_sending_mode_form();
 	do_action( 'mailweb_smtp_screen_after' ); // the daily limit and queue (mail-cap.php)
 }
 

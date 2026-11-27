@@ -42,7 +42,7 @@ function mailweb_home_page() {
 	if ( mailweb_ui_page( 'dashboard' ) ) {
 		return;
 	}
-	mailweb_ui_missing( __( 'MailWeb', 'mailweb' ) );
+	mailweb_native_dashboard();
 }
 
 /** The Dashboard's feature table: each feature, what it does, where it is set up and its state on this site. */
@@ -88,7 +88,7 @@ function mailweb_home_body() {
 		),
 		array(
 			__( 'Site sending (SMTP)', 'mailweb' ),
-			__( 'Every email the site sends goes through one Hostinger mailbox; test email.', 'mailweb' ),
+			__( 'When a mailbox password is saved, the site\'s email goes through that Hostinger mailbox (not while another SMTP plugin is active); test email.', 'mailweb' ),
 			$set( __( 'Settings → Sending', 'mailweb' ), 'sending' ),
 			mailweb_home_status( '' !== (string) ( $smtp['pass'] ?? '' ), sprintf( '%s:%s, %s', (string) ( $smtp['host'] ?? '' ), (string) ( $smtp['port'] ?? '' ), (string) ( $smtp['user'] ?? '' ) ) . ( '' === (string) ( $smtp['pass'] ?? '' ) ? ' — ' . __( 'no password set', 'mailweb' ) : '' ) ),
 		),
@@ -96,7 +96,9 @@ function mailweb_home_body() {
 			__( 'Daily limit and queue', 'mailweb' ),
 			__( 'A daily sending budget with priorities (replies first, newsletters last), retries, and a pause when Hostinger refuses.', 'mailweb' ),
 			$set( __( 'Settings → Sending → Daily limit', 'mailweb' ), 'sending', 'cap' ),
-			mailweb_home_status( ! $pause, sprintf( /* translators: 1: sent, 2: budget, 3: queued */ __( '%1$d of %2$d sent in 24 h, %3$d queued.', 'mailweb' ), $sent, (int) $cap['budget'], $queued ) . ( $pause ? ' ' . __( 'Sending is paused.', 'mailweb' ) : '' ) ),
+			function_exists( 'mailweb_cap_active' ) && ! mailweb_cap_active()
+				? mailweb_home_status( true, __( 'Off: emails are sent at once.', 'mailweb' ) )
+				: mailweb_home_status( ! $pause, sprintf( /* translators: 1: sent, 2: budget, 3: queued */ __( '%1$d of %2$d sent in 24 h, %3$d queued.', 'mailweb' ), $sent, (int) $cap['budget'], $queued ) . ( $pause ? ' ' . __( 'Sending is paused.', 'mailweb' ) : '' ) ),
 		),
 		array(
 			__( 'FluentCRM feed', 'mailweb' ),

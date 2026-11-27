@@ -5,7 +5,7 @@
  * - The Mail API token stays in wp-config as AW_HOSTINGER_MAIL_TOKEN; Mailweb reads MAILWEB_API_TOKEN.
  * - No strip under signatures since 12 Nov 2026: each signature has its own thin banner (mail-campaign-strip.php unused).
  * - Mail → Website forms: the Contact, Volunteer, Claim and Report forms' Fluent Forms entries and the older contact
- *   messages (aw_message), through `mailweb_forms_source`; a notice in wp-admin while any of them is unread (no email).
+ *   messages (aw_message), through `mailweb_forms_source`; the unread count shows in the Mail menu badge (no email, and no notice on other screens).
  *   Inbox → Contact messages opens it.
  * - Webhook address: /wp-json/mailweb/v1/mail-in is the active webhook receiver (old aw/v1/mail-in retired).
  * - Kits → Home → Email sending: a line on email sending.
@@ -283,40 +283,7 @@ add_filter(
 	)
 );
 
-/* ---------- New form entries: a notice in wp-admin (owner, 1 Nov 2026: no email; form emails stay off) ---------- */
-
-// For Mail users while Contact, Volunteer, Claim or Report entries they can read are unread (the same count as the
-// Mail menu badge); other forms' unread entries are counted in the same line. Marking an entry read clears it.
-add_action(
-	'admin_notices',
-	function () {
-		if ( ! defined( 'MAILWEB_CAP' ) || ! current_user_can( MAILWEB_CAP ) || ! function_exists( 'mailweb_forms' ) || ! mailweb_forms() ) {
-			return;
-		}
-		$counts = mailweb_wf_unread_counts();
-		$forms  = mailweb_wf_forms();
-		$parts  = array();
-		foreach ( $forms as $id => $key ) {
-			if ( ! empty( $counts[ $id ] ) ) {
-				$parts[] = MAILWEB_WF_KEYS[ $key ] . ' ' . (int) $counts[ $id ];
-			}
-		}
-		if ( ! $parts ) {
-			return;
-		}
-		$shown = array_merge( array_keys( $forms ), ( function_exists( 'kits_ff_id' ) ? array_map( 'kits_ff_id', array_keys( MAILWEB_WF_KEYS ) ) : array() ) );
-		$other = array_diff_key( $counts, array_flip( $shown ) );
-		if ( $other && current_user_can( 'manage_options' ) ) {
-			global $wpdb;
-			$titles = array_column( (array) $wpdb->get_results( "SELECT id, title FROM {$wpdb->prefix}fluentform_forms", ARRAY_A ), 'title', 'id' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			foreach ( $other as $id => $n ) {
-				$parts[] = ( $titles[ $id ] ?? 'Form ' . (int) $id ) . ' ' . (int) $n;
-			}
-		}
-		$url = add_query_arg( array( 'page' => 'mailweb', 'folder' => 'forms' ), admin_url( 'admin.php' ) );
-		wp_admin_notice( '<strong>New form entries:</strong> ' . esc_html( implode( ', ', $parts ) ) . '. <a href="' . esc_url( $url ) . '">Open Plugins → MailWeb → Website forms</a>', array( 'type' => 'info' ) );
-	}
-);
+/* ---------- New form entries: counted in the Mail menu badge and the Website forms folder (since 3.3.4 no notice on every wp-admin screen) ---------- */
 
 /* ---------- Webhook compatibility aliases ---------- */
 

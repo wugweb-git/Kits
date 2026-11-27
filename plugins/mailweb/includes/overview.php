@@ -90,7 +90,7 @@ function mailweb_overview_flush() {
 /** A message date as "j M Y" (the site's one date format) with the calendar icon. */
 function mailweb_overview_date( $date ) {
 	$t = $date ? strtotime( $date ) : false;
-	return $t ? '<span class="dashicons dashicons-calendar-alt" aria-hidden="true" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
+	return $t ? '<span class="dashicons dashicons-calendar-alt mailweb-icon-sm" aria-hidden="true"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
 }
 
 /**
@@ -166,14 +166,14 @@ function mailweb_overview_widget( $max ) {
 		$box  = mailweb_overview_box( $key );
 		$msgs = $box ? array_slice( (array) $box['messages'], 0, $max ) : array();
 		if ( ! $box ) {
-			$status = array( 'warning', '#b32d2e', __( 'Not reachable', 'mailweb' ) );
+			$status = array( 'warning', 'bad', __( 'Not reachable', 'mailweb' ) );
 		} elseif ( ! empty( $box['stale'] ) ) {
 			/* translators: %s: time of the last good answer. */
-			$status = array( 'clock', '#50575e', sprintf( __( 'Shown from %s', 'mailweb' ), wp_date( 'g:i a', (int) ( $box['at'] ?? 0 ) ) ) );
+			$status = array( 'clock', 'muted', sprintf( __( 'Shown from %s', 'mailweb' ), wp_date( 'g:i a', (int) ( $box['at'] ?? 0 ) ) ) );
 		} elseif ( ! $msgs ) {
-			$status = array( 'minus', '#50575e', __( 'Empty', 'mailweb' ) );
+			$status = array( 'minus', 'muted', __( 'Empty', 'mailweb' ) );
 		} else {
-			$status = array( 'yes-alt', '#007017', __( 'OK', 'mailweb' ) );
+			$status = array( 'yes-alt', 'good', __( 'OK', 'mailweb' ) );
 		}
 		$list = '';
 		foreach ( $msgs as $m ) {
@@ -185,9 +185,9 @@ function mailweb_overview_widget( $max ) {
 		$who  = ( function_exists( 'mailweb_profile_picture' ) ? wp_kses_post( mailweb_profile_picture( $addr, 20 ) ) : '' ) . esc_html( $addr );
 		$cell = $list ? '<details><summary>' . $who . '</summary><ul>' . $list . '</ul></details>' : $who;
 		$rows[] = array(
-			'mailbox' => '<div style="overflow-wrap:anywhere">' . $cell . '</div>',
+			'mailbox' => '<div class="mailweb-wrap">' . $cell . '</div>',
 			'unread'  => $box ? esc_html( number_format_i18n( (int) ( $box['unread'] ?? 0 ) ) ) : '–',
-			'status'  => '<span class="dashicons dashicons-' . esc_attr( $status[0] ) . '" style="color:' . esc_attr( $status[1] ) . '" aria-hidden="true"></span> ' . esc_html( $status[2] ),
+			'status'  => '<span class="dashicons dashicons-' . esc_attr( $status[0] ) . ' mailweb-st-' . esc_attr( $status[1] ) . '" aria-hidden="true"></span> ' . esc_html( $status[2] ),
 		);
 	}
 	mailweb_simple_table(

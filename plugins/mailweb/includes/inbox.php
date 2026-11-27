@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'MAILWEB_CAP' ) || define( 'MAILWEB_CAP', 'manage_mailweb' ); // mailweb-caps.php: administrators and editors (from edit_others_posts)
+defined( 'MAILWEB_CAP' ) || define( 'MAILWEB_CAP', 'manage_mailweb' ); // mailweb-caps.php: administrators; the filter mailweb_caps_from widens it
 const MAILWEB_PER_PAGE  = 25;
 const MAILWEB_SEND_HOUR = 30;
 const MAILWEB_FORMS     = 'forms'; // the "Website forms" folder (mailweb_forms())
@@ -413,10 +413,9 @@ function mailweb_inbox_page() {
 	$s    = mailweb_state();
 	$view = mailweb_inbox_view( $s );
 	if ( '' === $view ) {
-		mailweb_ui_missing( __( 'MailWeb inbox', 'mailweb' ) );
+		mailweb_native_inbox( $s ); // no Kits Core: the plain list (native-screens.php)
 		return;
 	}
-	echo '<style>#mailweb .awm-frame{width:100%;height:65vh;border:1px solid #c3c4c7;background:#fff;display:block}#mailweb .awm-actions .button{width:100%;text-align:center;margin:0 0 6px}#mailweb #titlewrap #title{padding:3px 8px;font-size:1.7em;height:1.7em;width:100%}#mailweb .awm-field{display:flex;gap:8px;align-items:center;margin:0 0 8px}#mailweb .awm-field label{flex:0 0 3.5em;color:#50575e}#mailweb .awm-field input{flex:1}</style>';
 	echo '<div class="wrap" id="mailweb">';
 	if ( 'compose' === $view ) {
 		mailweb_compose_screen( $s, sanitize_key( wp_unslash( $_GET['compose'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- which view to show; mailweb_inbox_view() set compose
@@ -450,7 +449,7 @@ function mailweb_notice() {
 /** A date as j M Y with the calendar icon. */
 function mailweb_day( $date ) {
 	$t = $date ? strtotime( (string) $date ) : false;
-	return $t ? '<span class="dashicons dashicons-calendar-alt" aria-hidden="true" style="font-size:16px;width:16px;height:16px;vertical-align:text-bottom"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
+	return $t ? '<span class="dashicons dashicons-calendar-alt mailweb-icon-sm" aria-hidden="true"></span> ' . esc_html( wp_date( 'j M Y', $t ) ) : '–';
 }
 
 /** One mailbox message: edit-screen layout, message left, actions right. */
@@ -472,7 +471,7 @@ function mailweb_message_screen( $s ) {
 	$u                    = array( 'box' => $s['box'], 'folder' => $path, 'uid' => $s['uid'], 'view' => $view );
 	$c                    = fn( $mode ) => add_query_arg( array( 'page' => 'mailweb', 'box' => $s['box'], 'folder' => $s['folder'], 'uid' => $s['uid'], 'compose' => $mode, 'view' => $view ), admin_url( 'admin.php' ) );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
-	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
+	echo '<h2 class="mailweb-subject">' . esc_html( '' !== trim( (string) ( $m['subject'] ?? '' ) ) ? $m['subject'] : __( '(no subject)', 'mailweb' ) ) . '</h2>';
 	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'From', 'mailweb' ) . '</th><td><strong>' . esc_html( mailweb_who( $m['from'] ?? array() ) ) . '</strong></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'To', 'mailweb' ) . '</th><td>' . esc_html( implode( ', ', array_map( 'mailweb_who', (array) ( $m['to'] ?? array() ) ) ) ) . '</td></tr>';
@@ -487,7 +486,7 @@ function mailweb_message_screen( $s ) {
 	echo '<iframe class="awm-frame" title="' . esc_attr__( 'Message', 'mailweb' ) . '" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" srcdoc="' . esc_attr( $doc ) . '"></iframe>';
 	$files = array_filter( (array) ( $m['attachments'] ?? array() ), fn( $a ) => empty( $a['inline'] ) || empty( $a['contentId'] ) );
 	if ( $files ) {
-		echo '<div class="postbox" style="margin-top:16px"><div class="postbox-header"><h2 class="hndle">' . esc_html__( 'Attachments', 'mailweb' ) . '</h2></div><div class="inside"><ul>';
+		echo '<div class="postbox mailweb-mt"><div class="postbox-header"><h2 class="hndle">' . esc_html__( 'Attachments', 'mailweb' ) . '</h2></div><div class="inside"><ul>';
 		foreach ( $files as $a ) {
 			echo '<li><span class="dashicons dashicons-paperclip" aria-hidden="true"></span> <a href="' . esc_url( mailweb_act_url( 'file', $u + array( 'att' => (string) $a['id'] ) ) ) . '">' . esc_html( (string) ( $a['filename'] ?? __( 'attachment', 'mailweb' ) ) ) . '</a> <span class="description">' . esc_html( size_format( (int) ( $a['sizeBytes'] ?? 0 ) ) ) . '</span></li>';
 		}
@@ -511,10 +510,10 @@ function mailweb_message_screen( $s ) {
 	echo '<a class="button" href="' . esc_url( mailweb_act_url( 'unread', $u ) ) . '">' . esc_html__( 'Mark unread', 'mailweb' ) . '</a>';
 	$others = array_diff_key( mailweb_folders( $s['box'] ), array( $path => 1 ) );
 	if ( $others ) {
-		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="display:flex;gap:4px;margin:4px 0 10px">';
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="mailweb-move">';
 		wp_nonce_field( 'mailweb_act' );
 		echo '<input type="hidden" name="action" value="mailweb_act"><input type="hidden" name="do" value="move"><input type="hidden" name="box" value="' . esc_attr( $s['box'] ) . '"><input type="hidden" name="folder" value="' . esc_attr( $path ) . '"><input type="hidden" name="uid" value="' . (int) $s['uid'] . '"><input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
-		echo '<label class="screen-reader-text" for="awm-move">' . esc_html__( 'Move to folder', 'mailweb' ) . '</label><select id="awm-move" name="to" style="flex:1">';
+		echo '<label class="screen-reader-text" for="awm-move">' . esc_html__( 'Move to folder', 'mailweb' ) . '</label><select id="awm-move" name="to">';
 		foreach ( $others as $p => $f ) {
 			echo '<option value="' . esc_attr( $p ) . '">' . esc_html( $f[0] ) . '</option>';
 		}
@@ -583,24 +582,24 @@ function mailweb_compose_screen( $s, $mode ) {
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
 	echo '<div class="awm-field"><label for="awm-to">' . esc_html__( 'To', 'mailweb' ) . '</label><input type="text" id="awm-to" name="to" class="regular-text" value="' . esc_attr( implode( ', ', $to ) ) . '" required autocomplete="email" placeholder="' . esc_attr__( 'name@example.com, …', 'mailweb' ) . '"></div>';
 	$show_cc = (bool) $cc;
-	echo '<p style="margin:-4px 0 8px 4.1em"' . ( $show_cc ? ' hidden' : '' ) . ' id="awm-cc-toggle"><a href="#" onclick="document.getElementById(\'awm-ccbcc\').hidden=false;this.parentNode.hidden=true;return false;">' . esc_html__( 'Add Cc / Bcc', 'mailweb' ) . '</a></p>';
-	echo '<div id="awm-ccbcc"' . ( $show_cc ? '' : ' hidden' ) . '><div class="awm-field"><label for="awm-cc">' . esc_html__( 'Cc', 'mailweb' ) . '</label><input type="text" id="awm-cc" name="cc" value="' . esc_attr( implode( ', ', $cc ) ) . '" autocomplete="email"></div><div class="awm-field"><label for="awm-bcc">' . esc_html__( 'Bcc', 'mailweb' ) . '</label><input type="text" id="awm-bcc" name="bcc" value="" autocomplete="email"></div></div>';
+	echo '<details class="awm-cc"' . ( $show_cc ? ' open' : '' ) . '><summary>' . esc_html__( 'Add Cc / Bcc', 'mailweb' ) . '</summary>';
+	echo '<div id="awm-ccbcc"><div class="awm-field"><label for="awm-cc">' . esc_html__( 'Cc', 'mailweb' ) . '</label><input type="text" id="awm-cc" name="cc" value="' . esc_attr( implode( ', ', $cc ) ) . '" autocomplete="email"></div><div class="awm-field"><label for="awm-bcc">' . esc_html__( 'Bcc', 'mailweb' ) . '</label><input type="text" id="awm-bcc" name="bcc" value="" autocomplete="email"></div></div></details>';
 	echo '<div id="titlediv"><div id="titlewrap"><label class="screen-reader-text" for="title">' . esc_html__( 'Subject', 'mailweb' ) . '</label><input type="text" name="subject" id="title" value="' . esc_attr( $subj ) . '" placeholder="' . esc_attr__( 'Subject', 'mailweb' ) . '" autocomplete="off"></div></div>';
-	echo '<div id="postdivrich" class="postarea" style="margin-top:12px">';
+	echo '<div id="postdivrich" class="postarea mailweb-mt">';
 	wp_editor( $start, 'awm_body', array( 'textarea_name' => 'body', 'media_buttons' => false, 'textarea_rows' => 18, 'editor_height' => 360 ) );
 	$after = (string) apply_filters( 'mailweb_after_signature', '', 'inbox' );
 	if ( '' !== $after ) {
-		echo '<p class="description" style="margin:10px 0 4px">' . esc_html__( 'Added under your signature when sent:', 'mailweb' ) . '</p>' . wp_kses_post( $after );
+		echo '<p class="description mailweb-after-sig">' . esc_html__( 'Added under your signature when sent:', 'mailweb' ) . '</p>' . wp_kses_post( $after );
 	}
 	echo '</div></div><div id="postbox-container-1" class="postbox-container">';
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html__( 'Send', 'mailweb' ) . '</h2></div><div class="inside"><p><label for="awm-from"><strong>' . esc_html__( 'From', 'mailweb' ) . '</strong></label><br>';
-	echo '<select id="awm-from" name="from" style="width:100%">';
+	echo '<select id="awm-from" name="from" class="mailweb-full">';
 	foreach ( $boxes as $k => $a ) {
 		$p = function_exists( 'mailweb_profile' ) ? mailweb_profile( $a )['name'] : '';
 		echo '<option value="' . esc_attr( $k ) . '"' . selected( $k, $from, false ) . '>' . esc_html( ( '' !== $p ? $p . ' – ' : '' ) . $a ) . '</option>';
 	}
 	echo '</select>' . ( $ref ? '<span class="description">' . esc_html__( 'Sent from a different mailbox than the one the message is in, the reply carries no thread link (most mail apps still group it by subject).', 'mailweb' ) . '</span>' : '' ) . '</p>';
-	echo '<div id="major-publishing-actions" style="margin:12px -12px -12px;display:flex;justify-content:space-between;align-items:center"><div id="delete-action"><a class="submitdelete deletion" href="' . esc_url( $cancel ) . '">' . esc_html__( 'Discard', 'mailweb' ) . '</a></div><div id="publishing-action"><button type="submit" class="button button-primary button-large">' . esc_html__( 'Send', 'mailweb' ) . '</button></div></div>';
+	echo '<div id="major-publishing-actions" class="mailweb-publish"><div id="delete-action"><a class="submitdelete deletion" href="' . esc_url( $cancel ) . '">' . esc_html__( 'Discard', 'mailweb' ) . '</a></div><div id="publishing-action"><button type="submit" class="button button-primary button-large">' . esc_html__( 'Send', 'mailweb' ) . '</button></div></div>';
 	echo '</div></div>';
 	echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html__( 'Attachments', 'mailweb' ) . '</h2></div><div class="inside"><input type="file" id="awm-files" name="files[]" multiple><p class="description">' . esc_html__( 'Up to 10 MB in total.', 'mailweb' ) . ( 'forward' === $mode ? ' ' . esc_html__( 'The forwarded message\'s attachments are included.', 'mailweb' ) : '' ) . '</p></div></div>';
 	echo '</div></div></div></form>';
@@ -630,7 +629,7 @@ function mailweb_form_item_screen( $s ) {
 	}
 	call_user_func( $src['mark'], $id, 'read' );
 	echo '<div id="poststuff"><div id="post-body" class="metabox-holder columns-2"><div id="post-body-content">';
-	echo '<h2 style="font-size:1.5em;padding:0;margin:0 0 12px">' . esc_html( (string) ( $f['subject'] ?? '' ) ) . '</h2>';
+	echo '<h2 class="mailweb-subject">' . esc_html( (string) ( $f['subject'] ?? '' ) ) . '</h2>';
 	echo '<div class="postbox"><div class="inside"><table class="form-table" role="presentation"><tbody>';
 	foreach ( (array) ( $f['fields'] ?? array() ) as $k => $v ) {
 		if ( '' !== trim( (string) $v ) ) {

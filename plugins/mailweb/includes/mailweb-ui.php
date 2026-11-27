@@ -173,3 +173,14 @@ function mailweb_ui_missing( string $title ) {
 	wp_admin_notice( esc_html__( 'MailWeb needs Kits Core (active, with its build) to show this screen.', 'mailweb' ), array( 'type' => 'error' ) );
 	echo '</div>';
 }
+
+/** The styles of the screens WordPress draws itself (assets/native.css), on every MailWeb screen. */
+add_action(
+	'admin_enqueue_scripts',
+	function () {
+		$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen this is; nothing is saved
+		if ( 0 === strpos( $page, 'mailweb' ) && file_exists( MAILWEB_DIR . 'assets/native.css' ) ) {
+			wp_enqueue_style( 'mailweb-native', plugins_url( 'assets/native.css', MAILWEB_FILE ), array(), MAILWEB_VERSION );
+		}
+	}
+);

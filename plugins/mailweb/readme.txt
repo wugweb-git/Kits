@@ -4,11 +4,11 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.3
+Stable tag: 3.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Hostinger Mail inside WordPress: read, reply and send from your mailboxes, plus SMTP sending with a daily limit and queue.
+Hostinger Mail inside WordPress: read, reply and send from your mailboxes, plus optional SMTP sending with a daily limit and queue.
 
 == Description ==
 
@@ -32,9 +32,15 @@ MailWeb puts a site's Hostinger mailboxes inside WordPress, so the team reads an
 
 = Sending =
 
-* Sends the site's own email (notices, confirmations, newsletters) through its SMTP mailbox, with the sender name and a default Reply-To. Until a password is saved, WordPress sends the default way. A test email can be sent from the settings.
-* A daily sending limit with a queue, for mailboxes that allow a fixed number of emails a day: priorities, retries, a pause when the mail server refuses mail, and pacing for FluentCRM campaigns.
+* Activating MailWeb changes nothing about how the site sends email. Three things are separate switches in Mail → Settings → Site sending → "How MailWeb handles the site's email", all off on a new install: force the From address and sender name, the daily sending limit and queue, and keeping the text of sent emails. A site that already had MailWeb settings saved before 3.3.4 keeps the first two on, as before.
+* With a mailbox password saved, the site's own email (notices, confirmations, newsletters) is sent through that SMTP mailbox, with the sender name and a default Reply-To. Until a password is saved, WordPress sends the default way. A test email can be sent from the settings.
+* MailWeb stands down while FluentSMTP, Post SMTP or WP Mail SMTP is active: it does not change the From address, send through its own SMTP settings, limit or queue. Developers can change this with the filter `mailweb_defer_to_external_smtp`.
+* The daily sending limit with a queue (off until you switch it on), for mailboxes that allow a fixed number of emails a day: priorities, retries, a pause when the mail server refuses mail, and pacing for FluentCRM campaigns. While it is on, an email over the limit waits in the queue table with its text until it can be sent.
 * All mail settings in one place: Mail, then Settings.
+
+= Without Kits Core =
+
+Kits Core is optional. Without it MailWeb draws the Dashboard (a status table), the Inbox (folders, search, paging, reading, replying, forwarding and writing) and Settings (Mail API token, which mailboxes may send, default From, aliases, Site sending) with plain WordPress screens. The richer layout, bulk actions in the Inbox list and the Profiles editor (names, signatures, pictures) need Kits Core.
 
 = FluentCRM =
 
@@ -43,7 +49,13 @@ MailWeb puts a site's Hostinger mailboxes inside WordPress, so the team reads an
 
 = Who can use it =
 
-Administrators and editors. Every action checks a nonce and the user's capability, sending is limited to 30 messages an hour, and no message text is written to any log.
+Administrators only: reading, replying to and deleting (to Trash) the site's mailboxes needs the capability `manage_mailweb`, which only administrators hold. A site that wants editors to read mail can return `array( 'edit_others_posts' )` from the filter `mailweb_caps_from`. Editors who had access through MailWeb 3.3.3 or earlier lose it when 3.3.4 first runs, unless the filter is set. Settings need `manage_options`. Every action checks a nonce and the user's capability, and sending from Mail is limited to 30 messages an hour.
+
+= What MailWeb keeps in the database =
+
+* Always: settings, the profiles, a log row for each email the site sends (time, priority, status, error; no recipient, subject or text) and a list of the last 200 test emails sent from the settings (recipient and subject), trimmed to the retention below.
+* Only while "Keep the text of sent emails" is on: the recipients, subject and text of each sent email, for the number of days you choose (1 to 365, default 30), then deleted by a daily job. Password reset links are among the emails. A held email that never went out loses its text after the same time. With the daily limit on, an email that is waiting or being retried keeps its text until it is sent, then it is cleared.
+* Messages in the mailboxes are not copied; they are read live.
 
 = Secrets =
 
@@ -65,7 +77,15 @@ The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified
 
 = Does it store my email in WordPress? =
 
-No. Messages are read live from the mailboxes. Only send times are kept, for the hourly limit, and the site's own outgoing emails wait in a queue table when the daily limit is reached.
+No. Messages are read live from the mailboxes. For the site's own outgoing emails MailWeb keeps metadata only (time, priority, status, error), unless you switch on "Keep the text of sent emails" (then also recipients, subject and text, for the days you set), and an email waits in a queue table with its text while the daily limit is on and reached.
+
+= Will it take over my site's email when I activate it? =
+
+No. The forced From address, the daily limit and the logging of email text are each a switch, off on a new install. It also stands down when FluentSMTP, Post SMTP or WP Mail SMTP is active.
+
+= Does it need Kits Core? =
+
+No. Without it the Dashboard, Inbox and Settings are drawn by WordPress itself (see "Without Kits Core"). FluentCRM and Fluent Forms are optional: the code for them loads only when they are active.
 
 = Can it send as an alias? =
 
@@ -73,15 +93,16 @@ No. The Hostinger Mail API sends only as a real mailbox, so choose a mailbox in 
 
 = What happens on uninstall? =
 
-Nothing is deleted. Settings and earlier data stay in place.
+By default nothing is deleted: settings, the queue table and saved secrets stay in place. If "Delete MailWeb's data when the plugin is deleted" is ticked (Mail → Settings → Site sending), deleting the plugin first writes a backup file to wp-content/uploads/wugweb-backups and then removes MailWeb's options, queue table, logs, transients, the capability and its scheduled jobs. Mailbox contents, FluentCRM contacts and notes are never touched. Deactivating the plugin always stops its scheduled jobs and deletes no data.
 
 == External services ==
 
 MailWeb connects to external services only when configured by the site administrator:
 
 * **Hostinger Mail API (`https://api.mail.hostinger.com`):** When a Hostinger Mail API token is configured, reads mailbox folders/messages and sends replies/outbound mail through your Hostinger mailboxes. Terms & Privacy: [https://www.hostinger.com/privacy-policy](https://www.hostinger.com/privacy-policy).
-* **Configured SMTP Server:** When SMTP credentials are configured under **Mail → Settings → Site sending**, delivers site emails via that SMTP host.
-* **FluentCRM (local WordPress plugin, optional):** When FluentCRM is active and enabled in settings, logs transactional contact notes locally in WordPress.
+* **Configured SMTP Server:** When SMTP credentials are configured under **Mail → Settings → Site sending**, delivers site emails via that SMTP host (Hostinger Mail by default). The SMTP presets for Hostinger, Gmail, Outlook, SendGrid, Mailgun, Postmark, Amazon SES and a custom server are only a list of host names and ports offered in the settings; MailWeb connects to a preset's host only if you save that host with a password. Sent email, including recipients and text, goes to that server. Terms and privacy are those of the provider you choose.
+* **DNS lookups (your DNS resolver):** The Site sending screen and a daily job look up the DKIM (`hostingermail1._domainkey`) and SPF TXT records of the site's mail domain, through the server's own DNS resolver, to warn when email authentication is not set up. No data about your visitors or email is sent; the lookups name the domain only.
+* **FluentCRM and Fluent Forms (local WordPress plugins, optional):** When active (and, for the mailbox feed, enabled in settings), MailWeb writes contact notes, tags and list changes in your own site's FluentCRM and shows form entries in the Inbox. Nothing leaves the site.
 * **Failure Alert Webhook (optional):** When an administrator configures a webhook URL (Slack, Discord, Telegram, or custom endpoint), sends throttled pause/failure notifications to that URL.
 
 == Upgrade Notice ==
@@ -100,6 +121,15 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.3.4 =
+* Activating MailWeb no longer takes over the site's email. Forcing the From address, the daily limit and queue, and keeping the text of sent emails are separate switches in Mail → Settings → Site sending, off on a new install. A site that already had MailWeb settings keeps the From address and limit on; the text of sent emails is kept only if you turn that on, for 1 to 365 days (default 30), and a daily job deletes older text.
+* MailWeb stands down while FluentSMTP, Post SMTP or WP Mail SMTP is active (filter `mailweb_defer_to_external_smtp`).
+* Without Kits Core the Dashboard, Inbox and Settings are drawn by WordPress itself instead of showing an error.
+* The FluentCRM, Fluent Forms and newsletter code loads only when FluentCRM or Fluent Forms is active, and the "New form entries" notice on every admin screen is gone (the Mail menu badge still counts them).
+* Only administrators can read the mailboxes; editors need the filter `mailweb_caps_from`. Editors who had access lose it on this update unless the filter is set.
+* Uninstall with "delete data" ticked now also removes the sending switches, email log, fallback SMTP and alert webhook settings, the capability, the pause marker and every scheduled job; deactivation stops all jobs. The readme now matches the code on uninstall, logging and who can read mailboxes, and lists the SMTP presets and DNS lookups under External services.
+* Admin screens use style sheets instead of inline styles and script.
 
 = 3.3.3 =
 * Fix: 3.3.2 loaded the sender-profile and retry-queue code, which is not ready. It is no longer loaded, and the failed mail it kept in the database, its schedule and its profiles are removed once.
