@@ -185,7 +185,7 @@ function kits_brand_token_definitions(): array {
 function kits_brand_presets(): array {
 	$presets = array(
 		'default' => array(
-			'name'        => 'Default (Animal Writes / Neutral Kits)',
+			'name'        => 'Default (Neutral Kits)',
 			'description' => 'Signature warm gold, deep slate and clean rounded cards.',
 			'tokens'      => array(
 				'accent'         => '#FFBE1A',

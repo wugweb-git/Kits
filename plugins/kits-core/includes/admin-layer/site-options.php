@@ -123,9 +123,10 @@ function kits_site_options_intro(): void {
 /** Emails from forms: on/off. */
 function kits_site_options_send_email(): void {
 	printf(
-		'<input type="checkbox" id="aw_ff_send_email" name="aw_ff_send_email" value="1"%1$s> <span class="description">%2$s</span>',
+		'<input type="checkbox" id="aw_ff_send_email" name="aw_ff_send_email" value="1"%1$s> <label for="aw_ff_send_email">%3$s</label> <span class="description">%2$s</span>',
 		checked( '1', (string) get_option( 'aw_ff_send_email', '0' ), false ),
-		esc_html( 'Send the emails a Fluent Forms submission makes (alerts to contact@, the newsletter confirmation). Off: no email is sent; entries are still saved.' )
+		esc_html( 'Send the emails a Fluent Forms submission makes (alerts to contact@, the newsletter confirmation). Off: no email is sent; entries are still saved.' ),
+		esc_html( 'On' )
 	);
 }
 

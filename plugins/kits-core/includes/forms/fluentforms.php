@@ -343,7 +343,7 @@ add_action(
 						'index'          => 90,
 						'element'        => $this->key,
 						'attributes'     => array( 'name' => $this->key ),
-						'settings'       => array( 'label' => $this->title, 'container_class' => '', 'html_codes' => '<p>' . esc_html( $this->title ) . ' (Animal Writes)</p>', 'conditional_logics' => array() ),
+						'settings'       => array( 'label' => $this->title, 'container_class' => '', 'html_codes' => '<p>' . esc_html( $this->title ) . ' (' . esc_html( get_bloginfo( 'name' ) ) . ')</p>', 'conditional_logics' => array() ),
 						'editor_options' => array( 'title' => $this->title, 'icon_class' => 'ff-edit-html', 'template' => 'customHTML' ),
 					);
 				}

@@ -188,7 +188,7 @@ function kits_cdn_settings_box() {
 	echo '<li>' . esc_html( 'Public pages: ' ) . ( $short ? '<code>Cache-Control: ' . esc_html( $short ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '<li>' . esc_html( 'Listings, Library items and Resources: ' ) . ( $long ? '<code>Cache-Control: ' . esc_html( $long ) . '</code>' : esc_html( 'none (CDN caching off)' ) ) . '</li>';
 	echo '</ul>';
-	submit_button();
+	kits_submit_button( __( 'Save Changes' ), 'kits-save-cdn' );
 	kits_site_reset_button( 'aw_cdn' ); // "Reset this section" (site-options.php)
 	echo '</form>';
 	kits_site_reset_form( 'aw_cdn' );

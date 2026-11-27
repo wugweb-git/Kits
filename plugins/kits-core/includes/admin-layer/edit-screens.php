@@ -155,7 +155,7 @@ function kits_edit_screen_source_from( string $where ): string {
 	}
 	if ( preg_match( '~/(?:plugins|mu-plugins)/([^/]+)/~', $where, $m ) ) {
 		$ours = array( 'aw-seo-extras', 'aw-sourcing', 'rankweb', 'sourceweb', 'kits-core', 'mailweb', 'directoryweb', 'insightweb', 'planweb' );
-		return in_array( $m[1], $ours, true ) ? 'Animal Writes (' . $m[1] . ')' : $m[1];
+		return in_array( $m[1], $ours, true ) ? get_bloginfo( 'name' ) . ' (' . $m[1] . ')' : $m[1];
 	}
 	return 'Theme or other';
 }
@@ -816,7 +816,7 @@ add_action(
 
 /** The note on rows that are listed from the map, not read live (page and command). */
 function kits_edit_screen_map_only_note(): string {
-	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (SourceWeb, RankWeb and Search Insights, Animal Writes, MailWeb, Kits Core) are listed from the map, not read live.';
+	return 'Sidebar panels that plugins add with JavaScript in the block editor, Dashboard widgets and the panels, boxes and tables on admin pages (SourceWeb, RankWeb and Search Insights, ' . get_bloginfo( 'name' ) . ', MailWeb, Kits Core) are listed from the map, not read live.';
 }
 
 /**

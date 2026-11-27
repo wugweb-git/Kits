@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,10 @@ Each of these loads only when you turn it on; none runs by default.
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
+
+= 1.3.4 =
+* No fixed site name in what visitors and admins read: the newsletter thank-you, the campaign consent line, the backup header and the form placeholder use the site's name (the Default brand preset is "Default (Neutral Kits)"; saved settings are unaffected).
+* Accessibility: Brand Tokens colour pickers have names, its "Default" hint is readable (7:1), and the screen prints once; Kits Settings save buttons have names and unique ids, and the on/off boxes (Backup, Uninstall, Content types, Forms emails) have label text; the shell calendar's disabled "Today" is readable (5.7:1).
 
 = 1.3.3 =
 * Form copy is off by default and has its own screen (Kits → Settings → Form copies): retention days (default 30), "Delete stored copies", and fields named pass, card, cvv, ssn or token are never stored. What is stored is now listed in this readme.

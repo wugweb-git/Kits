@@ -778,6 +778,16 @@ body.kits-shell-screen {
 	margin: 0 0 var(--ks-s3);
 }
 
+/* Today, off while the current month shows: #646970 on white is 5.7:1 (WCAG 1.4.3); no opacity, so it still reads as off by
+   the pointer and the missing underline. */
+.kits-shell-cal .kits-shell-cal__nav .kits-shell-cal__today.kits-shell-link:disabled,
+.kits-shell-cal .kits-shell-cal__nav .kits-shell-cal__today.kits-shell-link[aria-disabled="true"] {
+	color: #646970;
+	opacity: 1;
+	cursor: default;
+	text-decoration: none;
+}
+
 .kits-shell-cal__title {
 	min-width: 10em;
 	text-align: center;

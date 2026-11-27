@@ -741,6 +741,19 @@ function kits_options_box_titled( ?bool $set = null ): bool {
 
 /* ---------- Core Settings ---------- */
 
+/**
+ * A Kits Settings save button with a unique id and its text as an explicit accessible name (WordPress's own submit_button()
+ * gives every button the id "submit", which repeats on a screen of several forms).
+ *
+ * @param string $text Button text.
+ * @param string $id   Unique id (also the field name; nothing reads the old "submit" field).
+ * @param string $type Button type (primary, secondary, delete).
+ * @param bool   $wrap Wrap in a p.submit.
+ */
+function kits_submit_button( string $text, string $id, string $type = 'primary', bool $wrap = true ): void {
+	submit_button( $text, $type, sanitize_key( $id ), $wrap, array( 'aria-label' => $text ) );
+}
+
 /** The groups of fields that Core Settings shows, in order (theme-options.php): the speed fixes, then older content. */
 function kits_core_settings_groups(): array {
 	return array( 'Speed', 'Older content' );
@@ -767,7 +780,7 @@ function kits_core_settings_form( string $group, string $also = '', string $back
 		kits_theme_option_rows_of( $also );
 	}
 	echo '</tbody></table>';
-	submit_button( 'Save ' . $group );
+	kits_submit_button( 'Save ' . $group, 'kits-save-' . sanitize_title( $group ) );
 	echo '</form>';
 	if ( isset( kits_reset_sections()[ $back ] ) ) {
 		kits_reset_section_form( $back );
@@ -1051,9 +1064,10 @@ add_filter(
 /** The uninstall box. */
 function kits_uninstall_field(): void {
 	printf(
-		'<input type="checkbox" id="kits_delete_data_on_uninstall" name="kits_delete_data_on_uninstall" value="1"%1$s> <p class="description">%2$s</p>',
+		'<input type="checkbox" id="kits_delete_data_on_uninstall" name="kits_delete_data_on_uninstall" value="1"%1$s> <label for="kits_delete_data_on_uninstall">%3$s</label><p class="description">%2$s</p>',
 		checked( (bool) get_option( 'kits_delete_data_on_uninstall', false ), true, false ),
-		esc_html( 'Off: everything stays in the database if the plugin is deleted.' )
+		esc_html( 'Off: everything stays in the database if the plugin is deleted.' ),
+		esc_html( 'On' )
 	);
 }
 
@@ -1064,7 +1078,7 @@ function kits_uninstall_form(): void {
 	wp_nonce_field( 'kits_uninstall-options', '_wpnonce', false );
 	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=uninstall' ) ) ) . '">';
 	do_settings_sections( 'kits-uninstall' );
-	submit_button( 'Save uninstall setting' );
+	kits_submit_button( 'Save uninstall setting', 'kits-save-uninstall' );
 	echo '</form>';
 	kits_reset_section_form( 'uninstall' );
 }

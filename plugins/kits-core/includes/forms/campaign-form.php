@@ -215,7 +215,7 @@ function kits_raw_settings_form(): void {
 	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=form-copy' ) ) ) . '">';
 	echo '<p><label><input type="checkbox" name="kits_form_raw_capture" value="1"' . checked( kits_raw_capture_on(), true, false ) . '> ' . esc_html__( 'Copy form sends into the database', 'kits-core' ) . '</label></p>';
 	echo '<p><label>' . esc_html__( 'Keep copies for', 'kits-core' ) . ' <input type="number" min="1" max="365" name="kits_form_raw_days" value="' . esc_attr( (string) kits_raw_days() ) . '" class="small-text"> ' . esc_html__( 'days', 'kits-core' ) . '</label></p>';
-	submit_button( __( 'Save form copy settings', 'kits-core' ) );
+	kits_submit_button( __( 'Save form copy settings', 'kits-core' ), 'kits-save-form-copy' );
 	echo '</form>';
 	echo '<h3>' . esc_html__( 'Stored copies', 'kits-core' ) . '</h3>';
 	/* translators: %d: number of stored copies */
@@ -224,7 +224,7 @@ function kits_raw_settings_form(): void {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . $confirm . '\');">'; // phpcs:ignore WordPress.Security.EscapeOutput -- $confirm is esc_js()
 	echo '<input type="hidden" name="action" value="kits_raw_delete">';
 	wp_nonce_field( 'kits_raw_delete', 'kits_raw_delete_nonce' );
-	submit_button( __( 'Delete stored copies', 'kits-core' ), 'delete', 'submit', false );
+	kits_submit_button( __( 'Delete stored copies', 'kits-core' ), 'kits-delete-form-copies', 'delete', false );
 	echo '</form>';
 }
 

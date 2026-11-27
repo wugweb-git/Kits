@@ -98,7 +98,7 @@ function kits_ff_thanks_forms() {
 	return array(
 		'contact'     => array( 'contact', 'Message sent.', '' ),
 		'volunteer'   => array( 'volunteer', 'Thank you for signing up.', 'We will contact you when there is work in your area. You can ask us to delete your details at any time.' ),
-		'newsletter'  => array( 'newsletter', 'You\'re subscribed', 'Thank you for signing up for Animal Writes updates.' ),
+		'newsletter'  => array( 'newsletter', 'You\'re subscribed', sprintf( 'Thank you for signing up for %s updates.', get_bloginfo( 'name' ) ) ),
 		'claim'       => array( 'claim', 'Request sent.', '' ),
 	);
 }

@@ -108,10 +108,11 @@ function kits_daily_backup_field(): void {
 	$stored = '1' === (string) get_option( KITS_DAILY_BACKUP_OPTION, '0' );
 	$forced = kits_daily_backup_on() !== $stored ? ' This site sets it in code (filter kits_daily_backup), so the box does not decide.' : '';
 	printf(
-		'<input type="checkbox" id="%1$s" name="%1$s" value="1"%2$s> <p class="description">%3$s</p>',
+		'<input type="checkbox" id="%1$s" name="%1$s" value="1"%2$s> <label for="%1$s">%4$s</label><p class="description">%3$s</p>',
 		esc_attr( KITS_DAILY_BACKUP_OPTION ),
 		checked( $stored, true, false ),
-		esc_html( 'Every day at 03:30 (India time), a copy of the database and of the deployed code goes to the backups folder in the hosting account, outside the website, kept ' . KITS_BACKUP_KEEP_DAYS . ' days. Off: nothing is written; backups already there stay.' . $forced )
+		esc_html( 'Every day at 03:30 (India time), a copy of the database and of the deployed code goes to the backups folder in the hosting account, outside the website, kept ' . KITS_BACKUP_KEEP_DAYS . ' days. Off: nothing is written; backups already there stay.' . $forced ),
+		esc_html( 'On' )
 	);
 	if ( function_exists( 'kits_daily_backup_site_check' ) ) {
 		kits_daily_backup_site_check();
@@ -125,7 +126,7 @@ function kits_daily_backup_form(): void {
 	wp_nonce_field( 'kits_daily_backup-options', '_wpnonce', false );
 	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=backup' ) ) ) . '">';
 	do_settings_sections( 'kits-backup' );
-	submit_button( 'Save backup setting' );
+	kits_submit_button( 'Save backup setting', 'kits-save-backup' );
 	echo '</form>';
 }
 
@@ -153,7 +154,7 @@ function kits_daily_backup_run() {
 	$db = $dir . '/auto-db-' . $day . '.sql.gz';
 	$gz = gzopen( $db, 'wb6' );
 	if ( $gz ) {
-		gzwrite( $gz, "-- Animal Writes database backup {$report['at']}\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n" );
+		gzwrite( $gz, "-- " . get_bloginfo( 'name' ) . " database backup {$report['at']}\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n" );
 		foreach ( $wpdb->get_col( 'SHOW TABLES' ) as $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$create = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE %i', $table ), ARRAY_N ); // phpcs:ignore WordPress.DB
 			gzwrite( $gz, "\nDROP TABLE IF EXISTS `{$table}`;\n" . $create[1] . ";\n" );

@@ -1,8 +1,4 @@
-<?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-return array(
+<?php return array(
 	'dependencies' => array(
 		'react',
 		'react-dom',
@@ -21,5 +17,5 @@ return array(
 		'wp-theme',
 		'wp-warning'
 	),
-	'version' => 'e7593987d9446ba9f2c0'
+	'version' => 'bd1ef4ff680963ab9677'
 );

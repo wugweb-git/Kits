@@ -1040,7 +1040,7 @@ function kits_presets_field( array $args ): void {
 	$slug   = kits_preset_slug( kits_preset_type_args( $preset ) );
 	$taken  = kits_preset_slug_taken( $slug );
 	printf(
-		'<input type="checkbox" id="%1$s" name="%2$s[]" value="%3$s"%4$s%5$s> <p class="description">%6$s</p>',
+		'<input type="checkbox" id="%1$s" name="%2$s[]" value="%3$s"%4$s%5$s> <label for="%1$s">%7$s</label><p class="description">%6$s</p>',
 		esc_attr( 'kits_preset_' . $id ),
 		esc_attr( KITS_PRESETS_OPTION ),
 		esc_attr( $id ),
@@ -1052,7 +1052,8 @@ function kits_presets_field( array $args ): void {
 				? sprintf( __( 'Type %1$s, address %2$s.', 'kits-core' ), $preset['post_type'], '/' . $slug . '/' )
 				/* translators: %s: post type slug */
 				: sprintf( __( 'Type %s, with no pages of its own: shown inside other pages.', 'kits-core' ), $preset['post_type'] )
-		)
+		),
+		esc_html( 'On' )
 	);
 	if ( '' !== $taken ) {
 		/* translators: 1: address such as /events/, 2: page title */
@@ -1075,7 +1076,7 @@ function kits_presets_form(): void {
 	wp_nonce_field( 'kits_presets-options', '_wpnonce', false );
 	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=content-types' ) ) ) . '">';
 	do_settings_sections( 'kits-presets' );
-	submit_button( 'Save content types' );
+	kits_submit_button( 'Save content types', 'kits-save-content-types' );
 	echo '</form>';
 }
 

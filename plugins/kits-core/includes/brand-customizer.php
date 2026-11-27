@@ -174,6 +174,14 @@ function kits_brand_customizer_render_page() {
 		wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'kits-core' ) );
 	}
 
+	// The screen is registered under Kits and under Appearance with one slug; print it once per request so it never
+	// repeats its heading and outline (one <h1> per page).
+	static $printed = false;
+	if ( $printed ) {
+		return;
+	}
+	$printed = true;
+
 	$notices = array();
 
 	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
@@ -345,6 +353,7 @@ function kits_brand_customizer_render_page() {
 										<div style="display: flex; align-items: center; gap: 10px;">
 											<input type="color"
 												id="color_picker_<?php echo esc_attr( $key ); ?>"
+												aria-label="<?php echo esc_attr( sprintf( /* translators: %s: token name, e.g. "Accent" */ __( '%s colour picker', 'kits-core' ), $def['label'] ) ); ?>"
 												value="<?php echo esc_attr( ( 0 === strpos( $current_val, '#' ) && 7 === strlen( $current_val ) ) ? $current_val : '#000000' ); ?>"
 												style="width: 44px; height: 34px; padding: 0; border: 1px solid #ccd0d4; border-radius: 4px; cursor: pointer;"
 												onchange="document.getElementById('token_<?php echo esc_attr( $key ); ?>').value = this.value;">
@@ -374,7 +383,7 @@ function kits_brand_customizer_render_page() {
 									<?php endif; ?>
 									<p class="description" style="margin-top: 4px; font-size: 12px;">
 										<?php echo esc_html( $def['description'] ); ?>
-										<span style="color: #94a3b8; margin-left: 6px;">(Default: <code><?php echo esc_html( $def['default'] ); ?></code>)</span>
+										<span style="color: #50575e; margin-left: 6px;">(Default: <code><?php echo esc_html( $def['default'] ); ?></code>)</span>
 									</p>
 								</td>
 							</tr>

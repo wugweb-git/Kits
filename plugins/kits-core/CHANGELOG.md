@@ -2,6 +2,12 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.3.4
+
+- Neutral installs: the newsletter thank-you, the campaign consent line, the SQL backup header, the Fluent Forms placeholder and the "Animal Writes (plugin)" origin label now use get_bloginfo( 'name' ), so Animal Writes reads exactly as before. The Default brand preset is named "Default (Neutral Kits)"; its key is unchanged. AW_CL_OPTIN (unused) became kits_cl_optin_text().
+- Accessibility: Brand Tokens colour pickers get an aria-label, the "(Default: #…)" hint is #50575e (was 2.56:1), and the screen prints once per request. Kits Settings save buttons go through kits_submit_button() (aria-label, unique id instead of the repeated "submit"), and the Backup, Uninstall, Content types and Forms emails checkboxes get a label. Shell calendar "Today" when disabled is #646970 at full opacity (was 3.03:1); build/shell rebuilt.
+- Left as they are: the error-page marker "Animal Writes error page" (installed drop-ins are recognised by it), the drop-in HTML in assets/site/dropins/ (site layer, WordPress not loaded), the media-title pattern for existing "Animal Writes campaign photo" titles, and the map plugin name "Animal Writes core".
+
 ## 1.3.3
 
 - Form copy (wp_aw_form_raw) is off by default, with a Kits → Settings → Form copies screen: retention (default 30 days), "Delete stored copies" (nonce, manage_options), and fields named pass, card, cvv, ssn or token are never stored. readme.txt lists what is stored. Sites with the table keep the rows but copy nothing new until it is switched on.

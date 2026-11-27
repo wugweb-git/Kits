@@ -29,7 +29,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const AW_CL_DB_VERSION = '3'; // 2: nl_optin and wa_optin (owner, 21 Oct 2026); 3: send_id, one row per letter from either call
-const AW_CL_OPTIN      = 'Email me updates on this campaign and future Animal Writes campaigns, and add me as a volunteer. I can unsubscribe at any time.';
+/** The consent line next to the opt-in tick box; names the site (Animal Writes on the live site) rather than a fixed brand. */
+function kits_cl_optin_text(): string {
+	/* translators: %s: site name */
+	return sprintf( 'Email me updates on this campaign and future %s campaigns, and add me as a volunteer. I can unsubscribe at any time.', get_bloginfo( 'name' ) );
+}
 const AW_CL_CONSENT    = 'v3-campaign-optin-volunteer-preticked'; // the wording above; ticked by default, newsletter and volunteers (owner, 18 Oct 2026)
 const AW_CL_ROUTES     = array( 'gmail' => 'Gmail', 'outlook' => 'Outlook', 'mailto' => 'Email app', 'copy' => 'Copied' );
 const AW_CL_DEVICES    = array( 'phone' => 'Phone', 'tablet' => 'Tablet', 'desktop' => 'Desktop' );

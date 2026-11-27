@@ -96,6 +96,7 @@ export function CalendarGrid( { month, today, days = {}, onMonth, loading } ) {
 				</Button>
 				<Button
 					variant="link"
+					className="kits-shell-cal__today"
 					disabled={ month === thisMonth }
 					onClick={ () => onMonth( thisMonth ) }
 				>

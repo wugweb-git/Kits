@@ -170,5 +170,20 @@ brand_t( '6px' === ( $patch['settings']['border']['radiusSizes'][0]['size'] ?? '
 brand_t( '760px' === ( $patch['settings']['layout']['contentSize'] ?? '' ), 'Layer 3 patch updates layout contentSize' );
 brand_t( array() === kits_brand_build_theme_json( array(), $base_theme ), 'Layer 3 patch is empty when no tokens are set' );
 
+// 1.3.4: neutral preset name, accessible Brand Tokens screen, no fixed brand name in visible strings.
+brand_t( 'Default (Neutral Kits)' === $presets['default']['name'] && isset( $presets['default'] ), 'Default preset is named neutrally and keeps its key' );
+$screen = (string) file_get_contents( dirname( __DIR__ ) . '/includes/brand-customizer.php' );
+brand_t( false === strpos( $screen, '#94a3b8' ), 'Brand Tokens: no 2.56:1 grey (#94a3b8) left' );
+brand_t( false !== strpos( $screen, 'color: #50575e; margin-left: 6px;">(Default:' ), 'Brand Tokens: the Default hint uses #50575e (7:1 on white)' );
+brand_t( 1 === preg_match( '/<input type="color"\s+id="color_picker_[^\n]*\n\s*aria-label="[^\n]*colour picker/', $screen ), 'Brand Tokens: every colour picker has an accessible name' );
+brand_t( false !== strpos( $screen, 'static $printed' ), 'Brand Tokens: the screen prints once per request' );
+$calendar_css = (string) file_get_contents( dirname( __DIR__ ) . '/src/shell/more.css' );
+brand_t( 1 === preg_match( '/kits-shell-cal__today[^{]*:disabled[^{]*\{[^}]*color: #646970;[^}]*opacity: 1;/s', $calendar_css ), 'Shell calendar: disabled Today is #646970 at full opacity' );
+foreach ( array( 'campaign-letters.php', 'forms/form-pages.php', 'forms/fluentforms.php', 'backups.php', 'admin-layer/edit-screens.php', 'brand-customizer-model.php' ) as $f ) {
+	$code = preg_replace( '#^\s*(//|\*|/\*).*$#m', '', (string) file_get_contents( dirname( __DIR__ ) . '/includes/' . $f ) );
+	$code = str_replace( "'Animal Writes core'", '', $code ); // the map's own plugin name in kits_edit_screen_own_plugins(): a match key for existing data
+	brand_t( false === strpos( $code, 'Animal Writes' ), "$f: no fixed 'Animal Writes' outside comments" );
+}
+
 echo "\nSummary: $count checks, $fails failures.\n";
 exit( $fails > 0 ? 1 : 0 );
