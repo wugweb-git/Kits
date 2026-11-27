@@ -20,7 +20,11 @@
  *   aw_media_reuse_notice_*, aw_thumb_dupes_n, aw_error_count_mailed, aw_error_pages_checked, and the site transient kits_update_release.
  * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_thumb_rebuild, aw_error_count_daily,
  *   aw_site_check_deploy.
- * Tables: none of its own.
+ * Tables: {prefix}aw_form_raw (the optional form copy, dropped without a backup copy: it holds submitted personal data).
+ * Also options kits_active_style_variation, kits_update_channel, kits_global_styles_backup, kits_form_raw_*, kits_tidy_menus,
+ *   kits_error_count_daily, kits_daily_event, kits_public_gate_routes, kits_aw_carryover_done, aw_form_raw_db, and the
+ *   transient kits_registry. Scheduled events aw_daily, aw_error_count_daily, aw_daily_backup, aw_raw_prune and
+ *   kits_checkin_weekly are unscheduled on every uninstall (ticked or not).
  *
  * Never deleted, even when ticked:
  * - Posts, pages, synced patterns, Styles (wp_global_styles), terms, users, attachments and any post meta (the
@@ -44,6 +48,11 @@
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
+}
+
+// Scheduled events are removed on every uninstall (they are not data, and nothing else would unbook them).
+foreach ( array( 'aw_daily', 'aw_error_count_daily', 'aw_daily_backup', 'aw_raw_prune', 'kits_checkin_weekly' ) as $kits_hook ) {
+	wp_unschedule_hook( $kits_hook );
 }
 
 if ( true !== (bool) get_option( 'kits_delete_data_on_uninstall', false ) ) {
@@ -86,6 +95,17 @@ $kits_options = array(
 	'kits_checkin_on',
 	'kits_checkin_url',
 	'kits_checkin_last',
+	'kits_active_style_variation',
+	'kits_update_channel',
+	'kits_global_styles_backup',
+	'kits_form_raw_capture',
+	'kits_form_raw_days',
+	'aw_form_raw_db',
+	'kits_tidy_menus',
+	'kits_error_count_daily',
+	'kits_daily_event',
+	'kits_public_gate_routes',
+	'kits_aw_carryover_done',
 );
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
@@ -112,6 +132,11 @@ foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 
 	}
 }
 delete_site_transient( 'kits_update_release' );
+delete_transient( 'kits_registry' ); // includes/registry-updates.php
+delete_site_transient( 'kits_registry' );
+
+// The form copy table (includes/forms/campaign-form.php): the copies are personal data and are not written to the backup file.
+$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . 'aw_form_raw' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- uninstall: the form copy table, once.
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
 wp_unschedule_hook( 'aw_thumb_rebuild' ); // the thumbnail map rebuild (thumbs.php)

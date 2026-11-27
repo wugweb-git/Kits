@@ -406,11 +406,25 @@ function kits_error_count_daily() {
 		set_transient( 'aw_error_count_mailed', 1, 20 * HOUR_IN_SECONDS );
 	}
 }
+/**
+ * Whether the daily error count (and its email to the admin address) runs. Off by default: the option
+ * kits_error_count_daily is '1', or the filter kits_error_count_daily returns true.
+ */
+function kits_error_count_daily_on(): bool {
+	return (bool) apply_filters( 'kits_error_count_daily', '1' === (string) get_option( 'kits_error_count_daily', '0' ) );
+}
 add_action( 'aw_error_count_daily', 'kits_error_count_daily' );
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( 'aw_error_count_daily' ) ) {
+		$booked = wp_next_scheduled( 'aw_error_count_daily' );
+		if ( ! kits_error_count_daily_on() ) {
+			if ( $booked ) {
+				wp_unschedule_hook( 'aw_error_count_daily' );
+			}
+			return;
+		}
+		if ( ! $booked ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'aw_error_count_daily' );
 		}
 	}

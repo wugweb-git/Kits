@@ -1,7 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+// No ABSPATH guard: this is a command-line runner that defines ABSPATH itself.
 /**
  * Stub tests for includes/taxonomy-rename.php (no WordPress): the active name follows the data, nothing moves on
  * load, Rename moves terms, menu items and Rank Math keys after saving a backup, Undo puts them back, and the counts.

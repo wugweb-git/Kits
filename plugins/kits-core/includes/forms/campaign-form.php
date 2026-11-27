@@ -8,11 +8,12 @@
  * (Newsletter list, newsletter and volunteer tags, the campaign fields). After the link: the campaign-<slug> tag, the
  * boxes as 1/0 and the letter's anonymous statistics row (campaign-letters.php, one row per send_id).
  *
- * The raw copy (owner, 21 Oct 2026: "keep a ready fallback"): every form send (all Fluent Forms forms, and the campaign
- * sign-up) is copied whole into wp_aw_form_raw the moment it reaches the server, before any check. Its status says
- * what happened: received (refused by a check, or failed), saved (with the entry ID), duplicate (a retry of a
- * send already saved). Kept 180 days.
- * wp aw raw-export writes it as CSV.
+ * The raw copy (owner, 21 Oct 2026: "keep a ready fallback"): OFF by default since 1.3.3 (Kits -> Settings -> Form copies).
+ * When switched on, every form send (all Fluent Forms forms, and the campaign sign-up) is copied into wp_aw_form_raw
+ * the moment it reaches the server, before any check, minus fields whose names contain pass, card, cvv, ssn or token.
+ * Its status says what happened: received (refused by a check, or failed), saved (with the entry ID), duplicate (a
+ * retry of a send already saved). Kept 30 days unless the retention setting says otherwise (kits_form_raw_days).
+ * Turning it off keeps the stored rows; "Delete stored copies" removes them. wp aw raw-export writes it as CSV.
  *
  * Moved from Animal Writes Core `includes/campaign-form.php` (18 Nov 2026); options, meta keys, tags, hooks and
  * slugs are unchanged, and the old function names still work (back-compat wrappers).
@@ -26,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 const KITS_CF_OPTION   = 'aw_ff_campaign_form';
 const KITS_RAW_DB      = '1';
-const KITS_RAW_DAYS    = 180;
+const KITS_RAW_DAYS    = 30; // default retention in days (option kits_form_raw_days)
 const KITS_CF_RL_LIMIT = 30; // sends an hour from one connection (colleges and offices share one)
 
 /** The Campaign form's Fluent Forms ID, or 0. */
@@ -41,11 +42,48 @@ function kits_raw_table() {
 	return $wpdb->prefix . 'aw_form_raw';
 }
 
+/** Whether form sends are copied. Off by default: the option kits_form_raw_capture is '1'. */
+function kits_raw_capture_on(): bool {
+	return '1' === (string) get_option( 'kits_form_raw_capture', '0' );
+}
+
+/** Days a copy is kept (1 to 365; default 30). */
+function kits_raw_days(): int {
+	$d = (int) get_option( 'kits_form_raw_days', KITS_RAW_DAYS );
+	return $d < 1 ? KITS_RAW_DAYS : min( 365, $d );
+}
+
+/** Whether a field name is one never stored (password, card, cvv, ssn, token). */
+function kits_raw_sensitive_name( $name ): bool {
+	return 1 === preg_match( '/pass|card|cvv|ssn|token/i', (string) $name );
+}
+
+/** The send without its sensitive fields (at any depth). */
+function kits_raw_strip( $data ) {
+	$out = array();
+	foreach ( (array) $data as $k => $v ) {
+		if ( kits_raw_sensitive_name( $k ) ) {
+			continue;
+		}
+		$out[ $k ] = is_array( $v ) ? kits_raw_strip( $v ) : $v;
+	}
+	return $out;
+}
+
+/** Number of stored copies (0 when the table is missing). */
+function kits_raw_count(): int {
+	global $wpdb;
+	if ( KITS_RAW_DB !== get_option( 'aw_form_raw_db' ) ) {
+		return 0;
+	}
+	return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', kits_raw_table() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+}
+
 add_action(
 	'init',
 	function () {
-		if ( KITS_RAW_DB === get_option( 'aw_form_raw_db' ) ) {
-			return;
+		if ( ! kits_raw_capture_on() || KITS_RAW_DB === get_option( 'aw_form_raw_db' ) ) {
+			return; // off: no table is made; an existing one is left as it is
 		}
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -72,7 +110,10 @@ add_action(
 /** Copies one send as it arrived; returns the row ID (0 when the table is not there). */
 function kits_raw_save( $kind, $form_id, $data ) {
 	global $wpdb;
-	$data = (array) $data;
+	if ( ! kits_raw_capture_on() || KITS_RAW_DB !== get_option( 'aw_form_raw_db' ) ) {
+		return 0;
+	}
+	$data = kits_raw_strip( $data );
 	unset( $data['altcha'] ); // the bot check's answer: long and of no use later
 	$ok = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		kits_raw_table(),
@@ -116,11 +157,18 @@ add_action(
 	1
 );
 
-// Older than 180 days: gone (daily).
+// Older than the retention days: gone (daily). Booked only while the copy is on; nothing is deleted when it is off.
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( 'aw_raw_prune' ) ) {
+		$booked = wp_next_scheduled( 'aw_raw_prune' );
+		if ( ! kits_raw_capture_on() ) {
+			if ( $booked ) {
+				wp_unschedule_hook( 'aw_raw_prune' );
+			}
+			return;
+		}
+		if ( ! $booked ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'aw_raw_prune' );
 		}
 	}
@@ -129,7 +177,75 @@ add_action(
 	'aw_raw_prune',
 	function () {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE received_at < %s', kits_raw_table(), gmdate( 'Y-m-d H:i:s', time() - KITS_RAW_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		if ( ! kits_raw_capture_on() || KITS_RAW_DB !== get_option( 'aw_form_raw_db' ) ) {
+			return;
+		}
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE received_at < %s', kits_raw_table(), gmdate( 'Y-m-d H:i:s', time() - kits_raw_days() * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+);
+
+// Kits -> Settings -> Form copies: the switch, the retention, and "Delete stored copies".
+add_action(
+	'init',
+	function () {
+		register_setting( 'kits_form_raw', 'kits_form_raw_capture', array( 'type' => 'string', 'default' => '0', 'sanitize_callback' => fn( $v ) => '1' === (string) $v ? '1' : '0', 'show_in_rest' => false ) );
+		register_setting( 'kits_form_raw', 'kits_form_raw_days', array( 'type' => 'integer', 'default' => KITS_RAW_DAYS, 'sanitize_callback' => fn( $v ) => max( 1, min( 365, (int) $v ) ), 'show_in_rest' => false ) );
+	}
+);
+add_filter(
+	'kits_settings_sections',
+	function ( $sections ) {
+		$sections              = (array) $sections;
+		$sections['form-copy'] = array(
+			'title'  => __( 'Form copies', 'kits-core' ),
+			'render' => 'kits_raw_settings_form',
+			'cap'    => 'manage_options',
+			'order'  => 80,
+		);
+		return $sections;
+	}
+);
+
+/** Kits -> Settings -> Form copies. */
+function kits_raw_settings_form(): void {
+	echo '<p class="description">' . esc_html__( 'Off by default. When on, each Fluent Forms send is copied into the table wp_aw_form_raw the moment it arrives, before any check: the time, the form, the e-mail address and every submitted field except those whose name contains pass, card, cvv, ssn or token. It is a fallback if an entry fails to save. It is deleted after the retention days.', 'kits-core' ) . '</p>';
+	echo '<form method="post" action="options.php">';
+	echo '<input type="hidden" name="option_page" value="kits_form_raw"><input type="hidden" name="action" value="update">';
+	wp_nonce_field( 'kits_form_raw-options', '_wpnonce', false );
+	echo '<input type="hidden" name="_wp_http_referer" value="' . esc_attr( wp_make_link_relative( admin_url( 'admin.php?page=kits-settings&kits_section=form-copy' ) ) ) . '">';
+	echo '<p><label><input type="checkbox" name="kits_form_raw_capture" value="1"' . checked( kits_raw_capture_on(), true, false ) . '> ' . esc_html__( 'Copy form sends into the database', 'kits-core' ) . '</label></p>';
+	echo '<p><label>' . esc_html__( 'Keep copies for', 'kits-core' ) . ' <input type="number" min="1" max="365" name="kits_form_raw_days" value="' . esc_attr( (string) kits_raw_days() ) . '" class="small-text"> ' . esc_html__( 'days', 'kits-core' ) . '</label></p>';
+	submit_button( __( 'Save form copy settings', 'kits-core' ) );
+	echo '</form>';
+	echo '<h3>' . esc_html__( 'Stored copies', 'kits-core' ) . '</h3>';
+	/* translators: %d: number of stored copies */
+	echo '<p>' . esc_html( sprintf( __( '%d stored. Turning the copy off keeps them until you delete them here.', 'kits-core' ), kits_raw_count() ) ) . '</p>';
+	$confirm = esc_js( __( 'Delete every stored copy? This cannot be undone.', 'kits-core' ) );
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" onsubmit="return confirm(\'' . $confirm . '\');">'; // phpcs:ignore WordPress.Security.EscapeOutput -- $confirm is esc_js()
+	echo '<input type="hidden" name="action" value="kits_raw_delete">';
+	wp_nonce_field( 'kits_raw_delete', 'kits_raw_delete_nonce' );
+	submit_button( __( 'Delete stored copies', 'kits-core' ), 'delete', 'submit', false );
+	echo '</form>';
+}
+
+/** Deletes every stored copy (the table is emptied, not dropped). */
+function kits_raw_delete_all(): void {
+	global $wpdb;
+	if ( KITS_RAW_DB === get_option( 'aw_form_raw_db' ) ) {
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', kits_raw_table() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	}
+}
+
+add_action(
+	'admin_post_kits_raw_delete',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'kits-core' ), 403 );
+		}
+		check_admin_referer( 'kits_raw_delete', 'kits_raw_delete_nonce' );
+		kits_raw_delete_all();
+		wp_safe_redirect( add_query_arg( array( 'page' => 'kits-settings', 'kits_section' => 'form-copy', 'kits_deleted' => '1' ), admin_url( 'admin.php' ) ) );
+		exit;
 	}
 );
 

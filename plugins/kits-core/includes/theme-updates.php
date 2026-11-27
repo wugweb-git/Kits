@@ -47,7 +47,10 @@ function kits_update_release() {
 		return $cached['version'] ? $cached : false;
 	}
 	$release = array( 'version' => '' );
-	$res     = wp_remote_get( kits_update_url(), array( 'timeout' => 10 ) );
+	$res     = wp_remote_get( kits_update_url(), array(
+		'timeout'    => 10,
+		'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address
+	) );
 	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
 		$json = json_decode( (string) wp_remote_retrieve_body( $res ), true );
 		if ( is_array( $json ) && ! empty( $json['version'] ) && preg_match( '/^\d+(\.\d+)*$/', (string) $json['version'] ) ) {

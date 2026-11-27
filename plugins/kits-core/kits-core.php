@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.3.2
+ * Version: 1.3.3
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.3.2' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.3.3' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
@@ -157,6 +157,9 @@ register_deactivation_hook(
 		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
 		wp_unschedule_hook( 'aw_thumb_rebuild' ); // a queued thumbnail map rebuild (thumbs.php)
 		wp_unschedule_hook( 'kits_checkin_weekly' ); // the optional site check-in (includes/site-checkin.php)
+		foreach ( array( 'aw_daily', 'aw_error_count_daily', 'aw_daily_backup', 'aw_raw_prune' ) as $kits_hook ) {
+			wp_unschedule_hook( $kits_hook ); // booked again on the next request after it is switched back on, where its switch is on
+		}
 		// While it is off the rules may be rebuilt without the preset types and consent items may be published:
 		// rebuild the rules and recheck consent when it is back on (includes/presets.php).
 		delete_option( 'kits_presets_rewrite' );

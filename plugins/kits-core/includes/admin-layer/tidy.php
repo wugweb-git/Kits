@@ -18,6 +18,7 @@
  * - SCF (Secure Custom Fields' field-group editor: set up once; the fields themselves stay on every edit screen).
  * - Admin bar: Rank Math SEO and UpdraftPlus shortcuts.
  *
+ * Off by default: it runs only when the option kits_tidy_menus is '1' or the filter kits_tidy_menus returns true.
  * The lists are filterable: kits_admin_hide (menu label => submenu labels), kits_admin_hide_top, kits_admin_bar_hide.
  *
  * @package kits-core
@@ -25,6 +26,14 @@
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/**
+ * Whether the tidy runs. Off by default (a general-purpose plugin leaves other plugins' menus alone): the option
+ * kits_tidy_menus is '1', or the filter kits_tidy_menus returns true.
+ */
+function kits_tidy_menus_on(): bool {
+	return (bool) apply_filters( 'kits_tidy_menus', '1' === (string) get_option( 'kits_tidy_menus', '0' ) );
 }
 
 /** Menu label => submenu labels to hide (a label matches when the item's text starts with it). */
@@ -70,6 +79,9 @@ function kits_admin_label_in( $label, $list ) {
 add_action(
 	'admin_menu',
 	function () {
+		if ( ! kits_tidy_menus_on() ) {
+			return;
+		}
 		global $menu, $submenu;
 		$hide_top = (array) apply_filters( 'kits_admin_hide_top', KITS_ADMIN_HIDE_TOP );
 		$hide_sub = (array) apply_filters( 'kits_admin_hide', KITS_ADMIN_HIDE );
@@ -111,6 +123,9 @@ add_action(
 add_action(
 	'admin_bar_menu',
 	function ( $bar ) {
+		if ( ! kits_tidy_menus_on() ) {
+			return;
+		}
 		$hide = (array) apply_filters( 'kits_admin_bar_hide', KITS_ADMIN_BAR_HIDE );
 		foreach ( (array) $bar->get_nodes() as $node ) {
 			if ( empty( $node->parent ) && kits_admin_label_in( kits_admin_label( $node->title ), $hide ) ) {

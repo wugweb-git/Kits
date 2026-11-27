@@ -304,6 +304,9 @@ function kits_brand_sanitize_tokens( array $input ): array {
 		}
 
 		if ( 'color' === $def['type'] ) {
+			if ( preg_match( '/[{};<>]/', $raw ) ) {
+				continue; // never a colour: it could close a CSS rule or open a tag
+			}
 			// Validate 3, 6 or 8-digit hex, or rgb/rgba/hsl.
 			if ( preg_match( '/^#([a-f0-9]{3}|[a-f0-9]{6}|[a-f0-9]{8})$/i', $raw ) ||
 				preg_match( '/^(rgb|hsl)a?\([^\)]+\)$/i', $raw ) ) {

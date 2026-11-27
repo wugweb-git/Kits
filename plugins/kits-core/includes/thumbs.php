@@ -147,7 +147,9 @@ add_action(
 			'/thumb-dupes',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => '__return_true', // the deploy gate reads it without logging in (tools/ci/thumb_check.py)
+				'permission_callback' => function () { // manage_options, or public when kits_public_gate_routes is on (the deploy gate, tools/ci/thumb_check.py, reads it without logging in)
+					return function_exists( 'kits_gate_route_permission' ) ? kits_gate_route_permission() : current_user_can( 'manage_options' );
+				},
 				'callback'            => function () {
 					// The full scan takes about a second, so the public count is kept 5 minutes (plugin audit 6).
 					$n = get_transient( 'aw_thumb_dupes_n' );

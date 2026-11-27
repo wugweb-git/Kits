@@ -1,7 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+// No ABSPATH guard: this is a command-line runner that defines ABSPATH itself.
 /**
  * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the ops pieces moved from Animal Writes Core
  * on 18 Nov 2026. The error pages (includes/error-pages.php) install a missing drop-in, update ours, leave a current

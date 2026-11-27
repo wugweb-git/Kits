@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,7 +28,7 @@ The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified
 
 == Uninstall ==
 
-By default, deleting the plugin deletes nothing — theme options, form settings and saved keys all stay (the publisher records and keyword tables are SourceWeb's and InsightWeb's since 18 Nov 2026), so reinstalling finds everything as it was. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients, after first writing a backup to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails). Shared data and anything belonging to another plugin are never touched. Items of the content types are posts: they are never deleted, also when a type is switched off.
+By default, deleting the plugin deletes nothing — theme options, form settings and saved keys all stay (the publisher records and keyword tables are SourceWeb's and InsightWeb's since 18 Nov 2026), so reinstalling finds everything as it was. Scheduled events (aw_daily, aw_error_count_daily, aw_daily_backup, aw_raw_prune, kits_checkin_weekly) are always unscheduled. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients (including kits_active_style_variation, kits_update_channel, kits_global_styles_backup and the kits_registry transient) and drop the optional form copy table, after first writing a backup of the options to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails; the form copy table holds submitted personal data and is dropped without being written to the backup). Shared data and anything belonging to another plugin are never touched. Items of the content types are posts: they are never deleted, also when a type is switched off.
 
 == External services ==
 
@@ -38,11 +38,25 @@ Each of these loads only when you turn it on; none runs by default.
 * Microsoft Clarity — loaded only when a Clarity project is configured, under the same consent gate. Terms: https://www.microsoft.com/en-us/legal/terms-of-use — Privacy: https://privacy.microsoft.com/privacystatement
 * Update check (direct build only) — WordPress asks the Wugweb registry (https://wugweb-git.github.io/Kits/registry/index.json, GitHub Pages) for newer versions of the Wugweb plugins and theme, at most every 12 hours; no site data is sent. A new version downloads from the project's GitHub releases and is checked against the registry's SHA-256 before it installs. Turn it off with `define( 'KITS_NO_REGISTRY_UPDATES', true );`. Pre-releases are offered only when the channel is set to pre-release. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service — Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
-* Site check-in (optional, off by default) — when you switch it on in Kits → Tools and give an https address, this site sends a short message once a week to that address: the site address, the WordPress and PHP versions, the update channel, and the name and version of each Wugweb plugin and the Kits theme that is installed. No user, email address or content is sent. The receiver is whatever address you enter; nothing is sent while the address is empty or the switch is off.
+* Site check-in (optional, off by default) — when you switch it on in Kits → Tools and give an https address, this site sends a short message once a week to that address: the site address, the WordPress and PHP versions, the update channel, and the name and version of each Wugweb plugin and the Kits theme that is installed. No user, email address or content is sent. The receiver is whatever address you enter; nothing is sent by itself while the switch is off. "Send once now" in Kits → Tools sends one message with the switch off, but only when an address is saved.
+
+== Data stored ==
+
+* Form copy (optional, off by default; Kits &rarr; Settings &rarr; Form copies). When you switch it on, each Fluent Forms submission is copied into the table wp_aw_form_raw the moment it arrives, before any check: the time, the form ID, whether it was refused, saved or a repeat, the e-mail address, and every submitted field except those whose name contains pass, card, cvv, ssn or token. Copies are deleted after the retention days (default 30; 1 to 365). Switching it off keeps copies already stored until you press "Delete stored copies" (needs the manage_options capability). Deleting the plugin with the Uninstall option ticked drops the table. Sites that had this table from an earlier version keep it, but nothing new is copied until you switch it on.
+* Global Styles backup: the setup wizard stores one previous copy of your Styles in the option kits_global_styles_backup before it replaces them, so the Restore button can put them back.
+* Admin tidy, the daily error-count e-mail and the aw_daily event are off unless switched on (options or filters kits_tidy_menus, kits_error_count_daily, kits_daily_event). The REST routes aw/v1/deploy-status and aw/v1/thumb-dupes need the manage_options capability unless kits_public_gate_routes is turned on. A site that already had the aw_error_count_daily schedule keeps all of these on (one-time carry-over).
+* Update checks send the User-Agent "Kits-registry/1", with no site address.
 
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
+
+= 1.3.3 =
+* Form copy is off by default and has its own screen (Kits → Settings → Form copies): retention days (default 30), "Delete stored copies", and fields named pass, card, cvv, ssn or token are never stored. What is stored is now listed in this readme.
+* Setup wizard keeps one backup of your Styles before replacing them and has a Restore button; "Kits Default" no longer clears Styles unless you confirm.
+* Admin tidy of other plugins' menus, the daily error-count e-mail and the aw_daily event are off unless switched on; the deploy-status and thumb-dupes routes need an administrator unless made public. A site already running the daily error count keeps them on.
+* Update checks send a generic User-Agent. Deactivating unschedules the daily events; uninstalling also removes the form copy table, the style-variation, update-channel and registry settings. Brand colours containing { } ; < > are refused. The readme now says "Send once now" sends with the switch off when an address is saved.
+* The five test files content-bindings, ops, presets, site-ops and taxonomy-rename now actually run from the command line.
 
 = 1.3.2 =
 * New page Kits → More from Wugweb lists the other Wugweb plugins and whether each is installed; it is the only place they promote each other. "Check again" on Dashboard → Updates now clears the stored update list too, so a new release shows at once. The "Upgrade to Premium" link is gone from the Plugins screen. The setup wizard uses the Kits look.

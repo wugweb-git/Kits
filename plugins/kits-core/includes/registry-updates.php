@@ -56,7 +56,10 @@ function kits_registry_products(): array {
 		return $cached;
 	}
 	$products = array();
-	$res      = wp_remote_get( kits_registry_url(), array( 'timeout' => 10 ) );
+	$res      = wp_remote_get( kits_registry_url(), array(
+		'timeout'    => 10,
+		'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address
+	) );
 	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
 		$json = json_decode( (string) wp_remote_retrieve_body( $res ), true );
 		if ( is_array( $json ) && isset( $json['products'] ) && is_array( $json['products'] ) ) {

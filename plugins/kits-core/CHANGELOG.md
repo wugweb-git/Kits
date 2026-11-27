@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.3.3
+
+- Form copy (wp_aw_form_raw) is off by default, with a Kits → Settings → Form copies screen: retention (default 30 days), "Delete stored copies" (nonce, manage_options), and fields named pass, card, cvv, ssn or token are never stored. readme.txt lists what is stored. Sites with the table keep the rows but copy nothing new until it is switched on.
+- Setup wizard: one-level backup of Styles (option kits_global_styles_backup) with a Restore button; "Kits Default" needs a confirmation before it clears Styles.
+- Off unless enabled (option or filter): admin tidy (kits_tidy_menus), daily error-count e-mail (kits_error_count_daily), aw_daily (kits_daily_event). aw/v1/deploy-status and aw/v1/thumb-dupes need manage_options unless kits_public_gate_routes is on. One-time carry-over turns all four on where aw_error_count_daily is already booked.
+- Registry and theme-update requests send the User-Agent Kits-registry/1. Deactivation unschedules aw_daily, aw_error_count_daily, aw_daily_backup, aw_raw_prune; uninstall also removes kits_active_style_variation, kits_update_channel, the kits_registry transient, the form copy table and kits_checkin_weekly. Brand colour values containing { } ; < > are rejected.
+- Tests: content-bindings, ops, presets, site-ops and taxonomy-rename ran nothing before (an ABSPATH guard exited 0); they now run, and print a check count.
+
 ## 1.3.2
 
 - New page Kits → More from Wugweb lists the other Wugweb plugins and whether each is installed; it is the only place they promote each other. "Check again" on Dashboard → Updates now clears the stored update list too, so a new release shows at once. The "Upgrade to Premium" link is gone from the Plugins screen. The setup wizard uses the Kits look.

@@ -101,8 +101,14 @@ add_action(
 		if ( isset( $_POST['kits_style_variation'] ) ) {
 			$variation = sanitize_key( wp_unslash( $_POST['kits_style_variation'] ) );
 			if ( in_array( $variation, array( 'default', 'slate', 'forest', 'dark' ), true ) ) {
-				update_option( 'kits_active_style_variation', $variation );
-				kits_onboarding_apply_style_variation( $variation );
+				$confirmed = ! empty( $_POST['kits_confirm_default'] );
+				if ( 'default' === $variation && ! $confirmed ) {
+					$variation = ''; // Kits Default would wipe the saved styles: only with the confirmation box ticked
+				}
+				if ( '' !== $variation ) {
+					update_option( 'kits_active_style_variation', $variation );
+					kits_onboarding_apply_style_variation( $variation );
+				}
 			}
 		}
 
@@ -201,6 +207,7 @@ function kits_onboarding_page() {
 	echo '<p class="kits-action-row__desc">' . esc_html__( 'Choose one of the curated theme.json v3 style variations. Fully switchable at any time.', 'kits-core' ) . '</p>';
 	echo '</div>';
 
+	echo '<p class="description">' . esc_html__( 'Choosing a variation replaces your saved Global Styles. The previous styles are kept once, and can be restored below.', 'kits-core' ) . '</p>';
 	echo '<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;width:100%;">';
 	foreach ( $variations as $slug => $var ) {
 		$checked = ( $slug === $active_v ) ? 'checked' : '';
@@ -219,6 +226,8 @@ function kits_onboarding_page() {
 	echo '</div>';
 	echo '</div>';
 
+	echo '<label style="display:block;margin-top:-4px;"><input type="checkbox" name="kits_confirm_default" value="1"> ' . esc_html__( 'Confirm: Kits Default clears all saved Global Styles changes.', 'kits-core' ) . '</label>';
+
 	// Step 3: Starter Block Patterns & Full Site Editor
 	echo '<div class="kits-action-row" style="align-items:center;justify-content:space-between;">';
 	echo '<div class="kits-action-row__main">';
@@ -234,6 +243,15 @@ function kits_onboarding_page() {
 	echo '</div>';
 
 	echo '</form>';
+
+	if ( kits_onboarding_has_backup() ) {
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" style="margin-top:12px;">';
+		echo '<input type="hidden" name="action" value="kits_restore_global_styles">';
+		wp_nonce_field( 'kits_restore_global_styles', 'kits_restore_nonce' );
+		echo '<button type="submit" class="button">' . esc_html__( 'Restore previous Global Styles', 'kits-core' ) . '</button> ';
+		echo '<span class="description">' . esc_html__( 'Puts back the styles as they were before the last change here.', 'kits-core' ) . '</span>';
+		echo '</form>';
+	}
 	echo '</div>';
 
 	// Media upload JS script
@@ -307,6 +325,12 @@ function kits_onboarding_apply_style_variation( string $slug ): bool {
 		}
 	}
 
+	// One-level backup of what is about to be overwritten.
+	$current = get_post( (int) $post['ID'] );
+	if ( $current && '' !== (string) $current->post_content ) {
+		update_option( 'kits_global_styles_backup', (string) $current->post_content, false );
+	}
+
 	$res = wp_update_post(
 		array(
 			'ID'           => (int) $post['ID'],
@@ -316,3 +340,45 @@ function kits_onboarding_apply_style_variation( string $slug ): bool {
 	WP_Theme_JSON_Resolver::clean_cached_data();
 	return ! is_wp_error( $res ) && $res > 0;
 }
+
+/** Whether a Global Styles backup is stored. */
+function kits_onboarding_has_backup(): bool {
+	return '' !== (string) get_option( 'kits_global_styles_backup', '' );
+}
+
+/**
+ * Puts the backed-up Global Styles back (one level: the backup is replaced by what was just overwritten).
+ *
+ * @return bool Whether Global Styles was restored.
+ */
+function kits_onboarding_restore_global_styles(): bool {
+	$backup = (string) get_option( 'kits_global_styles_backup', '' );
+	if ( '' === $backup || ! class_exists( 'WP_Theme_JSON_Resolver' ) || ! function_exists( 'wp_get_theme' ) ) {
+		return false;
+	}
+	$post = WP_Theme_JSON_Resolver::get_user_data_from_wp_global_styles( wp_get_theme(), true );
+	if ( empty( $post['ID'] ) ) {
+		return false;
+	}
+	$current = get_post( (int) $post['ID'] );
+	$res     = wp_update_post( array( 'ID' => (int) $post['ID'], 'post_content' => wp_slash( $backup ) ) );
+	WP_Theme_JSON_Resolver::clean_cached_data();
+	if ( is_wp_error( $res ) || $res < 1 ) {
+		return false;
+	}
+	update_option( 'kits_global_styles_backup', $current ? (string) $current->post_content : '', false );
+	return true;
+}
+
+add_action(
+	'admin_post_kits_restore_global_styles',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'Permission denied.', 'kits-core' ), 403 );
+		}
+		check_admin_referer( 'kits_restore_global_styles', 'kits_restore_nonce' );
+		kits_onboarding_restore_global_styles();
+		wp_safe_redirect( add_query_arg( array( 'page' => 'kits-onboarding', 'restored' => '1' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+);

@@ -5,7 +5,8 @@
  * Each deploy replaces the deployed folder, so for a few seconds the plugins are missing. A FluentCRM campaign batch
  * that starts in that window sends without mailweb's mailbox and fails. The Deploy check workflow and tools/aw-ship.sh
  * read GET /wp-json/aw/v1/deploy-status (tools/ci/mail_sending_check.py) and do not deploy while it says sending.
- * Public, like /aw/v1/thumb-dupes: it returns only a yes or no, never campaign names, ids or counts.
+ * Since 1.3.3 it needs manage_options unless the option or filter kits_public_gate_routes is on (as does /aw/v1/thumb-dupes);
+ * it returns only a yes or no, never campaign names, ids or counts.
  *
  * @package kits-core
  */
@@ -26,6 +27,19 @@ function kits_mail_sending() {
 	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM %i c JOIN %i e ON e.campaign_id = c.id WHERE c.status IN ('working','scheduled') AND e.status IN ('pending','scheduled','processing') LIMIT 1", $c, $e ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
+/**
+ * Whether the deploy gate's routes (aw/v1/deploy-status, aw/v1/thumb-dupes) answer without a login. Off by default: they
+ * then need manage_options. The option kits_public_gate_routes is '1', or the filter kits_public_gate_routes returns true.
+ */
+function kits_public_gate_routes_on(): bool {
+	return (bool) apply_filters( 'kits_public_gate_routes', '1' === (string) get_option( 'kits_public_gate_routes', '0' ) );
+}
+
+/** permission_callback of the deploy gate's routes. */
+function kits_gate_route_permission(): bool {
+	return kits_public_gate_routes_on() || current_user_can( 'manage_options' );
+}
+
 add_action(
 	'rest_api_init',
 	function () {
@@ -34,7 +48,7 @@ add_action(
 			'/deploy-status',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => '__return_true', // the deploy gate reads it without logging in
+				'permission_callback' => 'kits_gate_route_permission', // manage_options, or public when kits_public_gate_routes is on (the deploy gate reads it without logging in)
 				'callback'            => function () {
 					$r = new WP_REST_Response( array( 'sending' => kits_mail_sending() ), 200 );
 					$r->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );

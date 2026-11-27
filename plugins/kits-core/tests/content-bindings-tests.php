@@ -1,7 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+// No ABSPATH guard: this is a command-line runner that defines ABSPATH itself.
 /**
  * Tests that need no WordPress (owner rule: no local WordPress or MySQL): the icon, the date component and the Block
  * Bindings source moved to Kits Core (kits_icon, kits_date, kits/post-field) print exactly what the site printed before
@@ -120,24 +118,43 @@ $root = dirname( __DIR__, 2 );
 require $root . '/kits-core/includes/primitives.php';
 require $root . '/kits-core/includes/bindings.php';
 require $root . '/kits-core/includes/taxonomy-rename.php'; // KITS_CAMPAIGN_LINK / KITS_MEDIA_GROUP, which systems.php reads (Kits Core loads it first)
-$site = dirname( $root ) . '/themes/kits-by-wugweb/assets/site/'; // the site layer: the content files moved here from animal-writes-core on 19 Nov 2026
-require $site . 'content/systems.php';
+$site       = dirname( $root ) . '/themes/kits-by-wugweb/assets/site/'; // the site layer: the content files moved here from animal-writes-core on 19 Nov 2026
+$site_layer = is_file( $site . 'content/systems.php' ) && is_file( $site . 'content/bindings.php' ) && is_file( $site . 'content/scf.php' );
 function kits_site_path( $f ) {
 	return dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $f, '/' );
 }
-require $site . 'content/bindings.php';
-require $root . '/kits-core/includes/scf.php';
-require $site . 'content/scf.php';
+if ( $site_layer ) {
+	require $site . 'content/systems.php';
+	require $site . 'content/bindings.php';
+	require $root . '/kits-core/includes/scf.php';
+	require $site . 'content/scf.php';
+} else {
+	echo "SKIP: the Animal Writes site layer (themes/kits-by-wugweb/assets/site/content/) is not in this checkout (deleted in 238fe14); the aw_i(), aw_date(), animal-writes/field and SCF checks are skipped. The Kits Core checks below still run.\n";
+	// Core-only stand-ins for the keys the site layer used to register, so the Kits Core binding source is still exercised.
+	add_filter(
+		'kits_post_fields',
+		function ( $f ) {
+			$meta = fn( $k ) => fn( $id ) => (string) get_post_meta( $id, $k );
+			$f['source_url']      = array( 'callback' => $meta( 'aw_source_url' ), 'type' => 'url' );
+			$f['source_name']     = array( 'callback' => $meta( 'aw_source_name' ), 'type' => 'text' );
+			$f['deadline_label']  = array( 'callback' => $meta( 'aw_deadline' ), 'type' => 'text' );
+			return $f;
+		}
+	);
+}
 do_action( 'init' );
 
 $GLOBALS['t_fail'] = 0;
+$GLOBALS['t_count'] = 0;
 function t_check( $ok, $what ) {
+	$GLOBALS['t_count'] = ( $GLOBALS['t_count'] ?? 0 ) + 1;
 	echo ( $ok ? 'ok   ' : 'FAIL ' ) . $what . "\n";
 	if ( ! $ok ) {
-		$GLOBALS['t_fail'] = 1;
+		$GLOBALS['t_fail'] = ( $GLOBALS['t_fail'] ?? 0 ) + 1;
 	}
 }
 
+if ( $site_layer ) {
 // Icon and date: the markup aw_i() and aw_date() printed before the move (systems.php at 73bbc87c).
 t_check( '<span class="kit-ico kit-ico--calendar" aria-hidden="true"></span>' === aw_i( 'calendar' ), 'aw_i(): same icon span' );
 t_check( '<span class="kit-ico kit-ico--type-ngo kit-ico--type" aria-hidden="true"></span>' === aw_i( 'type-ngo', 'kit-ico--type' ), 'aw_i(): extra class kept' );
@@ -146,10 +163,15 @@ t_check( $old_date === aw_date( '2026-11-18 12:00:00' ), 'aw_date(): same date c
 t_check( $old_date === aw_date( '20261118' ), 'aw_date(): Ymd from the date picker' );
 t_check( false !== strpos( aw_date( '2026-11-18 12:00:00', 'Y' ), '>2026</time>' ), 'aw_date(): own format' );
 t_check( '' === aw_date( 'not a date' ) && '' === aw_date( '' ), 'aw_date(): unreadable date prints nothing' );
+}
 t_check( '<span class="kit-date"><span class="kit-ico kit-ico--calendar" aria-hidden="true"></span><time datetime="2026-11-18">18 Nov 2026</time></span>' === kits_date( '2026-11-18 12:00:00' ), 'kits_date(): site format, no tenant class' );
 
 // The sources.
-t_check( isset( $GLOBALS['t_sources']['kits/post-field'], $GLOBALS['t_sources']['animal-writes/field'] ), 'both binding sources registered' );
+$sources = $site_layer ? array( 'kits/post-field', 'animal-writes/field' ) : array( 'kits/post-field' );
+t_check( isset( $GLOBALS['t_sources']['kits/post-field'] ), 'kits/post-field binding source registered' );
+if ( $site_layer ) {
+	t_check( isset( $GLOBALS['t_sources']['animal-writes/field'] ), 'animal-writes/field binding source registered' );
+}
 $GLOBALS['t_meta'][5] = array(
 	'aw_source_url'  => 'https://example.test/a?b=1"x',
 	'aw_source_name' => 'The <Times>',
@@ -158,11 +180,15 @@ $GLOBALS['t_meta'][5] = array(
 	'aw_website'     => '',
 );
 $block = new WP_Block( array( 'postId' => 5 ) );
-foreach ( array( 'kits/post-field', 'animal-writes/field' ) as $src ) {
+foreach ( $sources as $src ) {
 	$get = $GLOBALS['t_sources'][ $src ]['get_value_callback'];
 	t_check( 'https://example.test/a?b=1x' === $get( array( 'key' => 'source_url' ), $block ), "$src: url key escaped as a URL" );
-	t_check( 'The &lt;Times&gt;, 1 Nov 2026' === $get( array( 'key' => 'source_meta' ), $block ), "$src: text key escaped as text" );
-	t_check( 'Read at The &lt;Times&gt;' === $get( array( 'key' => 'source_link_label' ), $block ), "$src: label key" );
+	if ( $site_layer ) {
+		t_check( 'The &lt;Times&gt;, 1 Nov 2026' === $get( array( 'key' => 'source_meta' ), $block ), "$src: text key escaped as text" );
+		t_check( 'Read at The &lt;Times&gt;' === $get( array( 'key' => 'source_link_label' ), $block ), "$src: label key" );
+	} else {
+		t_check( 'The &lt;Times&gt;' === $get( array( 'key' => 'source_name' ), $block ), "$src: text key escaped as text" );
+	}
 	t_check( '' === $get( array( 'key' => 'no_such_key' ), $block ) && '' === $get( array(), $block ), "$src: unknown key is empty" );
 }
 
@@ -174,13 +200,14 @@ $bound  = fn( $src, $key, $name = 'core/paragraph' ) => array(
 	'blockName' => $name,
 	'attrs'     => array( 'metadata' => array( 'bindings' => array( 'content' => array( 'source' => $src, 'args' => array( 'key' => $key ) ) ) ) ),
 );
-foreach ( array( 'kits/post-field', 'animal-writes/field' ) as $src ) {
+foreach ( $sources as $src ) {
 	t_check( '' === $render( '<p>x</p>', $bound( $src, 'deadline_label' ), $block ), "$src: block bound to an empty value is left out" );
-	t_check( '<p>x</p>' === $render( '<p>x</p>', $bound( $src, 'source_meta' ), $block ), "$src: filled block kept" );
+	t_check( '<p>x</p>' === $render( '<p>x</p>', $bound( $src, $site_layer ? 'source_meta' : 'source_name' ), $block ), "$src: filled block kept" );
 }
 t_check( '<p>x</p>' === $render( '<p>x</p>', $bound( 'core/post-meta', 'anything' ), $block ), 'other sources untouched' );
 t_check( '<p>x</p>' === $render( '<p>x</p>', array( 'blockName' => 'core/paragraph', 'attrs' => array() ), $block ), 'unbound block untouched' );
 
+if ( $site_layer ) {
 // Directory contact buttons: greyed when empty, data-act when filled (bindings.php before the move).
 $GLOBALS['t_types'][7] = 'aw_listing';
 $GLOBALS['t_meta'][7]  = array( 'aw_email' => 'a@example.test', 'aw_website' => '' );
@@ -217,5 +244,7 @@ t_check( kits_site_path( 'acf-json' ) === apply_filters( 'acf/settings/save_json
 t_check( '' === apply_filters( 'acf/settings/save_json/key=group_aw_listing', '' ), 'SCF: other plugins\' groups are not saved here' );
 t_check( array_merge( AW_SCF_GROUPS, array( 'group_aw_listing', 'group_other' ) ) === aw_scf_group_keys(), 'SCF: group keys in the same order, plugins after ours, no duplicates' );
 t_check( false === aw_scf_active() && false === kits_scf_active(), 'SCF: not active without SCF' );
+}
 
-exit( $GLOBALS['t_fail'] );
+echo $GLOBALS['t_count'] . " checks, " . $GLOBALS['t_fail'] . " failed\n";
+exit( $GLOBALS['t_fail'] ? 1 : 0 );

@@ -72,6 +72,18 @@ brand_t( 'rgba(255, 255, 255, 0.95)' === $clean['bg'], 'Valid rgba color accepte
 brand_t( '8px background: red' === $clean['radius_control'], 'Semicolon stripped from radius string' );
 brand_t( 'scriptalert(1)/scriptInter, sans-serif' === $clean['font_display'], 'Tags and dangerous chars stripped from font string' );
 
+$bad_colors = kits_brand_sanitize_tokens(
+	array(
+		'accent'     => 'rgb(0,0,0); } body { display:none',
+		'bg'         => 'rgb(0,0,0){x}',
+		'ink'        => 'hsl(1,2%,3%)<b>',
+		'text'       => '#fff;',
+		'accent_ink' => '#111<',
+	)
+);
+brand_t( array() === $bad_colors, 'Colours containing { } ; < > are rejected' );
+brand_t( 'rgb(10, 20, 30)' === kits_brand_sanitize_tokens( array( 'accent' => 'rgb(10, 20, 30)' ) )['accent'], 'A plain rgb colour is still accepted' );
+
 // 4. CSS Compilation
 // When tokens match defaults, nothing emitted
 $css_empty = kits_brand_compile_css( array( 'accent' => '#FFBE1A' ) );
