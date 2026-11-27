@@ -98,6 +98,7 @@ function sourceweb_sourcing_keyword_stats( $days = 30 ) {
 	}
 	// Items from the workers (they carry a source URL). Arrival: aw_ingested_at; before 24 Oct 2026 post_date, which is
 	// the arrival for items still waiting and the source's date (a day or two earlier) for published ones.
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- the type list is built by *_sql_in_types()/*_sql_list(), which esc_sql() every slug
 	$items = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$wpdb->prepare(
 			"SELECT p.ID, p.post_type, p.post_status, p.post_title, p.post_excerpt, f.meta_value feed, i.meta_value ingested
@@ -111,6 +112,7 @@ function sourceweb_sourcing_keyword_stats( $days = 30 ) {
 			wp_date( 'Y-m-d H:i:s', $since )
 		)
 	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	foreach ( (array) $items as $it ) {
 		$side = sourceweb_is_type( $it->post_type, 'library' ) ? 'legal' : 'news';
 		$pub  = 'publish' === $it->post_status;

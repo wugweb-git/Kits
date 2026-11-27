@@ -296,7 +296,9 @@ function insightweb_si_rising_match( string $norm, string $term, bool $look_up_p
 	if ( '' === $page && $look_up_posts && mb_strlen( $term ) >= 4 ) {
 		// A title search (a scan of published posts' titles): only for a term seen for the first time.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- the type list is built by *_sql_in_types()/*_sql_list(), which esc_sql() every slug
 		$post = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ( " . insightweb_sql_list( insightweb_types_with( array( 'library', 'campaign', 'news' ), array( 'page', 'post' ) ) ) . " ) AND post_title LIKE %s ORDER BY " . insightweb_sql_in_types( 'post_type', insightweb_types( array( 'news' ) ) ) . ", post_date DESC LIMIT 1", '%' . $wpdb->esc_like( $term ) . '%' ) );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		if ( $post ) {
 			$page = insightweb_si_path( (string) get_permalink( (int) $post ) );
 		}

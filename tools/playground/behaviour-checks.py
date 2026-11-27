@@ -63,14 +63,13 @@ chk('robots.txt: no Content-Signal line by default', false === stripos($txt, 'Co
 chk('robots.txt: no news sitemap line on a site without News', false === stripos($txt, 'news-sitemap'), $txt);
 """,
     'kits-core': r"""
-chk('form copy: off on a new install', function_exists('kits_raw_capture_on') && false === kits_raw_capture_on());
-global $wpdb; $t = function_exists('kits_raw_table') ? kits_raw_table() : '';
-chk('no form copy table on a new install', $t && $wpdb->get_var("SHOW TABLES LIKE '" . esc_sql($t) . "'") !== $t);
-chk('no Animal Writes carry-over flag on a new site', empty(get_option('aw_form_raw_db')));
+chk('no form-copy (raw capture) code in Kits Core', !function_exists('kits_raw_capture_on') && !function_exists('kits_raw_table'));
+global $wpdb;
+chk('no Animal Writes form-copy table', $wpdb->get_var("SHOW TABLES LIKE '%aw_form_raw%'") === null);
+chk('no Animal Writes carry-over flag on a new site', empty(get_option('aw_form_raw_db')) && empty(get_option('kits_aw_carryover_done')));
+chk('no campaign letters or volunteer form code', !function_exists('kits_cl_optin_text') && !function_exists('kits_volunteer_errors'));
 $o = function_exists('kits_brand_sanitize_tokens') ? kits_brand_sanitize_tokens(array('primary' => '#123456; } body { display:none')) : array('x' => 1);
-chk('brand colour with CSS injection is rejected', empty($o['primary']) || '#123456' === $o['primary'] || false === strpos(json_encode($o), 'display'), json_encode($o));
-update_option('kits_form_raw_capture', '1'); do_action('init');
-chk('form copy: turning it on creates the table', $wpdb->get_var("SHOW TABLES LIKE '" . esc_sql($t) . "'") === $t);
+chk('brand colour with CSS injection is rejected', false === strpos(json_encode($o), 'display'), json_encode($o));
 """,
     'sourceweb': r"""
 $au = wp_insert_user(array('user_login' => 'au', 'user_pass' => wp_generate_password(), 'user_email' => 'au@example.test', 'role' => 'author'));

@@ -237,7 +237,9 @@ function insightweb_si_dry_report( string $day ): array {
 	);
 
 	// Listings: entities among the records.
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- the type list is built by *_sql_in_types()/*_sql_list(), which esc_sql() every slug
 	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE " . insightweb_sql_in_types( 'p.post_type', insightweb_types( array( 'listing' ) ) ) . " AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	foreach ( (array) $names as $name ) {
 		$n = insightweb_si_norm( insightweb_si_focus_parts( (string) $name )[0] );
 		if ( isset( $rec[ $n ] ) ) {
