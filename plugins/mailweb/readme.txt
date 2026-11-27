@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.3.5
+Stable tag: 3.3.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,6 +120,9 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.3.6 =
+* The 'Email sending is paused' notice now shows only on the Dashboard and the MailWeb screens. It used to show on every admin screen with no way to dismiss it.
 
 = 3.3.5 =
 * Corrects release notes that described work not yet built: the Status column in lists (3.3.0), email logging for real mail (only test emails are logged), the fallback SMTP connection (saved but not used to send), failure alert webhooks (the setting exists, nothing sends an alert), the per-user pause-notice dismissal (no button), and a resend control. The Failure Alert Webhook entry is removed from External services because MailWeb never calls it.

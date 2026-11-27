@@ -656,7 +656,7 @@ add_action(
 	}
 );
 
-/* ---------- When sending is paused: an admin notice (everywhere once a day; always on the Dashboard and Mail). No email is used to tell anyone. ---------- */
+/* ---------- When sending is paused: an admin notice on the Dashboard and the MailWeb screens only (the filter mailweb_pause_notice_always widens it). No email is used to tell anyone. ---------- */
 
 add_action(
 	'admin_notices',
@@ -668,8 +668,8 @@ add_action(
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 		$id     = $screen ? (string) $screen->id : '';
 		$always = in_array( $id, array( 'dashboard', 'toplevel_page_mailweb' ), true ) || str_ends_with( $id, '_page_mailweb-settings' ) || (bool) apply_filters( 'mailweb_pause_notice_always', false, $id );
-		if ( ! $always && function_exists( 'mailweb_is_pause_dismissed_for_user' ) && mailweb_is_pause_dismissed_for_user( $pause ) ) {
-			return;
+		if ( ! $always ) {
+			return; // there is no dismiss button, so the notice is not shown on every admin screen
 		}
 		wp_admin_notice(
 			'<strong>' . esc_html__( 'Email sending is paused.', 'mailweb' ) . '</strong> ' . esc_html(

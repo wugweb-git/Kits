@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.3.6
+
+- The 'Email sending is paused' notice now shows only on the Dashboard and the MailWeb screens. It used to show on every admin screen with no way to dismiss it.
+
 ## 3.3.5
 
 - Corrects release notes that described work not yet built: the Status column in lists (3.3.0), email logging for real mail (only test emails are logged), the fallback SMTP connection (saved but not used to send), failure alert webhooks (the setting exists, nothing sends an alert), the per-user pause-notice dismissal (no button), and a resend control. The Failure Alert Webhook entry is removed from External services because MailWeb never calls it.
