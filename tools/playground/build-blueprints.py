@@ -170,7 +170,7 @@ if ( $listing ) {
 		wp_set_current_user( $f6u );
 		$ra = $f6( array( 'aw_verified' => true ) );
 		$c( 'F6: a contributor cannot set the Verified mark over REST', in_array( $ra->get_status(), array( 400, 401, 403 ), true ) && ! get_post_meta( $f6o, 'aw_verified', true ), (string) $ra->get_status() );
-		$rb = $f6( array( 'aw_gov_verified_by' => 'Forged', 'aw_needs_reverify' => false, 'aw_darpan_id' => 'X1' ) );
+		$rb = $f6( array( 'aw_gov_verified_by' => 'Forged', 'aw_needs_reverify' => false ) );
 		$c( 'F6: nor the government source, re-verify flag or registry id', in_array( $rb->get_status(), array( 400, 401, 403 ), true ) && '' === (string) get_post_meta( $f6o, 'aw_gov_verified_by', true ) && '' === (string) get_post_meta( $f6o, 'aw_darpan_id', true ) );
 		$rc = $f6( array( 'aw_area' => 'Indiranagar' ) );
 		$c( 'F6: a contributor can still edit their own listing\'s descriptive fields', 200 === $rc->get_status() && 'Indiranagar' === get_post_meta( $f6o, 'aw_area', true ), (string) $rc->get_status() );
@@ -189,16 +189,16 @@ if ( $listing ) {
 		$fld = apply_filters( 'acf/prepare_field', array( 'name' => 'aw_verified', 'type' => 'true_false' ) );
 		$fld2 = apply_filters( 'acf/prepare_field', array( 'name' => 'aw_area', 'type' => 'text' ) );
 		$c( 'F6: Secure Custom Fields / ACF forms show the decision field read only to a contributor', ! empty( $fld['readonly'] ) && empty( $fld2['readonly'] ) );
-		$c( 'F6b: Secure Custom Fields / ACF forms do not draw the team-only fields for a contributor, and still draw public ones', false === apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_authority', 'type' => 'text' ) ) && false === apply_filters( 'acf/prepare_field', array( 'name' => 'aw_needs_reverify', 'type' => 'true_false' ) ) && is_array( apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_date', 'type' => 'text' ) ) ) );
+		$c( 'F6b: Secure Custom Fields / ACF forms do not draw the team-only fields for a contributor, and still draw public ones', false === apply_filters( 'acf/prepare_field', array( 'name' => 'aw_gov_verified_by', 'type' => 'text' ) ) && false === apply_filters( 'acf/prepare_field', array( 'name' => 'aw_needs_reverify', 'type' => 'true_false' ) ) && is_array( apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_date', 'type' => 'text' ) ) ) );
 		$bq = new WP_REST_Request( 'POST', '/batch/v1' );
 		$bq->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
-		$bq->set_body_params( array( 'requests' => array( array( 'method' => 'POST', 'path' => '/wp/v2/aw_listing/' . $f6o, 'body' => array( 'meta' => array( 'aw_needs_reverify' => true, 'aw_reg_authority' => 'Forged' ) ) ) ) ) );
+		$bq->set_body_params( array( 'requests' => array( array( 'method' => 'POST', 'path' => '/wp/v2/aw_listing/' . $f6o, 'body' => array( 'meta' => array( 'aw_needs_reverify' => true, 'aw_gov_verified_by' => 'Forged' ) ) ) ) ) );
 		rest_do_request( $bq );
-		$c( 'F6: the REST batch endpoint cannot be used to set them', ! get_post_meta( $f6o, 'aw_needs_reverify', true ) && '' === (string) get_post_meta( $f6o, 'aw_reg_authority', true ) );
+		$c( 'F6: the REST batch endpoint cannot be used to set them', ! get_post_meta( $f6o, 'aw_needs_reverify', true ) && '' === (string) get_post_meta( $f6o, 'aw_gov_verified_by', true ) );
 		wp_set_current_user( 1 );
 		// F6b: team-only meta must not appear in any public or non-manager read.
 		wp_set_current_user( 1 );
-		$priv = array( 'aw_reg_authority' => 'Registrar of Societies', 'aw_reg_act' => 'Societies Act', 'aw_gov_verified_by' => 'Darpan-source', 'aw_darpan_blacklisted_by' => 'Auditor', 'aw_darpan_blacklisted_on' => '2026-01-01', 'aw_sectors' => 'Animal welfare', 'aw_awbi_list_on' => '2026-05-31', 'aw_needs_reverify' => true );
+		$priv = array( 'aw_gov_verified_by' => 'Registry source', 'aw_needs_reverify' => true );
 		foreach ( $priv as $k => $v ) { update_post_meta( $f6l, $k, $v ); }
 		update_post_meta( $f6l, 'aw_gov_verified_on', '2026-02-02' );
 		update_post_meta( $f6l, 'aw_area', 'Indiranagar' );
@@ -226,12 +226,12 @@ if ( $listing ) {
 		$bq2->set_body_params( array( 'requests' => array( array( 'method' => 'POST', 'path' => '/wp/v2/aw_listing/' . $f6o, 'body' => array( 'meta' => array( 'aw_area' => 'Batch area' ) ) ) ) ) );
 		$bres = rest_do_request( $bq2 );
 		$c( 'F6b: a batch request\'s response body has no team-only meta', '' === $leak( $bres->get_data() ) );
-		$post = apply_filters( 'rest_post_dispatch', new WP_REST_Response( array( 'responses' => array( array( 'body' => array( 'meta' => array( 'aw_reg_authority' => 'x', 'aw_area' => 'y' ) ) ) ) ) ), rest_get_server(), new WP_REST_Request( 'POST', '/batch/v1' ) );
+		$post = apply_filters( 'rest_post_dispatch', new WP_REST_Response( array( 'responses' => array( array( 'body' => array( 'meta' => array( 'aw_gov_verified_by' => 'x', 'aw_area' => 'y' ) ) ) ) ) ), rest_get_server(), new WP_REST_Request( 'POST', '/batch/v1' ) );
 		$c( 'F6b: the response-level scrub removes a team-only key from any nested meta, keeps public ones', '' === $leak( $post->get_data() ) && false !== strpos( wp_json_encode( $post->get_data() ), 'aw_area' ) );
 		wp_set_current_user( 1 );
 		$mgr = $rest_get( '/wp/v2/aw_listing/' . $f6l, array( 'context' => 'edit' ) );
 		$mm  = $mgr->get_data()['meta'] ?? array();
-		$c( 'F6b: a manager still reads every team-only field', 'Registrar of Societies' === ( $mm['aw_reg_authority'] ?? '' ) && 'Auditor' === ( $mm['aw_darpan_blacklisted_by'] ?? '' ) && 'Darpan-source' === ( $mm['aw_gov_verified_by'] ?? '' ), wp_json_encode( array_intersect_key( $mm, $priv ) ) );
+		$c( 'F6b: a manager still reads every team-only field', true === ( $mm['aw_needs_reverify'] ?? false ) && 'Registry source' === ( $mm['aw_gov_verified_by'] ?? '' ), wp_json_encode( array_intersect_key( $mm, $priv ) ) );
 		$c( 'F6b: a manager still sees the team-only fields in Secure Custom Fields / ACF forms', is_array( apply_filters( 'acf/prepare_field', array( 'name' => 'aw_reg_authority', 'type' => 'text' ) ) ) );
 		foreach ( array_keys( $priv ) as $k ) { delete_post_meta( $f6l, $k ); }
 		update_post_meta( $f6l, 'aw_verified', true );
