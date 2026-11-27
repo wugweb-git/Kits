@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.1.5
+
+- Overview boxes load four at a time and retry on an error, and the Clarity 401/403 message says how to fix it.
+
 ## 1.1.4
 
 - Visitor counting (country and a shortened IP address per day) is now off by default and has a switch under Settings. A site that already held counted rows keeps counting until switched off. Turning it off, or deleting the plugin, deletes its table, the country file and the schedule. What is stored and for how long is now in `readme.txt`.
