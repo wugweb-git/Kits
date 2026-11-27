@@ -211,7 +211,7 @@ function insightweb_si_resolve_page( array $page, string $page_type ): array {
 
 /**
  * The seed file. Removed after the live seed (25 Oct 2026, 07:12); it and its build tool
- * (tools/search-insights/build_seed.py) are in git history. Without it a fresh seed reports "seed file missing".
+ * (tools/search-insights/build_seed.py) are in git history. Without it the seed does nothing, silently (since 1.1.4).
  */
 function insightweb_si_seed_data(): array {
 	$file = (string) apply_filters( 'aw_si_seed_file', INSIGHTWEB_DIR . 'data/search-insights-seed.json' );
@@ -233,7 +233,7 @@ function insightweb_si_seed(): array {
 	global $wpdb;
 	$seed = insightweb_si_seed_data();
 	if ( empty( $seed['map'] ) ) {
-		return array( 'error' => 'seed file missing' );
+		return array(); // No seed file ships with the plugin: nothing to load, and nothing to report.
 	}
 	$k = insightweb_si_table( 'keywords' );
 	// One lookup for every seeded phrase (creating the records), instead of one per row.

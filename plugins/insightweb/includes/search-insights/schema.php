@@ -167,6 +167,9 @@ function insightweb_si_drop_all(): void {
 	foreach ( array( 'kw_pages', 'obs', 'rising', 'links', 'scores' ) as $t ) {
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', insightweb_si_table( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table names.
 	}
+	if ( function_exists( 'insightweb_si_vis_off' ) ) {
+		insightweb_si_vis_off(); // visitor counting: its table, lookup files and schedule go, and it stays off.
+	}
 	// The keyword table is Animal Writes Core's and holds the owner's Sourcing, Press and Tracked roles (sourcing phase 2):
 	// records with one of those (or a dismissed suggestion, or a migrated spelling) stay, with Search Insights' own roles and figures cleared; the others are deleted.
 	$k = insightweb_si_table( 'keywords' );

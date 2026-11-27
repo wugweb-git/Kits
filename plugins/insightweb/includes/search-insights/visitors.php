@@ -3,6 +3,11 @@
  * Server tab, visitors (owner, 3 Nov 2026): the country and a shortened IP address of each front-end request that
  * reaches WordPress, as daily counts, for the admin only (to spot scrapers).
  *
+ * OFF by default since 1.1.4. Nothing is counted, no table is made and nothing is downloaded until an administrator turns
+ * it on under Settings → Visitor counting (option insightweb_visitor_tracking). Turning it off, and uninstalling the
+ * plugin, delete the table, the lookup files and the schedule. A site that already held counted rows when 1.1.4 was
+ * installed keeps counting (insightweb_si_vis_migrate()) and can turn it off the same way.
+ *
  * - Counted: front-end requests (not logged in; not wp-admin, the REST API, cron, AJAX or WP-CLI). Pages the CDN or the
  *   server's LiteSpeed page cache answer from a stored copy never reach WordPress, so these are the requests the server itself answered.
  * - Shortened IP: IPv4 with the last number zeroed (203.0.113.0), IPv6 cut to its first 48 bits (2001:db8:1::).
@@ -23,6 +28,61 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_VIS_DB      = '1'; // Table version.
 const AW_SI_VIS_IP_DAYS = 30;
 const AW_SI_GEO_CRON    = 'aw_si_geo_refresh';
+const AW_SI_VIS_OPTION  = 'insightweb_visitor_tracking'; // 1 on, 0 off; absent until chosen or migrated.
+
+/** Whether visitor counting is on. Absent means off: nothing is counted until an administrator turns it on. */
+function insightweb_si_vis_enabled(): bool {
+	return 1 === (int) get_option( AW_SI_VIS_OPTION, 0 );
+}
+
+/**
+ * Once, on a site that has no choice stored: keep counting only when the table already holds rows (a site that
+ * counted before 1.1.4); every other site starts off.
+ */
+function insightweb_si_vis_migrate(): void {
+	if ( false !== get_option( AW_SI_VIS_OPTION, false ) ) {
+		return;
+	}
+	global $wpdb;
+	$t        = insightweb_si_vis_table();
+	$has      = $t === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one check, once
+	$has_rows = $has && (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i LIMIT 1', $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one check, once
+	update_option( AW_SI_VIS_OPTION, $has_rows ? 1 : 0, true );
+}
+add_action( 'admin_init', 'insightweb_si_vis_migrate', 5 );
+
+/** Turn counting on (the table is made on the next admin request or daily run). */
+function insightweb_si_vis_on(): void {
+	update_option( AW_SI_VIS_OPTION, 1, true );
+	insightweb_si_vis_install();
+}
+
+/**
+ * Delete everything visitor counting stored: the table, its version, the country lookup files, the schedule.
+ * Used when it is switched off, by Delete data on Settings, and (as plain SQL) by uninstall.php.
+ */
+function insightweb_si_vis_purge(): void {
+	global $wpdb;
+	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', insightweb_si_vis_table() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- our own counter table
+	delete_option( 'aw_si_vis_db' );
+	delete_option( 'aw_si_geo_updated' );
+	wp_unschedule_hook( AW_SI_GEO_CRON );
+	$dir = insightweb_si_geo_dir();
+	foreach ( array( 'v4.bin', 'v6.bin', 'v4.bin.new', 'v6.bin.new' ) as $f ) {
+		if ( file_exists( $dir . $f ) ) {
+			wp_delete_file( $dir . $f );
+		}
+	}
+	if ( is_dir( $dir ) ) {
+		@rmdir( $dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- removes the folder only when it is empty
+	}
+}
+
+/** Turn counting off and delete what it stored. */
+function insightweb_si_vis_off(): void {
+	update_option( AW_SI_VIS_OPTION, 0, true );
+	insightweb_si_vis_purge();
+}
 
 /** The table name. */
 function insightweb_si_vis_table(): string {
@@ -32,7 +92,7 @@ function insightweb_si_vis_table(): string {
 
 /** Create or update the table (admin and the daily run only). */
 function insightweb_si_vis_install(): void {
-	if ( AW_SI_VIS_DB === get_option( 'aw_si_vis_db' ) ) {
+	if ( ! insightweb_si_vis_enabled() || AW_SI_VIS_DB === get_option( 'aw_si_vis_db' ) ) {
 		return;
 	}
 	global $wpdb;
@@ -126,7 +186,7 @@ function insightweb_si_vis_country(): string {
 
 /** At the end of a front-end request: one more for its country and its shortened address (one query). */
 function insightweb_si_vis_count(): void {
-	if ( AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) || is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_user_logged_in() ) {
+	if ( ! insightweb_si_vis_enabled() || AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) || is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_user_logged_in() ) {
 		return;
 	}
 	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
@@ -144,6 +204,10 @@ add_action( 'shutdown', 'insightweb_si_vis_count', 0 );
 
 /** The daily step: the table in place, shortened addresses older than 30 days deleted, the lookup files refreshed when a month old. */
 function insightweb_si_vis_daily(): void {
+	insightweb_si_vis_migrate();
+	if ( ! insightweb_si_vis_enabled() ) {
+		return;
+	}
 	insightweb_si_vis_install();
 	global $wpdb;
 	$t = insightweb_si_vis_table();
@@ -160,6 +224,9 @@ add_action( AW_SI_CRON_DAILY, 'insightweb_si_vis_daily', 21 );
  * lookup files. The old files stay until the new ones are complete.
  */
 function insightweb_si_geo_refresh(): void {
+	if ( ! insightweb_si_vis_enabled() ) {
+		return;
+	}
 	require_once ABSPATH . 'wp-admin/includes/file.php';
 	$dir = insightweb_si_geo_dir();
 	if ( ! wp_mkdir_p( $dir ) ) {
@@ -239,6 +306,10 @@ function insightweb_si_vis_top( string $kind, int $days, int $limit ): array {
 /** The visitors section of the Server tab. */
 function insightweb_si_vis_section(): void {
 	echo '<h2>' . esc_html__( 'Visitors', 'insightweb' ) . '</h2>';
+	if ( ! insightweb_si_vis_enabled() ) {
+		echo '<p>' . esc_html__( 'Visitor counting is off, and nothing about visitors is stored. It can be turned on under Settings → Visitor counting.', 'insightweb' ) . '</p>';
+		return;
+	}
 	if ( AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) ) {
 		echo '<p>' . esc_html__( 'Counting starts once this page has been opened after the update.', 'insightweb' ) . '</p>';
 		return;
@@ -329,3 +400,51 @@ function insightweb_si_vis_section(): void {
 		);
 	}
 }
+
+/* ---------- Settings: the switch ---------- */
+
+/** Settings row: Visitor counting, on or off, with what it stores. */
+function insightweb_si_vis_settings_row(): void {
+	$on = insightweb_si_vis_enabled();
+	echo '<tr><th scope="row">' . esc_html__( 'Visitor counting', 'insightweb' ) . '</th><td>';
+	echo '<p>' . esc_html( $on ? __( 'On.', 'insightweb' ) : __( 'Off. Nothing about visitors is stored.', 'insightweb' ) ) . '</p>';
+	echo '<p class="description">' . esc_html__( 'When on, each front-end request that reaches WordPress adds one to a daily count for its country and for its shortened IP address (IPv4 with the last number zeroed, IPv6 cut to 48 bits). No full address, user agent or cookie is stored. Shortened addresses are deleted after 30 days; country counts are kept until you turn this off or delete the plugin. Country comes from the CDN\'s country header when sent, otherwise from a free DB-IP Lite file (db-ip.com) downloaded about once a month to wp-content/uploads/aw-geo/. Turning this off deletes the counts and that file.', 'insightweb' ) . '</p>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_vis_switch">';
+	wp_nonce_field( 'aw_si_vis_switch' );
+	if ( $on ) {
+		echo '<button type="submit" name="vis" value="off" class="button button-secondary">' . esc_html__( 'Turn off and delete the counts', 'insightweb' ) . '</button>';
+	} else {
+		echo '<button type="submit" name="vis" value="on" class="button button-secondary">' . esc_html__( 'Turn on', 'insightweb' ) . '</button>';
+	}
+	echo '</form></td></tr>';
+}
+add_action( 'aw_si_settings_rows', 'insightweb_si_vis_settings_row', 6 );
+
+add_action(
+	'admin_post_aw_si_vis_switch',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'aw_si_vis_switch' ) ) {
+			wp_die( esc_html__( 'Not allowed.', 'insightweb' ), 403 );
+		}
+		$vis = isset( $_POST['vis'] ) ? sanitize_key( wp_unslash( $_POST['vis'] ) ) : '';
+		if ( 'on' === $vis ) {
+			insightweb_si_vis_on();
+		} else {
+			insightweb_si_vis_off();
+		}
+		wp_safe_redirect( add_query_arg( 'vis', 'on' === $vis ? 'on' : 'off', insightweb_si_return_url( 'settings' ) ) );
+		exit;
+	}
+);
+
+add_action(
+	'aw_si_settings_notices',
+	function () {
+		$vis = isset( $_GET['vis'] ) ? sanitize_key( wp_unslash( $_GET['vis'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+		if ( 'on' === $vis ) {
+			wp_admin_notice( esc_html__( 'Visitor counting is on.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+		} elseif ( 'off' === $vis ) {
+			wp_admin_notice( esc_html__( 'Visitor counting is off, and its counts and country files are deleted.', 'insightweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+		}
+	}
+);

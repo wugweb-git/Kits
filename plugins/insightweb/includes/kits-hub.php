@@ -42,7 +42,7 @@ function insightweb_kits_status_row( $rows ) {
 	/* translators: %s: plugin version. */
 	$text = sprintf( __( 'Active, %s', 'insightweb' ), INSIGHTWEB_VERSION );
 	if ( ! function_exists( 'insightweb_si_url' ) ) {
-		$fix    = __( 'Does nothing until Kits Core, Animal Writes Core and Rank Math SEO are active.', 'insightweb' );
+		$fix    = __( 'Search Insights did not load.', 'insightweb' );
 		$rows[] = array( __( 'InsightWeb', 'insightweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
 	}

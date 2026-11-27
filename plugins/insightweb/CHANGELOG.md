@@ -2,6 +2,15 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.1.4
+
+- Visitor counting (country and a shortened IP address per day) is now off by default and has a switch under Settings. A site that already held counted rows keeps counting until switched off. Turning it off, or deleting the plugin, deletes its table, the country file and the schedule. What is stored and for how long is now in `readme.txt`.
+- Every tab now has a native WordPress screen without Kits Core (Overview boxes, Rising, Pages, Clarity, Check list, Links, Server, plus the numbers form on Settings). The Kits Core install notice is gone. The readme says which sources each tab needs.
+- External services: added DB-IP (monthly country file), favicon fetching and the real PageSpeed behaviour (the key is optional).
+- A missing keyword-map seed file is no longer reported as an error on every daily run.
+- Neutral wording: the keyword map download and the Google Alerts notice use the site's name; no Animal Writes text by default.
+- The seven numbers are written to RankWeb's option only while RankWeb is active; otherwise to InsightWeb's own option `insightweb_numbers`.
+
 ## 1.1.3
 
 - Fix: 1.1.2 loaded the 404 and search logging, which is not ready. It is no longer loaded, and the 404 paths and search terms it stored are removed once.

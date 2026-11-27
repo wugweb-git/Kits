@@ -18,13 +18,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Kits → Tools export: the options the Settings screen saves. The seven numbers live in RankWeb's aw_seo_settings
- * (key search-insights), which RankWeb's export carries too; it is listed here as well so the file keeps it either way.
+ * Kits → Tools export: the options the Settings screen saves. The seven numbers live in insightweb_numbers, or, while
+ * RankWeb is active, in RankWeb's aw_seo_settings (key search-insights), which RankWeb's export carries too; it is
+ * listed here as well then, so the file keeps it either way.
  *
  * @param array $names Option names.
  */
 function insightweb_kits_export( $names ) {
-	return array_merge( (array) $names, array( 'aw_seo_settings', 'aw_si_gdelt_on', 'aw_si_tool_seeds' ) );
+	$own = array( 'insightweb_numbers', 'aw_si_gdelt_on', 'aw_si_tool_seeds' );
+	if ( insightweb_si_numbers_in_rankweb() ) {
+		$own[] = 'aw_seo_settings'; // RankWeb's option holds the numbers while RankWeb is active.
+	}
+	return array_merge( (array) $names, $own );
 }
 add_filter( 'kits_settings_transfer_options', 'insightweb_kits_export' );
 

@@ -33,6 +33,7 @@ const DAY_IN_SECONDS    = 86400;
 const MINUTE_IN_SECONDS = 60;
 
 $GLOBALS['iw_options'] = array();
+$GLOBALS['iw_filters'] = array( 'insightweb_numbers_in_rankweb_option' => true ); // the numbers tests below run as with RankWeb active
 $GLOBALS['iw_writes']  = 0;
 
 /** Stub: options in memory. */
@@ -59,7 +60,7 @@ function add_action() {}
 function add_filter() {}
 /** Stub: default passthrough (no filters registered in the test). */
 function apply_filters( $hook, $value = null ) {
-	return $value;
+	return array_key_exists( $hook, $GLOBALS['iw_filters'] ?? array() ) ? $GLOBALS['iw_filters'][ $hook ] : $value;
 }
 /** Stub. */
 function __( $s ) {
@@ -148,6 +149,16 @@ iw_check( 3 === $GLOBALS['iw_options']['aw_seo_settings']['titles']['AW_SEO_X'],
 insightweb_si_settings_save( array(), true );
 iw_check( array( 'on' => 1 ) === $GLOBALS['iw_options']['aw_seo_settings']['search-insights'], "Restore defaults keeps only RankWeb's old switch" );
 iw_check( '90' === iw_texts()['AW_SI_KEEP_DAYS'], 'the screen shows the default as text' );
+
+// 1b. Without RankWeb: the numbers go to InsightWeb's own option; RankWeb's option is never written.
+$GLOBALS['iw_filters']['insightweb_numbers_in_rankweb_option'] = false;
+$GLOBALS['iw_options']['aw_seo_settings'] = array( 'titles' => array( 'AW_SEO_X' => 3 ), 'search-insights' => array( 'AW_SI_MOVERS' => 30 ) );
+$rank_before = serialize( $GLOBALS['iw_options']['aw_seo_settings'] );
+iw_check( 30 === insightweb_si_settings_saved()['AW_SI_MOVERS'], 'no RankWeb: an earlier stored value is still read' );
+iw_check( insightweb_si_settings_save( array( 'AW_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['insightweb_numbers']['AW_SI_QUICK_MIN'] && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $rank_before, 'no RankWeb: a change goes to insightweb_numbers, aw_seo_settings is untouched' );
+insightweb_si_settings_save( array(), true );
+iw_check( array() === $GLOBALS['iw_options']['insightweb_numbers'] && array() === insightweb_si_settings_saved() && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $rank_before, 'no RankWeb: Restore defaults empties the own option and does not bring the old key back' );
+$GLOBALS['iw_filters']['insightweb_numbers_in_rankweb_option'] = true;
 
 // 2. GDELT.
 $w = $GLOBALS['iw_writes'];

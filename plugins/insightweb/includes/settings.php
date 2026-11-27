@@ -2,9 +2,12 @@
 /**
  * Search Insights' seven numbers and its API rule, as they were in RankWeb (moved 11 Nov 2026, docs/plugins/insightweb-plan.md).
  *
- * The numbers stay where RankWeb stored them: option aw_seo_settings, key 'search-insights', only values that differ
- * from the default. The constants are defined here from that key, with the same defaults. The Settings screen writes
- * only that key (insightweb_si_settings_save()).
+ * Only values that differ from the default are stored. Where: while RankWeb is active, in its option aw_seo_settings,
+ * key 'search-insights', as before (RankWeb's export carries it); without RankWeb, in InsightWeb's own option
+ * insightweb_numbers (since 1.1.4: InsightWeb no longer writes to another plugin's option unless that plugin is active).
+ * Values already in the old key are still read when the own option has not been written yet. The constants are defined
+ * here from the stored numbers, with the same defaults. The Settings screen writes only through
+ * insightweb_si_settings_save().
  *
  * @package insightweb
  */
@@ -59,9 +62,22 @@ function insightweb_si_setting_fields(): array {
 	);
 }
 
+const INSIGHTWEB_NUMBERS_OPTION = 'insightweb_numbers'; // the numbers when RankWeb is not active.
+
+/** Whether the numbers live in RankWeb's option: only while RankWeb is active. */
+function insightweb_si_numbers_in_rankweb(): bool {
+	return (bool) apply_filters( 'insightweb_numbers_in_rankweb_option', defined( 'RANKWEB_VERSION' ) );
+}
+
 /** The saved numbers (only those that differ from the default; the key may also hold RankWeb's old switch, 'on'). */
 function insightweb_si_settings_saved(): array {
-	$all = (array) get_option( 'aw_seo_settings', array() );
+	if ( ! insightweb_si_numbers_in_rankweb() ) {
+		$own = get_option( INSIGHTWEB_NUMBERS_OPTION, null );
+		if ( is_array( $own ) ) {
+			return $own;
+		}
+	}
+	$all = (array) get_option( 'aw_seo_settings', array() ); // read only here when RankWeb is not active: values an earlier version stored.
 	return (array) ( $all['search-insights'] ?? array() );
 }
 
@@ -90,8 +106,9 @@ function insightweb_si_api_allowed() {
  * @return bool Whether the option was written.
  */
 function insightweb_si_settings_save( array $posted, bool $reset = false ): bool {
-	$all  = (array) get_option( 'aw_seo_settings', array() ); // RankWeb's option: every other key stays as it is.
-	$had  = (array) ( $all['search-insights'] ?? array() );
+	$rank = insightweb_si_numbers_in_rankweb();
+	$all  = $rank ? (array) get_option( 'aw_seo_settings', array() ) : array(); // RankWeb's option (only while RankWeb is active): every other key stays as it is.
+	$had  = insightweb_si_settings_saved();
 	$mine = $had;
 	foreach ( insightweb_si_setting_fields() as $const => $f ) {
 		if ( $reset ) {
@@ -114,6 +131,10 @@ function insightweb_si_settings_save( array $posted, bool $reset = false ): bool
 	ksort( $b );
 	if ( $a === $b ) {
 		return false;
+	}
+	if ( ! $rank ) {
+		update_option( INSIGHTWEB_NUMBERS_OPTION, $mine, true ); // an empty array is kept, so the old key is not read again after Restore defaults.
+		return true;
 	}
 	if ( $mine ) {
 		$all['search-insights'] = $mine;
@@ -148,46 +169,6 @@ add_action(
 /* ---------- The options, registered with the Settings API ---------- */
 
 const INSIGHTWEB_DELETE_DATA = 'insightweb_delete_data'; // 1: uninstall.php deletes InsightWeb's own data. Default 0: it keeps everything.
-
-/**
- * The numbers' part of aw_seo_settings (key 'search-insights') as stored: AW_SI_* whole numbers, 'on' a boolean, any
- * other key kept.
- * Values the screen stored come back unchanged.
- *
- * @param mixed $part The key's value.
- */
-function insightweb_si_settings_part_clean( $part ): array {
-	$out = array();
-	foreach ( (array) $part as $name => $v ) {
-		$name = (string) $name;
-		if ( 'on' === $name ) {
-			$out['on'] = in_array( $v, array( true, false, 0, 1 ), true ) ? $v : (bool) $v; // Stored as it was (an older save left 1).
-		} elseif ( 0 === strpos( $name, 'AW_SI_' ) ) {
-			$out[ $name ] = max( 0, (int) $v );
-		} else {
-			$out[ $name ] = is_string( $v ) ? sanitize_text_field( $v ) : $v; // A key no field knows: kept.
-		}
-	}
-	return $out;
-}
-
-/**
- * Sanitize callback of aw_seo_settings when RankWeb is not loaded to register it (RankWeb's own callback cleans the
- * same key the same way). Only the 'search-insights' key is InsightWeb's: the other keys are RankWeb's and stay as
- * they are.
- *
- * @param mixed $value Value to store.
- */
-function insightweb_si_settings_sanitize( $value ): array {
-	$value = (array) $value;
-	if ( isset( $value['search-insights'] ) ) {
-		$value['search-insights'] = insightweb_si_settings_part_clean( $value['search-insights'] );
-		if ( ! $value['search-insights'] ) {
-			unset( $value['search-insights'] );
-		}
-	}
-	return $value;
-}
 
 /**
  * Every option the InsightWeb Settings screen saves, as register_setting() arguments. The names and stored shapes are
@@ -228,36 +209,9 @@ add_action(
 	}
 );
 
-// The seven numbers live in RankWeb's option. RankWeb registers it (its callback cleans this key too); without RankWeb,
-// InsightWeb registers it, cleaning only its own key.
-add_action(
-	'init',
-	function () {
-		if ( isset( get_registered_settings()['aw_seo_settings'] ) ) {
-			return;
-		}
-		register_setting(
-			'insightweb',
-			'aw_seo_settings',
-			array(
-				'type'              => 'object',
-				'description'       => 'RankWeb settings by module; key search-insights holds InsightWeb\'s numbers.',
-				'default'           => array(),
-				'sanitize_callback' => 'insightweb_si_settings_sanitize',
-				'show_in_rest'      => array(
-					'schema' => array(
-						'type'                 => 'object',
-						'additionalProperties' => array(
-							'type'                 => 'object',
-							'additionalProperties' => true,
-						),
-					),
-				),
-			)
-		);
-	},
-	20
-);
+// The seven numbers live in RankWeb's option while RankWeb is active, and RankWeb registers that option itself.
+// Without RankWeb they are in insightweb_numbers (insightweb_si_settings_save()), which the Settings screen reaches
+// through its own route, so InsightWeb registers nothing for another plugin's option.
 
 /** Whether InsightWeb's data goes when the plugin is deleted (Settings → Numbers → Keeping data). */
 function insightweb_delete_data_on(): bool {

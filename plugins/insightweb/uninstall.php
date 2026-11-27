@@ -1,7 +1,10 @@
 <?php
 /**
- * Uninstall InsightWeb. By default it deletes nothing: settings, keys, keyword tables and every report it has collected
+ * Uninstall InsightWeb. Apart from visitor counting's data (below), by default it deletes nothing: settings, keys, keyword tables and every report it has collected
  * stay, so reinstalling finds everything as it was.
+ *
+ * Always, whatever the switch below says: visitor counting's table {prefix}aw_si_visits, the options aw_si_vis_db,
+ * aw_si_geo_updated and insightweb_visitor_tracking, the country files in uploads/aw-geo/ and the aw_si_geo_refresh schedule.
  *
  * Only when "Delete this plugin's data when it is deleted" is ticked (InsightWeb → Settings → Numbers → Keeping data,
  * option insightweb_delete_data = 1) it deletes InsightWeb's own data, and exactly this:
@@ -43,11 +46,29 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-if ( ! get_option( 'insightweb_delete_data', 0 ) ) {
-	return; // The default: keep everything.
-}
-
 global $wpdb;
+
+// Visitor counting (country and shortened IP, off by default since 1.1.4) is personal-data-adjacent, so it goes on every
+// uninstall, whatever "Delete this plugin's data" says: its table, its country lookup files and their schedule.
+$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . 'aw_si_visits' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- fixed table name.
+delete_option( 'aw_si_vis_db' );
+delete_option( 'aw_si_geo_updated' );
+delete_option( 'insightweb_visitor_tracking' );
+wp_unschedule_hook( 'aw_si_geo_refresh' );
+$insightweb_geo_dir = trailingslashit( wp_upload_dir( null, false )['basedir'] ) . 'aw-geo/';
+foreach ( array( 'v4.bin', 'v6.bin', 'v4.bin.new', 'v6.bin.new' ) as $insightweb_geo_file ) {
+	if ( file_exists( $insightweb_geo_dir . $insightweb_geo_file ) ) {
+		wp_delete_file( $insightweb_geo_dir . $insightweb_geo_file );
+	}
+}
+if ( is_dir( $insightweb_geo_dir ) ) {
+	@rmdir( $insightweb_geo_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- only when empty.
+}
+unset( $insightweb_geo_dir, $insightweb_geo_file );
+
+if ( ! get_option( 'insightweb_delete_data', 0 ) ) {
+	return; // The default: keep everything else.
+}
 
 $insightweb_tables = array_map( fn( $t ) => $wpdb->prefix . 'aw_si_' . $t, array( 'kw_pages', 'obs', 'rising', 'links', 'visits' ) );
 

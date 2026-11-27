@@ -283,48 +283,98 @@ function insightweb_si_screen(): void {
 	insightweb_si_screen_fallback();
 }
 
-/** Standalone native fallback screen for InsightWeb. */
+/**
+ * The native screen, used whenever Kits Core's shell is not drawing it (Kits Core not active, or its build missing).
+ * Core WordPress markup only: the tab bar, each tab's own output (the same functions the shell draws from), the Overview
+ * boxes and the Settings forms, each with its nonce and capability check. Nothing here asks the site to install another plugin.
+ */
 function insightweb_si_screen_fallback(): void {
-	$tab = insightweb_si_tab();
+	$tab    = insightweb_si_tab();
+	$labels = array( 'overview' => __( 'Overview', 'insightweb' ) ) + insightweb_si_tab_labels_native() + array( 'settings' => __( 'Settings', 'insightweb' ) );
 	echo '<div class="wrap">';
 	echo '<h1>' . esc_html__( 'Search Insights', 'insightweb' ) . '</h1>';
-
-	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-		echo '<div class="notice notice-info"><p>' . esc_html__( 'InsightWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell, interactive charts, and quick-filter tabs.', 'insightweb' ) . '</p></div>';
-	} else {
-		wp_admin_notice( esc_html__( 'InsightWeb needs Kits Core (active, with its build) to show this screen.', 'insightweb' ), array( 'type' => 'error' ) );
+	echo '<nav class="nav-tab-wrapper wp-clearfix" aria-label="' . esc_attr__( 'Search Insights tabs', 'insightweb' ) . '">';
+	foreach ( $labels as $key => $label ) {
+		echo '<a href="' . esc_url( insightweb_si_url( $key ) ) . '" class="nav-tab' . ( $key === $tab ? ' nav-tab-active' : '' ) . '"' . ( $key === $tab ? ' aria-current="page"' : '' ) . '>' . esc_html( $label ) . '</a>';
 	}
+	echo '</nav>';
 
-	insightweb_si_screen_notices();
-
-	if ( 'keywords' === $tab ) {
+	if ( 'overview' === $tab ) {
+		insightweb_si_screen_notices();
+		insightweb_si_overview_native();
+	} elseif ( 'keywords' === $tab ) {
+		insightweb_si_action_notices();
 		insightweb_si_keywords_tab();
-	} elseif ( 'settings' === $tab && function_exists( 'insightweb_si_settings_tab' ) ) {
-		insightweb_si_settings_tab();
+	} elseif ( 'settings' === $tab ) {
+		insightweb_si_action_notices();
+		do_action( 'aw_si_settings_notices' );
+		insightweb_si_numbers_form_native();
+		if ( function_exists( 'insightweb_si_settings_tab' ) ) {
+			insightweb_si_settings_tab();
+		}
 	} else {
-		echo '<div style="margin-top:20px; display:flex; gap:16px; flex-wrap:wrap;">';
-
-		// Keywords card
-		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Keywords', 'insightweb' ) . '</h2>';
-		$kw_count = function_exists( 'aw_si_count_keywords' ) ? aw_si_count_keywords() : 0;
-		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( number_format_i18n( $kw_count ) ) . '</p>';
-		echo '<p><a href="' . esc_url( insightweb_si_url( 'keywords' ) ) . '" class="button button-secondary">' . esc_html__( 'View Keywords', 'insightweb' ) . '</a></p>';
-		echo '</div>';
-
-		// Sync status card
-		echo '<div class="card" style="flex:1; min-width:200px; padding:16px;">';
-		echo '<h2 style="margin-top:0;">' . esc_html__( 'Search Console', 'insightweb' ) . '</h2>';
-		$days = function_exists( 'aw_si_days_stored' ) ? aw_si_days_stored() : 0;
-		/* translators: %d: number of days stored. */
-		echo '<p style="font-size:32px; font-weight:600; margin:10px 0;">' . esc_html( sprintf( __( '%d days', 'insightweb' ), $days ) ) . '</p>';
-		echo '<p><a href="' . esc_url( insightweb_si_url( 'settings' ) ) . '" class="button button-secondary">' . esc_html__( 'Settings & Sync', 'insightweb' ) . '</a></p>';
-		echo '</div>';
-
-		echo '</div>';
+		insightweb_si_action_notices();
+		ob_start();
+		do_action( 'aw_si_tab_' . $tab );
+		$html = (string) ob_get_clean();
+		if ( '' === trim( $html ) ) {
+			wp_admin_notice( esc_html__( 'This tab has nothing to show yet.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+		} else {
+			echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each tab escapes its own output; this is the same output the shell screen takes.
+		}
 	}
 
 	echo '</div>';
+}
+
+/** The tabs between Overview and Settings: Keywords, then the ones other files add (key => label). */
+function insightweb_si_tab_labels_native(): array {
+	return array( 'keywords' => __( 'Keywords', 'insightweb' ) ) + insightweb_si_extra_tabs();
+}
+
+/** The Overview boxes as plain WordPress boxes, each from its own function (the same ones the Dashboard reads through REST). */
+function insightweb_si_overview_native(): void {
+	if ( get_option( 'aw_si_off' ) ) {
+		return; // the notice above says it is off.
+	}
+	foreach ( insightweb_si_overview_boxes() as $box ) {
+		if ( ! is_callable( $box[1] ) ) {
+			continue;
+		}
+		echo '<div class="postbox"><div class="postbox-header"><h2 class="hndle">' . esc_html( $box[0] ) . '</h2></div><div class="inside">';
+		call_user_func( $box[1] );
+		echo '</div></div>';
+	}
+}
+
+/** Settings: the numbers as a plain form (admin-post aw_si_settings, in settings.php, checks the nonce and manage_options). */
+function insightweb_si_numbers_form_native(): void {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	$saved = isset( $_GET['saved'] ) ? sanitize_key( wp_unslash( $_GET['saved'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
+	if ( 'saved' === $saved || 'reset' === $saved ) {
+		wp_admin_notice( esc_html( 'reset' === $saved ? __( 'Numbers set back to their defaults.', 'insightweb' ) : __( 'Numbers saved.', 'insightweb' ) ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
+	}
+	$have = insightweb_si_settings_saved();
+	echo '<h2>' . esc_html__( 'Numbers', 'insightweb' ) . '</h2>';
+	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_settings">';
+	wp_nonce_field( 'aw_si_settings' );
+	echo '<table class="form-table" role="presentation"><tbody>';
+	foreach ( insightweb_si_setting_fields() as $const => $f ) {
+		$id = 'aw-si-' . strtolower( $const );
+		echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $f['label'] ) . '</label></th><td>';
+		echo '<input type="number" min="0" step="1" class="small-text" id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $const ) . ']" value="' . esc_attr( (string) ( $have[ $const ] ?? $f['default'] ) ) . '">';
+		if ( '' !== $f['help'] ) {
+			echo ' <span class="description">' . esc_html( $f['help'] ) . '</span>';
+		}
+		echo '</td></tr>';
+	}
+	echo '</tbody></table>';
+	submit_button( __( 'Save numbers', 'insightweb' ), 'primary', 'submit', false );
+	echo ' ';
+	submit_button( __( 'Restore defaults', 'insightweb' ), 'secondary', 'reset', false );
+	echo '</form>';
 }
 
 /** The notices above every tab: each source's state, then the result of the last action. */
@@ -414,7 +464,8 @@ function insightweb_si_mini_table( array $rows, array $cols ): void {
 
 /** Overview box: what is not set up yet (the Google Alerts feeds), and where to set it. */
 function insightweb_si_box_setup(): void {
-	echo '<p>' . esc_html__( 'Google Alerts feeds are not set, so mentions of Animal Writes on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Settings → Keys. This box goes once a feed is set.', 'insightweb' ) . '</p>';
+	/* translators: %s: the site's name. */
+	echo '<p>' . esc_html( sprintf( __( 'Google Alerts feeds are not set, so mentions of %s on the web are not read. Create an alert at google.com/alerts, choose Deliver to: RSS feed, and paste the feed address under Settings → Keys. This box goes once a feed is set.', 'insightweb' ), get_bloginfo( 'name' ) ) ) . '</p>';
 	if ( current_user_can( 'manage_options' ) ) {
 		echo '<p><a class="button" href="' . esc_url( insightweb_si_url( 'settings' ) . '#keys' ) . '">' . esc_html__( 'Settings → Keys', 'insightweb' ) . '</a></p>';
 	}
@@ -1113,7 +1164,7 @@ function insightweb_si_settings_tab(): void {
 	echo $seeded
 		/* translators: %s: date. */
 		? esc_html( sprintf( __( 'Seeded once on %s from docs/seo/keyword-map.md and the 21 Oct rankings. The table here is the source of truth now.', 'insightweb' ), wp_date( 'j M Y, H:i', $seeded ) ) )
-		: esc_html__( 'Not seeded yet: the first run seeds it.', 'insightweb' );
+		: esc_html( function_exists( 'insightweb_si_seed_data' ) && insightweb_si_seed_data() ? __( 'Not seeded yet: the first run seeds it.', 'insightweb' ) : __( 'No keyword map seed is bundled. Keywords are added from Search Console, Rank Math and the Keywords tab.', 'insightweb' ) );
 	echo '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Action list', 'insightweb' ) . '</th><td>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_run">';

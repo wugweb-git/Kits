@@ -36,9 +36,6 @@ function insightweb_si_daily( bool $by_hand = false ): array {
 	// problem, the role counts, the priorities worked out and any write that failed.
 	insightweb_si_run_start( 'roles' );
 	$errors = array();
-	if ( ! empty( $out['seed']['error'] ) ) {
-		$errors[] = __( 'The keyword map seed file is missing, so the map was not loaded.', 'insightweb' );
-	}
 	$failed = '';
 	try {
 		$out['roles'] = insightweb_si_sync_roles();

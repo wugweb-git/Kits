@@ -162,7 +162,7 @@ function insightweb_si_keyword_map_md(): string {
 		'new-row'   => __( 'Rows added since 20 Oct 2026', 'insightweb' ),
 		'other'     => __( 'Other', 'insightweb' ),
 	);
-	$md     = "# Keyword map — Animal Writes 2.0\n\n";
+	$md     = '# Keyword map — ' . wp_strip_all_tags( get_bloginfo( 'name' ) ) . "\n\n";
 	$md    .= '**Rebuilt by Search Insights on ' . wp_date( 'j F Y' ) . ".** The keyword table on the site is the source of truth (plan §2); this file is its monthly copy. The hand-written notes of the 15 Oct map (search titles, the method, cannibalisation notes) are in git history.\n\n";
 	$md    .= "Columns: **Demand** = Trends T (\"animal welfare\" = 100) and Search Console impressions (28 days); **Rank** = the latest live Google check, or Search Console's 28-day position; **Priority** = the keyword-map rule (P1 high demand and we rank 4–20 or have a page; P2 high demand, no page; P3 the rest), or the owner's override.\n\n";
 	$n      = 1;
