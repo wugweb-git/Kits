@@ -1447,7 +1447,7 @@ function rankweb_press_schema() {
 			'position' => $i + 1,
 			'item'     => array_filter(
 				array(
-					'@type'         => 'Article', // coverage of Animal Writes, at the outlet's address
+					'@type'         => 'Article', // coverage of the site, at the outlet's address
 					'headline'      => rankweb_plain_text( get_the_title( $p ) ),
 					'about'         => array( '@id' => home_url( '/#organization' ) ),
 					'name'          => rankweb_plain_text( get_the_title( $p ) ),

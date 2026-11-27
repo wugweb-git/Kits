@@ -3724,7 +3724,7 @@ function KeywordSettings( { settings, press, onSaved } ) {
 				<SettingsBlock
 					title={ __( 'Press discovery', 'sourceweb' ) }
 					description={ __(
-						'The queries are the Press keywords below: Google News and Google Search for coverage of Animal Writes.',
+						'The queries are the Press keywords below: Google News and Google Search for coverage of this site.',
 						'sourceweb'
 					) }
 				>

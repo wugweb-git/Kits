@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,9 @@ InsightWeb connects to external services only when the corresponding integration
 InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt and a few key pages, some with AI-crawler user-agent names) to check that crawlers can reach them. These calls stay on your own domain.
 
 == Changelog ==
+
+= 1.1.6 =
+* The links seed uses the site's own name for the anchor and note text it writes, instead of a fixed name. Seeding and its gating are unchanged.
 
 = 1.1.5 =
 * Overview boxes load four at a time and retry on an error, and the Clarity 401/403 message says how to fix it.

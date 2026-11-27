@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.1.6
+
+- The links seed uses the site name (`get_bloginfo('name')`) for the anchor and note text it writes. Seeding and gating are unchanged.
+
 ## 1.1.5
 
 - Overview boxes load four at a time and retry on an error, and the Clarity 401/403 message says how to fix it.

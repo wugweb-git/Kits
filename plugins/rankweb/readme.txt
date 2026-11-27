@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.3.6
+Stable tag: 2.3.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,6 +82,9 @@ By default, deleting the plugin deletes no data: settings, FAQ records, focus ke
 Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Modules) and deleting the plugin removes its settings, stored scores and counts, link tables, scheduled jobs, the manage_rankweb capability, the page cache folder (wp-content/cache/rankweb) and the local font folder (wp-content/uploads/rankweb-fonts). A backup of the options and tables is first written to wp-content/uploads/wugweb-backups/; if it cannot be written, nothing is deleted. Posts, pages, post meta, Rank Math's data and the .webp copies in your media library are never deleted.
 
 == Changelog ==
+
+= 2.3.7 =
+- Wording only: a code note in the press-list schema no longer names a particular site. No change to the output.
 
 = 2.3.6 =
 - Import columns: a site that keeps SEO values in its own meta keys (a Notion sync, a script) lists its prefixes with the `rankweb_import_prefixes` filter, and the title, description, focus keyword, canonical address, share image and noindex it stores are copied into the SEO plugin's fields when saved. The source keys are never deleted. Does nothing until a site opts in.

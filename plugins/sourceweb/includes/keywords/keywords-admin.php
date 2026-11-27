@@ -51,7 +51,7 @@ function sourceweb_sourcing_kw_role_help() {
 		SOURCEWEB_KW_ROLE_CONTEXT  => 'Keeps an item together with an Animal word.',
 		SOURCEWEB_KW_ROLE_EXCLUDE  => 'Drops an item, whatever else it has (always, also with the relevance filter off).',
 		SOURCEWEB_KW_ROLE_SEARCH   => 'Its own Google News search every run (its query, or the keyword itself).',
-		SOURCEWEB_KW_ROLE_PRESS    => 'A weekly press-discovery query (coverage of Animal Writes): Google News and Google Search.',
+		SOURCEWEB_KW_ROLE_PRESS    => 'A weekly press-discovery query (coverage of this site): Google News and Google Search.',
 		SOURCEWEB_KW_ROLE_CATEGORY => 'Files an item into the categories it is mapped to when the keyword is in its title or summary.',
 	);
 }

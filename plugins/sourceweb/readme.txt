@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.3.0
+Stable tag: 0.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,7 +28,7 @@ SourceWeb operates standalone with no mandatory plugin dependencies, and optiona
 
 **Who may push items, and what goes live.** The worker routes need the SourceWeb capability (`manage_sourceweb`, held by administrators and by roles that can edit others' posts), or administrator rights; Authors and Contributors cannot use them. Change it with the `sourceweb_ingest_capability` filter. Every item arrives as Pending and waits in To review: nothing is published without a person unless an administrator ticks **Publishing** in SourceWeb → Settings (or a site returns true from the `sourceweb_allow_publish` filter).
 
-**Animal Writes extras.** The starter list of animal-welfare sources and keywords, the alert emails to the site administrator (ingestion, workers and relevance problems) and the Dashboard box are off unless **Animal Writes extras** is ticked in SourceWeb → Settings or a site returns true from the `sourceweb_animal_writes_context` filter. No alert email is sent from a site that has not switched it on.
+**Site-specific extras.** The starter list of animal-welfare sources and keywords, the alert emails to the site administrator (ingestion, workers and relevance problems) and the Dashboard box are off unless **Site-specific extras** is ticked in SourceWeb → Settings or a site returns true from the `sourceweb_animal_writes_context` filter. No alert email is sent from a site that has not switched it on.
 
 **Content types.** SourceWeb does not register the `aw_news`, `aw_legal`, `aw_listing` or `aw_opportunity` content types; another plugin or theme must. On a site without a type, the ingest route answers with an error for that kind of item and creates nothing.
 
@@ -74,6 +74,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 
 == Changelog ==
 
+= 0.3.1 =
+* No visible text names a particular site any more: the alert emails (ingestion, workers, relevance) use the site's own name in the subject and first line, the Site Health badge reads SourceWeb, the Press keyword help says "coverage of this site", and the Settings switch is labelled "Site-specific extras" (same option and filter as before).
+
 = 0.3.0 =
 * Without Kits Core, nine more screens work as plain WordPress screens instead of showing a notice: To review (publish or reject one, ticked, or every item of a view), Enrichment review (approve, reject or undo a proposed value), Keywords (the check's switches, the four keyword lists or the keyword table, Press settings, a headline test), Rules (domain trust, feed tags to leave out, tag rules, section rules), Places (routes, enhancements, how each source did), Workers (list, runs, add, change and delete a planned worker), Rejected, Relay log and Change log (search, view, sort, pages).
 * Every change on these screens is a POST with a capability check and a nonce; reading is by GET and changes nothing. Notices are kept in a short-lived per-user transient, not in the address.
@@ -89,7 +92,7 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 = 0.2.6 =
 * The worker routes (ingest, relevance, same story, relay, summaries, sourcing policy, heartbeat, AI usage) now need the SourceWeb capability or administrator rights instead of `edit_posts`. The routes that required an application password still do.
 * Nothing is published without a person unless **Publishing** is ticked in SourceWeb → Settings (off by default). This includes opportunities, backfill items and auto-review. Sites that relied on auto-publishing must tick it.
-* The Animal Writes starter sources, the alert emails and the Dashboard box are off unless **Animal Writes extras** is ticked in SourceWeb → Settings (off by default).
+* The Animal Writes starter sources, the alert emails and the Dashboard box are off unless **Site-specific extras** is ticked in SourceWeb → Settings (off by default).
 * Ingest answers with an error instead of inserting when the site has no `aw_news`, `aw_legal`, `aw_listing` or `aw_opportunity` content type.
 * `/wp-json/aw/v1/ai-keys` returns full keys only to a worker signed in with an application password; others get them masked.
 * Without Kits Core, Sources and AI models now have plain WordPress screens.

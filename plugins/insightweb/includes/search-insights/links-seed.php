@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The seed rows. */
 function insightweb_si_links_seed_data(): array {
+	$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ); // the site name ('Animal Writes' on the live site)
 	$home = 'https://animalwrites.in/';
 	$lab  = 'https://animalwrites.in/campaigns/lab-animals-rules-2026/';
 	$gsc  = 'Search Console Links, read 26 Oct 2026';
@@ -38,10 +39,10 @@ function insightweb_si_links_seed_data(): array {
 		);
 	};
 	// News and websites (confirmed on the live page).
-	$g( 'https://www.hindustantimes.com/entertainment/bollywood/kalki-koechlin-abhirami-nafisa-ali-urge-fans-to-send-objection-emails-to-government-over-new-draft-on-animal-testing-in-labs-101792400061102.html', $lab, 'press', 'According to Animal Writes', 'Under "What does the GSR 864(E) entail?"' );
+	$g( 'https://www.hindustantimes.com/entertainment/bollywood/kalki-koechlin-abhirami-nafisa-ali-urge-fans-to-send-objection-emails-to-government-over-new-draft-on-animal-testing-in-labs-101792400061102.html', $lab, 'press', 'According to ' . $site, 'Under "What does the GSR 864(E) entail?"' );
 	$g( 'https://www.freepressjournal.in/mumbai/nationwide-campaign-over-50000-citizens-write-to-supreme-court-seeking-recall-of-dog-removal-order', $home, 'press', '', 'Where we appear: "uploaded on the animalwrites.in website"' );
 	$g( 'https://www.dtnext.in/news/tamilnadu/over-15l-from-tn-write-to-sc-seeking-recall-of-dog-removal-order-855059', $home, 'press', '', 'Where we appear: "upload their receipts here https://animalwrites.in/"' );
-	$g( 'https://dirkvanlaere.com/article/bollywood-stars-speak-out-urgent-action-needed-to-protect-animals-from-new-draft', $lab, 'press', '', 'Where we appear: "According to reports from Animal Writes"' );
+	$g( 'https://dirkvanlaere.com/article/bollywood-stars-speak-out-urgent-action-needed-to-protect-animals-from-new-draft', $lab, 'press', '', 'Where we appear: "According to reports from ' . $site . '"' );
 	$g( 'https://www.cjmemorialtrust.org/post/animalwrites-in-pawsandpost-the-countdown-to-a-collective-voice-nov-29', $home, 'organisation', '', 'The whole post is about us (#PawsAndPost).' );
 	// Telegram.
 	$g( 'https://t.me/s/PeepalFarm', $home, 'social', '', 'Peepal Farm channel, 19 posts.', 19 );
@@ -97,7 +98,7 @@ function insightweb_si_links_seed_data(): array {
 		'wordofgodinstitute.org'      => 1,
 	);
 	foreach ( $copies as $d => $n ) {
-		$o( $d, $lab, 'copy', 'Animal Writes', '2026-10-19', 'Copy of the celebrity GSR 864(E) article (seen 19–24 Oct).', $n );
+		$o( $d, $lab, 'copy', $site, '2026-10-19', 'Copy of the celebrity GSR 864(E) article (seen 19–24 Oct).', $n );
 	}
 	$spam = array( 'clifflisting.com' => 2, 'dbike-us.com' => 1, 'techbumppy.com' => 1, 'thcradar.com' => 1, 'shanzytechs.site' => 1, 'sahammurah.com' => 1, 'bureatag.com' => 1, 'bestnz-poker-casinoslot.com' => 1, 'onlyhealthydeals.com' => 1, 'archive-hu.com' => 1, 'bestwebs123.site' => 1, 'thedocmag.com' => 1, 'dupurgeniefr.com' => 1, 'kernelpanicpodcast.com' => 1 );
 	foreach ( $spam as $d => $n ) {

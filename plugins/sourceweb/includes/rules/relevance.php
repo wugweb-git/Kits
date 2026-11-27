@@ -286,7 +286,7 @@ add_action(
 					}
 					$sent = wp_mail(
 						get_option( 'admin_email' ),
-						'Animal Writes: ' . $total . ' item(s) held — the relevance check could not run',
+						wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': ' . $total . ' item(s) held — the relevance check could not run',
 						"The workers found {$total} new item(s) but no AI service answered the relevance check, so nothing was created for them. They are tried again on the next run (every 6 hours).\n\nRun: {$run}\n" . ( $link ? "Details: {$link}\n" : '' ) . "\nUsually this means the free daily limit of the AI keys is used up. Adding credit to a key (OpenRouter, OpenAI, DeepSeek …) clears it."
 					);
 					if ( $sent ) {
@@ -517,8 +517,8 @@ function sourceweb_ingest_watchdog() {
 		return; // the same problems were emailed in the last 12 hours
 	}
 	$hb   = (array) get_option( 'aw_ingest_heartbeat', array() );
-	$body = "Animal Writes ingestion needs attention:\n\n- " . implode( "\n- ", $problems ) . "\n\n" . ( ! empty( $hb['last_link'] ) ? 'Last run: ' . $hb['last_link'] . "\n" : '' ) . "Runs: https://github.com/wugweb-git/animal-writes-workers/actions\n";
-	if ( wp_mail( get_option( 'admin_email' ), 'Animal Writes: ingestion problem — ' . reset( $problems ), $body ) ) {
+	$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " ingestion needs attention:\n\n- " . implode( "\n- ", $problems ) . "\n\n" . ( ! empty( $hb['last_link'] ) ? 'Last run: ' . $hb['last_link'] . "\n" : '' ) . "Runs: https://github.com/wugweb-git/animal-writes-workers/actions\n";
+	if ( wp_mail( get_option( 'admin_email' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': ingestion problem — ' . reset( $problems ), $body ) ) {
 		set_transient( 'aw_ingest_alert_mailed', $kinds, 12 * HOUR_IN_SECONDS );
 	}
 }

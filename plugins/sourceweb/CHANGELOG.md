@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.3.1
+
+- No visible text names a particular site: alert email subjects and bodies use the site name (`get_bloginfo('name')`), the Site Health badge reads SourceWeb, the Press keyword help says "coverage of this site", and the Settings switch is labelled "Site-specific extras". Option and filter names are unchanged.
+
 ## 0.3.0
 
 - Without Kits Core, nine more screens work as plain WordPress screens instead of showing a notice: To review, Enrichment review, Keywords, Rules, Places, Workers, Rejected, Relay log and Change log. They read through the same functions and route callbacks the Kits shell screens use, so searching, sorting and paging behave the same.
@@ -23,7 +27,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 - The worker routes (ingest, relevance, same story, relay, summaries, sourcing policy, heartbeat, AI usage) now need the SourceWeb capability or administrator rights instead of `edit_posts`. Routes that required an application password still do.
 - Nothing is published without a person unless Publishing is ticked in SourceWeb → Settings (off by default): opportunities, backfill items and auto-review included. Sites that relied on auto-publishing must tick it.
-- The Animal Writes starter sources, alert emails and Dashboard box are off unless Animal Writes extras is ticked in SourceWeb → Settings (filter `sourceweb_animal_writes_context`).
+- The Animal Writes starter sources, alert emails and Dashboard box are off unless Site-specific extras is ticked in SourceWeb → Settings (filter `sourceweb_animal_writes_context`).
 - Ingest answers with an error instead of inserting when the site has no `aw_news`, `aw_legal`, `aw_listing` or `aw_opportunity` content type.
 - `aw/v1/ai-keys` returns full keys only to a worker signed in with an application password; any other caller gets them masked.
 - Without Kits Core, Sources and AI models have plain WordPress screens.

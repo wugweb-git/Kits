@@ -2043,7 +2043,7 @@ msgid "Press discovery"
 msgstr ""
 
 #: src/index.js:3436
-msgid "The queries are the Press keywords below: Google News and Google Search for coverage of Animal Writes."
+msgid "The queries are the Press keywords below: Google News and Google Search for coverage of this site."
 msgstr ""
 
 #: src/index.js:3449
