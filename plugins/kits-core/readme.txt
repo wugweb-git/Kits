@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.0
+Stable tag: 1.4.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,7 @@ Kits Core is the shared layer of Kits by Wugweb sites. The site configures it th
 * Share bar: a native share sheet where the browser offers one, plus plain links and copy-link, with no third-party scripts or tracking.
 * Google Tag Manager and Microsoft Clarity with consent mode v2, denied by default where the law asks for it.
 * Preview-only items.
+* Blocks: Hero, Countdown, Metric, Share, Sticky action, Letter, Sponsored and Socials (plain links to the site's profiles; nothing is fetched from other sites).
 * The Kits admin shell: the screens of every Kits plugin built on WordPress components and DataViews, with lists, settings, empty and error states that look and work the same everywhere.
 * The Kits menu: Home, Theme Options, Settings, Tools and Help, with the design system and the registry of every component.
 * Content types: seven ready-made presets (portfolio, cards, infographics, case studies, events, people, testimonials) registered with WordPress's own post type and post meta calls, using core categories and tags only. Each is off until switched on in Kits &rarr; Settings &rarr; Content types, so the admin menu shows only the types a site uses. Their fields show in core blocks through the kits/post-field binding; Kits Core prints no structured data of its own.
@@ -36,7 +37,7 @@ Each of these loads only when you turn it on; none runs by default.
 
 * Google Tag Manager / Google Analytics — loaded only when a GTM or GA container is configured (through Site Kit or the site's own settings), under consent mode (denied by default where the law requires it). What is collected is whatever your container is set up to send. Terms: https://marketingplatform.google.com/about/analytics/terms/ — Privacy: https://policies.google.com/privacy
 * Microsoft Clarity — loaded only when a Clarity project is configured, under the same consent gate. Terms: https://www.microsoft.com/en-us/legal/terms-of-use — Privacy: https://privacy.microsoft.com/privacystatement
-* Update check (direct build only) — WordPress asks the Wugweb registry (https://wugweb-git.github.io/Kits/registry/index.json, GitHub Pages) for newer versions of the Wugweb plugins and theme, at most every 12 hours; no site data is sent. A new version downloads from the project's GitHub releases and is checked against the registry's SHA-256 before it installs. Turn it off with `define( 'KITS_NO_REGISTRY_UPDATES', true );`. Pre-releases are offered only when the channel is set to pre-release. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service — Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+* Update check (direct build only) — WordPress asks the Wugweb registry (https://wugweb-git.github.io/Kits/registry/index.json, GitHub Pages) for newer versions of the Wugweb plugins and theme, at most every 12 hours; no site data is sent. A new version downloads from the project's GitHub releases and is checked against the registry's SHA-256 before it installs; a theme package from the optional theme update address (off by default) is checked against the SHA-256 in its JSON in the same way. Turn it off with `define( 'KITS_NO_REGISTRY_UPDATES', true );`. Pre-releases are offered only when the channel is set to pre-release. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service — Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 * Site check-in (optional, off by default) — when you switch it on in Kits → Tools and give an https address, this site sends a short message once a week to that address: the site address, the WordPress and PHP versions, the update channel, and the name and version of each Wugweb plugin and the Kits theme that is installed. No user, email address or content is sent. The receiver is whatever address you enter; nothing is sent by itself while the switch is off. "Send once now" in Kits → Tools sends one message with the switch off, but only when an address is saved.
 
@@ -45,10 +46,18 @@ Each of these loads only when you turn it on; none runs by default.
 * Global Styles backup: the setup wizard stores one previous copy of your Styles in the option kits_global_styles_backup before it replaces them, so the Restore button can put them back.
 * Admin tidy, the daily error-count e-mail and the aw_daily event are off unless switched on (options or filters kits_tidy_menus, kits_error_count_daily, kits_daily_event). The REST route aw/v1/deploy-status needs the manage_options capability unless kits_public_gate_routes is turned on.
 * Update checks send the User-Agent "Kits-registry/1", with no site address.
+* ALTCHA: one short row per solved challenge (option names starting kits_altcha_used_, kept until the challenge expires, pruned hourly); they are removed on uninstall with the data.
+* Settings download: one short-lived row (transient kits_dl_…) per download link on the Kits → Tools screen, used once.
 
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
+
+= 1.4.1 =
+* Security: the fresh-form-key endpoint (admin-ajax kits_form_nonce) now gives a nonce only for a real form (one with an admin-post handler, or one a site lists with kits_form_nonce_actions); a spam-guard (ALTCHA) answer works once even when two requests arrive together (an atomic database claim replaces the transient check); a preview device link keeps its token after the # of the address and in a POST body, never in the query string; the settings file download link carries a single-use token that expires in 10 minutes instead of the reusable REST nonce; a Kits theme update package is offered only with an https address and a SHA-256 in the update JSON, and the download is checked against it before it installs (the check stays off until an update address is set).
+* New: the filters kits_features (rows of Help → Docs → Site features) and kits_settings_fields (fields of each Kits → Settings group); a read-only REST route kits/v1/site-check (administrators) with the last page check; a Socials block (kits/socials): plain, escaped links to the site's profiles (Rank Math's, or its own list), with no icons or scripts fetched from other sites; the filter kits_social_profiles.
+* Moved: the opt-in Library "Dated" and campaign "Metrics" edit fields now live in the Animal Writes site layer, so Kits Core names no site-specific types or keys.
+* Tests: new hardening, surface, block-renderer, wizard-backup, brand-reset and uninstall tests, SHA-256 checks of the registry updater, and the admin-layer test no longer stops halfway. Code style: the PHP passes the WordPress-Extra standard with no errors. The translation template was regenerated.
 
 = 1.4.0 =
 * Neutral for every site: everything that only made sense for one site was taken out of the plugin and moved, unchanged, to that site's own layer (outside this plugin). Gone from Kits Core: the campaign letters and Campaign form (with its raw copy of every send and the Form copies settings), the volunteer and Report a mistake forms and their blocks and pages, the campaign link taxonomy, Tools → Taxonomy rename, the thumbnail map and category photos, the placard card images, Tools → Reuse pictures, opportunity retention, the older aw_ function names, the branded error pages and their pictures, the duplicate-file groups of Tools → Duplicate files, and the one-time carry-over that kept features on for the site that was running them.

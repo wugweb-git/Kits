@@ -51,7 +51,14 @@ function kits_edit_screen_boxes(): array {
 	$boxes = (array) apply_filters( 'aw_edit_screen_boxes', $boxes ); // older name, still read
 	foreach ( $boxes as $id => $b ) {
 		if ( is_array( $b ) ) {
-			$out[ (string) $id ] = $b + array( 'title' => (string) $id, 'source' => '', 'file' => '', 'screen' => 'post', 'types' => array(), 'runtime' => 'live' );
+			$out[ (string) $id ] = $b + array(
+				'title' => (string) $id,
+				'source' => '',
+				'file' => '',
+				'screen' => 'post',
+				'types' => array(),
+				'runtime' => 'live',
+			);
 		}
 	}
 	return $out;
@@ -91,7 +98,14 @@ function kits_edit_screen_map(): array {
 		foreach ( (array) ( $k['boxes'] ?? array() ) as $b ) {
 			$id = is_array( $b ) ? (string) ( $b['id'] ?? '' ) : (string) $b;
 			if ( '' !== $id ) {
-				$list[] = is_array( $b ) ? $b + array( 'title' => $id, 'source' => '' ) : array( 'id' => $id, 'title' => (string) ( $boxes[ $id ]['title'] ?? $id ), 'source' => (string) ( $boxes[ $id ]['source'] ?? '' ) );
+				$list[] = is_array( $b ) ? $b + array(
+					'title' => $id,
+					'source' => '',
+				) : array(
+					'id' => $id,
+					'title' => (string) ( $boxes[ $id ]['title'] ?? $id ),
+					'source' => (string) ( $boxes[ $id ]['source'] ?? '' ),
+				);
 			}
 		}
 		$k['boxes']            = $list;
@@ -450,7 +464,18 @@ function kits_edit_screen_rows(): array {
 				continue;
 			}
 			$seen[ $gid ] = true;
-			$add( 'post', $type, $gid, array( 'title' => $g['title'], 'callback' => 'SCF field group', 'shows_on' => 'normal (SCF field group)' ), $g['fields'], array() );
+			$add(
+				'post',
+				$type,
+				$gid,
+				array(
+					'title' => $g['title'],
+					'callback' => 'SCF field group',
+					'shows_on' => 'normal (SCF field group)',
+				),
+				$g['fields'],
+				array()
+			);
 		}
 		foreach ( $boxes as $id => $b ) {
 			if ( isset( $seen[ $id ] ) || 'post' !== ( $b['screen'] ?? 'post' ) || empty( $b['types'] ) || ! in_array( $type, (array) $b['types'], true ) ) {
@@ -482,7 +507,18 @@ function kits_edit_screen_rows(): array {
 				continue;
 			}
 			$seen[ $id ] = array( $h['hook'] );
-			$add( 'term', $tax, $id, array( 'title' => $h['hook'], 'callback' => $h['callback'], 'shows_on' => $h['hook'] . ' / ' . $h['priority'] ), array(), array() );
+			$add(
+				'term',
+				$tax,
+				$id,
+				array(
+					'title' => $h['hook'],
+					'callback' => $h['callback'],
+					'shows_on' => $h['hook'] . ' / ' . $h['priority'],
+				),
+				array(),
+				array()
+			);
 		}
 		foreach ( $boxes as $id => $b ) {
 			if ( isset( $seen[ $id ] ) || 'term' !== ( $b['screen'] ?? '' ) || empty( $b['types'] ) || ! in_array( $tax, (array) $b['types'], true ) ) {
@@ -688,12 +724,19 @@ function kits_edit_screen_display_rows( array $rows ): array {
 		}
 		$group = $r['mapped'] && isset( $merge[ $r['id'] ] ) ? $merge[ $r['id'] ] : '';
 		if ( '' === $group ) {
-			$out[] = $r + array( 'label' => kits_edit_screen_type_label( $r['type'], $r['screen'] ), 'types' => array( $r['type'] ) );
+			$out[] = $r + array(
+				'label' => kits_edit_screen_type_label( $r['type'], $r['screen'] ),
+				'types' => array( $r['type'] ),
+			);
 			continue;
 		}
 		if ( ! isset( $at[ $group ] ) ) {
 			$at[ $group ] = count( $out );
-			$out[]        = $r + array( 'label' => '', 'types' => array(), 'ids' => array() );
+			$out[]        = $r + array(
+				'label' => '',
+				'types' => array(),
+				'ids' => array(),
+			);
 		}
 		$out[ $at[ $group ] ] = kits_edit_screen_join_row( $out[ $at[ $group ] ], $r );
 	}
@@ -975,7 +1018,13 @@ function kits_edit_screens_render( array $all ): void {
 	$text  = esc_html( sprintf( '%d %s on %d %s, %d %s on admin pages.', $n_box, 1 === $n_box ? 'box' : 'boxes', $n_scr, 1 === $n_scr ? 'edit screen' : 'edit screens', $admin, 1 === $admin ? 'widget' : 'widgets' ) );
 	$text .= ' ' . ( $unmapped ? '<a href="#aw-es-unmapped">' . esc_html( sprintf( 1 === $unmapped ? '%d box or field is not mapped yet.' : '%d boxes or fields are not mapped yet.', $unmapped ) ) . '</a>' : 'Every box is mapped.' );
 	$text .= ' ' . ( $twice ? '<a href="#aw-es-twice">' . esc_html( sprintf( 1 === count( $twice ) ? '%d field is edited in two places.' : '%d fields are edited in two places.', count( $twice ) ) ) . '</a>' : 'No field is edited in two places.' );
-	wp_admin_notice( $text, array( 'type' => $unmapped || $twice ? 'warning' : 'success', 'additional_classes' => array( 'inline' ) ) );
+	wp_admin_notice(
+		$text,
+		array(
+			'type' => $unmapped || $twice ? 'warning' : 'success',
+			'additional_classes' => array( 'inline' ),
+		)
+	);
 	if ( $unmapped ) {
 		kits_edit_screens_unmapped_section( $all, $screens );
 	}
@@ -1026,7 +1075,7 @@ function kits_edit_screens_mapping_tab( array $display, array $screens, callable
 	}
 	usort(
 		$boxes,
-		fn( $a, $b ) => strcasecmp( $a['plugin'], $b['plugin'] ) ?: ( strcasecmp( $a['purpose'], $b['purpose'] ) ?: strcasecmp( $a['title'], $b['title'] ) )
+		fn( $a, $b ) => 0 !== strcasecmp( $a['plugin'], $b['plugin'] ) ? strcasecmp( $a['plugin'], $b['plugin'] ) : ( 0 !== strcasecmp( $a['purpose'], $b['purpose'] ) ? strcasecmp( $a['purpose'], $b['purpose'] ) : strcasecmp( $a['title'], $b['title'] ) )
 	);
 	echo '<table class="form-table" role="presentation"><tbody>';
 	foreach ( $boxes as $r ) {
@@ -1177,16 +1226,32 @@ function kits_edit_screens_unmapped_section( array $all, array $screens ): void 
 		$type = esc_html( kits_edit_screen_module_label( $r['type'], $screens[ $r['type'] ] ?? $r['screen'] ) );
 		$box  = '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>';
 		if ( ! $r['mapped'] ) {
-			$cells[] = array( 'type' => $type, 'box' => $box, 'field' => '—' );
+			$cells[] = array(
+				'type' => $type,
+				'box' => $box,
+				'field' => '—',
+			);
 		}
 		foreach ( $r['notes'] as $note ) {
 			if ( ': Not mapped yet.' === substr( $note, -17 ) ) {
-				$cells[] = array( 'type' => $type, 'box' => $box, 'field' => '<code>' . esc_html( substr( $note, 0, -17 ) ) . '</code>' );
+				$cells[] = array(
+					'type' => $type,
+					'box' => $box,
+					'field' => '<code>' . esc_html( substr( $note, 0, -17 ) ) . '</code>',
+				);
 			}
 		}
 	}
 	echo '<h2 id="aw-es-unmapped">Not mapped yet</h2>';
-	kits_edit_screens_grid( 'es-unmapped', array( 'type' => 'Type', 'box' => 'Box', 'field' => 'Field' ), $cells );
+	kits_edit_screens_grid(
+		'es-unmapped',
+		array(
+			'type' => 'Type',
+			'box' => 'Box',
+			'field' => 'Field',
+		),
+		$cells
+	);
 }
 
 /**
@@ -1209,7 +1274,15 @@ function kits_edit_screens_twice_section( array $rows ): void {
 			'boxes' => esc_html( implode( ', ', $t['boxes'] ) ),
 		);
 	}
-	kits_edit_screens_grid( 'es-twice', array( 'type' => 'Type', 'key' => 'Key', 'boxes' => 'Boxes' ), $cells );
+	kits_edit_screens_grid(
+		'es-twice',
+		array(
+			'type' => 'Type',
+			'key' => 'Key',
+			'boxes' => 'Boxes',
+		),
+		$cells
+	);
 }
 
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
@@ -1230,7 +1303,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw-edit-screens',
 		function ( $args, $assoc ) {
-			$admins = get_users( array( 'role' => 'administrator', 'fields' => 'ID', 'number' => 1 ) );
+			$admins = get_users(
+				array(
+					'role' => 'administrator',
+					'fields' => 'ID',
+					'number' => 1,
+				)
+			);
 			if ( $admins && ! get_current_user_id() ) {
 				wp_set_current_user( (int) $admins[0] ); // boxes that check a capability; in memory only
 			}
@@ -1271,7 +1350,18 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$twice = kits_edit_screen_twice( $rows );
 			WP_CLI::log( 'Edited in two places:' );
 			if ( $twice ) {
-				WP_CLI\Utils\format_items( 'table', array_map( fn( $t ) => array( 'type' => $t['type'], 'key' => $t['key'], 'boxes' => implode( ', ', $t['boxes'] ) ), $twice ), array( 'type', 'key', 'boxes' ) );
+				WP_CLI\Utils\format_items(
+					'table',
+					array_map(
+						fn( $t ) => array(
+							'type' => $t['type'],
+							'key' => $t['key'],
+							'boxes' => implode( ', ', $t['boxes'] ),
+						),
+						$twice
+					),
+					array( 'type', 'key', 'boxes' )
+				);
 			} else {
 				WP_CLI::log( 'None.' );
 			}

@@ -64,7 +64,7 @@ function kits_fold_tabs( array $items, string $current ): array {
 		$label  = trim( html_entity_decode( explode( '<', (string) $item[0], 2 )[0], ENT_QUOTES, 'UTF-8' ) );
 		$tabs[] = array(
 			'' !== $label ? $label : $slug,
-			false !== strpos( $slug, '.php' ) ? $slug : kits_fold_link( $slug ),
+			false !== strpos( $slug, '.php' ) ? $slug : kits_fold_link( $slug ), // phpcs:ignore WordPress.PHP.YodaConditions.NotYoda -- the sniff misreads the ternary; the literal is already on the left
 			$current === $slug,
 		);
 	}

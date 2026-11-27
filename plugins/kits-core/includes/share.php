@@ -100,7 +100,24 @@ function kits_share_types() {
  *               'message' the line with its hashtags.
  */
 function kits_share_payload( $url, $title, $campaign = '', $args = array() ) {
-	$args = (array) apply_filters( 'kits_share_args', array_merge( array( 'text' => '', 'hashtags' => array(), 'image' => '', 'url' => '', 'post_id' => 0, 'follow' => array(), 'button' => '', 'order' => false ), (array) $args ), $url, $campaign );
+	$args = (array) apply_filters(
+		'kits_share_args',
+		array_merge(
+			array(
+				'text' => '',
+				'hashtags' => array(),
+				'image' => '',
+				'url' => '',
+				'post_id' => 0,
+				'follow' => array(),
+				'button' => '',
+				'order' => false,
+			),
+			(array) $args
+		),
+		$url,
+		$campaign
+	);
 	$text = '' !== trim( (string) $args['text'] ) ? trim( (string) $args['text'] ) : $title;
 	$tags = array_values( array_unique( array_filter( array_map( fn( $t ) => preg_replace( '/[^A-Za-z0-9_]/', '', (string) $t ), (array) $args['hashtags'] ), 'strlen' ) ) );
 	$hash = $tags ? ' ' . implode( ' ', array_map( fn( $t ) => '#' . $t, $tags ) ) : ''; // "#SiteTag #Tag" after the line

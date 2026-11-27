@@ -148,7 +148,7 @@ function kits_backup_rows( callable $fetch, callable $write, int $batch = KITS_B
 			++$done;
 		}
 		$offset += $batch;
-	} while ( count( $rows ) === $batch );
+	} while ( count( $rows ) === $batch ); // phpcs:ignore Squiz.PHP.DisallowSizeFunctionsInLoops -- the row count of the batch just read
 	return $done;
 }
 

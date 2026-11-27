@@ -72,7 +72,11 @@ function kits_error_count_dirs() {
 	$root   = untrailingslashit( ABSPATH );
 	$domain = dirname( $root );
 	$home   = dirname( dirname( $domain ) );
-	return array( 'root' => $root, 'domain' => $domain, 'home' => $home );
+	return array(
+		'root' => $root,
+		'domain' => $domain,
+		'home' => $home,
+	);
 }
 
 /**
@@ -168,7 +172,11 @@ function kits_error_count_resolve( array $candidates ) {
 			$files[ $real ] = $f;
 		}
 	}
-	return array( 'files' => array_values( $files ), 'tried' => $tried, 'unreadable' => $unreadable );
+	return array(
+		'files' => array_values( $files ),
+		'tried' => $tried,
+		'unreadable' => $unreadable,
+	);
 }
 
 /**
@@ -185,7 +193,10 @@ function kits_error_count_each_line( $file, callable $cb ) {
 	if ( '.gz' === substr( $file, -3 ) ) {
 		$h = function_exists( 'gzopen' ) ? gzopen( $file, 'rb' ) : false;
 		if ( ! $h ) {
-			return array( 'lines' => 0, 'cut' => false );
+			return array(
+				'lines' => 0,
+				'cut' => false,
+			);
 		}
 		while ( ! gzeof( $h ) ) {
 			$line = gzgets( $h, 65536 );
@@ -196,11 +207,17 @@ function kits_error_count_each_line( $file, callable $cb ) {
 			$cb( $line );
 		}
 		gzclose( $h );
-		return array( 'lines' => $lines, 'cut' => false );
+		return array(
+			'lines' => $lines,
+			'cut' => false,
+		);
 	}
 	$h = fopen( $file, 'rb' );
 	if ( ! $h ) {
-		return array( 'lines' => 0, 'cut' => false );
+		return array(
+			'lines' => 0,
+			'cut' => false,
+		);
 	}
 	$tail = max( 1048576, (int) apply_filters( 'kits_error_count_tail_bytes', 32 * 1048576 ) );
 	$size = (int) filesize( $file );
@@ -215,7 +232,10 @@ function kits_error_count_each_line( $file, callable $cb ) {
 	}
 	fclose( $h );
 	// phpcs:enable WordPress.WP.AlternativeFunctions
-	return array( 'lines' => $lines, 'cut' => $cut );
+	return array(
+		'lines' => $lines,
+		'cut' => $cut,
+	);
 }
 
 /**
@@ -268,9 +288,20 @@ function kits_error_count_php( $since ) {
 	$res   = kits_error_count_resolve( kits_error_count_php_candidates() );
 	$kinds = array();
 	foreach ( array_keys( kits_error_count_kinds() ) as $k ) {
-		$kinds[ $k ] = array( 'count' => 0, 'samples' => array() );
+		$kinds[ $k ] = array(
+			'count' => 0,
+			'samples' => array(),
+		);
 	}
-	$out = array( 'status' => 'not_found', 'count' => 0, 'files' => array(), 'partial' => false, 'samples' => array(), 'kinds' => $kinds, 'tried' => $res['tried'] );
+	$out = array(
+		'status' => 'not_found',
+		'count' => 0,
+		'files' => array(),
+		'partial' => false,
+		'samples' => array(),
+		'kinds' => $kinds,
+		'tried' => $res['tried'],
+	);
 	if ( ! $res['files'] ) {
 		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
 		return $out;
@@ -356,12 +387,21 @@ function kits_error_count_label( array $r, $kind = 'fatal' ) {
 function kits_error_count_kind( array $r, $kind ) {
 	if ( isset( $r['kinds'][ $kind ] ) && is_array( $r['kinds'][ $kind ] ) ) {
 		$k = $r['kinds'][ $kind ];
-		return array( 'count' => (int) ( $k['count'] ?? 0 ), 'samples' => (array) ( $k['samples'] ?? array() ) );
+		return array(
+			'count' => (int) ( $k['count'] ?? 0 ),
+			'samples' => (array) ( $k['samples'] ?? array() ),
+		);
 	}
 	if ( 'fatal' === $kind ) {
-		return array( 'count' => (int) ( $r['count'] ?? 0 ), 'samples' => (array) ( $r['samples'] ?? array() ) );
+		return array(
+			'count' => (int) ( $r['count'] ?? 0 ),
+			'samples' => (array) ( $r['samples'] ?? array() ),
+		);
 	}
-	return array( 'count' => 0, 'samples' => array() );
+	return array(
+		'count' => 0,
+		'samples' => array(),
+	);
 }
 
 /**
@@ -464,7 +504,16 @@ add_action(
 						'top'   => $top ? implode( '<br>', $top ) : '—',
 					);
 				}
-				kits_simple_table( 'error-count', array( 'check' => 'Check', 'count' => 'Count', 'from' => 'Read from', 'top' => 'Most frequent' ), $rows );
+				kits_simple_table(
+					'error-count',
+					array(
+						'check' => 'Check',
+						'count' => 'Count',
+						'from' => 'Read from',
+						'top' => 'Most frequent',
+					),
+					$rows
+				);
 			}
 		);
 	}

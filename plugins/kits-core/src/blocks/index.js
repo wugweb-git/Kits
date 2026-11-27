@@ -1,5 +1,5 @@
 /**
- * The Kits server-rendered blocks (countdown, metric, share, sticky action, letter, sponsored): one editor script, each
+ * The Kits server-rendered blocks (countdown, metric, share, sticky action, letter, sponsored, socials): one editor script, each
  * block a few settings in the sidebar and a server-side preview. Built by wp-scripts to build/blocks/.
  */
 import { registerBlockType } from '@wordpress/blocks';
@@ -40,6 +40,17 @@ const fields = {
 		[ 'intro', __( 'Opening line', 'kits-core' ), 'area' ],
 		[ 'closing', __( 'Closing line', 'kits-core' ), 'area' ],
 		[ 'sign', __( 'Sign-off', 'kits-core' ), 'text' ],
+	],
+	'kits/socials': [
+		[ 'heading', __( 'Heading', 'kits-core' ), 'text' ],
+		[
+			'profiles',
+			__(
+				'Profiles: one https address per line (empty: the site\'s profiles)',
+				'kits-core'
+			),
+			'area',
+		],
 	],
 	'kits/sponsored': [
 		[ 'heading', __( 'Heading', 'kits-core' ), 'text' ],

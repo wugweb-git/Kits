@@ -15,7 +15,8 @@
  *   the site operations (includes/ops/): aw_cdn_ttl, aw_cdn_ttl_long,
  *   aw_cron_runs, aw_deployed_head, aw_dispatch_log, aw_error_count, aw_site_check_last,
  *   the media records: aw_media_merge_log, aw_media_merge_data_*, aw_media_webp_log; kits_delete_data_on_uninstall.
- * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*,
+ * The used ALTCHA answers (option rows kits_altcha_used_*, 1.4.1), deleted by prefix.
+ * Transients (they expire anyway): kits_preview_link_*, kits_thanks_*, kits_transfer_result_*, kits_altcha_*, kits_dl_*,
  *   aw_error_count_mailed, aw_error_pages_checked, and the site transient kits_update_release.
  * Scheduled events: kits_spot_map_daily, aw_daily_backup, aw_error_count_daily, aw_site_check_deploy.
  * Also options kits_active_style_variation, kits_update_channel, kits_global_styles_backup, kits_tidy_menus,
@@ -118,9 +119,10 @@ foreach ( $kits_options as $kits_option ) {
 
 global $wpdb;
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'aw_media_merge_data_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: the merge tool's per-group records, once.
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'kits_altcha_used_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: used ALTCHA challenges, once.
 delete_transient( 'kits_brand_theme_data' );
 delete_transient( 'aw_error_count_mailed' ); // includes/ops/error-count.php
-foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_' ) as $kits_prefix ) {
+foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_', 'kits_dl_' ) as $kits_prefix ) {
 	foreach ( array( '_transient_', '_transient_timeout_' ) as $kits_kind ) {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $kits_kind . $kits_prefix ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: transients by prefix, once.
 	}

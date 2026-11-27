@@ -57,5 +57,9 @@ function animalwrites_kits_core_site_load(): void {
 	) as $file ) {
 		require_once $dir . $file;
 	}
+	// The Library "Dated" and campaign "Metrics" edit fields moved here from Kits Core 1.4.1; older Cores still carry them.
+	if ( version_compare( KITS_CORE_VERSION, '1.4.1', '>=' ) ) {
+		require_once $dir . 'edit-fields.php';
+	}
 }
 add_action( 'plugins_loaded', 'animalwrites_kits_core_site_load', 1 );

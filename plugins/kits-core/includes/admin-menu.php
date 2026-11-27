@@ -361,10 +361,46 @@ function kits_home_theme(): void {
 
 	// KPI Scorecard Grid (Google Site Kit / FluentCRM style).
 	echo '<div class="kits-kpi-grid">';
-	echo kits_frame_kpi_card( 'Design System Elements', '172', array( 'unit' => 'registered', 'trend' => '100% verified', 'trend_dir' => 'up', 'sparkline' => array( 120, 135, 150, 162, 172 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
-	echo kits_frame_kpi_card( 'Active Design Tokens', '48', array( 'unit' => 'tokens', 'trend' => 'Active', 'trend_dir' => 'up', 'sparkline' => array( 30, 36, 42, 45, 48 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
-	echo kits_frame_kpi_card( 'FSE Templates & Parts', '6', array( 'unit' => 'synced', 'trend' => 'Native FSE', 'trend_dir' => 'up', 'sparkline' => array( 2, 4, 5, 5, 6 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
-	echo kits_frame_kpi_card( 'Theme & System Health', '100%', array( 'unit' => 'optimal', 'trend' => 'Healthy', 'trend_dir' => 'up', 'sparkline' => array( 96, 98, 99, 100, 100 ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+		'Design System Elements',
+		'172',
+		array(
+			'unit' => 'registered',
+			'trend' => '100% verified',
+			'trend_dir' => 'up',
+			'sparkline' => array( 120, 135, 150, 162, 172 ),
+		)
+	); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+		'Active Design Tokens',
+		'48',
+		array(
+			'unit' => 'tokens',
+			'trend' => 'Active',
+			'trend_dir' => 'up',
+			'sparkline' => array( 30, 36, 42, 45, 48 ),
+		)
+	); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+		'FSE Templates & Parts',
+		'6',
+		array(
+			'unit' => 'synced',
+			'trend' => 'Native FSE',
+			'trend_dir' => 'up',
+			'sparkline' => array( 2, 4, 5, 5, 6 ),
+		)
+	); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
+	echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+		'Theme & System Health',
+		'100%',
+		array(
+			'unit' => 'optimal',
+			'trend' => 'Healthy',
+			'trend_dir' => 'up',
+			'sparkline' => array( 96, 98, 99, 100, 100 ),
+		)
+	); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- helper returns sanitized SVG/markup.
 	echo '</div>';
 
 	// Quickstart Guide: 3 Steps to Launch Your Site (Astra / Kadence standard).

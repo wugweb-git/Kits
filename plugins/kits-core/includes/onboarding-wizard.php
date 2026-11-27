@@ -112,7 +112,15 @@ add_action(
 			}
 		}
 
-		wp_safe_redirect( add_query_arg( array( 'page' => 'kits-onboarding', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page' => 'kits-onboarding',
+					'updated' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 		exit;
 	}
 );
@@ -361,7 +369,12 @@ function kits_onboarding_restore_global_styles(): bool {
 		return false;
 	}
 	$current = get_post( (int) $post['ID'] );
-	$res     = wp_update_post( array( 'ID' => (int) $post['ID'], 'post_content' => wp_slash( $backup ) ) );
+	$res     = wp_update_post(
+		array(
+			'ID' => (int) $post['ID'],
+			'post_content' => wp_slash( $backup ),
+		)
+	);
 	WP_Theme_JSON_Resolver::clean_cached_data();
 	if ( is_wp_error( $res ) || $res < 1 ) {
 		return false;
@@ -378,7 +391,15 @@ add_action(
 		}
 		check_admin_referer( 'kits_restore_global_styles', 'kits_restore_nonce' );
 		kits_onboarding_restore_global_styles();
-		wp_safe_redirect( add_query_arg( array( 'page' => 'kits-onboarding', 'restored' => '1' ), admin_url( 'admin.php' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page' => 'kits-onboarding',
+					'restored' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 		exit;
 	}
 );

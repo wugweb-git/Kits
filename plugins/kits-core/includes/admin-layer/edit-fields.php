@@ -1,15 +1,14 @@
 <?php
 /**
  * Edit fields for values that only WP-CLI could change before. Core form tables and meta box markup, no custom CSS; each value keeps its key and stored shape,
- * and a Save with no change writes nothing. The Library and Campaign types are the site's (kits_library_post_type,
- * kits_campaign_post_type); without them those two fields are not added.
+ * and a Save with no change writes nothing.
  *
  * - Category → Edit: Card image (term meta aw_category_card, media.php) and Pinned Resources (aw_pinned, one row per
  *   post ID, pages.php).
  * - Linked campaigns → Edit: Short name (term meta aw_short_name; the older key aw_campaign_short is read when it is
  *   empty, hub-blocks.php).
- * - Library item (Document box): Dated (aw_legal_dated, item-head.php).
- * - Campaign (Outcome box): Metrics (aw_campaign_metrics JSON, campaign-record.php), one line per metric.
+ * The Library "Dated" and campaign "Metrics" fields moved to the site layer in Kits Core 1.4.1
+ * (the site layer's includes/edit-fields.php); Kits Core no longer names those types or keys.
  *
  * @package kits-core
  */
@@ -67,27 +66,14 @@ add_action(
 
 /* ---------- Linked campaigns: short name ---------- */
 
-/** The site's Library post type ('' when it has none). */
-function kits_library_post_type(): string {
-	return (string) apply_filters( 'kits_library_post_type', '' );
-}
-
-// The hooks named after the site's types are added once the tenant has named them (KITS_CAMPAIGN_LINK and the type
-// filters are set while the plugins load).
+// The hook named after the site's linked-campaign taxonomy is added once the tenant has named it (KITS_CAMPAIGN_LINK is
+// set while the plugins load). The Library "Dated" and campaign "Metrics" fields are the site layer's since Kits Core 1.4.1.
 add_action(
 	'init',
 	function () {
 		if ( defined( 'KITS_CAMPAIGN_LINK' ) && '' !== (string) KITS_CAMPAIGN_LINK ) {
 			add_action( KITS_CAMPAIGN_LINK . '_edit_form_fields', 'kits_edit_fields_camp_field', 5 );
 			add_action( 'edited_' . KITS_CAMPAIGN_LINK, 'kits_edit_fields_camp_save' );
-		}
-		$library = kits_library_post_type();
-		if ( '' !== $library ) {
-			add_action( 'save_post_' . $library, 'kits_edit_fields_dated_save' );
-		}
-		$campaign = function_exists( 'kits_campaign_post_type' ) ? kits_campaign_post_type() : '';
-		if ( '' !== $campaign ) {
-			add_action( 'save_post_' . $campaign, 'kits_edit_fields_metrics_save', 20 );
 		}
 	},
 	1
@@ -137,149 +123,4 @@ function kits_edit_fields_camp_save( $term_id ): void {
 		return;
 	}
 		update_term_meta( $term_id, 'aw_short_name', $v ); // read before the older key
-}
-
-/* ---------- Library item: Dated ---------- */
-
-add_action(
-	'acf/render_field/key=field_aw_legal_msg_item',
-	function () {
-		global $post;
-		if ( ! $post instanceof WP_Post || '' === kits_library_post_type() || kits_library_post_type() !== $post->post_type ) {
-			return;
-		}
-		wp_nonce_field( 'kits_edit_fields_dated', 'kits_edit_fields_dated_nonce' );
-		printf(
-			'<p><label for="aw-legal-dated">%1$s</label><br><input type="date" id="aw-legal-dated" name="aw_legal_dated" value="%2$s"></p>',
-			esc_html( 'Dated (the document\'s own date, when it differs from its publication date). Empty: none' ),
-			esc_attr( (string) get_post_meta( $post->ID, 'aw_legal_dated', true ) )
-		);
-	},
-	20
-);
-
-/**
- * Library item: saves Dated.
- *
- * @param int $post_id Post ID.
- */
-function kits_edit_fields_dated_save( $post_id ): void {
-	if ( wp_is_post_revision( $post_id ) || ! isset( $_POST['kits_edit_fields_dated_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['kits_edit_fields_dated_nonce'] ) ), 'kits_edit_fields_dated' ) || ! current_user_can( 'edit_post', $post_id ) ) {
-		return;
-	}
-		$v   = sanitize_text_field( wp_unslash( $_POST['aw_legal_dated'] ?? '' ) );
-		$now = (string) get_post_meta( $post_id, 'aw_legal_dated', true );
-	if ( $v === $now ) {
-		return;
-	}
-	if ( '' === $v ) {
-		delete_post_meta( $post_id, 'aw_legal_dated' );
-	} elseif ( kits_edit_fields_is_day( $v ) ) {
-		update_post_meta( $post_id, 'aw_legal_dated', $v );
-	}
-}
-
-/**
- * Whether a text is a real day as Y-m-d.
- *
- * @param string $v Text.
- */
-function kits_edit_fields_is_day( string $v ): bool {
-	$d = DateTime::createFromFormat( '!Y-m-d', $v );
-	return $d && $d->format( 'Y-m-d' ) === $v;
-}
-
-/* ---------- Campaign: metrics ---------- */
-
-/** The fields of one metric line, in order. */
-const KITS_EDIT_METRIC_FIELDS = array( 'key', 'label', 'value', 'count', 'threshold', 'verified', 'stale_days', 'attribution', 'source_label', 'source_url' );
-
-/**
- * A campaign's metrics as lines: "key | label | value | count | threshold | verified | stale days | attribution |
- * source | source link".
- *
- * @param int $id Campaign ID.
- */
-function kits_edit_fields_metric_lines( $id ): string {
-	$list  = json_decode( (string) get_post_meta( $id, 'aw_campaign_metrics', true ), true );
-	$lines = array();
-	foreach ( is_array( $list ) ? $list : array() as $m ) {
-		$lines[] = implode( ' | ', array_map( fn( $k ) => (string) ( ( (array) $m )[ $k ] ?? '' ), KITS_EDIT_METRIC_FIELDS ) );
-	}
-	return implode( "\n", $lines );
-}
-
-/**
- * Lines back to the metric list, or null when a line cannot be read.
- *
- * @param string $text Posted lines.
- * @return array|null
- */
-function kits_edit_fields_metric_list( string $text ) {
-	$out = array();
-	foreach ( preg_split( '/\R/', $text ) as $line ) {
-		if ( '' === trim( $line ) ) {
-			continue;
-		}
-		$p = array_map( 'trim', explode( '|', $line ) );
-		if ( count( $p ) > 10 ) {
-			return null;
-		}
-		$m = array_combine( KITS_EDIT_METRIC_FIELDS, array_pad( $p, 10, '' ) );
-		if ( '' === sanitize_key( $m['key'] ) || ( '' !== $m['verified'] && ! kits_edit_fields_is_day( $m['verified'] ) ) || ( '' !== $m['source_url'] && ! wp_http_validate_url( $m['source_url'] ) ) ) {
-			return null;
-		}
-		$row = array();
-		foreach ( KITS_EDIT_METRIC_FIELDS as $k ) {
-			if ( '' === $m[ $k ] ) {
-				continue; // a field left empty is not stored, as before
-			}
-			if ( in_array( $k, array( 'threshold', 'stale_days' ), true ) ) {
-				$row[ $k ] = (int) $m[ $k ];
-			} elseif ( 'count' === $k ) {
-				$row[ $k ] = 0 + (float) $m[ $k ];
-			} elseif ( 'source_url' === $k ) {
-				$row[ $k ] = esc_url_raw( $m[ $k ] );
-			} else {
-				$row[ $k ] = 'key' === $k ? sanitize_key( $m[ $k ] ) : sanitize_text_field( $m[ $k ] );
-			}
-		}
-		$out[] = $row;
-	}
-	return $out;
-}
-
-/**
- * The Metrics field, inside the Outcome box after Real-world impact (campaign-record.php aw_camp_record_box()).
- *
- * @param WP_Post $post Campaign.
- */
-function kits_edit_fields_metrics_box( $post ): void {
-	wp_nonce_field( 'kits_edit_fields_metrics', 'kits_edit_fields_metrics_nonce' );
-	printf(
-		'<p><label for="aw-camp-metrics">%1$s</label><br><textarea class="large-text code" rows="4" wrap="off" spellcheck="false" id="aw-camp-metrics" name="aw_campaign_metrics_lines">%2$s</textarea></p><p class="description">%3$s</p>',
-		esc_html( 'Metrics' ),
-		esc_textarea( kits_edit_fields_metric_lines( $post->ID ) ),
-		esc_html( 'One per line: key | label | value | count | threshold | verified (YYYY-MM-DD) | stale after days | attribution | source | source link. A metric shows only once verified, and only when its count reaches the threshold. A line that cannot be read keeps all metrics as they were.' )
-	);
-}
-
-/**
- * Campaign: saves the Metrics lines.
- *
- * @param int $id Post ID.
- */
-function kits_edit_fields_metrics_save( $id ): void {
-	if ( wp_is_post_revision( $id ) || ! isset( $_POST['kits_edit_fields_metrics_nonce'], $_POST['aw_campaign_metrics_lines'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['kits_edit_fields_metrics_nonce'] ) ), 'kits_edit_fields_metrics' ) || ! current_user_can( 'edit_post', $id ) ) {
-		return;
-	}
-		$text = str_replace( "\r\n", "\n", (string) wp_unslash( $_POST['aw_campaign_metrics_lines'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each field is cleaned in kits_edit_fields_metric_list()
-	if ( trim( $text ) === trim( kits_edit_fields_metric_lines( $id ) ) ) {
-		return; // unchanged: the stored JSON stays byte for byte
-	}
-		$list = kits_edit_fields_metric_list( $text );
-	if ( null === $list ) {
-		return; // a line could not be read: nothing changes
-	}
-		$list ? update_post_meta( $id, 'aw_campaign_metrics', wp_slash( (string) wp_json_encode( $list ) ) ) : delete_post_meta( $id, 'aw_campaign_metrics' );
 }

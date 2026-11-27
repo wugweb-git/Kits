@@ -27,6 +27,10 @@ a:hover { color: var(--kit-color-link); text-decoration-thickness: var(--kit-und
 /* On dark surfaces the focus ring and links switch to light colours */
 :is(.kit-dark, .has-secondary-background-color, .wp-block-cover.is-dark, .kit-ed-help, .kit-ed-story, .kit-ed-hero, .kit-site-footer) { --kit-color-focus: var(--color-yellow); --kit-color-link: var(--neutral-0); }
 .wp-site-blocks > main { margin-block-start: 0; }
+/* A submenu panel is a light panel inside the dark header: the yellow ring meant for dark surfaces is 1.5:1 on it, so it uses the focus preset (6.1:1 on white) */
+.kit-site-header .wp-block-navigation__submenu-container { --kit-color-focus: var(--wp--preset--color--focus, #0062b8); }
+/* Windows high contrast removes box-shadow: give form fields a real outline there */
+@media (forced-colors: active) { .kit-form :is(input, select, textarea):focus-visible { outline: var(--kit-focus-width) solid CanvasText; } }
 .wp-site-blocks > main:has(> .wp-block-post-content > .alignfull:last-child) + * { margin-block-start: 0; } /* a page that ends with a full-width band meets the footer with no strip */
 
 /* 2. Typography ------------------------------------------------------------- */
@@ -467,6 +471,7 @@ html { overflow-x: clip; }
 
 /* Header: grouped navigation + Find help button */
 .kit-header-right { gap: var(--kit-space-5) !important; align-items: center; }
+.kit-header-right > .wp-block-navigation { flex-wrap: nowrap; align-items: center; } /* the injected theme toggle sits beside the menu, not under it */
 .kit-site-header .wp-block-navigation__submenu-container { background: var(--kit-color-raised) !important; color: var(--kit-color-ink) !important; border: var(--kit-border-width) solid var(--kit-color-line) !important; border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); padding: var(--kit-space-2) !important; min-width: 15rem !important; }
 .kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content { color: var(--kit-color-ink) !important; padding: var(--kit-space-2) var(--kit-space-3) !important; border-radius: var(--kit-radius-control); font-size: var(--kit-type-sm); }
 .kit-site-header .wp-block-navigation__submenu-container .wp-block-navigation-item__content:hover { background: var(--kit-color-canvas); }

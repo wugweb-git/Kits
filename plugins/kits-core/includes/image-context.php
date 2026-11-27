@@ -12,8 +12,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter(
 	'attachment_fields_to_edit',
 	function ( $fields, $post ) {
-		$fields['kits_image_context'] = array( 'label' => 'Image context', 'input' => 'textarea', 'value' => (string) get_post_meta( $post->ID, 'kits_image_context', true ), 'helps' => 'Note for editors: the copy this image supports. Not shown on the site.' );
-		$fields['kits_image_keyphrase'] = array( 'label' => 'Focus keyphrase', 'input' => 'text', 'value' => (string) get_post_meta( $post->ID, 'kits_image_keyphrase', true ), 'helps' => 'The one phrase this image supports in search. Editor note; not shown on the site.' );
+		$fields['kits_image_context'] = array(
+			'label' => 'Image context',
+			'input' => 'textarea',
+			'value' => (string) get_post_meta( $post->ID, 'kits_image_context', true ),
+			'helps' => 'Note for editors: the copy this image supports. Not shown on the site.',
+		);
+		$fields['kits_image_keyphrase'] = array(
+			'label' => 'Focus keyphrase',
+			'input' => 'text',
+			'value' => (string) get_post_meta( $post->ID, 'kits_image_keyphrase', true ),
+			'helps' => 'The one phrase this image supports in search. Editor note; not shown on the site.',
+		);
 		return $fields;
 	},
 	10,

@@ -52,8 +52,14 @@ add_action(
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 						array(
-							array( 'label' => 'Unread', 'value' => number_format_i18n( $unread ) ),
-							array( 'label' => 'New in the last 7 days', 'value' => number_format_i18n( $week ) ),
+							array(
+								'label' => 'Unread',
+								'value' => number_format_i18n( $unread ),
+							),
+							array(
+								'label' => 'New in the last 7 days',
+								'value' => number_format_i18n( $week ),
+							),
 						)
 					);
 				}

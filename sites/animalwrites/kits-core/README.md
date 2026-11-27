@@ -34,11 +34,12 @@ Deploy order for the live site: put this layer in place first (it is inert under
 | `includes/thumbs.php`, `category-images.php`, `card-images.php` | Card pictures that never repeat (`aw_thumb_map`, `/aw/v1/thumb-dupes`), category photos and the placard fallback (Animal Writes logo). |
 | `includes/tools/media-reuse.php`, `includes/tools/data/` | Media → Reuse pictures and its plan, and the duplicate file groups for Media → Duplicate files (live attachment IDs). |
 | `includes/ops/retention.php` | Opportunity closing dates (`aw_opportunity`). |
+| `includes/edit-fields.php` | The Library "Dated" (`aw_legal_dated`) and campaign "Metrics" (`aw_campaign_metrics`) edit fields, moved out of Kits Core 1.4.1. Loads only with Kits Core 1.4.1 or later; switch either off with the filter `animalwrites_edit_fields`; names the Library type `aw_legal` through `kits_library_post_type` (priority 5, so a later filter can change it). |
 | `includes/ops/compat.php`, `includes/forms/compat.php`, `includes/compat-backups-error-pages.php` | The older `aw_` function names, as thin wrappers over Kits Core's `kits_` functions. |
 | `assets/site/dropins/`, `assets/site/error/` | The branded 500 and 503 drop-ins (they carry the marker `Animal Writes error page`, a compatibility key: pages already in `wp-content` stay recognised and are updated in place) and the 404 pictures. |
 | `assets/js/sponsored-blocks.js` | Editor script of the `animal-writes/sponsored-*` blocks (nothing in this repository registers it; it comes from the theme layer). |
 | `assets/css/dashboard-letters.css` | The card look of the campaign letters Dashboard box (`#aw_cl_widget`), taken out of Kits Core's Dashboard cards. |
-| `tests/` | `php tests/site-layer-tests.php`, `php tests/site-ops-tests.php`, `php tests/taxonomy-rename-tests.php`. |
+| `tests/` | `php tests/site-layer-tests.php`, `php tests/site-ops-tests.php`, `php tests/taxonomy-rename-tests.php`, `php tests/edit-fields-tests.php`. |
 
 ## Notes
 

@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "kits/socials",
+	"title": "Socials",
+	"category": "widgets",
+	"description": "The site's social profiles as a list of links. Plain text links: no icons fetched, no third-party scripts.",
+	"keywords": [ "social", "profiles", "follow", "links", "kits" ],
+	"textdomain": "kits-core",
+	"attributes": {
+		"heading": { "type": "string", "default": "" },
+		"profiles": { "type": "string", "default": "" }
+	},
+	"supports": { "html": false, "align": [ "wide" ], "spacing": { "margin": true, "padding": true } },
+	"editorScript": "file:../../build/blocks/index.js",
+	"style": "file:./style.css"
+}

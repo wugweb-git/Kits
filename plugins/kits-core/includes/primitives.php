@@ -350,7 +350,15 @@ function kits_filter_dropdown( $legend, $param, $options ) {
 		. '<fieldset class="kit-dd-panel" id="' . esc_attr( $id ) . '" data-wp-bind--hidden="!callbacks.isOpen"><legend class="screen-reader-text">' . esc_html( $legend ) . '</legend><ul class="kit-dd-list">';
 	foreach ( $options as $o ) {
 		$html .= '<li><label class="kit-dd-opt"><input type="checkbox" class="kit-dd-check" name="' . esc_attr( $param ) . '[]" value="' . esc_attr( $o[1] ) . '"' . checked( ! empty( $o[2] ), true, false ) . '>'
-			. ( empty( $o[4] ) ? '' : wp_kses( (string) $o[4], array( 'span' => array( 'class' => true, 'aria-hidden' => true ) ) ) ) . '<span class="kit-dd-text">' . esc_html( $o[0] ) . '</span>' . kits_count( (int) $o[3] ) . '</label></li>';
+			. ( empty( $o[4] ) ? '' : wp_kses(
+				(string) $o[4],
+				array(
+					'span' => array(
+						'class' => true,
+						'aria-hidden' => true,
+					),
+				)
+			) ) . '<span class="kit-dd-text">' . esc_html( $o[0] ) . '</span>' . kits_count( (int) $o[3] ) . '</label></li>';
 	}
 	return kits_dd_render( $html . '</ul></fieldset></div>' );
 }
@@ -455,4 +463,3 @@ function kits_dd_render( $html ) {
 	wp_enqueue_script_module( 'kits-dropdown' );
 	return function_exists( 'wp_interactivity_process_directives' ) ? wp_interactivity_process_directives( $html ) : $html;
 }
-

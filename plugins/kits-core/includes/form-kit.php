@@ -18,23 +18,161 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function kits_field_dict() {
-	$phone = array( 'autocomplete' => 'tel', 'inputmode' => 'tel', 'maxlength' => 16, 'data-rule' => 'phone', 'data-msg-phone' => 'Enter a 10-digit phone number, like 98765 43210' );
+	$phone = array(
+		'autocomplete' => 'tel',
+		'inputmode' => 'tel',
+		'maxlength' => 16,
+		'data-rule' => 'phone',
+		'data-msg-phone' => 'Enter a 10-digit phone number, like 98765 43210',
+	);
 	$d     = array(
-		'name'         => array( 'label' => 'Your name', 'icon' => 'name', 'placeholder' => 'Your name', 'attrs' => array( 'autocomplete' => 'name', 'maxlength' => 80 ), 'rules' => array( 'max:80' ), 'messages' => array( 'required' => 'Enter your name' ) ),
-		'email'        => array( 'label' => 'Email', 'type' => 'email', 'icon' => 'mail', 'placeholder' => 'you@example.com', 'required' => true, 'attrs' => array( 'autocomplete' => 'email', 'inputmode' => 'email', 'maxlength' => 254 ), 'rules' => array( 'email' ), 'messages' => array( 'required' => 'Enter your email address', 'email' => 'Enter a full email address, like you@example.com' ) ),
-		'phone'        => array( 'label' => 'Phone', 'type' => 'tel', 'icon' => 'phone', 'placeholder' => '98765 43210', 'attrs' => $phone, 'rules' => array( 'phone' ), 'messages' => array( 'required' => 'Enter your phone number', 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ) ),
-		'whatsapp'     => array( 'label' => 'WhatsApp', 'type' => 'tel', 'icon' => 'brand-whatsapp', 'placeholder' => '98765 43210', 'attrs' => $phone, 'rules' => array( 'phone' ), 'messages' => array( 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ) ),
-		'organisation' => array( 'label' => 'Organisation', 'icon' => 'building', 'placeholder' => 'Example Trust', 'attrs' => array( 'autocomplete' => 'organization', 'maxlength' => 120 ), 'rules' => array( 'max:120' ) ),
-		'role'         => array( 'label' => 'Your role here', 'type' => 'select', 'required' => true, 'messages' => array( 'required' => 'Choose your role' ) ),
-		'pincode'      => array( 'label' => 'PIN code', 'icon' => 'map-pin', 'placeholder' => '682011', 'attrs' => array( 'inputmode' => 'numeric', 'maxlength' => 6, 'autocomplete' => 'postal-code', 'pattern' => '[1-9][0-9]{5}', 'data-pin-lookup' => '1', 'data-msg-pattern' => 'Enter a 6-digit PIN code, like 682011' ), 'rules' => array( 'pin' ) ),
-		'state'        => array( 'label' => 'State', 'type' => 'select', 'attrs' => array( 'autocomplete' => 'address-level1' ), 'messages' => array( 'required' => 'Choose a state' ) ),
-		'district'     => array( 'label' => 'District', 'type' => 'select', 'attrs' => array( 'autocomplete' => 'address-level2' ), 'messages' => array( 'required' => 'Choose a district' ) ),
-		'area'         => array( 'label' => 'Area or locality', 'placeholder' => 'Edappally', 'attrs' => array( 'autocomplete' => 'address-level3', 'maxlength' => 120 ), 'rules' => array( 'max:120' ) ),
-		'website'      => array( 'label' => 'Website', 'type' => 'url', 'icon' => 'world', 'placeholder' => 'https://example.org', 'attrs' => array( 'autocomplete' => 'url', 'inputmode' => 'url', 'maxlength' => 200, 'data-rule' => 'url', 'data-msg-url' => 'Enter a web address, like https://example.org' ), 'rules' => array( 'url' ), 'messages' => array( 'url' => 'Enter a web address, like https://example.org' ) ),
-		'reason'       => array( 'label' => 'What\'s this about?', 'type' => 'select', 'required' => true, 'messages' => array( 'required' => 'Choose what this is about' ) ),
-		'message'      => array( 'label' => 'Message', 'type' => 'textarea', 'attrs' => array( 'maxlength' => 3000, 'rows' => 5, 'data-counter' => 2500 ), 'rules' => array( 'max:3000' ), 'messages' => array( 'required' => 'Enter your message' ) ),
-		'logo'         => array( 'label' => 'Logo', 'type' => 'file', 'attrs' => array( 'accept' => 'image/png,image/jpeg,image/webp', 'data-max-bytes' => 8 * MB_IN_BYTES, 'data-msg-file' => 'Use a PNG, JPG or WebP.' ) ),
-		'consent'      => array( 'label' => '', 'type' => 'checkbox', 'required' => true, 'messages' => array( 'required' => 'Tick the box to agree' ) ),
+		'name'         => array(
+			'label' => 'Your name',
+			'icon' => 'name',
+			'placeholder' => 'Your name',
+			'attrs' => array(
+				'autocomplete' => 'name',
+				'maxlength' => 80,
+			),
+			'rules' => array( 'max:80' ),
+			'messages' => array( 'required' => 'Enter your name' ),
+		),
+		'email'        => array(
+			'label' => 'Email',
+			'type' => 'email',
+			'icon' => 'mail',
+			'placeholder' => 'you@example.com',
+			'required' => true,
+			'attrs' => array(
+				'autocomplete' => 'email',
+				'inputmode' => 'email',
+				'maxlength' => 254,
+			),
+			'rules' => array( 'email' ),
+			'messages' => array(
+				'required' => 'Enter your email address',
+				'email' => 'Enter a full email address, like you@example.com',
+			),
+		),
+		'phone'        => array(
+			'label' => 'Phone',
+			'type' => 'tel',
+			'icon' => 'phone',
+			'placeholder' => '98765 43210',
+			'attrs' => $phone,
+			'rules' => array( 'phone' ),
+			'messages' => array(
+				'required' => 'Enter your phone number',
+				'phone' => 'Enter a 10-digit phone number, like 98765 43210',
+			),
+		),
+		'whatsapp'     => array(
+			'label' => 'WhatsApp',
+			'type' => 'tel',
+			'icon' => 'brand-whatsapp',
+			'placeholder' => '98765 43210',
+			'attrs' => $phone,
+			'rules' => array( 'phone' ),
+			'messages' => array( 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ),
+		),
+		'organisation' => array(
+			'label' => 'Organisation',
+			'icon' => 'building',
+			'placeholder' => 'Example Trust',
+			'attrs' => array(
+				'autocomplete' => 'organization',
+				'maxlength' => 120,
+			),
+			'rules' => array( 'max:120' ),
+		),
+		'role'         => array(
+			'label' => 'Your role here',
+			'type' => 'select',
+			'required' => true,
+			'messages' => array( 'required' => 'Choose your role' ),
+		),
+		'pincode'      => array(
+			'label' => 'PIN code',
+			'icon' => 'map-pin',
+			'placeholder' => '682011',
+			'attrs' => array(
+				'inputmode' => 'numeric',
+				'maxlength' => 6,
+				'autocomplete' => 'postal-code',
+				'pattern' => '[1-9][0-9]{5}',
+				'data-pin-lookup' => '1',
+				'data-msg-pattern' => 'Enter a 6-digit PIN code, like 682011',
+			),
+			'rules' => array( 'pin' ),
+		),
+		'state'        => array(
+			'label' => 'State',
+			'type' => 'select',
+			'attrs' => array( 'autocomplete' => 'address-level1' ),
+			'messages' => array( 'required' => 'Choose a state' ),
+		),
+		'district'     => array(
+			'label' => 'District',
+			'type' => 'select',
+			'attrs' => array( 'autocomplete' => 'address-level2' ),
+			'messages' => array( 'required' => 'Choose a district' ),
+		),
+		'area'         => array(
+			'label' => 'Area or locality',
+			'placeholder' => 'Edappally',
+			'attrs' => array(
+				'autocomplete' => 'address-level3',
+				'maxlength' => 120,
+			),
+			'rules' => array( 'max:120' ),
+		),
+		'website'      => array(
+			'label' => 'Website',
+			'type' => 'url',
+			'icon' => 'world',
+			'placeholder' => 'https://example.org',
+			'attrs' => array(
+				'autocomplete' => 'url',
+				'inputmode' => 'url',
+				'maxlength' => 200,
+				'data-rule' => 'url',
+				'data-msg-url' => 'Enter a web address, like https://example.org',
+			),
+			'rules' => array( 'url' ),
+			'messages' => array( 'url' => 'Enter a web address, like https://example.org' ),
+		),
+		'reason'       => array(
+			'label' => 'What\'s this about?',
+			'type' => 'select',
+			'required' => true,
+			'messages' => array( 'required' => 'Choose what this is about' ),
+		),
+		'message'      => array(
+			'label' => 'Message',
+			'type' => 'textarea',
+			'attrs' => array(
+				'maxlength' => 3000,
+				'rows' => 5,
+				'data-counter' => 2500,
+			),
+			'rules' => array( 'max:3000' ),
+			'messages' => array( 'required' => 'Enter your message' ),
+		),
+		'logo'         => array(
+			'label' => 'Logo',
+			'type' => 'file',
+			'attrs' => array(
+				'accept' => 'image/png,image/jpeg,image/webp',
+				'data-max-bytes' => 8 * MB_IN_BYTES,
+				'data-msg-file' => 'Use a PNG, JPG or WebP.',
+			),
+		),
+		'consent'      => array(
+			'label' => '',
+			'type' => 'checkbox',
+			'required' => true,
+			'messages' => array( 'required' => 'Tick the box to agree' ),
+		),
 	);
 	return (array) apply_filters( 'kits_field_dict', $d );
 }
@@ -84,13 +222,29 @@ function kits_submitted_source() {
 	return substr( sanitize_text_field( wp_unslash( $_POST['aw_source'] ?? '' ) ), 0, 120 ); // phpcs:ignore WordPress.Security.NonceVerification
 }
 
+/**
+ * The nonce for a form key, or '' (1.4.1). The key must name a real form: one with an admin-post handler
+ * (admin_post_nopriv_{key} or admin_post_{key}) or one a site layer lists with the filter kits_form_nonce_actions.
+ * Before, any string got a nonce, so the endpoint minted a valid nonce for any action name to anyone.
+ *
+ * @param string $form Form key (the admin-post action and nonce action).
+ * @return string
+ */
+function kits_form_nonce_for( $form ) {
+	$form = sanitize_key( (string) $form );
+	if ( '' === $form ) {
+		return '';
+	}
+	$known = has_action( 'admin_post_nopriv_' . $form ) || has_action( 'admin_post_' . $form ) || in_array( $form, (array) apply_filters( 'kits_form_nonce_actions', array() ), true );
+	return $known ? wp_create_nonce( $form ) : '';
+}
+
 // A fresh form key when a cached page's key has expired: forms.js asks once, then sends again.
 add_action( 'wp_ajax_nopriv_kits_form_nonce', 'kits_form_nonce_json' );
 add_action( 'wp_ajax_kits_form_nonce', 'kits_form_nonce_json' );
 function kits_form_nonce_json() {
 	nocache_headers();
-	$form = sanitize_key( wp_unslash( $_GET['form'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	wp_send_json( array( 'nonce' => $form ? wp_create_nonce( $form ) : '' ) );
+	wp_send_json( array( 'nonce' => kits_form_nonce_for( wp_unslash( $_GET['form'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput -- the answer is the nonce for a known form; sanitized in kits_form_nonce_for()
 }
 
 /**

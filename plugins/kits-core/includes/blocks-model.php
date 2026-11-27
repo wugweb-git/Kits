@@ -90,6 +90,64 @@ function kits_sponsored_clean( array $items ): array {
 }
 
 /**
+ * Clean a list of social profile addresses for the Socials block: https only, no duplicates, at most 12, each with a
+ * label (the network's name, else the host). No request is made.
+ *
+ * @param array $raw Addresses or handles.
+ * @return array<int,array{label:string,url:string}>
+ */
+function kits_socials_clean( array $raw ): array {
+	$names = array(
+		'facebook.com'  => 'Facebook',
+		'x.com'         => 'X',
+		'twitter.com'   => 'X',
+		'instagram.com' => 'Instagram',
+		'linkedin.com'  => 'LinkedIn',
+		'youtube.com'   => 'YouTube',
+		'youtu.be'      => 'YouTube',
+		'tiktok.com'    => 'TikTok',
+		'pinterest.com' => 'Pinterest',
+		'threads.net'   => 'Threads',
+		'whatsapp.com'  => 'WhatsApp',
+		'wa.me'         => 'WhatsApp',
+		't.me'          => 'Telegram',
+		'github.com'    => 'GitHub',
+	);
+	$out  = array();
+	$seen = array();
+	foreach ( $raw as $item ) {
+		$url = trim( (string) $item );
+		if ( 0 !== strpos( $url, 'https://' ) || preg_match( '/[\s"<>]/', $url ) ) {
+			continue;
+		}
+		$host = strtolower( (string) wp_parse_url_kits( $url ) );
+		if ( '' === $host || isset( $seen[ $url ] ) ) {
+			continue;
+		}
+		$host          = preg_replace( '/^(www|m|mobile)\./', '', $host );
+		$seen[ $url ]  = true;
+		$out[]         = array(
+			'label' => $names[ $host ] ?? $host,
+			'url'   => $url,
+		);
+		if ( count( $out ) >= 12 ) {
+			break;
+		}
+	}
+	return $out;
+}
+
+/**
+ * The host of an address (stand-in for wp_parse_url so the model runs without WordPress).
+ *
+ * @param string $url Address.
+ */
+function wp_parse_url_kits( string $url ): string {
+	$h = parse_url( $url, PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
+	return is_string( $h ) ? $h : '';
+}
+
+/**
  * Tags out of a string (stand-in for wp_strip_all_tags so the model runs without WordPress).
  *
  * @param string $s Text.

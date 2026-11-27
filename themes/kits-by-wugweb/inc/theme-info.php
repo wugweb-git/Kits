@@ -42,7 +42,7 @@ function kits_theme_metadata(): array {
 			'1x'  => $uri . '/assets/images/kits-icon-128.png',
 			'2x'  => $uri . '/assets/images/kits-icon-256.png',
 		),
-		'screenshot'  => $uri . '/screenshot.jpg',
+		'screenshot'  => $uri . '/screenshot.png',
 		'links'       => array(
 			'faq'     => 'https://wugweb.com/themes/kits-by-wugweb/#faq',
 			'rate'    => 'https://wugweb.com/themes/kits-by-wugweb/reviews/#new-post',

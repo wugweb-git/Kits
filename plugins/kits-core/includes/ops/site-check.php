@@ -37,12 +37,25 @@ function kits_site_check_urls() {
 		if ( 'attachment' === $type ) {
 			continue;
 		}
-		$p = get_posts( array( 'post_type' => $type, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids' ) );
+		$p = get_posts(
+			array(
+				'post_type' => $type,
+				'post_status' => 'publish',
+				'numberposts' => 1,
+				'fields' => 'ids',
+			)
+		);
 		if ( $p ) {
 			$urls[ $obj->labels->singular_name ] = wp_parse_url( get_permalink( $p[0] ), PHP_URL_PATH );
 		}
 	}
-	$t = get_terms( array( 'taxonomy' => 'category', 'number' => 1, 'hide_empty' => true ) );
+	$t = get_terms(
+		array(
+			'taxonomy' => 'category',
+			'number' => 1,
+			'hide_empty' => true,
+		)
+	);
 	if ( $t && ! is_wp_error( $t ) ) {
 		$urls['A category'] = wp_parse_url( function_exists( 'kits_term_url' ) ? kits_term_url( $t[0] ) : get_term_link( $t[0] ), PHP_URL_PATH );
 	}
@@ -53,7 +66,13 @@ add_action(
 	'admin_bar_menu',
 	function ( $bar ) {
 		if ( current_user_can( 'manage_options' ) ) {
-			$bar->add_node( array( 'id' => 'aw-site-check', 'title' => 'Check site', 'href' => wp_nonce_url( admin_url( 'admin-post.php?action=aw_site_check' ), 'aw_site_check' ) ) );
+			$bar->add_node(
+				array(
+					'id' => 'aw-site-check',
+					'title' => 'Check site',
+					'href' => wp_nonce_url( admin_url( 'admin-post.php?action=aw_site_check' ), 'aw_site_check' ),
+				)
+			);
 		}
 	},
 	80
@@ -64,7 +83,14 @@ function kits_site_check_run() {
 	$out = array();
 	foreach ( kits_site_check_urls() as $label => $path ) {
 		$t0   = microtime( true );
-		$r    = wp_remote_get( add_query_arg( 'ck', wp_generate_password( 8, false ), home_url( $path ) ), array( 'timeout' => 30, 'redirection' => 0, 'headers' => array( 'Cache-Control' => 'no-cache' ) ) );
+		$r    = wp_remote_get(
+			add_query_arg( 'ck', wp_generate_password( 8, false ), home_url( $path ) ),
+			array(
+				'timeout' => 30,
+				'redirection' => 0,
+				'headers' => array( 'Cache-Control' => 'no-cache' ),
+			)
+		);
 		$ms   = (int) round( ( microtime( true ) - $t0 ) * 1000 );
 		$code = is_wp_error( $r ) ? 0 : (int) wp_remote_retrieve_response_code( $r );
 		$body = is_wp_error( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
@@ -94,9 +120,10 @@ add_action( 'aw_site_check_deploy', 'kits_site_check_run' );
  * One line on the last check: the result, when it ran and on which commit, and whether that is still the deployed
  * commit. For Kits → Home → Page check.
  *
+ * @param bool $schedule Book the missed run again when the check is stale (the screens do; the REST route does not, it only reads).
  * @return array{ok:bool,text:string} ok: a check on the deployed commit found no problem.
  */
-function kits_site_check_summary(): array {
+function kits_site_check_summary( bool $schedule = true ): array {
 	$c = get_option( 'aw_site_check_last' );
 	if ( ! is_array( $c ) || empty( $c['rows'] ) ) {
 		return array(
@@ -112,7 +139,7 @@ function kits_site_check_summary(): array {
 	$stale  = '' !== $now && $ran !== $now;
 	if ( $stale ) {
 		// The run after a deploy can be missed (a cron request that never came, or one cut short): schedule it again.
-		if ( ! wp_next_scheduled( 'aw_site_check_deploy' ) ) {
+		if ( $schedule && ! wp_next_scheduled( 'aw_site_check_deploy' ) ) {
 			kits_site_check_after_deploy();
 		}
 		$text .= ' The deployed commit is now ' . substr( $now, 0, 7 ) . ': this check is from before it; a new check runs within a few minutes.';
@@ -122,6 +149,54 @@ function kits_site_check_summary(): array {
 		'text' => $text,
 	);
 }
+
+/**
+ * The last site check as data, the same rows and summary the Kits → Home → Page check screen shows.
+ *
+ * @return array{summary:array{ok:bool,text:string},checked_at:string,commit:string,rows:array<int,array<string,mixed>>}
+ */
+function kits_site_check_report(): array {
+	$last = get_option( 'aw_site_check_last' );
+	$rows = array();
+	if ( is_array( $last ) && ! empty( $last['rows'] ) ) {
+		foreach ( (array) $last['rows'] as $r ) {
+			$rows[] = array(
+				'page'    => (string) ( $r[0] ?? '' ),
+				'path'    => (string) ( $r[1] ?? '' ),
+				'status'  => (int) ( $r[2] ?? 0 ),
+				'ms'      => (int) ( $r[3] ?? 0 ),
+				'problem' => (string) ( $r[4] ?? '' ),
+			);
+		}
+	}
+	return array(
+		'summary'    => kits_site_check_summary( false ),
+		'checked_at' => is_array( $last ) ? (string) ( $last['at'] ?? '' ) : '',
+		'commit'     => is_array( $last ) ? (string) ( $last['head'] ?? '' ) : '',
+		'rows'       => $rows,
+	);
+}
+
+// GET /wp-json/kits/v1/site-check (1.4.1): administrators only, read only. Returns the last check; it runs nothing and
+// changes nothing (the Check site button and the run after a deploy are what run it).
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'kits/v1',
+			'/site-check',
+			array(
+				'methods'             => 'GET',
+				'permission_callback' => fn() => current_user_can( 'manage_options' ),
+				'callback'            => function () {
+					$r = new WP_REST_Response( kits_site_check_report() );
+					$r->header( 'Cache-Control', 'no-store' );
+					return $r;
+				},
+			)
+		);
+	}
+);
 
 add_action(
 	'admin_post_aw_site_check',
@@ -151,7 +226,13 @@ function kits_site_check_results() {
 	}
 	$bad = array_filter( $last['rows'], fn( $r ) => '' !== $r[4] );
 	$sum = kits_site_check_summary();
-	wp_admin_notice( esc_html( $sum['text'] ), array( 'type' => $bad ? 'error' : ( $sum['ok'] ? 'success' : 'warning' ), 'additional_classes' => array( 'inline' ) ) );
+	wp_admin_notice(
+		esc_html( $sum['text'] ),
+		array(
+			'type' => $bad ? 'error' : ( $sum['ok'] ? 'success' : 'warning' ),
+			'additional_classes' => array( 'inline' ),
+		)
+	);
 	$cells = array();
 	foreach ( $last['rows'] as $r ) {
 		$cells[] = array(
@@ -162,7 +243,17 @@ function kits_site_check_results() {
 			'problem' => esc_html( $r[4] ),
 		);
 	}
-	kits_simple_table( 'site-check', array( 'page' => 'Page', 'address' => 'Address', 'status' => 'Status', 'time' => 'Time', 'problem' => 'Problem' ), $cells );
+	kits_simple_table(
+		'site-check',
+		array(
+			'page' => 'Page',
+			'address' => 'Address',
+			'status' => 'Status',
+			'time' => 'Time',
+			'problem' => 'Problem',
+		),
+		$cells
+	);
 }
 
 /*
@@ -175,6 +266,12 @@ function kits_site_check_joined() {
 		return;
 	}
 	$s = kits_parts_bundle_status();
-	wp_admin_notice( '<strong>' . esc_html( 'Joined component files:' ) . '</strong> ' . esc_html( trim( $s['text'] . '. ' . $s['fix'] ) ), array( 'type' => $s['warn'] ? 'warning' : 'info', 'additional_classes' => array( 'inline' ) ) );
+	wp_admin_notice(
+		'<strong>' . esc_html( 'Joined component files:' ) . '</strong> ' . esc_html( trim( $s['text'] . '. ' . $s['fix'] ) ),
+		array(
+			'type' => $s['warn'] ? 'warning' : 'info',
+			'additional_classes' => array( 'inline' ),
+		)
+	);
 }
 add_action( 'aw_site_check_after', 'kits_site_check_joined' );

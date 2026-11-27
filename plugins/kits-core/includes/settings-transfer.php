@@ -388,17 +388,60 @@ function kits_settings_import_patterns( $input, bool $dry_run ): array {
 	return $out;
 }
 
-/** A download link for the export, for a signed-in user who can edit theme options. */
+/**
+ * A download link for the export, for a signed-in user who can manage options. The link carries a random token that
+ * works once, for this user, for 10 minutes (1.4.1: it used to carry the reusable REST nonce, which stayed valid for
+ * a day and showed in logs and referrers). The file comes from admin-post.php with the user's login cookie.
+ */
 function kits_settings_transfer_url(): string {
+	$token = bin2hex( random_bytes( 16 ) );
+	set_transient( 'kits_dl_' . hash( 'sha256', $token ), get_current_user_id(), 10 * MINUTE_IN_SECONDS );
 	return add_query_arg(
 		array(
-			'download' => 1,
-			'_pretty'  => 1,
-			'_wpnonce' => wp_create_nonce( 'wp_rest' ),
+			'action'   => 'kits_settings_download',
+			'kits_dl'  => $token,
 		),
-		rest_url( 'kits/v1/settings' )
+		admin_url( 'admin-post.php' )
 	);
 }
+
+/**
+ * Use up a download token. True once, for the user it was made for.
+ *
+ * @param string $token   The token from the link.
+ * @param int    $user_id The signed-in user.
+ * @return bool
+ */
+function kits_settings_transfer_claim( $token, $user_id ): bool {
+	$token = (string) $token;
+	if ( ! preg_match( '/^[0-9a-f]{32}$/', $token ) ) {
+		return false;
+	}
+	$key = 'kits_dl_' . hash( 'sha256', $token );
+	$for = get_transient( $key );
+	delete_transient( $key ); // used or not, it is spent
+	return false !== $for && (int) $for === (int) $user_id && (int) $user_id > 0;
+}
+
+/** The download's file name: kits-settings-<host>-<date>.json. */
+function kits_settings_transfer_filename(): string {
+	$host = sanitize_file_name( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+	return sprintf( 'kits-settings-%s-%s.json', $host ? $host : 'site', gmdate( 'Y-m-d' ) );
+}
+
+add_action(
+	'admin_post_kits_settings_download',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) || ! kits_settings_transfer_claim( sanitize_text_field( wp_unslash( $_GET['kits_dl'] ?? '' ) ), get_current_user_id() ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- the single-use token is the check
+			wp_die( esc_html__( 'This download link has expired. Open the screen again and use the new link.', 'kits-core' ), '', array( 'response' => 403 ) );
+		}
+		nocache_headers();
+		header( 'Content-Type: application/json; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . kits_settings_transfer_filename() . '"' );
+		echo wp_json_encode( kits_settings_export(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ); // phpcs:ignore WordPress.Security.EscapeOutput -- JSON
+		exit;
+	}
+);
 
 add_action(
 	'rest_api_init',
@@ -421,8 +464,7 @@ add_action(
 						$response = new WP_REST_Response( kits_settings_export() );
 						$response->header( 'Cache-Control', 'no-store' );
 						if ( $request['download'] ) {
-							$host = sanitize_file_name( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
-							$name = sprintf( 'kits-settings-%s-%s.json', $host ? $host : 'site', gmdate( 'Y-m-d' ) );
+							$name = kits_settings_transfer_filename();
 							$response->header( 'Content-Disposition', 'attachment; filename="' . $name . '"' );
 						}
 						return $response;

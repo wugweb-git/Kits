@@ -65,7 +65,11 @@ function kits_registry() {
 	if ( null !== $reg ) {
 		return $reg;
 	}
-	$reg = array( 'items' => array(), 'nav' => array(), 'nav_status' => array() );
+	$reg = array(
+		'items' => array(),
+		'nav' => array(),
+		'nav_status' => array(),
+	);
 	foreach ( kits_system_dirs() as $dir ) {
 		$f = $dir . '/kits-registry.json';
 		$j = is_readable( $f ) ? json_decode( (string) file_get_contents( $f ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions
@@ -393,12 +397,46 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 	$total_count = count( $cells );
 	if ( function_exists( 'kits_frame_kpi_grid' ) && $total_count > 0 ) {
 		echo '<div class="kits-kpi-grid">';
-		echo kits_frame_kpi_card( 'Audited Color Pairs', (string) $total_count, array( 'unit' => 'pairs', 'trend' => 'WCAG AA', 'trend_dir' => 'up' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo kits_frame_kpi_card( 'Compliance Rate', (string) round( ( $pass_count / $total_count ) * 100 ) . '%', array( 'unit' => 'passing', 'trend' => $pass_count . '/' . $total_count . ' pass', 'trend_dir' => 'up' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo kits_frame_kpi_card( 'Minimum AA Standard', '4.5:1', array( 'unit' => 'contrast ratio', 'trend' => 'WCAG 2.1 AA', 'trend_dir' => 'neutral' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+			'Audited Color Pairs',
+			(string) $total_count,
+			array(
+				'unit' => 'pairs',
+				'trend' => 'WCAG AA',
+				'trend_dir' => 'up',
+			)
+		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+			'Compliance Rate',
+			(string) round( ( $pass_count / $total_count ) * 100 ) . '%',
+			array(
+				'unit' => 'passing',
+				'trend' => $pass_count . '/' . $total_count . ' pass',
+				'trend_dir' => 'up',
+			)
+		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo kits_frame_kpi_card( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- kits_frame_kpi_card() escapes every part.
+			'Minimum AA Standard',
+			'4.5:1',
+			array(
+				'unit' => 'contrast ratio',
+				'trend' => 'WCAG 2.1 AA',
+				'trend_dir' => 'neutral',
+			)
+		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo '</div>';
 	}
-	kits_simple_table( 'contrast', array( 'name' => 'Component', 'text' => 'Text', 'on' => 'On', 'ratio' => 'Ratio', 'aa' => 'AA (4.5:1 text)' ), $cells );
+	kits_simple_table(
+		'contrast',
+		array(
+			'name' => 'Component',
+			'text' => 'Text',
+			'on' => 'On',
+			'ratio' => 'Ratio',
+			'aa' => 'AA (4.5:1 text)',
+		),
+		$cells
+	);
 }
 
 /** Kits → Help → Design system. */
@@ -410,7 +448,13 @@ function kits_system_page() {
 	$used  = kits_class_usage();
 	$vals  = kits_token_values();
 	$demo  = get_page_by_path( 'kits-demo' );
-	$tabs  = array( 'components' => 'Components, blocks and patterns', 'states' => 'States sheet', 'menus' => 'Menu types', 'contrast' => 'Colour contrast', 'tokens' => 'Tokens' );
+	$tabs  = array(
+		'components' => 'Components, blocks and patterns',
+		'states' => 'States sheet',
+		'menus' => 'Menu types',
+		'contrast' => 'Colour contrast',
+		'tokens' => 'Tokens',
+	);
 	$pref  = array();
 	foreach ( $reg['items'] as $it ) {
 		$pref = array_merge( $pref, (array) ( $it['classes'] ?? array() ) );
@@ -421,7 +465,14 @@ function kits_system_page() {
 	kits_admin_tabs( 'kits-system' );
 	echo '<p>The design system as it is in the code: ' . count( $reg['items'] ) . ' entries from the Kits master and this site\'s theme. Read-only; change a component in its file, then its entry in <code>kits-registry.json</code>. Colours, fonts and sizes: Appearance → Editor → Styles. Patterns: Editor → Patterns. Menus: Editor → Navigation.</p>';
 	if ( $missing ) {
-		wp_admin_notice( '<p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details>', array( 'type' => 'error', 'additional_classes' => array( 'inline' ), 'paragraph_wrap' => false ) );
+		wp_admin_notice(
+			'<p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details>',
+			array(
+				'type' => 'error',
+				'additional_classes' => array( 'inline' ),
+				'paragraph_wrap' => false,
+			)
+		);
 	}
 	// Modern navigation chips (Site Kit / FluentCRM style).
 	echo '<div class="kits-reg-toolbar" style="margin-top: 16px; margin-bottom: 20px;"><div class="kits-reg-filters">';
@@ -444,9 +495,23 @@ function kits_system_page() {
 		$cells = array();
 		foreach ( $reg['nav'] as $n ) {
 			$st      = $reg['nav_status'][ $n['slug'] ] ?? $n['status'];
-			$cells[] = array( 'name' => '<strong>' . esc_html( $n['name'] ) . '</strong>', 'status' => esc_html( $st ), 'where' => esc_html( $n['where'] ), 'a11y' => esc_html( $n['a11y'] ) );
+			$cells[] = array(
+				'name' => '<strong>' . esc_html( $n['name'] ) . '</strong>',
+				'status' => esc_html( $st ),
+				'where' => esc_html( $n['where'] ),
+				'a11y' => esc_html( $n['a11y'] ),
+			);
 		}
-		kits_simple_table( 'menu-types', array( 'name' => 'Menu type', 'status' => 'On this site', 'where' => 'Where', 'a11y' => 'Accessibility' ), $cells );
+		kits_simple_table(
+			'menu-types',
+			array(
+				'name' => 'Menu type',
+				'status' => 'On this site',
+				'where' => 'Where',
+				'a11y' => 'Accessibility',
+			),
+			$cells
+		);
 		echo '</div>';
 		return;
 	}
@@ -533,15 +598,34 @@ function kits_system_page() {
 		$style = kits_registry_style( $it );
 
 		$acc = array();
-		foreach ( array( 'element' => 'Element', 'aria' => 'ARIA', 'keyboard' => 'Keyboard', 'focus' => 'Focus', 'target' => 'Target', 'motion' => 'Motion', 'sr' => 'Screen reader' ) as $k => $l ) {
+		foreach ( array(
+			'element' => 'Element',
+			'aria' => 'ARIA',
+			'keyboard' => 'Keyboard',
+			'focus' => 'Focus',
+			'target' => 'Target',
+			'motion' => 'Motion',
+			'sr' => 'Screen reader',
+		) as $k => $l ) {
 			if ( ! empty( $a[ $k ] ) && 'none' !== $a[ $k ] && 'n/a' !== $a[ $k ] && 'not interactive' !== $a[ $k ] ) {
-				$acc[] = array( 'label' => $l, 'value' => $a[ $k ] );
+				$acc[] = array(
+					'label' => $l,
+					'value' => $a[ $k ],
+				);
 			}
 		}
 		$seo = array();
-		foreach ( array( 'heading' => 'Heading', 'link' => 'Links', 'alt' => 'Images', 'schema' => 'Schema' ) as $k => $l ) {
+		foreach ( array(
+			'heading' => 'Heading',
+			'link' => 'Links',
+			'alt' => 'Images',
+			'schema' => 'Schema',
+		) as $k => $l ) {
 			if ( ! empty( $s[ $k ] ) && ! in_array( $s[ $k ], array( 'none', 'n/a' ), true ) ) {
-				$seo[] = array( 'label' => $l, 'value' => $s[ $k ] );
+				$seo[] = array(
+					'label' => $l,
+					'value' => $s[ $k ],
+				);
 			}
 		}
 
@@ -1125,7 +1209,13 @@ function kits_spot_map( $rebuild = false ) {
 	}
 	$found = array(); // class => first page using it
 	foreach ( function_exists( 'kits_spot_pages' ) ? kits_spot_pages() : array() as $url ) {
-		$r = wp_remote_get( $url, array( 'timeout' => 30, 'cookies' => array() ) );
+		$r = wp_remote_get(
+			$url,
+			array(
+				'timeout' => 30,
+				'cookies' => array(),
+			)
+		);
 		if ( is_wp_error( $r ) ) {
 			continue;
 		}

@@ -29,15 +29,14 @@ function check( $what, $ok ) {
 	echo ( $ok ? 'ok   ' : 'FAIL ' ) . $what . "\n";
 }
 
-// Allowed exceptions, each with its reason: field names stored in existing Fluent Forms claim forms (KITS_FF_DATES), the
-// Library post type and its field key in the opt-in Edit fields (inert unless a site names a Library type), and the aw_
-// listing function guard in the claim form check.
+// Allowed exceptions, each with its reason: field names stored in existing Fluent Forms claim forms (KITS_FF_DATES) and the
+// aw_ listing function guard in the claim form check. (The Library "Dated" and campaign Metrics edit fields, which named
+// aw_legal, moved to the site layer in 1.4.1: no exception for them any more.)
 $allowed = array(
-	'includes/forms/fluentforms.php'      => array( 'l_awbi_', 'aw_listing_phones' ),
-	'includes/admin-layer/edit-fields.php' => array( 'aw_legal' ),
+	'includes/forms/fluentforms.php' => array( 'l_awbi_', 'aw_listing_phones' ),
 );
 
-$words = '/animal|awbi|darpan|aw_news|aw_press|aw_opportunity|aw_campaign_link|animalwrites|aw1-im/i';
+$words = '/animal|awbi|darpan|aw_news|aw_press|aw_opportunity|aw_campaign_link|aw_campaign_metrics|aw_legal|animalwrites|aw1-im/i';
 $bad   = array();
 $it    = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $it as $file ) {
@@ -53,7 +52,7 @@ foreach ( $it as $file ) {
 			$row  = explode( "\n", $text )[ $line - 1 ];
 			$ok   = false;
 			foreach ( $allowed[ $rel ] ?? array() as $a ) {
-				$ok = $ok || false !== stripos( $row, $a ) || 'aw_legal' === $a && false !== stripos( $row, 'aw_legal' );
+				$ok = $ok || false !== stripos( $row, $a );
 			}
 			if ( ! $ok ) {
 				$bad[] = "$rel:$line";
@@ -62,6 +61,8 @@ foreach ( $it as $file ) {
 	}
 }
 check( 'no Animal Writes wording or data in the plugin code (found: ' . implode( ', ', array_slice( array_unique( $bad ), 0, 12 ) ) . ')', ! $bad );
+
+check( 'the Library and Metrics edit fields are in the site layer, not here', ! preg_match( '/aw_legal|aw_campaign_metrics|kits_library_post_type|kits_edit_fields_dated|kits_edit_fields_metric/', (string) file_get_contents( $root . 'includes/admin-layer/edit-fields.php' ) ) && is_file( dirname( $root, 2 ) . '/sites/animalwrites/kits-core/includes/edit-fields.php' ) );
 
 foreach ( array(
 	'includes/campaign-letters.php', 'includes/campaign-links.php', 'includes/thumbs.php', 'includes/category-images.php',

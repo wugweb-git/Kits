@@ -167,6 +167,30 @@ add_action(
 );
 
 /**
+ * Reset: back to the preset the site chose, or, when none was chosen, to the theme's own values (the option is removed).
+ */
+function kits_brand_reset(): void {
+	$active_preset = (string) get_option( KITS_BRAND_PRESET_OPTION, '' ); // None chosen: Reset goes back to the theme's own values, as it did before 1.3.0.
+	$presets       = kits_brand_presets();
+	$restore       = '' !== $active_preset ? ( $presets[ $active_preset ]['tokens'] ?? array() ) : array();
+	if ( ! empty( $restore ) ) {
+		update_option( KITS_BRAND_OPTION, kits_brand_sanitize_tokens( $restore ) );
+	} else {
+		delete_option( KITS_BRAND_OPTION );
+	}
+	kits_brand_clear_theme_cache();
+}
+
+/**
+ * Clear brand: remove every tenant brand value and the chosen preset.
+ */
+function kits_brand_clear(): void {
+	delete_option( KITS_BRAND_OPTION );
+	delete_option( KITS_BRAND_PRESET_OPTION );
+	kits_brand_clear_theme_cache();
+}
+
+/**
  * Renders the Brand Customizer admin screen.
  */
 function kits_brand_customizer_render_page() {
@@ -191,27 +215,23 @@ function kits_brand_customizer_render_page() {
 		$action = isset( $_POST['kits_brand_action'] ) ? sanitize_text_field( wp_unslash( $_POST['kits_brand_action'] ) ) : 'save';
 
 		if ( 'reset' === $action ) {
-			$active_preset = (string) get_option( KITS_BRAND_PRESET_OPTION, '' ); // None chosen: Reset goes back to the theme's own values, as it did before 1.3.0.
-			$presets       = kits_brand_presets();
-			$restore       = '' !== $active_preset ? ( $presets[ $active_preset ]['tokens'] ?? array() ) : array();
-			if ( ! empty( $restore ) ) {
-				update_option( KITS_BRAND_OPTION, kits_brand_sanitize_tokens( $restore ) );
-			} else {
-				delete_option( KITS_BRAND_OPTION );
-			}
-			kits_brand_clear_theme_cache();
+			kits_brand_reset();
 			if ( function_exists( 'do_action' ) ) {
 				do_action( 'litespeed_purge_all' );
 			}
-			$notices[] = array( 'type' => 'success', 'msg' => __( 'Brand tokens restored to the active tenant preset.', 'kits-core' ) );
+			$notices[] = array(
+				'type' => 'success',
+				'msg' => __( 'Brand tokens restored to the active tenant preset.', 'kits-core' ),
+			);
 		} elseif ( 'clear_brand' === $action ) {
-			delete_option( KITS_BRAND_OPTION );
-			delete_option( KITS_BRAND_PRESET_OPTION );
-			kits_brand_clear_theme_cache();
+			kits_brand_clear();
 			if ( function_exists( 'do_action' ) ) {
 				do_action( 'litespeed_purge_all' );
 			}
-			$notices[] = array( 'type' => 'success', 'msg' => __( 'All tenant brand overrides cleared to theme defaults.', 'kits-core' ) );
+			$notices[] = array(
+				'type' => 'success',
+				'msg' => __( 'All tenant brand overrides cleared to theme defaults.', 'kits-core' ),
+			);
 		} elseif ( 'apply_preset' === $action ) {
 			$preset_key = isset( $_POST['preset_key'] ) ? sanitize_key( wp_unslash( $_POST['preset_key'] ) ) : '';
 			$presets    = kits_brand_presets();
@@ -223,7 +243,11 @@ function kits_brand_customizer_render_page() {
 					do_action( 'litespeed_purge_all' );
 				}
 				/* translators: %s: Preset name */
-				$notices[] = array( 'type' => 'success', 'msg' => sprintf( __( 'Preset "%s" applied successfully!', 'kits-core' ), esc_html( $presets[ $preset_key ]['name'] ) ) );
+				$notices[] = array(
+					'type' => 'success',
+					/* translators: %s: Preset name */
+					'msg' => sprintf( __( 'Preset "%s" applied successfully!', 'kits-core' ), esc_html( $presets[ $preset_key ]['name'] ) ),
+				);
 			}
 		} elseif ( 'import_json' === $action ) {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw JSON decoded and each token sanitized by kits_brand_sanitize_tokens().
@@ -235,9 +259,15 @@ function kits_brand_customizer_render_page() {
 				if ( function_exists( 'do_action' ) ) {
 					do_action( 'litespeed_purge_all' );
 				}
-				$notices[] = array( 'type' => 'success', 'msg' => __( 'Brand tokens imported successfully!', 'kits-core' ) );
+				$notices[] = array(
+					'type' => 'success',
+					'msg' => __( 'Brand tokens imported successfully!', 'kits-core' ),
+				);
 			} else {
-				$notices[] = array( 'type' => 'error', 'msg' => __( 'Invalid JSON format for import.', 'kits-core' ) );
+				$notices[] = array(
+					'type' => 'error',
+					'msg' => __( 'Invalid JSON format for import.', 'kits-core' ),
+				);
 			}
 		} else {
 			// Standard Save
@@ -248,7 +278,10 @@ function kits_brand_customizer_render_page() {
 			if ( function_exists( 'do_action' ) ) {
 				do_action( 'litespeed_purge_all' );
 			}
-			$notices[] = array( 'type' => 'success', 'msg' => __( 'Brand tokens updated successfully. Live cache purged.', 'kits-core' ) );
+			$notices[] = array(
+				'type' => 'success',
+				'msg' => __( 'Brand tokens updated successfully. Live cache purged.', 'kits-core' ),
+			);
 		}
 	}
 
@@ -338,9 +371,10 @@ function kits_brand_customizer_render_page() {
 
 					<table class="form-table" role="presentation">
 						<tbody>
-						<?php foreach ( $tokens_in_cat as $key => $def ) :
+						<?php
+						foreach ( $tokens_in_cat as $key => $def ) :
 							$current_val = $saved[ $key ] ?? $def['default'];
-						?>
+							?>
 							<tr>
 								<th scope="row" style="width: 240px;">
 									<label for="token_<?php echo esc_attr( $key ); ?>">

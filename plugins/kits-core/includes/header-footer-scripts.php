@@ -78,7 +78,15 @@ add_action(
 		update_option( 'kits_body_scripts', $body );
 		update_option( 'kits_footer_scripts', $footer );
 
-		wp_safe_redirect( add_query_arg( array( 'page' => 'kits-scripts', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page' => 'kits-scripts',
+					'updated' => '1',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 		exit;
 	}
 );

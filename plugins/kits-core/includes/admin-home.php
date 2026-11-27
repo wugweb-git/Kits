@@ -71,7 +71,16 @@ function kits_overview_table( string $name, array $rows ): void {
 		'primary' => 'feature',
 		'foot'    => false,
 	);
-	kits_simple_table( $name, array( 'feature' => 'Feature', 'what' => 'What it is', 'status' => 'On this site' ), $cells, $opts );
+	kits_simple_table(
+		$name,
+		array(
+			'feature' => 'Feature',
+			'what' => 'What it is',
+			'status' => 'On this site',
+		),
+		$cells,
+		$opts
+	);
 }
 
 /** Kits → Overview (old address): Help → Docs. */
@@ -79,17 +88,39 @@ function kits_overview_page() {
 	kits_help_page();
 }
 
+/**
+ * The rows of the Site features table (Help → Docs): feature, what it does, where to change it, state. Each row is
+ * array( name, description, where, state ), the last three already escaped. A site or plugin adds, removes or changes
+ * rows with the filter kits_features (1.4.1).
+ *
+ * @return array<int,array<int,string>>
+ */
+function kits_features_rows(): array {
+	$auto    = 'Automatic';
+	$gtm     = function_exists( 'kits_gtm_container' ) ? kits_gtm_container() : '';
+	$clarity = function_exists( 'kits_clarity_id' ) ? (string) kits_clarity_id() : '';
+	$ips     = function_exists( 'kits_preview_ips' ) ? count( kits_preview_ips() ) : count( array_filter( preg_split( '/[\r\n,]+/', (string) get_option( 'kits_preview_ips', '' ) ) ) );
+	$devices = function_exists( 'kits_preview_devices' ) ? count( kits_preview_devices() ) : 0;
+	$rows    = array(
+		array( 'Forms', esc_html( 'One field dictionary for every form, per-field errors, expandable and multi-step forms, a fresh key on cached pages.' ), esc_html( 'Every site form' ), $auto ),
+		array( 'Spam guard (ALTCHA)', esc_html( 'Free proof-of-work check on every form: no third-party service, no cookies.' ), esc_html( 'Every site form' ), esc_html( '' !== (string) get_option( 'kits_altcha_key', '' ) ? 'Key set.' : 'Key made on first use.' ) ),
+		array( 'Analytics', esc_html( 'Google Tag Manager with consent mode, Microsoft Clarity, the page context for GA4.' ), kits_link( 'Site Kit', 'admin.php?page=googlesitekit-dashboard' ), esc_html( ( $gtm ? 'Tag Manager ' . $gtm : 'No Tag Manager container' ) . ( $clarity ? '; Clarity ' . $clarity : '' ) . '.' ) ),
+		array( 'Preview', esc_html( 'Preview-only items seen only by administrators, preview IP addresses and registered devices.' ), kits_link( 'Appearance → Kits → Settings → Preview access', 'admin.php?page=kits-settings#preview' ), esc_html( $ips . ' IP address(es), ' . $devices . ' device(s).' ) ),
+		array( 'Content types', esc_html( 'Seven ready-made types (portfolio, cards, infographics, case studies, events, people, testimonials), each off until switched on. Also with WP-CLI (wp kits preset list, read only).' ), kits_link( 'Appearance → Kits → Settings → Content types', 'admin.php?page=kits-settings#content-types' ), esc_html( function_exists( 'kits_presets_enabled' ) ? count( kits_presets_enabled() ) . ' on.' : '' ) ),
+		array( 'Share bar', esc_html( 'Plain share links and copy link: no third-party scripts, no tracking.' ), esc_html( 'Item pages' ), $auto ),
+		array( 'Source attribution', esc_html( 'Publisher favicon, name and time on News items (Google News pattern).' ), esc_html( 'News items' ), $auto ),
+		array( 'Page structure', esc_html( 'One labelled <main>, sticky header, labelled sections, skip link.' ), esc_html( 'Every page' ), $auto ),
+		array( 'Page speed', esc_html( 'Scripts at the end of the page, form styles only where a form is.' ), esc_html( 'Every page' ), $auto ),
+		array( 'Slugs and image notes', esc_html( 'Every published item gets a slug; an editor-only note per image on the copy it supports.' ), kits_link( 'Media', 'upload.php' ), $auto ),
+	);
+	return array_values( array_filter( (array) apply_filters( 'kits_features', $rows ), 'is_array' ) );
+}
+
 /** The Docs tables: design and branding, then the site features. */
 function kits_overview_tables() {
 	$theme  = wp_get_theme();
 	$parent = $theme->parent();
 	$auto   = 'Automatic';
-
-	// Plugin features and their state.
-	$gtm     = function_exists( 'kits_gtm_container' ) ? kits_gtm_container() : '';
-	$clarity = function_exists( 'kits_clarity_id' ) ? (string) kits_clarity_id() : '';
-	$ips     = function_exists( 'kits_preview_ips' ) ? count( kits_preview_ips() ) : count( array_filter( preg_split( '/[\r\n,]+/', (string) get_option( 'kits_preview_ips', '' ) ) ) );
-	$devices = function_exists( 'kits_preview_devices' ) ? count( kits_preview_devices() ) : 0;
 
 	echo '<h2>Design and branding</h2>';
 	$palette = (array) ( wp_get_global_settings( array( 'color', 'palette', 'theme' ) ) ?? array() );
@@ -130,20 +161,6 @@ function kits_overview_tables() {
 	);
 
 	echo '<h2>Site features (Kits Core)</h2>';
-	kits_overview_table(
-		'kits-features',
-		array(
-			array( 'Forms', esc_html( 'One field dictionary for every form, per-field errors, expandable and multi-step forms, a fresh key on cached pages.' ), esc_html( 'Every site form' ), $auto ),
-			array( 'Spam guard (ALTCHA)', esc_html( 'Free proof-of-work check on every form: no third-party service, no cookies.' ), esc_html( 'Every site form' ), esc_html( '' !== (string) get_option( 'kits_altcha_key', '' ) ? 'Key set.' : 'Key made on first use.' ) ),
-			array( 'Analytics', esc_html( 'Google Tag Manager with consent mode, Microsoft Clarity, the page context for GA4.' ), kits_link( 'Site Kit', 'admin.php?page=googlesitekit-dashboard' ), esc_html( ( $gtm ? 'Tag Manager ' . $gtm : 'No Tag Manager container' ) . ( $clarity ? '; Clarity ' . $clarity : '' ) . '.' ) ),
-			array( 'Preview', esc_html( 'Preview-only items seen only by administrators, preview IP addresses and registered devices.' ), kits_link( 'Appearance → Kits → Settings → Preview access', 'admin.php?page=kits-settings#preview' ), esc_html( $ips . ' IP address(es), ' . $devices . ' device(s).' ) ),
-			array( 'Content types', esc_html( 'Seven ready-made types (portfolio, cards, infographics, case studies, events, people, testimonials), each off until switched on. Also with WP-CLI (wp kits preset list, read only).' ), kits_link( 'Appearance → Kits → Settings → Content types', 'admin.php?page=kits-settings#content-types' ), esc_html( function_exists( 'kits_presets_enabled' ) ? count( kits_presets_enabled() ) . ' on.' : '' ) ),
-			array( 'Share bar', esc_html( 'Plain share links and copy link: no third-party scripts, no tracking.' ), esc_html( 'Item pages' ), $auto ),
-			array( 'Source attribution', esc_html( 'Publisher favicon, name and time on News items (Google News pattern).' ), esc_html( 'News items' ), $auto ),
-			array( 'Page structure', esc_html( 'One labelled <main>, sticky header, labelled sections, skip link.' ), esc_html( 'Every page' ), $auto ),
-			array( 'Page speed', esc_html( 'Scripts at the end of the page, form styles only where a form is.' ), esc_html( 'Every page' ), $auto ),
-			array( 'Slugs and image notes', esc_html( 'Every published item gets a slug; an editor-only note per image on the copy it supports.' ), kits_link( 'Media', 'upload.php' ), $auto ),
-		)
-	);
+	kits_overview_table( 'kits-features', kits_features_rows() );
 	do_action( 'kits_overview_after' );
 }

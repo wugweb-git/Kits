@@ -42,6 +42,23 @@ function __( $s ) { // phpcs:ignore
 	return $s;
 }
 define( 'HOUR_IN_SECONDS', 3600 );
+class WP_Error { // phpcs:ignore
+	public $code;
+	public function __construct( $code = '' ) {
+		$this->code = $code;
+	}
+}
+function is_wp_error( $x ) { // phpcs:ignore
+	return $x instanceof WP_Error;
+}
+function download_url( $url ) { // phpcs:ignore
+	$f = tempnam( sys_get_temp_dir(), 'kits-reg' );
+	file_put_contents( $f, $GLOBALS['t_bytes'] );
+	return $f;
+}
+function wp_delete_file( $f ) { // phpcs:ignore
+	@unlink( $f );
+}
 
 require dirname( __DIR__ ) . '/includes/registry-updates.php';
 
@@ -75,6 +92,36 @@ t( is_array( kits_registry_offer( 'planweb', '0.1.0' ) ), 'a stable release is o
 t( null === kits_registry_offer( 'insightweb', '1.0.0' ), 'an unreleased product is not offered' );
 t( null === kits_registry_offer( 'sourceweb', '0.1.0' ), 'a product the registry lacks is not offered' );
 t( kits_registry_trusted_package( $dl ) && ! kits_registry_trusted_package( 'http://github.com/wugweb-git/Kits/releases/download/a.zip' ), 'only https release files are trusted' );
+
+// ---- the SHA-256 check before WordPress unpacks a package ----
+$pre = $GLOBALS['t_filters']['upgrader_pre_download'][0] ?? null;
+t( is_callable( $pre ), 'the SHA-256 check is hooked on upgrader_pre_download' );
+$bytes = 'pretend zip';
+$good  = 'https://github.com/wugweb-git/Kits/releases/download/planweb-v0.2.0/planweb.zip';
+$GLOBALS['t_cache']['kits_registry']['planweb']['sha256']['commercial'] = hash( 'sha256', $bytes );
+$GLOBALS['t_bytes'] = $bytes;
+$res = $pre( false, $good );
+t( is_string( $res ) && is_file( $res ) && $bytes === file_get_contents( $res ), 'a file whose SHA-256 matches the registry is handed on' );
+@unlink( (string) $res );
+$GLOBALS['t_bytes'] = $bytes . 'x';
+$res = $pre( false, $good );
+t( $res instanceof WP_Error && 'kits_bad_checksum' === $res->code, 'a file that does not match is refused' );
+$GLOBALS['t_cache']['kits_registry']['planweb']['sha256']['commercial'] = strtoupper( hash( 'sha256', $bytes . 'x' ) );
+$res = $pre( false, $good );
+t( is_string( $res ), 'the registry checksum may be upper case' );
+@unlink( (string) $res );
+$GLOBALS['t_cache']['kits_registry']['planweb']['sha256']['commercial'] = '';
+$res = $pre( false, $good );
+t( $res instanceof WP_Error && 'kits_no_checksum' === $res->code, 'a registry entry with no checksum is not installed' );
+$GLOBALS['t_cache']['kits_registry']['planweb']['sha256']['commercial'] = 'not-hex';
+$res = $pre( false, $good );
+t( $res instanceof WP_Error && 'kits_no_checksum' === $res->code, 'a malformed checksum is not installed' );
+t( 'x' === $pre( 'x', $good ), 'an answer another filter already gave is kept' );
+t( false === $pre( false, 'https://example.org/other.zip' ), 'a package that is not the project\'s release file is left to WordPress' );
+t( false === $pre( false, 'http://github.com/wugweb-git/Kits/releases/download/a/b.zip' ), 'a plain http release address is not ours' );
+$GLOBALS['t_cache']['kits_registry']['planweb']['sha256']['commercial'] = hash( 'sha256', $bytes );
+$GLOBALS['t_bytes'] = $bytes;
+t( kits_download_verified( $good, 'zz' ) instanceof WP_Error && 'kits_no_checksum' === kits_download_verified( $good, 'zz' )->code, 'kits_download_verified refuses a malformed checksum' );
 
 echo "$count checks, $fails failed\n";
 exit( $fails ? 1 : 0 );

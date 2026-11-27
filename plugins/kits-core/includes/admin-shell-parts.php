@@ -12,6 +12,8 @@
  * @package kits-core
  */
 
+// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DOMDocument and DOMNode property names (childNodes, nodeName, textContent …) are fixed by PHP.
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

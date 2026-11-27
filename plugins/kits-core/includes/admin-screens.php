@@ -376,7 +376,14 @@ function kits_transfer_result(): void {
 		}
 		$body .= '</ul>';
 	}
-	wp_admin_notice( $body, array( 'type' => $ok ? 'success' : 'error', 'dismissible' => true, 'paragraph_wrap' => false ) );
+	wp_admin_notice(
+		$body,
+		array(
+			'type' => $ok ? 'success' : 'error',
+			'dismissible' => true,
+			'paragraph_wrap' => false,
+		)
+	);
 }
 
 /** Tools → Export. */
@@ -760,6 +767,26 @@ function kits_core_settings_groups(): array {
 }
 
 /**
+ * The fields of one Core Settings group, key => field, as Kits → Settings shows them. A site or plugin changes the list
+ * with the filter kits_settings_fields( $fields, $group ): leave a field out to hide it, reorder, or add one. A field it
+ * adds must also be registered with kits_theme_option_fields, which is what validates and saves it; entries that are not
+ * a field (an array with a group and a kind) are dropped.
+ *
+ * @param string $group A group of kits_core_settings_groups().
+ * @return array<string,array>
+ */
+function kits_core_settings_fields( string $group ): array {
+	$fields = array();
+	foreach ( kits_theme_option_fields() as $key => $f ) {
+		if ( $group === $f['group'] && 'core' === kits_theme_option_section( $key, $f ) ) {
+			$fields[ $key ] = $f;
+		}
+	}
+	$fields = (array) apply_filters( 'kits_settings_fields', $fields, $group );
+	return array_filter( $fields, fn( $f, $k ) => is_string( $k ) && is_array( $f ) && isset( $f['group'], $f['kind'] ), ARRAY_FILTER_USE_BOTH );
+}
+
+/**
  * One Core Settings group as a form of its own (Kits → Settings → Performance or Compatibility). The options save by
  * merging, so a form changes only its own fields.
  *
@@ -771,10 +798,8 @@ function kits_core_settings_form( string $group, string $also = '', string $back
 	echo '<form method="post" action="options.php">';
 	kits_options_form_fields( 'admin.php?page=kits-settings' . ( '' !== $back ? '&kits_section=' . rawurlencode( $back ) : '' ) );
 	echo '<table class="form-table" role="presentation"><tbody>';
-	foreach ( kits_theme_option_fields() as $key => $f ) {
-		if ( $group === $f['group'] && 'core' === kits_theme_option_section( $key, $f ) ) {
-			kits_theme_option_row( $key, $f );
-		}
+	foreach ( kits_core_settings_fields( $group ) as $key => $f ) {
+		kits_theme_option_row( $key, $f );
 	}
 	if ( '' !== $also ) {
 		kits_theme_option_rows_of( $also );

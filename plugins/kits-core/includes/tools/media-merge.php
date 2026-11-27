@@ -54,7 +54,11 @@ function kits_media_merge_log() {
 /** Save one group's status line. */
 function kits_media_merge_set_status( $keep, $status, $why = '', array $more = array() ) {
 	$log          = kits_media_merge_log();
-	$log[ $keep ] = array( 'status' => $status, 'why' => $why, 'time' => time() ) + $more;
+	$log[ $keep ] = array(
+		'status' => $status,
+		'why' => $why,
+		'time' => time(),
+	) + $more;
 	update_option( 'aw_media_merge_log', $log, false );
 }
 
@@ -114,7 +118,12 @@ function kits_media_merge_extras( $keep ) {
 function kits_media_merge_check( $keep, array $extras ) {
 	global $wpdb;
 	$fail   = function ( $why ) {
-		return array( 'ok' => false, 'why' => $why, 'meta' => array(), 'posts' => array() );
+		return array(
+			'ok' => false,
+			'why' => $why,
+			'meta' => array(),
+			'posts' => array(),
+		);
 	};
 	$extras = array_values( array_diff( array_map( 'intval', $extras ), array( (int) $keep ) ) );
 	if ( ! $extras ) {
@@ -160,7 +169,13 @@ function kits_media_merge_check( $keep, array $extras ) {
 		if ( ! in_array( $r->meta_key, $allowed, true ) ) {
 			return $fail( 'used by ' . $r->meta_key . ' on post ' . (int) $r->post_id );
 		}
-		$meta[] = array( 'meta_id' => (int) $r->meta_id, 'post_id' => (int) $r->post_id, 'key' => $r->meta_key, 'old' => (string) $r->meta_value, 'new' => (string) $keep );
+		$meta[] = array(
+			'meta_id' => (int) $r->meta_id,
+			'post_id' => (int) $r->post_id,
+			'key' => $r->meta_key,
+			'old' => (string) $r->meta_value,
+			'new' => (string) $keep,
+		);
 	}
 	// Listing photo lists (aw_gallery, comma-separated IDs): each extra becomes the kept copy, without repeats.
 	$grows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'aw_gallery' AND meta_value REGEXP %s", '(^|,)[[:space:]]*(' . implode( '|', $ids ) . ')[[:space:]]*(,|$)' ) );
@@ -176,7 +191,13 @@ function kits_media_merge_check( $keep, array $extras ) {
 				$list[] = $one;
 			}
 		}
-		$meta[] = array( 'meta_id' => (int) $r->meta_id, 'post_id' => (int) $r->post_id, 'key' => 'aw_gallery', 'old' => (string) $r->meta_value, 'new' => implode( ',', $list ) );
+		$meta[] = array(
+			'meta_id' => (int) $r->meta_id,
+			'post_id' => (int) $r->post_id,
+			'key' => 'aw_gallery',
+			'old' => (string) $r->meta_value,
+			'new' => implode( ',', $list ),
+		);
 	}
 	// The picture addresses Rank Math keeps beside its ID keys.
 	$kurls = kits_media_merge_urls( $keep );
@@ -189,7 +210,13 @@ function kits_media_merge_check( $keep, array $extras ) {
 		}
 		$urows = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_key IN ($uin) AND meta_value = %s", array_merge( $ukeys, array( $full ) ) ) );
 		foreach ( (array) $urows as $r ) {
-			$meta[] = array( 'meta_id' => (int) $r->meta_id, 'post_id' => (int) $r->post_id, 'key' => $r->meta_key, 'old' => (string) $r->meta_value, 'new' => $kurls['full'] );
+			$meta[] = array(
+				'meta_id' => (int) $r->meta_id,
+				'post_id' => (int) $r->post_id,
+				'key' => $r->meta_key,
+				'old' => (string) $r->meta_value,
+				'new' => $kurls['full'],
+			);
 		}
 	}
 	$trows = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->termmeta} WHERE meta_value IN ($in)", $ids ) );
@@ -200,7 +227,7 @@ function kits_media_merge_check( $keep, array $extras ) {
 	foreach ( $extras as $id ) {
 		array_push( $args, (string) $id, '%i:' . $id . ';%', '%"' . $id . '"%', '%:' . $id . ',%', '%:' . $id . '}%', '%[' . $id . ',%', '%,' . $id . ']%' );
 	}
-	$hit = $wpdb->get_var( $wpdb->prepare( 'SELECT option_name FROM ' . $wpdb->options . " WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( " . implode( ' OR ', array_fill( 0, count( $extras ), 'option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s' ) ) . ' ) LIMIT 1', array_merge( array( $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%' ), $args ) ) );
+	$hit = $wpdb->get_var( $wpdb->prepare( 'SELECT option_name FROM ' . $wpdb->options . ' WHERE option_name NOT LIKE %s AND option_name NOT LIKE %s AND option_name NOT LIKE %s AND ( ' . implode( ' OR ', array_fill( 0, count( $extras ), 'option_value = %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s OR option_value LIKE %s' ) ) . ' ) LIMIT 1', array_merge( array( $wpdb->esc_like( 'aw_media_merge_' ) . '%', $wpdb->esc_like( '_transient_' ) . '%', $wpdb->esc_like( '_site_transient_' ) . '%' ), $args ) ) );
 	if ( $hit ) {
 		return $fail( 'named in the option ' . $hit );
 	}
@@ -225,7 +252,12 @@ function kits_media_merge_check( $keep, array $extras ) {
 		return $fail( 'listed in a gallery on post ' . (int) $gal );
 	}
 	// phpcs:enable
-	return array( 'ok' => true, 'why' => '', 'meta' => $meta, 'posts' => array_values( array_unique( $posts ) ) );
+	return array(
+		'ok' => true,
+		'why' => '',
+		'meta' => $meta,
+		'posts' => array_values( array_unique( $posts ) ),
+	);
 }
 
 /** Give the extras their Trash status (files stay) or put them back. */
@@ -290,7 +322,10 @@ function kits_media_merge_group( $keep ) {
 	$log    = kits_media_merge_log();
 	$state  = $log[ $keep ]['status'] ?? '';
 	if ( 'merged' === $state ) {
-		return array( 'status' => 'merged', 'why' => 'already merged' );
+		return array(
+			'status' => 'merged',
+			'why' => 'already merged',
+		);
 	}
 	if ( 'pending' === $state ) { // An earlier run of this group stopped half way: put it back first.
 		kits_media_merge_restore( kits_media_merge_data( $keep ) );
@@ -299,15 +334,28 @@ function kits_media_merge_group( $keep ) {
 	$c = kits_media_merge_check( $keep, $extras );
 	if ( ! $c['ok'] ) {
 		kits_media_merge_set_status( $keep, 'blocked', $c['why'] );
-		return array( 'status' => 'blocked', 'why' => $c['why'] );
+		return array(
+			'status' => 'blocked',
+			'why' => $c['why'],
+		);
 	}
-	$data = array( 'keep' => $keep, 'extras' => $extras, 'meta' => array(), 'content' => array(), 'time' => time(), 'user' => get_current_user_id() );
+	$data = array(
+		'keep' => $keep,
+		'extras' => $extras,
+		'meta' => array(),
+		'content' => array(),
+		'time' => time(),
+		'user' => get_current_user_id(),
+	);
 	kits_media_merge_set_status( $keep, 'pending' );
 	// 1. Repoint the picture references (the old values are saved first).
 	$data['meta'] = $c['meta'];
 	if ( ! kits_media_merge_save_data( $keep, $data ) ) {
 		kits_media_merge_set_status( $keep, 'failed', 'the old values could not be saved; nothing was changed' );
-		return array( 'status' => 'failed', 'why' => 'the old values could not be saved' );
+		return array(
+			'status' => 'failed',
+			'why' => 'the old values could not be saved',
+		);
 	}
 	foreach ( $c['meta'] as $m ) {
 		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['new'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -326,21 +374,30 @@ function kits_media_merge_group( $keep ) {
 			foreach ( kits_media_merge_urls( $id ) as $size => $url ) {
 				$map[ $url ] = $kurls[ $size ] ?? ( $kurls['full'] ?? $url );
 			}
-			uksort( $map, function ( $a, $b ) {
-				return strlen( $b ) <=> strlen( $a );
-			} );
+			uksort(
+				$map,
+				function ( $a, $b ) {
+					return strlen( $b ) <=> strlen( $a );
+				}
+			);
 			$new = str_replace( array_keys( $map ), array_values( $map ), $new );
 			$new = preg_replace( '/wp-image-' . (int) $id . '(?!\d)/', 'wp-image-' . $keep, $new );
 			$new = preg_replace( '/"(id|mediaId)":' . (int) $id . '(?!\d)/', '"$1":' . $keep, $new );
 			$new = preg_replace( '/data-id="' . (int) $id . '"/', 'data-id="' . $keep . '"', $new );
 		}
 		if ( $new !== $post->post_content ) {
-			$data['content'][ $pid ] = array( 'old' => $post->post_content, 'hash' => md5( $new ) );
+			$data['content'][ $pid ] = array(
+				'old' => $post->post_content,
+				'hash' => md5( $new ),
+			);
 			if ( ! kits_media_merge_save_data( $keep, $data ) ) {
 				unset( $data['content'][ $pid ] );
 				$left = kits_media_merge_restore( $data );
 				kits_media_merge_set_status( $keep, $left ? 'pending' : 'failed', 'the old values could not be saved; the group was put back' );
-				return array( 'status' => 'failed', 'why' => 'the old values could not be saved' );
+				return array(
+					'status' => 'failed',
+					'why' => 'the old values could not be saved',
+				);
 			}
 			$wpdb->update( $wpdb->posts, array( 'post_content' => $new ), array( 'ID' => $pid ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			clean_post_cache( $pid );
@@ -351,12 +408,18 @@ function kits_media_merge_group( $keep ) {
 	if ( ! $left['ok'] || $left['meta'] || $left['posts'] ) {
 		$kept = kits_media_merge_restore( $data );
 		kits_media_merge_set_status( $keep, $kept ? 'pending' : 'failed', 'a reference was still left after repointing' . ( $kept ? '; ' . $kept . ' item(s) were edited meanwhile and still need Put back' : '; everything was put back' ) );
-		return array( 'status' => 'failed', 'why' => 'a reference was still left after repointing' );
+		return array(
+			'status' => 'failed',
+			'why' => 'a reference was still left after repointing',
+		);
 	}
 	// 4. Retire the extras (Trash status; files stay).
 	kits_media_merge_retire( $extras, $keep, true );
 	kits_media_merge_set_status( $keep, 'merged', '', array( 'extras' => $extras ) );
-	return array( 'status' => 'merged', 'why' => '' );
+	return array(
+		'status' => 'merged',
+		'why' => '',
+	);
 }
 
 /** Undo a merged group: references, content and the copies come back. */
@@ -455,10 +518,22 @@ function kits_media_merge_body(): void {
 	$groups = kits_media_merge_groups();
 	$log    = kits_media_merge_log();
 	if ( isset( $_GET['aw_mm'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		wp_admin_notice( 'Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.', array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		wp_admin_notice(
+			'Checked ' . (int) $_GET['aw_mm'] . ' group(s). Merged groups show the date; blocked ones show why.',
+			array(
+				'type' => 'success',
+				'dismissible' => true,
+			)
+		); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 	if ( isset( $_GET['aw_mm_undo'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		wp_admin_notice( 'Group ' . (int) $_GET['aw_mm_undo'] . ' put back as it was.' . ( ! empty( $_GET['aw_mm_skip'] ) ? ' ' . (int) $_GET['aw_mm_skip'] . ' item(s) changed after the merge and keep their newer value.' : '' ), array( 'type' => 'success', 'dismissible' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		wp_admin_notice(
+			'Group ' . (int) $_GET['aw_mm_undo'] . ' put back as it was.' . ( ! empty( $_GET['aw_mm_skip'] ) ? ' ' . (int) $_GET['aw_mm_skip'] . ' item(s) changed after the merge and keep their newer value.' : '' ),
+			array(
+				'type' => 'success',
+				'dismissible' => true,
+			)
+		); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 	echo '<p>The same picture uploaded more than once. A merge points every use at one copy and gives the extra copies the Trash status; files stay on disk and nothing is deleted. Undo puts everything back. A group is blocked when an extra is a featured image, hosted file, category photo or named in an option.</p>';
 	$merged  = 0;
@@ -515,7 +590,13 @@ function kits_media_merge_body(): void {
 	}
 	kits_simple_table(
 		'aw-media-duplicates',
-		array( 'keep' => 'Copy kept', 'extras' => 'Extra copies (IDs)', 'uses' => 'Places using the extras', 'state' => 'Status', 'action' => 'Action' ),
+		array(
+			'keep' => 'Copy kept',
+			'extras' => 'Extra copies (IDs)',
+			'uses' => 'Places using the extras',
+			'state' => 'Status',
+			'action' => 'Action',
+		),
 		$rows,
 		array( 'primary' => 'keep' )
 	);

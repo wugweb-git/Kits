@@ -274,7 +274,7 @@ function kits_media_webp_pending( $limit = 0 ) {
 	usort(
 		$out,
 		static function ( $a, $b ) use ( $weight ) {
-			return ( $weight[ $b ] <=> $weight[ $a ] ) ?: ( $a <=> $b );
+			return 0 !== ( $weight[ $b ] <=> $weight[ $a ] ) ? ( $weight[ $b ] <=> $weight[ $a ] ) : ( $a <=> $b );
 		}
 	);
 	return kits_media_webp_pick( $out, $log, $limit );
@@ -295,7 +295,12 @@ function kits_media_webp_convert( $id ) {
 		return false;
 	}
 	$old_orig   = isset( $meta['original_image'] ) ? (string) $meta['original_image'] : null;
-	$log[ $id ] = array( 'sizes' => $meta['sizes'], 'time' => time(), 'status' => 'failed', 'why' => 'Stopped before it finished' );
+	$log[ $id ] = array(
+		'sizes' => $meta['sizes'],
+		'time' => time(),
+		'status' => 'failed',
+		'why' => 'Stopped before it finished',
+	);
 	if ( null !== $old_orig ) {
 		$log[ $id ]['original_image'] = $old_orig; // kept with the old sizes so Undo restores both
 	}
@@ -427,16 +432,40 @@ function kits_media_webp_screen() {
 function kits_media_webp_body(): void {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended
 	if ( isset( $_GET['aw_mw'] ) ) {
-		wp_admin_notice( (int) $_GET['aw_mw'] . ' image(s) converted.' . ( ! empty( $_GET['aw_mw_fail'] ) ? ' ' . (int) $_GET['aw_mw_fail'] . ' could not be converted and keep their old sizes (see Status).' : '' ), array( 'type' => 'success', 'dismissible' => true ) );
+		wp_admin_notice(
+			(int) $_GET['aw_mw'] . ' image(s) converted.' . ( ! empty( $_GET['aw_mw_fail'] ) ? ' ' . (int) $_GET['aw_mw_fail'] . ' could not be converted and keep their old sizes (see Status).' : '' ),
+			array(
+				'type' => 'success',
+				'dismissible' => true,
+			)
+		);
 	}
 	if ( isset( $_GET['aw_mw_undo'] ) ) {
-		wp_admin_notice( 'Image ' . (int) $_GET['aw_mw_undo'] . ' has its old sizes back.', array( 'type' => 'success', 'dismissible' => true ) );
+		wp_admin_notice(
+			'Image ' . (int) $_GET['aw_mw_undo'] . ' has its old sizes back.',
+			array(
+				'type' => 'success',
+				'dismissible' => true,
+			)
+		);
 	}
 	if ( isset( $_GET['aw_mw_undo_fail'] ) ) {
-		wp_admin_notice( 'Image ' . (int) $_GET['aw_mw_undo_fail'] . ' could not be put back.', array( 'type' => 'error', 'dismissible' => true ) );
+		wp_admin_notice(
+			'Image ' . (int) $_GET['aw_mw_undo_fail'] . ' could not be put back.',
+			array(
+				'type' => 'error',
+				'dismissible' => true,
+			)
+		);
 	}
 	if ( isset( $_GET['aw_mw_off'] ) ) {
-		wp_admin_notice( 'This server cannot write WebP, so nothing was converted.', array( 'type' => 'error', 'dismissible' => true ) );
+		wp_admin_notice(
+			'This server cannot write WebP, so nothing was converted.',
+			array(
+				'type' => 'error',
+				'dismissible' => true,
+			)
+		);
 	}
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	$supported = wp_image_editor_supports( array( 'mime_type' => 'image/webp' ) );
@@ -474,9 +503,17 @@ function kits_media_webp_body(): void {
 	}
 	kits_simple_table(
 		'aw-media-webp',
-		array( 'image' => 'Image', 'sizes' => 'Old sizes kept', 'state' => 'Status', 'action' => 'Action' ),
+		array(
+			'image' => 'Image',
+			'sizes' => 'Old sizes kept',
+			'state' => 'Status',
+			'action' => 'Action',
+		),
 		$rows,
-		array( 'primary' => 'image', 'empty' => 'Nothing converted yet.' )
+		array(
+			'primary' => 'image',
+			'empty' => 'Nothing converted yet.',
+		)
 	);
 	echo '</form>';
 }

@@ -89,7 +89,10 @@ function kits_cron_stats( $times, $since, $now ) {
 		$gap  = max( $gap, $x - $prev );
 		$prev = $x;
 	}
-	return array( 'runs' => count( $t ), 'gap' => max( $gap, $now - $prev ) );
+	return array(
+		'runs' => count( $t ),
+		'gap' => max( $gap, $now - $prev ),
+	);
 }
 
 /** "2 h 05 min" / "12 min". */
@@ -116,7 +119,13 @@ add_action(
 				$runs    = kits_cron_runs();
 				$last    = kits_cron_last();
 				$running = $last && $now - $last < KITS_CRON_STALE;
-				$names   = array( 'hostinger' => 'Hostinger server cron', 'github' => 'GitHub Actions', 'uptimerobot' => 'UptimeRobot', 'cron-job.org' => 'cron-job.org', 'other' => 'Other' );
+				$names   = array(
+					'hostinger' => 'Hostinger server cron',
+					'github' => 'GitHub Actions',
+					'uptimerobot' => 'UptimeRobot',
+					'cron-job.org' => 'cron-job.org',
+					'other' => 'Other',
+				);
 				$marks   = array(
 					'ok'   => array( 'dashicons-yes-alt', '#007017', 'OK' ),
 					'late' => array( 'dashicons-warning', '#b32d2e', 'Late' ),
@@ -147,9 +156,18 @@ add_action(
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside kits_dash_cards().
 						array(
-							array( 'label' => 'Status', 'value' => $running ? 'Running' : 'Stopped' ),
-							array( 'label' => 'Last run', 'value' => $last ? kits_cron_span( $now - $last ) . ' ago' : 'Never' ),
-							array( 'label' => 'Runs, 24 h', 'value' => number_format_i18n( $total ) ),
+							array(
+								'label' => 'Status',
+								'value' => $running ? 'Running' : 'Stopped',
+							),
+							array(
+								'label' => 'Last run',
+								'value' => $last ? kits_cron_span( $now - $last ) . ' ago' : 'Never',
+							),
+							array(
+								'label' => 'Runs, 24 h',
+								'value' => number_format_i18n( $total ),
+							),
 						)
 					);
 				}
@@ -221,14 +239,23 @@ function kits_dispatch_workflow( $file, $inputs = array() ) {
 					'User-Agent'           => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
 					'Content-Type'         => 'application/json',
 				),
-				'body'    => wp_json_encode( array( 'ref' => 'main', 'inputs' => (object) array_map( 'strval', $inputs ) ) ),
+				'body'    => wp_json_encode(
+					array(
+						'ref' => 'main',
+						'inputs' => (object) array_map( 'strval', $inputs ),
+					)
+				),
 			)
 		);
 		$code = is_wp_error( $resp ) ? 0 : (int) wp_remote_retrieve_response_code( $resp );
 		$res  = 204 === $code ? true : new WP_Error( 'aw_dispatch_failed', is_wp_error( $resp ) ? $resp->get_error_message() : 'GitHub answered HTTP ' . $code . ': ' . mb_substr( (string) wp_remote_retrieve_body( $resp ), 0, 200 ) );
 	}
 	$log          = (array) get_option( 'aw_dispatch_log', array() );
-	$log[ $file ] = array( 'at' => time(), 'ok' => true === $res, 'msg' => true === $res ? 'started' : $res->get_error_message() );
+	$log[ $file ] = array(
+		'at' => time(),
+		'ok' => true === $res,
+		'msg' => true === $res ? 'started' : $res->get_error_message(),
+	);
 	update_option( 'aw_dispatch_log', $log, false );
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		echo esc_html( $file . ': ' . $log[ $file ]['msg'] ) . "\n";

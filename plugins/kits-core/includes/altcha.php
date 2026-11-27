@@ -39,6 +39,27 @@ function kits_altcha_challenge() {
 	);
 }
 
+/**
+ * Mark a solved challenge as used, atomically. The old check (read a transient, then write it) let two requests that
+ * arrived together both pass. INSERT IGNORE on the options table's unique option_name has one winner: the request
+ * that inserted the row; every other gets 0 affected rows. The row holds the challenge's expiry, and expired rows
+ * are pruned at most once an hour.
+ *
+ * @param string $challenge The solved challenge (hash).
+ * @param int    $expires   When the challenge expires (Unix time).
+ * @return bool True for the first use only.
+ */
+function kits_altcha_claim( $challenge, $expires ) {
+	global $wpdb;
+	$name = 'kits_altcha_used_' . md5( (string) $challenge );
+	$won  = 1 === (int) $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO {$wpdb->options} (option_name, option_value, autoload) VALUES (%s, %s, 'no')", $name, (string) (int) $expires ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- an atomic claim has no API equivalent
+	if ( $won && ! get_transient( 'kits_altcha_pruned' ) ) {
+		set_transient( 'kits_altcha_pruned', 1, HOUR_IN_SECONDS );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND CAST(option_value AS UNSIGNED) < %d", $wpdb->esc_like( 'kits_altcha_used_' ) . '%', time() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- pruning the used-challenge rows
+	}
+	return $won;
+}
+
 /** True when the posted payload is a solved, unexpired, unused challenge we signed. */
 function kits_altcha_verify( $payload ) {
 	$p = json_decode( (string) base64_decode( (string) $payload, true ), true );
@@ -59,12 +80,7 @@ function kits_altcha_verify( $payload ) {
 		|| ! hash_equals( hash_hmac( 'sha256', $challenge, kits_altcha_key() ), (string) $p['signature'] ) ) {
 		return false;
 	}
-	$used = 'kits_altcha_' . md5( $challenge ); // each solved challenge works once
-	if ( get_transient( $used ) ) {
-		return false;
-	}
-	set_transient( $used, 1, KITS_ALTCHA_TTL );
-	return true;
+	return kits_altcha_claim( $challenge, (int) $m[1] ); // each solved challenge works once
 }
 
 add_action(
@@ -113,15 +129,23 @@ function kits_altcha_widget( $mode = '' ) {
 	static $done = false;
 	if ( ! $done ) {
 		$done = true;
-		$src  = add_query_arg( array( 'kits_altcha_js' => 1, 'ver' => '2.3.0' ), home_url( '/' ) );
+		$src  = add_query_arg(
+			array(
+				'kits_altcha_js' => 1,
+				'ver' => '2.3.0',
+			),
+			home_url( '/' )
+		);
 		add_action(
 			'wp_footer',
 			function () use ( $src ) {
 				// Sit just above the form's send button (unless placed already: data-placed); load the widget on first touch of any form that has one.
-				wp_print_inline_script_tag( "(function(){function place(){document.querySelectorAll('.kit-captcha:not([data-placed])').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});}"
-					. "var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.src=" . wp_json_encode( $src ) . ";s.defer=true;document.head.appendChild(s);}"
+				wp_print_inline_script_tag(
+					"(function(){function place(){document.querySelectorAll('.kit-captcha:not([data-placed])').forEach(function(c){var f=c.closest('form'),b=f&&f.querySelector('button[type=submit]');for(var n=b;n&&n.parentNode!==f;n=n.parentNode);if(n){f.insertBefore(c,n);}});}"
+					. "var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.src=" . wp_json_encode( $src ) . ';s.defer=true;document.head.appendChild(s);}'
 					. "if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',place);}else{place();}"
-					. "['focusin','pointerdown'].forEach(function(ev){document.addEventListener(ev,function(e){var f=e.target.closest&&e.target.closest('form');if(f&&f.querySelector('.kit-captcha'))load();},{passive:true});});})();" );
+					. "['focusin','pointerdown'].forEach(function(ev){document.addEventListener(ev,function(e){var f=e.target.closest&&e.target.closest('form');if(f&&f.querySelector('.kit-captcha'))load();},{passive:true});});})();"
+				);
 			},
 			20
 		);

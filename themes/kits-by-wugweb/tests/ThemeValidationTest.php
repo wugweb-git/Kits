@@ -755,6 +755,312 @@ it('Every kit-ico--* icon the theme uses has a mask (--i) defined in kit.css and
     }
 });
 
+// 7. Release files: readme.txt (checked the way the wordpress.org readme parser reads it), changelog, screenshot, tags
+echo "\n7. Validating readme.txt, CHANGELOG.md, screenshot and style.css tags...\n";
+
+$style_css = file_get_contents($theme_dir . '/style.css');
+$style_get = function (string $key) use ($style_css) {
+    return preg_match('/^[ \t\/*#]*' . preg_quote($key, '/') . ':[ \t]*(.+?)[ \t]*$/mi', $style_css, $m) ? trim($m[1]) : '';
+};
+
+it('readme.txt has the title line, the header fields the wordpress.org parser reads, and they agree with style.css', function () use ($theme_dir, $style_get) {
+    $readme = file_get_contents($theme_dir . '/readme.txt');
+    $lines  = preg_split('/\r?\n/', $readme);
+    if (!preg_match('/^===\s*(.+?)\s*===\s*$/', $lines[0] ?? '', $m)) {
+        throw new \RuntimeException('First line must be "=== Theme Name ===", got: ' . ($lines[0] ?? ''));
+    }
+    if ($m[1] !== $style_get('Theme Name')) {
+        throw new \RuntimeException("readme title '{$m[1]}' differs from the style.css Theme Name '{$style_get('Theme Name')}'");
+    }
+    // Header block: "Key: value" lines up to the first blank line after the title, then a blank line and the short description.
+    $head = [];
+    $i    = 1;
+    for (; $i < count($lines) && trim($lines[$i]) === ''; $i++) {
+    }
+    for (; $i < count($lines) && preg_match('/^([A-Za-z ]+):\s*(.*)$/', $lines[$i], $kv); $i++) {
+        $head[strtolower(trim($kv[1]))] = trim($kv[2]);
+    }
+    foreach (['contributors', 'requires at least', 'tested up to', 'requires php', 'stable tag', 'license', 'license uri'] as $k) {
+        if (($head[$k] ?? '') === '') {
+            throw new \RuntimeException("readme.txt header lacks '$k'");
+        }
+    }
+    foreach (['requires at least', 'tested up to', 'requires php', 'stable tag'] as $k) {
+        if (!preg_match('/^\d+(\.\d+){1,2}$/', $head[$k])) {
+            throw new \RuntimeException("readme.txt '$k' is not a plain version number: {$head[$k]}");
+        }
+    }
+    if (version_compare($head['tested up to'], $head['requires at least'], '<')) {
+        throw new \RuntimeException('Tested up to is lower than Requires at least');
+    }
+    foreach (['requires at least' => 'Requires at least', 'tested up to' => 'Tested up to', 'requires php' => 'Requires PHP'] as $k => $cssk) {
+        if ($head[$k] !== $style_get($cssk)) {
+            throw new \RuntimeException("readme.txt $cssk {$head[$k]} differs from style.css {$style_get($cssk)}");
+        }
+    }
+    if ($head['stable tag'] !== $style_get('Version')) {
+        throw new \RuntimeException("readme.txt Stable tag {$head['stable tag']} differs from style.css Version {$style_get('Version')}");
+    }
+    if (!preg_match('/^(GPL-?(v?2|v?3)|GPLv2|GPLv3|GNU General Public License)/i', $head['license'])) {
+        throw new \RuntimeException('readme.txt License is not a GPL-compatible string: ' . $head['license']);
+    }
+    if (!preg_match('#^https?://#', $head['license uri'])) {
+        throw new \RuntimeException('License URI is not a URL');
+    }
+    if (preg_match('/^[a-z0-9-]+(,\s*[a-z0-9-]+)*$/i', $head['contributors']) !== 1) {
+        throw new \RuntimeException('Contributors must be a comma-separated list of wordpress.org usernames');
+    }
+    // Short description: the first non-empty line after the header, at most 150 characters, no Markdown.
+    for (; $i < count($lines) && trim($lines[$i]) === ''; $i++) {
+    }
+    $short = trim($lines[$i] ?? '');
+    if ($short === '' || str_starts_with($short, '==')) {
+        throw new \RuntimeException('No short description under the header');
+    }
+    if (strlen($short) > 150) {
+        throw new \RuntimeException('Short description is ' . strlen($short) . ' characters; the limit is 150');
+    }
+    if (preg_match('/[*`#\[]/', $short)) {
+        throw new \RuntimeException('Short description contains markup');
+    }
+});
+
+it('readme.txt sections are the ones the parser knows, Description, FAQ, Changelog and Installation exist, and no "= x =" heading is empty', function () use ($theme_dir) {
+    $readme = file_get_contents($theme_dir . '/readme.txt');
+    preg_match_all('/^==\s*([^=\n]+?)\s*==\s*$/m', $readme, $m);
+    $names = array_map('strtolower', $m[1]);
+    foreach (['description', 'installation', 'frequently asked questions', 'changelog'] as $need) {
+        if (!in_array($need, $names, true)) {
+            throw new \RuntimeException("readme.txt has no '== $need ==' section");
+        }
+    }
+    $known = ['description', 'installation', 'frequently asked questions', 'screenshots', 'changelog', 'upgrade notice', 'copyright'];
+    foreach ($names as $n) {
+        if (!in_array($n, $known, true)) {
+            throw new \RuntimeException("readme.txt section '$n' is not one the parser maps");
+        }
+    }
+    if (count($names) !== count(array_unique($names))) {
+        throw new \RuntimeException('readme.txt repeats a section');
+    }
+    $faq = preg_split('/^==\s*Frequently Asked Questions\s*==\s*$/mi', $readme)[1] ?? '';
+    $faq = preg_split('/^==[^=]/m', $faq)[0];
+    if (!preg_match('/^=\s*\S.*\s*=\s*$/m', $faq)) {
+        throw new \RuntimeException('FAQ has no "= Question =" entries');
+    }
+});
+
+it('readme.txt and CHANGELOG.md list the same versions, newest first, and the current version has an entry in both', function () use ($theme_dir, $style_get) {
+    $readme = file_get_contents($theme_dir . '/readme.txt');
+    $body   = preg_split('/^==\s*Changelog\s*==\s*$/mi', $readme)[1] ?? '';
+    $body   = preg_split('/^==\s*[^=\n]+==\s*$/m', $body)[0];
+    preg_match_all('/^=\s*(\d+\.\d+\.\d+)\s*=\s*$/m', $body, $r);
+    $md = file_get_contents($theme_dir . '/CHANGELOG.md');
+    preg_match_all('/^##\s*(\d+\.\d+\.\d+)\b/m', $md, $c);
+    if ($r[1] !== $c[1]) {
+        throw new \RuntimeException('readme.txt changelog versions [' . implode(', ', $r[1]) . '] differ from CHANGELOG.md [' . implode(', ', $c[1]) . ']');
+    }
+    if (($r[1][0] ?? '') !== $style_get('Version')) {
+        throw new \RuntimeException('Newest changelog entry ' . ($r[1][0] ?? 'none') . ' is not the style.css Version ' . $style_get('Version'));
+    }
+    $sorted = $r[1];
+    usort($sorted, fn($a, $b) => version_compare($b, $a));
+    if ($sorted !== $r[1]) {
+        throw new \RuntimeException('Changelog is not newest first');
+    }
+    // Each readme bullet for the current version has a counterpart in CHANGELOG.md (same leading words).
+    preg_match('/^=\s*' . preg_quote($r[1][0], '/') . '\s*=\s*\n(.*?)(?=^=\s|\z)/ms', $body, $cur);
+    foreach (preg_split('/\r?\n/', trim($cur[1] ?? '')) as $line) {
+        $words = preg_replace('/[^a-z0-9 ]/i', '', substr(ltrim($line, '* '), 0, 24));
+        if ($words !== '' && stripos(preg_replace('/[^a-z0-9 ]/i', '', $md), $words) === false) {
+            throw new \RuntimeException("CHANGELOG.md lacks the readme entry starting '$words'");
+        }
+    }
+});
+
+it('screenshot.png is a 1200 x 900 PNG under 1 MB, screenshot.jpg is gone, and nothing points at a missing screenshot', function () use ($theme_dir) {
+    $png = $theme_dir . '/screenshot.png';
+    if (!is_file($png)) {
+        throw new \RuntimeException('screenshot.png is missing');
+    }
+    $info = getimagesize($png);
+    if (!$info || $info[2] !== IMAGETYPE_PNG) {
+        throw new \RuntimeException('screenshot.png is not a PNG');
+    }
+    if ($info[0] !== 1200 || $info[1] !== 900) {
+        throw new \RuntimeException("screenshot.png is {$info[0]}x{$info[1]}; the theme directory wants 1200x900");
+    }
+    if (filesize($png) > 1048576) {
+        throw new \RuntimeException('screenshot.png is over 1 MB');
+    }
+    if (file_exists($theme_dir . '/screenshot.jpg')) {
+        throw new \RuntimeException('screenshot.jpg still exists next to screenshot.png');
+    }
+    $iter = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($theme_dir, \FilesystemIterator::SKIP_DOTS));
+    foreach ($iter as $f) {
+        if (!in_array($f->getExtension(), ['php', 'css', 'json', 'html', 'js', 'txt'], true) || str_contains($f->getPathname(), '/tests/')) {
+            continue;
+        }
+        if (str_contains(file_get_contents($f->getPathname()), 'screenshot.jpg')) {
+            throw new \RuntimeException($f->getPathname() . ' still refers to screenshot.jpg');
+        }
+    }
+});
+
+it('style.css Tags are all on the wordpress.org theme tag list, at most 15, and the header names no tenant', function () use ($style_get, $style_css) {
+    $allowed = ['accessibility-ready', 'block-patterns', 'block-styles', 'custom-background', 'custom-colors', 'custom-header', 'custom-logo', 'custom-menu', 'editor-style', 'featured-image-header', 'featured-images', 'flexible-header', 'footer-widgets', 'front-page-post-form', 'full-site-editing', 'grid-layout', 'microformats', 'post-formats', 'rtl-language-support', 'sticky-post', 'style-variations', 'template-editing', 'theme-options', 'threaded-comments', 'translation-ready', 'wide-blocks', 'one-column', 'two-columns', 'three-columns', 'four-columns', 'left-sidebar', 'right-sidebar'];
+    $tags    = array_map('trim', explode(',', $style_get('Tags')));
+    foreach ($tags as $t) {
+        if (!in_array($t, $allowed, true)) {
+            throw new \RuntimeException("Tag '$t' is not on the wordpress.org theme tag list");
+        }
+    }
+    if (count($tags) > 15) {
+        throw new \RuntimeException('More than 15 tags; the directory ignores the rest');
+    }
+    if (preg_match('/animal\s*writes/i', $style_css . file_get_contents(dirname(__DIR__) . '/readme.txt'))) {
+        throw new \RuntimeException('A tenant name is in the theme header or readme');
+    }
+});
+
+// 8. Accessibility that can be measured from the files
+echo "\n8. Validating accessibility: contrast for every style variation, focus, headings...\n";
+
+$contrast_sets = function () use ($theme_dir) {
+    $base = json_decode(file_get_contents($theme_dir . '/theme.json'), true);
+    $pal0 = [];
+    foreach ($base['settings']['color']['palette'] as $c) {
+        $pal0[$c['slug']] = $c['color'];
+    }
+    $sets = ['base' => $pal0];
+    foreach (glob($theme_dir . '/styles/*.json') as $f) {
+        $j   = json_decode(file_get_contents($f), true);
+        $pal = $pal0;
+        foreach (($j['settings']['color']['palette'] ?? []) as $c) {
+            $pal[$c['slug']] = $c['color'];
+        }
+        $sets[basename($f, '.json')] = $pal;
+    }
+    return $sets;
+};
+$wcag_lum   = function ($hex) {
+    $hex = ltrim($hex, '#');
+    $v   = array_map(fn($i) => hexdec(substr($hex, $i, 2)) / 255, [0, 2, 4]);
+    $v   = array_map(fn($x) => $x <= 0.03928 ? $x / 12.92 : pow(($x + 0.055) / 1.055, 2.4), $v);
+    return 0.2126 * $v[0] + 0.7152 * $v[1] + 0.0722 * $v[2];
+};
+$wcag_ratio = fn($a, $b, $lum = null) => (max($wcag_lum($a), $wcag_lum($b)) + 0.05) / (min($wcag_lum($a), $wcag_lum($b)) + 0.05);
+
+it('Every style variation (base, Dark, Forest, Slate): text and muted text on page, surface and raised read at 4.5:1; the focus colour reaches 3:1 on all three', function () use ($contrast_sets, $wcag_ratio) {
+    foreach ($contrast_sets() as $name => $p) {
+        foreach (['canvas', 'surface', 'background'] as $bg) {
+            foreach (['foreground', 'text-muted'] as $fg) {
+                $r = $wcag_ratio($p[$fg], $p[$bg]);
+                if ($r < 4.5) {
+                    throw new \RuntimeException(sprintf('%s: %s %s on %s %s is %.2f:1, below 4.5:1', $name, $fg, $p[$fg], $bg, $p[$bg], $r));
+                }
+            }
+            $r = $wcag_ratio($p['focus'], $p[$bg]);
+            if ($r < 3) {
+                throw new \RuntimeException(sprintf('%s: focus %s on %s %s is %.2f:1, below the 3:1 non-text minimum', $name, $p['focus'], $bg, $p[$bg], $r));
+            }
+        }
+    }
+});
+
+it('Every style variation: the content link colour (primary-dark) reads at 4.5:1 on the page, surface and raised colours', function () use ($contrast_sets, $wcag_ratio) {
+    foreach ($contrast_sets() as $name => $p) {
+        foreach (['canvas', 'surface', 'background'] as $bg) {
+            $r = $wcag_ratio($p['primary-dark'], $p[$bg]);
+            if ($r < 4.5) {
+                throw new \RuntimeException(sprintf('%s: link colour primary-dark %s on %s %s is %.2f:1, below 4.5:1', $name, $p['primary-dark'], $bg, $p[$bg], $r));
+            }
+        }
+    }
+});
+
+it('Every style variation: the default button (on-ink on ink), the Brand button (dark ash on the accent) and the status colours on the page and on their tints read at 4.5:1', function () use ($contrast_sets, $wcag_ratio, $theme_dir) {
+    $ash = '#191919'; // --color-ash, the text colour of the Brand button on the accent (kits-v42.css)
+    if (strpos(file_get_contents($theme_dir . '/assets/css/kits-v42.css'), '--color-ash: ' . $ash) === false) {
+        throw new \RuntimeException('--color-ash is no longer ' . $ash . '; update this test with the new value');
+    }
+    foreach ($contrast_sets() as $name => $p) {
+        $pairs = [
+            'button on-ink on ink' => [$p['on-ink'], $p['secondary']],
+            'Brand button ash on accent' => [$ash, $p['primary']],
+        ];
+        foreach (['error', 'success', 'warning'] as $s) {
+            $pairs["$s on page"]     = [$p[$s], $p['canvas']];
+            $pairs["$s on its tint"] = [$p[$s], $p[$s . '-soft']];
+        }
+        foreach ($pairs as $label => [$a, $b]) {
+            $r = $wcag_ratio($a, $b);
+            if ($r < 4.5) {
+                throw new \RuntimeException(sprintf('%s: %s (%s on %s) is %.2f:1, below 4.5:1', $name, $label, $a, $b, $r));
+            }
+        }
+    }
+});
+
+it('Dark mode runtime tokens in kits.css (html[data-theme=dark]) carry the same primary-dark as styles/dark.json', function () use ($theme_dir) {
+    $j = json_decode(file_get_contents($theme_dir . '/styles/dark.json'), true);
+    $dark = '';
+    foreach ($j['settings']['color']['palette'] as $c) {
+        if ($c['slug'] === 'primary-dark') {
+            $dark = $c['color'];
+        }
+    }
+    $css = file_get_contents($theme_dir . '/assets/css/kits.css');
+    if (strpos($css, '--wp--preset--color--primary-dark: ' . $dark) === false || strpos($css, '--kit-color-accent-ink: ' . $dark) === false) {
+        throw new \RuntimeException("kits.css dark tokens do not use styles/dark.json primary-dark $dark");
+    }
+});
+
+it('Focus: one global :focus-visible outline exists, every outline:none on a focus rule has a replacement, and form fields keep an outline in forced-colors mode', function () use ($theme_dir) {
+    foreach (['kit.css', 'kit.min.css'] as $file) {
+        $css = file_get_contents($theme_dir . '/assets/css/' . $file);
+        if (!preg_match('/:where\(a, ?button, ?input, ?select, ?textarea, ?summary, ?\[tabindex\]\):focus-visible\s*\{[^}]*outline:[^;}]*solid/', $css)) {
+            throw new \RuntimeException("$file: the global :focus-visible outline rule is missing");
+        }
+        if (!preg_match('/@media \(forced-colors: ?active\)\s*\{[^}]*\.kit-form[^}]*focus-visible[^}]*outline/', $css)) {
+            throw new \RuntimeException("$file: no forced-colors outline for form fields (their ring is a box-shadow, which Windows high contrast removes)");
+        }
+        if (!preg_match('/\.kit-site-header \.wp-block-navigation__submenu-container\s*\{[^}]*--kit-color-focus/', $css)) {
+            throw new \RuntimeException("$file: the header submenu panel does not set its own focus colour (yellow is 1.5:1 on its light panel)");
+        }
+    }
+});
+
+it('The theme toggle sits beside the header menu: the header navigation does not wrap (kit.css and kit.min.css)', function () use ($theme_dir) {
+    foreach (['kit.css', 'kit.min.css'] as $file) {
+        $css = file_get_contents($theme_dir . '/assets/css/' . $file);
+        if (!preg_match('/\.kit-header-right\s*>\s*\.wp-block-navigation\s*\{[^}]*flex-wrap:\s*nowrap/', $css)) {
+            throw new \RuntimeException("$file: .kit-header-right > .wp-block-navigation must be flex-wrap: nowrap, or the injected toggle drops under the menu on desktop");
+        }
+    }
+});
+
+it('Landmarks and headings in templates: each template has one main, header and footer parts, a skip target, and lists under the page h1 use h2 titles (no h1 to h3 jump)', function () use ($theme_dir) {
+    foreach (glob($theme_dir . '/templates/*.html') as $f) {
+        $name = basename($f, '.html');
+        $html = file_get_contents($f);
+        if (substr_count($html, '"tagName":"main"') !== 1) {
+            throw new \RuntimeException("$name: expected exactly one main group");
+        }
+        if (!in_array($name, ['blank'], true) && (strpos($html, '"slug":"header"') === false || strpos($html, '"slug":"footer"') === false)) {
+            throw new \RuntimeException("$name: header or footer part missing");
+        }
+        if (preg_match('/wp:post-title \{"level":([3-6])/', $html, $m) && !preg_match('/wp:heading \{[^}]*"level":2/', $html)) {
+            throw new \RuntimeException("$name: a post title is an h{$m[1]} with no h2 above it (skipped heading level)");
+        }
+    }
+    foreach (['empty-state'] as $p) {
+        if (preg_match('/<h3\b/', file_get_contents($theme_dir . "/patterns/$p.php"))) {
+            throw new \RuntimeException("$p opens on an h3 under the page h1");
+        }
+    }
+});
+
 // 6. Summary
 echo "\n===================================================\n";
 echo "Theme Validation: $checks checks, $failures failed.\n";

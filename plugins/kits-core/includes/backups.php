@@ -150,7 +150,7 @@ function kits_daily_backup_run() {
 	$db = $dir . '/auto-db-' . $day . '.sql.gz';
 	$gz = gzopen( $db, 'wb6' );
 	if ( $gz ) {
-		gzwrite( $gz, "-- " . get_bloginfo( 'name' ) . " database backup {$report['at']}\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n" );
+		gzwrite( $gz, '-- ' . get_bloginfo( 'name' ) . " database backup {$report['at']}\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n" );
 		foreach ( $wpdb->get_col( 'SHOW TABLES' ) as $table ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 			$create = $wpdb->get_row( $wpdb->prepare( 'SHOW CREATE TABLE %i', $table ), ARRAY_N ); // phpcs:ignore WordPress.DB
 			gzwrite( $gz, "\nDROP TABLE IF EXISTS `{$table}`;\n" . $create[1] . ";\n" );
@@ -162,7 +162,7 @@ function kits_daily_backup_run() {
 					gzwrite( $gz, "INSERT INTO `{$table}` VALUES (" . implode( ',', $vals ) . ");\n" );
 				}
 				$off += 500;
-			} while ( count( $rows ) === 500 );
+			} while ( 500 === count( $rows ) ); // phpcs:ignore Squiz.PHP.DisallowSizeFunctionsInLoops -- the row count of the batch just read
 		}
 		gzwrite( $gz, "SET FOREIGN_KEY_CHECKS=1;\n" );
 		gzclose( $gz );

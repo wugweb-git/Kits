@@ -128,11 +128,51 @@ function kits_cdn_ttl_sanitize( $v ) {
 add_action(
 	'admin_init',
 	function () {
-		register_setting( 'aw_cdn', 'kits_cdn_ttl', array( 'type' => 'integer', 'default' => 0, 'sanitize_callback' => 'kits_cdn_ttl_sanitize', 'show_in_rest' => false ) );
-		register_setting( 'aw_cdn', 'aw_cdn_ttl_long', array( 'type' => 'integer', 'default' => 3600, 'sanitize_callback' => 'kits_cdn_ttl_sanitize', 'show_in_rest' => false ) );
+		register_setting(
+			'aw_cdn',
+			'kits_cdn_ttl',
+			array(
+				'type' => 'integer',
+				'default' => 0,
+				'sanitize_callback' => 'kits_cdn_ttl_sanitize',
+				'show_in_rest' => false,
+			)
+		);
+		register_setting(
+			'aw_cdn',
+			'aw_cdn_ttl_long',
+			array(
+				'type' => 'integer',
+				'default' => 3600,
+				'sanitize_callback' => 'kits_cdn_ttl_sanitize',
+				'show_in_rest' => false,
+			)
+		);
 		add_settings_section( 'aw_cdn', 'Shared cache (CDN)', 'kits_cdn_settings_intro', 'aw-cdn' );
-		add_settings_field( 'kits_cdn_ttl', 'Public pages', 'kits_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'kits_cdn_ttl', 'default' => 0, 'note' => 'Home, News, hubs, Directory places and campaigns. 0 = off.' ) );
-		add_settings_field( 'aw_cdn_ttl_long', 'Listings, Library items and Resources', 'kits_cdn_settings_field', 'aw-cdn', 'aw_cdn', array( 'label_for' => 'aw_cdn_ttl_long', 'default' => 3600, 'note' => '0 = the same as public pages.' ) );
+		add_settings_field(
+			'kits_cdn_ttl',
+			'Public pages',
+			'kits_cdn_settings_field',
+			'aw-cdn',
+			'aw_cdn',
+			array(
+				'label_for' => 'kits_cdn_ttl',
+				'default' => 0,
+				'note' => 'Home, News, hubs, Directory places and campaigns. 0 = off.',
+			)
+		);
+		add_settings_field(
+			'aw_cdn_ttl_long',
+			'Listings, Library items and Resources',
+			'kits_cdn_settings_field',
+			'aw-cdn',
+			'aw_cdn',
+			array(
+				'label_for' => 'aw_cdn_ttl_long',
+				'default' => 3600,
+				'note' => '0 = the same as public pages.',
+			)
+		);
 	}
 );
 

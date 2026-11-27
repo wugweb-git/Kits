@@ -1,10 +1,9 @@
 <?php
 /**
  * Admin layer tests that need no WordPress (owner rule: no local WordPress or MySQL). The admin layer moved from
- * Animal Writes Core to Kits Core on 18 Nov 2026 (includes/admin-layer/); these check that, with Animal Writes' values
- * (the site layer's assets/site/admin.php), what it gives is what Animal Writes Core gave: the menu order, the
- * site's screens and their menu positions, the hidden upsell links, comments off, and the value parsers (campaign
- * metrics, district helplines, issuer short names). The Deploy check also loads every screen in a real WordPress
+ * Animal Writes Core to Kits Core on 18 Nov 2026 (includes/admin-layer/); these check the neutral defaults, the site's
+ * screens and their menu positions, the hidden upsell links, the value parsers (district helplines, issuer short names), the
+ * commands list and the frame joins. Animal Writes' own values are not here (see the note in the middle of this file). The Deploy check also loads every screen in a real WordPress
  * (tools/ci/smoke.sh).
  *
  * Usage: php plugins/kits-core/tests/admin-layer-tests.php
@@ -197,60 +196,15 @@ function kits_edit_screen_map_file_for_test(): string {
 	return (string) apply_filters( 'kits_edit_screen_map_file', '' );
 }
 
-/* ---------- With Animal Writes' values: what Animal Writes Core gave ---------- */
+/* ---------- Animal Writes' values are not tested here ---------- */
 
-/** The theme's site folder (assets/site/), as the theme's kits_site_path() gives it. */
-function kits_site_path( string $file ): string {
-	return dirname( __DIR__, 3 ) . '/themes/kits-by-wugweb/assets/site/' . ltrim( $file, '/' );
-}
-$site_admin_file = kits_site_path( 'admin.php' );
-if ( ! file_exists( $site_admin_file ) ) {
-	echo "Notice: assets/site/admin.php not found; skipped site-layer integration assertions.\n";
-	echo "$count checks, $fails failed\n";
-	exit( $fails ? 1 : 0 );
-}
-require $site_admin_file; // Animal Writes' values, moved from Animal Writes Core's admin-config.php (19 Nov 2026)
+// Animal Writes' values for the admin layer (menu order, labels, retired shortcodes, edit-screen map, Overview) lived in
+// the Kits theme's assets/site/admin.php, which was removed from this repository on 24 Nov 2026 (238fe14); they are not
+// in the site layer here (sites/animalwrites/kits-core/), so there is nothing in this repository to test them against.
+// The assertions that loaded that file were deleted rather than left to skip. The Library "Dated" and campaign Metrics
+// edit fields moved to the site layer in Kits Core 1.4.1 and are tested in sites/animalwrites/kits-core/tests/edit-fields-tests.php.
 define( 'KITS_CAMPAIGN_LINK', 'kits_campaign_link' );
-
-kits_t( true === kits_comments_off(), 'Animal Writes: comments off' );
-kits_t( array( 'category', 'post_tag', 'kits_campaign_link' ) === kits_admin_shared_taxonomies(), 'Animal Writes: Categories, Tags and Linked campaigns under Classification' );
-$was = array(
-	'index.php',
-	'edit.php?post_type=aw_listing',
-	'edit.php?post_type=aw_news',
-	'edit.php',
-	'edit.php?post_type=aw_legal',
-	'edit.php?post_type=aw_opportunity',
-	'edit.php?post_type=aw_campaign',
-	'edit.php?post_type=aw_press',
-	'edit.php?post_type=page',
-	'upload.php',
-	'aw-classification',
-	'separator-wugweb',
-	'kits',
-	'directoryweb',
-	'aw-sourcing-menu',
-	'aw-seo-plus',
-	'aw-search-insights',
-	'mailweb',
-	'planweb',
-	'separator2',
-	'themes.php',
-	'plugins.php',
-	'users.php',
-	'tools.php',
-	'options-general.php',
-	'googlesitekit-dashboard',
-	'litespeed',
-);
-kits_t( kits_admin_menu_order() === $was, 'Animal Writes: menu order exactly as in admin-ia.php' );
-kits_t( array( 'aw_testimonials', 'aw_banner' ) === apply_filters( 'kits_retired_shortcodes', array() ), 'Animal Writes: [aw_testimonials] and [aw_banner] print nothing' );
-kits_t( array( 'aw_message', 'aw_claim' ) === apply_filters( 'kits_admin_hidden_post_types', array() ), 'Animal Writes: messages and claims out of the menu' );
-kits_t( array( 'aw_message' => 'aw_read' ) === apply_filters( 'kits_admin_read_marks', array() ), 'Animal Writes: opening a message marks it read' );
-$labels = apply_filters( 'kits_admin_post_type_labels', array() );
-kits_t( 'Campaigns' === $labels['aw_campaign']['name'] && 'Contact messages' === $labels['aw_message']['all_items'], 'Animal Writes: labels' );
-kits_t( kits_site_path( 'data/edit-screen-map.json' ) === kits_edit_screen_map_file_for_test() && is_readable( kits_edit_screen_map_file_for_test() ), 'Animal Writes: the edit-screen map is the site\'s file' );
-kits_t( 'aw_legal' === kits_library_post_type(), 'Animal Writes: Library type' );
+kits_t( ! function_exists( 'kits_library_post_type' ) && ! function_exists( 'kits_edit_fields_metric_list' ) && ! function_exists( 'kits_edit_fields_dated_save' ), 'the Library and Metrics edit fields are not in Kits Core any more' );
 
 /* ---------- The site's screens and their menu positions ---------- */
 
@@ -268,17 +222,6 @@ kits_t( kits_admin_label_in( 'Unlock PRO now', array( 'Unlock PRO' ) ) && ! kits
 kits_t( array( 'Available Tools', 'Server-Timing', 'Scheduled Actions' ) === apply_filters( 'kits_admin_hide', KITS_ADMIN_HIDE )['Tools'], 'Tools: the same three links hidden' );
 kits_t( array( 'SCF' ) === KITS_ADMIN_HIDE_TOP && array( 'Rank Math SEO', 'UpdraftPlus' ) === KITS_ADMIN_BAR_HIDE, 'SCF menu and two admin-bar shortcuts hidden' );
 kits_t( ' <span class="awaiting-mod count-2"><span class="pending-count">2</span></span>' === kits_menu_count( 2 ) && '' === kits_menu_count( 0 ), 'menu count bubble' );
-
-/* ---------- Edit fields: campaign metrics ---------- */
-
-$lines = "visits | Visits | 1,200 | 1200 | 100 | 2026-11-01 | 30 | team | GA4 | https://example.org/\nletters | Letters";
-$list  = kits_edit_fields_metric_list( $lines );
-kits_t( is_array( $list ) && 2 === count( $list ), 'two metric lines read' );
-kits_t( 1200.0 === $list[0]['count'] && 100 === $list[0]['threshold'] && 30 === $list[0]['stale_days'] && '2026-11-01' === $list[0]['verified'], 'numbers and the date kept with their types' );
-kits_t( array( 'key' => 'letters', 'label' => 'Letters' ) === $list[1], 'empty fields are not stored' );
-kits_t( null === kits_edit_fields_metric_list( 'visits | Visits | 1 | 1 | 1 | 2026-13-40' ), 'a bad date keeps every metric as it was' );
-kits_t( null === kits_edit_fields_metric_list( 'a|b|c|d|e|f|g|h|i|j|k' ), 'more than ten fields is refused' );
-kits_t( kits_edit_fields_is_day( '2026-02-28' ) && ! kits_edit_fields_is_day( '2026-02-30' ), 'a real day only' );
 
 /* ---------- Modules: district helplines and issuer short names ---------- */
 
@@ -320,7 +263,7 @@ $names = array_column( kits_cli_command_rows( $tree, array( 'kits', 'aw' ) ), 'n
 kits_t( array( 'aw crm-setup', 'aw sort-dates', 'aw-edit-screens', 'kits export', 'kits preset list' ) === $names, 'commands: the site\'s, every runnable one, sorted; core and look-alikes left out' );
 kits_t( 'Export.' === kits_cli_command_rows( $tree, array( 'kits' ) )[0]['what'], 'commands: one-line description trimmed' );
 kits_t( array() === kits_cli_command_rows( $tree, array() ), 'commands: no prefixes, nothing listed' );
-kits_t( in_array( 'kits', kits_cli_command_prefixes(), true ) && in_array( 'aw', kits_cli_command_prefixes(), true ), 'commands: the Kits prefixes, and aw from admin-config.php' );
+kits_t( array( 'kits', 'mailweb', 'planweb', 'directoryweb', 'sourceweb', 'insightweb', 'rankweb' ) === kits_cli_command_prefixes() && ! in_array( 'aw', kits_cli_command_prefixes(), true ), 'commands: the default prefixes are the Kits suite\'s; a site adds its own (aw) with kits_cli_command_prefixes' );
 $GLOBALS['kits_test_options']['kits_cli_commands'] = array( array( 'name' => 'kits export', 'what' => 'x' ) );
 kits_t( 1 === count( kits_cli_commands() ), 'commands: the list kept at the last wp run' );
 $GLOBALS['kits_test_options']['kits_cli_commands'] = 'broken';
@@ -336,7 +279,8 @@ require dirname( __DIR__ ) . '/includes/admin-kits-frame.php';
 $joined = array(
 	'includes/media-webp.php'          => array( 'aw-media-webp', 'manage_options', 'kits-tools' ),
 	'includes/tools/media-merge.php'   => array( 'aw-media-duplicates', 'manage_options', 'kits-tools' ),
-	'../../themes/kits-by-wugweb/assets/site/includes/social-posts.php' => array( 'aw-modules', 'manage_options', 'kits-settings' ), // moved to the site layer, 19 Nov 2026
+	// The Social posts, Reuse pictures and Letter report screens moved to the site layer; their joins are tested in
+	// sites/animalwrites/kits-core/tests/site-layer-tests.php.
 );
 foreach ( $joined as $file => $def ) {
 	$src = (string) file_get_contents( dirname( __DIR__ ) . '/' . $file );
@@ -360,8 +304,8 @@ add_filter(
 );
 $frame_after = kits_frame_screens();
 kits_t( array( 'kits', 'kits-settings', 'kits-tools', 'kits-help' ) === array_slice( array_keys( $frame_after ), 0, 4 ), 'frame: the four Kits screens come first' );
-kits_t( 'manage_options' === $frame_after['kits-tools'] && 'manage_options' === $frame_after['aw-media-webp'] && 'edit_posts' === $frame_after['aw-letter-report'], 'frame: joined screens keep their capability; the Kits four cannot be replaced' );
-kits_t( 'kits-tools' === kits_frame_extra_tab( 'aw-media-reuse' ) && 'kits-settings' === kits_frame_extra_tab( 'aw-modules' ) && '' === kits_frame_extra_tab( 'nope' ), 'frame: the media screens sit under the Tools tab' );
+kits_t( 'manage_options' === $frame_after['kits-tools'] && 'manage_options' === $frame_after['aw-media-webp'] && 'manage_options' === $frame_after['aw-media-duplicates'], 'frame: joined screens keep their capability; the Kits four cannot be replaced' );
+kits_t( 'kits-tools' === kits_frame_extra_tab( 'aw-media-webp' ) && 'kits-tools' === kits_frame_extra_tab( 'aw-media-duplicates' ) && '' === kits_frame_extra_tab( 'nope' ), 'frame: the media screens sit under the Tools tab' );
 
 echo "$count checks, $fails failed\n";
 exit( $fails ? 1 : 0 );

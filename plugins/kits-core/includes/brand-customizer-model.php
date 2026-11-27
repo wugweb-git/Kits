@@ -266,7 +266,7 @@ function kits_brand_presets(): array {
 				'muted'          => '#4B6F64',
 				'line'           => '#D1E7DD',
 				'font_display'   => "'Plus Jakarta Sans', system-ui, sans-serif",
-				'font_body'      => "system-ui, -apple-system, sans-serif",
+				'font_body'      => 'system-ui, -apple-system, sans-serif',
 				'radius_control' => '9999px',
 				'radius_card'    => '16px',
 				'radius_media'   => '16px',

@@ -30,7 +30,11 @@ function kits_form_state( $form ) {
 	if ( is_array( $cache ) && ( $cache['form'] ?? '' ) === $form ) {
 		return $cache;
 	}
-	return array( 'errors' => array(), 'values' => array(), 'notice' => '' );
+	return array(
+		'errors' => array(),
+		'values' => array(),
+		'notice' => '',
+	);
 }
 
 /**
@@ -45,10 +49,25 @@ function kits_form_state( $form ) {
  */
 function kits_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' ) {
 	if ( kits_form_is_fetch() ) { // submitted with fetch(): answer in JSON, the page keeps what was typed
-		wp_send_json( array( 'ok' => false, 'errors' => (object) $errors, 'notice' => $notice ) );
+		wp_send_json(
+			array(
+				'ok' => false,
+				'errors' => (object) $errors,
+				'notice' => $notice,
+			)
+		);
 	}
 	$token = wp_generate_password( 16, false );
-	set_transient( 'kits_form_' . $token, array( 'form' => $form, 'errors' => $errors, 'values' => $values, 'notice' => $notice ), 10 * MINUTE_IN_SECONDS );
+	set_transient(
+		'kits_form_' . $token,
+		array(
+			'form' => $form,
+			'errors' => $errors,
+			'values' => $values,
+			'notice' => $notice,
+		),
+		10 * MINUTE_IN_SECONDS
+	);
 	wp_safe_redirect( add_query_arg( 'aw_err', $token, $back ) . '#' . $anchor );
 	exit;
 }
@@ -75,7 +94,17 @@ function kits_form_success( $url, $title, $text = '', $more = array() ) {
 	if ( kits_form_is_fetch() ) {
 		// A thank-you page URL: forms.js goes there; otherwise the form is replaced by the message in place.
 		$go = kits_is_thanks_url( $url ) ? array( 'redirect' => $url ) : array();
-		wp_send_json( array_merge( array( 'ok' => true, 'title' => $title, 'text' => $text ), $more, $go ) );
+		wp_send_json(
+			array_merge(
+				array(
+					'ok' => true,
+					'title' => $title,
+					'text' => $text,
+				),
+				$more,
+				$go
+			)
+		);
 	}
 	wp_safe_redirect( $url );
 	exit;
@@ -115,7 +144,15 @@ function kits_thanks_url( $form, $args = array(), $title = '', $text = '' ) {
 	}
 	if ( '' !== $title || '' !== $text ) {
 		$token = wp_generate_password( 16, false );
-		set_transient( 'kits_thanks_' . $token, array( 'form' => $q['form'], 'title' => $title, 'text' => $text ), 30 * MINUTE_IN_SECONDS );
+		set_transient(
+			'kits_thanks_' . $token,
+			array(
+				'form' => $q['form'],
+				'title' => $title,
+				'text' => $text,
+			),
+			30 * MINUTE_IN_SECONDS
+		);
 		$q['t'] = $token;
 	}
 	return add_query_arg( array_merge( $q, $args ), home_url( kits_thanks_path() ) );
@@ -244,7 +281,19 @@ function kits_field_id( $form, $name ) {
  * @return string
  */
 function kits_field( $form, $f ) {
-	$f     = array_merge( array( 'type' => 'text', 'required' => false, 'hint' => '', 'options' => array(), 'attrs' => array(), 'value' => '', 'icon' => '', 'messages' => array() ), $f );
+	$f     = array_merge(
+		array(
+			'type' => 'text',
+			'required' => false,
+			'hint' => '',
+			'options' => array(),
+			'attrs' => array(),
+			'value' => '',
+			'icon' => '',
+			'messages' => array(),
+		),
+		$f
+	);
 	$state = kits_form_state( $form );
 	$key   = rtrim( $f['name'], '[]' );
 	$id    = kits_field_id( $form, $f['name'] );
@@ -262,7 +311,11 @@ function kits_field( $form, $f ) {
 		$msgs[ 'data-msg-' . $rule ] = $text;
 	}
 	$a = array_merge(
-		array( 'id' => $id, 'name' => $f['name'], 'aria-describedby' => implode( ' ', $by ) ),
+		array(
+			'id' => $id,
+			'name' => $f['name'],
+			'aria-describedby' => implode( ' ', $by ),
+		),
 		$msgs,
 		$f['required'] ? array( 'required' => true ) : array(),
 		$err ? array( 'aria-invalid' => 'true' ) : array(),
@@ -322,7 +375,14 @@ function kits_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 	$nonce = isset( $_POST['_kits_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_kits_nonce'] ) ) : ( isset( $_POST['_aw_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_aw_nonce'] ) ) : '' ); // _aw_nonce: legacy field name still accepted
 	if ( '' === $nonce || ! wp_verify_nonce( $nonce, $form ) ) {
 		if ( kits_form_is_fetch() ) {
-			wp_send_json( array( 'ok' => false, 'code' => 'expired', 'errors' => (object) array(), 'notice' => 'This page has been open a while. Reload it and send again.' ) ); // forms.js gets a fresh key and sends once more
+			wp_send_json(
+				array(
+					'ok' => false,
+					'code' => 'expired',
+					'errors' => (object) array(),
+					'notice' => 'This page has been open a while. Reload it and send again.',
+				)
+			); // forms.js gets a fresh key and sends once more
 		}
 		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}

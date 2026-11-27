@@ -31,7 +31,17 @@ function kits_preview_mark() {
 	if ( headers_sent() || '1' === sanitize_key( wp_unslash( $_COOKIE[ KITS_PREVIEW_MARK ] ?? '' ) ) ) {
 		return;
 	}
-	setcookie( KITS_PREVIEW_MARK, '1', array( 'expires' => time() + 400 * DAY_IN_SECONDS, 'path' => '/', 'secure' => true, 'httponly' => false, 'samesite' => 'Lax' ) );
+	setcookie(
+		KITS_PREVIEW_MARK,
+		'1',
+		array(
+			'expires' => time() + 400 * DAY_IN_SECONDS,
+			'path' => '/',
+			'secure' => true,
+			'httponly' => false,
+			'samesite' => 'Lax',
+		)
+	);
 }
 
 // Administrators: marked on any admin screen.
@@ -281,7 +291,16 @@ function kits_preview_devices_screen() {
 					. '<button type="submit" class="button-link-delete">Remove</button></form>',
 			);
 		}
-		kits_simple_table( 'preview-devices', array( 'device' => 'Device', 'added' => 'Added', 'seen' => 'Last seen', 'remove' => '<span class="screen-reader-text">Remove</span>' ), $cells );
+		kits_simple_table(
+			'preview-devices',
+			array(
+				'device' => 'Device',
+				'added' => 'Added',
+				'seen' => 'Last seen',
+				'remove' => '<span class="screen-reader-text">Remove</span>',
+			),
+			$cells
+		);
 	}
 	echo '<form method="post" action="' . $post . '"><p><input type="hidden" name="action" value="kits_preview_register">' . wp_nonce_field( 'kits_preview_register', '_wpnonce', true, false ) // phpcs:ignore WordPress.Security.EscapeOutput
 		. '<label>Device name <input type="text" name="label" placeholder="Laptop"></label> <button type="submit" class="button">Register this device</button></p></form>';
@@ -320,7 +339,8 @@ add_action(
 );
 
 // A device link: one random token, valid 24 hours, used once. Opening it shows a button; pressing it registers that
-// device (link previews in chat apps only open the page, so they cannot use up the link).
+// device (link previews in chat apps only open the page, so they cannot use up the link). The token travels after the # of
+// the address and in a POST body, never in the query string.
 add_action(
 	'admin_post_kits_preview_link',
 	function () {
@@ -333,32 +353,61 @@ add_action(
 				'label' => sanitize_text_field( wp_unslash( $_POST['label'] ?? '' ) ),
 			);
 			update_option( 'kits_preview_links', $links, false );
-			set_transient( 'kits_preview_link_' . get_current_user_id(), add_query_arg( array( 'action' => 'kits_preview_device', 't' => $token ), admin_url( 'admin-post.php' ) ), 10 * MINUTE_IN_SECONDS );
+			set_transient( 'kits_preview_link_' . get_current_user_id(), kits_preview_link_url( $token ), 10 * MINUTE_IN_SECONDS );
 		}
 		kits_preview_back();
 	}
 );
 
-/** Opening a device link (GET: a button; POST: register). */
-function kits_preview_device_link() {
-	kits_preview_nocache();
-	$token = sanitize_text_field( wp_unslash( $_REQUEST['t'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- the token is the check
+/**
+ * The address of a device link. The token sits in the part after # (1.4.1), which a browser never sends to the server,
+ * so it stays out of access logs and Referer headers; the page reads it and sends it in a POST body.
+ *
+ * @param string $token The random token.
+ */
+function kits_preview_link_url( $token ): string {
+	return add_query_arg( 'action', 'kits_preview_device', admin_url( 'admin-post.php' ) ) . '#t=' . rawurlencode( (string) $token );
+}
+
+/**
+ * Check a device-link token and use it up.
+ *
+ * @param string $token The token the visitor sent.
+ * @return string|null The device label ('' when none), or null when the token is wrong, expired or already used.
+ */
+function kits_preview_link_take( $token ) {
+	$token = (string) $token;
 	$links = (array) get_option( 'kits_preview_links', array() );
 	$h     = kits_preview_hash( $token );
-	$ok    = preg_match( '/^[a-f0-9]{48}$/', $token ) && isset( $links[ $h ] ) && (int) $links[ $h ]['until'] > time();
-	if ( ! $ok ) {
-		wp_die( 'This device link has expired or was already used.', 'Preview device', array( 'response' => 410 ) );
-	}
-	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		wp_die(
-			'<form method="post"><input type="hidden" name="action" value="kits_preview_device"><input type="hidden" name="t" value="' . esc_attr( $token ) . '"><p><button type="submit" class="button">Register this device</button></p></form>',
-			'Preview device',
-			array( 'response' => 200 )
-		);
+	if ( ! preg_match( '/^[a-f0-9]{48}$/', $token ) || ! isset( $links[ $h ] ) || (int) ( $links[ $h ]['until'] ?? 0 ) <= time() ) {
+		return null;
 	}
 	$label = (string) ( $links[ $h ]['label'] ?? '' );
 	unset( $links[ $h ] );
 	update_option( 'kits_preview_links', $links, false );
+	return $label;
+}
+
+/** The page a device link opens: a button, and a script that moves the token from the address into the form. */
+function kits_preview_link_page(): string {
+	return '<form method="post" id="kits-pv-form"><input type="hidden" name="action" value="kits_preview_device"><input type="hidden" name="t" id="kits-pv-token" value=""><p><button type="submit" class="button" id="kits-pv-go" disabled>Register this device</button></p></form>'
+		. '<noscript><p>This page needs JavaScript to register the device.</p></noscript>'
+		. '<script>(function(){var m=/^#t=([a-f0-9]{48})$/.exec(location.hash);if(m){document.getElementById("kits-pv-token").value=m[1];document.getElementById("kits-pv-go").disabled=false;try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}}})();</script>';
+}
+
+/** Opening a device link (GET: a button; POST: register). The token is only read from the POST body, never from the query string. */
+function kits_preview_device_link() {
+	kits_preview_nocache();
+	if ( ! headers_sent() ) {
+		header( 'Referrer-Policy: no-referrer' );
+	}
+	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		wp_die( kits_preview_link_page(), 'Preview device', array( 'response' => 200 ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed markup
+	}
+	$label = kits_preview_link_take( sanitize_text_field( wp_unslash( $_POST['t'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- the token is the check
+	if ( null === $label ) {
+		wp_die( 'This device link has expired or was already used.', 'Preview device', array( 'response' => 410 ) );
+	}
 	kits_preview_register_device( '' !== $label ? $label : 'Device (link)' );
 	wp_safe_redirect( add_query_arg( 'kits-preview', '1', home_url( '/' ) ) );
 	exit;

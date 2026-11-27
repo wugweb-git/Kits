@@ -56,10 +56,13 @@ function kits_registry_products(): array {
 		return $cached;
 	}
 	$products = array();
-	$res      = wp_remote_get( kits_registry_url(), array(
-		'timeout'    => 10,
-		'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address
-	) );
+	$res      = wp_remote_get(
+		kits_registry_url(),
+		array(
+			'timeout'    => 10,
+			'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address
+		)
+	);
 	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
 		$json = json_decode( (string) wp_remote_retrieve_body( $res ), true );
 		if ( is_array( $json ) && isset( $json['products'] ) && is_array( $json['products'] ) ) {
@@ -171,6 +174,29 @@ add_filter(
 	3
 );
 
+/**
+ * Download a package and keep it only when its SHA-256 matches. Used for the registry's plugin packages and the theme's.
+ *
+ * @param string $package Package address.
+ * @param string $want    Expected SHA-256 (64 hex characters).
+ * @return string|WP_Error Path of the downloaded file, or the error.
+ */
+function kits_download_verified( string $package, string $want ) {
+	$want = strtolower( $want );
+	if ( ! preg_match( '/^[0-9a-f]{64}$/', $want ) ) {
+		return new WP_Error( 'kits_no_checksum', __( 'The update was not installed: no checksum is published for it.', 'kits-core' ) );
+	}
+	$file = download_url( $package );
+	if ( is_wp_error( $file ) ) {
+		return $file;
+	}
+	if ( ! hash_equals( $want, strtolower( (string) hash_file( 'sha256', $file ) ) ) ) {
+		wp_delete_file( $file );
+		return new WP_Error( 'kits_bad_checksum', __( 'The update was not installed: the downloaded file does not match the published checksum.', 'kits-core' ) );
+	}
+	return $file;
+}
+
 // Check the downloaded file against the registry's SHA-256 before WordPress unpacks it.
 add_filter(
 	'upgrader_pre_download',
@@ -188,15 +214,7 @@ add_filter(
 		if ( ! preg_match( '/^[0-9a-f]{64}$/', $want ) ) {
 			return new WP_Error( 'kits_no_checksum', __( 'The update was not installed: the registry has no checksum for it.', 'kits-core' ) );
 		}
-		$file = download_url( $package );
-		if ( is_wp_error( $file ) ) {
-			return $file;
-		}
-		if ( ! hash_equals( $want, strtolower( (string) hash_file( 'sha256', $file ) ) ) ) {
-			wp_delete_file( $file );
-			return new WP_Error( 'kits_bad_checksum', __( 'The update was not installed: the downloaded file does not match the registry checksum.', 'kits-core' ) );
-		}
-		return $file;
+		return kits_download_verified( $package, $want );
 	},
 	10,
 	2

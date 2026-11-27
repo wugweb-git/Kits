@@ -24,10 +24,9 @@
 	outline-offset: 2px;
 }
 
-/* Site-wide rules that came from Animal Writes Core's aw.css (18 Nov 2026), in their aw.css order: the finder,
-   claim box, document cover, share and segment targets, the h4/h5 and heading-link levels, the form field and
-   Fluent Forms button size, and the card title and meta row sizes. Rules only Animal Writes uses are in the
-   Animal Writes style variation (styles/animal-writes.json, styles.css). */
+/* Site-wide rules: the finder, claim box, document cover, share and segment targets, the h4/h5 and heading-link levels,
+   the form field and Fluent Forms button size, and the card title and meta row sizes. Rules only one site uses belong in
+   that site's own style variation, not here. */
 .kit-hero-title { margin: 0 0 var(--kit-space-4); }
 .kit-finder { display: flex; flex-wrap: wrap; gap: var(--kit-space-3); align-items: center; margin: var(--kit-space-5) 0 var(--kit-space-4); padding: var(--kit-space-3); background: var(--kit-color-raised); border: var(--kit-border-width) solid var(--kit-color-line); border-radius: var(--kit-radius-card); box-shadow: var(--kit-elevation-2); }
 .kit-finder label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -129,7 +128,7 @@ html[data-theme="dark"],
 :root[data-theme="dark"] {
 	/* Core WordPress preset color mappings */
 	--wp--preset--color--primary: #79B8FF;
-	--wp--preset--color--primary-dark: #2188FF;
+	--wp--preset--color--primary-dark: #3B94FF;
 	--wp--preset--color--secondary: #F0F6FC;
 	--wp--preset--color--foreground: #C9D1D9;
 	--wp--preset--color--text-muted: #8B949E;
@@ -154,7 +153,7 @@ html[data-theme="dark"],
 	--kit-color-muted: #8B949E;
 	--kit-color-line: #30363D;
 	--kit-color-accent: #79B8FF;
-	--kit-color-accent-ink: #2188FF;
+	--kit-color-accent-ink: #3B94FF;
 	--kit-color-on-accent: #0D1117;
 	--kit-color-on-ink: #0D1117;
 	--kit-color-focus: #58A6FF;

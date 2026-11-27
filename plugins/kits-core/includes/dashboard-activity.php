@@ -24,7 +24,17 @@ function kits_dashboard_activity_on(): bool {
 
 /** The post types the box covers: post, page and every public custom post type. */
 function kits_activity_types(): array {
-	$types = array_merge( array( 'post', 'page' ), array_values( get_post_types( array( 'public' => true, '_builtin' => false ) ) ) );
+	$types = array_merge(
+		array( 'post', 'page' ),
+		array_values(
+			get_post_types(
+				array(
+					'public' => true,
+					'_builtin' => false,
+				)
+			)
+		)
+	);
 	return array_values( array_unique( $types ) );
 }
 
@@ -97,9 +107,18 @@ add_action(
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 						array(
-							array( 'label' => 'Published, last 7 days', 'value' => number_format_i18n( $counts['week'] ) ),
-							array( 'label' => 'Scheduled', 'value' => number_format_i18n( $counts['future'] ) ),
-							array( 'label' => 'Awaiting review', 'value' => number_format_i18n( $counts['pending'] ) ),
+							array(
+								'label' => 'Published, last 7 days',
+								'value' => number_format_i18n( $counts['week'] ),
+							),
+							array(
+								'label' => 'Scheduled',
+								'value' => number_format_i18n( $counts['future'] ),
+							),
+							array(
+								'label' => 'Awaiting review',
+								'value' => number_format_i18n( $counts['pending'] ),
+							),
 						)
 					);
 				}

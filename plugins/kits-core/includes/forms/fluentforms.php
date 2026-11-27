@@ -56,15 +56,35 @@ add_action(
 
 const KITS_FF_OPTION = 'aw_ff_forms'; // key => Fluent Forms form ID
 const KITS_FF_FORMS  = array(
-	'contact'     => array( 'title' => 'Contact', 'thanks' => 'contact', 'limit' => 5 ),
-	'volunteer'   => array( 'title' => 'Volunteer sign-up', 'thanks' => 'volunteer', 'limit' => 5 ),
-	'claim'       => array( 'title' => 'Claim this listing', 'thanks' => 'claim', 'limit' => 5 ),
-	'report'      => array( 'title' => 'Report a mistake', 'thanks' => 'report', 'limit' => 10 ),
+	'contact'     => array(
+		'title' => 'Contact',
+		'thanks' => 'contact',
+		'limit' => 5,
+	),
+	'volunteer'   => array(
+		'title' => 'Volunteer sign-up',
+		'thanks' => 'volunteer',
+		'limit' => 5,
+	),
+	'claim'       => array(
+		'title' => 'Claim this listing',
+		'thanks' => 'claim',
+		'limit' => 5,
+	),
+	'report'      => array(
+		'title' => 'Report a mistake',
+		'thanks' => 'report',
+		'limit' => 10,
+	),
 );
 /** What the custom fields post (Fluent Forms keeps only fields it knows, plus these). */
 const KITS_FF_EXTRA = array( 'aw_t', 'aw_source', 'kits_hp', 'altcha', 'pincode', 'state', 'district', 'logo_token', 'proof_token', 'photo_tokens' );
 /** Private uploads: field => most files (photo_tokens: comma-separated tokens; owner, 31 Oct 2026). */
-const KITS_FF_UPLOADS = array( 'logo_token' => 1, 'proof_token' => 1, 'photo_tokens' => 5 );
+const KITS_FF_UPLOADS = array(
+	'logo_token' => 1,
+	'proof_token' => 1,
+	'photo_tokens' => 5,
+);
 
 /** Indian phone fields (owner, 31 Oct 2026): +91 shown before the box, 10 digits typed, saved as "+91 98765 43210". */
 const KITS_FF_PHONES = array( 'phone', 'whatsapp', 'org_phone', 'l_phone1', 'l_phone2', 'l_phone3' );
@@ -340,8 +360,17 @@ add_action(
 						'index'          => 90,
 						'element'        => $this->key,
 						'attributes'     => array( 'name' => $this->key ),
-						'settings'       => array( 'label' => $this->title, 'container_class' => '', 'html_codes' => '<p>' . esc_html( $this->title ) . ' (' . esc_html( get_bloginfo( 'name' ) ) . ')</p>', 'conditional_logics' => array() ),
-						'editor_options' => array( 'title' => $this->title, 'icon_class' => 'ff-edit-html', 'template' => 'customHTML' ),
+						'settings'       => array(
+							'label' => $this->title,
+							'container_class' => '',
+							'html_codes' => '<p>' . esc_html( $this->title ) . ' (' . esc_html( get_bloginfo( 'name' ) ) . ')</p>',
+							'conditional_logics' => array(),
+						),
+						'editor_options' => array(
+							'title' => $this->title,
+							'icon_class' => 'ff-edit-html',
+							'template' => 'customHTML',
+						),
 					);
 				}
 				public function getGeneralEditorElements() {
@@ -373,14 +402,30 @@ function kits_ff_render_places( $element, $form ) {
 	foreach ( array_merge( $pin['attrs'], array( 'placeholder' => $pin['placeholder'] ) ) as $k => $v ) {
 		$a .= ' ' . esc_attr( $k ) . '="' . esc_attr( (string) $v ) . '"';
 	}
-	$html  = kits_ff_group( $pid, 'PIN code', '<input type="text" id="' . esc_attr( $pid ) . '" name="pincode" class="ff-el-form-control" value="' . esc_attr( (string) ( $cf['vol_pincode'] ?? '' ) ) . '" aria-describedby="' . esc_attr( $pid ) . '-error"' . $a . '><span class="kit-field-message kit-field-error" id="' . esc_attr( $pid ) . '-error" aria-live="polite"></span>', array( 'icon' => $pin['icon'], 'class' => 'aw-form-ff-half' ) );
+	$html  = kits_ff_group(
+		$pid,
+		'PIN code',
+		'<input type="text" id="' . esc_attr( $pid ) . '" name="pincode" class="ff-el-form-control" value="' . esc_attr( (string) ( $cf['vol_pincode'] ?? '' ) ) . '" aria-describedby="' . esc_attr( $pid ) . '-error"' . $a . '><span class="kit-field-message kit-field-error" id="' . esc_attr( $pid ) . '-error" aria-live="polite"></span>',
+		array(
+			'icon' => $pin['icon'],
+			'class' => 'aw-form-ff-half',
+		)
+	);
 	$sid   = $f . '-state';
 	$did   = $f . '-district';
 	$opts  = '<option value="">Choose a state</option>';
 	foreach ( aw_place_states() as $st ) {
 		$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( (string) ( $cf['vol_state'] ?? '' ), $st->name, false ) . '>' . esc_html( $st->name ) . '</option>';
 	}
-	$html .= kits_ff_group( $sid, 'State', '<select id="' . esc_attr( $sid ) . '" name="state" class="ff-el-form-control"' . ( $need ? ' required data-msg-required="Choose a state"' : '' ) . ' autocomplete="address-level1" data-district-select="' . esc_attr( $did ) . '">' . $opts . '</select>', array( 'required' => $need, 'class' => 'aw-form-ff-half' ) );
+	$html .= kits_ff_group(
+		$sid,
+		'State',
+		'<select id="' . esc_attr( $sid ) . '" name="state" class="ff-el-form-control"' . ( $need ? ' required data-msg-required="Choose a state"' : '' ) . ' autocomplete="address-level1" data-district-select="' . esc_attr( $did ) . '">' . $opts . '</select>',
+		array(
+			'required' => $need,
+			'class' => 'aw-form-ff-half',
+		)
+	);
 	$opts  = '<option value="" data-none="Choose a state first" data-all="Choose a district">Choose a state first</option>';
 	foreach ( aw_place_states() as $st ) {
 		$opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '" hidden disabled>';
@@ -415,7 +460,15 @@ function kits_ff_render_logo( $element, $form ) {
 		. '<span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite"></span>';
 	$label = wp_strip_all_tags( (string) ( $element['settings']['label'] ?? 'Logo' ) );
 	$hint  = (string) ( $element['settings']['help_message'] ?? 'PNG, JPG or WebP, up to 8 MB.' );
-	return kits_ff_group( $id, $label, $ctl, array( 'hint' => $hint, 'data_name' => $name ) );
+	return kits_ff_group(
+		$id,
+		$label,
+		$ctl,
+		array(
+			'hint' => $hint,
+			'data_name' => $name,
+		)
+	);
 }
 
 /* ---------- Fluent Forms fields: the site's look ---------- */
@@ -423,10 +476,33 @@ function kits_ff_render_logo( $element, $form ) {
 /** The Volunteer form's ways to help => Kits icon (owner, 31 Oct 2026). */
 /** An icon before each choice: field name => ( option value => Kits icon ). Tiles and chips use the same map. */
 const KITS_FF_OPTION_ICONS = array(
-	'roles'        => array( 'coordinate' => 'campaign', 'letters' => 'send', 'rescue' => 'injured', 'creative' => 'share', 'legal' => 'legal' ),
-	'availability' => array( 'weekdays' => 'calendar', 'weekends' => 'sun', 'evenings' => 'moon', 'emergencies' => 'siren' ),
-	'travel_range' => array( '5km' => 'map-pin', 'district' => 'map', 'state' => 'landmark', 'anywhere' => 'world' ),
-	'skills'       => array( 'first_aid' => 'briefcase-medical', 'driving' => 'car', 'foster' => 'home', 'photo_video' => 'camera', 'social' => 'share', 'languages' => 'languages' ),
+	'roles'        => array(
+		'coordinate' => 'campaign',
+		'letters' => 'send',
+		'rescue' => 'injured',
+		'creative' => 'share',
+		'legal' => 'legal',
+	),
+	'availability' => array(
+		'weekdays' => 'calendar',
+		'weekends' => 'sun',
+		'evenings' => 'moon',
+		'emergencies' => 'siren',
+	),
+	'travel_range' => array(
+		'5km' => 'map-pin',
+		'district' => 'map',
+		'state' => 'landmark',
+		'anywhere' => 'world',
+	),
+	'skills'       => array(
+		'first_aid' => 'briefcase-medical',
+		'driving' => 'car',
+		'foster' => 'home',
+		'photo_video' => 'camera',
+		'social' => 'share',
+		'languages' => 'languages',
+	),
 );
 
 /** Icons inside fields, as the site's own forms have them. Social link boxes take the "Elsewhere" icons (aw_social_icon, pages.php). */
@@ -498,7 +574,10 @@ foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'select',
 					: $html;
 			}
 			if ( ! is_array( $data ) ) { // Fluent Forms passes the markup in place of the field for tick boxes
-				$data = array( 'element' => false !== strpos( $html, 'ff-el-form-check' ) ? 'input_checkbox' : '', 'attributes' => array( 'name' => preg_match( '/name=[\'"]([a-z_]+)/', $html, $m ) ? $m[1] : '' ) );
+				$data = array(
+					'element' => false !== strpos( $html, 'ff-el-form-check' ) ? 'input_checkbox' : '',
+					'attributes' => array( 'name' => preg_match( '/name=[\'"]([a-z_]+)/', $html, $m ) ? $m[1] : '' ),
+				);
 			}
 			$name = (string) ( $data['attributes']['name'] ?? '' );
 			$el   = $data['element'] ?? '';
@@ -574,7 +653,15 @@ function kits_ff_keep_upload( $token ) {
 /** A submission's reference: the form's prefix and Fluent Forms' serial number for the entry (FF-12, FF-C-3 …). */
 function kits_ff_ref( $key, $entry_id ) {
 	/** Reference prefixes per form; a site changes them with kits_ff_ref_prefixes. */
-	$prefix = (array) apply_filters( 'kits_ff_ref_prefixes', array( 'contact' => 'FF-', 'volunteer' => 'FF-V-', 'claim' => 'FF-C-', 'report' => 'FF-R-' ) );
+	$prefix = (array) apply_filters(
+		'kits_ff_ref_prefixes',
+		array(
+			'contact' => 'FF-',
+			'volunteer' => 'FF-V-',
+			'claim' => 'FF-C-',
+			'report' => 'FF-R-',
+		)
+	);
 	if ( ! class_exists( '\FluentForm\App\Models\Submission' ) ) {
 		return ''; // Fluent Forms is off: no serial number to give
 	}
@@ -641,7 +728,15 @@ add_filter(
 		}
 		// Bots (honeypot filled, or sent within 3 seconds) see a success; nothing is saved.
 		if ( ! empty( $data['kits_hp'] ) || ( time() - (int) ( $data['aw_t'] ?? 0 ) ) < 3 ) {
-			wp_send_json_success( array( 'insert_id' => 0, 'result' => array( 'redirectUrl' => kits_thanks_url( KITS_FF_FORMS[ $key ]['thanks'] ), 'message' => '' ) ) );
+			wp_send_json_success(
+				array(
+					'insert_id' => 0,
+					'result' => array(
+						'redirectUrl' => kits_thanks_url( KITS_FF_FORMS[ $key ]['thanks'] ),
+						'message' => '',
+					),
+				)
+			);
 		}
 		foreach ( kits_ff_errors( $key, $data ) as $field => $msg ) {
 			if ( empty( $errors[ $field ] ) ) {
@@ -677,7 +772,13 @@ add_filter(
 			foreach ( array_slice( array_filter( explode( ',', (string) ( $data[ $up ] ?? '' ) ) ), 0, $max ) as $token ) {
 				$file = kits_ff_keep_upload( $token );
 				if ( $file ) {
-					$links[] = add_query_arg( array( 'action' => 'aw_ff_file', 'f' => $file ), admin_url( 'admin-post.php' ) );
+					$links[] = add_query_arg(
+						array(
+							'action' => 'aw_ff_file',
+							'f' => $file,
+						),
+						admin_url( 'admin-post.php' )
+					);
 				}
 			}
 			if ( $links ) {
@@ -755,7 +856,15 @@ function kits_ff_upload_error( $logo ): string {
 		$sz = function_exists( 'size_format' ) ? size_format( (int) $logo['size'], 1 ) : round( (int) $logo['size'] / 1048576, 1 ) . ' MB';
 		return 'This file is ' . $sz . '. The limit is ' . $limit . '.';
 	}
-	$ft = wp_check_filetype_and_ext( $logo['tmp_name'], (string) ( $logo['name'] ?? '' ), array( 'jpg|jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp' ) );
+	$ft = wp_check_filetype_and_ext(
+		$logo['tmp_name'],
+		(string) ( $logo['name'] ?? '' ),
+		array(
+			'jpg|jpeg' => 'image/jpeg',
+			'png' => 'image/png',
+			'webp' => 'image/webp',
+		)
+	);
 	if ( empty( $ft['type'] ) ) {
 		$ext = strtolower( pathinfo( (string) ( $logo['name'] ?? '' ), PATHINFO_EXTENSION ) );
 		return in_array( $ext, array( 'heic', 'heif' ), true ) ? 'This is a HEIC file. Use PNG, JPG or WebP.' : 'This file type is not accepted. Use PNG, JPG or WebP.';

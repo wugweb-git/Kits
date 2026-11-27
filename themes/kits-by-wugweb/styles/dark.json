@@ -6,7 +6,7 @@
 		"color": {
 			"palette": [
 				{ "slug": "primary", "name": "Accent", "color": "#79B8FF" },
-				{ "slug": "primary-dark", "name": "Accent ink", "color": "#2188FF" },
+				{ "slug": "primary-dark", "name": "Accent ink", "color": "#3B94FF" },
 				{ "slug": "secondary", "name": "Ink", "color": "#F0F6FC" },
 				{ "slug": "foreground", "name": "Text", "color": "#C9D1D9" },
 				{ "slug": "text-muted", "name": "Muted", "color": "#8B949E" },

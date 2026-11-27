@@ -122,10 +122,25 @@ function kits_not_found_html(): string {
 	$html .= '<form class="kit-error-search" action="' . esc_url( home_url( '/search/' ) ) . '" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><span class="kit-error-field"><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="kit-404-q" type="search" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off"></span><button type="submit" class="kit-btn kit-btn--brand kit-btn--label">Search</button></form>';
 
 	if ( $section ) {
-		$posts = get_posts( array( 'post_type' => $section[0], 'post_status' => 'publish', 'numberposts' => 3, 'orderby' => 'date', 'order' => 'DESC' ) );
+		$posts = get_posts(
+			array(
+				'post_type' => $section[0],
+				'post_status' => 'publish',
+				'numberposts' => 3,
+				'orderby' => 'date',
+				'order' => 'DESC',
+			)
+		);
 		if ( $posts ) {
 			do_action( 'kits_not_found_section_styles', $section[0] ); // the site loads its list styles
-			$m     = (array) apply_filters( 'kits_not_found_markup', array( 'section' => 'kit-not-found-group', 'list' => '' ), $section[0] );
+			$m     = (array) apply_filters(
+				'kits_not_found_markup',
+				array(
+					'section' => 'kit-not-found-group',
+					'list' => '',
+				),
+				$section[0]
+			);
 			$html .= '<section class="' . esc_attr( (string) $m['section'] ) . '"><h2>Latest from ' . esc_html( $section[1] ) . '</h2><ul' . ( '' !== (string) $m['list'] ? ' class="' . esc_attr( (string) $m['list'] ) . '"' : '' ) . '>';
 			foreach ( $posts as $p ) {
 				$html .= '<li>' . (string) apply_filters( 'kits_not_found_item_before', '', $p ) . '<a href="' . esc_url( get_permalink( $p ) ) . '">' . esc_html( get_the_title( $p ) ) . '</a></li>';
@@ -155,7 +170,13 @@ add_shortcode( 'aw_not_found', 'kits_not_found_html' ); // the name the 404 temp
  * @return string
  */
 function kits_error_picture( $name ) {
-	$src   = (array) apply_filters( 'kits_error_picture_source', array( 'dir' => '', 'url' => '' ) );
+	$src   = (array) apply_filters(
+		'kits_error_picture_source',
+		array(
+			'dir' => '',
+			'url' => '',
+		)
+	);
 	$dir   = (string) ( $src['dir'] ?? '' );
 	$url   = (string) ( $src['url'] ?? '' );
 	if ( '' === $dir || '' === $url ) {

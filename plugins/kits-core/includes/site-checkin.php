@@ -119,10 +119,16 @@ function kits_checkin_settings(): array {
 function kits_checkin_send( bool $force = false ): array {
 	$s = kits_checkin_settings();
 	if ( '' === $s['url'] ) {
-		return array( 'ok' => false, 'message' => 'No address is set.' );
+		return array(
+			'ok' => false,
+			'message' => 'No address is set.',
+		);
 	}
 	if ( ! $force && ! kits_checkin_may_send( $s['on'], $s['url'] ) ) {
-		return array( 'ok' => false, 'message' => 'The check-in is off.' );
+		return array(
+			'ok' => false,
+			'message' => 'The check-in is off.',
+		);
 	}
 	$res = wp_remote_post(
 		$s['url'],
@@ -145,7 +151,10 @@ function kits_checkin_send( bool $force = false ): array {
 		),
 		false
 	);
-	return array( 'ok' => $ok, 'message' => $ok ? 'Sent.' : (string) get_option( 'kits_checkin_last' )['message'] );
+	return array(
+		'ok' => $ok,
+		'message' => $ok ? 'Sent.' : (string) get_option( 'kits_checkin_last' )['message'],
+	);
 }
 
 add_action(
@@ -217,8 +226,14 @@ add_action(
 		kits_checkin_sync_schedule();
 		kits_transfer_back(
 			$bad
-				? array( 'title' => 'Saved, but the address was not used', 'error' => 'It must be an https address.' )
-				: array( 'title' => 'Check-in settings saved.', 'lines' => array( ( $on && '' !== $url ) ? 'It will send once a week.' : 'Nothing will be sent.' ) )
+				? array(
+					'title' => 'Saved, but the address was not used',
+					'error' => 'It must be an https address.',
+				)
+				: array(
+					'title' => 'Check-in settings saved.',
+					'lines' => array( ( $on && '' !== $url ) ? 'It will send once a week.' : 'Nothing will be sent.' ),
+				)
 		);
 	}
 );
@@ -233,8 +248,14 @@ add_action(
 		$r = kits_checkin_send( true );
 		kits_transfer_back(
 			$r['ok']
-				? array( 'title' => 'Check-in sent.', 'lines' => array( 'Sent once, to the saved address.' ) )
-				: array( 'title' => 'Check-in not sent', 'error' => $r['message'] )
+				? array(
+					'title' => 'Check-in sent.',
+					'lines' => array( 'Sent once, to the saved address.' ),
+				)
+				: array(
+					'title' => 'Check-in not sent',
+					'error' => $r['message'],
+				)
 		);
 	}
 );
