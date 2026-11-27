@@ -5,3 +5,4 @@ dist/
 Wugweb_Brand_OS_Foundation/.DS_Store
 vendor/
 .claude/
+dist-test/

@@ -74,7 +74,6 @@ function kits_theme_prepare_for_js( array $prepared_themes ): array {
 			'<a href="' . esc_url( $links['details'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'View details', 'kits-by-wugweb' ) . '</a>',
 			'<a href="' . esc_url( $links['support'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Support', 'kits-by-wugweb' ) . '</a>',
 			'<a href="' . esc_url( $links['more'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'More', 'kits-by-wugweb' ) . '</a>',
-			'<a href="' . esc_url( $links['upgrade'] ) . '" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Upgrade to Premium', 'kits-by-wugweb' ) . '</a>',
 		)
 	);
 
