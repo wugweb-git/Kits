@@ -401,12 +401,12 @@ add_action(
 			array(
 				array(
 					'methods'             => 'GET',
-					'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+					'permission_callback' => 'sourceweb_ingest_can',
 					'callback'            => 'sourceweb_summary_rw_list',
 				),
 				array(
 					'methods'             => 'POST',
-					'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+					'permission_callback' => 'sourceweb_ingest_can',
 					'callback'            => 'sourceweb_summary_rw_post',
 				),
 			)

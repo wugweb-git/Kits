@@ -2,6 +2,16 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.2.6
+
+- The worker routes (ingest, relevance, same story, relay, summaries, sourcing policy, heartbeat, AI usage) now need the SourceWeb capability or administrator rights instead of `edit_posts`. Routes that required an application password still do.
+- Nothing is published without a person unless Publishing is ticked in SourceWeb → Settings (off by default): opportunities, backfill items and auto-review included. Sites that relied on auto-publishing must tick it.
+- The Animal Writes starter sources, alert emails and Dashboard box are off unless Animal Writes extras is ticked in SourceWeb → Settings (filter `sourceweb_animal_writes_context`).
+- Ingest answers with an error instead of inserting when the site has no `aw_news`, `aw_legal`, `aw_listing` or `aw_opportunity` content type.
+- `aw/v1/ai-keys` returns full keys only to a worker signed in with an application password; any other caller gets them masked.
+- Without Kits Core, Sources and AI models have plain WordPress screens.
+- Readme: how items arrive, what needs Kits Core, key storage, and favicon, image-host and AI provider endpoints under External services.
+
 ## 0.2.5
 
 - Stops loading the unfinished open-model consent and source-quality code that 0.2.4 shipped by mistake. It added two admin-only REST routes and no visible feature.

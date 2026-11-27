@@ -252,6 +252,9 @@ function sourceweb_auto_review( $id ) {
 		update_post_meta( $id, 'aw_review', 'merged into #' . $keep . ' as "also reported by" ' . wp_date( 'Y-m-d H:i' ) );
 		return 'merged';
 	}
+	if ( '' === $reason && ! sourceweb_publish_allowed() ) { // nothing goes live without a person unless publishing is switched on (sourceweb-context.php)
+		$reason = 'publishing is off (SourceWeb → Settings)';
+	}
 	if ( '' === $reason ) {
 		// The story's own date (owner, 12 Oct 2026), never later than now: an older story is not shown as today's.
 		$day  = substr( (string) get_post_meta( $id, 'aw_source_date', true ), 0, 10 );

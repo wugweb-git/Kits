@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'init',
 	function () {
-		if ( '1' === get_option( 'aw_sourcing_seed_s35' ) || ! function_exists( 'sourceweb_publishers' ) ) {
+		if ( '1' === get_option( 'aw_sourcing_seed_s35' ) || ! function_exists( 'sourceweb_publishers' ) || ! sourceweb_animal_writes_context() ) { // Animal Writes' own list: only when that is switched on
 			return;
 		}
 		$pubs = sourceweb_publishers();
@@ -42,7 +42,7 @@ add_action(
 add_action(
 	'init',
 	function () {
-		if ( '1' === get_option( 'aw_sourcing_seed_hc' ) || ! function_exists( 'sourceweb_sources_config' ) ) {
+		if ( '1' === get_option( 'aw_sourcing_seed_hc' ) || ! function_exists( 'sourceweb_sources_config' ) || ! sourceweb_animal_writes_context() ) { // Animal Writes' own list: only when that is switched on
 			return;
 		}
 		$c       = sourceweb_sources_config();

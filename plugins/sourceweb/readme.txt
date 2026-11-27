@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.2.5
+Stable tag: 0.2.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,18 @@ SourceWeb decides what comes into your site and lets your editorial team review 
 * **Optional AI & Worker Endpoints:** Configure optional AI provider keys with daily caps and REST endpoints for ingestion, relay, relevance, same-story grouping, summaries, and enrichment.
 
 SourceWeb operates standalone with no mandatory plugin dependencies, and optionally integrates with Kits Core, DirectoryWeb, and InsightWeb when active.
+
+**How items arrive.** SourceWeb does not fetch feeds inside WordPress. The list of sources you keep here is read by external workers (scripts run outside your site, for example GitHub Actions), and they send each item to this site's ingest routes (`/wp-json/aw/v1/ingest`, also at `/wp-json/sourceweb/v1/worker-api/ingest`) with an application password.  Without workers, no items arrive. The workers themselves are not part of this plugin.
+
+**What needs Kits Core.** Without Kits Core you get plain WordPress screens for Sources (list, add, turn on or off, remove), AI models (add and remove keys), To review, Rules (domain overrides and feed tag filters) and Settings. Keywords, Places, Workers, Rejected, Relay log, and Change log need Kits Core; without it they show a notice and the Overview counts.
+
+**Who may push items, and what goes live.** The worker routes need the SourceWeb capability (`manage_sourceweb`, held by administrators and by roles that can edit others' posts), or administrator rights; Authors and Contributors cannot use them. Change it with the `sourceweb_ingest_capability` filter. Every item arrives as Pending and waits in To review: nothing is published without a person unless an administrator ticks **Publishing** in SourceWeb → Settings (or a site returns true from the `sourceweb_allow_publish` filter).
+
+**Animal Writes extras.** The starter list of animal-welfare sources and keywords, the alert emails to the site administrator (ingestion, workers and relevance problems) and the Dashboard box are off unless **Animal Writes extras** is ticked in SourceWeb → Settings or a site returns true from the `sourceweb_animal_writes_context` filter. No alert email is sent from a site that has not switched it on.
+
+**Content types.** SourceWeb does not register the `aw_news`, `aw_legal`, `aw_listing` or `aw_opportunity` content types; another plugin or theme must. On a site without a type, the ingest route answers with an error for that kind of item and creates nothing.
+
+**API keys.** AI keys and the Google Places key are stored as saved in the WordPress options table (not encrypted). The admin screens and REST routes show a key only as its last four characters. The one route that returns the full keys, `/wp-json/aw/v1/ai-keys`, does so only to a worker signed in with an application password; any other caller gets them masked.
 
 = Source code =
 
@@ -50,6 +62,9 @@ SourceWeb may connect to external services only when the corresponding feature o
 * **Openverse API (`https://api.openverse.org/`):** When CC0 fallback image search is enabled, sends search keywords to retrieve public-domain/CC0 image metadata. Terms & Privacy: [https://openverse.org/](https://openverse.org/).
 * **DOI / Crossref (`https://doi.org/`):** When resolving research paper citations by DOI, sends the DOI identifier to retrieve bibliographic metadata. Terms: [https://www.crossref.org/services/metadata-retrieval/](https://www.crossref.org/services/metadata-retrieval/).
 * **Google Places API (`https://places.googleapis.com/`):** Only when a Google Places API key is configured and live place details are requested, sends the stored Place ID to retrieve business hours and contact details. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy).
+* **Google favicon service (`https://www.google.com/s2/favicons`):** When a publisher's site icon is cached, sends the publisher's host name (then tries `https://<host>/favicon.ico` on the publisher's own site).
+* **Image hosts and YouTube thumbnails (`https://i.ytimg.com/`):** When an item's picture is checked or a copy is kept, requests the page, its `og:image` and the image from the publisher's own host or from the host named in the page; a YouTube link uses its thumbnail from `i.ytimg.com`.
+* **AI provider endpoints:** Only when an administrator saves a key, SourceWeb sends a short test prompt to that key's provider, and the workers (not WordPress) later send article text and prompts using the key. The providers the code can call are OpenRouter (`openrouter.ai`), Requesty (`router.requesty.ai`), Cline (`api.cline.bot`), Command Code (`api.commandcode.ai`), NVIDIA (`integrate.api.nvidia.com`), Vercel AI Gateway (`ai-gateway.vercel.sh`), Hugging Face (`router.huggingface.co`), SambaNova (`api.sambanova.ai`), Groq (`api.groq.com`), Google Gemini (`generativelanguage.googleapis.com`), Mistral (`api.mistral.ai`) and Cerebras (`api.cerebras.ai`). Each provider's own terms and privacy policy apply.
 * **Configured AI Providers (free models only: OpenRouter, Google Gemini, Groq, Cerebras, NVIDIA, Mistral and similar):** Only when an administrator configures an API key for a provider, sends article text/prompts to perform relevance, summary, or enrichment tasks. Each provider's own Terms of Service and Privacy Policy apply.
 * **Configured Worker Relay:** Only when an administrator configures a relay worker URL, forwards fetch requests through that endpoint.
 
@@ -58,6 +73,15 @@ SourceWeb may connect to external services only when the corresponding feature o
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
 == Changelog ==
+
+= 0.2.6 =
+* The worker routes (ingest, relevance, same story, relay, summaries, sourcing policy, heartbeat, AI usage) now need the SourceWeb capability or administrator rights instead of `edit_posts`. The routes that required an application password still do.
+* Nothing is published without a person unless **Publishing** is ticked in SourceWeb → Settings (off by default). This includes opportunities, backfill items and auto-review. Sites that relied on auto-publishing must tick it.
+* The Animal Writes starter sources, the alert emails and the Dashboard box are off unless **Animal Writes extras** is ticked in SourceWeb → Settings (off by default).
+* Ingest answers with an error instead of inserting when the site has no `aw_news`, `aw_legal`, `aw_listing` or `aw_opportunity` content type.
+* `/wp-json/aw/v1/ai-keys` returns full keys only to a worker signed in with an application password; others get them masked.
+* Without Kits Core, Sources and AI models now have plain WordPress screens.
+* The readme says how items arrive, what needs Kits Core, and lists favicon, image-host and every AI provider endpoint under External services.
 
 = 0.2.5 =
 * Stops loading the unfinished open-model consent and source-quality code that 0.2.4 shipped by mistake. It added two admin-only REST routes and no visible feature. Any consent value saved through them is ignored.

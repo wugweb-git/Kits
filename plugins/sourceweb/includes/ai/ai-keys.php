@@ -272,6 +272,23 @@ function sourceweb_ai_served( string $worker = '', string $job = '' ): array {
 	return array( 'rows' => sourceweb_ai_order_for_job( $out, $job, AW_AI_CAPS ), 'tools' => $tools );
 }
 
+/**
+ * What sourceweb_ai_served() returns with every key cut to "…" and its last 4 characters.
+ *
+ * @param array $served { rows: array, tools: array }.
+ * @return array The same shape.
+ */
+function sourceweb_ai_mask_served( array $served ): array {
+	foreach ( array( 'rows', 'tools' ) as $group ) {
+		foreach ( (array) ( $served[ $group ] ?? array() ) as $i => $r ) {
+			if ( isset( $r['key'] ) ) {
+				$served[ $group ][ $i ]['key'] = '…' . substr( (string) $r['key'], -4 );
+			}
+		}
+	}
+	return $served;
+}
+
 /** "…abcd (Groq, label)" for notices and the change log: never more of the key than its last 4. */
 function sourceweb_ai_key_short( array $row ): string {
 	$p = (string) ( $row['provider'] ?? '' );
@@ -505,7 +522,13 @@ add_action(
 				),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$worker = preg_replace( '/\.ya?ml$/i', '', (string) $req->get_param( 'worker' ) );
-					return new WP_REST_Response( sourceweb_ai_served( sanitize_key( $worker ), sanitize_key( (string) $req->get_param( 'job' ) ) ) );
+					$served = sourceweb_ai_served( sanitize_key( $worker ), sanitize_key( (string) $req->get_param( 'job' ) ) );
+					// The workers (an application password) get the keys they call the providers with. Anyone else who may read
+					// this route (an administrator's browser session) gets each key masked to its last 4 characters.
+					if ( ! did_action( 'application_password_did_authenticate' ) ) {
+						$served = sourceweb_ai_mask_served( $served );
+					}
+					return new WP_REST_Response( $served );
 				},
 			)
 		);
@@ -552,7 +575,7 @@ add_action(
 			'/ai-usage',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => fn() => current_user_can( 'edit_posts' ) && did_action( 'application_password_did_authenticate' ),
+				'permission_callback' => fn() => sourceweb_ingest_can() && did_action( 'application_password_did_authenticate' ),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$now   = time();
 					$usage = sourceweb_ai_usage();

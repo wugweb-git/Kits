@@ -206,6 +206,9 @@ function sourceweb_workers_watchdog() {
 		delete_transient( 'aw_workers_alert_mailed' );
 		return;
 	}
+	if ( ! sourceweb_animal_writes_context() ) {
+		return; // alert emails are an Animal Writes extra: never sent unless that is switched on (sourceweb-context.php)
+	}
 	$sent = (string) get_transient( 'aw_workers_alert_mailed' );
 	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
 		return; // the same problems were emailed in the last 12 hours

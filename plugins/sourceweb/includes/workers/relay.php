@@ -196,7 +196,7 @@ add_action(
 			array(
 				'methods'             => 'GET',
 				// The workers' login only: an application password (never a browser session).
-				'permission_callback' => fn() => current_user_can( 'edit_posts' ) && did_action( 'application_password_did_authenticate' ),
+				'permission_callback' => fn() => sourceweb_ingest_can() && did_action( 'application_password_did_authenticate' ),
 				'args'                => array( 'url' => array( 'required' => true, 'type' => 'string' ) ),
 				'callback'            => function ( WP_REST_Request $req ) {
 					$res = sourceweb_relay_fetch( esc_url_raw( (string) $req->get_param( 'url' ), array( 'http', 'https' ) ) );

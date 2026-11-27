@@ -144,6 +144,10 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 	if ( ! $type ) {
 		return new WP_Error( 'aw_bad_type', 'type must be news, legal, research, listing or opportunity', array( 'status' => 400 ) );
 	}
+	// This plugin does not register aw_news, aw_legal, aw_listing or aw_opportunity (Animal Writes Core or DirectoryWeb do): a site without the type gets a clear answer, not an insert into a type that is not there.
+	if ( ! post_type_exists( $type ) ) {
+		return new WP_Error( 'aw_type_missing', 'This site has no content type "' . $type . '" for that kind of item.', array( 'status' => 422 ) );
+	}
 
 	$title      = sanitize_text_field( (string) $req->get_param( 'title' ) );
 	$summary    = sanitize_textarea_field( (string) $req->get_param( 'summary' ) );
@@ -222,12 +226,16 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		'feed'        => (string) $req->get_param( 'feed' ),
 		'kind'        => (string) $req->get_param( 'type' ),
 	);
+	$target_type = function_exists( 'sourceweb_place_post_type' ) ? sourceweb_place_post_type( $type, $place_item ) : $type; // the place's type; the item's own when no route is set (places/places.php)
+	if ( ! post_type_exists( $target_type ) ) {
+		return new WP_Error( 'aw_type_missing', 'This site has no content type "' . $target_type . '" for that kind of item.', array( 'status' => 422 ) );
+	}
 	$post_id    = wp_insert_post(
 		array(
-			'post_type'    => function_exists( 'sourceweb_place_post_type' ) ? sourceweb_place_post_type( $type, $place_item ) : $type, // the place's type; the item's own when no route is set (places/places.php)
+			'post_type'    => $target_type,
 			// Opportunities from approved sources are factual listings (title, organisation, place, deadline, link)
 			// and go live directly (owner's decision, 7 Oct 2026). Everything else waits for review.
-			'post_status'  => 'aw_opportunity' === $type ? 'publish' : 'pending',
+			'post_status'  => 'aw_opportunity' === $type && sourceweb_publish_allowed() ? 'publish' : 'pending', // everything waits for review unless publishing is switched on (sourceweb-context.php)
 			'post_title'   => $title,
 			// A research paper's short keyword slug from its headline (research_titles.py, owner 20 Oct 2026).
 			'post_name'    => 'research' === $req->get_param( 'type' ) ? sanitize_title( (string) $req->get_param( 'slug' ) ) : '',
@@ -440,6 +448,10 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
 		$review = 'held: ' . $hold;
 		update_post_meta( $post_id, 'aw_review', $review );
+	} elseif ( $backfill && ! sourceweb_publish_allowed() ) { // publishing is off: a backfill item waits in To review like any other
+		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
+		$review = 'held: publishing is off (SourceWeb → Settings)';
+		update_post_meta( $post_id, 'aw_review', $review );
 	} elseif ( $backfill ) {
 		update_post_meta( $post_id, 'aw_backfill', current_time( 'Y-m-d' ) );
 		$day = substr( (string) $req->get_param( 'source_date' ), 0, 10 );
@@ -483,9 +495,7 @@ add_action(
 			array(
 				'methods'             => 'POST',
 				'callback'            => 'sourceweb_ingest',
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
+				'permission_callback' => 'sourceweb_ingest_can', // not edit_posts: Authors and Contributors may not push items in (sourceweb-context.php)
 			)
 		);
 	}

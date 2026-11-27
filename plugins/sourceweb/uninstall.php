@@ -7,7 +7,7 @@
  * (aw_src_delete_data_on_uninstall is true) does it delete SourceWeb's own data, exactly this:
  *
  * Options:
- *   Settings: aw_backfill_floor, sourceweb_enrich_sources, aw_enrich_google_key, aw_enrich_live_cap, sourceweb_enrich_field_rules,
+ *   Settings: aw_backfill_floor, sourceweb_allow_publish, sourceweb_animal_writes_context, sourceweb_enrich_sources, aw_enrich_google_key, aw_enrich_live_cap, sourceweb_enrich_field_rules,
  *   sourceweb_summary_rules, sourceweb_sourcing_dismissed, aw_workers_groups.
  *   Records, logs and markers: aw_ai_free_caps, sourceweb_ai_usage, aw_ai_provider_icons, aw_enrich_db, aw_enrich_hosts,
  *   aw_enrich_ledger, aw_ingest_heartbeat, aw_ingest_watchdog_at, aw_ingest_watchdog_last, sourceweb_relay_log,
@@ -56,6 +56,9 @@ if ( true !== (bool) get_option( 'aw_src_delete_data_on_uninstall', false ) ) {
 
 $aw_src_options = array(
 	'aw_backfill_floor',
+	'sourceweb_allow_publish',
+	'sourceweb_modes_migrated',
+	'sourceweb_animal_writes_context',
 	'aw_enrich_sources',
 	'aw_enrich_google_key',
 	'aw_enrich_live_cap',

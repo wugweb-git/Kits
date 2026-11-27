@@ -298,7 +298,7 @@ add_action(
 			'/sourcing-policy',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+				'permission_callback' => 'sourceweb_ingest_can',
 				'callback'            => 'sourceweb_sourcing_policy_payload',
 			)
 		);

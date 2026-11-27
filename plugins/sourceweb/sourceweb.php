@@ -3,7 +3,7 @@
  * Plugin Name: SourceWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/sourceweb/
  * Description: What the workers fetch and how it arrives, in its own SourceWeb menu: Overview, To review, Enrichment review, the settings screens (sources with their feeds and relay, keywords, rules, press queries, categories, AI models), the reports and jobs (workers, rejected items, relay log, change log) and Settings; the worker endpoints (ingest, relay, sourcing policy, relevance, same story, summaries, enrichment) and auto-review. Enhanced by Kits Core, DirectoryWeb and InsightWeb.
- * Version: 0.2.5
+ * Version: 0.2.6
  * Update URI: https://wugweb.com/plugins/sourceweb/
  * Requires at least: 7.1
  * Requires PHP: 8.0
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.2.5' ); // keep equal to the Version header above
+defined( 'SOURCEWEB_VERSION' ) || define( 'SOURCEWEB_VERSION', '0.2.6' ); // keep equal to the Version header above
 // Core loads this file; if it is also active on its own, the second load stops here.
 if ( defined( 'SOURCEWEB_SOURCING_LOADED' ) ) {
 	return;
@@ -84,6 +84,7 @@ if ( ! defined( 'SOURCEWEB_SOURCING_DIR' ) ) {
 }
 
 // The menu's shape and the Sources model (plain functions, tested without WordPress by tests/run.php) first.
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-context.php'; // who may push items in, whether items may go live unreviewed, the Animal Writes switch (all off by default)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-caps.php'; // SourceWeb's own capability, manage_sourceweb (granted from edit_others_posts)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/content-helpers.php'; // section lists, item tags and meta rules it used from Core (18 Nov 2026)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/enhance/research-citation.php'; // research papers' credit: study title, authors, journal (moved from Core, 19 Nov 2026)
@@ -166,3 +167,4 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/rest/sourceweb-rest-tools.php'; 
 require_once SOURCEWEB_SOURCING_DIR . 'includes/compat/worker-routes-model.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/compat/worker-routes.php'; // the workers' routes also at sourceweb/v1/worker-api
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-ui.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/sourceweb-standalone.php'; // Sources and AI models as plain admin screens, for a site without Kits Core

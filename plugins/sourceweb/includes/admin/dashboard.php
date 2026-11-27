@@ -78,8 +78,8 @@ function sourceweb_sourcing_dash_workers(): array {
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( ! current_user_can( AW_REVIEW_CAP ) ) {
-			return; // the Sourcing menu's own capability
+		if ( ! sourceweb_animal_writes_context() || ! current_user_can( AW_REVIEW_CAP ) ) {
+			return; // the box is an Animal Writes extra (sourceweb-context.php); the Sourcing menu's own capability
 		}
 		wp_add_dashboard_widget(
 			'aw_sourcing_dashboard',

@@ -199,7 +199,7 @@ function sourceweb_relevance_recent_items(): array {
 add_action(
 	'rest_api_init',
 	function () {
-		$can = fn() => current_user_can( 'edit_posts' );
+		$can = 'sourceweb_ingest_can';
 		register_rest_route(
 			'aw/v1',
 			'/relevance-config',
@@ -276,6 +276,9 @@ add_action(
 					}
 					$prev = (array) get_option( 'aw_relevance_alert_notice', array() );
 					update_option( 'aw_relevance_alert_notice', array( 'held' => $n + (int) ( $prev['held'] ?? 0 ), 'since' => $prev['since'] ?? current_time( 'j M Y, g:i a' ), 'run' => $link ), false );
+					if ( ! sourceweb_animal_writes_context() ) { // the email is an Animal Writes extra; the dashboard notice above stays
+						return new WP_REST_Response( array( 'status' => 'email off', 'held' => $n ) );
+					}
 					$total = $n + (int) get_option( 'aw_relevance_alert_pending', 0 );
 					if ( get_transient( 'aw_relevance_alert_sent' ) ) {
 						update_option( 'aw_relevance_alert_pending', $total, false );
@@ -505,6 +508,9 @@ function sourceweb_ingest_watchdog() {
 		delete_transient( 'aw_ingest_alert_mailed' );
 		return;
 	}
+	if ( ! sourceweb_animal_writes_context() ) {
+		return; // alert emails are an Animal Writes extra: never sent unless that is switched on (sourceweb-context.php)
+	}
 	$kinds = implode( ',', array_keys( $problems ) );
 	$sent  = (string) get_transient( 'aw_ingest_alert_mailed' );
 	if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
@@ -547,7 +553,7 @@ add_action(
 			'/ingest-heartbeat',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+				'permission_callback' => 'sourceweb_ingest_can',
 				'callback'            => function ( WP_REST_Request $req ) {
 					$now       = time();
 					$new       = max( 0, (int) $req->get_param( 'new' ) );

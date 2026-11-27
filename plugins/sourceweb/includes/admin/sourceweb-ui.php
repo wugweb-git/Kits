@@ -203,13 +203,17 @@ function sourceweb_ui_fallback_page( string $screen, string $title ): void {
 	echo '<h1>' . esc_html( $title ) . '</h1>';
 
 	if ( ! defined( 'KITS_CORE_LOADED' ) ) {
-		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell and real-time feed monitors.', 'sourceweb' ) . '</p></div>';
+		echo '<div class="notice notice-info"><p>' . esc_html__( 'SourceWeb is running without Kits Core. Sources and AI models have a plain screen here; Keywords, Rules, Places, Workers, Rejected, Relay log and Change log need Kits Core. SourceWeb does not fetch feeds inside WordPress: external workers read your sources and push the items to this site.', 'sourceweb' ) . '</p></div>';
 	} else {
 		wp_admin_notice( esc_html__( 'SourceWeb needs Kits Core (active, with its build) to show this screen.', 'sourceweb' ), array( 'type' => 'error' ) );
 	}
 
-	if ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
+	if ( in_array( $screen, array( 'sources', 'ai' ), true ) && ! defined( 'KITS_CORE_LOADED' ) && current_user_can( 'manage_options' ) && function_exists( 'sourceweb_standalone_sources_screen' ) ) {
+		'sources' === $screen ? sourceweb_standalone_sources_screen() : sourceweb_standalone_ai_screen();
+	} elseif ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
 		echo '<div class="card" style="max-width:800px; padding:20px; margin-top:20px;">';
+		sourceweb_modes_form();
+		echo '<hr style="margin:24px 0;">';
 		settings_errors( 'aw_backfill_floor' );
 		settings_errors( 'aw_src_reset' );
 		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
@@ -399,6 +403,7 @@ function sourceweb_extra_parts( string $screen ): array {
 	} elseif ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
 		settings_errors( 'aw_backfill_floor' );
 		settings_errors( 'aw_src_reset' ); // "Defaults restored." after a reset below
+		sourceweb_modes_form();
 		echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 		settings_fields( 'aw_src_backfill' );
 		do_settings_sections( 'aw-src-backfill' );

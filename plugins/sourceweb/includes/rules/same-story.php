@@ -175,7 +175,7 @@ function sourceweb_same_story_post( WP_REST_Request $req ) {
 add_action(
 	'rest_api_init',
 	function () {
-		$can = fn() => current_user_can( 'edit_posts' );
+		$can = 'sourceweb_ingest_can';
 		register_rest_route(
 			'aw/v1',
 			'/same-story',
