@@ -76,7 +76,7 @@ class MailWeb_Fallback_Mailer extends MailWeb_Core_Mailer {
 		}
 		$message = $primary . ' | Fallback: ' . $second;
 		if ( ! empty( $thrown ) || $this->exceptions ) {
-			throw new MailWeb_Mailer_Exception( $message );
+			throw new MailWeb_Mailer_Exception( $message ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- a mailer error string for wp_mail_failed, never printed to a page
 		}
 		$this->ErrorInfo = $message;
 		return false;
