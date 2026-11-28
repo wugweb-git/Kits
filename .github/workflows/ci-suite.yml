@@ -211,6 +211,7 @@ jobs:
           php plugins/insightweb/tests/StandaloneInsightsTest.php
           php plugins/insightweb/tests/no-aw-functions-test.php
           php plugins/insightweb/tests/favicon-hosts-test.php
+          php plugins/insightweb/tests/uninstall-cron-test.php
 
       - name: Test RankWeb
         if: ${{ needs.changes.outputs.rankweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -232,6 +233,7 @@ jobs:
         if: ${{ needs.changes.outputs.planweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
         run: |
           php plugins/planweb/tests/run.php
+          php plugins/planweb/tests/uninstall-cron-test.php
 
       - name: Test SourceWeb
         if: ${{ needs.changes.outputs.sourceweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -242,6 +244,7 @@ jobs:
           php plugins/sourceweb/tests/no-aw-functions-test.php
           php plugins/sourceweb/tests/favicon-hosts-test.php
           php plugins/sourceweb/tests/dispatch-test.php
+          php plugins/sourceweb/tests/uninstall-cron-test.php
       - name: SourceWeb workflow list matches the workers repository
         # Not gating until the workers repo's chore/retire-eight-workflows is merged to its main.
         continue-on-error: true

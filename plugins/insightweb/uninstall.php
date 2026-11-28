@@ -4,7 +4,8 @@
  * stay, so reinstalling finds everything as it was.
  *
  * Always, whatever the switch below says: visitor counting's table {prefix}aw_si_visits, the options aw_si_vis_db,
- * aw_si_geo_updated and insightweb_visitor_tracking, the country files in uploads/aw-geo/ and the aw_si_geo_refresh schedule.
+ * aw_si_geo_updated and insightweb_visitor_tracking, the country files in uploads/aw-geo/, and every scheduled event of
+ * this plugin (list under "Scheduled events" below).
  *
  * Only when "Delete this plugin's data when it is deleted" is ticked (InsightWeb → Settings → Numbers → Keeping data,
  * option insightweb_delete_data = 1) it deletes InsightWeb's own data, and exactly this:
@@ -21,10 +22,10 @@
  * Transients (and their timeouts):
  *   every transient named aw_si_… or insightweb_… (insightweb_dash, aw_si_redirects, aw_si_rm_scores, per-user import
  *   results, Bing keyword volumes, …)
- * Scheduled events:
- *   insightweb_si_daily, insightweb_si_rollup, aw_si_alerts, aw_si_ga4, aw_si_psi, aw_si_psi_more, aw_si_clarity, aw_si_clarity_retry,
+ * Scheduled events (taken off on every uninstall, see above):
+ *   aw_si_daily, aw_si_rollup, insightweb_daily_telemetry_cron, aw_si_alerts, aw_si_ga4, aw_si_psi, aw_si_psi_more, aw_si_clarity, aw_si_clarity_retry,
  *   aw_si_bing, aw_si_bing_kw, aw_si_bing_crawl, aw_si_gsc_types, aw_si_inspect, aw_si_inspect_more, aw_si_crawl,
- *   insightweb_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build — every event of
+ *   aw_si_geo_refresh, aw_si_rising_spikes, aw_si_srv_ai, aw_si_srv_speed, insightweb_dash_build, insightweb_report_cron — every event of
  *   these hooks, whatever its arguments. Not aw_fetch_favicons: the hourly icon run is shared with SourceWeb and is
  *   left booked (an icon run with nothing to do costs nothing)
  *
@@ -65,6 +66,16 @@ if ( is_dir( $insightweb_geo_dir ) ) {
 	@rmdir( $insightweb_geo_dir ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged,WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- only when empty.
 }
 unset( $insightweb_geo_dir, $insightweb_geo_file );
+
+// Scheduled events go on every uninstall, whatever "Delete this plugin's data" says: they are not data, and once the code is
+// gone nothing would run them. wp_unschedule_hook() takes every event of a hook whatever its arguments. This list is the
+// plugin's own hooks (each constant that is scheduled somewhere under includes/); tests/uninstall-cron-test.php checks it
+// against the code. Not aw_fetch_favicons: it is shared with SourceWeb.
+$insightweb_hooks = array( 'aw_si_daily', 'aw_si_rollup', 'insightweb_daily_telemetry_cron', 'aw_si_alerts', 'aw_si_ga4', 'aw_si_psi', 'aw_si_psi_more', 'aw_si_clarity', 'aw_si_clarity_retry', 'aw_si_bing', 'aw_si_bing_kw', 'aw_si_bing_crawl', 'aw_si_gsc_types', 'aw_si_inspect', 'aw_si_inspect_more', 'aw_si_crawl', 'aw_si_geo_refresh', 'aw_si_rising_spikes', 'aw_si_srv_ai', 'aw_si_srv_speed', 'insightweb_dash_build', 'insightweb_report_cron' );
+foreach ( $insightweb_hooks as $insightweb_hook ) {
+	wp_unschedule_hook( $insightweb_hook );
+}
+unset( $insightweb_hooks, $insightweb_hook );
 
 if ( ! get_option( 'insightweb_delete_data', 0 ) ) {
 	return; // The default: keep everything else.
@@ -109,13 +120,6 @@ if ( is_array( $insightweb_seo ) && array_key_exists( 'search-insights', $insigh
 	}
 }
 unset( $insightweb_seo );
-
-// Scheduled events first: wp_clear_scheduled_hook() needs the arguments, so each event is taken off as it is listed.
-$insightweb_hooks = array( 'aw_si_daily', 'aw_si_rollup', 'aw_si_alerts', 'aw_si_ga4', 'aw_si_psi', 'aw_si_psi_more', 'aw_si_clarity', 'aw_si_clarity_retry', 'aw_si_bing', 'aw_si_bing_kw', 'aw_si_bing_crawl', 'aw_si_gsc_types', 'aw_si_inspect', 'aw_si_inspect_more', 'aw_si_crawl', 'aw_si_geo_refresh', 'aw_si_rising_spikes', 'aw_si_srv_ai', 'aw_si_srv_speed', 'insightweb_dash_build', 'insightweb_report_cron' );
-foreach ( $insightweb_hooks as $insightweb_hook ) {
-	wp_unschedule_hook( $insightweb_hook );
-}
-unset( $insightweb_hooks, $insightweb_hook, $insightweb_table );
 
 // Options and transients by name: aw_si_… and insightweb_… are InsightWeb's only.
 // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- no API deletes options by prefix.

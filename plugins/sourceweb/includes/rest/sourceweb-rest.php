@@ -310,8 +310,8 @@ function sourceweb_dashboard_payload(): array {
 			$p       = (array) ( $w['problems'] ?? array() );
 			$total   = (int) ( $w['total'] ?? 0 );
 			$rep     = (int) ( $w['reporting'] ?? $total ); // Only workflows that have reported can be on time or late.
-			$on_time = max( 0, $rep - count( $p ) );
-			if ( ! $counting && $total && 0 === $rep ) {
+			$on_time = (int) ( $w['on_time'] ?? max( 0, $rep - count( $p ) ) ); // from sourceweb_workers_health(), as the Workers screen
+			if ( ! $counting && $total && 'problems' !== ( $w['state'] ?? '' ) && 0 === $rep ) {
 				/* translators: %s: number of workflows. */
 				$wv  = sprintf( __( '0 of %s reporting', 'sourceweb' ), $num( $total ) );
 				$wsb = __( 'Waiting for the first report', 'sourceweb' );

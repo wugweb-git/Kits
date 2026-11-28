@@ -116,3 +116,9 @@
 	#planweb-app .kits-shell-datalist .dataviews-view-table .dataviews-view-table__cell-content-wrapper { min-width: 0; max-width: none; }
 	#planweb-app .kits-shell-datalist .planweb-secondary__label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; color: #50575e; }
 }
+
+/* Tables on the plain WordPress screens scroll sideways inside their own wrapper, so a wide table never widens the page
+   (1280 and 375 wide). The month grid keeps a readable width instead of squeezing seven days into a phone. */
+.planweb-scroll { max-width: 100%; overflow-x: auto; }
+.planweb-scroll > table { margin: 0; }
+.planweb-scroll > .planweb-month { min-width: 640px; }

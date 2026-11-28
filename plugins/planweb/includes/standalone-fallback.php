@@ -88,7 +88,7 @@ function planweb_standalone_screen( string $screen ) {
 	if ( ! $entries ) {
 		echo '<p>' . esc_html__( 'Nothing here yet. Add an entry below.', 'planweb' ) . '</p>';
 	} else {
-		echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Date', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'Entry', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'Type', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'planweb' ) . '</th></tr></thead><tbody>';
+		echo '<div class="planweb-scroll"><table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Date', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'Entry', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'Type', 'planweb' ) . '</th><th scope="col">' . esc_html__( 'Status', 'planweb' ) . '</th></tr></thead><tbody>';
 		foreach ( $entries as $e ) {
 			$href = planweb_url(
 				array(
@@ -100,7 +100,7 @@ function planweb_standalone_screen( string $screen ) {
 				. '<td><a href="' . esc_url( $href ) . '">' . esc_html( $e['title'] ) . '</a></td>'
 				. '<td>' . planweb_type_badge( $e['type'] ) . '</td><td>' . planweb_status_badge( $e['status'] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the badges escape their parts.
 		}
-		echo '</tbody></table>';
+		echo '</tbody></table></div>';
 	}
 	echo '<p><a href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ) ) ) ) . '">' . esc_html__( 'Open the month calendar', 'planweb' ) . '</a></p>';
 	planweb_form( null, wp_date( 'Y-m' ) ); // Nonce, capability check and escaping are in the form and its admin-post handler.
@@ -131,12 +131,12 @@ function planweb_standalone_settings() {
 	echo '<p>' . esc_html__( 'A read-only feed for Google Calendar, Apple Calendar or Outlook, with date, time, title, type, channels, status and link, never the note. Anyone with the address can read it, so keep it private. Nothing comes back from the calendar app and nothing is posted.', 'planweb' ) . '</p>';
 	$payload = planweb_feed_payload();
 	if ( $payload['on'] ) {
-		echo '<table class="widefat striped" role="presentation"><tbody>';
+		echo '<div class="planweb-scroll"><table class="widefat striped" role="presentation"><tbody>';
 		foreach ( $payload['urls'] as $u ) {
 			$id = 'planweb-feed-' . sanitize_key( substr( md5( $u['url'] ), 0, 8 ) );
 			echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $u['label'] ) . '</label></th><td><input type="text" readonly class="large-text code" id="' . esc_attr( $id ) . '" value="' . esc_attr( $u['url'] ) . '"></td></tr>';
 		}
-		echo '</tbody></table>';
+		echo '</tbody></table></div>';
 	} else {
 		echo '<p>' . esc_html__( 'The feed is off: there is no key.', 'planweb' ) . '</p>';
 	}

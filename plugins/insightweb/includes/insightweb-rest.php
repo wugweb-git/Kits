@@ -271,8 +271,10 @@ function insightweb_dash_shape( array $r, array $links ): array {
  * @param array  $gsc     The run log's gsc entry (ok, error, info).
  * @param string $state   The Search Console source's status (failed, late, refused, notrun, ok).
  * @param array  $links   overview, settings: addresses of the current tabs.
+ * @param bool   $figures True when the Dashboard shows stored figures; with no import time stored the tile then says so
+ *                        neutrally instead of "Never" beside figures.
  */
-function insightweb_health_shape( array $sources, array $gsc, string $state, array $links ): array {
+function insightweb_health_shape( array $sources, array $gsc, string $state, array $links, bool $figures = false ): array {
 	$words = array(
 		'failed'  => __( 'Failed', 'insightweb' ),
 		'late'    => __( 'Late', 'insightweb' ),
@@ -294,8 +296,11 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 	if ( ! empty( $gsc['error']['message'] ) && 'failed' === $state ) {
 		$sub = (string) $gsc['error']['message'];
 	} elseif ( ! $ok && '' === $upto ) {
-		// No run is logged: say so, so figures beside this tile are not read as an import that happened.
-		$sub = __( 'No import is logged yet. It runs daily at 07:10.', 'insightweb' );
+		// No run is logged: say so, so figures beside this tile are not read as an import that happened. With figures on the
+		// screen "never" would contradict them: the time was simply not stored.
+		$sub = $figures
+			? __( 'The time of the import is not stored.', 'insightweb' )
+			: __( 'No import is logged yet. It runs daily at 07:10.', 'insightweb' );
 	}
 	$good   = count( array_filter( $sources, fn( $s ) => 'ok' === ( $s['status'] ?? '' ) ) );
 	$waiting = count( array_filter( $sources, fn( $s ) => 'notrun' === ( $s['status'] ?? '' ) ) );
@@ -303,7 +308,7 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 		array(
 			'key'   => 'import',
 			'label' => __( 'Last Search Console import', 'insightweb' ),
-			'value' => $ok ? wp_date( 'j M, H:i', $ok ) : __( 'Never', 'insightweb' ),
+			'value' => $ok ? wp_date( 'j M, H:i', $ok ) : ( $figures ? '–' : __( 'Never', 'insightweb' ) ),
 			'delta' => '',
 			'sub'   => $sub,
 			'href'  => $links['settings'] ?? '',
@@ -371,8 +376,9 @@ function insightweb_dashboard_payload(): array {
 	foreach ( (array) ( $c['ranges'] ?? array() ) as $n => $r ) {
 		$ranges[ (string) $n ] = insightweb_dash_shape( (array) $r, $links );
 	}
-	$runs  = insightweb_si_runs();
-	$end   = (string) ( $c['end'] ?? '' );
+	$runs    = insightweb_si_runs();
+	$end     = (string) ( $c['end'] ?? '' );
+	$figures = (bool) array_filter( $ranges, fn( $r ) => empty( $r['empty'] ) );
 	$state = 'ok';
 	if ( '' !== insightweb_si_run_problem( 'gsc' ) ) {
 		$state = 'failed';
@@ -388,7 +394,7 @@ function insightweb_dashboard_payload(): array {
 		'atText'   => ! empty( $c['at'] ) ? wp_date( 'j M Y, H:i', (int) $c['at'] ) : '',
 		'endText'  => '' !== $end ? wp_date( 'j M Y', strtotime( $end . ' 12:00:00' ) ) : '',
 		'ranges'   => (object) $ranges,
-		'health'   => insightweb_health_shape( insightweb_seo_dash_sources(), (array) ( $runs['gsc'] ?? array() ), $state, $links ),
+		'health'   => insightweb_health_shape( insightweb_seo_dash_sources(), (array) ( $runs['gsc'] ?? array() ), $state, $links, $figures ),
 		'countries' => function_exists( 'insightweb_country_list' ) ? insightweb_country_list() : array(),
 		'links'    => $links,
 	);

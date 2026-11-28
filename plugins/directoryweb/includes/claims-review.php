@@ -518,7 +518,7 @@ function directoryweb_claim_review_screen( $entry_id ) {
 		return;
 	}
 	$lid    = $c['listing'];
-	$status = (string) ( $c['review']['status'] ?? 'pending' );
+	$status = directoryweb_claim_status( (array) $c['review'] ); // older stored keys read as the current ones
 	$back   = add_query_arg( array( 'post_type' => 'aw_listing', 'page' => 'aw-claims' ), admin_url( 'edit.php' ) );
 	echo '<h1>Claim: ' . esc_html( $lid ? get_the_title( $lid ) : '(no listing)' ) . ' <span class="subtitle">' . esc_html( $c['ref'] ) . '</span></h1>';
 	echo '<p><a href="' . esc_url( $back ) . '">All claims</a>' . ( $lid ? ' · <a href="' . esc_url( (string) get_edit_post_link( $lid ) ) . '">Edit listing</a> · <a href="' . esc_url( (string) get_permalink( $lid ) ) . '" target="_blank">View listing</a>' : '' ) . '</p>';
@@ -767,7 +767,8 @@ add_action(
 		$c    = directoryweb_claim_entry( $id );
 		$want = isset( $_POST['do_approve'] ) ? 'approved' : 'rejected';
 		// The state table (claim-native.php) decides whether this move is allowed; a form claim only moves out of 'pending' here.
-		$can = $c && $c['listing'] && ( function_exists( 'directoryweb_claim_can_transition' ) ? directoryweb_claim_can_transition( (string) ( $c['review']['status'] ?? 'pending' ), $want ) : 'pending' === (string) ( $c['review']['status'] ?? 'pending' ) );
+		$from = $c ? directoryweb_claim_status( (array) $c['review'] ) : 'pending'; // older stored keys read as the current ones
+		$can  = $c && $c['listing'] && ( function_exists( 'directoryweb_claim_can_transition' ) ? directoryweb_claim_can_transition( $from, $want ) : 'pending' === $from );
 		if ( ! $can ) {
 			wp_die( 'This claim was already decided, or its listing is missing.', 409 );
 		}

@@ -3,6 +3,9 @@
  * Uninstall SourceWeb. By default it deletes nothing: sources, keywords, rules, review queues, logs, AI model settings
  * and the source icons in the media library stay, so reinstalling finds everything as it was.
  *
+ * Always, whatever that switch says: every scheduled event SourceWeb books (listed under "Scheduled events" below) is taken
+ * off, because once the code is gone nothing would run it.
+ *
  * Only when SourceWeb → Settings → Uninstall → "Delete this plugin's data when it is deleted" is ticked
  * (aw_src_delete_data_on_uninstall is true) does it delete SourceWeb's own data, exactly this:
  *
@@ -21,9 +24,9 @@
  * Transients (caches; they expire anyway): aw_ingest_alert_mailed, aw_relevance_alert_sent, sourceweb_review_count,
  *   sourceweb_sourcing_host_stats, aw_summary_below, aw_workers_alert_mailed, sourceweb_dashboard, aw_cc0_lock, and those
  *   starting aw_newsm_, aw_glive_, aw_sourcing_kw_stats_, aw_relay_rl_, aw_ov_ (Openverse pages and aw_ov_pause).
- * Scheduled events (all of each hook, whatever its arguments): aw_sourcing_site_meta, sourceweb_ai_check_all,
- *   aw_ai_check_all_now, aw_ai_check_new, sourceweb_ingest_watchdog, sourceweb_workers_watchdog, sourceweb_dashboard_build,
- *   aw_sources_sync_dispatch, aw_cc0_run.
+ * Scheduled events (taken off on every uninstall, all of each hook, whatever its arguments): aw_sourcing_site_meta,
+ *   aw_ai_check_all, aw_ai_check_all_now, aw_ai_check_new, aw_ingest_watchdog, aw_workers_watchdog,
+ *   sourceweb_dashboard_build, aw_sources_sync_dispatch, aw_cc0_run.
  * Tables: {prefix}aw_enrich (the enrichment proposals and their sources; the values applied to listings are post meta
  *   and stay).
  *
@@ -49,6 +52,15 @@
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
+
+// Scheduled events go on every uninstall, whatever the switch below says: they are not data, and once the code is gone
+// nothing would run them. wp_unschedule_hook() takes every event of a hook whatever its arguments. This is every hook the
+// plugin books; tests/uninstall-cron-test.php checks the list against the code. Not aw_fetch_favicons or
+// aw_research_citation (see above).
+foreach ( array( 'aw_sourcing_site_meta', 'aw_ai_check_all', 'aw_ai_check_all_now', 'aw_ai_check_new', 'aw_ingest_watchdog', 'aw_workers_watchdog', 'sourceweb_dashboard_build', 'aw_sources_sync_dispatch', 'aw_cc0_run' ) as $sourceweb_src_hook ) {
+	wp_unschedule_hook( $sourceweb_src_hook );
+}
+unset( $sourceweb_src_hook );
 
 if ( true !== (bool) get_option( 'aw_src_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
@@ -140,9 +152,6 @@ foreach ( array( 'aw_newsm_', 'aw_glive_', 'aw_sourcing_kw_stats_', 'aw_relay_rl
 	$sourceweb_src_like( '_transient_timeout_' . $sourceweb_src_prefix );
 }
 
-foreach ( array( 'aw_sourcing_site_meta', 'aw_ai_check_all', 'aw_ai_check_all_now', 'aw_ai_check_new', 'aw_ingest_watchdog', 'aw_workers_watchdog', 'sourceweb_dashboard_build', 'aw_sources_sync_dispatch', 'aw_cc0_run' ) as $sourceweb_src_hook ) {
-	wp_unschedule_hook( $sourceweb_src_hook );
-}
 
 $wpdb->query( 'DROP TABLE IF EXISTS `' . esc_sql( $wpdb->prefix . 'aw_enrich' ) . '`' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange -- uninstall: SourceWeb's own table, name fixed.
 

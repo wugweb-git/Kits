@@ -30,6 +30,11 @@
 .mailweb-strong{font-weight:600}
 .mailweb-dns-value{display:block;width:100%;font-family:monospace;font-size:11px;word-break:break-all;user-select:all}
 .mailweb-native-nav{margin:12px 0}
+/* The tab row on the plain screens: the same size as the Kits shell tabs (8px above, 12px below, a 3px bar under the open one). */
+.mailweb-native-nav.nav-tab-wrapper{display:flex;flex-wrap:nowrap;gap:24px;max-width:100%;overflow-x:auto;padding:12px 0 0;border-bottom:1px solid #dfdfdf}
+.mailweb-native-nav .nav-tab{flex:none;float:none;margin:0;padding:8px 0 12px;border:0;border-bottom:3px solid transparent;background:none;color:#4a4a4a;font-size:14px;font-weight:500;line-height:1.5;white-space:nowrap}
+.mailweb-native-nav .nav-tab:hover,.mailweb-native-nav .nav-tab:focus{background:none;color:#141414}
+.mailweb-native-nav .nav-tab-active,.mailweb-native-nav .nav-tab-active:hover,.mailweb-native-nav .nav-tab-active:focus{border-bottom-color:#ffc300;background:none;color:#141414;font-weight:600}
 .mailweb-native-form .form-table th{width:220px}
 /* Checkboxes and radios: a label that wraps one is at least 24 x 24 px to hit (WCAG 2.5.8); the input keeps its look, a core list table's check column is left alone. */
 .wrap label:has(> input[type=checkbox]):not(.screen-reader-text),.wrap label:has(> input[type=radio]):not(.screen-reader-text){display:inline-flex;align-items:center;gap:6px;min-height:24px;min-width:24px;padding-block:4px;box-sizing:border-box}

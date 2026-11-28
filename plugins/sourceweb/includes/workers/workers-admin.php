@@ -34,30 +34,28 @@ function sourceweb_workers_late_words( array $w ) {
  * @return array[]
  */
 function sourceweb_workers_status_rows() {
-	$kinds = array();
-	$notes = array();
-	foreach ( sourceweb_workers_problems() as $k => $msg ) {
-		list( $file, $kind )              = explode( ':', $k, 2 );
-		$kinds[ sourceweb_worker_id( $file ) ][] = $kind;
-		$notes[ sourceweb_worker_id( $file ) ][] = $msg;
-	}
-	$out = array();
+	$health = sourceweb_workers_health(); // the same verdict the Dashboard shows
+	$kinds  = $health['by_file'];
+	$notes  = $health['notes'];
+	$out    = array();
 	foreach ( sourceweb_workers_all() as $id => $w ) {
 		$last = sourceweb_workers_last( $w['file'] );
-		$k    = $kinds[ $id ] ?? array();
+		$k    = $kinds[ $w['file'] ] ?? array();
 		if ( $w['planned'] && ! $last ) {
 			$status = 'planned';
 		} elseif ( array_intersect( $k, array( 'late', 'stuck' ) ) ) {
 			$status = 'late';
 		} elseif ( $k ) {
 			$status = 'failing';
+		} elseif ( ! $last ) {
+			$status = 'waiting'; // never reported: not "Active", and not counted as on time on the Dashboard
 		} else {
 			$status = 'active';
 		}
 		$out[] = $w + array(
 			'last'   => $last,
 			'status' => $status,
-			'note'   => implode( ' ', $notes[ $id ] ?? array() ),
+			'note'   => implode( ' ', $notes[ $w['file'] ] ?? array() ),
 			'keys'   => sourceweb_worker_key_count( $id ),
 		);
 	}

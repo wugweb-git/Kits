@@ -191,6 +191,16 @@ aw_t(
 	) === $n,
 	'log: the numbers a day keeps (daily totals included)'
 );
+$wf = array( 'a.yml', 'b.yml', 'c.yml' );
+$h  = sourceweb_workers_health_shape( array(), array(), $wf );
+aw_t( 'waiting' === $h['state'] && 0 === $h['reporting'] && 0 === $h['on_time'] && 3 === $h['total'], 'workers health: none reported is waiting, not "all on time"' );
+$h = sourceweb_workers_health_shape( array(), array( 'a.yml' ), $wf );
+aw_t( 'ok' === $h['state'] && 1 === $h['reporting'] && 1 === $h['on_time'], 'workers health: one reported, no problem is ok, 1 of 1' );
+$h = sourceweb_workers_health_shape( array( 'a.yml:late' => 'A is late.', 'a.yml:failed' => 'A failed.' ), array( 'a.yml', 'b.yml' ), $wf );
+aw_t( 'problems' === $h['state'] && 1 === $h['problem_files'] && 1 === $h['on_time'] && array( 'late', 'failed' ) === $h['by_file']['a.yml'] && 2 === count( $h['problems'] ), 'workers health: two problems of one workflow count it once; kinds and notes by file' );
+$h = sourceweb_workers_health_shape( array( 'updraftplus:backup' => 'Backup old.' ), array(), $wf );
+aw_t( 'problems' === $h['state'] && 0 === $h['problem_files'] && 0 === $h['on_time'], 'workers health: a backup problem is a problem but not a late workflow' );
+aw_t( 5 === sourceweb_dashboard_numbers( array( 'workers' => array( 'total' => 19, 'on_time' => 5, 'problems' => array( 'a', 'b' ) ) ) )['workers'], 'log: the workers number is the shared on-time count' );
 aw_t( ! isset( sourceweb_dashboard_numbers( array() )['workers'] ), 'log: no workers number without the workers' );
 $log = array();
 for ( $d = 1; $d <= 5; $d++ ) {

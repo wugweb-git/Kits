@@ -156,7 +156,7 @@ add_action(
 			return; // a native claim: claim-native.php draws these columns
 		}
 		if ( 'aw_status' === $col ) {
-			echo esc_html( ucfirst( (string) get_post_meta( $id, 'aw_c_status', true ) ) );
+			echo esc_html( ucfirst( directoryweb_claim_status( (string) get_post_meta( $id, 'aw_c_status', true ) ) ) ); // older stored keys read as the current ones
 		} elseif ( 'aw_changes' === $col ) {
 			$p = (array) get_post_meta( $id, 'aw_c_proposed', true );
 			$n = array_map( fn( $k ) => DIRECTORYWEB_CLAIM_FIELDS[ $k ][0] ?? $k, array_keys( $p ) );
@@ -184,7 +184,7 @@ add_action(
  */
 function directoryweb_claim_review_box( $post ) {
 	$lid      = (int) get_post_meta( $post->ID, 'aw_c_listing', true );
-	$status   = (string) get_post_meta( $post->ID, 'aw_c_status', true );
+	$status   = directoryweb_claim_status( (string) get_post_meta( $post->ID, 'aw_c_status', true ) ); // older stored keys read as the current ones
 	$proposed = (array) get_post_meta( $post->ID, 'aw_c_proposed', true );
 	$logo     = (string) get_post_meta( $post->ID, 'aw_c_logo', true );
 	$roles    = DIRECTORYWEB_CLAIM_ROLES;

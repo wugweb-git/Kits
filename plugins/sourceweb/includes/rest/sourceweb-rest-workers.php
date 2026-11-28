@@ -25,6 +25,7 @@ function sourceweb_workers_repo_url( string $path ): string {
 /** Worker status => label. */
 const SOURCEWEB_WORKER_STATUS = array(
 	'active'  => 'Active',
+	'waiting' => 'Waiting for first report',
 	'late'    => 'Late',
 	'failing' => 'Failing',
 	'planned' => 'Planned',

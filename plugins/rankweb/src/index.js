@@ -133,6 +133,10 @@ const TILE_GROUPS = [
 	},
 ];
 
+// The count the full bar height stands for at least: a chart of one or two small values (a new site) is short bars on an honest
+// scale, not full-height slabs. Bar width is capped in assets/admin.css.
+const CHART_FLOOR = 5;
+
 // Metrics with a daily history worth a trend chart (unit shown in the screen-reader table).
 const TREND_METRICS = [
 	{
@@ -419,6 +423,7 @@ function Dashboard( { view } ) {
 									label={ m.label }
 									points={ m.points }
 									unit={ m.unit }
+									floor={ CHART_FLOOR }
 								/>
 							</div>
 						) ) }
@@ -448,6 +453,7 @@ function Dashboard( { view } ) {
 										__( 'item', 'rankweb' ),
 										__( 'items', 'rankweb' ),
 									] }
+									floor={ CHART_FLOOR }
 								/>
 							</div>
 						) ) }

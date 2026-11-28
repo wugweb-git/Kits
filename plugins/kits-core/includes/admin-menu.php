@@ -421,24 +421,24 @@ function kits_home_theme(): void {
 		array(
 			array(
 				'title'       => __( 'Step 1: Upload Your Logo & Header Navigation', 'kits-core' ),
-				'description' => __( 'Open the Header template part in the Site Editor to upload your logo and customize navigation menus.', 'kits-core' ),
+				'desc'        => __( 'Open the Header template part in the Site Editor to upload your logo and customize navigation menus.', 'kits-core' ),
 				'icon_svg'    => '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>',
 				'status'      => __( 'Site Identity', 'kits-core' ),
-				'action'      => '<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template_part' ) ) . '" class="button button-primary">' . esc_html__( 'Edit Header →', 'kits-core' ) . '</a>',
+				'button'      => '<a href="' . esc_url( admin_url( 'site-editor.php?postType=wp_template_part' ) ) . '" class="button button-primary">' . esc_html__( 'Edit Header →', 'kits-core' ) . '</a>',
 			),
 			array(
 				'title'       => __( 'Step 2: Brand Colours & Typography Hierarchy', 'kits-core' ),
-				'description' => __( 'Pick a pre-designed style variation (Default, Slate, Forest) or set your custom brand palette in Global Styles.', 'kits-core' ),
+				'desc'        => __( 'Pick a pre-designed style variation (Default, Slate, Forest) or set your custom brand palette in Global Styles.', 'kits-core' ),
 				'icon_svg'    => '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="14.5" cy="7" r="1"/></svg>',
 				'status'      => __( 'Global Styles', 'kits-core' ),
-				'action'      => '<a href="' . esc_url( admin_url( 'site-editor.php?path=/wp_global_styles' ) ) . '" class="button button-secondary">' . esc_html__( 'Open Styles →', 'kits-core' ) . '</a>',
+				'button'      => '<a href="' . esc_url( admin_url( 'site-editor.php?path=/wp_global_styles' ) ) . '" class="button button-secondary">' . esc_html__( 'Open Styles →', 'kits-core' ) . '</a>',
 			),
 			array(
 				'title'       => __( 'Step 3: Browse & Insert Pre-built Block Patterns', 'kits-core' ),
-				'description' => __( 'Choose from 18 native block patterns: hero sections, responsive card grids, CTA banners, and FAQ accordions.', 'kits-core' ),
+				'desc'        => __( 'Choose from 18 native block patterns: hero sections, responsive card grids, CTA banners, and FAQ accordions.', 'kits-core' ),
 				'icon_svg'    => '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M10 4a2 2 0 1 1 4 0v2h4a1 1 0 0 1 1 1v4h-2a2 2 0 1 0 0 4h2v4a1 1 0 0 1-1 1h-4v-2a2 2 0 1 0-4 0v2H6a1 1 0 0 1-1-1v-4h2a2 2 0 1 0 0-4H5V7a1 1 0 0 1 1-1h4z"/></svg>',
 				'status'      => __( '18 Patterns', 'kits-core' ),
-				'action'      => '<a href="' . esc_url( admin_url( 'site-editor.php?path=/patterns' ) ) . '" class="button button-secondary">' . esc_html__( 'Browse Patterns →', 'kits-core' ) . '</a>',
+				'button'      => '<a href="' . esc_url( admin_url( 'site-editor.php?path=/patterns' ) ) . '" class="button button-secondary">' . esc_html__( 'Browse Patterns →', 'kits-core' ) . '</a>',
 			),
 		)
 	);

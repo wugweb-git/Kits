@@ -3,6 +3,9 @@
  * Uninstall PlanWeb. By default it deletes nothing: settings and every calendar entry stay, so reinstalling finds
  * everything as it was.
  *
+ * Always, whatever the switch below says: every scheduled event of this plugin (list under "Scheduled events" below). They are
+ * not data, and once the code is gone nothing would run them.
+ *
  * Only when Kits → Modules → PlanWeb → "Delete this plugin's data when it is deleted" is ticked
  * (planweb_delete_data_on_uninstall is true) does it delete PlanWeb's own data, exactly this:
  *
@@ -11,7 +14,7 @@
  *   settings (planweb_jobs_overdue, planweb_jobs_repeats, planweb_reminders_on, planweb_reminder_days, planweb_digest_on,
  *   planweb_digest_brand) and their dedupe lists (planweb_jobs_sent, planweb_digest_sent), planweb_delete_data_on_uninstall.
  * Transients (they expire anyway): planweb_counts and those starting planweb_draft_.
- * Scheduled events (all, whatever their arguments): planweb_counts_build, planweb_job_overdue, planweb_job_repeats,
+ * Scheduled events (taken off on every uninstall, all of each hook, whatever their arguments): planweb_counts_build, planweb_job_overdue, planweb_job_repeats,
  *   planweb_job_reminders, planweb_job_digest (the scheduled jobs, jobs.php).
  * Tables: none of its own.
  *
@@ -34,6 +37,15 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
+// Scheduled events go on every uninstall. wp_unschedule_hook() takes every event of a hook whatever its arguments (the Dashboard's
+// counts job also runs once with the argument 'now', which wp_clear_scheduled_hook( $hook ) alone would leave). This list is the
+// plugin's own hooks: PLANWEB_COUNTS_JOB (planweb-dashboard.php) and each hook of PLANWEB_JOBS (jobs-model.php);
+// tests/uninstall-cron-test.php checks it against the code.
+foreach ( array( 'planweb_counts_build', 'planweb_job_overdue', 'planweb_job_repeats', 'planweb_job_reminders', 'planweb_job_digest' ) as $planweb_hook ) {
+	wp_unschedule_hook( $planweb_hook );
+}
+unset( $planweb_hook );
+
 if ( true !== (bool) get_option( 'planweb_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
 }
@@ -53,11 +65,6 @@ delete_transient( 'planweb_counts' );
 global $wpdb;
 foreach ( array( '_transient_planweb_draft_', '_transient_timeout_planweb_draft_' ) as $planweb_start ) {
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $planweb_start ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: transients by prefix, once.
-}
-
-wp_unschedule_hook( 'planweb_counts_build' );
-foreach ( array( 'planweb_job_overdue', 'planweb_job_repeats', 'planweb_job_reminders', 'planweb_job_digest' ) as $planweb_hook ) {
-	wp_unschedule_hook( $planweb_hook );
 }
 
 delete_option( 'planweb_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

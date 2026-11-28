@@ -238,6 +238,22 @@ iw_check( 'error' === $h['tiles'][1]['tone'] && '1 needs attention' === $h['tile
 iw_check( 'Failed' === $h['sources'][0]['status'] && 'Never' === $h['sources'][0]['last'], 'sources list in plain words' );
 iw_check( 'HTTP 403' === $h['sources'][0]['why'] && '' === $h['sources'][1]['why'], 'a failed source says why' );
 
+// The verdict over sources that have never run, and the import tile beside figures with no timestamp.
+$none = array_map(
+	fn( $n ) => array(
+		'name'    => 'Source ' . $n,
+		'last'    => 0,
+		'status'  => 'notrun',
+		'problem' => false,
+	),
+	range( 1, 9 )
+);
+$h0   = insightweb_health_shape( $none, array(), 'notrun', array() );
+iw_check( 'Not run yet' === $h0['tiles'][1]['value'] && false === strpos( $h0['tiles'][1]['sub'], 'checked' ) && 'All working' !== $h0['tiles'][1]['value'], 'jobs tile: nine never-run sources are not "All working"' );
+iw_check( 'Never' === $h0['tiles'][0]['value'], 'import tile: no figures and no import says Never' );
+$h1 = insightweb_health_shape( $none, array(), 'notrun', array(), true );
+iw_check( '–' === $h1['tiles'][0]['value'] && false === strpos( $h1['tiles'][0]['sub'], 'No import is logged' ), 'import tile: figures on screen and no timestamp stored: no "Never"' );
+
 // 5. The Overview boxes as plain parts.
 if ( ! function_exists( 'esc_url_raw' ) ) {
 	/** Stub. */

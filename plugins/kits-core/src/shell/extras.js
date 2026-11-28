@@ -13,6 +13,8 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {string} props.label  What the chart shows (its caption).
  * @param {Array}  props.points [ { label, value } ], oldest first.
  * @param {string|Array} props.unit   Words after a number in the table ("rows"), or [ singular, plural ] when the singular differs.
+ * @param {number} props.floor  The smallest number the full height stands for (default 1). A caller with few or small values
+ *                              sets it so two bars of 1 and 2 do not fill the chart as if they were large.
  */
 /**
  * The words after a number: one string, or [ singular, plural ] (English "one" applies to exactly 1).
@@ -28,8 +30,8 @@ function unitFor( unit, value ) {
 	return unit;
 }
 
-export function MiniChart( { label, points = [], unit = '' } ) {
-	const max = Math.max( 1, ...points.map( ( p ) => Number( p.value ) || 0 ) );
+export function MiniChart( { label, points = [], unit = '', floor = 1 } ) {
+	const max = Math.max( Number( floor ) || 1, ...points.map( ( p ) => Number( p.value ) || 0 ) );
 	const w = 100 / Math.max( 1, points.length );
 	return (
 		<figure className="kits-shell-chart">

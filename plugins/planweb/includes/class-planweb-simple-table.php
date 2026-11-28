@@ -68,7 +68,7 @@ class PlanWeb_Simple_Table extends WP_List_Table {
 		echo '<div>';
 		$this->display_tablenav( 'top' );
 		$this->screen->render_screen_reader_content( 'heading_list' );
-		echo '<table class="wp-list-table ' . esc_attr( implode( ' ', $this->get_table_classes() ) ) . '">';
+		echo '<div class="planweb-scroll"><table class="wp-list-table ' . esc_attr( implode( ' ', $this->get_table_classes() ) ) . '">';
 		$this->print_table_description();
 		echo '<thead><tr>';
 		$this->print_column_headers();
@@ -80,7 +80,7 @@ class PlanWeb_Simple_Table extends WP_List_Table {
 			$this->print_column_headers( false );
 			echo '</tr></tfoot>';
 		}
-		echo '</table>';
+		echo '</table></div>';
 		$this->display_tablenav( 'bottom' );
 		echo '</div>';
 	}

@@ -214,7 +214,7 @@ function planweb_month_grid( string $month, array $f = array() ) {
 		$by[ $e['date'] ][] = $e;
 	}
 	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $prev ) + array_filter( $f ) ) ) . '">‹ ' . esc_html( wp_date( 'F', strtotime( $prev . '-01 12:00:00' ) ) ) . '</a> <strong>' . esc_html( wp_date( 'F Y', $first ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $next ) + array_filter( $f ) ) ) . '">' . esc_html( wp_date( 'F', strtotime( $next . '-01 12:00:00' ) ) ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Today', 'planweb' ) . '</a></p>';
-	echo '<table class="widefat fixed planweb-month"><caption class="screen-reader-text">' . esc_html( wp_date( 'F Y', $first ) ) . '</caption><thead><tr>';
+	echo '<div class="planweb-scroll"><table class="widefat fixed planweb-month"><caption class="screen-reader-text">' . esc_html( wp_date( 'F Y', $first ) ) . '</caption><thead><tr>';
 	foreach ( array( __( 'Mon', 'planweb' ), __( 'Tue', 'planweb' ), __( 'Wed', 'planweb' ), __( 'Thu', 'planweb' ), __( 'Fri', 'planweb' ), __( 'Sat', 'planweb' ), __( 'Sun', 'planweb' ) ) as $h ) {
 		echo '<th scope="col">' . esc_html( $h ) . '</th>';
 	}
@@ -244,7 +244,7 @@ function planweb_month_grid( string $month, array $f = array() ) {
 	for ( $i = ( 7 - ( $lead + $days ) % 7 ) % 7; $i > 0; $i-- ) {
 		echo '<td class="alternate"></td>';
 	}
-	echo '</tr></tbody></table>';
+	echo '</tr></tbody></table></div>';
 }
 
 /**
@@ -373,12 +373,12 @@ function planweb_timeline_view( array $f ) {
 		echo '</div></div>';
 	}
 	echo '</div>';
-	echo '<table class="widefat striped planweb-timeline-list"><caption class="screen-reader-text">' . esc_html__( 'Entries in this range', 'planweb' ) . '</caption><tbody>';
+	echo '<div class="planweb-scroll"><table class="widefat striped planweb-timeline-list"><caption class="screen-reader-text">' . esc_html__( 'Entries in this range', 'planweb' ) . '</caption><tbody>';
 	foreach ( $all as $e ) {
 		$href = planweb_url( array( 'm' => substr( $e['date'], 0, 7 ), 'edit' => $e['id'] ) ) . '#planweb-form';
 		echo '<tr><th scope="row">' . esc_html( planweb_date_label( $e['date'] ) . ( '' !== $e['time'] ? ' ' . $e['time'] : '' ) ) . '</th><td>' . planweb_type_badge( $e['type'] ) . ' <a href="' . esc_url( $href ) . '">' . esc_html( $e['title'] ) . '</a> ' . planweb_status_badge( $e['status'] ) . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the badges escape their parts.
 	}
-	echo '</tbody></table>';
+	echo '</tbody></table></div>';
 }
 
 /**
@@ -399,7 +399,7 @@ function planweb_week_view( string $week, array $f ) {
 	}
 	$m = substr( $week, 0, 7 );
 	echo '<p class="planweb-nav"><a class="button" href="' . esc_url( planweb_url( array( 'm' => $m, 'w' => $prev ) + array_filter( $f ) ) ) . '">‹ ' . esc_html__( 'Previous week', 'planweb' ) . '</a> <strong>' . esc_html( planweb_date_label( $week ) . ' – ' . planweb_date_label( $end ) ) . '</strong> <a class="button" href="' . esc_url( planweb_url( array( 'm' => $m, 'w' => $next ) + array_filter( $f ) ) ) . '">' . esc_html__( 'Next week', 'planweb' ) . ' ›</a> <a class="button" href="' . esc_url( planweb_url( array( 'm' => wp_date( 'Y-m' ), 'w' => planweb_week_start( $today ) ) + array_filter( $f ) ) ) . '">' . esc_html__( 'This week', 'planweb' ) . '</a></p>';
-	echo '<table class="widefat striped planweb-week"><caption class="screen-reader-text">' . esc_html( planweb_date_label( $week ) . ' – ' . planweb_date_label( $end ) ) . '</caption><tbody>';
+	echo '<div class="planweb-scroll"><table class="widefat striped planweb-week"><caption class="screen-reader-text">' . esc_html( planweb_date_label( $week ) . ' – ' . planweb_date_label( $end ) ) . '</caption><tbody>';
 	for ( $i = 0; $i < 7; $i++ ) {
 		$ymd = gmdate( 'Y-m-d', $start + $i * DAY_IN_SECONDS );
 		echo '<tr' . ( $ymd === $today ? ' class="highlight" aria-current="date"' : '' ) . '><th scope="row">' . esc_html( wp_date( 'D j M', strtotime( $ymd . ' 12:00:00' ) ) ) . '</th><td>';
@@ -409,7 +409,7 @@ function planweb_week_view( string $week, array $f ) {
 		}
 		echo '</td></tr>';
 	}
-	echo '</tbody></table>';
+	echo '</tbody></table></div>';
 }
 
 /**

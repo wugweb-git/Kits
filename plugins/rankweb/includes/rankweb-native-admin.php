@@ -113,6 +113,13 @@ function rankweb_native_overview(): void {
 	echo '<h2>' . esc_html__( 'Modules', 'rankweb' ) . '</h2><p>' . esc_html( sprintf( /* translators: 1: modules on, 2: modules */ __( '%1$d of %2$d switchable modules are on.', 'rankweb' ), $on, $sw ) ) . ' <a href="' . esc_url( rankweb_native_url( 'aw-seo-modules' ) ) . '">' . esc_html__( 'Manage modules', 'rankweb' ) . '</a> · <a href="' . esc_url( rankweb_native_url( 'aw-seo-settings' ) ) . '">' . esc_html__( 'Settings', 'rankweb' ) . '</a></p>';
 }
 
+/** The tab row of the plain Settings screen: the same size as the Kits shell tabs (8px above, 12px below, a 3px bar under the open one). */
+function rankweb_native_nav_style(): void {
+	wp_register_style( 'rankweb-native-nav', false, array(), RANKWEB_VERSION );
+	wp_enqueue_style( 'rankweb-native-nav' );
+	wp_add_inline_style( 'rankweb-native-nav', '/* The tab row on the plain screens: the same size as the Kits shell tabs (8px above, 12px below, a 3px bar under the open one). */\n.rankweb-native-nav.nav-tab-wrapper{display:flex;flex-wrap:nowrap;gap:24px;max-width:100%;overflow-x:auto;padding:12px 0 0;border-bottom:1px solid #dfdfdf}\n.rankweb-native-nav .nav-tab{flex:none;float:none;margin:0;padding:8px 0 12px;border:0;border-bottom:3px solid transparent;background:none;color:#4a4a4a;font-size:14px;font-weight:500;line-height:1.5;white-space:nowrap}\n.rankweb-native-nav .nav-tab:hover,.rankweb-native-nav .nav-tab:focus{background:none;color:#141414}\n.rankweb-native-nav .nav-tab-active,.rankweb-native-nav .nav-tab-active:hover,.rankweb-native-nav .nav-tab-active:focus{border-bottom-color:#ffc300;background:none;color:#141414;font-weight:600}\n' );
+}
+
 /** Settings (all tabs) or the Modules tab alone. */
 function rankweb_native_settings( bool $modules_only ): void {
 	$tabs = rankweb_seo_setting_tabs();
@@ -134,7 +141,8 @@ function rankweb_native_settings( bool $modules_only ): void {
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved.', 'rankweb' ) . '</p></div>';
 	}
 	if ( ! $modules_only ) {
-		echo '<nav class="nav-tab-wrapper" style="margin-bottom:16px">';
+		rankweb_native_nav_style();
+		echo '<nav class="nav-tab-wrapper rankweb-native-nav" style="margin-bottom:16px">';
 		foreach ( $tabs as $k => $t ) {
 			if ( 'modules' === $k ) {
 				continue;

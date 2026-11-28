@@ -294,9 +294,42 @@ function sourceweb_dashboard_numbers( array $c ): array {
 		'dupes'     => (int) ( $c['today']['dupes'] ?? 0 ),
 	);
 	if ( isset( $c['workers']['total'] ) ) {
-		$n['workers'] = (int) ( $c['workers']['reporting'] ?? $c['workers']['total'] ?? 0 ) - count( (array) ( $c['workers']['problems'] ?? array() ) );
+		$n['workers'] = isset( $c['workers']['on_time'] ) ? (int) $c['workers']['on_time'] : (int) ( $c['workers']['reporting'] ?? $c['workers']['total'] ?? 0 ) - count( (array) ( $c['workers']['problems'] ?? array() ) );
 	}
 	return $n;
+}
+
+/**
+ * The one verdict on the workers, shared by the Dashboard tile, the Workers screen, Site Health and the Scheduled tasks box
+ * (sourceweb_workers_health() collects the inputs; nothing else may decide whether the workers are fine). Only workflows
+ * that have reported can be on time or late, so with none reported the state is "waiting", never "ok".
+ *
+ * @param array<string,string> $problems  "file:kind" => sentence, from sourceweb_workers_problems().
+ * @param string[]             $reported  Workflow files that have reported at least one run.
+ * @param string[]             $files     Every workflow file of the registry.
+ * @return array { state: waiting|problems|ok, total, reporting, on_time, problems (sentences), by_file (file => kinds),
+ *               notes (file => sentences), problem_files (count of workflows with a problem) }.
+ */
+function sourceweb_workers_health_shape( array $problems, array $reported, array $files ): array {
+	$by_file = array();
+	$notes   = array();
+	foreach ( $problems as $k => $msg ) {
+		$bits                        = explode( ':', (string) $k, 2 );
+		$by_file[ $bits[0] ][]       = $bits[1] ?? '';
+		$notes[ $bits[0] ][]         = (string) $msg;
+	}
+	$bad       = count( array_intersect( array_keys( $by_file ), $files ) );
+	$reporting = count( array_intersect( $reported, $files ) );
+	return array(
+		'state'         => $problems ? 'problems' : ( $reporting ? 'ok' : 'waiting' ),
+		'total'         => count( $files ),
+		'reporting'     => $reporting,
+		'on_time'       => max( 0, $reporting - $bad ),
+		'problems'      => array_values( array_map( 'strval', $problems ) ),
+		'by_file'       => $by_file,
+		'notes'         => $notes,
+		'problem_files' => $bad,
+	);
 }
 
 /**

@@ -209,6 +209,23 @@ function sourceweb_workers_problems( $now = null ) {
 }
 
 /**
+ * The one health verdict on the workers: the Dashboard, the Workers screen, Site Health and the Scheduled tasks box all read
+ * it, so they cannot disagree (rules in sourceweb_workers_health_shape()).
+ *
+ * @param int|null $now Unix time (tests).
+ * @return array See sourceweb_workers_health_shape().
+ */
+function sourceweb_workers_health( $now = null ): array {
+	$reported = array();
+	foreach ( array_keys( AW_WORKERS ) as $file ) {
+		if ( sourceweb_workers_last( $file ) ) {
+			$reported[] = $file;
+		}
+	}
+	return sourceweb_workers_health_shape( sourceweb_workers_problems( $now ), $reported, array_keys( AW_WORKERS ) );
+}
+
+/**
  * Check the workers (hourly event, and after every end report): fires the action `sourceweb_workers_problems` with the
  * problems (an empty array when all is well). SourceWeb sends no email itself; a site that wants one hooks the action.
  */
@@ -478,9 +495,10 @@ add_action(
 		add_action(
 			'kits_cron_health_after',
 			function () {
-				$problems = sourceweb_workers_problems();
+				$health   = sourceweb_workers_health();
+				$problems = $health['problems'];
 				$url      = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );
-				if ( ! $problems && 0 === sourceweb_workers_reporting_count() ) {
+				if ( 'waiting' === $health['state'] ) {
 					echo '<p><span class="dashicons dashicons-clock" aria-hidden="true"></span> Workers: no report yet. <a href="' . esc_url( $url ) . '">Workers</a></p>';
 					return;
 				}
@@ -504,8 +522,9 @@ add_filter(
 		$tests['direct']['aw_workers'] = array(
 			'label' => 'Workers report on time',
 			'test'  => function () {
-				$problems = sourceweb_workers_problems();
-				$waiting  = ! $problems && 0 === sourceweb_workers_reporting_count();
+				$health   = sourceweb_workers_health();
+				$problems = $health['problems'];
+				$waiting  = 'waiting' === $health['state'];
 				return array(
 					'label'       => $problems ? 'Workers need attention' : ( $waiting ? 'No worker has reported yet' : 'Workers report on time' ),
 					'status'      => $problems ? 'critical' : ( $waiting ? 'recommended' : 'good' ),
