@@ -12,10 +12,10 @@ Replaces `standalone-audit-2026-11-26.md` (kept for history; its versions and mo
 | Kits by Wugweb theme | 2.2.2 | n/a | yes; Theme Check clean on the wordpress.org build |
 | DirectoryWeb | 1.4.0 | native screens | mostly: India place model and `aw_` names remain (below) |
 | RankWeb | 2.4.1 | classic fallback screens | yes; post types come from a filter |
-| SourceWeb | 0.4.1 | nine screens | yes; starter sources and post types come from filters |
-| InsightWeb | 1.2.1 | native screens | mostly: scoring and crawl code still name `aw_*` types |
-| MailWeb | 3.5.0 | native screens, fallback SMTP, alerts, delivery log | yes |
-| PlanWeb | 0.5.0 | calendar, list, filters | yes; import source comes from a filter |
+| SourceWeb | 0.5.0 | nine screens, Add place | yes; starter sources and post types come from filters |
+| InsightWeb | 1.2.2 | native screens | mostly: scoring and crawl code still name `aw_*` types |
+| MailWeb | 3.6.0 | native screens, fallback SMTP, alerts, delivery log, Resend, Inbox status, provider picker | yes |
+| PlanWeb | 0.6.0 | calendar, list, filters, date range, Timeline | yes; import source comes from a filter |
 
 ## What changed since the 26 Nov report
 
@@ -32,16 +32,22 @@ Replaces `standalone-audit-2026-11-26.md` (kept for history; its versions and mo
 - Plugin Check on every plugin zip: the only remaining error is `plugin_updater_detected` / Update URI. It is deliberate for plugins distributed from GitHub and would block WordPress.org; the `-wporg.zip` build omits the header.
 - Theme Check clean on the theme's wordpress.org build.
 
+## Built after the first version of this report (28 Nov 2026, same day)
+
+- **MailWeb 3.6.0:** Resend on Email Logs, Inbox status (New, Read, Replied, Forwarded), SMTP provider picker.
+- **PlanWeb 0.6.0:** From / To date range and a Timeline in the shell Entries screen.
+- **SourceWeb 0.5.0:** Add place and Remove place on the standalone Places screen.
+- **SourceWeb 0.5.0 and InsightWeb 1.2.2:** favicon host check (public host names only) with `*_favicon_hosts` and `*_favicon_third_party` filters. RankWeb and DirectoryWeb do not fetch favicons themselves, so they have nothing to change.
+- All four were released after CI was green on d5d472d. Unit tests only; the new screens were not opened on a live WordPress or in a browser.
+
 ## Not built (open, in each plugin's `PENDING.md`)
 
-- **MailWeb:** Status column in the Inbox, Resend button, SMTP presets screen.
-- **PlanWeb:** timeline and custom date range in the React screens; drag to reschedule.
-- **SourceWeb:** Run now, Add place, some rule types.
-- **Favicon host allow-list** in SourceWeb, DirectoryWeb, RankWeb and InsightWeb.
+- **PlanWeb:** drag to reschedule.
+- **SourceWeb:** Run now (needs a GitHub token and a workers repository that belong to the tenant), custom boolean route tests, some rule types.
 - **RankWeb:** shell screens for FAQ list, internal links, images and SEO CSV, redirect tools.
 - **InsightWeb:** tab order, scheduled report email, country filter (unverified against Site Kit).
 - **DirectoryWeb:** the place model is still the Local Government Directory's shape (state and district codes); the `aw_listing` post type and `aw_` meta prefix are not configurable everywhere.
-- **Suite:** cross-plugin "More from Kits" page, opt-in telemetry, remaining UX audit fixes, `.pot` regeneration for DirectoryWeb and InsightWeb, WPCS warnings.
+- **Suite:** cross-plugin "More from Kits" page, opt-in telemetry, remaining UX audit fixes, `.pot` regeneration, WPCS warnings.
 - **WordPress.org:** the Update URI / updater decision, and the `aw_` option and REST prefixes (kept so stored data keeps working; fails the directory's prefix rule in part).
 
 ## Not verified
