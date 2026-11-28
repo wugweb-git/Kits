@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.0
+
+- A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
+
 ## 1.4.0
 
 - The India and animal welfare registration fields are out of the plugin and in the site layer (`sites/animalwrites/directoryweb/includes/registrations.php`, deployed alongside DirectoryWeb 1.4.0): AWBI (`aw_awbi_*`), NGO Darpan (`aw_darpan_id`, `aw_darpan_blacklisted_*`, `aw_reg_authority`, `aw_reg_act`, `aw_sectors`), 12A (`aw_reg_12a`), 80G (`aw_reg_80g`) and FCRA (`aw_fcra`). Stored meta keys are unchanged. The plugin keeps `aw_registration`, `aw_reg_type` and `aw_reg_date`.

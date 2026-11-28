@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.1
+Stable tag: 1.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -40,6 +40,7 @@ Each of these loads only when you turn it on; none runs by default.
 * Update check (direct build only) — WordPress asks the Wugweb registry (https://wugweb-git.github.io/Kits/registry/index.json, GitHub Pages) for newer versions of the Wugweb plugins and theme, at most every 12 hours; no site data is sent. A new version downloads from the project's GitHub releases and is checked against the registry's SHA-256 before it installs; a theme package from the optional theme update address (off by default) is checked against the SHA-256 in its JSON in the same way. Turn it off with `define( 'KITS_NO_REGISTRY_UPDATES', true );`. Pre-releases are offered only when the channel is set to pre-release. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service — Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 * Site check-in (optional, off by default) — when you switch it on in Kits → Tools and give an https address, this site sends a short message once a week to that address: the site address, the WordPress and PHP versions, the update channel, and the name and version of each Wugweb plugin and the Kits theme that is installed. No user, email address or content is sent. The receiver is whatever address you enter; nothing is sent by itself while the switch is off. "Send once now" in Kits → Tools sends one message with the switch off, but only when an address is saved.
+* **More from Kits install (direct build only, only when you click Install):** the "More from Kits" page makes no request when it is viewed. When an administrator clicks Install, WordPress fetches the Wugweb registry (`https://wugweb-git.github.io/Kits/registry/index.json`, GitHub Pages) and then downloads that plugin's zip from the project's GitHub releases (`https://github.com/wugweb-git/Kits/releases/`), checked against the registry's SHA-256 before it installs. No site data is sent. This page is not in the WordPress.org build. Turn the Install button off with `define( 'KITS_NO_PLUGIN_INSTALLS', true );`. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service. Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 == Data stored ==
 
@@ -52,6 +53,9 @@ Each of these loads only when you turn it on; none runs by default.
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
 == Changelog ==
+
+= 1.5.0 =
+* A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
 
 = 1.4.1 =
 * Security: the fresh-form-key endpoint (admin-ajax kits_form_nonce) now gives a nonce only for a real form (one with an admin-post handler, or one a site lists with kits_form_nonce_actions); a spam-guard (ALTCHA) answer works once even when two requests arrive together (an atomic database claim replaces the transient check); a preview device link keeps its token after the # of the address and in a POST body, never in the query string; the settings file download link carries a single-use token that expires in 10 minutes instead of the reusable REST nonce; a Kits theme update package is offered only with an https address and a SHA-256 in the update JSON, and the download is checked against it before it installs (the check stays off until an update address is set).

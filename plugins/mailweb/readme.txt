@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.6.0
+Stable tag: 3.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,6 +111,7 @@ MailWeb connects to external services only when configured by the site administr
 * **Fallback SMTP Server:** Only when you switch on the fallback and save a server, mailbox and password under **Mail → Settings → Site sending**. If the primary send fails, the email, including recipients and text, is sent to that server. Terms and privacy are those of the provider you choose. Failure alerts and the delivery log send nothing outside the site: the alert is an ordinary WordPress email.
 * **DNS lookups (your DNS resolver):** The Site sending screen and a daily job look up the DKIM (`hostingermail1._domainkey`) and SPF TXT records of the site's mail domain, through the server's own DNS resolver, to warn when email authentication is not set up. No data about your visitors or email is sent; the lookups name the domain only.
 * **FluentCRM and Fluent Forms (local WordPress plugins, optional):** When active (and, for the mailbox feed, enabled in settings), MailWeb writes contact notes, tags and list changes in your own site's FluentCRM and shows form entries in the Inbox. Nothing leaves the site.
+* **More from Kits install (direct build only, only when you click Install):** the "More from Kits" page makes no request when it is viewed. When an administrator clicks Install, WordPress fetches the Wugweb registry (`https://wugweb-git.github.io/Kits/registry/index.json`, GitHub Pages) and then downloads that plugin's zip from the project's GitHub releases (`https://github.com/wugweb-git/Kits/releases/`), checked against the registry's SHA-256 before it installs. No site data is sent. This page is not in the WordPress.org build. Turn the Install button off with `define( 'KITS_NO_PLUGIN_INSTALLS', true );`. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service. Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 == Upgrade Notice ==
 
@@ -137,6 +138,9 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.7.0 =
+* A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
 
 = 3.6.0 =
 * Resend button on Email Logs for mail waiting to be retried (failed or held). The log keeps the queue row id.

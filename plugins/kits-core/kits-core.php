@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.4.1
+ * Version: 1.5.0
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.4.1' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.5.0' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
@@ -88,7 +88,9 @@ require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';
 require_once KITS_CORE_DIR . 'includes/brand-customizer.php'; // Brand Customizer: tenant brand tokens UI (admin.php?page=kits-brand) and live CSS
 require_once KITS_CORE_DIR . 'includes/onboarding-wizard.php'; // 1-Click Theme Setup & Onboarding Wizard (Astra/Kadence benchmark).
-require_once KITS_CORE_DIR . 'includes/more-products.php'; // Kits → More from Wugweb: the one page where products promote each other.
+if ( file_exists( KITS_CORE_DIR . 'includes/more-products.php' ) ) { // More from Kits: the one page where the plugins promote each other; the WordPress.org build leaves it out.
+	require_once KITS_CORE_DIR . 'includes/more-products.php';
+}
 require_once KITS_CORE_DIR . 'includes/header-footer-scripts.php'; // Header and Footer Custom Scripts & Pixels (WPCode/Insert Headers benchmark).
 require_once KITS_CORE_DIR . 'includes/admin-screens.php';
 require_once KITS_CORE_DIR . 'includes/admin-menu.php';

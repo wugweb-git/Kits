@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.4.1
+Stable tag: 2.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,7 @@ RankWeb contacts these third-party services, only when the matching feature is u
 * Video thumbnails — a YouTube video's structured data names its thumbnail on https://i.ytimg.com. The server does not fetch it; it is only written into the page's JSON-LD and the video sitemap.
 
 RankWeb's link audit, content analysis, sitemap check and llms.txt check request URLs on your own site only. No other host is contacted by the plugin code. The scripts and styles it loads in the admin are in the plugin folder.
+* **More from Kits install (direct build only, only when you click Install):** the "More from Kits" page makes no request when it is viewed. When an administrator clicks Install, WordPress fetches the Wugweb registry (`https://wugweb-git.github.io/Kits/registry/index.json`, GitHub Pages) and then downloads that plugin's zip from the project's GitHub releases (`https://github.com/wugweb-git/Kits/releases/`), checked against the registry's SHA-256 before it installs. No site data is sent. This page is not in the WordPress.org build. Turn the Install button off with `define( 'KITS_NO_PLUGIN_INSTALLS', true );`. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service. Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 == Uninstall ==
 
@@ -82,6 +83,9 @@ By default, deleting the plugin deletes no data: settings, FAQ records, focus ke
 Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Modules) and deleting the plugin removes its settings, stored scores and counts, link tables, scheduled jobs, the manage_rankweb capability, the page cache folder (wp-content/cache/rankweb) and the local font folder (wp-content/uploads/rankweb-fonts). A backup of the options and tables is first written to wp-content/uploads/wugweb-backups/; if it cannot be written, nothing is deleted. Posts, pages, post meta, Rank Math's data and the .webp copies in your media library are never deleted.
 
 == Changelog ==
+
+= 2.5.0 =
+* A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
 
 = 2.4.1 =
 * The plugin no longer names any content type of one site. It asks for a role (news, library, campaign, opportunity, listing, press) through `includes/post-type-roles.php` (`rankweb_type()`, `rankweb_is_type()`, `rankweb_types_with()`, `rankweb_is_singular()`, `rankweb_sql_in_types()`); the site says which type plays which role with the new filter `rankweb_post_type_roles` (default: no roles, so every per-type rule is inactive). The listing role comes from DirectoryWeb's `directoryweb_post_type()` when it is loaded. The per-type rules (title, description, schema, sitemap, robots, breadcrumb) are still written in the plugin and now keyed by role; they were not moved into the site layer.

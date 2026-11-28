@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.0
+
+- A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
+
 ## 1.4.1
 
 Hardening, the open features, tests for what had none, and the coding-standard clean-up. No other behaviour changed; neutral defaults are kept.

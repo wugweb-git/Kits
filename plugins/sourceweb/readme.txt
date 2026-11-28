@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.6.0
+Stable tag: 0.7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -68,12 +68,16 @@ SourceWeb may connect to external services only when the corresponding feature o
 * **Configured AI Providers (free models only: OpenRouter, Google Gemini, Groq, Cerebras, NVIDIA, Mistral and similar):** Only when an administrator configures an API key for a provider, sends article text/prompts to perform relevance, summary, or enrichment tasks. Each provider's own Terms of Service and Privacy Policy apply.
 * **GitHub Actions, the workers repository (`https://api.github.com/`):** Only when an administrator adds a GitHub token and the workers repository to wp-config.php and presses Run now on a worker, sends the workflow's file name and its inputs, with the token, to start that workflow. Nothing is sent otherwise. Terms & Privacy: [https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 * **Configured Worker Relay:** Only when an administrator configures a relay worker URL, forwards fetch requests through that endpoint.
+* **More from Kits install (direct build only, only when you click Install):** the "More from Kits" page makes no request when it is viewed. When an administrator clicks Install, WordPress fetches the Wugweb registry (`https://wugweb-git.github.io/Kits/registry/index.json`, GitHub Pages) and then downloads that plugin's zip from the project's GitHub releases (`https://github.com/wugweb-git/Kits/releases/`), checked against the registry's SHA-256 before it installs. No site data is sent. This page is not in the WordPress.org build. Turn the Install button off with `define( 'KITS_NO_PLUGIN_INSTALLS', true );`. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service. Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 == Uninstall ==
 
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
 == Changelog ==
+
+= 0.7.0 =
+* A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
 
 = 0.6.0 =
 * Run now works without Kits Core: set SOURCEWEB_GITHUB_TOKEN and SOURCEWEB_WORKERS_REPO in wp-config.php.

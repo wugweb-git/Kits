@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.7.0
+
+- A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
+
 ## 0.6.0
 
 - Run now works without Kits Core. SourceWeb starts a worker's workflow on GitHub itself (`sourceweb_dispatch_workflow()`, GitHub's workflow dispatch on the main branch). It needs a fine-grained token for the workers repository only, with Actions read and write, in wp-config.php as `SOURCEWEB_GITHUB_TOKEN` (the names `KITS_GITHUB_DISPATCH_TOKEN` and `AW_GITHUB_DISPATCH_TOKEN` keep working), and the repository as `SOURCEWEB_WORKERS_REPO` (owner/name) or the filter `sourceweb_workers_repo`. With neither set, Run now stays off and the Workers screen says what to add. The standalone Workers screen has a Run now button on each worker that can run; a renamed repository, a refused token and a missing workflow each give their own message. When Kits Core is present and this plugin has no setting of its own, Kits Core's connection is used as before.

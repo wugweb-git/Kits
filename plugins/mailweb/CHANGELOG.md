@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.7.0
+
+- A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
+
 ## 3.6.0
 
 - Resend: on Mail → Email Logs a message that is waiting to be retried (failed, or held by the daily limit or a pause) has a Resend button. It puts the queue row back in the queue; a row that is already queued or sent, or whose text was not kept, is refused. The log now carries the queue row id (a failed direct send and a queued mail), so the button knows which row to act on. `mailweb_resend_email()` checks the row's status first.

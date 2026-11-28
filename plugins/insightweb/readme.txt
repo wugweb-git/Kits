@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,8 +79,12 @@ InsightWeb connects to external services only when the corresponding integration
 * **Favicons of referring sites (`https://www.google.com/s2/favicons` and `https://<referring site>/favicon.ico`):** On the hourly icon run, up to five a run, InsightWeb fetches the small site icon of each referring site that GA4 reports, to show it on the Overview. It asks Google's favicon service first, which receives that site's domain name (not your visitors or your own site), and otherwise asks the referring site directly for its `/favicon.ico`. Icons are saved in the Media Library. This needs no key and runs once GA4 referrer data is stored. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy). Only public host names are asked; the `insightweb_favicon_hosts` filter limits it to a list and `insightweb_favicon_third_party` can turn the Google service off.
 
 InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt and a few key pages, some with AI-crawler user-agent names) to check that crawlers can reach them. These calls stay on your own domain.
+* **More from Kits install (direct build only, only when you click Install):** the "More from Kits" page makes no request when it is viewed. When an administrator clicks Install, WordPress fetches the Wugweb registry (`https://wugweb-git.github.io/Kits/registry/index.json`, GitHub Pages) and then downloads that plugin's zip from the project's GitHub releases (`https://github.com/wugweb-git/Kits/releases/`), checked against the registry's SHA-256 before it installs. No site data is sent. This page is not in the WordPress.org build. Turn the Install button off with `define( 'KITS_NO_PLUGIN_INSTALLS', true );`. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service. Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 == Changelog ==
+
+= 1.4.0 =
+* A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
 
 = 1.3.0 =
 * The Dashboard can show one country's Search Console figures (clicks, impressions, click rate, position). The daily run now also stores clicks and impressions by country.

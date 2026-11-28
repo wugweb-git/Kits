@@ -16,7 +16,7 @@
  * Plugin Name:       InsightWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/insightweb/
  * Description:       Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Update URI:           https://wugweb.com/plugins/insightweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'INSIGHTWEB_VERSION', '1.3.0' ); // equal to the header's Version.
+define( 'INSIGHTWEB_VERSION', '1.4.0' ); // equal to the header's Version.
 define( 'INSIGHTWEB_FILE', __FILE__ ); // RankWeb's bridge loads Search Insights only while this is not defined.
 if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the request that activates InsightWeb
 	define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
@@ -54,3 +54,8 @@ add_action(
 
 // No deactivation hook: Search Insights is never off while the theme runs (owner, 11 Nov 2026). the earlier Core plugin
 // loads it when this plugin is not active, so its scheduled jobs stay booked.
+
+// More from Kits: one quiet page that lists the other Kits plugins. The WordPress.org build leaves this file out.
+if ( file_exists( __DIR__ . '/includes/more-from-kits.php' ) ) {
+	require_once __DIR__ . '/includes/more-from-kits.php';
+}

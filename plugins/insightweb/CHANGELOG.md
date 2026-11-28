@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.4.0
+
+- A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
+
 ## 1.3.0
 
 - The Dashboard by country. The daily Search Console run asks once more for date + country and stores those rows (metric `c`, the three-letter code in the page column; a failure of that one request does not lose the day's other rows). Site Kit's Search Console call has no country filter (it filters by page only, checked in its source) but passes `dimensions` through, so country is stored as a dimension. The Dashboard has a Country choice (the 40 countries with the most clicks over 90 days); a chosen country shows its clicks, impressions, click rate and position for the range, with the same "compare only with a full window before" rule, and the clicks per day chart. Pages and searches are not split by country, and the lists are hidden while a country is chosen.

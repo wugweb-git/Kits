@@ -5,6 +5,7 @@ define( 'KITS_MENU', 'kits' );
 function add_action() {}
 function add_submenu_page() {}
 function __( $s ) { return $s; }
+function apply_filters( $t, $v ) { return $v; }
 require dirname( __DIR__ ) . '/includes/more-products.php';
 $fail = 0;
 $p    = kits_more_products();

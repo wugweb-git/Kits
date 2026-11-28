@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.5.0
+
+- A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
+
 ## 2.4.1
 
 Second pass on site-only code. The Animal Writes site layer must be deployed alongside RankWeb 2.4.1 (without it that site's content types are not mapped and the per-type rules do nothing).

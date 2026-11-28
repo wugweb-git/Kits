@@ -242,6 +242,9 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
     patterns = list(EXCLUDE)
     if track != "wporg":
         patterns.extend(SRC_EXCLUDE)
+    else:
+        # "More from Kits" installs other plugins from GitHub releases; WordPress.org does not allow that, so its build leaves the page out.
+        patterns.extend(["more-from-kits.php", "more-products.php"])
 
     # The source tree's vendor/ is never copied (it may hold dev dependencies, and is gitignored);
     # bundled targets get a fresh `composer install --no-dev` below.

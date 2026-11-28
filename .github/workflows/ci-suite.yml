@@ -270,6 +270,8 @@ jobs:
         run: python3 tools/validate/check-held-code.py
       - name: No visible Animal Writes text in plugin code
         run: python3 tools/validate/check-visible-brand.py
+      - name: More from Kits page is generated and works alone
+        run: sh tools/validate/more-page-test.sh
       - name: Animal Writes site layer tests
         run: |
           for f in sites/animalwrites/*/tests/*.php; do echo "== $f"; php "$f" || exit 1; done

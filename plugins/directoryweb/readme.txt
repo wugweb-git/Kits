@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,12 +81,16 @@ DirectoryWeb calls the outside services below, only for the tasks named. Nothing
 * **OpenStreetMap map tiles (`https://tile.openstreetmap.org/`):** when an editor opens the map beside the latitude and longitude fields of a listing, their browser loads map tile images from this host. The editor's IP address and browser details reach that host. Nothing is sent from your server. Tile usage policy: [https://operations.osmfoundation.org/policies/tiles/](https://operations.osmfoundation.org/policies/tiles/). Privacy: [https://osmfoundation.org/wiki/Privacy_Policy](https://osmfoundation.org/wiki/Privacy_Policy)
 
 Links shown in the admin and on listings to registers a site configures are plain links the reader may click; the plugin does not call them.
+* **More from Kits install (direct build only, only when you click Install):** the "More from Kits" page makes no request when it is viewed. When an administrator clicks Install, WordPress fetches the Wugweb registry (`https://wugweb-git.github.io/Kits/registry/index.json`, GitHub Pages) and then downloads that plugin's zip from the project's GitHub releases (`https://github.com/wugweb-git/Kits/releases/`), checked against the registry's SHA-256 before it installs. No site data is sent. This page is not in the WordPress.org build. Turn the Install button off with `define( 'KITS_NO_PLUGIN_INSTALLS', true );`. Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service. Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 == Uninstall ==
 
 By default, deleting the plugin removes nothing: listings, places, claims, settings and every option stay, so reinstalling finds everything as it was. Only if the option `directoryweb_delete_data_on_uninstall` is true does uninstall delete DirectoryWeb's own bookkeeping options (`directoryweb_caps`, `directoryweb_rewrite_ver`), its two cached counts and its scheduled count job, after writing a backup to `wp-content/uploads/wugweb-backups/`. It never deletes listings, claims, uploads, users, terms or any post, term or user meta. Deactivating the plugin unschedules the hourly count job and flushes the rewrite rules, and deletes nothing.
 
 == Changelog ==
+
+= 1.5.0 =
+* A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
 
 = 1.4.0 =
 * The India and animal welfare registration fields are out of the plugin: AWBI recognition (code, dates, the lapsed mark), NGO Darpan (ID, blacklist, authority, Act, sectors), 12A, 80G and FCRA, with their words, their claim form rows, their rows on the listing page and in the admin list, their editor field group and the daily check of the "valid until" date. The stored meta keys (`aw_awbi_*`, `aw_darpan_*`, `aw_reg_12a`, `aw_reg_80g`, `aw_fcra`, `aw_reg_authority`, `aw_reg_act`, `aw_sectors`) are unchanged: a site that had them keeps its data and puts the fields back with the filters below. The plugin keeps one neutral registration number, registration type and registration date.
