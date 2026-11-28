@@ -151,6 +151,9 @@ function sourceweb_relay_fetch( $url ) {
 			return $done( $ip );
 		}
 		$port = (int) ( $parts['port'] ?? ( 'https' === $parts['scheme'] ? 443 : 80 ) );
+		// Pins the request to the address just checked, so a name that changes its answer between our check and the request
+		// (DNS rebinding) cannot reach an internal address. It runs through WordPress's own http_api_curl hook; the URL cannot be
+		// rewritten to the address instead, because the HTTPS certificate is checked against the host name.
 		$pin  = function ( $handle ) use ( $host, $port, $ip ) {
 			curl_setopt( $handle, CURLOPT_RESOLVE, array( $host . ':' . $port . ':' . ( str_contains( $ip, ':' ) ? '[' . $ip . ']' : $ip ) ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		};

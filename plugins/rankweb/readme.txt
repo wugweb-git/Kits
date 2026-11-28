@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -83,6 +83,9 @@ By default, deleting the plugin deletes no data: settings, FAQ records, focus ke
 Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Modules) and deleting the plugin removes its settings, stored scores and counts, link tables, scheduled jobs, the manage_rankweb capability, the page cache folder (wp-content/cache/rankweb) and the local font folder (wp-content/uploads/rankweb-fonts). A backup of the options and tables is first written to wp-content/uploads/wugweb-backups/; if it cannot be written, nothing is deleted. Posts, pages, post meta, Rank Math's data and the .webp copies in your media library are never deleted.
 
 == Changelog ==
+
+= 2.5.1 =
+* The SEO column width on the list screens is added as a registered inline style instead of a raw style tag in the page head (WordPress.org readiness).
 
 = 2.5.0 =
 * A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).
