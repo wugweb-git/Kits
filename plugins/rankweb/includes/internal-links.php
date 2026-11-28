@@ -5,7 +5,7 @@
  * - Each item has "Link keywords" (post meta _aw_link_keywords, a list): in the RankWeb content panel of the block
  *   editor and in a "Link keywords" box on the classic editor. Until it is saved, the item's Rank Math focus keywords
  *   stand in for it (the field shows them).
- * - The keyword index, table {prefix}rankweb_link_keywords (keyword, keyword_norm, target_id, priority), holds the link
+ * - The keyword index, table {prefix}aw_link_keywords (keyword, keyword_norm, target_id, priority), holds the link
  *   keywords of every published item of the linked post types. One item's rows are rewritten when it is saved
  *   (wp_after_insert_post: after the editor has saved the meta); the scheduled job aw_link_index_build rebuilds the
  *   whole index daily and after a Settings save.
@@ -47,7 +47,7 @@ const RANKWEB_LINK_MAX_KWS    = 20; // keywords per item
 function rankweb_link_table( string $name ): string {
 	global $wpdb;
 	$names = array(
-		'keywords' => 'rankweb_link_keywords',
+		'keywords' => 'aw_link_keywords',
 		'audit'    => 'aw_link_audit',
 	);
 	return $wpdb->prefix . ( $names[ $name ] ?? 'aw_links' );

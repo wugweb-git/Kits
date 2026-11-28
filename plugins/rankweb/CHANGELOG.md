@@ -4,6 +4,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 ## 2.5.6
 
+- Link keyword index uses the table `{prefix}aw_link_keywords` again. The earlier rename to `rankweb_link_keywords` pointed at a table that was never created, so the index was missing on sites that already had version 1 installed.
 - Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
 
 ## 2.5.5

@@ -25,7 +25,7 @@
  *   manage_rankweb on every role, the page cache folder wp-content/cache/rankweb/ and the local font folder
  *   wp-content/uploads/rankweb-fonts/ (both rebuilt from the site when a speed option is on; not in the backup).
  *   Kept: the .webp copies the WebP conversion made next to the media files (they are ordinary files in the media library).
- * Custom tables: {prefix}rankweb_link_keywords, {prefix}aw_links, {prefix}aw_link_audit, {prefix}aw_silos and {prefix}aw_silo_items (Internal links), dropped. Rank Math's tables are Rank Math's.
+ * Custom tables: {prefix}aw_link_keywords, {prefix}aw_links, {prefix}aw_link_audit, {prefix}aw_silos and {prefix}aw_silo_items (Internal links), dropped. Rank Math's tables are Rank Math's.
  *
  * Before deleting, writes a backup to wp-content/uploads/wugweb-backups/rankweb-uninstall-<YYYYmmdd-His>.jsonl.gz
  * (includes/uninstall-backup.php): a header line, then every option below with its value as stored, then every row of
@@ -51,7 +51,7 @@ $rankweb_seo_options = array( 'aw_faq_off_types', 'aw_seo_keep_listings', 'aw_de
 require_once __DIR__ . '/includes/uninstall-backup.php';
 $rankweb_uninst_slug = file_exists( __DIR__ . '/rankweb.php' ) ? 'rankweb' : 'aw-seo-extras';
 $rankweb_uninst_file = file_exists( __DIR__ . '/rankweb.php' ) ? __DIR__ . '/rankweb.php' : __DIR__ . '/aw-seo-extras.php';
-if ( ! rankweb_seo_uninstall_backup( $rankweb_uninst_slug, $rankweb_uninst_file, array_merge( array( 'aw_seo_settings' ), $rankweb_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'rankweb_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links', $GLOBALS['wpdb']->prefix . 'aw_link_audit', $GLOBALS['wpdb']->prefix . 'aw_silos', $GLOBALS['wpdb']->prefix . 'aw_silo_items' ) ) ) {
+if ( ! rankweb_seo_uninstall_backup( $rankweb_uninst_slug, $rankweb_uninst_file, array_merge( array( 'aw_seo_settings' ), $rankweb_seo_options ), array(), array( $GLOBALS['wpdb']->prefix . 'aw_link_keywords', $GLOBALS['wpdb']->prefix . 'aw_links', $GLOBALS['wpdb']->prefix . 'aw_link_audit', $GLOBALS['wpdb']->prefix . 'aw_silos', $GLOBALS['wpdb']->prefix . 'aw_silo_items' ) ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 
@@ -114,6 +114,6 @@ wp_clear_scheduled_hook( 'aw_link_audit', array( 'now' ) );
 wp_clear_scheduled_hook( 'aw_link_audit', array( 'more' ) );
 
 // Internal links' tables (written to the backup above).
-foreach ( array( 'rankweb_link_keywords', 'aw_links', 'aw_link_audit', 'aw_silos', 'aw_silo_items' ) as $rankweb_seo_table ) {
+foreach ( array( 'aw_link_keywords', 'aw_links', 'aw_link_audit', 'aw_silos', 'aw_silo_items' ) as $rankweb_seo_table ) {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $rankweb_seo_table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.DirectDatabaseQuery.SchemaChange -- RankWeb's own tables, on uninstall.
 }
