@@ -39,7 +39,7 @@ function insightweb_si_sitekit_context() {
  * @return mixed|WP_Error What $callback returned, or a WP_Error saying in plain words why the module cannot be used.
  */
 function insightweb_si_with_module( string $slug, callable $callback ) {
-	$fake = apply_filters( 'aw_si_sitekit_module', null, $slug );
+	$fake = apply_filters( 'insightweb_si_sitekit_module', null, $slug );
 	if ( $fake ) {
 		return $callback( $fake );
 	}

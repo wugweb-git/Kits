@@ -32,7 +32,7 @@ function sourceweb_sourcing_tabs() {
 	$all = array(
 		'sources'  => array( 'Sources' ),
 		'keywords' => array( 'Keywords' ),
-	) + (array) apply_filters( 'kits_sourcing_tabs', array() ) + array( 'log' => array( 'Change log' ) );
+	) + (array) apply_filters( 'kits_sourcing_tabs', array() ) + array( 'log' => array( 'Change log' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	$out = array();
 	foreach ( array_keys( sourceweb_src_menu_order( array_map( fn( $t ) => (string) $t[0], $all ) ) ) as $k ) {
 		$out[ $k ] = $all[ $k ];

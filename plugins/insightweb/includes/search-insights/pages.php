@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_filter(
-	'aw_si_tabs',
+	'insightweb_si_tabs',
 	function ( $tabs ) {
 		return array( 'pages' => __( 'Pages', 'insightweb' ) ) + (array) $tabs;
 	},
@@ -94,7 +94,7 @@ function insightweb_si_pages_data(): array {
 		$out[ $r->page ]['ref_by'][ (string) $r->txt ] = (int) ( $out[ $r->page ]['ref_by'][ (string) $r->txt ] ?? 0 ) + (int) $r->v;
 	}
 	// A Clarity flag counts only on enough flagged days (filter aw_si_quality_min_days, as in insightweb_si_quality_pages()).
-	$c_min = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	$c_min = max( 1, (int) apply_filters( 'insightweb_si_quality_min_days', 3 ) );
 	foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT page, metric, SUM(value) s, AVG(value) a, SUM(value > 0) n FROM %i WHERE src = 'clarity' AND page <> '' AND period = 'day' AND d BETWEEN %s AND %s GROUP BY page, metric", $o, $from, $to ) ) as $r ) {
 		$set( $r->page, 'c_' . $r->metric, 'sessions' === $r->metric ? (int) $r->s : ( 'flag' === $r->metric ? (int) ( (int) $r->n >= $c_min ) : round( (float) $r->a, 1 ) ) );
 	}

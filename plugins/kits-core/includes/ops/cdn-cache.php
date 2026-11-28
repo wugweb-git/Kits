@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Pages that carry a form, a nonce or personal data: never in the shared cache. */
 function kits_cdn_excluded_slugs() {
 	$slugs = (array) apply_filters(
-		'aw_cdn_excluded_slugs', // the older name of this filter, still applied.
+		'kits_cdn_excluded_slugs', // the older name of this filter, still applied.
 		array( 'contact', 'volunteer', 'claim', 'remove-my-data', 'report', 'thank-you', 'corrections', 'helplines', 'search', 'login', 'register', 'my-account' )
 	);
 	return (array) apply_filters( 'kits_cdn_excluded_slugs', $slugs );
@@ -106,7 +106,7 @@ add_action(
 	function ( $term_id, $tt_id, $taxonomy ) {
 		$link = get_term_link( (int) $term_id, $taxonomy );
 		if ( ! is_wp_error( $link ) ) {
-			do_action( 'litespeed_purge_url', $link );
+			do_action( 'litespeed_purge_url', $link ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 		}
 	},
 	10,

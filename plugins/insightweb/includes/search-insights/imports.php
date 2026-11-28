@@ -25,7 +25,7 @@ function insightweb_si_import_kinds(): array {
 		'trends' => __( 'Google Trends averages (paste: keyword, value; the anchor topic = 100)', 'insightweb' ),
 		'gov'    => __( 'data.gov.in / IDSP figures (paste: state, measure, value, as of, source URL)', 'insightweb' ),
 	);
-	return (array) apply_filters( 'aw_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
+	return (array) apply_filters( 'insightweb_si_import_kinds', $kinds ); // tool-imports.php adds Ubersuggest, vidIQ, OpenSEO.
 }
 
 /**
@@ -110,7 +110,7 @@ function insightweb_si_import_number( string $v ): ?float {
 function insightweb_si_import( string $kind, string $raw ): array {
 	global $wpdb;
 	$o     = insightweb_si_table( 'obs' );
-	$other = apply_filters( 'aw_si_import_run', null, $kind, $raw ); // An import kind added by another file.
+	$other = apply_filters( 'insightweb_si_import_run', null, $kind, $raw ); // An import kind added by another file.
 	if ( is_array( $other ) ) {
 		return $other;
 	}
@@ -245,7 +245,7 @@ function insightweb_si_import_rows(): void {
 	}
 	echo '</td></tr>';
 }
-add_action( 'aw_si_settings_rows', 'insightweb_si_import_rows' );
+add_action( 'insightweb_si_settings_rows', 'insightweb_si_import_rows' );
 
 /**
  * Who may send an import: the Search Insights managers, or a separate sender account that has only the capability
@@ -299,7 +299,7 @@ add_action(
 );
 
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_si_settings_notices',
 	function () {
 		if ( ! isset( $_GET['imported'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 			return;
@@ -327,7 +327,7 @@ add_action(
 );
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		$s['live'] = array(
 			'label' => __( 'Live Google check (bookmarklet)', 'insightweb' ),

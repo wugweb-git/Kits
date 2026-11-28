@@ -36,7 +36,7 @@ function insightweb_si_bing_on(): bool {
 }
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		if ( insightweb_si_bing_on() ) { // Listed only once the key is set, so it never shows as late or failed before.
 			$s['bing'] = array(
@@ -443,7 +443,7 @@ function insightweb_si_bing_missing(): array {
 }
 
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_si_settings_rows',
 	function () {
 		if ( ! insightweb_si_bing_on() ) {
 			return;
@@ -483,7 +483,7 @@ add_action(
 );
 
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_si_settings_notices',
 	function () {
 		if ( ! isset( $_GET['bingkw'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 			return;

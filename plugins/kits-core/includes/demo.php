@@ -185,7 +185,7 @@ function kits_demo_more() {
 			'post_type'   => 'any',
 			'post_status' => 'publish',
 			'numberposts' => 1,
-			'meta_key'    => '_thumbnail_id',
+			'meta_key'    => '_thumbnail_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- needed here and bounded; see the surrounding code.
 			'fields'      => 'ids',
 		)
 	);

@@ -29,7 +29,7 @@ function insightweb_si_sourcing_push_min(): int {
 	 *
 	 * @param int $min The threshold (0-100).
 	 */
-	return (int) apply_filters( 'aw_si_sourcing_push_min', $min );
+	return (int) apply_filters( 'insightweb_si_sourcing_push_min', $min );
 }
 
 /**
@@ -102,7 +102,7 @@ function insightweb_si_push_sourcing_candidates(): int {
 		 * @param string[]             $terms   The term (one keyword label).
 		 * @param array<string, mixed> $context source, score, recommended_type, impressions, clicks, position, topic, focus_keyphrase, rank.
 		 */
-		do_action( 'sourceweb_push_keywords', array( (string) $r->label ), $context );
+		do_action( 'sourceweb_push_keywords', array( (string) $r->label ), $context ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 		++$n;
 	}
 	return $n;

@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_filter(
-	'aw_breadcrumb_label',
+	'rankweb_breadcrumb_label',
 	function ( $label, $id ) {
 		$b = trim( (string) get_post_meta( (int) $id, 'rank_math_breadcrumb_title', true ) );
 		return '' !== $b ? $b : $label;
@@ -71,7 +71,7 @@ function rankweb_seo_breadcrumb_trail() {
 		// Owner, 20 Oct 2026: the trail ends at the organisation's place (its district, else its state), like an item's ends at its category.
 		$trail = array_merge( array( $dir ), $place( $best ) );
 		if ( count( $trail ) < 2 ) {
-			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+			$trail[] = array( apply_filters( 'rankweb_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		}
 	} elseif ( is_singular( array_keys( directoryweb_post_types() ) ) ) {
 		$id      = get_queried_object_id();
@@ -86,7 +86,7 @@ function rankweb_seo_breadcrumb_trail() {
 			$n       = function_exists( 'rankweb_seo_filtered_count' ) ? rankweb_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
 			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : rankweb_seo_term_url( $cat ) );
 		} else {
-			$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+			$trail[] = array( apply_filters( 'rankweb_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		}
 	} elseif ( function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() && directoryweb_current_place() ) {
 		$city  = directoryweb_current_place();
@@ -117,7 +117,7 @@ function rankweb_seo_breadcrumb_trail() {
 		foreach ( array_reverse( get_post_ancestors( $id ) ) as $a ) {
 			$trail[] = array( get_the_title( $a ), get_permalink( $a ) );
 		}
-		$trail[] = array( apply_filters( 'aw_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
+		$trail[] = array( apply_filters( 'rankweb_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		$view    = function_exists( 'rankweb_seo_filtered_named' ) && rankweb_seo_filtered_named() ? rankweb_seo_filtered_view() : null;
 		if ( $view ) { // a hub filtered by one category or tag: Home › Section › Category
 			$trail[] = array( $view['name'], add_query_arg( $view['key'], rawurlencode( $view['slug'] ), rankweb_hub_canonical() ) );

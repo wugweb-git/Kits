@@ -197,7 +197,7 @@ add_action(
 					$cells,
 					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row.
 				);
-				do_action( 'aw_cron_health_after' );
+				do_action( 'kits_cron_health_after' );
 				if ( ! $running ) {
 					echo '<p><strong>No run for 30 minutes or more.</strong> The owner is emailed.</p>';
 				}
@@ -225,7 +225,7 @@ add_action(
  */
 function kits_dispatch_workflow( $file, $inputs = array() ) {
 	$token = defined( 'KITS_GITHUB_DISPATCH_TOKEN' ) ? (string) KITS_GITHUB_DISPATCH_TOKEN : ( defined( 'AW_GITHUB_DISPATCH_TOKEN' ) ? (string) AW_GITHUB_DISPATCH_TOKEN : '' ); // the constant the site already has in wp-config.php keeps working.
-	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started.
+	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started. // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	$file  = sanitize_file_name( $file );
 	if ( '' === $token ) {
 		$res = new WP_Error( 'aw_dispatch_token', 'AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php' );
@@ -275,7 +275,7 @@ add_action(
 			return;
 		}
 		add_action(
-			'aw_cron_health_after',
+			'kits_cron_health_after',
 			function () {
 				foreach ( (array) get_option( 'aw_dispatch_log', array() ) as $file => $r ) {
 					echo '<p>' . esc_html( $file ) . ' started from the server: ' . esc_html( wp_date( 'j M Y, g:i a', (int) $r['at'] ) ) . ' — ' . ( $r['ok'] ? 'started' : '<strong>' . esc_html( $r['msg'] ) . '</strong>' ) . '</p>';

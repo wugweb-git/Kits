@@ -245,4 +245,4 @@ function insightweb_si_snapshot_row(): void {
 	echo '<a class="button" href="' . esc_url( $url( 'map' ) ) . '">' . esc_html__( 'Download keyword-map.md', 'insightweb' ) . '</a></p>';
 	echo '<p class="description">' . esc_html__( 'The check list and every tracked P1/P2 keyword, in the columns of the 21 Oct rankings CSV plus demand, priority, status and action; and the keyword map rebuilt from the table. Once a month a session commits both to docs/seo/ (also: wp aw-si snapshot csv|map).', 'insightweb' ) . '</p></td></tr>';
 }
-add_action( 'aw_si_settings_rows', 'insightweb_si_snapshot_row', 5 );
+add_action( 'insightweb_si_settings_rows', 'insightweb_si_snapshot_row', 5 );

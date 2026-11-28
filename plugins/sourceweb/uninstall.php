@@ -54,7 +54,7 @@ if ( true !== (bool) get_option( 'aw_src_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
 }
 
-$aw_src_options = array(
+$sourceweb_src_options = array(
 	'aw_backfill_floor',
 	'sourceweb_allow_publish',
 	'sourceweb_modes_migrated',
@@ -114,34 +114,34 @@ global $wpdb;
 require_once __DIR__ . '/includes/lifecycle/uninstall-backup.php';
 $sourceweb_uninst_slug = file_exists( __DIR__ . '/sourceweb.php' ) ? 'sourceweb' : 'aw-sourcing';
 $sourceweb_uninst_file = file_exists( __DIR__ . '/sourceweb.php' ) ? __DIR__ . '/sourceweb.php' : __DIR__ . '/aw-sourcing.php';
-if ( ! sourceweb_src_uninstall_backup( $sourceweb_uninst_slug, $sourceweb_uninst_file, array_merge( $aw_src_options, array( 'aw_src_delete_data_on_uninstall' ) ), array( 'aw_worker_runs_', 'aw_backup_1_', 'aw_backup_2_', 'aw_backup_3_', 'aw_backup_4_' ), array( $wpdb->prefix . 'aw_enrich' ) ) ) {
+if ( ! sourceweb_src_uninstall_backup( $sourceweb_uninst_slug, $sourceweb_uninst_file, array_merge( $sourceweb_src_options, array( 'aw_src_delete_data_on_uninstall' ) ), array( 'aw_worker_runs_', 'aw_backup_1_', 'aw_backup_2_', 'aw_backup_3_', 'aw_backup_4_' ), array( $wpdb->prefix . 'aw_enrich' ) ) ) {
 	return; // No backup, no delete (the reason is in the error log).
 }
 
-foreach ( $aw_src_options as $aw_src_option ) {
-	delete_option( $aw_src_option );
+foreach ( $sourceweb_src_options as $sourceweb_src_option ) {
+	delete_option( $sourceweb_src_option );
 }
 
-$aw_src_like = static function ( string $start ) use ( $wpdb ): void {
+$sourceweb_src_like = static function ( string $start ) use ( $wpdb ): void {
 	$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $start ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: options by prefix, once.
 };
 
 // Options with a name or a date at the end: each workflow's runs, the migration backups (aw_backup_<phase>_<time>).
-$aw_src_like( 'aw_worker_runs_' );
-foreach ( array( 1, 2, 3, 4 ) as $aw_src_phase ) {
-	$aw_src_like( 'aw_backup_' . $aw_src_phase . '_' );
+$sourceweb_src_like( 'aw_worker_runs_' );
+foreach ( array( 1, 2, 3, 4 ) as $sourceweb_src_phase ) {
+	$sourceweb_src_like( 'aw_backup_' . $sourceweb_src_phase . '_' );
 }
 
-foreach ( array( 'aw_ingest_alert_mailed', 'aw_relevance_alert_sent', 'aw_review_count', 'aw_sourcing_host_stats', 'aw_summary_below', 'aw_workers_alert_mailed', 'sourceweb_dashboard', 'aw_cc0_lock' ) as $aw_src_transient ) {
-	delete_transient( $aw_src_transient );
+foreach ( array( 'aw_ingest_alert_mailed', 'aw_relevance_alert_sent', 'aw_review_count', 'aw_sourcing_host_stats', 'aw_summary_below', 'aw_workers_alert_mailed', 'sourceweb_dashboard', 'aw_cc0_lock' ) as $sourceweb_src_transient ) {
+	delete_transient( $sourceweb_src_transient );
 }
-foreach ( array( 'aw_newsm_', 'aw_glive_', 'aw_sourcing_kw_stats_', 'aw_relay_rl_', 'aw_ov_' ) as $aw_src_prefix ) {
-	$aw_src_like( '_transient_' . $aw_src_prefix );
-	$aw_src_like( '_transient_timeout_' . $aw_src_prefix );
+foreach ( array( 'aw_newsm_', 'aw_glive_', 'aw_sourcing_kw_stats_', 'aw_relay_rl_', 'aw_ov_' ) as $sourceweb_src_prefix ) {
+	$sourceweb_src_like( '_transient_' . $sourceweb_src_prefix );
+	$sourceweb_src_like( '_transient_timeout_' . $sourceweb_src_prefix );
 }
 
-foreach ( array( 'aw_sourcing_site_meta', 'aw_ai_check_all', 'aw_ai_check_all_now', 'aw_ai_check_new', 'aw_ingest_watchdog', 'aw_workers_watchdog', 'sourceweb_dashboard_build', 'aw_sources_sync_dispatch', 'aw_cc0_run' ) as $aw_src_hook ) {
-	wp_unschedule_hook( $aw_src_hook );
+foreach ( array( 'aw_sourcing_site_meta', 'aw_ai_check_all', 'aw_ai_check_all_now', 'aw_ai_check_new', 'aw_ingest_watchdog', 'aw_workers_watchdog', 'sourceweb_dashboard_build', 'aw_sources_sync_dispatch', 'aw_cc0_run' ) as $sourceweb_src_hook ) {
+	wp_unschedule_hook( $sourceweb_src_hook );
 }
 
 $wpdb->query( 'DROP TABLE IF EXISTS `' . esc_sql( $wpdb->prefix . 'aw_enrich' ) . '`' ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.SchemaChange -- uninstall: SourceWeb's own table, name fixed.

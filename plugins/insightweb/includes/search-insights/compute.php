@@ -133,13 +133,13 @@ function insightweb_si_quality_pages(): array {
 	global $wpdb;
 	$o     = insightweb_si_table( 'obs' );
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-28 days' )->format( 'Y-m-d' );
-	$days  = max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	$days  = max( 1, (int) apply_filters( 'insightweb_si_quality_min_days', 3 ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$clarity = (array) $wpdb->get_col( $wpdb->prepare( "SELECT page FROM %i WHERE src = 'clarity' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> '' GROUP BY page HAVING COUNT(DISTINCT d) >= %d", $o, $since, $days ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$psi   = (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT page FROM %i WHERE src = 'psi' AND metric = 'flag' AND value > 0 AND d >= %s AND page <> ''", $o, $since ) );
 	$paths = array_values( array_unique( array_merge( $clarity, $psi ) ) );
-	$paths = (array) apply_filters( 'aw_si_quality_pages', $paths );
+	$paths = (array) apply_filters( 'insightweb_si_quality_pages', $paths );
 	return array_fill_keys( array_map( 'strval', $paths ), true );
 }
 

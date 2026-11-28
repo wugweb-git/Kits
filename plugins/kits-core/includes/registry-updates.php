@@ -229,17 +229,3 @@ add_action(
 		}
 	}
 );
-
-/** "Check again" on Dashboard → Updates clears WordPress's update cache; clear the registry's 12 h copy with it, so a new release shows at once. */
-add_action(
-	'delete_site_transient_update_plugins',
-	function () {
-		delete_site_transient( 'kits_registry' );
-	}
-);
-add_action(
-	'delete_site_transient_update_themes',
-	function () {
-		delete_site_transient( 'kits_registry' );
-	}
-);

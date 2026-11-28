@@ -23,7 +23,7 @@ define( 'HOUR_IN_SECONDS', 3600 );
 // The few WordPress functions the file and the count use.
 function add_action() {}
 function apply_filters( $hook, $value ) {
-	return 'aw_error_count_php_paths' === $hook ? array( $GLOBALS['aw_test_log'] ) : $value;
+	return 'kits_error_count_php_paths' === $hook ? array( $GLOBALS['aw_test_log'] ) : $value;
 }
 function untrailingslashit( $s ) {
 	return rtrim( $s, '/\\' );

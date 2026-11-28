@@ -214,7 +214,7 @@ function insightweb_si_resolve_page( array $page, string $page_type ): array {
  * (tools/search-insights/build_seed.py) are in git history. Without it the seed does nothing, silently (since 1.1.4).
  */
 function insightweb_si_seed_data(): array {
-	$file = (string) apply_filters( 'aw_si_seed_file', INSIGHTWEB_DIR . 'data/search-insights-seed.json' );
+	$file = (string) apply_filters( 'insightweb_si_seed_file', INSIGHTWEB_DIR . 'data/search-insights-seed.json' );
 	$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file.
 	return is_array( $json ) ? $json : array();
 }

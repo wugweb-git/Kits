@@ -437,7 +437,7 @@ add_action(
 );
 
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_si_settings_rows',
 	function () {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;

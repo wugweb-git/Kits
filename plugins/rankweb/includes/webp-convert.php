@@ -132,7 +132,7 @@ function rankweb_webp_body(): void {
 		return;
 	}
 	$sum = null;
-	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && current_user_can( 'manage_options' ) && check_admin_referer( 'rankweb_webp' ) ) {
+	if ( 'POST' === ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) && current_user_can( 'manage_options' ) && check_admin_referer( 'rankweb_webp' ) ) {
 		$apply = ! empty( $_POST['apply'] );
 		$sum   = array( 'dry' => ! $apply, 'updated' => 0, 'made' => 0, 'scanned' => 0 );
 		$after = 0;

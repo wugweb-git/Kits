@@ -386,7 +386,7 @@ function sourceweb_summary_rw_post( WP_REST_Request $req ) {
 			'short' === $state ? $short_by + array( 'checked' => current_time( 'mysql' ) ) : array()
 		)
 	);
-	do_action( 'litespeed_purge_post', $id ); // this item only
+	do_action( 'litespeed_purge_post', $id ); // this item only // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	return new WP_REST_Response(
 		array(
 			'id'          => $id,

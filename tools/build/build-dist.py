@@ -69,6 +69,8 @@ EXCLUDE = [
     "composer.lock",
     "package.json",
     "PENDING.md",
+    "ARCHITECTURE.md",
+    "WORKERS.md",
     "package-lock.json",
     "pnpm-lock.yaml",
     "tsconfig.json",

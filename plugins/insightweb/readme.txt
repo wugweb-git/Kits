@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt
 
 == Changelog ==
 
+= 1.4.4 =
+* Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
+
 = 1.4.3 =
 * Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.
 
@@ -154,6 +157,9 @@ InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt
 * Standalone release with native admin UI fallback, daily telemetry cron, credential status diagnostics, and honest empty-state dashboard tiles.
 
 == Upgrade Notice ==
+
+= 1.4.4 =
+Hook names and variables now carry the plugin prefix.
 
 = 1.4.3 =
 Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.

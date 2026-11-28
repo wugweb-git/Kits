@@ -289,8 +289,8 @@ add_filter(
  * Sources sync copies the summary rules and the Directory schema too (phase 3): a save of either starts it, as a save
  * of the lists does (sourcing-lists.php sourceweb_sources_sync_soon).
  */
-foreach ( array( 'aw_summary_rules', AW_ENRICH_RULES_OPTION ) as $aw_rules_sync_option ) {
-	add_action( 'add_option_' . $aw_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
-	add_action( 'update_option_' . $aw_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
+foreach ( array( 'aw_summary_rules', AW_ENRICH_RULES_OPTION ) as $sourceweb_rules_sync_option ) {
+	add_action( 'add_option_' . $sourceweb_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
+	add_action( 'update_option_' . $sourceweb_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
 }
-unset( $aw_rules_sync_option );
+unset( $sourceweb_rules_sync_option );

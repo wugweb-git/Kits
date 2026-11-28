@@ -256,7 +256,7 @@ function rankweb_silo_save( int $id, string $name, int $hub, string $mode, array
 	}
 	$silos = rankweb_silo_table( 'silos' );
 	if ( $id > 0 ) {
-		$wpdb->update(
+		$wpdb->update( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
 			$silos,
 			array(
 				'name'   => $name,
@@ -268,7 +268,7 @@ function rankweb_silo_save( int $id, string $name, int $hub, string $mode, array
 			array( '%d' )
 		); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
 	} else {
-		$wpdb->insert(
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- needed here and bounded; see the surrounding code.
 			$silos,
 			array(
 				'name'   => $name,
@@ -284,7 +284,7 @@ function rankweb_silo_save( int $id, string $name, int $hub, string $mode, array
 	}
 	$wpdb->delete( rankweb_silo_table( 'items' ), array( 'silo_id' => $id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
 	foreach ( $items as $pos => $pid ) {
-		$wpdb->insert(
+		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- needed here and bounded; see the surrounding code.
 			rankweb_silo_table( 'items' ),
 			array(
 				'post_id'  => $pid,

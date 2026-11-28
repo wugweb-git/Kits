@@ -132,7 +132,7 @@ if ( ! function_exists( 'kits_sourcing_diff' ) ) {
 /** Relevance settings. */
 function sourceweb_relevance() {
 	$r = get_option( SOURCEWEB_REL_OPTION );
-	return is_array( $r ) ? $r : array( 'enabled' => false, 'gnews_allow_only' => false, 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array() );
+	return is_array( $r ) ? $r : array( 'enabled' => false, 'gnews_allow_only' => false, 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array() ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 }
 
 /** Seed once: empty relevance lists (filter off), and the publisher lists a site supplies through filters; the hosts already in the content are counted. */
@@ -175,7 +175,7 @@ add_action(
 				'strong'           => array(),
 				'animal'           => array(),
 				'context'          => array(),
-				'exclude'          => array(),
+				'exclude'          => array(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 			),
 			false
 		);
@@ -319,9 +319,9 @@ function sourceweb_sourcing_policy_payload() {
 	$by   = fn( $s ) => array_values( array_keys( array_filter( $pubs, fn( $p ) => ( $p['status'] ?? '' ) === $s ) ) );
 	$data = array(
 		'publishers' => array( 'blocked' => $by( 'block' ), 'allowed' => $by( 'allow' ), 'gnews_allow_only' => ! empty( $rel['gnews_allow_only'] ) ),
-		'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'] ?? array(), 'animal' => $rel['animal'] ?? array(), 'context' => $rel['context'] ?? array(), 'exclude' => $rel['exclude'] ?? array() ),
+		'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'] ?? array(), 'animal' => $rel['animal'] ?? array(), 'context' => $rel['context'] ?? array(), 'exclude' => $rel['exclude'] ?? array() ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	);
-	$data = apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here
+	$data = apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	if ( sourceweb_sourcing_phase() < 4 || ! function_exists( 'sourceweb_retire_policy' ) ) {
 		return $data;
 	}
@@ -564,8 +564,8 @@ function sourceweb_sourcing_lines( $text ) {
 }
 
 // Options.php checks the group's capability: the Sourcing screen's own.
-foreach ( array( 'aw_sourcing_switches', 'aw_sourcing_sources', 'aw_sourcing_summary', 'aw_sourcing_enrich' ) as $aw_group ) {
-	add_filter( 'option_page_capability_' . $aw_group, fn() => SOURCEWEB_SRC_CAP );
+foreach ( array( 'aw_sourcing_switches', 'aw_sourcing_sources', 'aw_sourcing_summary', 'aw_sourcing_enrich' ) as $sourceweb_group ) {
+	add_filter( 'option_page_capability_' . $sourceweb_group, fn() => SOURCEWEB_SRC_CAP );
 }
 
 // Keywords: the two switches (option sourceweb_relevance).

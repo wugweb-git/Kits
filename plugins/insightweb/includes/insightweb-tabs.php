@@ -58,7 +58,7 @@ function insightweb_tab_parts( string $tab ): array {
 	if ( 'keywords' === $tab ) {
 		insightweb_si_keywords_tab();
 	} else {
-		do_action( 'aw_si_tab_' . $tab );
+		do_action( 'insightweb_si_tab_' . $tab );
 	}
 	$html = (string) ob_get_clean();
 	return function_exists( 'kits_shell_html_parts' ) ? kits_shell_html_parts( $html ) : array();

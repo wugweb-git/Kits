@@ -33,7 +33,7 @@ const AW_SI_CRAWL_STALE = 15 * DAY_IN_SECONDS; // An outside run older than this
 /** User agents: the same as the workers job (aw_workers/crawl_check.py AGENTS). */
 function insightweb_si_crawl_agents(): array {
 	return (array) apply_filters(
-		'aw_si_crawl_agents',
+		'insightweb_si_crawl_agents',
 		array(
 			'Browser'         => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
 			'Googlebot'       => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
@@ -419,7 +419,7 @@ add_action(
 );
 
 add_filter(
-	'aw_si_cron_hooks',
+	'insightweb_si_cron_hooks',
 	function ( $hooks ) {
 		$hooks[] = AW_SI_CRAWL_CRON;
 		return $hooks;
@@ -427,7 +427,7 @@ add_filter(
 );
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		$s['crawl-in'] = array(
 			'label' => __( 'Crawler access, from the server', 'insightweb' ),

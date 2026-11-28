@@ -137,7 +137,7 @@ function directoryweb_block_listing_about( $a, $id ) {
 	$body = trim( (string) get_post_field( 'post_content', $id ) );
 	// The excerpt (the enriched "About", owner 25 Oct 2026) replaces an empty body or an import's one-line template intro.
 	$use  = has_excerpt( $id ) && ( '' === trim( wp_strip_all_tags( $body ) ) || directoryweb_listing_is_template_intro( $body ) );
-	$text = $use ? wpautop( esc_html( get_post_field( 'post_excerpt', $id ) ) ) : ( '' !== trim( wp_strip_all_tags( $body ) ) ? apply_filters( 'the_content', $body ) : '' );
+	$text = $use ? wpautop( esc_html( get_post_field( 'post_excerpt', $id ) ) ) : ( '' !== trim( wp_strip_all_tags( $body ) ) ? apply_filters( 'the_content', $body ) : '' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	if ( '' === $logo . trim( wp_strip_all_tags( $text ) ) ) {
 		return '';
 	}

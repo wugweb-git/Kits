@@ -9,7 +9,7 @@
  * - A PIN code in a listing's address fills an empty PIN field (so the address schema has postalCode), after every
  *   write to the address and in the sweep.
  * - Never on a claimed or verified listing. Off with the option aw_enrich_autoresolve = 0 or the filter
- *   aw_enrich_autoresolve.
+ *   sourceweb_enrich_autoresolve.
  *
  * @package aw-sourcing
  */
@@ -22,7 +22,7 @@ require_once __DIR__ . '/autoresolve-model.php';
 
 /** Whether queued values are decided by the rules. */
 function sourceweb_ar_on() {
-	return (bool) apply_filters( 'aw_enrich_autoresolve', '0' !== (string) get_option( 'aw_enrich_autoresolve', '1' ) );
+	return (bool) apply_filters( 'sourceweb_enrich_autoresolve', '0' !== (string) get_option( 'aw_enrich_autoresolve', '1' ) );
 }
 
 /**
@@ -100,7 +100,7 @@ function sourceweb_ar_row( $id, $apply = true ) {
 
 // A value queued for review is decided at once; the results reply says what became of it.
 add_filter(
-	'aw_enrich_queued_decision',
+	'sourceweb_enrich_queued_decision',
 	function ( $act, $id ) {
 		if ( $id && sourceweb_ar_on() ) {
 			$d = sourceweb_ar_row( (int) $id );
@@ -140,7 +140,7 @@ function sourceweb_ar_fill_pin( $lid ) {
 
 // After every write to a listing from the enrichment: its address may now hold a PIN the field lacks.
 add_action(
-	'aw_enrich_changed',
+	'sourceweb_enrich_changed',
 	function ( $lid ) {
 		if ( sourceweb_ar_on() ) {
 			sourceweb_ar_fill_pin( (int) $lid );

@@ -312,7 +312,7 @@ function directoryweb_org_search_public() {
 	if ( mb_strlen( $q ) < 3 ) {
 		wp_send_json_success( array() );
 	}
-	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'posts_per_page' => 8, 'fields' => 'ids', 'orderby' => 'relevance', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? (array) kits_preview_only_ids() : array() ) );
+	$ids = get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 's' => $q, 'posts_per_page' => 8, 'fields' => 'ids', 'orderby' => 'relevance', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? (array) kits_preview_only_ids() : array() ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- needed here and bounded; see the surrounding code.
 	$out = array();
 	foreach ( $ids as $id ) {
 		list( $state, $district ) = function_exists( 'directoryweb_item_place_names' ) ? directoryweb_item_place_names( $id ) : array( '', '' );

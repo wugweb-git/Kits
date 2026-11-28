@@ -89,7 +89,7 @@ add_filter( 'insightweb_brand_pattern', fn() => '/animal\s*-?\s*writ|animalwrit|
 
 // Rising lists the worker reads: what InsightWeb 1.1.6 shipped as its defaults.
 add_filter(
-	'aw_si_rising_lists',
+	'insightweb_si_rising_lists',
 	function ( $lists ) {
 		$lists['wikipedia']      = array( 'Rabies', 'Free-ranging dog', 'Indian pariah dog', 'Animal Welfare Board of India', 'Prevention of Cruelty to Animals Act, 1960', 'Wild Life (Protection) Act, 1972', 'Goshala', 'Cattle slaughter in India', 'Cow protection movement', 'Cow vigilante violence in India', 'Animal welfare and rights in India', 'Human–wildlife conflict', 'Project Tiger', 'Dog bite' );
 		$lists['gdelt']          = array( 'stray dogs', 'dog bite', 'rabies', 'animal cruelty', 'gaushala', 'cow vigilante', 'human wildlife conflict', 'leopard attack', 'elephant death', 'animal welfare board' );
@@ -103,12 +103,12 @@ add_filter(
 
 // Animal names counted in the Sourcing spikes (InsightWeb 1.1.6 default list).
 add_filter(
-	'aw_si_species',
+	'insightweb_si_species',
 	function ( $list ) {
 		return array_merge( (array) $list, array( 'dog', 'puppy', 'cat', 'kitten', 'cow', 'cattle', 'buffalo', 'calf', 'goat', 'sheep', 'pig', 'horse', 'donkey', 'mule', 'camel', 'monkey', 'macaque', 'langur', 'elephant', 'tiger', 'leopard', 'lion', 'cheetah', 'bear', 'deer', 'blackbuck', 'peacock', 'peafowl', 'pigeon', 'parrot', 'bird', 'vulture', 'eagle', 'owl', 'crow', 'snake', 'cobra', 'crocodile', 'turtle', 'tortoise', 'dolphin', 'whale', 'shark', 'pangolin', 'rhino', 'rhinoceros', 'wolf', 'jackal', 'hyena', 'boar', 'squirrel', 'rabbit', 'chicken', 'hen', 'poultry' ) );
 	}
 );
 
 // The Server tab links a PHP error in these folders to the site's public repository.
-add_filter( 'aw_si_srv_repo_dirs', fn() => array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb', 'animal-writes', 'kits-by-wugweb' ) );
-add_filter( 'aw_si_srv_repo_url', fn() => 'https://github.com/wugweb-git/animalwrites/blob/wordpress/' );
+add_filter( 'insightweb_si_srv_repo_dirs', fn() => array( 'animal-writes-core', 'aw-seo-extras', 'aw-sourcing', 'kits-core', 'mailweb', 'animal-writes', 'kits-by-wugweb' ) );
+add_filter( 'insightweb_si_srv_repo_url', fn() => 'https://github.com/wugweb-git/animalwrites/blob/wordpress/' );

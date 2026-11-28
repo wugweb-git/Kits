@@ -203,7 +203,7 @@ function sourceweb_review_reason( $id ) {
 				'post_type'   => $type,
 				'post_status' => 'publish', // compare with what readers already see, not with items still waiting
 				'date_query'  => array( array( 'after' => '7 days ago' ) ),
-				'exclude'     => array( $id ),
+				'exclude'     => array( $id ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 				'numberposts' => 200,
 			)
 		);

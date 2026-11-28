@@ -163,10 +163,3 @@ add_filter(
 	2
 );
 
-/** "Check again" on Dashboard > Updates clears WordPress's update cache; clear the registry's copy with it, so a new release shows at once. */
-add_action(
-	'delete_site_transient_update_plugins',
-	function () {
-		delete_site_transient( 'insightweb_reg_registry' );
-	}
-);

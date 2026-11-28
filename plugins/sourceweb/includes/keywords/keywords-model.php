@@ -29,7 +29,7 @@ const AW_KW_LISTS = array(
 	'strong'  => array( SOURCEWEB_KW_ROLE_INCLUDE, 'sourceweb_relevance.strong', 'Include' ),
 	'animal'  => array( SOURCEWEB_KW_ROLE_ANIMAL, 'sourceweb_relevance.animal', 'Animal' ),
 	'context' => array( SOURCEWEB_KW_ROLE_CONTEXT, 'sourceweb_relevance.context', 'Context' ),
-	'exclude' => array( SOURCEWEB_KW_ROLE_EXCLUDE, 'sourceweb_relevance.exclude', 'Exclude' ),
+	'exclude' => array( SOURCEWEB_KW_ROLE_EXCLUDE, 'sourceweb_relevance.exclude', 'Exclude' ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	'press'   => array( SOURCEWEB_KW_ROLE_PRESS, 'aw_sources.press.queries', 'Press queries' ),
 );
 
@@ -423,7 +423,7 @@ function sourceweb_kw_mirrors( array $rows ) {
 			}
 		}
 	}
-	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array(), 'press' => array(), 'categories' => array() );
+	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array(), 'press' => array(), 'categories' => array() ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	foreach ( $acc as $list => $items ) {
 		usort( $items, fn( $a, $b ) => ( $a[0] <=> $b[0] ) ?: ( $a[1] <=> $b[1] ) );
 		$words = array_values( array_unique( array_map( fn( $i ) => $i[2], $items ) ) );

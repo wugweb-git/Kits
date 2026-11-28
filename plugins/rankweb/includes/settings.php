@@ -377,15 +377,15 @@ function rankweb_seo_files_off(): array {
 }
 
 // The constants, from the saved settings or the defaults.
-foreach ( rankweb_seo_modules() as $aw_seo_key => $aw_seo_mod ) {
-	$rankweb_seo_saved = rankweb_seo_saved()[ $aw_seo_key ] ?? array();
-	foreach ( $aw_seo_mod['fields'] as $aw_seo_const => $aw_seo_field ) {
-		if ( ! defined( $aw_seo_const ) ) {
-			define( $aw_seo_const, array_key_exists( $aw_seo_const, $rankweb_seo_saved ) ? $rankweb_seo_saved[ $aw_seo_const ] : $aw_seo_field['default'] );
+foreach ( rankweb_seo_modules() as $rankweb_seo_key => $rankweb_seo_mod ) {
+	$rankweb_seo_saved = rankweb_seo_saved()[ $rankweb_seo_key ] ?? array();
+	foreach ( $rankweb_seo_mod['fields'] as $rankweb_seo_const => $rankweb_seo_field ) {
+		if ( ! defined( $rankweb_seo_const ) ) {
+			define( $rankweb_seo_const, array_key_exists( $rankweb_seo_const, $rankweb_seo_saved ) ? $rankweb_seo_saved[ $rankweb_seo_const ] : $rankweb_seo_field['default'] );
 		}
 	}
 }
-unset( $aw_seo_key, $aw_seo_mod, $rankweb_seo_saved, $aw_seo_const, $aw_seo_field );
+unset( $rankweb_seo_key, $rankweb_seo_mod, $rankweb_seo_saved, $rankweb_seo_const, $rankweb_seo_field );
 
 /* ---------- Text in the form and back ---------- */
 

@@ -356,7 +356,7 @@ function sourceweb_dispatch_token(): string {
 function sourceweb_dispatch_repo(): string {
 	$repo = trim( (string) apply_filters( 'sourceweb_workers_repo', defined( 'SOURCEWEB_WORKERS_REPO' ) ? (string) SOURCEWEB_WORKERS_REPO : '' ), '/ ' );
 	if ( '' === $repo ) {
-		$repo = trim( (string) apply_filters( 'kits_dispatch_repo', '' ), '/ ' );
+		$repo = trim( (string) apply_filters( 'kits_dispatch_repo', '' ), '/ ' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	}
 	return preg_match( '#^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$#', $repo ) ? $repo : '';
 }
@@ -476,7 +476,7 @@ add_action(
 			return;
 		}
 		add_action(
-			'aw_cron_health_after',
+			'kits_cron_health_after',
 			function () {
 				$problems = sourceweb_workers_problems();
 				$url      = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );

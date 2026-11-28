@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The ALTCHA spam guard runs locally (proof of work) and contacts no third-party s
 5. Tools: export and import of the settings file, restore defaults, media clean-up links and the optional weekly site check-in message.
 
 == Changelog ==
+
+= 1.5.5 =
+* Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
 
 = 1.5.4 =
 * Each plugin now answers its own update check against the registry (no change when Kits Core is active). Calls to other plugins use their current function names. The REQUEST_METHOD read is sanitised.

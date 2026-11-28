@@ -18,7 +18,7 @@ add_filter( 'kits_admin_app_data', 'kits_admin_app_global_styles_data' );
 add_action(
 	'rest_after_insert_wp_global_styles',
 	function () {
-		do_action( 'litespeed_purge_all' );
+		do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	}
 );
 

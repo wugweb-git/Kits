@@ -497,7 +497,7 @@ function rankweb_link_run( string $html, int $id ): array {
 			'self_id'        => $id,
 			'no_self'        => (bool) AW_LINK_NO_SELF,
 			'skip_linked'    => (bool) AW_LINK_SKIP_LINKED,
-			'exclude'        => rankweb_link_excluded(),
+			'exclude'        => rankweb_link_excluded(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 			'home'           => home_url(),
 			'anchor_ok'      => 'rankweb_anchor_ok',
 			'target_ok'      => function_exists( 'rankweb_silo_target_rule' ) ? rankweb_silo_target_rule( $id ) : null,

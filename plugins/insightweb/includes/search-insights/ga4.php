@@ -48,12 +48,12 @@ function insightweb_si_nf_is_test( string $path ): bool {
 
 /** Social sources counted as referrals even when GA4 files them under another channel. Filter insightweb_si_social_sources. */
 function insightweb_si_social_sources(): array {
-	return (array) apply_filters( 'aw_si_social_sources', array( 'ig', 'instagram.com', 'l.instagram.com', 'instagram', 'facebook.com', 'm.facebook.com', 'l.facebook.com', 'lm.facebook.com', 'facebook', 't.co', 'x.com', 'twitter.com', 'linkedin.com', 'lnkd.in', 'linkedin', 'reddit.com', 'out.reddit.com', 'reddit', 'whatsapp', 'wa.me', 'web.whatsapp.com', 'telegram', 't.me', 'web.telegram.org', 'linktr.ee' ) );
+	return (array) apply_filters( 'insightweb_si_social_sources', array( 'ig', 'instagram.com', 'l.instagram.com', 'instagram', 'facebook.com', 'm.facebook.com', 'l.facebook.com', 'lm.facebook.com', 'facebook', 't.co', 'x.com', 'twitter.com', 'linkedin.com', 'lnkd.in', 'linkedin', 'reddit.com', 'out.reddit.com', 'reddit', 'whatsapp', 'wa.me', 'web.whatsapp.com', 'telegram', 't.me', 'web.telegram.org', 'linktr.ee' ) );
 }
 
 /** Sources counted as X (Twitter). Filter insightweb_si_x_sources. */
 function insightweb_si_x_sources(): array {
-	return (array) apply_filters( 'aw_si_x_sources', array( 't.co', 'x.com', 'twitter.com' ) );
+	return (array) apply_filters( 'insightweb_si_x_sources', array( 't.co', 'x.com', 'twitter.com' ) );
 }
 
 /** Campaign events in the camp report => obs metric. */
@@ -70,7 +70,7 @@ function insightweb_si_ga4_skip_sql(): string {
 
 /** Session sources counted as AI referrals. Filter insightweb_si_ai_sources adds more. */
 function insightweb_si_ai_sources(): array {
-	return (array) apply_filters( 'aw_si_ai_sources', array( 'chatgpt.com', 'chat.openai.com', 'perplexity.ai', 'www.perplexity.ai', 'gemini.google.com', 'copilot.microsoft.com', 'copilot.com', 'claude.ai' ) );
+	return (array) apply_filters( 'insightweb_si_ai_sources', array( 'chatgpt.com', 'chat.openai.com', 'perplexity.ai', 'www.perplexity.ai', 'gemini.google.com', 'copilot.microsoft.com', 'copilot.com', 'claude.ai' ) );
 }
 
 /**

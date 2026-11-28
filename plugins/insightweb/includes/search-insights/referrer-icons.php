@@ -101,7 +101,7 @@ function insightweb_si_referrer_label( string $src ): string {
 		'bing.com'              => 'Bing',
 		'duckduckgo.com'        => 'DuckDuckGo',
 	);
-	$names = (array) apply_filters( 'aw_si_referrer_names', $names );
+	$names = (array) apply_filters( 'insightweb_si_referrer_names', $names );
 	if ( '' === $host ) {
 		return trim( $src );
 	}

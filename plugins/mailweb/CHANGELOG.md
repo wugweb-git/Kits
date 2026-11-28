@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.7.5
+
+- Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
+
 ## 3.7.4
 
 - Checks for its own updates from the registry. Log lines go through one helper and are written only with WP_DEBUG_LOG on. The bundled vendor/ ships with its composer.json.

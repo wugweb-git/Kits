@@ -81,7 +81,7 @@ add_action(
 /** The cookies' names and the request facts the cache rules read. */
 function rankweb_cache_request(): array {
 	return array(
-		'method'  => (string) ( $_SERVER['REQUEST_METHOD'] ?? '' ),
+		'method'  => (string) ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ),
 		'cookies' => array_keys( (array) $_COOKIE ),
 		'query'   => (string) ( $_SERVER['QUERY_STRING'] ?? '' ),
 		'path'    => (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ),
@@ -128,7 +128,7 @@ add_filter(
 
 /** Whether the pipeline should look at this page at all. */
 function rankweb_pipeline_wanted(): bool {
-	if ( is_admin() || is_user_logged_in() || is_feed() || is_preview() || is_customize_preview() || wp_doing_ajax() || 'GET' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) {
+	if ( is_admin() || is_user_logged_in() || is_feed() || is_preview() || is_customize_preview() || wp_doing_ajax() || 'GET' !== ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
 		return false;
 	}
 	foreach ( array( 'RANKWEB_DELAY_SCRIPTS', 'RANKWEB_MINIFY_CSS', 'RANKWEB_PRUNE_CSS', 'RANKWEB_LOCAL_FONTS', 'RANKWEB_WEBP_SERVE', 'RANKWEB_PAGE_CACHE' ) as $c ) {

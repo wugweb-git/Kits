@@ -219,7 +219,7 @@ function rankweb_seo_score_values( $ids ) {
 	foreach ( is_array( $data ) ? $data : array() as $id => $v ) {
 		$GLOBALS['post'] = get_post( (int) $id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		setup_postdata( $GLOBALS['post'] );
-		$v['tests']        = array_values( array_keys( apply_filters( 'rank_math/researches/tests', array_fill_keys( array_unique( array_merge( $base, AW_SEO_SUMMARY_SKIP_TESTS ) ), true ), 'post' ) ) );
+		$v['tests']        = array_values( array_keys( apply_filters( 'rank_math/researches/tests', array_fill_keys( array_unique( array_merge( $base, AW_SEO_SUMMARY_SKIP_TESTS ) ), true ), 'post' ) ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 		$rows[ (int) $id ] = $v;
 	}
 	wp_reset_postdata();
@@ -237,7 +237,7 @@ add_action(
 				'permission_callback' => 'rankweb_seo_api_allowed',
 				'args'                => array( 'limit' => array( 'type' => 'integer', 'default' => 20, 'minimum' => 1, 'maximum' => 50 ) ),
 				'callback'            => function ( WP_REST_Request $req ) {
-					do_action( 'litespeed_control_set_nocache', 'seo score API' );
+					do_action( 'litespeed_control_set_nocache', 'seo score API' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 					return rankweb_seo_score_values( rankweb_seo_unscored_ids( (int) $req['limit'] ) );
 				},
 			)

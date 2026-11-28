@@ -32,9 +32,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Post types shared as articles. */
 // AW_SEO_ARTICLE_TYPES: RankWeb → Settings (settings.php).
 
-foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
+foreach ( array( 'facebook', 'twitter' ) as $rankweb_seo_net ) {
 	add_action(
-		"rank_math/opengraph/{$aw_seo_net}/add_images",
+		"rank_math/opengraph/{$rankweb_seo_net}/add_images",
 		function ( $image ) {
 			if ( is_404() || ! is_object( $image ) || ! method_exists( $image, 'add_image' ) ) {
 				return;
@@ -65,25 +65,25 @@ foreach ( array( 'facebook', 'twitter' ) as $aw_seo_net ) {
 		}
 	);
 }
-unset( $aw_seo_net );
+unset( $rankweb_seo_net );
 
 /* og:image and twitter:image are the 1080x1080 share square of whatever picture Rank Math prints (owner, 13 Nov 2026),
    never AVIF or WebP (owner, 21 Oct 2026), with that file's own type and size (rankweb_seo_share_square). */
-foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/twitter_image' ) as $aw_seo_tag ) {
+foreach ( array( 'facebook/og_image', 'facebook/og_image_secure_url', 'twitter/twitter_image' ) as $rankweb_seo_tag ) {
 	add_filter(
-		"rank_math/opengraph/{$aw_seo_tag}",
+		"rank_math/opengraph/{$rankweb_seo_tag}",
 		function ( $url ) {
 			$safe = rankweb_seo_share_square( (string) $url );
 			// Set for every image (og:image comes first of each image's tags), so a swap never carries over to the next one.
-			$GLOBALS['aw_seo_og_swap'] = $safe[0] !== $url ? $safe : null;
+			$GLOBALS['rankweb_seo_og_swap'] = $safe[0] !== $url ? $safe : null;
 			return $safe[0];
 		}
 	);
 }
-unset( $aw_seo_tag );
-add_filter( 'rank_math/opengraph/facebook/og_image_type', fn( $type ) => ! empty( $GLOBALS['aw_seo_og_swap'][3] ) ? $GLOBALS['aw_seo_og_swap'][3] : $type );
-add_filter( 'rank_math/opengraph/facebook/og_image_width', fn( $w ) => ! empty( $GLOBALS['aw_seo_og_swap'][1] ) ? $GLOBALS['aw_seo_og_swap'][1] : $w );
-add_filter( 'rank_math/opengraph/facebook/og_image_height', fn( $h ) => ! empty( $GLOBALS['aw_seo_og_swap'][2] ) ? $GLOBALS['aw_seo_og_swap'][2] : $h );
+unset( $rankweb_seo_tag );
+add_filter( 'rank_math/opengraph/facebook/og_image_type', fn( $type ) => ! empty( $GLOBALS['rankweb_seo_og_swap'][3] ) ? $GLOBALS['rankweb_seo_og_swap'][3] : $type );
+add_filter( 'rank_math/opengraph/facebook/og_image_width', fn( $w ) => ! empty( $GLOBALS['rankweb_seo_og_swap'][1] ) ? $GLOBALS['rankweb_seo_og_swap'][1] : $w );
+add_filter( 'rank_math/opengraph/facebook/og_image_height', fn( $h ) => ! empty( $GLOBALS['rankweb_seo_og_swap'][2] ) ? $GLOBALS['rankweb_seo_og_swap'][2] : $h );
 
 add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
 add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( AW_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );

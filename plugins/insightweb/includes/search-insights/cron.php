@@ -121,6 +121,6 @@ add_action(
 );
 
 add_filter(
-	'aw_si_cron_hooks',
+	'insightweb_si_cron_hooks',
 	fn( $hooks ) => array_merge( (array) $hooks, array( INSIGHTWEB_CRON_TELEMETRY ) )
 );

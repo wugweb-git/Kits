@@ -97,7 +97,7 @@ function sourceweb_same_story_fold( $keep, $url, $publisher, $text = '', $model 
 	}
 	if ( $out['credited'] || $out['added'] ) {
 		clean_post_cache( $keep ); // post_date and post_modified stay as they are
-		do_action( 'litespeed_purge_post', $keep );
+		do_action( 'litespeed_purge_post', $keep ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	}
 	return $out;
 }

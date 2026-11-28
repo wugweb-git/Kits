@@ -123,7 +123,7 @@ function sourceweb_sa_back( string $screen, string $type, string $text, array $a
  * @param string $cap          Capability.
  */
 function sourceweb_sa_guard( string $nonce_action, string $cap ): void {
-	if ( 'POST' !== strtoupper( (string) ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
+	if ( 'POST' !== strtoupper( (string) ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) ) {
 		wp_die( esc_html__( 'This action needs a form post.', 'sourceweb' ), 405 );
 	}
 	if ( ! current_user_can( $cap ) ) {
@@ -494,8 +494,8 @@ function sourceweb_sa_screen_review(): void {
 		/* translators: %d: number of items. */
 		echo '<p><button type="submit" class="button" onclick="return confirm(' . esc_attr( (string) wp_json_encode( sprintf( __( 'Publish all %d items in this view?', 'sourceweb' ), (int) $res['count'] ) ) ) . ');">' . esc_html( sprintf( __( 'Publish all %d in this view', 'sourceweb' ), (int) $res['count'] ) ) . '</button></p></form>';
 	}
-	if ( has_action( 'aw_review_intake' ) ) {
-		do_action( 'aw_review_intake' ); // other plugins' intake forms (add an item by its link), as on the shell screen
+	if ( has_action( 'sourceweb_review_intake' ) ) {
+		do_action( 'sourceweb_review_intake' ); // other plugins' intake forms (add an item by its link), as on the shell screen
 	}
 }
 

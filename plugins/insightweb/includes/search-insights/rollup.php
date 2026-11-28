@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $metric Metric.
  */
 function insightweb_si_metric_kind( string $src, string $metric ): string {
-	$last = (array) apply_filters( 'aw_si_last_value_metrics', array( 'trends:index', 'live:position', 'psi:score', 'clarity:scroll', 'bing:in-index' ) );
+	$last = (array) apply_filters( 'insightweb_si_last_value_metrics', array( 'trends:index', 'live:position', 'psi:score', 'clarity:scroll', 'bing:in-index' ) );
 	return in_array( $src . ':' . $metric, $last, true ) ? 'last' : 'sum';
 }
 

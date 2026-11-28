@@ -440,7 +440,7 @@ function insightweb_si_sourcing_types(): array {
 	 * @param array<string, string> $map topic => 'news' | 'library' | 'campaign'.
 	 */
 	$map = array();
-	foreach ( (array) apply_filters( 'aw_si_sourcing_types', array() ) as $topic => $type ) {
+	foreach ( (array) apply_filters( 'insightweb_si_sourcing_types', array() ) as $topic => $type ) {
 		$t = strtolower( trim( (string) $topic ) );
 		if ( '' !== $t && in_array( $type, array( 'news', 'library', 'campaign' ), true ) ) {
 			$map[ $t ] = (string) $type;
@@ -511,7 +511,7 @@ function insightweb_si_use_labels(): array {
 		'sourcing:news'     => __( 'Sourcing candidate: news', 'insightweb' ),
 		'sourcing:library'  => __( 'Sourcing candidate: library', 'insightweb' ),
 		'sourcing:campaign' => __( 'Sourcing candidate: campaign', 'insightweb' ),
-		'exclude'           => __( 'Exclude', 'insightweb' ),
+		'exclude'           => __( 'Exclude', 'insightweb' ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	);
 }
 

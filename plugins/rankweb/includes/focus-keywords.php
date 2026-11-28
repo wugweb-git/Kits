@@ -186,7 +186,7 @@ add_action(
 					'missing'  => array( 'type' => 'boolean', 'default' => false ),
 				),
 				'callback'            => function ( WP_REST_Request $req ) {
-					do_action( 'litespeed_control_set_nocache', 'focus-keyword API' );
+					do_action( 'litespeed_control_set_nocache', 'focus-keyword API' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 					$args = array(
 						'post_type'           => $req['type'],
 						'post_status'         => 'publish',

@@ -33,7 +33,7 @@ function insightweb_si_sources(): array {
 			'every' => DAY_IN_SECONDS,
 		),
 	);
-	return (array) apply_filters( 'aw_si_sources', $s );
+	return (array) apply_filters( 'insightweb_si_sources', $s );
 }
 
 /**

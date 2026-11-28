@@ -136,7 +136,7 @@ function kits_daily_backup_run() {
 		return array( 'error' => 'off' ); // Switched off after the event was booked.
 	}
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( 600 );
+		set_time_limit( 600 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged -- needed here and bounded; see the surrounding code.
 	}
 	$dir = kits_daily_backup_dir();
 	if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {

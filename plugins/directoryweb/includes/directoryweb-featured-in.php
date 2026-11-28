@@ -29,7 +29,7 @@ function directoryweb_featured_in_render( $attributes ) {
     $query_args = get_option( 'directoryweb_featured_in_query_args', array(
         'post_type'      => 'aw_listing',
         'posts_per_page' => get_option( 'directoryweb_featured_count', 10 ),
-        'meta_query' => array(
+        'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- needed here and bounded; see the surrounding code.
             array(
                 'key'     => 'aw_rel_org',
                 'compare' => 'EXISTS',

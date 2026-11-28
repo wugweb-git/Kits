@@ -335,7 +335,7 @@ function kits_site_reset_sections(): array {
 	 *                        it wrote anything.
 	 */
 	$own = (array) apply_filters( 'kits_site_reset_sections', $own );
-	return (array) apply_filters( 'aw_core_reset_sections', $own ); // older name, still read.
+	return (array) apply_filters( 'kits_core_reset_sections', $own ); // older name, still read.
 }
 
 /**

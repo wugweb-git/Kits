@@ -156,7 +156,7 @@ function insightweb_si_geo_country( string $ip ): string {
 
 /** The visitor's country: the CDN's header when sent, else the lookup files; '--' when unknown. */
 function insightweb_si_vis_country(): string {
-	foreach ( (array) apply_filters( 'aw_si_vis_country_headers', array( 'HTTP_CF_IPCOUNTRY', 'HTTP_X_COUNTRY_CODE', 'HTTP_X_GEO_COUNTRY', 'HTTP_X_HCDN_COUNTRY', 'GEOIP_COUNTRY_CODE' ) ) as $h ) {
+	foreach ( (array) apply_filters( 'insightweb_si_vis_country_headers', array( 'HTTP_CF_IPCOUNTRY', 'HTTP_X_COUNTRY_CODE', 'HTTP_X_GEO_COUNTRY', 'HTTP_X_HCDN_COUNTRY', 'GEOIP_COUNTRY_CODE' ) ) as $h ) {
 		$v = isset( $_SERVER[ $h ] ) ? strtoupper( sanitize_key( wp_unslash( $_SERVER[ $h ] ) ) ) : '';
 		if ( preg_match( '/^[A-Z]{2}$/', $v ) && 'XX' !== $v ) {
 			return $v;
@@ -264,7 +264,7 @@ function insightweb_si_geo_refresh(): void {
 	}
 }
 add_action( AW_SI_GEO_CRON, 'insightweb_si_geo_refresh' );
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GEO_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GEO_CRON ) ) );
 
 /**
  * Rows for the tab.
@@ -400,7 +400,7 @@ function insightweb_si_vis_settings_row(): void {
 	}
 	echo '</form></td></tr>';
 }
-add_action( 'aw_si_settings_rows', 'insightweb_si_vis_settings_row', 6 );
+add_action( 'insightweb_si_settings_rows', 'insightweb_si_vis_settings_row', 6 );
 
 add_action(
 	'admin_post_aw_si_vis_switch',
@@ -420,7 +420,7 @@ add_action(
 );
 
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_si_settings_notices',
 	function () {
 		$vis = isset( $_GET['vis'] ) ? sanitize_key( wp_unslash( $_GET['vis'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( 'on' === $vis ) {

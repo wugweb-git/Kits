@@ -217,7 +217,7 @@ function kits_brand_customizer_render_page() {
 		if ( 'reset' === $action ) {
 			kits_brand_reset();
 			if ( function_exists( 'do_action' ) ) {
-				do_action( 'litespeed_purge_all' );
+				do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 			}
 			$notices[] = array(
 				'type' => 'success',
@@ -226,7 +226,7 @@ function kits_brand_customizer_render_page() {
 		} elseif ( 'clear_brand' === $action ) {
 			kits_brand_clear();
 			if ( function_exists( 'do_action' ) ) {
-				do_action( 'litespeed_purge_all' );
+				do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 			}
 			$notices[] = array(
 				'type' => 'success',
@@ -240,7 +240,7 @@ function kits_brand_customizer_render_page() {
 				update_option( KITS_BRAND_PRESET_OPTION, $preset_key );
 				kits_brand_clear_theme_cache();
 				if ( function_exists( 'do_action' ) ) {
-					do_action( 'litespeed_purge_all' );
+					do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 				}
 				/* translators: %s: Preset name */
 				$notices[] = array(
@@ -257,7 +257,7 @@ function kits_brand_customizer_render_page() {
 				$sanitized = kits_brand_sanitize_tokens( $decoded );
 				update_option( KITS_BRAND_OPTION, $sanitized );
 				if ( function_exists( 'do_action' ) ) {
-					do_action( 'litespeed_purge_all' );
+					do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 				}
 				$notices[] = array(
 					'type' => 'success',
@@ -276,7 +276,7 @@ function kits_brand_customizer_render_page() {
 			$sanitized  = kits_brand_sanitize_tokens( (array) $raw_tokens );
 			update_option( KITS_BRAND_OPTION, $sanitized );
 			if ( function_exists( 'do_action' ) ) {
-				do_action( 'litespeed_purge_all' );
+				do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 			}
 			$notices[] = array(
 				'type' => 'success',

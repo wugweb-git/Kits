@@ -80,8 +80,8 @@ function sourceweb_sourcing_kw_lists() {
 	if ( is_array( $out ) ) {
 		return $out;
 	}
-	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array(), 'search' => array() );
-	$map = array( 'strong' => SOURCEWEB_KW_ROLE_INCLUDE, 'animal' => SOURCEWEB_KW_ROLE_ANIMAL, 'context' => SOURCEWEB_KW_ROLE_CONTEXT, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH );
+	$out = array( 'strong' => array(), 'animal' => array(), 'context' => array(), 'exclude' => array(), 'search' => array() ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
+	$map = array( 'strong' => SOURCEWEB_KW_ROLE_INCLUDE, 'animal' => SOURCEWEB_KW_ROLE_ANIMAL, 'context' => SOURCEWEB_KW_ROLE_CONTEXT, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	foreach ( sourceweb_sourcing_kw_worker_rows() as $r ) {
 		foreach ( $map as $k => $bit ) {
 			if ( $r['roles'] & $bit ) {
@@ -96,7 +96,7 @@ function sourceweb_sourcing_kw_lists() {
 /* ---------- Mirrors: the old lists rebuilt after a change ---------- */
 
 add_action(
-	'aw_kw_saved',
+	'insightweb_kw_saved',
 	function ( $id = 0, $changed = null ) {
 		if ( array( 'dismissed' ) === $changed ) { // a suggestion dismissed or shown again: nothing the workers or the old lists read
 			return;
@@ -328,7 +328,7 @@ function sourceweb_sourcing_kw_views() {
 		'include'  => array( 'Include', SOURCEWEB_KW_ROLE_INCLUDE ),
 		'animal'   => array( 'Topic', SOURCEWEB_KW_ROLE_ANIMAL ),
 		'context'  => array( 'Context', SOURCEWEB_KW_ROLE_CONTEXT ),
-		'exclude'  => array( 'Exclude', SOURCEWEB_KW_ROLE_EXCLUDE ),
+		'exclude'  => array( 'Exclude', SOURCEWEB_KW_ROLE_EXCLUDE ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 		'search'   => array( 'Search', SOURCEWEB_KW_ROLE_SEARCH ),
 		'press'    => array( 'Press', SOURCEWEB_KW_ROLE_PRESS ),
 		'category' => array( 'Category words', SOURCEWEB_KW_ROLE_CATEGORY ),

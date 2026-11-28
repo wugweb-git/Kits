@@ -28,7 +28,7 @@ const AW_SI_INSPECT_GAP    = 300;  // Seconds between cron steps (WP-Cron runs t
 const AW_SI_INSPECT_D      = '2000-01-01'; // The one fixed date of the index-state rows.
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		$s['gsc_types'] = array(
 			'label' => __( 'Search Console: Discover and Google News', 'insightweb' ),
@@ -41,7 +41,7 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GSC_TYPES_CRON, AW_SI_INSPECT_CRON, AW_SI_INSPECT_MORE ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GSC_TYPES_CRON, AW_SI_INSPECT_CRON, AW_SI_INSPECT_MORE ) ) );
 
 add_action(
 	'init',
@@ -224,7 +224,7 @@ function insightweb_si_box_gsc_types(): void {
 
 /** The daily cap of URL Inspection calls. */
 function insightweb_si_inspect_cap(): int {
-	return max( 0, min( AW_SI_INSPECT_CAP, (int) apply_filters( 'aw_si_inspect_cap', AW_SI_INSPECT_CAP ) ) );
+	return max( 0, min( AW_SI_INSPECT_CAP, (int) apply_filters( 'insightweb_si_inspect_cap', AW_SI_INSPECT_CAP ) ) );
 }
 
 /**
@@ -573,7 +573,7 @@ function insightweb_si_coverage_html(): string {
 
 // The same form on the Settings tab (12 Nov 2026), where the shell keeps forms; the Dashboard's boxes show text only.
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_si_settings_rows',
 	function () {
 		echo '<tr><th scope="row">' . esc_html__( 'Search Console Page indexing', 'insightweb' ) . '</th><td>' . insightweb_si_coverage_html() . '</td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in insightweb_si_coverage_html().
 	},

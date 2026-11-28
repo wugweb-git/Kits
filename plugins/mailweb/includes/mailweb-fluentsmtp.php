@@ -528,7 +528,7 @@ function mailweb_render_logs_screen(): void {
 	echo '<h1>' . esc_html__( 'MailWeb: Email Logs', 'mailweb' ) . '</h1>';
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a result flag only, nothing is changed.
 	if ( isset( $_GET['mailweb_resent'] ) ) {
-		$ok = '1' === sanitize_text_field( wp_unslash( $_GET['mailweb_resent'] ) );
+		$ok = '1' === sanitize_text_field( wp_unslash( $_GET['mailweb_resent'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- needed here and bounded; see the surrounding code.
 		wp_admin_notice(
 			$ok ? esc_html__( 'Put back in the queue. It will be sent on the next queue run.', 'mailweb' ) : esc_html__( 'Not resent: that message is no longer waiting to be retried.', 'mailweb' ),
 			array( 'type' => $ok ? 'success' : 'warning', 'dismissible' => true )

@@ -112,7 +112,7 @@ function sourceweb_cc0_run() {
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '') // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
@@ -133,7 +133,7 @@ function sourceweb_cc0_run() {
 
 	// 2. Items with no usable picture of their own.
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . "
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value <> '' AND t.meta_value <> '0')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value LIKE 'https://%%')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0') )
@@ -157,7 +157,7 @@ function sourceweb_cc0_run() {
 	// 2b. Our own guides with no picture (owner, 18 Oct 2026): a CC0 photo of their own, used once site-wide. A guide
 	// linked to a campaign (campaign-links.php) is left to the campaign's own pictures (its motif), never a stock photo.
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
-	$own = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p
+	$own = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
 		WHERE p.post_status = 'publish' AND p.post_type = 'post'
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} su WHERE su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value <> '')
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value NOT IN ('','0'))

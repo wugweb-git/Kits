@@ -180,7 +180,7 @@ function planweb_settings_reset(): bool {
 
 // Kits → Modules → PlanWeb gets "Reset this section" (Kits Core's aw_core_reset_sections() filter).
 add_filter(
-	'aw_core_reset_sections',
+	'kits_core_reset_sections',
 	function ( $sections ) {
 		$sections                   = (array) $sections;
 		$sections['planweb_module'] = 'planweb_settings_reset';

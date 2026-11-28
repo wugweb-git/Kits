@@ -29,7 +29,7 @@ const AW_SI_BING_CRAWL_MAP  = array(
 );
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		if ( function_exists( 'insightweb_si_bing_on' ) && insightweb_si_bing_on() ) {
 			$s['bing_crawl'] = array(
@@ -44,7 +44,7 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_BING_CRAWL_CRON, AW_SI_BING_KW_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_BING_CRAWL_CRON, AW_SI_BING_KW_CRON ) ) );
 
 add_action(
 	'init',

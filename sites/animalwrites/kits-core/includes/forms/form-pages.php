@@ -206,7 +206,7 @@ add_filter(
 
 // /volunteer/ in the breadcrumb is "Volunteer".
 add_filter(
-	'aw_breadcrumb_label',
+	'rankweb_breadcrumb_label',
 	function ( $label, $id ) {
 		return 'volunteer' === get_post_field( 'post_name', $id ) ? 'Volunteer' : $label;
 	},

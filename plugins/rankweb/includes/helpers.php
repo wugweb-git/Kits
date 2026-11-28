@@ -299,7 +299,7 @@ function rankweb_seo_hub_rules( $type, array $v ) {
 		$v['meta_query'][] = kits_open_opportunities_meta_query();
 	}
 	if ( rankweb_seo_preview_ids() ) {
-		$v['post__not_in'] = rankweb_seo_preview_ids();
+		$v['post__not_in'] = rankweb_seo_preview_ids(); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- needed here and bounded; see the surrounding code.
 	}
 	return $v;
 }
@@ -347,22 +347,22 @@ function rankweb_seo_cached( $name, callable $build ) {
 }
 /** A post, its terms or its trash state changed: rankweb_seo_cached() values are rebuilt (written once, at the end of the request). */
 function rankweb_seo_cache_flush() {
-	$GLOBALS['aw_seo_cache_stale'] = true;
+	$GLOBALS['rankweb_seo_cache_stale'] = true;
 	if ( ! has_action( 'shutdown', 'rankweb_seo_cache_flush_write' ) ) {
 		add_action( 'shutdown', 'rankweb_seo_cache_flush_write', 0 );
 	}
 }
 /** Moves aw_seo_cache_gen on, so every key built before is no longer read. */
 function rankweb_seo_cache_flush_write() {
-	if ( ! empty( $GLOBALS['aw_seo_cache_stale'] ) ) {
+	if ( ! empty( $GLOBALS['rankweb_seo_cache_stale'] ) ) {
 		update_option( 'aw_seo_cache_gen', (string) microtime( true ), true );
-		$GLOBALS['aw_seo_cache_stale'] = false;
+		$GLOBALS['rankweb_seo_cache_stale'] = false;
 	}
 }
-foreach ( array( 'save_post', 'deleted_post', 'set_object_terms' ) as $aw_seo_hook ) {
-	add_action( $aw_seo_hook, 'rankweb_seo_cache_flush' );
+foreach ( array( 'save_post', 'deleted_post', 'set_object_terms' ) as $rankweb_seo_hook ) {
+	add_action( $rankweb_seo_hook, 'rankweb_seo_cache_flush' );
 }
-unset( $aw_seo_hook );
+unset( $rankweb_seo_hook );
 
 /**
  * The words that follow "the {Site} Directory" in a directory place's description: nothing on a generic site. A site

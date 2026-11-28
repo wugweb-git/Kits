@@ -176,7 +176,7 @@ function rankweb_media_autofill_run( $post_id ) {
 		$set['post_content'] = rankweb_media_autofill_description( $name, '-source' === substr( pathinfo( $file, PATHINFO_FILENAME ), -7 ) );
 	}
 	if ( $set ) {
-		$wpdb->update( $wpdb->posts, $set, array( 'ID' => $post_id ) );
+		$wpdb->update( $wpdb->posts, $set, array( 'ID' => $post_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- needed here and bounded; see the surrounding code.
 		clean_post_cache( $post_id );
 	}
 	if ( '' === trim( (string) get_post_meta( $post_id, '_wp_attachment_image_alt', true ) ) ) {

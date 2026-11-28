@@ -37,7 +37,7 @@ const AW_SI_SRV_URLS = 100; // distinct addresses kept per day and kind; more ar
  */
 function insightweb_si_srv_bots(): array {
 	return (array) apply_filters(
-		'aw_si_srv_bots',
+		'insightweb_si_srv_bots',
 		array(
 			'OAI-SearchBot'         => 'OAI-SearchBot',
 			'ChatGPT-User'          => 'ChatGPT-User',
@@ -212,8 +212,8 @@ function insightweb_si_srv_msg_html( string $msg ): string {
 	if ( ! preg_match( '#(wp-content/(plugins|themes)/([^/\s]+)/\S+?\.php)(?: on line |:)(\d+)#', $msg, $m ) ) {
 		return esc_html( $msg );
 	}
-	$own  = (array) apply_filters( 'aw_si_srv_repo_dirs', array() ); // folder names that have a public repository
-	$base = (string) apply_filters( 'aw_si_srv_repo_url', '' ); // e.g. https://github.com/owner/repo/blob/main/ (with the trailing slash)
+	$own  = (array) apply_filters( 'insightweb_si_srv_repo_dirs', array() ); // folder names that have a public repository
+	$base = (string) apply_filters( 'insightweb_si_srv_repo_url', '' ); // e.g. https://github.com/owner/repo/blob/main/ (with the trailing slash)
 	$file = $m[1] . ':' . $m[4];
 	$link = '' !== $base && in_array( $m[3], $own, true ) ? $base . substr( $m[1], strlen( 'wp-content/' ) ) . '#L' . $m[4] : '';
 	return esc_html( $msg ) . ' (' . ( '' !== $link ? '<a href="' . esc_url( $link ) . '" target="_blank" rel="noopener">' . esc_html( $file ) . '</a>' : esc_html( $file ) ) . ')';
@@ -338,7 +338,7 @@ function insightweb_si_srv_weeks_table( array $days ): void {
 /* ---------- The tab ---------- */
 
 add_filter(
-	'aw_si_tabs',
+	'insightweb_si_tabs',
 	function ( $tabs ) {
 		$tabs           = (array) $tabs;
 		$tabs['server'] = __( 'Server', 'insightweb' );

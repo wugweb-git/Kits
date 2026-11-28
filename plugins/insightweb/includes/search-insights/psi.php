@@ -65,7 +65,7 @@ function insightweb_si_psi_pages(): array {
 			$paths[] = insightweb_si_object_path( 'post', (int) $ids[0] );
 		}
 	}
-	return array_values( array_unique( array_filter( (array) apply_filters( 'aw_si_psi_pages', $paths ) ) ) );
+	return array_values( array_unique( array_filter( (array) apply_filters( 'insightweb_si_psi_pages', $paths ) ) ) );
 }
 
 /**

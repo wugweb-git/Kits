@@ -121,7 +121,7 @@ function rankweb_native_settings( bool $modules_only ): void {
 	if ( ! isset( $tabs[ $tab ] ) ) {
 		$tab = $modules_only ? 'modules' : 'titles';
 	}
-	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && check_admin_referer( 'rankweb_native_' . $tab ) && current_user_can( 'manage_options' ) ) {
+	if ( 'POST' === ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) && check_admin_referer( 'rankweb_native_' . $tab ) && current_user_can( 'manage_options' ) ) {
 		$posted = array();
 		foreach ( (array) wp_unslash( $_POST['f'] ?? array() ) as $k => $v ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$posted[ sanitize_text_field( (string) $k ) ] = is_scalar( $v ) ? (string) $v : '';

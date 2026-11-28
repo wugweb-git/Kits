@@ -93,7 +93,7 @@ final class RankWeb_Linker {
 			'self_id'        => 0,
 			'no_self'        => true,
 			'skip_linked'    => true,
-			'exclude'        => array(),
+			'exclude'        => array(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 			'home'           => '',
 			'anchor_ok'      => null,
 			'target_ok'      => null,

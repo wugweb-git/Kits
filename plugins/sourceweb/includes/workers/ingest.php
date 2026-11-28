@@ -41,8 +41,8 @@ function sourceweb_find_by_source( $post_type, $url ) {
 			'post_type'      => sourceweb_is_type( $post_type, 'listing' ) ? $post_type : sourceweb_item_types(),
 			// Trash included (12 Oct 2026): a trashed item must not come back as new if the workers' memory is lost.
 			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ),
-			'meta_key'       => 'aw_source_url',
-			'meta_value'     => $url,
+			'meta_key'       => 'aw_source_url', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- needed here and bounded; see the surrounding code.
+			'meta_value'     => $url, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- needed here and bounded; see the surrounding code.
 			'fields'         => 'ids',
 			'posts_per_page' => 1,
 			'no_found_rows'  => true,
@@ -60,8 +60,8 @@ function sourceweb_find_by_source( $post_type, $url ) {
 		array(
 			'post_type'      => sourceweb_item_types(),
 			'post_status'    => array( 'publish', 'pending', 'draft', 'private', 'future', 'trash' ),
-			'meta_key'       => 'aw_source_url',
-			'meta_value'     => '^https?://([a-z0-9-]+\\.)*pib\\.gov\\.in/.*[?&][Pp][Rr][Ii][Dd]=' . $prid . '([^0-9]|$)',
+			'meta_key'       => 'aw_source_url', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- needed here and bounded; see the surrounding code.
+			'meta_value'     => '^https?://([a-z0-9-]+\\.)*pib\\.gov\\.in/.*[?&][Pp][Rr][Ii][Dd]=' . $prid . '([^0-9]|$)', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- needed here and bounded; see the surrounding code.
 			'meta_compare'   => 'REGEXP',
 			'fields'         => 'ids',
 			'posts_per_page' => 1,

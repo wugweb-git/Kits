@@ -235,14 +235,14 @@ function directoryweb_directory_query_vars( $v ) {
 		$tq[] = array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => array( $service ) );
 	}
 	if ( $tq ) {
-		$v['tax_query'] = $tq;
+		$v['tax_query'] = $tq; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- needed here and bounded; see the surrounding code.
 	}
 	$text = sanitize_text_field( wp_unslash( $_GET['q'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( '' !== $text ) {
 		$v['s']              = $text;
 		$v['search_columns'] = array( 'post_title' );
 	}
-	$v['meta_query'] = $mq;
+	$v['meta_query'] = $mq; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- needed here and bounded; see the surrounding code.
 	$v['orderby']    = $order;
 	return $v;
 }

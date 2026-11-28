@@ -82,13 +82,13 @@ function insightweb_si_settings_saved(): array {
 }
 
 // The constants, from the saved numbers or the defaults.
-$aw_si_saved = insightweb_si_settings_saved();
-foreach ( insightweb_si_setting_fields() as $aw_si_const => $aw_si_field ) {
-	if ( ! defined( $aw_si_const ) ) {
-		define( $aw_si_const, array_key_exists( $aw_si_const, $aw_si_saved ) ? $aw_si_saved[ $aw_si_const ] : $aw_si_field['default'] );
+$insightweb_si_saved = insightweb_si_settings_saved();
+foreach ( insightweb_si_setting_fields() as $insightweb_si_const => $insightweb_si_field ) {
+	if ( ! defined( $insightweb_si_const ) ) {
+		define( $insightweb_si_const, array_key_exists( $insightweb_si_const, $insightweb_si_saved ) ? $insightweb_si_saved[ $insightweb_si_const ] : $insightweb_si_field['default'] );
 	}
 }
-unset( $aw_si_const, $aw_si_field, $aw_si_saved );
+unset( $insightweb_si_const, $insightweb_si_field, $insightweb_si_saved );
 
 /** Whether the current request may use the Search Insights APIs: administrators, or the workers' user (sourceweb_worker). */
 function insightweb_si_api_allowed() {

@@ -68,7 +68,7 @@ function rankweb_llms_ucfirst( $text ) {
 }
 
 // The counts are live: the page cache keeps llms.txt for an hour at most.
-add_action( 'rank_math/llms_txt/before_output', fn() => do_action( 'litespeed_control_set_ttl', HOUR_IN_SECONDS ) );
+add_action( 'rank_math/llms_txt/before_output', fn() => do_action( 'litespeed_control_set_ttl', HOUR_IN_SECONDS ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 
 add_filter(
 	'rank_math/llms_txt/posts',

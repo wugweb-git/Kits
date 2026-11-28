@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		$s['ga4'] = array(
 			'label' => __( 'GA4 (Site Kit)', 'insightweb' ),
@@ -33,7 +33,7 @@ add_filter(
 
 // Monthly rows keep the last value of rates, scores and notes (sums would mean nothing); counts are summed.
 add_filter(
-	'aw_si_last_value_metrics',
+	'insightweb_si_last_value_metrics',
 	function ( $last ) {
 		foreach ( array( 'score', 'lcp', 'tbt', 'cls' ) as $m ) {
 			$last[] = 'psi:' . $m . '-mobile';
@@ -55,7 +55,7 @@ function insightweb_si_keep_days(): int {
 
 /** Cron hooks of every Search Insights job, for scheduling, Delete data and deactivation. */
 function insightweb_si_cron_hooks(): array {
-	return (array) apply_filters( 'aw_si_cron_hooks', array( 'aw_si_daily', 'aw_si_rollup', AW_SI_GA4_CRON, AW_SI_PSI_CRON, AW_SI_PSI_MORE, AW_SI_CLARITY_CRON, AW_SI_CLARITY_RETRY, AW_SI_BING_CRON ) );
+	return (array) apply_filters( 'insightweb_si_cron_hooks', array( 'aw_si_daily', 'aw_si_rollup', AW_SI_GA4_CRON, AW_SI_PSI_CRON, AW_SI_PSI_MORE, AW_SI_CLARITY_CRON, AW_SI_CLARITY_RETRY, AW_SI_BING_CRON ) );
 }
 
 add_action(

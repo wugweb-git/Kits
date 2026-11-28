@@ -582,8 +582,8 @@ function sourceweb_enrich_sideload( $url, $lid, $alt, $referer = '' ) {
 /** After a listing changes: its page cache. */
 function sourceweb_enrich_after_change( $lid ) {
 	clean_post_cache( $lid );
-	do_action( 'litespeed_purge_post', $lid );
-	do_action( 'aw_enrich_changed', $lid ); // autoresolve.php: a PIN in the address fills an empty PIN field
+	do_action( 'litespeed_purge_post', $lid ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+	do_action( 'sourceweb_enrich_changed', $lid ); // autoresolve.php: a PIN in the address fills an empty PIN field
 }
 
 /** Values compared loosely: phones by the last 10 digits, links without scheme / www / slash, text lower-case. */
@@ -1036,7 +1036,7 @@ function sourceweb_enrich_union( $lid, $field, $value ) {
 
 // An approved claim's values are logged as approved rows from the organisation (provenance "claim"), before they apply.
 add_action(
-	'aw_claim_before_apply',
+	'directoryweb_claim_before_apply',
 	function ( $lid, $proposed, $claim_id ) {
 		sourceweb_enrich_install();
 		$map = array( 'aw_phone' => 'phone', 'aw_whatsapp' => 'whatsapp', 'aw_email' => 'email', 'aw_website' => 'website', 'aw_services' => 'services' );
@@ -1336,7 +1336,7 @@ function sourceweb_enrich_rest_results( WP_REST_Request $req ) {
 		$note = 'merge_into' === $field ? 'Same name and district, shared contact: approve to merge (the other listing becomes a draft with a 301)' : ( 'place' === $field && ! $protected ? ( 'low' === $conf ? 'Check first: the PIN code points to another state or district, or only the name gives the district' : 'The listing has a different state or already a district' ) : null );
 		$note = null !== $note ? $note : ( ! empty( $b['force_review'] ) ? 'From an imported list: approve to apply' : ( $protected ? 'Claimed or verified listing: never changed automatically' : ( 'low' === $conf ? 'Sources disagree' : 'Would replace a value already on the listing' ) ) );
 		$rid = sourceweb_enrich_add_row( $lid, $field, $value, sourceweb_enrich_snapshot( $lid, $field ), $srcs, $conf, 'pending', $run, trim( ( '' !== $svc_note ? $svc_note . '. ' : '' ) . $note, '. ' ) );
-		$dec = apply_filters( 'aw_enrich_queued_decision', '', (int) $rid, $lid, $field ); // autoresolve.php decides the obvious ones at once: approve | reject | ''
+		$dec = apply_filters( 'sourceweb_enrich_queued_decision', '', (int) $rid, $lid, $field ); // autoresolve.php decides the obvious ones at once: approve | reject | ''
 		if ( 'approve' === $dec ) {
 			$out['applied'][] = $field;
 		} elseif ( 'reject' === $dec ) {

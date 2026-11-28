@@ -143,9 +143,9 @@ function directoryweb_claim_now( $lid, $key, $public = true ) {
 
 /* ---------- Pre-fill (b) ---------- */
 
-foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_checkbox', 'input_radio', 'select' ) as $aw_claim_el ) {
+foreach ( array( 'input_text', 'input_email', 'input_url', 'textarea', 'input_checkbox', 'input_radio', 'select' ) as $directoryweb_claim_el ) {
 	add_filter(
-		'fluentform/rendering_field_data_' . $aw_claim_el,
+		'fluentform/rendering_field_data_' . $directoryweb_claim_el,
 		function ( $data, $form ) {
 			if ( ! directoryweb_claim_ff_id() || (int) $form->id !== directoryweb_claim_ff_id() || ! function_exists( 'directoryweb_ff_phone10' ) ) { // DirectoryWeb's own phone helper (standalone-fallback.php)
 				return $data;

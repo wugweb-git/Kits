@@ -139,11 +139,11 @@ add_action(
 	}
 );
 
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_REPORT_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_REPORT_CRON ) ) );
 
 /** The form on Settings → Runs and data. */
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_si_settings_rows',
 	function () {
 		$s = insightweb_report_settings();
 		echo '<tr><th scope="row">' . esc_html__( 'Search report by email', 'insightweb' ) . '</th><td>';
@@ -178,7 +178,7 @@ add_action(
 );
 
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_si_settings_notices',
 	function () {
 		$r = isset( $_GET['report'] ) ? sanitize_key( wp_unslash( $_GET['report'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		$m = array(

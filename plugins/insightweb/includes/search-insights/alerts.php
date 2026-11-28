@@ -28,7 +28,7 @@ function insightweb_si_alerts_feeds(): array {
 }
 
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $s ) {
 		if ( insightweb_si_alerts_feeds() ) {
 			$s['alerts'] = array(
@@ -39,9 +39,9 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_ALERTS_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_ALERTS_CRON ) ) );
 add_filter(
-	'aw_si_link_types',
+	'insightweb_si_link_types',
 	fn( $t ) => (array) $t + array( 'mention' => __( 'Mention', 'insightweb' ) )
 );
 

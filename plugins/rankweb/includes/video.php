@@ -296,7 +296,7 @@ add_action(
 		if ( 'video' !== ( $wp->query_vars['sitemap'] ?? '' ) || ! rankweb_video_types() ) {
 			return;
 		}
-		do_action( 'litespeed_control_set_ttl', 1800 );
+		do_action( 'litespeed_control_set_ttl', 1800 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 		if ( ! headers_sent() ) {
 			status_header( 200 );
 			header( 'Content-Type: application/xml; charset=UTF-8' );

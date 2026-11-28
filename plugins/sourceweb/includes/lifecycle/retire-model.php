@@ -43,7 +43,7 @@ const AW_RETIRE_LIST_ROLE = array(
 	'strong'  => SOURCEWEB_KW_ROLE_INCLUDE,
 	'animal'  => SOURCEWEB_KW_ROLE_ANIMAL,
 	'context' => SOURCEWEB_KW_ROLE_CONTEXT,
-	'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE,
+	'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 );
 
 /**

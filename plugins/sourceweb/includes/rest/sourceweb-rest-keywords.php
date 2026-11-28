@@ -130,7 +130,7 @@ function sourceweb_rest_keywords( WP_REST_Request $request ) {
 	}
 	$out['roles']      = $roles;
 	$out['include']    = SOURCEWEB_KW_ROLE_INCLUDE;
-	$out['exclude']    = SOURCEWEB_KW_ROLE_EXCLUDE;
+	$out['exclude']    = SOURCEWEB_KW_ROLE_EXCLUDE; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	$out['categories'] = array_map(
 		fn( $slug, $name ) => array(
 			'value' => $slug,

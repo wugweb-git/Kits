@@ -48,7 +48,7 @@ function kits_edit_screen_boxes(): array {
 	$data  = kits_edit_screen_map_data();
 	$out   = array();
 	$boxes = (array) apply_filters( 'kits_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) );
-	$boxes = (array) apply_filters( 'aw_edit_screen_boxes', $boxes ); // older name, still read.
+	$boxes = (array) apply_filters( 'kits_edit_screen_boxes', $boxes ); // older name, still read.
 	foreach ( $boxes as $id => $b ) {
 		if ( is_array( $b ) ) {
 			$out[ (string) $id ] = $b + array(
@@ -89,7 +89,7 @@ function kits_edit_screen_map(): array {
 	}
 	$out  = array();
 	$keys = (array) apply_filters( 'kits_edit_screen_map', $keys );
-	$keys = (array) apply_filters( 'aw_edit_screen_map', $keys ); // older name, still read.
+	$keys = (array) apply_filters( 'kits_edit_screen_map', $keys ); // older name, still read.
 	foreach ( $keys as $name => $k ) {
 		if ( ! is_array( $k ) ) {
 			continue;

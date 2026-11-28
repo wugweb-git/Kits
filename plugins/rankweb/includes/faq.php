@@ -314,16 +314,16 @@ add_action(
 
 // A tag's subject changed (box or REST meta): its page shows the new heading at once (LiteSpeed; the edge keeps it up
 // to kits_cdn_ttl). The REST API saves meta alone without edited_term, so the purge follows the meta, not the term.
-foreach ( array( 'added_term_meta', 'updated_term_meta', 'deleted_term_meta' ) as $aw_faq_hook ) {
+foreach ( array( 'added_term_meta', 'updated_term_meta', 'deleted_term_meta' ) as $rankweb_faq_hook ) {
 	add_action(
-		$aw_faq_hook,
+		$rankweb_faq_hook,
 		function ( $meta_id, $term_id, $key ) {
 			if ( 'rankweb_faq_subject' !== $key ) {
 				return;
 			}
 			$link = get_term_link( (int) $term_id );
 			if ( is_string( $link ) ) {
-				do_action( 'litespeed_purge_url', $link );
+				do_action( 'litespeed_purge_url', $link ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 			}
 			delete_transient( 'aw_faq_index' );
 		},
@@ -1043,7 +1043,7 @@ add_action(
 add_action(
 	'save_post',
 	function ( $post_id, $post ) {
-		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || ! empty( $GLOBALS['aw_faq_converting'] ) || ! rankweb_faq_editor_posted() ) {
+		if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) || ! empty( $GLOBALS['rankweb_faq_converting'] ) || ! rankweb_faq_editor_posted() ) {
 			return; // the conversion's own re-save must not overwrite the questions it just moved
 		}
 		if ( absint( wp_unslash( $_POST['post_ID'] ?? 0 ) ) !== (int) $post_id || ! current_user_can( 'edit_post', $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
@@ -1158,7 +1158,7 @@ add_action(
 add_action(
 	'save_post_post',
 	function ( $post_id ) {
-		if ( ! wp_is_post_revision( $post_id ) && empty( $GLOBALS['aw_faq_converting'] ) ) {
+		if ( ! wp_is_post_revision( $post_id ) && empty( $GLOBALS['rankweb_faq_converting'] ) ) {
 			rankweb_faq_convert_rank_math( $post_id ); // a Rank Math FAQ block added in the editor or by a publish script
 		}
 	},
@@ -1224,16 +1224,16 @@ function rankweb_faq_convert_rank_math( $post_id, $dry = false ) {
 		'faq'    => $before,
 	);
 	update_post_meta( $post_id, '_aw_faq_rm_block', wp_slash( wp_json_encode( $log ) ) );
-	$GLOBALS['aw_faq_converting'] = true;
-	$GLOBALS['aw_keep_modified']  = true; // the same questions in another field: the modified date stays (keep-modified.php)
+	$GLOBALS['rankweb_faq_converting'] = true;
+	$GLOBALS['rankweb_keep_modified']  = true; // the same questions in another field: the modified date stays (keep-modified.php)
 	wp_update_post(
 		array(
 			'ID'           => $post_id,
 			'post_content' => wp_slash( serialize_blocks( $keep ) ),
 		)
 	);
-	$GLOBALS['aw_faq_converting'] = false;
-	$GLOBALS['aw_keep_modified']  = false;
+	$GLOBALS['rankweb_faq_converting'] = false;
+	$GLOBALS['rankweb_keep_modified']  = false;
 	clean_post_cache( $post_id );
 	return array( count( $moved ), $long, $links );
 }
@@ -1275,16 +1275,16 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 				if ( ! $last ) {
 					WP_CLI::error( "Nothing to undo for $id." );
 				}
-				$GLOBALS['aw_faq_converting'] = true;
-				$GLOBALS['aw_keep_modified']  = true; // the same questions in another field: the modified date stays (keep-modified.php)
+				$GLOBALS['rankweb_faq_converting'] = true;
+				$GLOBALS['rankweb_keep_modified']  = true; // the same questions in another field: the modified date stays (keep-modified.php)
 				wp_update_post(
 					array(
 						'ID'           => $id,
 						'post_content' => wp_slash( get_post_field( 'post_content', $id ) . "\n\n" . $last['blocks'] ),
 					)
 				);
-				$GLOBALS['aw_faq_converting'] = false;
-				$GLOBALS['aw_keep_modified']  = false;
+				$GLOBALS['rankweb_faq_converting'] = false;
+				$GLOBALS['rankweb_keep_modified']  = false;
 				if ( '' === (string) $last['faq'] ) {
 					delete_post_meta( $id, 'aw_faq' );
 				} else {

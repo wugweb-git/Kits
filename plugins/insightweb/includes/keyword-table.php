@@ -315,7 +315,7 @@ function insightweb_kw_set_roles( $id, $add, $remove = 0 ) {
 	}
 	if ( $new !== (int) $row->roles ) {
 		$wpdb->update( $k, array( 'roles' => $new, 'updated' => insightweb_si_now() ), array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		do_action( 'aw_kw_saved', (int) $id );
+		do_action( 'insightweb_kw_saved', (int) $id );
 	}
 	return $new;
 }
@@ -363,7 +363,7 @@ function insightweb_kw_update( $id, array $fields ) {
 	$changed        = array_keys( $set );
 	$set['updated'] = insightweb_si_now();
 	$wpdb->update( insightweb_si_table( 'keywords' ), $set, array( 'id' => (int) $id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	do_action( 'aw_kw_saved', (int) $id, $changed );
+	do_action( 'insightweb_kw_saved', (int) $id, $changed );
 	return true;
 }
 
@@ -394,7 +394,7 @@ function insightweb_kw_map_set( $id, $kind, array $values ) {
 		$wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (kw_id, kind, value) VALUES (%d, %s, %s)', $m, (int) $id, $kind, $v ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
 	if ( $add || $del ) {
-		do_action( 'aw_kw_saved', (int) $id );
+		do_action( 'insightweb_kw_saved', (int) $id );
 		return true;
 	}
 	return false;

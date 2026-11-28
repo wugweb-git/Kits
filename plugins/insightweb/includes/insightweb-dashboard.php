@@ -35,7 +35,7 @@ add_action(
 add_action( 'aw_si_daily', 'insightweb_dash_request', 20 );
 
 // Delete data clears this job with the others.
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_DASH_JOB ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_DASH_JOB ) ) );
 
 /**
  * Ask for a count now (the Dashboard's first view, Count now, or after the daily import): one single event, never a

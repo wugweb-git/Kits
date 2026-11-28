@@ -104,7 +104,7 @@ function kits_error_count_php_candidates() {
 	if ( '' !== $host ) {
 		$out[] = $d['home'] . '/.logs/error_log_' . str_replace( array( '.', '-' ), '_', $host ); // Hostinger's log for this domain only (the folder holds every domain's).
 	}
-	return array_values( array_unique( (array) apply_filters( 'aw_error_count_php_paths', $out ) ) );
+	return array_values( array_unique( (array) apply_filters( 'kits_error_count_php_paths', $out ) ) );
 }
 
 /**
@@ -478,7 +478,7 @@ add_action(
 			return;
 		}
 		add_action(
-			'aw_cron_health_after',
+			'kits_cron_health_after',
 			function () {
 				$run = (array) get_option( 'aw_error_count', array() );
 				if ( empty( $run['at'] ) ) {

@@ -46,7 +46,7 @@ function sourceweb_sa_kw_list_defs(): array {
 		'strong'  => __( 'Include', 'sourceweb' ),
 		'animal'  => __( 'Topic', 'sourceweb' ),
 		'context' => __( 'Context', 'sourceweb' ),
-		'exclude' => __( 'Exclude', 'sourceweb' ),
+		'exclude' => __( 'Exclude', 'sourceweb' ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	);
 }
 
@@ -133,7 +133,7 @@ function sourceweb_sa_kw_lists_part( array $rel ): void {
 		'strong'  => __( 'Keeps an item on its own. Each English one is also searched on Google News every run.', 'sourceweb' ),
 		'animal'  => __( 'Keeps an item together with a Context word.', 'sourceweb' ),
 		'context' => __( 'Keeps an item together with a Topic word.', 'sourceweb' ),
-		'exclude' => __( 'Drops an item, whatever else it has.', 'sourceweb' ),
+		'exclude' => __( 'Drops an item, whatever else it has.', 'sourceweb' ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	);
 	foreach ( sourceweb_sa_kw_list_defs() as $k => $label ) {
 		echo '<tr><th scope="row"><label for="sw_kw_' . esc_attr( $k ) . '">' . esc_html( $label ) . '</label></th><td><textarea id="sw_kw_' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" rows="5" class="large-text code">' . esc_textarea( implode( "\n", array_map( 'strval', (array) ( $rel[ $k ] ?? array() ) ) ) ) . '</textarea><p class="description">' . esc_html( $help[ $k ] ) . ' ' . esc_html__( 'One word or phrase per line; a trailing * matches a prefix.', 'sourceweb' ) . '</p></td></tr>';

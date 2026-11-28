@@ -51,7 +51,7 @@ function insightweb_si_tools(): array {
 }
 
 add_filter(
-	'aw_si_import_kinds',
+	'insightweb_si_import_kinds',
 	function ( $kinds ) {
 		$kinds['ubersuggest'] = __( 'Ubersuggest (paste or CSV: keyword, volume; optional: SD, CPC)', 'insightweb' );
 		$kinds['vidiq']       = __( 'vidIQ (paste or CSV: keyword, volume; optional: competition, score)', 'insightweb' );
@@ -61,7 +61,7 @@ add_filter(
 );
 
 add_filter(
-	'aw_si_import_run',
+	'insightweb_si_import_run',
 	function ( $out, string $kind, string $raw ) {
 		return isset( insightweb_si_tools()[ $kind ] ) ? insightweb_si_tool_import( $kind, $raw ) : $out;
 	},
@@ -246,7 +246,7 @@ function insightweb_si_tool_seeds_save( string $raw ): bool {
 }
 
 add_filter(
-	'aw_si_rising_lists',
+	'insightweb_si_rising_lists',
 	function ( $lists ) {
 		$lists['tool_seeds'] = insightweb_si_tool_seeds();
 		return $lists;
@@ -254,7 +254,7 @@ add_filter(
 );
 
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_si_settings_rows',
 	function () {
 		echo '<tr><th scope="row"><label for="aw-si-tool-seeds">' . esc_html__( 'Seeds for keyword tools', 'insightweb' ) . '</label></th><td>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_tool_seeds">';
@@ -281,7 +281,7 @@ add_action(
 
 // The result of Save seeds, on Settings (12 Nov 2026: the save had no notice).
 add_action(
-	'aw_si_settings_notices',
+	'insightweb_si_settings_notices',
 	function () {
 		$r = isset( $_GET['seeds'] ) ? sanitize_key( wp_unslash( $_GET['seeds'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- message only.
 		if ( 'saved' === $r ) {

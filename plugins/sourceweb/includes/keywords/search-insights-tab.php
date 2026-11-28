@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // The tab sits between Search Insights' Searches and Settings tabs.
-add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'sourcing' => __( 'Sourcing keywords', 'sourceweb' ) ) );
+add_filter( 'insightweb_si_tabs', fn( $tabs ) => (array) $tabs + array( 'sourcing' => __( 'Sourcing keywords', 'sourceweb' ) ) );
 
 add_action(
 	'aw_si_tab_sourcing',
@@ -73,7 +73,7 @@ function sourceweb_sourcing_si_terms( $terms ) {
 	}
 	return array_merge( is_array( $terms ) ? $terms : array(), $out ); // another provider's searches are kept
 }
-add_filter( 'aw_search_demand_terms', 'sourceweb_sourcing_si_terms' );
+add_filter( 'sourceweb_search_demand_terms', 'sourceweb_sourcing_si_terms' );
 
 /** Search Insights is installed and switched on (aw-seo-extras active). */
 function sourceweb_sourcing_si_available() {

@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.7.4
+Stable tag: 3.7.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -115,6 +115,9 @@ MailWeb connects to external services only when configured by the site administr
 
 == Upgrade Notice ==
 
+= 3.7.5 =
+Hook names and variables now carry the plugin prefix.
+
 = 3.7.4 =
 Checks for its own updates from the registry. Log lines go through one helper and are written only with WP_DEBUG_LOG on. The bundled vendor/ ships with its composer.json.
 
@@ -128,7 +131,7 @@ Wording fixes only: the sender name in FluentCRM emails and setup is the site's 
 Adds a delivery log, a fallback SMTP connection and failure alerts by email, all off until you switch them on, and a dismiss link on the paused notice. Failure alerts are by email only; the unused webhook alert code is gone.
 
 = 3.3.0 =
-Adds a Site Health email sending check and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`). Corrected in 3.3.5: this note once also listed per-user pause dismissal, email logging and resend, fallback SMTP and failure alert webhooks. Those were not working then; logging, fallback, alerts and the dismiss link arrived in 3.4.0.
+Adds a Site Health email sending check and WP-CLI commands (`wp mailweb health|stats|test|prune-logs`). Logging, fallback and alerts arrived in 3.4.0.
 
 == Bundled libraries ==
 
@@ -149,6 +152,9 @@ Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each pack
 5. A website form message open in the Inbox, with the sender's fields and Reply, Mark unread and Move to Trash.
 
 == Changelog ==
+
+= 3.7.5 =
+* Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
 
 = 3.7.4 =
 * Checks for its own updates from the registry. Log lines go through one helper and are written only with WP_DEBUG_LOG on. The bundled vendor/ ships with its composer.json.

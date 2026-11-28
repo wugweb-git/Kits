@@ -57,7 +57,7 @@ add_action(
 function rankweb_seo_advice_text( WP_Post $post ) {
 	$html = function_exists( 'rankweb_seo_analysis_content' ) ? (string) rankweb_seo_analysis_content( $post ) : '';
 	if ( '' === $html ) {
-		$html = (string) apply_filters( 'the_content', $post->post_content );
+		$html = (string) apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	}
 	$text = trim( preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $html ) ) );
 	return array(

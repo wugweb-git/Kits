@@ -662,8 +662,8 @@ add_action(
 );
 
 // Titles and descriptions are printed in the one date format (owner, 17 Oct 2026); aw_heading_dates() is in the earlier Core plugin.
-foreach ( array( 'rank_math/frontend/title', 'rank_math/frontend/description' ) as $aw_hook ) {
-	add_filter( $aw_hook, fn( $text ) => function_exists( 'aw_heading_dates' ) ? aw_heading_dates( $text ) : $text, 20 );
+foreach ( array( 'rank_math/frontend/title', 'rank_math/frontend/description' ) as $rankweb_hook ) {
+	add_filter( $rankweb_hook, fn( $text ) => function_exists( 'aw_heading_dates' ) ? aw_heading_dates( $text ) : $text, 20 );
 }
 
 /* The standalone meta description is printed by standalone-seo.php (rankweb_print_head_tags), once, for every kind of page. */

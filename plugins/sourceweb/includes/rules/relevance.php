@@ -146,7 +146,7 @@ function sourceweb_relevance_directory() {
 		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'
 		 JOIN {$wpdb->terms} t ON t.term_id = tt.term_id AND t.slug IN ('animal-welfare-organisation','abc-centre','wildlife-rescue')
-		 WHERE {$is_l} AND p.post_status = 'publish'"
+		 WHERE {$is_l} AND p.post_status = 'publish'" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- needed here and bounded; see the surrounding code.
 	);
 }
 

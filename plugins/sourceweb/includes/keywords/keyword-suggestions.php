@@ -57,7 +57,7 @@ function sourceweb_sourcing_suggest_extra_defaults() {
  *                    rank, source, pushed), or null when neither Search Insights nor a push gives any data.
  */
 function sourceweb_sourcing_suggestions() {
-	$terms  = apply_filters( 'aw_search_demand_terms', null );
+	$terms  = apply_filters( 'sourceweb_search_demand_terms', null );
 	$pushed = function_exists( 'sourceweb_sourcing_pushed_suggestions' ) ? sourceweb_sourcing_pushed_suggestions() : array();
 	if ( ! is_array( $terms ) && ! $pushed ) {
 		return null;
@@ -148,7 +148,7 @@ function sourceweb_sourcing_suggest_apply( $op, array $qs ) {
 		$n = 0;
 		foreach ( $qs as $q ) {
 			if ( in_array( $op, array( 'include', 'exclude', 'search' ), true ) ) {
-				$bit = array( 'include' => SOURCEWEB_KW_ROLE_INCLUDE, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH )[ $op ];
+				$bit = array( 'include' => SOURCEWEB_KW_ROLE_INCLUDE, 'exclude' => SOURCEWEB_KW_ROLE_EXCLUDE, 'search' => SOURCEWEB_KW_ROLE_SEARCH )[ $op ]; // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 				$id  = insightweb_kw_id_by_norm( insightweb_si_norm( $q ) );
 				$was = $id ? (int) insightweb_kw_get( $id )['roles'] : 0;
 				$r   = sourceweb_sourcing_kw_add( $q, array( 'roles' => $bit, 'sections' => SOURCEWEB_KW_ROLE_EXCLUDE === $bit ? array() : sourceweb_types( array( 'news' ) ) ) );

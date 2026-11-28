@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -97,6 +97,9 @@ By default, deleting the plugin removes nothing: listings, places, claims, setti
 
 == Changelog ==
 
+= 1.5.4 =
+* Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
+
 = 1.5.3 =
 * Checks for its own updates from the registry. Calls to SourceWeb, InsightWeb and RankWeb use their current names, and the earlier aw_ shims are gone from the plugin. The Claims screen has a title in the tab and header.
 
@@ -163,6 +166,9 @@ By default, deleting the plugin removes nothing: listings, places, claims, setti
 * The Directory becomes its own plugin. Same pages, data, field groups, blocks, shortcodes and routes; nothing changes on the site.
 
 == Upgrade Notice ==
+
+= 1.5.4 =
+Hook names and variables now carry the plugin prefix.
 
 = 1.5.3 =
 Checks for its own updates from the registry. Calls to SourceWeb, InsightWeb and RankWeb use their current names, and the earlier aw_ shims are gone from the plugin. The Claims screen has a title in the tab and header.

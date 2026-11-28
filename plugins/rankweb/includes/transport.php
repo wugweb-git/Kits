@@ -352,7 +352,7 @@ add_action(
 function rankweb_transport_body(): void {
 	echo '<p>' . esc_html__( 'Copy SEO titles, descriptions, focus keywords and robots settings from another SEO plugin. A field that already has a value is never overwritten. Nothing is deleted from the other plugin.', 'rankweb' ) . '</p>';
 	$report = null;
-	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && current_user_can( 'manage_options' ) && check_admin_referer( 'rankweb_transport' ) ) {
+	if ( 'POST' === ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) && current_user_can( 'manage_options' ) && check_admin_referer( 'rankweb_transport' ) ) {
 		$apply  = ! empty( $_POST['apply'] );
 		$source = sanitize_key( wp_unslash( $_POST['source'] ?? '' ) );
 		$kind   = sanitize_key( wp_unslash( $_POST['kind'] ?? 'posts' ) );

@@ -4,7 +4,7 @@
  * the schema, the sitemaps and the "Updated" line, so it moves only when a reader would see a change. A save that only
  * changes letter case, moves data between fields or repairs a value keeps the date the page had:
  *
- * - in PHP: kits_keep_modified( fn() => wp_update_post( … ) ) (or set $GLOBALS['aw_keep_modified'] around the save);
+ * - in PHP: kits_keep_modified( fn() => wp_update_post( … ) ) (or set $GLOBALS['kits_keep_modified'] around the save);
  * - over the REST API (a script in the logged-in browser, WP-CLI's REST calls): add ?aw_keep_modified=1 to the request, or
  *   the header X-AW-Keep-Modified: 1. The user still needs the right to edit the item; only the date stays.
  *
@@ -24,18 +24,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return mixed
  */
 function kits_keep_modified( callable $save ) {
-	$was                         = ! empty( $GLOBALS['aw_keep_modified'] );
-	$GLOBALS['aw_keep_modified'] = true;
+	$was                         = ! empty( $GLOBALS['kits_keep_modified'] );
+	$GLOBALS['kits_keep_modified'] = true;
 	try {
 		return $save();
 	} finally {
-		$GLOBALS['aw_keep_modified'] = $was;
+		$GLOBALS['kits_keep_modified'] = $was;
 	}
 }
 
 /** Whether the save in progress asked to keep the modified date. */
 function kits_keep_modified_requested() {
-	if ( ! empty( $GLOBALS['aw_keep_modified'] ) ) {
+	if ( ! empty( $GLOBALS['kits_keep_modified'] ) || ! empty( $GLOBALS['rankweb_keep_modified'] ) ) {
 		return true;
 	}
 	if ( ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {

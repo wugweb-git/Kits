@@ -184,7 +184,7 @@ function insightweb_si_rising_blocked( string $src ): bool {
 // that has not reported yet joins once twice its schedule has passed since this code first loaded, so a deploy does not
 // show seven sources "late" against the date phase 1 was installed.
 add_filter(
-	'aw_si_sources',
+	'insightweb_si_sources',
 	function ( $sources ) {
 		$since = (int) get_option( 'aw_si_rising_since' );
 		if ( ! $since ) {
@@ -218,7 +218,7 @@ add_filter(
  * site lists its own with the filter aw_si_species. */
 function insightweb_si_species(): array {
 	$list = array();
-	return array_values( array_unique( array_map( 'strval', (array) apply_filters( 'aw_si_species', $list ) ) ) );
+	return array_values( array_unique( array_map( 'strval', (array) apply_filters( 'insightweb_si_species', $list ) ) ) );
 }
 
 /**
@@ -253,9 +253,9 @@ function insightweb_si_rising_lists(): array {
 		'interest'       => array_values( array_map( 'strval', (array) $interest ) ),
 		'anchor'         => '', // the comparison topic for Trends interest (= 100); a site sets its own with the filter
 		// Terms with these words are dropped by the worker: films, songs and shows fill the trending list. A site adds its own with the filter.
-		'exclude'        => array( 'anime', 'manga', 'movie', 'film', 'song', 'lyrics', 'season', 'episode', 'cast', 'trailer', 'netflix', 'web series', 'box office', 'game', 'meme', 'wallpaper', 'cartoon' ),
+		'exclude'        => array( 'anime', 'manga', 'movie', 'film', 'song', 'lyrics', 'season', 'episode', 'cast', 'trailer', 'netflix', 'web series', 'box office', 'game', 'meme', 'wallpaper', 'cartoon' ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	);
-	return (array) apply_filters( 'aw_si_rising_lists', $lists );
+	return (array) apply_filters( 'insightweb_si_rising_lists', $lists );
 }
 
 /**
@@ -297,7 +297,7 @@ function insightweb_si_rising_match( string $norm, string $term, bool $look_up_p
 		// A title search (a scan of published posts' titles): only for a term seen for the first time.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- the type list is built by *_sql_in_types()/*_sql_list(), which esc_sql() every slug
-		$post = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ( " . insightweb_sql_list( insightweb_types_with( array( 'library', 'campaign', 'news' ), array( 'page', 'post' ) ) ) . " ) AND post_title LIKE %s ORDER BY " . insightweb_sql_in_types( 'post_type', insightweb_types( array( 'news' ) ) ) . ", post_date DESC LIMIT 1", '%' . $wpdb->esc_like( $term ) . '%' ) );
+		$post = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_status = 'publish' AND post_type IN ( " . insightweb_sql_list( insightweb_types_with( array( 'library', 'campaign', 'news' ), array( 'page', 'post' ) ) ) . " ) AND post_title LIKE %s ORDER BY " . insightweb_sql_in_types( 'post_type', insightweb_types( array( 'news' ) ) ) . ", post_date DESC LIMIT 1", '%' . $wpdb->esc_like( $term ) . '%' ) ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		if ( $post ) {
 			$page = insightweb_si_path( (string) get_permalink( (int) $post ) );
@@ -688,11 +688,11 @@ add_action(
  * The Rising tab.
  */
 
-add_filter( 'aw_si_tabs', fn( $tabs ) => array( 'rising' => __( 'Rising', 'insightweb' ) ) + (array) $tabs );
+add_filter( 'insightweb_si_tabs', fn( $tabs ) => array( 'rising' => __( 'Rising', 'insightweb' ) ) + (array) $tabs );
 
 // A month of rising sightings keeps its last growth, never a sum of ratios (rollup.php).
 add_filter(
-	'aw_si_last_value_metrics',
+	'insightweb_si_last_value_metrics',
 	function ( $metrics ) {
 		foreach ( array_keys( insightweb_si_rising_sources() ) as $key ) {
 			$metrics[] = 'rising:' . $key;
@@ -702,7 +702,7 @@ add_filter(
 );
 
 // Deactivating the plugin removes the spikes event, as it does Search Insights' own (aw-seo-extras.php).
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_RISING_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_RISING_CRON ) ) );
 
 // The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped', 'added', 'not_added' ) ) );
@@ -1045,7 +1045,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 add_action(
-	'aw_si_settings_rows',
+	'insightweb_si_settings_rows',
 	function () {
 		$on = insightweb_si_gdelt_on();
 		echo '<tr><th scope="row">' . esc_html__( 'News (GDELT)', 'insightweb' ) . '</th><td>';

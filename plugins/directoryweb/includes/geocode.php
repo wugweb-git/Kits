@@ -262,9 +262,9 @@ add_action(
 	10,
 	3
 );
-foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_geo_hook ) {
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $directoryweb_geo_hook ) {
 	add_action(
-		$aw_geo_hook,
+		$directoryweb_geo_hook,
 		function ( $mid, $id, $key ) {
 			if ( in_array( $key, array_merge( (array) directoryweb_geo_profile()['address_keys'], array( 'aw_pincode', 'aw_district_code' ) ), true ) ) {
 				directoryweb_geo_queue( (int) $id );
@@ -274,7 +274,7 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 		3
 	);
 }
-unset( $aw_geo_hook );
+unset( $directoryweb_geo_hook );
 
 add_action(
 	'directoryweb_geocode_one',

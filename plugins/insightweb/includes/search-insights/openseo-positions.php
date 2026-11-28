@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 const AW_SI_OPENSEO_POS = 'openseo_serp';
 
 add_filter(
-	'aw_si_import_kinds',
+	'insightweb_si_import_kinds',
 	function ( $kinds ) {
 		$kinds[ AW_SI_OPENSEO_POS ] = __( 'OpenSEO positions (CSV: date, query, position; optional: url, top3, paa, source). Kept apart from the browser checks.', 'insightweb' );
 		return $kinds;
@@ -29,7 +29,7 @@ add_filter(
 );
 
 add_filter(
-	'aw_si_import_run',
+	'insightweb_si_import_run',
 	function ( $out, string $kind, string $raw ) {
 		return AW_SI_OPENSEO_POS === $kind ? insightweb_si_openseo_pos_import( $raw ) : $out;
 	},

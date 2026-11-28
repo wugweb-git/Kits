@@ -59,11 +59,11 @@ function sourceweb_sources_live_save( $on ) {
  * fallback. Only while "Workers use these lists" is on, and only with AW_GITHUB_DISPATCH_TOKEN (kits_dispatch_workflow
  * logs the missing token); without it the daily run copies the lists.
  */
-foreach ( array( 'aw_sources', 'aw_relevance' ) as $aw_sync_option ) {
-	add_action( 'add_option_' . $aw_sync_option, 'sourceweb_sources_sync_soon' );
-	add_action( 'update_option_' . $aw_sync_option, 'sourceweb_sources_sync_soon' );
+foreach ( array( 'aw_sources', 'aw_relevance' ) as $sourceweb_sync_option ) {
+	add_action( 'add_option_' . $sourceweb_sync_option, 'sourceweb_sources_sync_soon' );
+	add_action( 'update_option_' . $sourceweb_sync_option, 'sourceweb_sources_sync_soon' );
 }
-unset( $aw_sync_option );
+unset( $sourceweb_sync_option );
 
 /** Queue one Sources sync start, 2 minutes from now (a no-op if one is already queued). */
 function sourceweb_sources_sync_soon() {
@@ -312,11 +312,11 @@ function sourceweb_sources_sanitize( $value ) {
 	if ( '' === $tab ) {
 		return $value;
 	}
-	if ( ! has_filter( 'aw_sources_save_' . $tab ) ) { // a form of a tab that no longer exists: never replace the lists with it
+	if ( ! has_filter( 'sourceweb_sources_save_' . $tab ) ) { // a form of a tab that no longer exists: never replace the lists with it
 		return get_option( 'aw_sources' );
 	}
 	$was = sourceweb_sources_config();
-	$c   = apply_filters( 'aw_sources_save_' . $tab, $was, $value );
+	$c   = apply_filters( 'sourceweb_sources_save_' . $tab, $was, $value );
 	sourceweb_sourcing_settings_saved();
 	return $c === $was ? get_option( 'aw_sources' ) : $c; // Save with no change writes nothing (same keys, values and types)
 }

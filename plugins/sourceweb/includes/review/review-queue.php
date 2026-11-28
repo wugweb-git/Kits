@@ -101,9 +101,9 @@ add_action(
 	10,
 	3
 );
-foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $aw_review_hook ) {
+foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $sourceweb_review_hook ) {
 	add_action(
-		$aw_review_hook,
+		$sourceweb_review_hook,
 		function ( $mid, $id, $key ) {
 			if ( 'aw_review' === $key ) {
 				sourceweb_review_count_flush();
@@ -113,7 +113,7 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 		3
 	);
 }
-unset( $aw_review_hook );
+unset( $sourceweb_review_hook );
 
 add_action(
 	'admin_menu',

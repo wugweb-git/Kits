@@ -25,7 +25,7 @@ const AW_SI_LIVE_TOKEN = 'aw_si_live_token';
 const AW_SI_LIVE_TTL   = 2 * HOUR_IN_SECONDS;
 
 add_filter(
-	'aw_si_tabs',
+	'insightweb_si_tabs',
 	function ( $tabs ) {
 		$tabs['checklist'] = __( 'Check list', 'insightweb' );
 		return $tabs;
@@ -308,7 +308,7 @@ function insightweb_si_live_window(): void {
 		'nonce'   => wp_create_nonce( 'aw_si_live' ),
 		'token'   => $token,
 		'queries' => $pending,
-		'google'  => (array) apply_filters( 'aw_si_live_origins', array( 'https://www.google.com', 'https://www.google.co.in' ) ),
+		'google'  => (array) apply_filters( 'insightweb_si_live_origins', array( 'https://www.google.com', 'https://www.google.co.in' ) ),
 		'text'    => array(
 			/* translators: %d: keywords left. */
 			'left'    => __( '%d left.', 'insightweb' ),

@@ -102,7 +102,7 @@ add_action(
 				'callback'            => function () {
 					// LiteSpeed's REST cache (often on, for 7 days) replaces the header below with its own, and a cached
 					// challenge works once: everyone after the first sender failed the check (found 21 Oct 2026). Its own API wins.
-					do_action( 'litespeed_control_set_nocache', 'ALTCHA challenge' );
+					do_action( 'litespeed_control_set_nocache', 'ALTCHA challenge' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 					$r = new WP_REST_Response( kits_altcha_challenge() );
 					$r->header( 'Cache-Control', 'no-store' );
 					$r->header( 'X-LiteSpeed-Cache-Control', 'no-cache' );

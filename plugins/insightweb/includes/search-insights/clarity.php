@@ -42,7 +42,7 @@ function insightweb_si_clarity_on(): bool {
  */
 function insightweb_si_clarity_thresholds(): array {
 	return (array) apply_filters(
-		'aw_si_clarity_thresholds',
+		'insightweb_si_clarity_thresholds',
 		array(
 			'sessions'  => 20,
 			'rage'      => 5.0,
@@ -342,7 +342,7 @@ add_action( AW_SI_CLARITY_RETRY, fn() => get_option( 'aw_si_off' ) || ! insightw
 
 // Monthly rows keep the last value of averages and shares (a sum of them would mean nothing); counts are summed.
 add_filter(
-	'aw_si_last_value_metrics',
+	'insightweb_si_last_value_metrics',
 	function ( $last ) {
 		foreach ( array( 'pps', 'active', 'total', 'xscroll', 'errclick' ) as $m ) {
 			$last[] = 'clarity:' . $m;
@@ -361,7 +361,7 @@ function insightweb_si_clarity_since( int $days ): string {
 
 /** Days a Clarity page must be flagged on to count (filter aw_si_quality_min_days, as in insightweb_si_quality_pages()). */
 function insightweb_si_clarity_min_days(): int {
-	return max( 1, (int) apply_filters( 'aw_si_quality_min_days', 3 ) );
+	return max( 1, (int) apply_filters( 'insightweb_si_quality_min_days', 3 ) );
 }
 
 /**

@@ -19,7 +19,7 @@ defined( 'SOURCEWEB_SRC_CAP' ) || define( 'SOURCEWEB_SRC_CAP', 'manage_options' 
 if ( ! function_exists( 'kits_sourced_types' ) ) {
 	/** Post types fed by sources (news-like). Sites set them with the kits_sourced_post_types filter. */
 	function kits_sourced_types() {
-		return (array) apply_filters( 'kits_sourced_post_types', array( 'post' ) );
+		return (array) apply_filters( 'kits_sourced_post_types', array( 'post' ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	}
 }
 

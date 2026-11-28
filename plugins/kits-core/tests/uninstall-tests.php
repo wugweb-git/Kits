@@ -109,7 +109,7 @@ $files = glob( $GLOBALS['t_uploads'] . '/wugweb-backups/kits-core-uninstall-*.js
 t( 1 === count( $files ), 'ticked: one backup file is written' );
 $lines = $files ? array_map( fn( $l ) => json_decode( $l, true ), array_filter( explode( "\n", (string) implode( '', gzfile( $files[0] ) ) ) ) ) : array();
 $head  = $lines[0] ?? array();
-t( 'header' === ( $head['type'] ?? '' ) && 'kits-core' === ( $head['plugin'] ?? '' ) && '1.5.3' === ( $head['version'] ?? '' ), 'backup: the header names the plugin and version 1.5.0 (the version in kits-core.php)' );
+t( 'header' === ( $head['type'] ?? '' ) && 'kits-core' === ( $head['plugin'] ?? '' ) && ( preg_match( '/^ \* Version:\s*(\S+)/m', (string) file_get_contents( dirname( __DIR__ ) . '/kits-core.php' ), $kits_v ) ? $kits_v[1] : '' ) === ( $head['version'] ?? '' ), 'backup: the header names the plugin and the version in kits-core.php' );
 $saved = array_column( array_filter( $lines, fn( $l ) => 'option' === ( $l['type'] ?? '' ) ), 'value', 'name' );
 t( isset( $saved['kits_theme_options'], $saved['kits_brand_tokens'], $saved['site_layer_option'], $saved['kits_global_styles_backup'] ), 'backup: the options about to be deleted are in the file' );
 t( ! isset( $saved['kits_altcha_key'] ) && false === strpos( implode( '', gzfile( $files[0] ) ), 'SECRET-KEY-DO-NOT-BACKUP' ), 'backup: the ALTCHA secret is never written to the file' );

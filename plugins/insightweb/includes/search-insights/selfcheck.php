@@ -57,7 +57,7 @@ function insightweb_si_chk_daily(): void {
 	}
 }
 add_action( AW_SI_CRON_DAILY, 'insightweb_si_chk_daily', 22 );
-add_filter( 'aw_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_CHK_SPEED, AW_SI_CHK_AI ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_CHK_SPEED, AW_SI_CHK_AI ) ) );
 
 add_action(
 	AW_SI_CHK_SPEED,

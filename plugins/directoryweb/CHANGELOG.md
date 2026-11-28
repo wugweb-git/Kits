@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.4
+
+- Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
+
 ## 1.5.3
 
 - Checks for its own updates from the registry. Calls to SourceWeb, InsightWeb and RankWeb use their current names, and the earlier aw_ shims are gone from the plugin. The Claims screen has a title in the tab and header.

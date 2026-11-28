@@ -101,7 +101,7 @@ function sourceweb_dashboard_build( $why = '' ) {
 			'key'    => '' !== (string) get_option( 'aw_enrich_google_key', '' ),
 		),
 		// Tiles another plugin fills (a site plugin: Picture pipeline, Thumbnails): [ { key, label, value, sub, href, tone } ].
-		'extra'   => array_values( array_filter( (array) apply_filters( 'aw_sourcing_dashboard_tiles', array() ), 'is_array' ) ),
+		'extra'   => array_values( array_filter( (array) apply_filters( 'sourceweb_sourcing_dashboard_tiles', array() ), 'is_array' ) ),
 	);
 	set_transient( SOURCEWEB_DASH, $c, 3 * HOUR_IN_SECONDS );
 	update_option( SOURCEWEB_DASH_LOG, sourceweb_log_add( (array) get_option( SOURCEWEB_DASH_LOG, array() ), wp_date( 'Y-m-d' ), sourceweb_dashboard_numbers( $c ), SOURCEWEB_DASH_LOG_DAYS ), false );

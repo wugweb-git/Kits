@@ -297,7 +297,7 @@ function sourceweb_extra_parts( string $screen ): array {
 	}
 	ob_start();
 	if ( 'review' === $screen ) {
-		do_action( 'aw_review_intake' );
+		do_action( 'sourceweb_review_intake' );
 	} elseif ( 'settings' === $screen && current_user_can( 'manage_options' ) ) {
 		settings_errors( 'aw_backfill_floor' );
 		settings_errors( 'aw_src_reset' ); // "Defaults restored." after a reset below

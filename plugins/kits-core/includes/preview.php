@@ -155,7 +155,7 @@ function kits_preview_register_device( $label ) {
 
 /** Never cache this response (LiteSpeed, the CDN, browsers). */
 function kits_preview_nocache() {
-	do_action( 'litespeed_control_set_nocache', 'kits preview' );
+	do_action( 'litespeed_control_set_nocache', 'kits preview' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	if ( ! headers_sent() ) {
 		nocache_headers();
 		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private' );

@@ -420,7 +420,7 @@ function directoryweb_settings_native_page(): void {
 	$forms_map   = (array) get_option( $option_name, array() );
 	$saved       = false;
 
-	if ( 'POST' === ( $_SERVER['REQUEST_METHOD'] ?? '' ) && check_admin_referer( 'directoryweb_standalone_settings' ) ) {
+	if ( 'POST' === ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) && check_admin_referer( 'directoryweb_standalone_settings' ) ) {
 		update_option( 'aw_ff_send_email', ! empty( $_POST['directoryweb_claim_mail'] ) ? '1' : '0' );
 		$to = sanitize_email( wp_unslash( $_POST['directoryweb_claim_notify_to'] ?? '' ) );
 		update_option( 'directoryweb_claim_notify_to', is_email( $to ) ? $to : '' );

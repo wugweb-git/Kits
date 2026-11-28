@@ -135,7 +135,7 @@ add_action(
 	function () {
 		global $wp_filter;
 		if ( isset( $wp_filter['wp_robots'] ) && $wp_filter['wp_robots'] instanceof WP_Hook ) {
-			$GLOBALS['aw_seo_wp_robots'] = clone $wp_filter['wp_robots'];
+			$GLOBALS['rankweb_seo_wp_robots'] = clone $wp_filter['wp_robots'];
 		}
 	},
 	1
@@ -147,7 +147,7 @@ add_filter(
 		if ( rankweb_seo_noindex_rule() ) {
 			$robots['index'] = 'noindex';
 		}
-		$hook = $GLOBALS['aw_seo_wp_robots'] ?? null;
+		$hook = $GLOBALS['rankweb_seo_wp_robots'] ?? null;
 		if ( $hook instanceof WP_Hook ) {
 			$ours = (array) $hook->apply_filters( array(), array( array() ) );
 			if ( ! empty( $ours['noindex'] ) ) {
@@ -170,7 +170,7 @@ add_filter( 'rank_math/frontend/robots', fn( $r ) => rankweb_is_singular( array(
 add_filter(
 	'wp_robots',
 	function ( array $robots ) {
-		if ( rankweb_seo_noindex_rule() || ( rankweb_is_singular( array( 'listing' ) ) && isset( $_GET['press'] ) ) ) {
+		if ( rankweb_seo_noindex_rule() || ( rankweb_is_singular( array( 'listing' ) ) && isset( $_GET['press'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- needed here and bounded; see the surrounding code.
 			$robots['noindex'] = true;
 		}
 		return $robots;

@@ -184,7 +184,7 @@ function rankweb_link_audit_render( WP_Post $post ): string {
 	// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the content filters read the global post, as on a page view; restored below.
 	$GLOBALS['post'] = $post;
 	setup_postdata( $post );
-	$html = (string) apply_filters( 'the_content', $post->post_content );
+	$html = (string) apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	wp_reset_postdata();
 	return $html;
 }
@@ -417,7 +417,7 @@ function rankweb_link_audit_analyse( array $ids, int $started ): void {
 			array_push( $args, $id, $r['in'], $r['out'], (int) $r['depth'], $r['flags'] ? ',' . implode( ',', $r['flags'] ) . ',' : '', (string) wp_json_encode( (object) $r['detail'] ), $now );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders -- RankWeb's own table; the placeholders are built above.
-		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (post_id, links_in, links_out, depth, flags, detail, checked) VALUES ' . implode( ',', $sql ), $args ) );
+		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (post_id, links_in, links_out, depth, flags, detail, checked) VALUES ' . implode( ',', $sql ), $args ) ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- needed here and bounded; see the surrounding code.
 	}
 	$sum    = RankWeb_Link_Audit::summary( $result );
 	$anchor = function_exists( 'rankweb_anchor_rebuild' ) ? rankweb_anchor_rebuild() : array(

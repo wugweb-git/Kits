@@ -26,7 +26,7 @@ function insightweb_si_link_types(): array {
 		'copy'         => __( 'Copy', 'insightweb' ),
 		'spam'         => __( 'Spam', 'insightweb' ),
 	);
-	return (array) apply_filters( 'aw_si_link_types', $types ); // alerts.php adds Mention.
+	return (array) apply_filters( 'insightweb_si_link_types', $types ); // alerts.php adds Mention.
 }
 
 /**
@@ -91,7 +91,7 @@ function insightweb_si_link_put( array $l ): int {
  * The Links tab.
  */
 
-add_filter( 'aw_si_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'insightweb' ) ) );
+add_filter( 'insightweb_si_tabs', fn( $tabs ) => (array) $tabs + array( 'links' => __( 'Links', 'insightweb' ) ) );
 
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'linked', 'links_imported' ) ) );
 

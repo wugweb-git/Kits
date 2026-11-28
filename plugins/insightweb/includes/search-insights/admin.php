@@ -68,7 +68,7 @@ function insightweb_si_kw_action_url( string $action, int $id ): string {
  */
 function insightweb_si_extra_tabs(): array {
 	$out = array();
-	foreach ( (array) apply_filters( 'aw_si_tabs', array() ) as $key => $label ) {
+	foreach ( (array) apply_filters( 'insightweb_si_tabs', array() ) as $key => $label ) {
 		$key = sanitize_key( (string) $key );
 		if ( '' !== $key && ! in_array( $key, array( 'overview', 'keywords', 'settings' ), true ) ) {
 			$out[ $key ] = (string) $label;
@@ -121,7 +121,7 @@ function insightweb_si_load(): void {
 	insightweb_si_install();
 	$tab = insightweb_si_tab();
 	if ( isset( insightweb_si_extra_tabs()[ $tab ] ) ) {
-		do_action( 'aw_si_load_tab_' . $tab );
+		do_action( 'insightweb_si_load_tab_' . $tab );
 	}
 	if ( 'keywords' === $tab ) {
 		add_screen_option(
@@ -307,7 +307,7 @@ function insightweb_si_screen_fallback(): void {
 		insightweb_si_keywords_tab();
 	} elseif ( 'settings' === $tab ) {
 		insightweb_si_action_notices();
-		do_action( 'aw_si_settings_notices' );
+		do_action( 'insightweb_si_settings_notices' );
 		insightweb_si_numbers_form_native();
 		if ( function_exists( 'insightweb_si_settings_tab' ) ) {
 			insightweb_si_settings_tab();
@@ -315,7 +315,7 @@ function insightweb_si_screen_fallback(): void {
 	} else {
 		insightweb_si_action_notices();
 		ob_start();
-		do_action( 'aw_si_tab_' . $tab );
+		do_action( 'insightweb_si_tab_' . $tab );
 		$html = (string) ob_get_clean();
 		if ( '' === trim( $html ) ) {
 			wp_admin_notice( esc_html__( 'This tab has nothing to show yet.', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
@@ -1093,7 +1093,7 @@ function insightweb_si_box_clarity(): void {
 
 // Clarity tab: after Pages when Pages is there, else at the end.
 add_filter(
-	'aw_si_tabs',
+	'insightweb_si_tabs',
 	function ( $tabs ) {
 		$tabs = (array) $tabs;
 		$out  = array();
@@ -1161,7 +1161,7 @@ add_action(
  */
 function insightweb_si_settings_tab(): void {
 	$seeded = (int) get_option( 'aw_si_seeded' );
-	do_action( 'aw_si_settings_notices' );
+	do_action( 'insightweb_si_settings_notices' );
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row">' . esc_html__( 'Schedule', 'insightweb' ) . '</th><td><p>' . esc_html( sprintf( /* translators: 1: days of daily figures stored, 2: the same. */ __( 'Daily at 06:30 IST: Clarity (once the token is set). Daily at 07:10 IST: Search Console (the last 4 days again, plus up to 15 older days until %1$d days are stored), keyword roles from Rank Math and Sourcing, then priorities; at 07:15 IST Discover and Google News; from 07:40 IST URL Inspection (up to 2,000 pages a day, not indexed and never checked first). Daily at 07:20 IST: GA4 (site search, AI referrals, all referral and social sources, organic landing pages; the last 3 days; 404s and campaign events for the last 28 days). Daily at 08:10 IST: Google Alerts feeds (once set on Keys). Sundays at 06:00 IST: PageSpeed (lab scores and Chrome users\' figures) for the key pages and every campaign page, a few at a time. Mondays at 06:45 IST: Bing crawl figures; at 08:45 IST crawler access from the server; at 09:15 IST from outside (workers). Daily at 23:30 IST: rows older than %2$d days become monthly totals. The 2nd of each month at 07:40 IST: Bing Webmaster (links to us, and clicks and impressions by search and by page; once the key is set); once a month Bing search volumes for the top keywords. Searches on the site are counted as they happen.', 'insightweb' ), insightweb_si_keep_days(), insightweb_si_keep_days() ) ) . '</p></td></tr>';
 	echo '<tr><th scope="row">' . esc_html__( 'Keyword map seed', 'insightweb' ) . '</th><td><p>';
@@ -1241,7 +1241,7 @@ function insightweb_si_settings_tab(): void {
 	}
 	echo '</form>';
 	echo '<p class="description">' . esc_html__( 'The daily update can take a minute on the first run (it fetches up to 19 days of Search Console).', 'insightweb' ) . '</p></td></tr>';
-	do_action( 'aw_si_settings_rows' ); // More rows: imports and paste forms (imports.php).
+	do_action( 'insightweb_si_settings_rows' ); // More rows: imports and paste forms (imports.php).
 	echo '<tr><th scope="row"><label for="aw-si-confirm">' . esc_html__( 'Delete Search Insights data', 'insightweb' ) . '</label></th><td>';
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="aw_si_delete">';
 	wp_nonce_field( 'aw_si_delete' );
