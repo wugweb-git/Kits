@@ -11,7 +11,7 @@
 define( 'ABSPATH', __DIR__ );
 require dirname( __DIR__, 2 ) . '/plugins/sourceweb/includes/workers/workers-registry.php';
 
-$src = $argv[1] ?? 'https://raw.githubusercontent.com/wugweb-git/animal-writes-workers/main/docs/workers.json';
+$src = $argv[1] ?? 'https://raw.githubusercontent.com/wugweb-git/sourceweb-workers/main/docs/workers.json';
 $raw = @file_get_contents( $src );
 if ( false === $raw ) {
 	fwrite( STDOUT, "SKIP: could not read $src\n" );

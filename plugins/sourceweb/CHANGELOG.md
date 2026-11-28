@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.6.0
+
+- Run now works without Kits Core. SourceWeb starts a worker's workflow on GitHub itself (`sourceweb_dispatch_workflow()`, GitHub's workflow dispatch on the main branch). It needs a fine-grained token for the workers repository only, with Actions read and write, in wp-config.php as `SOURCEWEB_GITHUB_TOKEN` (the names `KITS_GITHUB_DISPATCH_TOKEN` and `AW_GITHUB_DISPATCH_TOKEN` keep working), and the repository as `SOURCEWEB_WORKERS_REPO` (owner/name) or the filter `sourceweb_workers_repo`. With neither set, Run now stays off and the Workers screen says what to add. The standalone Workers screen has a Run now button on each worker that can run; a renamed repository, a refused token and a missing workflow each give their own message. When Kits Core is present and this plugin has no setting of its own, Kits Core's connection is used as before.
+- The workers repository is now `wugweb-git/sourceweb-workers` (it was `wugweb-git/animal-writes-workers`). Names in the plugin's docs and comments, the site layer and the registry check are updated. The site layer sets both `sourceweb_workers_repo` and `kits_dispatch_repo` to it.
+- External services: GitHub's API (`api.github.com`) is listed in the readme and the registry; it is called only on Run now.
+- Tests: `tests/dispatch-test.php` (token, repository, request, every error), screens test (22 handlers).
+- Not run against GitHub or on a live WordPress.
+
 ## 0.5.0
 
 - Add a place: the standalone Places screen can make a place (a content type, plugin, workflow or other), with a name, an optional id and, for a content type, the content type. It is kept in the option `sourceweb_custom_places`, joins the list of places and can be chosen in a route. An id that is already a place is refused; a place a route still sends items to cannot be removed (`sourceweb_place_add()`, `sourceweb_place_remove()`).

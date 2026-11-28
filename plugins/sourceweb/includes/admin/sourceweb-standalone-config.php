@@ -846,9 +846,27 @@ function sourceweb_sa_handle_places_enhance(): void {
 
 /* ============================== Workers ============================== */
 
+add_action( 'admin_post_sourceweb_sa_worker_run', 'sourceweb_sa_handle_worker_run' );
+
+/** Run now for one worker: the same check and the same call as the shell's route. */
+function sourceweb_sa_handle_worker_run(): void {
+	sourceweb_sa_guard( 'sourceweb_sa_worker_run', sourceweb_sa_cap() );
+	$id = isset( $_POST['worker'] ) ? sanitize_key( wp_unslash( $_POST['worker'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
+	$w  = sourceweb_worker( $id );
+	if ( ! $w || ! sourceweb_workers_can_run( $w ) ) {
+		sourceweb_sa_back( 'workers', 'error', __( 'Run now is not available for this worker.', 'sourceweb' ) );
+	}
+	$res = sourceweb_workers_run_now( $w['file'] );
+	if ( true !== $res ) {
+		sourceweb_sa_back( 'workers', 'error', $w['name'] . ': ' . __( 'not started', 'sourceweb' ) . ' — ' . $res->get_error_message() );
+	}
+	sourceweb_sa_back( 'workers', 'success', $w['name'] . ': ' . __( 'started on GitHub. Its start report appears here within a minute or two.', 'sourceweb' ) );
+}
+
+
 /**
  * Workers: every worker the site knows, with its last report and status; its runs; add, change and delete a planned
- * worker. Run now is not here (it needs Kits Core's GitHub dispatch).
+ * worker. Run now is a button on each worker that can run (a GitHub token and the workers repository are set in wp-config.php).
  */
 function sourceweb_sa_screen_workers(): void {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- which view to show; nothing is saved.
@@ -866,8 +884,8 @@ function sourceweb_sa_screen_workers(): void {
 	$q   = sourceweb_sa_query();
 	$res = sourceweb_sa_data( 'sourceweb_rest_workers', $q );
 	echo '<p>' . esc_html__( 'The scheduled and manual jobs that fetch, check and tidy items, each with its last report and whether it is late or failing. A worker runs outside WordPress (GitHub Actions) and reports to this site when it starts and ends.', 'sourceweb' ) . '</p>';
-	if ( ! function_exists( 'kits_dispatch_workflow' ) || ! empty( $res['runOff'] ) ) {
-		sourceweb_sa_limit( __( 'Run now is not available here: starting a worker from the site needs Kits Core\'s GitHub connection and its token. Start a worker from GitHub Actions instead.', 'sourceweb' ) );
+	if ( ! empty( $res['runOff'] ) ) {
+		sourceweb_sa_limit( __( 'Run now is off: it needs a GitHub token and the workers repository. Add SOURCEWEB_GITHUB_TOKEN (a fine-grained token for that repository only, with Actions read and write) and SOURCEWEB_WORKERS_REPO (owner/name) to wp-config.php. Until then, start a worker from GitHub Actions.', 'sourceweb' ) );
 	}
 	echo '<p><a class="button" href="' . esc_url( sourceweb_sa_url( 'workers', array( 'sw_edit' => 'new' ) ) ) . '">' . esc_html__( 'Add a planned worker', 'sourceweb' ) . '</a></p>';
 	sourceweb_sa_list(
@@ -905,6 +923,9 @@ function sourceweb_sa_screen_workers(): void {
 					$out = '';
 					if ( empty( $r['planned'] ) || (int) $r['lastAt'] > 0 ) {
 						$out .= '<a class="button button-small" href="' . esc_url( sourceweb_sa_url( 'workers', array( 'sw_runs' => (string) $r['id'] ) ) ) . '">' . esc_html__( 'Runs', 'sourceweb' ) . '</a> ';
+					}
+					if ( ! empty( $r['canRun'] ) ) {
+						$out .= '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="sw-inline" style="display:inline"><input type="hidden" name="action" value="sourceweb_sa_worker_run"><input type="hidden" name="worker" value="' . esc_attr( (string) $r['id'] ) . '">' . wp_nonce_field( 'sourceweb_sa_worker_run', '_wpnonce', true, false ) . '<button type="submit" class="button button-small">' . esc_html__( 'Run now', 'sourceweb' ) . '</button></form> ';
 					}
 					return $out . '<a class="button button-small" href="' . esc_url( sourceweb_sa_url( 'workers', array( 'sw_edit' => (string) $r['id'] ) ) ) . '">' . esc_html__( 'Edit', 'sourceweb' ) . '</a>';
 				},

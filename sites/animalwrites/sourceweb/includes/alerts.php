@@ -25,7 +25,7 @@ add_action(
 			return; // the same problems were emailed in the last 12 hours
 		}
 		$hb   = (array) get_option( 'aw_ingest_heartbeat', array() );
-		$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " ingestion needs attention:\n\n- " . implode( "\n- ", $problems ) . "\n\n" . ( ! empty( $hb['last_link'] ) ? 'Last run: ' . $hb['last_link'] . "\n" : '' ) . "Runs: https://github.com/wugweb-git/animal-writes-workers/actions\n";
+		$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " ingestion needs attention:\n\n- " . implode( "\n- ", $problems ) . "\n\n" . ( ! empty( $hb['last_link'] ) ? 'Last run: ' . $hb['last_link'] . "\n" : '' ) . "Runs: https://github.com/wugweb-git/sourceweb-workers/actions\n";
 		if ( wp_mail( get_option( 'admin_email' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': ingestion problem — ' . reset( $problems ), $body ) ) {
 			set_transient( 'aw_ingest_alert_mailed', $kinds, 12 * HOUR_IN_SECONDS );
 		}
@@ -44,7 +44,7 @@ add_action(
 		if ( $sent && ! array_diff( array_keys( $problems ), explode( ',', $sent ) ) ) {
 			return; // the same problems were emailed in the last 12 hours
 		}
-		$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " workers need attention:\n\n- " . implode( "\n- ", $problems ) . "\n\nWorkers: " . admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) . "\nRuns: https://github.com/wugweb-git/animal-writes-workers/actions\n";
+		$body = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . " workers need attention:\n\n- " . implode( "\n- ", $problems ) . "\n\nWorkers: " . admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) . "\nRuns: https://github.com/wugweb-git/sourceweb-workers/actions\n";
 		if ( wp_mail( get_option( 'admin_email' ), wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ) . ': worker problem — ' . reset( $problems ), $body ) ) {
 			set_transient( 'aw_workers_alert_mailed', implode( ',', array_keys( $problems ) ), 12 * HOUR_IN_SECONDS );
 		}

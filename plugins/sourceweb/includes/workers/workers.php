@@ -5,7 +5,7 @@
  * can be overridden, and Planned workers added (workers-meta.php; the Workers screen is the Kits shell's, sourceweb-ui.php).
  *
  * Data: each workflow reports its start and end (POST aw/v1/worker-run, the workers' application password) from
- * .github/actions/report in wugweb-git/animal-writes-workers. Nothing polls GitHub.
+ * .github/actions/report in wugweb-git/sourceweb-workers. Nothing polls GitHub.
  * Alerts: a workflow with no report for its late limit (late_after_h), a run that failed, was cancelled or skipped its
  * main step, or a run with no end after its timeout; and UpdraftPlus's newest remote backup older than 36 hours or a
  * failed backup run (kits_backup_problem, Kits Core backups.php). Shown on the Workers screen, in the dashboard box "Scheduled tasks", in
@@ -326,15 +326,107 @@ add_filter(
 );
 
 /**
+ * The GitHub token that starts a workflow: a fine-grained token for the workers repository only, with Actions read and
+ * write, kept in wp-config.php (never in the database or a repository). SOURCEWEB_GITHUB_TOKEN; the names the site
+ * already uses (KITS_GITHUB_DISPATCH_TOKEN, AW_GITHUB_DISPATCH_TOKEN) keep working.
+ */
+function sourceweb_dispatch_token(): string {
+	foreach ( array( 'SOURCEWEB_GITHUB_TOKEN', 'KITS_GITHUB_DISPATCH_TOKEN', 'AW_GITHUB_DISPATCH_TOKEN' ) as $name ) {
+		if ( defined( $name ) && '' !== trim( (string) constant( $name ) ) ) {
+			return trim( (string) constant( $name ) );
+		}
+	}
+	return '';
+}
+
+/**
+ * The workers repository ("owner/name"): the filter `sourceweb_workers_repo`, then the constant SOURCEWEB_WORKERS_REPO, then
+ * Kits Core's filter `kits_dispatch_repo`. '' when none is set or the value is not a repository name.
+ */
+function sourceweb_dispatch_repo(): string {
+	$repo = trim( (string) apply_filters( 'sourceweb_workers_repo', defined( 'SOURCEWEB_WORKERS_REPO' ) ? (string) SOURCEWEB_WORKERS_REPO : '' ), '/ ' );
+	if ( '' === $repo ) {
+		$repo = trim( (string) apply_filters( 'kits_dispatch_repo', '' ), '/ ' );
+	}
+	return preg_match( '#^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$#', $repo ) ? $repo : '';
+}
+
+/** Whether Run now can start a workflow from this site: a token and a repository are set. */
+function sourceweb_dispatch_ready(): bool {
+	return '' !== sourceweb_dispatch_token() && '' !== sourceweb_dispatch_repo();
+}
+
+/**
+ * Start a workflow in the workers repository now (GitHub's workflow_dispatch, on the main branch). The workflow's own
+ * schedule stays as it is, and its concurrency group keeps runs from overlapping.
+ *
+ * @param string $file   Workflow file, e.g. sourcing.yml.
+ * @param array  $inputs workflow_dispatch inputs (strings).
+ * @return true|WP_Error
+ */
+function sourceweb_dispatch_workflow( $file, $inputs = array() ) {
+	$file  = sanitize_file_name( (string) $file );
+	$token = sourceweb_dispatch_token();
+	$repo  = sourceweb_dispatch_repo();
+	if ( '' === $token ) {
+		return new WP_Error( 'sourceweb_dispatch_token', __( 'No GitHub token is set. Add SOURCEWEB_GITHUB_TOKEN to wp-config.php.', 'sourceweb' ) );
+	}
+	if ( '' === $repo ) {
+		return new WP_Error( 'sourceweb_dispatch_repo', __( 'No workers repository is set. Add SOURCEWEB_WORKERS_REPO (owner/name) to wp-config.php.', 'sourceweb' ) );
+	}
+	if ( ! preg_match( '/^[A-Za-z0-9_.-]+\.ya?ml$/', $file ) ) {
+		return new WP_Error( 'sourceweb_dispatch_file', __( 'That is not a workflow file name.', 'sourceweb' ) );
+	}
+	$resp = wp_remote_post(
+		'https://api.github.com/repos/' . $repo . '/actions/workflows/' . rawurlencode( $file ) . '/dispatches',
+		array(
+			'timeout'     => 20,
+			'redirection' => 0, // a renamed repository answers 301; say so rather than follow it with a changed request
+			'headers'     => array(
+				'Authorization'        => 'Bearer ' . $token,
+				'Accept'               => 'application/vnd.github+json',
+				'X-GitHub-Api-Version' => '2022-11-28',
+				'User-Agent'           => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
+				'Content-Type'         => 'application/json',
+			),
+			'body'        => wp_json_encode(
+				array(
+					'ref'    => 'main',
+					'inputs' => (object) array_map( 'strval', (array) $inputs ),
+				)
+			),
+		)
+	);
+	if ( is_wp_error( $resp ) ) {
+		return new WP_Error( 'sourceweb_dispatch_failed', $resp->get_error_message() );
+	}
+	$code = (int) wp_remote_retrieve_response_code( $resp );
+	if ( 204 === $code ) {
+		return true;
+	}
+	if ( in_array( $code, array( 301, 302, 307, 308 ), true ) ) {
+		return new WP_Error( 'sourceweb_dispatch_moved', __( 'GitHub says the workers repository has moved. Set SOURCEWEB_WORKERS_REPO to its new name.', 'sourceweb' ) );
+	}
+	if ( 401 === $code || 403 === $code ) {
+		return new WP_Error( 'sourceweb_dispatch_denied', __( 'GitHub refused the token. It needs Actions read and write on the workers repository.', 'sourceweb' ) );
+	}
+	if ( 404 === $code ) {
+		return new WP_Error( 'sourceweb_dispatch_missing', __( 'GitHub could not find that repository or workflow, or the token cannot see it.', 'sourceweb' ) );
+	}
+	/* translators: %d: HTTP status. */
+	return new WP_Error( 'sourceweb_dispatch_failed', sprintf( __( 'GitHub answered HTTP %d.', 'sourceweb' ), $code ) );
+}
+
+/**
  * Run now: start a workflow on GitHub and note it in the Run now log (aw_worker_dispatch_log) and the change log.
  *
  * @param string $file Workflow file.
  * @return true|WP_Error
  */
 function sourceweb_workers_run_now( $file ) {
-	$res = function_exists( 'kits_dispatch_workflow' ) // Kits Core's ops/cron-health.php (GitHub token, dispatch)
+	$res = function_exists( 'kits_dispatch_workflow' ) && ! sourceweb_dispatch_ready() // Kits Core's connection, when this plugin has none of its own
 		? kits_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) )
-		: new WP_Error( 'sourceweb_no_dispatch', 'Run now needs the GitHub dispatch from Kits Core.' );
+		: sourceweb_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) );
 	$log = (array) get_option( 'aw_worker_dispatch_log', array() );
 	array_unshift(
 		$log,

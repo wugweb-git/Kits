@@ -1,6 +1,6 @@
 <?php
 /**
- * Directory clean-up proposals (owner, 25 Oct 2026): the Directory worker's clean-up pass (animal-writes-workers,
+ * Directory clean-up proposals (owner, 25 Oct 2026): the Directory worker's clean-up pass (sourceweb-workers,
  * aw_workers/directory/cleanup.py) sends two kinds of proposal through aw/v1/enrich/results, and they are reviewed in
  * Sourcing → Enrichment review like every other value.
  *

@@ -1,5 +1,10 @@
 # InsightWeb: Pending & Roadmap
 
+## Built 28 Nov 2026 (1.3.0)
+
+- Country on the Dashboard (item 53), built as a stored dimension because Site Kit has no country filter. Tests cover the code, names and stored rows. Not run with Site Kit and a real Search Console property: whether Search Console answers `date` + `country` through Site Kit's `dimensions` argument is read from Site Kit's source, not seen. If the first daily run stores nothing under metric `c`, the Country choice stays hidden.
+- Not split by country: pages and searches.
+
 ## Built 28 Nov 2026 (1.2.2)
 
 - Favicon host check with two filters (`tests/favicon-hosts-test.php`). Not run on a live WordPress.
@@ -44,7 +49,7 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 - Search report by email (items 11, 12, 29; 26 Nov): built, off by default, weekly or monthly to the site administrator with an optional first line for white label (`search-insights/report-email.php`, Settings → Runs and data). Not built: a PDF or a recipient list.
 - AdSense is not InsightWeb's (owner, 26 Nov): dropped from this plugin.
-- Country filter (53): not built. Site Kit's Search Console call is only known to take a page filter (`gsc.php`), and a filter it ignored would show unfiltered figures as filtered; build it once Site Kit's accepted arguments are verified on a real site.
+- Country filter (53): built in 1.3.0 as a stored dimension (see the 1.3.0 note above). Site Kit's Search Console call has no country filter, so there is none to use; country is stored from a `date` + `country` request. Not seen working with real Site Kit.
 - The Step 0 to 9 action plan surface and 404 / internal-search surfacing: unverified.
 - Tabs: 10 flat tabs; grouping inside the plugin is allowed (owner, 26 Nov) and proposed in `docs/ux-discovery/2026-11-26-admin-ia-discovery.md`.
 - `data/links-2026-11-02.php` holds static seeded links: confirm they are never shown as live data.

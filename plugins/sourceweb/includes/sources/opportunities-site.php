@@ -3,7 +3,7 @@
  * Opportunity sources the site fetches itself, once a day. Used where a source blocks the GitHub worker's servers
  * (Wildlife SOS sits behind Cloudflare, which refuses GitHub Actions but answers this host).
  *
- * Same rules as the worker (animal-writes-workers, sources.yaml): factual listing only (title, organisation,
+ * Same rules as the worker (sourceweb-workers, sources.yaml): factual listing only (title, organisation,
  * place, link), published directly, duplicates skipped by source URL. Items go through sourceweb_ingest().
  *
  * @package aw-sourcing

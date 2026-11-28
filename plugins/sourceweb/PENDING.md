@@ -1,5 +1,10 @@
 # SourceWeb: Pending & Roadmap
 
+## Built 28 Nov 2026 (0.6.0)
+
+- Run now without Kits Core (own GitHub dispatch, token and repository in wp-config.php). The workers repository is renamed `wugweb-git/sourceweb-workers`. Tested with a stand-in for GitHub only: no real dispatch was made. The live Animal Writes site must deploy the site layer (its `kits_dispatch_repo` and `sourceweb_workers_repo` now name the new repository) and, if its token is a fine-grained token for the old repository, keep using it (GitHub keeps tokens across a rename; if Run now says the repository moved, check `SOURCEWEB_WORKERS_REPO`).
+- The workers repository's own README, tests and docs may still say the old name; that is in that repository, not here.
+
 ## Built 28 Nov 2026 (0.5.0)
 
 - Add place (and Remove, when no route uses it) on the standalone Places screen; favicon host check with two filters. Unit tests only; not run on a live WordPress.
@@ -40,7 +45,7 @@ Checked line by line against the code on 27 Nov 2026.
 
 Nine screens that only said "needs Kits Core" are plain WordPress screens now: To review, Enrichment review, Keywords, Rules, Places, Workers, Rejected, Relay log, Change log (`includes/admin/sourceweb-standalone-screens.php`, `sourceweb-standalone-config.php`). Reads are GET, every change is a nonce-checked POST. With Kits Core the shell screens are untouched. What each screen cannot do without Kits Core or another plugin, and is therefore NOT BUILT standalone:
 
-- Workers: Run now (needs Kits Core's `kits_dispatch_workflow` and the GitHub token); attaching AI keys to a worker (done on AI models); the "All workers" union table.
+- Workers: attaching AI keys to a worker (done on AI models); the "All workers" union table.
 - Enrichment review: needs DirectoryWeb's `aw_listing` content type; without it the screen says so and shows nothing. Not exercised against real proposals in a browser (no listings exist in the Playground blueprint).
 - Keywords: Search suggestions and their auto-approve rules need InsightWeb's Search Insights data; the keyword table (roles, categories, spellings, languages) is only edited when InsightWeb has made it, and only add and remove are offered (no edit form for one keyword, no bulk actions, no category mapping). Without InsightWeb the four lists are edited as text; if the site once ran phase 2 the screen warns that InsightWeb rewrites them when switched on again.
 - Rules: summary rules, Directory enrichment field rules and trust order, and the review-queue (auto-resolve) rules are not here; they need the phase 3 migration and the Kits shell. The workers use their built-in defaults for them. Section rules show every public content type (`sourceweb_rules_sections( true )`) and list at most 500 tags to tick.

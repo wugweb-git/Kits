@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /*
- * The workflows: an exact copy of docs/workers.json in wugweb-git/animal-writes-workers. That repository's test fails when a
+ * The workflows: an exact copy of docs/workers.json in wugweb-git/sourceweb-workers. That repository's test fails when a
  * workflow's name, schedule or timeout changes without that file; tools/ci/workers_registry_check.php fails when this copy
  * differs from it. interval_min: the longest gap between two scheduled runs. runnow: inputs
  * sent by Run now (none: the workflow's own defaults). late_after_h: hours without a report before the workflow is late

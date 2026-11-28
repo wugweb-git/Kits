@@ -1,6 +1,6 @@
 # SourceWeb workers: audit and reorganisation (26 Nov 2026)
 
-Read from `includes/workers/workers-registry.php` (the plugin's copy), `workers-meta.php`, `includes/ai/ai-keys.php`, and the workers repository (`animal-writes-workers`: `docs/workers.json`, `.github/workflows/`, the docstring of each `aw_workers/*.py`). "AI?" is taken from those docstrings; rows marked *confirm* were not traced into the code.
+Read from `includes/workers/workers-registry.php` (the plugin's copy), `workers-meta.php`, `includes/ai/ai-keys.php`, and the workers repository (`sourceweb-workers`: `docs/workers.json`, `.github/workflows/`, the docstring of each `aw_workers/*.py`). "AI?" is taken from those docstrings; rows marked *confirm* were not traced into the code.
 
 ## 1. What exists: 20 workflows
 

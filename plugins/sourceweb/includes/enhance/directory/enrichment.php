@@ -1,6 +1,6 @@
 <?php
 /**
- * Directory enrichment: what the enrichment worker (animal-writes-workers, aw_workers/directory) found for a listing,
+ * Directory enrichment: what the enrichment worker (sourceweb-workers, aw_workers/directory) found for a listing,
  * where each value came from, and how it is applied.
  *
  * - Every proposed value is one row of {prefix}aw_enrich: field, value, the value it replaced, its sources

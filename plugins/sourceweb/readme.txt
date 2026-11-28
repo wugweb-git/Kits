@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,7 @@ SourceWeb may connect to external services only when the corresponding feature o
 * **Image hosts and YouTube thumbnails (`https://i.ytimg.com/`):** When an item's picture is checked or a copy is kept, requests the page, its `og:image` and the image from the publisher's own host or from the host named in the page; a YouTube link uses its thumbnail from `i.ytimg.com`.
 * **AI provider endpoints:** Only when an administrator saves a key, SourceWeb sends a short test prompt to that key's provider, and the workers (not WordPress) later send article text and prompts using the key. The providers the code can call are OpenRouter (`openrouter.ai`), Requesty (`router.requesty.ai`), Cline (`api.cline.bot`), Command Code (`api.commandcode.ai`), NVIDIA (`integrate.api.nvidia.com`), Vercel AI Gateway (`ai-gateway.vercel.sh`), Hugging Face (`router.huggingface.co`), SambaNova (`api.sambanova.ai`), Groq (`api.groq.com`), Google Gemini (`generativelanguage.googleapis.com`), Mistral (`api.mistral.ai`) and Cerebras (`api.cerebras.ai`). Each provider's own terms and privacy policy apply.
 * **Configured AI Providers (free models only: OpenRouter, Google Gemini, Groq, Cerebras, NVIDIA, Mistral and similar):** Only when an administrator configures an API key for a provider, sends article text/prompts to perform relevance, summary, or enrichment tasks. Each provider's own Terms of Service and Privacy Policy apply.
+* **GitHub Actions, the workers repository (`https://api.github.com/`):** Only when an administrator adds a GitHub token and the workers repository to wp-config.php and presses Run now on a worker, sends the workflow's file name and its inputs, with the token, to start that workflow. Nothing is sent otherwise. Terms & Privacy: [https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 * **Configured Worker Relay:** Only when an administrator configures a relay worker URL, forwards fetch requests through that endpoint.
 
 == Uninstall ==
@@ -73,6 +74,10 @@ SourceWeb may connect to external services only when the corresponding feature o
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
 == Changelog ==
+
+= 0.6.0 =
+* Run now works without Kits Core: set SOURCEWEB_GITHUB_TOKEN and SOURCEWEB_WORKERS_REPO in wp-config.php.
+* GitHub's API is listed under External services (called only when Run now is pressed).
 
 = 0.5.0 =
 * The Places screen can add a place and remove one a route does not use.

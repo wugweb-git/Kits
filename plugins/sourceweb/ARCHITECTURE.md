@@ -50,7 +50,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 | Folder | Purpose | Takes in | Puts out |
 |---|---|---|---|
 | `sources/` | The lists the workers fetch: feeds, publishers, hosts, their icons, the policy over them, opportunity pages the site fetches itself | The Sources and Press screens, the `sourceweb_starter_sources` filter | Option `aw_sources`; the lists the workers read over REST |
-| `workers/` | The Python workers (repo `animal-writes-workers`): their registry, status, the 15-minute tick that keeps GitHub's late schedules on time, the relay for publishers that block GitHub, and **ingest**, the endpoint where items arrive | Worker POSTs (`aw/v1/*`), hPanel cron, WP-CLI | New items as drafts; run records; worker status |
+| `workers/` | The Python workers (repo `sourceweb-workers`): their registry, status, the 15-minute tick that keeps GitHub's late schedules on time, the relay for publishers that block GitHub, and **ingest**, the endpoint where items arrive | Worker POSTs (`aw/v1/*`), hPanel cron, WP-CLI | New items as drafts; run records; worker status |
 | `rules/` | The gate: relevance (is it about the site's subject?), auto-review, auto-resolve of queued values, section rules, same-story grouping | An ingested item or a queued value | Accept, hold for review, or reject, each with a logged reason |
 | `review/` | The To review queue: everything that came in automatically and still needs a person | Items the rules held | A decision: publish, edit or reject |
 | `enhance/` | Making an item fit in. **Summarising is enhancement:** the summary rules and the rewrite pass. Also sentence-case titles, attribution and source row, CC0 images, Library PDFs, issuer label, research citation. `enhance/directory/` is directory enrichment: what the directory worker found for a listing, review of changes, clean-up proposals, the listing-page output | Items that passed the gate; worker results per listing | Final summary, title, image, credit; listing field changes with provenance |
@@ -75,7 +75,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 - Names: `sourcing-*`, `sourceweb-*` and plain names mix inside folders; `sourcing-basics.php` is loaded first and used everywhere.
 - `rest/sourceweb-rest-pages.php` is now the route list; the callbacks are split into `sourceweb-rest-workers/-sources/-keywords/-rules.php`. Moving each next to its model is still open.
 - `rules/` and `keywords/` each hold a model, an admin file and a WP side with overlapping helpers; they could share one small settings layer.
-- The workers repo (`animal-writes-workers`) is separate. `workers/workers-registry.php` mirrors its workflow list by hand and can drift; a generated registry would remove that.
+- The workers repo (`sourceweb-workers`) is separate. `workers/workers-registry.php` mirrors its workflow list by hand and can drift; a generated registry would remove that.
 
 ## Information architecture today, against the six steps (26 Nov 2026)
 

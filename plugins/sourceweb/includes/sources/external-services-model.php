@@ -34,6 +34,7 @@ const SOURCEWEB_EXTERNAL_SERVICES = array(
 	array( 'id' => 'ai-mistral', 'name' => 'Mistral', 'host' => 'api.mistral.ai', 'when' => 'a Mistral key is saved', 'sends' => 'a test prompt, then article text and prompts', 'terms' => 'https://mistral.ai/terms' ),
 	array( 'id' => 'ai-cerebras', 'name' => 'Cerebras', 'host' => 'api.cerebras.ai', 'when' => 'a Cerebras key is saved', 'sends' => 'a test prompt, then article text and prompts', 'terms' => 'https://www.cerebras.ai/privacy' ),
 	array( 'id' => 'ai', 'name' => 'Configured AI Providers', 'host' => '', 'when' => 'an administrator saves a key', 'sends' => 'article text and prompts', 'terms' => '' ),
+	array( 'id' => 'github', 'name' => 'GitHub Actions (workers repository)', 'host' => 'api.github.com', 'when' => 'an administrator sets a GitHub token and the workers repository and presses Run now', 'sends' => 'the workflow file name and its inputs, with the token', 'terms' => 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement' ),
 	array( 'id' => 'relay', 'name' => 'Configured Worker Relay', 'host' => '', 'when' => 'a relay worker URL is set', 'sends' => 'fetch requests', 'terms' => '' ),
 );
 

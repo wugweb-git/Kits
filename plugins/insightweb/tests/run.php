@@ -810,4 +810,13 @@ foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( dirname
 }
 iw_check( ! $iw_named, 'no runtime file names the site content types ' . implode( '; ', $iw_named ) );
 
+/* ---------- Dashboard by country (insightweb-country.php) ---------- */
+require dirname( __DIR__ ) . '/includes/insightweb-country.php';
+iw_check( 'ind' === insightweb_country_code( ' IND ' ) && '' === insightweb_country_code( 'in' ) && '' === insightweb_country_code( 'india' ) && '' === insightweb_country_code( "ind'--" ) && '' === insightweb_country_code( '' ), 'country: a code is three letters, anything else is refused' );
+iw_check( 'India' === insightweb_country_name( 'ind' ) && 'United States' === insightweb_country_name( 'USA' ), 'country: the names of common codes' );
+iw_check( 'ZZZ' === insightweb_country_name( 'zzz' ) && '' === insightweb_country_name( 'x1' ), 'country: a code with no name shows the code; a bad code shows nothing' );
+$cr = insightweb_country_store_rows( array( array( array( '2026-11-20', 'ind' ), 12, 340, 7.5 ), array( array( '2026-11-20', 'USA' ), 3, 90, 12.1 ), array( array( '2026-11-20', '' ), 9, 9, 1 ), array( array( '2026-11-20', "x'; DROP" ), 9, 9, 1 ) ) );
+iw_check( 2 === count( $cr ) && array( 0, 'ind', 'c', 12, 340, 7.5 ) === $cr[0] && 'usa' === $cr[1][1], 'country: rows are stored under metric c with the lower-case code; blank and bad codes are dropped' );
+iw_check( array() === insightweb_country_store_rows( array() ), 'country: no rows, nothing stored' );
+
 exit( $GLOBALS['iw_fail'] );

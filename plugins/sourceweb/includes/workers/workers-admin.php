@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Run now is offered: a registry workflow that needs no input, and the dispatch token is set. */
 function sourceweb_workers_can_run( array $w ) {
-	return ! $w['planned'] && empty( $w['registry']['needs_input'] ) && defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN;
+	return ! $w['planned'] && empty( $w['registry']['needs_input'] ) && ( sourceweb_dispatch_ready() || ( function_exists( 'kits_dispatch_workflow' ) && defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN ) );
 }
 
 /** "Late after 12 h", "Late after 9 days", "Never late (no alert)" or '' (by hand). */

@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,9 @@ InsightWeb connects to external services only when the corresponding integration
 InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt and a few key pages, some with AI-crawler user-agent names) to check that crawlers can reach them. These calls stay on your own domain.
 
 == Changelog ==
+
+= 1.3.0 =
+* The Dashboard can show one country's Search Console figures (clicks, impressions, click rate, position). The daily run now also stores clicks and impressions by country.
 
 = 1.2.2 =
 * Referring-site icons are fetched only from public host names. `insightweb_favicon_hosts` limits them to a list; `insightweb_favicon_third_party` can turn Google's favicon service off.

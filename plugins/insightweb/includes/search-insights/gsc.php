@@ -143,9 +143,14 @@ function insightweb_si_gsc_fetch_day( $module, string $day, float $until = 0 ) {
 		'q'     => array( 'date', 'query' ),
 		'qp'    => array( 'date', 'query', 'page' ),
 		'p'     => array( 'date', 'page' ),
+		'c'     => array( 'date', 'country' ), // the Dashboard by country (insightweb-country.php); Site Kit has no country filter but passes dimensions through
 	) as $key => $dims ) {
 		$rows = insightweb_si_gsc_rows( $module, $dims, $day );
 		if ( is_wp_error( $rows ) ) {
+			if ( 'c' === $key ) {
+				$out['c'] = array(); // the country split is extra: a failure there does not lose the day's other rows
+				continue;
+			}
 			return $rows;
 		}
 		if ( count( $rows ) >= AW_SI_GSC_LIMIT ) {
@@ -188,6 +193,9 @@ function insightweb_si_gsc_store_day( string $day, array $data ) {
 	foreach ( $data['total'] as $r ) {
 		$vals[] = array( 0, '', 'total', $r[1], $r[2], $r[3] );
 	}
+	foreach ( function_exists( 'insightweb_country_store_rows' ) ? insightweb_country_store_rows( (array) ( $data['c'] ?? array() ) ) : array() as $cv ) {
+		$vals[] = $cv;
+	}
 	foreach ( (array) ( $data['p'] ?? array() ) as $r ) {
 		$page = insightweb_si_path( (string) ( $r[0][1] ?? '' ) );
 		if ( '' !== $page ) {
@@ -217,7 +225,7 @@ function insightweb_si_gsc_store_day( string $day, array $data ) {
 		$merged[ $key ] = array( $m[0], $m[1], $m[2], $m[3] + $v[3], $impr, $impr ? ( $m[5] * $m[4] + $v[5] * $v[4] ) / $impr : 0 );
 	}
 	$rows = array_map( fn( $v ) => array( $v[0], $v[1], '' === $v[1] ? '' : md5( $v[1] ), $v[2], $v[3], $v[4], $v[5] ), array_values( $merged ) );
-	$n    = insightweb_si_obs_replace_day( 'gsc', $day, $rows, 'day', array( 'total', 'q', 'qp', 'p' ), 'gsc' ); // only the rows this run writes
+	$n    = insightweb_si_obs_replace_day( 'gsc', $day, $rows, 'day', array( 'total', 'q', 'qp', 'p', 'c' ), 'gsc' ); // only the rows this run writes
 	if ( is_wp_error( $n ) ) {
 		/* translators: 1: date, 2: database error. */
 		return new WP_Error( 'aw_si_store', sprintf( __( 'Search Console rows for %1$s could not be saved, so the earlier rows were kept: %2$s', 'insightweb' ), $day, $n->get_error_message() ) );

@@ -74,6 +74,7 @@ add_action(
 
 // The screens on the Kits admin shell: Dashboard, the tabs and Settings.
 require_once INSIGHTWEB_DIR . 'includes/insightweb-dashboard.php';
+require_once INSIGHTWEB_DIR . 'includes/insightweb-country.php'; // the Dashboard by country
 require_once INSIGHTWEB_DIR . 'includes/legacy-aliases.php'; // the earlier aw_si_* names that Kits Core, RankWeb and DirectoryWeb still call
 require_once INSIGHTWEB_DIR . 'includes/insightweb-rest.php';
 require_once INSIGHTWEB_DIR . 'includes/help-tab.php';

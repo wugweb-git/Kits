@@ -2,6 +2,13 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.3.0
+
+- The Dashboard by country. The daily Search Console run asks once more for date + country and stores those rows (metric `c`, the three-letter code in the page column; a failure of that one request does not lose the day's other rows). Site Kit's Search Console call has no country filter (it filters by page only, checked in its source) but passes `dimensions` through, so country is stored as a dimension. The Dashboard has a Country choice (the 40 countries with the most clicks over 90 days); a chosen country shows its clicks, impressions, click rate and position for the range, with the same "compare only with a full window before" rule, and the clicks per day chart. Pages and searches are not split by country, and the lists are hidden while a country is chosen.
+- New route `insightweb/v1/dashboard/country?code=`; the Dashboard payload has `countries`. Names for common codes are built in; the filter `insightweb_country_names` adds or corrects names, and a code with no name shows as the code.
+- Figures start with the first daily run after the update: older days have no country rows, so the first days show fewer stored days (the tile says so).
+- Tests: country code, names and stored rows in `tests/run.php`. `src/index.js` and `build/` rebuilt; lint clean. Not run on a live WordPress with Site Kit.
+
 ## 1.2.2
 
 - Favicon host check: referring-site icons are fetched only from a public DNS name (no address, no single-label or local-looking name). The filter `insightweb_favicon_hosts` limits it to a list of hosts and their subdomains; `insightweb_favicon_third_party` returns false to stop asking Google's favicon service. A host that fails the check gets the letter fallback.

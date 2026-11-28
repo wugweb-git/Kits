@@ -53,7 +53,15 @@ add_filter(
 add_filter(
 	'sourceweb_workers_repo',
 	function () {
-		return 'wugweb-git/animal-writes-workers';
+		return 'wugweb-git/sourceweb-workers';
+	}
+);
+
+/** Kits Core's own workflow starts (its cron health box) go to the same repository. */
+add_filter(
+	'kits_dispatch_repo',
+	function () {
+		return 'wugweb-git/sourceweb-workers';
 	}
 );
 

@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param string $path Path inside the repository, starting with a slash.
  */
 function sourceweb_workers_repo_url( string $path ): string {
-	$repo = trim( (string) apply_filters( 'sourceweb_workers_repo', '' ), '/' );
+	$repo = sourceweb_dispatch_repo();
 	return '' === $repo ? '' : 'https://github.com/' . $repo . $path;
 }
 
@@ -165,7 +165,7 @@ function sourceweb_rest_workers( WP_REST_Request $request ) {
 		);
 	}
 	$out['log']    = $log;
-	$out['runOff'] = ! defined( 'AW_GITHUB_DISPATCH_TOKEN' ) || '' === (string) AW_GITHUB_DISPATCH_TOKEN;
+	$out['runOff'] = ! sourceweb_dispatch_ready() && ! ( function_exists( 'kits_dispatch_workflow' ) && defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN );
 	return rest_ensure_response( $out );
 }
 

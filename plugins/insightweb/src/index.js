@@ -28,6 +28,7 @@ import {
 	PageParts,
 	SecretField,
 	SectionCard,
+	Select,
 	ServiceList,
 	ServiceRow,
 	SettingsBlock,
@@ -72,6 +73,29 @@ function Dashboard() {
 	const [ busy, setBusy ] = useState( false );
 	const [ tries, setTries ] = useState( 0 );
 	const [ waitFor, setWaitFor ] = useState( null );
+	const [ country, setCountry ] = useState( '' );
+	const [ cdata, setCdata ] = useState( null );
+	const [ cerror, setCerror ] = useState( '' );
+
+	// One country's figures (clicks, impressions, click rate, position): read when one is chosen.
+	useEffect( () => {
+		setCdata( null );
+		setCerror( '' );
+		if ( ! country ) {
+			return;
+		}
+		let stop = false;
+		apiFetch( {
+			path: `${ path( 'dashboard/country' ) }?code=${ encodeURIComponent(
+				country
+			) }`,
+		} )
+			.then( ( r ) => ! stop && setCdata( r ) )
+			.catch( ( e ) => ! stop && setCerror( errText( e ) ) );
+		return () => {
+			stop = true;
+		};
+	}, [ country ] );
 
 	const load = () => {
 		setError( '' );
@@ -128,7 +152,10 @@ function Dashboard() {
 			/>
 		);
 	}
-	const range = data.ranges?.[ String( days ) ];
+	const bycountry = !! country && !! cdata;
+	const range = bycountry
+		? cdata.ranges?.[ String( days ) ]
+		: data.ranges?.[ String( days ) ];
 	let after = data.atText
 		? sprintf(
 				/* translators: 1: date of the newest figures, 2: date and time of the count. */
@@ -193,6 +220,39 @@ function Dashboard() {
 					</>
 				}
 			/>
+			{ ( data.countries || [] ).length > 0 && (
+				<Field
+					label={ __( 'Country', 'insightweb' ) }
+					help={ __(
+						'Search Console figures for one country: clicks, impressions, click rate and position. Pages and searches are not split by country.',
+						'insightweb'
+					) }
+					render={ ( id, helpId ) => (
+						<Select
+							id={ id }
+							aria-describedby={ helpId }
+							value={ country }
+							none={ __( 'All countries', 'insightweb' ) }
+							options={ data.countries.map( ( c ) => ( {
+								value: c.code,
+								label: sprintf(
+									/* translators: 1: country, 2: clicks in the last 90 days. */
+									__( '%1$s (%2$s clicks)', 'insightweb' ),
+									c.name,
+									c.clicks.toLocaleString()
+								),
+							} ) ) }
+							onChange={ setCountry }
+						/>
+					) }
+				/>
+			) }
+			{ cerror && <Notice tone="error">{ cerror }</Notice> }
+			{ country && ! cdata && ! cerror && (
+				<LoadingState
+					label={ __( 'Loading the country…', 'insightweb' ) }
+				/>
+			) }
 			{ note && (
 				<Notice tone="info" onDismiss={ () => setNote( '' ) }>
 					{ note }
@@ -258,7 +318,7 @@ function Dashboard() {
 					/>
 				</SectionCard>
 			) }
-			{ ! data.counting && (
+			{ ! data.counting && ! country && (
 				<>
 					<SectionCard
 						id="top-pages"

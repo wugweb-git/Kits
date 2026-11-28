@@ -378,6 +378,7 @@ function insightweb_dashboard_payload(): array {
 		'endText'  => '' !== $end ? wp_date( 'j M Y', strtotime( $end . ' 12:00:00' ) ) : '',
 		'ranges'   => (object) $ranges,
 		'health'   => insightweb_health_shape( insightweb_seo_dash_sources(), (array) ( $runs['gsc'] ?? array() ), $state, $links ),
+		'countries' => function_exists( 'insightweb_country_list' ) ? insightweb_country_list() : array(),
 		'links'    => $links,
 	);
 }

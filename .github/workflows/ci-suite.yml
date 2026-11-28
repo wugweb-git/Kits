@@ -241,6 +241,7 @@ jobs:
           php plugins/sourceweb/tests/SourceWebStandaloneScreensTest.php
           php plugins/sourceweb/tests/no-aw-functions-test.php
           php plugins/sourceweb/tests/favicon-hosts-test.php
+          php plugins/sourceweb/tests/dispatch-test.php
       - name: SourceWeb workflow list matches the workers repository
         # Not gating until the workers repo's chore/retire-eight-workflows is merged to its main.
         continue-on-error: true
