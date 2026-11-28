@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.7.2
+Stable tag: 0.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 6. Workers: one row per scheduled workflow, with its group, workflow file, schedule and a run now button.
 
 == Changelog ==
+
+= 0.7.3 =
+* The menu item Overview reads Dashboard and AI models comes before Places, so the WordPress tab bar and the header agree and the bar is hidden. A failed Add place scrolls the message into view. Checkboxes and radios in labels have a 24px hit area.
 
 = 0.7.2 =
 * Add place and Remove on the Places screen of the shell (it was only on the classic screen). The Dashboard and Workers verdicts say "waiting for the first report" instead of "no problems" before any worker has reported. Narrower bars in the pipeline chart. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

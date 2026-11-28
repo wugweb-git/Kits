@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.5.4
+
+- The first menu item reads Dashboard, matching the header tab. Checkboxes and radios in labels have a 24px hit area.
+
 ## 2.5.3
 
 - Insights charts no longer stretch two bars across the card. Empty states say what to do (Internal links, FAQ). Module switches are named "Use <module>". The More from Kits link of a plugin goes to Kits Core's page when Core is active.

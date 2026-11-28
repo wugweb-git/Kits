@@ -109,7 +109,7 @@ add_action(
 		}
 		$main_file = defined( 'SOURCEWEB_FILE' ) ? SOURCEWEB_FILE : ( file_exists( SOURCEWEB_SOURCING_DIR . 'sourceweb.php' ) ? SOURCEWEB_SOURCING_DIR . 'sourceweb.php' : SOURCEWEB_SOURCING_DIR . 'aw-sourcing.php' );
 		$head      = get_file_data( $main_file, array( 'Version' => 'Version' ) );
-		// The header's tabs in menu order.
+		// The header's tabs in menu order, with the menu's names (admin-menu.php, menu-model.php): Kits Core hides its own tab row when this lists every item.
 		$order = array(
 			'dashboard'  => __( 'Dashboard', 'sourceweb' ),
 			'review'     => __( 'To review', 'sourceweb' ),
@@ -117,8 +117,8 @@ add_action(
 			'sources'    => __( 'Sources', 'sourceweb' ),
 			'keywords'   => __( 'Keywords', 'sourceweb' ),
 			'rules'      => __( 'Rules', 'sourceweb' ),
-			'places'     => __( 'Places', 'sourceweb' ),
 			'ai'         => __( 'AI models', 'sourceweb' ),
+			'places'     => __( 'Places', 'sourceweb' ),
 			'workers'    => __( 'Workers', 'sourceweb' ),
 			'rejected'   => __( 'Rejected', 'sourceweb' ),
 			'relay-log'  => __( 'Relay log', 'sourceweb' ),
@@ -431,5 +431,21 @@ add_action(
 		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
 		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( sourceweb_src_tab_path( AW_SRC_SETTINGS_TAB ) ) ) . '#backfill' );
 		exit;
+	}
+);
+
+// Checkboxes and radios on this plugin's classic admin screens: a label that wraps one is at least 24 x 24 px to hit
+// (WCAG 2.5.8). The input keeps WordPress's look, and a core list table's own check column is left as it is.
+add_action(
+	'admin_enqueue_scripts',
+	function () {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen is open; nothing is saved here.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 0 !== strpos( $page, 'aw-sourcing' ) && ! in_array( $page, array( 'aw-review', 'aw-enrich-review' ), true ) ) {
+			return;
+		}
+		wp_register_style( 'sourceweb-hit-area', false, array(), '1' );
+		wp_enqueue_style( 'sourceweb-hit-area' );
+		wp_add_inline_style( 'sourceweb-hit-area', '.wrap label:has(> input[type=checkbox]):not(.screen-reader-text),.wrap label:has(> input[type=radio]):not(.screen-reader-text){display:inline-flex;align-items:center;gap:6px;min-height:24px;min-width:24px;padding-block:4px;box-sizing:border-box}.wrap .wp-list-table label:has(> input[type=checkbox]),.wrap .wp-list-table label:has(> input[type=radio]){display:revert;min-height:0;min-width:0;padding-block:0;gap:0}' );
 	}
 );

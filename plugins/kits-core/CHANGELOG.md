@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.3
+
+- Kits Home step icons are inline SVG, so they no longer depend on an emoji image URL.
+
 ## 1.5.2
 
 - Kits Home links to More from Kits (and it has its own page title). One screen navigation: the WordPress tab bar is hidden when the header already lists every screen, the header tabs scroll the current tab into view and collapse to a select on phones, and the page is no longer wider than a phone screen. Empty states can carry an action. Link target sizes, per-row accessible names. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

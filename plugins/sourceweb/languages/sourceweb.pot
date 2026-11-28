@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SourceWeb 0.7.2\n"
+"Project-Id-Version: SourceWeb 0.7.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/sourceweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T07:13:25+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:46:04+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: sourceweb\n"
@@ -65,7 +65,7 @@ msgid "what is fetched and what is kept"
 msgstr ""
 
 #: includes/admin/help-tab.php:36
-#: includes/admin/sourceweb-ui.php:121
+#: includes/admin/sourceweb-ui.php:120
 #: includes/admin/sourceweb-ui.php:180
 #: includes/rest/sourceweb-rest.php:977
 #: includes/rest/sourceweb-rest.php:1072
@@ -368,9 +368,9 @@ msgstr ""
 #: includes/admin/sourceweb-standalone.php:123
 #: src/index.js:6683
 #: src/index.js:6730
-#: src/index.js:7472
-#: src/index.js:7550
-#: src/index.js:7588
+#: src/index.js:7475
+#: src/index.js:7553
+#: src/index.js:7591
 msgid "Remove"
 msgstr ""
 
@@ -496,7 +496,7 @@ msgstr ""
 #: src/index.js:2369
 #: src/index.js:3276
 #: src/index.js:3446
-#: src/index.js:7615
+#: src/index.js:7618
 msgid "Name"
 msgstr ""
 
@@ -727,7 +727,7 @@ msgstr ""
 #: includes/admin/sourceweb-standalone-config.php:624
 #: includes/admin/sourceweb-standalone-config.php:702
 #: src/index.js:7239
-#: src/index.js:7639
+#: src/index.js:7642
 msgid "Content type"
 msgstr ""
 
@@ -777,7 +777,7 @@ msgid "Where an item goes when it arrives. The routes are tried from the top and
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:638
-#: src/index.js:7395
+#: src/index.js:7398
 msgid "Routes"
 msgstr ""
 
@@ -795,7 +795,7 @@ msgstr ""
 #: src/index.js:2334
 #: src/index.js:4292
 #: src/index.js:6844
-#: src/index.js:7440
+#: src/index.js:7443
 msgid "Value"
 msgstr ""
 
@@ -815,13 +815,13 @@ msgstr ""
 #: src/index.js:5675
 #: src/index.js:6038
 #: src/index.js:6843
-#: src/index.js:7427
+#: src/index.js:7430
 msgid "Field"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:662
 #: includes/admin/sourceweb-standalone-config.php:677
-#: src/index.js:7546
+#: src/index.js:7549
 msgid "Place"
 msgstr ""
 
@@ -834,14 +834,14 @@ msgid "A blank row is ignored. To move a route, change its order number. \"is on
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:670
-#: src/index.js:7504
+#: src/index.js:7507
 msgid "Save routes"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:673
-#: includes/admin/sourceweb-ui.php:120
+#: includes/admin/sourceweb-ui.php:121
 #: includes/admin/sourceweb-ui.php:179
-#: src/index.js:7537
+#: src/index.js:7540
 msgid "Places"
 msgstr ""
 
@@ -851,8 +851,8 @@ msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:677
 #: includes/admin/sourceweb-standalone-config.php:697
-#: src/index.js:7547
-#: src/index.js:7629
+#: src/index.js:7550
+#: src/index.js:7632
 msgid "Kind"
 msgstr ""
 
@@ -865,27 +865,27 @@ msgid "No enhancements are available."
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:689
-#: src/index.js:7604
+#: src/index.js:7607
 msgid "Save enhancements"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:692
-#: src/index.js:7607
+#: src/index.js:7610
 msgid "Add a place"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:693
-#: src/index.js:7609
+#: src/index.js:7612
 msgid "A place is where items can go: a content type, another plugin, a workflow or something else. Add one here and it can be chosen in a route above."
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:696
-#: src/index.js:7620
+#: src/index.js:7623
 msgid "Id (optional)"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:696
-#: src/index.js:7621
+#: src/index.js:7624
 msgid "Lower-case letters, digits, dash and underscore. Left empty, it is made from the name. It cannot be changed later."
 msgstr ""
 
@@ -894,7 +894,7 @@ msgid "Only for the kind \"Content type\"."
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:707
-#: src/index.js:7655
+#: src/index.js:7658
 msgid "Add place"
 msgstr ""
 
@@ -918,18 +918,18 @@ msgstr ""
 #: src/index.js:591
 #: src/index.js:628
 #: src/index.js:1161
-#: src/index.js:7519
-#: src/index.js:7673
+#: src/index.js:7522
+#: src/index.js:7676
 msgid "Source"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:722
-#: src/index.js:7674
+#: src/index.js:7677
 msgid "Delivered"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:722
-#: src/index.js:7675
+#: src/index.js:7678
 msgid "Accepted"
 msgstr ""
 
@@ -938,12 +938,12 @@ msgstr ""
 #: includes/admin/sourceweb-ui.php:182
 #: includes/rest/sourceweb-rest.php:397
 #: src/index.js:7091
-#: src/index.js:7676
+#: src/index.js:7679
 msgid "Rejected"
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:722
-#: src/index.js:7678
+#: src/index.js:7681
 msgid "Accepted share"
 msgstr ""
 
@@ -971,7 +971,7 @@ msgid "Not removed. "
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:770
-#: src/index.js:7362
+#: src/index.js:7365
 msgid "Place removed."
 msgstr ""
 
@@ -980,7 +980,7 @@ msgid "Not saved. "
 msgstr ""
 
 #: includes/admin/sourceweb-standalone-config.php:829
-#: src/index.js:7380
+#: src/index.js:7383
 msgid "Routes saved."
 msgstr ""
 
@@ -1096,7 +1096,7 @@ msgstr ""
 #: src/index.js:5537
 #: src/index.js:5685
 #: src/index.js:7211
-#: src/index.js:7417
+#: src/index.js:7420
 msgid "When"
 msgstr ""
 
@@ -4789,80 +4789,80 @@ msgstr ""
 msgid "Loading places…"
 msgstr ""
 
-#: src/index.js:7396
+#: src/index.js:7399
 msgid "Where an item goes. Routes are tried from the top and the first that matches wins. An item that matches none goes to the place of its own type, as before."
 msgstr ""
 
-#: src/index.js:7403
+#: src/index.js:7406
 msgid "No routes: every item goes to the place of its own type."
 msgstr ""
 
-#: src/index.js:7450
+#: src/index.js:7453
 msgid "Send to"
 msgstr ""
 
-#: src/index.js:7459
+#: src/index.js:7462
 msgid "Up"
 msgstr ""
 
-#: src/index.js:7465
+#: src/index.js:7468
 msgid "Down"
 msgstr ""
 
-#: src/index.js:7478
+#: src/index.js:7481
 msgid "No places yet. Turn on a plugin that adds one (DirectoryWeb adds its listing types), or add one under Places below, then routes can be made."
 msgstr ""
 
-#: src/index.js:7501
+#: src/index.js:7504
 msgid "Add a route"
 msgstr ""
 
-#: src/index.js:7510
+#: src/index.js:7513
 msgid "Where items come from"
 msgstr ""
 
-#: src/index.js:7511
+#: src/index.js:7514
 msgid "Every way an item can enter SourceWeb. Plugins can add their own."
 msgstr ""
 
-#: src/index.js:7520
+#: src/index.js:7523
 msgid "Method"
 msgstr ""
 
-#: src/index.js:7521
+#: src/index.js:7524
 msgid "Run by"
 msgstr ""
 
-#: src/index.js:7538
+#: src/index.js:7541
 msgid "Content types SourceWeb fills, and any place a plugin or workflow registers."
 msgstr ""
 
-#: src/index.js:7548
+#: src/index.js:7551
 msgid "Owner"
 msgstr ""
 
-#: src/index.js:7549
+#: src/index.js:7552
 msgid "Enhancements"
 msgstr ""
 
 #. translators: %s: place name.
-#: src/index.js:7584
+#: src/index.js:7587
 #, js-format
 msgid "Remove place %s"
 msgstr ""
 
-#: src/index.js:7661
+#: src/index.js:7664
 msgid "What the places say back"
 msgstr ""
 
-#: src/index.js:7662
+#: src/index.js:7665
 msgid "Per source: items delivered, and how many a place accepted or rejected. Lowest acceptance first. Places report back with SourceWeb’s places/outcome route."
 msgstr ""
 
-#: src/index.js:7668
+#: src/index.js:7671
 msgid "Nothing yet."
 msgstr ""
 
-#: src/index.js:7691
+#: src/index.js:7694
 msgid "Review this source"
 msgstr ""

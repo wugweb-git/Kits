@@ -7344,7 +7344,10 @@ function Places() {
 					text: __( 'Place added.', 'sourceweb' ),
 				} );
 			} )
-			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.catch( ( e ) => {
+				setMsg( { tone: 'error', text: errText( e ) } );
+				window.scrollTo( { top: 0, behavior: 'smooth' } ); // the message is above the form
+			} )
 			.finally( () => setBusy( false ) );
 	};
 	const removePlace = ( id ) => {

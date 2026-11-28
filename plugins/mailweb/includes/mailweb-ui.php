@@ -75,18 +75,20 @@ add_action(
 		if ( 'settings' === $screen ) {
 			wp_enqueue_media(); // The Profiles picture picker (MediaField).
 		}
+		// Same names and order as the WordPress menu (overview.php: Inbox, Dashboard, Settings; then Email Logs, which has no
+		// shell screen), so the tab row Kits Core prints above the screen matches this one where they share screens.
 		$tabs = array(
-			array(
-				'slug'    => 'dashboard',
-				'label'   => __( 'Dashboard', 'mailweb' ),
-				'url'     => mailweb_ui_url( 'dashboard' ),
-				'current' => 'dashboard' === $screen,
-			),
 			array(
 				'slug'    => 'inbox',
 				'label'   => __( 'Inbox', 'mailweb' ),
 				'url'     => mailweb_ui_url( 'inbox' ),
 				'current' => 'inbox' === $screen,
+			),
+			array(
+				'slug'    => 'dashboard',
+				'label'   => __( 'Dashboard', 'mailweb' ),
+				'url'     => mailweb_ui_url( 'dashboard' ),
+				'current' => 'dashboard' === $screen,
 			),
 		);
 		if ( $admin ) {

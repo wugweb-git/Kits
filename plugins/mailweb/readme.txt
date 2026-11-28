@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.7.2
+Stable tag: 3.7.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -146,6 +146,9 @@ Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each pack
 5. A website form message open in the Inbox, with the sender's fields and Reply, Mark unread and Move to Trash.
 
 == Changelog ==
+
+= 3.7.3 =
+* The first screens read Inbox, Dashboard, Settings in the menu and the header, and the Overview item reads Dashboard. Checkboxes and radios in labels have a 24px hit area.
 
 = 3.7.2 =
 * The Dashboard and queue show "No limit" instead of a huge number when the daily limit is off. The provider picker preselects the saved provider. DNS values are visible text. Inbox and Email Logs empty states link to the setting that fixes them. Resend buttons are named for the message. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

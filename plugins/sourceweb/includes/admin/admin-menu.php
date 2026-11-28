@@ -70,7 +70,7 @@ add_action(
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' );
+		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Dashboard', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' );
 	},
 	9 // before To review (10) and Enrichment review (11)
 );

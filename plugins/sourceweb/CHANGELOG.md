@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.7.3
+
+- The menu item Overview reads Dashboard and AI models comes before Places, so the WordPress tab bar and the header agree and the bar is hidden. A failed Add place scrolls the message into view. Checkboxes and radios in labels have a 24px hit area.
+
 ## 0.7.2
 
 - Add place and Remove on the Places screen of the shell (it was only on the classic screen). The Dashboard and Workers verdicts say "waiting for the first report" instead of "no problems" before any worker has reported. Narrower bars in the pipeline chart. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

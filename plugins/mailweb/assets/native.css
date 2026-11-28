@@ -31,3 +31,6 @@
 .mailweb-dns-value{display:block;width:100%;font-family:monospace;font-size:11px;word-break:break-all;user-select:all}
 .mailweb-native-nav{margin:12px 0}
 .mailweb-native-form .form-table th{width:220px}
+/* Checkboxes and radios: a label that wraps one is at least 24 x 24 px to hit (WCAG 2.5.8); the input keeps its look, a core list table's check column is left alone. */
+.wrap label:has(> input[type=checkbox]):not(.screen-reader-text),.wrap label:has(> input[type=radio]):not(.screen-reader-text){display:inline-flex;align-items:center;gap:6px;min-height:24px;min-width:24px;padding-block:4px;box-sizing:border-box}
+.wrap .wp-list-table label:has(> input[type=checkbox]),.wrap .wp-list-table label:has(> input[type=radio]){display:revert;min-height:0;min-width:0;padding-block:0;gap:0}

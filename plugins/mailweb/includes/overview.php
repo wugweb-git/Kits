@@ -224,7 +224,7 @@ add_action(
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
 		add_submenu_page( 'mailweb', __( 'MailWeb', 'mailweb' ), __( 'Inbox', 'mailweb' ), MAILWEB_CAP, 'mailweb', 'mailweb_inbox_page' );
-		add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Overview', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
+		add_submenu_page( 'mailweb', __( 'MailWeb overview', 'mailweb' ), __( 'Dashboard', 'mailweb' ), MAILWEB_CAP, 'mailweb-overview', 'mailweb_home_page' ); // home.php
 		add_submenu_page( 'mailweb', __( 'MailWeb settings', 'mailweb' ), __( 'Settings', 'mailweb' ), 'manage_options', 'mailweb-settings', 'mailweb_settings_page' ); // settings-tab.php
 	}
 );

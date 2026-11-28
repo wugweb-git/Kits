@@ -36,7 +36,7 @@ add_action(
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Overview', RANKWEB_CAP, AW_SEO_MENU, 'rankweb_seo_overview_page' );
+		add_submenu_page( AW_SEO_MENU, 'RankWeb', 'Dashboard', RANKWEB_CAP, AW_SEO_MENU, 'rankweb_seo_overview_page' );
 		// The Dashboard's other two pages (trends and gaps; module switches and reference tables), so no page is long.
 		add_submenu_page( AW_SEO_MENU, 'RankWeb insights', 'Insights', RANKWEB_CAP, 'aw-seo-insights', 'rankweb_seo_insights_page' );
 		add_submenu_page( AW_SEO_MENU, 'RankWeb modules', 'Modules', RANKWEB_CAP, 'aw-seo-modules', 'rankweb_seo_modules_page' );

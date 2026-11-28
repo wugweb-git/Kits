@@ -290,14 +290,17 @@ function kits_frame_kpi_grid( array $cards ): void {
 /**
  * Structured Action List (replacing raw button piles).
  *
- * @param array $rows Array of [ 'title' => ..., 'desc' => ..., 'status' => ..., 'button' => ..., 'icon' => ... ].
+ * @param array $rows Array of [ 'title' => ..., 'desc' => ..., 'status' => ..., 'button' => ..., 'icon' => text glyph, 'icon_svg' => inline SVG (wins over icon) ].
  */
 function kits_frame_action_list( array $rows ): void {
 	echo '<div class="kits-action-list">';
 	foreach ( $rows as $r ) {
 		echo '<div class="kits-action-row">';
 		echo '<div class="kits-action-row__main">';
-		if ( ! empty( $r['icon'] ) ) {
+		if ( ! empty( $r['icon_svg'] ) ) {
+			// Inline SVG written in code (no network, no emoji image: WordPress turns an emoji into a twemoji <img> that can fail to load).
+			echo '<div class="kits-action-row__icon" aria-hidden="true">' . $r['icon_svg'] . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- the caller's own SVG markup, never user input.
+		} elseif ( ! empty( $r['icon'] ) ) {
 			echo '<div class="kits-action-row__icon">' . esc_html( $r['icon'] ) . '</div>';
 		}
 		echo '<div class="kits-action-row__info">';

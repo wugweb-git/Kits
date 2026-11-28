@@ -406,7 +406,7 @@ aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its
 foreach ( array( 'admin/admin-menu.php', 'review/review-queue.php', 'enhance/directory/enrichment-admin.php', 'sources/sourcing-policy.php' ) as $f ) {
 	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
 }
-aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Overview', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' )" ), 'Overview is the first item, at the menu\'s slug' );
+aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Dashboard', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' )" ), 'Dashboard (the Overview) is the first item, at the menu\'s slug' );
 aw_t( false !== strpos( (string) file_get_contents( $inc . 'review/review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
 aw_t( false !== strpos( (string) file_get_contents( $inc . 'enhance/directory/enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
 // Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.

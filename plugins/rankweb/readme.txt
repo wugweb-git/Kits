@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.3
+Stable tag: 2.5.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Mo
 5. Modules: each RankWeb module with where it is set up, its status and an on or off switch.
 
 == Changelog ==
+
+= 2.5.4 =
+* The first menu item reads Dashboard, matching the header tab. Checkboxes and radios in labels have a 24px hit area.
 
 = 2.5.3 =
 * Insights charts no longer stretch two bars across the card. Empty states say what to do (Internal links, FAQ). Module switches are named "Use <module>". The More from Kits link of a plugin goes to Kits Core's page when Core is active.

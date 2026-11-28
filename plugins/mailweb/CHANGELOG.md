@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.7.3
+
+- The first screens read Inbox, Dashboard, Settings in the menu and the header, and the Overview item reads Dashboard. Checkboxes and radios in labels have a 24px hit area.
+
 ## 3.7.2
 
 - The Dashboard and queue show "No limit" instead of a huge number when the daily limit is off. The provider picker preselects the saved provider. DNS values are visible text. Inbox and Email Logs empty states link to the setting that fixes them. Resend buttons are named for the message. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
