@@ -23,7 +23,7 @@ foreach ( array(
 	defined( $k ) || define( $k, $v );
 }
 defined( 'KITS_CORE_DIR' ) || define( 'KITS_CORE_DIR', dirname( __DIR__ ) . '/' );
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.4.1' );
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.5.0' );
 
 $GLOBALS['t_hooks']      = array();
 $GLOBALS['t_opts']       = array();
