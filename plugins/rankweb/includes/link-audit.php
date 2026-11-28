@@ -417,8 +417,9 @@ function rankweb_link_audit_analyse( array $ids, int $started ): void {
 			array_push( $args, $id, $r['in'], $r['out'], (int) $r['depth'], $r['flags'] ? ',' . implode( ',', $r['flags'] ) . ',' : '', (string) wp_json_encode( (object) $r['detail'] ), $now );
 		}
 		// Every value is a placeholder: only the repeated "(%d,...)" groups are joined, then the whole statement is prepared.
-		$insert = $wpdb->prepare( 'INSERT INTO %i (post_id, links_in, links_out, depth, flags, detail, checked) VALUES ' . implode( ',', $holders ), $args ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- RankWeb's own table; the placeholders are built above.
-		$wpdb->query( $insert ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- RankWeb's own table, rewritten whole by the nightly audit.
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- RankWeb's own table, rewritten whole by the nightly audit; the placeholders are built above.
+		$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (post_id, links_in, links_out, depth, flags, detail, checked) VALUES ' . implode( ',', $holders ), $args ) );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 	$sum    = RankWeb_Link_Audit::summary( $result );
 	$anchor = function_exists( 'rankweb_anchor_rebuild' ) ? rankweb_anchor_rebuild() : array(
