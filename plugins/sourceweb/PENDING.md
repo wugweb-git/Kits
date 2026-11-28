@@ -1,5 +1,10 @@
 # SourceWeb: Pending & Roadmap
 
+## Built 28 Nov 2026 (0.5.0)
+
+- Add place (and Remove, when no route uses it) on the standalone Places screen; favicon host check with two filters. Unit tests only; not run on a live WordPress.
+- Still not built standalone: Run now (needs a GitHub token and a workers repository, which belong to the tenant), custom boolean tests in routes, some rule types.
+
 ## 0.4.1: post types by role, AWBI and Darpan enrichment moved out (27 Nov 2026)
 
 Done: see CHANGELOG.md 0.4.1. Still to do from the 0.4.0 list below: `AW_WORKERS`, the India edition of Google News and IST, the Indian place-name scoring in `cc0-images.php`, the Indian hosts and "india" stop words in `library-pdfs.php` and `auto-review.php`, the India Post source and the `animals` field in `enrichment.php` and `src/index.js`, and the `awbi` and `darpan` keys in the `rules-model.php` trust-order seed (kept: the workers' constants and the seed fixture hold them). The AWBI and NGO Darpan sources, fields and queue group are no longer in that list: they are in the site layer.

@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.5.0
+Stable tag: 3.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -137,6 +137,11 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
 == Changelog ==
+
+= 3.6.0 =
+* Resend button on Email Logs for mail waiting to be retried (failed or held). The log keeps the queue row id.
+* Inbox shows New, Read, Replied or Forwarded for each message.
+* A Provider picker on Site sending fills the SMTP server and port.
 
 = 3.5.0 =
 * MailWeb no longer carries anything for one site. The code that served only the Animal Writes site is removed from the plugin and kept in that site's own layer (`sites/animalwrites/mailweb/`, outside the plugin package): the Website forms folder and its Fluent Forms entries, the `[aw_newsletter]` shortcode and old list links, the volunteer fields, update link and `{{aw.*}}` smart code, the contact-form and claim notes, `wp aw crm-setup`, a block list of junk addresses, the old `aw_*` function names and the `AW_HOSTINGER_MAIL_TOKEN` bridge.

@@ -194,6 +194,7 @@ add_action(
 		$id                            = (int) ( $GLOBALS['mailweb_direct_id'] ?? 0 );
 		if ( $id ) {
 			unset( $GLOBALS['mailweb_direct_id'] );
+			$GLOBALS['mailweb_failed_queue_id'] = $id; // the delivery log (mail-delivery.php) keeps it for the Resend button
 			mailweb_mark_failed( $id, $GLOBALS['mailweb_last_error'] );
 		}
 	},
@@ -341,7 +342,7 @@ add_filter(
 			return null; // could not queue: send rather than lose it
 		}
 		mailweb_stat( 'queued' );
-		do_action( 'mailweb_mail_queued', $atts ); // the delivery log records it (mail-delivery.php)
+		do_action( 'mailweb_mail_queued', $atts, (int) $wpdb->insert_id ); // the delivery log records it (mail-delivery.php)
 		return true;
 	},
 	20,

@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.5.0
+
+- Add a place: the standalone Places screen can make a place (a content type, plugin, workflow or other), with a name, an optional id and, for a content type, the content type. It is kept in the option `sourceweb_custom_places`, joins the list of places and can be chosen in a route. An id that is already a place is refused; a place a route still sends items to cannot be removed (`sourceweb_place_add()`, `sourceweb_place_remove()`).
+- Favicon host check: SourceWeb fetches a site icon only from a public DNS name (no address, no single-label or local-looking name). The filter `sourceweb_favicon_hosts` limits it to a list of hosts and their subdomains; `sourceweb_favicon_third_party` returns false to stop asking Google's favicon service. Applies to the hourly publisher icons and the source icons.
+- Uninstall also removes the routes, place choices, made places and outcomes options.
+- Tests: `tests/run.php` (places), `tests/favicon-hosts-test.php`, and the screens test (21 handlers).
+- Not built: Run now for workers (it needs a GitHub token and the workers' repository; Kits Core dispatches it). Not run on a live WordPress.
+
 ## 0.4.1
 
 - The second pass of taking site-specific code out of the plugin. The Animal Writes site layer (`sites/animalwrites/sourceweb/`, not in this zip) must be deployed alongside 0.4.1: without it the plugin finds no News, Library, Opportunity, Press or Directory content type on that site and its type-dependent features do nothing.

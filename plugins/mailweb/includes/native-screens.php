@@ -119,13 +119,14 @@ function mailweb_native_inbox( array $s ): void {
 		$cells[] = array(
 			'from'    => ! empty( $m['unseen'] ) ? '<strong>' . esc_html( $m['from'] ) . '</strong>' : esc_html( $m['from'] ),
 			'subject' => '<a href="' . esc_url( mailweb_native_list_url( $args ) ) . '">' . esc_html( $subj ) . '</a>' . ( ! empty( $m['unseen'] ) ? ' <span class="screen-reader-text">' . esc_html__( '(unread)', 'mailweb' ) . '</span>' : '' ),
+			'status'  => esc_html( mailweb_row_status_label( mailweb_row_status( $m ) ) ),
 			'date'    => $t ? esc_html( wp_date( 'j M Y H:i', $t ) ) : '–',
 		);
 	}
 	$total = (int) $res['total'];
 	mailweb_simple_table(
 		'mailweb-native-list',
-		array( 'from' => 'sent' === $s['folder'] ? __( 'To', 'mailweb' ) : __( 'From', 'mailweb' ), 'subject' => __( 'Subject', 'mailweb' ), 'date' => __( 'Date', 'mailweb' ) ),
+		array( 'from' => 'sent' === $s['folder'] ? __( 'To', 'mailweb' ) : __( 'From', 'mailweb' ), 'subject' => __( 'Subject', 'mailweb' ), 'status' => __( 'Status', 'mailweb' ), 'date' => __( 'Date', 'mailweb' ) ),
 		$cells,
 		array( 'primary' => 'subject', 'foot' => false, 'empty' => __( 'No messages here.', 'mailweb' ) )
 	);

@@ -163,6 +163,50 @@ register_deactivation_hook(
 	}
 );
 
+/**
+ * Whether Sourceweb may fetch a site icon from this host. A public DNS name only (no address, no single-label or
+ * local-looking name), and, when the site sets an allow-list with the `sourceweb_favicon_hosts` filter, only those hosts
+ * and their subdomains. Google's favicon service is used unless `sourceweb_favicon_third_party` returns false.
+ *
+ * @param string $host Host name.
+ * @return bool
+ */
+function sourceweb_favicon_host_ok( $host ) {
+	$host = strtolower( trim( (string) $host ) );
+	if ( strlen( $host ) > 253 || ! preg_match( '/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,61}[a-z0-9]$/', $host ) ) {
+		return false;
+	}
+	if ( preg_match( '/\.(?:local|localhost|internal|lan|home|corp|test|invalid|example|onion)$/', $host ) ) {
+		return false;
+	}
+	$allow = apply_filters( 'sourceweb_favicon_hosts', array() );
+	if ( is_array( $allow ) && $allow ) {
+		foreach ( $allow as $ok ) {
+			$ok = strtolower( trim( (string) $ok ) );
+			if ( '' !== $ok && ( $host === $ok || substr( $host, -strlen( $ok ) - 1 ) === '.' . $ok ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	return true;
+}
+
+/**
+ * The places an icon is asked for, in order: Google's favicon service (unless switched off), then the site itself.
+ *
+ * @param string $host Host name.
+ * @return string[]
+ */
+function sourceweb_favicon_sources( $host ) {
+	$out = array();
+	if ( apply_filters( 'sourceweb_favicon_third_party', true ) ) {
+		$out[] = 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host );
+	}
+	$out[] = 'https://' . $host . '/favicon.ico';
+	return $out;
+}
+
 /** Fetch up to 10 publisher favicons into the media library (hourly cron). */
 function sourceweb_fetch_favicons_run() {
 	require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -171,12 +215,12 @@ function sourceweb_fetch_favicons_run() {
 	$pubs = sourceweb_publishers();
 	$done = 0;
 	foreach ( $pubs as $host => $p ) {
-		if ( array_key_exists( 'icon', $p ) || ! (int) ( $p['count'] ?? 0 ) || $done >= 10 ) {
+		if ( array_key_exists( 'icon', $p ) || ! (int) ( $p['count'] ?? 0 ) || $done >= 10 || ! sourceweb_favicon_host_ok( $host ) ) {
 			continue;
 		}
 		$done++;
 		$att = 0;
-		foreach ( array( 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host ), 'https://' . $host . '/favicon.ico' ) as $src ) {
+		foreach ( sourceweb_favicon_sources( $host ) as $src ) {
 			$tmp = download_url( $src, 15 );
 			if ( is_wp_error( $tmp ) ) {
 				continue;

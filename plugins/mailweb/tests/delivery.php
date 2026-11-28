@@ -438,5 +438,88 @@ define( 'POST_SMTP_VER', '3' );
 t( ! mailweb_fallback_active(), 'fallback is not used while another SMTP plugin is active' );
 t( 'other-plugin' === mailweb_delivery_provider( false ), 'log: another SMTP plugin is named as the way it was sent' );
 
+
+// ---------- Resend: only a failed or held row that still has its message ----------
+t( mailweb_resend_allowed( 'failed' ) && mailweb_resend_allowed( 'held' ), 'resend: failed and held rows can go again' );
+t( ! mailweb_resend_allowed( 'queued' ) && ! mailweb_resend_allowed( 'sent' ) && ! mailweb_resend_allowed( 'sending' ) && ! mailweb_resend_allowed( '' ), 'resend: waiting, sent and sending rows are left alone' );
+class T_Wpdb {
+	public $prefix = 'wp_';
+	public $last   = array();
+	public $rows   = array(
+		1 => array( 'status' => 'failed', 'mail' => '{"to":"a@example.com"}' ),
+		2 => array( 'status' => 'sent', 'mail' => '{"to":"a@example.com"}' ),
+		3 => array( 'status' => 'failed', 'mail' => null ), // the text was not kept
+		4 => array( 'status' => 'held', 'mail' => '{"to":"b@example.com"}' ),
+	);
+	public function prepare( $q, ...$a ) {
+		$this->last = array( $q, $a );
+		return $q;
+	}
+	public function get_var( $q ) {
+		$id = $this->last[1][1] ?? 0;
+		return isset( $this->rows[ $id ] ) && null !== $this->rows[ $id ]['mail'] ? $this->rows[ $id ]['status'] : null;
+	}
+	public function update( $table, $data, $where ) {
+		if ( ! isset( $this->rows[ $where['id'] ] ) ) {
+			return 0;
+		}
+		$this->rows[ $where['id'] ] = array_merge( $this->rows[ $where['id'] ], array( 'status' => $data['status'] ) );
+		return 1;
+	}
+}
+$GLOBALS['wpdb'] = new T_Wpdb();
+t( 'failed' === mailweb_queue_row_status( 1 ), 'resend: the status of a row with its message is read' );
+t( '' === mailweb_queue_row_status( 3 ), 'resend: a row whose message was not kept is not offered' );
+t( '' === mailweb_queue_row_status( 99 ) && '' === mailweb_queue_row_status( 0 ), 'resend: no row, no status' );
+t( true === mailweb_resend_email( 1 ) && 'queued' === $GLOBALS['wpdb']->rows[1]['status'], 'resend: a failed row goes back to queued' );
+t( true === mailweb_resend_email( 4 ) && 'queued' === $GLOBALS['wpdb']->rows[4]['status'], 'resend: a held row goes back to queued' );
+t( false === mailweb_resend_email( 2 ) && 'sent' === $GLOBALS['wpdb']->rows[2]['status'], 'resend: a sent row is not sent twice' );
+t( false === mailweb_resend_email( 3 ), 'resend: a row with no message is refused' );
+t( false === mailweb_resend_email( 1 ), 'resend: a row already queued is not requeued' );
+unset( $GLOBALS['wpdb'] );
+
+// ---------- The queue row id reaches the log ----------
+// ---------- The queue row id reaches the log, so the Resend button has a row to act on ----------
+t_reset();
+update_option( 'mailweb_delivery', mailweb_delivery_clean( array( 'log_mail' => '1' ) ) );
+$GLOBALS['mailweb_failed_queue_id'] = 41;
+mailweb_on_mail_failed( new WP_Error( 'x', 'boom', array( 'to' => array( 'a@example.com' ), 'subject' => 'Hi' ) ) );
+mailweb_on_mail_queued( array( 'to' => 'q@example.com', 'subject' => 'Held' ), 52 );
+$ql = get_option( 'mailweb_email_logs', array() );
+t( 41 === ( $ql[0]['queue_id'] ?? 0 ) && 'failed' === $ql[0]['status'], 'log: a failed direct send keeps its queue row id' );
+t( 52 === ( $ql[1]['queue_id'] ?? 0 ) && 'queued' === $ql[1]['status'], 'log: a queued mail keeps its queue row id' );
+t( ! isset( $GLOBALS['mailweb_failed_queue_id'] ), 'log: the id is used once, not carried to the next failure' );
+
+// ---------- Inbox status: New, Read, Replied, Forwarded ----------
+$inbox_src = file_get_contents( dirname( __DIR__ ) . '/includes/inbox.php' );
+foreach ( array( 'mailweb_row_status', 'mailweb_row_status_label' ) as $fn ) {
+	preg_match( '/^function ' . $fn . '\(.*?^\}/ms', $inbox_src, $m );
+	t( ! empty( $m[0] ), "status: $fn is in inbox.php" );
+	if ( ! empty( $m[0] ) ) {
+		eval( $m[0] );
+	}
+}
+t( 'new' === mailweb_row_status( array( 'unseen' => true, 'answered' => true ) ), 'status: an unseen message is New whatever else it carries' );
+t( 'read' === mailweb_row_status( array( 'unseen' => false ) ), 'status: a seen message with no flag is Read' );
+t( 'replied' === mailweb_row_status( array( 'answered' => true ) ), 'status: Answered is Replied' );
+t( 'forwarded' === mailweb_row_status( array( 'forwarded' => true ) ), 'status: Forwarded is Forwarded' );
+t( 'replied' === mailweb_row_status( array( 'answered' => true, 'forwarded' => true ) ), 'status: replied and forwarded shows Replied' );
+t( 'Replied' === mailweb_row_status_label( 'replied' ) && 'Read' === mailweb_row_status_label( 'nonsense' ), 'status: the words, and an unknown one reads Read' );
+
+// ---------- SMTP presets: what the Provider picker fills in ----------
+$pre = mailweb_smtp_presets();
+t( isset( $pre['hostinger'], $pre['gmail'], $pre['custom'] ), 'presets: the common providers and Custom are listed' );
+$bad = array();
+foreach ( $pre as $k => $p ) {
+	if ( 'custom' === $k ) {
+		continue;
+	}
+	if ( ! preg_match( '/^[a-z0-9.-]+\.[a-z]{2,}$/', $p['host'] ) || ! in_array( (int) $p['port'], array( 25, 465, 587, 2525 ), true ) || ( 465 === (int) $p['port'] ) !== ( 'ssl' === $p['encryption'] ) ) {
+		$bad[] = $k;
+	}
+}
+t( ! $bad, 'presets: each has a real host name, a standard port, and SSL only on 465' . ( $bad ? ' (' . implode( ',', $bad ) . ')' : '' ) );
+t( '' === $pre['custom']['host'], 'presets: Custom leaves the server empty, so the picker fills nothing' );
+
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

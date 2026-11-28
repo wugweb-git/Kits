@@ -1,5 +1,10 @@
 # PlanWeb: Pending & Roadmap
 
+## Built 28 Nov 2026 (0.6.0)
+
+- Shell Entries: From / To date range, and a Timeline (lanes by type, weekly ticks, Earlier and Later). Range logic tested in `tests/run.php`; the Timeline REST route and the React screens were built and linted, not run on a live WordPress or in a browser.
+- Still not built: drag-and-drop rescheduling; campaign bars spanning dates.
+
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
 Checked line by line against the code on 27 Nov 2026.

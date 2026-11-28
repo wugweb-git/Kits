@@ -210,6 +210,7 @@ jobs:
           php plugins/insightweb/tests/run.php
           php plugins/insightweb/tests/StandaloneInsightsTest.php
           php plugins/insightweb/tests/no-aw-functions-test.php
+          php plugins/insightweb/tests/favicon-hosts-test.php
 
       - name: Test RankWeb
         if: ${{ needs.changes.outputs.rankweb == 'true' || needs.changes.outputs.packaging == 'true' || github.event_name == 'push' }}
@@ -239,6 +240,7 @@ jobs:
           php plugins/sourceweb/tests/SourceWebStandaloneTest.php
           php plugins/sourceweb/tests/SourceWebStandaloneScreensTest.php
           php plugins/sourceweb/tests/no-aw-functions-test.php
+          php plugins/sourceweb/tests/favicon-hosts-test.php
       - name: SourceWeb workflow list matches the workers repository
         # Not gating until the workers repo's chore/retire-eight-workflows is merged to its main.
         continue-on-error: true

@@ -651,6 +651,41 @@ function mailweb_form_item_screen( $s ) {
 /* ---------- Reading ---------- */
 
 /**
+ * The state of a message as the list says it: New (not opened yet), Replied or Forwarded (the mail server's Answered and
+ * Forwarded flags, or a website form marked replied), otherwise Read. Replied and Forwarded win over Read; a message that
+ * is unseen is New whatever else it carries.
+ *
+ * @param array $item A row from mailweb_list_rows(): unseen, answered, forwarded.
+ * @return string new|read|replied|forwarded
+ */
+function mailweb_row_status( array $item ): string {
+	if ( ! empty( $item['unseen'] ) ) {
+		return 'new';
+	}
+	if ( ! empty( $item['forwarded'] ) && empty( $item['answered'] ) ) {
+		return 'forwarded';
+	}
+	if ( ! empty( $item['answered'] ) ) {
+		return 'replied';
+	}
+	if ( ! empty( $item['forwarded'] ) ) {
+		return 'forwarded';
+	}
+	return 'read';
+}
+
+/** The word for a status from mailweb_row_status(). */
+function mailweb_row_status_label( string $status ): string {
+	$labels = array(
+		'new'       => __( 'New', 'mailweb' ),
+		'read'      => __( 'Read', 'mailweb' ),
+		'replied'   => __( 'Replied', 'mailweb' ),
+		'forwarded' => __( 'Forwarded', 'mailweb' ),
+	);
+	return $labels[ $status ] ?? $labels['read'];
+}
+
+/**
  * Mark a message read, as webmail does on open (the Mail API does not when its text is fetched), and drop the cached
  * unread counts.
  *

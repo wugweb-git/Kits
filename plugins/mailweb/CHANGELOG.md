@@ -2,6 +2,14 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 3.6.0
+
+- Resend: on Mail → Email Logs a message that is waiting to be retried (failed, or held by the daily limit or a pause) has a Resend button. It puts the queue row back in the queue; a row that is already queued or sent, or whose text was not kept, is refused. The log now carries the queue row id (a failed direct send and a queued mail), so the button knows which row to act on. `mailweb_resend_email()` checks the row's status first.
+- Inbox: every message shows its state, New, Read, Replied or Forwarded (the mail server's Answered and Forwarded flags; a website form marked replied), in the shell list and as a Status column in the classic list (`mailweb_row_status()`).
+- Site sending: a Provider picker fills the SMTP server and port for Hostinger, Gmail, Microsoft 365, SendGrid, Mailgun, Postmark and Amazon SES. Nothing is saved until Save.
+- Tests: `tests/delivery.php` covers resend, the queue row id in the log, the status words and the presets.
+- Not run on a live WordPress or against a real mail server.
+
 ## 3.5.0
 
 - Removed all Animal Writes-only code from the plugin. Moved unchanged to `sites/animalwrites/mailweb/`: `includes/website-forms.php`, `includes/newsletter.php`, `includes/fluentcrm-compat.php`, and the Animal Writes part of `includes/fluentcrm.php` (now `fluentcrm-aw.php` there: junk-address block list, tag titles, volunteer and form fields, update link and `{{aw.*}}` smart code, Contact and Claim notes, unticked-box handling, campaign signer, Pro one-off email headers and retry, unsubscribe sync, `wp aw crm-setup`, the Fluent Forms submission hook). `site.php` there loads them at `plugins_loaded` 6.

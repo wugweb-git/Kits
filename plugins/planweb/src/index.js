@@ -477,6 +477,8 @@ const FILTER_KEYS = [
 	'status',
 	'view',
 	'when',
+	'date_from',
+	'date_to',
 	'sort',
 	'dir',
 	'page',
@@ -808,6 +810,149 @@ const WHEN = () => [
 	{ value: 'all', label: __( 'All dates', 'planweb' ) },
 ];
 
+/**
+ * The Timeline: one lane for each Type that has an entry in the range, a marker for each entry along it, with the weeks
+ * ticked. It follows the list's filters and the From / To dates; with no dates it shows eight weeks from this week's
+ * Monday. Earlier and Later move the range by its own length.
+ *
+ * @param {Object} props
+ * @param {Object} props.args The list's arguments (type, status, owner, channel, date_from, date_to).
+ */
+function Timeline( { args } ) {
+	const [ range, setRange ] = useState( {
+		date_from: args.date_from || '',
+		date_to: args.date_to || '',
+	} );
+	const [ data, setData ] = useState( null );
+	const [ loading, setLoading ] = useState( true );
+	const [ error, setError ] = useState( '' );
+	useEffect(
+		() =>
+			setRange( {
+				date_from: args.date_from || '',
+				date_to: args.date_to || '',
+			} ),
+		[ args.date_from, args.date_to ]
+	);
+	const filters = {
+		type: args.type,
+		status: args.status,
+		owner: args.owner,
+		channel: args.channel,
+	};
+	const load = useCallback( () => {
+		setLoading( true );
+		setError( '' );
+		apiFetch( {
+			path: `${ path( 'timeline' ) }?${ query( { ...filters, ...range } ) }`,
+		} )
+			.then( setData )
+			.catch( ( e ) => setError( errText( e ) ) )
+			.finally( () => setLoading( false ) );
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- the filters are read from args.
+	}, [ range, args.type, args.status, args.owner, args.channel ] );
+	useEffect( load, [ load ] );
+	const shift = ( dir ) => {
+		if ( ! data ) {
+			return;
+		}
+		const day = 86400000;
+		const from = new Date( data.from + 'T12:00:00Z' ).getTime();
+		const step = data.days * day * dir;
+		const fmt = ( t ) => new Date( t ).toISOString().slice( 0, 10 );
+		setRange( {
+			date_from: fmt( from + step ),
+			date_to: fmt( from + step + ( data.days - 1 ) * day ),
+		} );
+	};
+	return (
+		<SectionCard
+			id="timeline"
+			title={ __( 'Timeline', 'planweb' ) }
+			description={ __(
+				'Entries by type along the dates. It follows the filters above; set From and To for a longer or shorter range.',
+				'planweb'
+			) }
+		>
+			{ error && <Notice tone="error">{ error }</Notice> }
+			{ loading && ! data && (
+				<LoadingState label={ __( 'Loading…', 'planweb' ) } />
+			) }
+			{ data && (
+				<>
+					<p className="planweb-nav">
+						<Button onClick={ () => shift( -1 ) }>
+							{ '‹ ' + __( 'Earlier', 'planweb' ) }
+						</Button>{ ' ' }
+						<strong>{ data.label }</strong>{ ' ' }
+						<Button onClick={ () => shift( 1 ) }>
+							{ __( 'Later', 'planweb' ) + ' ›' }
+						</Button>
+					</p>
+					{ ! data.lanes.length ? (
+						<p>{ __( 'No entries in this range.', 'planweb' ) }</p>
+					) : (
+						<div className="planweb-timeline">
+							<div className="planweb-timeline-row planweb-timeline-axis">
+								<span className="planweb-timeline-label" />
+								<div
+									className="planweb-timeline-track"
+									aria-hidden="true"
+								>
+									{ data.ticks.map( ( t ) => (
+										<span
+											key={ t.left + t.label }
+											className="planweb-timeline-tick"
+											style={ { left: `${ t.left }%` } }
+										>
+											{ t.label }
+										</span>
+									) ) }
+								</div>
+							</div>
+							{ data.lanes.map( ( lane ) => (
+								<div
+									key={ lane.type }
+									className="planweb-timeline-row"
+								>
+									<span className="planweb-timeline-label">
+										<span
+											className={ `planweb-type planweb-type--${ lane.type }` }
+										>
+											<span
+												className="planweb-mark"
+												aria-hidden="true"
+											/>
+											{ lane.label }
+										</span>
+									</span>
+									<div className="planweb-timeline-track">
+										{ lane.marks.map( ( m ) => (
+											<a
+												key={ m.id }
+												className={ `planweb-timeline-mark planweb-status--${ m.status }` }
+												style={ {
+													left: `${ m.left }%`,
+												} }
+												href={ m.editUrl }
+												title={ `${ m.date }: ${ m.title }` }
+											>
+												<span className="screen-reader-text">
+													{ `${ m.date }: ${ m.title }` }
+												</span>
+											</a>
+										) ) }
+									</div>
+								</div>
+							) ) }
+						</div>
+					) }
+				</>
+			) }
+		</SectionCard>
+	);
+}
+
 function Entries() {
 	const [ args, setArgs ] = useState( argsFromUrl );
 	const [ data, setData ] = useState( null );
@@ -1054,6 +1199,55 @@ function Entries() {
 				</p>
 			) }
 			<SectionCard
+				id="entry-dates"
+				title={ __( 'Dates', 'planweb' ) }
+				description={ __(
+					'Show only entries between two dates. Either end can be left empty. This replaces the Dates choice below.',
+					'planweb'
+				) }
+			>
+				<p className="planweb-range">
+					<label htmlFor="planweb-date-from">
+						{ __( 'From', 'planweb' ) }{ ' ' }
+						<input
+							id="planweb-date-from"
+							type="date"
+							value={ a.date_from || '' }
+							max={ a.date_to || undefined }
+							onChange={ ( e ) =>
+								change( 'date_from', e.target.value )
+							}
+						/>
+					</label>{ ' ' }
+					<label htmlFor="planweb-date-to">
+						{ __( 'To', 'planweb' ) }{ ' ' }
+						<input
+							id="planweb-date-to"
+							type="date"
+							value={ a.date_to || '' }
+							min={ a.date_from || undefined }
+							onChange={ ( e ) =>
+								change( 'date_to', e.target.value )
+							}
+						/>
+					</label>{ ' ' }
+					{ ( a.date_from || a.date_to ) && (
+						<Button
+							onClick={ () =>
+								setArgs( ( o ) => ( {
+									...o,
+									date_from: '',
+									date_to: '',
+									page: '',
+								} ) )
+							}
+						>
+							{ __( 'Clear dates', 'planweb' ) }
+						</Button>
+					) }
+				</p>
+			</SectionCard>
+			<SectionCard
 				id="entries"
 				title={ __( 'Entries', 'planweb' ) }
 				description={ __(
@@ -1160,6 +1354,7 @@ function Entries() {
 					emptyTitle={ __( 'No entries match.', 'planweb' ) }
 				/>
 			</SectionCard>
+			<Timeline args={ a } />
 		</>
 	);
 }

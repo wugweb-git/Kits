@@ -108,6 +108,7 @@ add_action(
 			'/dashboard'                 => array( 'GET', 'edit_planweb_entries', 'planweb_rest_dashboard', array() ),
 			'/dashboard/count'           => array( 'POST', 'edit_planweb_entries', 'planweb_rest_count_now', array() ),
 			'/entries'                   => array( 'GET', 'edit_planweb_entries', 'planweb_rest_entries', planweb_rest_list_params() ),
+			'/timeline'                  => array( 'GET', 'edit_planweb_entries', 'planweb_rest_timeline', planweb_rest_list_params() ),
 			'/entries/(?P<id>\d+)'       => array( 'POST', 'edit_planweb_entries', 'planweb_rest_save', $fields ),
 			'/entries/(?P<id>\d+)/trash' => array( 'POST', 'edit_planweb_entries', 'planweb_rest_trash', array() ),
 			'/settings'                  => array( 'GET', 'manage_options', fn() => rest_ensure_response( planweb_settings_payload() ), array() ),
@@ -245,6 +246,73 @@ function planweb_rest_list_params(): array {
 		'when'    => $enum( array_keys( PLANWEB_WINDOWS ) ),
 		'sort'    => $enum( array( 'date', 'title' ) ),
 		'dir'     => $enum( array( 'asc', 'desc' ) ),
+		'date_from' => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+		'date_to'   => array(
+			'type'    => 'string',
+			'default' => '',
+		),
+	);
+}
+
+/**
+ * GET timeline?date_from&date_to&type&status&owner&channel: the Timeline of the shell screen. One lane for each Type
+ * that has an entry in the range, each entry placed along it as a percentage (planweb_timeline_lanes()), with the
+ * weekly ticks. No range: eight weeks from this week's Monday. The same filters as the list.
+ *
+ * @param WP_REST_Request $request Request.
+ */
+function planweb_rest_timeline( WP_REST_Request $request ) {
+	$today = wp_date( 'Y-m-d' );
+	$r     = planweb_timeline_range( (string) $request['date_from'], (string) $request['date_to'], $today );
+	$f     = array(
+		'type'    => (string) $request['type'],
+		'status'  => (string) $request['status'],
+		'owner'   => (string) $request['owner'],
+		'channel' => (string) $request['channel'],
+	);
+	$all   = planweb_calendar_filter( planweb_entries( $r['from'], $r['to'] ), $f );
+	$lanes = array();
+	foreach ( planweb_timeline_lanes( $all, $r['from'], $r['to'] ) as $slug => $rows ) {
+		$lanes[] = array(
+			'type'  => $slug,
+			'label' => PLANWEB_TYPES[ $slug ] ?? $slug,
+			'marks' => array_map(
+				fn( $e ) => array(
+					'id'      => (int) $e['id'],
+					'title'   => (string) $e['title'],
+					'date'    => planweb_date_label( $e['date'] ),
+					'status'  => (string) $e['status'],
+					'left'    => (float) $e['left_pct'],
+					'editUrl' => planweb_ui_url( 'entries', array( 'edit' => $e['id'] ) ),
+				),
+				$rows
+			),
+		);
+	}
+	$ticks = array();
+	$at    = strtotime( $r['from'] . ' 12:00:00 UTC' );
+	for ( $t = strtotime( planweb_week_start( $r['from'] ) . ' 12:00:00 UTC' ); $t <= strtotime( $r['to'] . ' 12:00:00 UTC' ); $t += 7 * DAY_IN_SECONDS ) {
+		$day = (int) round( ( $t - $at ) / DAY_IN_SECONDS );
+		if ( $day >= 0 ) {
+			$ticks[] = array(
+				'left'  => round( ( $day / $r['days'] ) * 100, 2 ),
+				'label' => wp_date( 'j M', $t ),
+			);
+		}
+	}
+	return rest_ensure_response(
+		array(
+			'from'  => $r['from'],
+			'to'    => $r['to'],
+			'days'  => $r['days'],
+			'label' => planweb_date_label( $r['from'] ) . ' – ' . planweb_date_label( $r['to'] ),
+			'count' => count( $all ),
+			'ticks' => $ticks,
+			'lanes' => $lanes,
+		)
 	);
 }
 

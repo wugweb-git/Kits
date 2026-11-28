@@ -532,6 +532,27 @@ $gal = sourceweb_place_clean( array( 'id' => 'Gallery!', 'label' => ' Picture ga
 aw_t( 'gallery' === $gal['id'] && 'Picture gallery' === $gal['label'] && array( 'image', 'attribution' ) === $gal['enhance'] && 'myplugin' === $gal['owner'], 'places: a plugin place is tidied (id, label, enhancements without repeats)' );
 $all = sourceweb_places_clean( array_merge( array_values( $pl ), array( array( 'id' => 'aw_news', 'label' => 'News', 'kind' => 'content_type', 'post_type' => 'aw_news' ), array( 'id' => 'gallery', 'kind' => 'plugin' ), 'junk' ) ) );
 aw_t( 'News' === $all['aw_news']['label'] && isset( $all['gallery'] ) && 4 === count( $all ), 'places: a later place with the same id replaces the earlier one; junk is dropped' );
+
+// Add a place / remove a place (the Places screen)
+list( $cp, $why ) = sourceweb_place_add( array(), array( 'label' => 'Picture Gallery', 'kind' => 'plugin' ), array( 'aw_news', 'post' ) );
+aw_t( '' === $why && 'picture-gallery' === $cp[0]['id'] && 'Picture Gallery' === $cp[0]['label'] && 'plugin' === $cp[0]['kind'], 'add place: the id is made from the name' );
+list( $cp2, $why ) = sourceweb_place_add( $cp, array( 'label' => 'Again', 'id' => 'picture-gallery', 'kind' => 'plugin' ), array( 'post', 'picture-gallery' ) );
+aw_t( '' !== $why && 1 === count( $cp2 ), 'add place: an id already used is refused and nothing is added' );
+list( $cp2, $why ) = sourceweb_place_add( $cp, array( 'label' => 'News', 'id' => 'post', 'kind' => 'content_type', 'post_type' => 'post' ), array( 'post' ) );
+aw_t( '' !== $why && 1 === count( $cp2 ), 'add place: a content type place cannot take the id of a content type that is already one' );
+list( , $why ) = sourceweb_place_add( array(), array( 'label' => 'Blog', 'kind' => 'content_type' ), array() );
+aw_t( '' !== $why, 'add place: a content type place without a content type is refused' );
+list( , $why ) = sourceweb_place_add( array(), array( 'label' => '  ', 'id' => '' ), array() );
+aw_t( '' !== $why, 'add place: no name, no place' );
+list( $cp3, $why ) = sourceweb_place_add( array(), array( 'label' => 'Reviews', 'kind' => 'content_type', 'post_type' => 'review' ), array() );
+aw_t( '' === $why && 'review' === $cp3[0]['post_type'], 'add place: a content type place keeps its content type' );
+list( $left, $why ) = sourceweb_place_remove( $cp, 'picture-gallery', array( array( 'when' => array( 'always' ), 'place' => 'picture-gallery' ) ) );
+aw_t( '' !== $why && 1 === count( $left ), 'remove place: refused while a route still sends items to it' );
+list( $left, $why ) = sourceweb_place_remove( $cp, 'picture-gallery', array() );
+aw_t( '' === $why && array() === $left, 'remove place: removed when no route uses it' );
+list( , $why ) = sourceweb_place_remove( $cp, 'nope', array() );
+aw_t( '' !== $why, 'remove place: an id that was not made here is refused' );
+
 $it = array( 'type' => 'aw_news', 'title' => 'Dog rescued in Pune', 'source_name' => 'The Hindu', 'score' => 80, 'tags' => array( 'dogs' ) );
 aw_t( sourceweb_expr_eval( array(), $it ) && sourceweb_expr_eval( null, $it ), 'expr: no condition is true' );
 aw_t( sourceweb_expr_eval( array( 'eq', 'type', 'aw_news' ), $it ) && ! sourceweb_expr_eval( array( 'eq', 'type', 'post' ), $it ) && ! sourceweb_expr_eval( array( 'eq', 'nope', 'x' ), $it ), 'expr: eq, and a missing field is false' );

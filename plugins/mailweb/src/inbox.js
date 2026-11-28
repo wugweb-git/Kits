@@ -627,6 +627,13 @@ export default function Inbox() {
 								<span className="mailweb-mail__from">
 									{ r.from }
 								</span>
+								{ r.statusLabel && (
+									<span
+										className={ `mailweb-mail__status is-${ r.status }` }
+									>
+										{ r.statusLabel }
+									</span>
+								) }
 								<span className="mailweb-mail__date">
 									{ r.date }
 								</span>

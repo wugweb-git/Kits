@@ -2,6 +2,12 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.2.2
+
+- Favicon host check: referring-site icons are fetched only from a public DNS name (no address, no single-label or local-looking name). The filter `insightweb_favicon_hosts` limits it to a list of hosts and their subdomains; `insightweb_favicon_third_party` returns false to stop asking Google's favicon service. A host that fails the check gets the letter fallback.
+- Tests: `tests/favicon-hosts-test.php`.
+- Not rebuilt: `build/` (no `src/` change).
+
 ## 1.2.1
 
 The Animal Writes site layer must be deployed alongside InsightWeb 1.2.1 (it maps the content types).

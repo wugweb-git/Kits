@@ -256,6 +256,17 @@
 	vertical-align: middle;
 }
 
+.mailweb-mail__status {
+	flex: none;
+	color: var(--ks-g6);
+	font-size: 12px;
+}
+
+.mailweb-mail__status.is-new {
+	color: var(--ks-ink);
+	font-weight: 700;
+}
+
 .mailweb-mail__clip {
 	flex: none;
 	color: var(--ks-g6);

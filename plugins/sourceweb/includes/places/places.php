@@ -22,6 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/** The places made on the Places screen (Add a place): a list of id, label, kind, post_type, owner. */
+const SOURCEWEB_CUSTOM_PLACES_OPTION = 'sourceweb_custom_places';
+
 /** The routes chosen in settings: a list of [ 'when' => expression, 'place' => id ]. Empty by default. */
 const SOURCEWEB_ROUTES_OPTION = 'sourceweb_routes';
 
@@ -32,7 +35,8 @@ const SOURCEWEB_ROUTES_OPTION = 'sourceweb_routes';
  */
 function sourceweb_places(): array {
 	$places = sourceweb_places_default( function_exists( 'sourceweb_post_types' ) ? sourceweb_post_types() : array() );
-	$more   = apply_filters( 'sourceweb_places', array_values( $places ) );
+	$mine   = sourceweb_places_clean( array_values( (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() ) ) ); // made on the Places screen
+	$more   = apply_filters( 'sourceweb_places', array_values( $places + $mine ) );
 	$out    = sourceweb_places_clean( is_array( $more ) ? $more : array_values( $places ) );
 	// What to do to an item for a place can be chosen in settings (the Places tab): that choice wins over the code's.
 	foreach ( (array) get_option( SOURCEWEB_PLACE_ENHANCE_OPTION, array() ) as $id => $list ) {

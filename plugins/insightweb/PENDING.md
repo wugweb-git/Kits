@@ -1,5 +1,9 @@
 # InsightWeb: Pending & Roadmap
 
+## Built 28 Nov 2026 (1.2.2)
+
+- Favicon host check with two filters (`tests/favicon-hosts-test.php`). Not run on a live WordPress.
+
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
 Checked line by line against the code on 27 Nov 2026.

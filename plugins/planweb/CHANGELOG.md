@@ -2,6 +2,13 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.6.0
+
+- The shell Entries screen has a From / To date range (either end can be left empty; reversed ends are swapped; a bad date is ignored). It replaces the Dates choice, and Overdue still ends before today (`planweb_list_args()`, REST `date_from` and `date_to`).
+- The shell has a Timeline under the list: a lane for each type that has an entry in the range, a marker for each entry, weekly ticks, and Earlier and Later. It follows the list's filters and dates; with no dates it shows eight weeks from this week's Monday (new REST route `planweb/v1/timeline`, `planweb_rest_timeline()`).
+- Tests: `tests/run.php` covers the range. `src/index.js` and `build/` rebuilt; lint clean.
+- Not built: drag-and-drop rescheduling; campaign bars spanning dates (an entry has one date). Not run on a live WordPress or in a browser.
+
 ## 0.5.0
 
 - Removed all Animal Writes-only code. `includes/team-dates.php` (`aw_team_dates*`, `aw_team_dates_context()`, the seeded and campaign dates, their one-off migrations, the Kits → Dates screen and Dashboard box) moved unchanged to `sites/animalwrites/planweb/team-dates.php`, loaded by `sites/animalwrites/planweb/site.php`. `includes/migrate.php` (the 14 Nov 2026 one-time move, which names Animal Writes entry IDs 25181 to 25187) moved the same way. `planweb.php` requires neither.

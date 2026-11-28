@@ -105,6 +105,16 @@ function mailweb_smtp_screen() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'mailweb_smtp' );
 	echo '<input type="hidden" name="action" value="mailweb_smtp_save"><table class="form-table">';
+	// A provider picker: choosing one fills the server and port below (nothing is saved until Save). It has no name, so it is not submitted.
+	$presets = mailweb_smtp_presets();
+	echo '<tr><th scope="row"><label for="mailweb-smtp-preset">' . esc_html__( 'Provider', 'mailweb' ) . '</label></th><td><select id="mailweb-smtp-preset"><option value="">' . esc_html__( 'Choose to fill in the server and port', 'mailweb' ) . '</option>';
+	foreach ( $presets as $pk => $p ) {
+		echo '<option value="' . esc_attr( $pk ) . '">' . esc_html( $p['label'] ) . '</option>';
+	}
+	echo '</select><p class="description">' . esc_html__( 'Fills in the SMTP server and port for you. Check the mailbox and password, then Save.', 'mailweb' ) . '</p></td></tr>';
+	wp_register_script( 'mailweb-smtp-preset', false, array(), MAILWEB_VERSION, true );
+	wp_enqueue_script( 'mailweb-smtp-preset' );
+	wp_add_inline_script( 'mailweb-smtp-preset', '(function(){var p=' . wp_json_encode( array_map( fn( $x ) => array( 'host' => $x['host'], 'port' => $x['port'] ), $presets ) ) . ',sel=document.getElementById("mailweb-smtp-preset"),h=document.getElementById("mailweb-smtp-host"),o=document.getElementById("mailweb-smtp-port");if(!sel||!h||!o)return;sel.addEventListener("change",function(){var x=p[sel.value];if(!x||!x.host)return;h.value=x.host;o.value=x.port;});})();' );
 	$rows = array(
 		'user' => array( __( 'Mailbox (email address)', 'mailweb' ), 'email', $s['user'] ),
 		'pass' => array( __( 'Mailbox password', 'mailweb' ), 'password', '' ),

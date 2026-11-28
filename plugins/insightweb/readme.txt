@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,11 +76,14 @@ InsightWeb connects to external services only when the corresponding integration
 * **Bing Webmaster API (`https://ssl.bing.com/webmaster/`):** Only when a Bing Webmaster API key is configured, fetches crawl, backlink, and keyword telemetry for the site. Terms & Privacy: [https://privacy.microsoft.com/](https://privacy.microsoft.com/).
 * **Google Alerts RSS (`https://www.google.com/alerts/feeds/`, or your country's Google domain):** Only when alert feed addresses are configured, fetches alert entries for the Links view. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy).
 * **DB-IP Lite country database (`https://download.db-ip.com/free/`):** Only while Visitor counting is on. Downloads one file, `dbip-country-lite-YYYY-MM.csv.gz`, about once a month; nothing about your site or visitors is sent. The file is converted into two small look-up files in `wp-content/uploads/aw-geo/`. The database is by DB-IP.com under CC BY 4.0. Terms & Privacy: [https://db-ip.com/privacy](https://db-ip.com/privacy).
-* **Favicons of referring sites (`https://www.google.com/s2/favicons` and `https://<referring site>/favicon.ico`):** On the hourly icon run, up to five a run, InsightWeb fetches the small site icon of each referring site that GA4 reports, to show it on the Overview. It asks Google's favicon service first, which receives that site's domain name (not your visitors or your own site), and otherwise asks the referring site directly for its `/favicon.ico`. Icons are saved in the Media Library. This needs no key and runs once GA4 referrer data is stored. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy).
+* **Favicons of referring sites (`https://www.google.com/s2/favicons` and `https://<referring site>/favicon.ico`):** On the hourly icon run, up to five a run, InsightWeb fetches the small site icon of each referring site that GA4 reports, to show it on the Overview. It asks Google's favicon service first, which receives that site's domain name (not your visitors or your own site), and otherwise asks the referring site directly for its `/favicon.ico`. Icons are saved in the Media Library. This needs no key and runs once GA4 referrer data is stored. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy). Only public host names are asked; the `insightweb_favicon_hosts` filter limits it to a list and `insightweb_favicon_third_party` can turn the Google service off.
 
 InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt and a few key pages, some with AI-crawler user-agent names) to check that crawlers can reach them. These calls stay on your own domain.
 
 == Changelog ==
+
+= 1.2.2 =
+* Referring-site icons are fetched only from public host names. `insightweb_favicon_hosts` limits them to a list; `insightweb_favicon_third_party` can turn Google's favicon service off.
 
 = 1.2.1 =
 * The plugin no longer names any content type of one site. The scoring ladder's page class, the crawl check, the Request indexing order, the PageSpeed sample, the keyword and Rising title searches and the campaign box ask for a role (news, library, campaign, opportunity, listing) through `includes/post-type-roles.php`; the site says which type plays which role with the new filter `insightweb_post_type_roles` (default: none, so a type-specific step is skipped). The listing role comes from DirectoryWeb's `directoryweb_post_type()` when it is loaded.

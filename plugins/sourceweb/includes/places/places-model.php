@@ -76,6 +76,62 @@ function sourceweb_places_default( array $post_types ): array {
 }
 
 /**
+ * Add a place a person made on the Places screen. Its id comes from the label when none is given. Refused, with the
+ * reason, when it cannot be a place, or its id is already a place (the site's content types, other plugins' places and
+ * the ones made here all share one list of ids).
+ *
+ * @param array    $custom   The places made so far (a list of raw places).
+ * @param array    $raw      id, label, kind, post_type, owner of the new one.
+ * @param string[] $taken    Ids already used by any place.
+ * @return array{0:array,1:string} The list with the new place added (or unchanged), and the reason it was refused ('' when added).
+ */
+function sourceweb_place_add( array $custom, array $raw, array $taken ): array {
+	$label = trim( (string) ( $raw['label'] ?? '' ) );
+	$id    = '' !== trim( (string) ( $raw['id'] ?? '' ) ) ? (string) $raw['id'] : $label;
+	$id    = trim( preg_replace( '/[^a-z0-9_-]+/', '-', strtolower( $id ) ), '-_' );
+	if ( '' === $id ) {
+		return array( $custom, 'A place needs a name.' );
+	}
+	if ( in_array( $id, $taken, true ) ) {
+		return array( $custom, 'There is already a place with the id "' . $id . '".' );
+	}
+	$raw['id'] = $id;
+	if ( '' === $label ) {
+		$raw['label'] = $id;
+	}
+	$place = sourceweb_place_clean( $raw );
+	if ( ! $place ) {
+		return array( $custom, 'A content type place has to name its content type.' );
+	}
+	$custom[] = array(
+		'id'        => $place['id'],
+		'label'     => $place['label'],
+		'kind'      => $place['kind'],
+		'post_type' => $place['post_type'],
+		'owner'     => $place['owner'],
+	);
+	return array( $custom, '' );
+}
+
+/**
+ * Remove a place made on the Places screen, unless a route still sends items to it.
+ *
+ * @param array  $custom The places made so far.
+ * @param string $id     The place to remove.
+ * @param array  $routes The saved routes ([ 'when' => …, 'place' => id ]).
+ * @return array{0:array,1:string} The list, and the reason nothing was removed ('' when removed).
+ */
+function sourceweb_place_remove( array $custom, string $id, array $routes ): array {
+	foreach ( $routes as $r ) {
+		if ( is_array( $r ) && (string) ( $r['place'] ?? '' ) === $id ) {
+			return array( $custom, 'A route still sends items to "' . $id . '". Change or remove that route first.' );
+		}
+	}
+	$kept = array_values( array_filter( $custom, static fn( $p ) => is_array( $p ) && (string) ( $p['id'] ?? '' ) !== $id ) );
+	return array( $kept, count( $kept ) === count( $custom ) ? 'There is no place "' . $id . '" made here.' : '' );
+}
+
+/**
  * Tidies a list of places (from defaults plus whatever plugins register): bad ones are dropped, a later one with the
  * same id replaces an earlier one.
  *

@@ -689,6 +689,34 @@ function sourceweb_sa_screen_places(): void {
 	submit_button( __( 'Save enhancements', 'sourceweb' ), 'secondary' );
 	echo '</form>';
 
+	echo '<h2>' . esc_html__( 'Add a place', 'sourceweb' ) . '</h2>';
+	echo '<p>' . esc_html__( 'A place is where items can go: a content type, another plugin, a workflow or something else. Add one here and it can be chosen in a route above.', 'sourceweb' ) . '</p>';
+	sourceweb_sa_form( 'sourceweb_sa_place_add' );
+	echo '<table class="form-table" role="presentation"><tr><th scope="row"><label for="sw-place-label">' . esc_html__( 'Name', 'sourceweb' ) . '</label></th><td><input type="text" class="regular-text" id="sw-place-label" name="label" required></td></tr>';
+	echo '<tr><th scope="row"><label for="sw-place-id">' . esc_html__( 'Id (optional)', 'sourceweb' ) . '</label></th><td><input type="text" class="regular-text" id="sw-place-id" name="id" pattern="[a-z0-9_-]*"><p class="description">' . esc_html__( 'Lower-case letters, digits, dash and underscore. Left empty, it is made from the name. It cannot be changed later.', 'sourceweb' ) . '</p></td></tr>';
+	echo '<tr><th scope="row"><label for="sw-place-kind">' . esc_html__( 'Kind', 'sourceweb' ) . '</label></th><td><select id="sw-place-kind" name="kind">';
+	foreach ( $kinds as $k => $l ) {
+		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
+	}
+	echo '</select></td></tr>';
+	echo '<tr><th scope="row"><label for="sw-place-type">' . esc_html__( 'Content type', 'sourceweb' ) . '</label></th><td><select id="sw-place-type" name="post_type"><option value=""></option>';
+	foreach ( get_post_types( array( 'public' => true ), 'objects' ) as $pt ) {
+		echo '<option value="' . esc_attr( $pt->name ) . '">' . esc_html( $pt->label . ' (' . $pt->name . ')' ) . '</option>';
+	}
+	echo '</select><p class="description">' . esc_html__( 'Only for the kind "Content type".', 'sourceweb' ) . '</p></td></tr></table>';
+	submit_button( __( 'Add place', 'sourceweb' ), 'secondary' );
+	echo '</form>';
+	$mine = (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() );
+	if ( $mine ) {
+		echo '<h3>' . esc_html__( 'Places made here', 'sourceweb' ) . '</h3><ul>';
+		foreach ( $mine as $p ) {
+			echo '<li>';
+			sourceweb_sa_form( 'sourceweb_sa_place_remove', array( 'place' => (string) ( $p['id'] ?? '' ) ), 'sw-inline' );
+			echo esc_html( (string) ( $p['label'] ?? '' ) ) . ' <code>' . esc_html( (string) ( $p['id'] ?? '' ) ) . '</code> <button type="submit" class="button-link button-link-delete">' . esc_html__( 'Remove', 'sourceweb' ) . '</button></form></li>';
+		}
+		echo '</ul>';
+	}
+
 	echo '<h2>' . esc_html__( 'How each source did', 'sourceweb' ) . '</h2>';
 	echo '<p>' . esc_html__( 'Items given to a place, and what the place did with them. A source whose items are mostly rejected is flagged.', 'sourceweb' ) . '</p>';
 	echo '<table class="widefat striped"><thead><tr><th scope="col">' . esc_html__( 'Source', 'sourceweb' ) . '</th><th scope="col">' . esc_html__( 'Delivered', 'sourceweb' ) . '</th><th scope="col">' . esc_html__( 'Accepted', 'sourceweb' ) . '</th><th scope="col">' . esc_html__( 'Rejected', 'sourceweb' ) . '</th><th scope="col">' . esc_html__( 'Accepted share', 'sourceweb' ) . '</th></tr></thead><tbody>';
@@ -703,6 +731,45 @@ function sourceweb_sa_screen_places(): void {
 
 add_action( 'admin_post_sourceweb_sa_places_routes', 'sourceweb_sa_handle_places_routes' );
 add_action( 'admin_post_sourceweb_sa_places_enhance', 'sourceweb_sa_handle_places_enhance' );
+
+add_action( 'admin_post_sourceweb_sa_place_add', 'sourceweb_sa_handle_place_add' );
+add_action( 'admin_post_sourceweb_sa_place_remove', 'sourceweb_sa_handle_place_remove' );
+
+/** Add a place. */
+function sourceweb_sa_handle_place_add(): void {
+	sourceweb_sa_guard( 'sourceweb_sa_place_add', sourceweb_sa_cap() );
+	// phpcs:disable WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
+	$raw = array(
+		'label'     => isset( $_POST['label'] ) ? sanitize_text_field( wp_unslash( $_POST['label'] ) ) : '',
+		'id'        => isset( $_POST['id'] ) ? sanitize_text_field( wp_unslash( $_POST['id'] ) ) : '',
+		'kind'      => isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : '',
+		'post_type' => isset( $_POST['post_type'] ) ? sanitize_key( wp_unslash( $_POST['post_type'] ) ) : '',
+	);
+	// phpcs:enable WordPress.Security.NonceVerification.Missing
+	$custom                = array_values( (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() ) );
+	list( $custom, $why )  = sourceweb_place_add( $custom, $raw, array_keys( sourceweb_places() ) );
+	if ( '' !== $why ) {
+		sourceweb_sa_back( 'places', 'error', __( 'Not added. ', 'sourceweb' ) . $why );
+	}
+	update_option( SOURCEWEB_CUSTOM_PLACES_OPTION, $custom, false );
+	sourceweb_src_log( 'places', 'place added', '', (string) end( $custom )['id'] );
+	sourceweb_sa_back( 'places', 'success', __( 'Place added.', 'sourceweb' ) );
+}
+
+/** Remove a place made here. */
+function sourceweb_sa_handle_place_remove(): void {
+	sourceweb_sa_guard( 'sourceweb_sa_place_remove', sourceweb_sa_cap() );
+	$id                   = isset( $_POST['place'] ) ? sanitize_key( wp_unslash( $_POST['place'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
+	$custom               = array_values( (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() ) );
+	list( $custom, $why ) = sourceweb_place_remove( $custom, $id, (array) get_option( SOURCEWEB_ROUTES_OPTION, array() ) );
+	if ( '' !== $why ) {
+		sourceweb_sa_back( 'places', 'error', __( 'Not removed. ', 'sourceweb' ) . $why );
+	}
+	update_option( SOURCEWEB_CUSTOM_PLACES_OPTION, $custom, false );
+	sourceweb_src_log( 'places', 'place removed', $id, '' );
+	sourceweb_sa_back( 'places', 'success', __( 'Place removed.', 'sourceweb' ) );
+}
+
 
 /**
  * The route rows a form posted, in the order asked for, ready for sourceweb_routes_from_rows(). A row with no place and

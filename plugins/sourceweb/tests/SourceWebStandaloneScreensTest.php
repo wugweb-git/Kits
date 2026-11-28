@@ -202,7 +202,7 @@ foreach ( $GLOBALS['t_hooks'] as $hook => $cb ) {
 		$handlers[ substr( $hook, strlen( 'admin_post_' ) ) ] = $cb;
 	}
 }
-t( 19 === count( $handlers ), 'the screens register their handlers (' . count( $handlers ) . ')' );
+t( 21 === count( $handlers ), 'the screens register their handlers (' . count( $handlers ) . ')' );
 foreach ( $handlers as $action => $cb ) {
 	t( is_callable( $cb ), "$action: the handler exists" );
 	$_SERVER['REQUEST_METHOD'] = 'GET';

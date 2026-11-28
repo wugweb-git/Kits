@@ -501,6 +501,8 @@ function mailweb_inbox_payload( array $s ): array {
 			'subject'  => '' !== $item['subject'] ? (string) $item['subject'] : __( '(no subject)', 'mailweb' ),
 			'date'     => $t ? wp_date( 'j M Y', $t ) : '',
 			'unread'   => (bool) $item['unseen'],
+			'status'   => mailweb_row_status( $item ),
+			'statusLabel' => mailweb_row_status_label( mailweb_row_status( $item ) ),
 			'files'    => (bool) $item['files'],
 			'mailbox'  => isset( $item['mailbox'] ) ? strtok( (string) $item['mailbox'], '@' ) . '@' : '',
 			'openUrl'  => $open,

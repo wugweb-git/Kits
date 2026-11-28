@@ -328,7 +328,12 @@ function planweb_list_args( array $p, string $today ): array {
 		'from'    => '',
 		'to'      => '',
 		'before'  => '',
+		'date_from' => planweb_is_date( $p['date_from'] ?? '' ) ? (string) $p['date_from'] : '',
+		'date_to'   => planweb_is_date( $p['date_to'] ?? '' ) ? (string) $p['date_to'] : '',
 	);
+	if ( '' !== $a['date_from'] && '' !== $a['date_to'] && $a['date_to'] < $a['date_from'] ) {
+		list( $a['date_from'], $a['date_to'] ) = array( $a['date_to'], $a['date_from'] ); // reversed ends are swapped
+	}
 	if ( 'all' !== $a['view'] ) {
 		$a['when'] = 'all'; // Overdue is in the past by itself; Waiting counts every draft, whatever its date.
 	}
@@ -343,6 +348,16 @@ function planweb_list_args( array $p, string $today ): array {
 	}
 	if ( 'overdue' === $a['view'] ) {
 		$a['before'] = $today;
+	}
+	// A date range chosen by hand (From / To) replaces the Dates choice; either end may be left open.
+	if ( '' !== $a['date_from'] || '' !== $a['date_to'] ) {
+		$a['when']   = 'all';
+		$a['before'] = 'overdue' === $a['view'] ? $today : '';
+		$a['from']   = $a['date_from'];
+		$a['to']     = $a['date_to'];
+		if ( 'overdue' === $a['view'] && '' !== $a['to'] && $a['to'] >= $today ) {
+			$a['to'] = '';
+		}
 	}
 	return $a;
 }

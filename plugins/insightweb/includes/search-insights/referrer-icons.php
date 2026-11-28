@@ -187,6 +187,50 @@ function insightweb_si_ref_icons_wanted(): array {
 	return array_keys( $want );
 }
 
+/**
+ * Whether Insightweb may fetch a site icon from this host. A public DNS name only (no address, no single-label or
+ * local-looking name), and, when the site sets an allow-list with the `insightweb_favicon_hosts` filter, only those hosts
+ * and their subdomains. Google's favicon service is used unless `insightweb_favicon_third_party` returns false.
+ *
+ * @param string $host Host name.
+ * @return bool
+ */
+function insightweb_favicon_host_ok( $host ) {
+	$host = strtolower( trim( (string) $host ) );
+	if ( strlen( $host ) > 253 || ! preg_match( '/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{0,61}[a-z0-9]$/', $host ) ) {
+		return false;
+	}
+	if ( preg_match( '/\.(?:local|localhost|internal|lan|home|corp|test|invalid|example|onion)$/', $host ) ) {
+		return false;
+	}
+	$allow = apply_filters( 'insightweb_favicon_hosts', array() );
+	if ( is_array( $allow ) && $allow ) {
+		foreach ( $allow as $ok ) {
+			$ok = strtolower( trim( (string) $ok ) );
+			if ( '' !== $ok && ( $host === $ok || substr( $host, -strlen( $ok ) - 1 ) === '.' . $ok ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+	return true;
+}
+
+/**
+ * The places an icon is asked for, in order: Google's favicon service (unless switched off), then the site itself.
+ *
+ * @param string $host Host name.
+ * @return string[]
+ */
+function insightweb_favicon_sources( $host ) {
+	$out = array();
+	if ( apply_filters( 'insightweb_favicon_third_party', true ) ) {
+		$out[] = 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host );
+	}
+	$out[] = 'https://' . $host . '/favicon.ico';
+	return $out;
+}
+
 // The hourly favicon run, also booked here so the referrer icons fill without SourceWeb (the same event, booked once:
 // whoever comes first books it; SourceWeb's deactivation takes it off and this books it again on the next request).
 add_action(
@@ -219,8 +263,12 @@ add_action(
 			'image/webp'               => 'webp',
 		);
 		foreach ( $want as $host ) {
+			if ( ! insightweb_favicon_host_ok( $host ) ) {
+				$have[ $host ] = 0; // not a host an icon is asked from: the letter fallback
+				continue;
+			}
 			$att = 0;
-			foreach ( array( 'https://www.google.com/s2/favicons?sz=64&domain=' . rawurlencode( $host ), 'https://' . $host . '/favicon.ico' ) as $from ) {
+			foreach ( insightweb_favicon_sources( $host ) as $from ) {
 				$tmp = download_url( $from, 15 );
 				if ( is_wp_error( $tmp ) ) {
 					continue;

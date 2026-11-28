@@ -170,7 +170,7 @@ function sourceweb_src_icons_run( $limit = 10 ) {
 	$retry = gmdate( 'Y-m-d H:i', time() - 7 * DAY_IN_SECONDS );
 	$todo  = array_filter(
 		array_keys( $want ),
-		fn( $h ) => empty( $icons[ $h ]['id'] ) && ( (int) ( $icons[ $h ]['v'] ?? 1 ) < 2 || (string) ( $icons[ $h ]['at'] ?? '' ) < $retry ) && preg_match( '/^[a-z0-9.-]+\.[a-z0-9-]+$/', $h )
+		fn( $h ) => empty( $icons[ $h ]['id'] ) && ( (int) ( $icons[ $h ]['v'] ?? 1 ) < 2 || (string) ( $icons[ $h ]['at'] ?? '' ) < $retry ) && sourceweb_favicon_host_ok( $h )
 	);
 	$v1 = fn( $h ) => isset( $icons[ $h ] ) && (int) ( $icons[ $h ]['v'] ?? 1 ) < 2; // a miss from before ICO files were accepted: first
 	usort( $todo, fn( $a, $b ) => ( (int) $v1( $b ) <=> (int) $v1( $a ) ) ?: ( (int) $want[ $b ] <=> (int) $want[ $a ] ) ?: strcmp( (string) ( $icons[ $a ]['at'] ?? '' ), (string) ( $icons[ $b ]['at'] ?? '' ) ) ?: strcmp( $a, $b ) );

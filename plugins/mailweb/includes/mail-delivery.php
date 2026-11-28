@@ -189,6 +189,8 @@ add_action( 'wp_mail_succeeded', 'mailweb_on_mail_succeeded' );
  */
 function mailweb_on_mail_failed( $err ): void {
 	unset( $GLOBALS['mailweb_fallback_error'] );
+	$queue_id = (int) ( $GLOBALS['mailweb_failed_queue_id'] ?? 0 );
+	unset( $GLOBALS['mailweb_failed_queue_id'] );
 	$msg  = mailweb_delivery_error( is_wp_error( $err ) ? $err->get_error_message() : 'Send failed' );
 	$data = is_wp_error( $err ) && is_array( $err->get_error_data() ) ? $err->get_error_data() : array();
 	if ( mailweb_delivery_on( 'log_mail' ) ) {
@@ -199,6 +201,7 @@ function mailweb_on_mail_failed( $err ): void {
 				'status'   => 'failed',
 				'provider' => mailweb_delivery_provider( false ),
 				'error'    => '' === $msg ? 'Send failed' : $msg,
+				'queue_id' => $queue_id,
 			)
 		);
 	}
@@ -209,9 +212,10 @@ add_action( 'wp_mail_failed', 'mailweb_on_mail_failed', 10 );
 /**
  * An email was put in MailWeb's queue instead of being sent now (daily limit, or sending paused).
  *
- * @param array $atts wp_mail's arguments.
+ * @param array $atts     wp_mail's arguments.
+ * @param int   $queue_id The queue row.
  */
-function mailweb_on_mail_queued( $atts ): void {
+function mailweb_on_mail_queued( $atts, $queue_id = 0 ): void {
 	if ( ! mailweb_delivery_on( 'log_mail' ) ) {
 		return;
 	}
@@ -222,10 +226,11 @@ function mailweb_on_mail_queued( $atts ): void {
 			'subject'  => (string) ( $atts['subject'] ?? '' ),
 			'status'   => 'queued',
 			'provider' => 'queue',
+			'queue_id' => (int) $queue_id,
 		)
 	);
 }
-add_action( 'mailweb_mail_queued', 'mailweb_on_mail_queued' );
+add_action( 'mailweb_mail_queued', 'mailweb_on_mail_queued', 10, 2 );
 
 /** The words for a logged status: said as what it is, not as "delivered". */
 function mailweb_log_status_label( string $status ): string {

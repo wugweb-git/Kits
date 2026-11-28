@@ -327,6 +327,20 @@ $a = planweb_list_args(
 );
 check( '' === $a['from'] . $a['to'] . $a['before'] && 'all' === $a['view'], 'all dates; unknown view is all' );
 
+// A date range chosen by hand (From / To)
+$a = planweb_list_args( array( 'date_from' => '2026-12-01', 'date_to' => '2026-12-31' ), $today );
+check( '2026-12-01' === $a['from'] && '2026-12-31' === $a['to'] && '' === $a['before'] && 'all' === $a['when'], 'custom range: both ends, replaces the Dates choice' );
+$a = planweb_list_args( array( 'date_from' => '2026-12-31', 'date_to' => '2026-12-01' ), $today );
+check( '2026-12-01' === $a['from'] && '2026-12-31' === $a['to'], 'custom range: reversed ends are swapped' );
+$a = planweb_list_args( array( 'date_from' => '2026-12-01' ), $today );
+check( '2026-12-01' === $a['from'] && '' === $a['to'], 'custom range: the end can be left open' );
+$a = planweb_list_args( array( 'date_to' => '2026-12-01', 'when' => 'next30' ), $today );
+check( '' === $a['from'] && '2026-12-01' === $a['to'] && 'all' === $a['when'], 'custom range: a start left open, and it wins over the Dates choice' );
+$a = planweb_list_args( array( 'date_from' => '2026-13-45', 'date_to' => 'tomorrow' ), $today );
+check( '' === $a['date_from'] && '' === $a['date_to'] && 'from30' === $a['when'], 'custom range: a bad date is ignored, the Dates choice stays' );
+$a = planweb_list_args( array( 'view' => 'overdue', 'date_from' => '2026-01-01', 'date_to' => '2099-01-01' ), $today );
+check( $today === $a['before'] && '2026-01-01' === $a['from'] && '' === $a['to'], 'custom range: Overdue still ends before today' );
+
 // Save only what changed: the switch is written only when its stored form changes.
 check( null === planweb_switch_change( true, '1' ) && null === planweb_switch_change( false, '' ), 'unchanged switch writes nothing' );
 check( '' === planweb_switch_change( false, '1' ) && '1' === planweb_switch_change( true, '' ), 'changed switch gives the new stored value' );

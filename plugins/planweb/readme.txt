@@ -4,7 +4,7 @@ Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,6 +65,10 @@ PlanWeb does not connect to, call, or send any data to an external service, and 
 The iCalendar feed it serves is read by your own calendar app (Google, Apple or Outlook) pulling from this site; the plugin itself never contacts those apps. Any social tools named elsewhere in PlanWeb (for example Meta Business Suite or Buffer) are used by the team outside the plugin — nothing is sent to them from PlanWeb.
 
 == Changelog ==
+
+= 0.6.0 =
+* The Entries screen has a From / To date range.
+* The shell has a Timeline of entries by type, with Earlier and Later.
 
 = 0.5.0 =
 * PlanWeb no longer carries anything for one site. The team's Dates calendar (`includes/team-dates.php`, `aw_team_dates()`, the seeded and campaign dates, their migrations, the one-time 14 Nov entry move and the Kits → Dates screen) is removed from the plugin and kept for the Animal Writes site in its own site layer, `sites/animalwrites/planweb/`, outside the plugin package.

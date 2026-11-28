@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.4.1
+Stable tag: 0.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,7 +62,7 @@ SourceWeb may connect to external services only when the corresponding feature o
 * **Openverse API (`https://api.openverse.org/`):** When CC0 fallback image search is enabled, sends search keywords to retrieve public-domain/CC0 image metadata. Terms & Privacy: [https://openverse.org/](https://openverse.org/).
 * **DOI / Crossref (`https://doi.org/`):** When resolving research paper citations by DOI, sends the DOI identifier to retrieve bibliographic metadata. Terms: [https://www.crossref.org/services/metadata-retrieval/](https://www.crossref.org/services/metadata-retrieval/).
 * **Google Places API (`https://places.googleapis.com/`):** Only when a Google Places API key is configured and live place details are requested, sends the stored Place ID to retrieve business hours and contact details. Terms & Privacy: [https://policies.google.com/privacy](https://policies.google.com/privacy).
-* **Google favicon service (`https://www.google.com/s2/favicons`):** When a publisher's site icon is cached, sends the publisher's host name (then tries `https://<host>/favicon.ico` on the publisher's own site).
+* **Google favicon service (`https://www.google.com/s2/favicons`):** When a publisher's site icon is cached, sends the publisher's host name (then tries `https://<host>/favicon.ico` on the publisher's own site). Only public host names are asked; the `sourceweb_favicon_hosts` filter limits it to a list and `sourceweb_favicon_third_party` can turn the Google service off.
 * **Image hosts and YouTube thumbnails (`https://i.ytimg.com/`):** When an item's picture is checked or a copy is kept, requests the page, its `og:image` and the image from the publisher's own host or from the host named in the page; a YouTube link uses its thumbnail from `i.ytimg.com`.
 * **AI provider endpoints:** Only when an administrator saves a key, SourceWeb sends a short test prompt to that key's provider, and the workers (not WordPress) later send article text and prompts using the key. The providers the code can call are OpenRouter (`openrouter.ai`), Requesty (`router.requesty.ai`), Cline (`api.cline.bot`), Command Code (`api.commandcode.ai`), NVIDIA (`integrate.api.nvidia.com`), Vercel AI Gateway (`ai-gateway.vercel.sh`), Hugging Face (`router.huggingface.co`), SambaNova (`api.sambanova.ai`), Groq (`api.groq.com`), Google Gemini (`generativelanguage.googleapis.com`), Mistral (`api.mistral.ai`) and Cerebras (`api.cerebras.ai`). Each provider's own terms and privacy policy apply.
 * **Configured AI Providers (free models only: OpenRouter, Google Gemini, Groq, Cerebras, NVIDIA, Mistral and similar):** Only when an administrator configures an API key for a provider, sends article text/prompts to perform relevance, summary, or enrichment tasks. Each provider's own Terms of Service and Privacy Policy apply.
@@ -73,6 +73,10 @@ SourceWeb may connect to external services only when the corresponding feature o
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
 == Changelog ==
+
+= 0.5.0 =
+* The Places screen can add a place and remove one a route does not use.
+* Site icons are fetched only from public host names; `sourceweb_favicon_hosts` can limit them to a list and `sourceweb_favicon_third_party` can turn Google's favicon service off.
 
 = 0.4.1 =
 * The second pass of taking site-specific code out of the plugin. The Animal Writes site layer (`sites/animalwrites/sourceweb/`, not in this zip) must be deployed alongside 0.4.1: without it the plugin finds no News, Library, Opportunity, Press or Directory content type on that site and its type-dependent features do nothing.

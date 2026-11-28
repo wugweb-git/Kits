@@ -141,13 +141,37 @@ function mailweb_logs_list( int $limit = 50 ): array {
 }
 
 /**
- * Re-queue a failed or held item in mailweb_queue for resending.
+ * Whether a queue row in this status can be sent again: only one that gave up (failed) or was held back (held).
+ * A row that is already waiting (queued) or already went (sent) is left alone.
+ *
+ * @param string $status Queue row status.
+ */
+function mailweb_resend_allowed( string $status ): bool {
+	return in_array( $status, array( 'failed', 'held' ), true );
+}
+
+/**
+ * The status of a queue row that still has its message, or '' when there is no such row or its message was not kept.
+ *
+ * @param int $queue_id Row ID in {prefix}mailweb_queue.
+ */
+function mailweb_queue_row_status( int $queue_id ): string {
+	if ( $queue_id <= 0 ) {
+		return '';
+	}
+	global $wpdb;
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one row of the plugin's own table.
+	return (string) $wpdb->get_var( $wpdb->prepare( 'SELECT status FROM %i WHERE id = %d AND mail IS NOT NULL', $wpdb->prefix . 'mailweb_queue', $queue_id ) );
+}
+
+/**
+ * Re-queue a failed or held item in mailweb_queue for resending. A row that is already queued or sent is not touched.
  *
  * @param int $queue_id Row ID in {prefix}mailweb_queue.
  * @return bool
  */
 function mailweb_resend_email( int $queue_id ): bool {
-	if ( $queue_id <= 0 ) {
+	if ( $queue_id <= 0 || ! mailweb_resend_allowed( mailweb_queue_row_status( $queue_id ) ) ) {
 		return false;
 	}
 	global $wpdb;
@@ -167,6 +191,21 @@ function mailweb_resend_email( int $queue_id ): bool {
 	);
 	return false !== $updated && $updated > 0;
 }
+
+/** The Resend button on the Email Logs screen: nonce, administrators only, then back to the screen with the result. */
+add_action(
+	'admin_post_mailweb_resend',
+	function () {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You are not allowed to do that.', 'mailweb' ), 403 );
+		}
+		$id = isset( $_POST['queue_id'] ) ? absint( wp_unslash( $_POST['queue_id'] ) ) : 0;
+		check_admin_referer( 'mailweb_resend_' . $id );
+		$done = mailweb_resend_email( $id );
+		wp_safe_redirect( add_query_arg( 'mailweb_resent', $done ? '1' : '0', admin_url( 'admin.php?page=mailweb-logs' ) ) );
+		exit;
+	}
+);
 
 /**
  * Prune email logs older than N days.
@@ -454,6 +493,14 @@ function mailweb_render_logs_screen(): void {
 	$fb   = mailweb_smtp_fallback_settings();
 	echo '<div class="wrap">';
 	echo '<h1>' . esc_html__( 'MailWeb: Email Logs', 'mailweb' ) . '</h1>';
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a result flag only, nothing is changed.
+	if ( isset( $_GET['mailweb_resent'] ) ) {
+		$ok = '1' === sanitize_text_field( wp_unslash( $_GET['mailweb_resent'] ) );
+		wp_admin_notice(
+			$ok ? esc_html__( 'Put back in the queue. It will be sent on the next queue run.', 'mailweb' ) : esc_html__( 'Not resent: that message is no longer waiting to be retried.', 'mailweb' ),
+			array( 'type' => $ok ? 'success' : 'warning', 'dismissible' => true )
+		);
+	}
 	if ( ! mailweb_delivery_on( 'log_mail' ) ) {
 		wp_admin_notice(
 			esc_html__( 'The delivery log is off, so nothing new is recorded here. Turn it on under Site sending → Delivery log, fallback and alerts.', 'mailweb' ),
@@ -470,9 +517,10 @@ function mailweb_render_logs_screen(): void {
 	echo '<th>' . esc_html__( 'Status', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'Sent through', 'mailweb' ) . '</th>';
 	echo '<th>' . esc_html__( 'Error', 'mailweb' ) . '</th>';
+	echo '<th>' . esc_html__( 'Action', 'mailweb' ) . '</th>';
 	echo '</tr></thead><tbody>';
 	if ( empty( $logs ) ) {
-		echo '<tr><td colspan="6">' . esc_html__( 'No email log entries recorded yet.', 'mailweb' ) . '</td></tr>';
+		echo '<tr><td colspan="7">' . esc_html__( 'No email log entries recorded yet.', 'mailweb' ) . '</td></tr>';
 	} else {
 		foreach ( $logs as $row ) {
 			echo '<tr>';
@@ -482,6 +530,15 @@ function mailweb_render_logs_screen(): void {
 			echo '<td><strong>' . esc_html( mailweb_log_status_label( (string) ( $row['status'] ?? '' ) ) ) . '</strong></td>';
 			echo '<td>' . esc_html( (string) ( $row['provider'] ?? '' ) ) . '</td>';
 			echo '<td>' . esc_html( (string) ( $row['error'] ?? '' ) ) . '</td>';
+			$qid = (int) ( $row['queue_id'] ?? 0 );
+			echo '<td>';
+			if ( $qid > 0 && current_user_can( 'manage_options' ) && mailweb_resend_allowed( mailweb_queue_row_status( $qid ) ) ) {
+				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
+				echo '<input type="hidden" name="action" value="mailweb_resend"><input type="hidden" name="queue_id" value="' . esc_attr( (string) $qid ) . '">';
+				wp_nonce_field( 'mailweb_resend_' . $qid );
+				echo '<button type="submit" class="button button-small">' . esc_html__( 'Resend', 'mailweb' ) . '</button></form>';
+			}
+			echo '</td>';
 			echo '</tr>';
 		}
 	}

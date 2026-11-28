@@ -1,5 +1,10 @@
 # MailWeb: Pending & Roadmap
 
+## Built 28 Nov 2026 (3.6.0)
+
+- Resend button on Mail → Email Logs (failed or held rows with a kept message only); Inbox status (New, Read, Replied, Forwarded) in both lists; Provider picker for the SMTP presets. Tests in `tests/delivery.php`. Not run on a live WordPress, a real mail server or a browser.
+- Still not built: nothing compares the Sent folder, so "Replied" is only what the server's Answered flag says; the fallback has no live check.
+
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
 Checked line by line against the code on 27 Nov 2026. Updated for 3.4.0 the same day.
