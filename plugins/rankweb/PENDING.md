@@ -1,5 +1,14 @@
 # RankWeb: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (2.5.2)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Depends on Rank Math for its fields in about 30 files; the Plugins screen says so ("Works with"). Not a requirement (no Requires Plugins header).
+- Open: Insights charts look wrong with sparse data (two huge bars); contradicting health verdicts (UX 05/06 are InsightWeb and SourceWeb); Redirect tools need Rank Math.
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## Verified status, 27 Nov 2026 (this section overrides any 'done' or 'resolved' mark below)
 
 Checked line by line against the code on 27 Nov 2026.

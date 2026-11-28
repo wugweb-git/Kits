@@ -1,5 +1,13 @@
 # SourceWeb: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (0.7.1)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Open: pipeline chart shows fat blocks with three bars; contradicting health verdict on Dashboard and Workers (UX 06); verify Add place on the Core-shell Places screen (UX 22); tab strip overflow (UX 04).
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## Built 28 Nov 2026 (0.6.0)
 
 - Run now without Kits Core (own GitHub dispatch, token and repository in wp-config.php). The workers repository is renamed `wugweb-git/sourceweb-workers`. Tested with a stand-in for GitHub only: no real dispatch was made. The live Animal Writes site must deploy the site layer (its `kits_dispatch_repo` and `sourceweb_workers_repo` now name the new repository) and, if its token is a fine-grained token for the old repository, keep using it (GitHub keeps tokens across a rename; if Run now says the repository moved, check `SOURCEWEB_WORKERS_REPO`).

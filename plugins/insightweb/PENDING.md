@@ -1,5 +1,13 @@
 # InsightWeb: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (1.4.1)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Open: Dashboard says "All working, 9 sources checked" above a table of nine never-run sources (UX 05); Dashboard shows "Last Search Console import: Never" next to figures when no import timestamp is stored.
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## Built 28 Nov 2026 (1.3.0)
 
 - Country on the Dashboard (item 53), built as a stored dimension because Site Kit has no country filter. Tests cover the code, names and stored rows. Not run with Site Kit and a real Search Console property: whether Search Console answers `date` + `country` through Site Kit's `dimensions` argument is read from Site Kit's source, not seen. If the first daily run stores nothing under metric `c`, the Country choice stays hidden.

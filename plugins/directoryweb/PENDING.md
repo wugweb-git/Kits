@@ -1,5 +1,13 @@
 # DirectoryWeb: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (1.5.1)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Open: stray "0" above the Claims list; demo claims stored with older status keys show "old form"; the .pot was regenerated so removed strings are gone.
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## 1.4.0 (27 Nov 2026): registration fields and India places data out of the plugin
 
 Moved to `sites/animalwrites/directoryweb/` (not packaged): the registration fields AWBI (`aw_awbi_*`), NGO Darpan (`aw_darpan_id`, `aw_darpan_blacklisted_*`, `aw_reg_authority`, `aw_reg_act`, `aw_sectors`), 12A (`aw_reg_12a`), 80G (`aw_reg_80g`) and FCRA (`aw_fcra`) with their words, claim rows, listing rows, editor field group (`acf-json/group_aw_listing_registrations_in.json`) and the daily expiry flag; `data/lgd.json` and `data/district-centroids.json`. They come back through DirectoryWeb's filters (`includes/registrations.php`); stored keys are unchanged. A tenant (Wugweb, iKAN) defines its own fields in Schema & Fields or with the same filters.

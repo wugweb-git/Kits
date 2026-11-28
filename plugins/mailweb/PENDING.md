@@ -1,5 +1,13 @@
 # MailWeb: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (3.7.1)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Open: sending form UX (13, 14); real inbox needs the Hostinger Mail API (not testable in Playground).
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## Built 28 Nov 2026 (3.6.0)
 
 - Resend button on Mail → Email Logs (failed or held rows with a kept message only); Inbox status (New, Read, Replied, Forwarded) in both lists; Provider picker for the SMTP presets. Tests in `tests/delivery.php`. Not run on a live WordPress, a real mail server or a browser.

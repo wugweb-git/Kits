@@ -1,5 +1,13 @@
 # PlanWeb: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (0.7.1)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Open: table layout at 1280 and 375 (UX 12); Scheduled jobs block renders far below the first Settings card.
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## Built 28 Nov 2026 (0.6.0)
 
 - Shell Entries: From / To date range, and a Timeline (lanes by type, weekly ticks, Earlier and Later). Range logic tested in `tests/run.php`; the Timeline REST route and the React screens were built and linted, not run on a live WordPress or in a browser.

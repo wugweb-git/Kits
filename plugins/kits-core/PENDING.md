@@ -1,5 +1,14 @@
 # Kits Core: Pending & Roadmap
 
+## Status, 28 Nov 2026, second batch (1.5.1)
+
+Released from kits-suite with CI green on a3db44c. Tests run: version, held-code and brand checks, more-page and plugin-info tests, the plugin's own suite, `php -l`; screenshots captured in Playground with headless Chrome. Not run on a live WordPress.
+
+- Done: Plugins-screen row (Version | By | View details | Getting Started | Documentation) and the View details modal (Description, Installation, FAQ, Changelog, Screenshots, Reviews) from readme.txt and assets/screenshot-N.png; screenshots and captions; .pot regenerated; UX audit fixes 01, 07, 08, 09, 10 that touch this plugin; More from Kits registered after the plugin's own menu with a redirect to Kits Core's page when Core is active.
+- Open: link More from Kits from Kits Home and give the page a title (UX 02); one tab bar instead of two (UX 03); tab strip overflow at 1280 and 375 (UX 04).
+- Done: WPCS cleanup (16 warnings left on purpose); chart-table singular/plural unit.
+- Open, whole suite: official Plugin Check on a live WordPress (deferred by the owner); WordPress.org submission (when everything is done; Claude confirms each product first); staging then live deploy; UX findings listed in docs/ux-audit-2026-11-28.md; screen reader, Safari and real phones.
+
 ## Status, 27 Nov 2026 (Kits Core 1.4.1)
 
 Only what was run is marked done. Test runs: every `plugins/kits-core/tests/*-tests.php`, every `sites/animalwrites/*/tests/*.php`, `php -l` on each edited PHP file, and `tools/validate/check-versions.py`, `check-visible-brand.py`, `check-held-code.py`, all passing on 27 Nov 2026. No WordPress or MySQL was available: the tests use stand-ins for WordPress and, for the ALTCHA claim and the uninstall backup, an in-memory SQLite database that behaves like MySQL for the statements used. Nothing here was run on a live WordPress.
