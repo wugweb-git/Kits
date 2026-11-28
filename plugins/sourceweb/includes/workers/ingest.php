@@ -196,7 +196,7 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 	}
 
 	// Sourcing policy (News → Sourcing): blocked publishers and, when switched on, the keyword filter.
-	if ( function_exists( 'sourceweb_sourcing_gate' ) && function_exists( 'kits_sourced_types' ) && in_array( $type, kits_sourced_types(), true ) ) {
+	if ( function_exists( 'sourceweb_sourcing_gate' ) && function_exists( 'sourceweb_sourced_types' ) && in_array( $type, sourceweb_sourced_types(), true ) ) {
 		$verdict = sourceweb_sourcing_gate( $source_url, (string) $req->get_param( 'source_name' ), (string) $req->get_param( 'feed' ), $title . ' ' . $summary );
 		if ( $verdict ) {
 			return new WP_REST_Response( array( 'status' => $verdict ), 200 );

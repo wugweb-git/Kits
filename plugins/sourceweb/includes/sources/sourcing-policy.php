@@ -53,9 +53,9 @@ function sourceweb_src_log( $tab, $what, $old = null, $new = null ) {
 	if ( '' === trim( $what ) ) {
 		return;
 	}
-	$log = (array) get_option( 'kits_sourcing_log', array() );
+	$log = (array) get_option( 'sourceweb_sourcing_log', array() );
 	$log = sourceweb_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => wp_get_current_user()->display_name, 'tab' => $tab, 'what' => $what ), $old, $new );
-	update_option( 'kits_sourcing_log', $log, false );
+	update_option( 'sourceweb_sourcing_log', $log, false );
 }
 
 /**
@@ -68,12 +68,12 @@ function sourceweb_src_log_many( array $entries ) {
 	if ( ! $entries ) {
 		return;
 	}
-	$log  = (array) get_option( 'kits_sourcing_log', array() );
+	$log  = (array) get_option( 'sourceweb_sourcing_log', array() );
 	$user = wp_get_current_user()->display_name;
 	foreach ( $entries as $e ) {
 		$log = sourceweb_src_log_push( $log, array( 'at' => current_time( 'mysql' ), 'user' => $user, 'tab' => (string) $e[0], 'what' => (string) $e[1] ), $e[2] ?? null, $e[3] ?? null );
 	}
-	update_option( 'kits_sourcing_log', $log, false );
+	update_option( 'sourceweb_sourcing_log', $log, false );
 }
 
 /** What changed between two lists, in words ("added: a, b; removed: c"). */
@@ -93,7 +93,7 @@ function sourceweb_src_diff( $label, $old, $new ) {
 /**
  * The older names of the three change log functions, kept for existing callers (Kits Core and older SourceWeb code).
  */
-if ( ! function_exists( 'kits_sourcing_log' ) ) {
+if ( ! function_exists( 'sourceweb_sourcing_log' ) ) {
 	/**
 	 * Older name of sourceweb_src_log().
 	 *
@@ -102,21 +102,21 @@ if ( ! function_exists( 'kits_sourcing_log' ) ) {
 	 * @param mixed  $old  Value before.
 	 * @param mixed  $new  Value after.
 	 */
-	function kits_sourcing_log( $tab, $what, $old = null, $new = null ) {
+	function sourceweb_sourcing_log( $tab, $what, $old = null, $new = null ) {
 		sourceweb_src_log( $tab, $what, $old, $new );
 	}
 }
-if ( ! function_exists( 'kits_sourcing_log_many' ) ) {
+if ( ! function_exists( 'sourceweb_sourcing_log_many' ) ) {
 	/**
 	 * Older name of sourceweb_src_log_many().
 	 *
 	 * @param array[] $entries Entries.
 	 */
-	function kits_sourcing_log_many( array $entries ) {
+	function sourceweb_sourcing_log_many( array $entries ) {
 		sourceweb_src_log_many( $entries );
 	}
 }
-if ( ! function_exists( 'kits_sourcing_diff' ) ) {
+if ( ! function_exists( 'sourceweb_sourcing_diff' ) ) {
 	/**
 	 * Older name of sourceweb_src_diff().
 	 *
@@ -124,7 +124,7 @@ if ( ! function_exists( 'kits_sourcing_diff' ) ) {
 	 * @param array  $old   Before.
 	 * @param array  $new   After.
 	 */
-	function kits_sourcing_diff( $label, $old, $new ) {
+	function sourceweb_sourcing_diff( $label, $old, $new ) {
 		return sourceweb_src_diff( $label, $old, $new );
 	}
 }
@@ -153,7 +153,7 @@ add_action(
 		}
 		// Hosts already in the content, with their counts.
 		global $wpdb;
-		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('" . implode( "','", array_map( 'esc_sql', kits_sourced_types() ) ) . "')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the post types are the plugin's own list, escaped
+		$rows = $wpdb->get_results( "SELECT m.meta_value url, n.meta_value name, p.post_date d FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_source_url' LEFT JOIN {$wpdb->postmeta} n ON n.post_id = p.ID AND n.meta_key = 'aw_source_name' WHERE p.post_type IN ('" . implode( "','", array_map( 'esc_sql', sourceweb_sourced_types() ) ) . "')" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- fixed SQL; the post types are the plugin's own list, escaped
 		foreach ( $rows as $r ) {
 			$h = sourceweb_host( $r->url );
 			if ( ! $h ) {
@@ -437,7 +437,7 @@ add_action(
 add_action(
 	'admin_init',
 	function () {
-		foreach ( kits_sourced_types() as $aw_pt ) {
+		foreach ( sourceweb_sourced_types() as $aw_pt ) {
 			add_filter(
 				"manage_{$aw_pt}_posts_columns",
 				function ( $cols ) {
@@ -467,7 +467,7 @@ add_action(
 add_filter(
 	'post_row_actions',
 	function ( $actions, $post ) {
-		if ( ! in_array( $post->post_type, kits_sourced_types(), true ) || ! current_user_can( SOURCEWEB_SRC_CAP ) ) {
+		if ( ! in_array( $post->post_type, sourceweb_sourced_types(), true ) || ! current_user_can( SOURCEWEB_SRC_CAP ) ) {
 			return $actions;
 		}
 		$host = sourceweb_host( get_post_meta( $post->ID, 'aw_source_url', true ) );
@@ -515,7 +515,7 @@ function sourceweb_sourcing_change_rows(): array {
 		);
 	}
 	$rows = array();
-	foreach ( (array) get_option( 'kits_sourcing_log', array() ) as $e ) {
+	foreach ( (array) get_option( 'sourceweb_sourcing_log', array() ) as $e ) {
 		$e      = (array) $e;
 		$has    = array_key_exists( 'old', $e ) || array_key_exists( 'new', $e );
 		$rows[] = array(

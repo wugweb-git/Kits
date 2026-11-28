@@ -75,7 +75,7 @@ function kits_sponsored_clean( array $items ): array {
 		if ( ! is_array( $i ) ) {
 			continue;
 		}
-		$name = trim( wp_strip_all_tags_kits( (string) ( $i['name'] ?? '' ) ) );
+		$name = trim( kits_blocks_strip_tags( (string) ( $i['name'] ?? '' ) ) );
 		$url  = trim( (string) ( $i['url'] ?? '' ) );
 		if ( '' === $name || 0 !== strpos( $url, 'https://' ) ) {
 			continue;
@@ -83,7 +83,7 @@ function kits_sponsored_clean( array $items ): array {
 		$out[] = array(
 			'name' => $name,
 			'url'  => $url,
-			'text' => trim( wp_strip_all_tags_kits( (string) ( $i['text'] ?? '' ) ) ),
+			'text' => trim( kits_blocks_strip_tags( (string) ( $i['text'] ?? '' ) ) ),
 		);
 	}
 	return $out;
@@ -120,7 +120,7 @@ function kits_socials_clean( array $raw ): array {
 		if ( 0 !== strpos( $url, 'https://' ) || preg_match( '/[\s"<>]/', $url ) ) {
 			continue;
 		}
-		$host = strtolower( (string) wp_parse_url_kits( $url ) );
+		$host = strtolower( (string) kits_blocks_parse_url( $url ) );
 		if ( '' === $host || isset( $seen[ $url ] ) ) {
 			continue;
 		}
@@ -142,7 +142,7 @@ function kits_socials_clean( array $raw ): array {
  *
  * @param string $url Address.
  */
-function wp_parse_url_kits( string $url ): string {
+function kits_blocks_parse_url( string $url ): string {
 	$h = parse_url( $url, PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url
 	return is_string( $h ) ? $h : '';
 }
@@ -152,6 +152,6 @@ function wp_parse_url_kits( string $url ): string {
  *
  * @param string $s Text.
  */
-function wp_strip_all_tags_kits( string $s ): string {
+function kits_blocks_strip_tags( string $s ): string {
 	return trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags( $s ) ) );
 }

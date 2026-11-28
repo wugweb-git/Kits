@@ -32,7 +32,7 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 }
 
 /** Options a phase 3 backup holds. */
-const AW_SOURCING_BACKUP_OPTIONS_3 = array( 'aw_sources', 'aw_summary_rules', 'aw_enrich_field_rules', 'aw_enrich_sources', 'kits_sourcing_log', 'aw_sourcing_phase' );
+const AW_SOURCING_BACKUP_OPTIONS_3 = array( 'aw_sources', 'aw_summary_rules', 'aw_enrich_field_rules', 'aw_enrich_sources', 'sourceweb_sourcing_log', 'aw_sourcing_phase' );
 
 add_filter( 'aw_sourcing_cli_phases', fn( $p ) => array_values( array_unique( array_merge( (array) $p, array( 3 ) ) ) ) );
 add_filter( 'aw_sourcing_cli_backup_options', fn( $o, $phase ) => 3 === (int) $phase ? AW_SOURCING_BACKUP_OPTIONS_3 : $o, 10, 2 );
@@ -49,7 +49,7 @@ function sourceweb_sourcing_cli_counts3( array $opts ) {
 	$s  = $opts['aw_summary_rules'] ?? null;
 	$fr = $opts['aw_enrich_field_rules'] ?? null;
 	return sprintf(
-		'section rules %d · tag rules %d · summary sections %d (%s) + %d global keys · field rules %s · enrichment switches %d · kits_sourcing_log %d · phase %d',
+		'section rules %d · tag rules %d · summary sections %d (%s) + %d global keys · field rules %s · enrichment switches %d · sourceweb_sourcing_log %d · phase %d',
 		count( (array) ( $c['sections'] ?? array() ) ),
 		count( (array) ( $c['topic_tags'] ?? array() ) ),
 		is_array( $s ) ? count( (array) ( $s['sections'] ?? array() ) ) : 0,
@@ -57,7 +57,7 @@ function sourceweb_sourcing_cli_counts3( array $opts ) {
 		is_array( $s ) ? count( $s ) - ( isset( $s['sections'] ) ? 1 : 0 ) : 0,
 		is_array( $fr ) ? count( (array) ( $fr['fields'] ?? array() ) ) . ' fields, trust order ' . count( (array) ( $fr['priority'] ?? array() ) ) : 'not seeded',
 		count( (array) ( $opts['aw_enrich_sources'] ?? array() ) ),
-		count( (array) ( $opts['kits_sourcing_log'] ?? array() ) ),
+		count( (array) ( $opts['sourceweb_sourcing_log'] ?? array() ) ),
 		(int) ( $opts['aw_sourcing_phase'] ?? 0 )
 	);
 }

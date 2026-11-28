@@ -225,7 +225,7 @@ t( true === sourceweb_sa_kw_switches_save( true, false ), 'switching the keyword
 t( ! empty( get_option( SOURCEWEB_REL_OPTION )['enabled'] ), 'and it is stored' );
 t( false === sourceweb_sa_kw_switches_save( true, false ), 'saving the same switches changes nothing' );
 t( true === sourceweb_sa_kw_switches_save( true, true ), 'switching aggregators on is a change' );
-$log = get_option( 'kits_sourcing_log' );
+$log = get_option( 'sourceweb_sourcing_log' );
 t( is_array( $log ) && count( $log ) === 2, 'each change is in the change log' );
 
 // 4. Keyword lists.

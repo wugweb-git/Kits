@@ -35,10 +35,10 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 }
 
 /** Options a phase 1 backup holds. */
-const AW_SOURCING_BACKUP_OPTIONS = array( 'aw_publishers', 'aw_sources', 'aw_relay_log', 'kits_sourcing_log', 'aw_sourcing_phase' );
+const AW_SOURCING_BACKUP_OPTIONS = array( 'aw_publishers', 'aw_sources', 'aw_relay_log', 'sourceweb_sourcing_log', 'aw_sourcing_phase' );
 
 /** Options a phase 2 backup holds (plus the keyword table and its map table, sourcing-migrate-phase2.php). */
-const AW_SOURCING_BACKUP_OPTIONS_2 = array( 'aw_relevance', 'aw_sources', 'aw_sourcing_dismissed', 'kits_sourcing_log', 'aw_sourcing_phase' );
+const AW_SOURCING_BACKUP_OPTIONS_2 = array( 'aw_relevance', 'aw_sources', 'aw_sourcing_dismissed', 'sourceweb_sourcing_log', 'aw_sourcing_phase' );
 
 /** The phase asked for (1, 2, or a phase another file adds through aw_sourcing_cli_phases), or an error. */
 function sourceweb_sourcing_cli_phase( $assoc ) {
@@ -88,11 +88,11 @@ function sourceweb_sourcing_cli_counts( array $opts ) {
 		);
 	}
 	return sprintf(
-		'sourceweb_publishers %d · aw_sources.sources %d · sourceweb_relay_log %d · kits_sourcing_log %d · phase %d',
+		'sourceweb_publishers %d · aw_sources.sources %d · sourceweb_relay_log %d · sourceweb_sourcing_log %d · phase %d',
 		count( (array) ( $opts['aw_publishers'] ?? array() ) ),
 		count( (array) ( $c['sources'] ?? array() ) ),
 		count( (array) ( $opts['aw_relay_log'] ?? array() ) ),
-		count( (array) ( $opts['kits_sourcing_log'] ?? array() ) ),
+		count( (array) ( $opts['sourceweb_sourcing_log'] ?? array() ) ),
 		(int) ( $opts['aw_sourcing_phase'] ?? 0 )
 	);
 }

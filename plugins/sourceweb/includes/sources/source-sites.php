@@ -122,7 +122,7 @@ function sourceweb_sourcing_host_stats() {
 		return $hit;
 	}
 	global $wpdb;
-	$types = array_values( array_filter( array_map( 'strval', kits_sourced_types() ) ) );
+	$types = array_values( array_filter( array_map( 'strval', sourceweb_sourced_types() ) ) );
 	$since = time() - 30 * DAY_IN_SECONDS;
 	$hosts = array();
 	$pub   = array(); // post ID => host

@@ -13,7 +13,7 @@
  *   aw_enrich_ledger, aw_ingest_heartbeat, aw_ingest_watchdog_at, aw_ingest_watchdog_last, sourceweb_relay_log,
  *   aw_relevance_alert_notice, aw_relevance_alert_pending, aw_relevance_rejected, aw_site_opportunities_last,
  *   aw_source_icons, aw_sourcing_migrating, sourceweb_sourcing_phase, aw_sourcing_phase1_record … aw_sourcing_phase4_record,
- *   aw_sourcing_seed_hc, aw_sourcing_seed_s35, aw_sourcing_v1_archive, kits_sourcing_log (the retired v1 log),
+ *   aw_sourcing_seed_hc, aw_sourcing_seed_s35, aw_sourcing_v1_archive, sourceweb_sourcing_log (the retired v1 log),
  *   aw_worker_dispatch_log, sourceweb_workers_meta, sourceweb_workers_tick, aw_workers_tick_lock, aw_workers_watchdog_at,
  *   sourceweb_dashboard_log, the picture pipeline's aw_cc0_log, aw_ov_last and aw_ov_quota (cc0-images.php, from Animal
  *   Writes Core on 18 Nov 2026), aw_worker_runs_*, the migration backups aw_backup_1_* … aw_backup_4_* and
@@ -90,7 +90,7 @@ $sourceweb_src_options = array(
 	'aw_sourcing_seed_hc',
 	'aw_sourcing_seed_s35',
 	'aw_sourcing_v1_archive',
-	'kits_sourcing_log',
+	'sourceweb_sourcing_log',
 	'aw_worker_dispatch_log',
 	'aw_workers_meta',
 	'aw_workers_tick',

@@ -284,7 +284,7 @@ function sourceweb_clean_news_slug( $slug, $id ) {
 add_filter(
 	'kits_publish_slug_base',
 	function ( $base, $post ) {
-		return in_array( $post->post_type, kits_sourced_types(), true ) ? sourceweb_clean_news_slug( $base, $post->ID ) : $base;
+		return in_array( $post->post_type, sourceweb_sourced_types(), true ) ? sourceweb_clean_news_slug( $base, $post->ID ) : $base;
 	},
 	10,
 	2
@@ -294,7 +294,7 @@ add_filter(
 add_filter(
 	'wp_insert_post_data',
 	function ( $data, $postarr ) {
-		if ( ! in_array( $data['post_type'], kits_sourced_types(), true ) || empty( $postarr['ID'] ) || empty( $data['post_name'] ) ) {
+		if ( ! in_array( $data['post_type'], sourceweb_sourced_types(), true ) || empty( $postarr['ID'] ) || empty( $data['post_name'] ) ) {
 			return $data;
 		}
 		$clean = sourceweb_clean_news_slug( $data['post_name'], (int) $postarr['ID'] );
@@ -309,7 +309,7 @@ add_filter(
 
 /** The post type whose news cards show relative time (the first sourced type). */
 function sourceweb_news_type() {
-	$t = kits_sourced_types();
+	$t = sourceweb_sourced_types();
 	return (string) reset( $t );
 }
 

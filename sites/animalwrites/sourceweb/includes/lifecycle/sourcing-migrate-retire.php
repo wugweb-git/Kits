@@ -37,7 +37,7 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 }
 
 /** Options a phase 4 backup holds. */
-const AW_SOURCING_BACKUP_OPTIONS_4 = array( 'aw_relevance', 'aw_sources', 'aw_sourcing_dismissed', 'aw_sourcing_v1_archive', 'kits_sourcing_log', 'aw_sourcing_phase' );
+const AW_SOURCING_BACKUP_OPTIONS_4 = array( 'aw_relevance', 'aw_sources', 'aw_sourcing_dismissed', 'aw_sourcing_v1_archive', 'sourceweb_sourcing_log', 'aw_sourcing_phase' );
 
 /** The archive of the old lists (phase 4). */
 const AW_SOURCING_V1_ARCHIVE = 'aw_sourcing_v1_archive';
@@ -70,7 +70,7 @@ function sourceweb_sourcing_cli_counts4( array $opts ) {
 	$c = (array) ( $opts['aw_sources'] ?? array() );
 	$n = fn( $v ) => null === $v ? 'gone' : (string) count( (array) $v );
 	return sprintf(
-		'sourceweb_relevance: Include %s · Animal %s · Context %s · Exclude %s · switches %s · aw_sources: category words %s · seed keywords %s · press queries %s · sourceweb_sourcing_dismissed %s · archive %s · kits_sourcing_log %d · phase %d',
+		'sourceweb_relevance: Include %s · Animal %s · Context %s · Exclude %s · switches %s · aw_sources: category words %s · seed keywords %s · press queries %s · sourceweb_sourcing_dismissed %s · archive %s · sourceweb_sourcing_log %d · phase %d',
 		$n( $r['strong'] ?? null ),
 		$n( $r['animal'] ?? null ),
 		$n( $r['context'] ?? null ),
@@ -81,7 +81,7 @@ function sourceweb_sourcing_cli_counts4( array $opts ) {
 		$n( $c['press']['queries'] ?? null ),
 		$n( $opts['aw_sourcing_dismissed'] ?? null ),
 		is_array( $opts['aw_sourcing_v1_archive'] ?? null ) ? 'of ' . (string) ( $opts['aw_sourcing_v1_archive']['at'] ?? '?' ) : 'none',
-		count( (array) ( $opts['kits_sourcing_log'] ?? array() ) ),
+		count( (array) ( $opts['sourceweb_sourcing_log'] ?? array() ) ),
 		(int) ( $opts['aw_sourcing_phase'] ?? 0 )
 	);
 }
