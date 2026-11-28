@@ -3,7 +3,9 @@
 
 The canonical monorepo for the Wugweb ecosystem: WordPress theme, modular companion plugins, design system tokens, shared packages, skills, agents, and release tooling.
 
-Delivery and CI/CD: [`DEPLOYMENT.md`](DEPLOYMENT.md). Each product's open work and decisions: `plugins/<name>/PENDING.md` and `themes/kits-by-wugweb/PENDING.md`. The old `docs/` folder was retired on 26 Nov 2026; its text is in git history (kits-suite `9f81e36` and earlier).
+Delivery and CI/CD: [`DEPLOYMENT.md`](DEPLOYMENT.md). Each product's open work and decisions: `plugins/<name>/PENDING.md` and `themes/kits-by-wugweb/PENDING.md`. The old plan documents were retired on 26 Nov 2026 (kits-suite `9f81e36` and earlier). `docs/` now holds only dated reports: the current status report (`docs/standalone-audit-2026-11-28.md`), the staging check, and `docs/history/` for the older ledgers and audits.
+
+**Branches.** `kits-suite` is the default branch and the one CI and releases run from; `main` is kept equal to it (fast-forward only). Work branches are deleted once merged.
 
 ---
 
