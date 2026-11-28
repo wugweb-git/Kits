@@ -26,3 +26,5 @@ Not restored (shorter generic copy now): the media caption and description wordi
 ## Site operations list (retired 26 Nov 2026)
 
 `docs/org/pending.md` also held the Animal Writes site's own task list: campaign pages (Diwali, community dogs, Supreme Court strays, lab rules), Home and Directory content, search and keyword fixes, social accounts, help-now and FIR state pages, owner-only server steps (`WP_MEMORY_LIMIT`, hPanel cron for `wp aw workers-tick`, Rank Math 404 log), dates and a done log. That is site content and operations, not product code; the product items from it are in each plugin's `PENDING.md`. The full text is in git history at `docs/org/pending.md`.
+
+- `theme/site/`: the `assets/site/` folder of the Kits by Wugweb theme (templates, parts, patterns, styles, content types, campaign pages). Copied into the theme folder on the server; see `theme/README.md`.
