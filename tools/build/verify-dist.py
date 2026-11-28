@@ -88,7 +88,7 @@ def verify(slug: str, zip_path: pathlib.Path, errors: list[str]) -> dict:
             if not in_vendor and parts[0] in FORBIDDEN_TOP_LEVEL:
                 errors.append(f"{slug}: uncompiled source shipped: {rel}")
                 break
-            if parts[-1] in FORBIDDEN_NAMES:
+            if parts[-1] in FORBIDDEN_NAMES and not (parts == ['composer.json'] and slug in VENDOR_PRODUCTS):  # a bundled vendor/ ships with its composer.json
                 errors.append(f"{slug}: forbidden file shipped: {rel}")
                 break
         with tempfile.TemporaryDirectory() as tmp:
