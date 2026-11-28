@@ -245,6 +245,8 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
     else:
         # "More from Kits" installs other plugins from GitHub releases; WordPress.org does not allow that, so its build leaves the page out.
         patterns.extend(["more-from-kits.php", "more-products.php"])
+        # Icons, banners and screenshots go to the WordPress.org assets folder (SVN /assets), not into the zip: see below.
+        patterns.extend(["assets/banner-*.png", "assets/icon-128x128.png", "assets/icon-256x256.png", "assets/screenshot-*.png", "assets/screenshots.json"])
 
     # The source tree's vendor/ is never copied (it may hold dev dependencies, and is gitignored);
     # bundled targets get a fresh `composer install --no-dev` below.
@@ -274,6 +276,16 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
         main = stage / f"{slug}.php"
         if main.exists():
             main.write_text(re.sub(r"^[ \t]*\*?[ \t]*Update URI:.*\n", "", main.read_text(encoding="utf-8"), flags=re.MULTILINE), encoding="utf-8")
+
+    if track == "wporg" and target != "theme":
+        # What WordPress.org wants in its SVN /assets folder, next to trunk and tags: banners, icons and screenshots.
+        keep = out_dir / "wporg-assets" / slug
+        if keep.exists():
+            shutil.rmtree(keep)
+        keep.mkdir(parents=True)
+        for pat in ("banner-*.png", "icon-128x128.png", "icon-256x256.png", "icon.svg", "screenshot-*.png"):
+            for f in sorted((src / "assets").glob(pat)):
+                shutil.copy2(f, keep / f.name)
 
     zip_name = f"{slug}-{track}.zip" if target == "theme" and track != "commercial" else f"{slug}.zip"
     zip_path = out_dir / zip_name

@@ -14,8 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_filter( 'update_plugins_wugweb.com', 'rankweb_seo_plugin_update_row', 10, 3 );
-add_filter( 'plugins_api', 'rankweb_seo_plugin_details', 10, 3 );
+// The direct build (with an Update URI header) supplies its own row and View details window. The WordPress.org build has none:
+// WordPress.org supplies the window from the readme and its assets, and updates the plugin itself.
+if ( is_admin() && '' !== trim( (string) get_file_data( defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : RANKWEB_DIR . 'rankweb.php', array( 'uri' => 'Update URI' ) )['uri'] ) ) {
+	add_filter( 'update_plugins_wugweb.com', 'rankweb_seo_plugin_update_row', 10, 3 );
+	add_filter( 'plugins_api', 'rankweb_seo_plugin_details', 10, 3 );
+}
 add_filter( 'plugin_row_meta', 'rankweb_seo_plugin_row_meta', 10, 2 );
 add_action( 'admin_enqueue_scripts', fn( $hook ) => 'plugins.php' === $hook ? add_thickbox() : null );
 

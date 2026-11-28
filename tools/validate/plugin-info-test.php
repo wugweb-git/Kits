@@ -11,6 +11,15 @@ $GLOBALS['hooks'] = array();
 function add_filter( $t, $cb ) { $GLOBALS['hooks'][ $t ][] = $cb; }
 function add_action( $t, $cb ) { $GLOBALS['hooks'][ $t ][] = $cb; }
 function add_thickbox() {}
+function is_admin() { return true; }
+function get_file_data( $file, $h ) {
+	$src = file_get_contents( $file );
+	$out = array();
+	foreach ( $h as $k => $name ) {
+		$out[ $k ] = preg_match( '/^[ \t\/*#@]*' . preg_quote( $name, '/' ) . ':(.*)$/mi', $src, $m ) ? trim( $m[1] ) : '';
+	}
+	return $out;
+}
 function plugin_basename( $f ) { return basename( dirname( $f ) ) . '/' . basename( $f ); }
 function plugins_url( $p, $f ) { return 'https://example.test/wp-content/plugins/' . basename( dirname( $f ) ) . '/' . $p; }
 function menu_page_url( $s, $e ) { return 'https://example.test/wp-admin/admin.php?page=' . $s; }
