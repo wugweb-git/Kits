@@ -438,6 +438,39 @@ function mailweb_smtp_presets(): array {
 }
 
 /**
+ * The Provider picker's choice for a saved server and port: the preset that fills exactly these two, else Custom SMTP
+ * when a server is set, else nothing (so the picker never says "choose" over fields that are already filled).
+ *
+ * @param string $host Saved SMTP server.
+ * @param int    $port Saved port.
+ * @return string Preset key, or '' for none.
+ */
+function mailweb_smtp_preset_for( string $host, int $port ): string {
+	$host = strtolower( trim( $host ) );
+	if ( '' === $host ) {
+		return '';
+	}
+	foreach ( mailweb_smtp_presets() as $key => $p ) {
+		if ( '' !== $p['host'] && strtolower( $p['host'] ) === $host && (int) $p['port'] === $port ) {
+			return (string) $key;
+		}
+	}
+	return 'custom';
+}
+
+/**
+ * The mailbox the form shows. The default "noreply@<site host>" is not a real mailbox when the site host is an IP
+ * address or has no dot (a local or staging address), so the field is left empty with a placeholder instead.
+ *
+ * @param string $user Saved or default mailbox.
+ * @param string $site_host The site's host name.
+ */
+function mailweb_smtp_user_shown( string $user, string $site_host ): string {
+	$not_real = '' === $site_host || false === strpos( $site_host, '.' ) || false !== filter_var( $site_host, FILTER_VALIDATE_IP );
+	return $not_real && strtolower( $user ) === strtolower( 'noreply@' . $site_host ) ? '' : $user;
+}
+
+/**
  * Send a diagnostic test email and return structured status (accepted by the server, or the error).
  *
  * @param string $to   Recipient email.
@@ -503,7 +536,7 @@ function mailweb_render_logs_screen(): void {
 	}
 	if ( ! mailweb_delivery_on( 'log_mail' ) ) {
 		wp_admin_notice(
-			esc_html__( 'The delivery log is off, so nothing new is recorded here. Turn it on under Site sending → Delivery log, fallback and alerts.', 'mailweb' ),
+			esc_html__( 'The delivery log is off, so nothing new is recorded here.', 'mailweb' ) . ' <a href="' . esc_url( mailweb_settings_url( 'sending' ) ) . '">' . esc_html__( 'Turn it on under Site sending → Delivery log, fallback and alerts', 'mailweb' ) . '</a>.',
 			array( 'type' => 'info', 'additional_classes' => array( 'inline' ) )
 		);
 	}
@@ -520,7 +553,7 @@ function mailweb_render_logs_screen(): void {
 	echo '<th>' . esc_html__( 'Action', 'mailweb' ) . '</th>';
 	echo '</tr></thead><tbody>';
 	if ( empty( $logs ) ) {
-		echo '<tr><td colspan="7">' . esc_html__( 'No email log entries recorded yet.', 'mailweb' ) . '</td></tr>';
+		echo '<tr><td colspan="7">' . esc_html__( 'No email log entries recorded yet.', 'mailweb' ) . ( mailweb_delivery_on( 'log_mail' ) ? '' : ' <a href="' . esc_url( mailweb_settings_url( 'sending' ) ) . '">' . esc_html__( 'Turn on the delivery log', 'mailweb' ) . '</a>' ) . '</td></tr>';
 	} else {
 		foreach ( $logs as $row ) {
 			echo '<tr>';
@@ -536,7 +569,8 @@ function mailweb_render_logs_screen(): void {
 				echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 				echo '<input type="hidden" name="action" value="mailweb_resend"><input type="hidden" name="queue_id" value="' . esc_attr( (string) $qid ) . '">';
 				wp_nonce_field( 'mailweb_resend_' . $qid );
-				echo '<button type="submit" class="button button-small">' . esc_html__( 'Resend', 'mailweb' ) . '</button></form>';
+				/* translators: %s: the email's subject. */
+				echo '<button type="submit" class="button button-small" aria-label="' . esc_attr( sprintf( __( 'Resend: %s', 'mailweb' ), (string) ( $row['subject'] ?? '' ) ) ) . '">' . esc_html__( 'Resend', 'mailweb' ) . '</button></form>';
 			}
 			echo '</td>';
 			echo '</tr>';

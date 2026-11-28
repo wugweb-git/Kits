@@ -85,10 +85,34 @@
 .planweb-timeline-track { position: relative; flex: 1 1 auto; height: 24px; border-bottom: 1px solid #dcdcde; }
 .planweb-timeline-axis .planweb-timeline-track { height: 18px; }
 .planweb-timeline-tick { position: absolute; top: 0; padding-inline-start: 3px; border-inline-start: 1px solid #c3c4c7; font-size: 11px; line-height: 18px; color: #50575e; white-space: nowrap; }
-.planweb-timeline-mark { position: absolute; top: 6px; width: 12px; height: 12px; margin-inline-start: -6px; border: 2px solid #2271b1; border-radius: 50%; background: #fff; box-sizing: border-box; }
-.planweb-timeline-mark.planweb-status--idea, .planweb-timeline-mark.planweb-status--draft { border-style: dashed; }
-.planweb-timeline-mark.planweb-status--sent, .planweb-timeline-mark.planweb-status--done { background: #50575e; border-color: #50575e; }
-.planweb-timeline-mark:focus { outline: 2px solid #2271b1; outline-offset: 2px; }
+.planweb-timeline-mark { position: absolute; top: 0; width: 24px; height: 24px; margin-inline-start: -12px; padding: 0; border: 0; background: none; box-sizing: border-box; }
+.planweb-timeline-mark::before { content: ""; position: absolute; top: 6px; left: 6px; width: 12px; height: 12px; border: 2px solid #2271b1; border-radius: 50%; background: #fff; box-sizing: border-box; }
+.planweb-timeline-mark.planweb-status--approved::before, .planweb-timeline-mark.planweb-status--due::before, .planweb-timeline-mark.planweb-status--scheduled::before, .planweb-timeline-mark.planweb-status--sending::before, .planweb-timeline-mark.planweb-status--paused::before { border-color: #2271b1; }
+.planweb-timeline-mark.planweb-status--missed::before { border-color: #d63638; background: #fcf0f1; }
+.planweb-timeline-mark.planweb-status--idea::before, .planweb-timeline-mark.planweb-status--draft::before { border-style: dashed; }
+.planweb-timeline-mark.planweb-status--sent::before, .planweb-timeline-mark.planweb-status--done::before { background: #50575e; border-color: #50575e; }
+/* The 24 x 24 box is the link (WCAG 2.5.8); the 12 px dot inside it is only the drawing. The status classes also sit on the box. */
+.planweb-timeline-mark.planweb-timeline-mark { border-color: transparent; background: none; color: inherit; }
+.planweb-timeline-mark:focus { outline: 2px solid #2271b1; outline-offset: 0; border-radius: 50%; }
 .planweb-timeline-list { margin-bottom: 16px; }
 @media (max-width: 600px) { .planweb-timeline-label { flex-basis: 80px; } }
 
+
+/* Entries list (WCAG 1.4.10, no sideways scrolling): the Link now sits under the title, so six columns fit the full
+   admin width. The Channels and Owner values carry their own labels, shown only when the table is stacked. */
+.planweb-secondary__label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#planweb-app .kits-shell-datalist .planweb-link { overflow-wrap: anywhere; }
+@media (max-width: 782px) {
+	/* One entry is one block: the head row goes (each value says what it is), the cells stack. No cell sets a width
+	   that forces a scroll, so the page keeps the phone's width. */
+	#planweb-app .kits-shell-datalist .dataviews-view-table,
+	#planweb-app .kits-shell-datalist .dataviews-view-table tbody,
+	#planweb-app .kits-shell-datalist .dataviews-view-table tr,
+	#planweb-app .kits-shell-datalist .dataviews-view-table td { display: block; width: 100%; box-sizing: border-box; }
+	#planweb-app .kits-shell-datalist .dataviews-view-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+	#planweb-app .kits-shell-datalist .dataviews-view-table tr { padding: 8px 0; border-bottom: 1px solid #dcdcde; }
+	#planweb-app .kits-shell-datalist .dataviews-view-table td { padding: 2px 12px; border: 0; }
+	#planweb-app .kits-shell-datalist .dataviews-view-table td.dataviews-view-table__actions-column--sticky { position: static; text-align: start; }
+	#planweb-app .kits-shell-datalist .dataviews-view-table .dataviews-view-table__cell-content-wrapper { min-width: 0; max-width: none; }
+	#planweb-app .kits-shell-datalist .planweb-secondary__label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; color: #50575e; }
+}

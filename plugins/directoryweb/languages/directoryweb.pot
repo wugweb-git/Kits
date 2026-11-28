@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: DirectoryWeb 1.5.1\n"
+"Project-Id-Version: DirectoryWeb 1.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/directoryweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:38:17+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:13:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: directoryweb\n"
@@ -55,8 +55,8 @@ msgstr ""
 #: includes/directoryweb-rest.php:409
 #: includes/directoryweb-ui.php:106
 #: includes/directoryweb-ui.php:204
-#: src/index.js:1431
-#: src/index.js:1453
+#: src/index.js:1461
+#: src/index.js:1483
 msgid "Listings"
 msgstr ""
 
@@ -379,7 +379,7 @@ msgstr ""
 #: includes/directoryweb-status.php:61
 #: includes/listing-profile.php:169
 #: src/index.js:1112
-#: src/index.js:1412
+#: src/index.js:1442
 msgid "Claimed"
 msgstr ""
 
@@ -388,13 +388,13 @@ msgstr ""
 #: includes/directoryweb-status.php:70
 #: includes/listing-profile.php:172
 #: src/index.js:1117
-#: src/index.js:1413
+#: src/index.js:1443
 msgid "Verified"
 msgstr ""
 
 #: includes/directoryweb-listings.php:33
 #: src/index.js:1122
-#: src/index.js:1414
+#: src/index.js:1444
 msgid "Needs re-check"
 msgstr ""
 
@@ -1301,7 +1301,7 @@ msgid "Quick Actions"
 msgstr ""
 
 #: includes/directoryweb-ui.php:392
-#: src/index.js:1442
+#: src/index.js:1472
 msgid "Add New Listing"
 msgstr ""
 
@@ -1758,121 +1758,121 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-from-kits.php:67
-#: includes/more-from-kits.php:103
+#: includes/more-from-kits.php:104
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-from-kits.php:87
+#: includes/more-from-kits.php:88
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-from-kits.php:90
+#: includes/more-from-kits.php:91
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-from-kits.php:91
+#: includes/more-from-kits.php:92
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-from-kits.php:92
+#: includes/more-from-kits.php:93
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-from-kits.php:96
+#: includes/more-from-kits.php:97
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-from-kits.php:97
+#: includes/more-from-kits.php:98
 msgid "Activated."
 msgstr ""
 
-#: includes/more-from-kits.php:98
+#: includes/more-from-kits.php:99
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-from-kits.php:119
+#: includes/more-from-kits.php:120
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-from-kits.php:121
+#: includes/more-from-kits.php:122
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 msgid "Activate"
 msgstr ""
 
-#: includes/more-from-kits.php:140
+#: includes/more-from-kits.php:141
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-from-kits.php:144
+#: includes/more-from-kits.php:145
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-from-kits.php:175
+#: includes/more-from-kits.php:176
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-from-kits.php:178
+#: includes/more-from-kits.php:179
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-from-kits.php:183
+#: includes/more-from-kits.php:184
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:205
+#: includes/more-from-kits.php:206
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-from-kits.php:212
+#: includes/more-from-kits.php:213
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-from-kits.php:215
+#: includes/more-from-kits.php:216
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-from-kits.php:227
+#: includes/more-from-kits.php:228
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:230
+#: includes/more-from-kits.php:231
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-from-kits.php:241
+#: includes/more-from-kits.php:242
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-from-kits.php:245
+#: includes/more-from-kits.php:246
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-from-kits.php:251
+#: includes/more-from-kits.php:252
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-from-kits.php:262
+#: includes/more-from-kits.php:263
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -1914,7 +1914,7 @@ msgstr ""
 #: includes/place-intros.php:202
 #: includes/place-intros.php:239
 #: src/index.js:1197
-#: src/index.js:1403
+#: src/index.js:1433
 msgid "Place"
 msgstr ""
 
@@ -1927,7 +1927,6 @@ msgid "Write or edit"
 msgstr ""
 
 #: includes/place-intros.php:227
-#: src/index.js:1499
 msgid "Edit"
 msgstr ""
 
@@ -1938,7 +1937,7 @@ msgstr ""
 
 #: includes/place-intros.php:229
 #: src/index.js:687
-#: src/index.js:1472
+#: src/index.js:1502
 msgid "State"
 msgstr ""
 
@@ -2098,7 +2097,7 @@ msgstr ""
 
 #: includes/standalone-screens.php:147
 #: includes/standalone-screens.php:157
-#: src/index.js:1398
+#: src/index.js:1428
 #: src/schema-screens.js:124
 #: src/schema-screens.js:176
 msgid "Type"
@@ -2233,7 +2232,7 @@ msgstr ""
 #: includes/standalone-screens.php:271
 #: includes/standalone-screens.php:616
 #: src/index.js:635
-#: src/index.js:1408
+#: src/index.js:1438
 msgid "Status"
 msgstr ""
 
@@ -2262,7 +2261,7 @@ msgstr ""
 #: includes/standalone-screens.php:315
 #: includes/standalone-screens.php:401
 #: src/index.js:699
-#: src/index.js:1480
+#: src/index.js:1510
 #: src/schema-screens.js:625
 #: src/schema-screens.js:984
 msgid "Listing type"
@@ -2606,6 +2605,7 @@ msgstr ""
 #: src/index.js:501
 #: src/index.js:785
 #: src/index.js:1154
+#: src/index.js:1412
 msgid "Edit listing"
 msgstr ""
 
@@ -2779,7 +2779,7 @@ msgid "Added"
 msgstr ""
 
 #: src/index.js:1220
-#: src/index.js:1392
+#: src/index.js:1422
 msgid "Last changed"
 msgstr ""
 
@@ -2787,19 +2787,31 @@ msgstr ""
 msgid "Listing photos"
 msgstr ""
 
-#: src/index.js:1432
-msgid "The Directory’s listings, to read. View opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims."
+#. translators: %s: listing title.
+#: src/index.js:1395
+#, js-format
+msgid "View profile: %s"
 msgstr ""
 
-#: src/index.js:1464
-msgid "Search listings"
-msgstr ""
-
-#: src/index.js:1495
+#: src/index.js:1400
 msgid "View profile"
 msgstr ""
 
-#: src/index.js:1507
+#. translators: %s: listing title.
+#: src/index.js:1408
+#, js-format
+msgid "Edit listing: %s"
+msgstr ""
+
+#: src/index.js:1462
+msgid "The Directory’s listings, to read. View profile opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims."
+msgstr ""
+
+#: src/index.js:1494
+msgid "Search listings"
+msgstr ""
+
+#: src/index.js:1525
 msgid "No listing matches."
 msgstr ""
 

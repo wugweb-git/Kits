@@ -217,6 +217,8 @@ function sourceweb_places_screen(): array {
 	}
 	return array(
 		'places' => array_values( $places ),
+		'custom' => array_values( array_filter( array_map( static fn( $c ) => is_array( $c ) ? (string) ( $c['id'] ?? '' ) : '', (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() ) ) ) ), // ids made on this screen (the only ones that can be removed here)
+		'postTypes' => array_values( array_map( static fn( $pt ) => array( 'value' => $pt->name, 'label' => $pt->label . ' (' . $pt->name . ')' ), get_post_types( array( 'public' => true ), 'objects' ) ) ),
 		'routes' => $rows,
 		'sources' => array_values( sourceweb_source_types() ),
 		'enhancers' => array_map( static fn( $id, $e ) => array( 'id' => $id, 'label' => $e[0] ), array_keys( sourceweb_enhancers() ), sourceweb_enhancers() ),
@@ -245,6 +247,53 @@ add_action(
 						}
 					}
 					update_option( SOURCEWEB_PLACE_ENHANCE_OPTION, $save, false );
+					return rest_ensure_response( sourceweb_places_screen() );
+				},
+			)
+		);
+		register_rest_route(
+			SOURCEWEB_REST,
+			'/places/add',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => sourceweb_rest_can( SOURCEWEB_SRC_CAP ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$raw    = array(
+						'label'     => sanitize_text_field( (string) $req->get_param( 'label' ) ),
+						'id'        => sanitize_text_field( (string) $req->get_param( 'id' ) ),
+						'kind'      => sanitize_key( (string) $req->get_param( 'kind' ) ),
+						'post_type' => sanitize_key( (string) $req->get_param( 'post_type' ) ),
+					);
+					$custom = array_values( (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() ) );
+					list( $custom, $why ) = sourceweb_place_add( $custom, $raw, array_keys( sourceweb_places() ) );
+					if ( '' !== $why ) {
+						return new WP_Error( 'sourceweb_place', __( 'Not added. ', 'sourceweb' ) . $why, array( 'status' => 400 ) );
+					}
+					update_option( SOURCEWEB_CUSTOM_PLACES_OPTION, $custom, false );
+					if ( function_exists( 'sourceweb_src_log' ) ) {
+						sourceweb_src_log( 'places', 'place added', '', (string) end( $custom )['id'] );
+					}
+					return rest_ensure_response( sourceweb_places_screen() );
+				},
+			)
+		);
+		register_rest_route(
+			SOURCEWEB_REST,
+			'/places/remove',
+			array(
+				'methods'             => 'POST',
+				'permission_callback' => sourceweb_rest_can( SOURCEWEB_SRC_CAP ),
+				'callback'            => function ( WP_REST_Request $req ) {
+					$id                   = sanitize_key( (string) $req->get_param( 'place' ) );
+					$custom               = array_values( (array) get_option( SOURCEWEB_CUSTOM_PLACES_OPTION, array() ) );
+					list( $custom, $why ) = sourceweb_place_remove( $custom, $id, (array) get_option( SOURCEWEB_ROUTES_OPTION, array() ) );
+					if ( '' !== $why ) {
+						return new WP_Error( 'sourceweb_place', __( 'Not removed. ', 'sourceweb' ) . $why, array( 'status' => 400 ) );
+					}
+					update_option( SOURCEWEB_CUSTOM_PLACES_OPTION, $custom, false );
+					if ( function_exists( 'sourceweb_src_log' ) ) {
+						sourceweb_src_log( 'places', 'place removed', $id, '' );
+					}
 					return rest_ensure_response( sourceweb_places_screen() );
 				},
 			)

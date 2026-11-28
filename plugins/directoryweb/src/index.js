@@ -646,7 +646,7 @@ function Claims() {
 	const sortKey = 'listing' === q.sort ? 'title' : 'sent';
 	return (
 		<>
-			{ open && <Claim id={ open } onClose={ () => show( 0 ) } /> }
+			{ open ? <Claim id={ open } onClose={ () => show( 0 ) } /> : null }
 			<SectionCard
 				id="directoryweb-claims"
 				title={ __( 'Claims', 'directoryweb' ) }
@@ -1365,27 +1365,57 @@ function Listings() {
 			sortable: true,
 			// The listing's own picture (its logo once claimed), else its first letter.
 			render: ( r ) => (
-				<span className="kits-shell-withicon">
-					{ r.thumb ? (
-						<img
-							className="kits-shell-service__icon"
-							src={ r.thumb }
-							alt=""
-							width="32"
-							height="32"
-							loading="lazy"
-						/>
-					) : (
-						<span
-							className="kits-shell-service__icon is-blank"
-							aria-hidden="true"
+				<>
+					<span className="kits-shell-withicon">
+						{ r.thumb ? (
+							<img
+								className="kits-shell-service__icon"
+								src={ r.thumb }
+								alt=""
+								width="32"
+								height="32"
+								loading="lazy"
+							/>
+						) : (
+							<span
+								className="kits-shell-service__icon is-blank"
+								aria-hidden="true"
+							>
+								{ ( r.title || '?' ).charAt( 0 ).toUpperCase() }
+							</span>
+						) }
+						<strong>{ r.title }</strong>
+					</span>
+					<span className="kits-shell-rowactions directoryweb-rowactions">
+						<button
+							type="button"
+							className="kits-shell-link"
+							aria-label={ sprintf(
+								/* translators: %s: listing title. */
+								__( 'View profile: %s', 'directoryweb' ),
+								r.title
+							) }
+							onClick={ () => setProfileId( r.id ) }
 						>
-							{ ( r.title || '?' ).charAt( 0 ).toUpperCase() }
-						</span>
-					) }
-					<strong>{ r.title }</strong>
-				</span>
+							{ __( 'View profile', 'directoryweb' ) }
+						</button>
+						{ r.editUrl && (
+							<a
+								className="kits-shell-link"
+								href={ r.editUrl }
+								aria-label={ sprintf(
+									/* translators: %s: listing title. */
+									__( 'Edit listing: %s', 'directoryweb' ),
+									r.title
+								) }
+							>
+								{ __( 'Edit listing', 'directoryweb' ) }
+							</a>
+						) }
+					</span>
+				</>
 			),
+			// Not the shell's rowActions: each link names its listing, so three "Edit" links are three different names.
 		},
 		{
 			key: 'modified',
@@ -1430,7 +1460,7 @@ function Listings() {
 			id="directoryweb-listings"
 			title={ __( 'Listings', 'directoryweb' ) }
 			description={ __(
-				'The Directory’s listings, to read. View opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims.',
+				'The Directory’s listings, to read. View profile opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims.',
 				'directoryweb'
 			) }
 			actions={
@@ -1488,18 +1518,6 @@ function Listings() {
 				sort={ { key: q.sort, dir: q.dir } }
 				onSort={ ( key, dir ) =>
 					setQ( ( o ) => ( { ...o, sort: key, dir, page: 1 } ) )
-				}
-				rowActions={ ( r ) =>
-					[
-						{
-							label: __( 'View profile', 'directoryweb' ),
-							onClick: () => setProfileId( r.id ),
-						},
-						r.editUrl && {
-							label: __( 'Edit', 'directoryweb' ),
-							href: r.editUrl,
-						},
-					].filter( Boolean )
 				}
 				loading={ loading }
 				error={ error }

@@ -308,15 +308,31 @@ function sourceweb_dashboard_payload(): array {
 		$w = (array) ( $c['workers'] ?? array() );
 		if ( $w || $counting ) {
 			$p       = (array) ( $w['problems'] ?? array() );
+			$total   = (int) ( $w['total'] ?? 0 );
+			$rep     = (int) ( $w['reporting'] ?? $total ); // Only workflows that have reported can be on time or late.
+			$on_time = max( 0, $rep - count( $p ) );
+			if ( ! $counting && $total && 0 === $rep ) {
+				/* translators: %s: number of workflows. */
+				$wv  = sprintf( __( '0 of %s reporting', 'sourceweb' ), $num( $total ) );
+				$wsb = __( 'Waiting for the first report', 'sourceweb' );
+				$wt  = '';
+			} else {
+				/* translators: 1: on time, 2: workflows that have reported. */
+				$wv  = sprintf( __( '%1$s of %2$s', 'sourceweb' ), $num( $on_time ), $num( $rep ) );
+				$wsb = $p
+					? implode( ' ', array_slice( $p, 0, 2 ) )
+					/* translators: 1: workflows that have reported, 2: all workflows. */
+					: sprintf( __( '%1$s of %2$s have reported; every one that reports is on time', 'sourceweb' ), $num( $rep ), $num( $total ) );
+				$wt  = $p ? 'warn' : '';
+			}
 			$tiles[] = array(
 				'key'    => 'workers',
 				'label'  => __( 'Workers on time', 'sourceweb' ),
-				/* translators: 1: on time, 2: workflows. */
-				'value'  => $counting ? '' : sprintf( __( '%1$s of %2$s', 'sourceweb' ), $num( (int) ( $w['total'] ?? 0 ) - count( $p ) ), $num( $w['total'] ?? 0 ) ),
-				'raw'    => (int) ( $w['total'] ?? 0 ) - count( $p ),
-				'sub'    => $p ? implode( ' ', array_slice( $p, 0, 2 ) ) : __( 'Every workflow that reports is on time', 'sourceweb' ),
+				'value'  => $counting ? '' : $wv,
+				'raw'    => $on_time,
+				'sub'    => $wsb,
 				'href'   => sourceweb_admin_url( 'workers' ),
-				'tone'   => $p ? 'warn' : '',
+				'tone'   => $wt,
 				'metric' => 'workers',
 			);
 		}

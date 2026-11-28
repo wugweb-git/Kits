@@ -589,7 +589,30 @@ export default function Inbox() {
 	} else if ( error ) {
 		list = <ErrorState message={ error } onRetry={ load } />;
 	} else if ( ! rows.length ) {
-		list = <EmptyState title={ emptyTitle } />;
+		// Nothing to show because nothing is connected or nothing has arrived: say what to do next, not only what is missing.
+		const quiet = ! data?.failed && ! st.search && app.settingsUrl;
+		list = (
+			<EmptyState
+				title={ emptyTitle }
+				action={
+					quiet
+						? {
+								label: __( 'Connect a mailbox', 'mailweb' ),
+								href: app.settingsUrl,
+							}
+						: undefined
+				}
+			>
+				{ quiet && (
+					<p className="kits-shell-state__help">
+						{ __(
+							'If a mailbox is already connected, new mail appears here when it arrives. Otherwise, an administrator saves the Mail API token in MailWeb → Settings.',
+							'mailweb'
+						) }
+					</p>
+				) }
+			</EmptyState>
+		);
 	} else {
 		list = (
 			<ul

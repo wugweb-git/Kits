@@ -293,7 +293,12 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 		: __( 'Daily at 07:10', 'insightweb' );
 	if ( ! empty( $gsc['error']['message'] ) && 'failed' === $state ) {
 		$sub = (string) $gsc['error']['message'];
+	} elseif ( ! $ok && '' === $upto ) {
+		// No run is logged: say so, so figures beside this tile are not read as an import that happened.
+		$sub = __( 'No import is logged yet. It runs daily at 07:10.', 'insightweb' );
 	}
+	$good   = count( array_filter( $sources, fn( $s ) => 'ok' === ( $s['status'] ?? '' ) ) );
+	$waiting = count( array_filter( $sources, fn( $s ) => 'notrun' === ( $s['status'] ?? '' ) ) );
 	$tiles = array(
 		array(
 			'key'   => 'import',
@@ -310,12 +315,18 @@ function insightweb_health_shape( array $sources, array $gsc, string $state, arr
 			'value' => $need
 				/* translators: %s: number of sources. */
 				? sprintf( _n( '%s needs attention', '%s need attention', count( $need ), 'insightweb' ), number_format_i18n( count( $need ) ) )
-				: __( 'All working', 'insightweb' ),
+				: ( $good ? __( 'All working', 'insightweb' ) : __( 'Not run yet', 'insightweb' ) ),
 			'delta' => '',
 			'sub'   => $need
 				? implode( ', ', wp_list_pluck( $need, 'name' ) )
-				/* translators: %s: number of sources. */
-				: sprintf( _n( '%s source checked', '%s sources checked', count( $sources ), 'insightweb' ), number_format_i18n( count( $sources ) ) ),
+				: ( ! $good
+					/* translators: %s: number of sources. */
+					? sprintf( _n( '%s source is waiting for its first run', '%s sources are waiting for their first run', $waiting ? $waiting : count( $sources ), 'insightweb' ), number_format_i18n( $waiting ? $waiting : count( $sources ) ) )
+					: ( $waiting
+						/* translators: 1: sources with a good run, 2: all sources. */
+						? sprintf( __( '%1$s of %2$s sources have run; the rest are waiting', 'insightweb' ), number_format_i18n( $good ), number_format_i18n( count( $sources ) ) )
+						/* translators: %s: number of sources. */
+						: sprintf( _n( '%s source checked', '%s sources checked', count( $sources ), 'insightweb' ), number_format_i18n( count( $sources ) ) ) ) ),
 			'href'  => $links['overview'] ?? '',
 			'tone'  => $need ? ( in_array( 'failed', wp_list_pluck( $need, 'status' ), true ) ? 'error' : 'warn' ) : '',
 		),

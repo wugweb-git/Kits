@@ -578,7 +578,7 @@ function insightweb_si_box_priorities(): void {
 		'all'       => __( 'All keywords', 'insightweb' ),
 	);
 	$movers = insightweb_si_entity_movers(); // Listing names count as in the Keywords views: the ones that moved most, not all.
-	echo '<ul>';
+	echo '<ul class="insightweb-prio-list">';
 	foreach ( $labels as $view => $label ) {
 		echo '<li><a href="' . esc_url( add_query_arg( 'view', $view, insightweb_si_url( 'keywords' ) ) ) . '">' . esc_html( $label ) . '</a>: ' . esc_html( number_format_i18n( insightweb_si_view_count( $view, $movers ) ) ) . '</li>';
 	}

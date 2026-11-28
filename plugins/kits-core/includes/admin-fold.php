@@ -99,6 +99,67 @@ add_action(
 		if ( '' === $owner || 'kits' === $owner || ! function_exists( 'kits_admin_fold_tabs' ) ) {
 			return;
 		}
-		kits_admin_fold_tabs( $owner, __( 'Screens', 'kits-core' ) );
+		global $submenu;
+		// The row's name is the product's: a second row named "Screens" next to the header's own "Screens" is two
+		// navigations a screen reader cannot tell apart. (The header hides this row when it lists the same screens.)
+		$name = '';
+		foreach ( (array) ( $submenu[ (string) ( kits_folded_menus()[ $owner ] ?? '' ) ] ?? array() ) as $item ) {
+			if ( is_array( $item ) && isset( $item[0], $item[2] ) && kits_fold_link( $owner ) === $item[2] ) {
+				$name = trim( explode( '<', (string) $item[0], 2 )[0] );
+				break;
+			}
+		}
+		kits_admin_fold_tabs(
+			$owner,
+			'' !== $name
+				/* translators: %s: product name, e.g. RankWeb. */
+				? sprintf( __( 'All %s screens', 'kits-core' ), $name )
+				: __( 'All screens', 'kits-core' )
+		);
 	}
+);
+
+// More from Kits (more-products.php) is a hidden screen of the Kits menu (the menu keeps five items). It is reached from
+// Kits Home and from this Plugins list: a link under Plugins, next to the products it offers.
+add_action(
+	'admin_menu',
+	function () {
+		if ( ! function_exists( 'kits_more_page' ) || ! current_user_can( 'install_plugins' ) ) {
+			return;
+		}
+		add_submenu_page( 'plugins.php', __( 'More from Kits', 'kits-core' ), __( 'More from Kits', 'kits-core' ), 'install_plugins', kits_fold_link( 'kits-core-more' ) );
+	},
+	1002 // After the folded products' items (1001), so it comes last in the list.
+);
+
+// On the More page itself, light that item under Plugins.
+add_filter(
+	'parent_file',
+	function ( $file ) {
+		global $plugin_page;
+		return 'kits-core-more' === $plugin_page ? 'plugins.php' : $file;
+	},
+	100
+);
+add_filter(
+	'submenu_file',
+	function ( $file ) {
+		global $plugin_page;
+		return 'kits-core-more' === $plugin_page ? kits_fold_link( 'kits-core-more' ) : $file;
+	},
+	100
+);
+
+// The page's tab title: the screen has no entry in the menu (the Kits menu keeps five), so WordPress has no name for it.
+add_filter(
+	'admin_title',
+	function ( $admin_title, $title ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen is open; nothing is saved here.
+		if ( isset( $_GET['page'] ) && 'kits-core-more' === sanitize_key( wp_unslash( $_GET['page'] ) ) && '' === trim( (string) $title ) ) {
+			return __( 'More from Kits', 'kits-core' ) . (string) $admin_title;
+		}
+		return $admin_title;
+	},
+	10,
+	2
 );

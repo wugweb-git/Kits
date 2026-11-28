@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: InsightWeb 1.4.1\n"
+"Project-Id-Version: InsightWeb 1.4.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/insightweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:38:20+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:13:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: insightweb\n"
@@ -194,8 +194,8 @@ msgid "Keys saved."
 msgstr ""
 
 #: includes/insightweb-keys.php:367
-#: includes/insightweb-rest.php:489
-#: includes/insightweb-rest.php:522
+#: includes/insightweb-rest.php:500
+#: includes/insightweb-rest.php:533
 msgid "Nothing changed."
 msgstr ""
 
@@ -347,7 +347,7 @@ msgid "Failed"
 msgstr ""
 
 #: includes/insightweb-rest.php:278
-#: includes/insightweb-rest.php:551
+#: includes/insightweb-rest.php:562
 #: includes/search-insights/dashboard.php:186
 msgid "Late"
 msgstr ""
@@ -358,8 +358,9 @@ msgstr ""
 
 #. translators: %s: date and time.
 #: includes/insightweb-rest.php:280
-#: includes/insightweb-rest.php:541
-#: includes/insightweb-rest.php:553
+#: includes/insightweb-rest.php:318
+#: includes/insightweb-rest.php:552
+#: includes/insightweb-rest.php:564
 msgid "Not run yet"
 msgstr ""
 
@@ -378,194 +379,212 @@ msgstr ""
 msgid "Daily at 07:10"
 msgstr ""
 
-#: includes/insightweb-rest.php:300
+#: includes/insightweb-rest.php:298
+msgid "No import is logged yet. It runs daily at 07:10."
+msgstr ""
+
+#: includes/insightweb-rest.php:305
 msgid "Last Search Console import"
 msgstr ""
 
-#: includes/insightweb-rest.php:301
-#: includes/insightweb-rest.php:328
+#: includes/insightweb-rest.php:306
+#: includes/insightweb-rest.php:339
 msgid "Never"
 msgstr ""
 
-#: includes/insightweb-rest.php:309
+#: includes/insightweb-rest.php:314
 #: src/index.js:388
 #: src/index.js:395
 msgid "Daily jobs"
 msgstr ""
 
 #. translators: %s: number of sources.
-#: includes/insightweb-rest.php:312
+#: includes/insightweb-rest.php:317
 #, php-format
 msgid "%s needs attention"
 msgid_plural "%s need attention"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/insightweb-rest.php:313
+#: includes/insightweb-rest.php:318
 msgid "All working"
 msgstr ""
 
 #. translators: %s: number of sources.
-#: includes/insightweb-rest.php:318
+#: includes/insightweb-rest.php:324
+#, php-format
+msgid "%s source is waiting for its first run"
+msgid_plural "%s sources are waiting for their first run"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: sources with a good run, 2: all sources.
+#: includes/insightweb-rest.php:327
+#, php-format
+msgid "%1$s of %2$s sources have run; the rest are waiting"
+msgstr ""
+
+#. translators: %s: number of sources.
+#: includes/insightweb-rest.php:329
 #, php-format
 msgid "%s source checked"
 msgid_plural "%s sources checked"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/insightweb-rest.php:396
+#: includes/insightweb-rest.php:407
 #: includes/search-insights/admin.php:149
 msgid "Priorities"
 msgstr ""
 
-#: includes/insightweb-rest.php:396
+#: includes/insightweb-rest.php:407
 msgid "When a search counts as high demand or a quick win, and how listing names are shown."
 msgstr ""
 
-#: includes/insightweb-rest.php:397
+#: includes/insightweb-rest.php:408
 msgid "Page flags"
 msgstr ""
 
-#: includes/insightweb-rest.php:397
+#: includes/insightweb-rest.php:408
 msgid "Scores under these mark a page on the Pages tab."
 msgstr ""
 
-#: includes/insightweb-rest.php:398
+#: includes/insightweb-rest.php:409
 msgid "Keeping data"
 msgstr ""
 
-#: includes/insightweb-rest.php:426
+#: includes/insightweb-rest.php:437
 #: includes/search-insights/admin.php:360
 msgid "Numbers"
 msgstr ""
 
-#: includes/insightweb-rest.php:436
+#: includes/insightweb-rest.php:447
 #: includes/search-insights/rising.php:691
 msgid "Rising"
 msgstr ""
 
-#: includes/insightweb-rest.php:440
+#: includes/insightweb-rest.php:451
 msgid "Off by default: GDELT refuses requests from the workers' and the site's addresses. While it is off its results are not stored, and it is not shown as late or failing."
 msgstr ""
 
-#: includes/insightweb-rest.php:444
+#: includes/insightweb-rest.php:455
 msgid "One search per line. The Ubersuggest, vidIQ and OpenSEO reports start from these, in turn."
 msgstr ""
 
 #. translators: %s: field name.
-#: includes/insightweb-rest.php:476
+#: includes/insightweb-rest.php:487
 #, php-format
 msgid "%s must be a whole number."
 msgstr ""
 
-#: includes/insightweb-rest.php:489
-#: includes/insightweb-rest.php:508
+#: includes/insightweb-rest.php:500
+#: includes/insightweb-rest.php:519
 msgid "Defaults restored."
 msgstr ""
 
-#: includes/insightweb-rest.php:489
+#: includes/insightweb-rest.php:500
 msgid "Saved. The new numbers are used from the next daily run."
 msgstr ""
 
-#: includes/insightweb-rest.php:522
+#: includes/insightweb-rest.php:533
 #: includes/search-insights/links.php:179
 #: includes/search-insights/rising.php:763
 msgid "Saved."
 msgstr ""
 
 #. translators: %s: date and time.
-#: includes/insightweb-rest.php:541
+#: includes/insightweb-rest.php:552
 #, php-format
 msgid "Last good run: %s"
 msgstr ""
 
-#: includes/insightweb-rest.php:548
+#: includes/insightweb-rest.php:559
 msgid "Last run failed"
 msgstr ""
 
-#: includes/insightweb-rest.php:553
+#: includes/insightweb-rest.php:564
 msgid "Working"
 msgstr ""
 
-#: includes/insightweb-rest.php:569
+#: includes/insightweb-rest.php:580
 msgid "Site Kit not active"
 msgstr ""
 
-#: includes/insightweb-rest.php:572
+#: includes/insightweb-rest.php:583
 msgid "Not connected"
 msgstr ""
 
 #. translators: %s: Google property.
-#: includes/insightweb-rest.php:582
+#: includes/insightweb-rest.php:593
 #, php-format
 msgid "Through Site Kit by Google, property %s. Read only."
 msgstr ""
 
-#: includes/insightweb-rest.php:583
+#: includes/insightweb-rest.php:594
 msgid "Through Site Kit by Google. Read only."
 msgstr ""
 
-#: includes/insightweb-rest.php:587
+#: includes/insightweb-rest.php:598
 msgid "Site Kit settings"
 msgstr ""
 
-#: includes/insightweb-rest.php:591
+#: includes/insightweb-rest.php:602
 msgid "Run now (current Settings)"
 msgstr ""
 
-#: includes/insightweb-rest.php:597
+#: includes/insightweb-rest.php:608
 msgid "Search Console"
 msgstr ""
 
-#: includes/insightweb-rest.php:598
+#: includes/insightweb-rest.php:609
 #: includes/search-insights/admin.php:1192
 msgid "Google Analytics 4"
 msgstr ""
 
-#: includes/insightweb-rest.php:599
+#: includes/insightweb-rest.php:610
 #: includes/search-insights/admin.php:1199
 msgid "PageSpeed Insights"
 msgstr ""
 
-#: includes/insightweb-rest.php:601
+#: includes/insightweb-rest.php:612
 msgid "Through Site Kit by Google, with its own key as a fallback. Weekly."
 msgstr ""
 
-#: includes/insightweb-rest.php:605
+#: includes/insightweb-rest.php:616
 #: includes/search-insights/admin.php:1226
 msgid "Microsoft Clarity"
 msgstr ""
 
-#: includes/insightweb-rest.php:605
+#: includes/insightweb-rest.php:616
 msgid "Daily, 2 of its 10 free calls."
 msgstr ""
 
-#: includes/insightweb-rest.php:606
+#: includes/insightweb-rest.php:617
 #: includes/search-insights/bing.php:43
 msgid "Bing Webmaster"
 msgstr ""
 
-#: includes/insightweb-rest.php:606
+#: includes/insightweb-rest.php:617
 msgid "Monthly: links to us, and clicks and impressions by search and by page."
 msgstr ""
 
-#: includes/insightweb-rest.php:607
+#: includes/insightweb-rest.php:618
 msgid "Google Alerts"
 msgstr ""
 
-#: includes/insightweb-rest.php:607
+#: includes/insightweb-rest.php:618
 msgid "Daily: up to two alert feeds, as mentions on the Links tab."
 msgstr ""
 
-#: includes/insightweb-rest.php:612
+#: includes/insightweb-rest.php:623
 msgid "Not set up"
 msgstr ""
 
-#: includes/insightweb-rest.php:614
+#: includes/insightweb-rest.php:625
 msgid "Its key is not set, so it does not run."
 msgstr ""
 
-#: includes/insightweb-rest.php:619
+#: includes/insightweb-rest.php:630
 #: includes/search-insights/admin.php:470
 msgid "Settings → Keys"
 msgstr ""
@@ -674,121 +693,121 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-from-kits.php:67
-#: includes/more-from-kits.php:103
+#: includes/more-from-kits.php:104
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-from-kits.php:87
+#: includes/more-from-kits.php:88
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-from-kits.php:90
+#: includes/more-from-kits.php:91
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-from-kits.php:91
+#: includes/more-from-kits.php:92
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-from-kits.php:92
+#: includes/more-from-kits.php:93
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-from-kits.php:96
+#: includes/more-from-kits.php:97
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-from-kits.php:97
+#: includes/more-from-kits.php:98
 msgid "Activated."
 msgstr ""
 
-#: includes/more-from-kits.php:98
+#: includes/more-from-kits.php:99
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-from-kits.php:119
+#: includes/more-from-kits.php:120
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-from-kits.php:121
+#: includes/more-from-kits.php:122
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 msgid "Activate"
 msgstr ""
 
-#: includes/more-from-kits.php:140
+#: includes/more-from-kits.php:141
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-from-kits.php:144
+#: includes/more-from-kits.php:145
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-from-kits.php:175
+#: includes/more-from-kits.php:176
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-from-kits.php:178
+#: includes/more-from-kits.php:179
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-from-kits.php:183
+#: includes/more-from-kits.php:184
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:205
+#: includes/more-from-kits.php:206
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-from-kits.php:212
+#: includes/more-from-kits.php:213
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-from-kits.php:215
+#: includes/more-from-kits.php:216
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-from-kits.php:227
+#: includes/more-from-kits.php:228
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:230
+#: includes/more-from-kits.php:231
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-from-kits.php:241
+#: includes/more-from-kits.php:242
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-from-kits.php:245
+#: includes/more-from-kits.php:246
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-from-kits.php:251
+#: includes/more-from-kits.php:252
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-from-kits.php:262
+#: includes/more-from-kits.php:263
 msgid "It is not installed, or it is already active."
 msgstr ""
 

@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.7.1
+Stable tag: 0.7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 6. Workers: one row per scheduled workflow, with its group, workflow file, schedule and a run now button.
 
 == Changelog ==
+
+= 0.7.2 =
+* Add place and Remove on the Places screen of the shell (it was only on the classic screen). The Dashboard and Workers verdicts say "waiting for the first report" instead of "no problems" before any worker has reported. Narrower bars in the pipeline chart. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
 
 = 0.7.1 =
 * The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. The Run now notice names SOURCEWEB_GITHUB_TOKEN and SOURCEWEB_WORKERS_REPO. Singular and plural item labels.

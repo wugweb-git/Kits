@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.7.2
+
+- Entries table fits at 1280 and stacks on phones. Scheduled jobs are a card in Settings, not a block far below it. An empty Dashboard offers Add an entry. Timeline marks have 24px hit areas. Each screen has its own tab title. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
+
 ## 0.7.1
 
 - The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. The Dashboard says "1 idea, 1 draft" in the singular.

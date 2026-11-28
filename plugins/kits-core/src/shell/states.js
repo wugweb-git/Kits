@@ -9,13 +9,38 @@ import { Spinner } from '@wordpress/components';
  *
  * @param {Object}  props
  * @param {string}  props.title    One line.
- * @param {Element} props.children More words or an action.
+ * @param {Element} props.children More words.
+ * @param {Object}  props.action   The next step as a control: { label, href } for a link or { label, onClick } for a
+ *                                 button ("Connect a mailbox", "Choose post types"). An empty state with no way
+ *                                 forward is a dead end, so a screen passes one wherever there is a next step.
  */
-export function EmptyState( { title, children } ) {
+export function EmptyState( { title, children, action } ) {
+	let control = null;
+	if ( action?.label && action.href ) {
+		control = (
+			<a
+				className="kits-shell-button is-secondary kits-shell-state__action"
+				href={ action.href }
+			>
+				{ action.label }
+			</a>
+		);
+	} else if ( action?.label && action.onClick ) {
+		control = (
+			<button
+				type="button"
+				className="kits-shell-button is-secondary kits-shell-state__action"
+				onClick={ action.onClick }
+			>
+				{ action.label }
+			</button>
+		);
+	}
 	return (
 		<div className="kits-shell-state is-empty">
 			<p className="kits-shell-state__title">{ title }</p>
 			{ children }
+			{ control }
 		</div>
 	);
 }

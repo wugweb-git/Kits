@@ -10,3 +10,18 @@
 .kits-shell__body:has( .dataviews-wrapper ) {
 	max-width: none;
 }
+
+/*
+ * Target size (WCAG 2.5.8, minimum 24 x 24 CSS px; UX audit 28 Nov 2026, item 16): the text links InsightWeb draws
+ * itself (the Priorities box counts such as "P1: 0", and the "All pages" / "All keywords" links in a card heading)
+ * get a 24 px hit area without changing how they look in a line of text.
+ */
+.insightweb-prio-list a,
+.kits-shell-card__actions a {
+	display: inline-block;
+	box-sizing: border-box;
+	min-width: 24px;
+	min-height: 24px;
+	padding: 2px 4px;
+	line-height: 20px;
+}

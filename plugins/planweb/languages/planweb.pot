@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: PlanWeb 0.7.1\n"
+"Project-Id-Version: PlanWeb 0.7.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/planweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:38:21+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:13:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: planweb\n"
@@ -21,11 +21,12 @@ msgstr ""
 #: includes/kits-hub.php:49
 #: includes/kits-hub.php:59
 #: includes/planweb-ui.php:145
+#: includes/planweb-ui.php:167
 #: includes/standalone-fallback.php:60
 #: includes/standalone-fallback.php:61
 #: includes/switch.php:81
-#: src/index.js:1366
-#: src/index.js:1481
+#: src/index.js:1404
+#: src/index.js:1523
 msgid "PlanWeb"
 msgstr ""
 
@@ -56,13 +57,13 @@ msgstr ""
 #: includes/help-tab.php:62
 #: includes/kits-hub.php:58
 #: includes/standalone-fallback.php:67
-#: src/index.js:459
+#: src/index.js:476
 msgid "Calendar"
 msgstr ""
 
 #: includes/admin.php:36
-#: src/index.js:1203
-#: src/index.js:1293
+#: src/index.js:1241
+#: src/index.js:1331
 msgid "Dates"
 msgstr ""
 
@@ -98,7 +99,7 @@ msgstr ""
 
 #: includes/admin.php:148
 #: includes/admin.php:496
-#: src/index.js:793
+#: src/index.js:810
 msgid "Add entry"
 msgstr ""
 
@@ -177,12 +178,12 @@ msgid "Any channel"
 msgstr ""
 
 #: includes/admin.php:312
-#: src/index.js:1211
+#: src/index.js:1249
 msgid "From"
 msgstr ""
 
 #: includes/admin.php:313
-#: src/index.js:1223
+#: src/index.js:1261
 msgid "To"
 msgstr ""
 
@@ -203,22 +204,22 @@ msgid "Week view"
 msgstr ""
 
 #: includes/admin.php:322
-#: src/index.js:871
+#: src/index.js:888
 msgid "Timeline"
 msgstr ""
 
 #: includes/admin.php:351
-#: src/index.js:885
+#: src/index.js:902
 msgid "Earlier"
 msgstr ""
 
 #: includes/admin.php:351
-#: src/index.js:889
+#: src/index.js:906
 msgid "Later"
 msgstr ""
 
 #: includes/admin.php:353
-#: src/index.js:893
+#: src/index.js:910
 msgid "No entries in this range."
 msgstr ""
 
@@ -241,32 +242,34 @@ msgstr ""
 #: includes/admin.php:441
 #: includes/admin.php:482
 #: includes/planweb-rest.php:712
-#: src/index.js:688
-#: src/index.js:1148
+#: src/index.js:705
+#: src/index.js:1178
+#: src/index.js:1182
 msgid "Channels"
 msgstr ""
 
 #: includes/admin.php:473
-#: src/index.js:622
+#: src/index.js:639
 msgid "Edit entry"
 msgstr ""
 
 #: includes/admin.php:473
-#: src/index.js:623
-#: src/index.js:1197
+#: src/index.js:214
+#: src/index.js:640
+#: src/index.js:1235
 msgid "Add an entry"
 msgstr ""
 
 #: includes/admin.php:478
 #: includes/standalone-fallback.php:91
-#: src/index.js:354
-#: src/index.js:642
-#: src/index.js:1092
+#: src/index.js:371
+#: src/index.js:659
+#: src/index.js:1114
 msgid "Date"
 msgstr ""
 
 #: includes/admin.php:478
-#: src/index.js:646
+#: src/index.js:663
 msgid "Time"
 msgstr ""
 
@@ -275,33 +278,34 @@ msgid "Time is optional (IST)."
 msgstr ""
 
 #: includes/admin.php:479
-#: src/index.js:651
+#: src/index.js:668
 msgid "Title"
 msgstr ""
 
 #: includes/admin.php:480
-#: src/index.js:658
+#: src/index.js:675
 msgid "Note"
 msgstr ""
 
 #: includes/admin.php:480
-#: src/index.js:659
+#: src/index.js:676
 msgid "No email addresses, names or phone numbers."
 msgstr ""
 
 #: includes/admin.php:481
 #: includes/standalone-fallback.php:91
-#: src/index.js:259
-#: src/index.js:676
-#: src/index.js:1132
-#: src/index.js:1275
+#: src/index.js:276
+#: src/index.js:693
+#: src/index.js:1162
+#: src/index.js:1313
 msgid "Type"
 msgstr ""
 
 #: includes/admin.php:483
-#: src/index.js:725
-#: src/index.js:1153
-#: src/index.js:1308
+#: src/index.js:742
+#: src/index.js:1190
+#: src/index.js:1194
+#: src/index.js:1346
 msgid "Owner"
 msgstr ""
 
@@ -311,41 +315,40 @@ msgstr ""
 
 #: includes/admin.php:484
 #: includes/standalone-fallback.php:91
-#: src/index.js:281
-#: src/index.js:738
-#: src/index.js:1158
-#: src/index.js:1284
+#: src/index.js:298
+#: src/index.js:755
+#: src/index.js:1202
+#: src/index.js:1322
 msgid "Status"
 msgstr ""
 
 #: includes/admin.php:485
-#: src/index.js:766
+#: src/index.js:783
 msgid "Repeat"
 msgstr ""
 
 #: includes/admin.php:485
-#: src/index.js:767
+#: src/index.js:784
 msgid "Once the date has passed, PlanWeb makes the next one, a week or a month later, if \"Repeats\" is switched on under Scheduled jobs in Settings. It is made once and the old entry is left as it is."
 msgstr ""
 
 #: includes/admin.php:486
-#: src/index.js:782
-#: src/index.js:1169
+#: src/index.js:799
 msgid "Link"
 msgstr ""
 
 #: includes/admin.php:486
-#: src/index.js:783
+#: src/index.js:800
 msgid "A page on this site, or an X, LinkedIn, Instagram, Facebook, Threads, Bluesky, Reddit or WhatsApp channel address."
 msgstr ""
 
 #: includes/admin.php:496
-#: src/index.js:792
+#: src/index.js:809
 msgid "Save entry"
 msgstr ""
 
 #: includes/admin.php:498
-#: src/index.js:796
+#: src/index.js:813
 msgid "Cancel"
 msgstr ""
 
@@ -358,41 +361,41 @@ msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
 #: includes/admin.php:582
-#: src/index.js:1368
-#: src/index.js:1612
+#: src/index.js:1406
+#: src/index.js:1654
 msgid "Import from Dates"
 msgstr ""
 
 #: includes/admin.php:584
-#: src/index.js:1649
+#: src/index.js:1691
 msgid "Not run yet: it runs on the first admin page after PlanWeb is switched on."
 msgstr ""
 
 #. translators: 1: date and time, 2: elements in Dates, 3: entries made, 4: already there.
 #. translators: 1: date and time, 2: dates in Dates, 3: entries made, 4: already there.
 #: includes/admin.php:587
-#: src/index.js:1640
+#: src/index.js:1682
 #, php-format,js-format
 msgid "Last run %1$s: %2$d dates in Dates, %3$d entries made, %4$d already there."
 msgstr ""
 
 #. translators: 1: position in the Dates list, 2: error.
 #: includes/admin.php:591
-#: src/index.js:1658
+#: src/index.js:1700
 #, php-format,js-format
 msgid "Date %1$d was not imported: %2$s"
 msgstr ""
 
 #. translators: %s: entry IDs.
 #: includes/admin.php:601
-#: src/index.js:1668
+#: src/index.js:1710
 #, php-format,js-format
 msgid "These imported entries look as if they hold an email address or a phone number; check them: %s"
 msgstr ""
 
 #. translators: 1: same, 2: differs, 3: missing, 4: extra.
 #: includes/admin.php:611
-#: src/index.js:1679
+#: src/index.js:1721
 #, php-format,js-format
 msgid "Check now: %1$d the same, %2$d different, %3$d missing, %4$d extra."
 msgstr ""
@@ -403,28 +406,28 @@ msgstr ""
 
 #. translators: 1: position in the Dates list, 2: the stored value.
 #: includes/admin.php:621
-#: src/index.js:1693
+#: src/index.js:1735
 #, php-format,js-format
 msgid "Dates element %1$d is not a date and was not imported: %2$s"
 msgstr ""
 
 #: includes/admin.php:641
-#: src/index.js:1706
+#: src/index.js:1748
 msgid "Check"
 msgstr ""
 
 #: includes/admin.php:642
-#: src/index.js:1707
+#: src/index.js:1749
 msgid "In Dates"
 msgstr ""
 
 #: includes/admin.php:643
-#: src/index.js:1708
+#: src/index.js:1750
 msgid "In PlanWeb"
 msgstr ""
 
 #: includes/admin.php:658
-#: src/index.js:1620
+#: src/index.js:1662
 msgid "Run the import again"
 msgstr ""
 
@@ -442,7 +445,7 @@ msgstr ""
 
 #: includes/dashboard.php:19
 #: includes/jobs-model.php:392
-#: src/index.js:806
+#: src/index.js:823
 msgid "Next 7 days"
 msgstr ""
 
@@ -493,10 +496,10 @@ msgstr ""
 #: includes/help-tab.php:34
 #: includes/planweb-ui.php:82
 #: includes/standalone-fallback.php:57
-#: src/index.js:260
-#: src/index.js:282
-#: src/index.js:1252
-#: src/index.js:1259
+#: src/index.js:277
+#: src/index.js:299
+#: src/index.js:1290
+#: src/index.js:1297
 msgid "Entries"
 msgstr ""
 
@@ -624,6 +627,8 @@ msgid "Saved."
 msgstr ""
 
 #: includes/jobs.php:450
+#: src/index.js:1409
+#: src/index.js:2068
 msgid "Scheduled jobs"
 msgstr ""
 
@@ -632,43 +637,59 @@ msgid "Four small jobs that run once a day or once a week, all off until you swi
 msgstr ""
 
 #: includes/jobs.php:459
+#: src/index.js:2012
 msgid "Overdue sweep"
 msgstr ""
 
 #: includes/jobs.php:459
+#: src/index.js:2013
 msgid "Every day at 06:00 (site time), mark entries whose date has passed and that are still open (idea, draft, approved or due) as overdue, so the Calendar and Dashboard show them. Dates are never changed and nothing is deleted."
 msgstr ""
 
 #: includes/jobs.php:460
+#: src/index.js:2020
 msgid "Repeats"
 msgstr ""
 
 #: includes/jobs.php:460
+#: src/index.js:2021
 msgid "Every day at 06:15, make the next entry for an entry set to repeat every week or month, once its date has passed. One is made, with status Idea, and the old entry is marked so it never repeats twice. At most 50 a day."
 msgstr ""
 
 #: includes/jobs.php:461
+#: src/index.js:2028
 msgid "Reminders by email"
 msgstr ""
 
 #: includes/jobs.php:461
+#: src/index.js:2029
 msgid "Every day at 08:00, email each site user a list of their entries that are due soon and not finished. \"Their\" means the user who created the entry; an entry with no such user is skipped."
 msgstr ""
 
 #: includes/jobs.php:462
+#: src/index.js:2036
 msgid "Weekly digest by email"
 msgstr ""
 
 #: includes/jobs.php:462
+#: src/index.js:2037
 msgid "Every Monday at 08:30, email the site administrator address (Settings, General) the next 7 days and what is overdue."
 msgstr ""
 
+#. translators: %s: the job's name.
+#: includes/jobs.php:465
+#, php-format
+msgid "%s: on"
+msgstr ""
+
+#. translators: %s: the job's name.
 #: includes/jobs.php:465
 #: includes/planweb-rest.php:825
 msgid "On"
 msgstr ""
 
 #: includes/jobs.php:467
+#: src/index.js:2101
 msgid "Remind this many days ahead (1 to 14)"
 msgstr ""
 
@@ -677,6 +698,7 @@ msgid "First line of the email (optional)"
 msgstr ""
 
 #: includes/jobs.php:475
+#: src/index.js:2076
 msgid "Save scheduled jobs"
 msgstr ""
 
@@ -736,121 +758,121 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-from-kits.php:67
-#: includes/more-from-kits.php:103
+#: includes/more-from-kits.php:104
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-from-kits.php:87
+#: includes/more-from-kits.php:88
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-from-kits.php:90
+#: includes/more-from-kits.php:91
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-from-kits.php:91
+#: includes/more-from-kits.php:92
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-from-kits.php:92
+#: includes/more-from-kits.php:93
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-from-kits.php:96
+#: includes/more-from-kits.php:97
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-from-kits.php:97
+#: includes/more-from-kits.php:98
 msgid "Activated."
 msgstr ""
 
-#: includes/more-from-kits.php:98
+#: includes/more-from-kits.php:99
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-from-kits.php:119
+#: includes/more-from-kits.php:120
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-from-kits.php:121
+#: includes/more-from-kits.php:122
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 msgid "Activate"
 msgstr ""
 
-#: includes/more-from-kits.php:140
+#: includes/more-from-kits.php:141
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-from-kits.php:144
+#: includes/more-from-kits.php:145
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-from-kits.php:175
+#: includes/more-from-kits.php:176
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-from-kits.php:178
+#: includes/more-from-kits.php:179
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-from-kits.php:183
+#: includes/more-from-kits.php:184
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:205
+#: includes/more-from-kits.php:206
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-from-kits.php:212
+#: includes/more-from-kits.php:213
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-from-kits.php:215
+#: includes/more-from-kits.php:216
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-from-kits.php:227
+#: includes/more-from-kits.php:228
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:230
+#: includes/more-from-kits.php:231
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-from-kits.php:241
+#: includes/more-from-kits.php:242
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-from-kits.php:245
+#: includes/more-from-kits.php:246
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-from-kits.php:251
+#: includes/more-from-kits.php:252
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-from-kits.php:262
+#: includes/more-from-kits.php:263
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -885,7 +907,7 @@ msgstr ""
 #: includes/planweb-rest.php:587
 #: includes/ui-model.php:216
 #: src/index.js:134
-#: src/index.js:1116
+#: src/index.js:1138
 msgid "Overdue"
 msgstr ""
 
@@ -1014,10 +1036,12 @@ msgid "Dashboard"
 msgstr ""
 
 #: includes/planweb-ui.php:146
+#: includes/planweb-ui.php:168
 msgid "PlanWeb entries"
 msgstr ""
 
 #: includes/planweb-ui.php:147
+#: includes/planweb-ui.php:169
 msgid "PlanWeb settings"
 msgstr ""
 
@@ -1078,8 +1102,8 @@ msgid "Open the month calendar"
 msgstr ""
 
 #: includes/standalone-fallback.php:130
-#: src/index.js:1369
-#: src/index.js:1757
+#: src/index.js:1407
+#: src/index.js:1799
 msgid "Calendar feed"
 msgstr ""
 
@@ -1092,7 +1116,7 @@ msgid "The feed is off: there is no key."
 msgstr ""
 
 #: includes/standalone-fallback.php:145
-#: src/index.js:1770
+#: src/index.js:1812
 msgid "Make a new key"
 msgstr ""
 
@@ -1101,7 +1125,7 @@ msgid "Turn the feed on"
 msgstr ""
 
 #: includes/standalone-fallback.php:147
-#: src/index.js:1789
+#: src/index.js:1831
 msgid "Turn the feed off"
 msgstr ""
 
@@ -1155,7 +1179,7 @@ msgid "The team's calendar as its own plugin. Nothing is posted to any social ne
 msgstr ""
 
 #: includes/switch.php:89
-#: src/index.js:1511
+#: src/index.js:1553
 msgid "Calendar in PlanWeb"
 msgstr ""
 
@@ -1164,7 +1188,7 @@ msgid "On: the calendar is Plugins → PlanWeb → Calendar. Off: the PlanWeb sc
 msgstr ""
 
 #: includes/switch.php:103
-#: src/index.js:1900
+#: src/index.js:1942
 msgid "Site schedule in PlanWeb"
 msgstr ""
 
@@ -1173,12 +1197,12 @@ msgid "On: published, scheduled and missed posts and FluentCRM newsletters show 
 msgstr ""
 
 #: includes/switch.php:117
-#: src/index.js:1528
+#: src/index.js:1570
 msgid "Delete this plugin's data when it is deleted"
 msgstr ""
 
 #: includes/switch.php:122
-#: src/index.js:1537
+#: src/index.js:1579
 msgid "Off: everything stays in the database if the plugin is deleted."
 msgstr ""
 
@@ -1323,135 +1347,135 @@ msgstr ""
 msgid "PlanWeb at a glance"
 msgstr ""
 
-#: src/index.js:207
+#: src/index.js:224
 msgid "Overview"
 msgstr ""
 
-#: src/index.js:208
+#: src/index.js:225
 msgid "The plan at a glance. Each bar chart has the same numbers in a table for screen readers; the tables below open the matching list."
 msgstr ""
 
-#: src/index.js:215
+#: src/index.js:232
 msgid "Overdue vs coming up"
 msgstr ""
 
-#: src/index.js:220
-#: src/index.js:225
-#: src/index.js:234
-#: src/index.js:239
+#: src/index.js:237
+#: src/index.js:242
+#: src/index.js:251
+#: src/index.js:256
 msgid "entries"
 msgstr ""
 
-#: src/index.js:223
+#: src/index.js:240
 msgid "Entries by month"
 msgstr ""
 
 #. translators: %d: number of days.
-#: src/index.js:230
-#: src/index.js:248
+#: src/index.js:247
+#: src/index.js:265
 #, js-format
 msgid "By type, next %d days"
 msgstr ""
 
-#: src/index.js:237
-#: src/index.js:272
-#: src/index.js:279
+#: src/index.js:254
+#: src/index.js:289
+#: src/index.js:296
 msgid "By status"
 msgstr ""
 
-#: src/index.js:251
+#: src/index.js:268
 msgid "Entries from today on, by type. Each number opens the list."
 msgstr ""
 
-#: src/index.js:257
+#: src/index.js:274
 msgid "By type"
 msgstr ""
 
-#: src/index.js:273
+#: src/index.js:290
 msgid "Every entry, past and future. Approved and Sent are set by an administrator."
 msgstr ""
 
-#: src/index.js:344
-#: src/index.js:352
-#: src/index.js:1370
-#: src/index.js:1878
+#: src/index.js:361
+#: src/index.js:369
+#: src/index.js:1408
+#: src/index.js:1920
 msgid "Site schedule"
 msgstr ""
 
-#: src/index.js:345
+#: src/index.js:362
 msgid "Scheduled posts and newsletters in the next 30 days, and posts that missed their publish time, straight from WordPress and FluentCRM. Change a date in the post or the newsletter itself."
 msgstr ""
 
-#: src/index.js:355
+#: src/index.js:372
 msgid "Item"
 msgstr ""
 
-#: src/index.js:364
+#: src/index.js:381
 msgid "Nothing scheduled on the site in the next 30 days, and nothing missed."
 msgstr ""
 
-#: src/index.js:414
+#: src/index.js:431
 msgid "Loading the month…"
 msgstr ""
 
-#: src/index.js:460
+#: src/index.js:477
 msgid "The month’s entries by day, with the site’s own posts and newsletters (outlined mark). An entry opens its form on Entries; a post or newsletter opens in its own editor."
 msgstr ""
 
-#: src/index.js:625
+#: src/index.js:642
 msgid "Nothing on this calendar is posted or sent: it is the team’s plan."
 msgstr ""
 
-#: src/index.js:647
+#: src/index.js:664
 msgid "Optional (IST)."
 msgstr ""
 
-#: src/index.js:718
+#: src/index.js:735
 msgid "Tick every channel the entry goes out on."
 msgstr ""
 
-#: src/index.js:741
+#: src/index.js:758
 msgid "Due is set on the day by the scheduler."
 msgstr ""
 
-#: src/index.js:745
+#: src/index.js:762
 msgid "Approved and Sent are set by an administrator."
 msgstr ""
 
-#: src/index.js:805
+#: src/index.js:822
 msgid "From 30 days ago"
 msgstr ""
 
-#: src/index.js:807
+#: src/index.js:824
 msgid "Next 30 days"
 msgstr ""
 
-#: src/index.js:808
+#: src/index.js:825
 msgid "Next 90 days"
 msgstr ""
 
-#: src/index.js:809
+#: src/index.js:826
 msgid "Before today"
 msgstr ""
 
-#: src/index.js:810
+#: src/index.js:827
 msgid "All dates"
 msgstr ""
 
-#: src/index.js:872
+#: src/index.js:889
 msgid "Entries by type along the dates. It follows the filters above; set From and To for a longer or shorter range."
 msgstr ""
 
-#: src/index.js:879
+#: src/index.js:896
 msgid "Loading…"
 msgstr ""
 
-#: src/index.js:1009
+#: src/index.js:1031
 msgid "Move this entry to the Trash?"
 msgstr ""
 
 #. translators: %d: number of entries.
-#: src/index.js:1034
+#: src/index.js:1056
 #, js-format
 msgid "Move %d entry to the Trash?"
 msgid_plural "Move %d entries to the Trash?"
@@ -1459,195 +1483,203 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: number moved, 2: number that could not be.
-#: src/index.js:1063
+#: src/index.js:1085
 #, js-format
 msgid "%1$d moved to the Trash; %2$d could not be."
 msgstr ""
 
 #. translators: %d: number of entries.
-#: src/index.js:1072
+#: src/index.js:1094
 #, js-format
 msgid "%d entry moved to the Trash."
 msgid_plural "%d entries moved to the Trash."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/index.js:1107
+#: src/index.js:1129
 msgid "What"
 msgstr ""
 
-#: src/index.js:1204
+#: src/index.js:1242
 msgid "Show only entries between two dates. Either end can be left empty. This replaces the Dates choice below."
 msgstr ""
 
-#: src/index.js:1245
+#: src/index.js:1283
 msgid "Clear dates"
 msgstr ""
 
-#: src/index.js:1253
+#: src/index.js:1291
 msgid "The team’s plan. From 30 days ago by default; pick All dates for older ones."
 msgstr ""
 
-#: src/index.js:1268
+#: src/index.js:1306
 msgid "Search titles and notes"
 msgstr ""
 
-#: src/index.js:1278
+#: src/index.js:1316
 msgid "All types"
 msgstr ""
 
-#: src/index.js:1287
+#: src/index.js:1325
 msgid "All statuses"
 msgstr ""
 
-#: src/index.js:1299
+#: src/index.js:1337
 msgid "Channel"
 msgstr ""
 
-#: src/index.js:1302
+#: src/index.js:1340
 msgid "All channels"
 msgstr ""
 
-#: src/index.js:1311
+#: src/index.js:1349
 msgid "All owners"
 msgstr ""
 
-#: src/index.js:1329
+#: src/index.js:1367
 msgid "Move to Trash"
 msgstr ""
 
-#: src/index.js:1337
+#: src/index.js:1375
 msgid "Edit"
 msgstr ""
 
-#: src/index.js:1345
+#: src/index.js:1383
 msgid "Trash"
 msgstr ""
 
-#: src/index.js:1354
+#: src/index.js:1392
 msgid "No entries match."
 msgstr ""
 
-#: src/index.js:1365
-#: src/index.js:1397
 #: src/index.js:1403
+#: src/index.js:1439
+#: src/index.js:1445
 msgid "Connected services"
 msgstr ""
 
-#: src/index.js:1367
-#: src/index.js:1557
+#: src/index.js:1405
+#: src/index.js:1599
 msgid "Lists"
 msgstr ""
 
-#: src/index.js:1398
+#: src/index.js:1440
 msgid "What PlanWeb will read or work with, and the tools used by hand outside it. Nothing is posted or sent from PlanWeb."
 msgstr ""
 
-#: src/index.js:1458
+#: src/index.js:1500
 msgid "Switch PlanWeb off? These screens go; the entries are kept."
 msgstr ""
 
-#: src/index.js:1472
+#: src/index.js:1514
 msgid "Reset this section to its defaults?"
 msgstr ""
 
-#: src/index.js:1482
+#: src/index.js:1524
 msgid "The same settings as Kits → Modules → PlanWeb."
 msgstr ""
 
-#: src/index.js:1494
-#: src/index.js:1886
+#: src/index.js:1536
+#: src/index.js:1928
 msgid "Save changes"
 msgstr ""
 
-#: src/index.js:1497
+#: src/index.js:1539
 msgid "Reset this section"
 msgstr ""
 
-#: src/index.js:1514
+#: src/index.js:1556
 msgid "On: the calendar is PlanWeb → Calendar. Off: the PlanWeb screens are hidden; entries are kept."
 msgstr ""
 
-#: src/index.js:1558
+#: src/index.js:1600
 msgid "The values entries can take. They are fixed for now; renaming and adding come later."
 msgstr ""
 
-#: src/index.js:1569
+#: src/index.js:1611
 msgid "Entries using it"
 msgstr ""
 
-#: src/index.js:1613
+#: src/index.js:1655
 msgid "Every date in Dates copied here once. Dates itself is never changed."
 msgstr ""
 
-#: src/index.js:1623
+#: src/index.js:1665
 msgid "Adds only dates not imported yet."
 msgstr ""
 
-#: src/index.js:1704
+#: src/index.js:1746
 msgid "Dates that do not match"
 msgstr ""
 
-#: src/index.js:1750
+#: src/index.js:1792
 msgid "Make a new key? The current address stops working, and calendars subscribed to it stop updating until they subscribe again."
 msgstr ""
 
-#: src/index.js:1758
+#: src/index.js:1800
 msgid "A read-only feed for Google Calendar, Apple Calendar or Outlook: the whole schedule (entries, and the site’s posts and newsletters chosen under Site schedule) from 90 days ago on, with date, time, title, type, channels, status and link. Never the note. Nothing comes back from the calendar app, and nothing is posted."
 msgstr ""
 
-#: src/index.js:1771
+#: src/index.js:1813
 msgid "Make a key and turn the feed on"
 msgstr ""
 
-#: src/index.js:1782
+#: src/index.js:1824
 msgid "Turn the feed off? Calendars subscribed to it stop updating."
 msgstr ""
 
-#: src/index.js:1805
+#: src/index.js:1847
 msgid "The feed is off: there is no key, so there is no address."
 msgstr ""
 
-#: src/index.js:1814
+#: src/index.js:1856
 msgid "Each address holds the secret key: anyone with it can read these entries. Share it only with the calendar you subscribe."
 msgstr ""
 
-#: src/index.js:1835
+#: src/index.js:1877
 msgid "Google Calendar: Other calendars → + → From URL. Apple Calendar: File → New Calendar Subscription. Outlook: Add calendar → Subscribe from web. Calendar apps fetch the feed on their own schedule (Google: every few hours)."
 msgstr ""
 
-#: src/index.js:1879
+#: src/index.js:1921
 msgid "What WordPress and FluentCRM already schedule, shown beside the entries on the Dashboard, in the calendar, in the WordPress Dashboard box and in the calendar feed. Read only: dates are set in the post or the newsletter."
 msgstr ""
 
-#: src/index.js:1903
+#: src/index.js:1945
 msgid "On: the site's posts and newsletters show beside the entries."
 msgstr ""
 
-#: src/index.js:1907
+#: src/index.js:1949
 msgid "Off: PlanWeb shows only its own entries. Also in Kits → Modules → PlanWeb."
 msgstr ""
 
-#: src/index.js:1919
+#: src/index.js:1961
 msgid "Show"
 msgstr ""
 
-#: src/index.js:1940
+#: src/index.js:1982
 msgid "imported in bulk"
 msgstr ""
 
-#: src/index.js:1945
+#: src/index.js:1987
 msgid "News and Directory are imported in bulk (hundreds a month), so they are off unless ticked."
 msgstr ""
 
-#: src/index.js:1976
+#: src/index.js:2069
+msgid "Four small jobs that run once a day or once a week, all off until you switch them on. Nothing is posted to any social network. The two emails go only to people with an account on this site, sent by this site’s own email (wp_mail), and only when switched on here."
+msgstr ""
+
+#: src/index.js:2121
+msgid "First line of the digest email (optional)"
+msgstr ""
+
+#: src/index.js:2163
 msgid "Loading the settings…"
 msgstr ""
 
-#: src/index.js:1983
+#: src/index.js:2170
 msgid "Settings groups"
 msgstr ""
 
-#: src/index.js:2016
+#: src/index.js:2206
 msgid "No such group."
 msgstr ""

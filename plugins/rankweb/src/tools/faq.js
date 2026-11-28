@@ -308,6 +308,19 @@ export function Faq() {
 							? __( 'No draft questions waiting.', 'rankweb' )
 							: __( 'No page shows an FAQ yet.', 'rankweb' )
 					}
+					empty={
+						waiting ? undefined : (
+							<p className="kits-shell-state__help">
+								{ __(
+									'Open a page and add questions to its FAQ box; the page shows its FAQ once the box has enough questions.',
+									'rankweb'
+								) }{ ' ' }
+								<a href="edit.php?post_type=page">
+									{ __( 'Open pages', 'rankweb' ) }
+								</a>
+							</p>
+						)
+					}
 				/>
 			</SectionCard>
 			{ ! data && ! error && <LoadingState /> }

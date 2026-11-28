@@ -227,3 +227,12 @@
 	height: 100%;
 	background: var( --ks-ink );
 }
+
+/* Target size (WCAG 2.5.8): a row link is never smaller than 24 x 24 CSS px. */
+.directoryweb-rowactions .kits-shell-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px;
+	min-height: 24px;
+}

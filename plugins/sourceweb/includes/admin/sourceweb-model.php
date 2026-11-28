@@ -294,7 +294,7 @@ function sourceweb_dashboard_numbers( array $c ): array {
 		'dupes'     => (int) ( $c['today']['dupes'] ?? 0 ),
 	);
 	if ( isset( $c['workers']['total'] ) ) {
-		$n['workers'] = (int) ( $c['workers']['total'] ?? 0 ) - count( (array) ( $c['workers']['problems'] ?? array() ) );
+		$n['workers'] = (int) ( $c['workers']['reporting'] ?? $c['workers']['total'] ?? 0 ) - count( (array) ( $c['workers']['problems'] ?? array() ) );
 	}
 	return $n;
 }

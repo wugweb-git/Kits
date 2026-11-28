@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.2
+
+- Claims: no stray "0" above the list; older claim status keys map to approved, rejected or pending. Listings rows have View profile and Edit listing links named for the listing. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
+
 ## 1.5.1
 
 - The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. Keys copy points to Settings.

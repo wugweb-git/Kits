@@ -173,6 +173,9 @@ function kits_screen_sections( string $screen ): array {
 		$own = array(
 			'theme' => array( __( 'Edit the theme', 'kits-core' ), 'kits_home_theme', 'edit_theme_options', 10 ),
 		);
+		if ( function_exists( 'kits_more_page' ) ) { // The direct-download build only (more-products.php).
+			$own['more'] = array( __( 'More from Kits', 'kits-core' ), 'kits_home_more', 'install_plugins', 90 );
+		}
 	} elseif ( 'kits-settings' === $screen ) {
 		$filter = 'kits_settings_sections';
 		$own    = array(
@@ -352,6 +355,12 @@ JS;
 /** Kits → Home. */
 function kits_home_page() {
 	kits_sections_page( KITS_MENU, 'Home', 'Kits by Wugweb is the site\'s design system: the theme draws every page, Kits Core adds the features every Kits site shares. This site\'s versions and checks, then where to change things.' );
+}
+
+/** Kits → Home → More from Kits: the way to the page that lists the other Kits plugins (the Kits menu keeps five items). */
+function kits_home_more(): void {
+	echo '<p>' . esc_html__( 'The other Kits plugins, what each does and whether it is on this site.', 'kits-core' ) . '</p>';
+	echo '<p><a class="button" href="' . esc_url( admin_url( 'admin.php?page=kits-core-more' ) ) . '">' . esc_html__( 'More from Kits', 'kits-core' ) . '</a></p>';
 }
 
 /** Kits → Home → Edit the theme: the Site Editor screens that hold the theme's settings. */

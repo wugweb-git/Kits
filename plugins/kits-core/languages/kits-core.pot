@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Kits Core 1.5.0\n"
+"Project-Id-Version: Kits Core 1.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/kits-core\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:38:15+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:13:19+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-core\n"
@@ -240,10 +240,23 @@ msgstr ""
 msgid "Kits → Theme Options → Display per type"
 msgstr ""
 
-#: includes/admin-fold.php:102
-#: includes/admin-kits-frame.php:189
-#: src/shell/index.js:122
-msgid "Screens"
+#. translators: %s: product name, e.g. RankWeb.
+#: includes/admin-fold.php:116
+#, php-format
+msgid "All %s screens"
+msgstr ""
+
+#: includes/admin-fold.php:117
+msgid "All screens"
+msgstr ""
+
+#: includes/admin-fold.php:130
+#: includes/admin-fold.php:159
+#: includes/admin-menu.php:177
+#: includes/admin-menu.php:363
+#: includes/more-products.php:67
+#: includes/more-products.php:104
+msgid "More from Kits"
 msgstr ""
 
 #: includes/admin-home.php:26
@@ -260,6 +273,11 @@ msgstr ""
 
 #: includes/admin-kits-frame.php:103
 msgid "Kits Core needs its build (build/shell/) to show this screen."
+msgstr ""
+
+#: includes/admin-kits-frame.php:189
+#: src/shell/index.js:229
+msgid "Screens"
 msgstr ""
 
 #: includes/admin-layer/arrange.php:162
@@ -290,95 +308,99 @@ msgstr ""
 msgid "Edit the theme"
 msgstr ""
 
-#: includes/admin-menu.php:179
+#: includes/admin-menu.php:182
 msgid "Performance"
 msgstr ""
 
-#: includes/admin-menu.php:180
+#: includes/admin-menu.php:183
 msgid "Compatibility"
 msgstr ""
 
-#: includes/admin-menu.php:181
+#: includes/admin-menu.php:184
 msgid "Preview access"
 msgstr ""
 
-#: includes/admin-menu.php:182
+#: includes/admin-menu.php:185
 msgid "Analytics"
 msgstr ""
 
-#: includes/admin-menu.php:187
+#: includes/admin-menu.php:190
 msgid "Docs"
 msgstr ""
 
-#: includes/admin-menu.php:188
+#: includes/admin-menu.php:191
 msgid "Design system"
 msgstr ""
 
-#: includes/admin-menu.php:189
+#: includes/admin-menu.php:192
 msgid "Developer: extra settings"
 msgstr ""
 
-#: includes/admin-menu.php:245
+#: includes/admin-menu.php:248
 msgid "Screen sections"
 msgstr ""
 
-#: includes/admin-menu.php:253
+#: includes/admin-menu.php:256
 msgid "Show all"
 msgstr ""
 
-#: includes/admin-menu.php:408
-msgid "Quick Start: Customize Your Site in 3 Steps"
-msgstr ""
-
-#: includes/admin-menu.php:409
-msgid "Kits by Wugweb is a Full Site Editing block theme. Use these quick actions to personalize your site:"
-msgstr ""
-
-#: includes/admin-menu.php:414
-msgid "Step 1: Upload Your Logo & Header Navigation"
-msgstr ""
-
-#: includes/admin-menu.php:415
-msgid "Open the Header template part in the Site Editor to upload your logo and customize navigation menus."
+#: includes/admin-menu.php:362
+msgid "The other Kits plugins, what each does and whether it is on this site."
 msgstr ""
 
 #: includes/admin-menu.php:417
-msgid "Site Identity"
+msgid "Quick Start: Customize Your Site in 3 Steps"
 msgstr ""
 
 #: includes/admin-menu.php:418
-msgid "Edit Header →"
+msgid "Kits by Wugweb is a Full Site Editing block theme. Use these quick actions to personalize your site:"
 msgstr ""
 
-#: includes/admin-menu.php:421
-msgid "Step 2: Brand Colours & Typography Hierarchy"
-msgstr ""
-
-#: includes/admin-menu.php:422
-msgid "Pick a pre-designed style variation (Default, Slate, Forest) or set your custom brand palette in Global Styles."
+#: includes/admin-menu.php:423
+msgid "Step 1: Upload Your Logo & Header Navigation"
 msgstr ""
 
 #: includes/admin-menu.php:424
-msgid "Global Styles"
+msgid "Open the Header template part in the Site Editor to upload your logo and customize navigation menus."
 msgstr ""
 
-#: includes/admin-menu.php:425
-msgid "Open Styles →"
+#: includes/admin-menu.php:426
+msgid "Site Identity"
 msgstr ""
 
-#: includes/admin-menu.php:428
-msgid "Step 3: Browse & Insert Pre-built Block Patterns"
+#: includes/admin-menu.php:427
+msgid "Edit Header →"
 msgstr ""
 
-#: includes/admin-menu.php:429
-msgid "Choose from 18 native block patterns: hero sections, responsive card grids, CTA banners, and FAQ accordions."
+#: includes/admin-menu.php:430
+msgid "Step 2: Brand Colours & Typography Hierarchy"
 msgstr ""
 
 #: includes/admin-menu.php:431
+msgid "Pick a pre-designed style variation (Default, Slate, Forest) or set your custom brand palette in Global Styles."
+msgstr ""
+
+#: includes/admin-menu.php:433
+msgid "Global Styles"
+msgstr ""
+
+#: includes/admin-menu.php:434
+msgid "Open Styles →"
+msgstr ""
+
+#: includes/admin-menu.php:437
+msgid "Step 3: Browse & Insert Pre-built Block Patterns"
+msgstr ""
+
+#: includes/admin-menu.php:438
+msgid "Choose from 18 native block patterns: hero sections, responsive card grids, CTA banners, and FAQ accordions."
+msgstr ""
+
+#: includes/admin-menu.php:440
 msgid "18 Patterns"
 msgstr ""
 
-#: includes/admin-menu.php:432
+#: includes/admin-menu.php:441
 msgid "Browse Patterns →"
 msgstr ""
 
@@ -581,12 +603,12 @@ msgid "Generated Active CSS Overrides"
 msgstr ""
 
 #: includes/dashboard-cards.php:39
-#: src/shell/index.js:250
+#: src/shell/index.js:392
 msgid "Not working"
 msgstr ""
 
 #: includes/dashboard-cards.php:39
-#: src/shell/index.js:249
+#: src/shell/index.js:391
 msgid "Needs attention"
 msgstr ""
 
@@ -721,122 +743,117 @@ msgstr ""
 msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
-#: includes/more-products.php:67
-#: includes/more-products.php:103
-msgid "More from Kits"
-msgstr ""
-
-#: includes/more-products.php:87
+#: includes/more-products.php:88
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-products.php:90
+#: includes/more-products.php:91
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-products.php:91
+#: includes/more-products.php:92
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-products.php:92
+#: includes/more-products.php:93
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-products.php:96
+#: includes/more-products.php:97
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-products.php:97
+#: includes/more-products.php:98
 msgid "Activated."
 msgstr ""
 
-#: includes/more-products.php:98
+#: includes/more-products.php:99
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-products.php:119
+#: includes/more-products.php:120
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-products.php:121
+#: includes/more-products.php:122
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:132
+#: includes/more-products.php:133
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:132
+#: includes/more-products.php:133
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:138
+#: includes/more-products.php:139
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:138
+#: includes/more-products.php:139
 msgid "Activate"
 msgstr ""
 
-#: includes/more-products.php:140
+#: includes/more-products.php:141
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-products.php:144
+#: includes/more-products.php:145
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-products.php:175
+#: includes/more-products.php:176
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-products.php:178
+#: includes/more-products.php:179
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-products.php:183
+#: includes/more-products.php:184
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-products.php:205
+#: includes/more-products.php:206
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-products.php:212
+#: includes/more-products.php:213
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-products.php:215
+#: includes/more-products.php:216
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-products.php:227
+#: includes/more-products.php:228
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-products.php:230
+#: includes/more-products.php:231
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-products.php:241
+#: includes/more-products.php:242
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-products.php:245
+#: includes/more-products.php:246
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-products.php:251
+#: includes/more-products.php:252
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-products.php:262
+#: includes/more-products.php:263
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -2118,7 +2135,7 @@ msgid "Change in %s"
 msgstr ""
 
 #: src/shell/detail.js:39
-#: src/shell/index.js:587
+#: src/shell/index.js:729
 msgid "Close"
 msgstr ""
 
@@ -2235,25 +2252,29 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+#: src/shell/index.js:206
+msgid "Go to screen"
+msgstr ""
+
 #. translators: %s: plugin name.
-#: src/shell/index.js:289
+#: src/shell/index.js:431
 #, js-format
 msgid "%s not active"
 msgstr ""
 
-#: src/shell/index.js:300
+#: src/shell/index.js:442
 msgid "Counting…"
 msgstr ""
 
-#: src/shell/index.js:453
+#: src/shell/index.js:595
 msgid "Changed from the default."
 msgstr ""
 
-#: src/shell/index.js:464
+#: src/shell/index.js:606
 msgid "Reset to default"
 msgstr ""
 
-#: src/shell/index.js:588
+#: src/shell/index.js:730
 msgid "Edit"
 msgstr ""
 
@@ -2289,98 +2310,104 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
+#. translators: 1: action label ("Edit"), 2: the row's name.
+#: src/shell/list.js:58
+#, js-format
+msgid "%1$s: %2$s"
+msgstr ""
+
 #. translators: %s: action label.
-#: src/shell/list.js:57
+#: src/shell/list.js:68
 #, js-format
 msgid "%s (opens in a new tab)"
 msgstr ""
 
-#: src/shell/list.js:242
+#: src/shell/list.js:267
 msgid "View"
 msgstr ""
 
-#: src/shell/list.js:354
+#: src/shell/list.js:380
 msgid "Views"
 msgstr ""
 
-#: src/shell/list.js:400
-#: src/shell/list.js:430
-#: src/shell/list.js:434
-#: src/shell/list.js:445
+#: src/shell/list.js:426
+#: src/shell/list.js:456
+#: src/shell/list.js:460
+#: src/shell/list.js:471
 msgid "Search"
 msgstr ""
 
-#: src/shell/list.js:408
+#: src/shell/list.js:434
 #: src/shell/parts.js:229
 msgid "Nothing here."
 msgstr ""
 
 #. translators: 1: page, 2: pages, 3: rows.
-#: src/shell/list.js:469
+#: src/shell/list.js:495
 #, js-format
 msgid "Page %1$d of %2$d · %3$d rows"
 msgstr ""
 
 #. translators: %d: rows.
-#: src/shell/list.js:479
+#: src/shell/list.js:505
 #, js-format
 msgid "%d row"
 msgid_plural "%d rows"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/shell/list.js:560
+#: src/shell/list.js:586
 msgid "(empty)"
 msgstr ""
 
-#: src/shell/list.js:568
+#: src/shell/list.js:594
 msgid "Proposed changes"
 msgstr ""
 
-#: src/shell/list.js:573
-#: src/shell/list.js:604
+#: src/shell/list.js:599
+#: src/shell/list.js:630
 msgid "Field"
 msgstr ""
 
-#: src/shell/list.js:574
-#: src/shell/list.js:608
+#: src/shell/list.js:600
+#: src/shell/list.js:634
 msgid "Now"
 msgstr ""
 
-#: src/shell/list.js:575
-#: src/shell/list.js:611
+#: src/shell/list.js:601
+#: src/shell/list.js:637
 msgid "Proposed"
 msgstr ""
 
-#: src/shell/list.js:576
-#: src/shell/list.js:614
+#: src/shell/list.js:602
+#: src/shell/list.js:640
 msgid "State"
 msgstr ""
 
 #. translators: %s: field name.
-#: src/shell/list.js:592
+#: src/shell/list.js:618
 #, js-format
 msgid "Apply %s"
 msgstr ""
 
-#: src/shell/list.js:618
+#: src/shell/list.js:644
 msgid "Applied"
 msgstr ""
 
-#: src/shell/list.js:623
+#: src/shell/list.js:649
 msgid "Undo"
 msgstr ""
 
-#: src/shell/list.js:640
+#: src/shell/list.js:666
 msgid "Reject for good"
 msgstr ""
 
-#: src/shell/list.js:655
+#: src/shell/list.js:681
 msgid "Waiting"
 msgstr ""
 
 #. translators: %d: number of fields ticked.
-#: src/shell/list.js:675
+#: src/shell/list.js:701
 #, js-format
 msgid "Reject %d ticked"
 msgid_plural "Reject %d ticked"
@@ -2388,7 +2415,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of fields ticked.
-#: src/shell/list.js:695
+#: src/shell/list.js:721
 #, js-format
 msgid "Apply %d field"
 msgid_plural "Apply %d fields"
@@ -2417,15 +2444,15 @@ msgstr ""
 msgid "Continue"
 msgstr ""
 
-#: src/shell/states.js:34
+#: src/shell/states.js:59
 msgid "Loading…"
 msgstr ""
 
-#: src/shell/states.js:51
+#: src/shell/states.js:76
 msgid "This could not be loaded."
 msgstr ""
 
-#: src/shell/states.js:60
+#: src/shell/states.js:85
 msgid "Try again"
 msgstr ""
 

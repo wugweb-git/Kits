@@ -129,7 +129,7 @@ export function ModuleCards() {
 							<Switch
 								label={ sprintf(
 									/* translators: %s: module name. */
-									__( '%s on', 'rankweb' ),
+									__( 'Use %s', 'rankweb' ),
 									c.label
 								) }
 								checked={ c.on }

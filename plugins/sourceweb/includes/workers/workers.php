@@ -147,9 +147,19 @@ function sourceweb_workers_duration( $s ) {
 	return $s < 3600 ? ( $s >= 60 ? intdiv( $s, 60 ) . ' min ' : '' ) . ( $s % 60 ) . ' s' : sourceweb_cron_span( $s );
 }
 
+/** How many workflows have reported at least one run. Zero means "nothing to judge", not "all on time". */
+function sourceweb_workers_reporting_count(): int {
+	$n = 0;
+	foreach ( array_keys( AW_WORKERS ) as $file ) {
+		$n += sourceweb_workers_last( $file ) ? 1 : 0;
+	}
+	return $n;
+}
+
 /**
  * What is wrong with the workers now, as "file:kind" => sentence (empty when all is well). A workflow that has never
- * reported is not a problem (reports start when the workers' change is merged).
+ * reported is not a problem (reports start when the workers' change is merged); use sourceweb_workers_reporting_count()
+ * to tell "all on time" from "nothing has reported".
  *
  * @param int|null $now Unix time (tests).
  * @return array<string,string>
@@ -470,6 +480,10 @@ add_action(
 			function () {
 				$problems = sourceweb_workers_problems();
 				$url      = admin_url( 'admin.php?page=aw-sourcing&tab=workers' );
+				if ( ! $problems && 0 === sourceweb_workers_reporting_count() ) {
+					echo '<p><span class="dashicons dashicons-clock" aria-hidden="true"></span> Workers: no report yet. <a href="' . esc_url( $url ) . '">Workers</a></p>';
+					return;
+				}
 				if ( ! $problems ) {
 					echo '<p><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span> Workers: no problems. <a href="' . esc_url( $url ) . '">Workers</a></p>';
 					return;
@@ -491,14 +505,15 @@ add_filter(
 			'label' => 'Workers report on time',
 			'test'  => function () {
 				$problems = sourceweb_workers_problems();
+				$waiting  = ! $problems && 0 === sourceweb_workers_reporting_count();
 				return array(
-					'label'       => $problems ? 'Workers need attention' : 'Workers report on time',
-					'status'      => $problems ? 'critical' : 'good',
+					'label'       => $problems ? 'Workers need attention' : ( $waiting ? 'No worker has reported yet' : 'Workers report on time' ),
+					'status'      => $problems ? 'critical' : ( $waiting ? 'recommended' : 'good' ),
 					'badge'       => array(
 						'label' => 'SourceWeb',
 						'color' => $problems ? 'red' : 'blue',
 					),
-					'description' => '<p>' . ( $problems ? esc_html( implode( ' ', $problems ) ) : 'Every workflow of the workers repository that has reported is on time and its last run went through.' ) . '</p>',
+					'description' => '<p>' . ( $problems ? esc_html( implode( ' ', $problems ) ) : ( $waiting ? 'No workflow of the workers repository has reported a run yet, so nothing can be judged on time or late.' : 'Every workflow of the workers repository that has reported is on time and its last run went through.' ) ) . '</p>',
 					'actions'     => '<p><a href="' . esc_url( admin_url( 'admin.php?page=aw-sourcing&tab=workers' ) ) . '">Plugins → SourceWeb → Workers</a></p>',
 					'test'        => 'aw_workers',
 				);

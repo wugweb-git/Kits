@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.5.3
+
+- Insights charts no longer stretch two bars across the card. Empty states say what to do (Internal links, FAQ). Module switches are named "Use <module>". The More from Kits link of a plugin goes to Kits Core's page when Core is active.
+
 ## 2.5.2
 
 - The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. The sitemap and llms.txt notice shows only on RankWeb screens, the Dashboard and the Plugins list, can be dismissed, and links to Settings > Permalinks. Singular and plural item labels. Keys copy points to Settings.

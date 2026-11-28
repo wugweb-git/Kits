@@ -124,6 +124,7 @@ add_action(
 					'webmail'    => MAILWEB_WEBMAIL,
 					'provider'   => mailweb_provider_name(),
 					'oldSending' => mailweb_settings_url( 'sending', array(), 'cap' ),
+					'settingsUrl' => current_user_can( 'manage_options' ) ? mailweb_settings_url( 'incoming' ) : '',
 					'features'   => 'dashboard' === $screen && function_exists( 'mailweb_home_parts' ) ? mailweb_home_parts() : array(),
 				),
 			)

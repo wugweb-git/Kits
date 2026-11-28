@@ -108,15 +108,16 @@ function mailweb_smtp_screen() {
 	// A provider picker: choosing one fills the server and port below (nothing is saved until Save). It has no name, so it is not submitted.
 	$presets = mailweb_smtp_presets();
 	echo '<tr><th scope="row"><label for="mailweb-smtp-preset">' . esc_html__( 'Provider', 'mailweb' ) . '</label></th><td><select id="mailweb-smtp-preset"><option value="">' . esc_html__( 'Choose to fill in the server and port', 'mailweb' ) . '</option>';
+	$chosen = mailweb_smtp_preset_for( (string) $s['host'], (int) $s['port'] );
 	foreach ( $presets as $pk => $p ) {
-		echo '<option value="' . esc_attr( $pk ) . '">' . esc_html( $p['label'] ) . '</option>';
+		echo '<option value="' . esc_attr( $pk ) . '"' . selected( $chosen, $pk, false ) . '>' . esc_html( $p['label'] ) . '</option>';
 	}
 	echo '</select><p class="description">' . esc_html__( 'Fills in the SMTP server and port for you. Check the mailbox and password, then Save.', 'mailweb' ) . '</p></td></tr>';
 	wp_register_script( 'mailweb-smtp-preset', false, array(), MAILWEB_VERSION, true );
 	wp_enqueue_script( 'mailweb-smtp-preset' );
 	wp_add_inline_script( 'mailweb-smtp-preset', '(function(){var p=' . wp_json_encode( array_map( fn( $x ) => array( 'host' => $x['host'], 'port' => $x['port'] ), $presets ) ) . ',sel=document.getElementById("mailweb-smtp-preset"),h=document.getElementById("mailweb-smtp-host"),o=document.getElementById("mailweb-smtp-port");if(!sel||!h||!o)return;sel.addEventListener("change",function(){var x=p[sel.value];if(!x||!x.host)return;h.value=x.host;o.value=x.port;});})();' );
 	$rows = array(
-		'user' => array( __( 'Mailbox (email address)', 'mailweb' ), 'email', $s['user'] ),
+		'user' => array( __( 'Mailbox (email address)', 'mailweb' ), 'email', mailweb_smtp_user_shown( (string) $s['user'], (string) wp_parse_url( home_url(), PHP_URL_HOST ) ) ),
 		'pass' => array( __( 'Mailbox password', 'mailweb' ), 'password', '' ),
 		'name' => array( __( 'Sender name', 'mailweb' ), 'text', $s['name'] ),
 		'host' => array( __( 'SMTP server', 'mailweb' ), 'text', $s['host'] ),
@@ -129,10 +130,20 @@ function mailweb_smtp_screen() {
 			continue;
 		}
 		$ph = 'pass' === $k && '' !== $s['pass'] ? ' placeholder="' . esc_attr__( 'Saved. Leave empty to keep it.', 'mailweb' ) . '"' : '';
+		if ( 'user' === $k && '' === $r[2] ) {
+			$ph = ' placeholder="' . esc_attr__( 'name@yourdomain.com', 'mailweb' ) . '"';
+		}
 		echo '<input class="regular-text" id="mailweb-smtp-' . esc_attr( $k ) . '" name="' . esc_attr( $k ) . '" type="' . esc_attr( $r[1] ) . '" value="' . esc_attr( (string) $r[2] ) . '"' . $ph . ' autocomplete="' . ( 'pass' === $k ? 'new-password' : 'off' ) . '"></td></tr>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $ph is escaped above
 	}
 	echo '</table><p><button class="button button-primary" name="do" value="save">' . esc_html__( 'Save', 'mailweb' ) . '</button> <button class="button" name="do" value="test">' . esc_html__( 'Save and send a test email', 'mailweb' ) . '</button></p></form>';
 
+	// The Hostinger endpoints and DNS values only belong to a site that sends through Hostinger.
+	if ( false === stripos( (string) $s['host'], 'hostinger' ) ) {
+		echo '<div class="card mailweb-card"><h3>' . esc_html__( 'DNS records', 'mailweb' ) . '</h3><p>' . esc_html__( 'The SPF and DKIM records to add depend on the provider chosen above. Your provider shows them in its own dashboard; add them where the domain\'s DNS is managed.', 'mailweb' ) . '</p></div>';
+		mailweb_sending_mode_form();
+		do_action( 'mailweb_smtp_screen_after' ); // the daily limit and queue (mail-cap.php)
+		return;
+	}
 	// 1. Hostinger Mail Server Connectivity Configuration.
 	$servers = mailweb_server_protocols();
 	echo '<div class="card mailweb-card">';
@@ -173,7 +184,7 @@ function mailweb_smtp_screen() {
 		echo '<tr>';
 		echo '<td><strong>' . esc_html( $rec['type'] ) . '</strong></td>';
 		echo '<td><code>' . esc_html( $rec['host'] ) . '</code></td>';
-		echo '<td><textarea readonly rows="2" class="mailweb-dns-value">' . esc_textarea( $rec['value'] ) . '</textarea></td>';
+		echo '<td><code class="mailweb-dns-value" tabindex="0">' . esc_html( $rec['value'] ) . '</code></td>';
 		echo '<td class="mailweb-note">' . esc_html( $rec['note'] ) . '</td>';
 		echo '</tr>';
 	}

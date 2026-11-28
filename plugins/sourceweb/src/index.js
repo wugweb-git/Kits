@@ -262,14 +262,25 @@ function Dashboard() {
 						'sourceweb'
 					) }
 				>
-					<MiniChart
-						label={ __(
-							'Pipeline, last 28 days: ingested to reviewed to approved',
-							'sourceweb'
-						) }
-						points={ data.charts.funnel || [] }
-						unit={ [ __( 'item', 'sourceweb' ), __( 'items', 'sourceweb' ) ] }
-					/>
+					{ /* Three bars only: cap the drawing's width (3 rem a bar) so they stay bars, not blocks. */ }
+					<div
+						className="sourceweb-funnel"
+						style={ {
+							'--sw-bars': ( data.charts.funnel || [] ).length || 1,
+						} }
+					>
+						<style>
+							{ '.sourceweb-funnel .kits-shell-chart svg{width:calc(var(--sw-bars)*3rem);max-width:100%}' }
+						</style>
+						<MiniChart
+							label={ __(
+								'Pipeline, last 28 days: ingested to reviewed to approved',
+								'sourceweb'
+							) }
+							points={ data.charts.funnel || [] }
+							unit={ [ __( 'item', 'sourceweb' ), __( 'items', 'sourceweb' ) ] }
+						/>
+					</div>
 					<div
 						style={ {
 							display: 'grid',
@@ -7242,6 +7253,12 @@ function Places() {
 	const [ busy, setBusy ] = useState( false );
 	const [ msg, setMsg ] = useState( null );
 	const [ enh, setEnh ] = useState( {} );
+	const [ np, setNp ] = useState( {
+		label: '',
+		id: '',
+		kind: 'content_type',
+		post_type: '',
+	} );
 	const take = ( d ) => {
 		setData( d );
 		setRows( d.routes );
@@ -7306,6 +7323,43 @@ function Places() {
 				setMsg( {
 					tone: 'success',
 					text: __( 'Enhancements saved.', 'sourceweb' ),
+				} );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const addPlace = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'places/add' ),
+			method: 'POST',
+			data: np,
+		} )
+			.then( ( d ) => {
+				take( d );
+				setNp( { label: '', id: '', kind: 'content_type', post_type: '' } );
+				setMsg( {
+					tone: 'success',
+					text: __( 'Place added.', 'sourceweb' ),
+				} );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	const removePlace = ( id ) => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'places/remove' ),
+			method: 'POST',
+			data: { place: id },
+		} )
+			.then( ( d ) => {
+				take( d );
+				setMsg( {
+					tone: 'success',
+					text: __( 'Place removed.', 'sourceweb' ),
 				} );
 			} )
 			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
@@ -7422,7 +7476,7 @@ function Places() {
 				{ 0 === data.places.length && (
 					<p>
 						{ __(
-							'No places yet. Turn on a plugin that adds one (DirectoryWeb adds its listing types), or a site can add its own, then routes can be made.',
+							'No places yet. Turn on a plugin that adds one (DirectoryWeb adds its listing types), or add one under Places below, then routes can be made.',
 							'sourceweb'
 						) }
 					</p>
@@ -7493,6 +7547,7 @@ function Places() {
 							<th>{ __( 'Kind', 'sourceweb' ) }</th>
 							<th>{ __( 'Owner', 'sourceweb' ) }</th>
 							<th>{ __( 'Enhancements', 'sourceweb' ) }</th>
+							<th>{ __( 'Remove', 'sourceweb' ) }</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -7520,6 +7575,22 @@ function Places() {
 											) )
 										: '—' }
 								</td>
+								<td>
+									{ ( data.custom || [] ).includes( p.id ) ? (
+										<Button
+											onClick={ () => removePlace( p.id ) }
+											aria-label={ sprintf(
+												/* translators: %s: place name. */
+												__( 'Remove place %s', 'sourceweb' ),
+												p.label
+											) }
+										>
+											{ __( 'Remove', 'sourceweb' ) }
+										</Button>
+									) : (
+										'—'
+									) }
+								</td>
 							</tr>
 						) ) }
 					</tbody>
@@ -7531,6 +7602,57 @@ function Places() {
 						onClick={ saveEnhance }
 					>
 						{ __( 'Save enhancements', 'sourceweb' ) }
+					</Button>
+				</p>
+				<h3>{ __( 'Add a place', 'sourceweb' ) }</h3>
+				<p>
+					{ __(
+						'A place is where items can go: a content type, another plugin, a workflow or something else. Add one here and it can be chosen in a route above.',
+						'sourceweb'
+					) }
+				</p>
+				<TextField
+					label={ __( 'Name', 'sourceweb' ) }
+					value={ np.label }
+					onChange={ ( v ) => setNp( { ...np, label: v } ) }
+				/>
+				<TextField
+					label={ __( 'Id (optional)', 'sourceweb' ) }
+					help={ __(
+						'Lower-case letters, digits, dash and underscore. Left empty, it is made from the name. It cannot be changed later.',
+						'sourceweb'
+					) }
+					value={ np.id }
+					onChange={ ( v ) => setNp( { ...np, id: v } ) }
+				/>
+				<SelectField
+					label={ __( 'Kind', 'sourceweb' ) }
+					value={ np.kind }
+					options={ Object.keys( KIND_LABELS ).map( ( k ) => ( {
+						value: k,
+						label: KIND_LABELS[ k ],
+					} ) ) }
+					onChange={ ( v ) => setNp( { ...np, kind: v } ) }
+				/>
+				{ 'content_type' === np.kind && (
+					<SelectField
+						label={ __( 'Content type', 'sourceweb' ) }
+						value={ np.post_type }
+						options={ [
+							{ value: '', label: '' },
+							...( data.postTypes || [] ),
+						] }
+						onChange={ ( v ) => setNp( { ...np, post_type: v } ) }
+					/>
+				) }
+				<p>
+					<Button
+						variant="primary"
+						busy={ busy }
+						disabled={ '' === np.label.trim() }
+						onClick={ addPlace }
+					>
+						{ __( 'Add place', 'sourceweb' ) }
 					</Button>
 				</p>
 			</SectionCard>

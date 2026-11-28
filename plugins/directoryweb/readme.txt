@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -96,6 +96,9 @@ By default, deleting the plugin removes nothing: listings, places, claims, setti
 5. Schema & Fields: every field a listing can hold, with its label, key, type and whether it is required.
 
 == Changelog ==
+
+= 1.5.2 =
+* Claims: no stray "0" above the list; older claim status keys map to approved, rejected or pending. Listings rows have View profile and Edit listing links named for the listing. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
 
 = 1.5.1 =
 * The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. Keys copy points to Settings.

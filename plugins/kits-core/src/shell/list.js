@@ -45,19 +45,30 @@ const ROW_ICONS = {
  * @param {Object} props
  * @param {Object} props.action { label, href, onClick, disabled, why, tone, icon, expanded, controls }. expanded and
  *                              controls: a button that opens a part of the page (aria-expanded, aria-controls).
+ *                              context: the row's name; the accessible name becomes "Edit: Oak Street Books", so a
+ *                              column of "Edit" links is told apart (DataList passes it from the primary column).
  */
 export function RowAction( { action } ) {
 	const id = useId();
 	const named = ROW_ICONS[ action.icon ];
+	// The words on screen stay the label; the accessible name starts with them and adds the row.
+	const spoken = action.context
+		? sprintf(
+				/* translators: 1: action label ("Edit"), 2: the row's name. */
+				__( '%1$s: %2$s', 'kits-core' ),
+				action.label,
+				action.context
+			)
+		: action.label;
 	if ( named ) {
 		const ext = 'external' === action.icon;
 		const label = ext
 			? sprintf(
 					/* translators: %s: action label. */
 					__( '%s (opens in a new tab)', 'kits-core' ),
-					action.label
+					spoken
 				)
-			: action.label;
+			: spoken;
 		const button = (
 			<Button
 				className={ cx(
@@ -103,6 +114,7 @@ export function RowAction( { action } ) {
 					type="button"
 					className="kits-shell-link"
 					disabled
+					aria-label={ action.context ? spoken : undefined }
 					aria-describedby={ action.why ? id : undefined }
 				>
 					{ action.label }
@@ -117,7 +129,11 @@ export function RowAction( { action } ) {
 	}
 	if ( action.href ) {
 		return (
-			<a className={ cls } href={ action.href }>
+			<a
+				className={ cls }
+				href={ action.href }
+				aria-label={ action.context ? spoken : undefined }
+			>
 				{ action.label }
 			</a>
 		);
@@ -127,6 +143,7 @@ export function RowAction( { action } ) {
 			type="button"
 			className={ cls }
 			onClick={ action.onClick }
+			aria-label={ action.context ? spoken : undefined }
 			aria-expanded={
 				undefined === action.expanded ? undefined : action.expanded
 			}
@@ -172,7 +189,7 @@ export function RowAction( { action } ) {
  * @param {string}   props.error         What failed, or ''.
  * @param {Function} props.onRetry       Try again after an error.
  * @param {string}   props.emptyTitle    Words when there are no rows.
- * @param {Element}  props.empty         More words or an action when there are no rows.
+ * @param {Element}  props.empty         More words or an action when there are no rows (an EmptyState action: a link or button to the next step).
  */
 export function DataList( {
 	label,
@@ -234,13 +251,22 @@ export function DataList( {
 					if ( c !== primary || ! ( rowActions || rowView ) ) {
 						return cell;
 					}
-					const acts = [
-						...( ( rowActions && rowActions( item ) ) || [] ),
-					];
+					const raw = item[ c.key ];
+					const name =
+						'string' === typeof raw || 'number' === typeof raw
+							? String( raw )
+							: '';
+					const acts = (
+						( rowActions && rowActions( item ) ) ||
+						[]
+					).map( ( a ) =>
+						a.context || ! name ? a : { ...a, context: name }
+					);
 					if ( rowView && rowView( item ) ) {
 						acts.push( {
 							label: __( 'View', 'kits-core' ),
 							icon: 'view',
+							context: name,
 							onClick: () => setOpen( String( item[ rowKey ] ) ),
 						} );
 					}

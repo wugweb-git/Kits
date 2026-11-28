@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: RankWeb 2.5.2\n"
+"Project-Id-Version: RankWeb 2.5.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rankweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:38:18+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:13:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: rankweb\n"
@@ -19,7 +19,7 @@ msgstr ""
 #: includes/agent-tools.php:33
 #: includes/kits-hub.php:38
 #: includes/kits-hub.php:42
-#: includes/rankweb-ui.php:241
+#: includes/rankweb-ui.php:243
 msgid "RankWeb"
 msgstr ""
 
@@ -95,7 +95,7 @@ msgid "The redirect was already in the list or could not be saved."
 msgstr ""
 
 #: includes/bulk-csv.php:46
-#: includes/rankweb-ui.php:237
+#: includes/rankweb-ui.php:239
 msgid "SEO CSV"
 msgstr ""
 
@@ -400,7 +400,7 @@ msgstr ""
 
 #: includes/help-tab.php:34
 #: includes/rankweb-ui.php:158
-#: includes/rankweb-ui.php:232
+#: includes/rankweb-ui.php:234
 msgid "FAQ"
 msgstr ""
 
@@ -499,7 +499,7 @@ msgid "Naked URL"
 msgstr ""
 
 #: includes/link-anchors.php:147
-#: src/index.js:985
+#: src/index.js:998
 msgid "Image"
 msgstr ""
 
@@ -513,37 +513,37 @@ msgstr ""
 
 #. translators: 1: limit for exact match in percent, 2: limit for any other type in percent, 3: fewest links.
 #: includes/link-anchors.php:248
-#: src/tools/links.js:318
+#: src/tools/links.js:326
 #, php-format,js-format
 msgid "The share of each anchor type among the links to an item. A warning shows when exact match is over %1$s%% or another type is over %2$s%% (only for items with %3$s links or more). Change the limits under RankWeb → Settings → Internal links."
 msgstr ""
 
 #: includes/link-anchors.php:249
-#: src/tools/links.js:376
+#: src/tools/links.js:384
 msgid "All items"
 msgstr ""
 
 #: includes/link-anchors.php:249
-#: src/tools/links.js:379
+#: src/tools/links.js:387
 msgid "With a warning"
 msgstr ""
 
 #: includes/link-anchors.php:251
 #: includes/link-audit.php:714
-#: src/tools/links.js:200
-#: src/tools/links.js:335
+#: src/tools/links.js:208
+#: src/tools/links.js:343
 msgid "Item"
 msgstr ""
 
 #: includes/link-anchors.php:252
 #: includes/link-audit.php:715
-#: src/tools/links.js:206
-#: src/tools/links.js:341
+#: src/tools/links.js:214
+#: src/tools/links.js:349
 msgid "Links in"
 msgstr ""
 
 #: includes/link-anchors.php:255
-#: src/tools/links.js:352
+#: src/tools/links.js:360
 msgid "Warning"
 msgstr ""
 
@@ -559,20 +559,20 @@ msgstr ""
 #: includes/link-anchors.php:260
 #: includes/link-audit.php:704
 #: src/tools/faq.js:288
-#: src/tools/links.js:268
-#: src/tools/links.js:401
+#: src/tools/links.js:276
+#: src/tools/links.js:409
 msgid "View"
 msgstr ""
 
 #. translators: 1: anchor type, 2: its limit in percent.
 #: includes/link-anchors.php:269
-#: src/tools/links.js:358
+#: src/tools/links.js:366
 #, php-format,js-format
 msgid "%1$s over %2$s%%"
 msgstr ""
 
 #: includes/link-anchors.php:282
-#: src/tools/links.js:410
+#: src/tools/links.js:418
 msgid "No links to items are recorded yet. Run the audit first."
 msgstr ""
 
@@ -614,26 +614,26 @@ msgstr ""
 
 #: includes/link-audit.php:603
 #: includes/rankweb-rest.php:325
-#: includes/rankweb-ui.php:235
+#: includes/rankweb-ui.php:237
 msgid "Internal links"
 msgstr ""
 
 #: includes/link-audit.php:644
 #: src/tools/links.js:171
-#: src/tools/links.js:739
+#: src/tools/links.js:747
 msgid "Audit"
 msgstr ""
 
 #: includes/link-audit.php:646
-#: src/tools/links.js:313
-#: src/tools/links.js:740
+#: src/tools/links.js:321
+#: src/tools/links.js:748
 msgid "Anchor mix"
 msgstr ""
 
 #: includes/link-audit.php:649
-#: src/tools/links.js:641
-#: src/tools/links.js:655
-#: src/tools/links.js:741
+#: src/tools/links.js:649
+#: src/tools/links.js:663
+#: src/tools/links.js:749
 msgid "Silos"
 msgstr ""
 
@@ -696,33 +696,33 @@ msgid "All findings"
 msgstr ""
 
 #: includes/link-audit.php:707
-#: src/tools/links.js:220
+#: src/tools/links.js:228
 msgid "Not reached"
 msgstr ""
 
 #: includes/link-audit.php:716
-#: src/tools/links.js:211
+#: src/tools/links.js:219
 msgid "Links out"
 msgstr ""
 
 #: includes/link-audit.php:717
-#: src/tools/links.js:216
+#: src/tools/links.js:224
 msgid "Clicks from home"
 msgstr ""
 
 #: includes/link-audit.php:718
-#: src/tools/links.js:195
-#: src/tools/links.js:224
+#: src/tools/links.js:203
+#: src/tools/links.js:232
 msgid "Findings"
 msgstr ""
 
 #: includes/link-audit.php:725
-#: src/tools/links.js:279
+#: src/tools/links.js:287
 msgid "Nothing to list here."
 msgstr ""
 
 #: includes/link-audit.php:725
-#: src/tools/links.js:280
+#: src/tools/links.js:288
 msgid "The audit has not run yet."
 msgstr ""
 
@@ -870,121 +870,121 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-from-kits.php:67
-#: includes/more-from-kits.php:103
+#: includes/more-from-kits.php:104
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-from-kits.php:87
+#: includes/more-from-kits.php:88
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-from-kits.php:90
+#: includes/more-from-kits.php:91
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-from-kits.php:91
+#: includes/more-from-kits.php:92
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-from-kits.php:92
+#: includes/more-from-kits.php:93
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-from-kits.php:96
+#: includes/more-from-kits.php:97
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-from-kits.php:97
+#: includes/more-from-kits.php:98
 msgid "Activated."
 msgstr ""
 
-#: includes/more-from-kits.php:98
+#: includes/more-from-kits.php:99
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-from-kits.php:119
+#: includes/more-from-kits.php:120
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-from-kits.php:121
+#: includes/more-from-kits.php:122
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 msgid "Activate"
 msgstr ""
 
-#: includes/more-from-kits.php:140
+#: includes/more-from-kits.php:141
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-from-kits.php:144
+#: includes/more-from-kits.php:145
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-from-kits.php:175
+#: includes/more-from-kits.php:176
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-from-kits.php:178
+#: includes/more-from-kits.php:179
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-from-kits.php:183
+#: includes/more-from-kits.php:184
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:205
+#: includes/more-from-kits.php:206
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-from-kits.php:212
+#: includes/more-from-kits.php:213
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-from-kits.php:215
+#: includes/more-from-kits.php:216
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-from-kits.php:227
+#: includes/more-from-kits.php:228
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:230
+#: includes/more-from-kits.php:231
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-from-kits.php:241
+#: includes/more-from-kits.php:242
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-from-kits.php:245
+#: includes/more-from-kits.php:246
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-from-kits.php:251
+#: includes/more-from-kits.php:252
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-from-kits.php:262
+#: includes/more-from-kits.php:263
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -1212,7 +1212,7 @@ msgid "Settings saved."
 msgstr ""
 
 #: includes/rankweb-native-admin.php:154
-#: src/index.js:1056
+#: src/index.js:1069
 msgid "On"
 msgstr ""
 
@@ -1221,7 +1221,7 @@ msgid "Nothing to set on this tab."
 msgstr ""
 
 #: includes/rankweb-native-admin.php:184
-#: src/index.js:745
+#: src/index.js:758
 msgid "Save changes"
 msgstr ""
 
@@ -1268,7 +1268,7 @@ msgstr ""
 #: includes/rankweb-rest.php:252
 #: includes/rankweb-rest.php:291
 #: includes/rankweb-rest.php:339
-#: src/index.js:1057
+#: src/index.js:1070
 #: src/modules.js:112
 msgid "Off"
 msgstr ""
@@ -1325,7 +1325,7 @@ msgstr ""
 
 #: includes/rankweb-rest.php:302
 #: src/index.js:165
-#: src/index.js:447
+#: src/index.js:460
 msgid "Kept out of search"
 msgstr ""
 
@@ -1500,7 +1500,7 @@ msgid "The one list of redirects (forms, merges and imports add to it)"
 msgstr ""
 
 #: includes/rankweb-rest.php:561
-#: src/index.js:1165
+#: src/index.js:1178
 msgid "No such group."
 msgstr ""
 
@@ -1607,38 +1607,38 @@ msgstr ""
 msgid "Insights"
 msgstr ""
 
-#: includes/rankweb-ui.php:231
+#: includes/rankweb-ui.php:233
 msgid "RankWeb settings"
 msgstr ""
 
-#: includes/rankweb-ui.php:233
+#: includes/rankweb-ui.php:235
 msgid "RankWeb insights"
 msgstr ""
 
-#: includes/rankweb-ui.php:234
+#: includes/rankweb-ui.php:236
 msgid "RankWeb modules"
 msgstr ""
 
-#: includes/rankweb-ui.php:236
+#: includes/rankweb-ui.php:238
 msgid "Image SEO"
 msgstr ""
 
-#: includes/rankweb-ui.php:238
+#: includes/rankweb-ui.php:240
 #: includes/redirect-tools.php:94
 msgid "Redirect tools"
 msgstr ""
 
-#: includes/rankweb-ui.php:239
+#: includes/rankweb-ui.php:241
 #: includes/transport.php:26
 msgid "Transport"
 msgstr ""
 
-#: includes/rankweb-ui.php:240
+#: includes/rankweb-ui.php:242
 #: includes/webp-convert.php:24
 msgid "Convert to WebP"
 msgstr ""
 
-#: includes/rankweb-ui.php:251
+#: includes/rankweb-ui.php:253
 msgid "RankWeb needs Kits Core (active, with its build) to show this screen."
 msgstr ""
 
@@ -2031,102 +2031,102 @@ msgstr ""
 
 #: includes/silos.php:569
 #: includes/silos.php:629
-#: src/tools/links.js:493
-#: src/tools/links.js:649
+#: src/tools/links.js:501
+#: src/tools/links.js:657
 msgid "Add a silo"
 msgstr ""
 
 #: includes/silos.php:575
 #: includes/silos.php:635
-#: src/tools/links.js:424
+#: src/tools/links.js:432
 msgid "Virtual: each links to the hub and the others"
 msgstr ""
 
 #: includes/silos.php:576
 #: includes/silos.php:635
-#: src/tools/links.js:428
+#: src/tools/links.js:436
 msgid "Circle: each links to the next and back to the hub"
 msgstr ""
 
 #. translators: 1: items in the silo, 2: fewest items.
 #: includes/silos.php:584
-#: src/tools/links.js:688
+#: src/tools/links.js:696
 #, php-format,js-format
 msgid "Only %1$s items; at least %2$s are better."
 msgstr ""
 
 #. translators: 1: item IDs, 2: most folders deep.
 #: includes/silos.php:588
-#: src/tools/links.js:701
+#: src/tools/links.js:709
 #, php-format,js-format
 msgid "Deeper than %2$s folders: %1$s."
 msgstr ""
 
 #: includes/silos.php:601
-#: src/tools/links.js:659
+#: src/tools/links.js:667
 msgid "Silo"
 msgstr ""
 
 #: includes/silos.php:602
-#: src/tools/links.js:665
+#: src/tools/links.js:673
 msgid "Hub"
 msgstr ""
 
 #: includes/silos.php:603
 #: includes/silos.php:635
-#: src/tools/links.js:532
-#: src/tools/links.js:671
+#: src/tools/links.js:540
+#: src/tools/links.js:679
 msgid "Mode"
 msgstr ""
 
 #: includes/silos.php:604
-#: src/tools/links.js:676
+#: src/tools/links.js:684
 msgid "Supporting items"
 msgstr ""
 
 #: includes/silos.php:605
-#: src/tools/links.js:681
+#: src/tools/links.js:689
 msgid "Address checks"
 msgstr ""
 
 #: includes/silos.php:610
-#: src/tools/links.js:727
+#: src/tools/links.js:735
 msgid "No silos yet."
 msgstr ""
 
 #: includes/silos.php:629
-#: src/tools/links.js:492
+#: src/tools/links.js:500
 msgid "Change the silo"
 msgstr ""
 
 #: includes/silos.php:633
 #: src/tools/faq.js:175
-#: src/tools/links.js:502
+#: src/tools/links.js:510
 msgid "Name"
 msgstr ""
 
 #: includes/silos.php:634
-#: src/tools/links.js:514
+#: src/tools/links.js:522
 msgid "Hub item ID"
 msgstr ""
 
 #: includes/silos.php:636
-#: src/tools/links.js:544
+#: src/tools/links.js:552
 msgid "Supporting item IDs"
 msgstr ""
 
 #: includes/silos.php:636
-#: src/tools/links.js:545
+#: src/tools/links.js:553
 msgid "One item ID per line, in the order of the circle. Published items with their own page only."
 msgstr ""
 
 #: includes/silos.php:641
-#: src/tools/links.js:572
+#: src/tools/links.js:580
 msgid "Save the silo"
 msgstr ""
 
 #: includes/silos.php:642
-#: src/tools/links.js:575
+#: src/tools/links.js:583
 msgid "Cancel"
 msgstr ""
 
@@ -2135,7 +2135,7 @@ msgid "Deleting a silo removes its settings only. No item is changed or deleted.
 msgstr ""
 
 #: includes/silos.php:647
-#: src/tools/links.js:579
+#: src/tools/links.js:587
 msgid "Delete this silo"
 msgstr ""
 
@@ -2596,7 +2596,7 @@ msgstr ""
 #: src/index.js:146
 #: src/index.js:151
 #: src/index.js:156
-#: src/index.js:438
+#: src/index.js:448
 msgid "item"
 msgstr ""
 
@@ -2604,7 +2604,7 @@ msgstr ""
 #: src/index.js:146
 #: src/index.js:151
 #: src/index.js:156
-#: src/index.js:438
+#: src/index.js:449
 #: src/tools/files.js:294
 #: src/tools/files.js:305
 #: src/tools/transport.js:144
@@ -2633,7 +2633,7 @@ msgstr ""
 
 #. translators: %s: date and time.
 #: src/index.js:260
-#: src/tools/faq.js:332
+#: src/tools/faq.js:345
 #, js-format
 msgid "Counted %s."
 msgstr ""
@@ -2684,7 +2684,7 @@ msgid "Tool"
 msgstr ""
 
 #: src/index.js:368
-#: src/index.js:482
+#: src/index.js:495
 msgid "What it does"
 msgstr ""
 
@@ -2696,107 +2696,107 @@ msgstr ""
 msgid "One bar per recorded day within the compare range; the latest day is the darkest. The full numbers are in each chart’s table."
 msgstr ""
 
-#: src/index.js:426
+#: src/index.js:431
 msgid "Where the gaps are"
 msgstr ""
 
-#: src/index.js:427
+#: src/index.js:432
 msgid "The item types with the most missing fields right now (up to six types per chart). The full numbers are in each chart’s table."
 msgstr ""
 
-#: src/index.js:448
+#: src/index.js:461
 msgid "Pages RankWeb’s own rules mark noindex. They come back by themselves when they qualify (a contact added, more listings)."
 msgstr ""
 
-#: src/index.js:464
+#: src/index.js:477
 msgid "Where things are"
 msgstr ""
 
-#: src/index.js:465
+#: src/index.js:478
 msgid "Everything Rank Math doesn’t do or keeps for Premium, for this site. Rank Math holds everything else; where a setting lives in Rank Math, the link goes there."
 msgstr ""
 
-#: src/index.js:471
-#: src/index.js:473
+#: src/index.js:484
+#: src/index.js:486
 msgid "On edit screens"
 msgstr ""
 
-#: src/index.js:474
+#: src/index.js:487
 msgid "What you edit there"
 msgstr ""
 
-#: src/index.js:479
+#: src/index.js:492
 msgid "Commands"
 msgstr ""
 
-#: src/index.js:481
+#: src/index.js:494
 msgid "Commands (WP-CLI on the server)"
 msgstr ""
 
-#: src/index.js:490
-#: src/index.js:492
+#: src/index.js:503
+#: src/index.js:505
 msgid "In Rank Math"
 msgstr ""
 
-#: src/index.js:493
+#: src/index.js:506
 msgid "What is set there"
 msgstr ""
 
-#: src/index.js:728
+#: src/index.js:741
 msgid "Reset this section to its defaults?"
 msgstr ""
 
-#: src/index.js:748
+#: src/index.js:761
 msgid "Reset this section"
 msgstr ""
 
-#: src/index.js:763
+#: src/index.js:776
 msgid "A module switched off is not loaded: its screens, checks and output are gone until it is switched on again."
 msgstr ""
 
-#: src/index.js:786
+#: src/index.js:799
 msgid "Always on: other modules use it."
 msgstr ""
 
-#: src/index.js:810
+#: src/index.js:823
 msgid "Delete this plugin's data when it is deleted"
 msgstr ""
 
-#: src/index.js:826
+#: src/index.js:839
 msgid "Off: switch it on under Modules."
 msgstr ""
 
-#: src/index.js:844
+#: src/index.js:857
 #: src/tools/faq.js:67
 msgid "FAQ box on"
 msgstr ""
 
-#: src/index.js:845
+#: src/index.js:858
 #: src/tools/faq.js:68
 msgid "Ticked types have the FAQ box on their edit screens. A type registered later has it too."
 msgstr ""
 
-#: src/index.js:851
+#: src/index.js:864
 #: src/tools/faq.js:74
 msgid "Post types"
 msgstr ""
 
-#: src/index.js:852
+#: src/index.js:865
 #: src/tools/faq.js:75
 msgid "Taxonomies"
 msgstr ""
 
-#: src/index.js:897
+#: src/index.js:910
 #: src/tools/faq.js:109
 msgid "Save FAQ box types"
 msgstr ""
 
-#: src/index.js:904
+#: src/index.js:917
 msgid "Listings kept indexed"
 msgstr ""
 
 #. translators: %s: number of listings.
-#: src/index.js:907
+#: src/index.js:920
 #, js-format
 msgid "%s listing stays indexed though it has no contact (it had Search Console impressions)."
 msgid_plural "%s listings stay indexed though they have no contact (they had Search Console impressions)."
@@ -2804,58 +2804,58 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of listings.
-#: src/index.js:932
+#: src/index.js:945
 #, js-format
 msgid "and %s more"
 msgstr ""
 
-#: src/index.js:943
+#: src/index.js:956
 msgid "Listing IDs"
 msgstr ""
 
-#: src/index.js:944
+#: src/index.js:957
 msgid "One ID per line (or comma separated). Only Directory listings are kept; other IDs are left out."
 msgstr ""
 
-#: src/index.js:971
+#: src/index.js:984
 msgid "Save listings kept indexed"
 msgstr ""
 
-#: src/index.js:978
+#: src/index.js:991
 msgid "Default share image"
 msgstr ""
 
-#: src/index.js:979
+#: src/index.js:992
 msgid "Shown when a page shared on social media has no picture of its own. Best at 1200 × 630."
 msgstr ""
 
-#: src/index.js:986
+#: src/index.js:999
 msgid "An image from the media library. None: pages without a picture share no image."
 msgstr ""
 
-#: src/index.js:1002
+#: src/index.js:1015
 msgid "Save share image"
 msgstr ""
 
-#: src/index.js:1029
+#: src/index.js:1042
 msgid "No connected services."
 msgstr ""
 
-#: src/index.js:1035
-#: src/index.js:1041
-#: src/index.js:1137
+#: src/index.js:1048
+#: src/index.js:1054
+#: src/index.js:1150
 msgid "Connected services"
 msgstr ""
 
-#: src/index.js:1036
+#: src/index.js:1049
 msgid "What RankWeb works with. Keys are set in Settings and are never shown."
 msgstr ""
 
-#: src/index.js:1130
+#: src/index.js:1143
 msgid "Loading the settings…"
 msgstr ""
 
-#: src/index.js:1149
+#: src/index.js:1162
 msgid "Settings groups"
 msgstr ""
 
@@ -2900,7 +2900,7 @@ msgstr ""
 #. translators: %s: module name.
 #: src/modules.js:132
 #, js-format
-msgid "%s on"
+msgid "Use %s"
 msgstr ""
 
 #: src/modules.js:140
@@ -2945,7 +2945,7 @@ msgstr ""
 
 #: src/tools/faq.js:189
 #: src/tools/faq.js:255
-#: src/tools/faq.js:347
+#: src/tools/faq.js:360
 msgid "Type"
 msgstr ""
 
@@ -2982,40 +2982,48 @@ msgstr ""
 msgid "No page shows an FAQ yet."
 msgstr ""
 
-#: src/tools/faq.js:318
+#: src/tools/faq.js:314
+msgid "Open a page and add questions to its FAQ box; the page shows its FAQ once the box has enough questions."
+msgstr ""
+
+#: src/tools/faq.js:319
+msgid "Open pages"
+msgstr ""
+
+#: src/tools/faq.js:331
 msgid "FAQ box"
 msgstr ""
 
-#: src/tools/faq.js:329
+#: src/tools/faq.js:342
 msgid "Counts"
 msgstr ""
 
-#: src/tools/faq.js:340
+#: src/tools/faq.js:353
 msgid "Recount"
 msgstr ""
 
-#: src/tools/faq.js:345
+#: src/tools/faq.js:358
 msgid "FAQ counts by type"
 msgstr ""
 
-#: src/tools/faq.js:348
+#: src/tools/faq.js:361
 msgid "Published"
 msgstr ""
 
-#: src/tools/faq.js:349
+#: src/tools/faq.js:362
 msgid "Show an FAQ"
 msgstr ""
 
-#: src/tools/faq.js:350
+#: src/tools/faq.js:363
 msgid "Questions, but fewer than the minimum (no FAQ)"
 msgstr ""
 
-#: src/tools/faq.js:354
+#: src/tools/faq.js:367
 msgid "Draft questions waiting"
 msgstr ""
 
 #. translators: %s: a taxonomy's name.
-#: src/tools/faq.js:360
+#: src/tools/faq.js:373
 #, js-format
 msgid "%s (terms)"
 msgstr ""
@@ -3061,29 +3069,33 @@ msgstr ""
 msgid "Download every item’s SEO fields as a CSV."
 msgstr ""
 
-#: src/tools/links.js:259
-#: src/tools/links.js:392
-#: src/tools/links.js:721
+#: src/tools/links.js:196
+msgid "Choose post types"
+msgstr ""
+
+#: src/tools/links.js:267
+#: src/tools/links.js:400
+#: src/tools/links.js:729
 msgid "Edit"
 msgstr ""
 
-#: src/tools/links.js:330
+#: src/tools/links.js:338
 msgid "Anchor mix by item"
 msgstr ""
 
-#: src/tools/links.js:580
+#: src/tools/links.js:588
 msgid "Delete this silo? Its settings are removed. No item is changed or deleted."
 msgstr ""
 
-#: src/tools/links.js:642
+#: src/tools/links.js:650
 msgid "A silo is one hub item and its supporting items. Supporting items link to the hub and to each other; an item in one silo links to another silo’s hub only. An item is in one silo only."
 msgstr ""
 
-#: src/tools/links.js:761
+#: src/tools/links.js:769
 msgid "Internal links views"
 msgstr ""
 
-#: src/tools/links.js:774
+#: src/tools/links.js:782
 msgid "No such view."
 msgstr ""
 

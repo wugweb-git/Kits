@@ -198,6 +198,23 @@ function Dashboard() {
 					/>
 				) ) }
 			</TileGrid>
+			{ tiles.length > 0 &&
+				tiles.every(
+					( t ) =>
+						! parseInt( String( t.value ).replace( /\D/g, '' ), 10 )
+				) &&
+				app.entriesUrl && (
+					<p>
+						<a
+							className="kits-shell-button is-primary"
+							href={ `${ app.entriesUrl }${
+								app.entriesUrl.includes( '?' ) ? '&' : '?'
+							}add=1` }
+						>
+							{ __( 'Add an entry', 'planweb' ) }
+						</a>
+					</p>
+				) }
 			<Month />
 			<SiteSchedule items={ data.site || [] } />
 			{ ! data.counting && (
@@ -958,7 +975,12 @@ function Entries() {
 	const [ data, setData ] = useState( null );
 	const [ loading, setLoading ] = useState( true );
 	const [ error, setError ] = useState( '' );
-	const [ editing, setEditing ] = useState( null );
+	// The Dashboard's "Add an entry" opens this list with the form already open (?add=1).
+	const [ editing, setEditing ] = useState( () =>
+		new URLSearchParams( window.location.search ).has( 'add' )
+			? { ...BLANK }
+			: null
+	);
 	const [ msg, setMsg ] = useState( null );
 
 	const latest = useRef( 0 );
@@ -1124,6 +1146,14 @@ function Entries() {
 							</span>
 						</>
 					) }
+					{ r.link && (
+						<>
+							<br />
+							<a className="planweb-link" href={ r.link }>
+								{ r.linkHost }
+							</a>
+						</>
+					) }
 				</>
 			),
 		},
@@ -1146,12 +1176,26 @@ function Entries() {
 		{
 			key: 'channelText',
 			label: __( 'Channels', 'planweb' ),
-			render: ( r ) => r.channelText || '—',
+			render: ( r ) => (
+				<span className="planweb-secondary">
+					<span className="planweb-secondary__label">
+						{ __( 'Channels', 'planweb' ) }:{ ' ' }
+					</span>
+					{ r.channelText || '—' }
+				</span>
+			),
 		},
 		{
 			key: 'ownerText',
 			label: __( 'Owner', 'planweb' ),
-			render: ( r ) => r.ownerText || '—',
+			render: ( r ) => (
+				<span className="planweb-secondary">
+					<span className="planweb-secondary__label">
+						{ __( 'Owner', 'planweb' ) }:{ ' ' }
+					</span>
+					{ r.ownerText || '—' }
+				</span>
+			),
 		},
 		{
 			key: 'statusText',
@@ -1163,12 +1207,6 @@ function Entries() {
 					{ r.statusText }
 				</span>
 			),
-		},
-		{
-			key: 'link',
-			label: __( 'Link', 'planweb' ),
-			render: ( r ) =>
-				r.link ? <a href={ r.link }>{ r.linkHost }</a> : '—',
 		},
 	];
 	return (
@@ -1368,10 +1406,14 @@ const GROUPS = () => [
 	{ value: 'import', label: __( 'Import from Dates', 'planweb' ) },
 	{ value: 'feed', label: __( 'Calendar feed', 'planweb' ) },
 	{ value: 'site', label: __( 'Site schedule', 'planweb' ) },
+	{ value: 'jobs', label: __( 'Scheduled jobs', 'planweb' ) },
 ];
 
 function hashGroup() {
-	const h = window.location.hash.replace( '#', '' );
+	let h = window.location.hash.replace( '#', '' );
+	if ( 'planweb-jobs' === h ) {
+		h = 'jobs'; // the old address of the jobs form
+	}
 	return GROUPS().some( ( g ) => g.value === h ) ? h : 'services';
 }
 
@@ -1952,6 +1994,151 @@ function SiteGroup( { group, onSaved } ) {
 	);
 }
 
+/**
+ * The four scheduled jobs (jobs.php), each with its own switch named for the job, so the screen reader says which one.
+ *
+ * @param {Object}   props
+ * @param {Object}   props.group   { overdue, repeats, reminders, days, digest, brand }.
+ * @param {Function} props.onSaved New payload.
+ */
+function JobsGroup( { group, onSaved } ) {
+	const [ f, setF ] = useState( group );
+	const [ busy, setBusy ] = useState( false );
+	const [ msg, setMsg ] = useState( null );
+	useEffect( () => setF( group ), [ group ] );
+	const jobs = [
+		[
+			'overdue',
+			__( 'Overdue sweep', 'planweb' ),
+			__(
+				'Every day at 06:00 (site time), mark entries whose date has passed and that are still open (idea, draft, approved or due) as overdue, so the Calendar and Dashboard show them. Dates are never changed and nothing is deleted.',
+				'planweb'
+			),
+		],
+		[
+			'repeats',
+			__( 'Repeats', 'planweb' ),
+			__(
+				'Every day at 06:15, make the next entry for an entry set to repeat every week or month, once its date has passed. One is made, with status Idea, and the old entry is marked so it never repeats twice. At most 50 a day.',
+				'planweb'
+			),
+		],
+		[
+			'reminders',
+			__( 'Reminders by email', 'planweb' ),
+			__(
+				'Every day at 08:00, email each site user a list of their entries that are due soon and not finished. "Their" means the user who created the entry; an entry with no such user is skipped.',
+				'planweb'
+			),
+		],
+		[
+			'digest',
+			__( 'Weekly digest by email', 'planweb' ),
+			__(
+				'Every Monday at 08:30, email the site administrator address (Settings, General) the next 7 days and what is overdue.',
+				'planweb'
+			),
+		],
+	];
+	const save = () => {
+		setBusy( true );
+		setMsg( null );
+		apiFetch( {
+			path: path( 'settings/jobs' ),
+			method: 'POST',
+			data: {
+				overdue: f.overdue ? 1 : 0,
+				repeats: f.repeats ? 1 : 0,
+				reminders: f.reminders ? 1 : 0,
+				digest: f.digest ? 1 : 0,
+				days: String( f.days ),
+				brand: f.brand,
+			},
+		} )
+			.then( ( r ) => {
+				onSaved( r.jobs );
+				setMsg( { tone: 'success', text: r.message } );
+			} )
+			.catch( ( e ) => setMsg( { tone: 'error', text: errText( e ) } ) )
+			.finally( () => setBusy( false ) );
+	};
+	return (
+		<SettingsGroup
+			id="planweb-group-jobs"
+			title={ __( 'Scheduled jobs', 'planweb' ) }
+			description={ __(
+				'Four small jobs that run once a day or once a week, all off until you switch them on. Nothing is posted to any social network. The two emails go only to people with an account on this site, sent by this site’s own email (wp_mail), and only when switched on here.',
+				'planweb'
+			) }
+			footer={
+				<>
+					<Button variant="primary" busy={ busy } onClick={ save }>
+						{ __( 'Save scheduled jobs', 'planweb' ) }
+					</Button>
+					<span aria-live="polite">
+						{ msg && 'success' === msg.tone ? msg.text : '' }
+					</span>
+				</>
+			}
+		>
+			{ msg && 'error' === msg.tone && (
+				<Notice tone="error" onDismiss={ () => setMsg( null ) }>
+					{ msg.text }
+				</Notice>
+			) }
+			{ jobs.map( ( [ key, label, help ] ) => (
+				<Switch
+					key={ key }
+					label={ label }
+					help={ help }
+					checked={ !! f[ key ] }
+					onChange={ ( v ) =>
+						setF( ( o ) => ( { ...o, [ key ]: v } ) )
+					}
+				/>
+			) ) }
+			<Field
+				label={ __(
+					'Remind this many days ahead (1 to 14)',
+					'planweb'
+				) }
+				render={ ( id, describedBy ) => (
+					<input
+						id={ id }
+						aria-describedby={ describedBy }
+						type="number"
+						min="1"
+						max="14"
+						step="1"
+						value={ f.days }
+						onChange={ ( e ) =>
+							setF( ( o ) => ( { ...o, days: e.target.value } ) )
+						}
+					/>
+				) }
+			/>
+			<Field
+				label={ __(
+					'First line of the digest email (optional)',
+					'planweb'
+				) }
+				render={ ( id, describedBy ) => (
+					<input
+						id={ id }
+						aria-describedby={ describedBy }
+						type="text"
+						maxLength={ 120 }
+						value={ f.brand }
+						onChange={ ( e ) =>
+							setF( ( o ) => ( { ...o, brand: e.target.value } ) )
+						}
+					/>
+				) }
+			/>
+		</SettingsGroup>
+	);
+}
+
 function Settings() {
 	const [ data, setData ] = useState( null );
 	const [ error, setError ] = useState( '' );
@@ -2011,6 +2198,9 @@ function Settings() {
 			) }
 			{ 'feed' === open && (
 				<FeedGroup group={ data.feed } onSaved={ put( 'feed' ) } />
+			) }
+			{ 'jobs' === open && data.jobs && (
+				<JobsGroup group={ data.jobs } onSaved={ put( 'jobs' ) } />
 			) }
 			{ ! GROUPS().some( ( g ) => g.value === open ) && (
 				<EmptyState title={ __( 'No such group.', 'planweb' ) } />

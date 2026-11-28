@@ -189,6 +189,8 @@ add_action(
 					'faqUrl'    => add_query_arg( 'page', 'aw-faq', admin_url( 'admin.php' ) ),
 					// The Dashboard's module switches save through settings/modules (manage_options).
 					'canSwitch' => current_user_can( 'manage_options' ),
+					// Empty states point at the next step (administrators only: Settings is theirs).
+					'settingsUrl' => current_user_can( 'manage_options' ) && function_exists( 'rankweb_seo_settings_url' ) ? rankweb_seo_settings_url( 'links' ) : '',
 					// Internal links: the views whose files are loaded (a module switched off has none).
 					'linkViews' => 'links' === $screen ? rankweb_ui_link_views() : array(),
 					// The Dashboard's Tools card.

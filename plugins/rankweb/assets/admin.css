@@ -25,3 +25,10 @@ body.rankweb-shell-screen .rankweb-dash-grid {
 	grid-template-columns: repeat( auto-fit, minmax( 260px, 1fr ) );
 	margin-top: var( --ks-s4, 16px );
 }
+
+/* A chart with few days or types: the shell stretches the bars over the whole width (two bars are two huge slabs).
+   Each bar keeps a sensible width: the drawing is as wide as its bars need (about 2.5rem each, at least 8rem), at most
+   the card. --rankweb-bars is set from the number of points in src/index.js. */
+body.rankweb-shell-screen .rankweb-chart .kits-shell-chart svg {
+	width: min( 100%, max( 8rem, calc( var( --rankweb-bars, 1 ) * 2.5rem ) ) );
+}

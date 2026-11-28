@@ -136,7 +136,7 @@ add_action(
 		// admin width. Dashboard and Settings (no list table) keep the comfortable reading width.
 		// The cache-bust rev is bumped by hand whenever assets/admin.css changes, because the plugin Version is static
 		// (a stale admin.css?ver=1.0.0 is otherwise served from the browser cache). Bump on every admin.css edit.
-		wp_enqueue_style( 'insightweb-admin', plugins_url( 'assets/admin.css', $main ), array( 'kits-shell' ), (string) $head['Version'] . '-css2' );
+		wp_enqueue_style( 'insightweb-admin', plugins_url( 'assets/admin.css', $main ), array( 'kits-shell' ), (string) $head['Version'] . '-css3' );
 	}
 );
 

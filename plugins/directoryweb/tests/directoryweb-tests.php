@@ -42,6 +42,9 @@ check( 'pending' === directoryweb_claim_status( array() ), 'no review is pending
 check( 'approved' === directoryweb_claim_status( array( 'status' => 'approved' ) ), 'approved review' );
 check( 'rejected' === directoryweb_claim_status( 'rejected' ), 'old-form status string' );
 check( 'pending' === directoryweb_claim_status( array( 'status' => 'removed' ) ), 'an unknown status reads as pending' );
+check( 'approved' === directoryweb_claim_status( 'Accepted' ), 'an older approved key reads as approved' );
+check( 'rejected' === directoryweb_claim_status( 'declined' ), 'an older rejected key reads as rejected' );
+check( 'rejected' === directoryweb_claim_status( array( 'status' => 'withdrawn' ) ), 'withdrawn sits under rejected' );
 
 // The list: views, filters, sort, pages.
 $row  = fn( $st, $sent, $title, $name, $state = 0, $types = array(), $has = array() ) => array(

@@ -410,12 +410,17 @@ function Dashboard( { view } ) {
 				>
 					<div className="rankweb-dash-grid">
 						{ trendCharts.map( ( m ) => (
-							<MiniChart
+							<div
 								key={ m.metric }
-								label={ m.label }
-								points={ m.points }
-								unit={ m.unit }
-							/>
+								className="rankweb-chart"
+								style={ { '--rankweb-bars': m.points.length } }
+							>
+								<MiniChart
+									label={ m.label }
+									points={ m.points }
+									unit={ m.unit }
+								/>
+							</div>
 						) ) }
 					</div>
 				</SectionCard>
@@ -431,12 +436,20 @@ function Dashboard( { view } ) {
 				>
 					<div className="rankweb-dash-grid">
 						{ dists.map( ( t ) => (
-							<MiniChart
+							<div
 								key={ t.key }
-								label={ t.label }
-								points={ t.dist }
-								unit={ [ __( 'item', 'rankweb' ), __( 'items', 'rankweb' ) ] }
-							/>
+								className="rankweb-chart"
+								style={ { '--rankweb-bars': t.dist.length } }
+							>
+								<MiniChart
+									label={ t.label }
+									points={ t.dist }
+									unit={ [
+										__( 'item', 'rankweb' ),
+										__( 'items', 'rankweb' ),
+									] }
+								/>
+							</div>
 						) ) }
 					</div>
 				</SectionCard>

@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: MailWeb 3.7.1\n"
+"Project-Id-Version: MailWeb 3.7.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mailweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T06:38:21+00:00\n"
+"POT-Creation-Date: 2026-11-28T07:13:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mailweb\n"
@@ -20,8 +20,8 @@ msgstr ""
 #: includes/mailweb-fluentsmtp.php:44
 #: includes/mailweb-fluentsmtp.php:55
 #: includes/mailweb-fluentsmtp.php:65
-#: includes/mailweb-ui.php:155
 #: includes/mailweb-ui.php:156
+#: includes/mailweb-ui.php:157
 #: includes/native-screens.php:46
 #: includes/overview.php:221
 #: includes/overview.php:226
@@ -156,7 +156,7 @@ msgstr ""
 #: includes/mailweb-ui.php:87
 #: includes/native-screens.php:28
 #: includes/overview.php:226
-#: src/inbox.js:701
+#: src/inbox.js:724
 msgid "Inbox"
 msgstr ""
 
@@ -214,7 +214,7 @@ msgstr ""
 #: includes/native-screens.php:198
 #: includes/sending-mode.php:155
 #: includes/settings-tab.php:18
-#: includes/smtp.php:345
+#: includes/smtp.php:356
 msgid "Not allowed."
 msgstr ""
 
@@ -495,7 +495,7 @@ msgstr ""
 
 #: includes/inbox.php:477
 #: includes/inbox.php:583
-#: includes/mailweb-fluentsmtp.php:515
+#: includes/mailweb-fluentsmtp.php:548
 #: includes/mailweb-rest.php:562
 #: includes/native-screens.php:129
 #: src/inbox.js:335
@@ -604,7 +604,7 @@ msgid "Bcc"
 msgstr ""
 
 #: includes/inbox.php:587
-#: includes/mailweb-fluentsmtp.php:516
+#: includes/mailweb-fluentsmtp.php:549
 #: includes/mailweb-rest.php:563
 #: includes/native-screens.php:129
 #: includes/overview.php:131
@@ -984,7 +984,7 @@ msgid "Fallback mailbox password"
 msgstr ""
 
 #: includes/mail-delivery.php:354
-#: includes/smtp.php:131
+#: includes/smtp.php:132
 msgid "Saved. Leave empty to keep it."
 msgstr ""
 
@@ -995,7 +995,7 @@ msgstr ""
 #: includes/mail-delivery.php:361
 #: includes/native-screens.php:188
 #: includes/sending-mode.php:214
-#: includes/smtp.php:134
+#: includes/smtp.php:138
 msgid "Save"
 msgstr ""
 
@@ -1160,7 +1160,7 @@ msgid "MailWeb sending is active with no held messages."
 msgstr ""
 
 #: includes/mailweb-fluentsmtp.php:200
-#: includes/more-from-kits.php:178
+#: includes/more-from-kits.php:179
 msgid "You are not allowed to do that."
 msgstr ""
 
@@ -1168,100 +1168,115 @@ msgstr ""
 msgid "Please enter a valid recipient email address."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:451
-#: includes/mailweb-fluentsmtp.php:452
+#: includes/mailweb-fluentsmtp.php:484
+#: includes/mailweb-fluentsmtp.php:485
 msgid "This is a MailWeb test email confirming your outgoing mail configuration is working."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:464
+#: includes/mailweb-fluentsmtp.php:497
 msgid "Test email accepted by the mail server."
 msgstr ""
 
 #. translators: %s: the error.
-#: includes/mailweb-fluentsmtp.php:464
+#: includes/mailweb-fluentsmtp.php:497
 #, php-format
 msgid "Test email failed to send: %s"
 msgstr ""
 
 #. translators: %s: the error.
-#: includes/mailweb-fluentsmtp.php:464
-#: includes/smtp.php:372
+#: includes/mailweb-fluentsmtp.php:497
+#: includes/smtp.php:383
 msgid "unknown error"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:475
+#: includes/mailweb-fluentsmtp.php:508
 msgid "Email Logs & Test"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:476
+#: includes/mailweb-fluentsmtp.php:509
 msgid "Email Logs"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:490
-#: includes/more-from-kits.php:87
+#: includes/mailweb-fluentsmtp.php:523
+#: includes/more-from-kits.php:88
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:495
+#: includes/mailweb-fluentsmtp.php:528
 msgid "MailWeb: Email Logs"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:500
+#: includes/mailweb-fluentsmtp.php:533
 msgid "Put back in the queue. It will be sent on the next queue run."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:500
+#: includes/mailweb-fluentsmtp.php:533
 msgid "Not resent: that message is no longer waiting to be retried."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:506
-msgid "The delivery log is off, so nothing new is recorded here. Turn it on under Site sending → Delivery log, fallback and alerts."
+#: includes/mailweb-fluentsmtp.php:539
+msgid "The delivery log is off, so nothing new is recorded here."
+msgstr ""
+
+#: includes/mailweb-fluentsmtp.php:539
+msgid "Turn it on under Site sending → Delivery log, fallback and alerts"
 msgstr ""
 
 #. translators: %s: fallback status
-#: includes/mailweb-fluentsmtp.php:511
+#: includes/mailweb-fluentsmtp.php:544
 #, php-format
 msgid "Fallback SMTP: %s"
 msgstr ""
 
 #. translators: %s: fallback status
-#: includes/mailweb-fluentsmtp.php:511
+#: includes/mailweb-fluentsmtp.php:544
 msgid "not in use"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:512
+#: includes/mailweb-fluentsmtp.php:545
 msgid "Accepted means the mail server took the message; it does not say the message reached the inbox. The text of an email is never logged here."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:514
+#: includes/mailweb-fluentsmtp.php:547
 msgid "Time (UTC)"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:517
+#: includes/mailweb-fluentsmtp.php:550
 #: includes/native-screens.php:129
 #: includes/overview.php:198
 msgid "Status"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:518
+#: includes/mailweb-fluentsmtp.php:551
 msgid "Sent through"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:519
+#: includes/mailweb-fluentsmtp.php:552
 #: includes/mailweb-rest.php:921
 #: src/index.js:596
 msgid "Error"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:520
+#: includes/mailweb-fluentsmtp.php:553
 msgid "Action"
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:523
+#: includes/mailweb-fluentsmtp.php:556
 msgid "No email log entries recorded yet."
 msgstr ""
 
-#: includes/mailweb-fluentsmtp.php:539
+#: includes/mailweb-fluentsmtp.php:556
+msgid "Turn on the delivery log"
+msgstr ""
+
+#. translators: %s: the email's subject.
+#: includes/mailweb-fluentsmtp.php:573
+#, php-format
+msgid "Resend: %s"
+msgstr ""
+
+#. translators: %s: the email's subject.
+#: includes/mailweb-fluentsmtp.php:573
 msgid "Resend"
 msgstr ""
 
@@ -1501,13 +1516,13 @@ msgstr ""
 msgid "This is set in wp-config.php: change it there."
 msgstr ""
 
-#: includes/mailweb-ui.php:157
+#: includes/mailweb-ui.php:158
 #: includes/native-screens.php:153
 #: includes/overview.php:228
 msgid "MailWeb settings"
 msgstr ""
 
-#: includes/mailweb-ui.php:174
+#: includes/mailweb-ui.php:175
 msgid "MailWeb needs Kits Core (active, with its build) to show this screen."
 msgstr ""
 
@@ -1540,113 +1555,113 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-from-kits.php:67
-#: includes/more-from-kits.php:103
+#: includes/more-from-kits.php:104
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-from-kits.php:90
+#: includes/more-from-kits.php:91
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-from-kits.php:91
+#: includes/more-from-kits.php:92
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-from-kits.php:92
+#: includes/more-from-kits.php:93
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-from-kits.php:96
+#: includes/more-from-kits.php:97
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-from-kits.php:97
+#: includes/more-from-kits.php:98
 msgid "Activated."
 msgstr ""
 
-#: includes/more-from-kits.php:98
+#: includes/more-from-kits.php:99
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-from-kits.php:119
+#: includes/more-from-kits.php:120
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-from-kits.php:121
+#: includes/more-from-kits.php:122
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:132
+#: includes/more-from-kits.php:133
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:138
+#: includes/more-from-kits.php:139
 msgid "Activate"
 msgstr ""
 
-#: includes/more-from-kits.php:140
+#: includes/more-from-kits.php:141
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-from-kits.php:144
+#: includes/more-from-kits.php:145
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-from-kits.php:175
+#: includes/more-from-kits.php:176
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-from-kits.php:183
+#: includes/more-from-kits.php:184
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:205
+#: includes/more-from-kits.php:206
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-from-kits.php:212
+#: includes/more-from-kits.php:213
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-from-kits.php:215
+#: includes/more-from-kits.php:216
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-from-kits.php:227
+#: includes/more-from-kits.php:228
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:230
+#: includes/more-from-kits.php:231
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-from-kits.php:241
+#: includes/more-from-kits.php:242
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-from-kits.php:245
+#: includes/more-from-kits.php:246
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-from-kits.php:251
+#: includes/more-from-kits.php:252
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-from-kits.php:262
+#: includes/more-from-kits.php:263
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -1692,7 +1707,7 @@ msgstr ""
 #: includes/native-screens.php:121
 #: includes/overview.php:141
 #: includes/overview.php:183
-#: src/inbox.js:666
+#: src/inbox.js:689
 #: src/index.js:432
 msgid "(unread)"
 msgstr ""
@@ -1933,154 +1948,166 @@ msgstr ""
 msgid "Choose to fill in the server and port"
 msgstr ""
 
-#: includes/smtp.php:114
+#: includes/smtp.php:115
 msgid "Fills in the SMTP server and port for you. Check the mailbox and password, then Save."
 msgstr ""
 
-#: includes/smtp.php:119
+#: includes/smtp.php:120
 #: src/index.js:1124
 msgid "Mailbox (email address)"
 msgstr ""
 
-#: includes/smtp.php:120
+#: includes/smtp.php:121
 #: src/index.js:1153
 msgid "Mailbox password"
 msgstr ""
 
-#: includes/smtp.php:121
+#: includes/smtp.php:122
 #: src/index.js:1125
 msgid "Sender name"
 msgstr ""
 
-#: includes/smtp.php:122
+#: includes/smtp.php:123
 #: src/index.js:1126
 msgid "SMTP server"
 msgstr ""
 
-#: includes/smtp.php:123
-#: includes/smtp.php:142
+#: includes/smtp.php:124
+#: includes/smtp.php:153
 #: src/index.js:1127
 msgid "Port"
 msgstr ""
 
-#: includes/smtp.php:128
+#: includes/smtp.php:129
 msgid "Set in wp-config or the server environment."
 msgstr ""
 
 #: includes/smtp.php:134
+msgid "name@yourdomain.com"
+msgstr ""
+
+#: includes/smtp.php:138
 msgid "Save and send a test email"
 msgstr ""
 
-#: includes/smtp.php:139
+#: includes/smtp.php:142
+msgid "DNS records"
+msgstr ""
+
+#: includes/smtp.php:142
+msgid "The SPF and DKIM records to add depend on the provider chosen above. Your provider shows them in its own dashboard; add them where the domain's DNS is managed."
+msgstr ""
+
+#: includes/smtp.php:150
 msgid "Hostinger Mail Server Connectivity (IMAP, SMTP, POP3)"
 msgstr ""
 
-#: includes/smtp.php:140
+#: includes/smtp.php:151
 msgid "Standard protocol endpoints and ports for incoming and outgoing mailbox synchronization."
 msgstr ""
 
-#: includes/smtp.php:142
+#: includes/smtp.php:153
 msgid "Protocol"
 msgstr ""
 
-#: includes/smtp.php:142
+#: includes/smtp.php:153
 msgid "Hostname"
 msgstr ""
 
-#: includes/smtp.php:142
+#: includes/smtp.php:153
 msgid "TLS/SSL"
 msgstr ""
 
-#: includes/smtp.php:142
+#: includes/smtp.php:153
 msgid "Status / Recommendation"
 msgstr ""
 
-#: includes/smtp.php:168
+#: includes/smtp.php:179
 msgid "DNS & Deliverability Records (DKIM, SPF)"
 msgstr ""
 
-#: includes/smtp.php:169
+#: includes/smtp.php:180
 msgid "Add these DNS records to your domain DNS provider to ensure maximum inbox delivery and prevent spoofing."
 msgstr ""
 
-#: includes/smtp.php:171
+#: includes/smtp.php:182
 msgid "Record Type"
 msgstr ""
 
-#: includes/smtp.php:171
+#: includes/smtp.php:182
 msgid "Host / Name"
 msgstr ""
 
-#: includes/smtp.php:171
+#: includes/smtp.php:182
 #: src/index.js:1095
 msgid "Value"
 msgstr ""
 
-#: includes/smtp.php:171
+#: includes/smtp.php:182
 msgid "Notes"
 msgstr ""
 
-#: includes/smtp.php:194
+#: includes/smtp.php:205
 msgid "Incoming server (IMAP)"
 msgstr ""
 
-#: includes/smtp.php:198
+#: includes/smtp.php:209
 msgid "Recommended for syncing messages, folders, and read states."
 msgstr ""
 
-#: includes/smtp.php:201
+#: includes/smtp.php:212
 msgid "Outgoing server (SMTP)"
 msgstr ""
 
-#: includes/smtp.php:205
+#: includes/smtp.php:216
 msgid "Recommended outgoing relay for transaction notices and campaigns."
 msgstr ""
 
-#: includes/smtp.php:208
+#: includes/smtp.php:219
 msgid "Incoming server (POP3)"
 msgstr ""
 
-#: includes/smtp.php:212
+#: includes/smtp.php:223
 msgid "Not recommended (downloads emails to single device without folder sync)."
 msgstr ""
 
-#: includes/smtp.php:231
+#: includes/smtp.php:242
 msgid "Cryptographic DKIM signature verifying emails originate from authorized Hostinger mail servers."
 msgstr ""
 
-#: includes/smtp.php:238
+#: includes/smtp.php:249
 msgid "SPF policy designating Hostinger as an authorized sender for this domain."
 msgstr ""
 
-#: includes/smtp.php:254
-#: includes/smtp.php:289
+#: includes/smtp.php:265
+#: includes/smtp.php:300
 msgid "DNS check not available on this server."
 msgstr ""
 
-#: includes/smtp.php:261
+#: includes/smtp.php:272
 msgid "Record not detected yet (DNS propagation may take up to 24h)."
 msgstr ""
 
-#: includes/smtp.php:269
+#: includes/smtp.php:280
 msgid "DKIM signature verified and active in DNS."
 msgstr ""
 
-#: includes/smtp.php:275
+#: includes/smtp.php:286
 msgid "DKIM TXT record found but public key differs."
 msgstr ""
 
-#: includes/smtp.php:333
+#: includes/smtp.php:344
 msgid "MailWeb email setup:"
 msgstr ""
 
 #. translators: %s: site name.
-#: includes/smtp.php:366
+#: includes/smtp.php:377
 #, php-format
 msgid "Test email from %s"
 msgstr ""
 
 #. translators: %s: the sending mailbox address.
-#: includes/smtp.php:368
+#: includes/smtp.php:379
 #, php-format
 msgid "This test email was sent through %s. Mail is working."
 msgstr ""
@@ -2163,70 +2190,78 @@ msgstr ""
 msgid "Loading messages…"
 msgstr ""
 
-#: src/inbox.js:597
+#: src/inbox.js:600
+msgid "Connect a mailbox"
+msgstr ""
+
+#: src/inbox.js:608
+msgid "If a mailbox is already connected, new mail appears here when it arrives. Otherwise, an administrator saves the Mail API token in MailWeb → Settings."
+msgstr ""
+
+#: src/inbox.js:620
 msgid "Messages"
 msgstr ""
 
 #. translators: %s: message subject.
-#: src/inbox.js:616
+#: src/inbox.js:639
 #, js-format
 msgid "Select “%s”"
 msgstr ""
 
-#: src/inbox.js:649
+#: src/inbox.js:672
 msgid "Has attachments"
 msgstr ""
 
 #. translators: 1: action, 2: message subject.
-#: src/inbox.js:683
+#: src/inbox.js:706
 #, js-format
 msgid "%1$s: “%2$s”"
 msgstr ""
 
-#: src/inbox.js:705
+#: src/inbox.js:728
 msgid "Message list"
 msgstr ""
 
-#: src/inbox.js:720
-#: src/inbox.js:726
+#: src/inbox.js:743
+#: src/inbox.js:749
 msgid "Search mail"
 msgstr ""
 
-#: src/inbox.js:742
+#: src/inbox.js:765
 msgid "Select all on this page"
 msgstr ""
 
 #. translators: %d: number of messages.
-#: src/inbox.js:763
+#: src/inbox.js:786
 #, js-format
 msgid "%d message"
 msgid_plural "%d messages"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/inbox.js:778
+#: src/inbox.js:801
 msgid "Refresh"
 msgstr ""
 
-#: src/inbox.js:793
+#: src/inbox.js:816
 msgid "Pages"
 msgstr ""
 
-#: src/inbox.js:802
+#: src/inbox.js:825
 msgid "Newer"
 msgstr ""
 
 #. translators: 1: page number, 2: number of pages.
-#: src/inbox.js:807
+#: src/inbox.js:830
 #, js-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
-#: src/inbox.js:819
+#: src/inbox.js:842
 msgid "Older"
 msgstr ""
 
-#: src/inbox.js:826
+#: src/inbox.js:849
 msgid "Open message"
 msgstr ""
 

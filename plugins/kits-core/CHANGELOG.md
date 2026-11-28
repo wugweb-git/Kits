@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.2
+
+- Kits Home links to More from Kits (and it has its own page title). One screen navigation: the WordPress tab bar is hidden when the header already lists every screen, the header tabs scroll the current tab into view and collapse to a select on phones, and the page is no longer wider than a phone screen. Empty states can carry an action. Link target sizes, per-row accessible names. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
+
 ## 1.5.1
 
 - The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. Chart tables take a singular and plural unit. Coding-standard cleanup across the plugin (no behaviour change).

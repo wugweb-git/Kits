@@ -440,7 +440,7 @@ function planweb_jobs_panel( bool $wrap = false, string $back = '' ) {
 		echo '<div class="wrap planweb planweb-jobs">';
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- messages only.
 		if ( isset( $_GET['done'] ) && 'jobs' === sanitize_key( wp_unslash( $_GET['done'] ) ) ) {
-			wp_admin_notice( esc_html__( 'Scheduled jobs saved.', 'planweb' ), array( 'type' => 'success' ) );
+			wp_admin_notice( esc_html__( 'Scheduled jobs saved.', 'planweb' ), array( 'type' => 'success', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( isset( $_GET['error'] ) ) {
 			wp_admin_notice( esc_html( sanitize_text_field( wp_unslash( $_GET['error'] ) ) ), array( 'type' => 'error' ) );
@@ -462,7 +462,7 @@ function planweb_jobs_panel( bool $wrap = false, string $back = '' ) {
 		'digest'    => array( __( 'Weekly digest by email', 'planweb' ), __( 'Every Monday at 08:30, email the site administrator address (Settings, General) the next 7 days and what is overdue.', 'planweb' ) ),
 	);
 	foreach ( $rows as $key => $r ) {
-		echo '<tr><th scope="row">' . esc_html( $r[0] ) . '</th><td><label><input type="checkbox" name="' . esc_attr( $key ) . '" value="1"' . checked( $s[ $key ], true, false ) . '> ' . esc_html__( 'On', 'planweb' ) . '</label><p class="description">' . esc_html( $r[1] ) . '</p>';
+		echo '<tr><th scope="row">' . esc_html( $r[0] ) . '</th><td><label><input type="checkbox" name="' . esc_attr( $key ) . '" value="1" aria-label="' . esc_attr( sprintf( /* translators: %s: the job's name. */ __( '%s: on', 'planweb' ), $r[0] ) ) . '"' . checked( $s[ $key ], true, false ) . '> ' . esc_html__( 'On', 'planweb' ) . '</label><p class="description">' . esc_html( $r[1] ) . '</p>';
 		if ( 'reminders' === $key ) {
 			echo '<p><label for="planweb-jobs-days">' . esc_html__( 'Remind this many days ahead (1 to 14)', 'planweb' ) . '</label> <input type="number" id="planweb-jobs-days" name="days" min="1" max="14" step="1" class="small-text" value="' . (int) $s['days'] . '"></p>';
 		}

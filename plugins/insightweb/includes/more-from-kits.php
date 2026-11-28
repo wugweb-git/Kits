@@ -70,15 +70,16 @@ add_action(
 );
 
 add_action(
-	'admin_init',
+	'admin_menu',
 	function () {
-		// A link to this plugin's copy goes to Kits Core's page when Core is active.
+		// A link to this plugin's copy goes to Kits Core's page when Core is active (on admin_menu: WordPress refuses an unregistered page before admin_init).
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only page name.
 		if ( 'insightweb' !== 'kits' && function_exists( 'kits_more_page' ) && isset( $_GET['page'] ) && 'insightweb-more' === $_GET['page'] ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=kits-core-more' ) );
 			exit;
 		}
-	}
+	},
+	10000
 );
 
 /** The page: a card for each of the other plugins. */

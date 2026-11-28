@@ -68,6 +68,66 @@ export {
 const cx = ( ...names ) => names.filter( Boolean ).join( ' ' );
 
 /**
+ * Bring the open item (the current tab, the chosen chip) to the middle of a sideways scroller.
+ *
+ * @param {Element} el The scroller.
+ * @param {string}  on CSS selector of the open item inside it.
+ */
+function centreOpenItem( el, on ) {
+	const item = el?.querySelector( on );
+	if ( ! item || el.scrollWidth <= el.clientWidth ) {
+		return;
+	}
+	const left =
+		item.getBoundingClientRect().left -
+		el.getBoundingClientRect().left +
+		el.scrollLeft;
+	el.scrollLeft = Math.max(
+		0,
+		left - ( el.clientWidth - item.offsetWidth ) / 2
+	);
+}
+
+/**
+ * Whether a sideways scroller has more to show on either side, so the screen can fade that edge (a cue that the row
+ * scrolls). Kept up to date while the user scrolls and when the row or the window changes size.
+ *
+ * @param {Object} ref  Ref of the scroller.
+ * @param {string} deps A value that changes when the row's content does.
+ * @return {Object} { start, end }.
+ */
+function useEdgeCue( ref, deps ) {
+	const [ cue, setCue ] = useState( { start: false, end: false } );
+	useEffect( () => {
+		const el = ref.current;
+		if ( ! el ) {
+			return undefined;
+		}
+		const update = () => {
+			const start = el.scrollLeft > 1;
+			const end = el.scrollLeft < el.scrollWidth - el.clientWidth - 1;
+			setCue( ( c ) =>
+				c.start === start && c.end === end ? c : { start, end }
+			);
+		};
+		update();
+		el.addEventListener( 'scroll', update, { passive: true } );
+		window.addEventListener( 'resize', update );
+		const watch =
+			'undefined' !== typeof window.ResizeObserver
+				? new window.ResizeObserver( update )
+				: null;
+		watch?.observe( el );
+		return () => {
+			el.removeEventListener( 'scroll', update );
+			window.removeEventListener( 'resize', update );
+			watch?.disconnect();
+		};
+	}, [ ref, deps ] );
+	return cue;
+}
+
+/**
  * The whole screen: header on top, content under it.
  *
  * @param {Object}  props
@@ -96,6 +156,30 @@ export function AppShell( { header, children } ) {
  *                                the section or item the screen names (crumbs.js).
  */
 export function AppHeader( { icon, name, version, tabs = [], aside, crumbs } ) {
+	const strip = useRef( null );
+	const names = tabs.map( ( t ) => t.label ).join( '|' );
+	const cue = useEdgeCue( strip, names );
+	// The open tab is in view when the screen opens (a phone shows a few tabs of many).
+	useEffect( () => {
+		centreOpenItem( strip.current, '.is-current' );
+	}, [ names ] );
+	// Core also prints the product's own tab row above the screen (admin-menu.php). When this header already lists every
+	// screen that row has, the row is hidden, so there is one navigation, not two.
+	useEffect( () => {
+		const fold = document.querySelector( '.kits-fold-tabs' );
+		if ( ! fold || ! names ) {
+			return;
+		}
+		const mine = names.toLowerCase().split( '|' );
+		const theirs = Array.from( fold.querySelectorAll( 'a' ) ).map( ( a ) =>
+			a.textContent.trim().toLowerCase()
+		);
+		fold.classList.toggle(
+			'is-covered',
+			theirs.length > 0 && theirs.every( ( t ) => mine.includes( t ) )
+		);
+	}, [ names ] );
+	const open = tabs.find( ( t ) => t.current );
 	return (
 		<header className="kits-shell-header">
 			<Breadcrumbs name={ name } tabs={ tabs } crumbs={ crumbs } />
@@ -116,10 +200,34 @@ export function AppHeader( { icon, name, version, tabs = [], aside, crumbs } ) {
 					</span>
 				) }
 			</div>
+			{ tabs.length > 1 && (
+				<select
+					className="kits-shell-header__select"
+					aria-label={ __( 'Go to screen', 'kits-core' ) }
+					value={ open?.url || '' }
+					onChange={ ( e ) => {
+						if ( e.target.value ) {
+							window.location.assign( e.target.value );
+						}
+					} }
+				>
+					{ ! open && <option value="">{ name }</option> }
+					{ tabs.map( ( t ) => (
+						<option key={ t.slug } value={ t.url }>
+							{ t.label }
+						</option>
+					) ) }
+				</select>
+			) }
 			{ tabs.length > 0 && (
 				<nav
-					className="kits-shell-header__tabs"
+					className={ cx(
+						'kits-shell-header__tabs',
+						cue.start && 'has-more-start',
+						cue.end && 'has-more-end'
+					) }
 					aria-label={ __( 'Screens', 'kits-core' ) }
+					ref={ strip }
 				>
 					<ul>
 						{ tabs.map( ( t ) => (
@@ -161,6 +269,7 @@ export function AppHeader( { icon, name, version, tabs = [], aside, crumbs } ) {
  */
 export function ChipRow( { label, chips = [], value, onChange, after } ) {
 	const list = useRef( null );
+	const cue = useEdgeCue( list, chips.map( ( c ) => c.value ).join( '|' ) );
 	// On a phone the chips scroll sideways: bring the chosen one into view.
 	useEffect( () => {
 		const ul = list.current;
@@ -179,6 +288,7 @@ export function ChipRow( { label, chips = [], value, onChange, after } ) {
 			ul.scrollLeft = Math.max( 0, left - 16 );
 		}
 	}, [ value ] );
+	const links = chips.length > 3 && chips.every( ( c ) => c.href );
 	// Chips that are links are the screen's sections: the open one is the last breadcrumb.
 	const open = chips.find( ( c ) => c.href && c.value === value );
 	useCrumb(
@@ -186,8 +296,40 @@ export function ChipRow( { label, chips = [], value, onChange, after } ) {
 		open?.href
 	);
 	return (
-		<div className="kits-shell-chips">
-			<ul aria-label={ label } ref={ list }>
+		<div className={ cx( 'kits-shell-chips', links && 'has-select' ) }>
+			{ links && (
+				<select
+					className="kits-shell-chips__select"
+					aria-label={ label }
+					value={
+						chips.find( ( c ) => c.value === value )?.href || ''
+					}
+					onChange={ ( e ) => {
+						const to = chips.find(
+							( c ) => c.href === e.target.value
+						);
+						if ( to ) {
+							onChange?.( to.value );
+							window.location.assign( to.href );
+						}
+					} }
+				>
+					{ ! open && <option value="">{ label }</option> }
+					{ chips.map( ( c ) => (
+						<option key={ c.value } value={ c.href }>
+							{ String( c.label ).replace( /\s*•$/, '' ) }
+						</option>
+					) ) }
+				</select>
+			) }
+			<ul
+				aria-label={ label }
+				ref={ list }
+				className={ cx(
+					cue.start && 'has-more-start',
+					cue.end && 'has-more-end'
+				) }
+			>
 				{ chips.map( ( c ) => {
 					const on = c.value === value;
 					return (

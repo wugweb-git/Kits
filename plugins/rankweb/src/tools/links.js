@@ -189,6 +189,14 @@ function Audit() {
 						'No post type is linked yet, so there is nothing to audit. Add post types under RankWeb → Settings → Internal links.',
 						'rankweb'
 					) }
+					{ app.settingsUrl && (
+						<>
+							{ ' ' }
+							<a href={ app.settingsUrl }>
+								{ __( 'Choose post types', 'rankweb' ) }
+							</a>
+						</>
+					) }
 				</Notice>
 			) }
 			<DataList

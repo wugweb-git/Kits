@@ -520,6 +520,22 @@ foreach ( $pre as $k => $p ) {
 }
 t( ! $bad, 'presets: each has a real host name, a standard port, and SSL only on 465' . ( $bad ? ' (' . implode( ',', $bad ) . ')' : '' ) );
 t( '' === $pre['custom']['host'], 'presets: Custom leaves the server empty, so the picker fills nothing' );
+$mw_src = (string) file_get_contents( dirname( __DIR__ ) . '/includes/mailweb-fluentsmtp.php' );
+foreach ( array( 'mailweb_smtp_preset_for', 'mailweb_smtp_user_shown' ) as $fn ) {
+	preg_match( '/^function ' . $fn . '\(.*?^\}/ms', $mw_src, $m );
+	t( ! empty( $m[0] ), "presets: $fn exists" );
+	if ( ! empty( $m[0] ) && ! function_exists( $fn ) ) {
+		eval( $m[0] );
+	}
+}
+t( 'hostinger' === mailweb_smtp_preset_for( 'smtp.hostinger.com', 465 ), 'presets: the saved Hostinger server and port select Hostinger Mail' );
+t( 'gmail' === mailweb_smtp_preset_for( 'SMTP.gmail.com', 587 ), 'presets: the match ignores case' );
+t( 'custom' === mailweb_smtp_preset_for( 'smtp.hostinger.com', 587 ), 'presets: a known server on another port is Custom' );
+t( '' === mailweb_smtp_preset_for( '', 465 ), 'presets: no server selects nothing' );
+t( '' === mailweb_smtp_user_shown( 'noreply@127.0.0.1', '127.0.0.1' ), 'mailbox: the default at an IP address is not shown' );
+t( '' === mailweb_smtp_user_shown( 'noreply@localhost', 'localhost' ), 'mailbox: the default at a dotless host is not shown' );
+t( 'noreply@example.com' === mailweb_smtp_user_shown( 'noreply@example.com', 'example.com' ), 'mailbox: a real domain keeps its default' );
+t( 'me@127.0.0.1' === mailweb_smtp_user_shown( 'me@127.0.0.1', '127.0.0.1' ), 'mailbox: a saved address is never hidden' );
 
 echo $fails ? "\n$fails failed\n" : "\nall passed\n";
 exit( $fails ? 1 : 0 );

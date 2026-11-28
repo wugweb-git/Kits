@@ -209,6 +209,7 @@ function sourceweb_count_workers(): array {
 	$now  = time();
 	$runs = array();
 	$good = 0;
+	$seen_n = 0; // workflows that have reported at least one run
 	foreach ( sourceweb_workers_runs() as $file => $list ) {
 		$w = function_exists( 'sourceweb_worker_def' ) ? sourceweb_worker_def( $file, AW_WORKERS[ $file ] ) : AW_WORKERS[ $file ];
 		krsort( $list, SORT_NUMERIC );
@@ -217,6 +218,7 @@ function sourceweb_count_workers(): array {
 		$next   = ! empty( $w['crons'] ) && function_exists( 'sourceweb_workers_next' ) ? sourceweb_workers_next( (array) $w['crons'], $now ) : 0;
 		$result = $last ? (string) ( $last['result'] ?? 'failed' ) : '';
 		$good  += 'success' === $result ? 1 : 0;
+		$seen_n += $last ? 1 : 0;
 		$runs[] = array(
 			'file'   => (string) $file,
 			'name'   => (string) $w['name'],
@@ -229,6 +231,7 @@ function sourceweb_count_workers(): array {
 	return array(
 		'total'    => count( $runs ),
 		'good'     => $good,
+		'reporting' => $seen_n,
 		'problems' => function_exists( 'sourceweb_workers_problems' ) ? array_values( array_map( 'strval', (array) sourceweb_workers_problems() ) ) : array(),
 		'runs'     => $runs,
 		'token'    => defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN,

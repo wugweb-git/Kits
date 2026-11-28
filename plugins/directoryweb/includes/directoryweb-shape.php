@@ -18,6 +18,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function directoryweb_claim_status( $review ): string {
 	$st = is_array( $review ) ? (string) ( $review['status'] ?? '' ) : (string) $review;
+	$st = strtolower( trim( $st ) );
+	// Older stored keys (the old claim form, demo and imported claims) read as the three list buckets.
+	$map = array(
+		'approve'   => 'approved',
+		'accepted'  => 'approved',
+		'accept'    => 'approved',
+		'verified'  => 'approved',
+		'reject'    => 'rejected',
+		'declined'  => 'rejected',
+		'denied'    => 'rejected',
+		'refused'   => 'rejected',
+		'withdrawn' => 'rejected', // as the native claims: withdrawn and revoked sit under Rejected.
+		'revoked'   => 'rejected',
+	);
+	$st  = $map[ $st ] ?? $st;
 	return in_array( $st, array( 'approved', 'rejected' ), true ) ? $st : 'pending';
 }
 

@@ -147,8 +147,29 @@ function planweb_ui_page(): bool {
 		'settings'  => __( 'PlanWeb settings', 'planweb' ),
 	);
 	kits_shell_mount( 'planweb-app', $titles[ $screen ] );
-	if ( 'settings' === $screen ) {
-		planweb_jobs_panel( true ); // The scheduled jobs' settings, server-rendered under the shell's groups.
-	}
 	return true;
 }
+
+/**
+ * The tab title names the screen (WCAG 2.4.2): the Dashboard, the entries and the settings were all "Calendar".
+ *
+ * @param string $admin_title The title.
+ * @param string $title       The menu's page title.
+ */
+add_filter(
+	'admin_title',
+	function ( $admin_title, $title ) {
+		$screen = planweb_ui_wanted();
+		if ( '' === $screen || '' === (string) $title || 0 !== strpos( (string) $admin_title, (string) $title ) ) {
+			return $admin_title;
+		}
+		$names = array(
+			'dashboard' => __( 'PlanWeb', 'planweb' ),
+			'entries'   => __( 'PlanWeb entries', 'planweb' ),
+			'settings'  => __( 'PlanWeb settings', 'planweb' ),
+		);
+		return $names[ $screen ] . substr( (string) $admin_title, strlen( (string) $title ) );
+	},
+	10,
+	2
+);

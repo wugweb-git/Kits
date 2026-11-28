@@ -127,9 +127,20 @@ body.kits-shell-screen .wrap > .updated {
 
 /* ---------- App header ---------- */
 
+.kits-shell,
+.kits-shell__body {
+	min-width: 0;
+	max-width: 100%;
+}
+
+.kits-shell {
+	overflow-x: clip; /* nothing inside may make the page wider than the screen */
+}
+
 .kits-shell-header {
 	display: flex;
 	flex-wrap: wrap;
+	min-width: 0;
 	align-items: center;
 	gap: var(--ks-s3) var(--ks-s5);
 	padding: var(--ks-s3) var(--ks-s5) 0;
@@ -166,7 +177,34 @@ body.kits-shell-screen .wrap > .updated {
 	display: flex;
 	order: 3;
 	flex: 1 0 100%;
+	min-width: 0;
+	max-width: 100%;
 	overflow-x: auto;
+	contain: inline-size; /* a long row scrolls inside the header; it never widens the page (375 px phones) */
+}
+
+/* The row scrolls: fade the edge that has more, so a clipped tab does not look like the end. */
+.kits-shell-header__tabs.has-more-end {
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+}
+
+.kits-shell-header__tabs.has-more-start {
+	-webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent);
+	mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent);
+}
+
+.kits-shell-header__tabs.has-more-start.has-more-end {
+	-webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+	mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+}
+
+/* Below 640 px the tabs are one select (shown in the media query at the end), not a row to scroll. */
+.kits-shell-header__select {
+	display: none;
+	order: 3;
+	flex: 1 0 100%;
+	margin-bottom: var(--ks-s3);
 }
 
 .kits-shell-header__tabs ul {
@@ -300,6 +338,25 @@ body.kits-shell-screen .wrap > .updated {
 	gap: var(--ks-s3) var(--ks-s4);
 }
 
+.kits-shell-chips__select {
+	display: none;
+}
+
+.kits-shell-chips ul.has-more-end {
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+
+.kits-shell-chips ul.has-more-start {
+	-webkit-mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+	mask-image: linear-gradient(to left, #000 calc(100% - 32px), transparent);
+}
+
+.kits-shell-chips ul.has-more-start.has-more-end {
+	-webkit-mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+	mask-image: linear-gradient(to right, transparent, #000 32px, #000 calc(100% - 32px), transparent);
+}
+
 .kits-shell-chips ul {
 	display: flex;
 	flex-wrap: wrap;
@@ -399,7 +456,32 @@ body.kits-shell-screen .wrap > .updated {
 }
 
 .kits-shell-tile__value a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 24px; /* WCAG 2.5.8: a one-digit number is still a 24 px target */
+	min-height: 24px;
 	text-decoration-thickness: 1px;
+}
+
+/* Links in table cells and the breadcrumb are 24 px targets too (2.5.8). */
+.kits-shell td a,
+.kits-shell th a,
+.kits-shell-crumbs .components-button.is-link {
+	display: inline-flex;
+	align-items: center;
+	box-sizing: border-box;
+	min-width: 24px;
+	min-height: 24px;
+}
+
+.kits-shell-crumbs .components-button.is-link {
+	padding: 0 2px;
+}
+
+.kits-shell-state__action {
+	margin-top: var(--ks-s2);
+	text-decoration: none;
 }
 
 .kits-shell-tile__counting {
@@ -898,5 +980,48 @@ body.kits-shell-screen .wrap > .updated {
 	.kits-shell-table td {
 		border-top: 0;
 		padding-top: 0;
+	}
+}
+
+/* ---------- The product's own tab row (Core prints it above the screen; includes/admin-menu.php) ---------- */
+
+/* The header above lists every screen the row has: one navigation, not two (the header's script marks the row). */
+.kits-fold-tabs.is-covered {
+	display: none;
+}
+
+@media (max-width: 782px) {
+
+	/* When the header does not list them all, the row stays but is one line that scrolls, not 150 px of wrapped tabs. */
+	.kits-fold-tabs .nav-tab-wrapper {
+		display: flex;
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		max-width: 100%;
+	}
+
+	.kits-fold-tabs .nav-tab {
+		flex: none;
+		white-space: nowrap;
+	}
+}
+
+@media (max-width: 639px) {
+
+	.kits-shell-header__select {
+		display: block;
+	}
+
+	.kits-shell-header__tabs {
+		display: none;
+	}
+
+	.kits-shell-chips.has-select .kits-shell-chips__select {
+		display: block;
+		max-width: 100%;
+	}
+
+	.kits-shell-chips.has-select ul {
+		display: none;
 	}
 }
