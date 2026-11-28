@@ -290,8 +290,8 @@ foreach ( array( 'dashboard', 'modules', 'settings', 'insights' ) as $scr ) { //
 	$out = ob_get_clean();
 	$c( 'admin screen renders without Kits Core: ' . $scr, '' !== trim( $out ) && false === strpos( $out, 'needs Kits Core' ) && false === strpos( $out, 'Fatal error' ), substr( wp_strip_all_tags( $out ), 0, 80 ) );
 }
-rankweb_seo_settings_save( 'schema', array( 'AW_SITE_ALT_NAMES' => "Journey Site\nJS" ) );
-$c( 'settings save and persist', array( 'Journey Site', 'JS' ) === ( rankweb_seo_saved()['schema']['AW_SITE_ALT_NAMES'] ?? null ) );
+rankweb_seo_settings_save( 'schema', array( 'RANKWEB_SITE_ALT_NAMES' => "Journey Site\nJS" ) );
+$c( 'settings save and persist', array( 'Journey Site', 'JS' ) === ( rankweb_seo_saved()['schema']['RANKWEB_SITE_ALT_NAMES'] ?? null ) );
 $on = array(); foreach ( rankweb_seo_modules() as $k => $m ) { if ( ! empty( $m['switch'] ) && 'llms' !== $k ) { $on[ $k ] = true; } }
 rankweb_seo_settings_save( 'modules', array(), false, $on );
 $c( 'switching a module off takes its files out', ! rankweb_seo_module_on( 'llms' ) && in_array( 'llms', rankweb_seo_files_off(), true ) );
