@@ -45,6 +45,6 @@ function sourceweb_sourcing_kits_status_row( $rows ) {
 	if ( function_exists( 'sourceweb_review_count' ) ) {
 		$text .= '; ' . (int) sourceweb_review_count() . ' to review';
 	}
-	$rows[] = array( 'SourceWeb', esc_html( $text ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SRC_MENU ) ) . '">' . esc_html( 'Overview' ) . '</a>' );
+	$rows[] = array( 'SourceWeb', esc_html( $text ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=' . SOURCEWEB_SRC_MENU ) ) . '">' . esc_html( 'Overview' ) . '</a>' );
 	return $rows;
 }

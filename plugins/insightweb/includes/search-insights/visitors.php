@@ -24,19 +24,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_VIS_DB      = '1'; // Table version.
-const AW_SI_VIS_IP_DAYS = 30;
-const AW_SI_GEO_CRON    = 'aw_si_geo_refresh';
-const AW_SI_VIS_OPTION  = 'insightweb_visitor_tracking'; // 1 on, 0 off; absent until chosen.
+const INSIGHTWEB_SI_VIS_DB      = '1'; // Table version.
+const INSIGHTWEB_SI_VIS_IP_DAYS = 30;
+const INSIGHTWEB_SI_GEO_CRON    = 'aw_si_geo_refresh';
+const INSIGHTWEB_SI_VIS_OPTION  = 'insightweb_visitor_tracking'; // 1 on, 0 off; absent until chosen.
 
 /** Whether visitor counting is on. Absent means off: nothing is counted until an administrator turns it on. */
 function insightweb_si_vis_enabled(): bool {
-	return 1 === (int) get_option( AW_SI_VIS_OPTION, 0 );
+	return 1 === (int) get_option( INSIGHTWEB_SI_VIS_OPTION, 0 );
 }
 
 /** Turn counting on (the table is made on the next admin request or daily run). */
 function insightweb_si_vis_on(): void {
-	update_option( AW_SI_VIS_OPTION, 1, true );
+	update_option( INSIGHTWEB_SI_VIS_OPTION, 1, true );
 	insightweb_si_vis_install();
 }
 
@@ -49,7 +49,7 @@ function insightweb_si_vis_purge(): void {
 	$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', insightweb_si_vis_table() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.SchemaChange -- our own counter table
 	delete_option( 'aw_si_vis_db' );
 	delete_option( 'aw_si_geo_updated' );
-	wp_unschedule_hook( AW_SI_GEO_CRON );
+	wp_unschedule_hook( INSIGHTWEB_SI_GEO_CRON );
 	$dir = insightweb_si_geo_dir();
 	foreach ( array( 'v4.bin', 'v6.bin', 'v4.bin.new', 'v6.bin.new' ) as $f ) {
 		if ( file_exists( $dir . $f ) ) {
@@ -63,7 +63,7 @@ function insightweb_si_vis_purge(): void {
 
 /** Turn counting off and delete what it stored. */
 function insightweb_si_vis_off(): void {
-	update_option( AW_SI_VIS_OPTION, 0, true );
+	update_option( INSIGHTWEB_SI_VIS_OPTION, 0, true );
 	insightweb_si_vis_purge();
 }
 
@@ -75,7 +75,7 @@ function insightweb_si_vis_table(): string {
 
 /** Create or update the table (admin and the daily run only). */
 function insightweb_si_vis_install(): void {
-	if ( ! insightweb_si_vis_enabled() || AW_SI_VIS_DB === get_option( 'aw_si_vis_db' ) ) {
+	if ( ! insightweb_si_vis_enabled() || INSIGHTWEB_SI_VIS_DB === get_option( 'aw_si_vis_db' ) ) {
 		return;
 	}
 	global $wpdb;
@@ -89,7 +89,7 @@ function insightweb_si_vis_install(): void {
 			PRIMARY KEY  (day,kind,k)
 		) ' . $wpdb->get_charset_collate() . ';'
 	);
-	update_option( 'aw_si_vis_db', AW_SI_VIS_DB, true );
+	update_option( 'aw_si_vis_db', INSIGHTWEB_SI_VIS_DB, true );
 }
 add_action( 'admin_init', 'insightweb_si_vis_install' );
 
@@ -169,7 +169,7 @@ function insightweb_si_vis_country(): string {
 
 /** At the end of a front-end request: one more for its country and its shortened address (one query). */
 function insightweb_si_vis_count(): void {
-	if ( ! insightweb_si_vis_enabled() || AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) || is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_user_logged_in() ) {
+	if ( ! insightweb_si_vis_enabled() || INSIGHTWEB_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) || is_admin() || wp_doing_cron() || wp_doing_ajax() || ( defined( 'WP_CLI' ) && WP_CLI ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_user_logged_in() ) {
 		return;
 	}
 	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
@@ -193,13 +193,13 @@ function insightweb_si_vis_daily(): void {
 	insightweb_si_vis_install();
 	global $wpdb;
 	$t = insightweb_si_vis_table();
-	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE kind = 'i' AND day < %s", $t, wp_date( 'Y-m-d', time() - AW_SI_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- shortened addresses older than 30 days
+	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE kind = 'i' AND day < %s", $t, wp_date( 'Y-m-d', time() - INSIGHTWEB_SI_VIS_IP_DAYS * DAY_IN_SECONDS ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- shortened addresses older than 30 days
 	$v4 = insightweb_si_geo_dir() . 'v4.bin';
-	if ( ( ! is_readable( $v4 ) || filemtime( $v4 ) < time() - 30 * DAY_IN_SECONDS ) && ! wp_next_scheduled( AW_SI_GEO_CRON ) ) {
-		wp_schedule_single_event( time() + 120, AW_SI_GEO_CRON ); // its own run: the download and conversion take a while.
+	if ( ( ! is_readable( $v4 ) || filemtime( $v4 ) < time() - 30 * DAY_IN_SECONDS ) && ! wp_next_scheduled( INSIGHTWEB_SI_GEO_CRON ) ) {
+		wp_schedule_single_event( time() + 120, INSIGHTWEB_SI_GEO_CRON ); // its own run: the download and conversion take a while.
 	}
 }
-add_action( AW_SI_CRON_DAILY, 'insightweb_si_vis_daily', 21 );
+add_action( INSIGHTWEB_SI_CRON_DAILY, 'insightweb_si_vis_daily', 21 );
 
 /**
  * Download this month's DB-IP Lite country file (last month's when this month's is not out yet) and write the two
@@ -263,8 +263,8 @@ function insightweb_si_geo_refresh(): void {
 		wp_delete_file( $dir . 'v6.bin.new' );
 	}
 }
-add_action( AW_SI_GEO_CRON, 'insightweb_si_geo_refresh' );
-add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_GEO_CRON ) ) );
+add_action( INSIGHTWEB_SI_GEO_CRON, 'insightweb_si_geo_refresh' );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_SI_GEO_CRON ) ) );
 
 /**
  * Rows for the tab.
@@ -292,7 +292,7 @@ function insightweb_si_vis_section(): void {
 		echo '<p>' . esc_html__( 'Visitor counting is off, and nothing about visitors is stored. It can be turned on under Settings → Visitor counting.', 'insightweb' ) . '</p>';
 		return;
 	}
-	if ( AW_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) ) {
+	if ( INSIGHTWEB_SI_VIS_DB !== get_option( 'aw_si_vis_db' ) ) {
 		echo '<p>' . esc_html__( 'Counting starts once this page has been opened after the update.', 'insightweb' ) . '</p>';
 		return;
 	}
@@ -347,7 +347,7 @@ function insightweb_si_vis_section(): void {
 	foreach (
 		array(
 			'visitor-countries' => array( __( 'Top countries, all days', 'insightweb' ), __( 'Country', 'insightweb' ), insightweb_si_vis_top( 'c', 0, 10 ) ),
-			'visitor-addresses' => array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), insightweb_si_vis_top( 'i', AW_SI_VIS_IP_DAYS, 10 ) ),
+			'visitor-addresses' => array( __( 'Top shortened addresses, 30 days', 'insightweb' ), __( 'Shortened address', 'insightweb' ), insightweb_si_vis_top( 'i', INSIGHTWEB_SI_VIS_IP_DAYS, 10 ) ),
 		) as $name => $sec
 	) {
 		echo '<h3>' . esc_html( $sec[0] ) . '</h3>';

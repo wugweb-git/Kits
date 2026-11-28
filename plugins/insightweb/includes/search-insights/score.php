@@ -16,16 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Score weights (sum to 100). Demand leads, then Opportunity, then Momentum, then Engagement.
-const AW_SI_SCORE_W_DEMAND      = 35;
-const AW_SI_SCORE_W_OPPORTUNITY = 30;
-const AW_SI_SCORE_W_MOMENTUM    = 20;
-const AW_SI_SCORE_W_ENGAGEMENT  = 15;
+const INSIGHTWEB_SI_SCORE_W_DEMAND      = 35;
+const INSIGHTWEB_SI_SCORE_W_OPPORTUNITY = 30;
+const INSIGHTWEB_SI_SCORE_W_MOMENTUM    = 20;
+const INSIGHTWEB_SI_SCORE_W_ENGAGEMENT  = 15;
 
 // Caps that turn raw signals into 0–100 sub-scores.
-const AW_SI_SCORE_DEMAND_CAP = 5000; // impressions(28d) + volume that reaches a full demand sub-score (log scale).
-const AW_SI_SCORE_CTR_FULL   = 0.10; // a 10% click-through rate is a full engagement sub-score.
-const AW_SI_SCORE_GROWTH_CAP = 5.0;  // a rising growth of ×5 is a full momentum sub-score.
-const AW_SI_SCORE_TRENDS_CAP = 100;  // a Trends index of 100 is a full momentum sub-score (used when there is no growth).
+const INSIGHTWEB_SI_SCORE_DEMAND_CAP = 5000; // impressions(28d) + volume that reaches a full demand sub-score (log scale).
+const INSIGHTWEB_SI_SCORE_CTR_FULL   = 0.10; // a 10% click-through rate is a full engagement sub-score.
+const INSIGHTWEB_SI_SCORE_GROWTH_CAP = 5.0;  // a rising growth of ×5 is a full momentum sub-score.
+const INSIGHTWEB_SI_SCORE_TRENDS_CAP = 100;  // a Trends index of 100 is a full momentum sub-score (used when there is no growth).
 
 /**
  * The demand sub-score (0–100): how much a keyword is searched, from 28-day impressions plus any imported volume. Log
@@ -40,7 +40,7 @@ function insightweb_si_score_demand( int $impr, int $volume ): int {
 	if ( $total <= 0 ) {
 		return 0;
 	}
-	$score = log10( 1 + $total ) / log10( 1 + AW_SI_SCORE_DEMAND_CAP ) * 100;
+	$score = log10( 1 + $total ) / log10( 1 + INSIGHTWEB_SI_SCORE_DEMAND_CAP ) * 100;
 	return (int) max( 0, min( 100, round( $score ) ) );
 }
 
@@ -82,7 +82,7 @@ function insightweb_si_score_engagement( int $clicks, int $impr ): int {
 		return 0;
 	}
 	$ctr = max( 0, $clicks ) / $impr;
-	return (int) max( 0, min( 100, round( $ctr / AW_SI_SCORE_CTR_FULL * 100 ) ) );
+	return (int) max( 0, min( 100, round( $ctr / INSIGHTWEB_SI_SCORE_CTR_FULL * 100 ) ) );
 }
 
 /**
@@ -95,10 +95,10 @@ function insightweb_si_score_engagement( int $clicks, int $impr ): int {
  */
 function insightweb_si_score_momentum( ?float $growth, ?int $trends ): int {
 	if ( null !== $growth && $growth > 0 ) {
-		return (int) max( 0, min( 100, round( $growth / AW_SI_SCORE_GROWTH_CAP * 100 ) ) );
+		return (int) max( 0, min( 100, round( $growth / INSIGHTWEB_SI_SCORE_GROWTH_CAP * 100 ) ) );
 	}
 	if ( null !== $trends && $trends > 0 ) {
-		return (int) max( 0, min( 100, round( $trends / AW_SI_SCORE_TRENDS_CAP * 100 ) ) );
+		return (int) max( 0, min( 100, round( $trends / INSIGHTWEB_SI_SCORE_TRENDS_CAP * 100 ) ) );
 	}
 	return 0;
 }
@@ -117,10 +117,10 @@ function insightweb_si_score( array $s ): array {
 		isset( $s['growth'] ) && null !== $s['growth'] ? (float) $s['growth'] : null,
 		isset( $s['trends'] ) && null !== $s['trends'] ? (int) $s['trends'] : null
 	);
-	$score       = ( $demand * AW_SI_SCORE_W_DEMAND
-		+ $opportunity * AW_SI_SCORE_W_OPPORTUNITY
-		+ $momentum * AW_SI_SCORE_W_MOMENTUM
-		+ $engagement * AW_SI_SCORE_W_ENGAGEMENT ) / 100;
+	$score       = ( $demand * INSIGHTWEB_SI_SCORE_W_DEMAND
+		+ $opportunity * INSIGHTWEB_SI_SCORE_W_OPPORTUNITY
+		+ $momentum * INSIGHTWEB_SI_SCORE_W_MOMENTUM
+		+ $engagement * INSIGHTWEB_SI_SCORE_W_ENGAGEMENT ) / 100;
 	return array(
 		'score'       => (int) max( 0, min( 100, round( $score ) ) ),
 		'demand'      => $demand,
@@ -137,7 +137,7 @@ function insightweb_si_score( array $s ): array {
  * @return int
  */
 function insightweb_si_score_floor(): int {
-	return defined( 'AW_SI_SCORE_FLOOR' ) ? (int) AW_SI_SCORE_FLOOR : 55;
+	return defined( 'INSIGHTWEB_SI_SCORE_FLOOR' ) ? (int) INSIGHTWEB_SI_SCORE_FLOOR : 55;
 }
 
 /**
@@ -161,7 +161,7 @@ function insightweb_si_recommended_use( array $kw, array $sourcing_types = array
 	$has_page = ! empty( $kw['has_page'] );
 	$impr     = (int) ( $kw['impr'] ?? 0 );
 	$roles    = (int) ( $kw['roles'] ?? 0 );
-	$exclude  = defined( 'SOURCEWEB_KW_ROLE_EXCLUDE' ) ? (int) SOURCEWEB_KW_ROLE_EXCLUDE : 128;
+	$exclude  = defined( 'INSIGHTWEB_KW_ROLE_EXCLUDE' ) ? (int) INSIGHTWEB_KW_ROLE_EXCLUDE : 128;
 	$floor    = insightweb_si_score_floor();
 	$out      = array();
 
@@ -484,7 +484,7 @@ function insightweb_si_score_row( array $kw, array $sourcing_types = array() ): 
 		),
 		$sourcing_types
 	);
-	$focus    = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
+	$focus    = defined( 'INSIGHTWEB_SI_ROLE_FOCUS' ) ? (int) INSIGHTWEB_SI_ROLE_FOCUS : 2;
 	$in_a     = (bool) ( $roles & $focus );
 	$in_b     = insightweb_si_is_focus_candidate( $s['score'], $pos, $has_page );
 	return array(

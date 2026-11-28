@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * sent by Run now (none: the workflow's own defaults). late_after_h: hours without a report before the workflow is late
  * (null: never late; owner, 24 Oct 2026). Crons are UTC, as in the workflows.
  */
-const AW_WORKERS = array(
+const SOURCEWEB_WORKERS = array(
 	'sourcing.yml'             => array(
 		'name'         => 'Sourcing workers',
 		'what'         => 'Finds News, Library and press items (Google News, feeds), checks relevance, summarises with AI and sends them to the site',

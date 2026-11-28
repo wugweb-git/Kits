@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_SRV_URLS = 100; // distinct addresses kept per day and kind; more are counted as "(other)".
+const INSIGHTWEB_SI_SRV_URLS = 100; // distinct addresses kept per day and kind; more are counted as "(other)".
 
 /**
  * The crawler watch list (owner, 3 Nov 2026), as name => user-agent token, matched case-insensitively; the first match
@@ -98,13 +98,13 @@ function insightweb_si_srv_key( string $ymd ): string {
 }
 
 /**
- * Add one to a counted address, keeping at most AW_SI_SRV_URLS per kind.
+ * Add one to a counted address, keeping at most INSIGHTWEB_SI_SRV_URLS per kind.
  *
  * @param array  $urls Address => count (changed in place).
  * @param string $path Path.
  */
 function insightweb_si_srv_tally( array &$urls, string $path ): void {
-	if ( ! isset( $urls[ $path ] ) && count( $urls ) >= AW_SI_SRV_URLS ) {
+	if ( ! isset( $urls[ $path ] ) && count( $urls ) >= INSIGHTWEB_SI_SRV_URLS ) {
 		$path = '(other)';
 	}
 	$urls[ $path ] = (int) ( $urls[ $path ] ?? 0 ) + 1;
@@ -228,7 +228,7 @@ function insightweb_si_srv_daily(): void {
 	$day['php'] = insightweb_si_srv_php_errors( $ymd );
 	update_option( $key, $day, false );
 }
-add_action( AW_SI_CRON_DAILY, 'insightweb_si_srv_daily', 20 );
+add_action( INSIGHTWEB_SI_CRON_DAILY, 'insightweb_si_srv_daily', 20 );
 
 /**
  * The stored days, newest first.

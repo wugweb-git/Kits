@@ -446,7 +446,7 @@ class InsightWeb_SI_Keywords_Table extends WP_List_Table {
 			/* translators: %s: number of listing names. */
 			$out = '<strong><a href="' . esc_url( add_query_arg( 'view', 'entity', insightweb_si_url( 'keywords' ) ) ) . '">' . esc_html( sprintf( __( 'Listing names (%s)', 'insightweb' ), number_format_i18n( (int) $item->aggregate ) ) ) . '</a></strong>';
 			/* translators: %d: number of listing names listed one by one. */
-			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'insightweb' ), AW_SI_MOVERS ) ) . '</span>';
+			$out .= '<br><span class="description">' . esc_html( sprintf( __( 'All Directory listing names in one row. The %d that moved most are listed one by one; the Entities view lists them all.', 'insightweb' ), INSIGHTWEB_SI_MOVERS ) ) . '</span>';
 			return $out;
 		}
 		$out   = '<strong>' . esc_html( $item->label ) . '</strong>';
@@ -509,7 +509,7 @@ class InsightWeb_SI_Keywords_Table extends WP_List_Table {
 		$s      = $labels[ $item->status ] ?? '–';
 		if ( false !== strpos( $item->label, '{' ) ) {
 			$s .= ' · ' . __( 'Directory pattern, not searched', 'insightweb' );
-		} elseif ( ( (int) $item->roles & AW_SI_ROLE_TRACKED ) && 0 === (int) $item->impr28 ) {
+		} elseif ( ( (int) $item->roles & INSIGHTWEB_SI_ROLE_TRACKED ) && 0 === (int) $item->impr28 ) {
 			$s .= ' · ' . __( 'not ranking', 'insightweb' );
 		}
 		return esc_html( $s );

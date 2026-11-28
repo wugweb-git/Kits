@@ -64,7 +64,7 @@ add_action(
 		if ( 'sourceweb' !== 'kits' && function_exists( 'kits_more_page' ) ) {
 			return; // Kits Core's page is the one page.
 		}
-		add_submenu_page( AW_SRC_MENU, __( 'More from Kits', 'sourceweb' ), __( 'More from Kits', 'sourceweb' ), 'install_plugins', 'sourceweb-more', 'sourceweb_more_page', 90 );
+		add_submenu_page( SOURCEWEB_SRC_MENU, __( 'More from Kits', 'sourceweb' ), __( 'More from Kits', 'sourceweb' ), 'install_plugins', 'sourceweb-more', 'sourceweb_more_page', 90 );
 	},
 	101 // After the plugin's own menu (priority 100 at the latest), so the parent exists and the first item stays the plugin's own screen.
 );

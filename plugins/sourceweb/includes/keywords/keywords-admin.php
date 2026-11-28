@@ -428,7 +428,7 @@ function sourceweb_sourcing_kw_bulk( $op, array $ids ) {
 /* ---------- Help tabs, old addresses ---------- */
 
 add_action(
-	'load-' . AW_SRC_SCREEN,
+	'load-' . SOURCEWEB_SRC_SCREEN,
 	function () {
 		// phpcs:disable WordPress.Security.NonceVerification -- which screen is shown, nothing saved.
 		$tab = sanitize_key( $_GET['tab'] ?? '' );

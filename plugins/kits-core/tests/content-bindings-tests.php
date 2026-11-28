@@ -243,7 +243,7 @@ add_filter( 'kits_scf_groups', fn( $g ) => array_merge( (array) $g, array( 'grou
 t_check( in_array( kits_site_path( 'acf-json' ), apply_filters( 'acf/settings/load_json', array() ), true ), 'SCF: our acf-json folder is loaded' );
 t_check( kits_site_path( 'acf-json' ) === apply_filters( 'acf/settings/save_json/key=group_aw_news', '' ), 'SCF: our groups save back to it' );
 t_check( '' === apply_filters( 'acf/settings/save_json/key=group_aw_listing', '' ), 'SCF: other plugins\' groups are not saved here' );
-t_check( array_merge( AW_SCF_GROUPS, array( 'group_aw_listing', 'group_other' ) ) === aw_scf_group_keys(), 'SCF: group keys in the same order, plugins after ours, no duplicates' );
+t_check( array_merge( KITS_SCF_GROUPS, array( 'group_aw_listing', 'group_other' ) ) === aw_scf_group_keys(), 'SCF: group keys in the same order, plugins after ours, no duplicates' );
 t_check( false === aw_scf_active() && false === kits_scf_active(), 'SCF: not active without SCF' );
 }
 

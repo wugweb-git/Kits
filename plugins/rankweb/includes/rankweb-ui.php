@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function rankweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
 	return array(
-		AW_SEO_MENU       => 'dashboard',
+		RANKWEB_SEO_MENU       => 'dashboard',
 		'aw-seo-insights' => 'insights',
 		'aw-seo-modules'  => 'modules',
 		'aw-faq'          => 'faq',
@@ -89,7 +89,7 @@ function rankweb_ui_url( string $screen ): string {
 		'settings' => 'aw-seo-settings',
 		'insights' => 'aw-seo-insights',
 		'modules'  => 'aw-seo-modules',
-	)[ $screen ] ?? AW_SEO_MENU;
+	)[ $screen ] ?? RANKWEB_SEO_MENU;
 	return add_query_arg( 'page', $page, admin_url( 'admin.php' ) );
 }
 
@@ -108,7 +108,7 @@ function rankweb_ui_tools(): array {
 		'aw-webp'      => __( 'Make WebP copies of the media library images.', 'rankweb' ),
 		'aw-transport' => __( 'Copy titles, descriptions and robots settings from Yoast, Rank Math or All in One SEO.', 'rankweb' ),
 	);
-	$items = (array) ( $GLOBALS['submenu'][ AW_SEO_MENU ] ?? array() );
+	$items = (array) ( $GLOBALS['submenu'][ RANKWEB_SEO_MENU ] ?? array() );
 	$tools = array();
 	foreach ( $about as $slug => $desc ) {
 		foreach ( $items as $item ) {

@@ -330,7 +330,7 @@ if ( ! function_exists( 'kits_ff_form' ) ) {
 		$GLOBALS['kits_ff_ctx'] = array();
 		$attrs                  = '';
 		if ( 'contact' === $key ) { // the message placeholder follows the reason (aw.js); #write is the contact form's anchor.
-			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( AW_CONTACT_PLACEHOLDER ) ) . '"';
+			$attrs = ' id="write" data-placeholders="' . esc_attr( wp_json_encode( (array) apply_filters( 'kits_contact_placeholders', array() ) ) ) . '"';
 		}
 		$listing = $ctx['listing'] ?? null;
 		if ( $listing ) {

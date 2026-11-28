@@ -1,6 +1,6 @@
 <?php
 return array (
-  'AW_HUB_TITLES' => 
+  'RANKWEB_HUB_TITLES' => 
   array (
     'aw_news' => 'Animal Welfare News from India – Animal Writes',
     'aw_legal' => 'Animal Laws and Court Orders in India – Animal Writes',
@@ -10,13 +10,13 @@ return array (
     'aw_press' => 'Animal Writes in the News',
     'aw_campaign' => 'Animal Welfare Campaigns in India – Animal Writes',
   ),
-  'AW_HUB_DESCRIPTIONS' => 
+  'RANKWEB_HUB_DESCRIPTIONS' => 
   array (
     'aw_opportunity' => 'Volunteer, foster, intern or find a job with animal welfare organisations across India. Each opportunity lists its role, location and how to apply.',
     'aw_press' => 'Press coverage of Animal Writes campaigns for animals in India: news articles, videos and social posts.',
     'aw_listing' => 'Find %s animal welfare NGOs, shelters, rescuers, Gaushalas and government vets in every state and district of India, with phone, address and services.',
   ),
-  'AW_ARCHIVE_DESCRIPTIONS' => 
+  'RANKWEB_ARCHIVE_DESCRIPTIONS' => 
   array (
     'aw_news' => 'Animal-welfare news from across India, summarised with a link to every source.',
     'aw_legal' => 'Court orders, notifications and rules that affect animals in India, explained in plain words.',
@@ -25,15 +25,15 @@ return array (
     'aw_opportunity' => 'Volunteer, foster, internship and job opportunities in animal welfare in India.',
     'aw_listing' => 'Animal welfare organisations, Gaushalas and government vets across India.',
   ),
-  'AW_SEO_LISTING_SHARE_IMAGE' => 8814,
-  'AW_SEO_SOURCE_IMAGE_TYPES' => 
+  'RANKWEB_SEO_LISTING_SHARE_IMAGE' => 8814,
+  'RANKWEB_SEO_SOURCE_IMAGE_TYPES' => 
   array (
     0 => 'aw_news',
     1 => 'aw_legal',
     2 => 'post',
     3 => 'aw_opportunity',
   ),
-  'AW_SEO_ITEM_TYPES' => 
+  'RANKWEB_SEO_ITEM_TYPES' => 
   array (
     0 => 'aw_listing',
     1 => 'aw_news',
@@ -44,7 +44,7 @@ return array (
     6 => 'aw_opportunity',
     7 => 'aw_campaign',
   ),
-  'AW_SEO_BREAKDOWN' => 
+  'RANKWEB_SEO_BREAKDOWN' => 
   array (
     0 => 'animal-welfare-organisation',
     1 => 'gaushala',
@@ -52,7 +52,7 @@ return array (
     3 => 'abc-centre',
     4 => 'wildlife-rescue',
   ),
-  'AW_SEO_TERM_TITLES' => 
+  'RANKWEB_SEO_TERM_TITLES' => 
   array (
     'category:adoption' => 'Animal Adoption News and Guides for India',
     'category:animal-birth-control' => 'ABC Animal Birth Control Rules and News',
@@ -123,7 +123,7 @@ return array (
     'post_tag:guide' => 'Practical Animal Welfare Guides for India',
     'post_tag:research' => 'Animal Welfare Research Studies from India',
   ),
-  'AW_DIRECTORY_KEEP_INDEXED' => 
+  'RANKWEB_DIRECTORY_KEEP_INDEXED' => 
   array (
     0 => 'haryana/jhajjar/animal-welfare-organisation',
     1 => 'madhya-pradesh/sheopur/animal-welfare-organisation',
@@ -141,7 +141,7 @@ return array (
     13 => 'uttarakhand/chamoli/animal-welfare-organisation',
     14 => 'west-bengal/purba-medinipur/veterinary-office',
   ),
-  'AW_FILTERED_CATEGORY_HUBS' => 
+  'RANKWEB_FILTERED_CATEGORY_HUBS' => 
   array (
     0 => 'aw_news',
     1 => 'aw_legal',
@@ -149,7 +149,7 @@ return array (
     3 => 'aw_opportunity',
     4 => 'aw_campaign',
   ),
-  'AW_FILTERED_TITLE_WORDS' => 
+  'RANKWEB_FILTERED_TITLE_WORDS' => 
   array (
     'aw_news' => 
     array (
@@ -179,26 +179,26 @@ return array (
       1 => 'Campaigns on %s',
     ),
   ),
-  'AW_FILTERED_STATE_NOINDEX' => 
+  'RANKWEB_FILTERED_STATE_NOINDEX' => 
   array (
     0 => 'aw_news',
     1 => 'aw_legal',
     2 => 'aw_opportunity',
   ),
-  'AW_VIDEO_TYPES' => 
+  'RANKWEB_VIDEO_TYPES' => 
   array (
     0 => 'post',
     1 => 'aw_news',
     2 => 'aw_legal',
     3 => 'aw_campaign',
   ),
-  'AW_SITE_ALT_NAMES' => 
+  'RANKWEB_SITE_ALT_NAMES' => 
   array (
     0 => 'AnimalWrites',
     1 => 'Animal Writes India',
     2 => 'animalwrites.in',
   ),
-  'AW_SCHEMA_TYPES' => 
+  'RANKWEB_SCHEMA_TYPES' => 
   array (
     0 => 'post',
     1 => 'page',
@@ -208,7 +208,7 @@ return array (
     5 => 'aw_listing',
     6 => 'aw_opportunity',
   ),
-  'AW_RM_SCHEMA_TYPES' => 
+  'RANKWEB_RM_SCHEMA_TYPES' => 
   array (
     0 => 'page',
     1 => 'aw_legal',
@@ -218,14 +218,14 @@ return array (
     5 => 'aw_opportunity',
     6 => 'aw_listing',
   ),
-  'AW_SEO_ARTICLE_TYPES' => 
+  'RANKWEB_SEO_ARTICLE_TYPES' => 
   array (
     0 => 'aw_news',
     1 => 'aw_legal',
     2 => 'post',
     3 => 'aw_campaign',
   ),
-  'AW_SEO_GENERIC_WORDS' => 
+  'RANKWEB_SEO_GENERIC_WORDS' => 
   array (
     0 => 'animal',
     1 => 'animals',
@@ -242,7 +242,7 @@ return array (
     12 => 'case',
     13 => 'story',
   ),
-  'AW_BULK_TYPES' => 
+  'RANKWEB_BULK_TYPES' => 
   array (
     0 => 'aw_listing',
     1 => 'aw_news',
@@ -252,7 +252,7 @@ return array (
     5 => 'aw_campaign',
     6 => 'page',
   ),
-  'AW_SEO_RENDERED_TYPES' => 
+  'RANKWEB_SEO_RENDERED_TYPES' => 
   array (
     0 => 'aw_legal',
     1 => 'post',
@@ -261,7 +261,7 @@ return array (
     4 => 'aw_opportunity',
     5 => 'aw_listing',
   ),
-  'AW_LINK_BRAND' => 
+  'RANKWEB_LINK_BRAND' => 
   array (
     0 => 'Animal Writes',
   ),

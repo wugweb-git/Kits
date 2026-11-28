@@ -25,6 +25,8 @@ if ( defined( 'ANIMALWRITES_KITS_CORE_SITE' ) ) {
 define( 'ANIMALWRITES_KITS_CORE_SITE', '1.4.0' );
 define( 'ANIMALWRITES_KITS_CORE_SITE_DIR', __DIR__ . '/' );
 
+require_once ANIMALWRITES_KITS_CORE_SITE_DIR . 'config-names.php'; // earlier wp-config.php names -> Kits Core's own constants (before the plugin loads).
+
 // The uninstall and deactivation hooks work whether or not Kits Core is active (it is deactivated when it is deleted).
 require_once ANIMALWRITES_KITS_CORE_SITE_DIR . 'includes/site-uninstall.php';
 

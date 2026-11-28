@@ -23,7 +23,7 @@ const RANKWEB_TRANSPORT_BATCH = 200;
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Transport', 'rankweb' ), __( 'Transport', 'rankweb' ), 'manage_options', 'aw-transport', 'rankweb_transport_screen' );
+		add_submenu_page( RANKWEB_SEO_MENU, __( 'Transport', 'rankweb' ), __( 'Transport', 'rankweb' ), 'manage_options', 'aw-transport', 'rankweb_transport_screen' );
 	}
 );
 

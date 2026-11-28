@@ -10,8 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CRON_DAILY          = 'aw_si_daily';
-const AW_SI_CRON_ROLLUP         = 'aw_si_rollup';
+const INSIGHTWEB_SI_CRON_DAILY          = 'aw_si_daily';
+const INSIGHTWEB_SI_CRON_ROLLUP         = 'aw_si_rollup';
 const INSIGHTWEB_CRON_TELEMETRY = 'insightweb_daily_telemetry_cron';
 
 /**
@@ -65,7 +65,7 @@ function insightweb_si_daily( bool $by_hand = false ): array {
 	}
 	return $out;
 }
-add_action( AW_SI_CRON_DAILY, fn() => insightweb_si_daily() );
+add_action( INSIGHTWEB_SI_CRON_DAILY, fn() => insightweb_si_daily() );
 
 /**
  * Execute daily telemetry refresh: Search Console sync and metric compute.
@@ -99,7 +99,7 @@ function insightweb_si_rollup_cron(): void {
 		insightweb_si_run_fail( 'rollup', $e->getMessage() );
 	}
 }
-add_action( AW_SI_CRON_ROLLUP, 'insightweb_si_rollup_cron' );
+add_action( INSIGHTWEB_SI_CRON_ROLLUP, 'insightweb_si_rollup_cron' );
 
 add_action(
 	'init',
@@ -108,11 +108,11 @@ add_action(
 			return; // Switched off by Delete data.
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( AW_SI_CRON_DAILY ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:10', $tz ) )->getTimestamp(), 'daily', AW_SI_CRON_DAILY );
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_CRON_DAILY ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:10', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_SI_CRON_DAILY );
 		}
-		if ( ! wp_next_scheduled( AW_SI_CRON_ROLLUP ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'today 23:30', $tz ) )->getTimestamp(), 'daily', AW_SI_CRON_ROLLUP );
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_CRON_ROLLUP ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'today 23:30', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_SI_CRON_ROLLUP );
 		}
 		if ( ! wp_next_scheduled( INSIGHTWEB_CRON_TELEMETRY ) ) {
 			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:10', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_CRON_TELEMETRY );

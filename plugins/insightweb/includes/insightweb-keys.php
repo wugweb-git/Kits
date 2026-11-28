@@ -17,13 +17,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/insightweb-names.php'; // the stored names of the keys.
+
 const INSIGHTWEB_KEYS_OPTION = 'insightweb_keys';
 
 /** The old shared vault's option (the earlier Core plugin's includes/keys.php), read only, until it is retired. */
 const INSIGHTWEB_KEYS_OLD_OPTION = 'aw_keys';
 
 /** InsightWeb's key names (the wp-config.php constants), as insightweb_key_fields() lists them. */
-const INSIGHTWEB_KEY_NAMES = array( 'AW_CLARITY_TOKEN', 'AW_BING_WEBMASTER_KEY', 'AW_PSI_KEY', 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
+const INSIGHTWEB_KEY_NAMES = array( 'INSIGHTWEB_CLARITY_TOKEN', 'INSIGHTWEB_BING_WEBMASTER_KEY', 'INSIGHTWEB_PSI_KEY', 'INSIGHTWEB_GOOGLE_ALERTS_FEED_1', 'INSIGHTWEB_GOOGLE_ALERTS_FEED_2' );
 
 /**
  * InsightWeb's keys: constant name => [label, where to find it]. The names are the wp-config.php constants already in
@@ -33,11 +35,11 @@ const INSIGHTWEB_KEY_NAMES = array( 'AW_CLARITY_TOKEN', 'AW_BING_WEBMASTER_KEY',
  */
 function insightweb_key_fields(): array {
 	$keys = array(
-		'AW_CLARITY_TOKEN'      => array( __( 'Clarity Data Export token', 'insightweb' ), __( 'Clarity → Settings → Data Export → Generate new API token.', 'insightweb' ) ),
-		'AW_BING_WEBMASTER_KEY' => array( __( 'Bing Webmaster API key', 'insightweb' ), __( 'Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key.', 'insightweb' ) ),
-		'AW_PSI_KEY'            => array( __( 'PageSpeed Insights API key (Google, optional)', 'insightweb' ), __( 'Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit\'s PageSpeed can\'t be used.', 'insightweb' ) ),
+		'INSIGHTWEB_CLARITY_TOKEN'      => array( __( 'Clarity Data Export token', 'insightweb' ), __( 'Clarity → Settings → Data Export → Generate new API token.', 'insightweb' ) ),
+		'INSIGHTWEB_BING_WEBMASTER_KEY' => array( __( 'Bing Webmaster API key', 'insightweb' ), __( 'Bing Webmaster Tools → Settings (gear) → API access. Not an IndexNow key.', 'insightweb' ) ),
+		'INSIGHTWEB_PSI_KEY'            => array( __( 'PageSpeed Insights API key (Google, optional)', 'insightweb' ), __( 'Google Cloud → APIs → PageSpeed Insights API → Credentials. Only needed if Site Kit\'s PageSpeed can\'t be used.', 'insightweb' ) ),
 	);
-	foreach ( array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' ) as $i => $name ) {
+	foreach ( array( 'INSIGHTWEB_GOOGLE_ALERTS_FEED_1', 'INSIGHTWEB_GOOGLE_ALERTS_FEED_2' ) as $i => $name ) {
 		/* translators: %d: 1 or 2. */
 		$keys[ $name ] = array( sprintf( __( 'Google Alerts feed %d (RSS address)', 'insightweb' ), $i + 1 ), __( 'google.com/alerts → create an alert → Show options → Deliver to: RSS feed → copy the feed address (https://www.google.com/alerts/feeds/…).', 'insightweb' ) );
 	}
@@ -61,13 +63,13 @@ function insightweb_key_constant( string $name ): string {
  */
 function insightweb_key_saved( string $option, string $name ): string {
 	$saved = get_option( $option, array() );
-	return is_array( $saved ) ? (string) ( $saved[ $name ] ?? '' ) : '';
+	return is_array( $saved ) ? (string) ( $saved[ insightweb_stored_name( $name ) ] ?? '' ) : ''; // saved under the stored name.
 }
 
 /**
  * Where a key is set and its value: ['config' | 'insightweb' | '', value], first found wins.
  *
- * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ * @param string $name Constant name, e.g. INSIGHTWEB_CLARITY_TOKEN.
  * @return array{0: string, 1: string}
  */
 function insightweb_key_found( string $name ): array {
@@ -87,7 +89,7 @@ function insightweb_key_found( string $name ): array {
 /**
  * Where a key is set: 'config' (wp-config.php), 'insightweb' (Settings → Keys), 'old' (the old Kits → Keys) or ''.
  *
- * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ * @param string $name Constant name, e.g. INSIGHTWEB_CLARITY_TOKEN.
  */
 function insightweb_key_where( string $name ): string {
 	return insightweb_key_found( $name )[0];
@@ -97,7 +99,7 @@ function insightweb_key_where( string $name ): string {
  * A key's value: the wp-config.php constant, else InsightWeb's own, else the old Kits → Keys one, else ''. The old
  * place is read directly, also when the earlier Core plugin is off, so a key saved there keeps working until it is copied.
  *
- * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ * @param string $name Constant name, e.g. INSIGHTWEB_CLARITY_TOKEN.
  */
 function insightweb_key( string $name ): string {
 	return insightweb_key_found( $name )[1];
@@ -131,15 +133,15 @@ function insightweb_keys_sanitize( $value ): array {
 		if ( in_array( $name, $clear, true ) ) {
 			continue;
 		}
-		$in = 'config' === insightweb_key_where( $name ) ? '' : ( $value[ $name ] ?? '' ); // wp-config.php wins: nothing typed is kept for it.
+		$in = 'config' === insightweb_key_where( $name ) ? '' : ( $value[ $name ] ?? $value[ insightweb_stored_name( $name ) ] ?? '' ); // wp-config.php wins: nothing typed is kept for it.
 		$v  = is_scalar( $in ) ? mb_substr( (string) preg_replace( '/\s+/', '', sanitize_text_field( (string) $in ) ), 0, 512 ) : '';
 		if ( '' !== $v ) {
 			$out[ $name ] = $v;
-		} elseif ( isset( $saved[ $name ] ) && '' !== (string) $saved[ $name ] ) {
-			$out[ $name ] = (string) $saved[ $name ]; // Left empty: the saved key stays.
+		} elseif ( isset( $saved[ insightweb_stored_name( $name ) ] ) && '' !== (string) $saved[ insightweb_stored_name( $name ) ] ) {
+			$out[ $name ] = (string) $saved[ insightweb_stored_name( $name ) ]; // Left empty: the saved key stays.
 		}
 	}
-	return $out;
+	return insightweb_map_names( $out, true ); // stored under the earlier names.
 }
 
 add_action(
@@ -189,7 +191,7 @@ function insightweb_keys_copy( bool $write = true ): array {
 	foreach ( array_keys( insightweb_key_fields() ) as $name ) {
 		if ( '' !== insightweb_key_constant( $name ) ) {
 			$result[ $name ] = 'set in wp-config.php';
-		} elseif ( isset( $own[ $name ] ) && '' !== (string) $own[ $name ] ) {
+		} elseif ( isset( $own[ insightweb_stored_name( $name ) ] ) && '' !== (string) $own[ insightweb_stored_name( $name ) ] ) {
 			$result[ $name ] = 'already set';
 		} elseif ( '' === insightweb_key_saved( INSIGHTWEB_KEYS_OLD_OPTION, $name ) ) {
 			$result[ $name ] = 'not in the old place';
@@ -199,7 +201,7 @@ function insightweb_keys_copy( bool $write = true ): array {
 		}
 	}
 	if ( $write && $new ) {
-		update_option( INSIGHTWEB_KEYS_OPTION, array_merge( $own, $new ), false ); // through insightweb_keys_sanitize(); not autoloaded
+		update_option( INSIGHTWEB_KEYS_OPTION, array_merge( $own, insightweb_map_names( $new, true ) ), false ); // stored under the earlier names (insightweb_keys_sanitize() takes either); not autoloaded
 	}
 	return $result;
 }
@@ -253,7 +255,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 /**
  * Diagnostic check for an external service connection status.
  *
- * @param string $name Service constant name (e.g. AW_CLARITY_TOKEN, AW_BING_WEBMASTER_KEY, AW_PSI_KEY).
+ * @param string $name Service constant name (e.g. INSIGHTWEB_CLARITY_TOKEN, INSIGHTWEB_BING_WEBMASTER_KEY, INSIGHTWEB_PSI_KEY).
  * @return array{status: string, label: string, detail: string}
  */
 function insightweb_check_service_status( string $name ): array {
@@ -267,9 +269,9 @@ function insightweb_check_service_status( string $name ): array {
 	}
 
 	$src_map = array(
-		'AW_CLARITY_TOKEN'      => 'clarity',
-		'AW_BING_WEBMASTER_KEY' => 'bing',
-		'AW_PSI_KEY'            => 'psi',
+		'INSIGHTWEB_CLARITY_TOKEN'      => 'clarity',
+		'INSIGHTWEB_BING_WEBMASTER_KEY' => 'bing',
+		'INSIGHTWEB_PSI_KEY'            => 'psi',
 	);
 
 	if ( isset( $src_map[ $name ] ) ) {
@@ -300,7 +302,7 @@ function insightweb_check_service_status( string $name ): array {
 				}
 			}
 		}
-	} elseif ( 0 === strpos( $name, 'AW_GOOGLE_ALERTS_FEED_' ) ) {
+	} elseif ( 0 === strpos( $name, 'INSIGHTWEB_GOOGLE_ALERTS_FEED_' ) ) {
 		if ( ! filter_var( $val, FILTER_VALIDATE_URL ) || false === strpos( $val, 'google.com/alerts/feeds' ) ) {
 			return array(
 				'status' => 'invalid_key',

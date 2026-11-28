@@ -197,22 +197,22 @@ if ( ! function_exists( 'register_setting' ) ) {
 require_once dirname( __DIR__ ) . '/includes/insightweb-keys.php';
 
 // Not configured status
-$stat_empty = insightweb_check_service_status( 'AW_CLARITY_TOKEN' );
+$stat_empty = insightweb_check_service_status( 'INSIGHTWEB_CLARITY_TOKEN' );
 check( 'not_configured' === $stat_empty['status'], 'Unset key returns not_configured' );
 
 // Connected status when key is provided
 $GLOBALS['test_options'][ INSIGHTWEB_KEYS_OPTION ] = array(
-	'AW_CLARITY_TOKEN'        => 'clarity-test-token-12345',
-	'AW_GOOGLE_ALERTS_FEED_1' => 'https://www.google.com/alerts/feeds/12345/67890',
-	'AW_GOOGLE_ALERTS_FEED_2' => 'invalid-feed-url',
+	insightweb_stored_name( 'INSIGHTWEB_CLARITY_TOKEN' ) => 'clarity-test-token-12345',
+	insightweb_stored_name( 'INSIGHTWEB_GOOGLE_ALERTS_FEED_1' ) => 'https://www.google.com/alerts/feeds/12345/67890',
+	insightweb_stored_name( 'INSIGHTWEB_GOOGLE_ALERTS_FEED_2' ) => 'invalid-feed-url',
 );
-$stat_clarity = insightweb_check_service_status( 'AW_CLARITY_TOKEN' );
+$stat_clarity = insightweb_check_service_status( 'INSIGHTWEB_CLARITY_TOKEN' );
 check( 'connected' === $stat_clarity['status'], 'Configured key returns connected' );
 
-$stat_feed_ok = insightweb_check_service_status( 'AW_GOOGLE_ALERTS_FEED_1' );
+$stat_feed_ok = insightweb_check_service_status( 'INSIGHTWEB_GOOGLE_ALERTS_FEED_1' );
 check( 'connected' === $stat_feed_ok['status'], 'Valid alerts feed URL returns connected' );
 
-$stat_feed_bad = insightweb_check_service_status( 'AW_GOOGLE_ALERTS_FEED_2' );
+$stat_feed_bad = insightweb_check_service_status( 'INSIGHTWEB_GOOGLE_ALERTS_FEED_2' );
 check( 'invalid_key' === $stat_feed_bad['status'], 'Invalid alerts feed URL returns invalid_key' );
 
 // 5. Verify Telemetry Cron hook definition.

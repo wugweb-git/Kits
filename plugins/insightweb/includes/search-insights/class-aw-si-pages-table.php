@@ -107,7 +107,7 @@ class InsightWeb_SI_Pages_Table extends WP_List_Table {
 			'ref'       => fn( $r ) => ! empty( $r['ref'] ),
 			'conflicts' => fn( $r ) => ! empty( $r['conflicts'] ),
 			'noted'     => fn( $r ) => ! empty( $r['note'] ),
-			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < AW_SI_RM_LOW,
+			'lowseo'    => fn( $r ) => isset( $r['rm_score'] ) && $r['rm_score'] < INSIGHTWEB_SI_RM_LOW,
 			'unindexed' => fn( $r ) => isset( $r['index'] ) && 0 === $r['index'],
 		);
 	}
@@ -122,7 +122,7 @@ class InsightWeb_SI_Pages_Table extends WP_List_Table {
 			'conflicts' => __( 'With conflicts', 'insightweb' ),
 			'noted'     => __( 'With Clarity notes', 'insightweb' ),
 			/* translators: %d: score limit, e.g. 50. */
-			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'insightweb' ), AW_SI_RM_LOW ),
+			'lowseo'    => sprintf( __( 'Rank Math score under %d', 'insightweb' ), INSIGHTWEB_SI_RM_LOW ),
 			'unindexed' => __( 'Not indexed (URL Inspection)', 'insightweb' ),
 		);
 		$current = $this->arg( 'view' ) ? $this->arg( 'view' ) : 'all';

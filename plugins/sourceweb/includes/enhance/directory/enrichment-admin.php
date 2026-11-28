@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_ENRICH_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
+const SOURCEWEB_ENRICH_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
 
 /* ---------- Source icons ---------- */
 
@@ -185,7 +185,7 @@ add_action(
 			global $wpdb;
 			$n = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", sourceweb_enrich_table() ) ); // phpcs:ignore WordPress.DB
 		}
-		add_submenu_page( AW_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'kits_menu_count' ) ? kits_menu_count( $n ) : '' ), AW_ENRICH_CAP, 'aw-enrich-review', 'sourceweb_enrich_review_page' );
+		add_submenu_page( SOURCEWEB_SRC_MENU, 'Enrichment review', 'Enrichment review' . ( $n && function_exists( 'kits_menu_count' ) ? kits_menu_count( $n ) : '' ), SOURCEWEB_ENRICH_CAP, 'aw-enrich-review', 'sourceweb_enrich_review_page' );
 	},
 	11 // after To review (review-queue.php, 10)
 );
@@ -238,7 +238,7 @@ function sourceweb_enrich_where( $q ) {
 
 /** Sourcing → Enrichment review: the shell screen (sourceweb-ui.php). */
 function sourceweb_enrich_review_page() {
-	if ( ! current_user_can( AW_ENRICH_CAP ) ) {
+	if ( ! current_user_can( SOURCEWEB_ENRICH_CAP ) ) {
 		return;
 	}
 	sourceweb_ui_page( 'enrichment' );

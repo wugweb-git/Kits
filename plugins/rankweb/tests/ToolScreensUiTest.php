@@ -10,8 +10,8 @@
 
 require_once __DIR__ . '/tool-stubs.php';
 
-if ( ! defined( 'AW_SEO_MENU' ) ) {
-	define( 'AW_SEO_MENU', 'aw-seo-plus' );
+if ( ! defined( 'RANKWEB_SEO_MENU' ) ) {
+	define( 'RANKWEB_SEO_MENU', 'aw-seo-plus' );
 }
 
 require_once dirname( __DIR__ ) . '/includes/rankweb-ui.php';

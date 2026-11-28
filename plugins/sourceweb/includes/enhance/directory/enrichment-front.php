@@ -30,7 +30,7 @@ function sourceweb_front_date( $value ): string {
 }
 
 /** Google Places (New) Place Details with reviews: Enterprise + Atmosphere, USD per request. */
-const AW_GLIVE_COST = 0.025;
+const SOURCEWEB_GLIVE_COST = 0.025;
 
 /* ---------- Sources line ---------- */
 
@@ -135,7 +135,7 @@ function sourceweb_enrich_news_mentions( $id ) {
 /** A key is saved and this month's cap leaves room for one more request. */
 function sourceweb_glive_ready() {
 	$cap = (float) get_option( 'aw_enrich_live_cap', '20' );
-	return '' !== (string) get_option( 'aw_enrich_google_key', '' ) && sourceweb_enrich_spent( 'live' ) + AW_GLIVE_COST <= $cap && ! empty( sourceweb_enrich_sources_on()['google_places'] );
+	return '' !== (string) get_option( 'aw_enrich_google_key', '' ) && sourceweb_enrich_spent( 'live' ) + SOURCEWEB_GLIVE_COST <= $cap && ! empty( sourceweb_enrich_sources_on()['google_places'] );
 }
 
 add_action(
@@ -184,7 +184,7 @@ function sourceweb_glive_data( $place_id ) {
 			),
 		)
 	);
-	sourceweb_enrich_spend( AW_GLIVE_COST, 'live' );
+	sourceweb_enrich_spend( SOURCEWEB_GLIVE_COST, 'live' );
 	if ( is_wp_error( $resp ) || 200 !== wp_remote_retrieve_response_code( $resp ) ) {
 		set_transient( $key, array(), HOUR_IN_SECONDS ); // a failure is not retried for an hour
 		return null;

@@ -33,10 +33,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_ENRICH_DB_VERSION = '1';
+const SOURCEWEB_ENRICH_DB_VERSION = '1';
 
 /** How many days a check stays fresh before the listing is checked again. */
-const AW_ENRICH_REFRESH_DAYS = 90;
+const SOURCEWEB_ENRICH_REFRESH_DAYS = 90;
 
 /**
  * The sources: key => [name, host for the icon, on by default, what it gives].
@@ -130,7 +130,7 @@ function sourceweb_enrich_table() {
 
 /** Create or update the table (once per version). */
 function sourceweb_enrich_install() {
-	if ( get_option( 'aw_enrich_db' ) === AW_ENRICH_DB_VERSION ) {
+	if ( get_option( 'aw_enrich_db' ) === SOURCEWEB_ENRICH_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
@@ -156,7 +156,7 @@ function sourceweb_enrich_install() {
 		KEY status (status)
 		) {$wpdb->get_charset_collate()};"
 	);
-	update_option( 'aw_enrich_db', AW_ENRICH_DB_VERSION, false );
+	update_option( 'aw_enrich_db', SOURCEWEB_ENRICH_DB_VERSION, false );
 }
 add_action( 'admin_init', 'sourceweb_enrich_install' );
 add_action( 'rest_api_init', 'sourceweb_enrich_install', 1 );
@@ -314,8 +314,8 @@ function sourceweb_enrich_snapshot( $lid, $field ) {
 		case 'merge':
 			return '';
 		default:
-			if ( isset( AW_ENRICH_ALT[ $field ] ) ) {
-				return array( 'v' => (string) get_post_meta( $lid, $def[1], true ), 'alt' => (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ), 'unv' => directoryweb_unverified_list( $lid ) );
+			if ( isset( SOURCEWEB_ENRICH_ALT[ $field ] ) ) {
+				return array( 'v' => (string) get_post_meta( $lid, $def[1], true ), 'alt' => (string) get_post_meta( $lid, SOURCEWEB_ENRICH_ALT[ $field ], true ), 'unv' => directoryweb_unverified_list( $lid ) );
 			}
 			return (string) get_post_meta( $lid, $def[1], true );
 	}
@@ -366,7 +366,7 @@ function sourceweb_enrich_restore( $lid, $field, $snap ) {
 		default:
 			if ( is_array( $snap ) && isset( $snap['v'] ) ) { // a field that can hold a second value
 				'' === $snap['v'] ? delete_post_meta( $lid, $def[1] ) : update_post_meta( $lid, $def[1], $snap['v'] );
-				'' === $snap['alt'] ? delete_post_meta( $lid, AW_ENRICH_ALT[ $field ] ) : update_post_meta( $lid, AW_ENRICH_ALT[ $field ], $snap['alt'] );
+				'' === $snap['alt'] ? delete_post_meta( $lid, SOURCEWEB_ENRICH_ALT[ $field ] ) : update_post_meta( $lid, SOURCEWEB_ENRICH_ALT[ $field ], $snap['alt'] );
 				$snap['unv'] ? update_post_meta( $lid, 'aw_unverified', array_values( (array) $snap['unv'] ) ) : delete_post_meta( $lid, 'aw_unverified' );
 				break;
 			}
@@ -482,9 +482,9 @@ function sourceweb_enrich_write( $lid, $field, $value, $mode = 'apply', $sources
 			if ( '' === $v ) {
 				return false;
 			}
-			if ( 'both' === $mode && isset( AW_ENRICH_ALT[ $field ] ) ) { // keep the value already there, add this one next to it
+			if ( 'both' === $mode && isset( SOURCEWEB_ENRICH_ALT[ $field ] ) ) { // keep the value already there, add this one next to it
 				$now = (string) get_post_meta( $lid, $def[1], true );
-				update_post_meta( $lid, AW_ENRICH_ALT[ $field ], $v );
+				update_post_meta( $lid, SOURCEWEB_ENRICH_ALT[ $field ], $v );
 				directoryweb_unverified_add( $lid, array( $now, $v ) );
 				break;
 			}
@@ -668,11 +668,11 @@ function sourceweb_enrich_is_protected( $lid ) {
  * @return string
  */
 function sourceweb_enrich_both_note( $field ) {
-	return in_array( $field, AW_ENRICH_LIST_FIELDS, true ) ? 'Added to what was there; nothing removed' : 'Kept next to the value already there; both shown as unverified';
+	return in_array( $field, SOURCEWEB_ENRICH_LIST_FIELDS, true ) ? 'Added to what was there; nothing removed' : 'Kept next to the value already there; both shown as unverified';
 }
 
 /** Fields that can hold a second value next to the one already on the listing: field => meta key of the second value. */
-const AW_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website_alt' );
+const SOURCEWEB_ENRICH_ALT = array( 'email' => 'aw_email_alt', 'website' => 'aw_website_alt' );
 
 /**
  * What to do with a sourced value: 'apply' (the field is empty), 'both' (phones, email, website, list fields: keep it
@@ -689,7 +689,7 @@ function sourceweb_enrich_mode( $lid, $field, $conf, $protected, $value = null )
 		$protected,
 		fn() => sourceweb_enrich_is_empty( $lid, $field ),
 		fn() => (bool) ( function_exists( 'directoryweb_listing_phones' ) && directoryweb_listing_phones( $lid ) ),
-		fn() => isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ) ),
+		fn() => isset( SOURCEWEB_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $lid, SOURCEWEB_ENRICH_ALT[ $field ], true ) ),
 		fn() => sourceweb_enrich_place_fills( $lid, $value )
 	);
 }
@@ -946,7 +946,7 @@ function sourceweb_enrich_identity_unresolved( $lid ) {
 }
 
 /** List fields: a proposal adds to what is there and never drops a value. */
-const AW_ENRICH_LIST_FIELDS = array( 'services', 'animals', 'areas_served' );
+const SOURCEWEB_ENRICH_LIST_FIELDS = array( 'services', 'animals', 'areas_served' );
 
 /**
  * The items of a list field's value: an array (services) or comma-separated text.
@@ -963,13 +963,13 @@ function sourceweb_enrich_list_items( $v ) {
  * Words the worker uses for a service that are not services on the site, and the service each one is stored as
  * (owner, 25 Oct 2026). "wildlife-rescue" and "emergency-rescue" are listing types, not services (directoryweb_service_slugs()).
  */
-const AW_ENRICH_SERVICE_MAP = array(
+const SOURCEWEB_ENRICH_SERVICE_MAP = array(
 	'wildlife-rescue'  => 'rescue',
 	'emergency-rescue' => 'rescue',
 );
 
 /**
- * A services proposal as the site's service slugs: known ones kept, mapped ones (AW_ENRICH_SERVICE_MAP) replaced,
+ * A services proposal as the site's service slugs: known ones kept, mapped ones (SOURCEWEB_ENRICH_SERVICE_MAP) replaced,
  * others dropped. Returns the slugs and a note for the change-log row naming what was mapped or dropped ('' if none).
  *
  * @param mixed $value Proposed services (list or comma-separated text).
@@ -982,9 +982,9 @@ function sourceweb_enrich_services_norm( $value ) {
 	$drop   = array();
 	foreach ( sourceweb_enrich_list_items( $value ) as $item ) {
 		$slug = sanitize_title( $item );
-		if ( isset( AW_ENRICH_SERVICE_MAP[ $slug ] ) && in_array( AW_ENRICH_SERVICE_MAP[ $slug ], $known, true ) ) {
-			$mapped[] = $slug . ' as ' . AW_ENRICH_SERVICE_MAP[ $slug ];
-			$slug     = AW_ENRICH_SERVICE_MAP[ $slug ];
+		if ( isset( SOURCEWEB_ENRICH_SERVICE_MAP[ $slug ] ) && in_array( SOURCEWEB_ENRICH_SERVICE_MAP[ $slug ], $known, true ) ) {
+			$mapped[] = $slug . ' as ' . SOURCEWEB_ENRICH_SERVICE_MAP[ $slug ];
+			$slug     = SOURCEWEB_ENRICH_SERVICE_MAP[ $slug ];
 		} elseif ( ! in_array( $slug, $known, true ) ) {
 			if ( '' !== $slug ) {
 				$drop[] = $slug;
@@ -1015,7 +1015,7 @@ function sourceweb_enrich_services_norm( $value ) {
  * @return mixed
  */
 function sourceweb_enrich_union( $lid, $field, $value ) {
-	if ( ! in_array( $field, AW_ENRICH_LIST_FIELDS, true ) || sourceweb_enrich_is_empty( $lid, $field ) ) {
+	if ( ! in_array( $field, SOURCEWEB_ENRICH_LIST_FIELDS, true ) || sourceweb_enrich_is_empty( $lid, $field ) ) {
 		return $value;
 	}
 	$out  = sourceweb_enrich_list_items( sourceweb_enrich_current( $lid, $field ) );
@@ -1177,7 +1177,7 @@ function sourceweb_enrich_rest_queue( WP_REST_Request $req ) {
 			"c.meta_value IS NULL AND {$none}",
 			...( $google ? array( "{$gpend} AND {$none}", $gpend ) : array() ),
 			'c.meta_value IS NULL',
-			"c.meta_value < '" . wp_date( 'Y-m-d H:i:s', time() - AW_ENRICH_REFRESH_DAYS * DAY_IN_SECONDS ) . "'",
+			"c.meta_value < '" . wp_date( 'Y-m-d H:i:s', time() - SOURCEWEB_ENRICH_REFRESH_DAYS * DAY_IN_SECONDS ) . "'",
 		);
 		// Filter sourceweb_enrich_queue_steps( string[] $steps, string $group, array $ctx ): SQL conditions tried in order
 		// (c = the checked meta, p = the post, $ctx['m'] the postmeta table, ['none'] the "no way to reach them" test). A

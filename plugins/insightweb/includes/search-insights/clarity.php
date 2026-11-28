@@ -1,7 +1,7 @@
 <?php
 /**
  * Microsoft Clarity Data Export API (plan §5.2), daily at 06:30 IST, only when the owner has put a project API token in
- * InsightWeb → Settings → Keys or wp-config.php as AW_CLARITY_TOKEN (never in the repo). Two calls a day for the last 24 hours:
+ * InsightWeb → Settings → Keys or wp-config.php as INSIGHTWEB_CLARITY_TOKEN (never in the repo). Two calls a day for the last 24 hours:
  * by URL and device, then by device. The API allows 10 a day per project, so the job stops itself at 8. Only totals
  * per page and per device are stored: never recordings, session IDs or anything per session.
  *
@@ -25,15 +25,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CLARITY_CRON  = 'aw_si_clarity';
-const AW_SI_CLARITY_API   = 'https://www.clarity.ms/export-data/api/v1/project-live-insights';
-const AW_SI_CLARITY_MAX   = 8; // Calls a day this job allows itself (Clarity's limit is 10).
-const AW_SI_CLARITY_RETRY = 'aw_si_clarity_retry'; // One later try on a day whose run failed (owner, 31 Oct 2026).
-const AW_SI_CLARITY_KEEP  = 35; // Daily clarity and clarity-dev rows are kept at least this many days (rollup.php).
+const INSIGHTWEB_SI_CLARITY_CRON  = 'aw_si_clarity';
+const INSIGHTWEB_SI_CLARITY_API   = 'https://www.clarity.ms/export-data/api/v1/project-live-insights';
+const INSIGHTWEB_SI_CLARITY_MAX   = 8; // Calls a day this job allows itself (Clarity's limit is 10).
+const INSIGHTWEB_SI_CLARITY_RETRY = 'aw_si_clarity_retry'; // One later try on a day whose run failed (owner, 31 Oct 2026).
+const INSIGHTWEB_SI_CLARITY_KEEP  = 35; // Daily clarity and clarity-dev rows are kept at least this many days (rollup.php).
 
 /** Whether the Clarity token is set in wp-config.php. */
 function insightweb_si_clarity_on(): bool {
-	return '' !== insightweb_si_key( 'AW_CLARITY_TOKEN' );
+	return '' !== insightweb_si_key( 'INSIGHTWEB_CLARITY_TOKEN' );
 }
 
 /**
@@ -79,7 +79,7 @@ function insightweb_si_clarity_fields(): array {
 }
 
 /** Metrics that are added up when rows are combined; all others are averages weighted by sessions. */
-const AW_SI_CLARITY_COUNTS = array( 'sessions', 'users', 'bots' );
+const INSIGHTWEB_SI_CLARITY_COUNTS = array( 'sessions', 'users', 'bots' );
 
 /**
  * A dimension's value in one response row, whatever its case (the API sends "Url" for dimension URL).
@@ -106,7 +106,7 @@ function insightweb_si_clarity_call( array $dimensions ) {
 	$day   = wp_date( 'Y-m-d' );
 	$calls = get_option( 'aw_si_clarity_calls', array() );
 	$used  = (int) ( is_array( $calls ) && ( $calls['d'] ?? '' ) === $day ? $calls['n'] : 0 );
-	if ( $used >= AW_SI_CLARITY_MAX ) {
+	if ( $used >= INSIGHTWEB_SI_CLARITY_MAX ) {
 		return new WP_Error( 'aw_si_clarity', __( 'Clarity: the calls allowed today are used up; the next run tries again.', 'insightweb' ) );
 	}
 	update_option(
@@ -122,11 +122,11 @@ function insightweb_si_clarity_call( array $dimensions ) {
 		$query[ 'dimension' . ( $i + 1 ) ] = $dim;
 	}
 	$http = wp_remote_get(
-		add_query_arg( $query, AW_SI_CLARITY_API ),
+		add_query_arg( $query, INSIGHTWEB_SI_CLARITY_API ),
 		array(
 			'timeout' => 60, // Clarity's export can take over 30 s; the 30 s limit failed every run 27–31 Oct 2026.
 			'headers' => array(
-				'Authorization' => 'Bearer ' . insightweb_si_key( 'AW_CLARITY_TOKEN' ),
+				'Authorization' => 'Bearer ' . insightweb_si_key( 'INSIGHTWEB_CLARITY_TOKEN' ),
 				'Content-Type'  => 'application/json',
 			),
 		)
@@ -200,7 +200,7 @@ function insightweb_si_clarity_totals( array $resp, array $dims, callable $keyof
 	foreach ( $sum as $k => $metrics ) {
 		$out[ $k ]['sessions'] = 0.0;
 		foreach ( $metrics as $m => $s ) {
-			if ( in_array( $m, AW_SI_CLARITY_COUNTS, true ) ) {
+			if ( in_array( $m, INSIGHTWEB_SI_CLARITY_COUNTS, true ) ) {
 				$out[ $k ][ $m ] = $s[2];
 			} else {
 				// Rows without sessions (bots only) get a plain mean.
@@ -328,17 +328,17 @@ function insightweb_si_clarity_run( array $args = array() ): array {
 		insightweb_si_run_fail( 'clarity', $rep['error'] );
 		// One more try 3 hours later, once a day (calls stay well inside Clarity's 10 a day).
 		$today = wp_date( 'Y-m-d' );
-		if ( get_option( 'aw_si_clarity_retried' ) !== $today && ! wp_next_scheduled( AW_SI_CLARITY_RETRY ) ) {
+		if ( get_option( 'aw_si_clarity_retried' ) !== $today && ! wp_next_scheduled( INSIGHTWEB_SI_CLARITY_RETRY ) ) {
 			update_option( 'aw_si_clarity_retried', $today, false );
-			wp_schedule_single_event( time() + 3 * HOUR_IN_SECONDS, AW_SI_CLARITY_RETRY );
+			wp_schedule_single_event( time() + 3 * HOUR_IN_SECONDS, INSIGHTWEB_SI_CLARITY_RETRY );
 		}
 	} else {
 		insightweb_si_run_ok( 'clarity', $rep + array( 'up_to' => $day ) );
 	}
 	return $rep;
 }
-add_action( AW_SI_CLARITY_CRON, fn() => get_option( 'aw_si_off' ) || ! insightweb_si_clarity_on() ? null : insightweb_si_clarity_run() );
-add_action( AW_SI_CLARITY_RETRY, fn() => get_option( 'aw_si_off' ) || ! insightweb_si_clarity_on() ? null : insightweb_si_clarity_run() );
+add_action( INSIGHTWEB_SI_CLARITY_CRON, fn() => get_option( 'aw_si_off' ) || ! insightweb_si_clarity_on() ? null : insightweb_si_clarity_run() );
+add_action( INSIGHTWEB_SI_CLARITY_RETRY, fn() => get_option( 'aw_si_off' ) || ! insightweb_si_clarity_on() ? null : insightweb_si_clarity_run() );
 
 // Monthly rows keep the last value of averages and shares (a sum of them would mean nothing); counts are summed.
 add_filter(

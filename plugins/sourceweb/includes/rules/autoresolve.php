@@ -201,7 +201,7 @@ add_action(
 			'/enrichment/autoresolve',
 			array(
 				'methods'             => 'POST',
-				'permission_callback' => fn() => current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' ),
+				'permission_callback' => fn() => current_user_can( defined( 'SOURCEWEB_ENRICH_CAP' ) ? SOURCEWEB_ENRICH_CAP : 'edit_others_posts' ),
 				'callback'            => 'sourceweb_ar_rest_sweep',
 				'args'                => array(
 					'dry'   => array( 'required' => false ),
@@ -215,7 +215,7 @@ add_action(
 /* ---------- The rules as rows the owner can add, edit, delete and reorder (SourceWeb → Rules → Review-queue rules) ---------- */
 
 /** The option holding the rules (a list of rows; absent: the built-in rules). */
-const AW_AR_RULES_OPTION = 'aw_enrich_autoresolve_rules';
+const SOURCEWEB_AR_RULES_OPTION = 'aw_enrich_autoresolve_rules';
 
 /**
  * The rows as stored, cleaned (a row with an unknown field, condition or action is dropped), or the built-in rules.
@@ -223,14 +223,14 @@ const AW_AR_RULES_OPTION = 'aw_enrich_autoresolve_rules';
  * @return array[] each array{id, field, cond, action, on}
  */
 function sourceweb_ar_rules() {
-	$saved = get_option( AW_AR_RULES_OPTION );
+	$saved = get_option( SOURCEWEB_AR_RULES_OPTION );
 	if ( ! is_array( $saved ) ) {
 		return sourceweb_ar_default_rules();
 	}
 	$conds = sourceweb_ar_conditions();
 	$out   = array();
 	foreach ( $saved as $r ) {
-		if ( is_array( $r ) && isset( $r['id'], AW_AR_FIELDS[ $r['field'] ?? '' ], AW_AR_ACTIONS[ $r['action'] ?? '' ], $conds[ $r['cond'] ?? '' ] ) && in_array( $r['field'], $conds[ $r['cond'] ]['fields'], true ) ) {
+		if ( is_array( $r ) && isset( $r['id'], SOURCEWEB_AR_FIELDS[ $r['field'] ?? '' ], SOURCEWEB_AR_ACTIONS[ $r['action'] ?? '' ], $conds[ $r['cond'] ?? '' ] ) && in_array( $r['field'], $conds[ $r['cond'] ]['fields'], true ) ) {
 			$out[] = array( 'id' => (string) $r['id'], 'field' => $r['field'], 'cond' => $r['cond'], 'action' => $r['action'], 'on' => ! empty( $r['on'] ) );
 		}
 	}
@@ -245,7 +245,7 @@ function sourceweb_ar_rules() {
  */
 function sourceweb_ar_rules_store( array $rows, $what ) {
 	$old = sourceweb_ar_rules();
-	update_option( AW_AR_RULES_OPTION, array_values( $rows ), false );
+	update_option( SOURCEWEB_AR_RULES_OPTION, array_values( $rows ), false );
 	sourceweb_src_log( 'enrich', $what, $old, array_values( $rows ) );
 }
 
@@ -261,7 +261,7 @@ function sourceweb_ar_rule_save( array $in, $original = '' ) {
 	$cond   = (string) ( $in['cond'] ?? '' );
 	$action = (string) ( $in['action'] ?? '' );
 	$conds  = sourceweb_ar_conditions();
-	if ( ! isset( AW_AR_FIELDS[ $field ] ) || ! isset( $conds[ $cond ] ) || ! in_array( $field, $conds[ $cond ]['fields'], true ) || ! isset( AW_AR_ACTIONS[ $action ] ) ) {
+	if ( ! isset( SOURCEWEB_AR_FIELDS[ $field ] ) || ! isset( $conds[ $cond ] ) || ! in_array( $field, $conds[ $cond ]['fields'], true ) || ! isset( SOURCEWEB_AR_ACTIONS[ $action ] ) ) {
 		return array( 'error', __( 'Choose a field, a condition that fits it, and what to do.', 'sourceweb' ) );
 	}
 	$row  = array( 'id' => '', 'field' => $field, 'cond' => $cond, 'action' => $action, 'on' => ! empty( $in['on'] ) );
@@ -343,7 +343,7 @@ function sourceweb_ar_rule_move( $id, $dir ) {
 /** The built-in rules again (the edits are dropped; the log keeps them). */
 function sourceweb_ar_rules_reset() {
 	$old = sourceweb_ar_rules();
-	delete_option( AW_AR_RULES_OPTION );
+	delete_option( SOURCEWEB_AR_RULES_OPTION );
 	sourceweb_src_log( 'enrich', 'Review-queue rules reset to the built-in ones', $old, sourceweb_ar_default_rules() );
 	return array( 'reset', __( 'The built-in rules are back.', 'sourceweb' ) );
 }
@@ -359,11 +359,11 @@ function sourceweb_ar_rule_view( array $r ) {
 	return array(
 		'id'           => $r['id'],
 		'field'        => $r['field'],
-		'field_label'  => AW_AR_FIELDS[ $r['field'] ],
+		'field_label'  => SOURCEWEB_AR_FIELDS[ $r['field'] ],
 		'cond'         => $r['cond'],
 		'cond_label'   => $conds[ $r['cond'] ]['label'],
 		'action'       => $r['action'],
-		'action_label' => AW_AR_ACTIONS[ $r['action'] ],
+		'action_label' => SOURCEWEB_AR_ACTIONS[ $r['action'] ],
 		'on'           => (bool) $r['on'],
 	);
 }
@@ -401,16 +401,16 @@ add_action(
 			}
 			$fields  = array();
 			$actions = array();
-			foreach ( AW_AR_FIELDS as $k => $l ) {
+			foreach ( SOURCEWEB_AR_FIELDS as $k => $l ) {
 				$fields[] = array( 'value' => $k, 'label' => $l );
 			}
-			foreach ( AW_AR_ACTIONS as $k => $l ) {
+			foreach ( SOURCEWEB_AR_ACTIONS as $k => $l ) {
 				$actions[] = array( 'value' => $k, 'label' => $l );
 			}
 			return rest_ensure_response(
 				array(
 					'on'         => sourceweb_ar_on(),
-					'stored'     => is_array( get_option( AW_AR_RULES_OPTION ) ),
+					'stored'     => is_array( get_option( SOURCEWEB_AR_RULES_OPTION ) ),
 					'rows'       => array_map( 'sourceweb_ar_rule_view', $rows ),
 					'one'        => $one,
 					'fields'     => $fields,
@@ -474,7 +474,7 @@ add_action(
 /* ---------- Enrichment review: edit a waiting value, or delete it ---------- */
 
 /** Fields whose waiting value is not plain text, so it is not edited by hand here. */
-const AW_AR_NOT_EDITABLE = array( 'logo', 'photos', 'hours', 'services', 'place', 'merge_into', 'closed', 'animals', 'areas_served' );
+const SOURCEWEB_AR_NOT_EDITABLE = array( 'logo', 'photos', 'hours', 'services', 'place', 'merge_into', 'closed', 'animals', 'areas_served' );
 
 /**
  * Change what a waiting value says (the person checking it corrects a typo, then applies it).
@@ -486,7 +486,7 @@ const AW_AR_NOT_EDITABLE = array( 'logo', 'photos', 'hours', 'services', 'place'
 function sourceweb_ar_value_edit( $id, $value ) {
 	global $wpdb;
 	$r = sourceweb_enrich_row( (int) $id );
-	if ( ! $r || 'pending' !== $r['status'] || ! is_string( $r['value'] ) || in_array( $r['field'], AW_AR_NOT_EDITABLE, true ) ) {
+	if ( ! $r || 'pending' !== $r['status'] || ! is_string( $r['value'] ) || in_array( $r['field'], SOURCEWEB_AR_NOT_EDITABLE, true ) ) {
 		return array( 'error', __( 'Only a waiting text value can be edited.', 'sourceweb' ) );
 	}
 	$f   = (string) $r['field'];
@@ -531,7 +531,7 @@ function sourceweb_ar_value_delete( $id ) {
 add_action(
 	'rest_api_init',
 	function () {
-		$cap = fn() => current_user_can( defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'edit_others_posts' );
+		$cap = fn() => current_user_can( defined( 'SOURCEWEB_ENRICH_CAP' ) ? SOURCEWEB_ENRICH_CAP : 'edit_others_posts' );
 		$id  = array( 'type' => 'integer', 'required' => true );
 		register_rest_route( 'sourceweb/v1', '/enrichment/edit', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_value_edit( (int) $q['id'], (string) $q->get_param( 'value' ) ) ), 'args' => array( 'id' => $id ) ) );
 		register_rest_route( 'sourceweb/v1', '/enrichment/delete', array( 'methods' => 'POST', 'permission_callback' => $cap, 'callback' => fn( WP_REST_Request $q ) => sourceweb_ar_answer( sourceweb_ar_value_delete( (int) $q['id'] ) ), 'args' => array( 'id' => $id ) ) );

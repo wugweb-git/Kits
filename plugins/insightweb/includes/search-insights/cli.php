@@ -111,7 +111,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						);
 					} else {
 						insightweb_si_psi_start(); // The first calls now; WP-cron runs the rest every five minutes.
-						$out = get_option( AW_SI_PSI_QUEUE );
+						$out = get_option( INSIGHTWEB_SI_PSI_QUEUE );
 					}
 				} elseif ( 'clarity' === $src ) {
 					$out = insightweb_si_clarity_run( array( 'dry' => $dry ) );
@@ -127,7 +127,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						$out = array( 'next' => insightweb_si_inspect_todo( 20 ) );
 					} else {
 						insightweb_si_inspect_start(); // The first pages now; WP-cron runs the rest every five minutes.
-						$out = get_option( AW_SI_INSPECT_QUEUE );
+						$out = get_option( INSIGHTWEB_SI_INSPECT_QUEUE );
 						unset( $out['todo'] );
 					}
 				} elseif ( 'bing-crawl' === $src ) {

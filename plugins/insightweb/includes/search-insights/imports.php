@@ -364,7 +364,7 @@ add_action(
 				),
 				'started' => 0,
 			);
-			update_option( AW_SI_RUNS, $r, false );
+			update_option( INSIGHTWEB_SI_RUNS, $r, false );
 		}
 		update_option( 'aw_si_live_seed_run', time(), false );
 	}

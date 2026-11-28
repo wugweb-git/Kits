@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/keyphrase-model.php';
 
 /** Words that alone make no search phrase ("save animals", "animal welfare india"). */
-// AW_SEO_GENERIC_WORDS: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_GENERIC_WORDS: RankWeb → Settings (settings.php).
 
 /**
  * A keyword as stored: lower case, plain, no quotes, single spaces. '' when it is unusable:
@@ -62,10 +62,10 @@ function rankweb_seo_clean_keyword( $kw, $title, $text = '' ) {
 	if ( '' !== $brand && false !== strpos( $kw, $brand ) && false === mb_stripos( $title, $brand ) && false === mb_stripos( $title, str_replace( ' ', '', $brand ) ) ) {
 		return '';
 	}
-	if ( preg_match( '/^(?:' . AW_SEO_DANGLING . ')$/iu', (string) end( $parts ) ) ) {
+	if ( preg_match( '/^(?:' . RANKWEB_SEO_DANGLING . ')$/iu', (string) end( $parts ) ) ) {
 		return '';
 	}
-	if ( ! array_diff( $parts, AW_SEO_GENERIC_WORDS ) ) {
+	if ( ! array_diff( $parts, RANKWEB_SEO_GENERIC_WORDS ) ) {
 		return '';
 	}
 	$words = fn( $s ) => array_filter( preg_split( '/[^\p{L}\p{N}]+/u', mb_strtolower( $s ) ), fn( $w ) => mb_strlen( $w ) >= 3 );
@@ -180,7 +180,7 @@ add_action(
 				'methods'             => 'GET',
 				'permission_callback' => 'rankweb_seo_api_allowed',
 				'args'                => array(
-					'type'     => array( 'required' => true, 'type' => 'string', 'enum' => AW_SEO_ITEM_TYPES ),
+					'type'     => array( 'required' => true, 'type' => 'string', 'enum' => RANKWEB_SEO_ITEM_TYPES ),
 					'page'     => array( 'type' => 'integer', 'default' => 1, 'minimum' => 1 ),
 					'per_page' => array( 'type' => 'integer', 'default' => 100, 'minimum' => 1, 'maximum' => 200 ),
 					'missing'  => array( 'type' => 'boolean', 'default' => false ),
@@ -243,7 +243,7 @@ add_action(
 							$skipped[] = array( 'id' => $id, 'why' => 'press items: administrators only' );
 							continue;
 						}
-						if ( ! $post || ! ( $is_press ? in_array( $post->post_status, array( 'publish', 'private', 'draft', 'pending', 'future' ), true ) : ( 'publish' === $post->post_status && in_array( $post->post_type, AW_SEO_ITEM_TYPES, true ) ) ) ) {
+						if ( ! $post || ! ( $is_press ? in_array( $post->post_status, array( 'publish', 'private', 'draft', 'pending', 'future' ), true ) : ( 'publish' === $post->post_status && in_array( $post->post_type, RANKWEB_SEO_ITEM_TYPES, true ) ) ) ) {
 							$skipped[] = array( 'id' => $id, 'why' => 'not a published item' );
 							continue;
 						}

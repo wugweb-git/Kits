@@ -16,22 +16,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The menu's slug: its Overview (no other screen uses it). */
-const AW_SRC_MENU = 'aw-sourcing-menu';
+const SOURCEWEB_SRC_MENU = 'aw-sourcing-menu';
 
 /** The Sourcing page: every settings screen, report and job, one per tab (admin.php?page=aw-sourcing&tab=…). */
-const AW_SRC_PAGE = 'aw-sourcing';
+const SOURCEWEB_SRC_PAGE = 'aw-sourcing';
 
 /**
  * WordPress's screen id of the Sourcing page under the menu: the menu title "Sourcing" sanitised, "_page_", the page.
  * admin-menu.php registers the menu with exactly that title, so the id stays this.
  */
-const AW_SRC_SCREEN = 'sourcing_page_aw-sourcing';
+const SOURCEWEB_SRC_SCREEN = 'sourcing_page_aw-sourcing';
 
 /** The tabs that are reports or jobs, not settings, in their menu order. */
-const AW_SRC_REPORT_TABS = array( 'workers', 'rejected', 'relay-log', 'log' );
+const SOURCEWEB_SRC_REPORT_TABS = array( 'workers', 'rejected', 'relay-log', 'log' );
 
 /** The tab with the plugin's own switches; always the last item. */
-const AW_SRC_SETTINGS_TAB = 'settings';
+const SOURCEWEB_SRC_SETTINGS_TAB = 'settings';
 
 /**
  * The page's tabs in menu order: settings screens as given, then the reports and jobs, then Settings.
@@ -43,17 +43,17 @@ function sourceweb_src_menu_order( array $tabs ): array {
 	$settings = array();
 	$reports  = array();
 	foreach ( $tabs as $k => $label ) {
-		if ( AW_SRC_SETTINGS_TAB === $k || in_array( $k, AW_SRC_REPORT_TABS, true ) ) {
+		if ( SOURCEWEB_SRC_SETTINGS_TAB === $k || in_array( $k, SOURCEWEB_SRC_REPORT_TABS, true ) ) {
 			continue;
 		}
 		$settings[ $k ] = $label;
 	}
-	foreach ( AW_SRC_REPORT_TABS as $k ) {
+	foreach ( SOURCEWEB_SRC_REPORT_TABS as $k ) {
 		if ( isset( $tabs[ $k ] ) ) {
 			$reports[ $k ] = $tabs[ $k ];
 		}
 	}
-	$last = isset( $tabs[ AW_SRC_SETTINGS_TAB ] ) ? array( AW_SRC_SETTINGS_TAB => $tabs[ AW_SRC_SETTINGS_TAB ] ) : array();
+	$last = isset( $tabs[ SOURCEWEB_SRC_SETTINGS_TAB ] ) ? array( SOURCEWEB_SRC_SETTINGS_TAB => $tabs[ SOURCEWEB_SRC_SETTINGS_TAB ] ) : array();
 	return $settings + $reports + $last;
 }
 
@@ -66,7 +66,7 @@ function sourceweb_src_menu_order( array $tabs ): array {
  * @return string
  */
 function sourceweb_src_tab_path( string $tab = '', array $args = array() ): string {
-	$q = array( 'page' => AW_SRC_PAGE );
+	$q = array( 'page' => SOURCEWEB_SRC_PAGE );
 	if ( '' !== $tab && 'sources' !== $tab ) {
 		$q['tab'] = $tab;
 	}
@@ -75,18 +75,18 @@ function sourceweb_src_tab_path( string $tab = '', array $args = array() ): stri
 
 /** The menu item a tab belongs to: the page's own slug for Sources, the tab's address for the others. */
 function sourceweb_src_tab_menu_slug( string $tab ): string {
-	return '' === $tab || 'sources' === $tab ? AW_SRC_PAGE : sourceweb_src_tab_path( $tab );
+	return '' === $tab || 'sources' === $tab ? SOURCEWEB_SRC_PAGE : sourceweb_src_tab_path( $tab );
 }
 
 /** The Overview's address relative to wp-admin. */
 function sourceweb_src_overview_path(): string {
-	return 'admin.php?page=' . AW_SRC_MENU;
+	return 'admin.php?page=' . SOURCEWEB_SRC_MENU;
 }
 
 /** The Plugins screen's links under the plugin's name, label => address relative to wp-admin. */
 function sourceweb_src_action_link_paths(): array {
 	return array(
 		'Overview' => sourceweb_src_overview_path(),
-		'Settings' => sourceweb_src_tab_path( AW_SRC_SETTINGS_TAB ),
+		'Settings' => sourceweb_src_tab_path( SOURCEWEB_SRC_SETTINGS_TAB ),
 	);
 }

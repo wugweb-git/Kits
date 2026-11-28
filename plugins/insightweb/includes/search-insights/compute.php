@@ -12,10 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Keyword map rule: high demand is Trends T ≥ 20, or ≥ 50 Search Console impressions in 28 days.
-// AW_SI_HIGH_TRENDS: RankWeb → Settings (settings.php).
-// AW_SI_HIGH_IMPR: RankWeb → Settings (settings.php).
-// AW_SI_QUICK_MIN: RankWeb → Settings (settings.php).
-// AW_SI_MOVERS: RankWeb → Settings (settings.php).
+// INSIGHTWEB_SI_HIGH_TRENDS: RankWeb → Settings (settings.php).
+// INSIGHTWEB_SI_HIGH_IMPR: RankWeb → Settings (settings.php).
+// INSIGHTWEB_SI_QUICK_MIN: RankWeb → Settings (settings.php).
+// INSIGHTWEB_SI_MOVERS: RankWeb → Settings (settings.php).
 
 /** Suggested actions (plan §7). Keys are stored; labels are shown. */
 function insightweb_si_actions(): array {
@@ -45,7 +45,7 @@ function insightweb_si_priority( ?int $trends, int $impr, ?float $pos, bool $has
 	if ( null !== $pos && $pos > 0 && $pos <= 3 ) {
 		return 'P3'; // Already in the top 3.
 	}
-	$high = ( null !== $trends && $trends >= AW_SI_HIGH_TRENDS ) || $impr >= AW_SI_HIGH_IMPR;
+	$high = ( null !== $trends && $trends >= INSIGHTWEB_SI_HIGH_TRENDS ) || $impr >= INSIGHTWEB_SI_HIGH_IMPR;
 	if ( ! $high ) {
 		return 'P3';
 	}
@@ -155,7 +155,7 @@ function insightweb_si_entity_movers(): array {
 	}
 	$k = insightweb_si_table( 'keywords' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE entity = 1 AND pos28 IS NOT NULL AND pos_prev IS NOT NULL ORDER BY ABS(pos_prev - pos28) DESC, impr28 DESC, id LIMIT %d', $k, AW_SI_MOVERS ) ) );
+	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE entity = 1 AND pos28 IS NOT NULL AND pos_prev IS NOT NULL ORDER BY ABS(pos_prev - pos28) DESC, impr28 DESC, id LIMIT %d', $k, INSIGHTWEB_SI_MOVERS ) ) );
 }
 
 /**
@@ -170,7 +170,7 @@ function insightweb_si_entity_sql( ?array $movers = null ): string {
 
 /**
  * How many keyword records a view counts, as the Keywords tab and the Priorities box count them: listing names folded
- * (only the AW_SI_MOVERS that moved most count one by one; insightweb_si_entity_sql()).
+ * (only the INSIGHTWEB_SI_MOVERS that moved most count one by one; insightweb_si_entity_sql()).
  *
  * @param string     $view   A key of insightweb_si_view_sql().
  * @param int[]|null $movers insightweb_si_entity_movers(), when the caller already has it.
@@ -192,12 +192,12 @@ function insightweb_si_view_count( string $view, ?array $movers = null ): int {
  * @param int        $impr Impressions, 28 days.
  */
 function insightweb_si_quick_win( ?float $pos, int $impr ): bool {
-	return null !== $pos && $pos >= 8 && $pos <= 20 && $impr >= AW_SI_QUICK_MIN;
+	return null !== $pos && $pos >= 8 && $pos <= 20 && $impr >= INSIGHTWEB_SI_QUICK_MIN;
 }
 
 /** SQL condition of a quick win: the stored flag (keyword table version 3), else the same rule on the stored figures. */
 function insightweb_si_quick_sql(): string {
-	return function_exists( 'insightweb_kw_ready' ) && insightweb_kw_ready() ? 'quick_win = 1' : 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) AW_SI_QUICK_MIN;
+	return function_exists( 'insightweb_kw_ready' ) && insightweb_kw_ready() ? 'quick_win = 1' : 'pos28 BETWEEN 8 AND 20 AND impr28 >= ' . (int) INSIGHTWEB_SI_QUICK_MIN;
 }
 
 /**
@@ -225,7 +225,7 @@ function insightweb_si_view_sql( string $view = '' ) {
 		'gap'       => "status = 'gap'",
 		'conflict'  => "status = 'conflict'",
 		'quick'     => insightweb_si_quick_sql(),
-		'notranked' => 'roles & ' . (int) AW_SI_ROLE_TRACKED . " AND impr28 = 0 AND LOCATE('{', label) = 0", // Directory patterns are not searched; no % here, as views pass through prepare().
+		'notranked' => 'roles & ' . (int) INSIGHTWEB_SI_ROLE_TRACKED . " AND impr28 = 0 AND LOCATE('{', label) = 0", // Directory patterns are not searched; no % here, as views pass through prepare().
 		'entity'    => 'entity = 1',
 	);
 	return '' === $view ? $map : ( $map[ $view ] ?? '1=0' );
@@ -255,7 +255,7 @@ function insightweb_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $l
 	// News items and archives share topic phrases by nature, so only other pages count as two owners. When only News
 	// items or archives own it, Google showing another News item or archive is no conflict either.
 	$conflict = count( $main ) > 1
-		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= AW_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) && ( $main || empty( $ctx['shown_minor'] ) ) && ! insightweb_si_same_subject( $shown, $owners ) ); // the owner's own Directory type or Library item is no conflict
+		|| ( $owners && '' !== $shown && (int) ( $top[1] ?? 0 ) >= INSIGHTWEB_SI_QUICK_MIN && ! in_array( $shown, $owners, true ) && ( $main || empty( $ctx['shown_minor'] ) ) && ! insightweb_si_same_subject( $shown, $owners ) ); // the owner's own Directory type or Library item is no conflict
 	$priority = insightweb_si_priority( $trends, $impr, $pos, $has_page );
 	$status   = $conflict ? 'conflict' : ( $has_page ? 'has-page' : ( 'P2' === $priority ? 'gap' : '' ) );
 	$label    = (string) ( $ctx['label'] ?? '' );
@@ -270,11 +270,11 @@ function insightweb_si_decide( ?int $trends, int $impr, ?float $pos28, ?float $l
 		$action = $has_page ? 'guide-update' : 'add-secondary';
 	} elseif ( $impr > 0 && '' !== $page && isset( $ctx['quality'][ $page ] ) ) {
 		$action = 'page-quality'; // Searchers land on a page flagged by Clarity or PageSpeed.
-	} elseif ( ! $has_page && $impr >= AW_SI_QUICK_MIN && insightweb_si_is_question( $label ) ) {
+	} elseif ( ! $has_page && $impr >= INSIGHTWEB_SI_QUICK_MIN && insightweb_si_is_question( $label ) ) {
 		$action = 'faq-answer';
-	} elseif ( ! $has_page && $impr >= AW_SI_QUICK_MIN && insightweb_si_is_news( $label ) ) {
+	} elseif ( ! $has_page && $impr >= INSIGHTWEB_SI_QUICK_MIN && insightweb_si_is_news( $label ) ) {
 		$action = 'news-explainer';
-	} elseif ( $impr >= AW_SI_QUICK_MIN && 'en' === ( $ctx['lang'] ?? 'en' ) && empty( $ctx['sourcing'] ) && 0 === strpos( $shown, '/news/' ) && insightweb_si_is_news( $label ) ) {
+	} elseif ( $impr >= INSIGHTWEB_SI_QUICK_MIN && 'en' === ( $ctx['lang'] ?? 'en' ) && empty( $ctx['sourcing'] ) && 0 === strpos( $shown, '/news/' ) && insightweb_si_is_news( $label ) ) {
 		$action = 'sourcing'; // Our news items already show for it: more of them would help. Never for Hindi or Hinglish.
 	}
 	return compact( 'priority', 'status', 'action', 'conflict', 'pos', 'owners', 'shown' );
@@ -348,7 +348,7 @@ function insightweb_si_ctx( $r, array $quality ): array {
 	return array(
 		'label'    => (string) $r->label,
 		'lang'     => (string) $r->lang,
-		'sourcing' => (bool) ( (int) $r->roles & AW_SI_ROLE_SOURCING ),
+		'sourcing' => (bool) ( (int) $r->roles & INSIGHTWEB_SI_ROLE_SOURCING ),
 		'quality'  => $quality,
 	);
 }

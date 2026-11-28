@@ -32,7 +32,7 @@ foreach ( $p4plan['records'] as $r ) {
 
 // The options as phase 2 left them on live: the lists are the mirrors rebuilt from the table.
 $p4mir                     = sourceweb_kw_mirrors( $p4recs );
-$p4rel                     = array_merge( $p4['relevance'], array_intersect_key( $p4mir, array_flip( AW_RETIRE_REL_LISTS ) ) );
+$p4rel                     = array_merge( $p4['relevance'], array_intersect_key( $p4mir, array_flip( SOURCEWEB_RETIRE_REL_LISTS ) ) );
 $p4cfg                     = $p4['sources_option'];
 $p4cfg['press']['queries'] = $p4mir['press'];
 $p4cfg['categories']       = sourceweb_kw_categories_in_order( $p4mir['categories'], (array) $p4['sources_option']['categories'] );

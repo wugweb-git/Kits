@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SEO_SETTINGS = 'aw_seo_settings';
+const RANKWEB_SEO_SETTINGS = 'aw_seo_settings';
 
 /** Every module and its settings. */
 function rankweb_seo_modules(): array {
@@ -33,12 +33,12 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'helpers' ),
 			'desc'   => 'Shared rules: description length, the section hubs\' titles and descriptions, share images.',
 			'fields' => array(
-				'AW_SEO_DESC_MAX' => array( 'type' => 'int', 'label' => 'Longest description (characters)', 'help' => 'Search descriptions are cut at a word before this.', 'default' => 155 ),
-				'AW_HUB_TITLES' => array( 'type' => 'map', 'label' => 'Section hub titles', 'help' => 'One per line: post type | title.', 'default' => array() ),
-				'AW_HUB_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Section hub descriptions', 'help' => 'One per line: post type | description. %s is the number of listings (Directory).', 'default' => array() ),
-				'AW_ARCHIVE_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Archive descriptions', 'help' => 'One per line: post type | description.', 'default' => array() ),
-				'AW_SEO_LISTING_SHARE_IMAGE' => array( 'tab' => 'share', 'type' => 'int', 'label' => 'Listing share image (attachment ID)', 'help' => 'Used when a listing has no logo of its own.', 'default' => 0 ),
-				'AW_SEO_SOURCE_IMAGE_TYPES' => array( 'tab' => 'share', 'type' => 'list', 'label' => 'Types that share the publisher\'s image', 'help' => 'One post type per line.', 'default' => array() ),
+				'RANKWEB_SEO_DESC_MAX' => array( 'type' => 'int', 'label' => 'Longest description (characters)', 'help' => 'Search descriptions are cut at a word before this.', 'default' => 155 ),
+				'RANKWEB_HUB_TITLES' => array( 'type' => 'map', 'label' => 'Section hub titles', 'help' => 'One per line: post type | title.', 'default' => array() ),
+				'RANKWEB_HUB_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Section hub descriptions', 'help' => 'One per line: post type | description. %s is the number of listings (Directory).', 'default' => array() ),
+				'RANKWEB_ARCHIVE_DESCRIPTIONS' => array( 'type' => 'map', 'label' => 'Archive descriptions', 'help' => 'One per line: post type | description.', 'default' => array() ),
+				'RANKWEB_SEO_LISTING_SHARE_IMAGE' => array( 'tab' => 'share', 'type' => 'int', 'label' => 'Listing share image (attachment ID)', 'help' => 'Used when a listing has no logo of its own.', 'default' => 0 ),
+				'RANKWEB_SEO_SOURCE_IMAGE_TYPES' => array( 'tab' => 'share', 'type' => 'list', 'label' => 'Types that share the publisher\'s image', 'help' => 'One post type per line.', 'default' => array() ),
 			),
 		),
 		'titles' => array(
@@ -47,11 +47,11 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'titles' ),
 			'desc'   => 'Search titles and descriptions of items and of list pages (hubs, Directory places, categories, tags), built from their own counts and places.',
 			'fields' => array(
-				'AW_SEO_ITEM_TYPES' => array( 'type' => 'list', 'label' => 'Item types', 'help' => 'Post types whose items get titles, descriptions and focus keywords. One per line.', 'default' => array( 'post', 'page' ) ),
-				'AW_SEO_BREAKDOWN' => array( 'type' => 'list', 'label' => 'Directory place breakdown', 'help' => 'Listing types counted in a place\'s description, in this order. One tag slug per line.', 'default' => array() ),
+				'RANKWEB_SEO_ITEM_TYPES' => array( 'type' => 'list', 'label' => 'Item types', 'help' => 'Post types whose items get titles, descriptions and focus keywords. One per line.', 'default' => array( 'post', 'page' ) ),
+				'RANKWEB_SEO_BREAKDOWN' => array( 'type' => 'list', 'label' => 'Directory place breakdown', 'help' => 'Listing types counted in a place\'s description, in this order. One tag slug per line.', 'default' => array() ),
 				'RANKWEB_TITLE_SEPARATOR' => array( 'type' => 'text', 'label' => 'Title separator', 'help' => 'One of - – — | · • » « / ~ :. Empty keeps WordPress\'s own. Used when RankWeb prints the page head.', 'default' => '' ),
 				'RANKWEB_TITLE_PREFIX' => array( 'type' => 'text', 'label' => 'Text before every title', 'help' => 'Up to 40 characters, for example a brand mark. Empty for none.', 'default' => '' ),
-				'AW_SEO_TERM_TITLES' => array( 'type' => 'map', 'label' => 'Category and tag titles', 'help' => 'One per line: taxonomy:slug | title. Others get the rule-based title.', 'default' => array() ),
+				'RANKWEB_SEO_TERM_TITLES' => array( 'type' => 'map', 'label' => 'Category and tag titles', 'help' => 'One per line: taxonomy:slug | title. Others get the rule-based title.', 'default' => array() ),
 			),
 		),
 		'canonical' => array(
@@ -60,7 +60,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'canonical' ),
 			'desc'   => 'Canonical addresses Rank Math cannot work out: hub pages, Directory places, filtered lists.',
 			'fields' => array(
-				'AW_FILTER_PARAMS' => array( 'type' => 'list', 'label' => 'Filter parameters', 'help' => 'Query parameters that make a filtered list. One per line.', 'default' => array( 'tag', 'state', 'district', 'q', 'category_name', 'verified', 'gov', 'sort', 'publisher', 'court', 'issuer' ) ),
+				'RANKWEB_FILTER_PARAMS' => array( 'type' => 'list', 'label' => 'Filter parameters', 'help' => 'Query parameters that make a filtered list. One per line.', 'default' => array( 'tag', 'state', 'district', 'q', 'category_name', 'verified', 'gov', 'sort', 'publisher', 'court', 'issuer' ) ),
 			),
 		),
 		'robots' => array(
@@ -75,10 +75,10 @@ function rankweb_seo_modules(): array {
 				'RANKWEB_NOINDEX_ATTACHMENT' => array( 'type' => 'int', 'label' => 'Keep attachment pages out of search (1 on, 0 off)', 'help' => 'The page WordPress makes for each uploaded file.', 'default' => 0 ),
 				'RANKWEB_NOINDEX_WOO'        => array( 'type' => 'int', 'label' => 'Keep WooCommerce cart, checkout and account pages out of search (1 on, 0 off)', 'help' => 'Only does anything when WooCommerce is active. These pages are private to the shopper and have nothing to rank.', 'default' => 1 ),
 				'RANKWEB_NOINDEX_EMPTY'      => array( 'type' => 'int', 'label' => 'Keep empty category and tag archives out of search (1 on, 0 off)', 'help' => 'Archives with no items.', 'default' => 0 ),
-				'AW_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
-				'AW_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
+				'RANKWEB_SEO_NOINDEX_PROTECTED' => array( 'type' => 'int', 'label' => 'Keep password-protected items out of search (1 on, 0 off)', 'help' => 'A password-protected item hides its content, so it is set to noindex.', 'default' => 1 ),
+				'RANKWEB_THIN_DISTRICT_TYPE' => array( 'type' => 'int', 'label' => 'Fewest listings for an indexed Directory page', 'help' => 'A district × type page with fewer listings than this is noindex and left out of the Directory sitemap, unless it is on the "Thin pages kept indexed" list. At 1, the default, only a page with no listings is noindex.', 'default' => 1 ),
 				'RANKWEB_ITEM_ROBOTS' => array( 'type' => 'int', 'label' => 'Per-item robots options in the editor (1 on, 0 off)', 'help' => 'Nofollow, noarchive, nosnippet and max-snippet next to "Keep out of search results". Off: items print only the page-kind rules.', 'default' => 1 ),
-				'AW_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array() ),
+				'RANKWEB_DIRECTORY_KEEP_INDEXED' => array( 'type' => 'list', 'label' => 'Thin pages kept indexed', 'help' => 'Paths under /directory/ that stay indexed anyway. One per line.', 'default' => array() ),
 			),
 		),
 		'filtered' => array(
@@ -87,10 +87,10 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'filtered-views' ),
 			'desc'   => 'A hub filtered by one category or tag is a page of its own (title, description, canonical, sitemap) from a minimum number of items.',
 			'fields' => array(
-				'AW_FILTERED_MIN_ITEMS' => array( 'type' => 'int', 'label' => 'Fewest items for an indexed filtered list', 'help' => 'Below this a filtered list is noindex.', 'default' => 3 ),
-				'AW_FILTERED_CATEGORY_HUBS' => array( 'type' => 'list', 'label' => 'Hubs with filtered pages', 'help' => 'One post type per line.', 'default' => array() ),
-				'AW_FILTERED_TITLE_WORDS' => array( 'type' => 'maplist', 'label' => 'Filtered list titles', 'help' => 'One per line: post type | title | shorter title …, %s is the category or tag.', 'default' => array() ),
-				'AW_FILTERED_STATE_NOINDEX' => array( 'type' => 'list', 'label' => 'Hubs whose state views are noindex', 'help' => 'One post type per line.', 'default' => array() ),
+				'RANKWEB_FILTERED_MIN_ITEMS' => array( 'type' => 'int', 'label' => 'Fewest items for an indexed filtered list', 'help' => 'Below this a filtered list is noindex.', 'default' => 3 ),
+				'RANKWEB_FILTERED_CATEGORY_HUBS' => array( 'type' => 'list', 'label' => 'Hubs with filtered pages', 'help' => 'One post type per line.', 'default' => array() ),
+				'RANKWEB_FILTERED_TITLE_WORDS' => array( 'type' => 'maplist', 'label' => 'Filtered list titles', 'help' => 'One per line: post type | title | shorter title …, %s is the category or tag.', 'default' => array() ),
+				'RANKWEB_FILTERED_STATE_NOINDEX' => array( 'type' => 'list', 'label' => 'Hubs whose state views are noindex', 'help' => 'One post type per line.', 'default' => array() ),
 			),
 		),
 		'video' => array(
@@ -99,7 +99,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'video' ),
 			'desc'   => 'Finds YouTube and Vimeo videos in content, adds a VideoObject to the schema, and lists them in a video sitemap. No paid API: a YouTube video gets its title and thumbnail, not its duration or date.',
 			'fields' => array(
-				'AW_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post' ) ),
+				'RANKWEB_VIDEO_TYPES' => array( 'type' => 'list', 'label' => 'Post types scanned for videos', 'help' => 'Items of these types are scanned for YouTube and Vimeo videos. One per line. Empty: nothing runs.', 'default' => array( 'post' ) ),
 			),
 		),
 		'redirect-tools' => array(
@@ -108,7 +108,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'redirect-tools' ),
 			'desc'   => 'Export and import redirects as CSV, export Rank Math\'s 404 log, and an Apache .htaccess block. Redirects stay in Rank Math\'s one list.',
 			'fields' => array(
-				'AW_REDIRECT_HTACCESS' => array( 'type' => 'int', 'label' => 'Allow writing redirects to .htaccess (1 on, 0 off)', 'help' => 'Off by default. Apache or LiteSpeed only; a backup is written first. The download works whether this is on or off.', 'default' => 0 ),
+				'RANKWEB_REDIRECT_HTACCESS' => array( 'type' => 'int', 'label' => 'Allow writing redirects to .htaccess (1 on, 0 off)', 'help' => 'Off by default. Apache or LiteSpeed only; a backup is written first. The download works whether this is on or off.', 'default' => 0 ),
 			),
 		),
 		'speed' => array(
@@ -154,7 +154,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'schema' ),
 			'desc'   => 'The site\'s own JSON-LD nodes in Rank Math\'s graph (organisations, Library documents, campaigns, opportunities, lists).',
 			'fields' => array(
-				'AW_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array() ),
+				'RANKWEB_SITE_ALT_NAMES' => array( 'type' => 'list', 'label' => 'Other names of the site', 'help' => 'The WebSite node\'s alternateName. One per line.', 'default' => array() ),
 			),
 		),
 		'schema-plus' => array(
@@ -163,7 +163,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'schema-custom' ),
 			'desc'   => 'A per-item JSON-LD box (several nodes), Speakable, about and mentions, import schema from a URL, and a Rich Results Test link.',
 			'fields' => array(
-				'AW_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the custom-schema box', 'help' => 'Items of these types get the Custom schema box. One per line. Empty: none.', 'default' => array( 'post', 'page' ) ),
+				'RANKWEB_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the custom-schema box', 'help' => 'Items of these types get the Custom schema box. One per line. Empty: none.', 'default' => array( 'post', 'page' ) ),
 			),
 		),
 		'faq' => array(
@@ -172,11 +172,11 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'faq' ),
 			'desc'   => 'The FAQ box on the edit screen of every public post type and taxonomy (which ones: Plugins → RankWeb → FAQ), and the questions and answers with FAQPage schema on the page. Automatic questions from a page\'s own fields fill the box where the site provides them.',
 			'fields' => array(
-				'AW_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
-				'AW_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
-				'AW_FAQ_MAX' => array( 'type' => 'int', 'label' => 'Most questions shown', 'help' => '', 'default' => 6 ),
-				'AW_FAQ_WORDS' => array( 'type' => 'int', 'label' => 'Longest answer (words)', 'help' => 'Longer answers are flagged by the checks.', 'default' => 50 ),
-				'AW_FAQ_HUBS' => array( 'type' => 'map', 'label' => 'Pages with a subject in the FAQ heading', 'help' => 'One per line: page slug | subject (the heading: "Questions about <subject>"). Their FAQ sits under the list, wide. Other pages: the page title.', 'default' => array(
+				'RANKWEB_FAQ_MIN' => array( 'type' => 'int', 'label' => 'Fewest questions (pages and every other type)', 'help' => 'Fewer than this: no FAQ and no schema.', 'default' => 3 ),
+				'RANKWEB_FAQ_MIN_GUIDE' => array( 'type' => 'int', 'label' => 'Fewest questions on a post (Resources guides)', 'help' => '', 'default' => 2 ),
+				'RANKWEB_FAQ_MAX' => array( 'type' => 'int', 'label' => 'Most questions shown', 'help' => '', 'default' => 6 ),
+				'RANKWEB_FAQ_WORDS' => array( 'type' => 'int', 'label' => 'Longest answer (words)', 'help' => 'Longer answers are flagged by the checks.', 'default' => 50 ),
+				'RANKWEB_FAQ_HUBS' => array( 'type' => 'map', 'label' => 'Pages with a subject in the FAQ heading', 'help' => 'One per line: page slug | subject (the heading: "Questions about <subject>"). Their FAQ sits under the list, wide. Other pages: the page title.', 'default' => array(
 						'directory'     => 'the Directory',
 						'volunteer'     => 'volunteering',
 						'claim'         => 'claiming a listing',
@@ -190,7 +190,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'rank-math-schema' ),
 			'desc'   => 'Rank Math\'s own schema entries naming each item\'s real schema type, so its screens show it.',
 			'fields' => array(
-				'AW_RM_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types', 'help' => 'One per line.', 'default' => array( 'post', 'page' ) ),
+				'RANKWEB_RM_SCHEMA_TYPES' => array( 'type' => 'list', 'label' => 'Post types', 'help' => 'One per line.', 'default' => array( 'post', 'page' ) ),
 			),
 		),
 		'opengraph' => array(
@@ -199,7 +199,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'opengraph' ),
 			'desc'   => 'Share images and texts Rank Math\'s settings cannot express; a choice made in Rank Math wins.',
 			'fields' => array(
-				'AW_SEO_ARTICLE_TYPES' => array( 'type' => 'list', 'label' => 'Types shared as articles', 'help' => 'One post type per line.', 'default' => array( 'post' ) ),
+				'RANKWEB_SEO_ARTICLE_TYPES' => array( 'type' => 'list', 'label' => 'Types shared as articles', 'help' => 'One post type per line.', 'default' => array( 'post' ) ),
 			),
 		),
 		'sitemap' => array(
@@ -232,7 +232,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'focus-keywords' ),
 			'desc'   => 'Listings get their name as focus keyword; the workers\' job fills the rest through the site\'s API.',
 			'fields' => array(
-				'AW_SEO_GENERIC_WORDS' => array( 'type' => 'list', 'label' => 'Words that alone make no keyword', 'help' => 'One per line.', 'default' => array( 'save', 'help', 'news', 'care', 'update', 'updates', 'issue', 'case', 'story' ) ),
+				'RANKWEB_SEO_GENERIC_WORDS' => array( 'type' => 'list', 'label' => 'Words that alone make no keyword', 'help' => 'One per line.', 'default' => array( 'save', 'help', 'news', 'care', 'update', 'updates', 'issue', 'case', 'story' ) ),
 			),
 		),
 		'health' => array(
@@ -249,8 +249,8 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'llms' ),
 			'desc'   => 'llms.txt order, descriptions and the Directory section (Rank Math writes the file).',
 			'fields' => array(
-				'AW_LLMS_PAGE_ORDER' => array( 'type' => 'list', 'label' => 'Page order', 'help' => 'Page slugs in order, one per line; "/" is the home page.', 'default' => array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'press-coverage', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' ) ),
-				'AW_LLMS_GUIDE_TYPES' => array( 'type' => 'list', 'label' => 'Guide tags', 'help' => 'Tags whose Resources items are listed as guides. One per line.', 'default' => array( 'guide', 'faq' ) ),
+				'RANKWEB_LLMS_PAGE_ORDER' => array( 'type' => 'list', 'label' => 'Page order', 'help' => 'Page slugs in order, one per line; "/" is the home page.', 'default' => array( '', 'news', 'library', 'resources', 'directory', 'opportunities', 'campaigns', 'press-coverage', 'categories', 'about', 'editorial-policy', 'corrections', 'contact', 'privacy-policy', 'terms', 'disclaimer', 'volunteer', 'claim' ) ),
+				'RANKWEB_LLMS_GUIDE_TYPES' => array( 'type' => 'list', 'label' => 'Guide tags', 'help' => 'Tags whose Resources items are listed as guides. One per line.', 'default' => array( 'guide', 'faq' ) ),
 			),
 		),
 		'site-tags' => array(
@@ -272,7 +272,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'markdown' ),
 			'desc'   => 'Home and single pages as Markdown when a request asks for text/markdown; browsers get the HTML.',
 			'fields' => array(
-				'AW_MD_VARY_HTML' => array( 'type' => 'int', 'label' => 'Vary: Accept on the HTML (1 on, 0 off)', 'help' => 'Set 0 if the CDN stops storing Home and single pages (x-hcdn-cache-status never HIT).', 'default' => 1 ),
+				'RANKWEB_MD_VARY_HTML' => array( 'type' => 'int', 'label' => 'Vary: Accept on the HTML (1 on, 0 off)', 'help' => 'Set 0 if the CDN stops storing Home and single pages (x-hcdn-cache-status never HIT).', 'default' => 1 ),
 			),
 		),
 		'bulk' => array(
@@ -281,7 +281,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'bulk-edit', 'bulk-csv' ),
 			'desc'   => 'SEO columns, filters, Quick Edit and Bulk Edit on the post-list screens, and a CSV export and import of the SEO fields (RankWeb → SEO CSV).',
 			'fields' => array(
-				'AW_BULK_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the list-screen SEO tools', 'help' => 'One per line. Empty: none.', 'default' => array( 'post', 'page' ) ),
+				'RANKWEB_BULK_TYPES' => array( 'type' => 'list', 'label' => 'Post types with the list-screen SEO tools', 'help' => 'One per line. Empty: none.', 'default' => array( 'post', 'page' ) ),
 			),
 		),
 		'media' => array(
@@ -290,7 +290,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'media-seo' ),
 			'desc'   => 'Find and replace across image alt text, title and caption, and fill missing captions (RankWeb → Images).',
 			'fields' => array(
-				'AW_MEDIA_CAPTION' => array( 'type' => 'text', 'label' => 'Caption pattern for missing captions', 'help' => 'Placeholders: {title}, {filename}, {sitename}.', 'default' => '{title}' ),
+				'RANKWEB_MEDIA_CAPTION' => array( 'type' => 'text', 'label' => 'Caption pattern for missing captions', 'help' => 'Placeholders: {title}, {filename}, {sitename}.', 'default' => '{title}' ),
 			),
 		),
 		'agent' => array(
@@ -299,7 +299,7 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'agent-tools' ),
 			'desc'   => 'RankWeb\'s work as WordPress abilities (the Abilities API, 6.9+), exposed to AI agents by the MCP adapter. Reads only, unless writes are allowed below.',
 			'fields' => array(
-				'AW_AGENT_WRITES' => array( 'type' => 'int', 'label' => 'Allow write abilities (1 on, 0 off)', 'help' => 'Off by default. The reads are always registered; the writes (set SEO, add redirect, set schema) are registered only when this is on, and each still checks the capability.', 'default' => 0 ),
+				'RANKWEB_AGENT_WRITES' => array( 'type' => 'int', 'label' => 'Allow write abilities (1 on, 0 off)', 'help' => 'Off by default. The reads are always registered; the writes (set SEO, add redirect, set schema) are registered only when this is on, and each still checks the capability.', 'default' => 0 ),
 			),
 		),
 		'analysis' => array(
@@ -308,9 +308,9 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'analysis', 'content-advice' ),
 			'desc'   => 'Rank Math\'s analyzer reads the published page for Pages built from blocks; the RankWeb content panel in the editor.',
 			'fields' => array(
-				'AW_SEO_RENDERED_TYPES' => array( 'type' => 'list', 'label' => 'Types analysed as rendered', 'help' => 'One post type per line.', 'default' => array( 'post', 'page' ) ),
-				'AW_SEO_SUMMARY_SKIP_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests skipped on summaries', 'help' => 'One test ID per line.', 'default' => array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' ) ),
-				'AW_SEO_COVERED_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests RankWeb covers', 'help' => 'Skipped on every item: RankWeb does this work instead. One test ID per line.', 'default' => array( 'hasContentAI' ) ),
+				'RANKWEB_SEO_RENDERED_TYPES' => array( 'type' => 'list', 'label' => 'Types analysed as rendered', 'help' => 'One post type per line.', 'default' => array( 'post', 'page' ) ),
+				'RANKWEB_SEO_SUMMARY_SKIP_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests skipped on summaries', 'help' => 'One test ID per line.', 'default' => array( 'lengthContent', 'keywordDensity', 'keywordInSubheadings', 'contentHasTOC' ) ),
+				'RANKWEB_SEO_COVERED_TESTS' => array( 'type' => 'list', 'label' => 'Rank Math tests RankWeb covers', 'help' => 'Skipped on every item: RankWeb does this work instead. One test ID per line.', 'default' => array( 'hasContentAI' ) ),
 			),
 		),
 		'internal-links' => array(
@@ -319,25 +319,25 @@ function rankweb_seo_modules(): array {
 			'files'  => array( 'internal-links', 'link-audit', 'link-anchors', 'silos' ),
 			'desc'   => 'Links items to each other from their link keywords, and records every link in each item. Adds no link until a post type is listed.',
 			'fields' => array(
-				'AW_LINK_TYPES' => array( 'type' => 'list', 'label' => 'Post types linked', 'help' => 'Items of these types get links and can be linked to. One post type per line. Empty: no links are added.', 'default' => array() ),
-				'AW_LINK_MAX' => array( 'type' => 'int', 'label' => 'Most links added to one item', 'help' => '', 'default' => 5 ),
-				'AW_LINK_MAX_PER_TARGET' => array( 'type' => 'int', 'label' => 'Most links to the same page in one item', 'help' => '', 'default' => 1 ),
-				'AW_LINK_FIRST_ONLY' => array( 'type' => 'int', 'label' => 'Link only the first time a keyword appears (1 on, 0 off)', 'help' => '', 'default' => 1 ),
-				'AW_LINK_NO_SELF' => array( 'type' => 'int', 'label' => 'Never link an item to itself (1 on, 0 off)', 'help' => '', 'default' => 1 ),
-				'AW_LINK_SKIP_LINKED' => array( 'type' => 'int', 'label' => 'Skip a page the item already links to by hand (1 on, 0 off)', 'help' => '', 'default' => 1 ),
-				'AW_LINK_EXCLUDE' => array( 'type' => 'list', 'label' => 'Items left out', 'help' => 'Never linked from or to. One item ID per line.', 'default' => array() ),
-				'AW_LINK_AUDIT_DEPTH' => array( 'type' => 'int', 'label' => 'Audit: most clicks from the home page', 'help' => 'An item further away than this is listed as too deep.', 'default' => 3 ),
-				'AW_LINK_AUDIT_MAX' => array( 'type' => 'int', 'label' => 'Audit: most links in one item', 'help' => 'An item with more links than this is listed as having too many.', 'default' => 100 ),
-				'AW_LINK_ANCHOR_EXACT_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most exact match, in percent', 'help' => 'An item whose links in have more exact-match anchors than this share is warned about, and the auto-linker uses another keyword.', 'default' => 20 ),
-				'AW_LINK_ANCHOR_TYPE_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most of any other type, in percent', 'help' => 'The same for every other anchor type.', 'default' => 60 ),
-				'AW_LINK_ANCHOR_MIN' => array( 'type' => 'int', 'label' => 'Anchors: fewest links before a warning', 'help' => 'An item with fewer links in gets no warning.', 'default' => 5 ),
-				'AW_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array( rankweb_site_name() ) ),
-				'AW_LINK_GENERIC' => array( 'type' => 'list', 'label' => 'Anchors: generic anchors', 'help' => 'These anchors are generic. One per line.', 'default' => array( 'click here', 'here', 'read more', 'learn more', 'more', 'this page', 'this article', 'this link', 'link' ) ),
-				'AW_LINK_LONG_WORDS' => array( 'type' => 'int', 'label' => 'Anchors: words in a long-tail anchor', 'help' => 'An anchor with more words than this is long-tail.', 'default' => 6 ),
-				'AW_SILO_MAX' => array( 'type' => 'int', 'label' => 'Silos: most links an item shows', 'help' => 'The silo links at the end of an item. In virtual mode the others are listed from the next one round, so every item gets links.', 'default' => 10 ),
-				'AW_SILO_MIN' => array( 'type' => 'int', 'label' => 'Silos: fewest items', 'help' => 'A silo with fewer items (the hub counts) is flagged.', 'default' => 5 ),
-				'AW_SILO_DEPTH' => array( 'type' => 'int', 'label' => 'Silos: most folders deep', 'help' => 'An item whose address is deeper (/library/guides/page/ is 3) is flagged.', 'default' => 3 ),
-				'AW_LINK_AUDIT_AVOID' => array( 'type' => 'list', 'label' => 'Audit: addresses not to link to', 'help' => 'A link whose address contains one of these words is listed (thank-you and download pages). One per line.', 'default' => array( 'thank-you', 'thanks', 'download' ) ),
+				'RANKWEB_LINK_TYPES' => array( 'type' => 'list', 'label' => 'Post types linked', 'help' => 'Items of these types get links and can be linked to. One post type per line. Empty: no links are added.', 'default' => array() ),
+				'RANKWEB_LINK_MAX' => array( 'type' => 'int', 'label' => 'Most links added to one item', 'help' => '', 'default' => 5 ),
+				'RANKWEB_LINK_MAX_PER_TARGET' => array( 'type' => 'int', 'label' => 'Most links to the same page in one item', 'help' => '', 'default' => 1 ),
+				'RANKWEB_LINK_FIRST_ONLY' => array( 'type' => 'int', 'label' => 'Link only the first time a keyword appears (1 on, 0 off)', 'help' => '', 'default' => 1 ),
+				'RANKWEB_LINK_NO_SELF' => array( 'type' => 'int', 'label' => 'Never link an item to itself (1 on, 0 off)', 'help' => '', 'default' => 1 ),
+				'RANKWEB_LINK_SKIP_LINKED' => array( 'type' => 'int', 'label' => 'Skip a page the item already links to by hand (1 on, 0 off)', 'help' => '', 'default' => 1 ),
+				'RANKWEB_LINK_EXCLUDE' => array( 'type' => 'list', 'label' => 'Items left out', 'help' => 'Never linked from or to. One item ID per line.', 'default' => array() ),
+				'RANKWEB_LINK_AUDIT_DEPTH' => array( 'type' => 'int', 'label' => 'Audit: most clicks from the home page', 'help' => 'An item further away than this is listed as too deep.', 'default' => 3 ),
+				'RANKWEB_LINK_AUDIT_MAX' => array( 'type' => 'int', 'label' => 'Audit: most links in one item', 'help' => 'An item with more links than this is listed as having too many.', 'default' => 100 ),
+				'RANKWEB_LINK_ANCHOR_EXACT_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most exact match, in percent', 'help' => 'An item whose links in have more exact-match anchors than this share is warned about, and the auto-linker uses another keyword.', 'default' => 20 ),
+				'RANKWEB_LINK_ANCHOR_TYPE_MAX' => array( 'type' => 'int', 'label' => 'Anchors: most of any other type, in percent', 'help' => 'The same for every other anchor type.', 'default' => 60 ),
+				'RANKWEB_LINK_ANCHOR_MIN' => array( 'type' => 'int', 'label' => 'Anchors: fewest links before a warning', 'help' => 'An item with fewer links in gets no warning.', 'default' => 5 ),
+				'RANKWEB_LINK_BRAND' => array( 'type' => 'list', 'label' => 'Anchors: brand names', 'help' => 'An anchor with one of these words is branded. One per line.', 'default' => array( rankweb_site_name() ) ),
+				'RANKWEB_LINK_GENERIC' => array( 'type' => 'list', 'label' => 'Anchors: generic anchors', 'help' => 'These anchors are generic. One per line.', 'default' => array( 'click here', 'here', 'read more', 'learn more', 'more', 'this page', 'this article', 'this link', 'link' ) ),
+				'RANKWEB_LINK_LONG_WORDS' => array( 'type' => 'int', 'label' => 'Anchors: words in a long-tail anchor', 'help' => 'An anchor with more words than this is long-tail.', 'default' => 6 ),
+				'RANKWEB_SILO_MAX' => array( 'type' => 'int', 'label' => 'Silos: most links an item shows', 'help' => 'The silo links at the end of an item. In virtual mode the others are listed from the next one round, so every item gets links.', 'default' => 10 ),
+				'RANKWEB_SILO_MIN' => array( 'type' => 'int', 'label' => 'Silos: fewest items', 'help' => 'A silo with fewer items (the hub counts) is flagged.', 'default' => 5 ),
+				'RANKWEB_SILO_DEPTH' => array( 'type' => 'int', 'label' => 'Silos: most folders deep', 'help' => 'An item whose address is deeper (/library/guides/page/ is 3) is flagged.', 'default' => 3 ),
+				'RANKWEB_LINK_AUDIT_AVOID' => array( 'type' => 'list', 'label' => 'Audit: addresses not to link to', 'help' => 'A link whose address contains one of these words is listed (thank-you and download pages). One per line.', 'default' => array( 'thank-you', 'thanks', 'download' ) ),
 			),
 		),
 	);
@@ -352,7 +352,7 @@ function rankweb_seo_modules(): array {
 
 /** Saved settings (all modules). */
 function rankweb_seo_saved(): array {
-	return (array) get_option( AW_SEO_SETTINGS, array() );
+	return (array) get_option( RANKWEB_SEO_SETTINGS, array() );
 }
 
 /** Whether a module is on (foundation modules always are). */
@@ -382,7 +382,7 @@ function rankweb_seo_define_constants(): void {
 		$saved = rankweb_seo_saved()[ $key ] ?? array();
 		foreach ( $mod['fields'] as $name => $field ) {
 			if ( ! defined( $name ) ) {
-				define( $name, array_key_exists( $name, $saved ) ? $saved[ $name ] : $field['default'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- the names come from the fixed field lists in rankweb_seo_modules() (the AW_ settings constants other code reads).
+				define( $name, array_key_exists( $name, $saved ) ? $saved[ $name ] : $field['default'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- the names come from the fixed field lists in rankweb_seo_modules() (the RANKWEB_ settings constants other code reads).
 			}
 		}
 	}
@@ -510,8 +510,8 @@ add_action(
 	'admin_init',
 	function () {
 		// The settings are read on every request: autoload them (a save sets it too; this covers the option as it is).
-		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( AW_SEO_SETTINGS, false ) && ! array_key_exists( AW_SEO_SETTINGS, wp_load_alloptions() ) ) { // false passed: the registered default (array()) would hide a missing option
-			wp_set_option_autoload( AW_SEO_SETTINGS, true );
+		if ( function_exists( 'wp_set_option_autoload' ) && false !== get_option( RANKWEB_SEO_SETTINGS, false ) && ! array_key_exists( RANKWEB_SEO_SETTINGS, wp_load_alloptions() ) ) { // false passed: the registered default (array()) would hide a missing option
+			wp_set_option_autoload( RANKWEB_SEO_SETTINGS, true );
 		}
 		// An old link to Search Insights' module tab: its numbers are on Search Insights → Settings (InsightWeb).
 		if ( 'aw-seo-settings' === sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ) && 'search-insights' === sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) ) && function_exists( 'insightweb_si_url' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- navigation only
@@ -524,7 +524,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'rankweb_seo_settings_page' );
+		add_submenu_page( RANKWEB_SEO_MENU, 'RankWeb settings', 'Settings', 'manage_options', 'aw-seo-settings', 'rankweb_seo_settings_page' );
 	},
 	200 // last under RankWeb
 );
@@ -595,7 +595,7 @@ function rankweb_seo_settings_save( string $tab, array $posted, bool $reset = fa
 	if ( rankweb_seo_settings_sorted( $all ) === rankweb_seo_settings_sorted( $before ) ) {
 		return $before; // the same settings (perhaps in another key order): nothing to write
 	}
-	update_option( AW_SEO_SETTINGS, $all, true ); // read on every request (the constants), so autoloaded
+	update_option( RANKWEB_SEO_SETTINGS, $all, true ); // read on every request (the constants), so autoloaded
 	return $all;
 }
 
@@ -615,7 +615,7 @@ function rankweb_seo_settings_sorted( $value ) {
 
 /* ---------- The options, registered with the Settings API ---------- */
 
-const AW_SEO_DELETE_DATA = 'aw_seo_delete_data'; // 1: uninstall.php deletes RankWeb's own data. Default 0: it keeps everything.
+const RANKWEB_SEO_DELETE_DATA = 'aw_seo_delete_data'; // 1: uninstall.php deletes RankWeb's own data. Default 0: it keeps everything.
 
 /**
  * One stored setting value, cleaned by its field type. Values the screen stored come back unchanged (the same clean-up
@@ -653,7 +653,7 @@ function rankweb_seo_setting_clean( string $type, $v ) {
 
 /**
  * Sanitize callback of aw_seo_settings ({module: {CONST: value, on: bool}}). Runs on every write of the option: this
- * plugin's Settings route, InsightWeb's numbers (key 'search-insights', AW_SI_* whole numbers), Kits → Tools import
+ * plugin's Settings route, InsightWeb's numbers (key 'search-insights', *_SI_* whole numbers), Kits → Tools import
  * and /wp/v2/settings. Every module key is kept, a known field is cleaned by its type, 'on' is a boolean.
  *
  * @param mixed $value Value to store.
@@ -672,7 +672,7 @@ function rankweb_seo_settings_sanitize( $value ): array {
 				$out[ $key ]['on'] = in_array( $v, array( true, false, 0, 1 ), true ) ? $v : (bool) $v; // stored as it was (an older save left 1)
 				continue;
 			}
-			$type               = $mods[ $key ]['fields'][ $name ]['type'] ?? ( 0 === strpos( $name, 'AW_SI_' ) ? 'int' : '' );
+			$type               = $mods[ $key ]['fields'][ $name ]['type'] ?? ( 1 === preg_match( '/^[A-Z]+_SI_/', $name ) ? 'int' : '' );
 			$out[ $key ][ $name ] = rankweb_seo_setting_clean( $type, $v );
 		}
 	}
@@ -685,7 +685,7 @@ function rankweb_seo_settings_sanitize( $value ): array {
  */
 function rankweb_seo_registered_settings(): array {
 	return array(
-		AW_SEO_SETTINGS          => array(
+		RANKWEB_SEO_SETTINGS          => array(
 			'type'              => 'object',
 			'description'       => 'RankWeb settings by module: the values that differ from the defaults, and the module switches.',
 			'default'           => array(),
@@ -731,7 +731,7 @@ function rankweb_seo_registered_settings(): array {
 			'sanitize_callback' => 'absint',
 			'show_in_rest'      => array( 'schema' => array( 'type' => 'integer' ) ),
 		),
-		AW_SEO_DELETE_DATA       => array(
+		RANKWEB_SEO_DELETE_DATA       => array(
 			'type'              => 'boolean',
 			'description'       => 'Delete RankWeb\'s own data when the plugin is deleted.',
 			'default'           => false,
@@ -752,7 +752,7 @@ add_action(
 
 /** Whether RankWeb's data goes when the plugin is deleted (Modules group). */
 function rankweb_seo_delete_data_on(): bool {
-	return (bool) get_option( AW_SEO_DELETE_DATA, 0 );
+	return (bool) get_option( RANKWEB_SEO_DELETE_DATA, 0 );
 }
 
 /**
@@ -764,7 +764,7 @@ function rankweb_seo_delete_data_save( bool $on ): bool {
 	if ( rankweb_seo_delete_data_on() === $on ) {
 		return false;
 	}
-	update_option( AW_SEO_DELETE_DATA, $on ? 1 : 0, false );
+	update_option( RANKWEB_SEO_DELETE_DATA, $on ? 1 : 0, false );
 	return true;
 }
 
@@ -778,7 +778,7 @@ function rankweb_seo_settings_reset( string $tab ): void {
 	$defaults = rankweb_seo_registered_settings();
 	if ( 'modules' === $tab ) {
 		rankweb_seo_settings_save( 'modules', array(), false, array_fill_keys( array_keys( rankweb_seo_modules() ), true ) ); // every module on
-		rankweb_seo_delete_data_save( (bool) $defaults[ AW_SEO_DELETE_DATA ]['default'] );
+		rankweb_seo_delete_data_save( (bool) $defaults[ RANKWEB_SEO_DELETE_DATA ]['default'] );
 		return;
 	}
 	rankweb_seo_settings_save( $tab, array(), true );

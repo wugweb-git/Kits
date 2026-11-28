@@ -212,7 +212,7 @@ add_action(
  *   wp eval 'kits_dispatch_workflow("sourcing.yml", array("dry_run" => "false"));'
  * A run started this way begins at once; GitHub's schedule stays as the backup, and the workflow's concurrency group
  * keeps runs from overlapping. The repository comes from the filter kits_dispatch_repo. The token is a fine-grained
- * GitHub token for that repository only, with Actions read and write, kept in wp-config.php as AW_GITHUB_DISPATCH_TOKEN
+ * GitHub token for that repository only, with Actions read and write, kept in wp-config.php as KITS_GITHUB_DISPATCH_TOKEN
  * (never in a repository).
  */
 
@@ -224,11 +224,11 @@ add_action(
  * @return true|WP_Error
  */
 function kits_dispatch_workflow( $file, $inputs = array() ) {
-	$token = defined( 'KITS_GITHUB_DISPATCH_TOKEN' ) ? (string) KITS_GITHUB_DISPATCH_TOKEN : ( defined( 'AW_GITHUB_DISPATCH_TOKEN' ) ? (string) AW_GITHUB_DISPATCH_TOKEN : '' ); // the constant the site already has in wp-config.php keeps working.
+	$token = defined( 'KITS_GITHUB_DISPATCH_TOKEN' ) ? (string) KITS_GITHUB_DISPATCH_TOKEN : ''; // wp-config.php; a site layer can map an earlier name onto it.
 	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started. // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 	$file  = sanitize_file_name( $file );
 	if ( '' === $token ) {
-		$res = new WP_Error( 'aw_dispatch_token', 'AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php' );
+		$res = new WP_Error( 'aw_dispatch_token', 'KITS_GITHUB_DISPATCH_TOKEN is not set in wp-config.php' );
 	} elseif ( '' === $repo ) {
 		$res = new WP_Error( 'aw_dispatch_repo', 'No workflow repository is set (filter kits_dispatch_repo).' );
 	} else {

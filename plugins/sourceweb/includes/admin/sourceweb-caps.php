@@ -1,15 +1,15 @@
 <?php
 /**
  * SourceWeb's own capability, manage_sourceweb. It opens SourceWeb's screens and routes (Overview,
- * To review, Enrichment review; AW_REVIEW_CAP and AW_ENRICH_CAP point at it). The settings, reports and jobs screens
+ * To review, Enrichment review; SOURCEWEB_REVIEW_CAP and SOURCEWEB_ENRICH_CAP point at it). The settings, reports and jobs screens
  * keep SOURCEWEB_SRC_CAP (manage_options), administrators only, as before.
  *
  * Nobody loses access:
- * - Granted to administrator and to every role that holds edit_others_posts (the old AW_REVIEW_CAP and AW_ENRICH_CAP),
+ * - Granted to administrator and to every role that holds edit_others_posts (the old SOURCEWEB_REVIEW_CAP and SOURCEWEB_ENRICH_CAP),
  *   on activation and once on the first admin request after an upgrade (option sourceweb_caps, compared with
  *   SOURCEWEB_CAP_VERSION). No role loses a capability.
- * - Until a role has it, user_has_cap gives it to anyone holding edit_others_posts (the old AW_REVIEW_CAP and
- *   AW_ENRICH_CAP) (live, where activation hooks do not run on deploy). A role that holds it set to false (denied on
+ * - Until a role has it, user_has_cap gives it to anyone holding edit_others_posts (the old SOURCEWEB_REVIEW_CAP and
+ *   SOURCEWEB_ENRICH_CAP) (live, where activation hooks do not run on deploy). A role that holds it set to false (denied on
  *   purpose) is left denied.
  *
  * Self-contained: no other plugin's function or capability helper is used.

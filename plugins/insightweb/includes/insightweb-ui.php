@@ -38,7 +38,7 @@ add_filter( 'kits_settings_transfer_options', 'insightweb_kits_export' );
  */
 function insightweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- which screen to show; nothing is saved here
-	if ( AW_SI_SLUG !== $page || ! function_exists( 'kits_shell_app' ) ) {
+	if ( INSIGHTWEB_SI_SLUG !== $page || ! function_exists( 'kits_shell_app' ) ) {
 		return '';
 	}
 	$tab = insightweb_si_tab();

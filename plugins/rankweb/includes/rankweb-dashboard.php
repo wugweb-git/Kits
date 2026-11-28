@@ -53,7 +53,7 @@ function rankweb_health_request(): bool {
  */
 function rankweb_health_build( $why = '' ) {
 	unset( $why );
-	$types = array_values( array_filter( (array) AW_SEO_ITEM_TYPES, 'post_type_exists' ) );
+	$types = array_values( array_filter( (array) RANKWEB_SEO_ITEM_TYPES, 'post_type_exists' ) );
 	$c     = array(
 		'at'      => time(),
 		'items'   => rankweb_count_items( $types ),
@@ -142,7 +142,7 @@ function rankweb_count_filled_descriptions( array $types ): int {
  * @return array [ 'on' => bool, 'gaps' => n|null, 'seen' => n, 'at' => time|0, 'part' => items checked in this pass ].
  */
 function rankweb_count_schema_gaps(): array {
-	if ( ! function_exists( 'rankweb_rm_schema_sync' ) || ! defined( 'AW_RM_SCHEMA_TYPES' ) ) {
+	if ( ! function_exists( 'rankweb_rm_schema_sync' ) || ! defined( 'RANKWEB_RM_SCHEMA_TYPES' ) ) {
 		return array(
 			'on'   => false,
 			'gaps' => null,
@@ -161,7 +161,7 @@ function rankweb_count_schema_gaps(): array {
 			'done'   => array(),
 		)
 	);
-	$types = array_values( array_filter( (array) AW_RM_SCHEMA_TYPES, 'post_type_exists' ) );
+	$types = array_values( array_filter( (array) RANKWEB_RM_SCHEMA_TYPES, 'post_type_exists' ) );
 	$start = microtime( true );
 	while ( $types && microtime( true ) - $start < 20 ) {
 		$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- background count, by ID
@@ -234,24 +234,24 @@ function rankweb_count_noindex(): array {
 		'listings' => 0,
 		'thin'     => 0,
 		'filtered' => 0,
-		'kept'     => count( (array) ( defined( 'AW_DIRECTORY_KEEP_INDEXED' ) ? AW_DIRECTORY_KEEP_INDEXED : array() ) ) + count( (array) get_option( 'aw_seo_keep_listings', array() ) ),
+		'kept'     => count( (array) ( defined( 'RANKWEB_DIRECTORY_KEEP_INDEXED' ) ? RANKWEB_DIRECTORY_KEEP_INDEXED : array() ) ) + count( (array) get_option( 'aw_seo_keep_listings', array() ) ),
 	);
 	if ( function_exists( 'rankweb_sitemap_unreachable_listings' ) ) {
 		$out['listings'] = count( (array) rankweb_sitemap_unreachable_listings() );
 	}
-	if ( function_exists( 'directoryweb_place_counts' ) && function_exists( 'directoryweb_place_district' ) && function_exists( 'rankweb_directory_keep_indexed' ) && function_exists( 'directoryweb_directory_url' ) && defined( 'AW_THIN_DISTRICT_TYPE' ) ) {
+	if ( function_exists( 'directoryweb_place_counts' ) && function_exists( 'directoryweb_place_district' ) && function_exists( 'rankweb_directory_keep_indexed' ) && function_exists( 'directoryweb_directory_url' ) && defined( 'RANKWEB_THIN_DISTRICT_TYPE' ) ) {
 		foreach ( (array) ( directoryweb_place_counts()['pairs'] ?? array() ) as $p ) {
 			$d = directoryweb_place_district( $p[0] );
-			if ( $d && (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! rankweb_directory_keep_indexed( directoryweb_directory_url( $d->slug, $p[1] ) ) ) {
+			if ( $d && (int) $p[3] < RANKWEB_THIN_DISTRICT_TYPE && ! rankweb_directory_keep_indexed( directoryweb_directory_url( $d->slug, $p[1] ) ) ) {
 				++$out['thin'];
 			}
 		}
 	}
-	if ( function_exists( 'rankweb_seo_filtered_count' ) && function_exists( 'aw_section_categories' ) && defined( 'AW_FILTERED_CATEGORY_HUBS' ) ) {
-		foreach ( (array) AW_FILTERED_CATEGORY_HUBS as $type ) {
+	if ( function_exists( 'rankweb_seo_filtered_count' ) && function_exists( 'aw_section_categories' ) && defined( 'RANKWEB_FILTERED_CATEGORY_HUBS' ) ) {
+		foreach ( (array) RANKWEB_FILTERED_CATEGORY_HUBS as $type ) {
 			foreach ( (array) aw_section_categories( $type ) as $slug ) {
 				$n = (int) rankweb_seo_filtered_count( $type, 'category_name', (string) $slug );
-				if ( $n > 0 && $n < AW_FILTERED_MIN_ITEMS ) {
+				if ( $n > 0 && $n < RANKWEB_FILTERED_MIN_ITEMS ) {
 					++$out['filtered'];
 				}
 			}

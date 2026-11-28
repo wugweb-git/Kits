@@ -18,12 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_OPENSEO_POS = 'openseo_serp';
+const INSIGHTWEB_SI_OPENSEO_POS = 'openseo_serp';
 
 add_filter(
 	'insightweb_si_import_kinds',
 	function ( $kinds ) {
-		$kinds[ AW_SI_OPENSEO_POS ] = __( 'OpenSEO positions (CSV: date, query, position; optional: url, top3, paa, source). Kept apart from the browser checks.', 'insightweb' );
+		$kinds[ INSIGHTWEB_SI_OPENSEO_POS ] = __( 'OpenSEO positions (CSV: date, query, position; optional: url, top3, paa, source). Kept apart from the browser checks.', 'insightweb' );
 		return $kinds;
 	}
 );
@@ -31,7 +31,7 @@ add_filter(
 add_filter(
 	'insightweb_si_import_run',
 	function ( $out, string $kind, string $raw ) {
-		return AW_SI_OPENSEO_POS === $kind ? insightweb_si_openseo_pos_import( $raw ) : $out;
+		return INSIGHTWEB_SI_OPENSEO_POS === $kind ? insightweb_si_openseo_pos_import( $raw ) : $out;
 	},
 	10,
 	3
@@ -86,7 +86,7 @@ function insightweb_si_openseo_pos_import( string $raw ): array {
 		$ok = insightweb_si_obs_put(
 			$id,
 			'',
-			AW_SI_OPENSEO_POS,
+			INSIGHTWEB_SI_OPENSEO_POS,
 			'position',
 			'month',
 			$day,
@@ -98,7 +98,7 @@ function insightweb_si_openseo_pos_import( string $raw ): array {
 		foreach ( $extra as $metric => $c ) {
 			$v = '' !== $c ? trim( sanitize_text_field( (string) $r[ $c ] ) ) : '';
 			if ( '' !== $v ) {
-				$ok = insightweb_si_obs_put( $id, '', AW_SI_OPENSEO_POS, $metric, 'month', $day, array( 'txt' => $v ) ) && $ok;
+				$ok = insightweb_si_obs_put( $id, '', INSIGHTWEB_SI_OPENSEO_POS, $metric, 'month', $day, array( 'txt' => $v ) ) && $ok;
 			}
 		}
 		$ok ? ++$out['rows'] : ++$out['skipped'];
@@ -120,7 +120,7 @@ function insightweb_si_openseo_positions( array $ids ): array {
 	}
 	$o    = insightweb_si_table( 'obs' );
 	$in   = implode( ',', $ids );
-	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value, txt, d FROM %i WHERE src = %s AND metric = 'position' AND kw_id IN ({$in}) ORDER BY d", $o, AW_SI_OPENSEO_POS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
+	$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT kw_id, value, txt, d FROM %i WHERE src = %s AND metric = 'position' AND kw_id IN ({$in}) ORDER BY d", $o, INSIGHTWEB_SI_OPENSEO_POS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and a table name.
 	$out  = array();
 	foreach ( $rows as $r ) {
 		$out[ (int) $r->kw_id ] = $r; // Ordered by day: the latest wins.

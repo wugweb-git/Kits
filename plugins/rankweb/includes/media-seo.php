@@ -8,7 +8,7 @@
  *   case-insensitive), using RankWeb_Bulk::replace. A dry run lists the before and after of the first matches.
  * - Fill a missing caption from a pattern ({title}, {filename}, {sitename}); existing captions are never touched.
  *
- * Module "media" (RankWeb → Settings → Modules). No scheduled job. Each run is capped (AW_MEDIA_BATCH) so one screen
+ * Module "media" (RankWeb → Settings → Modules). No scheduled job. Each run is capped (RANKWEB_MEDIA_BATCH) so one screen
  * load never walks the whole library.
  *
  * @package rankweb
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/class-aw-bulk.php';
 
-const AW_MEDIA_BATCH = 500; // attachments touched in one run
+const RANKWEB_MEDIA_BATCH = 500; // attachments touched in one run
 
 /** The three fields and how they are stored. */
 function rankweb_media_fields(): array {
@@ -65,7 +65,7 @@ function rankweb_media_ids(): array {
 			array(
 				'post_type'        => 'attachment',
 				'post_status'      => 'inherit',
-				'posts_per_page'   => AW_MEDIA_BATCH,
+				'posts_per_page'   => RANKWEB_MEDIA_BATCH,
 				'orderby'          => 'ID',
 				'order'            => 'DESC',
 				'fields'           => 'ids',
@@ -86,7 +86,7 @@ function rankweb_media_caption_for( int $id ): string {
 	$name = trim( str_replace( array( '-', '_' ), ' ', (string) $name ) );
 	return trim(
 		strtr(
-			(string) AW_MEDIA_CAPTION,
+			(string) RANKWEB_MEDIA_CAPTION,
 			array(
 				'{title}'    => (string) $post->post_title,
 				'{filename}' => $name,
@@ -99,7 +99,7 @@ function rankweb_media_caption_for( int $id ): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Images', 'rankweb' ), __( 'Images', 'rankweb' ), 'manage_options', 'aw-images', 'rankweb_media_screen' );
+		add_submenu_page( RANKWEB_SEO_MENU, __( 'Images', 'rankweb' ), __( 'Images', 'rankweb' ), 'manage_options', 'aw-images', 'rankweb_media_screen' );
 	}
 );
 
@@ -182,7 +182,7 @@ add_action(
 /* ---------- Fill missing captions ---------- */
 
 /**
- * Fill the caption of attachments that have none from the pattern (AW_MEDIA_CAPTION); an existing caption is never
+ * Fill the caption of attachments that have none from the pattern (RANKWEB_MEDIA_CAPTION); an existing caption is never
  * touched. A dry run (the default) writes nothing. The classic handler and POST rankweb/v1/images/captions call this.
  *
  * @param bool $apply Write the captions (false: a dry run).
@@ -322,8 +322,8 @@ function rankweb_media_payload(): array {
 	}
 	return array(
 		'fields'  => $fields,
-		'batch'   => (int) AW_MEDIA_BATCH,
-		'pattern' => (string) AW_MEDIA_CAPTION,
+		'batch'   => (int) RANKWEB_MEDIA_BATCH,
+		'pattern' => (string) RANKWEB_MEDIA_CAPTION,
 	);
 }
 
@@ -340,7 +340,7 @@ function rankweb_media_screen(): void {
 /** The classic page's body, for a site with no Kits Core. The shell screen is native (src/tools/files.js) and uses the routes above. */
 function rankweb_media_body(): void {
 	$post = admin_url( 'admin-post.php' );
-	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'rankweb' ), number_format_i18n( AW_MEDIA_BATCH ) ) ) . '</p>';
+	echo '<p>' . esc_html( sprintf( /* translators: %s: a number. */ __( 'Each run works on the %s most recent attachments.', 'rankweb' ), number_format_i18n( RANKWEB_MEDIA_BATCH ) ) ) . '</p>';
 	$report = get_transient( 'aw_seo_media_report_' . get_current_user_id() );
 	if ( is_array( $report ) ) {
 		delete_transient( 'aw_seo_media_report_' . get_current_user_id() );
@@ -365,7 +365,7 @@ function rankweb_media_body(): void {
 	echo '</form>';
 
 	echo '<h2 style="margin-top:2em">' . esc_html__( 'Fill missing captions', 'rankweb' ) . '</h2>';
-	echo '<p>' . esc_html( sprintf( /* translators: %s: the caption pattern. */ __( 'Fills the caption of attachments that have none, from the pattern: %s. Existing captions are left alone. Change the pattern in RankWeb → Settings → Images.', 'rankweb' ), (string) AW_MEDIA_CAPTION ) ) . '</p>';
+	echo '<p>' . esc_html( sprintf( /* translators: %s: the caption pattern. */ __( 'Fills the caption of attachments that have none, from the pattern: %s. Existing captions are left alone. Change the pattern in RankWeb → Settings → Images.', 'rankweb' ), (string) RANKWEB_MEDIA_CAPTION ) ) . '</p>';
 	echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_media_captions">';
 	wp_nonce_field( 'aw_media_captions' );
 	echo '<p><label><input type="checkbox" name="aw_apply" value="1"> ' . esc_html__( 'Apply the changes (otherwise it is a dry run)', 'rankweb' ) . '</label></p>';

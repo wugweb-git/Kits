@@ -27,8 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 function sourceweb_sa_screens(): array {
 	$src = defined( 'SOURCEWEB_SRC_CAP' ) ? SOURCEWEB_SRC_CAP : 'manage_options';
 	return array(
-		'review'     => array( 'sourceweb_sa_screen_review', defined( 'AW_REVIEW_CAP' ) ? AW_REVIEW_CAP : 'manage_options' ),
-		'enrichment' => array( 'sourceweb_sa_screen_enrichment', defined( 'AW_ENRICH_CAP' ) ? AW_ENRICH_CAP : 'manage_options' ),
+		'review'     => array( 'sourceweb_sa_screen_review', defined( 'SOURCEWEB_REVIEW_CAP' ) ? SOURCEWEB_REVIEW_CAP : 'manage_options' ),
+		'enrichment' => array( 'sourceweb_sa_screen_enrichment', defined( 'SOURCEWEB_ENRICH_CAP' ) ? SOURCEWEB_ENRICH_CAP : 'manage_options' ),
 		'keywords'   => array( 'sourceweb_sa_screen_keywords', $src ),
 		'rules'      => array( 'sourceweb_sa_screen_rules', $src ),
 		'places'     => array( 'sourceweb_sa_screen_places', $src ),
@@ -523,7 +523,7 @@ function sourceweb_sa_review_choice( array $post ): array {
 
 /** Publish or Reject one, several or ticked items. */
 function sourceweb_sa_handle_review(): void {
-	sourceweb_sa_guard( 'sourceweb_sa_review', AW_REVIEW_CAP );
+	sourceweb_sa_guard( 'sourceweb_sa_review', SOURCEWEB_REVIEW_CAP );
 	list( $act, $ids ) = sourceweb_sa_review_choice( wp_unslash( $_POST ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- the nonce was checked by sourceweb_sa_guard(); each value is sanitized in the function.
 	$type = isset( $_POST['sw_type'] ) ? sanitize_key( wp_unslash( $_POST['sw_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked above.
 	$args = isset( sourceweb_review_types()[ $type ] ) ? array( 'sw_view' => $type ) : array();
@@ -543,7 +543,7 @@ function sourceweb_sa_handle_review(): void {
 
 /** Publish every item of the view, when the count the person saw is still the count. */
 function sourceweb_sa_handle_review_all(): void {
-	sourceweb_sa_guard( 'sourceweb_sa_review_all', AW_REVIEW_CAP );
+	sourceweb_sa_guard( 'sourceweb_sa_review_all', SOURCEWEB_REVIEW_CAP );
 	$type  = isset( $_POST['sw_type'] ) ? sanitize_key( wp_unslash( $_POST['sw_type'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
 	$count = isset( $_POST['sw_count'] ) ? absint( wp_unslash( $_POST['sw_count'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
 	$type  = isset( sourceweb_review_types()[ $type ] ) ? $type : '';
@@ -648,7 +648,7 @@ add_action( 'admin_post_sourceweb_sa_enrich', 'sourceweb_sa_handle_enrich' );
 
 /** Approve, reject or undo one proposed value. */
 function sourceweb_sa_handle_enrich(): void {
-	sourceweb_sa_guard( 'sourceweb_sa_enrich', AW_ENRICH_CAP );
+	sourceweb_sa_guard( 'sourceweb_sa_enrich', SOURCEWEB_ENRICH_CAP );
 	$go   = isset( $_POST['sw_go'] ) ? sanitize_text_field( wp_unslash( $_POST['sw_go'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
 	$view = isset( $_POST['sw_view'] ) ? sanitize_key( wp_unslash( $_POST['sw_view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- checked by sourceweb_sa_guard().
 	$args = isset( SOURCEWEB_ENRICH_VIEWS[ $view ] ) ? array( 'sw_view' => $view ) : array();

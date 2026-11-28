@@ -25,10 +25,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Option: host => [title, desc, code, at] from the background home-page check. */
-const AW_SOURCING_SITE_META = 'aw_source_site_meta';
+const SOURCEWEB_SOURCING_SITE_META = 'aw_source_site_meta';
 
 /** Cron hook of the home-page check. */
-const AW_SOURCING_SITE_META_CRON = 'aw_sourcing_site_meta';
+const SOURCEWEB_SOURCING_SITE_META_CRON = 'aw_sourcing_site_meta';
 
 /**
  * The sourcing restructure phase migrated on this site (option sourceweb_sourcing_phase, set by `wp aw-sourcing migrate`,
@@ -184,12 +184,12 @@ function sourceweb_sourcing_host_stats() {
 add_action(
 	'init',
 	function () {
-		if ( ! wp_next_scheduled( AW_SOURCING_SITE_META_CRON ) ) {
-			wp_schedule_event( time() + 20 * MINUTE_IN_SECONDS, 'hourly', AW_SOURCING_SITE_META_CRON );
+		if ( ! wp_next_scheduled( SOURCEWEB_SOURCING_SITE_META_CRON ) ) {
+			wp_schedule_event( time() + 20 * MINUTE_IN_SECONDS, 'hourly', SOURCEWEB_SOURCING_SITE_META_CRON );
 		}
 	}
 );
-add_action( AW_SOURCING_SITE_META_CRON, 'sourceweb_sourcing_site_meta_run' );
+add_action( SOURCEWEB_SOURCING_SITE_META_CRON, 'sourceweb_sourcing_site_meta_run' );
 
 /**
  * Title and description from a page's HTML: <title> and <meta name="description">, og:title / og:description when
@@ -268,7 +268,7 @@ function sourceweb_sourcing_parse_site_meta( $html ) {
  * @param int $limit Hosts per run.
  */
 function sourceweb_sourcing_site_meta_run( $limit = 15 ) {
-	$meta  = get_option( AW_SOURCING_SITE_META, array() );
+	$meta  = get_option( SOURCEWEB_SOURCING_SITE_META, array() );
 	$meta  = is_array( $meta ) ? $meta : array();
 	$want  = array();
 	foreach ( sourceweb_publishers() as $h => $p ) {
@@ -308,7 +308,7 @@ function sourceweb_sourcing_site_meta_run( $limit = 15 ) {
 		}
 		$meta[ $h ] = $rec;
 	}
-	update_option( AW_SOURCING_SITE_META, array_intersect_key( $meta, $want ), false ); // hosts no longer listed drop out
+	update_option( SOURCEWEB_SOURCING_SITE_META, array_intersect_key( $meta, $want ), false ); // hosts no longer listed drop out
 }
 
 /* ---------- Domain Rating from a JSON file (WP-CLI) ---------- */
@@ -406,7 +406,7 @@ function sourceweb_sourcing_sources_screen() {
 
 // Help tabs (core contextual help): the screen's explanation and what each column means.
 add_action(
-	'load-' . AW_SRC_SCREEN,
+	'load-' . SOURCEWEB_SRC_SCREEN,
 	function () {
 		$tab = sanitize_key( $_GET['tab'] ?? 'sources' ); // phpcs:ignore WordPress.Security.NonceVerification
 		if ( ! in_array( $tab, array( '', 'sources' ), true ) ) {
@@ -465,7 +465,7 @@ function sourceweb_sourcing_source_rows() {
 	$stats       = sourceweb_sourcing_host_stats();
 	$si          = ! empty( $stats['si'] );
 	$stale       = ! empty( $stats['stale'] );
-	$meta        = get_option( AW_SOURCING_SITE_META, array() );
+	$meta        = get_option( SOURCEWEB_SOURCING_SITE_META, array() );
 	$meta        = is_array( $meta ) ? $meta : array();
 	$press       = array_flip( sourceweb_sourcing_press_hosts() );
 	$pubs        = sourceweb_publishers();

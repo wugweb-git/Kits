@@ -12,13 +12,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_ALERTS_CRON = 'aw_si_alerts';
-const AW_SI_ALERTS_KEYS = array( 'AW_GOOGLE_ALERTS_FEED_1', 'AW_GOOGLE_ALERTS_FEED_2' );
+const INSIGHTWEB_SI_ALERTS_CRON = 'aw_si_alerts';
+const INSIGHTWEB_SI_ALERTS_KEYS = array( 'INSIGHTWEB_GOOGLE_ALERTS_FEED_1', 'INSIGHTWEB_GOOGLE_ALERTS_FEED_2' );
 
 /** The feed addresses that are set and look like Google Alerts feeds. */
 function insightweb_si_alerts_feeds(): array {
 	$out = array();
-	foreach ( AW_SI_ALERTS_KEYS as $name ) {
+	foreach ( INSIGHTWEB_SI_ALERTS_KEYS as $name ) {
 		$url = trim( insightweb_si_key( $name ) );
 		if ( preg_match( '#^https://www\.google\.[a-z.]+/alerts/feeds/#', $url ) ) {
 			$out[] = $url;
@@ -39,7 +39,7 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_ALERTS_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_SI_ALERTS_CRON ) ) );
 add_filter(
 	'insightweb_si_link_types',
 	fn( $t ) => (array) $t + array( 'mention' => __( 'Mention', 'insightweb' ) )
@@ -48,8 +48,8 @@ add_filter(
 add_action(
 	'init',
 	function () {
-		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( AW_SI_ALERTS_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 08:10', wp_timezone() ) )->getTimestamp(), 'daily', AW_SI_ALERTS_CRON );
+		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( INSIGHTWEB_SI_ALERTS_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 08:10', wp_timezone() ) )->getTimestamp(), 'daily', INSIGHTWEB_SI_ALERTS_CRON );
 		}
 	}
 );
@@ -126,4 +126,4 @@ function insightweb_si_alerts_run( bool $dry = false ): array {
 	}
 	return $rep;
 }
-add_action( AW_SI_ALERTS_CRON, fn() => insightweb_si_alerts_run() );
+add_action( INSIGHTWEB_SI_ALERTS_CRON, fn() => insightweb_si_alerts_run() );

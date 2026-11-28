@@ -43,7 +43,7 @@ function rankweb_bulk_csv_row( int $id ): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'SEO CSV', 'rankweb' ), __( 'SEO CSV', 'rankweb' ), 'manage_options', 'aw-seo-csv', 'rankweb_bulk_csv_screen' );
+		add_submenu_page( RANKWEB_SEO_MENU, __( 'SEO CSV', 'rankweb' ), __( 'SEO CSV', 'rankweb' ), 'manage_options', 'aw-seo-csv', 'rankweb_bulk_csv_screen' );
 	}
 );
 

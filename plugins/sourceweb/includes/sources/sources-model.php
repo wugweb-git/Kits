@@ -20,13 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Change log entries kept (owner, 25 Oct 2026: was 300). */
-const AW_SOURCING_LOG_CAP = 1000;
+const SOURCEWEB_SOURCING_LOG_CAP = 1000;
 
 /**
  * Relay hosts mapped at the phase 1 migration: the built-in substack.com becomes PFA's Substack only (owner's
  * decision 8, 25 Oct 2026: relay peopleforanimals.substack.com, not every Substack site).
  */
-const AW_SRC_RELAY_MAP = array( 'substack.com' => 'peopleforanimals.substack.com' );
+const SOURCEWEB_SRC_RELAY_MAP = array( 'substack.com' => 'peopleforanimals.substack.com' );
 
 /**
  * Lowercase host of a URL without www., or ''.
@@ -179,7 +179,7 @@ function sourceweb_src_relay_last( array $log, $host ) {
  * @param int   $cap   Entries kept.
  * @return array
  */
-function sourceweb_src_log_push( array $log, array $entry, $old = null, $new = null, $cap = AW_SOURCING_LOG_CAP ) {
+function sourceweb_src_log_push( array $log, array $entry, $old = null, $new = null, $cap = SOURCEWEB_SOURCING_LOG_CAP ) {
 	if ( null !== $old ) {
 		$entry['old'] = $old;
 	}
@@ -219,7 +219,7 @@ function sourceweb_src_log_value( $v ) {
 /**
  * The phase 1 migration, computed (nothing written): every source gets its publisher host; the relay hosts become
  * switches on publisher records (a host without a record gets one with kind=relay). Hosts are mapped first
- * (AW_SRC_RELAY_MAP).
+ * (SOURCEWEB_SRC_RELAY_MAP).
  *
  * @param array    $pubs    sourceweb_publishers.
  * @param array    $sources aw_sources.sources.
@@ -228,7 +228,7 @@ function sourceweb_src_log_value( $v ) {
  * @param array    $map     Host => host to switch on instead.
  * @return array{pubs: array, sources: array, flagged: string[], added: string[], hosts: array, hosted: string[], relay_before: string[], relay_after: string[], mapped: array}
  */
-function sourceweb_src_phase1_plan( array $pubs, array $sources, array $relay, $today, array $map = AW_SRC_RELAY_MAP ) {
+function sourceweb_src_phase1_plan( array $pubs, array $sources, array $relay, $today, array $map = SOURCEWEB_SRC_RELAY_MAP ) {
 	$hosts  = array();
 	$hosted = array();
 	foreach ( $sources as $i => $s ) {
@@ -335,7 +335,7 @@ function sourceweb_src_phase1_undo( array $pubs, array $sources, $hosted = null 
  * @param array    $map          Host mapping of the migration.
  * @return array{diffs: string[], planned: string[], since: string[]}
  */
-function sourceweb_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, array $sources, array $relay_before, array $relay_after, array $relay_log, array $map = AW_SRC_RELAY_MAP ) {
+function sourceweb_src_phase1_compare( array $bk_pubs, array $bk_sources, array $pubs, array $sources, array $relay_before, array $relay_after, array $relay_log, array $map = SOURCEWEB_SRC_RELAY_MAP ) {
 	$diffs   = array();
 	$planned = array();
 	$since   = array();

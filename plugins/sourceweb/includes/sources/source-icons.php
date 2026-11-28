@@ -18,9 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Option: host => [ id, at, src, miss ]. */
-const AW_SRC_ICONS = 'aw_source_icons';
+const SOURCEWEB_SRC_ICONS = 'aw_source_icons';
 
-add_action( AW_SOURCING_SITE_META_CRON, 'sourceweb_src_icons_run', 20 );
+add_action( SOURCEWEB_SOURCING_SITE_META_CRON, 'sourceweb_src_icons_run', 20 );
 
 /**
  * The icon's address in the media library for a host, or ''. The publisher's icon that attribution.php keeps (sourceweb_favicon_url(),
@@ -35,7 +35,7 @@ function sourceweb_src_icon_url( $host ) {
 	}
 	static $icons = null;
 	if ( null === $icons ) {
-		$icons = get_option( AW_SRC_ICONS, array() );
+		$icons = get_option( SOURCEWEB_SRC_ICONS, array() );
 		$icons = is_array( $icons ) ? $icons : array();
 	}
 	$id = (int) ( $icons[ (string) $host ]['id'] ?? 0 );
@@ -148,9 +148,9 @@ function sourceweb_src_icon_fetch( $url, $host ) {
  * @param int $limit Hosts per run.
  */
 function sourceweb_src_icons_run( $limit = 10 ) {
-	$icons = get_option( AW_SRC_ICONS, array() );
+	$icons = get_option( SOURCEWEB_SRC_ICONS, array() );
 	$icons = is_array( $icons ) ? $icons : array();
-	$meta  = get_option( AW_SOURCING_SITE_META, array() );
+	$meta  = get_option( SOURCEWEB_SOURCING_SITE_META, array() );
 	$meta  = is_array( $meta ) ? $meta : array();
 	$want  = array();
 	$pubs  = sourceweb_publishers();
@@ -189,5 +189,5 @@ function sourceweb_src_icons_run( $limit = 10 ) {
 		}
 		$icons[ $h ] = $rec;
 	}
-	update_option( AW_SRC_ICONS, $icons, false ); // hosts that drop out of the list keep their record: the file stays
+	update_option( SOURCEWEB_SRC_ICONS, $icons, false ); // hosts that drop out of the list keep their record: the file stays
 }

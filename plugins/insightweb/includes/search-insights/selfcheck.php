@@ -3,7 +3,7 @@
  * Server tab, daily checks (owner, 3 Nov 2026), in place of numbers typed from hPanel. Nothing is entered by hand.
  *
  * - Speed: PageSpeed Insights performance (0–100) of the home page, mobile and desktop, once a day, through the same
- *   free call as the weekly run (psi.php: Site Kit's module, else the public API with the free AW_PSI_KEY). Each
+ *   free call as the weekly run (psi.php: Site Kit's module, else the public API with the free INSIGHTWEB_PSI_KEY). Each
  *   strategy is its own cron event, as one call can take up to 40 seconds.
  * - AI visibility: the site asks itself, once a day, for the items hPanel scores. Score = items passed / items × 100.
  *   1. robots.txt has a Content-Signal line.
@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CHK_SPEED = 'aw_si_srv_speed';
-const AW_SI_CHK_AI    = 'aw_si_srv_ai';
+const INSIGHTWEB_SI_CHK_SPEED = 'aw_si_srv_speed';
+const INSIGHTWEB_SI_CHK_AI    = 'aw_si_srv_ai';
 
 /**
  * Store one day's result.
@@ -44,23 +44,23 @@ function insightweb_si_chk_put( string $part, array $value ): void {
 
 /** The daily step: the checks, each in its own run a few minutes apart. */
 function insightweb_si_chk_daily(): void {
-	if ( ! wp_next_scheduled( AW_SI_CHK_AI ) ) {
-		wp_schedule_single_event( time() + 60, AW_SI_CHK_AI );
+	if ( ! wp_next_scheduled( INSIGHTWEB_SI_CHK_AI ) ) {
+		wp_schedule_single_event( time() + 60, INSIGHTWEB_SI_CHK_AI );
 	}
 	foreach ( array(
 		'mobile'  => 180,
 		'desktop' => 480,
 	) as $strategy => $in ) {
-		if ( ! wp_next_scheduled( AW_SI_CHK_SPEED, array( $strategy ) ) ) {
-			wp_schedule_single_event( time() + $in, AW_SI_CHK_SPEED, array( $strategy ) );
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_CHK_SPEED, array( $strategy ) ) ) {
+			wp_schedule_single_event( time() + $in, INSIGHTWEB_SI_CHK_SPEED, array( $strategy ) );
 		}
 	}
 }
-add_action( AW_SI_CRON_DAILY, 'insightweb_si_chk_daily', 22 );
-add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_CHK_SPEED, AW_SI_CHK_AI ) ) );
+add_action( INSIGHTWEB_SI_CRON_DAILY, 'insightweb_si_chk_daily', 22 );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_SI_CHK_SPEED, INSIGHTWEB_SI_CHK_AI ) ) );
 
 add_action(
-	AW_SI_CHK_SPEED,
+	INSIGHTWEB_SI_CHK_SPEED,
 	function ( $strategy ) {
 		$strategy = 'desktop' === $strategy ? 'desktop' : 'mobile';
 		if ( ! function_exists( 'insightweb_si_psi_call' ) ) {
@@ -135,7 +135,7 @@ function insightweb_si_chk_robots_blocks( string $txt, string $bot ): bool {
 }
 
 add_action(
-	AW_SI_CHK_AI,
+	INSIGHTWEB_SI_CHK_AI,
 	function () {
 		$robots = insightweb_si_chk_fetch( '/robots.txt' );
 		$home   = insightweb_si_chk_fetch( '/', array(), true );

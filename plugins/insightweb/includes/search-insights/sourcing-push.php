@@ -18,12 +18,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * The score at or above which a keyword may be pushed to SourceWeb as a sourcing candidate. Set on the Settings tab
- * (the AW_SI_SOURCING_PUSH_MIN number); filterable.
+ * (the INSIGHTWEB_SI_SOURCING_PUSH_MIN number); filterable.
  *
  * @return int
  */
 function insightweb_si_sourcing_push_min(): int {
-	$min = defined( 'AW_SI_SOURCING_PUSH_MIN' ) ? (int) AW_SI_SOURCING_PUSH_MIN : 70;
+	$min = defined( 'INSIGHTWEB_SI_SOURCING_PUSH_MIN' ) ? (int) INSIGHTWEB_SI_SOURCING_PUSH_MIN : 70;
 	/**
 	 * Filter the minimum score to push a keyword to SourceWeb.
 	 *
@@ -41,7 +41,7 @@ function insightweb_si_sourcing_push_min(): int {
  */
 function insightweb_si_push_context( array $r ): array {
 	$roles = (int) ( $r['roles'] ?? 0 );
-	$focus = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
+	$focus = defined( 'INSIGHTWEB_SI_ROLE_FOCUS' ) ? (int) INSIGHTWEB_SI_ROLE_FOCUS : 2;
 	$pos   = isset( $r['pos'] ) && null !== $r['pos'] ? (float) $r['pos'] : null;
 	$type  = 'news'; // SourceWeb's default output; a sourcing:TYPE recommendation overrides it.
 	foreach ( explode( ',', (string) ( $r['recommended'] ?? '' ) ) as $key ) {
@@ -76,7 +76,7 @@ function insightweb_si_push_sourcing_candidates(): int {
 		return 0;
 	}
 	$min   = insightweb_si_sourcing_push_min();
-	$focus = defined( 'AW_SI_ROLE_FOCUS' ) ? (int) AW_SI_ROLE_FOCUS : 2;
+	$focus = defined( 'INSIGHTWEB_SI_ROLE_FOCUS' ) ? (int) INSIGHTWEB_SI_ROLE_FOCUS : 2;
 	$k     = insightweb_si_table( 'keywords' );
 	$s     = insightweb_si_table( 'scores' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names via %i; fixed conditions with placeholders.

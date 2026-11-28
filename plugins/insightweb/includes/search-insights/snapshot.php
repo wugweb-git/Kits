@@ -26,7 +26,7 @@ function insightweb_si_snapshot_keywords(): array {
 	$in  = $ids ? ' OR id IN (' . implode( ',', array_map( 'intval', $ids ) ) . ')' : '';
 	$eff = insightweb_si_eff_sql();
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of insightweb_si_eff_sql() and $in integers; the table is %i.
-	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM %i WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", $k, '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_ROLE_TRACKED ) );
+	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT *, {$eff} eff FROM %i WHERE entity = 0 AND label NOT LIKE %s AND ((roles & %d AND {$eff} IN ('P1', 'P2')){$in}) ORDER BY {$eff} = '', {$eff}, label", $k, '%' . $wpdb->esc_like( '{' ) . '%', INSIGHTWEB_SI_ROLE_TRACKED ) );
 }
 
 /**
@@ -79,7 +79,7 @@ function insightweb_si_snapshot_rows(): array {
 		if ( (int) $r->impr28 ) {
 			$demand[] = 'GSC ' . (int) $r->impr28 . ' impr';
 		}
-		$group = ( (int) $r->roles & AW_SI_ROLE_BRAND ) ? 'brand' : ( '' !== $r->topic ? $r->topic : ( '' !== $r->page_type ? $r->page_type : 'demand' ) );
+		$group = ( (int) $r->roles & INSIGHTWEB_SI_ROLE_BRAND ) ? 'brand' : ( '' !== $r->topic ? $r->topic : ( '' !== $r->page_type ? $r->page_type : 'demand' ) );
 		$out[] = array(
 			'date'                 => $date,
 			'query'                => (string) $r->label,
@@ -141,7 +141,7 @@ function insightweb_si_keyword_map_md(): string {
 	$p   = insightweb_si_table( 'kw_pages' );
 	$eff = insightweb_si_eff_sql( 'k.' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is the fixed SQL expression of insightweb_si_eff_sql(); the tables are %i.
-	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", $p, $k, AW_SI_ROLE_TRACKED ) );
+	$links = (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.id, k.label, k.page_type, k.intent, k.trends, k.impr28, k.pos28, k.live_txt, k.status, k.action, {$eff} eff, l.path, l.obj_type, l.obj_id, l.role FROM %i l JOIN %i k ON k.id = l.kw_id WHERE l.src = 'seed' AND l.role IN ('owner', 'secondary') AND k.roles & %d ORDER BY l.role = 'secondary', k.label", $p, $k, INSIGHTWEB_SI_ROLE_TRACKED ) );
 	$pages = array(); // section => page => [primary rows, secondary labels].
 	foreach ( $links as $l ) {
 		$section = '' !== $l->page_type ? $l->page_type : 'other';

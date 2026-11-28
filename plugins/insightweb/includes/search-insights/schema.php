@@ -11,15 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
-const AW_SI_DB_OPTION  = 'aw_si_db';
+const INSIGHTWEB_SI_DB_VERSION = '3'; // 2: links table (31 Oct 2026). 3: scores table (17 Nov 2026).
+const INSIGHTWEB_SI_DB_OPTION  = 'aw_si_db';
 
 // insightweb_si_table() and insightweb_si_now() live with the keyword table in InsightWeb's includes/keyword-table.php (Animal Writes
 // Core's from 25 Oct, Kits Core's from 12 Nov, InsightWeb's from 18 Nov 2026).
 
 /** Create or update the tables when the version changes. Cheap when nothing changed (one option read). */
 function insightweb_si_install(): void {
-	if ( get_option( AW_SI_DB_OPTION ) === AW_SI_DB_VERSION ) {
+	if ( get_option( INSIGHTWEB_SI_DB_OPTION ) === INSIGHTWEB_SI_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
@@ -142,7 +142,7 @@ function insightweb_si_install(): void {
 		KEY owner_flag (owner_flag)
 		) {$c};"
 	);
-	update_option( AW_SI_DB_OPTION, AW_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
+	update_option( INSIGHTWEB_SI_DB_OPTION, INSIGHTWEB_SI_DB_VERSION, true ); // Autoloaded: checked on every admin request.
 	add_option( 'aw_si_installed', time(), '', false );
 	/**
 	 * Fires after Search Insights' tables are installed or checked. A site's own code can add starter rows here (for
@@ -154,7 +154,7 @@ add_action( 'admin_init', 'insightweb_si_install', 1 ); // Also called by the cr
 
 /** Whether the tables exist (the install may not have run yet, e.g. on a fresh install before any admin visit). */
 function insightweb_si_ready(): bool {
-	return get_option( AW_SI_DB_OPTION ) === AW_SI_DB_VERSION;
+	return get_option( INSIGHTWEB_SI_DB_OPTION ) === INSIGHTWEB_SI_DB_VERSION;
 }
 
 /**
@@ -177,16 +177,16 @@ function insightweb_si_drop_all(): void {
 	$k = insightweb_si_table( 'keywords' );
 	$m = insightweb_si_table( 'kw_map' );
 	if ( insightweb_kw_ready() ) { // A dismissed suggestion or a migrated spelling is the owner's too.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE roles & %d = 0 AND dismissed = 0 AND (src_note IS NULL OR src_note = '')", $k, INSIGHTWEB_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	} else {
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, AW_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE roles & %d = 0', $k, INSIGHTWEB_KW_OWNER_ROLES ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	$set = insightweb_si_reset_sql( AW_KW_OWNER_ROLES ); // Every Search Insights column back to a new record's (Codex, PR #75).
+	$set = insightweb_si_reset_sql( INSIGHTWEB_KW_OWNER_ROLES ); // Every Search Insights column back to a new record's (Codex, PR #75).
 	$wpdb->query( $wpdb->prepare( "UPDATE %i SET {$set}", $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $set is the fixed column list of insightweb_si_reset_sql() (constants and integers, no %); the table is %i.
 	if ( insightweb_kw_ready() ) {
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE kw_id NOT IN (SELECT id FROM %i)', $m, $k ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	foreach ( array( AW_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports', 'insightweb_report_on', 'insightweb_report_freq', 'insightweb_report_brand', 'insightweb_report_sent' ) as $opt ) {
+	foreach ( array( INSIGHTWEB_SI_DB_OPTION, 'aw_si_runs', 'aw_si_seeded', 'aw_si_backfill', 'aw_si_installed', 'aw_si_psi_queue', 'aw_si_clarity_calls', 'aw_si_crawl_inside', 'aw_si_crawl_outside', 'aw_si_crawl_mailed', 'aw_si_clarity_retried', 'aw_si_bing_cursor', 'aw_si_checklist', 'aw_si_live_token', 'aw_si_live_seed_run', 'aw_si_gdelt_on', 'aw_si_rising_since', 'aw_si_ref_icons', 'aw_si_inspect_queue', 'aw_si_link_dr', 'aw_si_links_gsc_pages', 'aw_si_links_imports', 'insightweb_report_on', 'insightweb_report_freq', 'insightweb_report_brand', 'insightweb_report_sent' ) as $opt ) {
 		delete_option( $opt );
 	}
 	foreach ( array( 'aw_si_redirects', 'aw_si_redirects_rx', 'aw_si_rm_scores' ) as $tr ) {

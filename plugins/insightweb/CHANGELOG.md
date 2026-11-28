@@ -4,6 +4,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 ## 1.4.4
 
+- Constants carry the plugin's own prefix: every site-set constant (the eight numbers, the service keys, the score floor) is now INSIGHTWEB_*; wp-config.php and site code that set the earlier names map them to these. Nothing stored changes (option values keep their earlier key names), so no migration. The post types of the focus-keyphrase sync come from the filter insightweb_seo_item_types.
 - Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
 
 ## 1.4.3
@@ -47,7 +48,7 @@ The Animal Writes site layer must be deployed alongside InsightWeb 1.2.1 (it map
 
 Code that existed for one site (Animal Writes) is out of the plugin; it lives in `sites/animalwrites/insightweb/`, which must be deployed alongside InsightWeb 1.2.0 on that site.
 
-- Moved out, unchanged: `includes/search-insights/links-seed.php` and `data/links-2026-11-02.php` (the known-links seed, run through the new action `insightweb_si_links_seed`; markers cleared on the new action `insightweb_si_dropped`); `insightweb_si_vis_migrate()` (the carry-over that kept visitor counting on where the table had rows); the brand regex `AW_SI_BRAND` (now the filter `insightweb_brand_pattern`); the Rising and species word lists and the GitHub repository link for PHP errors (now filters).
+- Moved out, unchanged: `includes/search-insights/links-seed.php` and `data/links-2026-11-02.php` (the known-links seed, run through the new action `insightweb_si_links_seed`; markers cleared on the new action `insightweb_si_dropped`); `insightweb_si_vis_migrate()` (the carry-over that kept visitor counting on where the table had rows); the brand regex (now the filter `insightweb_brand_pattern`); the Rising and species word lists and the GitHub repository link for PHP errors (now filters).
 - Removed: the `wp aw-si links seed` subcommand (a site layer registers `wp aw-si-links seed`); the hard-coded one-host cache note on the Server tab.
 - Neutral defaults: brand pattern from the site name and host; Rising lists, species list and anchor topic empty; the "animal welfare = 100" wording is "the anchor topic = 100".
 - Behaviour change: a site that relied on the 1.1.4 carry-over and has no stored choice now starts with counting off. The Animal Writes site layer restores the rule.

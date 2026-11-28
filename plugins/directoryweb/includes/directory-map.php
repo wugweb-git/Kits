@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_DIR_MAP_LIB = 'assets/vendor/maplibre-gl-4.7.1/'; // MapLibre GL, served from this plugin (npm package files; see its README)
-const AW_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
+const DIRECTORYWEB_DIR_MAP_LIB = 'assets/vendor/maplibre-gl-4.7.1/'; // MapLibre GL, served from this plugin (npm package files; see its README)
+const DIRECTORYWEB_DIR_STYLE   = 'https://tiles.openfreemap.org/styles/liberty';
 
 /**
  * A district's centre [lat, lng] by LGD district code, from the file the `directoryweb_district_centroids_file`
@@ -436,8 +436,8 @@ add_action(
 			array(
 				'points' => rest_url( 'aw/v1/dir-points' ),
 				'near'   => rest_url( 'aw/v1/dir-near' ),
-				'lib'    => plugin_dir_url( __DIR__ ) . AW_DIR_MAP_LIB, // loaded by dir-map.js only when the map opens
-				'style'  => AW_DIR_STYLE,
+				'lib'    => plugin_dir_url( __DIR__ ) . DIRECTORYWEB_DIR_MAP_LIB, // loaded by dir-map.js only when the map opens
+				'style'  => DIRECTORYWEB_DIR_STYLE,
 			)
 		);
 	}

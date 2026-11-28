@@ -124,14 +124,14 @@ function rankweb_sql_in_types( string $column, array $types ): string {
 }
 
 /**
- * The post types the SEO items run over (the site's AW_SEO_ITEM_TYPES constant when it defines one, else the types of the
+ * The post types the SEO items run over (the site's RANKWEB_SEO_ITEM_TYPES constant when it defines one, else the types of the
  * news, library, campaign, opportunity and listing roles plus post and page).
  *
  * @return string[]
  */
 function rankweb_item_types(): array {
-	if ( defined( 'AW_SEO_ITEM_TYPES' ) ) {
-		return (array) AW_SEO_ITEM_TYPES;
+	if ( defined( 'RANKWEB_SEO_ITEM_TYPES' ) ) {
+		return (array) RANKWEB_SEO_ITEM_TYPES;
 	}
 	return rankweb_types_with( array( 'news', 'library', 'campaign', 'opportunity', 'listing' ), array( 'post', 'page' ) );
 }

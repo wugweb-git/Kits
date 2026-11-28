@@ -45,7 +45,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post meta holding the meta_id of the entry this plugin wrote (Rank Math updates entries in place, keeping it). */
-const AW_RM_SCHEMA_MID = '_aw_rm_schema_mid';
+const RANKWEB_RM_SCHEMA_MID = '_aw_rm_schema_mid';
 
 /**
  * The schema.org type of a Page, '' for none.
@@ -74,10 +74,10 @@ function rankweb_rm_page_schema_type( $id ) {
 }
 
 /** Post types whose items get a Rank Math schema entry. */
-// AW_RM_SCHEMA_TYPES: RankWeb → Settings (settings.php).
+// RANKWEB_RM_SCHEMA_TYPES: RankWeb → Settings (settings.php).
 
 /** Post meta set when this plugin wrote Rank Math's "no schema" flag (a closed Opportunity). */
-const AW_RM_SCHEMA_OFF = '_aw_rm_schema_off';
+const RANKWEB_RM_SCHEMA_OFF = '_aw_rm_schema_off';
 
 /**
  * The schema.org type of an item: the type of its own live node; '' for none. A Directory listing that is several
@@ -162,7 +162,7 @@ function rankweb_rm_schema_entry( $type, $shortcode = '' ) {
  * @return array|null
  */
 function rankweb_rm_schema_own( $id ) {
-	$mid = (int) get_post_meta( $id, AW_RM_SCHEMA_MID, true );
+	$mid = (int) get_post_meta( $id, RANKWEB_RM_SCHEMA_MID, true );
 	if ( ! $mid ) {
 		return null;
 	}
@@ -204,13 +204,13 @@ function rankweb_rm_schema_edited( $entry ) {
  * @return string What was done.
  */
 function rankweb_rm_schema_sync( $id, $dry = false ) {
-	if ( ! in_array( get_post_type( $id ), AW_RM_SCHEMA_TYPES, true ) || 'publish' !== get_post_status( $id ) ) {
+	if ( ! in_array( get_post_type( $id ), RANKWEB_RM_SCHEMA_TYPES, true ) || 'publish' !== get_post_status( $id ) ) {
 		return 'skipped';
 	}
 	$type  = rankweb_rm_schema_type( $id );
 	$own   = rankweb_rm_schema_own( $id );
 	$label = is_array( $type ) ? implode( '+', $type ) : $type;
-	if ( ! $own && get_post_meta( $id, AW_RM_SCHEMA_MID, true ) ) {
+	if ( ! $own && get_post_meta( $id, RANKWEB_RM_SCHEMA_MID, true ) ) {
 		return 'kept: removed by an editor';
 	}
 	if ( '' === $type ) {
@@ -230,23 +230,23 @@ function rankweb_rm_schema_sync( $id, $dry = false ) {
 			if ( ! $dry ) {
 				delete_post_meta( $id, 'rank_math_shortcode_schema_' . (string) ( $own[2]['metadata']['shortcode'] ?? '' ) );
 				delete_metadata_by_mid( 'post', $own[0] ); // the entry this plugin wrote while the posting was open
-				delete_post_meta( $id, AW_RM_SCHEMA_MID );
+				delete_post_meta( $id, RANKWEB_RM_SCHEMA_MID );
 			}
 		}
 		if ( ! metadata_exists( 'post', $id, 'rank_math_rich_snippet' ) ) {
 			$did[] = 'no-schema flag';
 			if ( ! $dry ) {
 				update_post_meta( $id, 'rank_math_rich_snippet', 'off' );
-				update_post_meta( $id, AW_RM_SCHEMA_OFF, 1 );
+				update_post_meta( $id, RANKWEB_RM_SCHEMA_OFF, 1 );
 			}
 		}
 		return $did ? 'closed: ' . implode( ', ', $did ) : 'unchanged none';
 	}
-	if ( ! $dry && get_post_meta( $id, AW_RM_SCHEMA_OFF, true ) ) { // open again: Rank Math's "no schema" flag this plugin set goes
+	if ( ! $dry && get_post_meta( $id, RANKWEB_RM_SCHEMA_OFF, true ) ) { // open again: Rank Math's "no schema" flag this plugin set goes
 		if ( 'off' === get_post_meta( $id, 'rank_math_rich_snippet', true ) ) {
 			delete_post_meta( $id, 'rank_math_rich_snippet' );
 		}
-		delete_post_meta( $id, AW_RM_SCHEMA_OFF );
+		delete_post_meta( $id, RANKWEB_RM_SCHEMA_OFF );
 	}
 	if ( $own ) {
 		list( $mid, $key, $value ) = $own;
@@ -270,7 +270,7 @@ function rankweb_rm_schema_sync( $id, $dry = false ) {
 		$mid   = add_post_meta( $id, rankweb_rm_schema_key( $type ), $entry );
 		if ( $mid ) {
 			add_post_meta( $id, 'rank_math_shortcode_schema_' . $entry['metadata']['shortcode'], $mid ); // Rank Math's own shortcut row
-			update_post_meta( $id, AW_RM_SCHEMA_MID, $mid );
+			update_post_meta( $id, RANKWEB_RM_SCHEMA_MID, $mid );
 		}
 	}
 	return 'added ' . $label;
@@ -279,13 +279,13 @@ function rankweb_rm_schema_sync( $id, $dry = false ) {
 /** Whether a post holds a schema entry added in Rank Math by an editor (one this plugin did not write). */
 function rankweb_rm_schema_foreign( $id ) {
 	global $wpdb;
-	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE %s AND meta_id <> %d LIMIT 1", $id, $wpdb->esc_like( 'rank_math_schema_' ) . '%', (int) get_post_meta( $id, AW_RM_SCHEMA_MID, true ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE %s AND meta_id <> %d LIMIT 1", $id, $wpdb->esc_like( 'rank_math_schema_' ) . '%', (int) get_post_meta( $id, RANKWEB_RM_SCHEMA_MID, true ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
 
 add_action(
 	'wp_after_insert_post',
 	function ( $id, $post ) {
-		if ( in_array( $post->post_type, AW_RM_SCHEMA_TYPES, true ) && ! wp_is_post_revision( $id ) && ! wp_is_post_autosave( $id ) ) {
+		if ( in_array( $post->post_type, RANKWEB_RM_SCHEMA_TYPES, true ) && ! wp_is_post_revision( $id ) && ! wp_is_post_autosave( $id ) ) {
 			rankweb_rm_schema_sync( $id ); // after terms and meta are saved: the type depends on them
 		}
 	},
@@ -298,7 +298,7 @@ add_action(
 add_filter(
 	'rank_math/json_ld',
 	function ( $data ) {
-		if ( ! is_singular( AW_RM_SCHEMA_TYPES ) || ! is_array( $data ) || ! $data ) {
+		if ( ! is_singular( RANKWEB_RM_SCHEMA_TYPES ) || ! is_array( $data ) || ! $data ) {
 			return $data;
 		}
 		$id   = get_queried_object_id();
@@ -371,7 +371,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		'aw-seo rank-math-schema',
 		function ( $args, $assoc ) {
 			$dry   = ! empty( $assoc['dry-run'] );
-			$types = array_intersect( isset( $assoc['type'] ) ? explode( ',', $assoc['type'] ) : AW_RM_SCHEMA_TYPES, AW_RM_SCHEMA_TYPES );
+			$types = array_intersect( isset( $assoc['type'] ) ? explode( ',', $assoc['type'] ) : RANKWEB_RM_SCHEMA_TYPES, RANKWEB_RM_SCHEMA_TYPES );
 			$ids   = get_posts( array( 'post_type' => array_values( $types ), 'post_status' => 'publish', 'numberposts' => isset( $assoc['limit'] ) ? (int) $assoc['limit'] : -1, 'offset' => (int) ( $assoc['offset'] ?? 0 ), 'orderby' => 'ID', 'order' => 'ASC', 'fields' => 'ids' ) );
 			foreach ( $ids as $id ) {
 				WP_CLI::log( sprintf( '%d %s %s: %s', $id, get_post_type( $id ), get_post_field( 'post_name', $id ), rankweb_rm_schema_sync( $id, $dry ) ) );

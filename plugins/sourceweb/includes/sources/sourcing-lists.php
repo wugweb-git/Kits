@@ -35,7 +35,7 @@ function sourceweb_gnews_query( $url ) {
  * Source types of the feeds: type => [label, the tab their changes are logged under]. The log keeps the tab names
  * of before 24 Oct 2026 (feeds, library, opportunities), when each type had its own tab.
  */
-const AW_SOURCE_TYPES = array(
+const SOURCEWEB_FEED_SOURCE_TYPES = array(
 	'news'        => array( 'News', 'feeds' ),
 	'legal'       => array( 'Library', 'library' ),
 	'opportunity' => array( 'Opportunity', 'opportunities' ),
@@ -56,7 +56,7 @@ function sourceweb_sources_live_save( $on ) {
 /*
  * Sources sync when the lists are saved (owner, 25 Oct 2026), instead of every hour: a save of the source lists or the
  * keywords starts sources-sync.yml once, 2 minutes later, so a run of edits is one copy. Its daily run stays as the
- * fallback. Only while "Workers use these lists" is on, and only with AW_GITHUB_DISPATCH_TOKEN (kits_dispatch_workflow
+ * fallback. Only while "Workers use these lists" is on, and only with a GitHub token set in wp-config.php (kits_dispatch_workflow
  * logs the missing token); without it the daily run copies the lists.
  */
 foreach ( array( 'aw_sources', 'aw_relevance' ) as $sourceweb_sync_option ) {
@@ -123,7 +123,7 @@ function sourceweb_sources_edit_form( $id, $type, $host = '' ) {
 	if ( $new ) {
 		echo '<select id="aw-src-type" name="src[0][type]"><option value="news"' . selected( $src['type'], 'news', false ) . '>News</option><option value="legal"' . selected( $src['type'], 'legal', false ) . '>Library</option></select><p class="description">News: news items. Library: Library documents and legal news. New kinds of opportunity site need code.</p>';
 	} else {
-		echo '<input type="hidden" name="src[0][type]" value="' . esc_attr( (string) $src['type'] ) . '">' . esc_html( AW_SOURCE_TYPES[ $src['type'] ][0] ?? (string) $src['type'] ) . ( $rss ? '' : ' <span class="description">(read by code)</span>' );
+		echo '<input type="hidden" name="src[0][type]" value="' . esc_attr( (string) $src['type'] ) . '">' . esc_html( SOURCEWEB_FEED_SOURCE_TYPES[ $src['type'] ][0] ?? (string) $src['type'] ) . ( $rss ? '' : ' <span class="description">(read by code)</span>' );
 	}
 	echo '</td></tr>';
 	echo '<tr><th scope="row"><label for="aw-src-name">Name</label></th><td><input type="text" id="aw-src-name" class="regular-text" name="src[0][name]" value="' . esc_attr( $src['name'] ) . '" required></td></tr>';
@@ -187,7 +187,7 @@ function sourceweb_sources_feed_op( $op, array $ids ) {
 	$log = array();
 	foreach ( $what as $t => $w ) {
 		foreach ( $w as $e ) {
-			$log[] = array( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
+			$log[] = array( SOURCEWEB_FEED_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
 		}
 	}
 	sourceweb_src_log_many( $log );
@@ -280,7 +280,7 @@ add_action(
 		$log = array();
 		foreach ( $what as $t => $w ) {
 			foreach ( $w as $e ) {
-				$log[] = array( AW_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
+				$log[] = array( SOURCEWEB_FEED_SOURCE_TYPES[ $t ][1] ?? 'feeds', $e[0], $e[1], $e[2] );
 			}
 		}
 		sourceweb_src_log_many( $log );

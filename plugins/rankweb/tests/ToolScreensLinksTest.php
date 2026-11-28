@@ -12,12 +12,12 @@
 require_once __DIR__ . '/tool-stubs.php';
 
 foreach ( array(
-	'AW_SILO_MIN'              => 5,
-	'AW_SILO_DEPTH'            => 3,
-	'AW_SILO_MAX'              => 10,
-	'AW_LINK_ANCHOR_EXACT_MAX' => 30,
-	'AW_LINK_ANCHOR_TYPE_MAX'  => 60,
-	'AW_LINK_ANCHOR_MIN'       => 5,
+	'RANKWEB_SILO_MIN'              => 5,
+	'RANKWEB_SILO_DEPTH'            => 3,
+	'RANKWEB_SILO_MAX'              => 10,
+	'RANKWEB_LINK_ANCHOR_EXACT_MAX' => 30,
+	'RANKWEB_LINK_ANCHOR_TYPE_MAX'  => 60,
+	'RANKWEB_LINK_ANCHOR_MIN'       => 5,
 	'ARRAY_A'                  => 'ARRAY_A',
 ) as $rw_name => $rw_value ) {
 	if ( ! defined( $rw_name ) ) {

@@ -27,8 +27,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/class-aw-silo.php';
 require_once __DIR__ . '/admin-table.php';
 
-const AW_SILO_DB     = 'aw_silo_db';
-const AW_SILO_DB_VER = '1';
+const RANKWEB_SILO_DB     = 'aw_silo_db';
+const RANKWEB_SILO_DB_VER = '1';
 
 /**
  * A table name with the site prefix.
@@ -42,7 +42,7 @@ function rankweb_silo_table( string $name ): string {
 
 /** Create the two tables (their own version option). */
 function rankweb_silo_install(): void {
-	if ( get_option( AW_SILO_DB ) === AW_SILO_DB_VER ) {
+	if ( get_option( RANKWEB_SILO_DB ) === RANKWEB_SILO_DB_VER ) {
 		return;
 	}
 	global $wpdb;
@@ -69,7 +69,7 @@ function rankweb_silo_install(): void {
 		KEY silo_id (silo_id)
 		) {$c};"
 	);
-	update_option( AW_SILO_DB, AW_SILO_DB_VER, true );
+	update_option( RANKWEB_SILO_DB, RANKWEB_SILO_DB_VER, true );
 }
 add_action( 'admin_init', 'rankweb_silo_install' );
 
@@ -90,7 +90,7 @@ function rankweb_silo_data(): array {
 			'silos' => array(),
 			'map'   => array(),
 		);
-		if ( get_option( AW_SILO_DB ) === AW_SILO_DB_VER ) {
+		if ( get_option( RANKWEB_SILO_DB ) === RANKWEB_SILO_DB_VER ) {
 			global $wpdb;
 			foreach ( (array) $wpdb->get_results( $wpdb->prepare( 'SELECT id, name, hub_id, mode FROM %i ORDER BY name, id', rankweb_silo_table( 'silos' ) ), ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table, kept in a transient.
 				$sid                              = (int) $r['id'];
@@ -142,7 +142,7 @@ function rankweb_silo_targets( int $id ): array {
 	}
 	$s   = $d['silos'][ $d['map'][ $id ]['silo'] ];
 	$out = array();
-	foreach ( RankWeb_Silo::links( $s['mode'], $s['hub'], $s['items'], $id, max( 1, (int) AW_SILO_MAX ) ) as $tid ) {
+	foreach ( RankWeb_Silo::links( $s['mode'], $s['hub'], $s['items'], $id, max( 1, (int) RANKWEB_SILO_MAX ) ) as $tid ) {
 		$t = get_post( $tid );
 		if ( $t instanceof WP_Post && 'publish' === $t->post_status && '' === $t->post_password ) {
 			$out[] = array(
@@ -315,7 +315,7 @@ add_action(
 	'deleted_post',
 	function ( $post_id ) {
 		global $wpdb;
-		if ( get_option( AW_SILO_DB ) !== AW_SILO_DB_VER ) {
+		if ( get_option( RANKWEB_SILO_DB ) !== RANKWEB_SILO_DB_VER ) {
 			return;
 		}
 		$was = (int) $wpdb->delete( rankweb_silo_table( 'items' ), array( 'post_id' => (int) $post_id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
@@ -339,7 +339,7 @@ function rankweb_silo_checks( array $silo ): array {
 	foreach ( array_merge( array( (int) $silo['hub'] ), (array) $silo['items'] ) as $pid ) {
 		$urls[ $pid ] = (string) get_permalink( $pid );
 	}
-	return RankWeb_Silo::check( $urls, home_url(), max( 1, (int) AW_SILO_MIN ), max( 1, (int) AW_SILO_DEPTH ) );
+	return RankWeb_Silo::check( $urls, home_url(), max( 1, (int) RANKWEB_SILO_MIN ), max( 1, (int) RANKWEB_SILO_DEPTH ) );
 }
 
 /**
@@ -375,8 +375,8 @@ function rankweb_silo_payload(): array {
 	}
 	return array(
 		'silos'    => $out,
-		'min'      => max( 1, (int) AW_SILO_MIN ),
-		'depth'    => max( 1, (int) AW_SILO_DEPTH ),
+		'min'      => max( 1, (int) RANKWEB_SILO_MIN ),
+		'depth'    => max( 1, (int) RANKWEB_SILO_DEPTH ),
 		'can_edit' => current_user_can( 'manage_options' ),
 	);
 }
@@ -581,11 +581,11 @@ function rankweb_silo_screen(): void {
 		$notes = array();
 		if ( $c['few'] ) {
 			/* translators: 1: items in the silo, 2: fewest items. */
-			$notes[] = esc_html( sprintf( __( 'Only %1$s items; at least %2$s are better.', 'rankweb' ), number_format_i18n( $c['few'] ), number_format_i18n( (int) AW_SILO_MIN ) ) );
+			$notes[] = esc_html( sprintf( __( 'Only %1$s items; at least %2$s are better.', 'rankweb' ), number_format_i18n( $c['few'] ), number_format_i18n( (int) RANKWEB_SILO_MIN ) ) );
 		}
 		if ( $c['deep'] ) {
 			/* translators: 1: item IDs, 2: most folders deep. */
-			$notes[] = esc_html( sprintf( __( 'Deeper than %2$s folders: %1$s.', 'rankweb' ), implode( ', ', $c['deep'] ), number_format_i18n( (int) AW_SILO_DEPTH ) ) );
+			$notes[] = esc_html( sprintf( __( 'Deeper than %2$s folders: %1$s.', 'rankweb' ), implode( ', ', $c['deep'] ), number_format_i18n( (int) RANKWEB_SILO_DEPTH ) ) );
 		}
 		$cells[] = array(
 			'name'  => ( $admin ? '<a href="' . esc_url( add_query_arg( 'silo', $sid, $base ) ) . '">' . esc_html( $s['name'] ) . '</a>' : esc_html( $s['name'] ) ),

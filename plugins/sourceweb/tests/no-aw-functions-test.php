@@ -1,6 +1,6 @@
 <?php
 /**
- * Guard: sourceweb defines no function with the short 'aw_' prefix except the earlier-name aliases in includes/compat/legacy-aliases.php
+ * Guard: sourceweb defines no constant or class with the earlier short prefix, and no function with the short 'aw_' prefix except the earlier-name aliases in includes/compat/legacy-aliases.php
  * (WordPress.org wants a project prefix of four or more characters). Stored names (options, meta, hooks, cron events,
  * REST routes) are not functions and keep their names.
  *
@@ -26,7 +26,12 @@ foreach ( $it as $file ) {
 		++$failed;
 		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines ' . implode( ', ', $m[1] ) . "\n";
 	}
-	preg_match_all( '/^\s*(?:final\s+|abstract\s+)?class\s+(AW_[A-Za-z0-9_]+)/m', $code, $c );
+	preg_match_all( '/^\s*(?:final\s+|abstract\s+)?class\s+((?:AW)_[A-Za-z0-9_]+)/m', $code, $c );
+	preg_match_all( '/^\s*const\s+((?:AW)_[A-Za-z0-9_]+)|define\(\s*[\'"]((?:AW)_[A-Za-z0-9_]+)/m', $code, $k ); // a constant carries the plugin's own prefix (SOURCEWEB_)
+	if ( array_filter( array_merge( $k[1], $k[2] ) ) ) {
+		++$failed;
+		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines constant ' . implode( ', ', array_filter( array_merge( $k[1], $k[2] ) ) ) . "\n";
+	}
 	if ( $c[1] ) {
 		++$failed;
 		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines class ' . implode( ', ', $c[1] ) . "\n";

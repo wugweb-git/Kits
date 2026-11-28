@@ -18,7 +18,7 @@
  *   picture (linked, not on our server) keeps its own size.
  * - The share kit (kits-core share.php) shares the same: the page's line (og:description) and the same square picture
  *   (kits_share_args, below).
- * - og:type "article" only for the types in AW_SEO_ARTICLE_TYPES (News, Library, Resources, campaigns); "website"
+ * - og:type "article" only for the types in RANKWEB_SEO_ARTICLE_TYPES (News, Library, Resources, campaigns); "website"
  *   elsewhere. og:locale en_IN.
  * - A missing page (404) shares no image, not even the site default.
  *
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post types shared as articles. */
-// AW_SEO_ARTICLE_TYPES: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_ARTICLE_TYPES: RankWeb → Settings (settings.php).
 
 foreach ( array( 'facebook', 'twitter' ) as $rankweb_seo_net ) {
 	add_action(
@@ -86,7 +86,7 @@ add_filter( 'rank_math/opengraph/facebook/og_image_width', fn( $w ) => ! empty( 
 add_filter( 'rank_math/opengraph/facebook/og_image_height', fn( $h ) => ! empty( $GLOBALS['rankweb_seo_og_swap'][2] ) ? $GLOBALS['rankweb_seo_og_swap'][2] : $h );
 
 add_filter( 'rank_math/opengraph/pre_set_default_image', fn( $skip ) => is_404() ? true : $skip );
-add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( AW_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );
+add_filter( 'rank_math/opengraph/type', fn( $type ) => is_singular( RANKWEB_SEO_ARTICLE_TYPES ) ? 'article' : 'website' );
 add_filter( 'rank_math/opengraph/facebook/og_locale', fn( $l ) => str_replace( '-', '_', rankweb_language() ) ); // the site's language (rankweb_language())
 
 /** A term's share picture alt text: "<focus keyphrase> in India – {Site}" (owner, 20 Oct 2026), else its name. */

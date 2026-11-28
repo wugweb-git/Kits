@@ -27,6 +27,11 @@ foreach ( $it as $file ) {
 		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines ' . implode( ', ', $m[1] ) . "\n";
 	}
 	preg_match_all( '/^\s*(?:final\s+|abstract\s+)?class\s+((?:AW|DW)_[A-Za-z0-9_]+)/m', $code, $c );
+	preg_match_all( '/^\s*const\s+((?:AW|DW)_[A-Za-z0-9_]+)|define\(\s*[\'"]((?:AW|DW)_[A-Za-z0-9_]+)/m', $code, $k ); // a constant carries the plugin's own prefix (DIRECTORYWEB_)
+	if ( array_filter( array_merge( $k[1], $k[2] ) ) ) {
+		++$failed;
+		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines constant ' . implode( ', ', array_filter( array_merge( $k[1], $k[2] ) ) ) . "\n";
+	}
 	if ( $c[1] ) {
 		++$failed;
 		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines class ' . implode( ', ', $c[1] ) . "\n";

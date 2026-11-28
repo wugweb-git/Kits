@@ -28,14 +28,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/class-aw-linker.php';
 
-const AW_LINK_DB_VERSION = '1';
-const AW_LINK_DB_OPTION  = 'aw_link_db';
-const AW_LINK_VERSION    = 'aw_link_index_version'; // raised on every index change (the index transient)
-const AW_LINK_PAGE_VER   = 'aw_link_page_version'; // raised when pages must be linked again (address changes, rebuild)
-const AW_LINK_META       = '_aw_link_keywords';
-const AW_LINK_JOB        = 'aw_link_index_build';
-const AW_LINK_MAX_WORDS  = 100; // characters per keyword
-const AW_LINK_MAX_KWS    = 20; // keywords per item
+const RANKWEB_LINK_DB_VERSION = '1';
+const RANKWEB_LINK_DB_OPTION  = 'aw_link_db';
+const RANKWEB_LINK_VERSION    = 'aw_link_index_version'; // raised on every index change (the index transient)
+const RANKWEB_LINK_PAGE_VER   = 'aw_link_page_version'; // raised when pages must be linked again (address changes, rebuild)
+const RANKWEB_LINK_META       = '_aw_link_keywords';
+const RANKWEB_LINK_JOB        = 'aw_link_index_build';
+const RANKWEB_LINK_MAX_WORDS  = 100; // characters per keyword
+const RANKWEB_LINK_MAX_KWS    = 20; // keywords per item
 
 /* ---------- Tables ---------- */
 
@@ -55,7 +55,7 @@ function rankweb_link_table( string $name ): string {
 
 /** Create or update the two tables when their version changes (one option read when nothing changed). */
 function rankweb_link_install(): void {
-	if ( get_option( AW_LINK_DB_OPTION ) === AW_LINK_DB_VERSION ) {
+	if ( get_option( RANKWEB_LINK_DB_OPTION ) === RANKWEB_LINK_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
@@ -91,7 +91,7 @@ function rankweb_link_install(): void {
 		KEY target_id (target_id)
 		) {$c};"
 	);
-	update_option( AW_LINK_DB_OPTION, AW_LINK_DB_VERSION, true );
+	update_option( RANKWEB_LINK_DB_OPTION, RANKWEB_LINK_DB_VERSION, true );
 }
 
 add_action( 'admin_init', 'rankweb_link_install' );
@@ -100,17 +100,17 @@ add_action( 'admin_init', 'rankweb_link_install' );
 
 /** The linked post types that exist (the Settings field; empty: no links are added). */
 function rankweb_link_types(): array {
-	return array_values( array_filter( array_map( 'sanitize_key', (array) AW_LINK_TYPES ), 'post_type_exists' ) );
+	return array_values( array_filter( array_map( 'sanitize_key', (array) RANKWEB_LINK_TYPES ), 'post_type_exists' ) );
 }
 
 /** Item IDs never linked from or to. */
 function rankweb_link_excluded(): array {
-	return array_values( array_filter( array_map( 'absint', (array) AW_LINK_EXCLUDE ) ) );
+	return array_values( array_filter( array_map( 'absint', (array) RANKWEB_LINK_EXCLUDE ) ) );
 }
 
 /** The settings that change an item's linked output, as one string (part of its cache key). */
 function rankweb_link_settings_key(): string {
-	return md5( (string) wp_json_encode( array( rankweb_link_types(), rankweb_link_excluded(), (int) AW_LINK_MAX, (int) AW_LINK_MAX_PER_TARGET, (int) AW_LINK_FIRST_ONLY, (int) AW_LINK_NO_SELF, (int) AW_LINK_SKIP_LINKED, (int) AW_LINK_ANCHOR_EXACT_MAX, (int) AW_LINK_ANCHOR_TYPE_MAX, (int) AW_LINK_ANCHOR_MIN, rankweb_anchor_settings_key() ) ) );
+	return md5( (string) wp_json_encode( array( rankweb_link_types(), rankweb_link_excluded(), (int) RANKWEB_LINK_MAX, (int) RANKWEB_LINK_MAX_PER_TARGET, (int) RANKWEB_LINK_FIRST_ONLY, (int) RANKWEB_LINK_NO_SELF, (int) RANKWEB_LINK_SKIP_LINKED, (int) RANKWEB_LINK_ANCHOR_EXACT_MAX, (int) RANKWEB_LINK_ANCHOR_TYPE_MAX, (int) RANKWEB_LINK_ANCHOR_MIN, rankweb_anchor_settings_key() ) ) );
 }
 
 /* ---------- Link keywords of an item ---------- */
@@ -127,12 +127,12 @@ function rankweb_link_keywords_clean( $value ): array {
 	}
 	$out = array();
 	foreach ( $value as $kw ) {
-		$kw = trim( mb_substr( sanitize_text_field( (string) $kw ), 0, AW_LINK_MAX_WORDS ) );
+		$kw = trim( mb_substr( sanitize_text_field( (string) $kw ), 0, RANKWEB_LINK_MAX_WORDS ) );
 		if ( '' !== $kw && ! isset( $out[ mb_strtolower( $kw ) ] ) ) {
 			$out[ mb_strtolower( $kw ) ] = $kw;
 		}
 	}
-	return array_slice( array_values( $out ), 0, AW_LINK_MAX_KWS );
+	return array_slice( array_values( $out ), 0, RANKWEB_LINK_MAX_KWS );
 }
 
 /**
@@ -146,7 +146,7 @@ function rankweb_link_focus_keywords( int $id ): array {
 
 /** Whether the item's link keywords were saved (until then its focus keywords stand in). */
 function rankweb_link_keywords_saved( int $id ): bool {
-	return metadata_exists( 'post', $id, AW_LINK_META );
+	return metadata_exists( 'post', $id, RANKWEB_LINK_META );
 }
 
 /**
@@ -155,7 +155,7 @@ function rankweb_link_keywords_saved( int $id ): bool {
  * @param int $id Item ID.
  */
 function rankweb_link_keywords( int $id ): array {
-	return rankweb_link_keywords_saved( $id ) ? rankweb_link_keywords_clean( get_post_meta( $id, AW_LINK_META, true ) ) : rankweb_link_focus_keywords( $id );
+	return rankweb_link_keywords_saved( $id ) ? rankweb_link_keywords_clean( get_post_meta( $id, RANKWEB_LINK_META, true ) ) : rankweb_link_focus_keywords( $id );
 }
 
 /**
@@ -168,7 +168,7 @@ function rankweb_link_keyword_ok( string $norm ): bool {
 	if ( mb_strlen( $norm ) < 3 ) {
 		return false;
 	}
-	$generic = defined( 'AW_SEO_GENERIC_WORDS' ) ? array_map( 'mb_strtolower', (array) AW_SEO_GENERIC_WORDS ) : array();
+	$generic = defined( 'RANKWEB_SEO_GENERIC_WORDS' ) ? array_map( 'mb_strtolower', (array) RANKWEB_SEO_GENERIC_WORDS ) : array();
 	return false !== strpos( $norm, ' ' ) || ! in_array( $norm, $generic, true );
 }
 
@@ -177,7 +177,7 @@ add_action(
 	function () {
 		register_post_meta(
 			'',
-			AW_LINK_META,
+			RANKWEB_LINK_META,
 			array(
 				'type'              => 'array',
 				'single'            => true,
@@ -189,7 +189,7 @@ add_action(
 						'type'  => 'array',
 						'items' => array(
 							'type'      => 'string',
-							'maxLength' => AW_LINK_MAX_WORDS,
+							'maxLength' => RANKWEB_LINK_MAX_WORDS,
 						),
 					),
 				),
@@ -259,9 +259,9 @@ function rankweb_link_insert_rows( array $rows ): void {
  * @param bool $pages Also build the cached pages again.
  */
 function rankweb_link_bump( bool $pages = false ): void {
-	update_option( AW_LINK_VERSION, (int) get_option( AW_LINK_VERSION, 0 ) + 1, true );
+	update_option( RANKWEB_LINK_VERSION, (int) get_option( RANKWEB_LINK_VERSION, 0 ) + 1, true );
 	if ( $pages ) {
-		update_option( AW_LINK_PAGE_VER, (int) get_option( AW_LINK_PAGE_VER, 0 ) + 1, true );
+		update_option( RANKWEB_LINK_PAGE_VER, (int) get_option( RANKWEB_LINK_PAGE_VER, 0 ) + 1, true );
 	}
 	delete_transient( 'aw_seo_link_index' );
 }
@@ -298,7 +298,7 @@ function rankweb_link_index_build(): void {
 			$wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- three named values, then one %s per type.
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- $in is a list of %s.
 				"SELECT p.ID, MAX( CASE WHEN m.meta_key = %s THEN m.meta_value END ) AS kws, MAX( CASE WHEN m.meta_key = %s THEN 1 ELSE 0 END ) AS saved, MAX( CASE WHEN m.meta_key = 'rank_math_focus_keyword' THEN m.meta_value END ) AS focus FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key IN ( %s, 'rank_math_focus_keyword' ) WHERE p.post_status = 'publish' AND p.post_password = '' AND p.post_type IN ( {$in} ) GROUP BY p.ID",
-				array_merge( array( AW_LINK_META, AW_LINK_META, AW_LINK_META ), $types )
+				array_merge( array( RANKWEB_LINK_META, RANKWEB_LINK_META, RANKWEB_LINK_META ), $types )
 			)
 		);
 		$skip = array_flip( rankweb_link_excluded() );
@@ -330,7 +330,7 @@ function rankweb_link_index_build(): void {
 		false
 	);
 }
-add_action( AW_LINK_JOB, 'aw_link_index_build' );
+add_action( RANKWEB_LINK_JOB, 'aw_link_index_build' );
 
 /**
  * The index as the linker reads it: keyword_norm => list of array( target_id, priority ), best five first
@@ -338,7 +338,7 @@ add_action( AW_LINK_JOB, 'aw_link_index_build' );
  */
 function rankweb_link_index(): array {
 	static $memo = null;
-	$version     = (int) get_option( AW_LINK_VERSION, 0 );
+	$version     = (int) get_option( RANKWEB_LINK_VERSION, 0 );
 	if ( null !== $memo && $memo['v'] === $version ) {
 		return $memo['map'];
 	}
@@ -346,7 +346,7 @@ function rankweb_link_index(): array {
 	if ( ! is_array( $hit ) || ( $hit['v'] ?? -1 ) !== $version ) {
 		global $wpdb;
 		$map = array();
-		if ( get_option( AW_LINK_DB_OPTION ) === AW_LINK_DB_VERSION ) {
+		if ( get_option( RANKWEB_LINK_DB_OPTION ) === RANKWEB_LINK_DB_VERSION ) {
 			$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT keyword_norm, target_id, priority FROM %i ORDER BY keyword_norm, priority DESC, target_id', rankweb_link_table( 'keywords' ) ), ARRAY_N ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- read once per index version, cached below.
 			foreach ( $rows as $r ) {
 				if ( count( $map[ (string) $r[0] ] ?? array() ) < 5 ) { // the best five targets of a keyword are plenty (rows come best first)
@@ -371,7 +371,7 @@ function rankweb_link_index(): array {
  */
 function rankweb_link_forget_source( int $id ): void {
 	global $wpdb;
-	if ( get_option( AW_LINK_DB_OPTION ) !== AW_LINK_DB_VERSION ) {
+	if ( get_option( RANKWEB_LINK_DB_OPTION ) !== RANKWEB_LINK_DB_VERSION ) {
 		return;
 	}
 	$wpdb->delete( rankweb_link_table( 'links' ), array( 'source_id' => $id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
@@ -423,7 +423,7 @@ add_action(
 	'deleted_post',
 	function ( $post_id ) {
 		global $wpdb;
-		if ( get_option( AW_LINK_DB_OPTION ) !== AW_LINK_DB_VERSION ) {
+		if ( get_option( RANKWEB_LINK_DB_OPTION ) !== RANKWEB_LINK_DB_VERSION ) {
 			return;
 		}
 		$gone = (int) $wpdb->delete( rankweb_link_table( 'keywords' ), array( 'target_id' => (int) $post_id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- RankWeb's own table.
@@ -439,17 +439,17 @@ add_action(
 add_action(
 	'init',
 	function () {
-		if ( ( is_admin() || wp_doing_cron() ) && ! wp_next_scheduled( AW_LINK_JOB ) ) {
-			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'daily', AW_LINK_JOB );
+		if ( ( is_admin() || wp_doing_cron() ) && ! wp_next_scheduled( RANKWEB_LINK_JOB ) ) {
+			wp_schedule_event( time() + 5 * MINUTE_IN_SECONDS, 'daily', RANKWEB_LINK_JOB );
 		}
 	}
 );
 add_action(
 	'update_option_aw_seo_settings',
 	function ( $old, $value ) {
-		$part = fn( $v ) => array( $v['internal-links']['AW_LINK_TYPES'] ?? null, $v['internal-links']['AW_LINK_EXCLUDE'] ?? null );
-		if ( $part( (array) $old ) !== $part( (array) $value ) && ! wp_next_scheduled( AW_LINK_JOB, array( 'now' ) ) ) {
-			wp_schedule_single_event( time() + 10, AW_LINK_JOB, array( 'now' ) );
+		$part = fn( $v ) => array( $v['internal-links']['RANKWEB_LINK_TYPES'] ?? null, $v['internal-links']['RANKWEB_LINK_EXCLUDE'] ?? null );
+		if ( $part( (array) $old ) !== $part( (array) $value ) && ! wp_next_scheduled( RANKWEB_LINK_JOB, array( 'now' ) ) ) {
+			wp_schedule_single_event( time() + 10, RANKWEB_LINK_JOB, array( 'now' ) );
 		}
 	},
 	10,
@@ -491,12 +491,12 @@ function rankweb_link_run( string $html, int $id ): array {
 			return $t instanceof WP_Post && rankweb_link_is_target( $t ) ? (string) get_permalink( $t ) : '';
 		},
 		array(
-			'max_links'      => (int) AW_LINK_MAX,
-			'max_per_target' => (int) AW_LINK_MAX_PER_TARGET,
-			'first_only'     => (bool) AW_LINK_FIRST_ONLY,
+			'max_links'      => (int) RANKWEB_LINK_MAX,
+			'max_per_target' => (int) RANKWEB_LINK_MAX_PER_TARGET,
+			'first_only'     => (bool) RANKWEB_LINK_FIRST_ONLY,
 			'self_id'        => $id,
-			'no_self'        => (bool) AW_LINK_NO_SELF,
-			'skip_linked'    => (bool) AW_LINK_SKIP_LINKED,
+			'no_self'        => (bool) RANKWEB_LINK_NO_SELF,
+			'skip_linked'    => (bool) RANKWEB_LINK_SKIP_LINKED,
 			'exclude'        => rankweb_link_excluded(), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 			'home'           => home_url(),
 			'anchor_ok'      => 'rankweb_anchor_ok',
@@ -522,7 +522,7 @@ function rankweb_link_filter_content( $html ) {
 	}
 	// One cache entry per input: a page can run the_content more than once on different HTML (the theme's content
 	// block, a plugin building a description), so the item keeps up to three entries, all of the same item state.
-	$state = md5( $post->post_modified_gmt . '|' . (int) get_option( AW_LINK_PAGE_VER, 0 ) . '|' . rankweb_link_settings_key() );
+	$state = md5( $post->post_modified_gmt . '|' . (int) get_option( RANKWEB_LINK_PAGE_VER, 0 ) . '|' . rankweb_link_settings_key() );
 	$input = md5( $html );
 	$name  = 'aw_seo_link_' . $id;
 	$hit   = get_transient( $name );
@@ -566,7 +566,7 @@ add_filter( 'the_content', 'rankweb_link_filter_content', 25 ); // runs after bl
  */
 function rankweb_link_store( int $source, array $result ): void {
 	global $wpdb;
-	if ( get_option( AW_LINK_DB_OPTION ) !== AW_LINK_DB_VERSION ) {
+	if ( get_option( RANKWEB_LINK_DB_OPTION ) !== RANKWEB_LINK_DB_VERSION ) {
 		return;
 	}
 	$home = RankWeb_Linker::url_key( home_url() );
@@ -673,7 +673,7 @@ add_action(
 		if ( ! rankweb_link_keywords_saved( (int) $post_id ) && rankweb_link_focus_keywords( (int) $post_id ) === $list ) {
 			return;
 		}
-		update_post_meta( $post_id, AW_LINK_META, $list );
+		update_post_meta( $post_id, RANKWEB_LINK_META, $list );
 	}
 );
 
@@ -713,7 +713,7 @@ add_action(
 				'callback'            => function ( WP_REST_Request $req ) {
 					$id   = (int) $req['id'];
 					$list = rankweb_link_keywords_clean( (array) $req['keywords'] );
-					update_post_meta( $id, AW_LINK_META, $list );
+					update_post_meta( $id, RANKWEB_LINK_META, $list );
 					rankweb_link_index_item( $id );
 					return rest_ensure_response( rankweb_link_panel_data( get_post( $id ) ) );
 				},

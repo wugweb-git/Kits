@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SOURCING_PUSH_AUTOAPPROVE = 'aw_sourcing_push_autoapprove';
+const SOURCEWEB_SOURCING_PUSH_AUTOAPPROVE = 'aw_sourcing_push_autoapprove';
 
 /**
  * The section (post type) a recommended_type routes to: news, library and campaign are role names
@@ -29,16 +29,16 @@ const AW_SOURCING_PUSH_AUTOAPPROVE = 'aw_sourcing_push_autoapprove';
  * @return string
  */
 function sourceweb_sourcing_push_section( $type ) {
-	return in_array( $type, AW_SOURCING_PUSHED_TYPES, true ) ? sourceweb_type( (string) $type ) : '';
+	return in_array( $type, SOURCEWEB_SOURCING_PUSHED_TYPES, true ) ? sourceweb_type( (string) $type ) : '';
 }
 
 /** The auto-approve settings, both rules off by default. */
 function sourceweb_sourcing_push_autoapprove() {
-	$o = (array) get_option( AW_SOURCING_PUSH_AUTOAPPROVE, array() );
+	$o = (array) get_option( SOURCEWEB_SOURCING_PUSH_AUTOAPPROVE, array() );
 	return array(
 		'on_score'    => ! empty( $o['on_score'] ),
 		'min_score'   => max( 0, (int) ( $o['min_score'] ?? 80 ) ),
-		'types'       => array_values( array_intersect( AW_SOURCING_PUSHED_TYPES, array_map( 'strval', (array) ( $o['types'] ?? array() ) ) ) ),
+		'types'       => array_values( array_intersect( SOURCEWEB_SOURCING_PUSHED_TYPES, array_map( 'strval', (array) ( $o['types'] ?? array() ) ) ) ),
 		'on_proven'   => ! empty( $o['on_proven'] ),
 		'proven_rank' => max( 1, (int) ( $o['proven_rank'] ?? 10 ) ),
 	);
@@ -55,12 +55,12 @@ function sourceweb_sourcing_push_autoapprove_save( array $in ) {
 	$new = array(
 		'on_score'    => ! empty( $in['on_score'] ),
 		'min_score'   => max( 0, (int) ( $in['min_score'] ?? $old['min_score'] ) ),
-		'types'       => array_values( array_intersect( AW_SOURCING_PUSHED_TYPES, array_map( 'strval', (array) ( $in['types'] ?? array() ) ) ) ),
+		'types'       => array_values( array_intersect( SOURCEWEB_SOURCING_PUSHED_TYPES, array_map( 'strval', (array) ( $in['types'] ?? array() ) ) ) ),
 		'on_proven'   => ! empty( $in['on_proven'] ),
 		'proven_rank' => max( 1, (int) ( $in['proven_rank'] ?? $old['proven_rank'] ) ),
 	);
 	if ( $new !== $old ) {
-		update_option( AW_SOURCING_PUSH_AUTOAPPROVE, $new, false );
+		update_option( SOURCEWEB_SOURCING_PUSH_AUTOAPPROVE, $new, false );
 		sourceweb_src_log( 'keywords', 'Pushed-keyword auto-approve: ' . ( $new['on_score'] ? 'score ≥ ' . $new['min_score'] . ' (' . ( $new['types'] ? implode( ', ', $new['types'] ) : 'any type' ) . ')' : 'score rule off' ) . '; ' . ( $new['on_proven'] ? 'proven rank ≤ ' . $new['proven_rank'] : 'proven rule off' ) );
 	}
 	return $new;

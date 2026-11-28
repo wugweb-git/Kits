@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once dirname( __DIR__ ) . '/compat/post-type-roles.php'; // which post type plays which role (the site says, through a filter)
 
 /** The old lists and the role each gives: list key => [role bit, where it lives, label]. */
-const AW_KW_LISTS = array(
+const SOURCEWEB_KW_LISTS = array(
 	'strong'  => array( SOURCEWEB_KW_ROLE_INCLUDE, 'sourceweb_relevance.strong', 'Include' ),
 	'animal'  => array( SOURCEWEB_KW_ROLE_ANIMAL, 'sourceweb_relevance.animal', 'Animal' ),
 	'context' => array( SOURCEWEB_KW_ROLE_CONTEXT, 'sourceweb_relevance.context', 'Context' ),
@@ -34,13 +34,13 @@ const AW_KW_LISTS = array(
 );
 
 /** The category the lab check words belong to, and the lab words no category list had (owner's decision 5). */
-const AW_KW_LAB_CATEGORY = 'animal-experimentation';
+const SOURCEWEB_KW_LAB_CATEGORY = 'animal-experimentation';
 
 /** The fixed extra Google News search of before phase 2 (workers run.py EXTRA_SEARCHES, keyword-stats.php). */
-const AW_KW_EXTRA_SEARCHES = array( 'stray dogs' );
+const SOURCEWEB_KW_EXTRA_SEARCHES = array( 'stray dogs' );
 
 /** Press settings dropped with Brave (owner's decision 7; kept in the backup). */
-const AW_KW_PRESS_DROPPED = array( 'sites', 'monthly_requests', 'weekly_requests', 'backfill_requests' );
+const SOURCEWEB_KW_PRESS_DROPPED = array( 'sites', 'monthly_requests', 'weekly_requests', 'backfill_requests' );
 
 /**
  * Whether a rollback may run (Codex, PR #75): a phase rolls back only when no later phase is migrated or half-migrated
@@ -164,7 +164,7 @@ function sourceweb_kw_feed_checks( array $sources, array $seed ) {
 		if ( $seed && $k === array_values( $seed ) ) {
 			$out[ (string) $s['id'] ] = array( 'roles' => array( 'include' ), 'categories' => array() );
 		} elseif ( $lab && $k === $lab ) {
-			$out[ (string) $s['id'] ] = array( 'roles' => array(), 'categories' => array( AW_KW_LAB_CATEGORY ) );
+			$out[ (string) $s['id'] ] = array( 'roles' => array(), 'categories' => array( SOURCEWEB_KW_LAB_CATEGORY ) );
 		}
 	}
 	return $out;
@@ -254,7 +254,7 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 		);
 	};
 
-	foreach ( AW_KW_LISTS as $key => $def ) {
+	foreach ( SOURCEWEB_KW_LISTS as $key => $def ) {
 		$words = 'press' === $key ? (array) ( $cfg['press']['queries'] ?? array() ) : (array) ( $rel[ $key ] ?? array() );
 		$count( $key, $words, $def[0] );
 	}
@@ -263,7 +263,7 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 	}
 	// Lab check words no category list has (owner's decision 5): mapped to Animal Experimentation.
 	$catnorms = array();
-	foreach ( (array) ( $cfg['categories'][ AW_KW_LAB_CATEGORY ] ?? array() ) as $w ) {
+	foreach ( (array) ( $cfg['categories'][ SOURCEWEB_KW_LAB_CATEGORY ] ?? array() ) as $w ) {
 		$catnorms[ insightweb_si_norm( (string) $w ) ] = true;
 	}
 	$labwords = array();
@@ -276,7 +276,7 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 			}
 		}
 	}
-	$count( 'lab', $labwords, SOURCEWEB_KW_ROLE_CATEGORY, AW_KW_LAB_CATEGORY );
+	$count( 'lab', $labwords, SOURCEWEB_KW_ROLE_CATEGORY, SOURCEWEB_KW_LAB_CATEGORY );
 
 	// The open-web Google News searches (owner's decision 2) and the fixed extra search: the Search role, feed ids kept.
 	$searches = array();
@@ -298,7 +298,7 @@ function sourceweb_kw_phase2_plan( array $rel, array $cfg, array $dismissed, arr
 		}
 		$searches[ $id ] = $n;
 	}
-	foreach ( AW_KW_EXTRA_SEARCHES as $t ) {
+	foreach ( SOURCEWEB_KW_EXTRA_SEARCHES as $t ) {
 		$n = $touch( $t );
 		$put( $n, 'search', count( $searches ), $t, SOURCEWEB_KW_ROLE_SEARCH );
 		$recs[ $n ]['feed_id'] = sourceweb_kw_feed_id( $t );
@@ -398,7 +398,7 @@ function sourceweb_kw_mirrors( array $rows ) {
 	foreach ( $rows as $r ) {
 		$roles = (int) $r['roles'];
 		$src   = (array) ( $r['src']['lists'] ?? array() );
-		foreach ( AW_KW_LISTS as $key => $def ) {
+		foreach ( SOURCEWEB_KW_LISTS as $key => $def ) {
 			if ( ! ( $roles & $def[0] ) ) {
 				continue;
 			}
@@ -412,7 +412,7 @@ function sourceweb_kw_mirrors( array $rows ) {
 		}
 		if ( $roles & SOURCEWEB_KW_ROLE_CATEGORY ) {
 			foreach ( (array) ( $r['categories'] ?? array() ) as $slug ) {
-				$places = $src[ 'cat:' . $slug ] ?? ( AW_KW_LAB_CATEGORY === $slug && ! empty( $src['lab'] ) ? array( array( 1e5, $src['lab'][0][1] ) ) : array() );
+				$places = $src[ 'cat:' . $slug ] ?? ( SOURCEWEB_KW_LAB_CATEGORY === $slug && ! empty( $src['lab'] ) ? array( array( 1e5, $src['lab'][0][1] ) ) : array() );
 				if ( $places ) {
 					foreach ( $places as $p ) {
 						$add( 'cat:' . $slug, $p[0], $r['id'], $p[1] );
@@ -668,14 +668,14 @@ function sourceweb_kw_compare_mirrors( array $old, array $mirror, array $hindi )
 		}
 		$extra = array_values( array_diff( $now, $expect ) );
 		$lost  = array_values( array_diff( $expect, $now ) );
-		if ( 'cat:' . AW_KW_LAB_CATEGORY === $key && ! $lost && array_values( array_intersect( $now, $expect ) ) === $expect ) {
+		if ( 'cat:' . SOURCEWEB_KW_LAB_CATEGORY === $key && ! $lost && array_values( array_intersect( $now, $expect ) ) === $expect ) {
 			$planned[] = $name . ': lab words added ' . implode( ', ', $extra ) . ' (decision 5)';
 			return;
 		}
 		$diffs[] = $name . ( $lost ? ': missing ' . implode( ', ', $lost ) : '' ) . ( $extra ? ': extra ' . implode( ', ', $extra ) : '' ) . ( ! $lost && ! $extra ? ': order differs' : '' );
 	};
 	foreach ( array( 'strong', 'animal', 'context', 'exclude', 'press' ) as $k ) {
-		$check( AW_KW_LISTS[ $k ][1], $k, array_values( (array) ( $old[ $k ] ?? array() ) ), array_values( (array) ( $mirror[ $k ] ?? array() ) ) );
+		$check( SOURCEWEB_KW_LISTS[ $k ][1], $k, array_values( (array) ( $old[ $k ] ?? array() ) ), array_values( (array) ( $mirror[ $k ] ?? array() ) ) );
 	}
 	$slugs = array_unique( array_merge( array_keys( (array) ( $old['categories'] ?? array() ) ), array_keys( (array) ( $mirror['categories'] ?? array() ) ) ) );
 	foreach ( $slugs as $slug ) {
@@ -703,7 +703,7 @@ function sourceweb_kw_v1_searches( array $sources, array $include ) {
 			$qs[ $q ]                 = true;
 		}
 	}
-	foreach ( array_merge( $include, AW_KW_EXTRA_SEARCHES ) as $kw ) {
+	foreach ( array_merge( $include, SOURCEWEB_KW_EXTRA_SEARCHES ) as $kw ) {
 		$kw = trim( (string) $kw );
 		if ( '' === $kw || ! sourceweb_kw_ascii( $kw ) ) {
 			continue;

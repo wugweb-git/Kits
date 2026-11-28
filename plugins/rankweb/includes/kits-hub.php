@@ -38,7 +38,7 @@ function rankweb_seo_extras_kits_status_row( $rows ) {
 		$rows[] = array( __( 'RankWeb', 'rankweb' ), function_exists( 'kits_status_cell' ) ? kits_status_cell( $text, $fix ) : esc_html( $text . '. ' . $fix ) );
 		return $rows;
 	}
-	$link   = defined( 'AW_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . AW_SEO_MENU ) ) . '">' . esc_html__( 'Overview', 'rankweb' ) . '</a>' : '';
+	$link   = defined( 'RANKWEB_SEO_MENU' ) ? ' <a href="' . esc_url( admin_url( 'admin.php?page=' . RANKWEB_SEO_MENU ) ) . '">' . esc_html__( 'Overview', 'rankweb' ) . '</a>' : '';
 	$rows[] = array( __( 'RankWeb', 'rankweb' ), esc_html( $text ) . $link );
 	return $rows;
 }

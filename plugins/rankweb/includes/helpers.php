@@ -50,7 +50,7 @@ function rankweb_seo_term_url( $term, $taxonomy = '' ): string {
 }
 
 /** Longest search description, in characters (155: Google's desktop snippet fits about 151 of ours, so more would be cut). */
-// AW_SEO_DESC_MAX: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_DESC_MAX: RankWeb → Settings (settings.php).
 
 /**
  * Cut text at a word boundary to at most $max characters, adding $more ("…") when cut.
@@ -166,7 +166,7 @@ function rankweb_seo_no_hyphens( $text, $case = true ) {
 			'/(?<=[\p{L}\p{N}])' . $d . '(\p{Ll})([\p{L}\p{N}\x{2019}\x{27}]*)/u',
 			function ( $m ) use ( $units ) {
 				$word = $m[1] . $m[2];
-				return '-' . ( in_array( $word, AW_SEO_SMALL_WORDS, true ) || in_array( $word, $units, true ) ? $word : mb_strtoupper( $m[1] ) . $m[2] );
+				return '-' . ( in_array( $word, RANKWEB_SEO_SMALL_WORDS, true ) || in_array( $word, $units, true ) ? $word : mb_strtoupper( $m[1] ) . $m[2] );
 			},
 			$t
 		) : $t
@@ -382,7 +382,7 @@ function rankweb_seo_branded( $text ) {
 }
 
 /** Words a cut title must not end on ("… rescued in", "… rabies prevention &"). */
-const AW_SEO_DANGLING = '&|\+|and|or|but|nor|of|the|a|an|to|in|on|at|by|for|with|from|into|onto|over|under|after|before|amid|as|via|per|than|that|which|who|whose|its|their|his|her|is|are|was|were|be|has|have|had|will|can|against|between|near|about|across|during|without|within|vs|v|every|each|all|some|any|this|these|those|our|your|my|what|how|why|when|where|whether|if|not|also|so|very|more|most|such|both|says|said';
+const RANKWEB_SEO_DANGLING = '&|\+|and|or|but|nor|of|the|a|an|to|in|on|at|by|for|with|from|into|onto|over|under|after|before|amid|as|via|per|than|that|which|who|whose|its|their|his|her|is|are|was|were|be|has|have|had|will|can|against|between|near|about|across|during|without|within|vs|v|every|each|all|some|any|this|these|those|our|your|my|what|how|why|when|where|whether|if|not|also|so|very|more|most|such|both|says|said';
 
 /**
  * A title cut to at most $max characters at a word boundary that leaves a whole phrase: no dangling connector
@@ -396,7 +396,7 @@ function rankweb_seo_cut_title( $text, $max = 60 ) {
 	}
 	do {
 		$before = $cut;
-		$cut    = preg_replace( '/(?:\s+(?:' . AW_SEO_DANGLING . ')|[\s,;:|\/\x{2013}\x{2014}-]+)$/iu', '', $cut );
+		$cut    = preg_replace( '/(?:\s+(?:' . RANKWEB_SEO_DANGLING . ')|[\s,;:|\/\x{2013}\x{2014}-]+)$/iu', '', $cut );
 	} while ( $cut !== $before && mb_strlen( $cut ) > $max * 0.5 );
 	if ( substr_count( $cut, '(' ) > substr_count( $cut, ')' ) ) {
 		$cut = preg_replace( '/[\s,;:\x{2013}\x{2014}-]+$/u', '', mb_substr( $cut, 0, mb_strrpos( $cut, '(' ) ) );
@@ -425,7 +425,7 @@ function rankweb_seo_headline_title( $title ) {
 }
 
 /** Words a headline in Title Case keeps lower case (not first). */
-const AW_SEO_SMALL_WORDS = array( 'a', 'an', 'the', 'and', 'or', 'nor', 'but', 'of', 'in', 'on', 'at', 'to', 'for', 'by', 'with', 'from', 'as', 'vs', 'via', 'per', 'into', 'onto' );
+const RANKWEB_SEO_SMALL_WORDS = array( 'a', 'an', 'the', 'and', 'or', 'nor', 'but', 'of', 'in', 'on', 'at', 'to', 'for', 'by', 'with', 'from', 'as', 'vs', 'via', 'per', 'into', 'onto' );
 
 /**
  * A headline in Title Case: each word capitalised except short connectors; acronyms, numbers and words with capitals
@@ -439,7 +439,7 @@ function rankweb_seo_headline_case( $text ) {
 	$words = explode( ' ', $text );
 	foreach ( $words as $i => $w ) {
 		$bare = mb_strtolower( trim( $w, '‘’“”"\'(),:;' ) );
-		if ( $i > 0 && in_array( $bare, AW_SEO_SMALL_WORDS, true ) && ! preg_match( '/[:;–—-]$/u', $words[ $i - 1 ] ) ) {
+		if ( $i > 0 && in_array( $bare, RANKWEB_SEO_SMALL_WORDS, true ) && ! preg_match( '/[:;–—-]$/u', $words[ $i - 1 ] ) ) {
 			$words[ $i ] = preg_match( '/^[‘“"(]?\p{Lu}\p{Ll}*[,:;)]?$/u', $w ) ? mb_strtolower( $w ) : $w; // "Of" → "of"; "OR", "of" as written
 			continue;
 		}
@@ -530,13 +530,13 @@ function rankweb_seo_listing_name( $id ) {
 }
 
 /** Fixed titles of the section hubs (post type => title). */
-// AW_HUB_TITLES: RankWeb → Settings (settings.php).
+// RANKWEB_HUB_TITLES: RankWeb → Settings (settings.php).
 
 /** Fixed descriptions of the section hubs that are not built from their intro. */
-// AW_HUB_DESCRIPTIONS: RankWeb → Settings (settings.php).
+// RANKWEB_HUB_DESCRIPTIONS: RankWeb → Settings (settings.php).
 
 /** Descriptions of the content types' own archives (post type => description). */
-// AW_ARCHIVE_DESCRIPTIONS: RankWeb → Settings (settings.php).
+// RANKWEB_ARCHIVE_DESCRIPTIONS: RankWeb → Settings (settings.php).
 
 /**
  * A listing type's name from the earlier Core plugin, or the slug in words when Core is not active.
@@ -598,7 +598,7 @@ function rankweb_seo_top_categories( $type ) {
 
 /**
  * Hub description built from its own intro (the hub Page's excerpt, as shown under its H1) and the list's facts:
- * "{intro} {N stories} on {category}, {category} and {category}." up to AW_SEO_DESC_MAX (155) characters.
+ * "{intro} {N stories} on {category}, {category} and {category}." up to RANKWEB_SEO_DESC_MAX (155) characters.
  */
 function rankweb_seo_hub_intro_description( $type ) {
 	$page  = get_queried_object();
@@ -614,7 +614,7 @@ function rankweb_seo_hub_intro_description( $type ) {
 		$list = array_slice( $cats, 0, $n );
 		$last = array_pop( $list );
 		$line = $intro . ' ' . $count . ' on ' . ( $list ? implode( ', ', $list ) . ' and ' : '' ) . $last . '.';
-		if ( mb_strlen( $line ) > AW_SEO_DESC_MAX ) {
+		if ( mb_strlen( $line ) > RANKWEB_SEO_DESC_MAX ) {
 			break;
 		}
 		$best = $line;
@@ -893,10 +893,10 @@ function rankweb_seo_default_image() {
 }
 
 /** Share image of a listing without a logo of its own (owner, 15 Oct 2026): the listing-wide banner, the Directory band picture. */
-// AW_SEO_LISTING_SHARE_IMAGE: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_LISTING_SHARE_IMAGE: RankWeb → Settings (settings.php).
 
 /** Post types whose share image is the publisher's own image, linked (News, Library, research, Opportunities). */
-// AW_SEO_SOURCE_IMAGE_TYPES: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_SOURCE_IMAGE_TYPES: RankWeb → Settings (settings.php).
 
 /**
  * The item's own image (owner, 15 Oct 2026: ingested items use the publisher's image, linked; never a category photo
@@ -918,7 +918,7 @@ function rankweb_seo_item_image( $id ) {
 		return $img;
 	}
 	$type = get_post_type( $id );
-	if ( in_array( $type, AW_SEO_SOURCE_IMAGE_TYPES, true ) && function_exists( 'sourceweb_publisher_image' ) ) {
+	if ( in_array( $type, RANKWEB_SEO_SOURCE_IMAGE_TYPES, true ) && function_exists( 'sourceweb_publisher_image' ) ) {
 		$url = sourceweb_publisher_image( $id );
 		if ( '' !== $url ) {
 			return array( 'id' => 0, 'url' => $url, 'width' => (int) get_post_meta( $id, 'aw_source_image_w', true ), 'height' => (int) get_post_meta( $id, 'aw_source_image_h', true ) );
@@ -967,7 +967,7 @@ function rankweb_seo_image() {
 	}
 	$img = is_singular() ? rankweb_seo_item_image( get_queried_object_id() ) : rankweb_seo_term_image();
 	if ( ! $img && rankweb_is_singular( array( 'listing' ) ) ) {
-		$img = rankweb_seo_attachment( AW_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
+		$img = rankweb_seo_attachment( RANKWEB_SEO_LISTING_SHARE_IMAGE, 'full' ); // a listing without its own logo: the Directory's wide band picture
 	}
 	if ( ! $img ) {
 		$img = rankweb_seo_default_image();

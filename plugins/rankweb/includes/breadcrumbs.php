@@ -84,7 +84,7 @@ function rankweb_seo_breadcrumb_trail() {
 		}
 		if ( $cat ) { // every item (owner, 20 Oct 2026): Home › Section › primary category, the section's list of it when indexed
 			$n       = function_exists( 'rankweb_seo_filtered_count' ) ? rankweb_seo_filtered_count( $type, 'category_name', $cat->slug ) : 0;
-			$trail[] = array( $cat->name, $n >= AW_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : rankweb_seo_term_url( $cat ) );
+			$trail[] = array( $cat->name, $n >= RANKWEB_FILTERED_MIN_ITEMS ? add_query_arg( 'category_name', rawurlencode( $cat->slug ), aw_hub_url( $type ) ) : rankweb_seo_term_url( $cat ) );
 		} else {
 			$trail[] = array( apply_filters( 'rankweb_breadcrumb_label', get_the_title( $id ), $id ), get_permalink( $id ) );
 		}

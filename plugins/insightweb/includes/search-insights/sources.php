@@ -48,14 +48,14 @@ add_filter(
 	}
 );
 
-/** Days the daily figures are kept before they become monthly totals (RankWeb → Settings, AW_SI_KEEP_DAYS). */
+/** Days the daily figures are kept before they become monthly totals (RankWeb → Settings, INSIGHTWEB_SI_KEEP_DAYS). */
 function insightweb_si_keep_days(): int {
-	return max( 1, defined( 'AW_SI_KEEP_DAYS' ) ? (int) AW_SI_KEEP_DAYS : 90 );
+	return max( 1, defined( 'INSIGHTWEB_SI_KEEP_DAYS' ) ? (int) INSIGHTWEB_SI_KEEP_DAYS : 90 );
 }
 
 /** Cron hooks of every Search Insights job, for scheduling, Delete data and deactivation. */
 function insightweb_si_cron_hooks(): array {
-	return (array) apply_filters( 'insightweb_si_cron_hooks', array( 'aw_si_daily', 'aw_si_rollup', AW_SI_GA4_CRON, AW_SI_PSI_CRON, AW_SI_PSI_MORE, AW_SI_CLARITY_CRON, AW_SI_CLARITY_RETRY, AW_SI_BING_CRON ) );
+	return (array) apply_filters( 'insightweb_si_cron_hooks', array( 'aw_si_daily', 'aw_si_rollup', INSIGHTWEB_SI_GA4_CRON, INSIGHTWEB_SI_PSI_CRON, INSIGHTWEB_SI_PSI_MORE, INSIGHTWEB_SI_CLARITY_CRON, INSIGHTWEB_SI_CLARITY_RETRY, INSIGHTWEB_SI_BING_CRON ) );
 }
 
 add_action(
@@ -65,14 +65,14 @@ add_action(
 			return;
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( AW_SI_GA4_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:20', $tz ) )->getTimestamp(), 'daily', AW_SI_GA4_CRON );
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_GA4_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 07:20', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_SI_GA4_CRON );
 		}
-		if ( ! wp_next_scheduled( AW_SI_PSI_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'next sunday 06:00', $tz ) )->getTimestamp(), 'weekly', AW_SI_PSI_CRON );
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_PSI_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'next sunday 06:00', $tz ) )->getTimestamp(), 'weekly', INSIGHTWEB_SI_PSI_CRON );
 		}
-		if ( insightweb_si_clarity_on() && ! wp_next_scheduled( AW_SI_CLARITY_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 06:30', $tz ) )->getTimestamp(), 'daily', AW_SI_CLARITY_CRON );
+		if ( insightweb_si_clarity_on() && ! wp_next_scheduled( INSIGHTWEB_SI_CLARITY_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'tomorrow 06:30', $tz ) )->getTimestamp(), 'daily', INSIGHTWEB_SI_CLARITY_CRON );
 		}
 	}
 );

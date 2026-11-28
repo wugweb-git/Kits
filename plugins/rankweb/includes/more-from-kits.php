@@ -64,7 +64,7 @@ add_action(
 		if ( 'rankweb' !== 'kits' && function_exists( 'kits_more_page' ) ) {
 			return; // Kits Core's page is the one page.
 		}
-		add_submenu_page( AW_SEO_MENU, __( 'More from Kits', 'rankweb' ), __( 'More from Kits', 'rankweb' ), 'install_plugins', 'rankweb-more', 'rankweb_more_page', 90 );
+		add_submenu_page( RANKWEB_SEO_MENU, __( 'More from Kits', 'rankweb' ), __( 'More from Kits', 'rankweb' ), 'install_plugins', 'rankweb-more', 'rankweb_more_page', 90 );
 	},
 	101 // After the plugin's own menu (priority 100 at the latest), so the parent exists and the first item stays the plugin's own screen.
 );

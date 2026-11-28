@@ -57,7 +57,7 @@ function sourceweb_sourcing_si_terms( $terms ) {
 	}
 	global $wpdb;
 	$k     = insightweb_si_table( 'keywords' );
-	$brand = defined( 'AW_SI_ROLE_BRAND' ) ? (int) AW_SI_ROLE_BRAND : 8;
+	$brand = (int) apply_filters( 'sourceweb_si_role_brand', defined( 'INSIGHTWEB_SI_ROLE_BRAND' ) ? (int) INSIGHTWEB_SI_ROLE_BRAND : 8 ); // InsightWeb's Brand role bit; 8 when InsightWeb's constant is not there
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- the table name comes from Search Insights.
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT norm, label, impr28, clicks28, pos28, roles FROM %i WHERE lang = 'en' AND impr28 >= 20 ORDER BY impr28 DESC LIMIT 5000", $k ) ); // the suggestions' own floor (keyword-suggestions.php)
 	$out  = array();

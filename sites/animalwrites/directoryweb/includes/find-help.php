@@ -36,11 +36,11 @@ const AW_PLACE_DETECT_MAX_STATES = 3;
 
 /** District names that are also ordinary words, people's names or rivers (keys): never detected. Delhi's districts are
  * named for directions ("Central", "North East"); the state is still found from "Delhi". */
-const AW_PLACE_DETECT_SKIP = array( 'east', 'west', 'north', 'south', 'central', 'northeast', 'northwest', 'southeast', 'southwest', 'centralnorth', 'anand', 'mon', 'una', 'korea', 'sagar', 'mau', 'dhar', 'guna', 'banda', 'hassan', 'salem', 'pali', 'mandi', 'tapi', 'gomati', 'saran', 'mansa', 'nadia', 'ntr', 'sakti', 'kota', 'siang', 'lohit', 'panna', 'erode', 'noney', 'kamle', 'krishna', 'narmada', 'mahisagar', 'vaishali', 'vidisha', 'kheda' );
+const DIRECTORYWEB_PLACE_DETECT_SKIP = array( 'east', 'west', 'north', 'south', 'central', 'northeast', 'northwest', 'southeast', 'southwest', 'centralnorth', 'anand', 'mon', 'una', 'korea', 'sagar', 'mau', 'dhar', 'guna', 'banda', 'hassan', 'salem', 'pali', 'mandi', 'tapi', 'gomati', 'saran', 'mansa', 'nadia', 'ntr', 'sakti', 'kota', 'siang', 'lohit', 'panna', 'erode', 'noney', 'kamle', 'krishna', 'narmada', 'mahisagar', 'vaishali', 'vidisha', 'kheda' );
 
 /** City and big-city neighbourhood names people write for a district (keys as directoryweb_place_key() makes them) → the LGD
  * district name. Only names no other district shares (not Dwarka: Devbhumi Dwarka is in Gujarat). */
-const AW_PLACE_DETECT_CITIES = array(
+const DIRECTORYWEB_PLACE_DETECT_CITIES = array(
 	'bengaluru'    => 'Bengaluru Urban',
 	'noida'        => 'Gautam Buddha Nagar',
 	'greaternoida' => 'Gautam Buddha Nagar',
@@ -135,7 +135,7 @@ function directoryweb_place_detect_index() {
 			$ix[1][ directoryweb_place_key( $n ) ][ $d->code ] = $d;
 		}
 	}
-	foreach ( AW_PLACE_DETECT_CITIES as $k => $name ) {
+	foreach ( DIRECTORYWEB_PLACE_DETECT_CITIES as $k => $name ) {
 		$d = directoryweb_place_district_by_name( $name );
 		if ( $d ) {
 			$ix[1][ $k ] = array( $d->code => $d );
@@ -175,7 +175,7 @@ function directoryweb_place_mentions( $text ) {
 			$kd     = directoryweb_place_key( $phrase );
 			if ( $len > 1 && 'Delhi' === $words[ $i + $len - 1 ] && isset( $districts[ $kd . 'delhi' ] ) ) {
 				$kd = $kd . 'delhi'; // "South Delhi": lgd.json reads it as "South", a skipped word
-			} elseif ( in_array( $kd, AW_PLACE_DETECT_SKIP, true ) ) {
+			} elseif ( in_array( $kd, DIRECTORYWEB_PLACE_DETECT_SKIP, true ) ) {
 				continue;
 			}
 			if ( isset( $districts[ $kd ] ) ) { // a district first: Chandigarh and Puducherry are both

@@ -76,16 +76,16 @@ function rankweb_seo_rendered_main( $id, $fresh = false, $store = true ) {
 }
 
 /** Post types analysed on their rendered <main> whatever their content (Library, Resources, campaigns, News, Opportunities, Directory). */
-// AW_SEO_RENDERED_TYPES: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_RENDERED_TYPES: RankWeb → Settings (settings.php).
 
-/** Rank Math tests that do not fit a summary page or a profile (the AW_SEO_RENDERED_TYPES). */
-// AW_SEO_SUMMARY_SKIP_TESTS: RankWeb → Settings (settings.php).
+/** Rank Math tests that do not fit a summary page or a profile (the RANKWEB_SEO_RENDERED_TYPES). */
+// RANKWEB_SEO_SUMMARY_SKIP_TESTS: RankWeb → Settings (settings.php).
 
 /** Rank Math tests for features RankWeb does instead (Content AI), skipped on every item. */
-// AW_SEO_COVERED_TESTS: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_COVERED_TESTS: RankWeb → Settings (settings.php).
 
 /**
- * The content Rank Math should analyse: the rendered <main> of a built Page or an item of AW_SEO_RENDERED_TYPES, else ''.
+ * The content Rank Math should analyse: the rendered <main> of a built Page or an item of RANKWEB_SEO_RENDERED_TYPES, else ''.
  *
  * @param int|WP_Post $post  Post.
  * @param bool        $store Keep the rendered copy (see rankweb_seo_rendered_main()).
@@ -96,13 +96,13 @@ function rankweb_seo_analysis_content( $post, $store = true ) {
 	if ( ! $post ) {
 		return '';
 	}
-	return ( in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) || rankweb_seo_page_is_built( $post ) ) ? rankweb_seo_rendered_main( $post->ID, false, $store ) : '';
+	return ( in_array( $post->post_type, RANKWEB_SEO_RENDERED_TYPES, true ) || rankweb_seo_page_is_built( $post ) ) ? rankweb_seo_rendered_main( $post->ID, false, $store ) : '';
 }
 
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( 'page' === $post->post_type || in_array( $post->post_type, AW_SEO_RENDERED_TYPES, true ) ) {
+		if ( 'page' === $post->post_type || in_array( $post->post_type, RANKWEB_SEO_RENDERED_TYPES, true ) ) {
 			delete_transient( 'aw_seo_rendered_' . (int) $id );
 		}
 	},
@@ -116,11 +116,11 @@ add_action(
 add_filter(
 	'rank_math/researches/tests',
 	function ( $tests, $type ) {
-		if ( 'post' === $type && in_array( get_post_type(), AW_SEO_RENDERED_TYPES, true ) ) {
-			$tests = array_diff_key( $tests, array_flip( AW_SEO_SUMMARY_SKIP_TESTS ) );
+		if ( 'post' === $type && in_array( get_post_type(), RANKWEB_SEO_RENDERED_TYPES, true ) ) {
+			$tests = array_diff_key( $tests, array_flip( RANKWEB_SEO_SUMMARY_SKIP_TESTS ) );
 		}
 		if ( 'post' === $type ) {
-			$tests = array_diff_key( $tests, array_flip( AW_SEO_COVERED_TESTS ) );
+			$tests = array_diff_key( $tests, array_flip( RANKWEB_SEO_COVERED_TESTS ) );
 		}
 		return $tests;
 	},
@@ -219,7 +219,7 @@ function rankweb_seo_score_values( $ids ) {
 	foreach ( is_array( $data ) ? $data : array() as $id => $v ) {
 		$GLOBALS['post'] = get_post( (int) $id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride
 		setup_postdata( $GLOBALS['post'] );
-		$v['tests']        = array_values( array_keys( apply_filters( 'rank_math/researches/tests', array_fill_keys( array_unique( array_merge( $base, AW_SEO_SUMMARY_SKIP_TESTS ) ), true ), 'post' ) ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+		$v['tests']        = array_values( array_keys( apply_filters( 'rank_math/researches/tests', array_fill_keys( array_unique( array_merge( $base, RANKWEB_SEO_SUMMARY_SKIP_TESTS ) ), true ), 'post' ) ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
 		$rows[ (int) $id ] = $v;
 	}
 	wp_reset_postdata();
@@ -252,7 +252,7 @@ add_action(
 					$written = array();
 					foreach ( array_slice( (array) $req->get_param( 'scores' ), 0, 100, true ) as $id => $score ) {
 						$id = absint( $id );
-						if ( ! $id || 'publish' !== get_post_status( $id ) || ! in_array( get_post_type( $id ), AW_SEO_ITEM_TYPES, true ) || ! is_numeric( $score ) || $score < 0 || $score > 100 ) {
+						if ( ! $id || 'publish' !== get_post_status( $id ) || ! in_array( get_post_type( $id ), RANKWEB_SEO_ITEM_TYPES, true ) || ! is_numeric( $score ) || $score < 0 || $score > 100 ) {
 							continue;
 						}
 						update_post_meta( $id, 'rank_math_seo_score', (int) round( $score ) ); // as Rank Math's own updateSeoScore stores it

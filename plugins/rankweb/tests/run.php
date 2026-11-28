@@ -180,25 +180,25 @@ foreach ( $tabs as $tab ) {
 	}
 }
 rw_check( 0 === $GLOBALS['rw_writes'], 'absent option: no write after an unchanged Save of every group (' . $GLOBALS['rw_writes'] . ' writes)' );
-rw_check( ! array_key_exists( AW_SEO_SETTINGS, $GLOBALS['rw_options'] ), 'absent option stays absent' );
+rw_check( ! array_key_exists( RANKWEB_SEO_SETTINGS, $GLOBALS['rw_options'] ), 'absent option stays absent' );
 
 // 2b. Option with values (a changed field, a module off, InsightWeb's numbers): unchanged Saves keep it byte for byte.
 $stored                = array(
 	'search-insights' => array(
-		'AW_SI_DAYS' => 90,
+		'INSIGHTWEB_SI_DAYS' => 90,
 		'on'         => 1,
 	),
-	'general'         => array( 'AW_SEO_DESC_MAX' => 150 ),
-	'titles'          => array( 'AW_SEO_ITEM_TYPES' => array( 'aw_listing', 'aw_news', 'page' ) ),
+	'general'         => array( 'RANKWEB_SEO_DESC_MAX' => 150 ),
+	'titles'          => array( 'RANKWEB_SEO_ITEM_TYPES' => array( 'aw_listing', 'aw_news', 'page' ) ),
 	'llms'            => array( 'on' => false ),
 	'faq'             => array(
-		'AW_FAQ_HUBS' => array(
+		'RANKWEB_FAQ_HUBS' => array(
 			'news'    => 'News questions | more',
 			'library' => 'Library',
 		),
 	),
 );
-$GLOBALS['rw_options'] = array( AW_SEO_SETTINGS => $stored );
+$GLOBALS['rw_options'] = array( RANKWEB_SEO_SETTINGS => $stored );
 $GLOBALS['rw_writes']  = 0;
 $bytes                 = serialize( $stored );
 foreach ( $tabs as $tab ) {
@@ -209,19 +209,19 @@ foreach ( $tabs as $tab ) {
 	}
 }
 rw_check( 0 === $GLOBALS['rw_writes'], 'stored option: no write after an unchanged Save of every group (' . $GLOBALS['rw_writes'] . ' writes)' );
-rw_check( serialize( get_option( AW_SEO_SETTINGS ) ) === $bytes, 'stored option byte for byte the same' );
+rw_check( serialize( get_option( RANKWEB_SEO_SETTINGS ) ) === $bytes, 'stored option byte for byte the same' );
 
 // 3. A change is stored; Restore defaults takes it out; other groups and InsightWeb's numbers stay.
 $t                    = rw_texts( 'ai' );
-$t['AW_MD_VARY_HTML'] = '0';
+$t['RANKWEB_MD_VARY_HTML'] = '0';
 rankweb_seo_settings_save( 'ai', $t, false );
-$now = get_option( AW_SEO_SETTINGS );
-rw_check( 0 === ( $now['markdown']['AW_MD_VARY_HTML'] ?? null ), 'changed field stored' );
+$now = get_option( RANKWEB_SEO_SETTINGS );
+rw_check( 0 === ( $now['markdown']['RANKWEB_MD_VARY_HTML'] ?? null ), 'changed field stored' );
 rw_check( $now['search-insights'] === $stored['search-insights'], 'search-insights kept after a save' );
-rw_check( 150 === ( $now['general']['AW_SEO_DESC_MAX'] ?? null ), 'another group kept after a save' );
+rw_check( 150 === ( $now['general']['RANKWEB_SEO_DESC_MAX'] ?? null ), 'another group kept after a save' );
 rankweb_seo_settings_save( 'ai', array(), true );
-$now = get_option( AW_SEO_SETTINGS );
-rw_check( ! isset( $now['markdown']['AW_MD_VARY_HTML'] ), 'Restore defaults takes the field out' );
+$now = get_option( RANKWEB_SEO_SETTINGS );
+rw_check( ! isset( $now['markdown']['RANKWEB_MD_VARY_HTML'] ), 'Restore defaults takes the field out' );
 rw_check( false === ( $now['llms']['on'] ?? null ), 'Restore defaults keeps a module switch' );
 rw_check( serialize( $now ) === $bytes, 'after change and Restore defaults the option is as before' );
 
@@ -230,13 +230,13 @@ $GLOBALS['rw_options'] = array();
 $on                    = rw_on();
 $on['redirects']       = false;
 rankweb_seo_settings_save( 'modules', array(), false, $on );
-rw_check( array( 'redirects' => array( 'on' => false ) ) === get_option( AW_SEO_SETTINGS ), 'module off stored as { on: false } only' );
+rw_check( array( 'redirects' => array( 'on' => false ) ) === get_option( RANKWEB_SEO_SETTINGS ), 'module off stored as { on: false } only' );
 $on['redirects'] = true;
 rankweb_seo_settings_save( 'modules', array(), false, $on );
-rw_check( array() === get_option( AW_SEO_SETTINGS ), 'module on again: nothing stored' );
+rw_check( array() === get_option( RANKWEB_SEO_SETTINGS ), 'module on again: nothing stored' );
 
 // 5. An 'on' => true left by an older save: an unchanged modules Save keeps it and writes nothing.
-$GLOBALS['rw_options'] = array( AW_SEO_SETTINGS => array( 'faq' => array( 'on' => true ) ) );
+$GLOBALS['rw_options'] = array( RANKWEB_SEO_SETTINGS => array( 'faq' => array( 'on' => true ) ) );
 $GLOBALS['rw_writes']  = 0;
 rankweb_seo_settings_save( 'modules', array(), false, rw_on() );
 rw_check( 0 === $GLOBALS['rw_writes'], "older 'on' => true: no write after an unchanged modules Save" );
@@ -245,11 +245,11 @@ rw_check( 0 === $GLOBALS['rw_writes'], "older 'on' => true: no write after an un
 //    unchanged: every field at its default, module switches, InsightWeb's numbers and a key no field knows.
 $full = array(
 	'search-insights' => array(
-		'AW_SI_HIGH_TRENDS' => 25,
+		'INSIGHTWEB_SI_HIGH_TRENDS' => 25,
 		'on'                => true,
 	),
 	'llms'            => array( 'on' => false ),
-	'faq'             => array( 'AW_FAQ_OFF_TYPES' => array( 'aw_listing' ) ),
+	'faq'             => array( 'RANKWEB_FAQ_OFF_TYPES' => array( 'aw_listing' ) ),
 );
 foreach ( rankweb_seo_modules() as $key => $mod ) {
 	foreach ( $mod['fields'] as $const => $f ) {
@@ -258,21 +258,21 @@ foreach ( rankweb_seo_modules() as $key => $mod ) {
 }
 rw_check( serialize( rankweb_seo_settings_sanitize( $full ) ) === serialize( $full ), 'sanitize callback: a stored value comes back byte for byte' );
 rw_check( serialize( rankweb_seo_settings_sanitize( $stored ) ) === serialize( $stored ), 'sanitize callback: the test option comes back byte for byte' );
-rw_check( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( 'a', 'b' ) ) ) === rankweb_seo_settings_sanitize( array( 'titles' => array( 'AW_SEO_ITEM_TYPES' => array( '<b>a</b>', 'b' ) ) ) ), 'sanitize callback: list texts cleaned' );
+rw_check( array( 'titles' => array( 'RANKWEB_SEO_ITEM_TYPES' => array( 'a', 'b' ) ) ) === rankweb_seo_settings_sanitize( array( 'titles' => array( 'RANKWEB_SEO_ITEM_TYPES' => array( '<b>a</b>', 'b' ) ) ) ), 'sanitize callback: list texts cleaned' );
 
 // 7. Reset this section on Modules: every module on again, "Delete this plugin's data" off; other groups kept.
 $GLOBALS['rw_options'] = array(
-	AW_SEO_SETTINGS    => array(
+	RANKWEB_SEO_SETTINGS    => array(
 		'llms'    => array( 'on' => false ),
-		'general' => array( 'AW_SEO_DESC_MAX' => 150 ),
+		'general' => array( 'RANKWEB_SEO_DESC_MAX' => 150 ),
 	),
-	AW_SEO_DELETE_DATA => 1,
+	RANKWEB_SEO_DELETE_DATA => 1,
 );
 rankweb_seo_settings_reset( 'modules' );
-rw_check( array( 'general' => array( 'AW_SEO_DESC_MAX' => 150 ) ) === get_option( AW_SEO_SETTINGS ), 'Reset Modules: switches back on, fields kept' );
-rw_check( 0 === get_option( AW_SEO_DELETE_DATA ), 'Reset Modules: delete data back to off' );
+rw_check( array( 'general' => array( 'RANKWEB_SEO_DESC_MAX' => 150 ) ) === get_option( RANKWEB_SEO_SETTINGS ), 'Reset Modules: switches back on, fields kept' );
+rw_check( 0 === get_option( RANKWEB_SEO_DELETE_DATA ), 'Reset Modules: delete data back to off' );
 rankweb_seo_settings_reset( 'titles' );
-rw_check( array() === get_option( AW_SEO_SETTINGS ), 'Reset a field group: its fields back to defaults' );
+rw_check( array() === get_option( RANKWEB_SEO_SETTINGS ), 'Reset a field group: its fields back to defaults' );
 
 // Backup before uninstall deletes (includes/uninstall-backup.php): the lines, the 500-row batches, the folder guard.
 require_once dirname( __DIR__ ) . '/includes/uninstall-backup.php';

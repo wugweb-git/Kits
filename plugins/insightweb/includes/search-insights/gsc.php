@@ -22,12 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_GSC_LIMIT    = 5000;
-const AW_SI_GSC_REFETCH  = 4;
-const AW_SI_GSC_BACKFILL = 90;
-const AW_SI_GSC_PER_RUN  = 15;
-const AW_SI_GSC_BUDGET   = 50; // Seconds per run: stop before a host time limit, so the run is always logged.
-const AW_SI_GSC_SPLIT    = 50; // Pages fetched one by one on a day whose query + page rows hit the limit.
+const INSIGHTWEB_SI_GSC_LIMIT    = 5000;
+const INSIGHTWEB_SI_GSC_REFETCH  = 4;
+const INSIGHTWEB_SI_GSC_BACKFILL = 90;
+const INSIGHTWEB_SI_GSC_PER_RUN  = 15;
+const INSIGHTWEB_SI_GSC_BUDGET   = 50; // Seconds per run: stop before a host time limit, so the run is always logged.
+const INSIGHTWEB_SI_GSC_SPLIT    = 50; // Pages fetched one by one on a day whose query + page rows hit the limit.
 
 /**
  * Rows of one searchanalytics request through Site Kit's module, as plain arrays: keys, clicks, impressions, position.
@@ -46,7 +46,7 @@ function insightweb_si_gsc_query( $module, array $dims, string $start, string $e
 		'dimensions' => $dims,
 		'startDate'  => $start,
 		'endDate'    => $end,
-		'limit'      => AW_SI_GSC_LIMIT,
+		'limit'      => INSIGHTWEB_SI_GSC_LIMIT,
 	);
 	if ( '' !== $url ) {
 		$args['url'] = $url;
@@ -100,7 +100,7 @@ function insightweb_si_gsc_split_qp( $module, string $day, array $qp, array $pag
 	$split = array();
 	$rows  = array();
 	$full  = false;
-	foreach ( array_slice( $pages, 0, AW_SI_GSC_SPLIT ) as $p ) {
+	foreach ( array_slice( $pages, 0, INSIGHTWEB_SI_GSC_SPLIT ) as $p ) {
 		if ( $until && microtime( true ) > $until ) {
 			break; // Out of time: the pages left keep the first request's rows, and the day stays marked truncated.
 		}
@@ -109,7 +109,7 @@ function insightweb_si_gsc_split_qp( $module, string $day, array $qp, array $pag
 		if ( is_wp_error( $got ) ) {
 			return $got;
 		}
-		$full          = $full || count( $got ) >= AW_SI_GSC_LIMIT;
+		$full          = $full || count( $got ) >= INSIGHTWEB_SI_GSC_LIMIT;
 		$split[ $url ] = true;
 		foreach ( $got as $r ) {
 			$rows[] = array( array( $r[0][0] ?? $day, (string) ( $r[0][1] ?? '' ), $url ), $r[1], $r[2], $r[3] );
@@ -153,7 +153,7 @@ function insightweb_si_gsc_fetch_day( $module, string $day, float $until = 0 ) {
 			}
 			return $rows;
 		}
-		if ( count( $rows ) >= AW_SI_GSC_LIMIT ) {
+		if ( count( $rows ) >= INSIGHTWEB_SI_GSC_LIMIT ) {
 			$out['truncated'][] = $key;
 		}
 		$out[ $key ] = $rows;
@@ -188,7 +188,7 @@ function insightweb_si_gsc_store_day( string $day, array $data ) {
 			$labels[] = (string) ( $r[0][1] ?? '' );
 		}
 	}
-	$ids  = insightweb_si_kw_ids( array_unique( $labels ), AW_SI_ROLE_SEARCHED );
+	$ids  = insightweb_si_kw_ids( array_unique( $labels ), INSIGHTWEB_SI_ROLE_SEARCHED );
 	$vals = array();
 	foreach ( $data['total'] as $r ) {
 		$vals[] = array( 0, '', 'total', $r[1], $r[2], $r[3] );
@@ -239,15 +239,15 @@ function insightweb_si_gsc_store_day( string $day, array $data ) {
  * @param DateTimeImmutable|null $today   Today (site time zone); for tests.
  * @param int                    $per_run Older days per run.
  */
-function insightweb_si_gsc_days( ?DateTimeImmutable $today = null, int $per_run = AW_SI_GSC_PER_RUN ): array {
+function insightweb_si_gsc_days( ?DateTimeImmutable $today = null, int $per_run = INSIGHTWEB_SI_GSC_PER_RUN ): array {
 	$today = $today ?? new DateTimeImmutable( 'today', wp_timezone() );
 	$days  = array();
-	for ( $i = 1; $i <= AW_SI_GSC_REFETCH; $i++ ) {
+	for ( $i = 1; $i <= INSIGHTWEB_SI_GSC_REFETCH; $i++ ) {
 		$days[] = $today->modify( "-{$i} days" )->format( 'Y-m-d' );
 	}
 	$next  = (string) get_option( 'aw_si_backfill', '' ); // The next older day to backfill.
-	$floor = $today->modify( '-' . min( AW_SI_GSC_BACKFILL, insightweb_si_keep_days() ) . ' days' )->format( 'Y-m-d' ); // never a day already rolled up
-	$from  = $next && $next < end( $days ) ? $next : $today->modify( '-' . ( AW_SI_GSC_REFETCH + 1 ) . ' days' )->format( 'Y-m-d' );
+	$floor = $today->modify( '-' . min( INSIGHTWEB_SI_GSC_BACKFILL, insightweb_si_keep_days() ) . ' days' )->format( 'Y-m-d' ); // never a day already rolled up
+	$from  = $next && $next < end( $days ) ? $next : $today->modify( '-' . ( INSIGHTWEB_SI_GSC_REFETCH + 1 ) . ' days' )->format( 'Y-m-d' );
 	$d     = new DateTimeImmutable( $from, wp_timezone() );
 	for ( $i = 0; $i < $per_run; $i++ ) {
 		$day = $d->format( 'Y-m-d' );
@@ -281,11 +281,11 @@ function insightweb_si_gsc_run( array $args = array() ): array {
 			);
 			$start = microtime( true );
 			foreach ( $days as $i => $day ) {
-				if ( $i >= AW_SI_GSC_REFETCH && microtime( true ) - $start > AW_SI_GSC_BUDGET ) {
+				if ( $i >= INSIGHTWEB_SI_GSC_REFETCH && microtime( true ) - $start > INSIGHTWEB_SI_GSC_BUDGET ) {
 					$rep['stopped'] = $day; // The backfill goes on from here next run.
 					break;
 				}
-				$data = insightweb_si_gsc_fetch_day( $module, $day, $start + AW_SI_GSC_BUDGET );
+				$data = insightweb_si_gsc_fetch_day( $module, $day, $start + INSIGHTWEB_SI_GSC_BUDGET );
 				if ( is_wp_error( $data ) ) {
 					/* translators: 1: date, 2: error message. */
 					$rep['error'] = sprintf( __( 'Search Console could not be read for %1$s: %2$s', 'insightweb' ), $day, $data->get_error_message() );
@@ -310,7 +310,7 @@ function insightweb_si_gsc_run( array $args = array() ): array {
 					'named' => (int) array_sum( array_column( $data['q'], 2 ) ),
 				);
 				$rep['rows']        += $n;
-				if ( ! $dry && $i >= AW_SI_GSC_REFETCH ) {
+				if ( ! $dry && $i >= INSIGHTWEB_SI_GSC_REFETCH ) {
 					// Save the backfill position after each older day, so a run cut short still moves on.
 					update_option( 'aw_si_backfill', ( new DateTimeImmutable( $day, wp_timezone() ) )->modify( '-1 day' )->format( 'Y-m-d' ), false );
 				}

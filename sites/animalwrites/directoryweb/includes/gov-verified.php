@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Import sources that are government lists (data-sources.php). AWBI is read from the listing's AWBI code. */
-const AW_GOV_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest', 'gov' );
+const DIRECTORYWEB_GOV_SOURCES = array( 'darpan', 'datagov', 'nalsa', 'gujforest', 'gov' );
 
 /** The listing fields a government import's registration details live in => their enrichment field. */
 const AW_GOV_REG_KEYS = array( 'aw_registration' => 'registration', 'aw_reg_12a' => 'reg_12a', 'aw_reg_80g' => 'reg_80g', 'aw_fcra' => 'fcra', 'aw_darpan_id' => 'darpan_id' );
@@ -67,7 +67,7 @@ function directoryweb_gov_verification( $id ) {
 	if ( ! $srcs && '' !== $name && false === stripos( $name, 'google' ) && false === stripos( $name, 'AWBI' ) ) {
 		$srcs = array( 'gov' ); // imported before directoryweb_data_sources was kept: the named list is a government one (as directoryweb_listing_sources() labels it)
 	}
-	$gov = array_values( array_intersect( $srcs, AW_GOV_SOURCES ) );
+	$gov = array_values( array_intersect( $srcs, DIRECTORYWEB_GOV_SOURCES ) );
 	if ( $gov && array_filter( AW_GOV_REG_KEYS, fn( $f, $k ) => '' !== $m( $k ) && directoryweb_gov_value_official( $id, $f ), ARRAY_FILTER_USE_BOTH ) ) {
 		$out[ $gov[0] ] = $ymd( $m( 'aw_source_date' ) );
 	}

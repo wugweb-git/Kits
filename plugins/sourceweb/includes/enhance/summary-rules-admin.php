@@ -69,7 +69,7 @@ function sourceweb_summary_below_counts() {
 
 add_action(
 	'admin_init',
-	fn() => register_setting( 'aw_sourcing_summary', AW_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'sourceweb_summary_rules_sanitize', 'show_in_rest' => false ) )
+	fn() => register_setting( 'aw_sourcing_summary', SOURCEWEB_SUMMARY_RULES_OPTION, array( 'type' => 'array', 'sanitize_callback' => 'sourceweb_summary_rules_sanitize', 'show_in_rest' => false ) )
 );
 
 /**
@@ -122,7 +122,7 @@ function sourceweb_summary_rules_sanitize( $in ) {
 		}
 	}
 	if ( $by_type ) { // a section's own rule that was not on the form (a section added since the page was opened) stays
-		$stored = get_option( AW_SUMMARY_RULES_OPTION );
+		$stored = get_option( SOURCEWEB_SUMMARY_RULES_OPTION );
 		foreach ( is_array( $stored ) ? (array) ( $stored['sections'] ?? array() ) : array() as $pt => $entry ) {
 			if ( ! isset( $in['sections'][ $pt ] ) && ! isset( $new['sections'][ $pt ] ) && is_array( $entry ) ) {
 				$new['sections'][ $pt ] = $entry;
@@ -145,16 +145,16 @@ function sourceweb_summary_rules_sanitize( $in ) {
 		}
 	}
 	// What changed, read through sourceweb_summary_rules() as the site will (the defaults fill what is empty).
-	add_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek = fn() => $new );
+	add_filter( 'pre_option_' . SOURCEWEB_SUMMARY_RULES_OPTION, $peek = fn() => $new );
 	$now = sourceweb_summary_rules();
-	remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
+	remove_filter( 'pre_option_' . SOURCEWEB_SUMMARY_RULES_OPTION, $peek );
 	$what = array();
 	$log  = array(); // each change with its value before and after (phase 3)
 	if ( $by_type ) {
 		$saved_new = $new;
-		add_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek = fn() => $saved_new );
+		add_filter( 'pre_option_' . SOURCEWEB_SUMMARY_RULES_OPTION, $peek = fn() => $saved_new );
 		$now_bt = sourceweb_rules_summary_by_type();
-		remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
+		remove_filter( 'pre_option_' . SOURCEWEB_SUMMARY_RULES_OPTION, $peek );
 		foreach ( $now_bt as $pt => $sec ) {
 			$was = $old_bt[ $pt ] ?? array();
 			if ( (string) ( $was['inherit'] ?? '' ) !== (string) ( $sec['inherit'] ?? '' ) ) {
@@ -199,5 +199,5 @@ function sourceweb_summary_rules_sanitize( $in ) {
 	} elseif ( $what ) { // a save with no change writes nothing, not even a log entry (round-trip rule)
 		sourceweb_src_log( 'summary', implode( ' · ', $what ) );
 	}
-	return $what ? $new : get_option( AW_SUMMARY_RULES_OPTION ); // no change: the stored rules stay exactly as they are
+	return $what ? $new : get_option( SOURCEWEB_SUMMARY_RULES_OPTION ); // no change: the stored rules stay exactly as they are
 }

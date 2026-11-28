@@ -226,7 +226,7 @@ function sourceweb_sourcing_cli_p2_print( array $plan, array $report, $n, $total
 		$drop = array_unique( array_filter( $was, fn( $w ) => ! in_array( insightweb_si_norm( $w ), $nn, true ) ) );
 		WP_CLI::log( sprintf( 'Keyword check of %s: %s (decision %d). Adds: %s. Drops: %s.', $id, $chk['roles'] ? 'Include role' : 'keywords mapped to ' . implode( ', ', $chk['categories'] ), $chk['roles'] ? 4 : 5, $add ? implode( ', ', $add ) : '(none)', $drop ? implode( ', ', $drop ) : '(none)' ) );
 	}
-	$press = array_intersect( AW_KW_PRESS_DROPPED, array_keys( (array) ( $cfg['press'] ?? array() ) ) );
+	$press = array_intersect( SOURCEWEB_KW_PRESS_DROPPED, array_keys( (array) ( $cfg['press'] ?? array() ) ) );
 	WP_CLI::log( 'Press settings removed with Brave (decision 7, kept in the backup): ' . ( $press ? implode( ', ', $press ) . ( ! empty( $cfg['press']['sites'] ) ? ' (sites: ' . implode( ', ', (array) $cfg['press']['sites'] ) . ')' : '' ) : '(none)' ) );
 
 	// The mirrors the records will give, against the lists now.
@@ -444,7 +444,7 @@ function sourceweb_sourcing_cli_p2_migrate( $dry ) {
 		}
 	}
 	$cfg['sources'] = sourceweb_kw_apply_to_sources( (array) $cfg['sources'], $plan['checks'], $kw_ids );
-	foreach ( AW_KW_PRESS_DROPPED as $k ) {
+	foreach ( SOURCEWEB_KW_PRESS_DROPPED as $k ) {
 		unset( $cfg['press'][ $k ] );
 	}
 	sourceweb_sourcing_cli_p2_write_mirrors( $got, $cfg );
@@ -495,7 +495,7 @@ function sourceweb_sourcing_cli_p2_verify( $bk, array $old ) {
 	$opt     = sourceweb_sourcing_cli_p2_lists( (array) $now['aw_relevance'], $c_now );
 	foreach ( array( 'strong', 'animal', 'context', 'exclude', 'press' ) as $k ) {
 		if ( $opt[ $k ] !== $m[ $k ] ) {
-			$diffs[] = AW_KW_LISTS[ $k ][1] . ' is not the list rebuilt from the table';
+			$diffs[] = SOURCEWEB_KW_LISTS[ $k ][1] . ' is not the list rebuilt from the table';
 		}
 	}
 	if ( $opt['categories'] !== $m['categories'] ) {
@@ -523,13 +523,13 @@ function sourceweb_sourcing_cli_p2_verify( $bk, array $old ) {
 	$planned[] = 'open-web searches that are keywords now: ' . implode( ', ', array_map( fn( $f, $id ) => "$f (keyword #$id)", array_keys( (array) ( $rec['kw_ids'] ?? array() ) ), (array) ( $rec['kw_ids'] ?? array() ) ) );
 	$p_old = (array) ( $c_old['press'] ?? array() );
 	$p_now = (array) ( $c_now['press'] ?? array() );
-	foreach ( array_merge( AW_KW_PRESS_DROPPED, array( 'queries' ) ) as $k ) {
+	foreach ( array_merge( SOURCEWEB_KW_PRESS_DROPPED, array( 'queries' ) ) as $k ) {
 		unset( $p_old[ $k ], $p_now[ $k ] );
 	}
 	if ( $p_old !== $p_now ) {
 		$diffs[] = 'aw_sources.press changed beyond the Brave keys';
 	}
-	$planned[] = 'press: removed ' . implode( ', ', array_intersect( AW_KW_PRESS_DROPPED, array_keys( (array) ( $c_old['press'] ?? array() ) ) ) );
+	$planned[] = 'press: removed ' . implode( ', ', array_intersect( SOURCEWEB_KW_PRESS_DROPPED, array_keys( (array) ( $c_old['press'] ?? array() ) ) ) );
 	$rest_old  = $c_old;
 	$rest_now  = $c_now;
 	foreach ( array( 'sources', 'press', 'categories' ) as $k ) {
@@ -549,7 +549,7 @@ function sourceweb_sourcing_cli_p2_verify( $bk, array $old ) {
 	foreach ( (array) $now['table:keywords'] as $r ) {
 		$is[ (int) $r['id'] ] = $r;
 	}
-	$keep = AW_KW_OWNER_ROLES;
+	$keep = INSIGHTWEB_KW_OWNER_ROLES; // InsightWeb's own constant (was AW-prefixed)
 	foreach ( $was as $id => $r ) {
 		if ( ! isset( $is[ $id ] ) ) {
 			$diffs[] = 'record #' . $id . ' (' . $r['label'] . ') is missing';

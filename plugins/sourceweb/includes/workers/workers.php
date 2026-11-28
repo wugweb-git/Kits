@@ -20,12 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/workers-registry.php';
 
-const AW_WORKERS_KEEP = 20; // runs kept per workflow
+const SOURCEWEB_WORKERS_KEEP = 20; // runs kept per workflow
 
 /** Workflow file => array of runs (run_id => record), newest last. */
 function sourceweb_workers_runs() {
 	$all = array();
-	foreach ( array_keys( AW_WORKERS ) as $file ) {
+	foreach ( array_keys( SOURCEWEB_WORKERS ) as $file ) {
 		$all[ $file ] = (array) get_option( sourceweb_workers_option( $file ), array() );
 	}
 	return $all;
@@ -150,7 +150,7 @@ function sourceweb_workers_duration( $s ) {
 /** How many workflows have reported at least one run. Zero means "nothing to judge", not "all on time". */
 function sourceweb_workers_reporting_count(): int {
 	$n = 0;
-	foreach ( array_keys( AW_WORKERS ) as $file ) {
+	foreach ( array_keys( SOURCEWEB_WORKERS ) as $file ) {
 		$n += sourceweb_workers_last( $file ) ? 1 : 0;
 	}
 	return $n;
@@ -172,7 +172,7 @@ function sourceweb_workers_problems( $now = null ) {
 	$cache = null === $now;
 	$now   = $now ? $now : time();
 	$out   = array();
-	foreach ( AW_WORKERS as $file => $w ) {
+	foreach ( SOURCEWEB_WORKERS as $file => $w ) {
 		$last = sourceweb_workers_last( $file );
 		if ( ! $last ) {
 			continue;
@@ -217,12 +217,12 @@ function sourceweb_workers_problems( $now = null ) {
  */
 function sourceweb_workers_health( $now = null ): array {
 	$reported = array();
-	foreach ( array_keys( AW_WORKERS ) as $file ) {
+	foreach ( array_keys( SOURCEWEB_WORKERS ) as $file ) {
 		if ( sourceweb_workers_last( $file ) ) {
 			$reported[] = $file;
 		}
 	}
-	return sourceweb_workers_health_shape( sourceweb_workers_problems( $now ), $reported, array_keys( AW_WORKERS ) );
+	return sourceweb_workers_health_shape( sourceweb_workers_problems( $now ), $reported, array_keys( SOURCEWEB_WORKERS ) );
 }
 
 /**
@@ -273,7 +273,7 @@ add_action(
 					$file = sanitize_file_name( (string) $req->get_param( 'workflow' ) );
 					$run  = preg_replace( '/\D/', '', (string) $req->get_param( 'run_id' ) );
 					// A Planned worker's new workflow may report before the registry has it: its runs are kept (no alerts).
-					if ( ( ! isset( AW_WORKERS[ $file ] ) && ! ( preg_match( '/\.ya?ml$/', $file ) && sourceweb_worker_is_planned( sourceweb_worker_id( $file ) ) ) ) || '' === $run ) {
+					if ( ( ! isset( SOURCEWEB_WORKERS[ $file ] ) && ! ( preg_match( '/\.ya?ml$/', $file ) && sourceweb_worker_is_planned( sourceweb_worker_id( $file ) ) ) ) || '' === $run ) {
 						return new WP_Error( 'aw_worker_unknown', 'Unknown workflow or run.', array( 'status' => 400 ) );
 					}
 					$now    = time();
@@ -331,7 +331,7 @@ add_action(
 					}
 					$runs[ $run ] = $r;
 					ksort( $runs, SORT_NUMERIC );
-					update_option( sourceweb_workers_option( $file ), array_slice( $runs, -AW_WORKERS_KEEP, null, true ), false );
+					update_option( sourceweb_workers_option( $file ), array_slice( $runs, -SOURCEWEB_WORKERS_KEEP, null, true ), false );
 					$wpdb->query( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- releases the lock above
 					if ( 'end' === $phase && ! wp_next_scheduled( 'aw_workers_watchdog', array( 'report' ) ) ) {
 						// Checked (and emailed) by the next scheduled-task tick, not inside the worker's request.
@@ -355,10 +355,10 @@ add_filter(
 /**
  * The GitHub token that starts a workflow: a fine-grained token for the workers repository only, with Actions read and
  * write, kept in wp-config.php (never in the database or a repository). SOURCEWEB_GITHUB_TOKEN; the names the site
- * already uses (KITS_GITHUB_DISPATCH_TOKEN, AW_GITHUB_DISPATCH_TOKEN) keep working.
+ * already uses (KITS_GITHUB_DISPATCH_TOKEN) keeps working; a site layer can map an earlier name onto either.
  */
 function sourceweb_dispatch_token(): string {
-	foreach ( array( 'SOURCEWEB_GITHUB_TOKEN', 'KITS_GITHUB_DISPATCH_TOKEN', 'AW_GITHUB_DISPATCH_TOKEN' ) as $name ) {
+	foreach ( array( 'SOURCEWEB_GITHUB_TOKEN', 'KITS_GITHUB_DISPATCH_TOKEN' ) as $name ) {
 		if ( defined( $name ) && '' !== trim( (string) constant( $name ) ) ) {
 			return trim( (string) constant( $name ) );
 		}
@@ -452,8 +452,8 @@ function sourceweb_dispatch_workflow( $file, $inputs = array() ) {
  */
 function sourceweb_workers_run_now( $file ) {
 	$res = function_exists( 'kits_dispatch_workflow' ) && ! sourceweb_dispatch_ready() // Kits Core's connection, when this plugin has none of its own
-		? kits_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) )
-		: sourceweb_dispatch_workflow( $file, (array) ( AW_WORKERS[ $file ]['runnow'] ?? array() ) );
+		? kits_dispatch_workflow( $file, (array) ( SOURCEWEB_WORKERS[ $file ]['runnow'] ?? array() ) )
+		: sourceweb_dispatch_workflow( $file, (array) ( SOURCEWEB_WORKERS[ $file ]['runnow'] ?? array() ) );
 	$log = (array) get_option( 'aw_worker_dispatch_log', array() );
 	array_unshift(
 		$log,
@@ -475,7 +475,7 @@ add_action(
 	'admin_notices',
 	function () {
 		$screen = get_current_screen();
-		if ( ! current_user_can( 'manage_options' ) || ! $screen || ! in_array( $screen->id, array( 'dashboard', AW_SRC_SCREEN ), true ) ) {
+		if ( ! current_user_can( 'manage_options' ) || ! $screen || ! in_array( $screen->id, array( 'dashboard', SOURCEWEB_SRC_SCREEN ), true ) ) {
 			return;
 		}
 		$problems = sourceweb_workers_problems();

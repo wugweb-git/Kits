@@ -6,7 +6,7 @@
  * archives; site search).
  *
  * - Closed opportunities (past their deadline or review date): noindex, links followed.
- * - Directory district × type pages with no listings (AW_THIN_DISTRICT_TYPE = 1): noindex.
+ * - Directory district × type pages with no listings (RANKWEB_THIN_DISTRICT_TYPE = 1): noindex.
  * - Directory profiles with no contact at all, unless they have Search Console impressions: noindex.
  * - The Web Stories archive (/web-stories/) while no story is published: noindex.
  * - Every RSS/Atom feed (posts, News, Opportunities, Library, comments): X-Robots-Tag noindex, links followed (owner, 25 Oct 2026).
@@ -29,18 +29,18 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Owner, 21 Oct 2026: the 3-organisation rule of 20 Oct is withdrawn. A district × type page with at least 1 organisation is
  * indexed and in the sitemap; only a page with none (nothing to show) stays noindex (stored counts).
  */
-// AW_THIN_DISTRICT_TYPE: RankWeb → Settings (settings.php).
+// RANKWEB_THIN_DISTRICT_TYPE: RankWeb → Settings (settings.php).
 
 /**
  * Thin district × type pages that stay indexed: every one with Search Console clicks or impressions in the 90 days to
  * 20 Oct 2026 (owner). Paths under /directory/.
  */
-// AW_DIRECTORY_KEEP_INDEXED: RankWeb → Settings (settings.php).
+// RANKWEB_DIRECTORY_KEEP_INDEXED: RankWeb → Settings (settings.php).
 
 /** Whether a district × type page (its URL) is on the keep-indexed list. */
 function rankweb_directory_keep_indexed( $url ) {
 	$path = trim( (string) wp_parse_url( $url, PHP_URL_PATH ), '/' );
-	return in_array( preg_replace( '#^directory/#', '', $path ), AW_DIRECTORY_KEEP_INDEXED, true );
+	return in_array( preg_replace( '#^directory/#', '', $path ), RANKWEB_DIRECTORY_KEEP_INDEXED, true );
 }
 
 /** District × type page with too few listings to be worth indexing. */
@@ -56,7 +56,7 @@ function rankweb_is_thin_directory_page() {
 	$type = (string) get_query_var( 'aw_dir_type' );
 	foreach ( directoryweb_place_counts()['pairs'] as $p ) {
 		if ( (string) $p[0] === (string) $place->code && $p[1] === $type ) {
-			return (int) $p[3] < AW_THIN_DISTRICT_TYPE && ! rankweb_directory_keep_indexed( directoryweb_directory_url( $place->slug, $type ) );
+			return (int) $p[3] < RANKWEB_THIN_DISTRICT_TYPE && ! rankweb_directory_keep_indexed( directoryweb_directory_url( $place->slug, $type ) );
 		}
 	}
 	return true; // no listings of this type here
@@ -112,7 +112,7 @@ add_action( 'aw_seo_fill_daily', 'rankweb_seo_fill_contact_scores', 40 ); // the
 
 /** Whether the current view is an item or list kept out of search engines by a rule of its state. */
 function rankweb_seo_noindex_rule() {
-	if ( AW_SEO_NOINDEX_PROTECTED && is_singular() ) {
+	if ( RANKWEB_SEO_NOINDEX_PROTECTED && is_singular() ) {
 		$qid = get_queried_object_id();
 		if ( $qid && '' !== (string) get_post_field( 'post_password', $qid ) ) {
 			return true; // a password-protected item: its content is hidden, so keep it out of the index

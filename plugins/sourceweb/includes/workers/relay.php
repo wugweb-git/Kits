@@ -16,9 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_RELAY_MAX_BYTES = 5 * MB_IN_BYTES;
-const AW_RELAY_TIMEOUT   = 40; // GDELT takes 12–17 s (31 Oct 2026); was 20
-const AW_RELAY_RATE      = 30; // requests per host per 10 minutes
+const SOURCEWEB_RELAY_MAX_BYTES = 5 * MB_IN_BYTES;
+const SOURCEWEB_RELAY_TIMEOUT   = 40; // GDELT takes 12–17 s (31 Oct 2026); was 20
+const SOURCEWEB_RELAY_RATE      = 30; // requests per host per 10 minutes
 /** The built-in relay allow list: empty. A site adds hosts on the Sources screen, or through the filter `sourceweb_relay_default_hosts`. */
 function sourceweb_relay_default_hosts(): array {
 	return array_values( array_filter( (array) apply_filters( 'sourceweb_relay_default_hosts', array() ), 'is_string' ) );
@@ -132,7 +132,7 @@ function sourceweb_relay_fetch( $url ) {
 	}
 	$key = 'aw_relay_rl_' . md5( $first );
 	$n   = (int) get_transient( $key );
-	if ( $n >= AW_RELAY_RATE ) {
+	if ( $n >= SOURCEWEB_RELAY_RATE ) {
 		return $done( new WP_Error( 'aw_relay_rate', 'too many requests for ' . $first, array( 'status' => 429 ) ) );
 	}
 	set_transient( $key, $n + 1, 10 * MINUTE_IN_SECONDS );
@@ -161,9 +161,9 @@ function sourceweb_relay_fetch( $url ) {
 		$resp = wp_remote_get(
 			$url,
 			array(
-				'timeout'             => AW_RELAY_TIMEOUT,
+				'timeout'             => SOURCEWEB_RELAY_TIMEOUT,
 				'redirection'         => 0,
-				'limit_response_size' => AW_RELAY_MAX_BYTES,
+				'limit_response_size' => SOURCEWEB_RELAY_MAX_BYTES,
 				'user-agent'          => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36',
 				'headers'             => array( 'Accept' => 'text/html,application/xhtml+xml,application/xml,application/rss+xml;q=0.9,*/*;q=0.8' ),
 				'reject_unsafe_urls'  => true,

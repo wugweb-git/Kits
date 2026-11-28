@@ -30,19 +30,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Fewest items for a filtered list to be indexed. */
-// AW_FILTERED_MIN_ITEMS: RankWeb → Settings (settings.php).
+// RANKWEB_FILTERED_MIN_ITEMS: RankWeb → Settings (settings.php).
 
 /** Hubs whose ?category_name= views can be indexed (Directory listings have no categories as a filter). */
-// AW_FILTERED_CATEGORY_HUBS: RankWeb → Settings (settings.php).
+// RANKWEB_FILTERED_CATEGORY_HUBS: RankWeb → Settings (settings.php).
 
 /**
  * Title shapes of a filtered view per section (words from the hub titles), longest first; %s is the category name.
  * No colon or comma: the only separator in a title is the " – " before the site name (owner, 15 Oct 2026).
  */
-// AW_FILTERED_TITLE_WORDS: RankWeb → Settings (settings.php).
+// RANKWEB_FILTERED_TITLE_WORDS: RankWeb → Settings (settings.php).
 
 /** Hubs whose ?state= views are never indexed (owner, 24 Oct 2026: News, Library, Opportunities). */
-// AW_FILTERED_STATE_NOINDEX: RankWeb → Settings (settings.php).
+// RANKWEB_FILTERED_STATE_NOINDEX: RankWeb → Settings (settings.php).
 
 /** Title shapes of a ?state= or ?publisher= view, longest first; %s is the state or publisher name. */
 function rankweb_filtered_place_title_words(): array {
@@ -83,7 +83,7 @@ function rankweb_seo_filtered_place( $type, $key, $slug ) {
 /** Filter parameters present on this request (sort is an order, not a filter): param => raw string. */
 function rankweb_seo_filter_params() {
 	$out = array();
-	foreach ( array_merge( AW_FILTER_PARAMS, array( 'format' ) ) as $k ) {
+	foreach ( array_merge( RANKWEB_FILTER_PARAMS, array( 'format' ) ) as $k ) {
 		if ( 'sort' !== $k && isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$out[ $k ] = is_string( $_GET[ $k ] ) ? sanitize_text_field( wp_unslash( $_GET[ $k ] ) ) : '[]'; // phpcs:ignore WordPress.Security.NonceVerification
 		}
@@ -138,7 +138,7 @@ function rankweb_seo_filtered_view() {
 	}
 	$view  = array( 'type' => $type, 'key' => '', 'slug' => '', 'name' => '', 'n' => 0, 'index' => false, 'canonical' => '' );
 	$key   = (string) array_key_first( $params );
-	$own   = rankweb_is_type( $type, 'listing' ) ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( defined( 'AW_LIST_FILTERS' ) ? ( AW_LIST_FILTERS[ $type ] ?? array() ) : array(), 0 );
+	$own   = rankweb_is_type( $type, 'listing' ) ? array( 'tag', 'q', 'verified', 'gov' ) : array_column( defined( 'RANKWEB_LIST_FILTERS' ) ? ( RANKWEB_LIST_FILTERS[ $type ] ?? array() ) : array(), 0 );
 	$value = (string) $params[ $key ];
 	if ( count( $params ) > 1 || ! in_array( $key, $own, true ) || preg_match( '/,|%2C|\[\]/i', $value ) ) {
 		return $view; // several filters, several values, or not a filter of this hub: noindex
@@ -153,7 +153,7 @@ function rankweb_seo_filtered_view() {
 			return $view; // names nothing: noindex
 		}
 		$view = array_merge( $view, array( 'key' => $key, 'slug' => $slug, 'name' => rankweb_plain_text( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) ), 'n' => $n ) );
-		if ( $n >= AW_FILTERED_MIN_ITEMS && ! ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) ) {
+		if ( $n >= RANKWEB_FILTERED_MIN_ITEMS && ! ( 'state' === $key && in_array( $type, RANKWEB_FILTERED_STATE_NOINDEX, true ) ) ) {
 			$view['index']     = true;
 			$view['canonical'] = add_query_arg( $key, rawurlencode( $slug ), rankweb_hub_canonical() );
 		}
@@ -174,10 +174,10 @@ function rankweb_seo_filtered_view() {
 	$view['slug'] = $slug;
 	$view['name'] = rankweb_plain_text( html_entity_decode( $name, ENT_QUOTES, 'UTF-8' ) );
 	$view['n']    = rankweb_seo_filtered_count( $type, $key, $slug );
-	if ( $view['n'] < AW_FILTERED_MIN_ITEMS ) {
+	if ( $view['n'] < RANKWEB_FILTERED_MIN_ITEMS ) {
 		return $view;
 	}
-	if ( 'tag' === $key && $term && (int) $term->count >= AW_FILTERED_MIN_ITEMS ) {
+	if ( 'tag' === $key && $term && (int) $term->count >= RANKWEB_FILTERED_MIN_ITEMS ) {
 		$view['canonical'] = rankweb_seo_term_url( $term ); // the tag page lists the same items and is the indexed one
 		$view['index']     = true;
 		return $view;
@@ -224,7 +224,7 @@ function rankweb_seo_filtered_title() {
 	}
 	$what = array();
 	$words = fn( $t ) => array_diff( preg_split( '/\W+/u', mb_strtolower( $t ), -1, PREG_SPLIT_NO_EMPTY ), array( 'and', 'in', 'on', 'of', 'the', 'from', 'india' ) );
-	$all   = AW_FILTERED_TITLE_WORDS[ $v['type'] ] ?? array( '%s' );
+	$all   = RANKWEB_FILTERED_TITLE_WORDS[ $v['type'] ] ?? array( '%s' );
 	foreach ( $all as $shape ) {
 		if ( ! array_intersect( $words( $name ), $words( str_replace( '%s', '', $shape ) ) ) ) {
 			$what[] = sprintf( $shape, $name );
@@ -254,7 +254,7 @@ function rankweb_seo_filtered_description() {
 	$count = function_exists( 'aw_hub_count_label' ) ? aw_hub_count_label( $v['type'] ) : '';
 	$about = 'state' === $v['key'] ? ' in ' . $v['name'] : ( 'publisher' === $v['key'] ? ' from ' . $v['name'] : ' on ' . rankweb_seo_sentence_case( str_replace( ' & ', ' and ', $v['name'] ) ) );
 	$lead = '' !== $count ? $count . $about . '. ' : '';
-	$desc = $lead . ( AW_ARCHIVE_DESCRIPTIONS[ $v['type'] ] ?? '' );
+	$desc = $lead . ( RANKWEB_ARCHIVE_DESCRIPTIONS[ $v['type'] ] ?? '' );
 	return rankweb_seo_with_page( rankweb_seo_cut( $desc, 155 - mb_strlen( rankweb_seo_page_suffix() ) ) );
 }
 
@@ -305,21 +305,21 @@ function rankweb_sitemap_filtered_build() {
 	if ( ! function_exists( 'aw_hub_url' ) ) { // the hubs (the earlier Core plugin) are not loaded
 		return $urls;
 	}
-	foreach ( AW_FILTERED_CATEGORY_HUBS as $type ) {
+	foreach ( RANKWEB_FILTERED_CATEGORY_HUBS as $type ) {
 		$cats = function_exists( 'aw_section_categories' ) ? aw_section_categories( $type ) : array();
 		foreach ( (array) $cats as $slug ) {
-			if ( rankweb_seo_filtered_count( $type, 'category_name', (string) $slug ) >= AW_FILTERED_MIN_ITEMS ) {
+			if ( rankweb_seo_filtered_count( $type, 'category_name', (string) $slug ) >= RANKWEB_FILTERED_MIN_ITEMS ) {
 				$urls[] = array( 'loc' => add_query_arg( 'category_name', rawurlencode( (string) $slug ), aw_hub_url( $type ) ) );
 			}
 		}
 	}
 	foreach ( rankweb_filtered_place_title_words() as $key => $types ) { // ?state= and ?publisher= views from 3 items (17 Oct 2026)
 		foreach ( array_keys( $types ) as $type ) {
-			if ( 'state' === $key && in_array( $type, AW_FILTERED_STATE_NOINDEX, true ) ) {
+			if ( 'state' === $key && in_array( $type, RANKWEB_FILTERED_STATE_NOINDEX, true ) ) {
 				continue; // noindex (owner, 24 Oct 2026)
 			}
 			foreach ( rankweb_sitemap_filtered_values( $type, $key ) as $slug ) {
-				if ( rankweb_seo_filtered_place( $type, $key, $slug )[1] >= AW_FILTERED_MIN_ITEMS ) {
+				if ( rankweb_seo_filtered_place( $type, $key, $slug )[1] >= RANKWEB_FILTERED_MIN_ITEMS ) {
 					$urls[] = array( 'loc' => add_query_arg( $key, rawurlencode( $slug ), aw_hub_url( $type ) ) );
 				}
 			}
@@ -330,14 +330,14 @@ function rankweb_sitemap_filtered_build() {
 
 /**
  * Candidate ?state= or ?publisher= values of a hub: the states and publishers its published items carry at least
- * AW_FILTERED_MIN_ITEMS times (the exact count, with the hub's own rules, comes from rankweb_seo_filtered_place()).
+ * RANKWEB_FILTERED_MIN_ITEMS times (the exact count, with the hub's own rules, comes from rankweb_seo_filtered_place()).
  *
  * @return string[] URL values (state slugs, publisher keys).
  */
 function rankweb_sitemap_filtered_values( $type, $key ) {
 	global $wpdb;
 	$meta = 'state' === $key ? 'aw_state_code' : 'aw_publisher';
-	$rows = $wpdb->get_col( $wpdb->prepare( "SELECT m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = %s AND p.post_type = %s AND p.post_status = 'publish' GROUP BY m.meta_value HAVING COUNT( DISTINCT p.ID ) >= %d", $meta, $type, AW_FILTERED_MIN_ITEMS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$rows = $wpdb->get_col( $wpdb->prepare( "SELECT m.meta_value FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key = %s AND p.post_type = %s AND p.post_status = 'publish' GROUP BY m.meta_value HAVING COUNT( DISTINCT p.ID ) >= %d", $meta, $type, RANKWEB_FILTERED_MIN_ITEMS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( 'publisher' === $key ) {
 		return array_values( array_filter( array_map( 'sanitize_title', $rows ) ) );
 	}

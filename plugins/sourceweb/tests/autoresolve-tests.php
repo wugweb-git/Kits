@@ -80,7 +80,7 @@ aw_t( 'leave' === aw_ar_act( 'founded', '1998', '1999' ), 'a field without a rul
 $ar_rows = sourceweb_ar_default_rules();
 aw_t( 25 === count( $ar_rows ) && 'address-pin_differs' === $ar_rows[1]['id'], 'rules: the built-in list has 25 rows with stable ids' );
 $ar_cond = sourceweb_ar_conditions();
-$ar_bad  = array_filter( $ar_rows, fn( $r ) => ! isset( $ar_cond[ $r['cond'] ] ) || ! in_array( $r['field'], $ar_cond[ $r['cond'] ]['fields'], true ) || ! isset( AW_AR_ACTIONS[ $r['action'] ] ) );
+$ar_bad  = array_filter( $ar_rows, fn( $r ) => ! isset( $ar_cond[ $r['cond'] ] ) || ! in_array( $r['field'], $ar_cond[ $r['cond'] ]['fields'], true ) || ! isset( SOURCEWEB_AR_ACTIONS[ $r['action'] ] ) );
 aw_t( ! $ar_bad, 'rules: every built-in row uses a condition that fits its field and a known action' );
 $ar_off = array_map( fn( $r ) => 'address-fuller' === $r['id'] ? array_merge( $r, array( 'on' => false ) ) : $r, $ar_rows );
 aw_t( 'leave' === sourceweb_ar_decide( 'address', '305 Nandini Garden, Fort', 'No.305, Nandhini Garden, Fort, Thiruvananthapuram', 'medium', array(), $ar_off )['act'], 'rules: switching a rule off lets the value fall through to a person' );

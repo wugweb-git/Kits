@@ -18,34 +18,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Roles (a bit field on each record). 1-16 are Search Insights' (1 was "Sourcing": the Include list); 32 and up
 // arrived with phase 2. Include keeps bit 1, so Search Insights' "Sourcing" filter still finds the Include words.
-const AW_SI_ROLE_SOURCING = 1;    // Include: keeps an item on its own; an English one is also a Google News search.
-const AW_SI_ROLE_FOCUS    = 2;    // A Rank Math focus keyphrase (primary or secondary) on a post or term.
-const AW_SI_ROLE_TRACKED  = 4;    // Keyword map target, demand gap or the monthly check list.
-const AW_SI_ROLE_BRAND    = 8;    // Matches insightweb_si_brand_pattern().
-const AW_SI_ROLE_SEARCHED = 16;   // Seen in Search Console.
-const SOURCEWEB_KW_ROLE_INCLUDE  = 1;    // The same bit as AW_SI_ROLE_SOURCING.
-const SOURCEWEB_KW_ROLE_ANIMAL   = 32;   // An animal word: keeps an item together with a context word.
-const SOURCEWEB_KW_ROLE_CONTEXT  = 64;   // A context word: keeps an item together with an animal word.
-const SOURCEWEB_KW_ROLE_EXCLUDE  = 128;  // Drops an item, whatever else it has (always, on the site as in the workers).
-const SOURCEWEB_KW_ROLE_SEARCH   = 256;  // Its own Google News search, besides (or instead of) Include.
-const SOURCEWEB_KW_ROLE_PRESS    = 512;  // A press-discovery query (coverage of the site).
-const SOURCEWEB_KW_ROLE_CATEGORY = 1024; // Files items into the categories it is mapped to.
+const INSIGHTWEB_SI_ROLE_SOURCING = 1;    // Include: keeps an item on its own; an English one is also a Google News search.
+const INSIGHTWEB_SI_ROLE_FOCUS    = 2;    // A Rank Math focus keyphrase (primary or secondary) on a post or term.
+const INSIGHTWEB_SI_ROLE_TRACKED  = 4;    // Keyword map target, demand gap or the monthly check list.
+const INSIGHTWEB_SI_ROLE_BRAND    = 8;    // Matches insightweb_si_brand_pattern().
+const INSIGHTWEB_SI_ROLE_SEARCHED = 16;   // Seen in Search Console.
+const INSIGHTWEB_KW_ROLE_INCLUDE  = 1;    // The same bit as INSIGHTWEB_SI_ROLE_SOURCING.
+const INSIGHTWEB_KW_ROLE_ANIMAL   = 32;   // An animal word: keeps an item together with a context word.
+const INSIGHTWEB_KW_ROLE_CONTEXT  = 64;   // A context word: keeps an item together with an animal word.
+const INSIGHTWEB_KW_ROLE_EXCLUDE  = 128;  // Drops an item, whatever else it has (always, on the site as in the workers).
+const INSIGHTWEB_KW_ROLE_SEARCH   = 256;  // Its own Google News search, besides (or instead of) Include.
+const INSIGHTWEB_KW_ROLE_PRESS    = 512;  // A press-discovery query (coverage of the site).
+const INSIGHTWEB_KW_ROLE_CATEGORY = 1024; // Files items into the categories it is mapped to.
 
 /** The Sourcing roles (the ones the workers read, English only). */
-const SOURCEWEB_KW_SOURCING_ROLES = SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_ANIMAL | SOURCEWEB_KW_ROLE_CONTEXT | SOURCEWEB_KW_ROLE_EXCLUDE | SOURCEWEB_KW_ROLE_SEARCH | SOURCEWEB_KW_ROLE_CATEGORY;
+const INSIGHTWEB_KW_SOURCING_ROLES = INSIGHTWEB_KW_ROLE_INCLUDE | INSIGHTWEB_KW_ROLE_ANIMAL | INSIGHTWEB_KW_ROLE_CONTEXT | INSIGHTWEB_KW_ROLE_EXCLUDE | INSIGHTWEB_KW_ROLE_SEARCH | INSIGHTWEB_KW_ROLE_CATEGORY;
 
 /** Sourcing and Press: the roles the workers receive (lang = en only). */
-const SOURCEWEB_KW_WORKER_ROLES = SOURCEWEB_KW_SOURCING_ROLES | SOURCEWEB_KW_ROLE_PRESS;
+const INSIGHTWEB_KW_WORKER_ROLES = INSIGHTWEB_KW_SOURCING_ROLES | INSIGHTWEB_KW_ROLE_PRESS;
 
 /** Roles the owner sets by hand: kept when Search Insights' data is deleted, never rebuilt by its daily sync. */
-const AW_KW_OWNER_ROLES = SOURCEWEB_KW_WORKER_ROLES | AW_SI_ROLE_TRACKED;
+const INSIGHTWEB_KW_OWNER_ROLES = INSIGHTWEB_KW_WORKER_ROLES | INSIGHTWEB_SI_ROLE_TRACKED;
 
 /**
  * Search Insights' own columns, as a new record has them: "Delete Search Insights data" puts these back on the records
  * it keeps (Codex, PR #75). group_id goes back to the record itself. Never the owner's: label, norm, lang, roles (only
  * Search Insights' bits are cleared), variants, query, feed_id, search_on, dismissed, src_note, and the maps.
  */
-const AW_SI_RESET_COLUMNS = array(
+const INSIGHTWEB_SI_RESET_COLUMNS = array(
 	'topic'             => '',
 	'page_type'         => '',
 	'intent'            => '',
@@ -69,12 +69,12 @@ const AW_SI_RESET_COLUMNS = array(
 /**
  * The SET part of the reset (Search Insights' columns, its role bits off, group_id back to the record).
  *
- * @param int $keep Role bits kept (AW_KW_OWNER_ROLES).
+ * @param int $keep Role bits kept (INSIGHTWEB_KW_OWNER_ROLES).
  * @return string
  */
 function insightweb_si_reset_sql( $keep ) {
 	$out = array( 'roles = roles & ' . (int) $keep, 'group_id = id' );
-	$cols = AW_SI_RESET_COLUMNS;
+	$cols = INSIGHTWEB_SI_RESET_COLUMNS;
 	if ( function_exists( 'insightweb_kw_ready' ) && insightweb_kw_ready() ) {
 		$cols['quick_win'] = 0; // Keyword table version 3: the stored quick-win flag goes too.
 	}
@@ -85,7 +85,7 @@ function insightweb_si_reset_sql( $keep ) {
 }
 
 // Words ending in s that are not plurals: never folded ("news" must not become "new").
-const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
+const INSIGHTWEB_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies', 'diabetes', 'herpes', 'mumps', 'measles', 'always', 'perhaps', 'whereas', 'christmas' );
 
 /**
  * The worker roles by bit: bit => slug the workers read (sourcing policy keywords_v2[].roles).
@@ -94,13 +94,13 @@ const AW_SI_NOT_PLURAL = array( 'news', 'rabies', 'species', 'series', 'scabies'
  */
 function insightweb_kw_role_slugs() {
 	return array(
-		SOURCEWEB_KW_ROLE_INCLUDE  => 'include',
-		SOURCEWEB_KW_ROLE_ANIMAL   => 'animal',
-		SOURCEWEB_KW_ROLE_CONTEXT  => 'context',
-		SOURCEWEB_KW_ROLE_EXCLUDE  => 'exclude',
-		SOURCEWEB_KW_ROLE_SEARCH   => 'search',
-		SOURCEWEB_KW_ROLE_PRESS    => 'press',
-		SOURCEWEB_KW_ROLE_CATEGORY => 'category',
+		INSIGHTWEB_KW_ROLE_INCLUDE  => 'include',
+		INSIGHTWEB_KW_ROLE_ANIMAL   => 'animal',
+		INSIGHTWEB_KW_ROLE_CONTEXT  => 'context',
+		INSIGHTWEB_KW_ROLE_EXCLUDE  => 'exclude',
+		INSIGHTWEB_KW_ROLE_SEARCH   => 'search',
+		INSIGHTWEB_KW_ROLE_PRESS    => 'press',
+		INSIGHTWEB_KW_ROLE_CATEGORY => 'category',
 	);
 }
 
@@ -168,7 +168,7 @@ function insightweb_si_norm( string $s ): string {
 	$s = (string) preg_replace( '/[^\p{L}\p{M}\p{N}{}]+/u', ' ', $s );
 	$w = preg_split( '/\s+/u', trim( $s ) );
 	foreach ( (array) $w as $i => $word ) {
-		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) && ! in_array( $word, AW_SI_NOT_PLURAL, true ) ) {
+		if ( preg_match( '/^[a-z]{4,}s$/', $word ) && ! preg_match( '/(ss|us|is|ous)$/', $word ) && ! in_array( $word, INSIGHTWEB_SI_NOT_PLURAL, true ) ) {
 			$w[ $i ] = substr( $word, 0, -1 );
 		}
 	}
@@ -216,10 +216,10 @@ function insightweb_kw_roles_check( $roles, $add, $remove, $lang ) {
 	$roles = (int) $roles;
 	$new   = ( $roles | (int) $add ) & ~(int) $remove;
 	$gain  = $new & ~$roles;
-	if ( 'en' !== (string) $lang && ( $gain & SOURCEWEB_KW_WORKER_ROLES ) ) {
+	if ( 'en' !== (string) $lang && ( $gain & INSIGHTWEB_KW_WORKER_ROLES ) ) {
 		return array( $roles, 'Sourcing and Press roles are for English keywords only (this one is ' . ( 'hi' === $lang ? 'Hindi' : ( 'hinglish' === $lang ? 'Hinglish' : (string) $lang ) ) . ').' );
 	}
-	if ( ( $new & SOURCEWEB_KW_ROLE_INCLUDE ) && ( $new & SOURCEWEB_KW_ROLE_EXCLUDE ) ) {
+	if ( ( $new & INSIGHTWEB_KW_ROLE_INCLUDE ) && ( $new & INSIGHTWEB_KW_ROLE_EXCLUDE ) ) {
 		return array( $roles, 'A keyword cannot be both Include and Exclude.' );
 	}
 	return array( $new, '' );

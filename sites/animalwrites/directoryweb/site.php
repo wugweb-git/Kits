@@ -13,6 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/config-names.php'; // earlier wp-config.php names -> DirectoryWeb's own constants (before the plugin loads).
+
 add_filter(
 	'directoryweb_labels',
 	function ( $labels ) {

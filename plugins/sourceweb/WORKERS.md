@@ -32,7 +32,7 @@ Step = where it sits in SourceWeb's flow (source, guard, route, enhance) or *pla
 Counts: 8 sources, 2 guards, 5 enhance, 5 platform. **Seven use AI for a real job; the rest do not.**
 
 ### Drift found
-`backup-offsite.yml` ("Site backup copy") is in the workers repository's `docs/workers.json` but **not** in the plugin's `AW_WORKERS`, which has 19. The plugin's copy is maintained by hand, so the Workers screen does not show the backup worker and cannot alert if it stops. The Deploy check that compares the two is not in this repository (`tools/ci/workers_registry_check.php`).
+`backup-offsite.yml` ("Site backup copy") is in the workers repository's `docs/workers.json` but **not** in the plugin's `SOURCEWEB_WORKERS`, which has 19. The plugin's copy is maintained by hand, so the Workers screen does not show the backup worker and cannot alert if it stops. The Deploy check that compares the two is not in this repository (`tools/ci/workers_registry_check.php`).
 
 ## 2. AI models: what they are for
 

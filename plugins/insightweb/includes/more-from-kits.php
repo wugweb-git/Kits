@@ -64,7 +64,7 @@ add_action(
 		if ( 'insightweb' !== 'kits' && function_exists( 'kits_more_page' ) ) {
 			return; // Kits Core's page is the one page.
 		}
-		add_submenu_page( AW_SI_SLUG, __( 'More from Kits', 'insightweb' ), __( 'More from Kits', 'insightweb' ), 'install_plugins', 'insightweb-more', 'insightweb_more_page', 90 );
+		add_submenu_page( INSIGHTWEB_SI_SLUG, __( 'More from Kits', 'insightweb' ), __( 'More from Kits', 'insightweb' ), 'install_plugins', 'insightweb-more', 'insightweb_more_page', 90 );
 	},
 	101 // After the plugin's own menu (priority 100 at the latest), so the parent exists and the first item stays the plugin's own screen.
 );

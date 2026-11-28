@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// The role constants, insightweb_si_brand_pattern(), AW_SI_NOT_PLURAL, insightweb_si_roles(), insightweb_si_is_brand(), insightweb_si_norm() and insightweb_si_lang() moved
+// The role constants, insightweb_si_brand_pattern(), INSIGHTWEB_SI_NOT_PLURAL, insightweb_si_roles(), insightweb_si_is_brand(), insightweb_si_norm() and insightweb_si_lang() moved
 // out with the keyword table (owner's decision 3, 25 Oct 2026); since 18 Nov 2026 they are in InsightWeb's
 // includes/keyword-model.php and keyword-table.php, loaded by includes/keywords.php before Search Insights itself.
 
@@ -51,7 +51,7 @@ function insightweb_si_kw_ids( array $labels, int $role, array $extra = array() 
 	foreach ( array_chunk( $new, 200, true ) as $chunk ) {
 		$args = array();
 		foreach ( $chunk as $norm => $label ) {
-			array_push( $args, (string) $norm, mb_substr( $label, 0, 255 ), insightweb_si_lang( $label ), $role | ( insightweb_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0 ), (string) ( $extra['page_type'] ?? '' ), (string) ( $extra['intent'] ?? '' ), (int) ( $extra['entity'] ?? 0 ), $now, $now );
+			array_push( $args, (string) $norm, mb_substr( $label, 0, 255 ), insightweb_si_lang( $label ), $role | ( insightweb_si_is_brand( $label ) ? INSIGHTWEB_SI_ROLE_BRAND : 0 ), (string) ( $extra['page_type'] ?? '' ), (string) ( $extra['intent'] ?? '' ), (int) ( $extra['entity'] ?? 0 ), $now, $now );
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one placeholder group per row.
 		$wpdb->query( $wpdb->prepare( 'INSERT IGNORE INTO %i (norm, label, lang, roles, page_type, intent, entity, created, updated) VALUES ' . implode( ', ', array_fill( 0, count( $chunk ), '(%s, %s, %s, %d, %s, %s, %d, %s, %s)' ) ), array_merge( array( $t ), $args ) ) );
@@ -238,7 +238,7 @@ function insightweb_si_seed(): array {
 	$k = insightweb_si_table( 'keywords' );
 	// One lookup for every seeded phrase (creating the records), instead of one per row.
 	$all   = array_merge( array_column( $seed['map'], 'keyword' ), array_column( (array) ( $seed['gaps'] ?? array() ), 'keyword' ), array_column( (array) ( $seed['rankings'] ?? array() ), 'keyword' ) );
-	$ids   = insightweb_si_kw_ids( $all, AW_SI_ROLE_TRACKED );
+	$ids   = insightweb_si_kw_ids( $all, INSIGHTWEB_SI_ROLE_TRACKED );
 	$count = array(
 		'map'      => 0,
 		'gaps'     => 0,
@@ -436,7 +436,7 @@ function insightweb_si_focus_parts( string $field ): array {
 
 /**
  * Daily role sync (read-only towards Rank Math and Sourcing):
- * - focus: Rank Math keyphrases of published items (AW_SEO_ITEM_TYPES without listings) and of terms; listings only mark
+ * - focus: Rank Math keyphrases of published items (the item types, filter insightweb_seo_item_types, without listings) and of terms; listings only mark
  *   matching records as entities (their names are not added one by one: plan, fixed decisions);
  * - sourcing: SourceWeb's Include list (sourceweb_relevance()['strong']), when SourceWeb is active and before its phase 2
  *   (from phase 2 the owner sets Include on the record and this leaves it alone);
@@ -448,7 +448,7 @@ function insightweb_si_sync_roles(): array {
 	global $wpdb;
 	$k     = insightweb_si_table( 'keywords' );
 	$p     = insightweb_si_table( 'kw_pages' );
-	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, insightweb_types( array( 'listing' ) ) ) ) : array( 'post', 'page' );
+	$types = array_values( array_diff( insightweb_item_types(), insightweb_types( array( 'listing' ) ) ) );
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	$rows  = $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_status = 'publish' AND p.post_type IN ({$in}) AND m.meta_value <> ''", $types ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per type.
 	$terms = $wpdb->get_results( "SELECT t.term_id AS ID, m.meta_value FROM {$wpdb->terms} t JOIN {$wpdb->termmeta} m ON m.term_id = t.term_id AND m.meta_key = 'rank_math_focus_keyword' WHERE m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -472,8 +472,8 @@ function insightweb_si_sync_roles(): array {
 		}
 	}
 	// The focus role is rebuilt from scratch each day so a keyphrase the owner removed loses it.
-	$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, AW_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$ids = insightweb_si_kw_ids( $labels, AW_SI_ROLE_FOCUS );
+	$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, INSIGHTWEB_SI_ROLE_FOCUS ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$ids = insightweb_si_kw_ids( $labels, INSIGHTWEB_SI_ROLE_FOCUS );
 	// Load every linked post and term in a few queries before building their links.
 	_prime_post_caches( array_map( 'intval', wp_list_pluck( (array) $rows, 'ID' ) ), false, false );
 	_prime_term_caches( array_map( 'intval', wp_list_pluck( (array) $terms, 'ID' ) ), false );
@@ -531,15 +531,15 @@ function insightweb_si_sync_roles(): array {
 	$sourcing = array();
 	$p2_busy = get_option( 'aw_sourcing_migrating' ) || get_option( 'aw_sourcing_phase2_record' ); // a phase 2 migration running or unfinished: leave the roles alone (Codex)
 	if ( $p2_busy ) {
-		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, INSIGHTWEB_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
 	} elseif ( (int) get_option( 'aw_sourcing_phase', 0 ) < 2 ) { // the option itself: SourceWeb may be off while this runs
-		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( $wpdb->prepare( 'UPDATE %i SET roles = roles & ~%d', $k, INSIGHTWEB_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 		$sourcing = function_exists( 'sourceweb_relevance' ) ? (array) ( sourceweb_relevance()['strong'] ?? array() ) : array();
 		if ( $sourcing ) {
-			insightweb_si_kw_ids( $sourcing, AW_SI_ROLE_SOURCING );
+			insightweb_si_kw_ids( $sourcing, INSIGHTWEB_SI_ROLE_SOURCING );
 		}
 	} else {
-		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
+		$sourcing = (array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, INSIGHTWEB_SI_ROLE_SOURCING ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counted for the run log only
 	}
 
 	// Brand: every record whose label matches.
@@ -551,7 +551,7 @@ function insightweb_si_sync_roles(): array {
 	}
 	foreach ( array_chunk( $brand, 500 ) as $chunk ) {
 		$in = implode( ',', array_map( 'intval', $chunk ) );
-		$wpdb->query( $wpdb->prepare( "UPDATE %i SET roles = roles | %d WHERE id IN ({$in})", $k, AW_SI_ROLE_BRAND ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
+		$wpdb->query( $wpdb->prepare( "UPDATE %i SET roles = roles | %d WHERE id IN ({$in})", $k, INSIGHTWEB_SI_ROLE_BRAND ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers.
 	}
 
 	return array(

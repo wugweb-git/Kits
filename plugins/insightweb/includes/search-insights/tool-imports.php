@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_TOOL_SEEDS = 'aw_si_tool_seeds';
+const INSIGHTWEB_SI_TOOL_SEEDS = 'aw_si_tool_seeds';
 
 /**
  * The tools: label, metric stored, what the figure is, how often the routine sends it.
@@ -215,7 +215,7 @@ function insightweb_si_tool_figures( array $ids ): array {
 
 /** The seeds the routine uses with the tools, one per line. */
 function insightweb_si_tool_seeds(): array {
-	$raw = (string) get_option( AW_SI_TOOL_SEEDS, '' );
+	$raw = (string) get_option( INSIGHTWEB_SI_TOOL_SEEDS, '' );
 	return array_values( array_unique( array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\r|\n/', $raw ) ), 'strlen' ) ) );
 }
 
@@ -238,10 +238,10 @@ function insightweb_si_tool_seeds_clean( string $raw ): string {
  */
 function insightweb_si_tool_seeds_save( string $raw ): bool {
 	$clean = insightweb_si_tool_seeds_clean( $raw );
-	if ( (string) get_option( AW_SI_TOOL_SEEDS, '' ) === $clean ) {
+	if ( (string) get_option( INSIGHTWEB_SI_TOOL_SEEDS, '' ) === $clean ) {
 		return false;
 	}
-	update_option( AW_SI_TOOL_SEEDS, $clean, false );
+	update_option( INSIGHTWEB_SI_TOOL_SEEDS, $clean, false );
 	return true;
 }
 

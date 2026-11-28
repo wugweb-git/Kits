@@ -25,13 +25,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Words an address match ignores. */
-const AW_AR_STOP = array( 'india', 'post', 'po', 'p', 'o', 'dist', 'district', 'tal', 'taluka', 'taluk', 'near', 'opp', 'opposite', 'behind', 'the', 'of', 'and', 'at', 'pin', 'pincode', 'state', 'no', 'h', 'hno', 'house', 'plot', 'flat' );
+const SOURCEWEB_AR_STOP = array( 'india', 'post', 'po', 'p', 'o', 'dist', 'district', 'tal', 'taluka', 'taluk', 'near', 'opp', 'opposite', 'behind', 'the', 'of', 'and', 'at', 'pin', 'pincode', 'state', 'no', 'h', 'hno', 'house', 'plot', 'flat' );
 
 /** Mail domains a typo may be fixed to. */
-const AW_AR_MAIL_DOMAINS = array( 'gmail.com', 'yahoo.com', 'yahoo.co.in', 'yahoo.in', 'hotmail.com', 'outlook.com', 'rediffmail.com', 'live.com', 'icloud.com' );
+const SOURCEWEB_AR_MAIL_DOMAINS = array( 'gmail.com', 'yahoo.com', 'yahoo.co.in', 'yahoo.in', 'hotmail.com', 'outlook.com', 'rediffmail.com', 'live.com', 'icloud.com' );
 
 /** First path words that are not a page name on a social site. */
-const AW_AR_GENERIC = array( 'people', 'pages', 'pg', 'profile.php', 'groups', 'public', 'p', 'in', 'company', 'user', 'channel', 'c', 'id', 'sharer', 'share.php', 'login', 'home', 'watch' );
+const SOURCEWEB_AR_GENERIC = array( 'people', 'pages', 'pg', 'profile.php', 'groups', 'public', 'p', 'in', 'company', 'user', 'channel', 'c', 'id', 'sharer', 'share.php', 'login', 'home', 'watch' );
 
 /**
  * The 6-digit PIN code in a text, or ''.
@@ -55,7 +55,7 @@ function sourceweb_ar_tokens( $s ) {
 	$s   = preg_replace( '/[^a-z0-9\/ ]+/', ' ', $s );
 	$out = array();
 	foreach ( preg_split( '/\s+/', $s ) as $w ) {
-		if ( '' !== $w && ! in_array( $w, AW_AR_STOP, true ) && ! in_array( $w, $out, true ) ) {
+		if ( '' !== $w && ! in_array( $w, SOURCEWEB_AR_STOP, true ) && ! in_array( $w, $out, true ) ) {
 			$out[] = $w;
 		}
 	}
@@ -109,7 +109,7 @@ function sourceweb_ar_path( $u ) {
 }
 
 /** The fields the rules cover (the five social fields are one group, "social"). */
-const AW_AR_FIELDS = array(
+const SOURCEWEB_AR_FIELDS = array(
 	'address'    => 'Address',
 	'pincode'    => 'PIN code',
 	'phone'      => 'Phone',
@@ -121,10 +121,10 @@ const AW_AR_FIELDS = array(
 );
 
 /** The five fields of the "social" group. */
-const AW_AR_SOCIAL = array( 'facebook', 'instagram', 'x', 'linkedin', 'youtube' );
+const SOURCEWEB_AR_SOCIAL = array( 'facebook', 'instagram', 'x', 'linkedin', 'youtube' );
 
 /** What a rule can do with a waiting value. */
-const AW_AR_ACTIONS = array(
+const SOURCEWEB_AR_ACTIONS = array(
 	'approve' => 'Apply it',
 	'reject'  => 'Reject it and keep the current value',
 	'leave'   => 'Leave it for a person',
@@ -139,8 +139,8 @@ const AW_AR_ACTIONS = array(
 function sourceweb_ar_conditions() {
 	$social = array( 'social' );
 	return array(
-		'any'            => array( 'label' => 'always (anything that reaches this rule)', 'fields' => array_keys( AW_AR_FIELDS ) ),
-		'low_tier'       => array( 'label' => 'the source is low tier', 'fields' => array_keys( AW_AR_FIELDS ) ),
+		'any'            => array( 'label' => 'always (anything that reaches this rule)', 'fields' => array_keys( SOURCEWEB_AR_FIELDS ) ),
+		'low_tier'       => array( 'label' => 'the source is low tier', 'fields' => array_keys( SOURCEWEB_AR_FIELDS ) ),
 		'unusable'       => array( 'label' => 'nothing readable is proposed', 'fields' => array( 'address' ) ),
 		'pin_differs'    => array( 'label' => 'its PIN differs from the current one (another place)', 'fields' => array( 'address' ) ),
 		'adds_nothing'   => array( 'label' => 'it adds nothing (same words, spelling variants, "No." prefixes)', 'fields' => array( 'address' ) ),
@@ -237,7 +237,7 @@ function sourceweb_ar_test( $cond, $field, $now, $value, $conf, array $ctx ) {
 			return (bool) preg_match( '#/(posts|photos|videos|permalink|story\.php|share|reels?|watch|events|hashtag)(/|\?|$)#', strtolower( $value ) );
 		case 'bare_link':
 			$bp = explode( '/', sourceweb_ar_url( $now ) );
-			return count( $bp ) <= 1 || ( count( $bp ) <= 2 && in_array( $bp[1] ?? '', AW_AR_GENERIC, true ) );
+			return count( $bp ) <= 1 || ( count( $bp ) <= 2 && in_array( $bp[1] ?? '', SOURCEWEB_AR_GENERIC, true ) );
 		case 'same_handle':
 			$bp = explode( '/', sourceweb_ar_url( $now ) );
 			$ap = explode( '/', sourceweb_ar_url( $value ) );
@@ -258,7 +258,7 @@ function sourceweb_ar_test( $cond, $field, $now, $value, $conf, array $ctx ) {
 				return false;
 			}
 			if ( 'domain_typo' === $cond ) {
-				$known = array_merge( AW_AR_MAIL_DOMAINS, array( strtolower( (string) ( $ctx['site_host'] ?? '' ) ) ) );
+				$known = array_merge( SOURCEWEB_AR_MAIL_DOMAINS, array( strtolower( (string) ( $ctx['site_host'] ?? '' ) ) ) );
 				return $a[0] === $b[0] && $a[1] !== $b[1] && levenshtein( $a[1], $b[1] ) <= 2 && in_array( $a[1], $known, true );
 			}
 			if ( $a[1] !== $b[1] || strlen( $a[0] ) < 4 || levenshtein( $a[0], $b[0] ) > 2 || $a[0] === $b[0] ) {
@@ -292,10 +292,10 @@ function sourceweb_ar_decide( $field, $now, $value, $conf = '', array $ctx = arr
 	if ( '' === $value || ( '' === $now && 'phone' !== $field ) ) {
 		return array( 'act' => 'leave', 'why' => 'nothing to compare' ); // an empty field follows the plugin's own rules
 	}
-	$group = in_array( $field, AW_AR_SOCIAL, true ) ? 'social' : $field;
+	$group = in_array( $field, SOURCEWEB_AR_SOCIAL, true ) ? 'social' : $field;
 	$conds = sourceweb_ar_conditions();
 	foreach ( null === $rules ? sourceweb_ar_default_rules() : $rules as $r ) {
-		if ( empty( $r['on'] ) || ( $r['field'] ?? '' ) !== $group || ! isset( $conds[ $r['cond'] ?? '' ] ) || ! isset( AW_AR_ACTIONS[ $r['action'] ?? '' ] ) ) {
+		if ( empty( $r['on'] ) || ( $r['field'] ?? '' ) !== $group || ! isset( $conds[ $r['cond'] ?? '' ] ) || ! isset( SOURCEWEB_AR_ACTIONS[ $r['action'] ?? '' ] ) ) {
 			continue;
 		}
 		if ( sourceweb_ar_test( $r['cond'], $field, $now, $value, $conf, $ctx ) ) {

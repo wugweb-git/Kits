@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_REF_ICONS = 'aw_si_ref_icons';
+const INSIGHTWEB_SI_REF_ICONS = 'aw_si_ref_icons';
 
 /**
  * The site a GA4 source stands for: "ig" and l.instagram.com are Instagram, t.co is X, and so on. '' when the source is
@@ -63,7 +63,7 @@ function insightweb_si_ref_icon( string $src ): string {
 	$host = insightweb_si_ref_host( $src );
 	$url  = '' !== $host && function_exists( 'sourceweb_favicon_url' ) ? sourceweb_favicon_url( $host ) : '';
 	if ( '' === $url && '' !== $host ) {
-		$id  = (int) ( ( (array) get_option( AW_SI_REF_ICONS, array() ) )[ $host ] ?? 0 );
+		$id  = (int) ( ( (array) get_option( INSIGHTWEB_SI_REF_ICONS, array() ) )[ $host ] ?? 0 );
 		$url = $id ? (string) wp_get_attachment_image_url( $id, 'thumbnail' ) : '';
 	}
 	if ( '' === $url ) {
@@ -176,7 +176,7 @@ function insightweb_si_ref_icons_wanted(): array {
 	$since = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-90 days' )->format( 'Y-m-d' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$srcs = (array) $wpdb->get_col( $wpdb->prepare( "SELECT txt FROM %i WHERE src = 'ga4' AND metric IN ('ref', 'ai') AND period = 'day' AND d >= %s GROUP BY txt ORDER BY SUM(value) DESC LIMIT 60", $o, $since ) );
-	$have = (array) get_option( AW_SI_REF_ICONS, array() );
+	$have = (array) get_option( INSIGHTWEB_SI_REF_ICONS, array() );
 	$want = array();
 	foreach ( $srcs as $src ) {
 		$host = insightweb_si_ref_host( (string) $src );
@@ -253,7 +253,7 @@ add_action(
 		require_once ABSPATH . 'wp-admin/includes/file.php';
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		require_once ABSPATH . 'wp-admin/includes/media.php';
-		$have  = (array) get_option( AW_SI_REF_ICONS, array() );
+		$have  = (array) get_option( INSIGHTWEB_SI_REF_ICONS, array() );
 		$types = array(
 			'image/png'                => 'png',
 			'image/x-icon'             => 'ico',
@@ -296,7 +296,7 @@ add_action(
 			}
 			$have[ $host ] = $att;
 		}
-		update_option( AW_SI_REF_ICONS, $have, false );
+		update_option( INSIGHTWEB_SI_REF_ICONS, $have, false );
 	},
 	30
 );

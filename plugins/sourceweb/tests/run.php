@@ -52,6 +52,12 @@ function apply_filters( $tag, $value = null ) {
 	}
 	return $value;
 }
+// The keyword role bits SourceWeb defines in sourceweb.php (InsightWeb's own file no longer carries them).
+foreach ( array( 'ROLE_INCLUDE' => 1, 'ROLE_ANIMAL' => 32, 'ROLE_CONTEXT' => 64, 'ROLE_EXCLUDE' => 128, 'ROLE_SEARCH' => 256, 'ROLE_PRESS' => 512, 'ROLE_CATEGORY' => 1024 ) as $sw_name => $sw_bit ) {
+	defined( 'SOURCEWEB_KW_' . $sw_name ) || define( 'SOURCEWEB_KW_' . $sw_name, $sw_bit );
+}
+defined( 'SOURCEWEB_KW_SOURCING_ROLES' ) || define( 'SOURCEWEB_KW_SOURCING_ROLES', SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_ANIMAL | SOURCEWEB_KW_ROLE_CONTEXT | SOURCEWEB_KW_ROLE_EXCLUDE | SOURCEWEB_KW_ROLE_SEARCH | SOURCEWEB_KW_ROLE_CATEGORY );
+defined( 'SOURCEWEB_KW_WORKER_ROLES' ) || define( 'SOURCEWEB_KW_WORKER_ROLES', SOURCEWEB_KW_SOURCING_ROLES | SOURCEWEB_KW_ROLE_PRESS );
 require dirname( __DIR__, 2 ) . '/insightweb/includes/keyword-model.php';
 require dirname( __DIR__ ) . '/includes/sources/sources-model.php';
 require dirname( __DIR__ ) . '/includes/keywords/keywords-model.php';
@@ -229,13 +235,13 @@ aw_t( null === sourceweb_src_relay_last( $log, 'thehindu.com' ), 'no relay resul
 aw_t( array( 1, '' ) === insightweb_kw_roles_check( 0, SOURCEWEB_KW_ROLE_INCLUDE, 0, 'en' ), 'roles: Include on an English keyword' );
 aw_t( '' !== insightweb_kw_roles_check( 0, SOURCEWEB_KW_ROLE_INCLUDE, 0, 'hi' )[1] && 0 === insightweb_kw_roles_check( 0, SOURCEWEB_KW_ROLE_INCLUDE, 0, 'hi' )[0], 'roles: Include refused on a Hindi keyword' );
 aw_t( '' !== insightweb_kw_roles_check( 0, SOURCEWEB_KW_ROLE_PRESS, 0, 'hinglish' )[1], 'roles: Press refused on a Hinglish keyword' );
-aw_t( array( AW_SI_ROLE_TRACKED, '' ) === insightweb_kw_roles_check( AW_SI_ROLE_TRACKED, AW_SI_ROLE_TRACKED, 0, 'hi' ), 'roles: other roles still allowed on Hindi' );
+aw_t( array( 4, '' ) === insightweb_kw_roles_check( 4, 4, 0, 'hi' ), 'roles: other roles still allowed on Hindi' );
 aw_t( array( 0, '' ) === insightweb_kw_roles_check( SOURCEWEB_KW_ROLE_INCLUDE, 0, SOURCEWEB_KW_ROLE_INCLUDE, 'hi' ), 'roles: a Sourcing role can always be removed' );
 aw_t( '' !== insightweb_kw_roles_check( SOURCEWEB_KW_ROLE_INCLUDE, SOURCEWEB_KW_ROLE_EXCLUDE, 0, 'en' )[1], 'roles: Include + Exclude refused' );
 aw_t( array( SOURCEWEB_KW_ROLE_EXCLUDE, '' ) === insightweb_kw_roles_check( SOURCEWEB_KW_ROLE_INCLUDE, SOURCEWEB_KW_ROLE_EXCLUDE, SOURCEWEB_KW_ROLE_INCLUDE, 'en' ), 'roles: Include moved to Exclude' );
 aw_t( 'gaushala' === insightweb_si_norm( 'Gaushalas' ) && 'dogs' === insightweb_si_norm( 'dogs' ) && 'gsr 864' === insightweb_si_norm( 'G.S.R. 864' ) && 'animalwrite' === insightweb_si_norm( '#animalwrites' ) && 'rabies' === insightweb_si_norm( 'rabies' ), 'insightweb_si_norm folds plurals and punctuation' );
 aw_t( 'hi' === insightweb_si_lang( 'पशु' ) && 'hinglish' === insightweb_si_lang( 'kutta bite' ) && 'en' === insightweb_si_lang( 'stray dog' ), 'aw_si_lang' );
-aw_t( array( 'include', 'search' ) === insightweb_kw_roles_to_slugs( SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_SEARCH | AW_SI_ROLE_BRAND ), 'role slugs for the workers' );
+aw_t( array( 'include', 'search' ) === insightweb_kw_roles_to_slugs( SOURCEWEB_KW_ROLE_INCLUDE | SOURCEWEB_KW_ROLE_SEARCH | 8 ), 'role slugs for the workers' );
 aw_t( array( 'a', 'b*' ) === insightweb_kw_variants_list( "a\n\n A \nb*\r\n" ), 'other spellings: one per line, no repeats' );
 
 // The migration plan on the live lists and records of 25 Oct 2026.
@@ -365,8 +371,8 @@ aw_t( '' === sourceweb_src_rollback_refusal( 2, 1, true ) && '' === sourceweb_sr
 aw_t( 1 === sourceweb_src_phase_after_p2_rollback( 1, 2, false ) && 1 === sourceweb_src_phase_after_p2_rollback( 1, 1, true ) && 0 === sourceweb_src_phase_after_p2_rollback( 1, 0, true ), 'the phase marker goes back to the phase before 2, never up' );
 
 // "Delete Search Insights data" resets Search Insights' columns on the records it keeps (Codex, PR #75), never the owner's.
-$reset = insightweb_si_reset_sql( AW_KW_OWNER_ROLES );
-foreach ( array( 'group_id = id', 'page_type', 'intent', 'priority_override', 'entity = 0', "note = ''", 'impr28 = 0', 'roles = roles & ' . AW_KW_OWNER_ROLES ) as $x ) {
+$reset = insightweb_si_reset_sql( SOURCEWEB_KW_WORKER_ROLES | 4 );
+foreach ( array( 'group_id = id', 'page_type', 'intent', 'priority_override', 'entity = 0', "note = ''", 'impr28 = 0', 'roles = roles & ' . ( SOURCEWEB_KW_WORKER_ROLES | 4 ) ) as $x ) {
 	aw_t( false !== strpos( $reset, $x ), "Search Insights reset sets $x" );
 }
 foreach ( array( 'label', 'norm', 'lang', 'variants', 'query', 'feed_id', 'search_on', 'dismissed', 'src_note' ) as $x ) {
@@ -397,18 +403,18 @@ aw_t( isset( $kw_us[0]['url'] ) && ! isset( $kw_us[0]['q'] ), 'an HTTPS:// searc
 // 2026: one item under Plugins, the screens as tabs, the same addresses) ----
 $inc   = dirname( __DIR__ ) . '/includes/';
 $menu  = (string) file_get_contents( $inc . 'admin/admin-menu.php' );
-aw_t( 'aw-sourcing-menu' === AW_SRC_MENU, 'the menu has its own slug' );
-aw_t( ! in_array( AW_SRC_MENU, array( AW_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
-aw_t( 'sourcing_page_' . AW_SRC_PAGE === AW_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
-aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb' . \$count, AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page', \$icon, '58.3' );" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing';" ), 'SourceWeb: its own top-level menu (core add_menu_page, at 58.3 in the Wugweb block), with the To review count, opening the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
+aw_t( 'aw-sourcing-menu' === SOURCEWEB_SRC_MENU, 'the menu has its own slug' );
+aw_t( ! in_array( SOURCEWEB_SRC_MENU, array( SOURCEWEB_SRC_PAGE, 'aw-review', 'aw-enrich-review', 'aw-inbox' ), true ), 'the menu slug is no screen\'s slug' );
+aw_t( 'sourcing_page_' . SOURCEWEB_SRC_PAGE === SOURCEWEB_SRC_SCREEN, 'the page\'s screen id follows the menu\'s hook prefix ("sourcing")' );
+aw_t( false !== strpos( $menu, "add_menu_page( 'SourceWeb', 'SourceWeb' . \$count, SOURCEWEB_REVIEW_CAP, SOURCEWEB_SRC_MENU, 'sourceweb_sourcing_overview_page', \$icon, '58.3' );" ) && false !== strpos( $menu, "\$GLOBALS['admin_page_hooks'][ SOURCEWEB_SRC_MENU ] = 'sourcing';" ), 'SourceWeb: its own top-level menu (core add_menu_page, at 58.3 in the Wugweb block), with the To review count, opening the Overview; the hook prefix stays "sourcing" (the screen id depends on it)' );
 aw_t( false === strpos( $menu, 'kits_admin_fold_menu' ) && false !== strpos( $menu, "'separator-wugweb'" ), 'the menu needs no Kits Core: no fold helper, its own separator above the block' );
 aw_t( false === strpos( $menu, "'menu_order'" ), 'no top-level menu order of its own' );
 foreach ( array( 'admin/admin-menu.php', 'review/review-queue.php', 'enhance/directory/enrichment-admin.php', 'sources/sourcing-policy.php' ) as $f ) {
 	aw_t( false !== strpos( (string) file_get_contents( $inc . $f ), 'sourceweb_ui_page( ' ), "the screen in $f is drawn by sourceweb_ui_page()" );
 }
-aw_t( false !== strpos( $menu, "add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Dashboard', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' )" ), 'Dashboard (the Overview) is the first item, at the menu\'s slug' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'review/review-queue.php' ), "add_submenu_page( AW_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
-aw_t( false !== strpos( (string) file_get_contents( $inc . 'enhance/directory/enrichment-admin.php' ), "add_submenu_page( AW_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
+aw_t( false !== strpos( $menu, "add_submenu_page( SOURCEWEB_SRC_MENU, 'SourceWeb', 'Dashboard', SOURCEWEB_REVIEW_CAP, SOURCEWEB_SRC_MENU, 'sourceweb_sourcing_overview_page' )" ), 'Dashboard (the Overview) is the first item, at the menu\'s slug' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'review/review-queue.php' ), "add_submenu_page( SOURCEWEB_SRC_MENU, 'To review'" ), 'To review is a SourceWeb screen' );
+aw_t( false !== strpos( (string) file_get_contents( $inc . 'enhance/directory/enrichment-admin.php' ), "add_submenu_page( SOURCEWEB_SRC_MENU, 'Enrichment review'" ), 'Enrichment review is a SourceWeb screen' );
 // Phase 2 as on live, 25 Oct 2026 (kits_sourcing_tabs), plus the Relay log and Settings.
 $tabs  = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'press' => 'Press queries', 'categories' => 'Categories', 'sections' => 'Sections', 'summary' => 'Summary rules', 'enrich' => 'Directory enrichment', 'relay-log' => 'Relay log', 'settings' => 'Settings', 'ai' => 'AI models', 'workers' => 'Workers', 'rejected' => 'Rejected', 'log' => 'Change log' );
 aw_t( array( 'sources', 'keywords', 'press', 'categories', 'sections', 'summary', 'enrich', 'ai', 'workers', 'rejected', 'relay-log', 'log', 'settings' ) === array_keys( sourceweb_src_menu_order( $tabs ) ), 'menu order: settings screens, then reports and jobs, then Settings' );
@@ -416,7 +422,7 @@ $p3 = array( 'sources' => 'Sources', 'keywords' => 'Keywords', 'rules' => 'Rules
 aw_t( array( 'sources', 'keywords', 'rules', 'press', 'workers', 'log', 'settings' ) === array_keys( sourceweb_src_menu_order( $p3 ) ), 'phase 3: Rules after Keywords; a missing report is skipped' );
 aw_t( 'admin.php?page=aw-sourcing' === sourceweb_src_tab_path( 'sources' ) && 'admin.php?page=aw-sourcing' === sourceweb_src_tab_path(), 'Sources is the page\'s own address' );
 aw_t( 'admin.php?page=aw-sourcing&tab=workers' === sourceweb_src_tab_path( 'workers' ) && 'admin.php?page=aw-sourcing&tab=relay-log' === sourceweb_src_tab_menu_slug( 'relay-log' ), 'a tab\'s address and menu slug' );
-aw_t( AW_SRC_PAGE === sourceweb_src_tab_menu_slug( 'sources' ), 'the Sources item is the page itself' );
+aw_t( SOURCEWEB_SRC_PAGE === sourceweb_src_tab_menu_slug( 'sources' ), 'the Sources item is the page itself' );
 aw_t( array( 'Overview' => 'admin.php?page=aw-sourcing-menu', 'Settings' => 'admin.php?page=aw-sourcing&tab=settings' ) === sourceweb_src_action_link_paths(), 'Plugins screen links: Overview, Settings' );
 aw_t( false !== strpos( $menu, "'plugin_action_links_' . plugin_basename(" ), 'the links are added under SourceWeb on the Plugins screen' );
 // No screen is under Settings or Inbox any more, and no old screen id is used.
@@ -429,7 +435,7 @@ aw_t( false === strpos( $all_inc, 'settings_page_aw-sourcing' ), 'no code uses t
 preg_match_all( '/^function\s+([a-z0-9_]+)\s*\(/mi', $all_inc, $fn_m );
 $fn_dup = array_keys( array_filter( array_count_values( array_map( 'strtolower', $fn_m[1] ) ), fn( $c ) => $c > 1 ) );
 aw_t( array() === $fn_dup, 'every function is declared once (' . implode( ', ', $fn_dup ) . ')' );
-aw_t( false !== strpos( $menu, "\$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings' );" ) && false === strpos( $menu, 'aw_sourcing_own_settings_tab' ), 'Sourcing → Settings is a shell screen (no classic callback)' );
+aw_t( false !== strpos( $menu, "\$tabs[ SOURCEWEB_SRC_SETTINGS_TAB ] = array( 'Settings' );" ) && false === strpos( $menu, 'aw_sourcing_own_settings_tab' ), 'Sourcing → Settings is a shell screen (no classic callback)' );
 // One way to draw each screen: no tab registers a classic callback, no ui=classic switch, no screen options.
 aw_t( ! preg_match( '/\$tabs\[[^\]]+\] = array\( \'[^\']+\', /', $all_inc ) && false !== strpos( (string) file_get_contents( $inc . 'rules/rules-admin.php' ), "array( 'rules' => array( 'Rules' ) )" ), 'no tab registers a classic callback' );
 aw_t( false === strpos( $all_inc, "'classic'" ) && false === strpos( $all_inc, 'ui=classic' ) && false === strpos( $all_inc, "'ui' => 'next'" ), 'no ui=classic or ui=next switch' );
@@ -617,13 +623,13 @@ aw_t( abs( 2 / 3 - sourceweb_outcome_rate( $o['BBC'] ) ) < 0.0001 && null === so
 // Worker union.
 require_once dirname( __DIR__ ) . '/includes/workers/workers-registry.php';
 require_once dirname( __DIR__ ) . '/includes/workers/worker-union-model.php';
-$un = sourceweb_worker_union( AW_WORKERS, array( array( 'id' => 'gallery-tagger', 'step' => 'enhance', 'runner' => 'plugin' ), array( 'id' => 'sourcing', 'step' => 'source', 'runner' => 'plugin' ), array( 'id' => 'bad', 'step' => 'nope', 'runner' => 'plugin' ) ) );
-aw_t( count( AW_WORKERS ) + 1 === count( $un ), 'union: every workflow, plus the plugin worker; a bad one and a taken id are left out' );
+$un = sourceweb_worker_union( SOURCEWEB_WORKERS, array( array( 'id' => 'gallery-tagger', 'step' => 'enhance', 'runner' => 'plugin' ), array( 'id' => 'sourcing', 'step' => 'source', 'runner' => 'plugin' ), array( 'id' => 'bad', 'step' => 'nope', 'runner' => 'plugin' ) ) );
+aw_t( count( SOURCEWEB_WORKERS ) + 1 === count( $un ), 'union: every workflow, plus the plugin worker; a bad one and a taken id are left out' );
 aw_t( 'workflow' === $un['sourcing']['runner'] && 'scheduled' === $un['sourcing']['trigger'] && 'source' === $un['sourcing']['step'], 'union: sourcing is a scheduled source workflow' );
 aw_t( 'after' === $un['tests']['trigger'] && 'platform' === $un['tests']['step'], 'union: tests runs after another' );
 $steps = array_unique( array_column( $un, 'step' ) );
 aw_t( ! array_diff( $steps, SOURCEWEB_WORKER_STEPS ), 'union: every worker has a known step' );
-aw_t( ! array_diff( array_map( static fn( $f ) => preg_replace( '/\.yml$/', '', $f ), array_keys( AW_WORKERS ) ), array_keys( SOURCEWEB_WORKER_PROFILES ) ), 'union: every workflow has a profile (step and AI job)' );
+aw_t( ! array_diff( array_map( static fn( $f ) => preg_replace( '/\.yml$/', '', $f ), array_keys( SOURCEWEB_WORKERS ) ), array_keys( SOURCEWEB_WORKER_PROFILES ) ), 'union: every workflow has a profile (step and AI job)' );
 
 // External services: the readme names every one.
 require_once dirname( __DIR__ ) . '/includes/sources/external-services-model.php';

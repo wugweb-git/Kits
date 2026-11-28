@@ -1,7 +1,7 @@
 <?php
 /**
  * Bing Webmaster (owner, 31 Oct 2026), free JSON API, monthly on the 2nd at 07:40 IST. Only with
- * AW_BING_WEBMASTER_KEY under InsightWeb → Settings → Keys or in wp-config.php (the Webmaster API key, not an IndexNow key); without it nothing runs and the
+ * INSIGHTWEB_BING_WEBMASTER_KEY under InsightWeb → Settings → Keys or in wp-config.php (the Webmaster API key, not an IndexNow key); without it nothing runs and the
  * source is not listed. The key is never logged or shown.
  *
  * - Links: GetLinkCounts (our pages with inbound links, paged), then GetUrlLinks for each page (linking page and anchor),
@@ -22,17 +22,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_BING_CRON   = 'aw_si_bing';
-const AW_SI_BING_API    = 'https://ssl.bing.com/webmaster/api.svc/json/';
-const AW_SI_BING_SOURCE = 'Bing Webmaster';
-const AW_SI_BING_PAGES  = 20; // Pages of GetLinkCounts, and of GetUrlLinks per linked page, at most.
-const AW_SI_BING_BUDGET = 120; // Seconds per run: stop before a host time limit, so the run is always logged.
-const AW_SI_BING_CURSOR = 'aw_si_bing_cursor'; // Option: where the last cut-short link read stopped (targets, next, page).
-const AW_SI_BING_DAYS   = 85; // Figures stored: at most this many days, and 5 fewer than the rollup keeps (insightweb_si_bing_days()).
+const INSIGHTWEB_SI_BING_CRON   = 'aw_si_bing';
+const INSIGHTWEB_SI_BING_API    = 'https://ssl.bing.com/webmaster/api.svc/json/';
+const INSIGHTWEB_SI_BING_SOURCE = 'Bing Webmaster';
+const INSIGHTWEB_SI_BING_PAGES  = 20; // Pages of GetLinkCounts, and of GetUrlLinks per linked page, at most.
+const INSIGHTWEB_SI_BING_BUDGET = 120; // Seconds per run: stop before a host time limit, so the run is always logged.
+const INSIGHTWEB_SI_BING_CURSOR = 'aw_si_bing_cursor'; // Option: where the last cut-short link read stopped (targets, next, page).
+const INSIGHTWEB_SI_BING_DAYS   = 85; // Figures stored: at most this many days, and 5 fewer than the rollup keeps (insightweb_si_bing_days()).
 
 /** Whether the Webmaster API key is set. */
 function insightweb_si_bing_on(): bool {
-	return '' !== insightweb_si_key( 'AW_BING_WEBMASTER_KEY' );
+	return '' !== insightweb_si_key( 'INSIGHTWEB_BING_WEBMASTER_KEY' );
 }
 
 add_filter(
@@ -56,8 +56,8 @@ add_filter(
  * @return mixed|WP_Error The "d" part.
  */
 function insightweb_si_bing_call( string $method, array $args = array() ) {
-	$key = insightweb_si_key( 'AW_BING_WEBMASTER_KEY' );
-	$url = add_query_arg( array_map( 'rawurlencode', array( 'siteUrl' => home_url( '/' ) ) + $args + array( 'apikey' => $key ) ), AW_SI_BING_API . $method );
+	$key = insightweb_si_key( 'INSIGHTWEB_BING_WEBMASTER_KEY' );
+	$url = add_query_arg( array_map( 'rawurlencode', array( 'siteUrl' => home_url( '/' ) ) + $args + array( 'apikey' => $key ) ), INSIGHTWEB_SI_BING_API . $method );
 	$res = wp_remote_get(
 		$url,
 		array(
@@ -92,13 +92,13 @@ function insightweb_si_bing_date( string $d ): string {
 
 /** Days of figures stored: fewer than the rollup keeps as days, so a day already rolled up is never stored again. */
 function insightweb_si_bing_days(): int {
-	return max( 1, min( AW_SI_BING_DAYS, insightweb_si_keep_days() - 5 ) );
+	return max( 1, min( INSIGHTWEB_SI_BING_DAYS, insightweb_si_keep_days() - 5 ) );
 }
 
 /**
  * Inbound links: [linked_url, from_url, anchor] for every page Bing lists, within the time budget. A failed
  * GetLinkCounts call fails the run; a failed GetUrlLinks call stops here and keeps what was read (partial). A read cut
- * short by time, a page cap or an error saves where it stopped (AW_SI_BING_CURSOR) and the next run carries on there
+ * short by time, a page cap or an error saves where it stopped (INSIGHTWEB_SI_BING_CURSOR) and the next run carries on there
  * (Codex, PR #91): links are upserted, so reading a page twice only moves its dates.
  *
  * @param float $until Stop time (microtime).
@@ -108,7 +108,7 @@ function insightweb_si_bing_days(): int {
 function insightweb_si_bing_links( float $until, bool $dry = false ) {
 	$partial = false;
 	$warning = '';
-	$cur     = (array) get_option( AW_SI_BING_CURSOR, array() );
+	$cur     = (array) get_option( INSIGHTWEB_SI_BING_CURSOR, array() );
 	if ( ! empty( $cur['targets'] ) && time() - (int) ( $cur['at'] ?? 0 ) < 45 * DAY_IN_SECONDS ) {
 		$ours = array_values( (array) $cur['targets'] ); // Carry on with last run's list of our linked pages.
 		$next = (int) ( $cur['next'] ?? 0 );
@@ -117,7 +117,7 @@ function insightweb_si_bing_links( float $until, bool $dry = false ) {
 		$ours = array();
 		$next = 0;
 		$from = 0;
-		for ( $page = 0; $page < AW_SI_BING_PAGES; $page++ ) {
+		for ( $page = 0; $page < INSIGHTWEB_SI_BING_PAGES; $page++ ) {
 			if ( microtime( true ) > $until ) {
 				$partial = true;
 				break;
@@ -135,7 +135,7 @@ function insightweb_si_bing_links( float $until, bool $dry = false ) {
 			if ( $page + 1 >= $total ) {
 				break;
 			}
-			if ( $page + 1 >= AW_SI_BING_PAGES ) {
+			if ( $page + 1 >= INSIGHTWEB_SI_BING_PAGES ) {
 				$partial = true; // More pages of our linked pages than one run reads.
 			}
 		}
@@ -146,7 +146,7 @@ function insightweb_si_bing_links( float $until, bool $dry = false ) {
 	for ( $i = $next; $i < count( $ours ); $i++ ) {
 		$to = $ours[ $i ];
 		for ( $page = $i === $next ? $from : 0; ; $page++ ) {
-			if ( microtime( true ) > $until || $page >= ( $i === $next ? $from : 0 ) + AW_SI_BING_PAGES ) {
+			if ( microtime( true ) > $until || $page >= ( $i === $next ? $from : 0 ) + INSIGHTWEB_SI_BING_PAGES ) {
 				$partial = true;
 				$stop    = array( $i, $page );
 				break 2;
@@ -171,7 +171,7 @@ function insightweb_si_bing_links( float $until, bool $dry = false ) {
 	if ( ! $dry ) {
 		if ( $stop ) {
 			update_option(
-				AW_SI_BING_CURSOR,
+				INSIGHTWEB_SI_BING_CURSOR,
 				array(
 					'targets' => $ours,
 					'next'    => $stop[0],
@@ -181,7 +181,7 @@ function insightweb_si_bing_links( float $until, bool $dry = false ) {
 				false
 			);
 		} else {
-			delete_option( AW_SI_BING_CURSOR );
+			delete_option( INSIGHTWEB_SI_BING_CURSOR );
 		}
 	}
 	return array(
@@ -299,7 +299,7 @@ function insightweb_si_bing_run( array $args = array() ): array {
 		'warnings' => array(),
 	);
 	try {
-		$until = microtime( true ) + AW_SI_BING_BUDGET;
+		$until = microtime( true ) + INSIGHTWEB_SI_BING_BUDGET;
 		$q     = insightweb_si_bing_call( 'GetQueryStats' );
 		$p     = is_wp_error( $q ) ? $q : insightweb_si_bing_call( 'GetPageStats' );
 		if ( is_wp_error( $p ) ) {
@@ -340,8 +340,8 @@ function insightweb_si_bing_run( array $args = array() ): array {
 				} elseif ( $l['partial'] ) {
 					$rep['warnings'][] = __( 'Not every linked page was read in time; the next run carries on from there.', 'insightweb' );
 				}
-				if ( ! $dry && ! empty( $l['resume'] ) && ! wp_next_scheduled( AW_SI_BING_CRON ) ) {
-					wp_schedule_single_event( time() + HOUR_IN_SECONDS, AW_SI_BING_CRON ); // Carry on in an hour, not next month.
+				if ( ! $dry && ! empty( $l['resume'] ) && ! wp_next_scheduled( INSIGHTWEB_SI_BING_CRON ) ) {
+					wp_schedule_single_event( time() + HOUR_IN_SECONDS, INSIGHTWEB_SI_BING_CRON ); // Carry on in an hour, not next month.
 				}
 				if ( $dry ) {
 					$rep['sample'] = array(
@@ -360,7 +360,7 @@ function insightweb_si_bing_run( array $args = array() ): array {
 							'from_url'   => $v[1],
 							'linked_url' => $v[0],
 							'anchor'     => $v[2],
-							'source'     => AW_SI_BING_SOURCE,
+							'source'     => INSIGHTWEB_SI_BING_SOURCE,
 							'type'       => insightweb_si_link_auto_type( $v[2] ),
 						)
 					);
@@ -383,7 +383,7 @@ function insightweb_si_bing_run( array $args = array() ): array {
 			}
 		}
 	} catch ( Throwable $e ) {
-		$rep['error'] = str_replace( insightweb_si_key( 'AW_BING_WEBMASTER_KEY' ), '…', $e->getMessage() );
+		$rep['error'] = str_replace( insightweb_si_key( 'INSIGHTWEB_BING_WEBMASTER_KEY' ), '…', $e->getMessage() );
 	}
 	if ( ! $dry ) {
 		if ( ! empty( $rep['error'] ) ) {
@@ -394,7 +394,7 @@ function insightweb_si_bing_run( array $args = array() ): array {
 	}
 	return $rep;
 }
-add_action( AW_SI_BING_CRON, fn() => get_option( 'aw_si_off' ) || ! insightweb_si_bing_on() ? null : insightweb_si_bing_run() );
+add_action( INSIGHTWEB_SI_BING_CRON, fn() => get_option( 'aw_si_off' ) || ! insightweb_si_bing_on() ? null : insightweb_si_bing_run() );
 
 /** Next 2nd of the month at 07:40 IST (site time). */
 function insightweb_si_bing_next(): int {
@@ -410,10 +410,10 @@ function insightweb_si_bing_next(): int {
 add_action(
 	'init',
 	function () {
-		if ( get_option( 'aw_si_off' ) || ! insightweb_si_bing_on() || wp_next_scheduled( AW_SI_BING_CRON ) ) {
+		if ( get_option( 'aw_si_off' ) || ! insightweb_si_bing_on() || wp_next_scheduled( INSIGHTWEB_SI_BING_CRON ) ) {
 			return;
 		}
-		wp_schedule_single_event( insightweb_si_bing_next(), AW_SI_BING_CRON );
+		wp_schedule_single_event( insightweb_si_bing_next(), INSIGHTWEB_SI_BING_CRON );
 	}
 );
 
@@ -473,7 +473,7 @@ add_action(
 			'list'  => array_slice( $miss['labels'], 0, 60 ),
 		);
 		if ( '' === $miss['error'] && 'add' === $what && $miss['labels'] && ! get_option( 'aw_si_off' ) ) {
-			$res['added'] = count( insightweb_si_kw_ids( $miss['labels'], AW_SI_ROLE_SEARCHED ) );
+			$res['added'] = count( insightweb_si_kw_ids( $miss['labels'], INSIGHTWEB_SI_ROLE_SEARCHED ) );
 			insightweb_si_bing_run();
 		}
 		set_transient( 'aw_si_bing_kw_' . get_current_user_id(), $res, 10 * MINUTE_IN_SECONDS );

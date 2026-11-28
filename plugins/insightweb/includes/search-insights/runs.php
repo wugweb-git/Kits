@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_RUNS = 'aw_si_runs';
+const INSIGHTWEB_SI_RUNS = 'aw_si_runs';
 
 /**
  * Sources and how often each should run. Later phases add theirs through the insightweb_si_sources filter.
@@ -40,7 +40,7 @@ function insightweb_si_sources(): array {
  * A service key: InsightWeb's own reader (includes/insightweb-keys.php: wp-config.php constant, then Settings → Keys,
  * then the old Kits → Keys during the move). Kept under this name for the callers.
  *
- * @param string $name Constant name, e.g. AW_CLARITY_TOKEN.
+ * @param string $name Constant name, e.g. INSIGHTWEB_CLARITY_TOKEN.
  */
 function insightweb_si_key( string $name ): string {
 	return insightweb_key( $name );
@@ -48,7 +48,7 @@ function insightweb_si_key( string $name ): string {
 
 /** The run log: source => ok, error, info. */
 function insightweb_si_runs(): array {
-	$r = get_option( AW_SI_RUNS, array() );
+	$r = get_option( INSIGHTWEB_SI_RUNS, array() );
 	return is_array( $r ) ? $r : array();
 }
 
@@ -61,7 +61,7 @@ function insightweb_si_run_start( string $src ): void {
 	$r                    = insightweb_si_runs();
 	$r[ $src ]            = $r[ $src ] ?? array( 'ok' => 0 );
 	$r[ $src ]['started'] = time();
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_SI_RUNS, $r, false );
 }
 
 /**
@@ -75,7 +75,7 @@ function insightweb_si_run_beat( string $src ): void {
 		return;
 	}
 	$r[ $src ]['beat'] = time();
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_SI_RUNS, $r, false );
 }
 
 /**
@@ -112,7 +112,7 @@ function insightweb_si_run_ok( string $src, array $info = array() ): void {
 		// When this source last stored rows (1 Nov 2026): a run that keeps "succeeding" with 0 rows is a failing source.
 		'rows_at' => ! array_key_exists( 'rows', $info ) || (int) $info['rows'] > 0 ? time() : ( $had ? $had : time() ),
 	);
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_SI_RUNS, $r, false );
 }
 
 /**
@@ -128,7 +128,7 @@ function insightweb_si_run_fail( string $src, string $message ): void {
 		'time'    => time(),
 		'message' => $message,
 	);
-	update_option( AW_SI_RUNS, $r, false );
+	update_option( INSIGHTWEB_SI_RUNS, $r, false );
 }
 
 /**

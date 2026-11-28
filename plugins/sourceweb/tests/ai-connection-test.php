@@ -22,7 +22,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security.EscapeOutput, Universal.Files.SeparateFunctionsFromOO -- a command-line test runner with stubs.
 
 defined( 'DAY_IN_SECONDS' ) || define( 'DAY_IN_SECONDS', 86400 );
-defined( 'AW_SRC_SCREEN' ) || define( 'AW_SRC_SCREEN', 'toplevel_page_aw-sourcing' );
+defined( 'SOURCEWEB_SRC_SCREEN' ) || define( 'SOURCEWEB_SRC_SCREEN', 'toplevel_page_aw-sourcing' );
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	function wp_parse_url( $url, $component = -1 ) { // stand-in: WordPress's wrapper around parse_url()
+		return parse_url( $url, $component );
+	}
+}
 
 $GLOBALS['t_options'] = array();
 $GLOBALS['t_hooks']   = array();
@@ -207,7 +212,7 @@ $served = sourceweb_ai_served();
 t( 'aprov' === $served['rows'][0]['provider'] && 'https://old.example.test/api/v1/chat/completions' === $served['rows'][0]['url'] && 'ownclient' === $served['rows'][1]['provider'] && '' === $served['rows'][1]['url'], 'migration: after it, the workers are served the same ids, models and addresses as before' );
 
 // ---- No hardcoded provider, address or model in the plugin ----
-$bad   = '/openrouter|requesty|cline\.bot|commandcode|nvidia|vercel|hugging ?face|sambanova|groq|generativelanguage|mistral|cerebras|firecrawl|tinyfish|anthropic|openai\.com|api\.openai|gemini|AW_AI_PROVIDERS|AW_AI_TOOLS/i';
+$bad   = '/openrouter|requesty|cline\.bot|commandcode|nvidia|vercel|hugging ?face|sambanova|groq|generativelanguage|mistral|cerebras|firecrawl|tinyfish|anthropic|openai\.com|api\.openai|gemini|AI_PROVIDERS|AI_TOOLS/i';
 $found = array();
 $it    = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root . '/includes', FilesystemIterator::SKIP_DOTS ) );
 $files = 0;

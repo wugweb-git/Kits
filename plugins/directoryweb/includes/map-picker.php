@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_LEAFLET_VER = '1.9.4';
+const DIRECTORYWEB_LEAFLET_VER = '1.9.4';
 
 add_action(
 	'admin_enqueue_scripts',
@@ -28,9 +28,9 @@ add_action(
 		if ( ! $screen || 'aw_listing' !== $screen->post_type ) {
 			return;
 		}
-		$base = plugins_url( 'assets/vendor/leaflet-' . AW_LEAFLET_VER . '/', DIRECTORYWEB_FILE );
-		wp_enqueue_style( 'aw-leaflet', $base . 'leaflet.css', array(), AW_LEAFLET_VER );
-		wp_enqueue_script( 'aw-leaflet', $base . 'leaflet.js', array(), AW_LEAFLET_VER, true );
+		$base = plugins_url( 'assets/vendor/leaflet-' . DIRECTORYWEB_LEAFLET_VER . '/', DIRECTORYWEB_FILE );
+		wp_enqueue_style( 'aw-leaflet', $base . 'leaflet.css', array(), DIRECTORYWEB_LEAFLET_VER );
+		wp_enqueue_script( 'aw-leaflet', $base . 'leaflet.js', array(), DIRECTORYWEB_LEAFLET_VER, true );
 		wp_enqueue_script( 'aw-map-picker', plugins_url( 'assets/js/map-picker.js', DIRECTORYWEB_FILE ), array( 'aw-leaflet' ), (string) filemtime( DIRECTORYWEB_DIR . 'assets/js/map-picker.js' ), true );
 		wp_localize_script( 'aw-map-picker', 'awMapPicker', array( 'icons' => $base . 'images/' ) );
 		wp_add_inline_style( 'aw-leaflet', '.aw-map-picker{height:320px;margin:8px 0 4px;border:1px solid #c3c4c7;border-radius:4px}.aw-map-picker-help{margin:0 0 8px;color:#646970;font-size:12px}' );

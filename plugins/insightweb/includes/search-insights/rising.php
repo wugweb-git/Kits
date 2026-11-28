@@ -27,10 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_RISING_CRON      = 'aw_si_rising_spikes'; // The removed News spikes' event, kept only to clear it.
-const AW_SI_RISING_MAX_ROWS  = 500; // Per POST: rising terms.
-const AW_SI_RISING_MAX_OBS   = 3000; // Per POST: figures.
-const AW_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt', 'paste_gnews' ); // Sources that mean "in the news".
+const INSIGHTWEB_SI_RISING_CRON      = 'aw_si_rising_spikes'; // The removed News spikes' event, kept only to clear it.
+const INSIGHTWEB_SI_RISING_MAX_ROWS  = 500; // Per POST: rising terms.
+const INSIGHTWEB_SI_RISING_MAX_OBS   = 3000; // Per POST: figures.
+const INSIGHTWEB_SI_RISING_NEWS_SRCS = array( 'trends_rss', 'gdelt', 'paste_gnews' ); // Sources that mean "in the news".
 
 require_once __DIR__ . '/rising-drops.php'; // what each run dropped and why (12 Nov 2026)
 
@@ -233,13 +233,13 @@ function insightweb_si_rising_lists(): array {
 	$interest = array();
 	if ( insightweb_si_ready() ) {
 		$k     = insightweb_si_table( 'keywords' );
-		$roles = (int) ( AW_SI_ROLE_TRACKED | AW_SI_ROLE_SOURCING | AW_SI_ROLE_FOCUS );
+		$roles = (int) ( INSIGHTWEB_SI_ROLE_TRACKED | INSIGHTWEB_SI_ROLE_SOURCING | INSIGHTWEB_SI_ROLE_FOCUS );
 		$eff   = insightweb_si_eff_sql();
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- integers and insightweb_si_eff_sql() (a fixed expression) only.
 		$keywords = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM %i WHERE lang = 'en' AND entity = 0 AND roles & %d AND label NOT LIKE %s ORDER BY impr28 DESC, id LIMIT 3000", $k, $roles, '%{%' ) );
 		$topics   = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT topic FROM %i WHERE topic <> '' AND lang = 'en' ORDER BY topic", $k ) );
 		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter -- $eff is insightweb_si_eff_sql(), a fixed column expression.
-		$interest = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM %i WHERE lang = 'en' AND entity = 0 AND roles & %d AND {$eff} IN ('P1', 'P2') AND label NOT LIKE %s ORDER BY {$eff}, impr28 DESC, id LIMIT 40", $k, AW_SI_ROLE_TRACKED, '%{%' ) );
+		$interest = $wpdb->get_col( $wpdb->prepare( "SELECT label FROM %i WHERE lang = 'en' AND entity = 0 AND roles & %d AND {$eff} IN ('P1', 'P2') AND label NOT LIKE %s ORDER BY {$eff}, impr28 DESC, id LIMIT 40", $k, INSIGHTWEB_SI_ROLE_TRACKED, '%{%' ) );
 		// phpcs:enable
 	}
 	$lists = array(
@@ -315,7 +315,7 @@ function insightweb_si_rising_match( string $norm, string $term, bool $look_up_p
  * @param string   $page    Matching page, or ''.
  */
 function insightweb_si_rising_action( string $term, array $sources, string $page ): string {
-	$news = (bool) array_intersect( $sources, AW_SI_RISING_NEWS_SRCS );
+	$news = (bool) array_intersect( $sources, INSIGHTWEB_SI_RISING_NEWS_SRCS );
 	if ( '' !== $page ) {
 		return $news ? 'news-explainer' : 'guide-update';
 	}
@@ -448,8 +448,8 @@ function insightweb_si_rising_receive( array $body ): array {
 			'skipped' => 0,
 		);
 	}
-	$rising = array_slice( array_values( array_filter( (array) ( $body['rising'] ?? array() ), 'is_array' ) ), 0, AW_SI_RISING_MAX_ROWS );
-	$obs    = array_slice( array_values( array_filter( (array) ( $body['obs'] ?? array() ), 'is_array' ) ), 0, AW_SI_RISING_MAX_OBS );
+	$rising = array_slice( array_values( array_filter( (array) ( $body['rising'] ?? array() ), 'is_array' ) ), 0, INSIGHTWEB_SI_RISING_MAX_ROWS );
+	$obs    = array_slice( array_values( array_filter( (array) ( $body['obs'] ?? array() ), 'is_array' ) ), 0, INSIGHTWEB_SI_RISING_MAX_OBS );
 	$error  = sanitize_text_field( (string) ( $body['error'] ?? '' ) );
 	$out    = array(
 		'source'  => $source,
@@ -526,7 +526,7 @@ function insightweb_si_rising_receive( array $body ): array {
 		'rising'  => count( $rising ),
 		'figures' => $out['figures'],
 		'worker'  => array_map( 'sanitize_text_field', array_filter( (array) ( $body['info'] ?? array() ), 'is_scalar' ) ),
-		'dropped' => array_slice( array_merge( $refused, insightweb_si_rising_worker_dropped( $body['dropped'] ?? array() ) ), 0, AW_SI_RISING_MAX_DROPPED ), // shown on the Rising tab (12 Nov 2026)
+		'dropped' => array_slice( array_merge( $refused, insightweb_si_rising_worker_dropped( $body['dropped'] ?? array() ) ), 0, INSIGHTWEB_SI_RISING_MAX_DROPPED ), // shown on the Rising tab (12 Nov 2026)
 	);
 	// What 0 rows means (1 Nov 2026): the source refused ("source failed"), the run only recorded the usual level of each
 	// term ("baseline"), or the source answered and nothing passed the filters ("no rows"). Never "no demand".
@@ -678,8 +678,8 @@ add_action(
 add_action(
 	'init',
 	function () {
-		if ( wp_next_scheduled( AW_SI_RISING_CRON ) ) {
-			wp_clear_scheduled_hook( AW_SI_RISING_CRON );
+		if ( wp_next_scheduled( INSIGHTWEB_SI_RISING_CRON ) ) {
+			wp_clear_scheduled_hook( INSIGHTWEB_SI_RISING_CRON );
 		}
 	}
 );
@@ -702,7 +702,7 @@ add_filter(
 );
 
 // Deactivating the plugin removes the spikes event, as it does Search Insights' own (aw-seo-extras.php).
-add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_RISING_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_SI_RISING_CRON ) ) );
 
 // The tab's message flags are dropped from the address after showing, so sort and page links do not repeat them.
 add_filter( 'removable_query_args', fn( $args ) => array_merge( (array) $args, array( 'marked', 'pasted', 'skipped', 'added', 'not_added' ) ) );
@@ -786,7 +786,7 @@ function insightweb_si_rising_tab(): void {
 	$table = new InsightWeb_SI_Rising_Table();
 	$table->prepare_items();
 	$table->views();
-	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="rising">';
+	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SI_SLUG ) . '"><input type="hidden" name="tab" value="rising">';
 	$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 	if ( $view ) {
 		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';

@@ -73,35 +73,35 @@ function sourceweb_rules_worker_types(): array {
 }
 
 /** Post types that are never sections, even when public. */
-const AW_RULES_NOT_SECTIONS = array( 'page', 'attachment' );
+const SOURCEWEB_RULES_NOT_SECTIONS = array( 'page', 'attachment' );
 
 /*
  * The workers' constants (aw_workers/directory/merge.py, 25 Oct 2026): the seed of the field rules, and what the
  * workers use when the site sends none.
  */
-const AW_ENRICH_SEED_MULTI    = array(
+const SOURCEWEB_ENRICH_SEED_MULTI    = array(
 	'phone'     => 2,
 	'whatsapp'  => 1,
 	'emergency' => 1,
 );
-const AW_ENRICH_SEED_AI       = array( 'services', 'animals', 'areas_served', 'description', 'reg_type', 'head' );
-const AW_ENRICH_SEED_PRIORITY = array( 'claim', 'website', 'darpan', 'wikidata', 'osm', 'social', 'awbi', 'google_places' );
-const AW_ENRICH_SEED_INVITE   = array( 'phone', 'hours', 'address', 'website' );
-const AW_ENRICH_SEED_SOCIAL   = array( 'instagram', 'facebook', 'x', 'youtube', 'linkedin' );
-const AW_ENRICH_SEED_OFFICIAL = array(
+const SOURCEWEB_ENRICH_SEED_AI       = array( 'services', 'animals', 'areas_served', 'description', 'reg_type', 'head' );
+const SOURCEWEB_ENRICH_SEED_PRIORITY = array( 'claim', 'website', 'darpan', 'wikidata', 'osm', 'social', 'awbi', 'google_places' );
+const SOURCEWEB_ENRICH_SEED_INVITE   = array( 'phone', 'hours', 'address', 'website' );
+const SOURCEWEB_ENRICH_SEED_SOCIAL   = array( 'instagram', 'facebook', 'x', 'youtube', 'linkedin' );
+const SOURCEWEB_ENRICH_SEED_OFFICIAL = array(
 	'address' => 'awbi',
 	'pincode' => 'awbi',
 );
 
-/** Phone fields (one list on the listing), and fields that can keep a second value (enrichment.php AW_ENRICH_ALT, list fields). */
-const AW_ENRICH_PHONE_FIELDS = array( 'phone', 'whatsapp', 'emergency' );
-const AW_ENRICH_TWO_FIELDS   = array( 'phone', 'whatsapp', 'emergency', 'email', 'website', 'services', 'animals', 'areas_served' );
+/** Phone fields (one list on the listing), and fields that can keep a second value (enrichment.php SOURCEWEB_ENRICH_ALT, list fields). */
+const SOURCEWEB_ENRICH_PHONE_FIELDS = array( 'phone', 'whatsapp', 'emergency' );
+const SOURCEWEB_ENRICH_TWO_FIELDS   = array( 'phone', 'whatsapp', 'emergency', 'email', 'website', 'services', 'animals', 'areas_served' );
 
 /** Fields a person always decides (enrichment.php sourceweb_enrich_mode before phase 3). */
-const AW_ENRICH_REVIEW_FIELDS = array( 'closed', 'merge_into' );
+const SOURCEWEB_ENRICH_REVIEW_FIELDS = array( 'closed', 'merge_into' );
 
 /** Special stores kept in a listing field by code: store => the ACF field (Phone numbers, Opening hours, Photos). */
-const AW_ENRICH_SPECIAL_ACF = array(
+const SOURCEWEB_ENRICH_SPECIAL_ACF = array(
 	'phones' => 'aw_phones',
 	'hours'  => 'aw_opening_hours',
 	'photos' => 'aw_gallery',
@@ -111,7 +111,7 @@ const AW_ENRICH_SPECIAL_ACF = array(
  * ACF field types enrichment can write into a listing field added in wp-admin (one text value in post meta, as the
  * built-in fields are written). Repeaters, galleries, files, images, choices and relations are left to people.
  */
-const AW_ENRICH_ACF_WRITABLE = array( 'text', 'textarea', 'url', 'email', 'number', 'date_picker' );
+const SOURCEWEB_ENRICH_ACF_WRITABLE = array( 'text', 'textarea', 'url', 'email', 'number', 'date_picker' );
 
 /**
  * Why a listing field cannot be filled by enrichment ('' when it can).
@@ -120,7 +120,7 @@ const AW_ENRICH_ACF_WRITABLE = array( 'text', 'textarea', 'url', 'email', 'numbe
  * @return string
  */
 function sourceweb_enrich_acf_not_writable( $type ) {
-	return in_array( (string) $type, AW_ENRICH_ACF_WRITABLE, true ) ? '' : sprintf( 'a %s field cannot be filled by enrichment (only text, text area, URL, email, number and date fields)', str_replace( '_', ' ', (string) $type ) );
+	return in_array( (string) $type, SOURCEWEB_ENRICH_ACF_WRITABLE, true ) ? '' : sprintf( 'a %s field cannot be filled by enrichment (only text, text area, URL, email, number and date fields)', str_replace( '_', ' ', (string) $type ) );
 }
 
 /**
@@ -167,7 +167,7 @@ function sourceweb_enrich_allowed_sources( array $srcs, array $allow ) {
 }
 
 /** The apply rules a field rule may have. */
-const AW_ENRICH_APPLY = array(
+const SOURCEWEB_ENRICH_APPLY = array(
 	'empty'  => 'Fill an empty field (a value already there waits for review)',
 	'both'   => 'Keep it next to the value already there (both unverified)',
 	'review' => 'Always wait for review',
@@ -183,7 +183,7 @@ const AW_ENRICH_APPLY = array(
  * @return string[]
  */
 function sourceweb_rules_section_types( array $public, array $opt_in, array $order = array() ) {
-	$all = array_values( array_unique( array_merge( array_diff( $public, AW_RULES_NOT_SECTIONS ), $opt_in ) ) );
+	$all = array_values( array_unique( array_merge( array_diff( $public, SOURCEWEB_RULES_NOT_SECTIONS ), $opt_in ) ) );
 	$out = array_values( array_intersect( $order, $all ) );
 	foreach ( $all as $t ) {
 		if ( ! in_array( $t, $out, true ) ) {
@@ -300,9 +300,9 @@ function sourceweb_rules_summary_fields( array $sec ) {
  * @return array
  */
 function sourceweb_enrich_rule_seed( $field ) {
-	if ( in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
+	if ( in_array( $field, SOURCEWEB_ENRICH_REVIEW_FIELDS, true ) ) {
 		$apply = 'review';
-	} elseif ( in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) {
+	} elseif ( in_array( $field, SOURCEWEB_ENRICH_TWO_FIELDS, true ) ) {
 		$apply = 'both';
 	} else {
 		$apply = 'empty';
@@ -310,11 +310,11 @@ function sourceweb_enrich_rule_seed( $field ) {
 	return array(
 		'on'       => true,
 		'sources'  => array(),
-		'multi'    => (int) ( AW_ENRICH_SEED_MULTI[ $field ] ?? 0 ),
-		'official' => (string) ( AW_ENRICH_SEED_OFFICIAL[ $field ] ?? '' ),
-		'ai'       => in_array( $field, AW_ENRICH_SEED_AI, true ),
-		'invite'   => in_array( $field, AW_ENRICH_SEED_INVITE, true ),
-		'social'   => in_array( $field, AW_ENRICH_SEED_SOCIAL, true ),
+		'multi'    => (int) ( SOURCEWEB_ENRICH_SEED_MULTI[ $field ] ?? 0 ),
+		'official' => (string) ( SOURCEWEB_ENRICH_SEED_OFFICIAL[ $field ] ?? '' ),
+		'ai'       => in_array( $field, SOURCEWEB_ENRICH_SEED_AI, true ),
+		'invite'   => in_array( $field, SOURCEWEB_ENRICH_SEED_INVITE, true ),
+		'social'   => in_array( $field, SOURCEWEB_ENRICH_SEED_SOCIAL, true ),
 		'apply'    => $apply,
 	);
 }
@@ -327,7 +327,7 @@ function sourceweb_enrich_rule_seed( $field ) {
  */
 function sourceweb_enrich_field_rules_seed( array $fields ) {
 	$out = array(
-		'priority' => AW_ENRICH_SEED_PRIORITY,
+		'priority' => SOURCEWEB_ENRICH_SEED_PRIORITY,
 		'fields'   => array(),
 	);
 	foreach ( $fields as $f ) {
@@ -381,12 +381,12 @@ function sourceweb_enrich_rule_clean( $field, array $in, array $sources, array $
 	}
 	if ( array_key_exists( 'apply', $in ) ) {
 		$apply        = (string) $in['apply'];
-		$out['apply'] = isset( AW_ENRICH_APPLY[ $apply ] ) ? $apply : $out['apply'];
+		$out['apply'] = isset( SOURCEWEB_ENRICH_APPLY[ $apply ] ) ? $apply : $out['apply'];
 	}
-	if ( 'both' === $out['apply'] && ! in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) {
+	if ( 'both' === $out['apply'] && ! in_array( $field, SOURCEWEB_ENRICH_TWO_FIELDS, true ) ) {
 		$out['apply'] = 'empty'; // only phones, email, website and the list fields can keep two values
 	}
-	if ( in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
+	if ( in_array( $field, SOURCEWEB_ENRICH_REVIEW_FIELDS, true ) ) {
 		$out['apply'] = 'review'; // closed and merge_into: always a person
 	}
 	return $out;
@@ -435,13 +435,13 @@ function sourceweb_enrich_priority_from_positions( array $positions, array $sour
  * @return string apply, both or queue.
  */
 function sourceweb_enrich_mode_decide( $field, $apply, $conf, $protected, callable $is_empty, callable $has_phones, callable $alt_empty, callable $place_fills ) {
-	if ( $protected || 'low' === $conf || 'review' === $apply || in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) {
+	if ( $protected || 'low' === $conf || 'review' === $apply || in_array( $field, SOURCEWEB_ENRICH_REVIEW_FIELDS, true ) ) {
 		return 'queue'; // closed and merge_into: always a person, whatever the rule says (a merge is the owner's decision)
 	}
 	if ( 'place' === $field ) {
 		return $place_fills() ? 'apply' : 'queue';
 	}
-	if ( in_array( $field, AW_ENRICH_PHONE_FIELDS, true ) ) {
+	if ( in_array( $field, SOURCEWEB_ENRICH_PHONE_FIELDS, true ) ) {
 		if ( ! $has_phones() ) {
 			return 'apply';
 		}
@@ -494,7 +494,7 @@ function sourceweb_enrich_schema_build( array $acf_fields, array $enrich, $group
 	$by_store = array(); // listing field name => the enrichment fields that fill it
 	foreach ( $enrich as $k => $e ) {
 		$store               = (string) $e[1];
-		$name                = AW_ENRICH_SPECIAL_ACF[ $store ] ?? $store;
+		$name                = SOURCEWEB_ENRICH_SPECIAL_ACF[ $store ] ?? $store;
 		$by_store[ $name ][] = $k;
 	}
 	$fields = array();
@@ -551,7 +551,7 @@ function sourceweb_enrich_field_rule_rows( array $schema, array $enrich, array $
 			'label' => (string) $e[0],
 			'group' => (string) $e[2],
 			'store' => (string) $e[1],
-			'acf'   => isset( $acf[ AW_ENRICH_SPECIAL_ACF[ $e[1] ] ?? $e[1] ] ),
+			'acf'   => isset( $acf[ SOURCEWEB_ENRICH_SPECIAL_ACF[ $e[1] ] ?? $e[1] ] ),
 			'rule'  => isset( $rules[ $k ] ) ? $rules[ $k ] : sourceweb_enrich_rule_seed( $k ),
 			'set'   => isset( $rules[ $k ] ),
 		);
@@ -812,7 +812,7 @@ function sourceweb_rules_phase3_undo( array $sources_opt, $summary_opt, array $a
 /* ---------- Domain Trust Overrides & Feed Filtering ---------- */
 
 /** Domain trust override choices. */
-const AW_DOMAIN_TRUST_STATUSES = array(
+const SOURCEWEB_DOMAIN_TRUST_STATUSES = array(
 	'allow'   => 'Allow (Auto-approve if checks pass)',
 	'neutral' => 'Require Review (Hold in Review Queue)',
 	'block'   => 'Discard (Block and Reject)',

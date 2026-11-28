@@ -30,16 +30,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The sourceweb_relevance lists no longer used from phase 4 (its switches stay in use). */
-const AW_RETIRE_REL_LISTS = array( 'strong', 'animal', 'context', 'exclude' );
+const SOURCEWEB_RETIRE_REL_LISTS = array( 'strong', 'animal', 'context', 'exclude' );
 
 /** The aw_sources keys no longer used from phase 4 ('press.queries' is the queries inside press). */
-const AW_RETIRE_SOURCES_KEYS = array( 'categories', 'keywords', 'press.queries' );
+const SOURCEWEB_RETIRE_SOURCES_KEYS = array( 'categories', 'keywords', 'press.queries' );
 
 /** The policy's config keys not sent from phase 4 (the v1 shape; sources_v2, the keyword table and sections_v2 replace them). */
-const AW_RETIRE_V1_CONFIG = array( 'keywords', 'sources', 'categories', 'sections' );
+const SOURCEWEB_RETIRE_V1_CONFIG = array( 'keywords', 'sources', 'categories', 'sections' );
 
 /** The role of each old relevance list. */
-const AW_RETIRE_LIST_ROLE = array(
+const SOURCEWEB_RETIRE_LIST_ROLE = array(
 	'strong'  => SOURCEWEB_KW_ROLE_INCLUDE,
 	'animal'  => SOURCEWEB_KW_ROLE_ANIMAL,
 	'context' => SOURCEWEB_KW_ROLE_CONTEXT,
@@ -133,7 +133,7 @@ function sourceweb_retire_plan( array $rel, array $cfg, array $dismissed, array 
 		'aw_sources'   => array(),
 	);
 	$counts    = array();
-	foreach ( AW_RETIRE_LIST_ROLE as $k => $bit ) {
+	foreach ( SOURCEWEB_RETIRE_LIST_ROLE as $k => $bit ) {
 		if ( array_key_exists( $k, $rel ) ) {
 			$archive['aw_relevance'][ $k ]  = $rel[ $k ];
 			$counts[ 'sourceweb_relevance.' . $k ] = count( (array) $rel[ $k ] );
@@ -240,7 +240,7 @@ function sourceweb_retire_policy( array $data ) {
 		$data['relevance'] = array( 'enabled' => ! empty( $data['relevance']['enabled'] ) );
 	}
 	if ( isset( $data['config'] ) && is_array( $data['config'] ) ) {
-		foreach ( AW_RETIRE_V1_CONFIG as $k ) {
+		foreach ( SOURCEWEB_RETIRE_V1_CONFIG as $k ) {
 			unset( $data['config'][ $k ] );
 		}
 		if ( is_array( $data['config']['press'] ?? null ) ) {
@@ -258,7 +258,7 @@ function sourceweb_retire_policy( array $data ) {
  */
 function sourceweb_retire_policy_problems( array $data ) {
 	$out = array();
-	foreach ( AW_RETIRE_REL_LISTS as $k ) {
+	foreach ( SOURCEWEB_RETIRE_REL_LISTS as $k ) {
 		if ( array_key_exists( $k, (array) ( $data['relevance'] ?? array() ) ) ) {
 			$out[] = "relevance.$k is still sent";
 		}
@@ -269,7 +269,7 @@ function sourceweb_retire_policy_problems( array $data ) {
 	if ( ! isset( $data['config'] ) ) {
 		return $out; // "Workers use these lists" is off: no lists are sent at all
 	}
-	foreach ( AW_RETIRE_V1_CONFIG as $k ) {
+	foreach ( SOURCEWEB_RETIRE_V1_CONFIG as $k ) {
 		if ( array_key_exists( $k, (array) $data['config'] ) ) {
 			$out[] = "config.$k is still sent";
 		}

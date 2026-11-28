@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 // The earlier aw_* function names (they moved here from the plugin; each calls the rankweb_* function when it runs).
 require_once __DIR__ . '/legacy-aliases.php';
 
+// The earlier AW_ constant names of RankWeb's settings (wp-config overrides, saved settings, readers of the old names): before RankWeb loads.
+require_once __DIR__ . '/rankweb-constant-names.php';
+
 // Which content type plays which role for RankWeb: the plugin names none of them.
 add_filter(
 	'rankweb_post_type_roles',

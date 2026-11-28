@@ -35,7 +35,7 @@ add_action(
 			)
 		);
 		$specs = rankweb_agent_specs();
-		foreach ( RankWeb_Agent::enabled( (bool) AW_AGENT_WRITES ) as $ability ) {
+		foreach ( RankWeb_Agent::enabled( (bool) RANKWEB_AGENT_WRITES ) as $ability ) {
 			$spec = $specs[ $ability['name'] ] ?? null;
 			if ( ! $spec ) {
 				continue;

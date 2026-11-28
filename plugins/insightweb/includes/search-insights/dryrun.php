@@ -38,7 +38,7 @@ function insightweb_si_dry_report( string $day ): array {
 		if ( ! isset( $rec[ $norm ] ) ) {
 			$rec[ $norm ] = array(
 				'label'    => $label,
-				'roles'    => insightweb_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0,
+				'roles'    => insightweb_si_is_brand( $label ) ? INSIGHTWEB_SI_ROLE_BRAND : 0,
 				'lang'     => insightweb_si_lang( $label ),
 				'trends'   => null,
 				'live'     => null,
@@ -59,7 +59,7 @@ function insightweb_si_dry_report( string $day ): array {
 	// Seed (keyword map, gaps, 21 Oct rankings).
 	$seed = insightweb_si_seed_data();
 	foreach ( (array) ( $seed['map'] ?? array() ) as $row ) {
-		$n = $add( $row['keyword'], AW_SI_ROLE_TRACKED );
+		$n = $add( $row['keyword'], INSIGHTWEB_SI_ROLE_TRACKED );
 		if ( '' === $n ) {
 			continue;
 		}
@@ -86,10 +86,10 @@ function insightweb_si_dry_report( string $day ): array {
 		}
 	}
 	foreach ( (array) ( $seed['gaps'] ?? array() ) as $g ) {
-		$add( $g['keyword'], AW_SI_ROLE_TRACKED );
+		$add( $g['keyword'], INSIGHTWEB_SI_ROLE_TRACKED );
 	}
 	foreach ( (array) ( $seed['rankings'] ?? array() ) as $r ) {
-		$n = $add( $r['keyword'], AW_SI_ROLE_TRACKED );
+		$n = $add( $r['keyword'], INSIGHTWEB_SI_ROLE_TRACKED );
 		if ( '' === $n ) {
 			continue;
 		}
@@ -109,7 +109,7 @@ function insightweb_si_dry_report( string $day ): array {
 	);
 
 	// Rank Math focus keyphrases (items without listings, and terms).
-	$types = defined( 'AW_SEO_ITEM_TYPES' ) ? array_values( array_diff( AW_SEO_ITEM_TYPES, insightweb_types( array( 'listing' ) ) ) ) : array( 'post', 'page' );
+	$types = array_values( array_diff( insightweb_item_types(), insightweb_types( array( 'listing' ) ) ) );
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per type.
 	$posts = (array) $wpdb->get_results( $wpdb->prepare( "SELECT p.ID, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE p.post_status = 'publish' AND p.post_type IN ({$in}) AND m.meta_value <> ''", $types ) );
@@ -124,7 +124,7 @@ function insightweb_si_dry_report( string $day ): array {
 		foreach ( $list as $r ) {
 			list( $primary, $secondary ) = insightweb_si_focus_parts( (string) $r->meta_value );
 			foreach ( array_merge( array( $primary ), $secondary ) as $i => $phrase ) {
-				$n = '' !== $phrase ? $add( $phrase, AW_SI_ROLE_FOCUS ) : '';
+				$n = '' !== $phrase ? $add( $phrase, INSIGHTWEB_SI_ROLE_FOCUS ) : '';
 				if ( '' === $n ) {
 					continue;
 				}
@@ -159,7 +159,7 @@ function insightweb_si_dry_report( string $day ): array {
 		$sourcing = function_exists( 'sourceweb_relevance' ) ? (array) ( sourceweb_relevance()['strong'] ?? array() ) : null;
 	}
 	foreach ( (array) $sourcing as $s ) {
-		$add( (string) $s, AW_SI_ROLE_SOURCING );
+		$add( (string) $s, INSIGHTWEB_SI_ROLE_SOURCING );
 	}
 	$out['sourcing'] = null === $sourcing ? 'SourceWeb not active: the Sourcing role stays empty' : count( $sourcing ) . ' Google News searches';
 
@@ -195,7 +195,7 @@ function insightweb_si_dry_report( string $day ): array {
 	}
 	list( $one, $q28, $qp28 ) = $gsc;
 	foreach ( $q28 as $r ) {
-		$n = $add( (string) ( $r[0][0] ?? '' ), AW_SI_ROLE_SEARCHED );
+		$n = $add( (string) ( $r[0][0] ?? '' ), INSIGHTWEB_SI_ROLE_SEARCHED );
 		if ( '' === $n ) {
 			continue; // A query of symbols only: the daily run skips it too.
 		}
@@ -269,7 +269,7 @@ function insightweb_si_dry_report( string $day ): array {
 		$views[ $d['priority'] ] += $in;
 		$views['gap']       += $in && 'gap' === $d['status'] ? 1 : 0;
 		$views['conflict']  += $in && $d['conflict'] ? 1 : 0;
-		$views['notranked'] += $in && ( $r['roles'] & AW_SI_ROLE_TRACKED ) && 0 === $r['impr'] ? 1 : 0;
+		$views['notranked'] += $in && ( $r['roles'] & INSIGHTWEB_SI_ROLE_TRACKED ) && 0 === $r['impr'] ? 1 : 0;
 		$views['entity']    += $r['entity'];
 		foreach ( array_keys( $roles ) as $bit ) {
 			$roles[ $bit ] += ( $r['roles'] & $bit ) ? 1 : 0;
@@ -282,7 +282,7 @@ function insightweb_si_dry_report( string $day ): array {
 			$views['quick'] += $in;
 			$quick[] = array( $r['label'], $r['pos'], $r['impr'], $d['owners'] ? $d['owners'][0] : $d['shown'], $d['action'] );
 		}
-		if ( $r['roles'] & AW_SI_ROLE_BRAND && $r['impr'] ) {
+		if ( $r['roles'] & INSIGHTWEB_SI_ROLE_BRAND && $r['impr'] ) {
 			$brand[] = array( $r['label'], $r['pos'], $r['impr'], $r['clicks'] );
 		}
 	}

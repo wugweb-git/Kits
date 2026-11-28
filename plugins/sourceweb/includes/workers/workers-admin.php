@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Run now is offered: a registry workflow that needs no input, and the dispatch token is set. */
 function sourceweb_workers_can_run( array $w ) {
-	return ! $w['planned'] && empty( $w['registry']['needs_input'] ) && ( sourceweb_dispatch_ready() || ( function_exists( 'kits_dispatch_workflow' ) && defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN ) );
+	return ! $w['planned'] && empty( $w['registry']['needs_input'] ) && ( sourceweb_dispatch_ready() || ( function_exists( 'kits_dispatch_workflow' ) && '' !== sourceweb_dispatch_token() ) );
 }
 
 /** "Late after 12 h", "Late after 9 days", "Never late (no alert)" or '' (by hand). */
@@ -207,7 +207,7 @@ function sourceweb_worker_save( array $in ) {
 			$m['late_after_h'] = $late;
 		}
 		// The group it has with no override (sourceweb_workers_all()): kept only when it differs.
-		$def = AW_WORKER_DEFAULT_GROUP[ $id ] ?? ( ! empty( $reg['crons'] ) || ! empty( $reg['after'] ) ? 'maintenance' : 'one-off' );
+		$def = SOURCEWEB_WORKER_DEFAULT_GROUP[ $id ] ?? ( ! empty( $reg['crons'] ) || ! empty( $reg['after'] ) ? 'maintenance' : 'one-off' );
 		if ( $def === $group ) {
 			unset( $m['group'] );
 		} else {

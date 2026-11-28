@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The parts of the Rules tab: slug => label. */
-const AW_RULES_PARTS = array(
+const SOURCEWEB_RULES_PARTS = array(
 	'sections' => 'Section rules',
 	'summary'  => 'Summary rules',
 	'enrich'   => 'Directory enrichment',
@@ -44,7 +44,7 @@ add_action(
 			return;
 		}
 		$tab = sanitize_key( $_GET['tab'] ?? '' );
-		if ( ! isset( AW_RULES_PARTS[ $tab ] ) ) {
+		if ( ! isset( SOURCEWEB_RULES_PARTS[ $tab ] ) ) {
 			return;
 		}
 		$q = array();
@@ -141,7 +141,7 @@ function sourceweb_rules_tag_delete( $tag ) {
 
 /** The stored option, or the seed when it is not stored yet. */
 function sourceweb_rules_enrich_option() {
-	$o = get_option( AW_ENRICH_RULES_OPTION );
+	$o = get_option( SOURCEWEB_ENRICH_RULES_OPTION );
 	return is_array( $o ) && ! empty( $o['fields'] ) ? $o : sourceweb_enrich_field_rules_seed( array_keys( sourceweb_enrich_fields() ) );
 }
 
@@ -162,7 +162,7 @@ function sourceweb_rules_field_reset( $field ) {
 	}
 	$old = $opt['fields'][ $field ];
 	unset( $opt['fields'][ $field ] );
-	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
+	update_option( SOURCEWEB_ENRICH_RULES_OPTION, $opt, false );
 	sourceweb_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ') put back to the built-in rule', $old, '' );
 	return array( 'field_reset', $rows[ $field ]['label'] );
 }
@@ -181,7 +181,7 @@ function sourceweb_rules_priority_save( array $pos ) {
 		return array( 'none', 'the trust order' );
 	}
 	$opt['priority'] = $new;
-	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
+	update_option( SOURCEWEB_ENRICH_RULES_OPTION, $opt, false );
 	sourceweb_src_log( 'enrich', 'Trust order changed', $old, $new );
 	return array( 'order_saved', implode( ', ', $new ) );
 }
@@ -213,7 +213,7 @@ function sourceweb_rules_field_save( $field, array $in ) {
 	}
 	$opt                     = sourceweb_rules_enrich_option();
 	$opt['fields'][ $field ] = $new;
-	update_option( AW_ENRICH_RULES_OPTION, $opt, false );
+	update_option( SOURCEWEB_ENRICH_RULES_OPTION, $opt, false );
 	sourceweb_src_log( 'enrich', 'Field rule ' . $rows[ $field ]['label'] . ' (' . $field . ')' . ( $rows[ $field ]['set'] ? ' edited' : ' set' ), $old, $new );
 	return array( 'field_saved', $rows[ $field ]['label'] );
 }
@@ -221,7 +221,7 @@ function sourceweb_rules_field_save( $field, array $in ) {
 /* ---------- Help tabs ---------- */
 
 add_action(
-	'load-' . AW_SRC_SCREEN,
+	'load-' . SOURCEWEB_SRC_SCREEN,
 	function () {
 		if ( ! sourceweb_rules_live() || 'rules' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which help to show
 			return;

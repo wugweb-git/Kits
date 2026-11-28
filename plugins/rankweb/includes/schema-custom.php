@@ -27,14 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/class-aw-schema.php';
 
-const AW_SCHEMA_JSONLD_META    = '_aw_jsonld';
-const AW_SCHEMA_SPEAKABLE_META = '_aw_speakable';
-const AW_SCHEMA_ABOUT_META     = '_aw_schema_about';
-const AW_SCHEMA_MENTIONS_META  = '_aw_schema_mentions';
+const RANKWEB_SCHEMA_JSONLD_META    = '_aw_jsonld';
+const RANKWEB_SCHEMA_SPEAKABLE_META = '_aw_speakable';
+const RANKWEB_SCHEMA_ABOUT_META     = '_aw_schema_about';
+const RANKWEB_SCHEMA_MENTIONS_META  = '_aw_schema_mentions';
 
 /** The post types that get the custom-schema box (the setting; empty: none). */
 function rankweb_schema_custom_types(): array {
-	return array_values( array_filter( array_map( 'sanitize_key', (array) AW_SCHEMA_TYPES ), 'post_type_exists' ) );
+	return array_values( array_filter( array_map( 'sanitize_key', (array) RANKWEB_SCHEMA_TYPES ), 'post_type_exists' ) );
 }
 
 /** A list field (one value per line), cleaned. */
@@ -92,16 +92,16 @@ function rankweb_schema_custom_box( WP_Post $post ): void {
 	}
 	echo '<p><label for="aw-jsonld"><strong>' . esc_html__( 'JSON-LD', 'rankweb' ) . '</strong></label><br>';
 	echo '<span class="description">' . esc_html__( 'One object, a list of objects, or a { "@graph": [ … ] }. Added to the page\'s schema. Checked when you save.', 'rankweb' ) . '</span></p>';
-	echo '<textarea id="aw-jsonld" name="aw_jsonld" rows="10" class="large-text code" spellcheck="false">' . esc_textarea( (string) get_post_meta( $id, AW_SCHEMA_JSONLD_META, true ) ) . '</textarea>';
+	echo '<textarea id="aw-jsonld" name="aw_jsonld" rows="10" class="large-text code" spellcheck="false">' . esc_textarea( (string) get_post_meta( $id, RANKWEB_SCHEMA_JSONLD_META, true ) ) . '</textarea>';
 
 	echo '<p><label for="aw-speakable"><strong>' . esc_html__( 'Speakable (CSS selectors)', 'rankweb' ) . '</strong></label><br>';
 	echo '<span class="description">' . esc_html__( 'One CSS selector per line (for example .entry-title or .lead). Added as SpeakableSpecification.', 'rankweb' ) . '</span></p>';
-	echo '<textarea id="aw-speakable" name="aw_speakable" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, AW_SCHEMA_SPEAKABLE_META, true ) ) ) . '</textarea>';
+	echo '<textarea id="aw-speakable" name="aw_speakable" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, RANKWEB_SCHEMA_SPEAKABLE_META, true ) ) ) . '</textarea>';
 
 	echo '<div style="display:flex;gap:1em;flex-wrap:wrap"><div style="flex:1;min-width:14em"><p><label for="aw-schema-about"><strong>' . esc_html__( 'About', 'rankweb' ) . '</strong></label><br><span class="description">' . esc_html__( 'Names or URLs, one per line.', 'rankweb' ) . '</span></p>';
-	echo '<textarea id="aw-schema-about" name="aw_schema_about" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, AW_SCHEMA_ABOUT_META, true ) ) ) . '</textarea></div>';
+	echo '<textarea id="aw-schema-about" name="aw_schema_about" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, RANKWEB_SCHEMA_ABOUT_META, true ) ) ) . '</textarea></div>';
 	echo '<div style="flex:1;min-width:14em"><p><label for="aw-schema-mentions"><strong>' . esc_html__( 'Mentions', 'rankweb' ) . '</strong></label><br><span class="description">' . esc_html__( 'Names or URLs, one per line.', 'rankweb' ) . '</span></p>';
-	echo '<textarea id="aw-schema-mentions" name="aw_schema_mentions" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, AW_SCHEMA_MENTIONS_META, true ) ) ) . '</textarea></div></div>';
+	echo '<textarea id="aw-schema-mentions" name="aw_schema_mentions" rows="3" class="large-text code">' . esc_textarea( implode( "\n", (array) get_post_meta( $id, RANKWEB_SCHEMA_MENTIONS_META, true ) ) ) . '</textarea></div></div>';
 
 	// Import from a URL and the Dataset starter. No inner form (forms cannot nest: its action and _wpnonce fields would
 	// join the post form and break Update). Both are part of the item's save instead; the buttons are plain submit
@@ -147,14 +147,14 @@ add_action(
 			/* translators: %s: the JSON error. */
 			set_transient( 'aw_seo_schema_err_' . $post_id, sprintf( __( 'The custom JSON-LD was not saved: %s', 'rankweb' ), $parsed['error'] ), 2 * MINUTE_IN_SECONDS );
 		} elseif ( '' === $raw ) {
-			delete_post_meta( $post_id, AW_SCHEMA_JSONLD_META );
+			delete_post_meta( $post_id, RANKWEB_SCHEMA_JSONLD_META );
 		} else {
-			update_post_meta( $post_id, AW_SCHEMA_JSONLD_META, $raw );
+			update_post_meta( $post_id, RANKWEB_SCHEMA_JSONLD_META, $raw );
 		}
 		foreach ( array(
-			AW_SCHEMA_SPEAKABLE_META => 'aw_speakable',
-			AW_SCHEMA_ABOUT_META     => 'aw_schema_about',
-			AW_SCHEMA_MENTIONS_META  => 'aw_schema_mentions',
+			RANKWEB_SCHEMA_SPEAKABLE_META => 'aw_speakable',
+			RANKWEB_SCHEMA_ABOUT_META     => 'aw_schema_about',
+			RANKWEB_SCHEMA_MENTIONS_META  => 'aw_schema_mentions',
 		) as $meta => $field ) {
 			$list = isset( $_POST[ $field ] ) ? rankweb_schema_lines( wp_unslash( $_POST[ $field ] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each line sanitized in rankweb_schema_lines()
 			if ( $list ) {
@@ -165,7 +165,7 @@ add_action(
 		}
 		// The Dataset starter or an import (only when its own button was clicked) replaces the JSON-LD saved above.
 		if ( isset( $_POST['rankweb_schema_dataset'] ) ) {
-			update_post_meta( $post_id, AW_SCHEMA_JSONLD_META, RankWeb_Schema::dataset_template() );
+			update_post_meta( $post_id, RANKWEB_SCHEMA_JSONLD_META, RankWeb_Schema::dataset_template() );
 			delete_transient( 'aw_seo_schema_err_' . $post_id ); // what was typed in the box is replaced either way
 			set_transient( 'rankweb_schema_note_' . $post_id, __( 'Dataset template filled in. Complete it and Update the item.', 'rankweb' ), 2 * MINUTE_IN_SECONDS );
 		} elseif ( isset( $_POST['rankweb_schema_import'] ) ) {
@@ -218,7 +218,7 @@ function rankweb_schema_import( int $id, string $url ): void {
 		return;
 	}
 	delete_transient( 'aw_seo_schema_err_' . $id ); // what was typed in the box is replaced by the import
-	update_post_meta( $id, AW_SCHEMA_JSONLD_META, (string) wp_json_encode( 1 === count( $nodes ) ? $nodes[0] : array( '@graph' => $nodes ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
+	update_post_meta( $id, RANKWEB_SCHEMA_JSONLD_META, (string) wp_json_encode( 1 === count( $nodes ) ? $nodes[0] : array( '@graph' => $nodes ), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
 	/* translators: %d: number of nodes. */
 	set_transient( 'rankweb_schema_note_' . $id, sprintf( _n( 'Imported %d node and saved it. Review it below.', 'Imported %d nodes and saved them. Review them below.', count( $nodes ), 'rankweb' ), count( $nodes ) ), 2 * MINUTE_IN_SECONDS );
 }
@@ -235,7 +235,7 @@ add_filter(
 		$id   = get_queried_object_id();
 		$base = (string) get_permalink( $id );
 
-		$raw = (string) get_post_meta( $id, AW_SCHEMA_JSONLD_META, true );
+		$raw = (string) get_post_meta( $id, RANKWEB_SCHEMA_JSONLD_META, true );
 		if ( '' !== $raw ) {
 			$parsed = RankWeb_Schema::parse( $raw );
 			$n      = 0;
@@ -246,9 +246,9 @@ add_filter(
 		}
 
 		// Speakable, about and mentions go on the page's WebPage node (the one Rank Math always prints).
-		$speak = RankWeb_Schema::speakable( (array) get_post_meta( $id, AW_SCHEMA_SPEAKABLE_META, true ) );
-		$about = RankWeb_Schema::things( (array) get_post_meta( $id, AW_SCHEMA_ABOUT_META, true ) );
-		$ment  = RankWeb_Schema::things( (array) get_post_meta( $id, AW_SCHEMA_MENTIONS_META, true ) );
+		$speak = RankWeb_Schema::speakable( (array) get_post_meta( $id, RANKWEB_SCHEMA_SPEAKABLE_META, true ) );
+		$about = RankWeb_Schema::things( (array) get_post_meta( $id, RANKWEB_SCHEMA_ABOUT_META, true ) );
+		$ment  = RankWeb_Schema::things( (array) get_post_meta( $id, RANKWEB_SCHEMA_MENTIONS_META, true ) );
 		if ( ( $speak || $about || $ment ) && isset( $data['WebPage'] ) && is_array( $data['WebPage'] ) ) {
 			if ( $speak ) {
 				$data['WebPage']['speakable'] = $speak;

@@ -22,14 +22,14 @@ function kits_admin_bar_product_list(): array {
 	if ( defined( 'DIRECTORYWEB_PAGE' ) ) {
 		$list[] = array( 'directoryweb', 'DirectoryWeb', DIRECTORYWEB_PAGE, defined( 'DIRECTORYWEB_CAP' ) ? DIRECTORYWEB_CAP : 'edit_aw_volunteers' );
 	}
-	if ( defined( 'AW_SRC_MENU' ) ) {
-		$list[] = array( 'sourceweb', 'SourceWeb', AW_SRC_MENU, defined( 'AW_REVIEW_CAP' ) ? AW_REVIEW_CAP : 'edit_others_posts' );
+	if ( defined( 'SOURCEWEB_SRC_MENU' ) ) {
+		$list[] = array( 'sourceweb', 'SourceWeb', SOURCEWEB_SRC_MENU, defined( 'SOURCEWEB_REVIEW_CAP' ) ? SOURCEWEB_REVIEW_CAP : 'edit_others_posts' );
 	}
-	if ( defined( 'AW_SEO_MENU' ) ) {
-		$list[] = array( 'rankweb', 'RankWeb', AW_SEO_MENU, defined( 'RANKWEB_CAP' ) ? RANKWEB_CAP : 'manage_categories' );
+	if ( defined( 'RANKWEB_SEO_MENU' ) ) {
+		$list[] = array( 'rankweb', 'RankWeb', RANKWEB_SEO_MENU, defined( 'RANKWEB_CAP' ) ? RANKWEB_CAP : 'manage_categories' );
 	}
-	if ( defined( 'AW_SI_SLUG' ) ) {
-		$list[] = array( 'insightweb', 'InsightWeb', AW_SI_SLUG, function_exists( 'insightweb_si_cap' ) ? insightweb_si_cap() : 'manage_options' );
+	if ( defined( 'INSIGHTWEB_SI_SLUG' ) ) {
+		$list[] = array( 'insightweb', 'InsightWeb', INSIGHTWEB_SI_SLUG, function_exists( 'insightweb_si_cap' ) ? insightweb_si_cap() : 'manage_options' );
 	}
 	if ( defined( 'MAILWEB_CAP' ) ) {
 		$list[] = array( 'mailweb', 'MailWeb', 'mailweb', MAILWEB_CAP );

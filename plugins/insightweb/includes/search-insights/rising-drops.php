@@ -3,7 +3,7 @@
  * Rising: what each source's latest run kept and dropped, and why (12 Nov 2026: Rising showed New (0) for days with no
  * way to see what the sources had seen). The workers send counts for their own filters (trending, kept, excluded) and
  * may send dropped: [ { term, filter } ]; terms the site itself refuses (not English, empty, no valid date) are
- * always recorded. Kept in the run log (insightweb_si_runs), at most AW_SI_RISING_MAX_DROPPED terms per run. Loaded by
+ * always recorded. Kept in the run log (insightweb_si_runs), at most INSIGHTWEB_SI_RISING_MAX_DROPPED terms per run. Loaded by
  * rising.php.
  *
  * @package insightweb
@@ -13,10 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_RISING_MAX_DROPPED = 100; // Per run: dropped terms kept in the run log, with the filter that dropped each.
+const INSIGHTWEB_SI_RISING_MAX_DROPPED = 100; // Per run: dropped terms kept in the run log, with the filter that dropped each.
 
 /**
- * The terms a worker says its own filters dropped: [ [term, filter], … ], at most AW_SI_RISING_MAX_DROPPED. The worker
+ * The terms a worker says its own filters dropped: [ [term, filter], … ], at most INSIGHTWEB_SI_RISING_MAX_DROPPED. The worker
  * may send dropped: [ { term, filter } ]; anything else is ignored.
  *
  * @param mixed $list The body's dropped field.
@@ -32,7 +32,7 @@ function insightweb_si_rising_worker_dropped( $list ): array {
 		if ( '' !== $term ) {
 			$out[] = array( $term, 'worker:' . mb_substr( sanitize_key( (string) $r['filter'] ), 0, 40 ) );
 		}
-		if ( count( $out ) >= AW_SI_RISING_MAX_DROPPED ) {
+		if ( count( $out ) >= INSIGHTWEB_SI_RISING_MAX_DROPPED ) {
 			break;
 		}
 	}

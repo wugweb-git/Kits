@@ -3524,7 +3524,7 @@ msgid "The note was empty or the page unknown, so nothing was saved."
 msgstr ""
 
 #: includes/search-insights/pages.php:153
-msgid "Clarity figures start once the Clarity token is added under Settings → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token)."
+msgid "Clarity figures start once the Clarity token is added under Settings → Keys as INSIGHTWEB_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token)."
 msgstr ""
 
 #. translators: %s: page path.

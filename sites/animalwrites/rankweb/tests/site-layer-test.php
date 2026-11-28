@@ -25,10 +25,19 @@ $fails = 0;
 function chk( $ok, $label ) { global $fails; echo ( $ok ? 'ok   ' : 'FAIL ' ) . $label . "\n"; $fails += $ok ? 0 : 1; }
 
 $dir = dirname( __DIR__ );
-foreach ( array( 'site.php', 'legacy-aliases.php', 'listings.php', 'schema-hubs.php', 'news-and-robots.php', 'faq-data.php', 'programmatic.php', 'defaults.php' ) as $f ) {
+foreach ( array( 'site.php', 'legacy-aliases.php', 'listings.php', 'schema-hubs.php', 'news-and-robots.php', 'faq-data.php', 'programmatic.php', 'defaults.php', 'rankweb-constant-names.php' ) as $f ) {
 	exec( 'php -l ' . escapeshellarg( $dir . '/' . $f ) . ' 2>&1', $out, $rc );
 	chk( 0 === $rc, "{$f} parses" );
 }
+
+// The old AW_ constant names: a wp-config override carries over, saved keys are read under the new names.
+define( 'AW_SEO_DESC_MAX', 140 );
+require $dir . '/rankweb-constant-names.php';
+chk( defined( 'RANKWEB_SEO_DESC_MAX' ) && 140 === RANKWEB_SEO_DESC_MAX, 'wp-config AW_SEO_DESC_MAX carries over to RANKWEB_SEO_DESC_MAX' );
+chk( ! defined( 'RANKWEB_FAQ_MAX' ), 'a name not overridden stays undefined' );
+$mapped = apply_filters( 'option_aw_seo_settings', array( 'general' => array( 'AW_SEO_DESC_MAX' => 150, 'on' => 1 ), 'search-insights' => array( 'AW_SI_DAYS' => 90 ) ) );
+chk( array( 'on' => 1, 'RANKWEB_SEO_DESC_MAX' => 150 ) === $mapped['general'] || array( 'RANKWEB_SEO_DESC_MAX' => 150, 'on' => 1 ) === $mapped['general'], 'saved AW_ keys are read as RANKWEB_ keys' );
+chk( array( 'AW_SI_DAYS' => 90 ) === $mapped['search-insights'], 'InsightWeb keys are left alone' );
 
 require $dir . '/news-and-robots.php';
 $txt = "User-agent: *\nDisallow: /wp-admin/\n";

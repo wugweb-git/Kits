@@ -26,7 +26,7 @@ foreach ( $it as $file ) {
 		++$failed;
 		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines ' . implode( ', ', $m[1] ) . "\n";
 	}
-	preg_match_all( '/^\s*(?:final\s+|abstract\s+)?class\s+(AW_[A-Za-z0-9_]+)/m', $code, $c );
+	preg_match_all( '/^\s*(?:final\s+|abstract\s+)?class\s+(INSIGHTWEB_[A-Za-z0-9_]+)/m', $code, $c );
 	if ( $c[1] ) {
 		++$failed;
 		echo 'FAIL ' . substr( $path, strlen( $root ) + 1 ) . ' defines class ' . implode( ', ', $c[1] ) . "\n";

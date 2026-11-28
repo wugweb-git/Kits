@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_SLUG = 'aw-search-insights';
+const INSIGHTWEB_SI_SLUG = 'aw-search-insights';
 
 /** InsightWeb's own capability, manage_insightweb (insightweb-caps.php); whoever had manage_options (or SOURCEWEB_SRC_CAP) still has it. */
 function insightweb_si_cap(): string {
@@ -27,7 +27,7 @@ function insightweb_si_cap(): string {
 function insightweb_si_url( string $tab = 'overview' ): string {
 	return add_query_arg(
 		array(
-			'page' => AW_SI_SLUG,
+			'page' => INSIGHTWEB_SI_SLUG,
 			'tab'  => $tab,
 		),
 		admin_url( 'admin.php' )
@@ -94,12 +94,12 @@ add_action(
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__, 2 ) . '/assets/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-chart-area'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', insightweb_si_cap(), AW_SI_SLUG, 'insightweb_si_screen', $icon, '58.5' );
-		$GLOBALS['admin_page_hooks'][ AW_SI_SLUG ] = 'insightweb'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (insightweb_page_…), whatever the title.
+		add_menu_page( __( 'Search Insights', 'insightweb' ), 'InsightWeb', insightweb_si_cap(), INSIGHTWEB_SI_SLUG, 'insightweb_si_screen', $icon, '58.5' );
+		$GLOBALS['admin_page_hooks'][ INSIGHTWEB_SI_SLUG ] = 'insightweb'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (insightweb_page_…), whatever the title.
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		$hook = add_submenu_page( AW_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), insightweb_si_cap(), AW_SI_SLUG, 'insightweb_si_screen' );
+		$hook = add_submenu_page( INSIGHTWEB_SI_SLUG, __( 'Search Insights', 'insightweb' ), __( 'Search Insights', 'insightweb' ), insightweb_si_cap(), INSIGHTWEB_SI_SLUG, 'insightweb_si_screen' );
 		if ( $hook ) {
 			add_action( 'load-' . $hook, 'insightweb_si_load' );
 		}
@@ -148,7 +148,7 @@ function insightweb_si_overview_boxes(): array {
 	return $setup + array(
 		'priorities'  => array( __( 'Priorities', 'insightweb' ), 'insightweb_si_box_priorities' ),
 		/* translators: %d: minimum impressions. */
-		'quick'       => array( sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'insightweb' ), AW_SI_QUICK_MIN ), 'insightweb_si_box_quick' ),
+		'quick'       => array( sprintf( __( 'Quick wins (position 8–20, at least %d impressions)', 'insightweb' ), INSIGHTWEB_SI_QUICK_MIN ), 'insightweb_si_box_quick' ),
 		'rising-week' => array( __( 'Rising this week', 'insightweb' ), 'insightweb_si_box_rising_week' ),
 		'movers'      => array( __( 'Movers (28 days against the 28 before)', 'insightweb' ), 'insightweb_si_box_movers' ),
 		'brand'       => array( __( 'Brand', 'insightweb' ), 'insightweb_si_box_brand' ),
@@ -401,7 +401,7 @@ function insightweb_si_keywords_tab(): void {
 	$table = new InsightWeb_SI_Keywords_Table();
 	$table->prepare_items();
 	$table->views();
-	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="keywords">';
+	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SI_SLUG ) . '"><input type="hidden" name="tab" value="keywords">';
 	$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 	if ( $view ) {
 		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';
@@ -592,7 +592,7 @@ function insightweb_si_box_priorities(): void {
 /**
  * Why the Sources row's priority counts are higher than the Priorities box and the Keywords tab (12 Nov 2026: P1 224
  * against 203): the daily calculation counts every keyword record, the views fold listing names into one row and
- * count only the AW_SI_MOVERS that moved most. Empty when no calculation is logged.
+ * count only the INSIGHTWEB_SI_MOVERS that moved most. Empty when no calculation is logged.
  */
 function insightweb_si_prio_all_line(): string {
 	$prio = (array) ( insightweb_si_runs()['roles']['info']['prio'] ?? array() );
@@ -600,7 +600,7 @@ function insightweb_si_prio_all_line(): string {
 		return '';
 	}
 	/* translators: 1: listing names counted one by one, 2–4: P1, P2, P3 over every record. */
-	return sprintf( __( 'Listing names are folded here, as on the Keywords tab (only the %1$s that moved most count one by one). The daily calculation in the Sources box counts every record, listing names too: P1 %2$s, P2 %3$s, P3 %4$s.', 'insightweb' ), number_format_i18n( (int) AW_SI_MOVERS ), number_format_i18n( (int) ( $prio['P1'] ?? 0 ) ), number_format_i18n( (int) ( $prio['P2'] ?? 0 ) ), number_format_i18n( (int) ( $prio['P3'] ?? 0 ) ) );
+	return sprintf( __( 'Listing names are folded here, as on the Keywords tab (only the %1$s that moved most count one by one). The daily calculation in the Sources box counts every record, listing names too: P1 %2$s, P2 %3$s, P3 %4$s.', 'insightweb' ), number_format_i18n( (int) INSIGHTWEB_SI_MOVERS ), number_format_i18n( (int) ( $prio['P1'] ?? 0 ) ), number_format_i18n( (int) ( $prio['P2'] ?? 0 ) ), number_format_i18n( (int) ( $prio['P3'] ?? 0 ) ) );
 }
 
 /** Overview box: quick wins. */
@@ -632,7 +632,7 @@ function insightweb_si_box_movers(): void {
 /** Overview box: brand searches. */
 function insightweb_si_box_brand(): void {
 	insightweb_si_mini_table(
-		insightweb_si_rows( 'roles & ' . (int) AW_SI_ROLE_BRAND, 'impr28 DESC' ),
+		insightweb_si_rows( 'roles & ' . (int) INSIGHTWEB_SI_ROLE_BRAND, 'impr28 DESC' ),
 		array(
 			'pos28'    => __( 'Position', 'insightweb' ),
 			'impr28'   => __( 'Impressions', 'insightweb' ),
@@ -644,7 +644,7 @@ function insightweb_si_box_brand(): void {
 	global $wpdb;
 	$o     = insightweb_si_table( 'obs' );
 	$k     = insightweb_si_table( 'keywords' );
-	$links = insightweb_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM %i WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", $o, $k, AW_SI_ROLE_BRAND, $o ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$links = insightweb_si_ready() ? (array) $wpdb->get_results( $wpdb->prepare( "SELECT k.label, o.value, o.d FROM %i o JOIN %i k ON k.id = o.kw_id WHERE o.src = 'live' AND o.metric = 'ours' AND o.value >= 2 AND k.roles & %d AND o.d = (SELECT MAX(d) FROM %i WHERE src = 'live' AND metric = 'ours' AND kw_id = o.kw_id) ORDER BY o.value DESC LIMIT 10", $o, $k, INSIGHTWEB_SI_ROLE_BRAND, $o ) ) : array(); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	if ( $links ) {
 		$parts = array();
 		foreach ( $links as $l ) {
@@ -1144,7 +1144,7 @@ add_action(
 		$table = new InsightWeb_SI_Clarity_Table();
 		$table->prepare_items();
 		$table->views();
-		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="clarity">';
+		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SI_SLUG ) . '"><input type="hidden" name="tab" value="clarity">';
 		$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 		if ( $view ) {
 			echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';

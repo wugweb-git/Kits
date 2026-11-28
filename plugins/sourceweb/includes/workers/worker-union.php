@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** @return array<string, array> id => definition. */
 function sourceweb_workers_union(): array {
 	$added = apply_filters( 'sourceweb_workers', array() );
-	return sourceweb_worker_union( AW_WORKERS, is_array( $added ) ? $added : array() );
+	return sourceweb_worker_union( SOURCEWEB_WORKERS, is_array( $added ) ? $added : array() );
 }
 
 add_action(

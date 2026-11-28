@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/class-aw-redirects.php';
 
-const AW_HTACCESS_MARKER = 'RankWeb Redirects';
+const RANKWEB_HTACCESS_MARKER = 'RankWeb Redirects';
 
 /** Whether Rank Math's redirections module is on. */
 function rankweb_redirect_ready(): bool {
@@ -91,7 +91,7 @@ function rankweb_redirect_category_counts(): array {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Redirect tools', 'rankweb' ), __( 'Redirect tools', 'rankweb' ), 'manage_options', 'aw-redirects', 'rankweb_redirect_tools_screen' );
+		add_submenu_page( RANKWEB_SEO_MENU, __( 'Redirect tools', 'rankweb' ), __( 'Redirect tools', 'rankweb' ), 'manage_options', 'aw-redirects', 'rankweb_redirect_tools_screen' );
 	}
 );
 
@@ -299,7 +299,7 @@ function rankweb_redirect_apache(): bool {
 
 /** The block of Apache directives the .htaccess download and the write both use. */
 function rankweb_redirect_htaccess_block(): string {
-	return '# BEGIN ' . AW_HTACCESS_MARKER . "\n" . implode( "\n", rankweb_redirect_htaccess_lines() ) . "\n# END " . AW_HTACCESS_MARKER . "\n";
+	return '# BEGIN ' . RANKWEB_HTACCESS_MARKER . "\n" . implode( "\n", rankweb_redirect_htaccess_lines() ) . "\n# END " . RANKWEB_HTACCESS_MARKER . "\n";
 }
 
 add_action(
@@ -357,7 +357,7 @@ add_action(
  * @return array{error: string, ok: string}
  */
 function rankweb_redirect_htaccess_apply( bool $remove ): array {
-	if ( ! AW_REDIRECT_HTACCESS ) {
+	if ( ! RANKWEB_REDIRECT_HTACCESS ) {
 		return array(
 			'error' => __( 'The .htaccess option is off (RankWeb → Settings → Redirect tools).', 'rankweb' ),
 			'ok'    => '',
@@ -397,7 +397,7 @@ function rankweb_redirect_htaccess_apply( bool $remove ): array {
 		);
 	}
 	$lines = $remove ? array() : rankweb_redirect_htaccess_lines();
-	if ( ! insert_with_markers( $path, AW_HTACCESS_MARKER, $lines ) ) {
+	if ( ! insert_with_markers( $path, RANKWEB_HTACCESS_MARKER, $lines ) ) {
 		return array(
 			'error' => __( 'The .htaccess file could not be written.', 'rankweb' ),
 			'ok'    => '',
@@ -516,9 +516,9 @@ function rankweb_redirect_payload(): array {
 		'categories' => $cats,
 		'htaccess'   => array(
 			'count'  => count( rankweb_redirect_htaccess_lines() ),
-			'on'     => (bool) AW_REDIRECT_HTACCESS,
+			'on'     => (bool) RANKWEB_REDIRECT_HTACCESS,
 			'apache' => $apache,
-			'can'    => (bool) AW_REDIRECT_HTACCESS && $apache,
+			'can'    => (bool) RANKWEB_REDIRECT_HTACCESS && $apache,
 		),
 		'export'     => array(
 			'redirects' => $link( 'aw_redirect_export', 'aw_redirect_export' ),
@@ -584,7 +584,7 @@ function rankweb_redirect_tools_body(): void {
 	wp_nonce_field( 'aw_redirect_htaccess' );
 	submit_button( __( 'Download the .htaccess block', 'rankweb' ), 'secondary', 'submit', false );
 	echo '</form>';
-	if ( AW_REDIRECT_HTACCESS && rankweb_redirect_apache() ) {
+	if ( RANKWEB_REDIRECT_HTACCESS && rankweb_redirect_apache() ) {
 		echo '<form method="post" action="' . esc_url( $post ) . '"><input type="hidden" name="action" value="aw_redirect_htaccess_write">';
 		wp_nonce_field( 'aw_redirect_htaccess' );
 		echo '<p><label><input type="checkbox" name="aw_confirm" value="1"> ' . esc_html__( 'Yes, edit .htaccess (a backup is made first)', 'rankweb' ) . '</label></p>';

@@ -20,10 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The order of Pages in llms.txt, by slug ("" = the home page). Pages not named here follow, as Rank Math lists them. */
-// AW_LLMS_PAGE_ORDER: RankWeb → Settings (settings.php).
+// RANKWEB_LLMS_PAGE_ORDER: RankWeb → Settings (settings.php).
 
 /** Resource types that are guides (listed before research). */
-// AW_LLMS_GUIDE_TYPES: RankWeb → Settings (settings.php).
+// RANKWEB_LLMS_GUIDE_TYPES: RankWeb → Settings (settings.php).
 
 add_filter( 'rank_math/llms_txt/remove_credit', '__return_true' );
 
@@ -76,7 +76,7 @@ add_filter(
 		$type = $args['post_type'] ?? '';
 		if ( 'page' === $type ) {
 			$front = (int) get_option( 'page_on_front' );
-			$rank  = array_flip( AW_LLMS_PAGE_ORDER );
+			$rank  = array_flip( RANKWEB_LLMS_PAGE_ORDER );
 			$key   = fn( $p ) => $rank[ (int) $p->ID === $front ? '' : $p->post_name ] ?? 999;
 			usort( $posts, fn( $a, $b ) => $key( $a ) <=> $key( $b ) );
 			return $posts;
@@ -89,7 +89,7 @@ add_filter(
 					'post_status'    => 'publish',
 					'posts_per_page' => $limit,
 					'has_password'   => false,
-					'tax_query'      => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => AW_LLMS_GUIDE_TYPES ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
+					'tax_query'      => array( array( 'taxonomy' => 'post_tag', 'field' => 'slug', 'terms' => RANKWEB_LLMS_GUIDE_TYPES ) ), // phpcs:ignore WordPress.DB.SlowDBQuery
 				)
 			);
 			$seen   = array_flip( wp_list_pluck( $guides, 'ID' ) );

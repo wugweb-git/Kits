@@ -19,10 +19,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_PLACE_INTROS      = 'directoryweb_place_intros';
-const AW_PLACE_INTROS_PAGE = 'directoryweb-place-intros';
-const AW_PLACE_INTRO_MAX   = 1000; // characters of visible text: a short paragraph, not an article
-const AW_PLACE_INTRO_SRCS  = 10;
+const DIRECTORYWEB_PLACE_INTROS      = 'directoryweb_place_intros';
+const DIRECTORYWEB_PLACE_INTROS_PAGE = 'directoryweb-place-intros';
+const DIRECTORYWEB_PLACE_INTRO_MAX   = 1000; // characters of visible text: a short paragraph, not an article
+const DIRECTORYWEB_PLACE_INTRO_SRCS  = 10;
 
 /* ---------- Store ---------- */
 
@@ -42,7 +42,7 @@ function directoryweb_place_intro_place_of( $key ) {
 
 /** Every stored entry, key => {text, sources, checked}. */
 function directoryweb_place_intros(): array {
-	$all = get_option( AW_PLACE_INTROS, array() );
+	$all = get_option( DIRECTORYWEB_PLACE_INTROS, array() );
 	return is_array( $all ) ? $all : array();
 }
 
@@ -73,9 +73,9 @@ function directoryweb_place_intro_clean( $text, $sources, $checked ) {
 		return new WP_Error( 'aw_place_intro_utf8', __( 'The intro has characters that are not text (often from a paste). Type them again. Nothing was saved.', 'directoryweb' ) );
 	}
 	$text = trim( (string) $flat );
-	if ( mb_strlen( html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, 'UTF-8' ) ) > AW_PLACE_INTRO_MAX ) {
+	if ( mb_strlen( html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES, 'UTF-8' ) ) > DIRECTORYWEB_PLACE_INTRO_MAX ) {
 		/* translators: %d: number of characters. */
-		return new WP_Error( 'aw_place_intro_long', sprintf( __( 'The intro is longer than %d characters. Nothing was saved.', 'directoryweb' ), AW_PLACE_INTRO_MAX ) );
+		return new WP_Error( 'aw_place_intro_long', sprintf( __( 'The intro is longer than %d characters. Nothing was saved.', 'directoryweb' ), DIRECTORYWEB_PLACE_INTRO_MAX ) );
 	}
 	$list = is_array( $sources ) ? $sources : preg_split( '/[\r\n]+/', (string) $sources );
 	$urls = array();
@@ -94,7 +94,7 @@ function directoryweb_place_intro_clean( $text, $sources, $checked ) {
 	}
 	return array(
 		'text'    => $text,
-		'sources' => array_slice( $urls, 0, AW_PLACE_INTRO_SRCS ),
+		'sources' => array_slice( $urls, 0, DIRECTORYWEB_PLACE_INTRO_SRCS ),
 		'checked' => $checked,
 	);
 }
@@ -117,7 +117,7 @@ function directoryweb_place_intro_store( $key, array $entry ): bool {
 		$all[ $key ] = $entry;
 	}
 	ksort( $all, SORT_NATURAL );
-	update_option( AW_PLACE_INTROS, $all, false ); // read only on place pages and this screen
+	update_option( DIRECTORYWEB_PLACE_INTROS, $all, false ); // read only on place pages and this screen
 	do_action( 'litespeed_purge_url', directoryweb_directory_url( directoryweb_place_intro_place_of( $key )->slug ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- another plugin's or core's hook, only invoked here (the page shows the change now, not when its cached copy runs out)
 	return true;
 }
@@ -147,14 +147,14 @@ function directoryweb_place_intro_html(): string {
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', AW_PLACE_INTROS_PAGE, 'directoryweb_place_intros_page' );
+		add_submenu_page( DIRECTORYWEB_PAGE, __( 'Place intros', 'directoryweb' ), __( 'Place intros', 'directoryweb' ), 'manage_options', DIRECTORYWEB_PLACE_INTROS_PAGE, 'directoryweb_place_intros_page' );
 	},
 	11 // after DirectoryWeb's own menu (directoryweb-ui.php)
 );
 
 /** The screen's address, with extra query args. */
 function directoryweb_place_intros_url( array $args = array() ): string {
-	return add_query_arg( array_merge( array( 'page' => AW_PLACE_INTROS_PAGE ), $args ), admin_url( 'admin.php' ) );
+	return add_query_arg( array_merge( array( 'page' => DIRECTORYWEB_PLACE_INTROS_PAGE ), $args ), admin_url( 'admin.php' ) );
 }
 
 /** A place's name as the screen shows it: "Mumbai, Maharashtra" or "Kerala". */
@@ -177,7 +177,7 @@ function directoryweb_place_intros_page(): void {
 	$notices = array(
 		'saved'   => array( 'success', __( 'Intro saved.', 'directoryweb' ) ),
 		'removed' => array( 'success', __( 'Intro removed. The page shows only its usual line.', 'directoryweb' ) ),
-		'long'    => array( 'error', sprintf( /* translators: %d: number of characters. */ __( 'The intro is longer than %d characters. Nothing was saved.', 'directoryweb' ), AW_PLACE_INTRO_MAX ) ),
+		'long'    => array( 'error', sprintf( /* translators: %d: number of characters. */ __( 'The intro is longer than %d characters. Nothing was saved.', 'directoryweb' ), DIRECTORYWEB_PLACE_INTRO_MAX ) ),
 		'date'    => array( 'error', __( 'The checked date is not a date (YYYY-MM-DD). Nothing was saved.', 'directoryweb' ) ),
 		'utf8'    => array( 'error', __( 'The intro has characters that are not text (often from a paste). Type them again. Nothing was saved.', 'directoryweb' ) ),
 	);
@@ -198,7 +198,7 @@ function directoryweb_place_intros_page(): void {
 /** The stored intros as a core list table, and the picker that opens a place's form. */
 function directoryweb_place_intros_list(): void {
 	echo '<p>' . esc_html__( 'A short paragraph under the usual line on a state or district page of the Directory, on its first page only. A place with no intro shows only its usual line.', 'directoryweb' ) . '</p>';
-	echo '<form method="get" action="' . esc_url( admin_url( 'admin.php' ) ) . '"><input type="hidden" name="page" value="' . esc_attr( AW_PLACE_INTROS_PAGE ) . '">';
+	echo '<form method="get" action="' . esc_url( admin_url( 'admin.php' ) ) . '"><input type="hidden" name="page" value="' . esc_attr( DIRECTORYWEB_PLACE_INTROS_PAGE ) . '">';
 	echo '<label for="aw-pi-place">' . esc_html__( 'Place', 'directoryweb' ) . '</label> <select id="aw-pi-place" name="place"><optgroup label="' . esc_attr__( 'States and union territories', 'directoryweb' ) . '">';
 	foreach ( directoryweb_place_states() as $s ) {
 		echo '<option value="' . esc_attr( directoryweb_place_intro_key( $s ) ) . '">' . esc_html( $s->name ) . '</option>';
@@ -265,10 +265,10 @@ function directoryweb_place_intro_form( $place ): void {
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row"><label for="aw-pi-text">' . esc_html__( 'Intro', 'directoryweb' ) . '</label></th><td><textarea id="aw-pi-text" name="aw_text" rows="6" class="large-text" aria-describedby="aw-pi-text-d">' . esc_textarea( (string) ( $entry['text'] ?? '' ) ) . '</textarea>';
 	/* translators: %d: number of characters. */
-	echo '<p class="description" id="aw-pi-text-d">' . esc_html( sprintf( __( 'One short paragraph, up to %d characters. Links as <a href="https://…">words</a>; no other formatting. Leave empty to remove the intro.', 'directoryweb' ), AW_PLACE_INTRO_MAX ) ) . '</p></td></tr>';
+	echo '<p class="description" id="aw-pi-text-d">' . esc_html( sprintf( __( 'One short paragraph, up to %d characters. Links as <a href="https://…">words</a>; no other formatting. Leave empty to remove the intro.', 'directoryweb' ), DIRECTORYWEB_PLACE_INTRO_MAX ) ) . '</p></td></tr>';
 	echo '<tr><th scope="row"><label for="aw-pi-src">' . esc_html__( 'Sources', 'directoryweb' ) . '</label></th><td><textarea id="aw-pi-src" name="aw_sources" rows="4" class="large-text code" aria-describedby="aw-pi-src-d">' . esc_textarea( implode( "\n", (array) ( $entry['sources'] ?? array() ) ) ) . '</textarea>';
 	/* translators: %d: number of addresses. */
-	echo '<p class="description" id="aw-pi-src-d">' . esc_html( sprintf( __( 'Where the facts come from, one address per line (up to %d). Kept for editors; not shown on the page.', 'directoryweb' ), AW_PLACE_INTRO_SRCS ) ) . '</p></td></tr>';
+	echo '<p class="description" id="aw-pi-src-d">' . esc_html( sprintf( __( 'Where the facts come from, one address per line (up to %d). Kept for editors; not shown on the page.', 'directoryweb' ), DIRECTORYWEB_PLACE_INTRO_SRCS ) ) . '</p></td></tr>';
 	echo '<tr><th scope="row"><label for="aw-pi-checked">' . esc_html__( 'Checked', 'directoryweb' ) . '</label></th><td><input type="date" id="aw-pi-checked" name="aw_checked" value="' . esc_attr( (string) ( $entry['checked'] ?? '' ) ) . '">';
 	echo '<p class="description">' . esc_html__( 'The day the facts were last checked against the sources.', 'directoryweb' ) . '</p></td></tr>';
 	echo '</tbody></table>';

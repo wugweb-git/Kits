@@ -21,7 +21,7 @@ const RANKWEB_WEBP_BATCH = 15;
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SEO_MENU, __( 'Convert to WebP', 'rankweb' ), __( 'Convert to WebP', 'rankweb' ), 'manage_options', 'aw-webp', 'rankweb_webp_screen' );
+		add_submenu_page( RANKWEB_SEO_MENU, __( 'Convert to WebP', 'rankweb' ), __( 'Convert to WebP', 'rankweb' ), 'manage_options', 'aw-webp', 'rankweb_webp_screen' );
 	}
 );
 

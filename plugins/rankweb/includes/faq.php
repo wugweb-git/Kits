@@ -38,10 +38,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once __DIR__ . '/admin-table.php'; // rankweb_seo_extras_simple_table() for RankWeb → FAQ
 require_once __DIR__ . '/faq-overview.php'; // RankWeb → FAQ
 
-// AW_FAQ_MIN, AW_FAQ_MIN_GUIDE, AW_FAQ_MAX, AW_FAQ_WORDS, AW_FAQ_HUBS: RankWeb → Settings (settings.php).
+// RANKWEB_FAQ_MIN, RANKWEB_FAQ_MIN_GUIDE, RANKWEB_FAQ_MAX, RANKWEB_FAQ_WORDS, RANKWEB_FAQ_HUBS: RankWeb → Settings (settings.php).
 
 /** Tags allowed in an answer written in the box (the page and the schema print the same HTML). */
-const AW_FAQ_ANSWER_HTML = array(
+const RANKWEB_FAQ_ANSWER_HTML = array(
 	'a'      => array( 'href' => true ),
 	'strong' => array(),
 	'em'     => array(),
@@ -56,14 +56,14 @@ function rankweb_faq_item_block_name() {
 }
 
 /**
- * Fewest questions a page shows (and marks up): AW_FAQ_MIN, posts AW_FAQ_MIN_GUIDE (owner, 21 and 25 Oct 2026: 2 for
+ * Fewest questions a page shows (and marks up): RANKWEB_FAQ_MIN, posts RANKWEB_FAQ_MIN_GUIDE (owner, 21 and 25 Oct 2026: 2 for
  * Resources guides).
  *
  * @param array|null $ctx rankweb_faq_context().
  * @return int
  */
 function rankweb_faq_min( $ctx ) {
-	return (int) apply_filters( 'rankweb_faq_min', is_array( $ctx ) && 'post' === ( $ctx['type'] ?? '' ) ? AW_FAQ_MIN_GUIDE : AW_FAQ_MIN, $ctx );
+	return (int) apply_filters( 'rankweb_faq_min', is_array( $ctx ) && 'post' === ( $ctx['type'] ?? '' ) ? RANKWEB_FAQ_MIN_GUIDE : RANKWEB_FAQ_MIN, $ctx );
 }
 
 /* ---------- Which types have the box ---------- */
@@ -82,7 +82,7 @@ function rankweb_faq_off_types() {
 	$off = get_option( 'aw_faq_off_types', null );
 	if ( null === $off ) { // once: the former Settings → FAQ list "Types without the FAQ box"
 		$old = get_option( 'aw_seo_settings', array() );
-		$old = is_array( $old ) ? (array) ( $old['faq']['AW_FAQ_OFF_TYPES'] ?? array() ) : array();
+		$old = is_array( $old ) ? (array) ( $old['faq']['RANKWEB_FAQ_OFF_TYPES'] ?? array() ) : array();
 		$off = array_values( array_unique( array_filter( array_map( 'sanitize_key', $old ) ) ) );
 		if ( $off ) {
 			update_option( 'aw_faq_off_types', $off, false );
@@ -144,7 +144,7 @@ function rankweb_faq_hub_pages() {
 		return $out;
 	}
 	$out = array();
-	foreach ( (array) AW_FAQ_HUBS as $slug => $subject ) {
+	foreach ( (array) RANKWEB_FAQ_HUBS as $slug => $subject ) {
 		$p = get_page_by_path( (string) $slug );
 		if ( $p ) {
 			$out[ (int) $p->ID ] = (string) $subject;
@@ -159,7 +159,7 @@ function rankweb_faq_subject_types(): array {
 }
 
 /** Taxonomies whose FAQ heading can name a subject of its own (term meta rankweb_faq_subject; else the term's name). */
-const AW_FAQ_SUBJECT_TAXONOMIES = array( 'post_tag' );
+const RANKWEB_FAQ_SUBJECT_TAXONOMIES = array( 'post_tag' );
 
 /**
  * A term's own FAQ subject (the FAQ box's Subject field), '' when it has none or its taxonomy has no field.
@@ -168,7 +168,7 @@ const AW_FAQ_SUBJECT_TAXONOMIES = array( 'post_tag' );
  * @return string
  */
 function rankweb_faq_term_subject( $term ) {
-	return in_array( $term->taxonomy, AW_FAQ_SUBJECT_TAXONOMIES, true ) ? rankweb_faq_plain( (string) get_term_meta( $term->term_id, 'rankweb_faq_subject', true ) ) : '';
+	return in_array( $term->taxonomy, RANKWEB_FAQ_SUBJECT_TAXONOMIES, true ) ? rankweb_faq_plain( (string) get_term_meta( $term->term_id, 'rankweb_faq_subject', true ) ) : '';
 }
 
 /**
@@ -198,10 +198,10 @@ function rankweb_faq_subject( $post ) {
  * The FAQ section head, site-wide: which style the H2, the supporting line and the "see all" link use. Switching
  * style is this one line; the styles are in rankweb_faq_head_styles().
  */
-const AW_FAQ_HEAD_STYLE = 'about';
+const RANKWEB_FAQ_HEAD_STYLE = 'about';
 
 /** Longest subject (characters) the 'subject' style names; a longer one, or one that is itself a question or an FAQ title, gets plain "FAQs". */
-const AW_FAQ_HEAD_MAX = 40;
+const RANKWEB_FAQ_HEAD_MAX = 40;
 
 /**
  * The FAQ head styles: style => [ H2 pattern (%s = the subject; '' = no subject), plain H2 (a long or missing
@@ -221,13 +221,13 @@ function rankweb_faq_head_styles() {
 /** The current head style's row (rankweb_faq_head_styles()). */
 function rankweb_faq_head_style() {
 	$styles = rankweb_faq_head_styles();
-	return $styles[ AW_FAQ_HEAD_STYLE ] ?? $styles['subject'];
+	return $styles[ RANKWEB_FAQ_HEAD_STYLE ] ?? $styles['subject'];
 }
 
 /**
  * The FAQ H2 for a subject, in the site's head style (filter rankweb_faq_heading). The visible H2 and the FAQPage name
  * both come from here. In the 'about' style (the current one) the subject is used as it is. In the others: a leading "the" is dropped and the first letter capitalised
- * ("the Directory" -> "Directory FAQs"); a subject over AW_FAQ_HEAD_MAX characters, one that starts with a question
+ * ("the Directory" -> "Directory FAQs"); a subject over RANKWEB_FAQ_HEAD_MAX characters, one that starts with a question
  * word ("How to report ...") or one that already says FAQ gets the plain H2.
  *
  * @param string $subject The subject (rankweb_faq_subject(), a term name, a document's short name).
@@ -236,9 +236,9 @@ function rankweb_faq_head_style() {
 function rankweb_faq_heading( $subject ) {
 	list( $pattern, $plain ) = rankweb_faq_head_style();
 	$subject                 = trim( (string) $subject );
-	if ( 'about' !== AW_FAQ_HEAD_STYLE ) {
+	if ( 'about' !== RANKWEB_FAQ_HEAD_STYLE ) {
 		$subject = ucfirst( (string) preg_replace( '/^the\s+/i', '', $subject ) );
-		if ( mb_strlen( $subject ) > AW_FAQ_HEAD_MAX || preg_match( '/^(how|what|why|when|where|who|which|can|do|does|is|are|should)\b/i', $subject ) || preg_match( '/\bFAQs?\b|frequently asked/i', $subject ) ) {
+		if ( mb_strlen( $subject ) > RANKWEB_FAQ_HEAD_MAX || preg_match( '/^(how|what|why|when|where|who|which|can|do|does|is|are|should)\b/i', $subject ) || preg_match( '/\bFAQs?\b|frequently asked/i', $subject ) ) {
 			$subject = '';
 		}
 	}
@@ -296,7 +296,7 @@ add_action(
 				)
 			);
 		}
-		foreach ( AW_FAQ_SUBJECT_TAXONOMIES as $tax ) { // a tag's FAQ subject (FAQ box → Subject; REST: meta.rankweb_faq_subject)
+		foreach ( RANKWEB_FAQ_SUBJECT_TAXONOMIES as $tax ) { // a tag's FAQ subject (FAQ box → Subject; REST: meta.rankweb_faq_subject)
 			register_term_meta(
 				$tax,
 				'rankweb_faq_subject',
@@ -453,7 +453,7 @@ function rankweb_faq_auto( $ctx ) {
 function rankweb_faq_clean_row( $row ) {
 	$auto = sanitize_key( (string) ( $row['auto'] ?? '' ) );
 	$q    = trim( sanitize_text_field( wp_strip_all_tags( (string) ( $row['q'] ?? '' ) ) ) );
-	$a    = trim( wp_kses( (string) ( $row['a'] ?? '' ), AW_FAQ_ANSWER_HTML ) );
+	$a    = trim( wp_kses( (string) ( $row['a'] ?? '' ), RANKWEB_FAQ_ANSWER_HTML ) );
 	if ( '' !== $auto ) {
 		$state = in_array( $row['state'] ?? '', array( 'edited', 'removed' ), true ) ? $row['state'] : 'auto';
 		if ( 'edited' === $state && ( '' === $q || '' === $a ) ) {
@@ -566,7 +566,7 @@ function rankweb_faq_rows( $ctx, $cache = true ) {
 
 /**
  * Mark which rows the page shows, in the box's order: removed, hidden and draft rows are not shown; a row stating a fact (or
- * asking a question) already shown is dropped; at most AW_FAQ_MAX; fewer than the minimum counted = no FAQ at all.
+ * asking a question) already shown is dropped; at most RANKWEB_FAQ_MAX; fewer than the minimum counted = no FAQ at all.
  *
  * @param array $ctx  rankweb_faq_context().
  * @param array $rows rankweb_faq_rows() rows.
@@ -591,8 +591,8 @@ function rankweb_faq_rows_mark( $ctx, array $rows ) {
 		} else {
 			$seen[ 'f:' . $r['fact'] ] = true;
 			$seen[ $qk ]               = true;
-			if ( $shown >= AW_FAQ_MAX ) {
-				$why = sprintf( 'Over the limit of %d questions', AW_FAQ_MAX );
+			if ( $shown >= RANKWEB_FAQ_MAX ) {
+				$why = sprintf( 'Over the limit of %d questions', RANKWEB_FAQ_MAX );
 			}
 		}
 		$rows[ $i ]['shown'] = '' === $why;
@@ -842,7 +842,7 @@ add_filter(
 
 /** A question and answer as compared and shown in the box (the answer as the box may store it). */
 function rankweb_faq_norm( $q, $a ) {
-	return array( trim( sanitize_text_field( (string) $q ) ), trim( preg_replace( '/\s+/u', ' ', wp_kses( (string) $a, AW_FAQ_ANSWER_HTML ) ) ) );
+	return array( trim( sanitize_text_field( (string) $q ) ), trim( preg_replace( '/\s+/u', ' ', wp_kses( (string) $a, RANKWEB_FAQ_ANSWER_HTML ) ) ) );
 }
 
 /** Fingerprint of a question and answer as the box showed them (an unchanged automatic row stays automatic). */
@@ -869,7 +869,7 @@ function rankweb_faq_editor( $ctx ) {
 		}
 		$line = (string) get_post_meta( $ctx['id'], 'aw_faq_line', true );
 		echo '<p><label for="aw-faq-line"><strong>Subtitle</strong> (one line under the heading; leave empty for none)</label><br><input type="text" class="large-text" id="aw-faq-line" name="aw_faq_line" value="' . esc_attr( $line ) . '"></p>';
-	} elseif ( 'term' === $ctx['store'] && in_array( $ctx['type'], AW_FAQ_SUBJECT_TAXONOMIES, true ) ) { // a tag: the subject only (empty = the tag's name)
+	} elseif ( 'term' === $ctx['store'] && in_array( $ctx['type'], RANKWEB_FAQ_SUBJECT_TAXONOMIES, true ) ) { // a tag: the subject only (empty = the tag's name)
 		$own = (string) get_term_meta( $ctx['id'], 'rankweb_faq_subject', true );
 		echo '<p><label for="aw-faq-subject"><strong>Subject</strong> (the heading reads “' . esc_html( rankweb_faq_heading( 'Subject' ) ) . '”; leave empty for the tag\'s name)</label><br><input type="text" class="large-text" id="aw-faq-subject" name="rankweb_faq_subject" value="' . esc_attr( $own ) . '" placeholder="' . esc_attr( '' === $own ? $ctx['entity'] : '' ) . '"></p>';
 	}
@@ -884,8 +884,8 @@ function rankweb_faq_editor( $ctx ) {
 			sprintf(
 				'The page shows these questions in this order: at least %1$d, at most %2$d (fewer than %1$d: no FAQ and no FAQ schema). Auto questions come from this page’s own fields (on a tag: from the items tagged) and follow them; edit one and it is kept as written (Back to automatic undoes that). Remove hides a question; Order moves it. Your own questions show once Approved. First sentence answers and names the subject; at most %3$d words; one link (the source or a section of the site); dates as 4 Oct 2026. Answers may use links, bold and italic. Sources: one per line, "Name | URL".',
 				$r['min'],
-				AW_FAQ_MAX,
-				AW_FAQ_WORDS
+				RANKWEB_FAQ_MAX,
+				RANKWEB_FAQ_WORDS
 			)
 		)
 	);
@@ -907,7 +907,7 @@ function rankweb_faq_editor( $ctx ) {
 		list( $q, $a ) = $auto && 'edited' !== $row['origin'] ? rankweb_faq_norm( $row['q'], $row['a'] ) : array( $row['q'], $row['a'] );
 		$wc   = '' !== $a ? rankweb_faq_word_count( $a ) : 0;
 		$tag  = $blank ? 'New question' : $labels[ $row['origin'] ] . ( 'own' === $row['origin'] ? ', ' . ( 'approved' === $row['status'] ? 'approved' : 'draft' ) : '' ) . ' · ' . ( $row['shown'] ? ( '' !== $row['why'] ? $row['why'] : 'Shown' ) : 'Not shown: ' . $row['why'] );
-		echo '<fieldset style="border:1px solid #c3c4c7;padding:8px 12px;margin:0 0 12px"><legend><strong>' . esc_html( $blank ? 'Add a question' : 'Question ' . ( $i + 1 ) ) . '</strong> — ' . esc_html( $tag ) . ( $wc > AW_FAQ_WORDS ? ' <span style="color:#b32d2e">(' . (int) $wc . ' words: over ' . (int) AW_FAQ_WORDS . ')</span>' : '' ) . '</legend>';
+		echo '<fieldset style="border:1px solid #c3c4c7;padding:8px 12px;margin:0 0 12px"><legend><strong>' . esc_html( $blank ? 'Add a question' : 'Question ' . ( $i + 1 ) ) . '</strong> — ' . esc_html( $tag ) . ( $wc > RANKWEB_FAQ_WORDS ? ' <span style="color:#b32d2e">(' . (int) $wc . ' words: over ' . (int) RANKWEB_FAQ_WORDS . ')</span>' : '' ) . '</legend>';
 		echo '<p><label>Order <input type="number" class="small-text" min="1" name="' . esc_attr( $n ) . '[order]" value="' . esc_attr( $blank ? '' : (string) ( $i + 1 ) ) . '"></label>';
 		if ( ! $blank ) {
 			echo ' &nbsp; <label><input type="checkbox" name="' . esc_attr( $n ) . '[remove]" value="1"' . checked( 'removed', $row['origin'], false ) . '> Remove</label>';
@@ -1129,7 +1129,7 @@ function rankweb_faq_term_box( $term ) {
 function rankweb_faq_term_save( $term_id ) {
 	$term = get_term( $term_id );
 	$ok   = $term instanceof WP_Term && rankweb_faq_editor_posted() && current_user_can( 'edit_term', $term_id );
-	if ( $ok && isset( $_POST['rankweb_faq_subject'] ) && in_array( $term->taxonomy, AW_FAQ_SUBJECT_TAXONOMIES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
+	if ( $ok && isset( $_POST['rankweb_faq_subject'] ) && in_array( $term->taxonomy, RANKWEB_FAQ_SUBJECT_TAXONOMIES, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 		$subject = sanitize_text_field( wp_unslash( $_POST['rankweb_faq_subject'] ) ); // phpcs:ignore WordPress.Security.NonceVerification -- checked in rankweb_faq_editor_posted()
 		if ( '' === $subject ) {
 			delete_term_meta( $term_id, 'rankweb_faq_subject' );
@@ -1201,7 +1201,7 @@ function rankweb_faq_convert_rank_math( $post_id, $dry = false ) {
 		}
 		$keep[] = $b;
 	}
-	$long  = count( array_filter( $moved, fn( $m ) => rankweb_faq_word_count( $m['a'] ) > AW_FAQ_WORDS ) );
+	$long  = count( array_filter( $moved, fn( $m ) => rankweb_faq_word_count( $m['a'] ) > RANKWEB_FAQ_WORDS ) );
 	$links = count( array_filter( $moved, fn( $m ) => substr_count( $m['a'], '<a ' ) > 1 ) );
 	if ( $dry ) {
 		return array( count( $moved ), $long, $links );
@@ -1258,7 +1258,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					if ( null === $r ) {
 						continue;
 					}
-					WP_CLI::line( sprintf( '%d %s: %d questions%s%s', $id, get_post_field( 'post_name', $id ), $r[0], $r[1] ? ", $r[1] over 50 words" : '', $r[2] ? ", $r[2] with more than one link" : '' ) . ( $r[0] > AW_FAQ_MAX ? ', MORE THAN ' . AW_FAQ_MAX . ': only the first ' . AW_FAQ_MAX . ' show' : '' ) );
+					WP_CLI::line( sprintf( '%d %s: %d questions%s%s', $id, get_post_field( 'post_name', $id ), $r[0], $r[1] ? ", $r[1] over 50 words" : '', $r[2] ? ", $r[2] with more than one link" : '' ) . ( $r[0] > RANKWEB_FAQ_MAX ? ', MORE THAN ' . RANKWEB_FAQ_MAX . ': only the first ' . RANKWEB_FAQ_MAX . ' show' : '' ) );
 					++$tot[0];
 					$tot[1] += $r[0];
 					$tot[2] += $r[1];
@@ -1338,7 +1338,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			}
 			if ( 'check' === $cmd ) {
 				// Spec §9 on every page with an FAQ: minimum to 6 questions; schema text = visible text; no duplicate
-				// question; ≤ AW_FAQ_WORDS words; one link. Also: the focus keyphrase in at least 2 questions.
+				// question; ≤ RANKWEB_FAQ_WORDS words; one link. Also: the focus keyphrase in at least 2 questions.
 				$fail   = 0;
 				$seen   = 0;
 				$kwmiss = 0;
@@ -1361,7 +1361,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					}
 					$qa   = rankweb_faq_parse( rankweb_faq_html( $faq ) );
 					$errs = array();
-					if ( count( $qa ) < rankweb_faq_min( $faq['ctx'] ) || count( $qa ) > AW_FAQ_MAX ) {
+					if ( count( $qa ) < rankweb_faq_min( $faq['ctx'] ) || count( $qa ) > RANKWEB_FAQ_MAX ) {
 						$errs[] = count( $qa ) . ' questions';
 					}
 					if ( count( array_unique( array_map( 'strtolower', wp_list_pluck( $qa, 'q' ) ) ) ) !== count( $qa ) ) {
@@ -1371,8 +1371,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 						if ( rankweb_faq_plain( $x['a'] ) !== $x['a_text'] ) {
 							$errs[] = 'Q' . ( $i + 1 ) . ' schema text differs';
 						}
-						if ( rankweb_faq_word_count( $x['a'] ) > AW_FAQ_WORDS ) {
-							$errs[] = 'Q' . ( $i + 1 ) . ' over ' . AW_FAQ_WORDS . ' words';
+						if ( rankweb_faq_word_count( $x['a'] ) > RANKWEB_FAQ_WORDS ) {
+							$errs[] = 'Q' . ( $i + 1 ) . ' over ' . RANKWEB_FAQ_WORDS . ' words';
 						}
 						if ( 1 !== substr_count( $x['a'], '<a ' ) ) {
 							$errs[] = 'Q' . ( $i + 1 ) . ' has ' . substr_count( $x['a'], '<a ' ) . ' links';

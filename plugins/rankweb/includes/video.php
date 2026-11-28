@@ -24,14 +24,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/class-aw-video.php';
 
-const AW_VIDEO_META  = '_aw_videos';
-const AW_VIDEO_JOB   = 'rankweb_video_sync';
-const AW_VIDEO_TTL   = 7 * DAY_IN_SECONDS; // re-fetch a video's data at most weekly
-const AW_VIDEO_BATCH = 100; // items the daily backfill does in one run
+const RANKWEB_VIDEO_META  = '_aw_videos';
+const RANKWEB_VIDEO_JOB   = 'rankweb_video_sync';
+const RANKWEB_VIDEO_TTL   = 7 * DAY_IN_SECONDS; // re-fetch a video's data at most weekly
+const RANKWEB_VIDEO_BATCH = 100; // items the daily backfill does in one run
 
 /** The post types scanned for videos (the setting; empty: nothing runs). */
 function rankweb_video_types(): array {
-	return array_values( array_filter( array_map( 'sanitize_key', (array) AW_VIDEO_TYPES ), 'post_type_exists' ) );
+	return array_values( array_filter( array_map( 'sanitize_key', (array) RANKWEB_VIDEO_TYPES ), 'post_type_exists' ) );
 }
 
 /* ---------- oEmbed ---------- */
@@ -79,7 +79,7 @@ function rankweb_video_fetch( array $v ): array {
 		}
 	}
 	// A short cache when nothing came back, so a provider hiccup is retried soon; the full week when it worked.
-	set_transient( $key, $data, '' === $data['name'] ? HOUR_IN_SECONDS : AW_VIDEO_TTL );
+	set_transient( $key, $data, '' === $data['name'] ? HOUR_IN_SECONDS : RANKWEB_VIDEO_TTL );
 	return $data;
 }
 
@@ -93,7 +93,7 @@ function rankweb_video_fetch( array $v ): array {
 function rankweb_video_sync_item( int $id ): array {
 	$post = get_post( $id );
 	if ( ! $post instanceof WP_Post || ! in_array( $post->post_type, rankweb_video_types(), true ) ) {
-		delete_post_meta( $id, AW_VIDEO_META );
+		delete_post_meta( $id, RANKWEB_VIDEO_META );
 		return array();
 	}
 	$videos = array();
@@ -101,16 +101,16 @@ function rankweb_video_sync_item( int $id ): array {
 		$videos[] = array_merge( $v, rankweb_video_fetch( $v ) );
 	}
 	if ( $videos ) {
-		update_post_meta( $id, AW_VIDEO_META, $videos );
+		update_post_meta( $id, RANKWEB_VIDEO_META, $videos );
 	} else {
-		delete_post_meta( $id, AW_VIDEO_META );
+		delete_post_meta( $id, RANKWEB_VIDEO_META );
 	}
 	return $videos;
 }
 
 /** An item's stored videos. */
 function rankweb_video_get( int $id ): array {
-	$v = get_post_meta( $id, AW_VIDEO_META, true );
+	$v = get_post_meta( $id, RANKWEB_VIDEO_META, true );
 	return is_array( $v ) ? $v : array();
 }
 
@@ -141,14 +141,14 @@ function rankweb_video_backfill_ids(): array {
 		array(
 			'post_type'        => $types,
 			'post_status'      => 'publish',
-			'posts_per_page'   => AW_VIDEO_BATCH,
+			'posts_per_page'   => RANKWEB_VIDEO_BATCH,
 			'orderby'          => 'modified',
 			'order'            => 'ASC',
 			'fields'           => 'ids',
 			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
-			'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- the daily backfill, capped to AW_VIDEO_BATCH
+			'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- the daily backfill, capped to RANKWEB_VIDEO_BATCH
 				array(
-					'key'     => AW_VIDEO_META,
+					'key'     => RANKWEB_VIDEO_META,
 					'compare' => 'NOT EXISTS',
 				),
 			),
@@ -162,12 +162,12 @@ function rankweb_video_sync(): void {
 		rankweb_video_sync_item( (int) $id );
 	}
 }
-add_action( AW_VIDEO_JOB, 'rankweb_video_sync' );
+add_action( RANKWEB_VIDEO_JOB, 'rankweb_video_sync' );
 add_action(
 	'init',
 	function () {
-		if ( ( is_admin() || wp_doing_cron() ) && rankweb_video_types() && ! wp_next_scheduled( AW_VIDEO_JOB ) ) {
-			wp_schedule_event( time() + 25 * MINUTE_IN_SECONDS, 'daily', AW_VIDEO_JOB );
+		if ( ( is_admin() || wp_doing_cron() ) && rankweb_video_types() && ! wp_next_scheduled( RANKWEB_VIDEO_JOB ) ) {
+			wp_schedule_event( time() + 25 * MINUTE_IN_SECONDS, 'daily', RANKWEB_VIDEO_JOB );
 		}
 	}
 );
@@ -230,7 +230,7 @@ function rankweb_video_sitemap_items(): array {
 			'suppress_filters' => true, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters_suppress_filters -- admin/background query over post IDs; filters suppressed so other plugins do not alter this internal set (capped or cached, never a front-end query).
 			'meta_query'       => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- the video sitemap, built on request and cached by the server
 				array(
-					'key'     => AW_VIDEO_META,
+					'key'     => RANKWEB_VIDEO_META,
 					'compare' => 'EXISTS',
 				),
 			),

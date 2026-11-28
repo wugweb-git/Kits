@@ -23,8 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_KW_DB_VERSION = '3';
-const AW_KW_DB_OPTION  = 'aw_kw_db';
+const INSIGHTWEB_KW_DB_VERSION = '3';
+const INSIGHTWEB_KW_DB_OPTION  = 'aw_kw_db';
 
 /**
  * Full name of a Search Insights / keyword table.
@@ -44,17 +44,17 @@ function insightweb_si_now(): string {
 /** Role bits with their labels (Search Insights' filters and AW Sourcing's Keywords screen). */
 function insightweb_si_roles(): array {
 	return array(
-		AW_SI_ROLE_TRACKED  => __( 'Tracked', 'insightweb' ),
-		AW_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'insightweb' ),
-		AW_SI_ROLE_SOURCING => __( 'Include', 'insightweb' ),
-		SOURCEWEB_KW_ROLE_ANIMAL   => __( 'Animal', 'insightweb' ),
-		SOURCEWEB_KW_ROLE_CONTEXT  => __( 'Context', 'insightweb' ),
-		SOURCEWEB_KW_ROLE_EXCLUDE  => __( 'Exclude', 'insightweb' ),
-		SOURCEWEB_KW_ROLE_SEARCH   => __( 'Search', 'insightweb' ),
-		SOURCEWEB_KW_ROLE_PRESS    => __( 'Press', 'insightweb' ),
-		SOURCEWEB_KW_ROLE_CATEGORY => __( 'Category word', 'insightweb' ),
-		AW_SI_ROLE_BRAND    => __( 'Brand', 'insightweb' ),
-		AW_SI_ROLE_SEARCHED => __( 'Searched', 'insightweb' ),
+		INSIGHTWEB_SI_ROLE_TRACKED  => __( 'Tracked', 'insightweb' ),
+		INSIGHTWEB_SI_ROLE_FOCUS    => __( 'Focus keyphrase', 'insightweb' ),
+		INSIGHTWEB_SI_ROLE_SOURCING => __( 'Include', 'insightweb' ),
+		INSIGHTWEB_KW_ROLE_ANIMAL   => __( 'Animal', 'insightweb' ),
+		INSIGHTWEB_KW_ROLE_CONTEXT  => __( 'Context', 'insightweb' ),
+		INSIGHTWEB_KW_ROLE_EXCLUDE  => __( 'Exclude', 'insightweb' ),
+		INSIGHTWEB_KW_ROLE_SEARCH   => __( 'Search', 'insightweb' ),
+		INSIGHTWEB_KW_ROLE_PRESS    => __( 'Press', 'insightweb' ),
+		INSIGHTWEB_KW_ROLE_CATEGORY => __( 'Category word', 'insightweb' ),
+		INSIGHTWEB_SI_ROLE_BRAND    => __( 'Brand', 'insightweb' ),
+		INSIGHTWEB_SI_ROLE_SEARCHED => __( 'Searched', 'insightweb' ),
 	);
 }
 
@@ -63,7 +63,7 @@ function insightweb_si_roles(): array {
  * autoloaded option read). dbDelta adds the version 2 columns to the table Search Insights created; nothing is dropped.
  */
 function insightweb_kw_install(): void {
-	if ( get_option( AW_KW_DB_OPTION ) === AW_KW_DB_VERSION ) {
+	if ( get_option( INSIGHTWEB_KW_DB_OPTION ) === INSIGHTWEB_KW_DB_VERSION ) {
 		return;
 	}
 	global $wpdb;
@@ -127,13 +127,13 @@ function insightweb_kw_install(): void {
 		KEY kind_value (kind,value)
 		) {$c};"
 	);
-	update_option( AW_KW_DB_OPTION, AW_KW_DB_VERSION, true ); // Autoloaded: checked on every admin request.
+	update_option( INSIGHTWEB_KW_DB_OPTION, INSIGHTWEB_KW_DB_VERSION, true ); // Autoloaded: checked on every admin request.
 }
 add_action( 'admin_init', 'insightweb_kw_install', 1 ); // Also called by WP-CLI (wp aw-sourcing migrate) and Search Insights.
 
 /** Whether the table is at the current version (the install may not have run yet). */
 function insightweb_kw_ready(): bool {
-	return get_option( AW_KW_DB_OPTION ) === AW_KW_DB_VERSION;
+	return get_option( INSIGHTWEB_KW_DB_OPTION ) === INSIGHTWEB_KW_DB_VERSION;
 }
 
 /**
@@ -161,7 +161,7 @@ function insightweb_kw_decode( $r ) {
  * @param bool $en_only Only lang = en.
  * @return array[] id => record.
  */
-function insightweb_kw_rows( $mask = AW_KW_OWNER_ROLES, $en_only = false ) {
+function insightweb_kw_rows( $mask = INSIGHTWEB_KW_OWNER_ROLES, $en_only = false ) {
 	global $wpdb;
 	$k    = insightweb_si_table( 'keywords' );
 	$args = $mask ? array( $k, (int) $mask ) : array( $k );
@@ -268,7 +268,7 @@ function insightweb_kw_create( $label, array $fields = array() ) {
 		'norm'    => $norm,
 		'label'   => mb_substr( $label, 0, 255 ),
 		'lang'    => isset( $fields['lang'] ) ? (string) $fields['lang'] : insightweb_si_lang( $label ),
-		'roles'   => insightweb_si_is_brand( $label ) ? AW_SI_ROLE_BRAND : 0,
+		'roles'   => insightweb_si_is_brand( $label ) ? INSIGHTWEB_SI_ROLE_BRAND : 0,
 		'created' => $now,
 		'updated' => $now,
 	);
@@ -336,7 +336,7 @@ function insightweb_kw_update( $id, array $fields ) {
 	}
 	$set = array();
 	if ( isset( $fields['lang'] ) && in_array( $fields['lang'], array( 'en', 'hi', 'hinglish' ), true ) && $fields['lang'] !== $cur['lang'] ) {
-		if ( 'en' !== $fields['lang'] && ( $cur['roles'] & SOURCEWEB_KW_WORKER_ROLES ) ) {
+		if ( 'en' !== $fields['lang'] && ( $cur['roles'] & INSIGHTWEB_KW_WORKER_ROLES ) ) {
 			return new WP_Error( 'aw_kw_refused', 'Remove its Sourcing and Press roles first: they are for English keywords only.' );
 		}
 		$set['lang'] = $fields['lang'];

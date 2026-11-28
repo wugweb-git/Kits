@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## Unreleased
+
+- Plugin Check: every constant carries the plugin's own prefix (`DIRECTORYWEB_`). Stored names are unchanged. The days before a Claimed listing is checked again are read from `DIRECTORYWEB_REVERIFY_DAYS` (default 180); a site that used another name maps it in its site layer.
+
 ## 1.5.4
 
 - Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
@@ -35,7 +39,7 @@ Each version's notes also sit in `readme.txt`. Newest first.
 
 - DirectoryWeb is a generic directory: all Animal Writes only code is out of the plugin and lives, unchanged, in the site layer `sites/animalwrites/directoryweb/` (not in the plugin zip; deploy it alongside DirectoryWeb 1.3.0).
 - Removed from the plugin (moved): `includes/find-help.php`, `directoryweb-find-help.php`, `district-helplines.php`, `directoryweb-helplines.php`, `local-cards.php`, `directoryweb-local-card.php` (Find help, district helplines with 112 and the 1962 unit, the local card and their three blocks), `gov-verified.php` (Verified from government lists), `featured.php` (Featured in), and from `places.php`, `places-admin.php`, `directory.php` and `directory-map.php` the India Post PIN lookup, its AJAX handlers, the nearest-district-by-PIN query and the PIN box.
-- Neutral defaults and filters in their place: `directoryweb_type_groups` (replaces the AW_VET_TYPES constant), `directoryweb_services`, `directoryweb_service_type_slugs`, `directoryweb_type_services` (replace DIRECTORYWEB_SERVICES and AW_TYPE_SERVICES), `directoryweb_directory_h1`, `directoryweb_directory_intro`, `directoryweb_archive_place_title`, `directoryweb_claim_copy`, `directoryweb_data_sources` and four more source filters (replace the Animal Writes source list, host list and import list), `directoryweb_geocode_profile` (country, address fields, postal code rules), `directoryweb_postal_code_valid`, `directoryweb_postal_code_input`, `directoryweb_place_box_postal_row`, `directoryweb_search_place_from_code`, `directoryweb_near_from_code`, `directoryweb_near_code_input`, `directoryweb_settings_services`.
+- Neutral defaults and filters in their place: `directoryweb_type_groups` (replaces the earlier VET_TYPES constant), `directoryweb_services`, `directoryweb_service_type_slugs`, `directoryweb_type_services` (replace the earlier SERVICES and TYPE_SERVICES constants), `directoryweb_directory_h1`, `directoryweb_directory_intro`, `directoryweb_archive_place_title`, `directoryweb_claim_copy`, `directoryweb_data_sources` and four more source filters (replace the Animal Writes source list, host list and import list), `directoryweb_geocode_profile` (country, address fields, postal code rules), `directoryweb_postal_code_valid`, `directoryweb_postal_code_input`, `directoryweb_place_box_postal_row`, `directoryweb_search_place_from_code`, `directoryweb_near_from_code`, `directoryweb_near_code_input`, `directoryweb_settings_services`.
 - Behaviour without the site layer: the Directory H1 for a place reads "Listings in {place}", the archive title "Directory: {place}", no services list, no type groups, no helpline benefit on /claim/, geocoding adds no country, no PIN search.
 - Tests: new `tests/generic-defaults-tests.php`; `labels-tests.php` keeps only the neutral half; the Animal Writes half and the site layer's wiring are in `sites/animalwrites/directoryweb/tests/`.
 - Not moved: the stored listing field names `aw_awbi_*`, `aw_darpan_id`, `aw_reg_12a`, `aw_reg_80g`, `aw_fcra` and the claim form rows for them (neutral labels; see PENDING.md).

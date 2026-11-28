@@ -93,6 +93,7 @@ InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt
 == Changelog ==
 
 = 1.4.4 =
+* Constants carry the plugin's own prefix: every site-set constant (the eight numbers, the service keys, the score floor) is now INSIGHTWEB_*. Nothing stored changes. The post types of the focus-keyphrase sync come from the filter insightweb_seo_item_types.
 * Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
 
 = 1.4.3 =

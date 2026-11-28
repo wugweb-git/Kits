@@ -4,12 +4,12 @@
  * stable ID: the workflow file without .yml (sourcing, summary-rewrite, focus-keywords …); the ID never changes when a
  * name does. A worker could later map to a workflow and one of its jobs (key "job"), but nothing splits one yet.
  *
- * AW_WORKERS (workers-registry.php, an exact copy of docs/workers.json in the workers repository) stays the source of
+ * SOURCEWEB_WORKERS (workers-registry.php, an exact copy of docs/workers.json in the workers repository) stays the source of
  * truth for what exists, its schedule and its workflow file. Option sourceweb_workers_meta (id => fields, not autoloaded) adds:
  * - overrides for a registry worker: name, what, group, late_after_h (present = overridden; null = never late);
  * - Planned workers (planned => true): ID, name, what, group, schedule wanted (words), late_after_h. They show
  *   "Not built yet" until a workflow with that ID reports a run, and never raise an alert.
- * Option aw_workers_groups adds groups to AW_WORKER_GROUPS (slug => [label, dashicon]).
+ * Option aw_workers_groups adds groups to SOURCEWEB_WORKER_GROUPS (slug => [label, dashicon]).
  *
  * @package aw-sourcing
  */
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The groups, with a core dashicon each. More can be added on a worker's edit screen. */
-const AW_WORKER_GROUPS = array(
+const SOURCEWEB_WORKER_GROUPS = array(
 	'sourcing'    => array( 'Sourcing', 'rss' ),
 	'seo'         => array( 'SEO', 'chart-line' ),
 	'directory'   => array( 'Directory', 'location' ),
@@ -28,7 +28,7 @@ const AW_WORKER_GROUPS = array(
 );
 
 /** Each registry worker's group until the owner moves it. */
-const AW_WORKER_DEFAULT_GROUP = array(
+const SOURCEWEB_WORKER_DEFAULT_GROUP = array(
 	'sourcing'             => 'sourcing',
 	'summary-rewrite'      => 'sourcing',
 	'sources-sync'         => 'sourcing',
@@ -55,7 +55,7 @@ function sourceweb_worker_group_defs() {
 			$extra[ sanitize_key( $slug ) ] = array( (string) $g[0], (string) ( $g[1] ?? 'admin-generic' ) );
 		}
 	}
-	return AW_WORKER_GROUPS + $extra;
+	return SOURCEWEB_WORKER_GROUPS + $extra;
 }
 
 /** Saved overrides and Planned workers. */
@@ -66,7 +66,7 @@ function sourceweb_workers_meta() {
 /**
  * Every worker: the registry's, in its order, then the Planned ones by name.
  *
- * @return array<string,array> id => id, file, name, what, group, late_after_h, planned, schedule, registry (AW_WORKERS row or null), overrides (field names)
+ * @return array<string,array> id => id, file, name, what, group, late_after_h, planned, schedule, registry (SOURCEWEB_WORKERS row or null), overrides (field names)
  */
 function sourceweb_workers_all() {
 	static $memo = null;
@@ -78,11 +78,11 @@ function sourceweb_workers_all() {
 	}
 	$groups = sourceweb_worker_group_defs();
 	$out    = array();
-	foreach ( AW_WORKERS as $file => $w ) {
+	foreach ( SOURCEWEB_WORKERS as $file => $w ) {
 		$id         = sourceweb_worker_id( $file );
 		$m          = (array) ( $meta[ $id ] ?? array() );
 		$over       = array_values( array_intersect( array( 'name', 'what', 'group', 'late_after_h' ), array_keys( $m ) ) );
-		$group      = (string) ( $m['group'] ?? ( AW_WORKER_DEFAULT_GROUP[ $id ] ?? ( $w['crons'] || ! empty( $w['after'] ) ? 'maintenance' : 'one-off' ) ) );
+		$group      = (string) ( $m['group'] ?? ( SOURCEWEB_WORKER_DEFAULT_GROUP[ $id ] ?? ( $w['crons'] || ! empty( $w['after'] ) ? 'maintenance' : 'one-off' ) ) );
 		$out[ $id ] = array(
 			'id'           => $id,
 			'file'         => $file,
@@ -137,7 +137,7 @@ function sourceweb_worker_is_planned( $id ) {
  * A registry row with the owner's overrides (name, what, late limit), for the alerts.
  *
  * @param string $file Workflow file.
- * @param array  $w    Its AW_WORKERS row.
+ * @param array  $w    Its SOURCEWEB_WORKERS row.
  * @return array
  */
 function sourceweb_worker_def( $file, array $w ) {

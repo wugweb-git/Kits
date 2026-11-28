@@ -410,9 +410,9 @@ function insightweb_dashboard_payload(): array {
 function insightweb_numbers_group( array $saved ): array {
 	$fields = insightweb_si_setting_fields();
 	$blocks = array(
-		'priorities' => array( __( 'Priorities', 'insightweb' ), __( 'When a search counts as high demand or a quick win, and how listing names are shown.', 'insightweb' ), array( 'AW_SI_HIGH_TRENDS', 'AW_SI_HIGH_IMPR', 'AW_SI_QUICK_MIN', 'AW_SI_MOVERS' ) ),
-		'flags'      => array( __( 'Page flags', 'insightweb' ), __( 'Scores under these mark a page on the Pages tab.', 'insightweb' ), array( 'AW_SI_PSI_FLAG', 'AW_SI_RM_LOW' ) ),
-		'keep'       => array( __( 'Keeping data', 'insightweb' ), '', array( 'AW_SI_KEEP_DAYS' ) ),
+		'priorities' => array( __( 'Priorities', 'insightweb' ), __( 'When a search counts as high demand or a quick win, and how listing names are shown.', 'insightweb' ), array( 'INSIGHTWEB_SI_HIGH_TRENDS', 'INSIGHTWEB_SI_HIGH_IMPR', 'INSIGHTWEB_SI_QUICK_MIN', 'INSIGHTWEB_SI_MOVERS' ) ),
+		'flags'      => array( __( 'Page flags', 'insightweb' ), __( 'Scores under these mark a page on the Pages tab.', 'insightweb' ), array( 'INSIGHTWEB_SI_PSI_FLAG', 'INSIGHTWEB_SI_RM_LOW' ) ),
+		'keep'       => array( __( 'Keeping data', 'insightweb' ), '', array( 'INSIGHTWEB_SI_KEEP_DAYS' ) ),
 	);
 	$out    = array();
 	foreach ( $blocks as $key => $b ) {
@@ -614,7 +614,7 @@ function insightweb_services(): array {
 	$out[]   = $module( 'search-console', 'gsc', __( 'Search Console', 'insightweb' ), 'propertyID' );
 	$out[]   = $module( 'analytics-4', 'ga4', __( 'Google Analytics 4', 'insightweb' ), 'propertyID' );
 	$psi     = $module( 'pagespeed-insights', 'psi', __( 'PageSpeed Insights', 'insightweb' ), '' );
-	if ( '' !== insightweb_si_key( 'AW_PSI_KEY' ) ) {
+	if ( '' !== insightweb_si_key( 'INSIGHTWEB_PSI_KEY' ) ) {
 		$psi['summary'] = __( 'Through Site Kit by Google, with its own key as a fallback. Weekly.', 'insightweb' );
 	}
 	$out[] = $psi;

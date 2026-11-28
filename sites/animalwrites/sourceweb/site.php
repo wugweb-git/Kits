@@ -16,6 +16,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'ANIMALWRITES_SOURCEWEB_DIR', __DIR__ . '/' );
 
+require_once __DIR__ . '/config-names.php'; // earlier wp-config.php names -> SourceWeb's own constants (before the plugin loads).
+
+// The services a listing can offer, slug => name, from this site's list (Animal Writes Core's, when it is loaded).
+add_filter(
+	'sourceweb_enrich_services',
+	function ( $services ) {
+		return defined( 'AW_SERVICES' ) && is_array( AW_SERVICES ) ? AW_SERVICES : $services;
+	}
+);
+
 // Filters and actions only: safe to load before SourceWeb itself.
 
 // Which content type plays which role. SourceWeb names no site's post types: it asks for a role (news, library, campaign,

@@ -79,9 +79,9 @@ function sourceweb_sourcing_cli_now3() {
  */
 function sourceweb_sourcing_cli_summary_with( $opt ) {
 	$peek = fn() => is_array( $opt ) ? $opt : false;
-	add_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
+	add_filter( 'pre_option_' . SOURCEWEB_SUMMARY_RULES_OPTION, $peek );
 	$out  = sourceweb_summary_rules();
-	remove_filter( 'pre_option_' . AW_SUMMARY_RULES_OPTION, $peek );
+	remove_filter( 'pre_option_' . SOURCEWEB_SUMMARY_RULES_OPTION, $peek );
 	return $out;
 }
 
@@ -118,8 +118,8 @@ add_action(
 		$types  = array_keys( sourceweb_rules_sections( true ) );
 		$fields = array_keys( sourceweb_enrich_fields() );
 		$c      = (array) get_option( 'aw_sources', array() );
-		$sum    = get_option( AW_SUMMARY_RULES_OPTION );
-		$fr     = get_option( AW_ENRICH_RULES_OPTION );
+		$sum    = get_option( SOURCEWEB_SUMMARY_RULES_OPTION );
+		$fr     = get_option( SOURCEWEB_ENRICH_RULES_OPTION );
 		$plan   = sourceweb_rules_phase3_plan( $c, $sum, $fr, $types, $fields );
 
 		WP_CLI::log( 'Sections (the site\'s content types): ' . implode( ', ', $types ) );
@@ -163,13 +163,13 @@ add_action(
 			WP_CLI::error( 'Not migrated: resolve the conflicts above first.' );
 		}
 		// Read-modify-write right before saving: the plan applied to the options as they are now.
-		$now = sourceweb_rules_phase3_plan( (array) get_option( 'aw_sources', array() ), get_option( AW_SUMMARY_RULES_OPTION ), get_option( AW_ENRICH_RULES_OPTION ), $types, $fields );
+		$now = sourceweb_rules_phase3_plan( (array) get_option( 'aw_sources', array() ), get_option( SOURCEWEB_SUMMARY_RULES_OPTION ), get_option( SOURCEWEB_ENRICH_RULES_OPTION ), $types, $fields );
 		update_option( 'aw_sources', $now['sources'], false );
 		if ( is_array( $now['summary'] ) ) {
-			update_option( AW_SUMMARY_RULES_OPTION, $now['summary'] );
+			update_option( SOURCEWEB_SUMMARY_RULES_OPTION, $now['summary'] );
 		}
 		if ( $now['seeded'] ) {
-			update_option( AW_ENRICH_RULES_OPTION, $now['field_rules'], false );
+			update_option( SOURCEWEB_ENRICH_RULES_OPTION, $now['field_rules'], false );
 		}
 		update_option(
 			'aw_sourcing_phase3_record',
@@ -265,8 +265,8 @@ add_action(
 		$all              = ! empty( $assoc['restore-all'] );
 		WP_CLI::confirm( 'Roll phase 3 back ' . ( $all ? "to backup $bk exactly (aw_sources, sourceweb_summary_rules and sourceweb_enrich_field_rules as backed up)" : '(undo the migration on the current options)' ) . '?', $assoc );
 		$c   = (array) get_option( 'aw_sources', array() );
-		$sum = get_option( AW_SUMMARY_RULES_OPTION );
-		$fr  = get_option( AW_ENRICH_RULES_OPTION );
+		$sum = get_option( SOURCEWEB_SUMMARY_RULES_OPTION );
+		$fr  = get_option( SOURCEWEB_ENRICH_RULES_OPTION );
 		// What the rollback takes away is kept (the owner's edits since the migration are not lost).
 		update_option(
 			'aw_sourcing_phase3_rolled_back',
@@ -281,11 +281,11 @@ add_action(
 		);
 		if ( $all ) {
 			update_option( 'aw_sources', $old['aw_sources'], false );
-			foreach ( array( AW_SUMMARY_RULES_OPTION, AW_ENRICH_RULES_OPTION ) as $k ) {
+			foreach ( array( SOURCEWEB_SUMMARY_RULES_OPTION, SOURCEWEB_ENRICH_RULES_OPTION ) as $k ) {
 				if ( null === $old[ $k ] || false === $old[ $k ] ) {
 					delete_option( $k );
 				} else {
-					update_option( $k, $old[ $k ], AW_SUMMARY_RULES_OPTION === $k ? null : false );
+					update_option( $k, $old[ $k ], SOURCEWEB_SUMMARY_RULES_OPTION === $k ? null : false );
 				}
 			}
 			$what = "restored aw_sources, sourceweb_summary_rules and sourceweb_enrich_field_rules from $bk";
@@ -294,9 +294,9 @@ add_action(
 			$undo = sourceweb_rules_phase3_undo( $c, $sum, (array) ( $rec['added'] ?? array() ) );
 			update_option( 'aw_sources', $undo['sources'], false );
 			if ( is_array( $undo['summary'] ) ) {
-				update_option( AW_SUMMARY_RULES_OPTION, $undo['summary'] );
+				update_option( SOURCEWEB_SUMMARY_RULES_OPTION, $undo['summary'] );
 			}
-			delete_option( AW_ENRICH_RULES_OPTION ); // the code's rules apply again
+			delete_option( SOURCEWEB_ENRICH_RULES_OPTION ); // the code's rules apply again
 			$what = sprintf( 'section rules removed for %s%s; summary rules back to their old names; field rules off (kept in aw_sourcing_phase3_rolled_back)', $undo['removed'] ? implode( ', ', $undo['removed'] ) : 'none', $undo['kept'] ? ' (kept, filled in since: ' . implode( ', ', $undo['kept'] ) . ')' : '' );
 		}
 		if ( null === $old['aw_sourcing_phase'] ) {

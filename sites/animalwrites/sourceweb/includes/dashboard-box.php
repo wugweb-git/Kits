@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action(
 	'wp_dashboard_setup',
 	function () {
-		if ( ! current_user_can( AW_REVIEW_CAP ) ) {
+		if ( ! current_user_can( SOURCEWEB_REVIEW_CAP ) ) {
 			return; // the Sourcing menu's own capability
 		}
 		wp_add_dashboard_widget(
@@ -25,7 +25,7 @@ add_action(
 				$need    = count( array_filter( $rows, fn( $r ) => $r['problem'] ) );
 				$refused = sourceweb_sourcing_dash_ai_refused();
 				$review  = sourceweb_review_count();
-				$to_rev  = sourceweb_sourcing_overview_link( 'To review', admin_url( 'admin.php?page=aw-review' ), AW_REVIEW_CAP );
+				$to_rev  = sourceweb_sourcing_overview_link( 'To review', admin_url( 'admin.php?page=aw-review' ), SOURCEWEB_REVIEW_CAP );
 				if ( function_exists( 'kits_dash_cards' ) ) {
 					echo kits_dash_cards( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside.
 						array(

@@ -310,7 +310,7 @@ function sourceweb_rest_feeds( WP_REST_Request $request ) {
 			'id'       => $t . '|' . $s['id'],
 			'title'    => (string) ( $s['name'] ?? $s['id'] ),
 			'type'     => $t,
-			'typeText' => (string) ( AW_SOURCE_TYPES[ $t ][0] ?? $t ),
+			'typeText' => (string) ( SOURCEWEB_FEED_SOURCE_TYPES[ $t ][0] ?? $t ),
 			'rss'      => $rss,
 			'address'  => $q ? $q : (string) ( $s['url'] ?? '' ),
 			'note'     => $q ? 'Google News search' : ( $rss ? '' : (string) ( $s['kind'] ?? '' ) . '; needs code to change' ),
@@ -324,7 +324,7 @@ function sourceweb_rest_feeds( WP_REST_Request $request ) {
 		);
 	}
 	$views = array();
-	foreach ( AW_SOURCE_TYPES as $t => $l ) {
+	foreach ( SOURCEWEB_FEED_SOURCE_TYPES as $t => $l ) {
 		$views[ $t ] = array( $l[0], fn( $r ) => $r['type'] === $t );
 	}
 	$views['on']  = array( 'On', fn( $r ) => $r['on'] );

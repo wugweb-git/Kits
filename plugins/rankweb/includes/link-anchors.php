@@ -26,15 +26,15 @@ require_once __DIR__ . '/class-aw-anchor.php';
 /** The limits as RankWeb_Anchor::mix() reads them. */
 function rankweb_anchor_limits(): array {
 	return array(
-		'exact_max' => max( 0, (int) AW_LINK_ANCHOR_EXACT_MAX ),
-		'type_max'  => max( 0, (int) AW_LINK_ANCHOR_TYPE_MAX ),
-		'min_links' => max( 1, (int) AW_LINK_ANCHOR_MIN ),
+		'exact_max' => max( 0, (int) RANKWEB_LINK_ANCHOR_EXACT_MAX ),
+		'type_max'  => max( 0, (int) RANKWEB_LINK_ANCHOR_TYPE_MAX ),
+		'min_links' => max( 1, (int) RANKWEB_LINK_ANCHOR_MIN ),
 	);
 }
 
 /** The settings that change how an anchor is typed, as one string (part of an item's cache key). */
 function rankweb_anchor_settings_key(): string {
-	return md5( (string) wp_json_encode( array( (array) AW_LINK_BRAND, (array) AW_LINK_GENERIC, (int) AW_LINK_LONG_WORDS ) ) );
+	return md5( (string) wp_json_encode( array( (array) RANKWEB_LINK_BRAND, (array) RANKWEB_LINK_GENERIC, (int) RANKWEB_LINK_LONG_WORDS ) ) );
 }
 
 /** The parts of the sorter's context that are the same for every target (brand names, generic anchors, long). */
@@ -42,9 +42,9 @@ function rankweb_anchor_base_ctx(): array {
 	static $memo = null;
 	if ( null === $memo ) {
 		$memo = array(
-			'brand'      => RankWeb_Anchor::normalize_list( (array) AW_LINK_BRAND ),
-			'generic'    => RankWeb_Anchor::normalize_list( (array) AW_LINK_GENERIC ),
-			'long_words' => max( 1, (int) AW_LINK_LONG_WORDS ),
+			'brand'      => RankWeb_Anchor::normalize_list( (array) RANKWEB_LINK_BRAND ),
+			'generic'    => RankWeb_Anchor::normalize_list( (array) RANKWEB_LINK_GENERIC ),
+			'long_words' => max( 1, (int) RANKWEB_LINK_LONG_WORDS ),
 		);
 	}
 	return $memo;

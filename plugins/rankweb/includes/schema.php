@@ -275,7 +275,7 @@ function rankweb_publisher_schema() {
 				'@type'         => 'Organization',
 				'@id'           => home_url( '/#organization' ),
 				'name'          => '' !== $name ? $name : get_bloginfo( 'name' ),
-				'alternateName' => AW_SITE_ALT_NAMES,
+				'alternateName' => RANKWEB_SITE_ALT_NAMES,
 				'url'           => home_url( '/' ),
 				'description'   => rankweb_plain_text( $desc ),
 				'logo'          => $logo ? array_filter( array( '@type' => 'ImageObject', 'url' => $logo, 'width' => (int) ( $lmeta['width'] ?? 0 ), 'height' => (int) ( $lmeta['height'] ?? 0 ) ) ) : null,
@@ -516,7 +516,7 @@ function rankweb_article_nodes( $id ) {
 			array( 'author' => $us, 'publisher' => $us )
 		);
 	} elseif ( rankweb_is_type( $type, 'library' ) ) {
-		$court = $issuer && function_exists( 'sourceweb_item_issuer' ) && defined( 'AW_COURT_ISSUERS' ) && in_array( sourceweb_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
+		$court = $issuer && function_exists( 'sourceweb_item_issuer' ) && defined( 'RANKWEB_COURT_ISSUERS' ) && in_array( sourceweb_item_issuer( $id )->slug, RANKWEB_COURT_ISSUERS, true );
 		$doc   = array_filter(
 			array(
 				'@type'         => 'CreativeWork',
@@ -750,7 +750,7 @@ function rankweb_schema_language( $node ) {
 }
 
 /** Other names of the site and organisation (owner, 20 Oct 2026); Google reads the WebSite's for the site name in results. */
-// AW_SITE_ALT_NAMES: RankWeb → Settings (settings.php).
+// RANKWEB_SITE_ALT_NAMES: RankWeb → Settings (settings.php).
 
 /** The site itself (shown on every page). */
 function rankweb_website_schema() {
@@ -758,7 +758,7 @@ function rankweb_website_schema() {
 		'@type'         => 'WebSite',
 		'@id'           => home_url( '/#website' ),
 		'name'          => get_bloginfo( 'name' ),
-		'alternateName' => AW_SITE_ALT_NAMES,
+		'alternateName' => RANKWEB_SITE_ALT_NAMES,
 		'url'           => home_url( '/' ),
 		'inLanguage'    => rankweb_language(),
 		'publisher'     => array( '@id' => home_url( '/#organization' ) ),

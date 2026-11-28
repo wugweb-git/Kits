@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Who reviews: the To review screen and its Publish and Reject. */
-const AW_REVIEW_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
+const SOURCEWEB_REVIEW_CAP = SOURCEWEB_CAP; // manage_sourceweb (sourceweb-caps.php); was edit_others_posts, which still opens it
 
 /**
  * Types in the queue: post type => label. Built from the site's type roles (sourceweb_post_type_roles); a role with no
@@ -118,7 +118,7 @@ unset( $sourceweb_review_hook );
 add_action(
 	'admin_menu',
 	function () {
-		add_submenu_page( AW_SRC_MENU, 'To review', 'To review' . ( function_exists( 'kits_menu_count' ) ? kits_menu_count( sourceweb_review_count() ) : '' ), AW_REVIEW_CAP, 'aw-review', 'sourceweb_review_page' );
+		add_submenu_page( SOURCEWEB_SRC_MENU, 'To review', 'To review' . ( function_exists( 'kits_menu_count' ) ? kits_menu_count( sourceweb_review_count() ) : '' ), SOURCEWEB_REVIEW_CAP, 'aw-review', 'sourceweb_review_page' );
 	},
 	10 // after the menu and its Overview (admin-menu.php, 9)
 );
@@ -162,7 +162,7 @@ function sourceweb_review_apply( $ids, $action ) {
 
 /** Sourcing → To review: the shell screen (sourceweb-ui.php). */
 function sourceweb_review_page() {
-	if ( ! current_user_can( AW_REVIEW_CAP ) ) {
+	if ( ! current_user_can( SOURCEWEB_REVIEW_CAP ) ) {
 		return;
 	}
 	sourceweb_ui_page( 'review' );
@@ -213,7 +213,7 @@ add_action(
 	function () {
 		$type   = sanitize_key( $_GET['post_type'] ?? '' );
 		$status = sanitize_key( $_GET['status'] ?? '' );
-		if ( ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( sourceweb_review_types()[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
+		if ( ! current_user_can( SOURCEWEB_REVIEW_CAP ) || ! check_admin_referer( 'aw_publish_all' ) || ! isset( sourceweb_review_types()[ $type ] ) || 'post' === $type || ! in_array( $status, array( 'pending', 'draft' ), true ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		$ids = get_posts( array( 'post_type' => $type, 'post_status' => $status, 'fields' => 'ids', 'numberposts' => -1 ) );
@@ -227,7 +227,7 @@ add_action(
 	function () {
 		$id     = absint( $_GET['item_id'] ?? 0 );
 		$action = sanitize_key( $_GET['review_action'] ?? '' );
-		if ( ! $id || ! in_array( $action, array( 'publish', 'reject' ), true ) || ! current_user_can( AW_REVIEW_CAP ) || ! check_admin_referer( 'aw_review_' . $id ) ) {
+		if ( ! $id || ! in_array( $action, array( 'publish', 'reject' ), true ) || ! current_user_can( SOURCEWEB_REVIEW_CAP ) || ! check_admin_referer( 'aw_review_' . $id ) ) {
 			wp_die( 'Not allowed.', 403 );
 		}
 		sourceweb_review_apply( array( $id ), $action );

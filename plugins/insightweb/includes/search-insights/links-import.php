@@ -21,11 +21,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_LINK_DR_OPTION    = 'aw_si_link_dr';         // domain => [DR 0–100, Y-m-d read]
-const AW_SI_LINK_PAGES_OPTION = 'aw_si_links_gsc_pages'; // [ day, rows: [ [url, links, sites], … ] ]
-const AW_SI_LINK_READS_OPTION = 'aw_si_links_imports';   // source => [ time of the import, rows, day read ]
-const AW_SI_LINK_MAX_ROWS     = 2000;                    // per import
-const AW_SI_LINK_MAX_BYTES    = 2097152;                 // 2 MB per file or paste
+const INSIGHTWEB_SI_LINK_DR_OPTION    = 'aw_si_link_dr';         // domain => [DR 0–100, Y-m-d read]
+const INSIGHTWEB_SI_LINK_PAGES_OPTION = 'aw_si_links_gsc_pages'; // [ day, rows: [ [url, links, sites], … ] ]
+const INSIGHTWEB_SI_LINK_READS_OPTION = 'aw_si_links_imports';   // source => [ time of the import, rows, day read ]
+const INSIGHTWEB_SI_LINK_MAX_ROWS     = 2000;                    // per import
+const INSIGHTWEB_SI_LINK_MAX_BYTES    = 2097152;                 // 2 MB per file or paste
 
 /** The import's sources: form value => the source name stored on each row (with ", read <date>"). */
 function insightweb_si_links_import_sources(): array {
@@ -153,7 +153,7 @@ function insightweb_si_links_import_parse( string $raw, string $home, string $so
 		$v = str_replace( array( ',', ' ' ), '', $v );
 		return ctype_digit( $v ) ? (int) $v : -1;
 	};
-	foreach ( array_slice( $rows, 0, AW_SI_LINK_MAX_ROWS ) as $r ) {
+	foreach ( array_slice( $rows, 0, INSIGHTWEB_SI_LINK_MAX_ROWS ) as $r ) {
 		if ( 'pages' === $out['kind'] ) {
 			$url = esc_url_raw( (string) $r[ $to ], array( 'http', 'https' ) );
 			if ( '' === $url || insightweb_si_links_import_host( $url ) !== $hhost ) {
@@ -200,7 +200,7 @@ function insightweb_si_links_import_parse( string $raw, string $home, string $so
 			}
 		}
 	}
-	$out['skipped'] += max( 0, count( $rows ) - AW_SI_LINK_MAX_ROWS );
+	$out['skipped'] += max( 0, count( $rows ) - INSIGHTWEB_SI_LINK_MAX_ROWS );
 	return $out;
 }
 
@@ -212,7 +212,7 @@ function insightweb_si_links_import_parse( string $raw, string $home, string $so
 function insightweb_si_link_dr( string $domain ): ?array {
 	static $all = null;
 	if ( null === $all ) {
-		$all = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
+		$all = (array) get_option( INSIGHTWEB_SI_LINK_DR_OPTION, array() );
 	}
 	return isset( $all[ $domain ] ) && is_array( $all[ $domain ] ) ? $all[ $domain ] : null;
 }
@@ -251,18 +251,18 @@ function insightweb_si_links_import_store( array $parsed, string $source, string
 		}
 	}
 	if ( $parsed['dr'] ) {
-		$all = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
+		$all = (array) get_option( INSIGHTWEB_SI_LINK_DR_OPTION, array() );
 		foreach ( $parsed['dr'] as $domain => $v ) {
 			if ( (string) ( $all[ $domain ][1] ?? '' ) <= $day ) { // an older read never replaces a newer one
 				$all[ $domain ] = array( (int) $v, $day );
 			}
 		}
-		update_option( AW_SI_LINK_DR_OPTION, $all, false );
+		update_option( INSIGHTWEB_SI_LINK_DR_OPTION, $all, false );
 	}
 	if ( $parsed['pages'] ) {
 		usort( $parsed['pages'], fn( $a, $b ) => $b[1] <=> $a[1] );
 		update_option(
-			AW_SI_LINK_PAGES_OPTION,
+			INSIGHTWEB_SI_LINK_PAGES_OPTION,
 			array(
 				'day'  => $day,
 				'rows' => array_slice( $parsed['pages'], 0, 200 ),
@@ -270,9 +270,9 @@ function insightweb_si_links_import_store( array $parsed, string $source, string
 			false
 		);
 	}
-	$reads            = (array) get_option( AW_SI_LINK_READS_OPTION, array() );
+	$reads            = (array) get_option( INSIGHTWEB_SI_LINK_READS_OPTION, array() );
 	$reads[ $source ] = array( time(), $res['added'] + $res['updated'] + $res['pages'], $day );
-	update_option( AW_SI_LINK_READS_OPTION, $reads, false );
+	update_option( INSIGHTWEB_SI_LINK_READS_OPTION, $reads, false );
 	return $res;
 }
 
@@ -322,7 +322,7 @@ add_action(
 		if ( ! empty( $_FILES['file']['name'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 			$size = isset( $_FILES['file']['size'] ) ? absint( $_FILES['file']['size'] ) : 0;
-			if ( $size > AW_SI_LINK_MAX_BYTES ) {
+			if ( $size > INSIGHTWEB_SI_LINK_MAX_BYTES ) {
 				$fail( __( 'The file is larger than 2 MB.', 'insightweb' ) );
 			}
 			$up = wp_handle_upload(
@@ -344,7 +344,7 @@ add_action(
 		if ( '' === trim( $raw ) ) {
 			$fail( __( 'Nothing to import: choose a file or paste the rows.', 'insightweb' ) );
 		}
-		if ( strlen( $raw ) > AW_SI_LINK_MAX_BYTES ) {
+		if ( strlen( $raw ) > INSIGHTWEB_SI_LINK_MAX_BYTES ) {
 			$fail( __( 'The paste is larger than 2 MB.', 'insightweb' ) );
 		}
 		/* translators: 1: source, 2: date read. */
@@ -397,13 +397,13 @@ function insightweb_si_links_reads_section(): void {
 		}
 	}
 	$runs  = insightweb_si_runs();
-	$reads = (array) get_option( AW_SI_LINK_READS_OPTION, array() );
+	$reads = (array) get_option( INSIGHTWEB_SI_LINK_READS_OPTION, array() );
 	$rows  = array();
 	foreach ( $by as $k => $v ) {
 		// The day of the read itself when one was logged: rows keep their own (older) last seen from the export.
 		$day  = max( $v[1], is_array( $reads[ $k ] ?? null ) ? (string) ( $reads[ $k ][2] ?? '' ) : '' );
 		$read = '' !== $day ? mysql2date( 'j M Y', $day ) : '–';
-		if ( defined( 'AW_SI_BING_SOURCE' ) && AW_SI_BING_SOURCE === $k && ! empty( $runs['bing']['ok'] ) ) {
+		if ( defined( 'INSIGHTWEB_SI_BING_SOURCE' ) && INSIGHTWEB_SI_BING_SOURCE === $k && ! empty( $runs['bing']['ok'] ) ) {
 			$read = wp_date( 'j M Y', (int) $runs['bing']['ok'] ); // the monthly run itself, even when it found nothing new
 		}
 		$rows[] = array( $k, number_format_i18n( $v[0] ), $read, $v[0], $day );
@@ -413,11 +413,11 @@ function insightweb_si_links_reads_section(): void {
 			$rows[] = array( (string) $src, '–', mysql2date( 'j M Y', (string) ( $r[2] ?? '' ) ), -1, (string) ( $r[2] ?? '' ) ); // a read with no link rows (Top linked pages only)
 		}
 	}
-	$pages = (array) get_option( AW_SI_LINK_PAGES_OPTION, array() );
+	$pages = (array) get_option( INSIGHTWEB_SI_LINK_PAGES_OPTION, array() );
 	if ( ! empty( $pages['day'] ) ) {
 		$rows[] = array( __( 'Search Console Links: top linked pages', 'insightweb' ), number_format_i18n( count( (array) ( $pages['rows'] ?? array() ) ) ), mysql2date( 'j M Y', (string) $pages['day'] ), count( (array) ( $pages['rows'] ?? array() ) ), (string) $pages['day'] );
 	}
-	$dr = (array) get_option( AW_SI_LINK_DR_OPTION, array() );
+	$dr = (array) get_option( INSIGHTWEB_SI_LINK_DR_OPTION, array() );
 	if ( $dr ) {
 		$dr_day = (string) max( array_map( fn( $x ) => (string) ( $x[1] ?? '' ), $dr ) );
 		$rows[] = array( __( 'DR (Ahrefs, typed by hand)', 'insightweb' ), number_format_i18n( count( $dr ) ), mysql2date( 'j M Y', $dr_day ), count( $dr ), $dr_day );

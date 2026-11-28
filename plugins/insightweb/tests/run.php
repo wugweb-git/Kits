@@ -130,10 +130,10 @@ function iw_texts(): array {
 $w = $GLOBALS['iw_writes'];
 iw_check( false === insightweb_si_settings_save( iw_texts() ) && $GLOBALS['iw_writes'] === $w && ! array_key_exists( 'aw_seo_settings', $GLOBALS['iw_options'] ), 'unchanged Save with nothing stored writes nothing' );
 $GLOBALS['iw_options']['aw_seo_settings'] = array(
-	'titles'          => array( 'AW_SEO_X' => 3 ),
+	'titles'          => array( 'RANKWEB_OWN_KEY' => 3 ),
 	'search-insights' => array(
 		'on'           => 1,
-		'AW_SI_MOVERS' => 30, // A real (non-default) value; only these are stored.
+		insightweb_stored_name( 'INSIGHTWEB_SI_MOVERS' ) => 30, // A real (non-default) value; only these are stored.
 	),
 );
 $before                                   = serialize( $GLOBALS['iw_options']['aw_seo_settings'] );
@@ -141,23 +141,23 @@ $w                                        = $GLOBALS['iw_writes'];
 iw_check( false === insightweb_si_settings_save( iw_texts() ) && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $before && $GLOBALS['iw_writes'] === $w, 'unchanged Save with values stored writes nothing (byte for byte)' );
 // A value stored though equal to its default (a stale key) is taken out on the next Save, so a later default change is
 // followed (docs/pending.md, fixed b3cd3a0d). The Save writes once; the other stored key is kept.
-$GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] = 50; // Equal to the default.
+$GLOBALS['iw_options']['aw_seo_settings']['search-insights'][ insightweb_stored_name( 'INSIGHTWEB_SI_HIGH_IMPR' ) ] = 50; // Equal to the default.
 $w = $GLOBALS['iw_writes'];
-iw_check( true === insightweb_si_settings_save( iw_texts() ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_HIGH_IMPR'] ) && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] && $GLOBALS['iw_writes'] === $w + 1, 'a stored value equal to the default is taken out on the next Save (follows a later default change)' );
+iw_check( true === insightweb_si_settings_save( iw_texts() ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights'][ insightweb_stored_name( 'INSIGHTWEB_SI_HIGH_IMPR' ) ] ) && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights'][ insightweb_stored_name( 'INSIGHTWEB_SI_MOVERS' ) ] && $GLOBALS['iw_writes'] === $w + 1, 'a stored value equal to the default is taken out on the next Save (follows a later default change)' );
 iw_check( false === insightweb_si_settings_save( array() ), 'a Save sending nothing writes nothing' );
-iw_check( insightweb_si_settings_save( array( 'AW_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_QUICK_MIN'] && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'], 'a changed number is stored; one not sent keeps its value' );
-iw_check( insightweb_si_settings_save( array( 'AW_SI_MOVERS' => '20' ) ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights']['AW_SI_MOVERS'] ), 'a number set back to its default is taken out' );
-iw_check( 3 === $GLOBALS['iw_options']['aw_seo_settings']['titles']['AW_SEO_X'], "RankWeb's own keys are untouched" );
+iw_check( insightweb_si_settings_save( array( 'INSIGHTWEB_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights'][ insightweb_stored_name( 'INSIGHTWEB_SI_QUICK_MIN' ) ] && 30 === $GLOBALS['iw_options']['aw_seo_settings']['search-insights'][ insightweb_stored_name( 'INSIGHTWEB_SI_MOVERS' ) ], 'a changed number is stored; one not sent keeps its value' );
+iw_check( insightweb_si_settings_save( array( 'INSIGHTWEB_SI_MOVERS' => '20' ) ) && ! isset( $GLOBALS['iw_options']['aw_seo_settings']['search-insights'][ insightweb_stored_name( 'INSIGHTWEB_SI_MOVERS' ) ] ), 'a number set back to its default is taken out' );
+iw_check( 3 === $GLOBALS['iw_options']['aw_seo_settings']['titles']['RANKWEB_OWN_KEY'], "RankWeb's own keys are untouched" );
 insightweb_si_settings_save( array(), true );
 iw_check( array( 'on' => 1 ) === $GLOBALS['iw_options']['aw_seo_settings']['search-insights'], "Restore defaults keeps only RankWeb's old switch" );
-iw_check( '90' === iw_texts()['AW_SI_KEEP_DAYS'], 'the screen shows the default as text' );
+iw_check( '90' === iw_texts()['INSIGHTWEB_SI_KEEP_DAYS'], 'the screen shows the default as text' );
 
 // 1b. Without RankWeb: the numbers go to InsightWeb's own option; RankWeb's option is never written.
 $GLOBALS['iw_filters']['insightweb_numbers_in_rankweb_option'] = false;
-$GLOBALS['iw_options']['aw_seo_settings'] = array( 'titles' => array( 'AW_SEO_X' => 3 ), 'search-insights' => array( 'AW_SI_MOVERS' => 30 ) );
+$GLOBALS['iw_options']['aw_seo_settings'] = array( 'titles' => array( 'RANKWEB_OWN_KEY' => 3 ), 'search-insights' => array( insightweb_stored_name( 'INSIGHTWEB_SI_MOVERS' ) => 30 ) );
 $rank_before = serialize( $GLOBALS['iw_options']['aw_seo_settings'] );
-iw_check( 30 === insightweb_si_settings_saved()['AW_SI_MOVERS'], 'no RankWeb: an earlier stored value is still read' );
-iw_check( insightweb_si_settings_save( array( 'AW_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['insightweb_numbers']['AW_SI_QUICK_MIN'] && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $rank_before, 'no RankWeb: a change goes to insightweb_numbers, aw_seo_settings is untouched' );
+iw_check( 30 === insightweb_si_settings_saved()['INSIGHTWEB_SI_MOVERS'], 'no RankWeb: an earlier stored value is still read' );
+iw_check( insightweb_si_settings_save( array( 'INSIGHTWEB_SI_QUICK_MIN' => '15' ) ) && 15 === $GLOBALS['iw_options']['insightweb_numbers'][ insightweb_stored_name( 'INSIGHTWEB_SI_QUICK_MIN' ) ] && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $rank_before, 'no RankWeb: a change goes to insightweb_numbers, aw_seo_settings is untouched' );
 insightweb_si_settings_save( array(), true );
 iw_check( array() === $GLOBALS['iw_options']['insightweb_numbers'] && array() === insightweb_si_settings_saved() && serialize( $GLOBALS['iw_options']['aw_seo_settings'] ) === $rank_before, 'no RankWeb: Restore defaults empties the own option and does not bring the old key back' );
 $GLOBALS['iw_filters']['insightweb_numbers_in_rankweb_option'] = true;
@@ -720,20 +720,20 @@ iw_check( 'news' === $ctx['recommended_type'] && false === $ctx['focus_keyphrase
 /* ---------- 9. Keys: the copy from the old vault (insightweb-keys.php) ---------- */
 
 require dirname( __DIR__ ) . '/includes/insightweb-keys.php';
-$GLOBALS['iw_options']['aw_keys'] = array( 'AW_CLARITY_TOKEN' => 'old-clarity', 'AW_BING_WEBMASTER_KEY' => 'old-bing', 'AW_OTHER_PLUGIN_KEY' => 'not-ours' );
+$GLOBALS['iw_options']['aw_keys'] = array( insightweb_stored_name( 'INSIGHTWEB_CLARITY_TOKEN' ) => 'old-clarity', insightweb_stored_name( 'INSIGHTWEB_BING_WEBMASTER_KEY' ) => 'old-bing', 'OTHER_PLUGIN_KEY' => 'not-ours' );
 unset( $GLOBALS['iw_options']['insightweb_keys'] );
 $writes = $GLOBALS['iw_writes'];
 $res    = insightweb_keys_copy( false );
-iw_check( 'copied' === $res['AW_CLARITY_TOKEN'] && 'copied' === $res['AW_BING_WEBMASTER_KEY'] && 'not in the old place' === $res['AW_PSI_KEY'] && $writes === $GLOBALS['iw_writes'] && ! isset( $GLOBALS['iw_options']['insightweb_keys'] ), 'keys copy: a rehearsal names what it would copy and writes nothing' );
+iw_check( 'copied' === $res['INSIGHTWEB_CLARITY_TOKEN'] && 'copied' === $res['INSIGHTWEB_BING_WEBMASTER_KEY'] && 'not in the old place' === $res['INSIGHTWEB_PSI_KEY'] && $writes === $GLOBALS['iw_writes'] && ! isset( $GLOBALS['iw_options']['insightweb_keys'] ), 'keys copy: a rehearsal names what it would copy and writes nothing' );
 $res = insightweb_keys_copy( true );
-iw_check( 'copied' === $res['AW_CLARITY_TOKEN'] && 'old-clarity' === ( $GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'] ?? '' ) && 'old-bing' === ( $GLOBALS['iw_options']['insightweb_keys']['AW_BING_WEBMASTER_KEY'] ?? '' ), 'keys copy: the vault\'s InsightWeb keys are copied into InsightWeb\'s own option' );
-iw_check( ! isset( $GLOBALS['iw_options']['insightweb_keys']['AW_OTHER_PLUGIN_KEY'] ) && isset( $GLOBALS['iw_options']['aw_keys']['AW_OTHER_PLUGIN_KEY'] ) && 'old-clarity' === $GLOBALS['iw_options']['aw_keys']['AW_CLARITY_TOKEN'], 'keys copy: a key InsightWeb does not own is not copied, and the old vault is left as it was' );
+iw_check( 'copied' === $res['INSIGHTWEB_CLARITY_TOKEN'] && 'old-clarity' === ( $GLOBALS['iw_options']['insightweb_keys'][ insightweb_stored_name( 'INSIGHTWEB_CLARITY_TOKEN' ) ] ?? '' ) && 'old-bing' === ( $GLOBALS['iw_options']['insightweb_keys'][ insightweb_stored_name( 'INSIGHTWEB_BING_WEBMASTER_KEY' ) ] ?? '' ), 'keys copy: the vault\'s InsightWeb keys are copied into InsightWeb\'s own option' );
+iw_check( ! isset( $GLOBALS['iw_options']['insightweb_keys']['OTHER_PLUGIN_KEY'] ) && isset( $GLOBALS['iw_options']['aw_keys']['OTHER_PLUGIN_KEY'] ) && 'old-clarity' === $GLOBALS['iw_options']['aw_keys'][ insightweb_stored_name( 'INSIGHTWEB_CLARITY_TOKEN' ) ], 'keys copy: a key InsightWeb does not own is not copied, and the old vault is left as it was' );
 $writes = $GLOBALS['iw_writes'];
 $res    = insightweb_keys_copy( true );
-iw_check( 'already set' === $res['AW_CLARITY_TOKEN'] && 'already set' === $res['AW_BING_WEBMASTER_KEY'] && $writes === $GLOBALS['iw_writes'], 'keys copy: run again, it copies nothing and writes nothing' );
-$GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'] = 'new-clarity';
+iw_check( 'already set' === $res['INSIGHTWEB_CLARITY_TOKEN'] && 'already set' === $res['INSIGHTWEB_BING_WEBMASTER_KEY'] && $writes === $GLOBALS['iw_writes'], 'keys copy: run again, it copies nothing and writes nothing' );
+$GLOBALS['iw_options']['insightweb_keys'][ insightweb_stored_name( 'INSIGHTWEB_CLARITY_TOKEN' ) ] = 'new-clarity';
 insightweb_keys_copy( true );
-iw_check( 'new-clarity' === $GLOBALS['iw_options']['insightweb_keys']['AW_CLARITY_TOKEN'], 'keys copy: a key already set in InsightWeb is never overwritten by the old one' );
+iw_check( 'new-clarity' === $GLOBALS['iw_options']['insightweb_keys'][ insightweb_stored_name( 'INSIGHTWEB_CLARITY_TOKEN' ) ], 'keys copy: a key already set in InsightWeb is never overwritten by the old one' );
 iw_check( ! in_array( 'old-clarity', array_map( 'strval', array_values( $res ) ), true ), 'keys copy: the result carries names and words, never a value' );
 
 // Tab order: reading screens, then site screens; unknown tabs last; missing tabs skipped.

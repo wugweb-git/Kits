@@ -23,13 +23,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Kinds of connection a row can be. Nothing here names a provider: the administrator enters the label, the address and
  * the model (a "tool" connection has no model and is never tested as one).
  */
-const AW_AI_KINDS = array(
+const SOURCEWEB_AI_KINDS = array(
 	'ai'   => array( 'AI model', 'An OpenAI-compatible address, a model name and a key.' ),
 	'tool' => array( 'Tool', 'Not an AI model: an address and a key a worker calls.' ),
 );
 
 /** What each connection can do, as icons (owner, 22 Oct 2026: "label like directories do"). dashicon, label. Rows may carry a `caps` list. */
-const AW_AI_CAP_ICONS = array(
+const SOURCEWEB_AI_CAP_ICONS = array(
 	'text'      => array( 'editor-paragraph', 'Text' ),
 	'fast'      => array( 'performance', 'Fast' ),
 	'reasoning' => array( 'lightbulb', 'Reasoning' ),
@@ -42,7 +42,7 @@ const AW_AI_CAP_ICONS = array(
 	'agent'     => array( 'admin-users', 'Web agent' ),
 );
 
-const AW_AI_STATUS = array(
+const SOURCEWEB_AI_STATUS = array(
 	'card'       => 'Needs a card on file',
 	'works'      => 'Works',
 	'tool'       => 'Tool key, not an AI model',
@@ -74,7 +74,7 @@ function sourceweb_ai_clean_url( string $url ): string {
 
 /** The host of a connection's address, for display. */
 function sourceweb_ai_host( string $url ): string {
-	$h = parse_url( $url, PHP_URL_HOST );
+	$h = wp_parse_url( $url, PHP_URL_HOST );
 	return is_string( $h ) ? $h : '';
 }
 
@@ -141,7 +141,7 @@ add_action(
 
 // Keys overview (&overview=1): help in the core Help tab.
 add_action(
-	'load-' . AW_SRC_SCREEN,
+	'load-' . SOURCEWEB_SRC_SCREEN,
 	function () {
 		if ( 'ai' !== sanitize_key( $_GET['tab'] ?? '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- which tab is shown
 			return;
@@ -919,7 +919,7 @@ function sourceweb_ai_overview_data( array $rows ): array {
  * registry's name; a name not in the registry stays as it is.
  */
 function sourceweb_ai_usage_worker( string $name ): string {
-	foreach ( AW_WORKERS as $file => $w ) {
+	foreach ( SOURCEWEB_WORKERS as $file => $w ) {
 		if ( $w['name'] === $name ) {
 			return sourceweb_worker_id( $file );
 		}
@@ -942,7 +942,7 @@ function sourceweb_ai_tier_groups( array $rows ): array {
 		$g[ $t ][ $n ]['works'] = ( $g[ $t ][ $n ]['works'] ?? 0 ) + ( in_array( $r['status'], array( 'works', 'tool' ), true ) ? 1 : 0 );
 	}
 	$out = array();
-	foreach ( array_keys( AW_AI_KINDS ) as $t ) {
+	foreach ( array_keys( SOURCEWEB_AI_KINDS ) as $t ) {
 		if ( empty( $g[ $t ] ) ) {
 			continue;
 		}
@@ -951,8 +951,8 @@ function sourceweb_ai_tier_groups( array $rows ): array {
 			$parts[] = $n . ' ' . $c['works'] . ' / ' . $c['all'];
 		}
 		$out[] = array(
-			'group'     => (string) AW_AI_KINDS[ $t ][0],
-			'means'     => (string) AW_AI_KINDS[ $t ][1],
+			'group'     => (string) SOURCEWEB_AI_KINDS[ $t ][0],
+			'means'     => (string) SOURCEWEB_AI_KINDS[ $t ][1],
 			'providers' => implode( ' · ', $parts ),
 		);
 	}

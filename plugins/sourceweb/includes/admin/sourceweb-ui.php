@@ -40,11 +40,11 @@ function sourceweb_ui_wanted(): string {
 	$page = sanitize_key( wp_unslash( $_GET['page'] ?? '' ) );
 	$tab  = sanitize_key( wp_unslash( $_GET['tab'] ?? '' ) );
 	// phpcs:enable WordPress.Security.NonceVerification.Recommended
-	if ( AW_SRC_PAGE === $page ) {
+	if ( SOURCEWEB_SRC_PAGE === $page ) {
 		return in_array( $tab, SOURCEWEB_UI_TABS, true ) ? $tab : 'sources';
 	}
 	return array(
-		AW_SRC_MENU        => 'dashboard',
+		SOURCEWEB_SRC_MENU        => 'dashboard',
 		'aw-review'        => 'review',
 		'aw-enrich-review' => 'enrichment',
 	)[ $page ] ?? '';
@@ -53,9 +53,9 @@ function sourceweb_ui_wanted(): string {
 /** The capability each screen needs. */
 function sourceweb_ui_caps(): array {
 	return array(
-		'dashboard'  => AW_REVIEW_CAP,
-		'review'     => AW_REVIEW_CAP,
-		'enrichment' => AW_ENRICH_CAP,
+		'dashboard'  => SOURCEWEB_REVIEW_CAP,
+		'review'     => SOURCEWEB_REVIEW_CAP,
+		'enrichment' => SOURCEWEB_ENRICH_CAP,
 		'sources'    => SOURCEWEB_SRC_CAP,
 		'keywords'   => SOURCEWEB_SRC_CAP,
 		'rules'      => SOURCEWEB_SRC_CAP,
@@ -89,14 +89,14 @@ function sourceweb_ui_ready( ?bool $set = null ): bool {
  */
 function sourceweb_ui_url( string $screen ): string {
 	$q = array(
-		'dashboard'  => array( 'page' => AW_SRC_MENU ),
+		'dashboard'  => array( 'page' => SOURCEWEB_SRC_MENU ),
 		'review'     => array( 'page' => 'aw-review' ),
 		'enrichment' => array( 'page' => 'aw-enrich-review' ),
-		'sources'    => array( 'page' => AW_SRC_PAGE ),
+		'sources'    => array( 'page' => SOURCEWEB_SRC_PAGE ),
 	)[ $screen ] ?? ( in_array( $screen, SOURCEWEB_UI_TABS, true ) ? array(
-		'page' => AW_SRC_PAGE,
+		'page' => SOURCEWEB_SRC_PAGE,
 		'tab'  => $screen,
-	) : array( 'page' => AW_SRC_MENU ) );
+	) : array( 'page' => SOURCEWEB_SRC_MENU ) );
 	return add_query_arg( $q, admin_url( 'admin.php' ) );
 }
 
@@ -429,7 +429,7 @@ add_action(
 		}
 		add_settings_error( 'aw_src_reset', 'aw_src_reset', 'Defaults restored.', 'success' );
 		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
-		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( sourceweb_src_tab_path( AW_SRC_SETTINGS_TAB ) ) ) . '#backfill' );
+		wp_safe_redirect( add_query_arg( 'settings-updated', 'true', admin_url( sourceweb_src_tab_path( SOURCEWEB_SRC_SETTINGS_TAB ) ) ) . '#backfill' );
 		exit;
 	}
 );

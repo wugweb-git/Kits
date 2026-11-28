@@ -229,7 +229,7 @@ aw_t( isset( $all['funnel'], $all['throughput'], $all['dupes'], $all['queue'] ) 
 $rest = file_get_contents( dirname( __DIR__ ) . '/includes/rest/sourceweb-rest.php' );
 aw_t( false === strpos( $rest, '__return_true' ), 'routes: none is open to everyone' );
 aw_t( 1 === substr_count( $rest, "'permission_callback' => sourceweb_rest_can( \$r[1] )" ), 'routes: every route registers through the one permission check' );
-preg_match_all( "/^\t\t\t'\/[^']+'\s*=> array\(\s*'(GET|POST)',\s*(AW_REVIEW_CAP|AW_ENRICH_CAP|SOURCEWEB_SRC_CAP),/m", $rest, $m );
+preg_match_all( "/^\t\t\t'\/[^']+'\s*=> array\(\s*'(GET|POST)',\s*(SOURCEWEB_REVIEW_CAP|SOURCEWEB_ENRICH_CAP|SOURCEWEB_SRC_CAP),/m", $rest, $m );
 aw_t( 10 === count( $m[0] ), 'routes: 10 routes, each with a capability (' . count( $m[0] ) . ')' );
 aw_t( false === strpos( $rest, "'key'     => (string) get_option( 'aw_enrich_google_key'" ) && false !== strpos( $rest, "'key'     => array( 'set' => \$key )" ), 'routes: the Google key goes out as set or not set only' );
 

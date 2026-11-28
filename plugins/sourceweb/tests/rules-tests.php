@@ -93,7 +93,7 @@ aw_t( $g_old === $g_new && 15 === count( $g_old ), 'the 15 global summary keys u
 aw_t( $plan['seeded'] && 42 === count( $plan['field_rules']['fields'] ), 'field rules seeded: 42 fields' );
 
 // The seed equals the workers' constants (the shared fixture) exactly.
-aw_t( $seedfx['priority'] === $plan['field_rules']['priority'] && array( 'claim', 'website', 'darpan', 'wikidata', 'osm', 'social', 'awbi', 'google_places' ) === AW_ENRICH_SEED_PRIORITY, 'trust order = PRIORITY' );
+aw_t( $seedfx['priority'] === $plan['field_rules']['priority'] && array( 'claim', 'website', 'darpan', 'wikidata', 'osm', 'social', 'awbi', 'google_places' ) === SOURCEWEB_ENRICH_SEED_PRIORITY, 'trust order = PRIORITY' );
 aw_t( $seedfx['field_rules'] === $plan['field_rules']['fields'], 'every seeded field rule equals the workers\' constants (enrich_field_rules_seed.json)' );
 aw_t( 2 === $plan['field_rules']['fields']['phone']['multi'] && 'awbi' === $plan['field_rules']['fields']['pincode']['official'] && $plan['field_rules']['fields']['head']['ai'] && $plan['field_rules']['fields']['hours']['invite'] && $plan['field_rules']['fields']['linkedin']['social'], 'MULTI, OFFICIAL_AWBI, AI_FIELDS, INVITE_FIELDS, SOCIAL_FIELDS in the seed' );
 
@@ -191,13 +191,13 @@ $r  = sourceweb_enrich_rule_clean(
 aw_t( 'empty' === $r['apply'] && '' === $r['official'] && 5 === $r['multi'] && array( 'wikidata' ) === $r['sources'], 'a field rule is checked: no "both" for a one-value field, a known official source, at most 5 values, known sources' );
 aw_t( sourceweb_enrich_rule_clean( 'email', sourceweb_enrich_rule_seed( 'email' ), $sk, sourceweb_enrich_rule_seed( 'email' ) ) === sourceweb_enrich_rule_seed( 'email' ), 'a field rule saved unchanged is unchanged' );
 $pos = array();
-foreach ( AW_ENRICH_SEED_PRIORITY as $i => $k ) {
+foreach ( SOURCEWEB_ENRICH_SEED_PRIORITY as $i => $k ) {
 	$pos[ $k ] = (string) ( $i + 1 );
 }
-aw_t( AW_ENRICH_SEED_PRIORITY === sourceweb_enrich_priority_from_positions( $pos, $sk, AW_ENRICH_SEED_PRIORITY ), 'trust order saved unchanged is unchanged' );
+aw_t( SOURCEWEB_ENRICH_SEED_PRIORITY === sourceweb_enrich_priority_from_positions( $pos, $sk, SOURCEWEB_ENRICH_SEED_PRIORITY ), 'trust order saved unchanged is unchanged' );
 $pos['osm'] = '1';
-aw_t( 'osm' === sourceweb_enrich_priority_from_positions( $pos, $sk, AW_ENRICH_SEED_PRIORITY )[0], 'trust order: a source moved to 1 comes first' );
-aw_t( AW_ENRICH_SEED_PRIORITY === sourceweb_enrich_priority_from_positions( array(), $sk, AW_ENRICH_SEED_PRIORITY ), 'trust order: nothing numbered keeps the order' );
+aw_t( 'osm' === sourceweb_enrich_priority_from_positions( $pos, $sk, SOURCEWEB_ENRICH_SEED_PRIORITY )[0], 'trust order: a source moved to 1 comes first' );
+aw_t( SOURCEWEB_ENRICH_SEED_PRIORITY === sourceweb_enrich_priority_from_positions( array(), $sk, SOURCEWEB_ENRICH_SEED_PRIORITY ), 'trust order: nothing numbered keeps the order' );
 
 // ---- the apply rule: the seeded rules decide exactly as the code did before phase 3 ----
 $before = function ( $field, $conf, $protected, $empty, $phones, $alt, $place ) {

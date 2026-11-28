@@ -166,7 +166,7 @@ function sourceweb_rest_workers( WP_REST_Request $request ) {
 		);
 	}
 	$out['log']    = $log;
-	$out['runOff'] = ! sourceweb_dispatch_ready() && ! ( function_exists( 'kits_dispatch_workflow' ) && defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN );
+	$out['runOff'] = ! sourceweb_dispatch_ready() && ! ( function_exists( 'kits_dispatch_workflow' ) && '' !== sourceweb_dispatch_token() );
 	return rest_ensure_response( $out );
 }
 
@@ -259,7 +259,7 @@ function sourceweb_rest_worker_runs( WP_REST_Request $request ) {
 			'id'        => $w['id'],
 			'name'      => $w['name'],
 			'planned'   => (bool) $w['planned'],
-			'keep'      => (int) AW_WORKERS_KEEP,
+			'keep'      => (int) SOURCEWEB_WORKERS_KEEP,
 			'githubUrl' => $w['planned'] ? '' : sourceweb_workers_repo_url( '/actions/workflows/' . rawurlencode( $w['file'] ) ),
 			'rows'      => $rows,
 		)

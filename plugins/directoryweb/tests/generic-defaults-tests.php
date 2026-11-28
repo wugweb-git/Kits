@@ -35,7 +35,7 @@ check( false === strpos( $main, "'featured'," ), 'directoryweb.php does not load
 check( false === strpos( $main, 'directoryweb_helplines_enabled' ), 'no switch or option for the helplines in the plugin' );
 
 // 2. No Animal Writes code in the runtime files (comments ignored).
-$tokens = array( 'AW_VET_TYPES', 'postalpincode', 'district_helplines', 'directoryweb/find-help', 'directoryweb/helplines', 'directoryweb/local-card', 'AW_TYPE_SERVICES', 'DIRECTORYWEB_SERVICES', 'AW_SOURCE_HOSTS', 'AW_IMPORT_SOURCES', "'India'", "'veterinary'", 'Gaushala', 'Emergency Helpline' );
+$tokens = array( 'DIRECTORYWEB_VET_TYPES', 'postalpincode', 'district_helplines', 'directoryweb/find-help', 'directoryweb/helplines', 'directoryweb/local-card', 'DIRECTORYWEB_TYPE_SERVICES', 'DIRECTORYWEB_SERVICES', 'DIRECTORYWEB_SOURCE_HOSTS', 'DIRECTORYWEB_IMPORT_SOURCES', "'India'", "'veterinary'", 'Gaushala', 'Emergency Helpline' );
 $it     = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root . '/includes', FilesystemIterator::SKIP_DOTS ) );
 foreach ( $it as $f ) {
 	if ( 'php' !== $f->getExtension() ) {

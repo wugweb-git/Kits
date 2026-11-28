@@ -18,7 +18,7 @@
  *
  * Rows in obs: src ga4, period day; search (txt = term, page_key = md5 of the term), ai (page = landing path,
  * txt = source), organic (page = landing path), ref / ref_eng / ref_key (page = landing path, txt = source). value =
- * events or sessions. Referral counts leave out AW_SI_GA4_SKIP_DAYS (22 Oct 2026: test events). nf rows: period 28d,
+ * events or sessions. Referral counts leave out INSIGHTWEB_SI_GA4_SKIP_DAYS (22 Oct 2026: test events). nf rows: period 28d,
  * d = the last day of the window, page = txt = path, value = events; each run replaces the earlier window, and a failed
  * report keeps it.
  * camp rows: period 28d, d = the last day of the window, metric camp_view (sessions), camp_sent or camp_conf (events),
@@ -31,19 +31,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_GA4_DAYS = 3;
-const AW_SI_GA4_CRON = 'aw_si_ga4';
-const AW_SI_GA4_ROWS = 10000; // Rows per report; a report that returns this many is marked truncated.
+const INSIGHTWEB_SI_GA4_DAYS = 3;
+const INSIGHTWEB_SI_GA4_CRON = 'aw_si_ga4';
+const INSIGHTWEB_SI_GA4_ROWS = 10000; // Rows per report; a report that returns this many is marked truncated.
 
 /** Days left out of referral counts: 22 Oct 2026 has GA4 test events (owner, 31 Oct 2026). */
-const AW_SI_GA4_SKIP_DAYS = array( '2026-10-22' );
+const INSIGHTWEB_SI_GA4_SKIP_DAYS = array( '2026-10-22' );
 
 /** Addresses opened on purpose to test the 404 page; never counted as 404s (12 Nov 2026). */
-const AW_SI_NF_TEST_PATHS = array( '/no-such-page/', '/no-such-page-xyz/' );
+const INSIGHTWEB_SI_NF_TEST_PATHS = array( '/no-such-page/', '/no-such-page-xyz/' );
 
 /** Whether a 404 path is one of the test addresses (with or without the trailing slash). */
 function insightweb_si_nf_is_test( string $path ): bool {
-	return in_array( trailingslashit( $path ), AW_SI_NF_TEST_PATHS, true );
+	return in_array( trailingslashit( $path ), INSIGHTWEB_SI_NF_TEST_PATHS, true );
 }
 
 /** Social sources counted as referrals even when GA4 files them under another channel. Filter insightweb_si_social_sources. */
@@ -57,15 +57,15 @@ function insightweb_si_x_sources(): array {
 }
 
 /** Campaign events in the camp report => obs metric. */
-const AW_SI_GA4_CAMP_EVENTS = array(
+const INSIGHTWEB_SI_GA4_CAMP_EVENTS = array(
 	'campaign_view'       => 'camp_view',
 	'objection_sent'      => 'camp_sent',
 	'objection_confirmed' => 'camp_conf',
 );
 
-/** SQL condition that leaves out AW_SI_GA4_SKIP_DAYS (column d). */
+/** SQL condition that leaves out INSIGHTWEB_SI_GA4_SKIP_DAYS (column d). */
 function insightweb_si_ga4_skip_sql(): string {
-	return AW_SI_GA4_SKIP_DAYS ? " AND d NOT IN ('" . implode( "', '", array_map( 'esc_sql', AW_SI_GA4_SKIP_DAYS ) ) . "')" : '';
+	return INSIGHTWEB_SI_GA4_SKIP_DAYS ? " AND d NOT IN ('" . implode( "', '", array_map( 'esc_sql', INSIGHTWEB_SI_GA4_SKIP_DAYS ) ) . "')" : '';
 }
 
 /** Session sources counted as AI referrals. Filter insightweb_si_ai_sources adds more. */
@@ -103,7 +103,7 @@ function insightweb_si_ga4_rows( $resp ): array {
  */
 function insightweb_si_ga4_report( $module, array $args ) {
 	try {
-		$resp = $module->get_data( 'report', $args + array( 'limit' => AW_SI_GA4_ROWS ) );
+		$resp = $module->get_data( 'report', $args + array( 'limit' => INSIGHTWEB_SI_GA4_ROWS ) );
 	} catch ( Throwable $e ) {
 		return new WP_Error( 'aw_si_ga4', $e->getMessage() );
 	}
@@ -217,7 +217,7 @@ function insightweb_si_ga4_obs_rows( array $data ): array {
 }
 
 /**
- * 404_view events by path for the 28 days up to $end, without AW_SI_GA4_SKIP_DAYS.
+ * 404_view events by path for the 28 days up to $end, without INSIGHTWEB_SI_GA4_SKIP_DAYS.
  *
  * @param object $module Site Kit's analytics-4 module.
  * @param string $end    Last day (Y-m-d).
@@ -247,7 +247,7 @@ function insightweb_si_ga4_fetch_nf( $module, string $end ) {
 	if ( is_wp_error( $res ) ) {
 		return $err;
 	}
-	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), AW_SI_GA4_SKIP_DAYS );
+	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), INSIGHTWEB_SI_GA4_SKIP_DAYS );
 	$out  = array();
 	foreach ( $res as $r ) {
 		$path = insightweb_si_landing_path( (string) ( $r[0][0] ?? '' ) );
@@ -260,7 +260,7 @@ function insightweb_si_ga4_fetch_nf( $module, string $end ) {
 	return array(
 		'dim'       => $dim,
 		'rows'      => $out,
-		'truncated' => count( $res ) >= AW_SI_GA4_ROWS,
+		'truncated' => count( $res ) >= INSIGHTWEB_SI_GA4_ROWS,
 	);
 }
 
@@ -286,7 +286,7 @@ function insightweb_si_ga4_store_nf( string $end, array $rows ) {
 }
 
 /**
- * Campaign events by session source and page for the 28 days up to $end, without AW_SI_GA4_SKIP_DAYS: sessions with a
+ * Campaign events by session source and page for the 28 days up to $end, without INSIGHTWEB_SI_GA4_SKIP_DAYS: sessions with a
  * campaign_view, and objection_sent and objection_confirmed events.
  *
  * @param object $module Site Kit's analytics-4 module.
@@ -303,7 +303,7 @@ function insightweb_si_ga4_fetch_camp( $module, string $end ) {
 			'dimensions'       => array( 'sessionSource', 'eventName', 'pagePath', 'date' ),
 			'metrics'          => array( 'eventCount', 'sessions' ),
 			'dimensionFilters' => array(
-				'eventName' => array_keys( AW_SI_GA4_CAMP_EVENTS ),
+				'eventName' => array_keys( INSIGHTWEB_SI_GA4_CAMP_EVENTS ),
 				'pagePath'  => array(
 					'filterType' => 'stringFilter',
 					'matchType'  => 'BEGINS_WITH',
@@ -315,11 +315,11 @@ function insightweb_si_ga4_fetch_camp( $module, string $end ) {
 	if ( is_wp_error( $res ) ) {
 		return $res;
 	}
-	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), AW_SI_GA4_SKIP_DAYS );
+	$skip = array_map( fn( $d ) => str_replace( '-', '', $d ), INSIGHTWEB_SI_GA4_SKIP_DAYS );
 	$out  = array();
 	$days = array();
 	foreach ( $res as $r ) {
-		$metric = AW_SI_GA4_CAMP_EVENTS[ (string) ( $r[0][1] ?? '' ) ] ?? '';
+		$metric = INSIGHTWEB_SI_GA4_CAMP_EVENTS[ (string) ( $r[0][1] ?? '' ) ] ?? '';
 		$path   = mb_substr( insightweb_si_landing_path( (string) ( $r[0][2] ?? '' ) ), 0, 255 );
 		$src    = mb_substr( strtolower( (string) ( $r[0][0] ?? '' ) ), 0, 100 );
 		if ( '' === $metric || '' === $path || '' === $src || in_array( (string) ( $r[0][3] ?? '' ), $skip, true ) ) {
@@ -339,7 +339,7 @@ function insightweb_si_ga4_fetch_camp( $module, string $end ) {
 	return array(
 		'rows'      => array_values( $out ),
 		'days'      => $days,
-		'truncated' => count( $res ) >= AW_SI_GA4_ROWS,
+		'truncated' => count( $res ) >= INSIGHTWEB_SI_GA4_ROWS,
 	);
 }
 
@@ -352,7 +352,7 @@ function insightweb_si_ga4_fetch_camp( $module, string $end ) {
  */
 function insightweb_si_ga4_store_camp( string $end, array $rows ) {
 	global $wpdb;
-	$metrics = array_values( AW_SI_GA4_CAMP_EVENTS );
+	$metrics = array_values( INSIGHTWEB_SI_GA4_CAMP_EVENTS );
 	$obs     = array();
 	foreach ( $rows as $r ) {
 		$obs[] = array( 0, $r[1], md5( $r[0] . '|' . $r[1] . '|' . $r[2] ), $r[0], (float) $r[3], $r[2] );
@@ -405,7 +405,7 @@ function insightweb_si_landing_path( string $lp ): string {
  */
 function insightweb_si_ga4_run( array $args = array() ): array {
 	$dry  = ! empty( $args['dry'] );
-	$days = $args['days'] ?? array_map( fn( $i ) => ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$i} days" )->format( 'Y-m-d' ), range( 1, AW_SI_GA4_DAYS ) );
+	$days = $args['days'] ?? array_map( fn( $i ) => ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( "-{$i} days" )->format( 'Y-m-d' ), range( 1, INSIGHTWEB_SI_GA4_DAYS ) );
 	if ( ! $dry ) {
 		insightweb_si_run_start( 'ga4' );
 	}
@@ -434,7 +434,7 @@ function insightweb_si_ga4_run( array $args = array() ): array {
 					break;
 				}
 				foreach ( array( 'search', 'ai', 'organic', 'ref', 'social' ) as $key ) {
-					if ( count( $data[ $key ] ) >= AW_SI_GA4_ROWS ) {
+					if ( count( $data[ $key ] ) >= INSIGHTWEB_SI_GA4_ROWS ) {
 						$rep['truncated'][ $day ][] = $key;
 					}
 				}
@@ -528,4 +528,4 @@ function insightweb_si_ga4_run( array $args = array() ): array {
 	}
 	return $rep;
 }
-add_action( AW_SI_GA4_CRON, fn() => get_option( 'aw_si_off' ) ? null : insightweb_si_ga4_run() );
+add_action( INSIGHTWEB_SI_GA4_CRON, fn() => get_option( 'aw_si_off' ) ? null : insightweb_si_ga4_run() );

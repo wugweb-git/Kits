@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SUMMARY_RULES_OPTION = 'aw_summary_rules';
+const SOURCEWEB_SUMMARY_RULES_OPTION = 'aw_summary_rules';
 
 /** The defaults (the workers keep the same file). */
 function sourceweb_summary_rules_defaults() {
@@ -35,7 +35,7 @@ function sourceweb_summary_rules_defaults() {
 /** The rules in force: the saved values over the defaults. */
 function sourceweb_summary_rules() {
 	$out   = sourceweb_summary_rules_defaults();
-	$saved = get_option( AW_SUMMARY_RULES_OPTION );
+	$saved = get_option( SOURCEWEB_SUMMARY_RULES_OPTION );
 	if ( ! is_array( $saved ) ) {
 		return $out;
 	}

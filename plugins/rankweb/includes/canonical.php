@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Query parameters that filter a list: such a URL is indexed with its own canonical (owner, 10 Oct 2026). */
-// AW_FILTER_PARAMS: RankWeb → Settings (settings.php).
+// RANKWEB_FILTER_PARAMS: RankWeb → Settings (settings.php).
 
 /** Canonical URL of a hub page: its path without filters, with /page/N/. */
 function rankweb_hub_canonical() {
@@ -33,7 +33,7 @@ function rankweb_is_filtered_list() {
 	if ( is_singular() && ! $is_list ) {
 		return false;
 	}
-	foreach ( AW_FILTER_PARAMS as $k ) {
+	foreach ( RANKWEB_FILTER_PARAMS as $k ) {
 		if ( isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] ) { // phpcs:ignore WordPress.Security.NonceVerification
 			return true;
 		}
@@ -49,7 +49,7 @@ function rankweb_list_canonical() {
 	$path = (string) wp_parse_url( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 	$url  = home_url( user_trailingslashit( $path ) );
 	$args = array();
-	foreach ( AW_FILTER_PARAMS as $k ) {
+	foreach ( RANKWEB_FILTER_PARAMS as $k ) {
 		if ( 'sort' !== $k && isset( $_GET[ $k ] ) && '' !== $_GET[ $k ] && is_string( $_GET[ $k ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$args[ $k ] = sanitize_text_field( wp_unslash( $_GET[ $k ] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 		}

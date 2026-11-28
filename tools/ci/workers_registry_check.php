@@ -23,7 +23,7 @@ if ( ! is_array( $theirs ) || ! isset( $theirs['workers'] ) ) {
 	exit( 1 );
 }
 
-$ours = AW_WORKERS;
+$ours = SOURCEWEB_WORKERS;
 $bad  = array();
 foreach ( array_diff( array_keys( $theirs['workers'] ), array_keys( $ours ) ) as $k ) {
 	$bad[] = "missing in the plugin: $k";

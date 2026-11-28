@@ -38,5 +38,17 @@ chk( '' !== $rx && preg_match( $rx, 'animal writes petition' ) && preg_match( $r
 $site = file_get_contents( dirname( __DIR__ ) . '/site.php' );
 chk( false !== strpos( $site, "'insightweb_post_type_roles'" ) && false !== strpos( $site, "'campaign'    => 'aw_campaign'" ), 'site.php feeds the content type roles' );
 
+// The earlier wp-config.php names map to InsightWeb's constants; a new name already set wins; the item types go to the filter.
+function add_filter( $t, $cb ) { $GLOBALS['filters'][ $t ] = $cb; }
+define( 'AW_SI_MOVERS', 33 );
+define( 'AW_CLARITY_TOKEN', 'tok' );
+define( 'AW_PSI_KEY', 'old-psi' );
+define( 'INSIGHTWEB_PSI_KEY', 'new-psi' );
+define( 'AW_SEO_ITEM_TYPES', array( 'aw_news', 'page' ) );
+require dirname( __DIR__ ) . '/config-names.php';
+chk( 33 === INSIGHTWEB_SI_MOVERS && 'tok' === INSIGHTWEB_CLARITY_TOKEN, 'config-names: earlier wp-config names define the INSIGHTWEB_ ones' );
+chk( 'new-psi' === INSIGHTWEB_PSI_KEY && ! defined( 'INSIGHTWEB_SI_QUICK_MIN' ), 'config-names: a new name already set wins; a name not set stays unset' );
+chk( array( 'aw_news', 'page' ) === ( $GLOBALS['filters']['insightweb_seo_item_types'] )(), 'config-names: the item types reach the plugin filter' );
+
 echo $fails ? "{$fails} failed\n" : "all passed\n";
 exit( $fails ? 1 : 0 );

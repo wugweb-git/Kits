@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_LIVE_TOKEN = 'aw_si_live_token';
-const AW_SI_LIVE_TTL   = 2 * HOUR_IN_SECONDS;
+const INSIGHTWEB_SI_LIVE_TOKEN = 'aw_si_live_token';
+const INSIGHTWEB_SI_LIVE_TTL   = 2 * HOUR_IN_SECONDS;
 
 add_filter(
 	'insightweb_si_tabs',
@@ -69,8 +69,8 @@ function insightweb_si_checklist_defaults(): array {
 	$o   = insightweb_si_table( 'obs' );
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- constants and insightweb_si_view_sql() (fixed SQL from a map, no %).
 	$ids = array_merge(
-		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d AND ( ' . insightweb_si_view_sql( 'p1' ) . ' OR ' . insightweb_si_view_sql( 'p2' ) . ' ) AND entity = 0', $k, AW_SI_ROLE_TRACKED ) ),
-		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, AW_SI_ROLE_BRAND ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d AND ( ' . insightweb_si_view_sql( 'p1' ) . ' OR ' . insightweb_si_view_sql( 'p2' ) . ' ) AND entity = 0', $k, INSIGHTWEB_SI_ROLE_TRACKED ) ),
+		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE roles & %d', $k, INSIGHTWEB_SI_ROLE_BRAND ) ),
 		(array) $wpdb->get_col( $wpdb->prepare( 'SELECT id FROM %i WHERE ' . insightweb_si_view_sql( 'quick' ) . ' AND entity = 0 ORDER BY impr28 DESC LIMIT 100', $k ) ),
 		(array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT kw_id FROM %i WHERE src = 'live' AND metric = 'position' AND kw_id > 0", $o ) )
 	);
@@ -109,10 +109,10 @@ function insightweb_si_live_pending(): array {
 function insightweb_si_live_token_new(): string {
 	$token = wp_generate_password( 32, false );
 	update_option(
-		AW_SI_LIVE_TOKEN,
+		INSIGHTWEB_SI_LIVE_TOKEN,
 		array(
 			'hash'    => hash_hmac( 'sha256', $token, wp_salt( 'auth' ) ),
-			'expires' => time() + AW_SI_LIVE_TTL,
+			'expires' => time() + INSIGHTWEB_SI_LIVE_TTL,
 			'user'    => get_current_user_id(),
 		),
 		false
@@ -126,7 +126,7 @@ function insightweb_si_live_token_new(): string {
  * @param string $token Token from the request.
  */
 function insightweb_si_live_token_ok( string $token ): bool {
-	$t = get_option( AW_SI_LIVE_TOKEN );
+	$t = get_option( INSIGHTWEB_SI_LIVE_TOKEN );
 	return is_array( $t ) && '' !== $token && time() < (int) $t['expires'] && get_current_user_id() === (int) $t['user']
 		&& hash_equals( (string) $t['hash'], hash_hmac( 'sha256', $token, wp_salt( 'auth' ) ) );
 }
@@ -139,7 +139,7 @@ function insightweb_si_live_token_ok( string $token ): bool {
 function insightweb_si_bookmarklet( string $token ): string {
 	$win  = add_query_arg(
 		array(
-			'page'  => AW_SI_SLUG,
+			'page'  => INSIGHTWEB_SI_SLUG,
 			'tab'   => 'checklist',
 			'live'  => 1,
 			'token' => $token,
@@ -275,14 +275,14 @@ function insightweb_si_checklist_handle(): void {
 		$msg  = 'removed';
 	} elseif ( 'add' === $action ) {
 		$lines = preg_split( '/[\r\n]+/', isset( $_POST['keywords'] ) ? sanitize_textarea_field( wp_unslash( $_POST['keywords'] ) ) : '' );
-		$ids   = insightweb_si_kw_ids( array_filter( array_map( 'trim', (array) $lines ) ), AW_SI_ROLE_TRACKED );
+		$ids   = insightweb_si_kw_ids( array_filter( array_map( 'trim', (array) $lines ) ), INSIGHTWEB_SI_ROLE_TRACKED );
 		$list  = array_values( array_unique( array_merge( $list, array_map( 'intval', $ids ) ) ) );
 		$msg   = 'added';
 	} elseif ( 'rebuild' === $action ) {
 		$list = insightweb_si_checklist_defaults();
 		$msg  = 'rebuilt';
 	} elseif ( 'start' === $action ) {
-		set_transient( 'aw_si_live_new_' . get_current_user_id(), insightweb_si_live_token_new(), AW_SI_LIVE_TTL );
+		set_transient( 'aw_si_live_new_' . get_current_user_id(), insightweb_si_live_token_new(), INSIGHTWEB_SI_LIVE_TTL );
 		$msg = 'started';
 	}
 	update_option( 'aw_si_checklist', array_slice( $list, 0, 500 ), false );
@@ -388,7 +388,7 @@ add_action(
 		echo '</form>';
 		$table = new InsightWeb_SI_Checklist_Table();
 		$table->prepare_items();
-		echo '<form method="post"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="checklist">';
+		echo '<form method="post"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SI_SLUG ) . '"><input type="hidden" name="tab" value="checklist">';
 		$table->search_box( __( 'Search the list', 'insightweb' ), 'aw-si-cl' );
 		$table->display();
 		echo '</form>';

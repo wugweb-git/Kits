@@ -57,20 +57,20 @@ add_action(
 	function () {
 		// Plugins → SourceWeb (owner, 11 Nov 2026: "all plugins" under Plugins), opening the Overview, with the To review
 		// count; the other screens are its tabs (the shell header). Without Kits Core, a menu of its own as before.
-		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (AW_SRC_SCREEN,
+		// WordPress names the screens under a menu after its hook prefix, which stays "sourcing" (SOURCEWEB_SRC_SCREEN,
 		// sourcing_page_…): saved screen options and columns stay.
-		$count = current_user_can( AW_REVIEW_CAP ) && function_exists( 'sourceweb_review_count' ) && function_exists( 'kits_menu_count' ) ? kits_menu_count( sourceweb_review_count() ) : '';
+		$count = current_user_can( SOURCEWEB_REVIEW_CAP ) && function_exists( 'sourceweb_review_count' ) && function_exists( 'kits_menu_count' ) ? kits_menu_count( sourceweb_review_count() ) : '';
 		// The Wugweb block (owner, 12 Nov 2026): Kits, DirectoryWeb, SourceWeb, RankWeb, InsightWeb, MailWeb, PlanWeb at 58.1-58.7,
 		// after one separator (58.05), before WordPress's second separator (59); the same with or without Kits Core.
 		// The icon is the plugin's one-colour SVG as a data URI, which WordPress paints in the admin colour scheme.
 		$icon = dirname( __DIR__, 2 ) . '/assets/menu-icon.svg';
 		$icon = is_readable( $icon ) ? 'data:image/svg+xml;base64,' . base64_encode( (string) file_get_contents( $icon ) ) : 'dashicons-rss'; // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- the plugin's own small SVG file.
-		add_menu_page( 'SourceWeb', 'SourceWeb' . $count, AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page', $icon, '58.3' );
-		$GLOBALS['admin_page_hooks'][ AW_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (sourcing_page_…), whatever the title.
+		add_menu_page( 'SourceWeb', 'SourceWeb' . $count, SOURCEWEB_REVIEW_CAP, SOURCEWEB_SRC_MENU, 'sourceweb_sourcing_overview_page', $icon, '58.3' );
+		$GLOBALS['admin_page_hooks'][ SOURCEWEB_SRC_MENU ] = 'sourcing'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screens' hook prefix (sourcing_page_…), whatever the title.
 		if ( ! isset( $GLOBALS['menu']['58.05'] ) ) {
 			$GLOBALS['menu']['58.05'] = array( '', 'read', 'separator-wugweb', '', 'wp-menu-separator', 'separator-wugweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- one separator above the block, as core adds its own.
 		}
-		add_submenu_page( AW_SRC_MENU, 'SourceWeb', 'Dashboard', AW_REVIEW_CAP, AW_SRC_MENU, 'sourceweb_sourcing_overview_page' );
+		add_submenu_page( SOURCEWEB_SRC_MENU, 'SourceWeb', 'Dashboard', SOURCEWEB_REVIEW_CAP, SOURCEWEB_SRC_MENU, 'sourceweb_sourcing_overview_page' );
 	},
 	9 // before To review (10) and Enrichment review (11)
 );
@@ -82,15 +82,15 @@ add_action(
 		$first = true;
 		foreach ( sourceweb_sourcing_tabs() as $tab => $t ) {
 			if ( $first ) {
-				$hook = add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], SOURCEWEB_SRC_CAP, AW_SRC_PAGE, 'sourceweb_sourcing_page' );
-				if ( $hook && AW_SRC_SCREEN !== $hook ) { // the menu title changed: the screens' hooks would not fire, so pass them on and say so
-					add_action( 'load-' . $hook, fn() => do_action( 'load-' . AW_SRC_SCREEN ) );
-					error_log( 'SourceWeb: the Sourcing page is ' . $hook . ', not ' . AW_SRC_SCREEN . ' (menu-model.php); list-table settings and columns will not apply.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+				$hook = add_submenu_page( SOURCEWEB_SRC_MENU, (string) $t[0], (string) $t[0], SOURCEWEB_SRC_CAP, SOURCEWEB_SRC_PAGE, 'sourceweb_sourcing_page' );
+				if ( $hook && SOURCEWEB_SRC_SCREEN !== $hook ) { // the menu title changed: the screens' hooks would not fire, so pass them on and say so
+					add_action( 'load-' . $hook, fn() => do_action( 'load-' . SOURCEWEB_SRC_SCREEN ) );
+					error_log( 'SourceWeb: the Sourcing page is ' . $hook . ', not ' . SOURCEWEB_SRC_SCREEN . ' (menu-model.php); list-table settings and columns will not apply.' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 				}
 				$first = false;
 				continue;
 			}
-			add_submenu_page( AW_SRC_MENU, (string) $t[0], (string) $t[0], SOURCEWEB_SRC_CAP, sourceweb_src_tab_menu_slug( $tab ) );
+			add_submenu_page( SOURCEWEB_SRC_MENU, (string) $t[0], (string) $t[0], SOURCEWEB_SRC_CAP, sourceweb_src_tab_menu_slug( $tab ) );
 		}
 	},
 	12
@@ -100,7 +100,7 @@ add_action(
 add_filter(
 	'submenu_file',
 	function ( $file, $parent ) {
-		return AW_SRC_MENU === $parent && AW_SRC_PAGE === sanitize_key( $_GET['page'] ?? '' ) ? sourceweb_src_tab_menu_slug( sourceweb_sourcing_current_tab() ) : $file; // phpcs:ignore WordPress.Security.NonceVerification -- which item to mark
+		return SOURCEWEB_SRC_MENU === $parent && SOURCEWEB_SRC_PAGE === sanitize_key( $_GET['page'] ?? '' ) ? sourceweb_src_tab_menu_slug( sourceweb_sourcing_current_tab() ) : $file; // phpcs:ignore WordPress.Security.NonceVerification -- which item to mark
 	},
 	10,
 	2
@@ -108,7 +108,7 @@ add_filter(
 add_filter(
 	'admin_title',
 	function ( $admin_title, $title ) {
-		if ( AW_SRC_PAGE !== sanitize_key( $_GET['page'] ?? '' ) || '' === (string) $title || 0 !== strpos( (string) $admin_title, (string) $title ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a title only
+		if ( SOURCEWEB_SRC_PAGE !== sanitize_key( $_GET['page'] ?? '' ) || '' === (string) $title || 0 !== strpos( (string) $admin_title, (string) $title ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- a title only
 			return $admin_title;
 		}
 		return sourceweb_sourcing_tabs()[ sourceweb_sourcing_current_tab() ][0] . substr( (string) $admin_title, strlen( (string) $title ) );
@@ -134,7 +134,7 @@ add_filter(
 add_filter(
 	'kits_sourcing_tabs',
 	function ( $tabs ) {
-		$tabs[ AW_SRC_SETTINGS_TAB ] = array( 'Settings' );
+		$tabs[ SOURCEWEB_SRC_SETTINGS_TAB ] = array( 'Settings' );
 		return $tabs;
 	}
 );
@@ -194,7 +194,7 @@ function sourceweb_sourcing_moved_redirect() {
 	// phpcs:disable WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- a GET redirect, nothing saved; each value is sanitized below.
 	$page = sanitize_key( $_GET['page'] ?? '' );
 	$get  = 'GET' === sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) );
-	$old  = $get && ( ( 'options-general.php' === $pagenow && AW_SRC_PAGE === $page ) || ( 'edit.php' === $pagenow && 'aw-enrich-review' === $page ) );
+	$old  = $get && ( ( 'options-general.php' === $pagenow && SOURCEWEB_SRC_PAGE === $page ) || ( 'edit.php' === $pagenow && 'aw-enrich-review' === $page ) );
 	if ( ! $old ) {
 		return;
 	}
@@ -265,7 +265,7 @@ function sourceweb_sourcing_ai_counts() {
 
 /** Sourcing → Overview: the shell Dashboard (sourceweb-ui.php). */
 function sourceweb_sourcing_overview_page() {
-	if ( ! current_user_can( AW_REVIEW_CAP ) ) {
+	if ( ! current_user_can( SOURCEWEB_REVIEW_CAP ) ) {
 		return;
 	}
 	sourceweb_ui_page( 'dashboard' );

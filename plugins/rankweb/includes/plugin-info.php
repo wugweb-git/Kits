@@ -77,7 +77,7 @@ function rankweb_seo_plugin_row_meta( array $links, string $file, $plugin_data =
 			esc_html__( 'View details' ) // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own string.
 		);
 	}
-	$page  = (string) ( defined( 'AW_SEO_MENU' ) ? AW_SEO_MENU : 'rankweb' );
+	$page  = (string) ( defined( 'RANKWEB_SEO_MENU' ) ? RANKWEB_SEO_MENU : 'rankweb' );
 	$start = menu_page_url( $page, false );
 	if ( '' === (string) $start ) {
 		$start = admin_url( 'admin.php?page=' . rawurlencode( $page ) );

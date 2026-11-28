@@ -12,8 +12,8 @@
 
 require_once __DIR__ . '/tool-stubs.php';
 
-if ( ! defined( 'AW_REDIRECT_HTACCESS' ) ) {
-	define( 'AW_REDIRECT_HTACCESS', 0 ); // the option is off: a confirmed write stops at "the option is off", before any file is touched
+if ( ! defined( 'RANKWEB_REDIRECT_HTACCESS' ) ) {
+	define( 'RANKWEB_REDIRECT_HTACCESS', 0 ); // the option is off: a confirmed write stops at "the option is off", before any file is touched
 }
 if ( ! defined( 'ARRAY_A' ) ) {
 	define( 'ARRAY_A', 'ARRAY_A' );

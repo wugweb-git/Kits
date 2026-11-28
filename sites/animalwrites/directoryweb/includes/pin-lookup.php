@@ -143,7 +143,7 @@ foreach ( array( 'admin_print_footer_scripts-post.php', 'admin_print_footer_scri
 	add_action(
 		$directoryweb_pin_hook,
 		function () {
-			if ( ! function_exists( 'directoryweb_place_box' ) || ! defined( 'AW_PLACE_EDIT_TYPES' ) || ! in_array( get_post_type(), AW_PLACE_EDIT_TYPES, true ) ) {
+			if ( ! function_exists( 'directoryweb_place_box' ) || ! defined( 'DIRECTORYWEB_PLACE_EDIT_TYPES' ) || ! in_array( get_post_type(), DIRECTORYWEB_PLACE_EDIT_TYPES, true ) ) {
 				return;
 			}
 			ob_start();

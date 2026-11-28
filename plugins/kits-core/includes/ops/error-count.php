@@ -11,7 +11,7 @@
  *   "Not found", never 0.
  * - When the fatal count is above zero, the admin email gets one plain-text message for that run (with the other
  *   kinds' counts). Warnings, notices and deprecations alone send nothing.
- * - Log paths are found at run time. Override them with the constant AW_PHP_ERROR_LOG (a file or a folder) in
+ * - Log paths are found at run time. Override them with the constant KITS_PHP_ERROR_LOG (a file or a folder) in
  *   wp-config.php, or the filter aw_error_count_php_paths.
  * - `wp aw error-count [--paths]` prints one line per kind, the files read and the most frequent messages (with
  *   --paths, every path tried), without saving or emailing.
@@ -87,8 +87,8 @@ function kits_error_count_dirs() {
 function kits_error_count_php_candidates() {
 	$d   = kits_error_count_dirs();
 	$out = array();
-	if ( defined( 'AW_PHP_ERROR_LOG' ) && AW_PHP_ERROR_LOG ) {
-		$out[] = (string) AW_PHP_ERROR_LOG;
+	if ( defined( 'KITS_PHP_ERROR_LOG' ) && KITS_PHP_ERROR_LOG ) {
+		$out[] = (string) KITS_PHP_ERROR_LOG;
 	}
 	$ini = (string) ini_get( 'error_log' );
 	if ( '' !== $ini && 'syslog' !== $ini ) {

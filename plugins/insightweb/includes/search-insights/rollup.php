@@ -1,8 +1,8 @@
 <?php
 /**
- * Retention (plan §3): daily rows older than 90 days (setting AW_SI_KEEP_DAYS) become one monthly row per keyword,
+ * Retention (plan §3): daily rows older than 90 days (setting INSIGHTWEB_SI_KEEP_DAYS) become one monthly row per keyword,
  * page, source and metric, then the daily rows are deleted. Clarity's daily rows (clarity, clarity-dev) are kept at
- * least AW_SI_CLARITY_KEEP (35) days even when the setting is lower. Monthly rows are kept indefinitely.
+ * least INSIGHTWEB_SI_CLARITY_KEEP (35) days even when the setting is lower. Monthly rows are kept indefinitely.
  *
  * Only period = day rows are rolled up, so sums never add overlapping windows: clicks and impressions are summed,
  * position is the mean weighted by impressions, and value is summed for counts or kept as the month's last value for
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// AW_SI_KEEP_DAYS: RankWeb → Settings (settings.php).
+// INSIGHTWEB_SI_KEEP_DAYS: RankWeb → Settings (settings.php).
 
 /**
  * How a metric's value rolls up: sum (counts) or last (indexes, positions, text).
@@ -40,8 +40,8 @@ function insightweb_si_rollup( bool $dry = false, int $limit = 50000 ): array {
 	$o      = insightweb_si_table( 'obs' );
 	$today  = new DateTimeImmutable( 'today', wp_timezone() );
 	$cutoff = $today->modify( '-' . insightweb_si_keep_days() . ' days' )->format( 'Y-m-d' );
-	// Clarity's daily rows stay at least AW_SI_CLARITY_KEEP days (its 28-day views), whatever the setting says.
-	$c_keep = max( insightweb_si_keep_days(), defined( 'AW_SI_CLARITY_KEEP' ) ? (int) AW_SI_CLARITY_KEEP : 35 );
+	// Clarity's daily rows stay at least INSIGHTWEB_SI_CLARITY_KEEP days (its 28-day views), whatever the setting says.
+	$c_keep = max( insightweb_si_keep_days(), defined( 'INSIGHTWEB_SI_CLARITY_KEEP' ) ? (int) INSIGHTWEB_SI_CLARITY_KEEP : 35 );
 	$c_cut  = $today->modify( '-' . $c_keep . ' days' )->format( 'Y-m-d' );
 	// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name only.
 	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id, kw_id, page, page_key, src, metric, d, clicks, impr, pos, value, txt FROM %i WHERE ( period = 'day' OR ( period = 'week' AND src = 'bing' AND metric <> 'kw-volume' ) ) AND d < %s AND ( src NOT IN ('clarity', 'clarity-dev') OR d < %s ) ORDER BY d LIMIT %d", $o, $cutoff, $c_cut, $limit ) );

@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Content types whose items carry stored titles, descriptions and focus keywords. */
-// AW_SEO_ITEM_TYPES: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_ITEM_TYPES: RankWeb → Settings (settings.php).
 
 /** Whether a post is a section hub Page (a list, not an item). */
 function rankweb_seo_is_hub_page( $post ) {
@@ -138,7 +138,7 @@ function rankweb_seo_item_description( $post ) {
 	if ( has_excerpt( $post ) && function_exists( 'sourceweb_summary_section' ) && '' !== sourceweb_summary_section( $post ) ) {
 		return sourceweb_summary_description( trim( str_replace( '[Needs legal review]', '', $desc ) ) );
 	}
-	return rankweb_seo_cut( $desc, AW_SEO_DESC_MAX );
+	return rankweb_seo_cut( $desc, RANKWEB_SEO_DESC_MAX );
 }
 
 /**
@@ -150,7 +150,7 @@ function rankweb_seo_item_description( $post ) {
  */
 function rankweb_seo_fill_post( $post_id ) {
 	$post = get_post( $post_id );
-	if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, AW_SEO_ITEM_TYPES, true ) || rankweb_seo_is_hub_page( $post ) ) {
+	if ( ! $post || 'publish' !== $post->post_status || ! in_array( $post->post_type, RANKWEB_SEO_ITEM_TYPES, true ) || rankweb_seo_is_hub_page( $post ) ) {
 		return array();
 	}
 	$auto  = (array) json_decode( (string) get_post_meta( $post->ID, '_aw_seo_auto', true ), true );
@@ -215,7 +215,7 @@ add_action(
 	'aw_seo_fill_daily',
 	function () {
 		global $wpdb;
-		$types = array_values( (array) AW_SEO_ITEM_TYPES );
+		$types = array_values( (array) RANKWEB_SEO_ITEM_TYPES );
 		$ids   = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_title' WHERE p.post_type IN (" . implode( ',', array_fill( 0, count( $types ), '%s' ) ) . ") AND p.post_status = 'publish' AND m.meta_id IS NULL LIMIT 500", $types ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %s per item type
 		foreach ( $ids as $id ) {
 			rankweb_seo_fill_post( $id );
@@ -314,7 +314,7 @@ function rankweb_seo_list_title() {
 			return ''; // name searches and other filtered lists keep their own titles
 		}
 		if ( ! $place ) {
-			return rankweb_seo_fit( array_filter( array( AW_HUB_TITLES[ rankweb_type( 'listing' ) ] ?? '' ) ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
+			return rankweb_seo_fit( array_filter( array( RANKWEB_HUB_TITLES[ rankweb_type( 'listing' ) ] ?? '' ) ), 60 - mb_strlen( rankweb_seo_page_suffix() ) );
 		}
 		if ( $place->parent ) { // within 60 characters: the longest of these that fits
 			$where = $place->name . ', ' . directoryweb_place_parent_state( $place )->name;
@@ -364,7 +364,7 @@ function rankweb_seo_list_title() {
 		$what = rankweb_seo_term_title( get_queried_object() );
 		return rankweb_seo_page_number() > 1 ? rankweb_seo_fit( array( $what, preg_replace( '/ – ' . preg_quote( get_bloginfo( 'name' ), '/' ) . '$/u', '', $what ) ), 60 - mb_strlen( rankweb_seo_page_suffix() ) ) : $what;
 	}
-	return AW_HUB_TITLES[ $hub ] ?? '';
+	return RANKWEB_HUB_TITLES[ $hub ] ?? '';
 }
 
 /**
@@ -523,7 +523,7 @@ function rankweb_seo_list_description() {
 		$post = get_queried_object();
 		$desc = has_excerpt( $post ) ? $post->post_excerpt : rankweb_seo_intro( $post );
 	} elseif ( is_post_type_archive() ) {
-		$desc = AW_ARCHIVE_DESCRIPTIONS[ get_query_var( 'post_type' ) ] ?? '';
+		$desc = RANKWEB_ARCHIVE_DESCRIPTIONS[ get_query_var( 'post_type' ) ] ?? '';
 	} elseif ( is_tag() && '' === trim( (string) term_description() ) && function_exists( 'rankweb_seo_tag_description' ) ) {
 		$desc = rankweb_seo_tag_description( get_queried_object() ); // what the tag holds, counted (programmatic.php)
 	} elseif ( rankweb_seo_is_category_page() && '' !== rankweb_seo_category_description( get_queried_object() ) ) {
@@ -543,13 +543,13 @@ function rankweb_seo_list_description() {
 		$n     = number_format_i18n( aw_hub_total( rankweb_type( 'listing' ) ) );
 		$state = $place ? directoryweb_place_parent_state( $place ) : null;
 		if ( ! $place ) {
-			$desc = ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( AW_HUB_DESCRIPTIONS[ rankweb_type( 'listing' ) ] ?? '%s', $n ); // phpcs:ignore WordPress.Security.NonceVerification
+			$desc = ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) ? $desc : sprintf( RANKWEB_HUB_DESCRIPTIONS[ rankweb_type( 'listing' ) ] ?? '%s', $n ); // phpcs:ignore WordPress.Security.NonceVerification
 		} elseif ( $place->parent && '' !== $slug && '0' !== $n ) {
 			$what = '1' === $n ? 'One ' . preg_replace( '/\bgaushala\b/u', 'Gaushala', mb_strtolower( trim( preg_replace( '/\s*\(.*?\)\s*/', ' ', rankweb_seo_listing_type_name( $slug ) ) ) ) ) : $n . ' ' . rankweb_seo_type_plural( $slug );
 			$desc = sprintf( '1' === $n ? '%1$s in %2$s, %3$s: address, phone number and services.' : '%1$s in %2$s, %3$s: addresses, phone numbers and services.', $what, $place->name, $state->name );
 			$more = ' From the ' . rankweb_site_name() . ' Directory' . rankweb_seo_dir_scope( true ) . '.';
 			$short = ' From the ' . rankweb_site_name() . ' Directory.';
-			$desc = mb_strlen( $desc . $more ) <= AW_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . $short ) <= AW_SEO_DESC_MAX ? $desc . $short : $desc );
+			$desc = mb_strlen( $desc . $more ) <= RANKWEB_SEO_DESC_MAX ? $desc . $more : ( mb_strlen( $desc . $short ) <= RANKWEB_SEO_DESC_MAX ? $desc . $short : $desc );
 		} elseif ( directoryweb_current_type_name() || ! empty( $_GET['q'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$desc = $desc; // a filtered list: as before
 		} elseif ( $place->parent ) {
@@ -559,8 +559,8 @@ function rankweb_seo_list_description() {
 		} else {
 			$desc = sprintf( '%1$s ' . $adjl_lc . 'NGOs, shelters, rescuers, Gaushalas and government vets in %2$s, district by district. Phone, address and services.', $n, $place->name );
 		}
-	} elseif ( isset( AW_HUB_DESCRIPTIONS[ $hub ] ) && ! rankweb_is_type( $hub, 'listing' ) ) { // the Directory's has a count to fill in (above)
-		$desc = AW_HUB_DESCRIPTIONS[ $hub ];
+	} elseif ( isset( RANKWEB_HUB_DESCRIPTIONS[ $hub ] ) && ! rankweb_is_type( $hub, 'listing' ) ) { // the Directory's has a count to fill in (above)
+		$desc = RANKWEB_HUB_DESCRIPTIONS[ $hub ];
 	} elseif ( in_array( $hub, rankweb_types_with( array( 'news', 'library' ), array( 'post' ) ), true ) ) {
 		$desc = rankweb_seo_hub_intro_description( $hub );
 	}
@@ -569,7 +569,7 @@ function rankweb_seo_list_description() {
 	}
 	$desc  = preg_replace( '/\s+,/u', ',', html_entity_decode( wp_strip_all_tags( (string) $desc ), ENT_QUOTES, 'UTF-8' ) );
 	$pages = rankweb_seo_page_suffix();
-	return rankweb_seo_with_page( rankweb_seo_cut( $desc, AW_SEO_DESC_MAX - mb_strlen( $pages ) ) );
+	return rankweb_seo_with_page( rankweb_seo_cut( $desc, RANKWEB_SEO_DESC_MAX - mb_strlen( $pages ) ) );
 }
 
 /**

@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 // phpcs:disable WordPress.WP.AlternativeFunctions, WordPress.Security, Squiz.Commenting, Generic.Files.OneObjectStructurePerFile -- a command-line test with stubs.
 
 define( 'MINUTE_IN_SECONDS', 60 );
-define( 'AW_REVIEW_CAP', 'manage_sourceweb' );
-define( 'AW_ENRICH_CAP', 'manage_sourceweb' );
+define( 'SOURCEWEB_REVIEW_CAP', 'manage_sourceweb' );
+define( 'SOURCEWEB_ENRICH_CAP', 'manage_sourceweb' );
 
 $GLOBALS['t_options']   = array();
 $GLOBALS['t_trans']     = array();

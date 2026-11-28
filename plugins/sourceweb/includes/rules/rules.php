@@ -18,10 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** The option holding the Directory enrichment field rules and trust order. */
-const AW_ENRICH_RULES_OPTION = 'aw_enrich_field_rules';
+const SOURCEWEB_ENRICH_RULES_OPTION = 'aw_enrich_field_rules';
 
 /** The listing's first ACF field group; every group whose key starts with it is a listing group (one box each). */
-const AW_ENRICH_LISTING_GROUP = 'group_aw_listing';
+const SOURCEWEB_ENRICH_LISTING_GROUP = 'group_aw_listing';
 
 // Media & PR is a section (owner's decision 12): it is not public, so it opts in. After press.php registers it.
 add_action(
@@ -104,7 +104,7 @@ function sourceweb_rules_url( $part = 'sections', array $args = array() ) {
  * @return array
  */
 function sourceweb_rules_summary_by_type() {
-	$saved = get_option( AW_SUMMARY_RULES_OPTION );
+	$saved = get_option( SOURCEWEB_SUMMARY_RULES_OPTION );
 	return sourceweb_rules_summary_resolve( sourceweb_summary_rules()['sections'], is_array( $saved ) ? (array) ( $saved['sections'] ?? array() ) : array(), sourceweb_rules_section_labels() );
 }
 
@@ -123,7 +123,7 @@ function sourceweb_enrich_source_keys() {
  */
 function sourceweb_enrich_field_rules() {
 	static $memo = array();
-	$saved = sourceweb_rules_live() ? get_option( AW_ENRICH_RULES_OPTION ) : false; // before phase 3 (or after its rollback): the code's rules
+	$saved = sourceweb_rules_live() ? get_option( SOURCEWEB_ENRICH_RULES_OPTION ) : false; // before phase 3 (or after its rollback): the code's rules
 	$key   = md5( (string) wp_json_encode( $saved ) );
 	if ( isset( $memo[ $key ] ) ) {
 		return $memo[ $key ]; // read once per request (the results endpoint asks for each proposal)
@@ -179,25 +179,25 @@ function sourceweb_enrich_listing_acf_fields() {
 	if ( function_exists( 'acf_get_field_groups' ) && function_exists( 'acf_get_fields' ) ) {
 		$groups = array();
 		foreach ( (array) acf_get_field_groups() as $g ) {
-			if ( is_array( $g ) && 0 === strpos( (string) ( $g['key'] ?? '' ), AW_ENRICH_LISTING_GROUP ) ) {
+			if ( is_array( $g ) && 0 === strpos( (string) ( $g['key'] ?? '' ), SOURCEWEB_ENRICH_LISTING_GROUP ) ) {
 				$g['fields'] = (array) acf_get_fields( $g['key'] );
 				$groups[]    = $g;
 			}
 		}
-		$f = sourceweb_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
+		$f = sourceweb_enrich_listing_groups_fields( $groups, SOURCEWEB_ENRICH_LISTING_GROUP );
 		if ( $f ) {
 			return $f;
 		}
 	}
 	$groups = array();
 	$dir    = ( defined( 'DIRECTORYWEB_DIR' ) ? DIRECTORYWEB_DIR : dirname( __DIR__, 3 ) . '/directoryweb/' ) . 'acf-json/'; // the listing field groups are DirectoryWeb's
-	foreach ( (array) glob( $dir . AW_ENRICH_LISTING_GROUP . '*.json' ) as $file ) {
+	foreach ( (array) glob( $dir . SOURCEWEB_ENRICH_LISTING_GROUP . '*.json' ) as $file ) {
 		$json = is_readable( $file ) ? json_decode( (string) file_get_contents( $file ), true ) : null; // phpcs:ignore WordPress.WP.AlternativeFunctions -- a local file
 		if ( is_array( $json ) ) {
 			$groups[] = $json;
 		}
 	}
-	return sourceweb_enrich_listing_groups_fields( $groups, AW_ENRICH_LISTING_GROUP );
+	return sourceweb_enrich_listing_groups_fields( $groups, SOURCEWEB_ENRICH_LISTING_GROUP );
 }
 
 /** The Directory schema (rules-model.php sourceweb_enrich_schema_build) for enrich/config; built once per request. */
@@ -209,7 +209,7 @@ function sourceweb_enrich_schema() {
 	$secs  = function_exists( 'sourceweb_sources_config' ) ? (array) ( sourceweb_sources_config()['sections'] ?? array() ) : array();
 	$listing = sourceweb_type( 'listing' );
 	$types   = '' !== $listing ? (array) ( $secs[ $listing ]['tags'] ?? array() ) : array();
-	$out   = sourceweb_enrich_schema_build( sourceweb_enrich_listing_acf_fields(), sourceweb_enrich_fields(), AW_ENRICH_LISTING_GROUP, $types, defined( 'AW_SERVICES' ) ? AW_SERVICES : array() );
+	$out   = sourceweb_enrich_schema_build( sourceweb_enrich_listing_acf_fields(), sourceweb_enrich_fields(), SOURCEWEB_ENRICH_LISTING_GROUP, $types, (array) apply_filters( 'sourceweb_enrich_services', array() ) ); // slug => name of the services a listing can offer; a site supplies them
 	if ( did_action( 'init' ) ) {
 		$memo = $out;
 	}
@@ -218,7 +218,7 @@ function sourceweb_enrich_schema() {
 
 /**
  * Listing fields added in wp-admin whose field rule is on (phase 3): field name => [label, meta key, group, ACF type],
- * the shape of sourceweb_enrich_fields(). Only types enrichment can write (AW_ENRICH_ACF_WRITABLE).
+ * the shape of sourceweb_enrich_fields(). Only types enrichment can write (SOURCEWEB_ENRICH_ACF_WRITABLE).
  *
  * @return array
  */
@@ -289,7 +289,7 @@ add_filter(
  * Sources sync copies the summary rules and the Directory schema too (phase 3): a save of either starts it, as a save
  * of the lists does (sourcing-lists.php sourceweb_sources_sync_soon).
  */
-foreach ( array( 'aw_summary_rules', AW_ENRICH_RULES_OPTION ) as $sourceweb_rules_sync_option ) {
+foreach ( array( 'aw_summary_rules', SOURCEWEB_ENRICH_RULES_OPTION ) as $sourceweb_rules_sync_option ) {
 	add_action( 'add_option_' . $sourceweb_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
 	add_action( 'update_option_' . $sourceweb_rules_sync_option, fn() => function_exists( 'sourceweb_sources_sync_soon' ) && sourceweb_rules_live() ? sourceweb_sources_sync_soon() : null );
 }

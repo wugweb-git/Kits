@@ -150,7 +150,7 @@ add_action(
 			wp_admin_notice( esc_html__( 'The note was empty or the page unknown, so nothing was saved.', 'insightweb' ), array( 'type' => 'warning', 'additional_classes' => array( 'inline' ) ) );
 		}
 		if ( ! insightweb_si_clarity_on() ) {
-			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Settings → Keys as AW_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
+			wp_admin_notice( esc_html__( 'Clarity figures start once the Clarity token is added under Settings → Keys as INSIGHTWEB_CLARITY_TOKEN (Clarity → Settings → Data Export → Generate new API token).', 'insightweb' ), array( 'type' => 'info', 'additional_classes' => array( 'inline' ) ) );
 		}
 		$note = isset( $_GET['note'] ) ? insightweb_si_path( home_url( sanitize_text_field( wp_unslash( $_GET['note'] ) ) ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- opens a form only.
 		if ( '' !== $note ) {
@@ -170,7 +170,7 @@ add_action(
 		if ( 'unindexed' === ( isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : '' ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 			echo '<p class="description">' . esc_html__( 'Pages whose latest URL Inspection result is not indexed: the same rule, and the same count, as the Overview\'s "pages we inspected, latest result" figure. Pages with no search figures in 28 days are listed too. Search Console\'s own Page indexing total counts the whole site, so it differs.', 'insightweb' ) . '</p>';
 		}
-		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
+		echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SI_SLUG ) . '"><input type="hidden" name="tab" value="pages">';
 		$table->search_box( __( 'Search pages', 'insightweb' ), 'aw-si-pages' );
 		$table->display();
 		echo '</form>';

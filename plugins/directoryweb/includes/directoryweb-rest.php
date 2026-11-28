@@ -822,7 +822,7 @@ function directoryweb_settings_payload(): array {
 			$tags[] = array( $slug, ! empty( $found ) );
 		}
 	}
-	$sw   = defined( 'SOURCEWEB_SOURCING_DIR' ) || defined( 'AW_SOURCING_DIR' );
+	$sw   = defined( 'SOURCEWEB_SOURCING_DIR' );
 	$rw   = function_exists( 'rankweb_ui_url' );
 	$iw   = defined( 'INSIGHTWEB_LOADED' );
 	$rule = $rw ? rankweb_ui_url( 'settings' ) . '#indexing' : '';
@@ -848,7 +848,7 @@ function directoryweb_settings_payload(): array {
 			'facts'   => array(
 				directoryweb_fact( __( 'Country', 'directoryweb' ), directoryweb_geo_profile()['country'] ?: __( 'Any', 'directoryweb' ) ),
 				/* translators: %s: number of days. */
-				directoryweb_fact( __( 'Answers kept', 'directoryweb' ), defined( 'AW_GEO_CACHE' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( AW_GEO_CACHE / DAY_IN_SECONDS ) ) : '' ),
+				directoryweb_fact( __( 'Answers kept', 'directoryweb' ), defined( 'DIRECTORYWEB_GEO_CACHE' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( DIRECTORYWEB_GEO_CACHE / DAY_IN_SECONDS ) ) : '' ),
 				directoryweb_fact( __( 'Contact sent with each request', 'directoryweb' ), function_exists( 'directoryweb_geo_user_agent' ) ? directoryweb_geo_user_agent() : '' ),
 			),
 		),
@@ -859,8 +859,8 @@ function directoryweb_settings_payload(): array {
 			'tone'    => '',
 			'summary' => __( 'The tile style and the map library are fixed in code.', 'directoryweb' ),
 			'facts'   => array(
-				directoryweb_fact( __( 'Tile style', 'directoryweb' ), defined( 'AW_DIR_STYLE' ) ? AW_DIR_STYLE : '' ),
-				directoryweb_fact( __( 'Map library', 'directoryweb' ), defined( 'AW_DIR_MAP_LIB' ) ? AW_DIR_MAP_LIB : '' ),
+				directoryweb_fact( __( 'Tile style', 'directoryweb' ), defined( 'DIRECTORYWEB_DIR_STYLE' ) ? DIRECTORYWEB_DIR_STYLE : '' ),
+				directoryweb_fact( __( 'Map library', 'directoryweb' ), defined( 'DIRECTORYWEB_DIR_MAP_LIB' ) ? DIRECTORYWEB_DIR_MAP_LIB : '' ),
 			),
 		),
 		array(
@@ -905,7 +905,7 @@ function directoryweb_settings_payload(): array {
 			'summary' => $sw ? ( is_array( $stats ) && is_array( $stats['enrichment'] ?? null ) ? sprintf( __( '%s proposals waiting. Enrichment sources and keys stay in SourceWeb.', 'directoryweb' ), $num( $stats['enrichment']['pending'] ) ) : __( 'Enrichment sources and keys stay in SourceWeb.', 'directoryweb' ) ) : __( 'Undo of a claimed field needs SourceWeb’s change log.', 'directoryweb' ),
 			'link'    => $sw ? array(
 				'label' => __( 'SourceWeb settings', 'directoryweb' ),
-				'url'   => add_query_arg( 'page', defined( 'AW_SRC_PAGE' ) ? AW_SRC_PAGE : 'aw-sourcing', admin_url( 'admin.php' ) ),
+				'url'   => add_query_arg( 'page', defined( 'SOURCEWEB_SRC_PAGE' ) ? SOURCEWEB_SRC_PAGE : 'aw-sourcing', admin_url( 'admin.php' ) ),
 			) : null,
 		),
 		array(
@@ -957,11 +957,11 @@ function directoryweb_settings_payload(): array {
 			'label'       => __( 'Places', 'directoryweb' ),
 			'description' => '',
 			'facts'       => array(
-				directoryweb_fact( __( 'Content types that carry a place', 'directoryweb' ), defined( 'AW_PLACE_TYPES' ) ? implode( ', ', AW_PLACE_TYPES ) : '' ),
+				directoryweb_fact( __( 'Content types that carry a place', 'directoryweb' ), defined( 'DIRECTORYWEB_PLACE_TYPES' ) ? implode( ', ', DIRECTORYWEB_PLACE_TYPES ) : '' ),
 				/* translators: %s: number. */
-				directoryweb_fact( __( 'District common names', 'directoryweb' ), defined( 'AW_DISTRICT_COMMON_NAMES' ) ? sprintf( __( '%s names', 'directoryweb' ), $num( count( AW_DISTRICT_COMMON_NAMES ) ) ) : '' ),
+				directoryweb_fact( __( 'District common names', 'directoryweb' ), defined( 'DIRECTORYWEB_DISTRICT_COMMON_NAMES' ) ? sprintf( __( '%s names', 'directoryweb' ), $num( count( DIRECTORYWEB_DISTRICT_COMMON_NAMES ) ) ) : '' ),
 				/* translators: %s: number. */
-				directoryweb_fact( __( 'Cities found in text', 'directoryweb' ), defined( 'AW_PLACE_DETECT_CITIES' ) ? sprintf( __( '%s cities', 'directoryweb' ), $num( count( AW_PLACE_DETECT_CITIES ) ) ) : '' ),
+				directoryweb_fact( __( 'Cities found in text', 'directoryweb' ), defined( 'DIRECTORYWEB_PLACE_DETECT_CITIES' ) ? sprintf( __( '%s cities', 'directoryweb' ), $num( count( DIRECTORYWEB_PLACE_DETECT_CITIES ) ) ) : '' ),
 			),
 		),
 		array(
@@ -971,7 +971,7 @@ function directoryweb_settings_payload(): array {
 			'facts'       => array(
 				directoryweb_fact( __( 'Roles', 'directoryweb' ), implode( ', ', $roles ) ),
 				/* translators: %s: number of days. */
-				directoryweb_fact( __( 'Re-check a Claimed listing after', 'directoryweb' ), defined( 'AW_REVERIFY_DAYS' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( AW_REVERIFY_DAYS ) ) : '' ),
+				directoryweb_fact( __( 'Re-check a Claimed listing after', 'directoryweb' ), defined( 'DIRECTORYWEB_REVERIFY_DAYS' ) ? sprintf( __( '%s days', 'directoryweb' ), $num( DIRECTORYWEB_REVERIFY_DAYS ) ) : '' ),
 				directoryweb_fact( __( '"Show my name" starts as', 'directoryweb' ), __( 'No', 'directoryweb' ), __( 'Set in the claim form', 'directoryweb' ) ),
 				directoryweb_fact( __( 'Emails from forms and claims', 'directoryweb' ), '1' === (string) get_option( 'aw_ff_send_email', '0' ) ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), $where( 'wp option update aw_ff_send_email' ) ),
 			),
@@ -982,8 +982,8 @@ function directoryweb_settings_payload(): array {
 			'description' => __( 'Claimed is set by an approved claim. Verified comes from government records.', 'directoryweb' ),
 			'facts'       => array(
 				directoryweb_fact( __( 'Claimed label', 'directoryweb' ), __( 'Claimed', 'directoryweb' ) ),
-				...( defined( 'AW_GOV_SOURCES' ) ? array(
-					directoryweb_fact( __( 'Verified sources', 'directoryweb' ), defined( 'AW_GOV_SOURCES' ) ? implode( ', ', AW_GOV_SOURCES ) : '' ),
+				...( defined( 'DIRECTORYWEB_GOV_SOURCES' ) ? array(
+					directoryweb_fact( __( 'Verified sources', 'directoryweb' ), defined( 'DIRECTORYWEB_GOV_SOURCES' ) ? implode( ', ', DIRECTORYWEB_GOV_SOURCES ) : '' ),
 					directoryweb_fact( __( 'Verified', 'directoryweb' ), get_option( 'aw_gov_verified_live' ) ? __( 'On', 'directoryweb' ) : __( 'Off', 'directoryweb' ), $where( 'wp aw gov-verify' ) ),
 				) : array() ), // government-list verification comes from the site layer
 				/* translators: %s: number. */
@@ -1008,7 +1008,7 @@ function directoryweb_settings_payload(): array {
 			'description' => __( 'Titles and the intro are neutral by default; a site rewrites them with filters.', 'directoryweb' ),
 			'facts'       => array(
 				/* translators: %s: number. */
-				directoryweb_fact( __( 'Search aliases', 'directoryweb' ), defined( 'AW_SEARCH_NAME_ALIASES' ) ? implode( ', ', array_map( fn( $k, $v ) => $k . ' → ' . $v, array_keys( AW_SEARCH_NAME_ALIASES ), AW_SEARCH_NAME_ALIASES ) ) : '' ),
+				directoryweb_fact( __( 'Search aliases', 'directoryweb' ), defined( 'DIRECTORYWEB_SEARCH_NAME_ALIASES' ) ? implode( ', ', array_map( fn( $k, $v ) => $k . ' → ' . $v, array_keys( DIRECTORYWEB_SEARCH_NAME_ALIASES ), DIRECTORYWEB_SEARCH_NAME_ALIASES ) ) : '' ),
 			),
 		),
 	);

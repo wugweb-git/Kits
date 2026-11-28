@@ -73,6 +73,18 @@ function insightweb_types( array $roles ): array {
 }
 
 /**
+ * The post types the Rank Math focus-keyphrase sync runs over: post and page, unless the site says otherwise through the
+ * filter insightweb_seo_item_types (an array of post type slugs; an empty or non-array answer is ignored).
+ *
+ * @return string[]
+ */
+function insightweb_item_types(): array {
+	$types = apply_filters( 'insightweb_seo_item_types', array( 'post', 'page' ) );
+	$types = is_array( $types ) ? array_values( array_filter( array_map( 'strval', $types ), 'strlen' ) ) : array();
+	return $types ? $types : array( 'post', 'page' );
+}
+
+/**
  * The same, with extra plain types (WordPress's own post, page) added after them.
  *
  * @param string[] $roles Role names.

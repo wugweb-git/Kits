@@ -33,7 +33,7 @@ function kits_site_menu_parent(): string {
 function kits_site_screens( bool $all = false ): array {
 	$screens = array(
 		'kits-overview'   => array( 'Overview', 'edit_posts' ),
-		'aw-dates'        => array( 'Dates', defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : 'edit_others_posts' ),
+		'aw-dates'        => array( 'Dates', (string) apply_filters( 'kits_dates_cap', 'edit_others_posts' ) ), // a site layer sets who may edit the dates
 		'aw-site-check'   => array( 'Check site', 'manage_options' ),
 		'aw-elsewhere'    => array( 'Contact links', 'edit_pages' ),
 		'aw-modules'      => array( 'Modules', 'manage_options' ),

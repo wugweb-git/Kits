@@ -20,11 +20,11 @@ Released from kits-suite with CI green on a3db44c. Tests run: version, held-code
 
 ## 0.4.1: post types by role, AWBI and Darpan enrichment moved out (27 Nov 2026)
 
-Done: see CHANGELOG.md 0.4.1. Still to do from the 0.4.0 list below: `AW_WORKERS`, the India edition of Google News and IST, the Indian place-name scoring in `cc0-images.php`, the Indian hosts and "india" stop words in `library-pdfs.php` and `auto-review.php`, the India Post source and the `animals` field in `enrichment.php` and `src/index.js`, and the `awbi` and `darpan` keys in the `rules-model.php` trust-order seed (kept: the workers' constants and the seed fixture hold them). The AWBI and NGO Darpan sources, fields and queue group are no longer in that list: they are in the site layer.
+Done: see CHANGELOG.md 0.4.1. Still to do from the 0.4.0 list below: `SOURCEWEB_WORKERS`, the India edition of Google News and IST, the Indian place-name scoring in `cc0-images.php`, the Indian hosts and "india" stop words in `library-pdfs.php` and `auto-review.php`, the India Post source and the `animals` field in `enrichment.php` and `src/index.js`, and the `awbi` and `darpan` keys in the `rules-model.php` trust-order seed (kept: the workers' constants and the seed fixture hold them). The AWBI and NGO Darpan sources, fields and queue group are no longer in that list: they are in the site layer.
 
 Also still Animal Writes shaped, found while removing the types: the Indian place matching in `ingest.php` (`aw_places_from_text`, the LGD files), the Gazette notification number check (`sourceweb_legal_by_number`), the "about India" verdict in `sourceweb_ai_passed()`, and the `aw_post_types()` and `aw_section_*` calls that read Kits Core. `includes/compat/legacy-aliases.php` is not site-only (callers outside the plugin use those names), so it stays until they call the `sourceweb_` functions.
 
-The ACF group key `group_aw_listing` (`AW_ENRICH_LISTING_GROUP`, `rules.php`) is the one place the plugin still spells a listing name: it is the key of DirectoryWeb's field group file; it should come from a DirectoryWeb accessor.
+The ACF group key `group_aw_listing` (`SOURCEWEB_ENRICH_LISTING_GROUP`, `rules.php`) is the one place the plugin still spells a listing name: it is the key of DirectoryWeb's field group file; it should come from a DirectoryWeb accessor.
 
 ## 0.4.0: site-specific code removed (27 Nov 2026)
 
@@ -32,7 +32,7 @@ Done: see CHANGELOG.md 0.4.0. The Animal Writes extras live in `sites/animalwrit
 
 Not done, still site-shaped, to decide:
 
-- `AW_WORKERS` (`includes/workers/workers-registry.php`) is the Animal Writes workers repository's workflow list, including "Research (India, ...)" and "Finds new Indian animal-welfare papers". The workers repository's test compares it with its `docs/workers.json`, so changing the wording means changing both. It needs to become a filter with an empty default.
+- `SOURCEWEB_WORKERS` (`includes/workers/workers-registry.php`) is the Animal Writes workers repository's workflow list, including "Research (India, ...)" and "Finds new Indian animal-welfare papers". The workers repository's test compares it with its `docs/workers.json`, so changing the wording means changing both. It needs to become a filter with an empty default.
 - Google News is searched in the India edition (`hl=en-IN&gl=IN`, " India" appended in `keywords-model.php`), and the Workers screen shows schedules in IST. Both should follow a setting or the site's locale and timezone.
 - `cc0-images.php` scores photos higher for Indian place names; `library-pdfs.php` and `auto-review.php`'s stop words name Indian government hosts and "india"; `enrichment.php` has AWBI and India Post sources and `aw_awbi_*` fields; `rules-model.php` lists `awbi` and `darpan` in the enrichment trust order; `src/index.js` lists the DirectoryWeb field `animals`. These are Directory-enrichment and Library features written for Indian animal welfare; each needs a filter or to move to the site layer.
 - (Done in 0.4.1: the content-type names are no longer in the plugin; see the roles in CHANGELOG.md.)
@@ -95,7 +95,7 @@ The content ingestion and syndication plugin owns:
 
 Open items from the retired plan docs, each checked against the code on 26 Nov. The full old text is in git history (kits-suite `9f81e36` and earlier, `docs/org/`).
 
-- Standalone edition (26 Nov 2026), part built: an external-services registry (`includes/sources/external-services-model.php`, `sourceweb_external_services` filter; a test fails when `readme.txt` stops naming a service), and every `aw/v1` worker route is also served at `sourceweb/v1/worker-api/<route>`. Not built: moving the workers repository to the new address, a shared `Wugweb\ExternalServices` package across plugins, and renaming the `AW_*` constants and stored `aw_*` names (kept: renaming breaks stored data and the workers).
+- Standalone edition (26 Nov 2026), part built: an external-services registry (`includes/sources/external-services-model.php`, `sourceweb_external_services` filter; a test fails when `readme.txt` stops naming a service), and every `aw/v1` worker route is also served at `sourceweb/v1/worker-api/<route>`. Not built: moving the workers repository to the new address, a shared `Wugweb\ExternalServices` package across plugins, and renaming the stored `aw_*` names (the constants carry `SOURCEWEB_` since the Plugin Check clean-up; kept: renaming breaks stored data and the workers).
 - Menu: the code has Overview, Enrichment review, To review and per-tab items; the old plan wanted Dashboard, To review, Settings.
 - `enrichment-front.php` Kits Core calls (`kits_icon`, `kits_date`) are now guarded (26 Nov).
 - The AI model router is on hold (owner).
@@ -106,7 +106,7 @@ Open items from the retired plan docs, each checked against the code on 26 Nov. 
 
 - Places tab (routes, per-place enhancements, source types, what places say back); AI keys ordered by job (`?job=`) with the paid providers removed; worker union (`workers/union`, `sourceweb_workers` filter); manual re-check tool on Rejected; REST callbacks split by feature.
 - Not verified in a browser: the Places screen and the re-check card (built and linted, never opened).
-- Closed loop (26 Nov): a source with 10 or more decisions and under 30% accepted is flagged "Review this source" on Places; nothing is blocked automatically. Workers screen has an "All workers" table (the union). The workers repo sends `job` when `AW_AI_JOB` is set (branch chore/retire-eight-workflows); the site picks a default job from the worker otherwise.
+- Closed loop (26 Nov): a source with 10 or more decisions and under 30% accepted is flagged "Review this source" on Places; nothing is blocked automatically. Workers screen has an "All workers" table (the union). The workers repo sends `job` when its AI job variable is set (branch chore/retire-eight-workflows); the site picks a default job from the worker otherwise.
 - Fixed 26 Nov: the first Places build shipped enhancement handlers in the wrong component and no checkboxes (lint showed it; I had not read the lint output). Rebuilt and relinted clean.
 - Browser check (26 Nov): Places, Workers, DirectoryWeb (all screens) and RankWeb (FAQ, Internal links, Images, SEO CSV, Redirect tools) opened in the Playground suite; two bugs found and fixed: the alias guard in DirectoryWeb legacy-aliases.php (a fatal when SourceWeb ran without Core) and DirectoryWeb Settings reading SourceWeb as "Not active" (it tested an old constant).
 - Not built: anything that acts on a flag (auto-pausing a source); places calling `places/outcome` (no place calls it yet); the standalone edition's renames.

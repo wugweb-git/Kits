@@ -383,7 +383,7 @@ function sourceweb_sa_rules_domains(): void {
 		echo '<tr><td colspan="5">' . esc_html__( 'No publisher has been allowed or blocked by hand yet.', 'sourceweb' ) . '</td></tr>';
 	}
 	foreach ( $rows as $host => $r ) {
-		echo '<tr><td><strong>' . esc_html( (string) $host ) . '</strong></td><td>' . esc_html( (string) $r['name'] ) . '</td><td>' . esc_html( (string) ( AW_DOMAIN_TRUST_STATUSES[ $r['status'] ] ?? $r['status'] ) ) . '</td><td>' . esc_html( '' !== (string) $r['last'] ? (string) $r['last'] : '–' ) . '</td><td>';
+		echo '<tr><td><strong>' . esc_html( (string) $host ) . '</strong></td><td>' . esc_html( (string) $r['name'] ) . '</td><td>' . esc_html( (string) ( SOURCEWEB_DOMAIN_TRUST_STATUSES[ $r['status'] ] ?? $r['status'] ) ) . '</td><td>' . esc_html( '' !== (string) $r['last'] ? (string) $r['last'] : '–' ) . '</td><td>';
 		sourceweb_sa_form( 'sourceweb_sa_rules_domain_reset', array( 'host' => (string) $host ), 'sw-inline' );
 		echo '<button type="submit" class="button button-small button-link-delete">' . esc_html__( 'Reset to neutral', 'sourceweb' ) . '</button></form></td></tr>';
 	}
@@ -392,7 +392,7 @@ function sourceweb_sa_rules_domains(): void {
 	echo '<table class="form-table" role="presentation"><tbody>';
 	echo '<tr><th scope="row"><label for="sw_dom_host">' . esc_html__( 'Domain', 'sourceweb' ) . '</label></th><td><input type="text" id="sw_dom_host" name="host" class="regular-text" placeholder="example.com" required></td></tr>';
 	echo '<tr><th scope="row"><label for="sw_dom_status">' . esc_html__( 'Policy', 'sourceweb' ) . '</label></th><td><select id="sw_dom_status" name="status">';
-	foreach ( AW_DOMAIN_TRUST_STATUSES as $k => $l ) {
+	foreach ( SOURCEWEB_DOMAIN_TRUST_STATUSES as $k => $l ) {
 		echo '<option value="' . esc_attr( $k ) . '">' . esc_html( $l ) . '</option>';
 	}
 	echo '</select></td></tr>';

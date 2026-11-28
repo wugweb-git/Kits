@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Item types an organisation can be featured in, with the label shown beside the link. */
-const AW_FEATURED_TYPES = array( 'aw_news' => 'News', 'aw_legal' => 'Library', 'post' => 'Resource', 'aw_press' => 'Press', 'aw_campaign' => 'Campaign' );
+const DIRECTORYWEB_FEATURED_TYPES = array( 'aw_news' => 'News', 'aw_legal' => 'Library', 'post' => 'Resource', 'aw_press' => 'Press', 'aw_campaign' => 'Campaign' );
 
 /** Names too common to mean one organisation, after the words every NGO name shares are taken out. */
 const AW_FEATURED_GENERIC = array( 'people for animals', 'animal welfare society', 'animal welfare organisation', 'animal welfare trust', 'animal care society', 'animal care trust', 'animal rescue trust', 'animal rescue', 'blue cross society', 'gaushala samiti', 'shri gaushala', 'shri gaushala samiti', 'gau seva samiti', 'gau sewa samiti', 'jeev daya', 'jivdaya trust', 'panjrapole', 'shri panjrapole', 'animal welfare board', 'animal welfare board of india', 'society for prevention of cruelty to animals', 'spca', 'district spca' );
@@ -262,7 +262,7 @@ function directoryweb_featured_link_hits( $html ) {
  */
 function directoryweb_featured_scan( $id ) {
 	$type = get_post_type( $id );
-	if ( ! isset( AW_FEATURED_TYPES[ $type ] ) ) {
+	if ( ! isset( DIRECTORYWEB_FEATURED_TYPES[ $type ] ) ) {
 		return array();
 	}
 	$content = (string) get_post_field( 'post_content', $id );
@@ -314,7 +314,7 @@ function directoryweb_featured_flush() {
  * @param int $offset Where to start.
  */
 function directoryweb_featured_rescan( $offset = 0 ) {
-	$ids = get_posts( array( 'post_type' => array_keys( AW_FEATURED_TYPES ), 'post_status' => 'publish', 'numberposts' => 300, 'offset' => (int) $offset, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'ASC' ) );
+	$ids = get_posts( array( 'post_type' => array_keys( DIRECTORYWEB_FEATURED_TYPES ), 'post_status' => 'publish', 'numberposts' => 300, 'offset' => (int) $offset, 'fields' => 'ids', 'orderby' => 'ID', 'order' => 'ASC' ) );
 	foreach ( $ids as $i ) {
 		directoryweb_featured_scan( $i );
 	}
@@ -344,7 +344,7 @@ foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) a
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( wp_is_post_revision( $id ) || ! isset( AW_FEATURED_TYPES[ $post->post_type ] ) || 'auto-draft' === $post->post_status ) {
+		if ( wp_is_post_revision( $id ) || ! isset( DIRECTORYWEB_FEATURED_TYPES[ $post->post_type ] ) || 'auto-draft' === $post->post_status ) {
 			return;
 		}
 		if ( isset( $_POST['_aw_model'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_aw_model'] ) ), 'aw_model_' . $id ) && current_user_can( 'edit_post', $id ) ) {
@@ -383,7 +383,7 @@ function directoryweb_featured_orgs( $id ) {
 function directoryweb_featured_items( $lid, $max = 30 ) {
 	$ids = get_posts(
 		array(
-			'post_type'   => array_keys( AW_FEATURED_TYPES ),
+			'post_type'   => array_keys( DIRECTORYWEB_FEATURED_TYPES ),
 			'post_status' => 'publish',
 			'numberposts' => $max * 2,
 			'fields'      => 'ids',
@@ -447,7 +447,7 @@ function directoryweb_featured_subject_schema( $lid ) {
  * @param WP_Post $post Item.
  */
 function directoryweb_featured_admin_rows( $post ) {
-	if ( ! isset( AW_FEATURED_TYPES[ $post->post_type ] ) ) {
+	if ( ! isset( DIRECTORYWEB_FEATURED_TYPES[ $post->post_type ] ) ) {
 		return;
 	}
 	$found = array_map( 'intval', (array) get_post_meta( $post->ID, 'aw_rel_org_auto', false ) );
@@ -472,7 +472,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	WP_CLI::add_command(
 		'aw-featured scan',
 		function ( $args, $assoc ) {
-			$types = ! empty( $assoc['type'] ) ? array( $assoc['type'] ) : array_keys( AW_FEATURED_TYPES );
+			$types = ! empty( $assoc['type'] ) ? array( $assoc['type'] ) : array_keys( DIRECTORYWEB_FEATURED_TYPES );
 			directoryweb_featured_flush();
 			$items = 0;
 			$links = 0;

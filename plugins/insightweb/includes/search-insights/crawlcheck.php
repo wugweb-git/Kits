@@ -23,12 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_CRAWL_CRON  = 'aw_si_crawl';
-const AW_SI_CRAWL_IN    = 'aw_si_crawl_inside'; // Option: the last inside run.
-const AW_SI_CRAWL_OUT   = 'aw_si_crawl_outside'; // Option: the last outside run.
-const AW_SI_CRAWL_WEEKS = 12;
-const AW_SI_CRAWL_TIME  = 240; // Seconds the inside run may take before it stops.
-const AW_SI_CRAWL_STALE = 15 * DAY_IN_SECONDS; // An outside run older than this no longer counts (the job stopped?).
+const INSIGHTWEB_SI_CRAWL_CRON  = 'aw_si_crawl';
+const INSIGHTWEB_SI_CRAWL_IN    = 'aw_si_crawl_inside'; // Option: the last inside run.
+const INSIGHTWEB_SI_CRAWL_OUT   = 'aw_si_crawl_outside'; // Option: the last outside run.
+const INSIGHTWEB_SI_CRAWL_WEEKS = 12;
+const INSIGHTWEB_SI_CRAWL_TIME  = 240; // Seconds the inside run may take before it stops.
+const INSIGHTWEB_SI_CRAWL_STALE = 15 * DAY_IN_SECONDS; // An outside run older than this no longer counts (the job stopped?).
 
 /** User agents: the same as the workers job (aw_workers/crawl_check.py AGENTS). */
 function insightweb_si_crawl_agents(): array {
@@ -136,7 +136,7 @@ function insightweb_si_crawl_run( bool $dry = false ): array {
 		insightweb_si_run_start( 'crawl-in' );
 	}
 	if ( function_exists( 'set_time_limit' ) ) {
-		set_time_limit( AW_SI_CRAWL_TIME + 60 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions -- the run stops itself at AW_SI_CRAWL_TIME.
+		set_time_limit( INSIGHTWEB_SI_CRAWL_TIME + 60 ); // phpcs:ignore Squiz.PHP.DiscouragedFunctions -- the run stops itself at INSIGHTWEB_SI_CRAWL_TIME.
 	}
 	$plan   = insightweb_si_crawl_pages();
 	$start  = time();
@@ -144,7 +144,7 @@ function insightweb_si_crawl_run( bool $dry = false ): array {
 	$cut    = false;
 	foreach ( insightweb_si_crawl_agents() as $agent => $ua ) {
 		foreach ( $plan['pages'] as $p ) {
-			if ( time() - $start > AW_SI_CRAWL_TIME ) {
+			if ( time() - $start > INSIGHTWEB_SI_CRAWL_TIME ) {
 				$cut = true;
 				break 2;
 			}
@@ -181,20 +181,20 @@ function insightweb_si_crawl_run( bool $dry = false ): array {
 		insightweb_si_crawl_store( 'inside', $run );
 		if ( $cut ) {
 			/* translators: %d: seconds. */
-			insightweb_si_run_fail( 'crawl-in', sprintf( __( 'The check stopped after %d seconds; some agents were not asked.', 'insightweb' ), AW_SI_CRAWL_TIME ) );
+			insightweb_si_run_fail( 'crawl-in', sprintf( __( 'The check stopped after %d seconds; some agents were not asked.', 'insightweb' ), INSIGHTWEB_SI_CRAWL_TIME ) );
 		}
 	}
 	return $run;
 }
 
 /**
- * A stored run, or [] when there is none, or (outside only) it is older than AW_SI_CRAWL_STALE.
+ * A stored run, or [] when there is none, or (outside only) it is older than INSIGHTWEB_SI_CRAWL_STALE.
  *
- * @param string $opt AW_SI_CRAWL_IN or AW_SI_CRAWL_OUT.
+ * @param string $opt INSIGHTWEB_SI_CRAWL_IN or INSIGHTWEB_SI_CRAWL_OUT.
  */
 function insightweb_si_crawl_last( string $opt ): array {
 	$run = (array) get_option( $opt, array() );
-	if ( empty( $run['at'] ) || ( AW_SI_CRAWL_OUT === $opt && time() - (int) $run['at'] > AW_SI_CRAWL_STALE ) ) {
+	if ( empty( $run['at'] ) || ( INSIGHTWEB_SI_CRAWL_OUT === $opt && time() - (int) $run['at'] > INSIGHTWEB_SI_CRAWL_STALE ) ) {
 		return array();
 	}
 	return $run;
@@ -266,7 +266,7 @@ function insightweb_si_crawl_problems( array $run ): array {
  */
 function insightweb_si_crawl_store( string $side, array $run ): void {
 	global $wpdb;
-	update_option( 'inside' === $side ? AW_SI_CRAWL_IN : AW_SI_CRAWL_OUT, $run, false );
+	update_option( 'inside' === $side ? INSIGHTWEB_SI_CRAWL_IN : INSIGHTWEB_SI_CRAWL_OUT, $run, false );
 	$day = wp_date( 'Y-m-d', (int) $run['at'] );
 	$per = array();
 	foreach ( (array) $run['checks'] as $c ) {
@@ -290,7 +290,7 @@ function insightweb_si_crawl_store( string $side, array $run ): void {
 			)
 		);
 	}
-	$keep = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . AW_SI_CRAWL_WEEKS . ' weeks' )->format( 'Y-m-d' );
+	$keep = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-' . INSIGHTWEB_SI_CRAWL_WEEKS . ' weeks' )->format( 'Y-m-d' );
 	$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE src = 'crawl' AND d < %s", $o, $keep ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$problems = insightweb_si_crawl_problems( $run );
 	insightweb_si_run_ok(
@@ -307,8 +307,8 @@ function insightweb_si_crawl_store( string $side, array $run ): void {
 function insightweb_si_crawl_alert(): void {
 	$all = array();
 	foreach ( array(
-		__( 'From the server', 'insightweb' )  => AW_SI_CRAWL_IN,
-		__( 'From outside', 'insightweb' )     => AW_SI_CRAWL_OUT,
+		__( 'From the server', 'insightweb' )  => INSIGHTWEB_SI_CRAWL_IN,
+		__( 'From outside', 'insightweb' )     => INSIGHTWEB_SI_CRAWL_OUT,
 	) as $label => $opt ) {
 		foreach ( insightweb_si_crawl_problems( insightweb_si_crawl_last( $opt ) ) as $p ) {
 			$all[] = $label . ': ' . $p;
@@ -407,13 +407,13 @@ add_action(
 	}
 );
 
-add_action( AW_SI_CRAWL_CRON, fn() => get_option( 'aw_si_off' ) ? null : insightweb_si_crawl_run() );
+add_action( INSIGHTWEB_SI_CRAWL_CRON, fn() => get_option( 'aw_si_off' ) ? null : insightweb_si_crawl_run() );
 
 add_action(
 	'init',
 	function () {
-		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( AW_SI_CRAWL_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'next monday 08:45', wp_timezone() ) )->getTimestamp(), 'weekly', AW_SI_CRAWL_CRON );
+		if ( ! get_option( 'aw_si_off' ) && ! wp_next_scheduled( INSIGHTWEB_SI_CRAWL_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'next monday 08:45', wp_timezone() ) )->getTimestamp(), 'weekly', INSIGHTWEB_SI_CRAWL_CRON );
 		}
 	}
 );
@@ -421,7 +421,7 @@ add_action(
 add_filter(
 	'insightweb_si_cron_hooks',
 	function ( $hooks ) {
-		$hooks[] = AW_SI_CRAWL_CRON;
+		$hooks[] = INSIGHTWEB_SI_CRAWL_CRON;
 		return $hooks;
 	}
 );
@@ -433,7 +433,7 @@ add_filter(
 			'label' => __( 'Crawler access, from the server', 'insightweb' ),
 			'every' => WEEK_IN_SECONDS,
 		);
-		if ( get_option( AW_SI_CRAWL_OUT ) ) { // Listed once the workers job has reported, so it never shows as late before.
+		if ( get_option( INSIGHTWEB_SI_CRAWL_OUT ) ) { // Listed once the workers job has reported, so it never shows as late before.
 			$s['crawl-out'] = array(
 				'label' => __( 'Crawler access, from outside (workers)', 'insightweb' ),
 				'every' => WEEK_IN_SECONDS,
@@ -448,10 +448,10 @@ function insightweb_si_crawl_health_test(): array {
 	$items = '';
 	$any   = false;
 	$bad   = 0;
-	$out   = (bool) insightweb_si_crawl_last( AW_SI_CRAWL_OUT );
+	$out   = (bool) insightweb_si_crawl_last( INSIGHTWEB_SI_CRAWL_OUT );
 	foreach ( array(
-		__( 'From the server (user-agent rules only)', 'insightweb' ) => AW_SI_CRAWL_IN,
-		__( 'From outside (GitHub runner, weekly)', 'insightweb' )    => AW_SI_CRAWL_OUT,
+		__( 'From the server (user-agent rules only)', 'insightweb' ) => INSIGHTWEB_SI_CRAWL_IN,
+		__( 'From outside (GitHub runner, weekly)', 'insightweb' )    => INSIGHTWEB_SI_CRAWL_OUT,
 	) as $label => $opt ) {
 		$run = insightweb_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {
@@ -494,8 +494,8 @@ add_filter(
 /** Overview box: the last inside and outside runs, problems first. */
 function insightweb_si_box_crawl(): void {
 	foreach ( array(
-		__( 'From the server', 'insightweb' )         => AW_SI_CRAWL_IN,
-		__( 'From outside (workers)', 'insightweb' ) => AW_SI_CRAWL_OUT,
+		__( 'From the server', 'insightweb' )         => INSIGHTWEB_SI_CRAWL_IN,
+		__( 'From outside (workers)', 'insightweb' ) => INSIGHTWEB_SI_CRAWL_OUT,
 	) as $label => $opt ) {
 		$run = insightweb_si_crawl_last( $opt );
 		if ( empty( $run['at'] ) ) {

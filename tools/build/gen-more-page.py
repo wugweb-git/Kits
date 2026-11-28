@@ -17,9 +17,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 # slug -> (function prefix, menu parent expression, output file)
 TARGETS = {
     'directoryweb': ('directoryweb', 'DIRECTORYWEB_PAGE', 'includes/more-from-kits.php'),
-    'rankweb': ('rankweb', 'AW_SEO_MENU', 'includes/more-from-kits.php'),
-    'insightweb': ('insightweb', 'AW_SI_SLUG', 'includes/more-from-kits.php'),
-    'sourceweb': ('sourceweb', 'AW_SRC_MENU', 'includes/more-from-kits.php'),
+    'rankweb': ('rankweb', 'RANKWEB_SEO_MENU', 'includes/more-from-kits.php'),
+    'insightweb': ('insightweb', 'INSIGHTWEB_SI_SLUG', 'includes/more-from-kits.php'),
+    'sourceweb': ('sourceweb', 'SOURCEWEB_SRC_MENU', 'includes/more-from-kits.php'),
     'mailweb': ('mailweb', "'mailweb'", 'includes/more-from-kits.php'),
     'planweb': ('planweb', 'PLANWEB_MENU', 'includes/more-from-kits.php'),
     'kits-core': ('kits', 'KITS_MENU', 'includes/more-products.php'),

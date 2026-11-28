@@ -20,10 +20,10 @@ function kits_countdown_days( string $date, string $today ): ?int {
 	if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $date, $a ) || ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $today, $b ) || ! checkdate( (int) $a[2], (int) $a[3], (int) $a[1] ) ) {
 		return null;
 	}
-	return (int) round( ( gmmktime( 0, 0, 0, (int) $a[2], (int) $a[3], (int) $a[1] ) - gmmktime( 0, 0, 0, (int) $b[2], (int) $b[3], (int) $b[1] ) ) / DAY_SECONDS_KITS );
+	return (int) round( ( gmmktime( 0, 0, 0, (int) $a[2], (int) $a[3], (int) $a[1] ) - gmmktime( 0, 0, 0, (int) $b[2], (int) $b[3], (int) $b[1] ) ) / KITS_DAY_SECONDS );
 }
 
-const DAY_SECONDS_KITS = 86400;
+const KITS_DAY_SECONDS = 86400;
 
 /**
  * Whether a metric shows: a number at or above its threshold. No number, or a number under the threshold, shows nothing.

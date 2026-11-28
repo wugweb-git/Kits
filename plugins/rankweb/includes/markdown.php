@@ -10,7 +10,7 @@
  * - Headers: Content-Type text/markdown; charset=utf-8, Vary: Accept, Cache-Control no-store, private (and LiteSpeed
  *   no-cache) and a canonical Link to the HTML page, so no shared cache keeps the Markdown or hands it to a browser. The HTML of
  *   these pages keeps its own cache headers (cdn-cache.php) and also gets Vary: Accept (owner, 3 Nov 2026), so a cache that
- *   honours Vary stores it per Accept header (AW_MD_VARY_HTML, RankWeb → Settings; 0 turns it off). The server's page cache (LiteSpeed) and the Hostinger CDN answer from their
+ *   honours Vary stores it per Accept header (RANKWEB_MD_VARY_HTML, RankWeb → Settings; 0 turns it off). The server's page cache (LiteSpeed) and the Hostinger CDN answer from their
  *   copy before WordPress runs; how agents get past them: docs/cdn.md (not in this repo), step C.
  * - Password-protected pages, previews and logged-in requests are never converted.
  * - Off with the "Markdown for agents" switch in RankWeb → Settings.
@@ -317,7 +317,7 @@ add_action(
 	'template_redirect',
 	function () {
 		if ( ! rankweb_md_wanted() ) {
-			if ( ( ! defined( 'AW_MD_VARY_HTML' ) || AW_MD_VARY_HTML ) && rankweb_md_has_version() && ! headers_sent() ) {
+			if ( ( ! defined( 'RANKWEB_MD_VARY_HTML' ) || RANKWEB_MD_VARY_HTML ) && rankweb_md_has_version() && ! headers_sent() ) {
 				header( 'Vary: Accept', false ); // the HTML too, so a shared cache that honours Vary keeps it apart from the Markdown.
 			}
 			return;

@@ -5,13 +5,13 @@
  *
  *   cd /home/u544169507/domains/animalwrites.in/public_html && /usr/local/bin/wp aw workers-tick >> /home/u544169507/aw-cron.log 2>&1
  *
- * Each workflow in AW_WORKERS (workers-registry.php) whose cron time has come since the last tick is started through
+ * Each workflow in SOURCEWEB_WORKERS (workers-registry.php) whose cron time has come since the last tick is started through
  * GitHub's API (kits_dispatch_workflow, Kits Core ops/cron-health.php) with the input scheduled_cron, so the run
  * behaves as GitHub's scheduled run for that cron. One start per cron, however many slots were missed; a start GitHub
  * refused is tried again at the next tick. WordPress's own cron is not run here: hPanel already runs wp-cron every
  * 5 minutes (cron-health.php, trigger "hostinger").
  *
- * GitHub's own scheduled runs are skipped while the workers repository's variable AW_SCHEDULER is "site"; unset it to go
+ * GitHub's own scheduled runs are skipped while the workers repository's scheduler variable is "site"; unset it to go
  * back to GitHub's schedule. This tick replaces the old hPanel job that started sourcing.yml every 4 hours.
  *
  * @package aw-sourcing
@@ -22,13 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Not started here: keepalive.yml (GitHub's own). */
-const AW_TICK_SKIP = array( 'keepalive.yml' );
+const SOURCEWEB_TICK_SKIP = array( 'keepalive.yml' );
 
 /** Longest look back for a missed slot (the server cron was down): one day. */
-const AW_TICK_LOOKBACK_MIN = 1440;
+const SOURCEWEB_TICK_LOOKBACK_MIN = 1440;
 
 /** Exponential retry backoff intervals in seconds: 1m, 5m, 15m, 60m. */
-const AW_WORKER_BACKOFF_STEPS = array( 60, 300, 900, 3600 );
+const SOURCEWEB_WORKER_BACKOFF_STEPS = array( 60, 300, 900, 3600 );
 
 /**
  * Record a retry backoff interval for a worker after an upstream refusal or error.
@@ -44,8 +44,8 @@ function sourceweb_worker_retry_backoff( $worker_id, $http_code = 0 ) {
 		$state = array( 'attempts' => 0, 'until' => 0, 'code' => 0 );
 	}
 	$attempts = (int) ( $state['attempts'] ?? 0 ) + 1;
-	$idx      = min( $attempts - 1, count( AW_WORKER_BACKOFF_STEPS ) - 1 );
-	$delay    = AW_WORKER_BACKOFF_STEPS[ $idx ];
+	$idx      = min( $attempts - 1, count( SOURCEWEB_WORKER_BACKOFF_STEPS ) - 1 );
+	$delay    = SOURCEWEB_WORKER_BACKOFF_STEPS[ $idx ];
 	$until    = time() + $delay;
 	$new_state = array(
 		'worker'   => $worker_id,
@@ -146,7 +146,7 @@ function sourceweb_tick_cron_matches( $cron, $ts ) {
  */
 function sourceweb_tick_last_slot( $cron, $after, $now ) {
 	$now   -= $now % 60;
-	$after  = max( $after - $after % 60, $now - AW_TICK_LOOKBACK_MIN * 60 );
+	$after  = max( $after - $after % 60, $now - SOURCEWEB_TICK_LOOKBACK_MIN * 60 );
 	for ( $t = $now; $t > $after; $t -= 60 ) {
 		if ( sourceweb_tick_cron_matches( $cron, $t ) ) {
 			return $t;
@@ -167,8 +167,8 @@ function sourceweb_workers_tick( $now, $dispatch = null ) {
 	$state    = (array) get_option( 'aw_workers_tick', array() ); // "file|cron" => last slot started; "_last" => last tick
 	$last     = (int) ( $state['_last'] ?? 0 );
 	$lines    = array();
-	foreach ( AW_WORKERS as $file => $w ) {
-		if ( in_array( $file, AW_TICK_SKIP, true ) ) {
+	foreach ( SOURCEWEB_WORKERS as $file => $w ) {
+		if ( in_array( $file, SOURCEWEB_TICK_SKIP, true ) ) {
 			continue;
 		}
 		if ( sourceweb_worker_is_in_backoff( $file, $now ) ) {

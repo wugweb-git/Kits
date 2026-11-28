@@ -16,45 +16,47 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/insightweb-names.php'; // the stored names of the settings and keys.
+
 /** The settings numbers: constant => [label, help, default]. As RankWeb's module list had them. */
 function insightweb_si_setting_fields(): array {
 	return array(
-		'AW_SI_HIGH_TRENDS'       => array(
+		'INSIGHTWEB_SI_HIGH_TRENDS'       => array(
 			'label'   => 'High demand: Trends at least',
 			'help'    => '',
 			'default' => 20,
 		),
-		'AW_SI_HIGH_IMPR'         => array(
+		'INSIGHTWEB_SI_HIGH_IMPR'         => array(
 			'label'   => 'High demand: impressions in 28 days at least',
 			'help'    => '',
 			'default' => 50,
 		),
-		'AW_SI_QUICK_MIN'         => array(
+		'INSIGHTWEB_SI_QUICK_MIN'         => array(
 			'label'   => 'Quick win: impressions at least',
 			'help'    => 'At position 8 to 20.',
 			'default' => 10,
 		),
-		'AW_SI_MOVERS'            => array(
+		'INSIGHTWEB_SI_MOVERS'            => array(
 			'label'   => 'Listing names shown one by one',
 			'help'    => 'The rest are one "entity" row.',
 			'default' => 20,
 		),
-		'AW_SI_PSI_FLAG'          => array(
+		'INSIGHTWEB_SI_PSI_FLAG'          => array(
 			'label'   => 'PageSpeed mobile score that flags a page (under)',
 			'help'    => '',
 			'default' => 50,
 		),
-		'AW_SI_RM_LOW'            => array(
+		'INSIGHTWEB_SI_RM_LOW'            => array(
 			'label'   => 'Rank Math SEO score that is "low" (under)',
 			'help'    => '',
 			'default' => 50,
 		),
-		'AW_SI_KEEP_DAYS'         => array(
+		'INSIGHTWEB_SI_KEEP_DAYS'         => array(
 			'label'   => 'Daily figures kept (days)',
 			'help'    => 'Older days become monthly totals.',
 			'default' => 90,
 		),
-		'AW_SI_SOURCING_PUSH_MIN' => array(
+		'INSIGHTWEB_SI_SOURCING_PUSH_MIN' => array(
 			'label'   => 'Score to offer a keyword to SourceWeb (at least)',
 			'help'    => 'A sourcing candidate scoring this high is offered to SourceWeb as a suggestion.',
 			'default' => 70,
@@ -74,11 +76,11 @@ function insightweb_si_settings_saved(): array {
 	if ( ! insightweb_si_numbers_in_rankweb() ) {
 		$own = get_option( INSIGHTWEB_NUMBERS_OPTION, null );
 		if ( is_array( $own ) ) {
-			return $own;
+			return insightweb_map_names( $own, false );
 		}
 	}
 	$all = (array) get_option( 'aw_seo_settings', array() ); // read only here when RankWeb is not active: values an earlier version stored.
-	return (array) ( $all['search-insights'] ?? array() );
+	return insightweb_map_names( (array) ( $all['search-insights'] ?? array() ), false );
 }
 
 // The constants, from the saved numbers or the defaults (in a function, so no loop variable is left in the global scope).
@@ -86,7 +88,7 @@ function insightweb_si_define_constants(): void {
 	$saved = insightweb_si_settings_saved();
 	foreach ( insightweb_si_setting_fields() as $name => $field ) {
 		if ( ! defined( $name ) ) {
-			define( $name, array_key_exists( $name, $saved ) ? $saved[ $name ] : $field['default'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- the names come from the fixed list in insightweb_si_setting_fields() (the AW_SI_ settings constants other code reads).
+			define( $name, array_key_exists( $name, $saved ) ? $saved[ $name ] : $field['default'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- the names come from the fixed list in insightweb_si_setting_fields() (the INSIGHTWEB_SI_ settings constants other code reads).
 		}
 	}
 }
@@ -135,11 +137,11 @@ function insightweb_si_settings_save( array $posted, bool $reset = false ): bool
 		return false;
 	}
 	if ( ! $rank ) {
-		update_option( INSIGHTWEB_NUMBERS_OPTION, $mine, true ); // an empty array is kept, so the old key is not read again after Restore defaults.
+		update_option( INSIGHTWEB_NUMBERS_OPTION, insightweb_map_names( $mine, true ), true ); // an empty array is kept, so the old key is not read again after Restore defaults.
 		return true;
 	}
 	if ( $mine ) {
-		$all['search-insights'] = $mine;
+		$all['search-insights'] = insightweb_map_names( $mine, true );
 	} else {
 		unset( $all['search-insights'] );
 	}

@@ -3,7 +3,7 @@
  * Which search brought each item in, and the per-keyword figures (owner, 24 Oct 2026).
  *
  * - Every English Include word is a Google News search in the workers (feed id gnews-kw-<slug>), plus the fixed
- *   searches in AW_SOURCING_EXTRA_SEARCHES. Since 24 Oct 2026 an item keeps the feed that brought it in (aw_feed) and
+ *   searches in SOURCEWEB_SOURCING_EXTRA_SEARCHES. Since 24 Oct 2026 an item keeps the feed that brought it in (aw_feed) and
  *   when it arrived (aw_ingested_at); older items are counted by an Include word in their title or summary and shown
  *   as estimated.
  * - sourceweb_sourcing_keyword_stats(): per search, items fetched (every status: held, merged and backfilled too) and
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Searches the workers always make besides the Include words (aw_workers/run.py EXTRA_SEARCHES; keep both in step). */
-const AW_SOURCING_EXTRA_SEARCHES = array( 'stray dogs' );
+const SOURCEWEB_SOURCING_EXTRA_SEARCHES = array( 'stray dogs' );
 
 /** A search's feed id, as the workers make it. */
 function sourceweb_sourcing_feed_id( $term ) {
@@ -38,7 +38,7 @@ function sourceweb_sourcing_searches() {
 		}
 		return $out;
 	}
-	foreach ( array_merge( (array) ( sourceweb_relevance()['strong'] ?? array() ), AW_SOURCING_EXTRA_SEARCHES ) as $t ) {
+	foreach ( array_merge( (array) ( sourceweb_relevance()['strong'] ?? array() ), SOURCEWEB_SOURCING_EXTRA_SEARCHES ) as $t ) {
 		$t = trim( (string) $t );
 		if ( '' !== $t && preg_match( '/^[\x20-\x7e]+$/', $t ) ) {
 			$out[ sourceweb_sourcing_feed_id( $t ) ] = $out[ sourceweb_sourcing_feed_id( $t ) ] ?? $t;
@@ -81,7 +81,7 @@ function sourceweb_sourcing_keyword_stats( $days = 30 ) {
 	$rows     = array();
 	$row      = function ( $feed, $term ) use ( &$rows, $include ) {
 		if ( ! isset( $rows[ $feed ] ) ) {
-			$fixed          = ! ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) && in_array( $term, AW_SOURCING_EXTRA_SEARCHES, true ) && ! in_array( $term, $include, true );
+			$fixed          = ! ( function_exists( 'sourceweb_sourcing_kw_on' ) && sourceweb_sourcing_kw_on() ) && in_array( $term, SOURCEWEB_SOURCING_EXTRA_SEARCHES, true ) && ! in_array( $term, $include, true );
 			$rows[ $feed ] = array(
 				'term'      => $term,
 				'listed'    => in_array( mb_strtolower( $term ), array_map( 'mb_strtolower', $include ), true ),

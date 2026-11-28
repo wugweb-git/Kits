@@ -19,16 +19,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SOURCING_PUSHED = 'aw_sourcing_pushed_keywords';
+const SOURCEWEB_SOURCING_PUSHED = 'aw_sourcing_pushed_keywords';
 
 /** Candidates older than this are dropped on the next read/write (InsightWeb re-pushes current ones each run). */
-const AW_SOURCING_PUSHED_TTL = 90 * DAY_IN_SECONDS;
+const SOURCEWEB_SOURCING_PUSHED_TTL = 90 * DAY_IN_SECONDS;
 
 /** At most this many candidates are kept (the highest-scoring, freshest). */
-const AW_SOURCING_PUSHED_MAX = 1000;
+const SOURCEWEB_SOURCING_PUSHED_MAX = 1000;
 
 /** The recommended uses InsightWeb may send, and the section each routes to (keyword-routing.php uses this map). */
-const AW_SOURCING_PUSHED_TYPES = array( 'news', 'library', 'campaign' );
+const SOURCEWEB_SOURCING_PUSHED_TYPES = array( 'news', 'library', 'campaign' );
 
 /**
  * One field of a pushed keyword, from the keyword's own row first, then the batch context.
@@ -64,7 +64,7 @@ function sourceweb_sourcing_pushed_clean( $term, array $context ) {
 		return null;
 	}
 	$type = (string) sourceweb_sourcing_pushed_field( $row, $context, 'recommended_type', '' );
-	$type = in_array( $type, AW_SOURCING_PUSHED_TYPES, true ) ? $type : '';
+	$type = in_array( $type, SOURCEWEB_SOURCING_PUSHED_TYPES, true ) ? $type : '';
 	$rank = (int) sourceweb_sourcing_pushed_field( $row, $context, 'rank', 0 );
 	return array(
 		'q'                => $q,
@@ -112,8 +112,8 @@ add_action( 'sourceweb_push_keywords', 'sourceweb_sourcing_receive_pushed_keywor
 
 /** The raw store (norm => candidate), old ones dropped. */
 function sourceweb_sourcing_pushed_raw() {
-	$store = (array) get_option( AW_SOURCING_PUSHED, array() );
-	$cut   = time() - AW_SOURCING_PUSHED_TTL;
+	$store = (array) get_option( SOURCEWEB_SOURCING_PUSHED, array() );
+	$cut   = time() - SOURCEWEB_SOURCING_PUSHED_TTL;
 	$out   = array();
 	foreach ( $store as $norm => $row ) {
 		if ( is_array( $row ) && '' !== (string) ( $row['q'] ?? '' ) && (int) ( $row['pushed_at'] ?? 0 ) >= $cut ) {
@@ -124,17 +124,17 @@ function sourceweb_sourcing_pushed_raw() {
 }
 
 /**
- * Store candidates, keeping at most AW_SOURCING_PUSHED_MAX (the highest-scoring, then freshest).
+ * Store candidates, keeping at most SOURCEWEB_SOURCING_PUSHED_MAX (the highest-scoring, then freshest).
  *
  * @param array $store norm => candidate.
  * @return void
  */
 function sourceweb_sourcing_pushed_save( array $store ) {
-	if ( count( $store ) > AW_SOURCING_PUSHED_MAX ) {
+	if ( count( $store ) > SOURCEWEB_SOURCING_PUSHED_MAX ) {
 		uasort( $store, fn( $a, $b ) => ( (int) $b['score'] <=> (int) $a['score'] ) ?: ( (int) $b['pushed_at'] <=> (int) $a['pushed_at'] ) );
-		$store = array_slice( $store, 0, AW_SOURCING_PUSHED_MAX, true );
+		$store = array_slice( $store, 0, SOURCEWEB_SOURCING_PUSHED_MAX, true );
 	}
-	update_option( AW_SOURCING_PUSHED, $store, false );
+	update_option( SOURCEWEB_SOURCING_PUSHED, $store, false );
 }
 
 /** Forget one pushed candidate by its normalised keyword (after it is approved or dismissed). */
@@ -142,7 +142,7 @@ function sourceweb_sourcing_pushed_forget( $norm ) {
 	$store = sourceweb_sourcing_pushed_raw();
 	if ( isset( $store[ (string) $norm ] ) ) {
 		unset( $store[ (string) $norm ] );
-		update_option( AW_SOURCING_PUSHED, $store, false );
+		update_option( SOURCEWEB_SOURCING_PUSHED, $store, false );
 	}
 }
 

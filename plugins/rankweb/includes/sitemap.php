@@ -32,7 +32,7 @@ function rankweb_sitemap_directory_pairs() {
 	$pairs = array();
 	foreach ( directoryweb_place_counts()['pairs'] as $p ) {
 		$d = directoryweb_place_district( $p[0] );
-		if ( $d && ( $p[3] >= AW_THIN_DISTRICT_TYPE || rankweb_directory_keep_indexed( directoryweb_directory_url( $d->slug, $p[1] ) ) ) ) {
+		if ( $d && ( $p[3] >= RANKWEB_THIN_DISTRICT_TYPE || rankweb_directory_keep_indexed( directoryweb_directory_url( $d->slug, $p[1] ) ) ) ) {
 			$pairs[] = array( 'city' => $d->slug, 'type' => $p[1], 'modified' => $p[2], 'n' => $p[3] );
 		}
 	}
@@ -286,7 +286,7 @@ if ( function_exists( 'rankweb_seo_extras_rank_math' ) && ! rankweb_seo_extras_r
 /* ---------- HTML sitemap: /sitemap/ (indexing work, owner 12 Nov 2026) ---------- */
 
 /** The HTML sitemap page's address. */
-const AW_HTML_SITEMAP_SLUG = 'sitemap';
+const RANKWEB_HTML_SITEMAP_SLUG = 'sitemap';
 
 /**
  * Links to every indexable section, item and Directory place, for people and crawlers: [aw_html_sitemap] on the
@@ -355,7 +355,7 @@ function rankweb_html_sitemap() {
 	$html = '';
 	// The site's own pages (not the sections, which follow, nor pages kept out of search).
 	$hubs  = array_column( rankweb_hubs(), 0 );
-	$skip  = array_merge( $hubs, array( 'home', AW_HTML_SITEMAP_SLUG, 'thank-you', 'search', 'claim', 'update' ) );
+	$skip  = array_merge( $hubs, array( 'home', RANKWEB_HTML_SITEMAP_SLUG, 'thank-you', 'search', 'claim', 'update' ) );
 	$pages = array();
 	foreach ( get_pages( array( 'post_status' => 'publish', 'sort_column' => 'post_title' ) ) as $p ) {
 		if ( ! in_array( $p->post_name, $skip, true ) && ! $noidx( $p->ID ) ) {
@@ -422,13 +422,13 @@ add_action(
 		if ( get_option( 'aw_html_sitemap_page' ) || ! current_user_can( 'publish_pages' ) ) {
 			return;
 		}
-		$page = get_page_by_path( AW_HTML_SITEMAP_SLUG );
+		$page = get_page_by_path( RANKWEB_HTML_SITEMAP_SLUG );
 		$id   = $page ? (int) $page->ID : (int) wp_insert_post(
 			array(
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
 				'post_title'   => __( 'Sitemap', 'rankweb' ),
-				'post_name'    => AW_HTML_SITEMAP_SLUG,
+				'post_name'    => RANKWEB_HTML_SITEMAP_SLUG,
 				'post_content' => '<!-- wp:shortcode -->[aw_html_sitemap]<!-- /wp:shortcode -->',
 			)
 		);

@@ -2,7 +2,7 @@
 /**
  * PageSpeed (plan §5.1): mobile and desktop for the key pages and every campaign page, weekly on Sunday 06:00 IST, through Site Kit's
  * pagespeed-insights module as its owner; when the module can't be used (no owner, not connected), the public PageSpeed
- * API directly, with the free AW_PSI_KEY (InsightWeb → Settings → Keys or wp-config.php) when set (keyless calls have a small shared quota). One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
+ * API directly, with the free INSIGHTWEB_PSI_KEY (InsightWeb → Settings → Keys or wp-config.php) when set (keyless calls have a small shared quota). One PageSpeed call can take 10–40 seconds, so the 32 calls run as a queue: a few per cron run, the next run
  * five minutes later, until the queue is empty.
  *
  * Rows in obs: src psi, period day (the week's run date), page = path; metrics score-mobile, lcp-mobile, tbt-mobile,
@@ -17,11 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_PSI_CRON   = 'aw_si_psi';
-const AW_SI_PSI_MORE   = 'aw_si_psi_more';
-const AW_SI_PSI_QUEUE  = 'aw_si_psi_queue';
-const AW_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run stays inside host time limits.
-// AW_SI_PSI_FLAG: RankWeb → Settings (settings.php).
+const INSIGHTWEB_SI_PSI_CRON   = 'aw_si_psi';
+const INSIGHTWEB_SI_PSI_MORE   = 'aw_si_psi_more';
+const INSIGHTWEB_SI_PSI_QUEUE  = 'aw_si_psi_queue';
+const INSIGHTWEB_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run stays inside host time limits.
+// INSIGHTWEB_SI_PSI_FLAG: RankWeb → Settings (settings.php).
 
 /**
  * The key pages of the 20 Oct PageSpeed audit: the hubs, a state and a district page, the newest item of each type,
@@ -125,7 +125,7 @@ function insightweb_si_psi_field( array $exp, string $prefix ): array {
 }
 
 /**
- * One PageSpeed call: Site Kit's module first, the AW_PSI_KEY API second.
+ * One PageSpeed call: Site Kit's module first, the INSIGHTWEB_PSI_KEY API second.
  *
  * @param string $path     Site path.
  * @param string $strategy mobile or desktop.
@@ -155,8 +155,8 @@ function insightweb_si_psi_call( string $path, string $strategy ) {
 			'strategy' => $strategy,
 			'category' => 'performance',
 		);
-		if ( '' !== insightweb_si_key( 'AW_PSI_KEY' ) ) {
-			$query['key'] = insightweb_si_key( 'AW_PSI_KEY' );
+		if ( '' !== insightweb_si_key( 'INSIGHTWEB_PSI_KEY' ) ) {
+			$query['key'] = insightweb_si_key( 'INSIGHTWEB_PSI_KEY' );
 		}
 		$http = wp_remote_get(
 			add_query_arg(
@@ -186,7 +186,7 @@ function insightweb_si_psi_start(): void {
 	if ( get_option( 'aw_si_off' ) || ! insightweb_si_ready() ) {
 		return;
 	}
-	$q = get_option( AW_SI_PSI_QUEUE );
+	$q = get_option( INSIGHTWEB_SI_PSI_QUEUE );
 	if ( is_array( $q ) && ! empty( $q['todo'] ) && ( $q['d'] ?? '' ) >= wp_date( 'Y-m-d', time() - DAY_IN_SECONDS ) ) {
 		insightweb_si_psi_step(); // A run is still in progress: carry on with it instead of starting over.
 		return;
@@ -197,7 +197,7 @@ function insightweb_si_psi_start(): void {
 		$todo[] = array( $path, 'desktop' );
 	}
 	update_option(
-		AW_SI_PSI_QUEUE,
+		INSIGHTWEB_SI_PSI_QUEUE,
 		array(
 			'd'      => wp_date( 'Y-m-d' ),
 			'todo'   => $todo,
@@ -211,23 +211,23 @@ function insightweb_si_psi_start(): void {
 }
 
 /**
- * Work through the queue for up to AW_SI_PSI_BUDGET seconds; schedule the next step when calls are left.
+ * Work through the queue for up to INSIGHTWEB_SI_PSI_BUDGET seconds; schedule the next step when calls are left.
  *
  * @return array The queue as it stands.
  */
 function insightweb_si_psi_step(): array {
-	$q = get_option( AW_SI_PSI_QUEUE );
+	$q = get_option( INSIGHTWEB_SI_PSI_QUEUE );
 	if ( ! is_array( $q ) || empty( $q['todo'] ) || get_option( 'aw_si_off' ) || ! insightweb_si_ready() ) {
 		return is_array( $q ) ? $q : array();
 	}
 	// The next step is booked before any call (25 Oct 2026): a step the host's time limit cuts off mid-call never reached
 	// the booking after the loop, so the queue stopped until someone pressed Start PageSpeed again. The call it was making
 	// is still in the saved queue and is tried again.
-	if ( ! wp_next_scheduled( AW_SI_PSI_MORE ) ) {
-		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, AW_SI_PSI_MORE );
+	if ( ! wp_next_scheduled( INSIGHTWEB_SI_PSI_MORE ) ) {
+		wp_schedule_single_event( time() + 5 * MINUTE_IN_SECONDS, INSIGHTWEB_SI_PSI_MORE );
 	}
 	$start = microtime( true );
-	while ( $q['todo'] && microtime( true ) - $start < AW_SI_PSI_BUDGET ) {
+	while ( $q['todo'] && microtime( true ) - $start < INSIGHTWEB_SI_PSI_BUDGET ) {
 		list( $path, $strategy ) = array_shift( $q['todo'] );
 		$fig                     = insightweb_si_psi_call( $path, $strategy );
 		if ( is_wp_error( $fig ) ) {
@@ -239,17 +239,17 @@ function insightweb_si_psi_step(): array {
 				}
 			}
 			if ( 'mobile' === $strategy ) {
-				insightweb_si_obs_put( 0, $path, 'psi', 'flag', 'day', $q['d'], array( 'value' => $fig['score'] < AW_SI_PSI_FLAG ? 1.0 : 0.0 ) );
+				insightweb_si_obs_put( 0, $path, 'psi', 'flag', 'day', $q['d'], array( 'value' => $fig['score'] < INSIGHTWEB_SI_PSI_FLAG ? 1.0 : 0.0 ) );
 			}
 			++$q['done'];
 		}
-		update_option( AW_SI_PSI_QUEUE, $q, false ); // Saved after each call, so a run cut short loses nothing.
+		update_option( INSIGHTWEB_SI_PSI_QUEUE, $q, false ); // Saved after each call, so a run cut short loses nothing.
 	}
 	if ( $q['todo'] ) {
 		insightweb_si_run_beat( 'psi' );
 		return $q; // The next step is already booked (above).
 	}
-	wp_clear_scheduled_hook( AW_SI_PSI_MORE ); // Done: no further step.
+	wp_clear_scheduled_hook( INSIGHTWEB_SI_PSI_MORE ); // Done: no further step.
 	// Finished: good when at least one call worked; every error is listed either way.
 	if ( $q['done'] ) {
 		insightweb_si_run_ok(
@@ -266,5 +266,5 @@ function insightweb_si_psi_step(): array {
 	}
 	return $q;
 }
-add_action( AW_SI_PSI_CRON, 'insightweb_si_psi_start' );
-add_action( AW_SI_PSI_MORE, 'insightweb_si_psi_step' );
+add_action( INSIGHTWEB_SI_PSI_CRON, 'insightweb_si_psi_start' );
+add_action( INSIGHTWEB_SI_PSI_MORE, 'insightweb_si_psi_step' );

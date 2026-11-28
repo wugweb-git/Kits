@@ -35,8 +35,8 @@ function sourceweb_relevance_types(): array {
 	return sourceweb_types_with( array( 'news', 'library', 'opportunity', 'press' ), array( 'post' ) );
 }
 
-const AW_RELEVANCE_LOG     = 'aw_relevance_rejected';
-const AW_RELEVANCE_LOG_MAX = 500;
+const SOURCEWEB_RELEVANCE_LOG     = 'aw_relevance_rejected';
+const SOURCEWEB_RELEVANCE_LOG_MAX = 500;
 
 /**
  * A verdict as stored on an item (meta sourceweb_relevance): JSON {relevant, category, india, issuer, reason, model, at}.
@@ -314,8 +314,8 @@ add_action(
 				'permission_callback' => $can,
 				'callback'            => function ( WP_REST_Request $req ) {
 					$batch = $req->get_param( 'entries' ); // the workers send a run's rejections in one request
-					$batch = is_array( $batch ) ? array_slice( $batch, 0, AW_RELEVANCE_LOG_MAX ) : array( $req->get_params() );
-					$log   = (array) get_option( AW_RELEVANCE_LOG, array() );
+					$batch = is_array( $batch ) ? array_slice( $batch, 0, SOURCEWEB_RELEVANCE_LOG_MAX ) : array( $req->get_params() );
+					$log   = (array) get_option( SOURCEWEB_RELEVANCE_LOG, array() );
 					foreach ( $batch as $e ) {
 						$e     = (array) $e;
 						$url   = esc_url_raw( (string) ( $e['source_url'] ?? '' ) );
@@ -332,7 +332,7 @@ add_action(
 						$log = array_values( array_filter( $log, fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
 						array_unshift( $log, $entry );
 					}
-					update_option( AW_RELEVANCE_LOG, array_slice( $log, 0, AW_RELEVANCE_LOG_MAX ), false );
+					update_option( SOURCEWEB_RELEVANCE_LOG, array_slice( $log, 0, SOURCEWEB_RELEVANCE_LOG_MAX ), false );
 					return new WP_REST_Response( array( 'status' => 'logged' ) );
 				},
 			)
@@ -365,7 +365,7 @@ function sourceweb_not_news_reason( $title, $url, $type ) {
 /** Add one entry to the Rejected log (Sourcing → Rejected), as the relevance-rejected endpoint does. */
 function sourceweb_relevance_log_one( $title, $url, $reason, $type, $feed = '' ) {
 	$url = esc_url_raw( (string) $url );
-	$log = array_values( array_filter( (array) get_option( AW_RELEVANCE_LOG, array() ), fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
+	$log = array_values( array_filter( (array) get_option( SOURCEWEB_RELEVANCE_LOG, array() ), fn( $x ) => is_array( $x ) && ( $x['url'] ?? '' ) !== $url ) );
 	array_unshift(
 		$log,
 		array(
@@ -379,7 +379,7 @@ function sourceweb_relevance_log_one( $title, $url, $reason, $type, $feed = '' )
 			'at'     => current_time( 'Y-m-d H:i' ),
 		)
 	);
-	update_option( AW_RELEVANCE_LOG, array_slice( $log, 0, AW_RELEVANCE_LOG_MAX ), false );
+	update_option( SOURCEWEB_RELEVANCE_LOG, array_slice( $log, 0, SOURCEWEB_RELEVANCE_LOG_MAX ), false );
 }
 
 /** Stored verdict says "not relevant". */
@@ -413,7 +413,7 @@ add_filter(
 function sourceweb_relevance_rejected_rows(): array {
 	$pubs = sourceweb_publishers();
 	$rows = array();
-	foreach ( (array) get_option( AW_RELEVANCE_LOG, array() ) as $e ) {
+	foreach ( (array) get_option( SOURCEWEB_RELEVANCE_LOG, array() ) as $e ) {
 		$url    = (string) ( $e['url'] ?? '' );
 		$host   = (string) wp_parse_url( $url, PHP_URL_HOST );
 		$title  = (string) ( $e['title'] ?? '' );

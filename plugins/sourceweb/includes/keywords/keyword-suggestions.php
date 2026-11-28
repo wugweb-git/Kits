@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SOURCING_DISMISSED = 'aw_sourcing_dismissed';
+const SOURCEWEB_SOURCING_DISMISSED = 'aw_sourcing_dismissed';
 
 /** Lowercase, single-spaced. */
 function sourceweb_sourcing_suggest_norm( $s ) {
@@ -33,7 +33,7 @@ function sourceweb_sourcing_dismissed() {
 		$k = insightweb_si_table( 'keywords' );
 		return array_map( 'sourceweb_sourcing_suggest_norm', (array) $wpdb->get_col( $wpdb->prepare( 'SELECT label FROM %i WHERE dismissed = 1', $k ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	}
-	return array_values( array_filter( (array) get_option( AW_SOURCING_DISMISSED, array() ), 'is_string' ) );
+	return array_values( array_filter( (array) get_option( SOURCEWEB_SOURCING_DISMISSED, array() ), 'is_string' ) );
 }
 
 /** Every suggestion row carries these fields; the ones InsightWeb pushes default empty for Search Console demand rows. */
@@ -183,6 +183,6 @@ function sourceweb_sourcing_suggest_apply( $op, array $qs ) {
 	}
 	$d   = sourceweb_sourcing_dismissed();
 	$new = 'dismiss' === $op ? array_values( array_unique( array_merge( $d, $qs ) ) ) : array_values( array_diff( $d, $qs ) );
-	update_option( AW_SOURCING_DISMISSED, $new, false );
+	update_option( SOURCEWEB_SOURCING_DISMISSED, $new, false );
 	return abs( count( $new ) - count( $d ) );
 }

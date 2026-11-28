@@ -77,7 +77,7 @@ function sourceweb_src_plugin_row_meta( array $links, string $file, $plugin_data
 			esc_html__( 'View details' ) // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own string.
 		);
 	}
-	$page  = (string) ( defined( 'AW_SRC_MENU' ) ? AW_SRC_MENU : 'sourceweb' );
+	$page  = (string) ( defined( 'SOURCEWEB_SRC_MENU' ) ? SOURCEWEB_SRC_MENU : 'sourceweb' );
 	$start = menu_page_url( $page, false );
 	if ( '' === (string) $start ) {
 		$start = admin_url( 'admin.php?page=' . rawurlencode( $page ) );

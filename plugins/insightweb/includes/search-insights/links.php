@@ -184,7 +184,7 @@ function insightweb_si_links_tab(): void {
 	$table = new InsightWeb_SI_Links_Table();
 	$table->prepare_items();
 	$table->views();
-	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( AW_SI_SLUG ) . '"><input type="hidden" name="tab" value="links">';
+	echo '<form method="get"><input type="hidden" name="page" value="' . esc_attr( INSIGHTWEB_SI_SLUG ) . '"><input type="hidden" name="tab" value="links">';
 	$view = isset( $_GET['view'] ) ? sanitize_key( wp_unslash( $_GET['view'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- navigation only.
 	if ( $view ) {
 		echo '<input type="hidden" name="view" value="' . esc_attr( $view ) . '">';

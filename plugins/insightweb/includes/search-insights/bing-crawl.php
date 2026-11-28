@@ -6,7 +6,7 @@
  *   4xx and 5xx answers, blocked by robots.txt) into obs src bing, period day, metrics crawl-pages, crawl-errors,
  *   in-index, code-4xx, code-5xx, robots-blocked; GetCrawlIssues counted in the run log.
  * - Keyword stats, monthly on the 1st at 07:00 IST: GetKeywordStats (Bing's weekly searches across all sites, India,
- *   English) for the P1 and quick-win keywords, at most AW_SI_BING_KW a run, into obs src bing, period week, metric
+ *   English) for the P1 and quick-win keywords, at most INSIGHTWEB_SI_BING_KW a run, into obs src bing, period week, metric
  *   kw-volume (value = Impressions, txt = broad impressions), kw_id set. Only the last 12 weeks are kept.
  *
  * @package insightweb
@@ -16,10 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const AW_SI_BING_CRAWL_CRON = 'aw_si_bing_crawl';
-const AW_SI_BING_KW_CRON    = 'aw_si_bing_kw';
-const AW_SI_BING_KW         = 60;
-const AW_SI_BING_CRAWL_MAP  = array(
+const INSIGHTWEB_SI_BING_CRAWL_CRON = 'aw_si_bing_crawl';
+const INSIGHTWEB_SI_BING_KW_CRON    = 'aw_si_bing_kw';
+const INSIGHTWEB_SI_BING_KW         = 60;
+const INSIGHTWEB_SI_BING_CRAWL_MAP  = array(
 	'CrawledPages'       => 'crawl-pages',
 	'CrawlErrors'        => 'crawl-errors',
 	'InIndex'            => 'in-index',
@@ -44,7 +44,7 @@ add_filter(
 		return $s;
 	}
 );
-add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( AW_SI_BING_CRAWL_CRON, AW_SI_BING_KW_CRON ) ) );
+add_filter( 'insightweb_si_cron_hooks', fn( $h ) => array_merge( (array) $h, array( INSIGHTWEB_SI_BING_CRAWL_CRON, INSIGHTWEB_SI_BING_KW_CRON ) ) );
 
 add_action(
 	'init',
@@ -53,11 +53,11 @@ add_action(
 			return;
 		}
 		$tz = wp_timezone();
-		if ( ! wp_next_scheduled( AW_SI_BING_CRAWL_CRON ) ) {
-			wp_schedule_event( ( new DateTimeImmutable( 'next monday 06:45', $tz ) )->getTimestamp(), 'weekly', AW_SI_BING_CRAWL_CRON );
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_BING_CRAWL_CRON ) ) {
+			wp_schedule_event( ( new DateTimeImmutable( 'next monday 06:45', $tz ) )->getTimestamp(), 'weekly', INSIGHTWEB_SI_BING_CRAWL_CRON );
 		}
-		if ( ! wp_next_scheduled( AW_SI_BING_KW_CRON ) ) {
-			wp_schedule_single_event( ( new DateTimeImmutable( 'first day of next month 07:00', $tz ) )->getTimestamp(), AW_SI_BING_KW_CRON ); // Booked again after each run: WordPress has no monthly recurrence.
+		if ( ! wp_next_scheduled( INSIGHTWEB_SI_BING_KW_CRON ) ) {
+			wp_schedule_single_event( ( new DateTimeImmutable( 'first day of next month 07:00', $tz ) )->getTimestamp(), INSIGHTWEB_SI_BING_KW_CRON ); // Booked again after each run: WordPress has no monthly recurrence.
 		}
 	}
 );
@@ -90,7 +90,7 @@ function insightweb_si_bing_crawl_run( bool $dry = false ): array {
 		if ( '' === $d || $d < $keep ) {
 			continue; // Days the rollup already folded into months are not stored again.
 		}
-		foreach ( AW_SI_BING_CRAWL_MAP as $field => $metric ) {
+		foreach ( INSIGHTWEB_SI_BING_CRAWL_MAP as $field => $metric ) {
 			if ( isset( $r[ $field ] ) && ! $dry ) {
 				insightweb_si_obs_put( 0, '', 'bing', $metric, 'day', $d, array( 'value' => (float) $r[ $field ] ) );
 			}
@@ -113,7 +113,7 @@ function insightweb_si_bing_crawl_run( bool $dry = false ): array {
 	}
 	return $info;
 }
-add_action( AW_SI_BING_CRAWL_CRON, fn() => insightweb_si_bing_crawl_run() );
+add_action( INSIGHTWEB_SI_BING_CRAWL_CRON, fn() => insightweb_si_bing_crawl_run() );
 
 /**
  * The monthly keyword-volume run for the P1 and quick-win keywords (English only).
@@ -122,7 +122,7 @@ add_action( AW_SI_BING_CRAWL_CRON, fn() => insightweb_si_bing_crawl_run() );
  */
 function insightweb_si_bing_kw_run( bool $dry = false ): array {
 	if ( ! $dry ) {
-		wp_clear_scheduled_hook( AW_SI_BING_KW_CRON ); // The init hook books next month's run.
+		wp_clear_scheduled_hook( INSIGHTWEB_SI_BING_KW_CRON ); // The init hook books next month's run.
 	}
 	if ( get_option( 'aw_si_off' ) || ! insightweb_si_ready() || ! function_exists( 'insightweb_si_bing_on' ) || ! insightweb_si_bing_on() ) {
 		return array( 'off' => true );
@@ -136,7 +136,7 @@ function insightweb_si_bing_kw_run( bool $dry = false ): array {
 	$quick = insightweb_si_view_sql( 'quick' );
 	$p1    = insightweb_si_view_sql( 'p1' );
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- $p1 and $quick are the fixed view conditions of insightweb_si_view_sql(); the table is %i.
-	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", $k, '%' . $wpdb->esc_like( '{' ) . '%', AW_SI_BING_KW ) );
+	$kws  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id, label FROM %i WHERE ( {$p1} OR {$quick} ) AND COALESCE(lang, 'en') = 'en' AND label NOT LIKE %s ORDER BY impr28 DESC LIMIT %d", $k, '%' . $wpdb->esc_like( '{' ) . '%', INSIGHTWEB_SI_BING_KW ) );
 	$rows = 0;
 	$fail = array();
 	$cut  = ( new DateTimeImmutable( 'today', wp_timezone() ) )->modify( '-84 days' )->format( 'Y-m-d' );
@@ -201,7 +201,7 @@ function insightweb_si_bing_kw_run( bool $dry = false ): array {
 	}
 	return array( 'rows' => $rows );
 }
-add_action( AW_SI_BING_KW_CRON, fn() => insightweb_si_bing_kw_run() );
+add_action( INSIGHTWEB_SI_BING_KW_CRON, fn() => insightweb_si_bing_kw_run() );
 
 /** Overview box: Bing's crawl over the last 28 days and the last 12 weeks. */
 function insightweb_si_box_bing_crawl(): void {

@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## Unreleased
+
+- Plugin Check: every constant carries the plugin's own prefix (`KITS_`). Stored names are unchanged. The GitHub token and the PHP error log path are read from `KITS_GITHUB_DISPATCH_TOKEN` and `KITS_PHP_ERROR_LOG`; a site that used other names maps them in its site layer. New filters: `kits_dates_cap` (who may edit the dates) and `kits_contact_placeholders` (the contact form's message placeholders, empty by default).
+
 ## 1.5.5
 
 - Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.
@@ -57,7 +61,7 @@ Hardening, the open features, tests for what had none, and the coding-standard c
 
 ## 1.3.4
 
-- Neutral installs: the newsletter thank-you, the campaign consent line, the SQL backup header, the Fluent Forms placeholder and the "Animal Writes (plugin)" origin label now use get_bloginfo( 'name' ), so Animal Writes reads exactly as before. The Default brand preset is named "Default (Neutral Kits)"; its key is unchanged. AW_CL_OPTIN (unused) became kits_cl_optin_text().
+- Neutral installs: the newsletter thank-you, the campaign consent line, the SQL backup header, the Fluent Forms placeholder and the "Animal Writes (plugin)" origin label now use get_bloginfo( 'name' ), so Animal Writes reads exactly as before. The Default brand preset is named "Default (Neutral Kits)"; its key is unchanged. The unused CL_OPTIN constant became kits_cl_optin_text().
 - Accessibility: Brand Tokens colour pickers get an aria-label, the "(Default: #…)" hint is #50575e (was 2.56:1), and the screen prints once per request. Kits Settings save buttons go through kits_submit_button() (aria-label, unique id instead of the repeated "submit"), and the Backup, Uninstall, Content types and Forms emails checkboxes get a label. Shell calendar "Today" when disabled is #646970 at full opacity (was 3.03:1); build/shell rebuilt.
 - Left as they are: the error-page marker "Animal Writes error page" (installed drop-ins are recognised by it), the drop-in HTML in assets/site/dropins/ (site layer, WordPress not loaded), the media-title pattern for existing "Animal Writes campaign photo" titles, and the map plugin name "Animal Writes core".
 

@@ -453,7 +453,7 @@ add_action(
  * a search for the key is run as a search for the value (site searches, 1 Nov 2026). Keys are letters and digits only,
  * lower case; the value is searched as typed-in words (every word must be in the name).
  */
-const AW_SEARCH_NAME_ALIASES = array(
+const DIRECTORYWEB_SEARCH_NAME_ALIASES = array(
 	'bluecross' => 'blue cross', // initials such as "pfa" are left alone: listings carry them in their names ("PFA Faridabad")
 );
 
@@ -467,16 +467,16 @@ const AW_SEARCH_NAME_ALIASES = array(
  */
 function directoryweb_search_name_alias( $text ) {
 	$key = preg_replace( '/[^a-z0-9]/', '', strtolower( (string) $text ) );
-	if ( '' === $key || empty( AW_SEARCH_NAME_ALIASES[ $key ] ) ) {
+	if ( '' === $key || empty( DIRECTORYWEB_SEARCH_NAME_ALIASES[ $key ] ) ) {
 		return '';
 	}
-	$to = AW_SEARCH_NAME_ALIASES[ $key ];
+	$to = DIRECTORYWEB_SEARCH_NAME_ALIASES[ $key ];
 	return trim( preg_replace( '/\s+/', ' ', strtolower( (string) $text ) ) ) === $to ? '' : $to;
 }
 
 /**
  * The place a search term names: a district or state by its LGD or common name (places.php), or a city or
- * neighbourhood the place detector maps to a district (AW_PLACE_DETECT_CITIES, find-help.php). Null when the term is
+ * neighbourhood the place detector maps to a district (DIRECTORYWEB_PLACE_DETECT_CITIES, find-help.php). Null when the term is
  * not a place name, names more than one district, or is a word the detector skips ("south", "mon").
  *
  * @param string $text The search box text.
@@ -488,12 +488,12 @@ function directoryweb_search_place( $text ) {
 		return null;
 	}
 	$key = directoryweb_place_key( $text );
-	if ( defined( 'AW_PLACE_DETECT_SKIP' ) && in_array( $key, AW_PLACE_DETECT_SKIP, true ) ) {
+	if ( defined( 'DIRECTORYWEB_PLACE_DETECT_SKIP' ) && in_array( $key, DIRECTORYWEB_PLACE_DETECT_SKIP, true ) ) {
 		return null;
 	}
 	$d = directoryweb_place_district_by_name( $text );
-	if ( ! $d && defined( 'AW_PLACE_DETECT_CITIES' ) && isset( AW_PLACE_DETECT_CITIES[ $key ] ) ) {
-		$d = directoryweb_place_district_by_name( AW_PLACE_DETECT_CITIES[ $key ] );
+	if ( ! $d && defined( 'DIRECTORYWEB_PLACE_DETECT_CITIES' ) && isset( DIRECTORYWEB_PLACE_DETECT_CITIES[ $key ] ) ) {
+		$d = directoryweb_place_district_by_name( DIRECTORYWEB_PLACE_DETECT_CITIES[ $key ] );
 	}
 	return $d ? $d : directoryweb_place_state_by_name( $text );
 }

@@ -14,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/config-names.php'; // earlier wp-config.php names -> InsightWeb's INSIGHTWEB_ constants (before the plugin loads).
 require_once __DIR__ . '/links-seed.php';
 
 // Which content type plays which role for InsightWeb (scoring ladder, crawl check, indexing order, PageSpeed sample): the
@@ -72,19 +73,19 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 add_action(
 	'admin_init',
 	function () {
-		if ( ! defined( 'AW_SI_VIS_OPTION' ) || ! function_exists( 'insightweb_si_vis_table' ) || false !== get_option( AW_SI_VIS_OPTION, false ) ) {
+		if ( ! defined( 'INSIGHTWEB_SI_VIS_OPTION' ) || ! function_exists( 'insightweb_si_vis_table' ) || false !== get_option( INSIGHTWEB_SI_VIS_OPTION, false ) ) {
 			return;
 		}
 		global $wpdb;
 		$t        = insightweb_si_vis_table();
 		$has      = $t === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $t ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one check, once
 		$has_rows = $has && (bool) $wpdb->get_var( $wpdb->prepare( 'SELECT 1 FROM %i LIMIT 1', $t ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one check, once
-		update_option( AW_SI_VIS_OPTION, $has_rows ? 1 : 0, true );
+		update_option( INSIGHTWEB_SI_VIS_OPTION, $has_rows ? 1 : 0, true );
 	},
 	5
 );
 
-// Brand searches: Animal Writes in any spelling, and the old animalrights.in name (was InsightWeb's AW_SI_BRAND).
+// Brand searches: Animal Writes in any spelling, and the old animalrights.in name (was InsightWeb's old brand constant).
 add_filter( 'insightweb_brand_pattern', fn() => '/animal\s*-?\s*writ|animalwrit|animal\s*-?\s*rights?\s*\.\s*in|animalrights?\.in|india\s*writes/i' );
 
 // Rising lists the worker reads: what InsightWeb 1.1.6 shipped as its defaults.

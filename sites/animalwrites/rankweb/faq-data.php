@@ -348,7 +348,7 @@ function rankweb_faq_listing_services( $id, $name ) {
 }
 
 /**
- * Whether the type question makes the FAQ when "services based on type" gives way to it: fewer than AW_FAQ_MAX
+ * Whether the type question makes the FAQ when "services based on type" gives way to it: fewer than RANKWEB_FAQ_MAX
  * questions shown before it, counting the listing's other answers of a higher priority in the default order (hidden
  * and repeated facts left out, as the FAQ box does). Otherwise the services answer stays, so one of the two shows.
  */
@@ -369,7 +369,7 @@ function rankweb_faq_listing_type_fits( $id, $name ) {
 			$seen[ (string) $r[1] ] = true;
 		}
 	}
-	return count( $seen ) < ( defined( 'AW_FAQ_MAX' ) ? AW_FAQ_MAX : 6 );
+	return count( $seen ) < ( defined( 'RANKWEB_FAQ_MAX' ) ? RANKWEB_FAQ_MAX : 6 );
 }
 
 function rankweb_faq_listing_awbi( $id, $name ) {
@@ -1160,7 +1160,7 @@ function rankweb_faq_tag_items( $term_id ) {
 	$t     = get_term( $term_id, 'post_tag' );
 	$types = function_exists( 'directoryweb_listing_type_slugs' ) ? (array) directoryweb_listing_type_slugs() : array();
 	$own   = $t instanceof WP_Term ? array_filter( rankweb_faq_items( 'term', $term_id ), fn( $x ) => '' === ( $x['auto'] ?? '' ) && 'approved' === ( $x['status'] ?? '' ) ) : array();
-	if ( ! $t instanceof WP_Term || in_array( $t->slug, $types, true ) || count( $own ) >= AW_FAQ_MIN ) { // a written FAQ of its own: kept as it is
+	if ( ! $t instanceof WP_Term || in_array( $t->slug, $types, true ) || count( $own ) >= RANKWEB_FAQ_MIN ) { // a written FAQ of its own: kept as it is
 		return $memo[ $term_id ] = null;
 	}
 	$out = get_transient( 'aw_faq_tag_' . $term_id ); // the IDs, for an hour: a tag page would otherwise query every item on each view

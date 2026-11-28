@@ -119,7 +119,7 @@ check( 1 === get_post_meta( 8, 'aw_phones' ) && '011 2222 3333' === get_post_met
 update_post_meta( 8, 'aw_phones', 2 );
 update_post_meta( 8, 'aw_phones_1_number', '9876543210' ); // written past the check (an old row)
 check( 1 === count( aw_listing_phones( 8 ) ), 'a listed number is never shown' );
-check( AW_WEEKDAYS === DIRECTORYWEB_WEEKDAYS, 'weekdays the same' );
+check( 7 === count( DIRECTORYWEB_WEEKDAYS ) && 'Monday' === DIRECTORYWEB_WEEKDAYS[0], 'weekdays: seven, Monday first' );
 
 echo $count . ' checks, ' . $fails . " failed\n";
 exit( $fails ? 1 : 0 );

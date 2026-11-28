@@ -164,7 +164,7 @@ function sourceweb_enrich_merge( $from, $into, $rid ) {
 		if ( sourceweb_enrich_has_value( $into, $field, $value ) ) {
 			continue;
 		}
-		$mode = sourceweb_enrich_is_empty( $into, $field ) ? 'apply' : ( in_array( $field, AW_ENRICH_LIST_FIELDS, true ) || ( isset( AW_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $into, AW_ENRICH_ALT[ $field ], true ) ) ) ? 'both' : '' );
+		$mode = sourceweb_enrich_is_empty( $into, $field ) ? 'apply' : ( in_array( $field, SOURCEWEB_ENRICH_LIST_FIELDS, true ) || ( isset( SOURCEWEB_ENRICH_ALT[ $field ] ) && '' === trim( (string) get_post_meta( $into, SOURCEWEB_ENRICH_ALT[ $field ], true ) ) ) ? 'both' : '' );
 		if ( '' === $mode ) {
 			continue; // the kept listing's value stands
 		}

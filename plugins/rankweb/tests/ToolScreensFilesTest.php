@@ -11,8 +11,8 @@
 
 require_once __DIR__ . '/tool-stubs.php';
 
-if ( ! defined( 'AW_MEDIA_CAPTION' ) ) {
-	define( 'AW_MEDIA_CAPTION', '{title} on {sitename}' );
+if ( ! defined( 'RANKWEB_MEDIA_CAPTION' ) ) {
+	define( 'RANKWEB_MEDIA_CAPTION', '{title} on {sitename}' );
 }
 
 $GLOBALS['rw_meta']  = $GLOBALS['rw_meta'] ?? array();

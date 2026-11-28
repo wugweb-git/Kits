@@ -146,9 +146,9 @@ function sourceweb_ai_key_row( array $r ): array {
 	if ( 'failed' === $r['status'] ) {
 		$status = 'Failed in the last run';
 	} else {
-		$status = (string) ( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] );
+		$status = (string) ( SOURCEWEB_AI_STATUS[ $r['status'] ] ?? $r['status'] );
 	}
-	$caps = array_map( fn( $c ) => AW_AI_CAP_ICONS[ $c ][1], array_filter( (array) $r['caps'], fn( $c ) => isset( AW_AI_CAP_ICONS[ $c ] ) ) );
+	$caps = array_map( fn( $c ) => SOURCEWEB_AI_CAP_ICONS[ $c ][1], array_filter( (array) $r['caps'], fn( $c ) => isset( SOURCEWEB_AI_CAP_ICONS[ $c ] ) ) );
 	return array(
 		'id'            => $r['id'],
 		'pos'           => $r['pos'],
@@ -161,7 +161,7 @@ function sourceweb_ai_key_row( array $r ): array {
 		'model'         => '' !== $r['model'] ? $r['model'] : '—',
 		'label'         => $r['label'],
 		'usedBy'        => $r['workers'] ? implode( ', ', $names ) : 'All workers',
-		'group'         => $r['secret'] ? '—' : AW_AI_KINDS[ $r['kind'] ][0],
+		'group'         => $r['secret'] ? '—' : SOURCEWEB_AI_KINDS[ $r['kind'] ][0],
 		'caps'          => $caps ? implode( ', ', $caps ) : '—',
 		'capsNote'      => '',
 		'status'        => $r['status'],
@@ -175,7 +175,7 @@ function sourceweb_ai_key_row( array $r ): array {
 		'checked'       => $r['checked'] ? wp_date( 'j M, H:i', $r['checked'] ) : '—',
 		'checkedAt'     => $r['checked'],
 		'secret'        => $r['secret'],
-		'problem'       => ! $r['secret'] && 'bad' === $tone ? sprintf( 'Key …%s: %s. It is not used; safe to remove.', $r['last4'], AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ) : '',
+		'problem'       => ! $r['secret'] && 'bad' === $tone ? sprintf( 'Key …%s: %s. It is not used; safe to remove.', $r['last4'], SOURCEWEB_AI_STATUS[ $r['status'] ] ?? $r['status'] ) : '',
 	);
 }
 
@@ -284,12 +284,12 @@ function sourceweb_rest_ai_key( WP_REST_Request $request ) {
 				'id'            => $id,
 				'last4'         => substr( $r['key'], -4 ),
 				'providerLabel' => '' !== sourceweb_ai_row_name( $r ) ? sourceweb_ai_row_name( $r ) : '—',
-				'group'         => AW_AI_KINDS[ sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai' ][0],
+				'group'         => SOURCEWEB_AI_KINDS[ sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai' ][0],
 				'url'           => (string) ( $r['url'] ?? '' ),
 				'kind'          => sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai',
 				'modelValue'    => (string) ( $r['model'] ?? '' ),
 				'model'         => '' !== (string) $r['model'] ? (string) $r['model'] : '—',
-				'statusLabel'   => (string) ( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ),
+				'statusLabel'   => (string) ( SOURCEWEB_AI_STATUS[ $r['status'] ] ?? $r['status'] ),
 				'tone'          => sourceweb_ai_key_tone( (string) $r['status'] ),
 				'checked'       => ! empty( $r['checked'] ) ? wp_date( 'j M Y, H:i', (int) $r['checked'] ) : 'Not checked yet',
 				'label'         => (string) ( $r['label'] ?? '' ),
@@ -314,7 +314,7 @@ function sourceweb_rest_ai_overview() {
 		$ws     = sourceweb_ai_row_workers( $r );
 		$keys[] = array(
 			sourceweb_ai_key_short( $r ),
-			(string) ( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ),
+			(string) ( SOURCEWEB_AI_STATUS[ $r['status'] ] ?? $r['status'] ),
 			$ws ? implode( ', ', array_map( fn( $id ) => isset( $workers[ $id ] ) ? $workers[ $id ]['name'] : $id . ' (no longer exists)', $ws ) ) : 'All workers',
 		);
 	}

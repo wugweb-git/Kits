@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post types that can have a place. */
-const AW_PLACE_TYPES = array( 'aw_listing', 'aw_opportunity', 'aw_campaign', 'aw_news', 'aw_legal' );
+const DIRECTORYWEB_PLACE_TYPES = array( 'aw_listing', 'aw_opportunity', 'aw_campaign', 'aw_news', 'aw_legal' );
 
 /**
  * Display names for districts whose LGD name is not the name people use (owner, 25 Oct 2026: "Angul", not "Anugola").
@@ -32,7 +32,7 @@ const AW_PLACE_TYPES = array( 'aw_listing', 'aw_opportunity', 'aw_campaign', 'aw
  * by name accepts both. Sources: odisha.gov.in/about-us/districts (Odisha), ntr.ap.gov.in, mauganj.nic.in,
  * jamshedpur.nic.in (East Singhbhum).
  */
-const AW_DISTRICT_COMMON_NAMES = array(
+const DIRECTORYWEB_DISTRICT_COMMON_NAMES = array(
 	344 => 'Angul',          // LGD: Anugola.
 	347 => 'Bargarh',        // LGD: Baragada.
 	350 => 'Cuttack',        // LGD: Kataka.
@@ -79,7 +79,7 @@ function directoryweb_lgd() {
 		if ( ! $st ) {
 			continue;
 		}
-		$p = (object) array( 'term_id' => (int) ( $s['id'] ? $s['id'] : 1000000 + $s['code'] ), 'code' => (int) $s['code'], 'slug' => $s['slug'], 'name' => AW_DISTRICT_COMMON_NAMES[ (int) $s['code'] ] ?? $s['name'], 'lgd' => $s['lgd'], 'parent' => $st->term_id, 'state' => $st->code, 'kind' => 'district', 'taxonomy' => 'aw_place' );
+		$p = (object) array( 'term_id' => (int) ( $s['id'] ? $s['id'] : 1000000 + $s['code'] ), 'code' => (int) $s['code'], 'slug' => $s['slug'], 'name' => DIRECTORYWEB_DISTRICT_COMMON_NAMES[ (int) $s['code'] ] ?? $s['name'], 'lgd' => $s['lgd'], 'parent' => $st->term_id, 'state' => $st->code, 'kind' => 'district', 'taxonomy' => 'aw_place' );
 		$d['districts'][ $p->code ]          = $p;
 		$d['by_state'][ $st->code ][ $p->code ] = $p;
 	}
@@ -351,7 +351,7 @@ function directoryweb_place_count( $place ) {
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( in_array( $post->post_type, AW_PLACE_TYPES, true ) ) {
+		if ( in_array( $post->post_type, DIRECTORYWEB_PLACE_TYPES, true ) ) {
 			directoryweb_place_counts_reset();
 		}
 	},

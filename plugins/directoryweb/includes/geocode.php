@@ -38,8 +38,8 @@ function directoryweb_geo_user_agent(): string {
 	return 'DirectoryWeb/' . ( defined( 'DIRECTORYWEB_VERSION' ) ? DIRECTORYWEB_VERSION : '1' ) . ' (+' . home_url( '/' ) . ( '' !== $contact ? '; ' . $contact : '' ) . ')';
 }
 
-const AW_GEO_NEAR_KM  = 60; // a match farther than this from the listing's district centre is not trusted
-const AW_GEO_CACHE    = 90 * DAY_IN_SECONDS;
+const DIRECTORYWEB_GEO_NEAR_KM  = 60; // a match farther than this from the listing's district centre is not trusted
+const DIRECTORYWEB_GEO_CACHE    = 90 * DAY_IN_SECONDS;
 
 /**
  * One Nominatim search (cached). Returns the first result [lat, lng, place_rank] or null.
@@ -76,7 +76,7 @@ function directoryweb_geo_nominatim( $args ) {
 	}
 	$j   = json_decode( (string) wp_remote_retrieve_body( $r ), true );
 	$out = is_array( $j ) && ! empty( $j[0]['lat'] ) ? array( (float) $j[0]['lat'], (float) $j[0]['lon'], (int) ( $j[0]['place_rank'] ?? 0 ) ) : null;
-	set_transient( $key, $out ? $out : 'none', AW_GEO_CACHE );
+	set_transient( $key, $out ? $out : 'none', DIRECTORYWEB_GEO_CACHE );
 	return $out;
 }
 
@@ -198,7 +198,7 @@ function directoryweb_geocode_listing( $id, $redo_approx = false ) {
 	$codes = function_exists( 'directoryweb_item_codes' ) ? directoryweb_item_codes( $id ) : array( array(), array() );
 	$dist  = (int) ( $codes[1][0] ?? 0 );
 	$cent  = $dist && function_exists( 'aw_district_centroid' ) ? aw_district_centroid( $dist ) : null;
-	$near  = fn( $p ) => ! $cent || directoryweb_geo_km( $p[0], $p[1], $cent[0], $cent[1] ) <= AW_GEO_NEAR_KM;
+	$near  = fn( $p ) => ! $cent || directoryweb_geo_km( $p[0], $p[1], $cent[0], $cent[1] ) <= DIRECTORYWEB_GEO_NEAR_KM;
 	$save  = function ( $lat, $lng, $prec ) use ( $id ) {
 		update_post_meta( $id, 'aw_geo_lat', number_format( $lat, 6, '.', '' ) );
 		update_post_meta( $id, 'aw_geo_lng', number_format( $lng, 6, '.', '' ) );

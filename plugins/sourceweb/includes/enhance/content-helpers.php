@@ -10,12 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The days in order, Monday first (Core's AW_WEEKDAYS; a listing's opening hours). */
+/** The days in order, Monday first (a listing's opening hours). */
 const SOURCEWEB_WEEKDAYS = array( 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' );
 
 /**
- * The types the same-story check compares: the news and library types of the site (Core's AW_SAME_STORY_TYPES,
- * also-reported.php). Empty on a site with neither: the check then finds no story.
+ * The types the same-story check compares: the news and library types of the site. Empty on a site with neither: the check then finds no story.
  *
  * @return string[]
  */
@@ -23,7 +22,7 @@ function sourceweb_same_story_types(): array {
 	return sourceweb_types( array( 'news', 'library' ) );
 }
 
-/** The Library types, tag slug => name (Core's AW_LEGAL_KINDS, model.php). */
+/** The Library types, tag slug => name (a Library item's kind). */
 const SOURCEWEB_LEGAL_KINDS = array(
 	'act'              => 'Act',
 	'rule'             => 'Rule',
@@ -36,7 +35,7 @@ const SOURCEWEB_LEGAL_KINDS = array(
 	'official-release' => 'Official Release',
 );
 
-/** Scheduled tasks count as stopped after this long without a run (Core's AW_CRON_STALE, cron-health.php). */
+/** Scheduled tasks count as stopped after this long without a run (as in Kits Core's cron health). */
 const SOURCEWEB_CRON_STALE = 30 * MINUTE_IN_SECONDS;
 
 /**

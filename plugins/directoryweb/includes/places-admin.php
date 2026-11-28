@@ -1,6 +1,6 @@
 <?php
 /**
- * Place fields on Directory listings, inside the Address and place box (AW_PLACE_EDIT_TYPES; owner, 1 Nov 2026). Other place types (AW_PLACE_TYPES in
+ * Place fields on Directory listings, inside the Address and place box (DIRECTORYWEB_PLACE_EDIT_TYPES; owner, 1 Nov 2026). Other place types (DIRECTORYWEB_PLACE_TYPES in
  * places.php) keep their stored place, found by auto-detect or set before; it is still read and counted.
  * State → District dropdowns built from the LGD file; a site can add a postal code lookup through the `directoryweb_place_box_postal_row` filter.
  * There is no place list in WP Admin and no way to type a place that is not in LGD. Codes that are not in the file
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /** Post types whose edit screen shows the Place fields (no side box: they are rendered in the Address and place box). */
-const AW_PLACE_EDIT_TYPES = array( 'aw_listing' );
+const DIRECTORYWEB_PLACE_EDIT_TYPES = array( 'aw_listing' );
 
 /** The box. */
 function directoryweb_place_box( $post ) {
@@ -84,7 +84,7 @@ add_action(
 add_action(
 	'save_post',
 	function ( $id, $post ) {
-		if ( ! in_array( $post->post_type, AW_PLACE_TYPES, true ) || ! isset( $_POST['aw_place_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_place_nonce'] ), 'aw_place_save' ) || ! current_user_can( 'edit_post', $id ) || wp_is_post_revision( $id ) ) {
+		if ( ! in_array( $post->post_type, DIRECTORYWEB_PLACE_TYPES, true ) || ! isset( $_POST['aw_place_nonce'] ) || ! wp_verify_nonce( sanitize_key( $_POST['aw_place_nonce'] ), 'aw_place_save' ) || ! current_user_can( 'edit_post', $id ) || wp_is_post_revision( $id ) ) {
 			return;
 		}
 		$state    = absint( $_POST['aw_state_code'] ?? 0 );
@@ -136,7 +136,7 @@ add_action(
 
 /** District follows State. */
 function directoryweb_place_box_js() {
-	if ( ! in_array( get_post_type(), AW_PLACE_EDIT_TYPES, true ) ) {
+	if ( ! in_array( get_post_type(), DIRECTORYWEB_PLACE_EDIT_TYPES, true ) ) {
 		return;
 	}
 	ob_start();

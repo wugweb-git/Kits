@@ -15,7 +15,7 @@
  *   POST aw/v1/summary-rewrite {id, before_md5, settle:"reason"}   the summary stays as it is: nothing better can be said.
  *   GET  aw/v1/summary-rewrite?short=1&per_page=10   'short' items due another try (owner, 25 Oct 2026), oldest first:
  *        why = "rules" when their section's word minimum changed since they were settled (one try per change), or
- *        "recheck" when their source has not been re-read for AW_SUMMARY_RW_RECHECK_DAYS (the worker re-reads it and
+ *        "recheck" when their source has not been re-read for SOURCEWEB_SUMMARY_RW_RECHECK_DAYS (the worker re-reads it and
  *        rewrites only when it finds more text than src_chars; never padded). The worker asks for them only after the
  *        new and failed items, a few per run, so they never hold up new ones.
  *   POST aw/v1/summary-rewrite {id, before_md5, recheck: chars}   a short item's source re-read, nothing new: only the
@@ -79,7 +79,7 @@ function sourceweb_summary_rw_settled( $id, $excerpt ) {
 }
 
 /** Days before a short item's source is read again. */
-const AW_SUMMARY_RW_RECHECK_DAYS = 14;
+const SOURCEWEB_SUMMARY_RW_RECHECK_DAYS = 14;
 
 /** The word minimum a short item was judged by: stored since 25 Oct 2026, before that read from its reason. */
 function sourceweb_summary_rw_short_min( array $m ) {
@@ -103,7 +103,7 @@ function sourceweb_summary_rw_short_due( array $m, $section, $now ) {
 		return 'rules'; // the minimum changed since it was judged: one try per change
 	}
 	$last = strtotime( (string) ( $m['checked'] ?? $m['at'] ?? '' ) );
-	return ( ! $last || $now - $last >= AW_SUMMARY_RW_RECHECK_DAYS * DAY_IN_SECONDS ) ? 'recheck' : '';
+	return ( ! $last || $now - $last >= SOURCEWEB_SUMMARY_RW_RECHECK_DAYS * DAY_IN_SECONDS ) ? 'recheck' : '';
 }
 
 /** SQL: the post type column is a type that carries a summary (news, library, post). */

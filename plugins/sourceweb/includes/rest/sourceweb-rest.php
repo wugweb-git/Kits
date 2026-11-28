@@ -69,11 +69,11 @@ add_action(
 			'default' => '',
 		);
 		$routes = array(
-			'/dashboard'           => array( 'GET', AW_REVIEW_CAP, fn() => rest_ensure_response( sourceweb_dashboard_payload() ), array() ),
-			'/dashboard/count'     => array( 'POST', AW_REVIEW_CAP, fn() => rest_ensure_response( array( 'waiting' => sourceweb_dashboard_request() ) ), array() ),
+			'/dashboard'           => array( 'GET', SOURCEWEB_REVIEW_CAP, fn() => rest_ensure_response( sourceweb_dashboard_payload() ), array() ),
+			'/dashboard/count'     => array( 'POST', SOURCEWEB_REVIEW_CAP, fn() => rest_ensure_response( array( 'waiting' => sourceweb_dashboard_request() ) ), array() ),
 			'/review'              => array(
 				'GET',
-				AW_REVIEW_CAP,
+				SOURCEWEB_REVIEW_CAP,
 				'sourceweb_rest_review',
 				array(
 					'type'    => $text,
@@ -90,7 +90,7 @@ add_action(
 			),
 			'/review/decide'       => array(
 				'POST',
-				AW_REVIEW_CAP,
+				SOURCEWEB_REVIEW_CAP,
 				'sourceweb_rest_review_decide',
 				array(
 					'ids'    => $ids,
@@ -103,7 +103,7 @@ add_action(
 			),
 			'/review/publish-all'  => array(
 				'POST',
-				AW_REVIEW_CAP,
+				SOURCEWEB_REVIEW_CAP,
 				'sourceweb_rest_review_publish_all',
 				array(
 					'type'  => $text,
@@ -115,7 +115,7 @@ add_action(
 			),
 			'/enrichment'          => array(
 				'GET',
-				AW_ENRICH_CAP,
+				SOURCEWEB_ENRICH_CAP,
 				'sourceweb_rest_enrichment',
 				array(
 					'status'     => array(
@@ -141,7 +141,7 @@ add_action(
 			),
 			'/enrichment/decide'   => array(
 				'POST',
-				AW_ENRICH_CAP,
+				SOURCEWEB_ENRICH_CAP,
 				'sourceweb_rest_enrichment_decide',
 				array(
 					'ids'        => $ids,
@@ -921,7 +921,7 @@ function sourceweb_services(): array {
 	$now   = sourceweb_settings_now();
 	$on    = sourceweb_enrich_sources_on();
 	$out   = array();
-	$tok   = defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN;
+	$tok   = '' !== sourceweb_dispatch_token();
 	$prob  = function_exists( 'sourceweb_workers_problems' ) ? count( (array) sourceweb_workers_problems() ) : 0;
 	$out[] = array(
 		'slug'    => 'github',
@@ -929,7 +929,7 @@ function sourceweb_services(): array {
 		'status'  => $tok ? __( 'Run now token set', 'sourceweb' ) : __( 'Run now token not set', 'sourceweb' ),
 		'tone'    => $tok ? ( $prob ? 'warn' : '' ) : 'warn',
 		/* translators: 1: workflows, 2: late or failed. */
-		'summary' => sprintf( __( '%1$d workflows; %2$d late or failed. The token is kept in wp-config.php.', 'sourceweb' ), defined( 'AW_WORKERS' ) ? count( AW_WORKERS ) : 0, $prob ),
+		'summary' => sprintf( __( '%1$d workflows; %2$d late or failed. The token is kept in wp-config.php.', 'sourceweb' ), defined( 'SOURCEWEB_WORKERS' ) ? count( SOURCEWEB_WORKERS ) : 0, $prob ),
 		'links'   => array(
 			array(
 				'label' => __( 'Workers', 'sourceweb' ),

@@ -114,3 +114,19 @@ add_action(
 	},
 	1
 );
+
+// Who may edit the dates (Kits Core's Dates screen): PlanWeb's site layer names the capability.
+add_filter(
+	'kits_dates_cap',
+	function ( $cap ) {
+		return defined( 'AW_DATES_CAP' ) ? AW_DATES_CAP : $cap;
+	}
+);
+
+// The contact form's message placeholders, one per reason (Animal Writes Core's list, when it is loaded).
+add_filter(
+	'kits_contact_placeholders',
+	function ( $placeholders ) {
+		return defined( 'AW_CONTACT_PLACEHOLDER' ) && is_array( AW_CONTACT_PLACEHOLDER ) ? AW_CONTACT_PLACEHOLDER : $placeholders;
+	}
+);

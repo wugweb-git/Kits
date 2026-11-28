@@ -167,7 +167,7 @@ function sourceweb_count_intake(): array {
 	$test  = function_exists( 'sourceweb_sourcing_health_test' ) ? sourceweb_sourcing_health_test() : array();
 	$today = current_time( 'Y-m-d' );
 	$rej   = 0;
-	foreach ( (array) get_option( defined( 'AW_RELEVANCE_LOG' ) ? AW_RELEVANCE_LOG : 'aw_relevance_rejected', array() ) as $e ) {
+	foreach ( (array) get_option( defined( 'SOURCEWEB_RELEVANCE_LOG' ) ? SOURCEWEB_RELEVANCE_LOG : 'aw_relevance_rejected', array() ) as $e ) {
 		if ( is_array( $e ) && 0 === strpos( (string) ( $e['at'] ?? '' ), $today ) ) {
 			++$rej;
 		}
@@ -183,7 +183,7 @@ function sourceweb_count_intake(): array {
 		'sources'        => (int) ( $hb['sources'] ?? 0 ),
 		'failed'         => (int) ( $hb['sources_failed'] ?? 0 ),
 		'rejected_today' => $rej,
-		'rejected_all'   => count( (array) get_option( defined( 'AW_RELEVANCE_LOG' ) ? AW_RELEVANCE_LOG : 'aw_relevance_rejected', array() ) ),
+		'rejected_all'   => count( (array) get_option( defined( 'SOURCEWEB_RELEVANCE_LOG' ) ? SOURCEWEB_RELEVANCE_LOG : 'aw_relevance_rejected', array() ) ),
 	);
 }
 
@@ -203,14 +203,14 @@ function sourceweb_count_sources(): array {
 
 /** Workers: every workflow's last report and next run, and the problems the hourly watchdog sees. */
 function sourceweb_count_workers(): array {
-	if ( ! function_exists( 'sourceweb_workers_runs' ) || ! defined( 'AW_WORKERS' ) ) {
+	if ( ! function_exists( 'sourceweb_workers_runs' ) || ! defined( 'SOURCEWEB_WORKERS' ) ) {
 		return array();
 	}
 	$now  = time();
 	$runs = array();
 	$good = 0;
 	foreach ( sourceweb_workers_runs() as $file => $list ) {
-		$w = function_exists( 'sourceweb_worker_def' ) ? sourceweb_worker_def( $file, AW_WORKERS[ $file ] ) : AW_WORKERS[ $file ];
+		$w = function_exists( 'sourceweb_worker_def' ) ? sourceweb_worker_def( $file, SOURCEWEB_WORKERS[ $file ] ) : SOURCEWEB_WORKERS[ $file ];
 		krsort( $list, SORT_NUMERIC );
 		$last   = $list ? reset( $list ) : null;
 		$seen   = $last ? max( (int) ( $last['ended'] ?? 0 ), (int) ( $last['started'] ?? 0 ) ) : 0;
@@ -235,6 +235,6 @@ function sourceweb_count_workers(): array {
 		'state'     => $health['state'],
 		'problems'  => $health['problems'],
 		'runs'      => $runs,
-		'token'     => defined( 'AW_GITHUB_DISPATCH_TOKEN' ) && '' !== (string) AW_GITHUB_DISPATCH_TOKEN,
+		'token'     => '' !== sourceweb_dispatch_token(),
 	);
 }

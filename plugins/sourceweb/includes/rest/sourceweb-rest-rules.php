@@ -413,8 +413,8 @@ function sourceweb_rest_rules_field( WP_REST_Request $request ) {
 		);
 	}
 	$apply = array();
-	foreach ( AW_ENRICH_APPLY as $k => $label ) {
-		if ( ( 'both' === $k && ! in_array( $field, AW_ENRICH_TWO_FIELDS, true ) ) || ( 'review' !== $k && in_array( $field, AW_ENRICH_REVIEW_FIELDS, true ) ) ) {
+	foreach ( SOURCEWEB_ENRICH_APPLY as $k => $label ) {
+		if ( ( 'both' === $k && ! in_array( $field, SOURCEWEB_ENRICH_TWO_FIELDS, true ) ) || ( 'review' !== $k && in_array( $field, SOURCEWEB_ENRICH_REVIEW_FIELDS, true ) ) ) {
 			continue; // two values only where a field can hold them; closed and merge_into always to a person
 		}
 		$apply[] = array(
@@ -587,11 +587,11 @@ function sourceweb_rest_rules_summary_save( WP_REST_Request $request ) {
 		}
 		$in['sections'][ sanitize_key( (string) $pt ) ] = $one;
 	}
-	$before = get_option( AW_SUMMARY_RULES_OPTION );
+	$before = get_option( SOURCEWEB_SUMMARY_RULES_OPTION );
 	$new    = sourceweb_summary_rules_sanitize( $in );
 	$saved  = $new !== $before;
 	if ( $saved ) {
-		update_option( AW_SUMMARY_RULES_OPTION, $new, false );
+		update_option( SOURCEWEB_SUMMARY_RULES_OPTION, $new, false );
 	}
 	return rest_ensure_response(
 		array(

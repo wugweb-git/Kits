@@ -565,13 +565,13 @@ function directoryweb_hours_rows_spec( $rows ) {
 }
 
 /**
- * Daily: Claimed listings last checked more than AW_REVERIFY_DAYS ago, and listings whose accreditation date has passed
+ * Daily: Claimed listings last checked more than DIRECTORYWEB_REVERIFY_DAYS ago, and listings whose accreditation date has passed
  * (the meta names a site gives in `directoryweb_expiry_meta_names`; none by default), are flagged for re-checking (the badge and trust line say so). Runs on Core's daily event (aw_daily), as before.
  */
 function directoryweb_flag_reverify() {
 	$p      = directoryweb_meta_prefix();
 	$today  = current_time( 'Y-m-d' );
-	$days   = defined( 'AW_REVERIFY_DAYS' ) ? (int) AW_REVERIFY_DAYS : 180;
+	$days   = defined( 'DIRECTORYWEB_REVERIFY_DAYS' ) ? (int) DIRECTORYWEB_REVERIFY_DAYS : 180;
 	$cutoff = gmdate( 'Y-m-d', strtotime( $today . ' -' . $days . ' days' ) );
 	$stale  = get_posts(
 		array(

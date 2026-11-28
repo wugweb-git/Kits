@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /* ---------- Directory data: listings per state, district and India, by type ---------- */
 
 /** Types named in a place's breakdown, in this order when counts tie ("veterinary" = every veterinary type, as the filter). */
-// AW_SEO_BREAKDOWN: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_BREAKDOWN: RankWeb → Settings (settings.php).
 
 /**
  * Published listings counted per state code, district code and for all of India, by listing type (its slug), by
@@ -147,7 +147,7 @@ function rankweb_seo_dir_children( $place, $key = '*' ) {
 }
 
 /**
- * What is listed in a place, by type, most first: the types in AW_SEO_BREAKDOWN, then any other type with listings.
+ * What is listed in a place, by type, most first: the types in RANKWEB_SEO_BREAKDOWN, then any other type with listings.
  * Each listing is counted once, under its most specific type (rankweb_seo_main_type()), so the parts add up to the whole.
  *
  * @param object $place State or district.
@@ -162,7 +162,7 @@ function rankweb_seo_dir_breakdown( $place ) {
 			$out[] = array( substr( $k, 1 ), (int) $n ); // veterinary types are counted once, as "veterinary"
 		}
 	}
-	$rank = array_flip( AW_SEO_BREAKDOWN );
+	$rank = array_flip( RANKWEB_SEO_BREAKDOWN );
 	usort( $out, fn( $a, $b ) => $b[1] <=> $a[1] ?: ( $rank[ $a[0] ] ?? 99 ) <=> ( $rank[ $b[0] ] ?? 99 ) );
 	return $out;
 }
@@ -443,7 +443,7 @@ function rankweb_seo_dir_description() {
 		}
 	}
 	foreach ( $cands as $c ) {
-		if ( mb_strlen( $c ) <= AW_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() ) ) {
+		if ( mb_strlen( $c ) <= RANKWEB_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() ) ) {
 			return $c;
 		}
 	}
@@ -691,7 +691,7 @@ function rankweb_seo_category_description( $term ) {
 	}
 	list( $items, $dir ) = rankweb_seo_category_split( $parts );
 	$lead  = rankweb_plain_text( $term->name ) . ' in India on ' . rankweb_site_name() . ': ';
-	$room  = AW_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() );
+	$room  = RANKWEB_SEO_DESC_MAX - mb_strlen( rankweb_seo_page_suffix() );
 	$cands = array();
 	for ( $d = count( $dir ); $d >= 0; $d-- ) {
 		$tail = $d ? ' In the Directory: ' . rankweb_seo_join( array_slice( $dir, 0, $d ) ) . '.' : '';
@@ -777,13 +777,13 @@ add_action( 'aw_seo_fill_daily', 'rankweb_seo_sync_categories', 30 );
  * Search titles of the categories and tags, written to fit 55–58 characters with " – Animal Writes" (keyword first,
  * plain text, the site name only as the suffix). A term not listed gets rankweb_seo_term_title_rule().
  */
-// AW_SEO_TERM_TITLES: RankWeb → Settings (settings.php).
+// RANKWEB_SEO_TERM_TITLES: RankWeb → Settings (settings.php).
 
 /** A category's or tag's search title, with " – Animal Writes". */
 function rankweb_seo_term_title( $term ) {
 	$key = $term->taxonomy . ':' . $term->slug;
-	if ( isset( AW_SEO_TERM_TITLES[ $key ] ) ) {
-		return rankweb_seo_branded( AW_SEO_TERM_TITLES[ $key ] );
+	if ( isset( RANKWEB_SEO_TERM_TITLES[ $key ] ) ) {
+		return rankweb_seo_branded( RANKWEB_SEO_TERM_TITLES[ $key ] );
 	}
 	return rankweb_seo_term_title_rule( $term );
 }
@@ -794,7 +794,7 @@ function rankweb_seo_term_title( $term ) {
  */
 function rankweb_seo_term_title_rule( $term ) {
 	// Only tails that say what the page really lists, and no separator but the " – " before the brand (owner, 15 Oct
-	// 2026: no filler such as ": News" added to reach a length, no colons or commas, no promise of phone numbers). New terms should still get a written title in AW_SEO_TERM_TITLES.
+	// 2026: no filler such as ": News" added to reach a length, no colons or commas, no promise of phone numbers). New terms should still get a written title in RANKWEB_SEO_TERM_TITLES.
 	$what  = 'post_tag' === $term->taxonomy ? rankweb_seo_tag_title( $term ) : rankweb_plain_text( $term->name ) . ' in India';
 	$types = array();
 	foreach ( array( 'aw_listing', 'aw_legal', 'aw_news', 'post', 'aw_opportunity' ) as $pt ) {
@@ -892,7 +892,7 @@ function rankweb_seo_tag_description( $term ) {
 		$text = 0 === $n
 			? sprintf( 'Organisations offering %s in India, with phone numbers and addresses.', $what )
 			: sprintf( '%1$s organisation%2$s offering %3$s in India, with phone numbers and addresses.', 1 === $n ? 'One' : number_format_i18n( $n ), 1 === $n ? '' : 's', $what );
-		return rankweb_seo_cut( $text, AW_SEO_DESC_MAX );
+		return rankweb_seo_cut( $text, RANKWEB_SEO_DESC_MAX );
 	}
 	switch ( $sec ) {
 		case 'aw_listing':
@@ -910,7 +910,7 @@ function rankweb_seo_tag_description( $term ) {
 		default:
 			$text = sprintf( '%1$s%2$s on %3$s, animal welfare in India.', $num, $what, rankweb_site_name() );
 	}
-	return rankweb_seo_cut( ucfirst( $text ), AW_SEO_DESC_MAX );
+	return rankweb_seo_cut( ucfirst( $text ), RANKWEB_SEO_DESC_MAX );
 }
 
 /**

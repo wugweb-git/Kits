@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** The post types that get the list-screen SEO tools (the setting; empty: none). */
 function rankweb_bulk_types(): array {
-	return array_values( array_filter( array_map( 'sanitize_key', (array) AW_BULK_TYPES ), 'post_type_exists' ) );
+	return array_values( array_filter( array_map( 'sanitize_key', (array) RANKWEB_BULK_TYPES ), 'post_type_exists' ) );
 }
 
 /** An item's robots flags (Rank Math's rank_math_robots, an array like array( 'noindex' )). */

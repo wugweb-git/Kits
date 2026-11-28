@@ -65,7 +65,7 @@ sources ──> workers ──> rules ──> review ──> enrichment / output
 
 - A file belongs to the folder of the thing it is **for**, not of the screen that shows it. The screen part of a feature is `admin/` or `rest/`; its model and logic stay with the feature.
 - `*-model.php` files are pure (no WordPress calls) so `tests/run.php` can load them alone. Keep new logic pure where it can be.
-- Stored names (`aw_*` options, `aw/v1` routes, `AW_*` constants) stay: live data and the workers depend on them.
+- Stored names (`aw_*` options, `aw/v1` routes) stay: live data and the workers depend on them. Constants carry the plugin's prefix (`SOURCEWEB_*`); a site's earlier wp-config names are mapped in its site layer.
 
 ## Still scattered (next steps, not done)
 

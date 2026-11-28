@@ -37,7 +37,7 @@ const SOURCEWEB_AI_WORKER_JOBS = array(
  *
  * @param array  $rows Rows with a `provider`.
  * @param string $job  Job id.
- * @param array  $caps provider => list of capabilities (AW_AI_CAPS).
+ * @param array  $caps provider => list of capabilities (the capabilities each connection lists).
  * @return array Same rows, reordered. An unknown job leaves them as they are.
  */
 function sourceweb_ai_order_for_job( array $rows, string $job, array $caps ): array {
