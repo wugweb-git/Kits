@@ -24,7 +24,11 @@ function kits_checkin_known_plugins(): array {
 	return array( 'kits-core', 'directoryweb', 'rankweb', 'sourceweb', 'insightweb', 'mailweb', 'planweb' );
 }
 
-/** A safe https address, or an empty string. */
+/**
+ * A safe https address, or an empty string.
+ *
+ * @param mixed $url The address as saved.
+ */
 function kits_checkin_clean_url( $url ): string {
 	$url = esc_url_raw( trim( (string) $url ), array( 'https' ) );
 	if ( '' === $url ) {
@@ -34,7 +38,11 @@ function kits_checkin_clean_url( $url ): string {
 	return ( is_array( $parts ) && ! empty( $parts['host'] ) && empty( $parts['user'] ) && empty( $parts['pass'] ) ) ? $url : '';
 }
 
-/** 1 or 0 (a checkbox). */
+/**
+ * 1 or 0 (a checkbox).
+ *
+ * @param mixed $value The checkbox value as saved.
+ */
 function kits_checkin_clean_flag( $value ): int {
 	return ( true === $value || 1 === $value || '1' === $value || 'on' === $value ) ? 1 : 0;
 }
@@ -120,17 +128,17 @@ function kits_checkin_send( bool $force = false ): array {
 	$s = kits_checkin_settings();
 	if ( '' === $s['url'] ) {
 		return array(
-			'ok' => false,
+			'ok'      => false,
 			'message' => 'No address is set.',
 		);
 	}
 	if ( ! $force && ! kits_checkin_may_send( $s['on'], $s['url'] ) ) {
 		return array(
-			'ok' => false,
+			'ok'      => false,
 			'message' => 'The check-in is off.',
 		);
 	}
-	$res = wp_remote_post(
+	$res  = wp_remote_post(
 		$s['url'],
 		array(
 			'timeout'     => 5,
@@ -152,7 +160,7 @@ function kits_checkin_send( bool $force = false ): array {
 		false
 	);
 	return array(
-		'ok' => $ok,
+		'ok'      => $ok,
 		'message' => $ok ? 'Sent.' : (string) get_option( 'kits_checkin_last' )['message'],
 	);
 }

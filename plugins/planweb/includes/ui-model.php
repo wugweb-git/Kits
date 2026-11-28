@@ -261,8 +261,8 @@ function planweb_dashboard_tiles( array $c, int $range, callable $url, callable 
 			'key'   => 'total',
 			'label' => __( 'All entries', 'planweb' ),
 			'value' => $num( $c['total'] ?? 0 ),
-			/* translators: 1: ideas, 2: drafts, 3: sent. */
-			'sub'   => sprintf( __( '%1$s ideas, %2$s drafts, %3$s sent', 'planweb' ), $num( $c['statuses']['idea'] ?? 0 ), $num( $c['statuses']['draft'] ?? 0 ), $num( $c['statuses']['sent'] ?? 0 ) ),
+			/* translators: 1: number of ideas, 2: number of drafts, 3: number sent. */
+			'sub'   => sprintf( __( '%1$s, %2$s, %3$s sent', 'planweb' ), sprintf( _n( '%s idea', '%s ideas', (int) ( $c['statuses']['idea'] ?? 0 ), 'planweb' ), $num( $c['statuses']['idea'] ?? 0 ) ), sprintf( _n( '%s draft', '%s drafts', (int) ( $c['statuses']['draft'] ?? 0 ), 'planweb' ), $num( $c['statuses']['draft'] ?? 0 ) ), $num( $c['statuses']['sent'] ?? 0 ) ),
 			'href'  => $url( array( 'when' => 'all' ) ),
 			'tone'  => '',
 		),

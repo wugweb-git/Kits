@@ -12,12 +12,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** A unique id on this page. */
+/**
+ * A unique id on this page.
+ *
+ * @param string $base Base for the id, usually a heading text.
+ */
 function kits_section_id( $base ) {
 	static $used = array();
-	$id = sanitize_title( $base );
-	$id = $id ? $id : 'section';
-	$n  = $id;
+	$id          = sanitize_title( $base );
+	$id          = $id ? $id : 'section';
+	$n           = $id;
 	for ( $i = 2; isset( $used[ $n ] ); $i++ ) {
 		$n = $id . '-' . $i;
 	}
@@ -65,10 +69,10 @@ add_filter(
 		}
 		$p = new WP_HTML_Tag_Processor( $html );
 		if ( ! $p->next_tag() || 'DIV' !== $p->get_tag() ) {
-			return $html; // page header bands keep <header>
+			return $html; // page header bands keep <header>.
 		}
 		if ( false !== strpos( (string) $p->get_attribute( 'class' ), 'kit-site-' ) || null !== $p->get_attribute( 'aria-label' ) ) {
-			return $html; // site header and footer are landmarks already
+			return $html; // site header and footer are landmarks already.
 		}
 		$p->set_bookmark( 'kits-open' );
 		$id    = '';
@@ -100,7 +104,7 @@ add_filter(
 			}
 		}
 		if ( ! $hid && ! $label ) {
-			return $html; // nothing to name it by: leave as a plain group
+			return $html; // nothing to name it by: leave as a plain group.
 		}
 		$p->seek( 'kits-open' );
 		$hid ? $p->set_attribute( 'aria-labelledby', $hid ) : $p->set_attribute( 'aria-label', $label );
@@ -142,7 +146,7 @@ add_filter(
 			$hid  = '';
 			if ( is_string( $lb ) && $lb ) {
 				$name = preg_replace( '/-(title|h|heading)$/', '', $lb );
-				$name = $name === $lb ? $lb . '-section' : $name; // a heading id with no suffix: never give the section the heading's own id
+				$name = $name === $lb ? $lb . '-section' : $name; // a heading id with no suffix: never give the section the heading's own id.
 			} elseif ( is_string( $al ) && $al ) {
 				$name = $al;
 			} else {

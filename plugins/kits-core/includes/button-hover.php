@@ -10,7 +10,6 @@
  * @package kits-core
  */
 
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

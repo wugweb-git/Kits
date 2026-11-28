@@ -268,7 +268,7 @@ function Dashboard() {
 							'sourceweb'
 						) }
 						points={ data.charts.funnel || [] }
-						unit={ __( 'items', 'sourceweb' ) }
+						unit={ [ __( 'item', 'sourceweb' ), __( 'items', 'sourceweb' ) ] }
 					/>
 					<div
 						style={ {
@@ -284,7 +284,7 @@ function Dashboard() {
 								'sourceweb'
 							) }
 							points={ data.charts.throughput || [] }
-							unit={ __( 'items', 'sourceweb' ) }
+							unit={ [ __( 'item', 'sourceweb' ), __( 'items', 'sourceweb' ) ] }
 						/>
 						<MiniChart
 							label={ __(
@@ -292,7 +292,7 @@ function Dashboard() {
 								'sourceweb'
 							) }
 							points={ data.charts.dupes || [] }
-							unit={ __( 'items', 'sourceweb' ) }
+							unit={ [ __( 'item', 'sourceweb' ), __( 'items', 'sourceweb' ) ] }
 						/>
 						<MiniChart
 							label={ __( 'Review-queue size', 'sourceweb' ) }
@@ -1886,7 +1886,7 @@ function WorkerList( { go, msg, setMsg } ) {
 				{ data?.runOff && (
 					<Notice tone="warning">
 						{ __(
-							'Run now is off: AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php (a fine-grained GitHub token for the workers repository only, Actions read and write).',
+							'Run now is off. Add SOURCEWEB_GITHUB_TOKEN (a fine-grained GitHub token for the workers repository only, Actions read and write) and SOURCEWEB_WORKERS_REPO (owner/name) to wp-config.php.',
 							'sourceweb'
 						) }
 					</Notice>

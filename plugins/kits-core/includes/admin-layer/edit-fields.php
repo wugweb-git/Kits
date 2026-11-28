@@ -115,12 +115,12 @@ function kits_edit_fields_camp_save( $term_id ): void {
 	}
 		$v = sanitize_text_field( wp_unslash( $_POST['aw_term_short_name'] ?? '' ) );
 	if ( kits_edit_fields_term_short( $term_id ) === $v ) {
-		return; // unchanged: neither key is touched
+		return; // unchanged: neither key is touched.
 	}
 	if ( '' === $v ) {
 		delete_term_meta( $term_id, 'aw_short_name' );
-		delete_term_meta( $term_id, 'aw_campaign_short' ); // emptied on purpose: the full name shows
+		delete_term_meta( $term_id, 'aw_campaign_short' ); // emptied on purpose: the full name shows.
 		return;
 	}
-		update_term_meta( $term_id, 'aw_short_name', $v ); // read before the older key
+		update_term_meta( $term_id, 'aw_short_name', $v ); // read before the older key.
 }

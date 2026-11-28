@@ -4,6 +4,8 @@
  * sticky action, letter, sponsored, socials. All render on the server, so saved content never goes stale and an old page shows
  * the new look. Where a block needs data the site holds, it asks a `kits_*` filter and the site answers:
  *
+ * The filters, with what each returns:
+ *
  *   kits_countdown_date( $date )         the close date when the block has none (YYYY-MM-DD)
  *   kits_metric_value( $value, $key )    the number for a key (null when none)
  *   kits_sponsored_items( $items )       rows of [ name, url, text ]
@@ -131,14 +133,14 @@ function kits_render_letter( array $a ): string {
 		'closing' => wp_strip_all_tags( (string) ( $a['closing'] ?? '' ) ),
 		'sign'    => wp_strip_all_tags( (string) ( $a['sign'] ?? '' ) ),
 	);
-	$id   = wp_unique_id( 'kits-letter-' );
-	$out  = '<div ' . get_block_wrapper_attributes(
+	$id     = wp_unique_id( 'kits-letter-' );
+	$out    = '<div ' . get_block_wrapper_attributes(
 		array(
-			'class' => 'kits-letter',
+			'class'            => 'kits-letter',
 			'data-kits-letter' => wp_json_encode( $cfg ),
 		)
 	) . '>';
-	$out .= '<fieldset class="kits-letter__grounds"><legend>' . esc_html__( 'Tick the grounds to include', 'kits-core' ) . '</legend>';
+	$out   .= '<fieldset class="kits-letter__grounds"><legend>' . esc_html__( 'Tick the grounds to include', 'kits-core' ) . '</legend>';
 	foreach ( $grounds as $i => $g ) {
 		$out .= '<label class="kits-letter__g"><input type="checkbox" value="' . esc_attr( $g ) . '"' . ( in_array( (string) ( $i + 1 ), $ticked, true ) ? ' checked' : '' ) . '> <span>' . esc_html( $g ) . '</span></label>';
 	}
@@ -159,7 +161,7 @@ function kits_render_sponsored( array $a ): string {
 		$p      = array_map( 'trim', explode( '|', $line ) );
 		$rows[] = array(
 			'name' => $p[0] ?? '',
-			'url' => $p[1] ?? '',
+			'url'  => $p[1] ?? '',
 			'text' => $p[2] ?? '',
 		);
 	}
@@ -169,7 +171,7 @@ function kits_render_sponsored( array $a ): string {
 	}
 	$out = '<aside ' . get_block_wrapper_attributes(
 		array(
-			'class' => 'kits-sponsored',
+			'class'      => 'kits-sponsored',
 			'aria-label' => __( 'Sponsored', 'kits-core' ),
 		)
 	) . '><p class="kits-sponsored__tag">' . esc_html__( 'Sponsored', 'kits-core' ) . '</p>';
@@ -195,7 +197,7 @@ function kits_social_profiles(): array {
 	if ( ! empty( $rm['social_url_facebook'] ) ) {
 		$urls[] = (string) $rm['social_url_facebook'];
 	}
-	$x = ltrim( trim( (string) ( $rm['twitter_author_names'] ?? '' ) ), '@' ); // a handle, not an address
+	$x = ltrim( trim( (string) ( $rm['twitter_author_names'] ?? '' ) ), '@' ); // a handle, not an address.
 	if ( preg_match( '/^[A-Za-z0-9_]{1,15}$/', $x ) ) {
 		$urls[] = 'https://x.com/' . $x;
 	}
@@ -219,7 +221,7 @@ function kits_render_socials( array $a ): string {
 	}
 	$out = '<nav ' . get_block_wrapper_attributes(
 		array(
-			'class' => 'kits-socials',
+			'class'      => 'kits-socials',
 			'aria-label' => '' !== (string) ( $a['heading'] ?? '' ) ? (string) $a['heading'] : __( 'Social profiles', 'kits-core' ),
 		)
 	) . '>';

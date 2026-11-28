@@ -40,7 +40,7 @@ function kits_deployed_head() {
 	$git  = dirname( (string) realpath( KITS_CORE_DIR ), 2 ) . '/.git';
 	$head = is_readable( $git . '/HEAD' ) ? trim( (string) file_get_contents( $git . '/HEAD' ) ) : ''; // phpcs:ignore WordPress.WP.AlternativeFunctions
 	if ( 0 !== strpos( $head, 'ref: ' ) ) {
-		return preg_match( '/^[0-9a-f]{40}$/', $head ) ? $head : ''; // detached: the commit itself
+		return preg_match( '/^[0-9a-f]{40}$/', $head ) ? $head : ''; // detached: the commit itself.
 	}
 	$ref = substr( $head, 5 );
 	if ( is_readable( $git . '/' . $ref ) ) {
@@ -67,7 +67,7 @@ function kits_deploy_purge_if_new(): bool {
 	if ( function_exists( 'kits_site_check_after_deploy' ) ) {
 		kits_site_check_after_deploy(); // Check site runs again for the new commit (site-check.php).
 	}
-	do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active
+	do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active.
 	return true;
 }
 
@@ -75,10 +75,10 @@ add_action(
 	'init',
 	function () {
 		if ( 'cli' === PHP_SAPI || ( defined( 'WP_CLI' ) && WP_CLI ) || headers_sent() ) {
-			return; // no response to carry the purge header: leave the commit for a web request
+			return; // no response to carry the purge header: leave the commit for a web request.
 		}
 		if ( isset( $_GET['aw_deploy_nudge'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			do_action( 'litespeed_control_set_nocache', 'deploy nudge' ); // one-off URLs: keep them out of the cache
+			do_action( 'litespeed_control_set_nocache', 'deploy nudge' ); // one-off URLs: keep them out of the cache.
 		}
 		kits_deploy_purge_if_new();
 	},

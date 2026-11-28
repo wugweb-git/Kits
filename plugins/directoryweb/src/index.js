@@ -949,7 +949,7 @@ function Settings() {
 				id="directoryweb-services"
 				title={ __( 'Connected services', 'directoryweb' ) }
 				description={ __(
-					'What the Directory works with. Keys stay in Kits → Keys and are never shown here.',
+					'What the Directory works with. Keys are set in Settings and are never shown here.',
 					'directoryweb'
 				) }
 			>

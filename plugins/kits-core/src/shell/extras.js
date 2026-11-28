@@ -12,8 +12,22 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {Object} props
  * @param {string} props.label  What the chart shows (its caption).
  * @param {Array}  props.points [ { label, value } ], oldest first.
- * @param {string} props.unit   Words after a number in the table ("rows").
+ * @param {string|Array} props.unit   Words after a number in the table ("rows"), or [ singular, plural ] when the singular differs.
  */
+/**
+ * The words after a number: one string, or [ singular, plural ] (English "one" applies to exactly 1).
+ *
+ * @param {string|Array} unit  The unit.
+ * @param {number}       value The number.
+ * @return {string} The words to print.
+ */
+function unitFor( unit, value ) {
+	if ( Array.isArray( unit ) ) {
+		return Number( value ) === 1 ? unit[ 0 ] : unit[ 1 ];
+	}
+	return unit;
+}
+
 export function MiniChart( { label, points = [], unit = '' } ) {
 	const max = Math.max( 1, ...points.map( ( p ) => Number( p.value ) || 0 ) );
 	const w = 100 / Math.max( 1, points.length );
@@ -65,7 +79,7 @@ export function MiniChart( { label, points = [], unit = '' } ) {
 						<tr key={ i }>
 							<th scope="row">{ p.label }</th>
 							<td>
-								{ p.value } { unit }
+								{ p.value } { unitFor( unit, p.value ) }
 							</td>
 						</tr>
 					) ) }

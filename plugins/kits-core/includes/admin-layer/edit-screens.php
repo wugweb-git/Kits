@@ -48,15 +48,15 @@ function kits_edit_screen_boxes(): array {
 	$data  = kits_edit_screen_map_data();
 	$out   = array();
 	$boxes = (array) apply_filters( 'kits_edit_screen_boxes', (array) ( $data['boxes'] ?? array() ) );
-	$boxes = (array) apply_filters( 'aw_edit_screen_boxes', $boxes ); // older name, still read
+	$boxes = (array) apply_filters( 'aw_edit_screen_boxes', $boxes ); // older name, still read.
 	foreach ( $boxes as $id => $b ) {
 		if ( is_array( $b ) ) {
 			$out[ (string) $id ] = $b + array(
-				'title' => (string) $id,
-				'source' => '',
-				'file' => '',
-				'screen' => 'post',
-				'types' => array(),
+				'title'   => (string) $id,
+				'source'  => '',
+				'file'    => '',
+				'screen'  => 'post',
+				'types'   => array(),
 				'runtime' => 'live',
 			);
 		}
@@ -89,7 +89,7 @@ function kits_edit_screen_map(): array {
 	}
 	$out  = array();
 	$keys = (array) apply_filters( 'kits_edit_screen_map', $keys );
-	$keys = (array) apply_filters( 'aw_edit_screen_map', $keys ); // older name, still read
+	$keys = (array) apply_filters( 'aw_edit_screen_map', $keys ); // older name, still read.
 	foreach ( $keys as $name => $k ) {
 		if ( ! is_array( $k ) ) {
 			continue;
@@ -99,11 +99,11 @@ function kits_edit_screen_map(): array {
 			$id = is_array( $b ) ? (string) ( $b['id'] ?? '' ) : (string) $b;
 			if ( '' !== $id ) {
 				$list[] = is_array( $b ) ? $b + array(
-					'title' => $id,
+					'title'  => $id,
 					'source' => '',
 				) : array(
-					'id' => $id,
-					'title' => (string) ( $boxes[ $id ]['title'] ?? $id ),
+					'id'     => $id,
+					'title'  => (string) ( $boxes[ $id ]['title'] ?? $id ),
 					'source' => (string) ( $boxes[ $id ]['source'] ?? '' ),
 				);
 			}
@@ -168,7 +168,7 @@ function kits_edit_screen_source_from( string $where ): string {
 		return 'WordPress';
 	}
 	if ( preg_match( '~/(?:plugins|mu-plugins)/([^/]+)/~', $where, $m ) ) {
-		$ours = (array) apply_filters( 'kits_edit_screen_own_folders', array( 'rankweb', 'sourceweb', 'kits-core', 'mailweb', 'directoryweb', 'insightweb', 'planweb' ) ); // a site adds the folders of its own plugins
+		$ours = (array) apply_filters( 'kits_edit_screen_own_folders', array( 'rankweb', 'sourceweb', 'kits-core', 'mailweb', 'directoryweb', 'insightweb', 'planweb' ) ); // a site adds the folders of its own plugins.
 		return in_array( $m[1], $ours, true ) ? get_bloginfo( 'name' ) . ' (' . $m[1] . ')' : $m[1];
 	}
 	return 'Theme or other';
@@ -232,7 +232,7 @@ function kits_edit_screen_read_boxes( array &$out ): void {
 		$post          = $dummy; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- put back below.
 		set_current_screen( $type );
 		if ( function_exists( 'register_and_do_post_meta_boxes' ) ) {
-			register_and_do_post_meta_boxes( $dummy ); // core boxes + add_meta_boxes + add_meta_boxes_{type} + do_meta_boxes
+			register_and_do_post_meta_boxes( $dummy ); // core boxes + add_meta_boxes + add_meta_boxes_{type} + do_meta_boxes.
 		} else {
 			do_action( 'add_meta_boxes', $type, $dummy );
 			do_action( "add_meta_boxes_{$type}", $dummy );
@@ -242,7 +242,7 @@ function kits_edit_screen_read_boxes( array &$out ): void {
 			foreach ( (array) $prios as $prio => $list ) {
 				foreach ( (array) $list as $id => $b ) {
 					if ( ! is_array( $b ) ) {
-						continue; // removed
+						continue; // removed.
 					}
 					$out[ $type ][ (string) $id ] = array(
 						'title'    => wp_strip_all_tags( (string) $b['title'] ),
@@ -469,7 +469,7 @@ function kits_edit_screen_rows(): array {
 				$type,
 				$gid,
 				array(
-					'title' => $g['title'],
+					'title'    => $g['title'],
 					'callback' => 'SCF field group',
 					'shows_on' => 'normal (SCF field group)',
 				),
@@ -483,7 +483,7 @@ function kits_edit_screen_rows(): array {
 			}
 			$rt = (string) ( $b['runtime'] ?? 'live' );
 			if ( 'fallback' === $rt || ( 'scf' === $rt && $scf ) ) {
-				continue; // a fallback shows only when registered; an SCF group comes from SCF itself
+				continue; // a fallback shows only when registered; an SCF group comes from SCF itself.
 			}
 			$note = 'edit-screen-only' === $rt ? 'Registered only on the edit screen itself; listed from the map.' : ( 'scf' === $rt ? 'SCF is not active: this group does not show.' : 'Not registered on this page load; listed from the map.' );
 			$add( 'post', $type, $id, array( 'shows_on' => '—' ), array(), array( $note ) );
@@ -512,7 +512,7 @@ function kits_edit_screen_rows(): array {
 				$tax,
 				$id,
 				array(
-					'title' => $h['hook'],
+					'title'    => $h['hook'],
 					'callback' => $h['callback'],
 					'shows_on' => $h['hook'] . ' / ' . $h['priority'],
 				),
@@ -553,7 +553,7 @@ function kits_edit_screen_rows(): array {
 	$by = array();
 	foreach ( $rows as $i => $r ) {
 		if ( 'postcustom' === $r['id'] ) {
-			continue; // Custom Fields can edit any key
+			continue; // Custom Fields can edit any key.
 		}
 		foreach ( array_keys( $r['fields'] ) as $k ) {
 			$by[ $r['type'] ][ $k ][] = $i;
@@ -653,7 +653,7 @@ add_action(
 			return;
 		}
 		if ( false !== get_user_option( 'closedpostboxes_' . $screen->id ) ) {
-			return; // the user has opened or closed a box on this screen: their own choice wins
+			return; // the user has opened or closed a box on this screen: their own choice wins.
 		}
 		foreach ( kits_edit_screen_collapsed_boxes() as $box ) {
 			$hook = 'postbox_classes_' . $screen->id . '_' . $box;
@@ -715,7 +715,7 @@ function kits_edit_screen_display_rows( array $rows ): array {
 	}
 	$general = array();
 	$out     = array();
-	$at      = array(); // group => index in $out
+	$at      = array(); // group => index in $out.
 	foreach ( $rows as $r ) {
 		$r += kits_edit_screen_row_about( $r );
 		if ( kits_edit_screen_is_core( $r ) ) {
@@ -735,7 +735,7 @@ function kits_edit_screen_display_rows( array $rows ): array {
 			$out[]        = $r + array(
 				'label' => '',
 				'types' => array(),
-				'ids' => array(),
+				'ids'   => array(),
 			);
 		}
 		$out[ $at[ $group ] ] = kits_edit_screen_join_row( $out[ $at[ $group ] ], $r );
@@ -767,7 +767,7 @@ function kits_edit_screen_display_rows( array $rows ): array {
 			if ( ! in_array( $r['id'], $row['ids'], true ) ) {
 				$row['titles'][] = $r['title'] . ( 'term' === $r['screen'] ? ' (term screens)' : ( 'admin' === $r['screen'] ? ' — ' . kits_edit_screen_type_label( $r['type'], 'admin' ) : '' ) );
 			}
-			foreach ( $r['notes'] as $n ) { // every type's notes, not only the first type's
+			foreach ( $r['notes'] as $n ) { // every type's notes, not only the first type's.
 				$row['notes'][] = $r['title'] . ( '' !== (string) $r['type'] ? ' (' . $r['type'] . ')' : '' ) . ': ' . $n;
 			}
 			$row = kits_edit_screen_join_row( $row, $r, false );
@@ -848,13 +848,13 @@ add_action(
 				'load-' . $hook,
 				function () {
 					if ( current_user_can( 'manage_options' ) ) {
-						kits_edit_screen_rows(); // read the boxes before the page prints anything
+						kits_edit_screen_rows(); // read the boxes before the page prints anything.
 					}
 				}
 			);
 		}
 	},
-	kits_site_menu_priority( 'aw-edit-screens' ) // order: kits_site_screens() (site-screens.php)
+	kits_site_menu_priority( 'aw-edit-screens' ) // order: kits_site_screens() (site-screens.php).
 );
 
 /** The note on rows that are listed from the map, not read live (page and command). */
@@ -996,12 +996,12 @@ function kits_edit_screens_render( array $all ): void {
 	$tab  = isset( $tabs[ $tab ] ) ? $tab : 'mapping';
 	$base = admin_url( 'admin.php?page=kits-help' ) . '#developer/edit-screens';
 
-	$screens = array(); // post type or taxonomy => post|term, in screen order
+	$screens = array(); // post type or taxonomy => post|term, in screen order.
 	$ids     = array();
 	$admin   = 0;
 	foreach ( $all as $r ) {
 		if ( 'admin' === $r['screen'] ) {
-			$admin += in_array( kits_edit_screen_row_about( $r )['plugin'], kits_edit_screen_own_plugins(), true ) ? 1 : 0; // ours only, as in Admin pages under Mapping
+			$admin += in_array( kits_edit_screen_row_about( $r )['plugin'], kits_edit_screen_own_plugins(), true ) ? 1 : 0; // ours only, as in Admin pages under Mapping.
 			continue;
 		}
 		$screens[ $r['type'] ] = $r['screen'];
@@ -1021,7 +1021,7 @@ function kits_edit_screens_render( array $all ): void {
 	wp_admin_notice(
 		$text,
 		array(
-			'type' => $unmapped || $twice ? 'warning' : 'success',
+			'type'               => $unmapped || $twice ? 'warning' : 'success',
 			'additional_classes' => array( 'inline' ),
 		)
 	);
@@ -1227,16 +1227,16 @@ function kits_edit_screens_unmapped_section( array $all, array $screens ): void 
 		$box  = '<strong>' . esc_html( $r['title'] ) . '</strong><br><code>' . esc_html( $r['id'] ) . '</code>';
 		if ( ! $r['mapped'] ) {
 			$cells[] = array(
-				'type' => $type,
-				'box' => $box,
+				'type'  => $type,
+				'box'   => $box,
 				'field' => '—',
 			);
 		}
 		foreach ( $r['notes'] as $note ) {
 			if ( ': Not mapped yet.' === substr( $note, -17 ) ) {
 				$cells[] = array(
-					'type' => $type,
-					'box' => $box,
+					'type'  => $type,
+					'box'   => $box,
 					'field' => '<code>' . esc_html( substr( $note, 0, -17 ) ) . '</code>',
 				);
 			}
@@ -1246,8 +1246,8 @@ function kits_edit_screens_unmapped_section( array $all, array $screens ): void 
 	kits_edit_screens_grid(
 		'es-unmapped',
 		array(
-			'type' => 'Type',
-			'box' => 'Box',
+			'type'  => 'Type',
+			'box'   => 'Box',
 			'field' => 'Field',
 		),
 		$cells
@@ -1277,8 +1277,8 @@ function kits_edit_screens_twice_section( array $rows ): void {
 	kits_edit_screens_grid(
 		'es-twice',
 		array(
-			'type' => 'Type',
-			'key' => 'Key',
+			'type'  => 'Type',
+			'key'   => 'Key',
 			'boxes' => 'Boxes',
 		),
 		$cells
@@ -1305,13 +1305,13 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		function ( $args, $assoc ) {
 			$admins = get_users(
 				array(
-					'role' => 'administrator',
+					'role'   => 'administrator',
 					'fields' => 'ID',
 					'number' => 1,
 				)
 			);
 			if ( $admins && ! get_current_user_id() ) {
-				wp_set_current_user( (int) $admins[0] ); // boxes that check a capability; in memory only
+				wp_set_current_user( (int) $admins[0] ); // boxes that check a capability; in memory only.
 			}
 			$type = sanitize_key( (string) ( $assoc['type'] ?? '' ) );
 			$rows = kits_edit_screen_rows_for( $type );
@@ -1354,8 +1354,8 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					'table',
 					array_map(
 						fn( $t ) => array(
-							'type' => $t['type'],
-							'key' => $t['key'],
+							'type'  => $t['type'],
+							'key'   => $t['key'],
 							'boxes' => implode( ', ', $t['boxes'] ),
 						),
 						$twice

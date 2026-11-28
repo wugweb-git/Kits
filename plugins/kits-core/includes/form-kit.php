@@ -19,157 +19,157 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function kits_field_dict() {
 	$phone = array(
-		'autocomplete' => 'tel',
-		'inputmode' => 'tel',
-		'maxlength' => 16,
-		'data-rule' => 'phone',
+		'autocomplete'   => 'tel',
+		'inputmode'      => 'tel',
+		'maxlength'      => 16,
+		'data-rule'      => 'phone',
 		'data-msg-phone' => 'Enter a 10-digit phone number, like 98765 43210',
 	);
 	$d     = array(
 		'name'         => array(
-			'label' => 'Your name',
-			'icon' => 'name',
+			'label'       => 'Your name',
+			'icon'        => 'name',
 			'placeholder' => 'Your name',
-			'attrs' => array(
+			'attrs'       => array(
 				'autocomplete' => 'name',
-				'maxlength' => 80,
+				'maxlength'    => 80,
 			),
-			'rules' => array( 'max:80' ),
-			'messages' => array( 'required' => 'Enter your name' ),
+			'rules'       => array( 'max:80' ),
+			'messages'    => array( 'required' => 'Enter your name' ),
 		),
 		'email'        => array(
-			'label' => 'Email',
-			'type' => 'email',
-			'icon' => 'mail',
+			'label'       => 'Email',
+			'type'        => 'email',
+			'icon'        => 'mail',
 			'placeholder' => 'you@example.com',
-			'required' => true,
-			'attrs' => array(
+			'required'    => true,
+			'attrs'       => array(
 				'autocomplete' => 'email',
-				'inputmode' => 'email',
-				'maxlength' => 254,
+				'inputmode'    => 'email',
+				'maxlength'    => 254,
 			),
-			'rules' => array( 'email' ),
-			'messages' => array(
+			'rules'       => array( 'email' ),
+			'messages'    => array(
 				'required' => 'Enter your email address',
-				'email' => 'Enter a full email address, like you@example.com',
+				'email'    => 'Enter a full email address, like you@example.com',
 			),
 		),
 		'phone'        => array(
-			'label' => 'Phone',
-			'type' => 'tel',
-			'icon' => 'phone',
+			'label'       => 'Phone',
+			'type'        => 'tel',
+			'icon'        => 'phone',
 			'placeholder' => '98765 43210',
-			'attrs' => $phone,
-			'rules' => array( 'phone' ),
-			'messages' => array(
+			'attrs'       => $phone,
+			'rules'       => array( 'phone' ),
+			'messages'    => array(
 				'required' => 'Enter your phone number',
-				'phone' => 'Enter a 10-digit phone number, like 98765 43210',
+				'phone'    => 'Enter a 10-digit phone number, like 98765 43210',
 			),
 		),
 		'whatsapp'     => array(
-			'label' => 'WhatsApp',
-			'type' => 'tel',
-			'icon' => 'brand-whatsapp',
+			'label'       => 'WhatsApp',
+			'type'        => 'tel',
+			'icon'        => 'brand-whatsapp',
 			'placeholder' => '98765 43210',
-			'attrs' => $phone,
-			'rules' => array( 'phone' ),
-			'messages' => array( 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ),
+			'attrs'       => $phone,
+			'rules'       => array( 'phone' ),
+			'messages'    => array( 'phone' => 'Enter a 10-digit phone number, like 98765 43210' ),
 		),
 		'organisation' => array(
-			'label' => 'Organisation',
-			'icon' => 'building',
+			'label'       => 'Organisation',
+			'icon'        => 'building',
 			'placeholder' => 'Example Trust',
-			'attrs' => array(
+			'attrs'       => array(
 				'autocomplete' => 'organization',
-				'maxlength' => 120,
+				'maxlength'    => 120,
 			),
-			'rules' => array( 'max:120' ),
+			'rules'       => array( 'max:120' ),
 		),
 		'role'         => array(
-			'label' => 'Your role here',
-			'type' => 'select',
+			'label'    => 'Your role here',
+			'type'     => 'select',
 			'required' => true,
 			'messages' => array( 'required' => 'Choose your role' ),
 		),
 		'pincode'      => array(
-			'label' => 'PIN code',
-			'icon' => 'map-pin',
+			'label'       => 'PIN code',
+			'icon'        => 'map-pin',
 			'placeholder' => '682011',
-			'attrs' => array(
-				'inputmode' => 'numeric',
-				'maxlength' => 6,
-				'autocomplete' => 'postal-code',
-				'pattern' => '[1-9][0-9]{5}',
-				'data-pin-lookup' => '1',
+			'attrs'       => array(
+				'inputmode'        => 'numeric',
+				'maxlength'        => 6,
+				'autocomplete'     => 'postal-code',
+				'pattern'          => '[1-9][0-9]{5}',
+				'data-pin-lookup'  => '1',
 				'data-msg-pattern' => 'Enter a 6-digit PIN code, like 682011',
 			),
-			'rules' => array( 'pin' ),
+			'rules'       => array( 'pin' ),
 		),
 		'state'        => array(
-			'label' => 'State',
-			'type' => 'select',
-			'attrs' => array( 'autocomplete' => 'address-level1' ),
+			'label'    => 'State',
+			'type'     => 'select',
+			'attrs'    => array( 'autocomplete' => 'address-level1' ),
 			'messages' => array( 'required' => 'Choose a state' ),
 		),
 		'district'     => array(
-			'label' => 'District',
-			'type' => 'select',
-			'attrs' => array( 'autocomplete' => 'address-level2' ),
+			'label'    => 'District',
+			'type'     => 'select',
+			'attrs'    => array( 'autocomplete' => 'address-level2' ),
 			'messages' => array( 'required' => 'Choose a district' ),
 		),
 		'area'         => array(
-			'label' => 'Area or locality',
+			'label'       => 'Area or locality',
 			'placeholder' => 'Edappally',
-			'attrs' => array(
+			'attrs'       => array(
 				'autocomplete' => 'address-level3',
-				'maxlength' => 120,
+				'maxlength'    => 120,
 			),
-			'rules' => array( 'max:120' ),
+			'rules'       => array( 'max:120' ),
 		),
 		'website'      => array(
-			'label' => 'Website',
-			'type' => 'url',
-			'icon' => 'world',
+			'label'       => 'Website',
+			'type'        => 'url',
+			'icon'        => 'world',
 			'placeholder' => 'https://example.org',
-			'attrs' => array(
+			'attrs'       => array(
 				'autocomplete' => 'url',
-				'inputmode' => 'url',
-				'maxlength' => 200,
-				'data-rule' => 'url',
+				'inputmode'    => 'url',
+				'maxlength'    => 200,
+				'data-rule'    => 'url',
 				'data-msg-url' => 'Enter a web address, like https://example.org',
 			),
-			'rules' => array( 'url' ),
-			'messages' => array( 'url' => 'Enter a web address, like https://example.org' ),
+			'rules'       => array( 'url' ),
+			'messages'    => array( 'url' => 'Enter a web address, like https://example.org' ),
 		),
 		'reason'       => array(
-			'label' => 'What\'s this about?',
-			'type' => 'select',
+			'label'    => 'What\'s this about?',
+			'type'     => 'select',
 			'required' => true,
 			'messages' => array( 'required' => 'Choose what this is about' ),
 		),
 		'message'      => array(
-			'label' => 'Message',
-			'type' => 'textarea',
-			'attrs' => array(
-				'maxlength' => 3000,
-				'rows' => 5,
+			'label'    => 'Message',
+			'type'     => 'textarea',
+			'attrs'    => array(
+				'maxlength'    => 3000,
+				'rows'         => 5,
 				'data-counter' => 2500,
 			),
-			'rules' => array( 'max:3000' ),
+			'rules'    => array( 'max:3000' ),
 			'messages' => array( 'required' => 'Enter your message' ),
 		),
 		'logo'         => array(
 			'label' => 'Logo',
-			'type' => 'file',
+			'type'  => 'file',
 			'attrs' => array(
-				'accept' => 'image/png,image/jpeg,image/webp',
+				'accept'         => 'image/png,image/jpeg,image/webp',
 				'data-max-bytes' => 8 * MB_IN_BYTES,
-				'data-msg-file' => 'Use a PNG, JPG or WebP.',
+				'data-msg-file'  => 'Use a PNG, JPG or WebP.',
 			),
 		),
 		'consent'      => array(
-			'label' => '',
-			'type' => 'checkbox',
+			'label'    => '',
+			'type'     => 'checkbox',
 			'required' => true,
 			'messages' => array( 'required' => 'Tick the box to agree' ),
 		),
@@ -179,6 +179,9 @@ function kits_field_dict() {
 
 /**
  * Server rules and messages for a set of fields: [field => dictionary key], with the required ones listed.
+ *
+ * @param array $fields Fields: [field => dictionary key].
+ * @param array $required Names of the required fields.
  *
  * @return array{0: array, 1: array} rules, messages.
  */
@@ -194,7 +197,11 @@ function kits_dict_rules( $fields, $required = array() ) {
 	return array( $rules, $msgs );
 }
 
-/** A phone number as 10 digits (a leading +91 or 0 is dropped), or '' when it is not one. */
+/**
+ * A phone number as 10 digits (a leading +91 or 0 is dropped), or '' when it is not one.
+ *
+ * @param string $v The phone number as typed.
+ */
 function kits_clean_phone( $v ) {
 	$d = preg_replace( '/\D/', '', (string) $v );
 	if ( 12 === strlen( $d ) && str_starts_with( $d, '91' ) ) {
@@ -205,7 +212,11 @@ function kits_clean_phone( $v ) {
 	return 10 === strlen( $d ) ? $d : '';
 }
 
-/** A web address with https:// added when it has none. */
+/**
+ * A web address with https:// added when it has none.
+ *
+ * @param string $v The web address as typed.
+ */
 function kits_clean_url( $v ) {
 	$v = trim( (string) $v );
 	return ( '' === $v || preg_match( '#^https?://#i', $v ) ) ? $v : 'https://' . $v;
@@ -242,6 +253,9 @@ function kits_form_nonce_for( $form ) {
 // A fresh form key when a cached page's key has expired: forms.js asks once, then sends again.
 add_action( 'wp_ajax_nopriv_kits_form_nonce', 'kits_form_nonce_json' );
 add_action( 'wp_ajax_kits_form_nonce', 'kits_form_nonce_json' );
+/**
+ * Answer with a fresh form key (AJAX).
+ */
 function kits_form_nonce_json() {
 	nocache_headers();
 	wp_send_json( array( 'nonce' => kits_form_nonce_for( wp_unslash( $_GET['form'] ?? '' ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput -- the answer is the nonce for a known form; sanitized in kits_form_nonce_for()

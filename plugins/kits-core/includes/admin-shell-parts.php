@@ -94,7 +94,7 @@ function kits_shell_parts_blocks_walk( DOMNode $node, array &$out, bool $forms =
 			}
 			if ( 'table' === $tag && false !== strpos( $class, ' form-table ' ) ) {
 				$flush();
-				kits_shell_parts_form_table( $c, $out ); // a settings page: each row is a heading, then its content
+				kits_shell_parts_form_table( $c, $out ); // a settings page: each row is a heading, then its content.
 				continue;
 			}
 			if ( 'ul' === $tag && false !== strpos( $class, ' subsubsub ' ) ) {
@@ -103,7 +103,7 @@ function kits_shell_parts_blocks_walk( DOMNode $node, array &$out, bool $forms =
 				continue;
 			}
 			if ( ( 'div' === $tag && false !== strpos( $class, ' tablenav ' ) ) || ( 'p' === $tag && false !== strpos( $class, ' search-box ' ) ) ) {
-				continue; // read with the list table
+				continue; // read with the list table.
 			}
 		}
 		if ( in_array( $tag, array( 'script', 'style', 'form', 'input', 'button', 'select', 'textarea', 'noscript' ), true ) ) {
@@ -152,7 +152,7 @@ function kits_shell_parts_blocks_walk( DOMNode $node, array &$out, bool $forms =
 				);
 			}
 		} else {
-			kits_shell_parts_blocks_walk( $c, $out, $forms ); // div, details, section …
+			kits_shell_parts_blocks_walk( $c, $out, $forms ); // div, details, section ….
 		}
 	}
 	$flush();
@@ -443,7 +443,7 @@ function kits_shell_parts_listtable_block( DOMElement $table, ?DOMElement $form 
 		foreach ( kits_shell_parts_find( $nav, 'input', 'current-page' ) as $s ) {
 			$part['page'] = max( 1, (int) $s->getAttribute( 'value' ) );
 		}
-		foreach ( kits_shell_parts_find( $nav, 'span', 'current-page' ) as $s ) { // the pages with only one page of links
+		foreach ( kits_shell_parts_find( $nav, 'span', 'current-page' ) as $s ) { // the pages with only one page of links.
 			$part['page'] = max( 1, (int) preg_replace( '/\D/', '', $s->textContent ) );
 		}
 		break;
@@ -725,7 +725,7 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 			'name'     => $name,
 			'label'    => $label,
 			'help'     => $help,
-			'disabled' => $el->hasAttribute( 'disabled' ), // shown, not sent (for example: only administrators can change it)
+			'disabled' => $el->hasAttribute( 'disabled' ), // shown, not sent (for example: only administrators can change it).
 		);
 		if ( 'select' === $type ) {
 			$field['options']  = array();
@@ -737,7 +737,7 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 					'label' => kits_shell_parts_squash( $o->textContent ),
 				);
 				if ( $o->hasAttribute( 'selected' ) || null === $field['value'] ) {
-					$field['value'] = $o->getAttribute( 'value' ); // the first option, unless one is selected
+					$field['value'] = $o->getAttribute( 'value' ); // the first option, unless one is selected.
 				}
 			}
 			$field['value'] = (string) $field['value'];
@@ -745,7 +745,7 @@ function kits_shell_parts_form_block( DOMElement $form ): array {
 			$field['value'] = $el->textContent;
 			$field['rows']  = max( 2, (int) $el->getAttribute( 'rows' ) );
 		} elseif ( 'file' === $type ) {
-			$field['accept'] = $el->getAttribute( 'accept' ); // a file is picked in the browser; nothing is filled in
+			$field['accept'] = $el->getAttribute( 'accept' ); // a file is picked in the browser; nothing is filled in.
 		} elseif ( 'checkbox' === $type ) {
 			$field['value']   = $el->hasAttribute( 'value' ) ? $el->getAttribute( 'value' ) : 'on';
 			$field['checked'] = $el->hasAttribute( 'checked' );

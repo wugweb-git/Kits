@@ -104,14 +104,14 @@ function kits_share_payload( $url, $title, $campaign = '', $args = array() ) {
 		'kits_share_args',
 		array_merge(
 			array(
-				'text' => '',
+				'text'     => '',
 				'hashtags' => array(),
-				'image' => '',
-				'url' => '',
-				'post_id' => 0,
-				'follow' => array(),
-				'button' => '',
-				'order' => false,
+				'image'    => '',
+				'url'      => '',
+				'post_id'  => 0,
+				'follow'   => array(),
+				'button'   => '',
+				'order'    => false,
 			),
 			(array) $args
 		),
@@ -150,17 +150,17 @@ function kits_share_payload( $url, $title, $campaign = '', $args = array() ) {
  * @return string
  */
 function kits_share_html( $url, $title, $only = null, $campaign = '', $args = array() ) {
-	$p     = kits_share_payload( $url, $title, $campaign, $args );
-	$args  = $p['args'];
-	$url   = $p['url'];
-	$text  = $p['text'];
-	$tags  = $p['hashtags'];
-	$hash  = $p['hash'];
-	$tag   = fn( $source ) => kits_share_tagged_url( $url, $source, $campaign );
-	$site  = html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES );
-	$nets  = array( // key => [name, icon, link]
+	$p    = kits_share_payload( $url, $title, $campaign, $args );
+	$args = $p['args'];
+	$url  = $p['url'];
+	$text = $p['text'];
+	$tags = $p['hashtags'];
+	$hash = $p['hash'];
+	$tag  = fn( $source ) => kits_share_tagged_url( $url, $source, $campaign );
+	$site = html_entity_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+	$nets = array( // key => [name, icon, link].
 		'x'        => array( 'X', 'x-brand', 'https://x.com/intent/post?text=' . rawurlencode( $text ) . '&url=' . rawurlencode( $tag( 'x' ) ) . ( $tags ? '&hashtags=' . rawurlencode( implode( ',', $tags ) ) : '' ) ),
-		'facebook' => array( 'Facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $tag( 'facebook' ) ) ), // Facebook takes the link only; its card comes from the page's link preview
+		'facebook' => array( 'Facebook', 'facebook', 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $tag( 'facebook' ) ) ), // Facebook takes the link only; its card comes from the page's link preview.
 		'linkedin' => array( 'LinkedIn', 'linkedin', 'https://www.linkedin.com/sharing/share-offsite/?url=' . rawurlencode( $tag( 'linkedin' ) ) ),
 		'whatsapp' => array( 'WhatsApp', 'brand-whatsapp', 'https://wa.me/?text=' . rawurlencode( $text . ' ' . $tag( 'whatsapp' ) . $hash ) ),
 		'email'    => array( 'Email', 'mail', 'mailto:?subject=' . rawurlencode( sprintf( 'From %s: %s', $site, $title ) ) . '&body=' . rawurlencode( $p['message'] . "\n\n" . $tag( 'email' ) ) ),
@@ -204,7 +204,7 @@ function kits_follow_html( $rows ) {
 	$out = '<div class="kit-share kit-follow" role="group" aria-label="' . esc_attr__( 'Follow us', 'kits-core' ) . '"><span class="kit-share-label" aria-hidden="true">' . esc_html__( 'Follow us', 'kits-core' ) . '</span>';
 	foreach ( $rows as $r ) {
 		list( $name, $href ) = $r;
-		$icon = isset( $r[2] ) ? (string) $r[2] : 'link';
+		$icon                = isset( $r[2] ) ? (string) $r[2] : 'link';
 		/* translators: %s: network name. */
 		$label = sprintf( __( 'Follow us on %s', 'kits-core' ), $name );
 		$out  .= '<a class="kit-share-btn kit-follow-btn" href="' . esc_url( $href ) . '" target="_blank" rel="noopener" aria-label="' . esc_attr( $label ) . '" title="' . esc_attr( $label ) . '"><span class="kit-ico kit-ico--' . esc_attr( sanitize_html_class( $icon ) ) . '" aria-hidden="true"></span><span class="kit-share-name" aria-hidden="true">' . esc_html( $name ) . '</span></a>';
@@ -217,7 +217,7 @@ add_filter(
 	'render_block_core/group',
 	function ( $content, $block ) {
 		static $done = false;
-		$types = kits_share_types();
+		$types       = kits_share_types();
 		if ( $done || ! $types || 'main' !== ( $block['attrs']['tagName'] ?? '' ) || ! is_singular( $types ) ) { // No types: off (is_singular( [] ) would match every page).
 			return $content;
 		}

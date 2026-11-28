@@ -47,7 +47,7 @@ add_filter(
 		}
 		$status = (array) $q->get( 'post_status' );
 		if ( $status && array( '' ) !== $status && ! in_array( 'publish', $status, true ) ) {
-			return $where; // drafts and other non-public lists
+			return $where; // drafts and other non-public lists.
 		}
 		global $wpdb;
 		return $where . " AND {$wpdb->posts}.post_name <> ''";

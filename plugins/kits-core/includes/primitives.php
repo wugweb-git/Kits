@@ -1,22 +1,9 @@
 <?php
 /**
- * A term's address, or '' when WordPress cannot make one (get_term_link returns a WP_Error for a missing term or
- * taxonomy; printed or put in schema it raised notices). Use this instead of get_term_link in templates and schema.
- *
- * @param WP_Term|int|string $term     Term.
- * @param string             $taxonomy Taxonomy, when $term is not an object.
- * @return string
- */
-if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy for a site without Kits Core
-	function kits_term_url( $term, $taxonomy = '' ) {
-		$url = get_term_link( $term, $taxonomy );
-		return is_wp_error( $url ) ? '' : (string) $url;
-	}
-}
-
-/**
  * Kits primitives (Phase 11 B.2): markup helpers so every page uses the same component for the same job.
  * Styles: themes/kits-by-wugweb/assets/css/kit-primitives.css. Behaviour (sheet, show more): kit.js.
+ *
+ * The helpers, with the element each prints:
  *
  *  kits_tag()            static metadata (type, language, "Template")          span.kit-tag
  *  kits_chip()           a tag that navigates (categories)                      a.kit-chip
@@ -41,25 +28,64 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! function_exists( 'kits_term_url' ) ) { // aw-seo-extras carries a copy for a site without Kits Core.
+	/**
+	 * A term's address, or '' when WordPress cannot make one (get_term_link returns a WP_Error for a missing term or
+	 * taxonomy; printed or put in schema it raised notices). Use this instead of get_term_link in templates and schema.
+	 *
+	 * @param WP_Term|int|string $term     Term.
+	 * @param string             $taxonomy Taxonomy, when $term is not an object.
+	 * @return string
+	 */
+	function kits_term_url( $term, $taxonomy = '' ) {
+		$url = get_term_link( $term, $taxonomy );
+		return is_wp_error( $url ) ? '' : (string) $url;
+	}
+}
+
 if ( ! function_exists( 'kits_tag' ) ) {
+	/**
+	 * A static tag: metadata that does not navigate.
+	 *
+	 * @param string $text    Tag text.
+	 * @param string $variant Optional variant name.
+	 */
 	function kits_tag( $text, $variant = '' ) {
 		return '<span class="kit-tag' . ( $variant ? ' kit-tag--' . esc_attr( $variant ) : '' ) . '">' . esc_html( $text ) . '</span>';
 	}
 }
 
 if ( ! function_exists( 'kits_chip' ) ) {
+	/**
+	 * A tag that navigates.
+	 *
+	 * @param string $text    Chip text.
+	 * @param string $url     Where the chip links.
+	 * @param string $variant Optional variant name.
+	 */
 	function kits_chip( $text, $url, $variant = '' ) {
 		return '<a class="kit-chip' . ( $variant ? ' kit-chip--' . esc_attr( $variant ) : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $text ) . '</a>';
 	}
 }
 
 if ( ! function_exists( 'kits_badge' ) ) {
+	/**
+	 * A state badge: verified, unconfirmed, featured, sponsored, ad, closed or new.
+	 *
+	 * @param string $text    Badge text.
+	 * @param string $variant State name.
+	 */
 	function kits_badge( $text, $variant ) {
 		return '<span class="kit-badge kit-badge--' . esc_attr( $variant ) . '">' . esc_html( $text ) . '</span>';
 	}
 }
 
 if ( ! function_exists( 'kits_eyebrow' ) ) {
+	/**
+	 * A small label that carries information.
+	 *
+	 * @param string $text Label text.
+	 */
 	function kits_eyebrow( $text ) {
 		return '<span class="kit-eyebrow">' . esc_html( $text ) . '</span>';
 	}
@@ -146,7 +172,7 @@ function kits_milestone_state( array $m, $today = '' ) {
 	if ( in_array( $set, array( 'past', 'present', 'ongoing', 'future' ), true ) ) {
 		return $set;
 	}
-	$today = '' !== $today ? (string) $today : kits_timeline_today();
+	$today                = '' !== $today ? (string) $today : kits_timeline_today();
 	list( $start, $last ) = kits_milestone_range( $m );
 	if ( '' === $start ) {
 		return ! empty( $m['current'] ) ? 'present' : 'undated';
@@ -189,8 +215,8 @@ function kits_milestone_state_label( $state ) {
  * @return string A time element, or '' when the date cannot be read.
  */
 function kits_datecard( $when, $variant = '', $state = '' ) {
-	unset( $variant ); // one size everywhere (owner, 13 Nov 2026: "same geometry everywhere")
-	$m = is_array( $when ) ? $when : array( 'date' => is_numeric( $when ) ? wp_date( 'Y-m-d', (int) $when, new DateTimeZone( 'Asia/Kolkata' ) ) : (string) $when );
+	unset( $variant ); // one size everywhere (owner, 13 Nov 2026: "same geometry everywhere").
+	$m                      = is_array( $when ) ? $when : array( 'date' => is_numeric( $when ) ? wp_date( 'Y-m-d', (int) $when, new DateTimeZone( 'Asia/Kolkata' ) ) : (string) $when );
 	list( $start, , $prec ) = kits_milestone_range( $m );
 	if ( '' === $start && ! is_array( $when ) && ! is_numeric( $when ) ) {
 		$ts = strtotime( (string) $when . ' 12:00' );
@@ -253,7 +279,7 @@ function kits_timeline( array $items, array $args = array() ) {
 		$card  = 'undated' === $state || ( 'present' === $state && '' === kits_milestone_range( (array) $m )[0] )
 			? kits_datecard_word( (string) ( $m['word'] ?? '' ), '', $state )
 			: kits_datecard( (array) $m, '', $state );
-		$what = '';
+		$what  = '';
 		if ( ! empty( $m['word'] ) ) {
 			$what .= '<span class="kit-dateline-word">' . esc_html( (string) $m['word'] ) . '</span> ';
 		}
@@ -264,7 +290,7 @@ function kits_timeline( array $items, array $args = array() ) {
 			$what .= '<span class="kit-dateline-desc">' . wp_kses_post( (string) $m['description'] ) . '</span> ';
 		}
 		if ( ! empty( $m['html'] ) ) {
-			$what .= (string) $m['html']; // already rendered post content (the_content), kept as it is
+			$what .= (string) $m['html']; // already rendered post content (the_content), kept as it is.
 		}
 		if ( ! empty( $m['media'] ) ) {
 			$id    = (int) $m['media'];
@@ -288,36 +314,41 @@ function kits_timeline( array $items, array $args = array() ) {
 }
 
 if ( ! function_exists( 'kits_count' ) ) {
+	/**
+	 * A number beside a label.
+	 *
+	 * @param int $n The number.
+	 */
 	function kits_count( $n ) {
 		return '<span class="kit-count">' . esc_html( number_format_i18n( (int) $n ) ) . '</span>';
 	}
 }
 
-/**
- * An icon: an empty span the theme draws from its icon set (kit-ico--{name}; kit-primitives.css). Decorative, so
- * hidden from screen readers; the words next to it carry the meaning.
- *
- * @param string $name  Icon name (calendar, arrow-up-right, play...).
- * @param string $class Optional extra classes.
- * @return string
- */
 if ( ! function_exists( 'kits_icon' ) ) {
+	/**
+	 * An icon: an empty span the theme draws from its icon set (kit-ico--{name}; kit-primitives.css). Decorative, so
+	 * hidden from screen readers; the words next to it carry the meaning.
+	 *
+	 * @param string $name  Icon name (calendar, arrow-up-right, play...).
+	 * @param string $class Optional extra classes.
+	 * @return string
+	 */
 	function kits_icon( $name, $class = '' ) {
 		return '<span class="kit-ico kit-ico--' . esc_attr( $name ) . ( '' !== $class ? ' ' . esc_attr( $class ) : '' ) . '" aria-hidden="true"></span>';
 	}
 }
 
-/**
- * The date component: the calendar icon directly before the date, nothing between them, in a <time>. Every visible
- * date goes through here, so all dates look and read the same.
- *
- * @param string|int $when  Any date strtotime() reads (Y-m-d, a full timestamp string), Ymd (the SCF date picker's
- *                          stored value) or a Unix time.
- * @param string|null $fmt  Display format (null = the site's date format).
- * @param string     $class Optional extra classes on the wrapper.
- * @return string '' when the date cannot be read.
- */
 if ( ! function_exists( 'kits_date' ) ) {
+	/**
+	 * The date component: the calendar icon directly before the date, nothing between them, in a <time>. Every visible
+	 * date goes through here, so all dates look and read the same.
+	 *
+	 * @param string|int  $when  Any date strtotime() reads (Y-m-d, a full timestamp string), Ymd (the SCF date picker's
+	 *                           stored value) or a Unix time.
+	 * @param string|null $fmt  Display format (null = the site's date format).
+	 * @param string      $class Optional extra classes on the wrapper.
+	 * @return string '' when the date cannot be read.
+	 */
 	function kits_date( $when, $fmt = null, $class = '' ) {
 		$when = preg_match( '/^\d{8}$/', (string) $when ) ? substr( $when, 0, 4 ) . '-' . substr( $when, 4, 2 ) . '-' . substr( $when, 6, 2 ) : $when;
 		$ts   = is_numeric( $when ) ? (int) $when : strtotime( (string) $when );
@@ -354,7 +385,7 @@ function kits_filter_dropdown( $legend, $param, $options ) {
 				(string) $o[4],
 				array(
 					'span' => array(
-						'class' => true,
+						'class'       => true,
 						'aria-hidden' => true,
 					),
 				)
@@ -421,7 +452,7 @@ function kits_filter_bar( $groups, $active, $clear, $sort = '', $keep = array() 
 		$hidden .= '<input type="hidden" name="' . esc_attr( $k ) . '" value="' . esc_attr( $v ) . '">';
 	}
 	$html = '<form class="kit-filterbar" method="get" action="' . esc_url( $clear ) . '" data-kit-filterbar>' . $hidden;
-	if ( false !== strpos( $groups, 'kit-dd--menu' ) ) { // one Filters menu: compact already, no phone sheet around it
+	if ( false !== strpos( $groups, 'kit-dd--menu' ) ) { // one Filters menu: compact already, no phone sheet around it.
 		$html .= '<div class="kit-filters" role="toolbar" aria-label="Filters">' . $groups . '</div>';
 	} elseif ( '' !== trim( $groups ) ) {
 		$html .= '<details class="kit-filter-sheet" open><summary><span class="kit-ico kit-ico--sliders" aria-hidden="true"></span>' . esc_html( 'Filters' ) . ( $n ? ' ' . kits_count( $n ) : '' ) . '</summary>'
@@ -452,13 +483,22 @@ add_action(
 	}
 );
 
-/** Opening tag of a dropdown (its own context: the id that is open). */
+/**
+ * Opening tag of a dropdown (its own context: the id that is open).
+ *
+ * @param string $id Id of the dropdown.
+ * @param string $class Extra class for the wrapper.
+ */
 function kits_dd_open( $id, $class ) {
 	return '<div class="kit-dd' . ( $class ? ' ' . esc_attr( $class ) : '' ) . '" data-wp-interactive="kits/dropdown" ' . wp_interactivity_data_wp_context( array( 'id' => $id ) )
 		. ' data-wp-class--is-open="callbacks.isOpen" data-wp-on--keydown="actions.keys" data-wp-on-document--click="actions.outside">';
 }
 
-/** Process the directives (so the first paint is right) and load the module once. */
+/**
+ * Process the directives (so the first paint is right) and load the module once.
+ *
+ * @param string $html Dropdown markup.
+ */
 function kits_dd_render( $html ) {
 	wp_enqueue_script_module( 'kits-dropdown' );
 	return function_exists( 'wp_interactivity_process_directives' ) ? wp_interactivity_process_directives( $html ) : $html;

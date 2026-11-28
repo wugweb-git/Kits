@@ -39,7 +39,7 @@ add_action(
 		}
 		$base = plugins_url( 'build/shell/', KITS_CORE_DIR . 'kits-core.php' );
 		wp_register_script( 'kits-shell', $base . 'index.js', $a['dependencies'] ?? array(), $a['version'] ?? false, true );
-		wp_register_style( 'kits-shell', $base . 'index.css', wp_style_is( 'wp-theme', 'registered' ) ? array( 'wp-components', 'wp-theme' ) : array( 'wp-components' ), $a['version'] ?? false ); // after WordPress's component styles and design tokens (DataViews reads them): the Kits look on top
+		wp_register_style( 'kits-shell', $base . 'index.css', wp_style_is( 'wp-theme', 'registered' ) ? array( 'wp-components', 'wp-theme' ) : array( 'wp-components' ), $a['version'] ?? false ); // after WordPress's component styles and design tokens (DataViews reads them): the Kits look on top.
 		wp_set_script_translations( 'kits-shell', 'kits-core' );
 	},
 	1
@@ -135,15 +135,15 @@ function kits_shell_ui_next(): bool {
 	return true;
 }
 
-/**
- * The permission check of a shell screen's REST route (docs/plugins/kits-plugin-ui-spec.md, Data):
- * 401 when signed out; 403 when a browser request has no valid wp_rest nonce (an Application Password request has
- * none); 403 without the capability.
- *
- * @param string $cap Capability the route needs.
- * @return callable A permission_callback.
- */
 if ( ! function_exists( 'kits_shell_rest_can' ) ) {
+	/**
+	 * The permission check of a shell screen's REST route (docs/plugins/kits-plugin-ui-spec.md, Data):
+	 * 401 when signed out; 403 when a browser request has no valid wp_rest nonce (an Application Password request has
+	 * none); 403 without the capability.
+	 *
+	 * @param string $cap Capability the route needs.
+	 * @return callable A permission_callback.
+	 */
 	function kits_shell_rest_can( string $cap ): callable {
 		return function ( $request ) use ( $cap ) {
 			if ( ! is_user_logged_in() ) {

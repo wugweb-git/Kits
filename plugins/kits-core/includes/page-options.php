@@ -49,7 +49,11 @@ function kits_page_option_note( string $key ): string {
 	return $notes[ $key ] ?? '';
 }
 
-/** Which group an option shows under in the editor panel. */
+/**
+ * Which group an option shows under in the editor panel.
+ *
+ * @param string $key Option key.
+ */
 function kits_page_option_group( string $key ): string {
 	return array(
 		'header' => 'Header',
@@ -119,8 +123,8 @@ function kits_page_context(): string {
 		$type = get_query_var( 'post_type' );
 		$ctx  = 'archive_' . (string) ( is_array( $type ) ? reset( $type ) : $type );
 	} elseif ( is_tax() ) {
-		$tax  = get_taxonomy( (string) get_query_var( 'taxonomy' ) );
-		$ctx  = $tax && $tax->object_type ? 'archive_' . (string) reset( $tax->object_type ) : '';
+		$tax = get_taxonomy( (string) get_query_var( 'taxonomy' ) );
+		$ctx = $tax && $tax->object_type ? 'archive_' . (string) reset( $tax->object_type ) : '';
 	}
 	// The second argument is the post being edited in the block editor; null on the front end.
 	$ctx = (string) apply_filters( 'kits_page_options_context', $ctx, null );

@@ -2,71 +2,316 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: DirectoryWeb 1.1.0\n"
-"Report-Msgid-Bugs-To: https://wugweb.com/\n"
+"Project-Id-Version: DirectoryWeb 1.5.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/directoryweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-13T04:28:10+00:00\n"
+"POT-Creation-Date: 2026-11-28T05:53:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: directoryweb\n"
 
 #. Plugin Name of the plugin
-#: animal-writes-core.php
-msgid "Animal Writes Core"
+#: directoryweb.php
+#: includes/directoryweb-ui.php:100
+#: includes/directoryweb-ui.php:105
+#: includes/directoryweb-ui.php:264
+#: includes/place-intros.php:175
+msgid "DirectoryWeb"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: directoryweb.php
+msgid "https://wugweb-git.github.io/Kits/plugins/directoryweb/"
 msgstr ""
 
 #. Description of the plugin
-#: animal-writes-core.php
-msgid "The Animal Writes site: content types and fields, the Directory with its map and places, campaigns and letters, forms and people (Fluent Forms, FluentCRM), card pictures, and the jobs that keep it running (backups, site check, scheduled tasks, deploy purge, CDN cache). Its screens are in the Kits menu (Home, Settings, Theme Options, Help). Theme-independent."
+#: directoryweb.php
+msgid "The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks. Enhanced by Kits Core."
 msgstr ""
 
 #. Author of the plugin
-#: animal-writes-core.php
+#: directoryweb.php
 msgid "Wugweb"
 msgstr ""
 
 #. Author URI of the plugin
-#: animal-writes-core.php
-msgid "https://wugweb.com"
+#: directoryweb.php
+msgid "https://wugweb.com/"
 msgstr ""
 
-#: includes/claims-review.php:369
-#: includes/claims-review.php:371
+#: directoryweb.php:131
+#: includes/directoryweb-help-tab.php:37
+#: includes/directoryweb-ui.php:107
+#: includes/directoryweb-ui.php:214
+msgid "Settings"
+msgstr ""
+
+#: includes/bootstrap.php:19
+#: includes/directoryweb-help-tab.php:34
+#: includes/directoryweb-rest.php:409
+#: includes/directoryweb-ui.php:106
+#: includes/directoryweb-ui.php:204
+#: src/index.js:1431
+#: src/index.js:1453
+msgid "Listings"
+msgstr ""
+
+#: includes/bootstrap.php:20
+#: includes/schema/schema.php:43
+#: includes/standalone-screens.php:616
+#: src/index.js:591
+#: src/index.js:1363
+msgid "Listing"
+msgstr ""
+
+#: includes/claim-evidence.php:392
+msgid "Not allowed."
+msgstr ""
+
+#: includes/claim-evidence.php:397
+msgid "File not found."
+msgstr ""
+
+#: includes/claim-evidence.php:397
+msgid "This file cannot be opened. It was saved with different site security keys (the salts in wp-config.php changed) or it is damaged."
+msgstr ""
+
+#: includes/claim-evidence.php:427
+msgid "Open the PDF"
+msgstr ""
+
+#: includes/claim-evidence.php:431
+msgid "No files were sent with this claim."
+msgstr ""
+
+#: includes/claim-native.php:344
+msgid "Thank you. Your claim was received and will be reviewed by our team."
+msgstr ""
+
+#: includes/claim-native.php:367
+msgid "Your name"
+msgstr ""
+
+#: includes/claim-native.php:367
+msgid "Your email"
+msgstr ""
+
+#: includes/claim-native.php:367
+msgid "Your phone (optional)"
+msgstr ""
+
+#: includes/claim-native.php:368
+msgid "Your connection to this organisation"
+msgstr ""
+
+#: includes/claim-native.php:373
+msgid "What should the listing say?"
+msgstr ""
+
+#: includes/claim-native.php:374
+#: includes/directoryweb-rest.php:722
+#: includes/directoryweb-rest.php:1093
+#: includes/listing-template.php:204
+#: includes/listing-template.php:216
+msgid "Phone"
+msgstr ""
+
+#: includes/claim-native.php:374
+msgid "Public email"
+msgstr ""
+
+#: includes/claim-native.php:374
+#: includes/directoryweb-listings.php:345
+#: includes/listing-template.php:198
+#: includes/listing-template.php:204
+#: includes/listing-template.php:223
+msgid "Website"
+msgstr ""
+
+#: includes/claim-native.php:374
+msgid "Area or locality"
+msgstr ""
+
+#: includes/claim-native.php:375
+#: src/index.js:1231
+msgid "About"
+msgstr ""
+
+#: includes/claim-native.php:380
+msgid "Show my name on the listing"
+msgstr ""
+
+#: includes/claim-native.php:381
+msgid "Anything else we should know"
+msgstr ""
+
+#: includes/claim-native.php:382
+msgid "Files (optional)"
+msgstr ""
+
+#: includes/claim-native.php:383
+msgid "Proof that you speak for this organisation (PDF, PNG, JPG or WebP, up to 8 MB; kept private, never published)"
+msgstr ""
+
+#: includes/claim-native.php:384
+msgid "Logo (PNG, JPG or WebP, up to 5 MB; used only if approved)"
+msgstr ""
+
+#: includes/claim-native.php:385
+msgid "Photos (up to 5; used only if approved)"
+msgstr ""
+
+#: includes/claim-native.php:386
+msgid "Send claim"
+msgstr ""
+
+#: includes/claim-native.php:428
+msgid "Choose the files again."
+msgstr ""
+
+#: includes/claim-native.php:464
+msgid "Claim review"
+msgstr ""
+
+#: includes/claim-native.php:480
+msgid "Notes only"
+msgstr ""
+
+#: includes/claim-native.php:499
+msgid "This claim came from a form entry. Review it under Directory → Claims."
+msgstr ""
+
+#: includes/claim-native.php:503
+msgid "Listing:"
+msgstr ""
+
+#: includes/claim-native.php:503
+msgid "State:"
+msgstr ""
+
+#: includes/claim-native.php:504
+#: src/index.js:418
+#: src/index.js:425
+msgid "Field"
+msgstr ""
+
+#: includes/claim-native.php:504
+#: src/index.js:827
+msgid "Now"
+msgstr ""
+
+#: includes/claim-native.php:504
+#: src/index.js:420
+msgid "Proposed"
+msgstr ""
+
+#: includes/claim-native.php:511
+msgid "Files sent with the claim"
+msgstr ""
+
+#: includes/claim-native.php:522
+msgid "History"
+msgstr ""
+
+#: includes/claim-native.php:713
+msgid "Claim a listing"
+msgstr ""
+
+#: includes/claim-native.php:779
+msgid "Stored setting"
+msgstr ""
+
+#: includes/claim-native.php:780
+msgid "Default (nothing stored)"
+msgstr ""
+
+#: includes/claim-native.php:781
+msgid "Fixed in code"
+msgstr ""
+
+#: includes/claims-review.php:411
+#: includes/claims-review.php:463
+#: includes/claims-review.php:465
 #: includes/directoryweb-help-tab.php:35
-#: includes/directoryweb-rest.php:317
-#: includes/directoryweb-ui.php:118
-#: includes/directoryweb-ui.php:177
-#: directoryweb/src/index.js:563
-#: directoryweb/src/index.js:570
+#: includes/directoryweb-rest.php:417
+#: includes/directoryweb-rest.php:793
+#: includes/directoryweb-ui.php:211
+#: includes/directoryweb-ui.php:265
+#: includes/standalone-screens.php:600
+#: src/index.js:652
+#: src/index.js:659
 msgid "Claims"
 msgstr ""
 
-#: includes/claims-review.php:372
-#: includes/directoryweb-ui.php:192
+#: includes/claims-review.php:466
+#: includes/directoryweb-ui.php:293
 msgid "DirectoryWeb needs Kits Core (active, with its build) to show this screen."
 msgstr ""
 
+#: includes/claims-review.php:474
+msgid "The Fluent Forms claim form is not set up. Choose it under DirectoryWeb → Settings, or use the built-in claim form."
+msgstr ""
+
+#: includes/directory-map.php:395
+msgid "Directory Map"
+msgstr ""
+
+#: includes/directory-map.php:396
+msgid "Interactive directory map with markers, clustering, and Near me geolocation."
+msgstr ""
+
+#. translators: %s: place name.
+#: includes/directory.php:279
+#, php-format
+msgid "Listings in %s"
+msgstr ""
+
+#. translators: 1: listing type, 2: city.
+#: includes/directory.php:338
+#, php-format
+msgid "%1$s in %2$s"
+msgstr ""
+
+#. translators: %s: city.
+#: includes/directory.php:342
+#, php-format
+msgid "Directory: %s"
+msgstr ""
+
+#: includes/directoryweb-collection-filter.php:23
+msgid "Directory filter"
+msgstr ""
+
+#: includes/directoryweb-collection-filter.php:24
+msgid "Filter the directory by place, type, services and verified status."
+msgstr ""
+
+#: includes/directoryweb-featured-in.php:45
+msgid "Featured in"
+msgstr ""
+
+#: includes/directoryweb-featured-in.php:58
+msgid "No featured listings found"
+msgstr ""
+
+#. translators: %s: the field group key (for example "about").
+#: includes/directoryweb-fields.php:52
+#, php-format
+msgid "No fields found for group: %s"
+msgstr ""
+
 #: includes/directoryweb-help-tab.php:33
-#: includes/directoryweb-ui.php:92
-#: includes/directoryweb-ui.php:112
+#: includes/directoryweb-ui.php:105
+#: includes/directoryweb-ui.php:203
 msgid "Dashboard"
 msgstr ""
 
 #: includes/directoryweb-help-tab.php:33
 msgid "listings by state, type and status"
-msgstr ""
-
-#: includes/directoryweb-help-tab.php:34
-#: includes/directoryweb-rest.php:309
-#: includes/directoryweb-ui.php:93
-#: includes/directoryweb-ui.php:124
-#: directoryweb/src/index.js:1124
-#: directoryweb/src/index.js:1141
-msgid "Listings"
 msgstr ""
 
 #: includes/directoryweb-help-tab.php:34
@@ -78,7 +323,7 @@ msgid "claims from organisations, read and applied field by field"
 msgstr ""
 
 #: includes/directoryweb-help-tab.php:36
-#: includes/directoryweb-ui.php:138
+#: includes/directoryweb-ui.php:217
 #: includes/place-intros.php:150
 #: includes/place-intros.php:173
 msgid "Place intros"
@@ -86,12 +331,6 @@ msgstr ""
 
 #: includes/directoryweb-help-tab.php:36
 msgid "the intro of each state and district page"
-msgstr ""
-
-#: includes/directoryweb-help-tab.php:37
-#: includes/directoryweb-ui.php:94
-#: includes/directoryweb-ui.php:132
-msgid "Settings"
 msgstr ""
 
 #: includes/directoryweb-help-tab.php:37
@@ -113,132 +352,268 @@ msgid "Plugins"
 msgstr ""
 
 #: includes/directoryweb-help-tab.php:56
+#: includes/listing-template.php:198
 msgid "(opens in a new tab)"
 msgstr ""
 
-#: includes/directoryweb-listings.php:23
-#: includes/directoryweb-rest.php:305
-#: directoryweb/src/index.js:587
+#: includes/directoryweb-listings.php:28
+#: includes/directoryweb-rest.php:405
+#: includes/standalone-screens.php:606
+#: src/index.js:676
 msgid "All"
 msgstr ""
 
-#: includes/directoryweb-listings.php:24
+#: includes/directoryweb-listings.php:29
+#: includes/directoryweb-rest.php:329
+#: includes/directoryweb-widget.php:35
 msgid "Published"
 msgstr ""
 
-#: includes/directoryweb-listings.php:25
-#: includes/directoryweb-rest.php:205
+#: includes/directoryweb-listings.php:30
+#: includes/directoryweb-rest.php:228
 msgid "Not published"
 msgstr ""
 
-#: includes/directoryweb-listings.php:26
-#: includes/directoryweb-rest.php:866
-#: directoryweb/src/index.js:993
-#: directoryweb/src/index.js:1113
+#: includes/directoryweb-listings.php:31
+#: includes/directoryweb-rest.php:984
+#: includes/directoryweb-status.php:61
+#: includes/listing-profile.php:169
+#: src/index.js:1112
+#: src/index.js:1412
 msgid "Claimed"
 msgstr ""
 
-#: includes/directoryweb-listings.php:27
-#: includes/directoryweb-rest.php:868
-#: directoryweb/src/index.js:1114
+#: includes/directoryweb-listings.php:32
+#: includes/directoryweb-rest.php:987
+#: includes/directoryweb-status.php:70
+#: includes/listing-profile.php:172
+#: src/index.js:1117
+#: src/index.js:1413
 msgid "Verified"
 msgstr ""
 
-#: includes/directoryweb-listings.php:28
-#: directoryweb/src/index.js:1115
+#: includes/directoryweb-listings.php:33
+#: src/index.js:1122
+#: src/index.js:1414
 msgid "Needs re-check"
 msgstr ""
 
-#: includes/directoryweb-listings.php:163
+#: includes/directoryweb-listings.php:126
+#: src/index.js:1336
+msgid "Publish"
+msgstr ""
+
+#: includes/directoryweb-listings.php:127
+#: src/index.js:1337
+msgid "Move to draft"
+msgstr ""
+
+#: includes/directoryweb-listings.php:128
+#: src/index.js:1338
+msgid "Mark for re-check"
+msgstr ""
+
+#: includes/directoryweb-listings.php:129
+#: src/index.js:1341
+msgid "Clear re-check"
+msgstr ""
+
+#: includes/directoryweb-listings.php:214
 msgid "Every state"
 msgstr ""
 
-#: includes/directoryweb-listings.php:175
+#: includes/directoryweb-listings.php:226
 msgid "Every type"
 msgstr ""
 
-#: includes/directoryweb-listings.php:241
-#: includes/directoryweb-ui.php:248
+#: includes/directoryweb-listings.php:267
+msgid "You are not allowed to publish listings."
+msgstr ""
+
+#. translators: 1: action label, 2: number changed, 3: number skipped.
+#: includes/directoryweb-listings.php:306
+#, php-format
+msgid "%1$s — %2$d changed, %3$d skipped."
+msgstr ""
+
+#: includes/directoryweb-listings.php:332
+msgid "No such listing."
+msgstr ""
+
+#: includes/directoryweb-listings.php:346
+msgid "Google Maps"
+msgstr ""
+
+#: includes/directoryweb-listings.php:347
+msgid "Google Business Profile"
+msgstr ""
+
+#: includes/directoryweb-listings.php:348
+#: includes/listing-template.php:468
+msgid "Instagram"
+msgstr ""
+
+#: includes/directoryweb-listings.php:349
+msgid "Facebook"
+msgstr ""
+
+#: includes/directoryweb-listings.php:350
+msgid "X (Twitter)"
+msgstr ""
+
+#: includes/directoryweb-listings.php:351
+msgid "YouTube"
+msgstr ""
+
+#: includes/directoryweb-listings.php:352
+msgid "LinkedIn"
+msgstr ""
+
+#. translators: %s: registration type, e.g. Trust.
+#: includes/directoryweb-listings.php:378
+#: includes/listing-template.php:162
+msgid "Registration"
+msgstr ""
+
+#: includes/directoryweb-listings.php:385
+msgid "Year established"
+msgstr ""
+
+#: includes/directoryweb-listings.php:386
+#: includes/listing-template.php:309
+msgid "Head of the organisation"
+msgstr ""
+
+#: includes/directoryweb-listings.php:388
+#: includes/listing-template.php:271
+msgid "Languages"
+msgstr ""
+
+#: includes/directoryweb-listings.php:393
+msgid "Google rating"
+msgstr ""
+
+#: includes/directoryweb-listings.php:394
+msgid "Google reviews"
+msgstr ""
+
+#: includes/directoryweb-listings.php:395
+msgid "Google category"
+msgstr ""
+
+#: includes/directoryweb-listings.php:402
+msgid "Closed"
+msgstr ""
+
+#: includes/directoryweb-listings.php:463
+#: includes/directoryweb-rest.php:58
+#: includes/directoryweb-ui.php:409
 #: includes/place-intros.php:168
 #: includes/place-intros.php:283
+#: includes/standalone-fallback.php:349
+#: includes/standalone-screens.php:41
+#: includes/standalone-screens.php:480
+#: includes/standalone-screens.php:538
+#: includes/standalone-screens.php:570
 msgid "You are not allowed to do this."
 msgstr ""
 
-#: includes/directoryweb-listings.php:246
-#: includes/directoryweb-ui.php:93
-#: includes/directoryweb-ui.php:178
-#: directoryweb/src/index.js:47
+#: includes/directoryweb-listings.php:472
+#: includes/directoryweb-ui.php:106
+#: includes/directoryweb-ui.php:266
+#: src/index.js:54
 msgid "Directory listings"
 msgstr ""
 
-#: includes/directoryweb-rest.php:40
-msgid "This needs Kits Core."
+#: includes/directoryweb-listings.php:473
+msgid "Open All Listings"
+msgstr ""
+
+#. translators: %s: the organisation's name.
+#: includes/directoryweb-people.php:46
+#, php-format
+msgid "People for: %s"
+msgstr ""
+
+#: includes/directoryweb-people.php:49
+msgid "FluentCRM not active"
+msgstr ""
+
+#: includes/directoryweb-rest.php:43
+#: includes/standalone-fallback.php:334
+msgid "Sign in to use this."
+msgstr ""
+
+#: includes/directoryweb-rest.php:54
+#: includes/standalone-fallback.php:345
+msgid "The page has expired. Reload it and try again."
 msgstr ""
 
 #. translators: %s: number of listings.
-#: includes/directoryweb-rest.php:190
+#: includes/directoryweb-rest.php:213
 #, php-format
 msgid "other types %s"
 msgstr ""
 
-#: includes/directoryweb-rest.php:195
+#: includes/directoryweb-rest.php:218
 msgid "Published listings"
 msgstr ""
 
-#: includes/directoryweb-rest.php:197
+#: includes/directoryweb-rest.php:220
 msgid "No listing type counted yet"
 msgstr ""
 
 #. translators: 1: drafts, 2: waiting for review, 3: private.
-#: includes/directoryweb-rest.php:208
+#: includes/directoryweb-rest.php:231
 #, php-format
 msgid "%1$s drafts · %2$s waiting for review · %3$s private"
 msgstr ""
 
-#: includes/directoryweb-rest.php:215
+#: includes/directoryweb-rest.php:238
 msgid "Places covered"
 msgstr ""
 
 #. translators: 1: states with a listing, 2: all states.
-#: includes/directoryweb-rest.php:217
+#: includes/directoryweb-rest.php:240
 #, php-format
 msgid "%1$s of %2$s states"
 msgstr ""
 
 #. translators: 1: districts with a listing, 2: all districts, 3: place file version.
-#: includes/directoryweb-rest.php:219
+#: includes/directoryweb-rest.php:242
 #, php-format
 msgid "%1$s of %2$s districts · place file %3$s"
 msgstr ""
 
-#: includes/directoryweb-rest.php:227
+#: includes/directoryweb-rest.php:250
 msgid "Indexable listings"
 msgstr ""
 
 #. translators: 1: listings with no contact, 2: listings kept indexed.
-#: includes/directoryweb-rest.php:236
+#: includes/directoryweb-rest.php:259
 #, php-format
 msgid "%1$s with no contact (kept out of search) · %2$s kept indexed on purpose"
 msgstr ""
 
-#: includes/directoryweb-rest.php:243
+#: includes/directoryweb-rest.php:266
 msgid "Directory search clicks"
 msgstr ""
 
-#: includes/directoryweb-rest.php:244
+#: includes/directoryweb-rest.php:267
 msgid "In InsightWeb"
 msgstr ""
 
-#: includes/directoryweb-rest.php:245
+#: includes/directoryweb-rest.php:268
 msgid "Search Console clicks for /directory/ pages are in Search Insights"
 msgstr ""
 
-#: includes/directoryweb-rest.php:255
+#: includes/directoryweb-rest.php:278
+#: includes/directoryweb-widget.php:37
 msgid "Claims waiting"
 msgstr ""
 
 #. translators: %s: number of days.
-#: includes/directoryweb-rest.php:265
+#: includes/directoryweb-rest.php:288
 #, php-format
 msgid "The oldest has waited %s day"
 msgid_plural "The oldest has waited %s days"
@@ -246,550 +621,1259 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: number of days.
-#: includes/directoryweb-rest.php:265
+#: includes/directoryweb-rest.php:288
 msgid "None waiting"
 msgstr ""
 
-#: includes/directoryweb-rest.php:273
+#: includes/directoryweb-rest.php:296
 msgid "Claimed listings"
 msgstr ""
 
 #. translators: 1: Verified listings, 2: listings that need a re-check.
-#: includes/directoryweb-rest.php:276
+#: includes/directoryweb-rest.php:299
 #, php-format
 msgid "%1$s Verified from government records · %2$s need a re-check"
 msgstr ""
 
-#: includes/directoryweb-rest.php:284
+#: includes/directoryweb-rest.php:307
 msgid "Enrichment queue"
 msgstr ""
 
-#: includes/directoryweb-rest.php:292
+#: includes/directoryweb-rest.php:315
 msgid "never"
 msgstr ""
 
 #. translators: 1: listings waiting for Google, 2: date of the newest change.
-#: includes/directoryweb-rest.php:294
+#: includes/directoryweb-rest.php:317
 #, php-format
 msgid "%1$s listings waiting for Google · newest change %2$s"
 msgstr ""
 
-#: includes/directoryweb-rest.php:313
-#: includes/directoryweb-rest.php:875
-msgid "Indexing"
+#: includes/directoryweb-rest.php:333
+#: includes/standalone-screens.php:320
+#: includes/standalone-screens.php:408
+msgid "Draft"
 msgstr ""
 
-#: includes/directoryweb-rest.php:321
-msgid "Enrichment"
+#: includes/directoryweb-rest.php:337
+msgid "Pending"
+msgstr ""
+
+#: includes/directoryweb-rest.php:341
+msgid "Private"
 msgstr ""
 
 #: includes/directoryweb-rest.php:348
-msgid "No such tile."
-msgstr ""
-
-#: includes/directoryweb-rest.php:428
-#: directoryweb/src/index.js:584
+#: includes/directoryweb-rest.php:528
+#: includes/standalone-screens.php:603
+#: src/index.js:673
 msgid "Waiting"
 msgstr ""
 
-#: includes/directoryweb-rest.php:429
-#: directoryweb/src/index.js:585
+#: includes/directoryweb-rest.php:352
+#: includes/directoryweb-rest.php:529
+#: includes/standalone-screens.php:604
+#: src/index.js:674
 msgid "Approved"
 msgstr ""
 
-#: includes/directoryweb-rest.php:430
-#: directoryweb/src/index.js:586
+#: includes/directoryweb-rest.php:356
+#: includes/directoryweb-rest.php:530
+#: includes/standalone-screens.php:605
+#: src/index.js:675
 msgid "Rejected"
 msgstr ""
 
-#: includes/directoryweb-rest.php:456
-#: includes/directoryweb-rest.php:607
+#: includes/directoryweb-rest.php:392
+msgid "Other"
+msgstr ""
+
+#: includes/directoryweb-rest.php:413
+#: includes/directoryweb-rest.php:995
+msgid "Indexing"
+msgstr ""
+
+#: includes/directoryweb-rest.php:421
+msgid "Enrichment"
+msgstr ""
+
+#: includes/directoryweb-rest.php:448
+msgid "No such tile."
+msgstr ""
+
+#: includes/directoryweb-rest.php:531
+msgid "Withdrawn"
+msgstr ""
+
+#: includes/directoryweb-rest.php:532
+msgid "Revoked"
+msgstr ""
+
+#: includes/directoryweb-rest.php:562
+#: includes/directoryweb-rest.php:708
+#: includes/directoryweb-rest.php:1086
 msgid "(no listing)"
 msgstr ""
 
-#: includes/directoryweb-rest.php:482
-#: directoryweb/src/index.js:973
+#: includes/directoryweb-rest.php:588
 msgid "Logo"
 msgstr ""
 
-#: includes/directoryweb-rest.php:485
+#: includes/directoryweb-rest.php:591
 msgid "Photos (added before the current ones, 6 at most)"
 msgstr ""
 
-#: includes/directoryweb-rest.php:555
+#: includes/directoryweb-rest.php:656
 msgid "Uploaded with the claim"
 msgstr ""
 
 #. translators: %s: the proposed opening hours.
-#: includes/directoryweb-rest.php:563
+#: includes/directoryweb-rest.php:664
 #, php-format
 msgid "Opening hours proposed: %s. Enter them by hand in the listing’s Opening hours."
 msgstr ""
 
 #. translators: %s: the proposed opening hours.
-#: includes/directoryweb-rest.php:563
+#: includes/directoryweb-rest.php:664
 msgid "(none)"
 msgstr ""
 
-#: includes/directoryweb-rest.php:567
+#: includes/directoryweb-rest.php:668
 msgid "A line of the phone numbers is not a phone number: approving on the Claims screen keeps the list as it is."
 msgstr ""
 
-#: includes/directoryweb-rest.php:573
+#: includes/directoryweb-rest.php:674
 msgid "(remove)"
 msgstr ""
 
-#: includes/directoryweb-rest.php:581
+#: includes/directoryweb-rest.php:682
 msgid "Has a logo"
 msgstr ""
 
-#: includes/directoryweb-rest.php:582
+#: includes/directoryweb-rest.php:683
 msgid "New logo uploaded"
 msgstr ""
 
 #. translators: %s: number of photos.
-#: includes/directoryweb-rest.php:592
+#: includes/directoryweb-rest.php:693
 #, php-format
 msgid "%s now"
 msgstr ""
 
 #. translators: %s: number of photos.
-#: includes/directoryweb-rest.php:594
+#: includes/directoryweb-rest.php:695
 #, php-format
 msgid "%s uploaded"
 msgstr ""
 
-#: includes/directoryweb-rest.php:619
-#: directoryweb/src/index.js:530
+#: includes/directoryweb-rest.php:720
+#: includes/directoryweb-rest.php:1091
+#: includes/standalone-screens.php:616
+#: src/index.js:619
 msgid "From"
 msgstr ""
 
-#: includes/directoryweb-rest.php:620
+#: includes/directoryweb-rest.php:721
+#: includes/directoryweb-rest.php:1092
+#: includes/listing-template.php:195
+#: includes/listing-template.php:204
+#: includes/listing-template.php:220
 msgid "Email"
 msgstr ""
 
-#: includes/directoryweb-rest.php:621
-msgid "Phone"
-msgstr ""
-
-#: includes/directoryweb-rest.php:622
+#: includes/directoryweb-rest.php:723
 msgid "Show name on listing"
 msgstr ""
 
-#: includes/directoryweb-rest.php:622
-#: directoryweb/src/index.js:962
+#: includes/directoryweb-rest.php:723
+#: includes/directoryweb-rest.php:799
+#: includes/directoryweb-ui.php:486
 msgid "Yes"
 msgstr ""
 
-#: includes/directoryweb-rest.php:622
-#: includes/directoryweb-rest.php:857
+#: includes/directoryweb-rest.php:723
+#: includes/directoryweb-rest.php:799
+#: includes/directoryweb-rest.php:975
+#: includes/directoryweb-ui.php:487
 msgid "No"
 msgstr ""
 
-#: includes/directoryweb-rest.php:623
+#: includes/directoryweb-rest.php:724
+#: includes/directoryweb-rest.php:1094
 msgid "Anything else"
 msgstr ""
 
-#: includes/directoryweb-rest.php:624
-#: directoryweb/src/index.js:519
-#: directoryweb/src/index.js:645
+#: includes/directoryweb-rest.php:725
+#: includes/standalone-screens.php:616
+#: src/index.js:608
+#: src/index.js:734
 msgid "Sent"
 msgstr ""
 
-#: includes/directoryweb-rest.php:625
-#: directoryweb/src/index.js:551
+#: includes/directoryweb-rest.php:726
+#: includes/directoryweb-rest.php:1095
+#: src/index.js:640
 msgid "Decided"
 msgstr ""
 
-#: includes/directoryweb-rest.php:645
+#: includes/directoryweb-rest.php:749
+#: includes/directoryweb-rest.php:753
 msgid "No such claim."
 msgstr ""
 
-#: includes/directoryweb-rest.php:676
+#: includes/directoryweb-rest.php:784
 msgid "Set in code"
 msgstr ""
 
-#: includes/directoryweb-rest.php:705
+#: includes/directoryweb-rest.php:794
+#: includes/directoryweb-ui.php:490
+msgid "Built-in form"
+msgstr ""
+
+#: includes/directoryweb-rest.php:794
+#: includes/directoryweb-rest.php:868
+#: includes/directoryweb-ui.php:490
+msgid "Fluent Forms"
+msgstr ""
+
+#. translators: 1: pending built-in claims, 2: all built-in claims.
+#: includes/directoryweb-rest.php:797
+#, php-format
+msgid "%1$s built-in claims waiting for review, %2$s built-in in all. Claims sent through Fluent Forms or another form provider are not counted here."
+msgstr ""
+
+#: includes/directoryweb-rest.php:799
+#: includes/directoryweb-ui.php:492
+msgid "Claim page published"
+msgstr ""
+
+#: includes/directoryweb-rest.php:800
+#: includes/directoryweb-ui.php:463
+#: includes/directoryweb-ui.php:493
+msgid "Claim emails"
+msgstr ""
+
+#: includes/directoryweb-rest.php:800
+#: includes/directoryweb-rest.php:976
+#: includes/directoryweb-rest.php:987
+#: includes/directoryweb-rest.php:999
+#: includes/directoryweb-ui.php:493
+#: src/schema-screens.js:770
+msgid "On"
+msgstr ""
+
+#: includes/directoryweb-rest.php:800
+#: includes/directoryweb-rest.php:976
+#: includes/directoryweb-rest.php:987
+#: includes/directoryweb-ui.php:493
+msgid "Off"
+msgstr ""
+
+#: includes/directoryweb-rest.php:801
+#: includes/directoryweb-ui.php:494
+msgid "New-claim emails go to"
+msgstr ""
+
+#: includes/directoryweb-rest.php:801
+msgid "Site admin email, default"
+msgstr ""
+
+#. translators: 1: open claims per email, 2: submissions per hour.
+#: includes/directoryweb-rest.php:803
+#: includes/directoryweb-ui.php:496
+msgid "Limits"
+msgstr ""
+
+#. translators: 1: open claims per email, 2: submissions per hour.
+#: includes/directoryweb-rest.php:803
+#, php-format
+msgid "%1$d open per email; %2$d submissions an hour per connection"
+msgstr ""
+
+#: includes/directoryweb-rest.php:833
 msgid "Place source"
 msgstr ""
 
 #. translators: %s: file version.
-#: includes/directoryweb-rest.php:707
+#: includes/directoryweb-rest.php:835
 #, php-format
-msgid "LGD, %s"
+msgid "File version %s"
+msgstr ""
+
+#. translators: %s: file version.
+#: includes/directoryweb-rest.php:835
+msgid "No places file"
 msgstr ""
 
 #. translators: 1: states, 2: districts, 3: source.
-#: includes/directoryweb-rest.php:710
+#: includes/directoryweb-rest.php:838
 #, php-format
-msgid "%1$s states / %2$s districts, from %3$s. A data file in the plugin; another country ships its own file."
+msgid "%1$s states / %2$s districts, from %3$s. A data file the site supplies (the directoryweb_places_file filter); the plugin ships none."
 msgstr ""
 
-#: includes/directoryweb-rest.php:715
-msgid "PIN code lookup"
-msgstr ""
-
-#: includes/directoryweb-rest.php:716
-msgid "India Post, on"
-msgstr ""
-
-#: includes/directoryweb-rest.php:718
-msgid "Answers are kept for a week."
-msgstr ""
-
-#: includes/directoryweb-rest.php:720
-msgid "Service"
-msgstr ""
-
-#: includes/directoryweb-rest.php:721
-msgid "PIN pattern"
-msgstr ""
-
-#: includes/directoryweb-rest.php:726
+#: includes/directoryweb-rest.php:843
 msgid "Geocoder"
 msgstr ""
 
-#: includes/directoryweb-rest.php:727
+#: includes/directoryweb-rest.php:844
 msgid "Nominatim, on"
 msgstr ""
 
 #. translators: %s: date and time.
-#: includes/directoryweb-rest.php:730
+#: includes/directoryweb-rest.php:847
 #, php-format
 msgid "Last request %s."
 msgstr ""
 
 #. translators: %s: date and time.
-#: includes/directoryweb-rest.php:730
+#: includes/directoryweb-rest.php:847
 msgid "No request yet."
 msgstr ""
 
-#: includes/directoryweb-rest.php:732
+#: includes/directoryweb-rest.php:849
 msgid "Country"
 msgstr ""
 
+#: includes/directoryweb-rest.php:849
+msgid "Any"
+msgstr ""
+
 #. translators: %s: number of days.
-#: includes/directoryweb-rest.php:734
+#: includes/directoryweb-rest.php:851
 msgid "Answers kept"
 msgstr ""
 
 #. translators: %s: number of days.
-#: includes/directoryweb-rest.php:734
-#: includes/directoryweb-rest.php:856
+#: includes/directoryweb-rest.php:851
+#: includes/directoryweb-rest.php:974
 #, php-format
 msgid "%s days"
 msgstr ""
 
-#: includes/directoryweb-rest.php:735
+#: includes/directoryweb-rest.php:852
 msgid "Contact sent with each request"
 msgstr ""
 
-#: includes/directoryweb-rest.php:740
+#: includes/directoryweb-rest.php:857
 msgid "Map tiles"
 msgstr ""
 
-#: includes/directoryweb-rest.php:741
+#: includes/directoryweb-rest.php:858
 msgid "OpenFreeMap"
 msgstr ""
 
-#: includes/directoryweb-rest.php:743
+#: includes/directoryweb-rest.php:860
 msgid "The tile style and the map library are fixed in code."
 msgstr ""
 
-#: includes/directoryweb-rest.php:745
+#: includes/directoryweb-rest.php:862
 msgid "Tile style"
 msgstr ""
 
-#: includes/directoryweb-rest.php:746
+#: includes/directoryweb-rest.php:863
 msgid "Map library"
 msgstr ""
 
-#: includes/directoryweb-rest.php:751
-msgid "Fluent Forms"
-msgstr ""
-
 #. translators: %d: form ID.
-#: includes/directoryweb-rest.php:753
-#: includes/directoryweb-rest.php:772
-#: includes/directoryweb-rest.php:784
-#: includes/directoryweb-rest.php:796
-#: includes/directoryweb-rest.php:807
+#: includes/directoryweb-rest.php:870
+#: includes/directoryweb-rest.php:890
+#: includes/directoryweb-rest.php:902
+#: includes/directoryweb-rest.php:914
+#: includes/directoryweb-rest.php:925
+#: includes/standalone-screens.php:283
 msgid "Not active"
 msgstr ""
 
 #. translators: %d: form ID.
-#: includes/directoryweb-rest.php:753
+#: includes/directoryweb-rest.php:870
 #, php-format
 msgid "Claim form #%d found"
 msgstr ""
 
 #. translators: %d: form ID.
-#: includes/directoryweb-rest.php:753
+#: includes/directoryweb-rest.php:870
 msgid "Claim form missing"
 msgstr ""
 
-#: includes/directoryweb-rest.php:755
+#: includes/directoryweb-rest.php:872
 msgid "Claims cannot be sent until a claim form is chosen."
 msgstr ""
 
 #. translators: 1: form ID, 2: form title.
-#: includes/directoryweb-rest.php:762
+#: includes/directoryweb-rest.php:879
 #, php-format
 msgid "#%1$d %2$s"
 msgstr ""
 
-#: includes/directoryweb-rest.php:771
+#: includes/directoryweb-rest.php:889
 msgid "FluentCRM"
 msgstr ""
 
-#: includes/directoryweb-rest.php:772
-#: includes/directoryweb-rest.php:784
-#: includes/directoryweb-rest.php:796
-#: includes/directoryweb-rest.php:807
+#: includes/directoryweb-rest.php:890
+#: includes/directoryweb-rest.php:902
+#: includes/directoryweb-rest.php:914
+#: includes/directoryweb-rest.php:925
+#: includes/standalone-screens.php:283
+#: src/schema-screens.js:1121
 msgid "Active"
 msgstr ""
 
-#: includes/directoryweb-rest.php:774
+#: includes/directoryweb-rest.php:892
 msgid "An approved claimant is tagged and linked to the listing’s people."
 msgstr ""
 
-#: includes/directoryweb-rest.php:774
+#: includes/directoryweb-rest.php:892
 msgid "Approved claimants are not linked to the listing’s people until FluentCRM is active."
 msgstr ""
 
 #. translators: %s: tag slug.
-#: includes/directoryweb-rest.php:777
+#: includes/directoryweb-rest.php:895
 #, php-format
 msgid "Tag %s"
 msgstr ""
 
 #. translators: %s: tag slug.
-#: includes/directoryweb-rest.php:777
+#: includes/directoryweb-rest.php:895
 msgid "Found"
 msgstr ""
 
 #. translators: %s: tag slug.
-#: includes/directoryweb-rest.php:777
+#: includes/directoryweb-rest.php:895
 msgid "Not found"
 msgstr ""
 
 #. translators: %s: number of proposals.
-#: includes/directoryweb-rest.php:787
+#: includes/directoryweb-rest.php:905
 #, php-format
 msgid "%s proposals waiting. Enrichment sources and keys stay in SourceWeb."
 msgstr ""
 
 #. translators: %s: number of proposals.
-#: includes/directoryweb-rest.php:787
+#: includes/directoryweb-rest.php:905
 msgid "Enrichment sources and keys stay in SourceWeb."
 msgstr ""
 
 #. translators: %s: number of proposals.
-#: includes/directoryweb-rest.php:787
+#: includes/directoryweb-rest.php:905
 msgid "Undo of a claimed field needs SourceWeb’s change log."
 msgstr ""
 
-#: includes/directoryweb-rest.php:789
+#: includes/directoryweb-rest.php:907
 msgid "SourceWeb settings"
 msgstr ""
 
-#: includes/directoryweb-rest.php:798
+#: includes/directoryweb-rest.php:916
 msgid "A published listing with no way to reach it is kept out of search."
 msgstr ""
 
-#: includes/directoryweb-rest.php:800
+#: includes/directoryweb-rest.php:918
 msgid "RankWeb settings"
 msgstr ""
 
-#: includes/directoryweb-rest.php:809
+#: includes/directoryweb-rest.php:927
 msgid "Search Console clicks for the Directory pages."
 msgstr ""
 
-#: includes/directoryweb-rest.php:811
+#: includes/directoryweb-rest.php:929
 msgid "Search Insights"
 msgstr ""
 
 #. translators: %s: a WP-CLI command.
-#: includes/directoryweb-rest.php:824
+#: includes/directoryweb-rest.php:942
 #, php-format
 msgid "Set with %s"
 msgstr ""
 
-#: includes/directoryweb-rest.php:830
+#: includes/directoryweb-rest.php:948
 msgid "Listing types"
 msgstr ""
 
-#: includes/directoryweb-rest.php:831
+#: includes/directoryweb-rest.php:949
 msgid "The Directory’s tags that are not services. They come from the sourcing lists (SourceWeb → Sources)."
 msgstr ""
 
-#: includes/directoryweb-rest.php:833
+#: includes/directoryweb-rest.php:951
 msgid "Types"
 msgstr ""
 
-#: includes/directoryweb-rest.php:833
+#: includes/directoryweb-rest.php:951
 msgid "Set in the sourcing lists"
 msgstr ""
 
-#: includes/directoryweb-rest.php:834
-msgid "Veterinary as one filter"
+#. translators: %s: group name.
+#: includes/directoryweb-rest.php:952
+#, php-format
+msgid "%s as one filter"
 msgstr ""
 
-#: includes/directoryweb-rest.php:839
+#: includes/directoryweb-rest.php:957
+#: includes/directoryweb-ui.php:380
 msgid "Places"
 msgstr ""
 
-#: includes/directoryweb-rest.php:842
+#: includes/directoryweb-rest.php:960
 msgid "Content types that carry a place"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:844
+#: includes/directoryweb-rest.php:962
 msgid "District common names"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:844
+#: includes/directoryweb-rest.php:962
 #, php-format
 msgid "%s names"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:846
+#: includes/directoryweb-rest.php:964
 msgid "Cities found in text"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:846
+#: includes/directoryweb-rest.php:964
 #, php-format
 msgid "%s cities"
 msgstr ""
 
-#: includes/directoryweb-rest.php:851
+#: includes/directoryweb-rest.php:969
 msgid "Claim rules"
 msgstr ""
 
-#: includes/directoryweb-rest.php:852
+#: includes/directoryweb-rest.php:970
 msgid "Undo puts one field back and never takes the Claimed mark off."
 msgstr ""
 
-#: includes/directoryweb-rest.php:854
+#: includes/directoryweb-rest.php:972
 msgid "Roles"
 msgstr ""
 
 #. translators: %s: number of days.
-#: includes/directoryweb-rest.php:856
+#: includes/directoryweb-rest.php:974
 msgid "Re-check a Claimed listing after"
 msgstr ""
 
-#: includes/directoryweb-rest.php:857
+#: includes/directoryweb-rest.php:975
 msgid "\"Show my name\" starts as"
 msgstr ""
 
-#: includes/directoryweb-rest.php:857
+#: includes/directoryweb-rest.php:975
 msgid "Set in the claim form"
 msgstr ""
 
-#: includes/directoryweb-rest.php:858
+#: includes/directoryweb-rest.php:976
 msgid "Emails from forms and claims"
 msgstr ""
 
-#: includes/directoryweb-rest.php:858
-#: includes/directoryweb-rest.php:868
-#: includes/directoryweb-rest.php:879
-msgid "On"
-msgstr ""
-
-#: includes/directoryweb-rest.php:858
-#: includes/directoryweb-rest.php:868
-msgid "Off"
-msgstr ""
-
-#: includes/directoryweb-rest.php:863
+#: includes/directoryweb-rest.php:981
 msgid "Badges"
 msgstr ""
 
-#: includes/directoryweb-rest.php:864
+#: includes/directoryweb-rest.php:982
 msgid "Claimed is set by an approved claim. Verified comes from government records."
 msgstr ""
 
-#: includes/directoryweb-rest.php:866
+#: includes/directoryweb-rest.php:984
 msgid "Claimed label"
 msgstr ""
 
-#: includes/directoryweb-rest.php:867
+#: includes/directoryweb-rest.php:986
 msgid "Verified sources"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:870
+#: includes/directoryweb-rest.php:990
 msgid "Phone numbers never published"
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:870
+#: includes/directoryweb-rest.php:990
 #, php-format
 msgid "%s kept as fingerprints only"
 msgstr ""
 
-#: includes/directoryweb-rest.php:878
+#: includes/directoryweb-rest.php:998
 msgid "Listings with no contact are kept out of search"
 msgstr ""
 
-#: includes/directoryweb-rest.php:879
+#: includes/directoryweb-rest.php:999
 msgid "Not applied"
 msgstr ""
 
-#: includes/directoryweb-rest.php:887
-msgid "Find help"
-msgstr ""
-
-#: includes/directoryweb-rest.php:890
-msgid "Places shown at most"
-msgstr ""
-
-#: includes/directoryweb-rest.php:891
-msgid "States found in one text at most"
-msgstr ""
-
-#: includes/directoryweb-rest.php:896
+#: includes/directoryweb-rest.php:1007
 msgid "Directory copy"
 msgstr ""
 
-#: includes/directoryweb-rest.php:897
-msgid "Titles, the intro and the helpline cards are written in the Directory’s code for now."
+#: includes/directoryweb-rest.php:1008
+msgid "Titles and the intro are neutral by default; a site rewrites them with filters."
 msgstr ""
 
 #. translators: %s: number.
-#: includes/directoryweb-rest.php:900
+#: includes/directoryweb-rest.php:1011
 msgid "Search aliases"
 msgstr ""
 
-#: includes/directoryweb-rest.php:919
+#: includes/directoryweb-rest.php:1031
 msgid "No such form."
 msgstr ""
 
-#: includes/directoryweb-rest.php:930
+#: includes/directoryweb-rest.php:1042
 msgid "Saved."
 msgstr ""
 
-#: includes/directoryweb-rest.php:930
+#: includes/directoryweb-rest.php:1042
 msgid "Nothing changed."
 msgstr ""
 
-#: includes/directoryweb-ui.php:88
-#: includes/directoryweb-ui.php:90
-#: includes/directoryweb-ui.php:92
-#: includes/directoryweb-ui.php:176
-#: includes/directoryweb-ui.php:242
-#: includes/place-intros.php:175
-msgid "DirectoryWeb"
+#: includes/directoryweb-status.php:76
+msgid "Blacklisted"
 msgstr ""
 
-#: includes/directoryweb-ui.php:94
-#: includes/directoryweb-ui.php:179
-#: includes/directoryweb-ui.php:253
+#: includes/directoryweb-status.php:80
+msgid "Reported closed"
+msgstr ""
+
+#: includes/directoryweb-ui.php:107
+#: includes/directoryweb-ui.php:267
 msgid "DirectoryWeb settings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:109
+#: includes/directoryweb-ui.php:207
+#: includes/directoryweb-ui.php:268
+#: includes/standalone-screens.php:23
+msgid "Listing Types"
+msgstr ""
+
+#: includes/directoryweb-ui.php:110
+#: includes/directoryweb-ui.php:208
+#: includes/directoryweb-ui.php:269
+#: includes/standalone-screens.php:24
+#: src/schema-screens.js:113
+msgid "Schema & Fields"
+msgstr ""
+
+#: includes/directoryweb-ui.php:111
+#: includes/directoryweb-ui.php:209
+#: includes/directoryweb-ui.php:270
+#: includes/standalone-screens.php:25
+msgid "Form Integrations"
+msgstr ""
+
+#: includes/directoryweb-ui.php:112
+#: includes/directoryweb-ui.php:213
+#: includes/directoryweb-ui.php:271
+#: includes/standalone-screens.php:26
+msgid "Import / Export"
+msgstr ""
+
+#: includes/directoryweb-ui.php:355
+msgid "DirectoryWeb Dashboard"
+msgstr ""
+
+#: includes/directoryweb-ui.php:358
+msgid "DirectoryWeb is running in standalone mode with native WordPress admin screens. Install and activate Kits Core to unlock the unified React shell, interactive charts, and quick-filter tabs."
+msgstr ""
+
+#: includes/directoryweb-ui.php:365
+msgid "Published Listings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:367
+msgid "View Listings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:372
+msgid "Draft Listings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:374
+msgid "View Drafts"
+msgstr ""
+
+#: includes/directoryweb-ui.php:382
+msgid "Manage Places"
+msgstr ""
+
+#: includes/directoryweb-ui.php:390
+msgid "Quick Actions"
+msgstr ""
+
+#: includes/directoryweb-ui.php:392
+#: src/index.js:1442
+msgid "Add New Listing"
+msgstr ""
+
+#: includes/directoryweb-ui.php:394
+msgid "Add New Place"
+msgstr ""
+
+#: includes/directoryweb-ui.php:397
+msgid "Review Claims"
+msgstr ""
+
+#: includes/directoryweb-ui.php:399
+#: includes/directoryweb-ui.php:442
+msgid "DirectoryWeb Settings"
+msgstr ""
+
+#: includes/directoryweb-ui.php:444
+msgid "Settings saved successfully."
+msgstr ""
+
+#: includes/directoryweb-ui.php:447
+msgid "DirectoryWeb is running on its own. Settings saved here configure the directory and claims."
+msgstr ""
+
+#: includes/directoryweb-ui.php:453
+msgid "Listing claims"
+msgstr ""
+
+#: includes/directoryweb-ui.php:455
+msgid "Claims use the built-in claim form. Review them under Claims."
+msgstr ""
+
+#: includes/directoryweb-ui.php:457
+msgid "View the claim page"
+msgstr ""
+
+#: includes/directoryweb-ui.php:460
+msgid "Claims come from the selected Fluent Forms form."
+msgstr ""
+
+#: includes/directoryweb-ui.php:463
+msgid "Email claimants and the site owner about new claims and decisions"
+msgstr ""
+
+#: includes/directoryweb-ui.php:464
+msgid "Notify"
+msgstr ""
+
+#: includes/directoryweb-ui.php:464
+msgid "Where new-claim emails go. Empty uses the site admin email."
+msgstr ""
+
+#: includes/directoryweb-ui.php:466
+msgid "Fluent Forms claim form"
+msgstr ""
+
+#: includes/directoryweb-ui.php:466
+msgid "None (use the built-in form)"
+msgstr ""
+
+#: includes/directoryweb-ui.php:473
+msgid "Save Changes"
+msgstr ""
+
+#: includes/directoryweb-ui.php:490
+msgid "Claim path"
+msgstr ""
+
+#: includes/directoryweb-ui.php:491
+msgid "Fluent Forms active"
+msgstr ""
+
+#: includes/directoryweb-ui.php:494
+msgid "site admin email"
+msgstr ""
+
+#. translators: 1: open claims per email, 2: submissions per hour.
+#: includes/directoryweb-ui.php:496
+#, php-format
+msgid "%1$d open claims per email; %2$d submissions per hour per connection"
+msgstr ""
+
+#. translators: %s: claim state.
+#: includes/directoryweb-ui.php:500
+#, php-format
+msgid "Built-in claims: %s"
+msgstr ""
+
+#: includes/directoryweb-ui.php:502
+msgid "Built-in claims: all"
+msgstr ""
+
+#: includes/directoryweb-ui.php:504
+msgid "Claim status"
+msgstr ""
+
+#: includes/directoryweb-ui.php:510
+msgid "Read live each time this page opens. Counts are DirectoryWeb’s built-in claims only: claims submitted through Fluent Forms or another form provider are not read and not included."
+msgstr ""
+
+#: includes/directoryweb-widget.php:26
+msgid "Counting. Come back in a minute."
+msgstr ""
+
+#: includes/directoryweb-widget.php:36
+msgid "Waiting for review"
+msgstr ""
+
+#: includes/directoryweb-widget.php:38
+msgid "Need a re-check"
+msgstr ""
+
+#: includes/directoryweb-widget.php:50
+msgid "Open DirectoryWeb"
+msgstr ""
+
+#: includes/labels.php:27
+msgid "Who is helped"
+msgstr ""
+
+#: includes/labels.php:28
+msgid "Comma separated"
+msgstr ""
+
+#: includes/labels.php:29
+msgid "Community centre"
+msgstr ""
+
+#: includes/listing-profile.php:89
+msgid "Organisation profile"
+msgstr ""
+
+#: includes/listing-profile.php:96
+#: includes/listing-template.php:225
+#: src/index.js:624
+msgid "Contact"
+msgstr ""
+
+#: includes/listing-profile.php:96
+msgid "How people reach the organisation."
+msgstr ""
+
+#: includes/listing-profile.php:97
+#: src/index.js:1241
+msgid "Online & social"
+msgstr ""
+
+#: includes/listing-profile.php:97
+msgid "Website, map and social profiles."
+msgstr ""
+
+#: includes/listing-profile.php:98
+#: src/index.js:1259
+msgid "About & registration"
+msgstr ""
+
+#: includes/listing-profile.php:98
+msgid "Who they are and how they are registered."
+msgstr ""
+
+#: includes/listing-profile.php:99
+#: includes/listing-template.php:348
+msgid "Support"
+msgstr ""
+
+#: includes/listing-profile.php:99
+msgid "Ways people can help."
+msgstr ""
+
+#: includes/listing-profile.php:100
+msgid "Link visibility"
+msgstr ""
+
+#: includes/listing-profile.php:182
+msgid "(no name yet)"
+msgstr ""
+
+#: includes/listing-profile.php:185
+msgid "Every field is optional; empty fields are not shown on the listing. The short bio is the Excerpt."
+msgstr ""
+
+#: includes/listing-profile.php:201
+msgid "Phone numbers"
+msgstr ""
+
+#: includes/listing-profile.php:203
+msgid "One per line: number | label | whatsapp (the last two optional), e.g. 98765 43210 | Helpline | whatsapp"
+msgstr ""
+
+#: includes/listing-profile.php:204
+msgid "Opening hours by day"
+msgstr ""
+
+#: includes/listing-profile.php:206
+msgid "One day per line: Monday 09:00-18:00, or Sunday closed. Open all day: 00:00-23:59."
+msgstr ""
+
+#: includes/listing-profile.php:213
+#: includes/listing-template.php:377
+#: src/index.js:724
+#: src/index.js:1290
+msgid "Photos"
+msgstr ""
+
+#: includes/listing-profile.php:214
+msgid "Up to six photos of the organisation."
+msgstr ""
+
+#: includes/listing-profile.php:220
+msgid "Choose photos"
+msgstr ""
+
+#: includes/listing-profile.php:220
+msgid "Remove all"
+msgstr ""
+
+#: includes/listing-template.php:82
+msgid "Data not yet available"
+msgstr ""
+
+#: includes/listing-template.php:83
+msgid "Suggest an update"
+msgstr ""
+
+#: includes/listing-template.php:94
+msgid "Expired"
+msgstr ""
+
+#: includes/listing-template.php:95
+msgid "valid until"
+msgstr ""
+
+#. translators: %s: registration type, e.g. Trust.
+#: includes/listing-template.php:162
+#, php-format
+msgid "Registration (%s)"
+msgstr ""
+
+#: includes/listing-template.php:173
+msgid "Registrations"
+msgstr ""
+
+#. translators: %s: phone number.
+#: includes/listing-template.php:189
+#, php-format
+msgid "Call %s"
+msgstr ""
+
+#: includes/listing-template.php:192
+msgid "WhatsApp"
+msgstr ""
+
+#: includes/listing-template.php:201
+#: includes/listing-template.php:202
+msgid "Directions"
+msgstr ""
+
+#: includes/listing-template.php:243
+msgid "Address"
+msgstr ""
+
+#: includes/listing-template.php:244
+#: includes/place-intros.php:229
+msgid "District"
+msgstr ""
+
+#: includes/listing-template.php:245
+#: src/index.js:1272
+msgid "Opening hours"
+msgstr ""
+
+#: includes/listing-template.php:247
+msgid "Location"
+msgstr ""
+
+#: includes/listing-template.php:260
+msgid "Based on type"
+msgstr ""
+
+#. translators: %s: who stated the services.
+#: includes/listing-template.php:265
+#, php-format
+msgid "Stated by %s"
+msgstr ""
+
+#. translators: %s: who stated the services.
+#: includes/listing-template.php:265
+msgid "the organisation"
+msgstr ""
+
+#: includes/listing-template.php:268
+#: includes/listing-template.php:273
+#: src/index.js:1205
+msgid "Services"
+msgstr ""
+
+#: includes/listing-template.php:270
+msgid "Areas served"
+msgstr ""
+
+#: includes/listing-template.php:307
+msgid "Established"
+msgstr ""
+
+#: includes/listing-template.php:308
+msgid "Incorporated"
+msgstr ""
+
+#: includes/listing-template.php:311
+msgid "Organisation"
+msgstr ""
+
+#. translators: 1: organisation, 2: network.
+#: includes/listing-template.php:325
+#, php-format
+msgid "%1$s on %2$s"
+msgstr ""
+
+#: includes/listing-template.php:330
+msgid "Online profiles"
+msgstr ""
+
+#: includes/listing-template.php:342
+msgid "Volunteer"
+msgstr ""
+
+#: includes/listing-template.php:342
+msgid "Adopt"
+msgstr ""
+
+#: includes/listing-template.php:454
+msgid "out of 5"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:454
+#, php-format
+msgid "%s review"
+msgid_plural "%s reviews"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:455
+#: src/index.js:1266
+msgid "Google"
+msgstr ""
+
+#: includes/listing-template.php:456
+#: includes/listing-template.php:469
+msgid "as on"
+msgstr ""
+
+#: includes/listing-template.php:457
+msgid "View on Google"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:463
+#, php-format
+msgid "%s followers"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:464
+#, php-format
+msgid "%s posts"
+msgstr ""
+
+#. translators: %s: number.
+#: includes/listing-template.php:465
+msgid "last post"
+msgstr ""
+
+#: includes/listing-template.php:470
+msgid "View on Instagram"
+msgstr ""
+
+#: includes/listing-template.php:472
+msgid "Activity"
+msgstr ""
+
+#. translators: %d: number.
+#: includes/listing-template.php:501
+#, php-format
+msgid "See all (%d)"
+msgstr ""
+
+#. translators: %d: number.
+#: includes/listing-template.php:502
+msgid "In the press"
+msgstr ""
+
+#. translators: %s: organisation.
+#: includes/listing-template.php:521
+#, php-format
+msgid "Opportunities at %s"
+msgstr ""
+
+#: includes/listing-template.php:535
+msgid "Organiser"
+msgstr ""
+
+#: includes/listing-template.php:541
+msgid "Partner"
+msgstr ""
+
+#: includes/listing-template.php:547
+msgid "Supporter"
+msgstr ""
+
+#. translators: %s: organisation.
+#: includes/listing-template.php:569
+#, php-format
+msgid "Campaigns with %s"
+msgstr ""
+
+#: includes/listing-template.php:577
+#: includes/listing-template.php:579
+#: includes/listing-template.php:581
+msgid "Claim your listing"
+msgstr ""
+
+#: includes/listing-template.php:580
+msgid "Run an organisation listed in our Directory? Claim it to correct its details and add your logo and photos."
+msgstr ""
+
+#: includes/more-from-kits.php:22
+msgid "The shared admin, brand and settings layer the other plugins plug into."
+msgstr ""
+
+#: includes/more-from-kits.php:23
+msgid "A searchable directory of places and listings, with claims and review."
+msgstr ""
+
+#: includes/more-from-kits.php:24
+msgid "SEO on top of Rank Math: sitemaps, redirects, FAQ, internal links and checks."
+msgstr ""
+
+#: includes/more-from-kits.php:25
+msgid "Search and visitor insights from Google, in one place."
+msgstr ""
+
+#: includes/more-from-kits.php:26
+msgid "Finds, checks and queues news and sources for review before anything is published."
+msgstr ""
+
+#: includes/more-from-kits.php:27
+msgid "Mailboxes, sending and a team inbox inside WordPress."
+msgstr ""
+
+#: includes/more-from-kits.php:28
+msgid "A content and team calendar with reminders and a weekly digest."
+msgstr ""
+
+#: includes/more-from-kits.php:67
+#: includes/more-from-kits.php:91
+msgid "More from Kits"
+msgstr ""
+
+#: includes/more-from-kits.php:75
+msgid "You are not allowed to access this page."
+msgstr ""
+
+#: includes/more-from-kits.php:78
+msgid "Active on this site"
+msgstr ""
+
+#: includes/more-from-kits.php:79
+msgid "Installed, not active"
+msgstr ""
+
+#: includes/more-from-kits.php:80
+msgid "Not installed"
+msgstr ""
+
+#: includes/more-from-kits.php:84
+msgid "Installed. It is not active yet: press Activate."
+msgstr ""
+
+#: includes/more-from-kits.php:85
+msgid "Activated."
+msgstr ""
+
+#: includes/more-from-kits.php:86
+msgid "That did not work. Nothing was changed."
+msgstr ""
+
+#: includes/more-from-kits.php:101
+msgid "The other Kits plugins. Each works on its own, and they work better together."
+msgstr ""
+
+#: includes/more-from-kits.php:103
+msgid "This copy of the plugin does not install other plugins. Use the links to find them."
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/more-from-kits.php:114
+#, php-format
+msgid "Install %s"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/more-from-kits.php:114
+msgid "Install"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/more-from-kits.php:120
+#, php-format
+msgid "Activate %s"
+msgstr ""
+
+#. translators: %s: plugin name.
+#: includes/more-from-kits.php:120
+msgid "Activate"
+msgstr ""
+
+#: includes/more-from-kits.php:122
+msgid "Learn more"
+msgstr ""
+
+#: includes/more-from-kits.php:126
+msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
+msgstr ""
+
+#: includes/more-from-kits.php:158
+msgid "This action needs a form post."
+msgstr ""
+
+#: includes/more-from-kits.php:161
+msgid "You are not allowed to do that."
+msgstr ""
+
+#: includes/more-from-kits.php:166
+msgid "That is not one of the Kits plugins."
+msgstr ""
+
+#: includes/more-from-kits.php:182
+msgid "The list of releases could not be reached."
+msgstr ""
+
+#: includes/more-from-kits.php:189
+msgid "There is no stable release of that plugin yet."
+msgstr ""
+
+#: includes/more-from-kits.php:192
+msgid "The release is not one this plugin trusts."
+msgstr ""
+
+#: includes/more-from-kits.php:201
+msgid "This copy does not install plugins."
+msgstr ""
+
+#: includes/more-from-kits.php:204
+msgid "It is already installed."
+msgstr ""
+
+#: includes/more-from-kits.php:215
+msgid "The download failed."
+msgstr ""
+
+#: includes/more-from-kits.php:219
+msgid "The download did not match its checksum, so it was not installed."
+msgstr ""
+
+#: includes/more-from-kits.php:225
+msgid "WordPress could not install it."
+msgstr ""
+
+#: includes/more-from-kits.php:236
+msgid "It is not installed, or it is already active."
 msgstr ""
 
 #: includes/place-intros.php:73
@@ -829,8 +1913,8 @@ msgstr ""
 
 #: includes/place-intros.php:202
 #: includes/place-intros.php:239
-#: directoryweb/src/index.js:977
-#: directoryweb/src/index.js:1104
+#: src/index.js:1197
+#: src/index.js:1403
 msgid "Place"
 msgstr ""
 
@@ -843,7 +1927,7 @@ msgid "Write or edit"
 msgstr ""
 
 #: includes/place-intros.php:227
-#: directoryweb/src/index.js:1182
+#: src/index.js:1499
 msgid "Edit"
 msgstr ""
 
@@ -853,12 +1937,8 @@ msgid "View page"
 msgstr ""
 
 #: includes/place-intros.php:229
-msgid "District"
-msgstr ""
-
-#: includes/place-intros.php:229
-#: directoryweb/src/index.js:598
-#: directoryweb/src/index.js:1158
+#: src/index.js:687
+#: src/index.js:1472
 msgid "State"
 msgstr ""
 
@@ -913,456 +1993,992 @@ msgstr ""
 msgid "Save intro"
 msgstr ""
 
-#: directoryweb/src/index.js:100
+#: includes/places-admin.php:45
+msgid "Postal code"
+msgstr ""
+
+#: includes/plugin-info.php:51
+msgid "Getting Started"
+msgstr ""
+
+#: includes/plugin-info.php:52
+msgid "Documentation"
+msgstr ""
+
+#: includes/plugin-info.php:114
+#: src/schema-screens.js:1109
+msgid "Works with"
+msgstr ""
+
+#: includes/plugin-info.php:118
+msgid "None of these is required to activate the plugin."
+msgstr ""
+
+#: includes/plugin-info.php:167
+msgid "Tell us how DirectoryWeb works for you, or what is missing, on the plugin page."
+msgstr ""
+
+#: includes/plugin-info.php:167
+msgid "Open the DirectoryWeb page"
+msgstr ""
+
+#: includes/schema/csv.php:106
+#: includes/standalone-screens.php:546
+msgid "Unknown listing type."
+msgstr ""
+
+#: includes/schema/schema.php:131
+msgid "New listing"
+msgstr ""
+
+#: includes/schema/schema.php:185
+msgid "Finds and enriches listings: contact details, links and missing facts, for you to review."
+msgstr ""
+
+#: includes/schema/schema.php:186
+msgid "Search titles, descriptions, schema and sitemaps for every listing page."
+msgstr ""
+
+#: includes/schema/schema.php:187
+msgid "Shows which listings and searches people find you by."
+msgstr ""
+
+#: includes/schema/schema.php:188
+msgid "Sends claim and submission emails reliably."
+msgstr ""
+
+#: includes/schema/schema.php:189
+msgid "Plans the content that promotes your directory."
+msgstr ""
+
+#: includes/schema/schema.php:225
+msgid "A schema needs at least one valid field."
+msgstr ""
+
+#: includes/schema/schema.php:240
+msgid "Keep at least one listing type."
+msgstr ""
+
+#: includes/schema/schema.php:290
+#: includes/standalone-screens.php:450
+msgid "That file has no valid fields."
+msgstr ""
+
+#: includes/schema/schema.php:294
+#: includes/standalone-screens.php:454
+msgid "That file has no valid listing types."
+msgstr ""
+
+#: includes/standalone-fallback.php:146
+msgid "No items found."
+msgstr ""
+
+#: includes/standalone-fallback.php:264
+msgid "Claim form not configured. Select a form in DirectoryWeb Settings."
+msgstr ""
+
+#: includes/standalone-screens.php:144
+msgid "The fields every listing type draws from. A key is letters, numbers and underscores. A choice field needs choices, separated by commas. Tick Remove to drop a field; the stored values on listings are not deleted."
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:155
+#: src/schema-screens.js:123
+#: src/schema-screens.js:162
+msgid "Key"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:156
+#: includes/standalone-screens.php:226
+#: src/schema-screens.js:122
+#: src/schema-screens.js:147
+msgid "Label"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:157
+#: src/index.js:1398
+#: src/schema-screens.js:124
+#: src/schema-screens.js:176
+msgid "Type"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:162
+#: src/schema-screens.js:126
+#: src/schema-screens.js:200
+msgid "Required"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:163
+#: src/schema-screens.js:222
+msgid "Choices"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:164
+msgid "Help"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:165
+#: src/schema-screens.js:134
+#: src/schema-screens.js:249
+msgid "Min"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:166
+#: src/schema-screens.js:135
+#: src/schema-screens.js:264
+msgid "Max"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:167
+#: src/schema-screens.js:136
+#: src/schema-screens.js:279
+msgid "Pattern"
+msgstr ""
+
+#: includes/standalone-screens.php:147
+#: includes/standalone-screens.php:168
+#: includes/standalone-screens.php:234
+#: includes/standalone-screens.php:324
+#: src/schema-screens.js:300
+#: src/schema-screens.js:781
+msgid "Remove"
+msgstr ""
+
+#: includes/standalone-screens.php:172
+msgid "Save fields"
+msgstr ""
+
+#: includes/standalone-screens.php:196
+msgid "A schema needs at least one valid field. Nothing was saved."
+msgstr ""
+
+#. translators: %d: number of fields.
+#: includes/standalone-screens.php:200
+#, php-format
+msgid "Saved %d field."
+msgid_plural "Saved %d fields."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/standalone-screens.php:217
+msgid "A listing type chooses which fields it uses. The id is letters, numbers, hyphens and underscores and cannot change once saved. Leave Post type empty to use the directory's own. Tick Remove to drop a type (at least one stays)."
+msgstr ""
+
+#: includes/standalone-screens.php:223
+#: src/schema-screens.js:465
+msgid "Add a listing type"
+msgstr ""
+
+#: includes/standalone-screens.php:225
+#: src/schema-screens.js:415
+msgid "Id"
+msgstr ""
+
+#: includes/standalone-screens.php:227
+msgid "Post type"
+msgstr ""
+
+#: includes/standalone-screens.php:228
+msgid "Fields"
+msgstr ""
+
+#: includes/standalone-screens.php:228
+msgid "Fields this type uses"
+msgstr ""
+
+#: includes/standalone-screens.php:234
+#: src/schema-screens.js:447
+msgid "Remove this type"
+msgstr ""
+
+#: includes/standalone-screens.php:238
+#: src/schema-screens.js:479
+msgid "Save listing types"
+msgstr ""
+
+#: includes/standalone-screens.php:257
+msgid "Keep at least one listing type. Nothing was saved."
+msgstr ""
+
+#. translators: %d: number of listing types.
+#: includes/standalone-screens.php:261
+#, php-format
+msgid "Saved %d listing type."
+msgid_plural "Saved %d listing types."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/standalone-screens.php:270
+msgid "Map a form from another plugin to a listing type. A submission to a mapped and enabled form arrives as a pending (or draft) listing. One line per field: the form field name, an equals sign, then the field key from Schema & Fields."
+msgstr ""
+
+#: includes/standalone-screens.php:271
+#: src/schema-screens.js:522
+msgid "Form providers"
+msgstr ""
+
+#: includes/standalone-screens.php:271
+#: src/schema-screens.js:568
+msgid "Provider"
+msgstr ""
+
+#: includes/standalone-screens.php:271
+#: includes/standalone-screens.php:616
+#: src/index.js:635
+#: src/index.js:1408
+msgid "Status"
+msgstr ""
+
+#: includes/standalone-screens.php:271
+msgid "Forms"
+msgstr ""
+
+#: includes/standalone-screens.php:296
+msgid "Mappings"
+msgstr ""
+
+#: includes/standalone-screens.php:305
+msgid "Add a mapping"
+msgstr ""
+
+#: includes/standalone-screens.php:309
+#: src/schema-screens.js:599
+msgid "Form"
+msgstr ""
+
+#: includes/standalone-screens.php:309
+#: src/index.js:903
+msgid "Choose a form"
+msgstr ""
+
+#: includes/standalone-screens.php:315
+#: includes/standalone-screens.php:401
+#: src/index.js:699
+#: src/index.js:1480
+#: src/schema-screens.js:625
+#: src/schema-screens.js:984
+msgid "Listing type"
+msgstr ""
+
+#: includes/standalone-screens.php:320
+#: includes/standalone-screens.php:408
+#: src/schema-screens.js:734
+msgid "New listings are"
+msgstr ""
+
+#: includes/standalone-screens.php:320
+#: includes/standalone-screens.php:408
+msgid "Pending review"
+msgstr ""
+
+#: includes/standalone-screens.php:321
+msgid "Enabled"
+msgstr ""
+
+#: includes/standalone-screens.php:321
+msgid "Make a listing from each submission"
+msgstr ""
+
+#: includes/standalone-screens.php:322
+msgid "Field map"
+msgstr ""
+
+#: includes/standalone-screens.php:324
+msgid "Remove this mapping"
+msgstr ""
+
+#: includes/standalone-screens.php:328
+#: src/schema-screens.js:817
+msgid "Save mappings"
+msgstr ""
+
+#. translators: %d: number of mappings.
+#: includes/standalone-screens.php:372
+#, php-format
+msgid "Saved %d mapping."
+msgid_plural "Saved %d mappings."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/standalone-screens.php:381
+#: src/schema-screens.js:881
+msgid "Export the structure"
+msgstr ""
+
+#: includes/standalone-screens.php:382
+#: src/schema-screens.js:882
+msgid "Fields, listing types and form mappings as one file, to move to another site. Listings themselves are not in it."
+msgstr ""
+
+#: includes/standalone-screens.php:383
+msgid "Download the structure"
+msgstr ""
+
+#: includes/standalone-screens.php:385
+#: src/schema-screens.js:893
+msgid "Import a structure"
+msgstr ""
+
+#: includes/standalone-screens.php:386
+msgid "Paste an exported file. It replaces this site's fields, listing types and form mappings."
+msgstr ""
+
+#: includes/standalone-screens.php:388
+msgid "Structure file contents"
+msgstr ""
+
+#: includes/standalone-screens.php:389
+msgid "Import the structure"
+msgstr ""
+
+#: includes/standalone-screens.php:391
+msgid "Export listings (CSV)"
+msgstr ""
+
+#. translators: %s: listing type label.
+#: includes/standalone-screens.php:393
+#, php-format
+msgid "Download %s as CSV"
+msgstr ""
+
+#: includes/standalone-screens.php:397
+msgid "Import listings (CSV)"
+msgstr ""
+
+#: includes/standalone-screens.php:398
+msgid "The first row names the columns, which are field keys of the chosen listing type. Every row is checked like a form submission. At most 500 rows. Leave \"Only check\" ticked to see what would happen first."
+msgstr ""
+
+#: includes/standalone-screens.php:406
+#: src/schema-screens.js:1004
+msgid "CSV file"
+msgstr ""
+
+#: includes/standalone-screens.php:407
+msgid "Or paste the CSV"
+msgstr ""
+
+#: includes/standalone-screens.php:409
+msgid "Only check"
+msgstr ""
+
+#: includes/standalone-screens.php:409
+msgid "Check every row but create nothing"
+msgstr ""
+
+#: includes/standalone-screens.php:411
+msgid "Check or import"
+msgstr ""
+
+#. translators: 1: rows read, 2: rows that passed, 3: listings created.
+#: includes/standalone-screens.php:418
+#, php-format
+msgid "Rows read: %1$d. Rows that passed: %2$d. Listings created: %3$d."
+msgstr ""
+
+#: includes/standalone-screens.php:420
+msgid "Columns that are not fields of this type were ignored:"
+msgstr ""
+
+#. translators: %d: row number.
+#: includes/standalone-screens.php:426
+#, php-format
+msgid "Row %d:"
+msgstr ""
+
+#: includes/standalone-screens.php:446
+#: src/schema-screens.js:858
+msgid "That is not valid JSON."
+msgstr ""
+
+#. translators: 1: fields, 2: listing types, 3: mappings.
+#: includes/standalone-screens.php:467
+#, php-format
+msgid "Imported %1$d fields, %2$d listing types and %3$d mappings."
+msgstr ""
+
+#: includes/standalone-screens.php:477
+msgid "Unknown screen."
+msgstr ""
+
+#: includes/standalone-screens.php:510
+msgid "The file could not be uploaded."
+msgstr ""
+
+#: includes/standalone-screens.php:513
+msgid "Use a .csv file of 2 MB or less."
+msgstr ""
+
+#: includes/standalone-screens.php:520
+msgid "Choose a CSV file or paste the CSV."
+msgstr ""
+
+#: includes/standalone-screens.php:523
+msgid "The CSV must be UTF-8."
+msgstr ""
+
+#: includes/standalone-screens.php:531
+msgid "Checked. Nothing was created."
+msgstr ""
+
+#: includes/standalone-screens.php:531
+msgid "Import finished."
+msgstr ""
+
+#: includes/standalone-screens.php:616
+msgid "Review"
+msgstr ""
+
+#: includes/standalone-screens.php:621
+msgid "No claims here."
+msgstr ""
+
+#: includes/standalone-screens.php:643
+msgid "Open"
+msgstr ""
+
+#: src/index.js:125
 msgid "A count is running in the background. The numbers change when it is done (about a minute)."
 msgstr ""
 
-#: directoryweb/src/index.js:116
+#: src/index.js:141
 msgid "Loading the counts…"
 msgstr ""
 
 #. translators: %s: date and time.
-#: directoryweb/src/index.js:127
+#: src/index.js:152
 #, js-format
 msgid "Counted %s."
 msgstr ""
 
-#: directoryweb/src/index.js:130
+#: src/index.js:155
 msgid "Counting for the first time…"
 msgstr ""
 
-#: directoryweb/src/index.js:136
+#: src/index.js:161
 msgid "Show"
 msgstr ""
 
-#: directoryweb/src/index.js:146
+#: src/index.js:171
 msgid "The count is taking longer than usual; reload this page later."
 msgstr ""
 
-#: directoryweb/src/index.js:155
+#: src/index.js:180
 msgid "Count now"
 msgstr ""
 
-#: directoryweb/src/index.js:167
+#: src/index.js:192
 msgid "Needs attention"
 msgstr ""
 
-#: directoryweb/src/index.js:178
+#: src/index.js:203
 msgid "The Directory at a glance"
 msgstr ""
 
-#: directoryweb/src/index.js:200
+#: src/index.js:225
+#: src/index.js:260
 msgid "Published listings by type"
 msgstr ""
 
-#: directoryweb/src/index.js:264
+#: src/index.js:240
+msgid "In numbers"
+msgstr ""
+
+#: src/index.js:241
+msgid "The Directory at a glance. Each chart has the same figures as a table for screen readers."
+msgstr ""
+
+#: src/index.js:249
+msgid "Listings by status"
+msgstr ""
+
+#: src/index.js:254
+#: src/index.js:265
+#: src/index.js:280
+msgid "listings"
+msgstr ""
+
+#. translators: %d: average completeness percentage.
+#: src/index.js:273
+#, js-format
+msgid "Listing completeness — average %d%%"
+msgstr ""
+
+#: src/index.js:286
+msgid "Claims by status"
+msgstr ""
+
+#: src/index.js:291
+msgid "claims"
+msgstr ""
+
+#: src/index.js:353
 msgid "Loading the claim…"
 msgstr ""
 
-#: directoryweb/src/index.js:280
+#: src/index.js:369
 msgid "The listing’s current logo"
 msgstr ""
 
-#: directoryweb/src/index.js:291
+#: src/index.js:380
 msgid "Logo sent with the claim"
 msgstr ""
 
 #. translators: %d: photo number.
-#: directoryweb/src/index.js:305
+#: src/index.js:394
 #, js-format
 msgid "Photo %d sent with the claim"
 msgstr ""
 
 #. translators: %s: field names.
-#: directoryweb/src/index.js:321
+#: src/index.js:410
 #, js-format
 msgid "Undone: %s."
 msgstr ""
 
-#: directoryweb/src/index.js:329
-#: directoryweb/src/index.js:336
-msgid "Field"
-msgstr ""
-
-#: directoryweb/src/index.js:330
+#: src/index.js:419
 msgid "Listing now"
 msgstr ""
 
-#: directoryweb/src/index.js:331
-msgid "Proposed"
-msgstr ""
-
-#: directoryweb/src/index.js:333
+#: src/index.js:422
 msgid "Proposed changes"
 msgstr ""
 
-#: directoryweb/src/index.js:337
+#: src/index.js:426
 msgid "Proposed (rejected)"
 msgstr ""
 
-#: directoryweb/src/index.js:339
+#: src/index.js:428
 msgid "What the claim proposed"
 msgstr ""
 
-#: directoryweb/src/index.js:341
+#: src/index.js:430
 msgid "Applied fields"
 msgstr ""
 
-#: directoryweb/src/index.js:346
+#: src/index.js:435
 msgid "Who sent it"
 msgstr ""
 
-#: directoryweb/src/index.js:348
-#: directoryweb/src/index.js:438
+#: src/index.js:437
+#: src/index.js:527
 msgid "Claim"
 msgstr ""
 
-#: directoryweb/src/index.js:349
-#: directoryweb/src/index.js:889
+#: src/index.js:438
+#: src/index.js:978
 msgid "Details"
 msgstr ""
 
-#: directoryweb/src/index.js:354
-#: directoryweb/src/index.js:639
+#: src/index.js:443
+#: src/index.js:728
 msgid "Proof"
 msgstr ""
 
-#: directoryweb/src/index.js:362
+#: src/index.js:451
 msgid "Open the document"
 msgstr ""
 
-#: directoryweb/src/index.js:385
+#: src/index.js:474
 msgid "Nothing differs from the listing."
 msgstr ""
 
-#: directoryweb/src/index.js:394
+#: src/index.js:483
 msgid "This screen only shows the claim. Approve or reject it on the Claims screen."
 msgstr ""
 
-#: directoryweb/src/index.js:398
+#: src/index.js:487
 msgid "This screen only shows the claim. Changes to it are made on the Claims screen."
 msgstr ""
 
-#: directoryweb/src/index.js:403
+#: src/index.js:492
 msgid "Open this claim on the Claims screen"
 msgstr ""
 
-#: directoryweb/src/index.js:412
-#: directoryweb/src/index.js:696
-#: directoryweb/src/index.js:1017
+#: src/index.js:501
+#: src/index.js:785
+#: src/index.js:1154
 msgid "Edit listing"
 msgstr ""
 
-#: directoryweb/src/index.js:419
+#: src/index.js:508
 msgid "View listing"
 msgstr ""
 
 #. translators: 1: listing name, 2: claim reference.
-#: directoryweb/src/index.js:434
+#: src/index.js:523
 #, js-format
 msgid "Claim: %1$s %2$s"
 msgstr ""
 
-#: directoryweb/src/index.js:443
+#: src/index.js:532
 msgid "Back to all claims"
 msgstr ""
 
-#: directoryweb/src/index.js:487
+#: src/index.js:576
 msgid "The claim form is not set up."
 msgstr ""
 
-#: directoryweb/src/index.js:490
+#: src/index.js:579
 msgid "Choose the claim form under Settings → Fluent Forms. Claims sent with the old form still show here."
 msgstr ""
 
-#: directoryweb/src/index.js:502
-#: directoryweb/src/index.js:1064
-msgid "Listing"
-msgstr ""
-
-#: directoryweb/src/index.js:511
+#: src/index.js:600
 msgid "old form"
 msgstr ""
 
-#: directoryweb/src/index.js:525
+#: src/index.js:614
 msgid "Reference"
 msgstr ""
 
-#: directoryweb/src/index.js:535
-msgid "Contact"
-msgstr ""
-
-#: directoryweb/src/index.js:541
+#: src/index.js:630
 msgid "Fields changed"
 msgstr ""
 
-#: directoryweb/src/index.js:546
-#: directoryweb/src/index.js:1109
-msgid "Status"
-msgstr ""
-
-#: directoryweb/src/index.js:564
+#: src/index.js:653
 msgid "Claims sent with the claim form, to read. Nothing here changes a claim or a listing: claims are approved or rejected on the Claims screen."
 msgstr ""
 
-#: directoryweb/src/index.js:579
+#: src/index.js:668
 msgid "Search listing, claimant or reference"
 msgstr ""
 
-#: directoryweb/src/index.js:603
+#: src/index.js:692
 msgid "All states"
 msgstr ""
 
-#: directoryweb/src/index.js:610
-#: directoryweb/src/index.js:1166
-msgid "Listing type"
-msgstr ""
-
-#: directoryweb/src/index.js:615
+#: src/index.js:704
 msgid "All types"
 msgstr ""
 
-#: directoryweb/src/index.js:622
+#: src/index.js:711
 msgid "Sent with"
 msgstr ""
 
-#: directoryweb/src/index.js:627
+#: src/index.js:716
 msgid "Anything"
 msgstr ""
 
-#: directoryweb/src/index.js:631
+#: src/index.js:720
 msgid "A logo"
 msgstr ""
 
-#: directoryweb/src/index.js:635
-msgid "Photos"
-msgstr ""
-
-#: directoryweb/src/index.js:650
+#: src/index.js:739
 msgid "Any time"
 msgstr ""
 
-#: directoryweb/src/index.js:654
+#: src/index.js:743
 msgid "Last 7 days"
 msgstr ""
 
-#: directoryweb/src/index.js:658
+#: src/index.js:747
 msgid "Last 30 days"
 msgstr ""
 
-#: directoryweb/src/index.js:662
+#: src/index.js:751
 msgid "Last 90 days"
 msgstr ""
 
-#: directoryweb/src/index.js:681
+#: src/index.js:770
 msgid "Review on its own screen"
 msgstr ""
 
-#: directoryweb/src/index.js:690
+#: src/index.js:779
 msgid "View"
 msgstr ""
 
-#: directoryweb/src/index.js:711
+#: src/index.js:800
 msgid "No claims waiting."
 msgstr ""
 
-#: directoryweb/src/index.js:712
+#: src/index.js:801
 msgid "No claims match."
 msgstr ""
 
-#: directoryweb/src/index.js:737
+#: src/index.js:826
 msgid "Setting"
 msgstr ""
 
-#: directoryweb/src/index.js:738
-msgid "Now"
-msgstr ""
-
-#: directoryweb/src/index.js:785
+#: src/index.js:874
 msgid "Fluent Forms has no forms, or is not active."
 msgstr ""
 
-#: directoryweb/src/index.js:800
+#: src/index.js:889
 msgid "Claim form"
 msgstr ""
 
-#: directoryweb/src/index.js:801
+#: src/index.js:890
 msgid "The Fluent Forms form shown as “Claim this listing”."
 msgstr ""
 
-#: directoryweb/src/index.js:814
-msgid "Choose a form"
-msgstr ""
-
-#: directoryweb/src/index.js:831
+#: src/index.js:920
 msgid "Save changes"
 msgstr ""
 
-#: directoryweb/src/index.js:853
+#: src/index.js:942
 msgid "Loading the settings…"
 msgstr ""
 
-#: directoryweb/src/index.js:861
-#: directoryweb/src/index.js:868
+#: src/index.js:950
+#: src/index.js:957
 msgid "Connected services"
 msgstr ""
 
-#: directoryweb/src/index.js:862
+#: src/index.js:951
 msgid "What the Directory works with. Keys stay in Kits → Keys and are never shown here."
 msgstr ""
 
-#: directoryweb/src/index.js:924
+#: src/index.js:1013
 msgid "Read only: these are set in code or with WP-CLI today."
 msgstr ""
 
-#: directoryweb/src/index.js:969
-msgid "Picture"
+#: src/index.js:1086
+msgid "← All listings"
 msgstr ""
 
-#: directoryweb/src/index.js:978
-msgid "Area"
+#: src/index.js:1102
+msgid "Loading the listing…"
 msgstr ""
 
-#: directoryweb/src/index.js:979
-msgid "Services"
-msgstr ""
-
-#: directoryweb/src/index.js:981
-msgid "Website"
-msgstr ""
-
-#: directoryweb/src/index.js:997
-msgid "Verified (government record)"
-msgstr ""
-
-#: directoryweb/src/index.js:1001
-msgid "Needs a re-check"
-msgstr ""
-
-#: directoryweb/src/index.js:1004
-msgid "Added"
-msgstr ""
-
-#: directoryweb/src/index.js:1006
-#: directoryweb/src/index.js:1093
-msgid "Last changed"
-msgstr ""
-
-#: directoryweb/src/index.js:1025
+#: src/index.js:1164
 msgid "View on the site"
 msgstr ""
 
-#: directoryweb/src/index.js:1099
-msgid "Type"
+#: src/index.js:1175
+msgid "Profile completeness"
 msgstr ""
 
-#: directoryweb/src/index.js:1125
+#. translators: %d: percent complete.
+#: src/index.js:1182
+#, js-format
+msgid "%d%% complete"
+msgstr ""
+
+#: src/index.js:1194
+msgid "Key facts"
+msgstr ""
+
+#: src/index.js:1201
+msgid "Area"
+msgstr ""
+
+#: src/index.js:1209
+msgid "Verified (government record)"
+msgstr ""
+
+#: src/index.js:1216
+msgid "Added"
+msgstr ""
+
+#: src/index.js:1220
+#: src/index.js:1392
+msgid "Last changed"
+msgstr ""
+
+#: src/index.js:1294
+msgid "Listing photos"
+msgstr ""
+
+#: src/index.js:1432
 msgid "The Directory’s listings, to read. View opens a listing’s details; Edit listing opens its own edit screen, where every change is made. Claims are reviewed on Directory → Claims."
 msgstr ""
 
-#: directoryweb/src/index.js:1135
-msgid "Add New Listing"
-msgstr ""
-
-#: directoryweb/src/index.js:1150
+#: src/index.js:1464
 msgid "Search listings"
 msgstr ""
 
-#: directoryweb/src/index.js:1192
+#: src/index.js:1495
+msgid "View profile"
+msgstr ""
+
+#: src/index.js:1507
 msgid "No listing matches."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Accent"
+#: src/schema-screens.js:64
+msgid "Loading…"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Accent ink"
+#: src/schema-screens.js:114
+msgid "What a listing contains. Every form and every listing type uses these fields; no form has a schema of its own."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Ink"
+#: src/schema-screens.js:129
+msgid "Choices (comma separated)"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Text"
+#: src/schema-screens.js:328
+msgid "Add a field"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Muted"
+#: src/schema-screens.js:338
+msgid "Schema saved."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Line"
+#: src/schema-screens.js:342
+msgid "Save schema"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Page"
+#: src/schema-screens.js:396
+msgid "New listing type"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Surface"
+#: src/schema-screens.js:398
+msgid "The fields this kind of listing uses, from the Schema."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Raised"
+#: src/schema-screens.js:405
+msgid "Name"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "On ink"
+#: src/schema-screens.js:475
+msgid "Listing types saved."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Focus"
+#: src/schema-screens.js:523
+msgid "Plugins whose forms can create listings. Each form is mapped to fields in the schema; many forms can feed one listing type."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Danger"
+#. translators: %d: forms.
+#: src/schema-screens.js:535
+#, js-format
+msgid "active, %d forms"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Success"
+#: src/schema-screens.js:541
+msgid "not installed or not active"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Color name"
-msgid "Warning"
+#: src/schema-screens.js:558
+msgid "New mapping"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Font family name"
-msgid "Inter"
+#: src/schema-screens.js:560
+msgid "Send this form’s answers into a listing type."
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Font family name"
-msgid "Inter (headings)"
+#: src/schema-screens.js:581
+msgid "Provider…"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Custom template name"
-msgid "Page — Wide"
+#: src/schema-screens.js:611
+msgid "Form…"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Custom template name"
-msgid "Hub (section band + list)"
+#: src/schema-screens.js:637
+msgid "Listing type…"
 msgstr ""
 
-#: theme/theme.json
-msgctxt "Custom template name"
-msgid "Campaign page (full width; the page's own H1)"
+#: src/schema-screens.js:654
+msgid "Form field"
+msgstr ""
+
+#: src/schema-screens.js:660
+msgid "Goes to"
+msgstr ""
+
+#: src/schema-screens.js:706
+msgid "Not used"
+msgstr ""
+
+#: src/schema-screens.js:747
+#: src/schema-screens.js:1016
+msgid "pending review"
+msgstr ""
+
+#: src/schema-screens.js:753
+#: src/schema-screens.js:1019
+msgid "drafts"
+msgstr ""
+
+#: src/schema-screens.js:803
+msgid "Add a form mapping"
+msgstr ""
+
+#: src/schema-screens.js:813
+msgid "Mappings saved."
+msgstr ""
+
+#: src/schema-screens.js:866
+msgid "Imported. Fields, listing types and form mappings are replaced."
+msgstr ""
+
+#: src/schema-screens.js:888
+msgid "Download"
+msgstr ""
+
+#: src/schema-screens.js:894
+msgid "Paste an exported file. It replaces this site’s fields, listing types and form mappings."
+msgstr ""
+
+#: src/schema-screens.js:903
+msgid "Exported file"
+msgstr ""
+
+#: src/schema-screens.js:908
+msgid "Import"
+msgstr ""
+
+#: src/schema-screens.js:974
+msgid "Listings as CSV"
+msgstr ""
+
+#: src/schema-screens.js:975
+msgid "One column per field of the listing type. Each imported row is checked like a form submission and arrives as pending or draft; nothing is overwritten."
+msgstr ""
+
+#: src/schema-screens.js:997
+msgid "Download CSV"
+msgstr ""
+
+#: src/schema-screens.js:1010
+msgid "Imported listings are"
+msgstr ""
+
+#: src/schema-screens.js:1028
+msgid "Check the file"
+msgstr ""
+
+#: src/schema-screens.js:1041
+msgid "Import the good rows"
+msgstr ""
+
+#. translators: 1: rows that pass, 2: rows read.
+#: src/schema-screens.js:1053
+#, js-format
+msgid "%1$d of %2$d rows are good."
+msgstr ""
+
+#. translators: %d: listings created.
+#: src/schema-screens.js:1062
+#, js-format
+msgid "%d listings created."
+msgstr ""
+
+#. translators: %s: column names.
+#: src/schema-screens.js:1072
+#, js-format
+msgid "Columns not used: %s."
+msgstr ""
+
+#. translators: %s: row number.
+#: src/schema-screens.js:1086
+#, js-format
+msgid "Row %s:"
+msgstr ""
+
+#: src/schema-screens.js:1110
+msgid "Other plugins that add to DirectoryWeb. DirectoryWeb works without them."
+msgstr ""
+
+#: src/schema-screens.js:1124
+msgid "Get it"
 msgstr ""

@@ -60,7 +60,7 @@ function kits_registry_products(): array {
 		kits_registry_url(),
 		array(
 			'timeout'    => 10,
-			'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address
+			'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address.
 		)
 	);
 	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {

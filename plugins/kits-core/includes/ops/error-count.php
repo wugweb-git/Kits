@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const KITS_ERROR_COUNT_SAMPLES = 5;
-const KITS_ERROR_COUNT_KEYS    = 500; // distinct samples tracked while counting, per kind (memory bound)
+const KITS_ERROR_COUNT_KEYS    = 500; // distinct samples tracked while counting, per kind (memory bound).
 
 /**
  * The kinds counted, key => label. "fatal" covers fatal and parse errors.
@@ -73,9 +73,9 @@ function kits_error_count_dirs() {
 	$domain = dirname( $root );
 	$home   = dirname( dirname( $domain ) );
 	return array(
-		'root' => $root,
+		'root'   => $root,
 		'domain' => $domain,
-		'home' => $home,
+		'home'   => $home,
 	);
 }
 
@@ -102,7 +102,7 @@ function kits_error_count_php_candidates() {
 	$out[] = $d['root'] . '/wp-admin/error_log';
 	$host  = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 	if ( '' !== $host ) {
-		$out[] = $d['home'] . '/.logs/error_log_' . str_replace( array( '.', '-' ), '_', $host ); // Hostinger's log for this domain only (the folder holds every domain's)
+		$out[] = $d['home'] . '/.logs/error_log_' . str_replace( array( '.', '-' ), '_', $host ); // Hostinger's log for this domain only (the folder holds every domain's).
 	}
 	return array_values( array_unique( (array) apply_filters( 'aw_error_count_php_paths', $out ) ) );
 }
@@ -173,8 +173,8 @@ function kits_error_count_resolve( array $candidates ) {
 		}
 	}
 	return array(
-		'files' => array_values( $files ),
-		'tried' => $tried,
+		'files'      => array_values( $files ),
+		'tried'      => $tried,
 		'unreadable' => $unreadable,
 	);
 }
@@ -195,7 +195,7 @@ function kits_error_count_each_line( $file, callable $cb ) {
 		if ( ! $h ) {
 			return array(
 				'lines' => 0,
-				'cut' => false,
+				'cut'   => false,
 			);
 		}
 		while ( ! gzeof( $h ) ) {
@@ -209,21 +209,21 @@ function kits_error_count_each_line( $file, callable $cb ) {
 		gzclose( $h );
 		return array(
 			'lines' => $lines,
-			'cut' => false,
+			'cut'   => false,
 		);
 	}
 	$h = fopen( $file, 'rb' );
 	if ( ! $h ) {
 		return array(
 			'lines' => 0,
-			'cut' => false,
+			'cut'   => false,
 		);
 	}
 	$tail = max( 1048576, (int) apply_filters( 'kits_error_count_tail_bytes', 32 * 1048576 ) );
 	$size = (int) filesize( $file );
 	if ( $size > $tail ) {
 		fseek( $h, $size - $tail );
-		fgets( $h, 65536 ); // drop the partial first line
+		fgets( $h, 65536 ); // drop the partial first line.
 		$cut = true;
 	}
 	while ( false !== ( $line = fgets( $h, 65536 ) ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition -- standard read loop
@@ -234,7 +234,7 @@ function kits_error_count_each_line( $file, callable $cb ) {
 	// phpcs:enable WordPress.WP.AlternativeFunctions
 	return array(
 		'lines' => $lines,
-		'cut' => $cut,
+		'cut'   => $cut,
 	);
 }
 
@@ -289,18 +289,18 @@ function kits_error_count_php( $since ) {
 	$kinds = array();
 	foreach ( array_keys( kits_error_count_kinds() ) as $k ) {
 		$kinds[ $k ] = array(
-			'count' => 0,
+			'count'   => 0,
 			'samples' => array(),
 		);
 	}
 	$out = array(
-		'status' => 'not_found',
-		'count' => 0,
-		'files' => array(),
+		'status'  => 'not_found',
+		'count'   => 0,
+		'files'   => array(),
 		'partial' => false,
 		'samples' => array(),
-		'kinds' => $kinds,
-		'tried' => $res['tried'],
+		'kinds'   => $kinds,
+		'tried'   => $res['tried'],
 	);
 	if ( ! $res['files'] ) {
 		$out['status'] = $res['unreadable'] ? 'unreadable' : 'not_found';
@@ -308,7 +308,7 @@ function kits_error_count_php( $since ) {
 	}
 	foreach ( $res['files'] as $f ) {
 		if ( (int) filemtime( $f ) < $since ) {
-			$out['files'][ $f ] = 0; // nothing logged in the window
+			$out['files'][ $f ] = 0; // nothing logged in the window.
 			continue;
 		}
 		$first              = null;
@@ -388,18 +388,18 @@ function kits_error_count_kind( array $r, $kind ) {
 	if ( isset( $r['kinds'][ $kind ] ) && is_array( $r['kinds'][ $kind ] ) ) {
 		$k = $r['kinds'][ $kind ];
 		return array(
-			'count' => (int) ( $k['count'] ?? 0 ),
+			'count'   => (int) ( $k['count'] ?? 0 ),
 			'samples' => (array) ( $k['samples'] ?? array() ),
 		);
 	}
 	if ( 'fatal' === $kind ) {
 		return array(
-			'count' => (int) ( $r['count'] ?? 0 ),
+			'count'   => (int) ( $r['count'] ?? 0 ),
 			'samples' => (array) ( $r['samples'] ?? array() ),
 		);
 	}
 	return array(
-		'count' => 0,
+		'count'   => 0,
 		'samples' => array(),
 	);
 }
@@ -417,11 +417,11 @@ function kits_error_count_total( array $run ) {
 /** Daily event: count, store, and email the admin address when anything was found. */
 function kits_error_count_daily() {
 	$run = kits_error_count_collect();
-	unset( $run['php']['tried'] ); // only the CLI shows them
+	unset( $run['php']['tried'] ); // only the CLI shows them.
 	update_option( 'aw_error_count', $run, false );
 	$total = kits_error_count_total( $run );
 	if ( ! $total || get_transient( 'aw_error_count_mailed' ) ) {
-		return; // nothing found, or this day's message is already sent
+		return; // nothing found, or this day's message is already sent.
 	}
 	$lines = array(
 		sprintf( 'Server errors on %s in the 24 hours to %s:', wp_parse_url( home_url(), PHP_URL_HOST ), wp_date( 'j M Y, g:i a', $run['at'] ) ),
@@ -439,7 +439,7 @@ function kits_error_count_daily() {
 	}
 	$lines[] = '';
 	$lines[] = 'Dashboard: ' . admin_url();
-	$site = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
+	$site    = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 	/* translators: 1: site name, 2: number of errors. */
 	$subject = sprintf( _n( '%1$s: %2$d server error in the last 24 hours', '%1$s: %2$d server errors in the last 24 hours', $total, 'kits-core' ), $site, $total );
 	if ( wp_mail( get_option( 'admin_email' ), $subject, implode( "\n", $lines ) . "\n" ) ) {
@@ -509,8 +509,8 @@ add_action(
 					array(
 						'check' => 'Check',
 						'count' => 'Count',
-						'from' => 'Read from',
-						'top' => 'Most frequent',
+						'from'  => 'Read from',
+						'top'   => 'Most frequent',
 					),
 					$rows
 				);

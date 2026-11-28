@@ -137,8 +137,8 @@ function kits_product_icon( string $name ): string {
 		$file = get_template_directory() . '/assets/images/kits-icon.svg';
 	} elseif ( isset( $folders[ $name ] ) ) {
 		list( $const, $folder ) = array_values( (array) $folders[ $name ] ) + array( '', '' );
-		$dir  = '' !== $const && defined( $const ) ? trailingslashit( (string) constant( $const ) ) : WP_PLUGIN_DIR . '/' . $folder . '/';
-		$file = $dir . 'assets/icon.svg';
+		$dir                    = '' !== $const && defined( $const ) ? trailingslashit( (string) constant( $const ) ) : WP_PLUGIN_DIR . '/' . $folder . '/';
+		$file                   = $dir . 'assets/icon.svg';
 	} else {
 		return '';
 	}
@@ -290,7 +290,7 @@ function kits_status_rows(): array {
 function kits_site_health_info( $info ) {
 	$fields = array();
 	foreach ( kits_status_rows() as $i => $r ) {
-		$value = trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( str_replace( '<br>', ' — ', (string) $r[1] ) ) ) );
+		$value                      = trim( (string) preg_replace( '/\s+/', ' ', wp_strip_all_tags( str_replace( '<br>', ' — ', (string) $r[1] ) ) ) );
 		$fields[ 'kits_row_' . $i ] = array(
 			'label' => (string) $r[0],
 			'value' => '' === $value ? '—' : $value,
@@ -365,7 +365,7 @@ function kits_transfer_result(): void {
 		return;
 	}
 	delete_transient( 'kits_transfer_result_' . $user );
-	$ok = empty( $result['error'] );
+	$ok   = empty( $result['error'] );
 	$body = '<p><strong>' . esc_html( (string) $result['title'] ) . '</strong></p>';
 	if ( ! $ok ) {
 		$body .= '<p>' . esc_html( (string) $result['error'] ) . '</p>';
@@ -379,8 +379,8 @@ function kits_transfer_result(): void {
 	wp_admin_notice(
 		$body,
 		array(
-			'type' => $ok ? 'success' : 'error',
-			'dismissible' => true,
+			'type'           => $ok ? 'success' : 'error',
+			'dismissible'    => true,
 			'paragraph_wrap' => false,
 		)
 	);
@@ -893,7 +893,7 @@ function kits_options_sections(): array {
  * @param string $path  Relative to wp-admin.
  */
 function kits_options_link( string $label, string $path ): string {
-	return kits_link( $label, $path ); // one link helper (admin-home.php); this name stays for existing callers
+	return kits_link( $label, $path ); // one link helper (admin-home.php); this name stays for existing callers.
 }
 
 /**
@@ -1000,7 +1000,7 @@ function kits_options_socials(): void {
 	$rm   = (array) get_option( 'rank-math-options-titles', array() );
 	$rows = array();
 	foreach ( array(
-		'social_url_facebook' => 'Facebook',
+		'social_url_facebook'  => 'Facebook',
 		'twitter_author_names' => 'X',
 	) as $k => $label ) {
 		if ( ! empty( $rm[ $k ] ) ) {
@@ -1165,7 +1165,7 @@ function kits_settings_reset( string $section ): bool {
 	if ( ! array_intersect_key( kits_theme_options_saved(), array_flip( $keys ) ) ) {
 		return false;
 	}
-	update_option( 'kits_theme_options', array_fill_keys( $keys, '' ) ); // the clean-up drops each key sent empty: the default again; other keys stay
+	update_option( 'kits_theme_options', array_fill_keys( $keys, '' ) ); // the clean-up drops each key sent empty: the default again; other keys stay.
 	return true;
 }
 
@@ -1197,7 +1197,7 @@ add_action(
 		}
 		kits_settings_reset( $section );
 		add_settings_error( 'general', 'settings_updated', 'Defaults restored.', 'success' );
-		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
+		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen.
 		wp_safe_redirect( admin_url( 'admin.php?page=kits-settings&kits_section=' . rawurlencode( $section ) . '&settings-updated=true' ) );
 		exit;
 	}

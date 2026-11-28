@@ -27,7 +27,7 @@ function sourceweb_more_products(): array {
 		'mailweb'      => array( 'MailWeb', __( 'Mailboxes, sending and a team inbox inside WordPress.', 'sourceweb' ), 'https://wugweb.com/plugins/mailweb/' ),
 		'planweb'      => array( 'PlanWeb', __( 'A content and team calendar with reminders and a weekly digest.', 'sourceweb' ), 'https://wugweb.com/plugins/planweb/' ),
 	);
-	unset( $all['sourceweb'] ); // not this one
+	unset( $all['sourceweb'] ); // Not this one.
 	return $all;
 }
 
@@ -66,7 +66,19 @@ add_action(
 		}
 		add_submenu_page( AW_SRC_MENU, __( 'More from Kits', 'sourceweb' ), __( 'More from Kits', 'sourceweb' ), 'install_plugins', 'sourceweb-more', 'sourceweb_more_page', 90 );
 	},
-	99
+	101 // After the plugin's own menu (priority 100 at the latest), so the parent exists and the first item stays the plugin's own screen.
+);
+
+add_action(
+	'admin_init',
+	function () {
+		// A link to this plugin's copy goes to Kits Core's page when Core is active.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only page name.
+		if ( 'sourceweb' !== 'kits' && function_exists( 'kits_more_page' ) && isset( $_GET['page'] ) && 'sourceweb-more' === $_GET['page'] ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=kits-core-more' ) );
+			exit;
+		}
+	}
 );
 
 /** The page: a card for each of the other plugins. */
@@ -85,17 +97,23 @@ function sourceweb_more_page(): void {
 		'activated' => array( 'success', __( 'Activated.', 'sourceweb' ) ),
 		'failed'    => array( 'error', __( 'That did not work. Nothing was changed.', 'sourceweb' ) ),
 	);
-	wp_register_style( 'sourceweb-more', false, array(), null );
+	wp_register_style( 'sourceweb-more', false, array(), '1' );
 	wp_enqueue_style( 'sourceweb-more' );
 	wp_add_inline_style( 'sourceweb-more', '.sourceweb-more h1{font-size:28px;font-weight:700;letter-spacing:-.02em}.sourceweb-more__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px;max-width:1000px}.sourceweb-more__card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px 20px}.sourceweb-more__card h2{margin:0 0 8px;font-size:18px}.sourceweb-more__state{font-weight:600}.sourceweb-more__acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sourceweb-more__acts form{margin:0}' );
 	echo '<div class="wrap sourceweb-more"><h1>' . esc_html__( 'More from Kits', 'sourceweb' ) . '</h1>';
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a result word only; nothing is changed by reading it.
 	$done = isset( $_GET['sourceweb_more'] ) ? sanitize_key( wp_unslash( $_GET['sourceweb_more'] ) ) : '';
 	if ( isset( $results[ $done ] ) ) {
-		wp_admin_notice( esc_html( $results[ $done ][1] ), array( 'type' => $results[ $done ][0], 'dismissible' => true ) );
+		wp_admin_notice(
+			esc_html( $results[ $done ][1] ),
+			array(
+				'type'        => $results[ $done ][0],
+				'dismissible' => true,
+			)
+		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reason is shown as text, escaped.
 		if ( 'failed' === $done && isset( $_GET['sourceweb_why'] ) ) {
-			echo '<p class="description">' . esc_html( sanitize_text_field( wp_unslash( $_GET['sourceweb_why'] ) ) ) . '</p>';
+			echo '<p class="description">' . esc_html( sanitize_text_field( wp_unslash( $_GET['sourceweb_why'] ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reason is shown as escaped text.
 		}
 	}
 	echo '<p class="description">' . esc_html__( 'The other Kits plugins. Each works on its own, and they work better together.', 'sourceweb' ) . '</p>';
@@ -135,10 +153,9 @@ function sourceweb_more_page(): void {
  * @param string $why    A short reason for a failure.
  */
 function sourceweb_more_back( string $result, string $why = '' ): void {
-	$args = array(
-		'page'          => 'sourceweb-more',
-		'sourceweb_more'      => $result,
-	);
+	$args = array( 'page' => 'sourceweb-more' );
+
+	$args['sourceweb_more'] = $result;
 	if ( '' !== $why ) {
 		$args['sourceweb_why'] = mb_substr( $why, 0, 200 );
 	}
@@ -177,7 +194,13 @@ function sourceweb_more_folder( string $key, string $cap ): string {
  */
 function sourceweb_more_release( string $folder ) {
 	$url = defined( 'KITS_REGISTRY_URL' ) ? (string) KITS_REGISTRY_URL : 'https://wugweb-git.github.io/Kits/registry/index.json';
-	$res = wp_remote_get( esc_url_raw( $url ), array( 'timeout' => 10, 'user-agent' => 'Kits-registry/1' ) );
+	$res = wp_remote_get(
+		esc_url_raw( $url ),
+		array(
+			'timeout'    => 10,
+			'user-agent' => 'Kits-registry/1',
+		)
+	);
 	if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
 		return new WP_Error( 'more_registry', __( 'The list of releases could not be reached.', 'sourceweb' ) );
 	}
@@ -191,7 +214,10 @@ function sourceweb_more_release( string $folder ) {
 	if ( 0 !== strpos( $pkg, 'https://github.com/wugweb-git/Kits/releases/download/' ) || ! preg_match( '/^[a-f0-9]{64}$/', $sum ) ) {
 		return new WP_Error( 'more_untrusted', __( 'The release is not one this plugin trusts.', 'sourceweb' ) );
 	}
-	return array( 'url' => $pkg, 'sha256' => $sum );
+	return array(
+		'url'    => $pkg,
+		'sha256' => $sum,
+	);
 }
 
 /** Install: an administrator, a nonce, a release from the registry, the checksum, then WordPress's own installer. */
@@ -230,7 +256,7 @@ add_action( 'admin_post_sourceweb_more_install', 'sourceweb_more_install' );
 
 /** Activate a plugin that is installed. */
 function sourceweb_more_activate(): void {
-	$folder = sourceweb_more_folder( 'sourceweb_more_activate_', 'activate_plugins' );
+	$folder               = sourceweb_more_folder( 'sourceweb_more_activate_', 'activate_plugins' );
 	list( $state, $file ) = sourceweb_more_state( $folder );
 	if ( 'installed' !== $state ) {
 		sourceweb_more_back( 'failed', __( 'It is not installed, or it is already active.', 'sourceweb' ) );

@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/admin-menu-model.php';
-require_once __DIR__ . '/admin-fold-model.php'; // kits_fold_tabs() for kits_admin_fold_tabs() below
+require_once __DIR__ . '/admin-fold-model.php'; // The tab fold helper used by the Kits menu, below.
 
 add_action(
 	'admin_menu',
@@ -365,8 +365,8 @@ function kits_home_theme(): void {
 		'Design System Elements',
 		'172',
 		array(
-			'unit' => 'registered',
-			'trend' => '100% verified',
+			'unit'      => 'registered',
+			'trend'     => '100% verified',
 			'trend_dir' => 'up',
 			'sparkline' => array( 120, 135, 150, 162, 172 ),
 		)
@@ -375,8 +375,8 @@ function kits_home_theme(): void {
 		'Active Design Tokens',
 		'48',
 		array(
-			'unit' => 'tokens',
-			'trend' => 'Active',
+			'unit'      => 'tokens',
+			'trend'     => 'Active',
 			'trend_dir' => 'up',
 			'sparkline' => array( 30, 36, 42, 45, 48 ),
 		)
@@ -385,8 +385,8 @@ function kits_home_theme(): void {
 		'FSE Templates & Parts',
 		'6',
 		array(
-			'unit' => 'synced',
-			'trend' => 'Native FSE',
+			'unit'      => 'synced',
+			'trend'     => 'Native FSE',
 			'trend_dir' => 'up',
 			'sparkline' => array( 2, 4, 5, 5, 6 ),
 		)
@@ -395,8 +395,8 @@ function kits_home_theme(): void {
 		'Theme & System Health',
 		'100%',
 		array(
-			'unit' => 'optimal',
-			'trend' => 'Healthy',
+			'unit'      => 'optimal',
+			'trend'     => 'Healthy',
 			'trend_dir' => 'up',
 			'sparkline' => array( 96, 98, 99, 100, 100 ),
 		)

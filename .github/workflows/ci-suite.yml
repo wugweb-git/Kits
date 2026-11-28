@@ -272,6 +272,8 @@ jobs:
         run: python3 tools/validate/check-visible-brand.py
       - name: More from Kits page is generated and works alone
         run: sh tools/validate/more-page-test.sh
+      - name: Plugins-screen details (View details, row links) are generated and work alone
+        run: sh tools/validate/plugin-info-test.sh
       - name: Animal Writes site layer tests
         run: |
           for f in sites/animalwrites/*/tests/*.php; do echo "== $f"; php "$f" || exit 1; done

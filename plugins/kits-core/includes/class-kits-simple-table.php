@@ -17,21 +17,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Plain rows in a core list table. */
 class Kits_Simple_Table extends WP_List_Table {
 
-	/** @var array column => label */
+	/**
+	 * Column => label.
+	 *
+	 * @var array
+	 */
 	private $cols;
 
-	/** @var array rows: column => escaped HTML, plus _sort => column => raw value to sort by, _after => a whole row of escaped HTML printed under it */
+	/**
+	 * Rows: column => escaped HTML, plus _sort => column => raw value to sort by, _after => a whole row of escaped HTML printed under it.
+	 *
+	 * @var array
+	 */
 	private $rows;
 
 	/**
-	 * @var array per_page (0: all on one page), total (rows are already that page), primary, fixed (bool), empty
+	 * Options.
+	 *
+	 * Keys: per_page (0: all on one page), total (rows are already that page), primary, fixed (bool), empty
 	 * (text when there are no rows; null: core's "No items found."), foot (bool: the footer header row), sortable
 	 * (column => true to sort descending first, false ascending first; the rows keep their own order until a heading
 	 * is clicked), caption (a screen-reader caption).
+	 *
+	 * @var array
 	 */
 	private $opts;
 
 	/**
+	 * Set up the table.
+	 *
 	 * @param string $plural Table name (CSS class, screen-reader texts, and the prefix of its sort and header ids).
 	 * @param array  $cols   Column => label.
 	 * @param array  $rows   Rows.
@@ -41,22 +55,22 @@ class Kits_Simple_Table extends WP_List_Table {
 		parent::__construct(
 			array(
 				'singular' => $plural,
-				'plural' => $plural,
-				'ajax' => false,
-				'screen' => get_current_screen(),
+				'plural'   => $plural,
+				'ajax'     => false,
+				'screen'   => get_current_screen(),
 			)
 		);
 		$this->cols = $cols;
 		$this->rows = $rows;
 		$this->opts = $opts + array(
 			'per_page' => 0,
-			'total' => null,
-			'primary' => (string) array_key_first( $cols ),
-			'fixed' => false,
-			'empty' => 'Nothing yet.',
-			'foot' => true,
+			'total'    => null,
+			'primary'  => (string) array_key_first( $cols ),
+			'fixed'    => false,
+			'empty'    => 'Nothing yet.',
+			'foot'     => true,
 			'sortable' => array(),
-			'caption' => '',
+			'caption'  => '',
 		);
 	}
 
@@ -113,6 +127,11 @@ class Kits_Simple_Table extends WP_List_Table {
 		echo str_replace( 'cb-select-all-', esc_attr( $prefix ) . 'cb-select-all-', $html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core's own header markup.
 	}
 
+	/**
+	 * The columns, column => label.
+	 *
+	 * @return array
+	 */
 	public function get_columns() {
 		return $this->cols;
 	}
@@ -128,16 +147,30 @@ class Kits_Simple_Table extends WP_List_Table {
 		return $out;
 	}
 
+	/**
+	 * The primary column.
+	 *
+	 * @return string
+	 */
 	protected function get_primary_column_name() {
 		return $this->opts['primary'];
 	}
 
+	/**
+	 * The table's CSS classes.
+	 *
+	 * @return string[]
+	 */
 	protected function get_table_classes() {
 		$c = parent::get_table_classes();
-		return $this->opts['fixed'] ? $c : array_values( array_diff( $c, array( 'fixed' ) ) ); // content-wide columns unless asked
+		return $this->opts['fixed'] ? $c : array_values( array_diff( $c, array( 'fixed' ) ) ); // content-wide columns unless asked.
 	}
 
-	/** No bulk actions and no nonce: nothing here posts. */
+	/**
+	 * No bulk actions and no nonce: nothing here posts.
+	 *
+	 * @param string $which Which navigation: "top" or "bottom".
+	 */
 	protected function display_tablenav( $which ) {
 		if ( ! $this->opts['per_page'] ) {
 			return;
@@ -147,18 +180,21 @@ class Kits_Simple_Table extends WP_List_Table {
 		echo '<br class="clear"></div>';
 	}
 
+	/**
+	 * Sort the rows, take the page, and set the pagination.
+	 */
 	public function prepare_items() {
 		$rows = $this->rows;
 		$per  = (int) $this->opts['per_page'];
 		if ( null === $this->opts['total'] ) {
-			$rows = $this->sorted( $rows ); // a page the screen fetched itself keeps the screen's order
+			$rows = $this->sorted( $rows ); // a page the screen fetched itself keeps the screen's order.
 		}
 		if ( $per ) {
 			$total = null === $this->opts['total'] ? count( $rows ) : (int) $this->opts['total'];
 			$this->set_pagination_args(
 				array(
 					'total_items' => $total,
-					'per_page' => $per,
+					'per_page'    => $per,
 				)
 			);
 			if ( null === $this->opts['total'] ) {
@@ -208,14 +244,30 @@ class Kits_Simple_Table extends WP_List_Table {
 		}
 	}
 
+	/**
+	 * The row's checkbox cell.
+	 *
+	 * @param array $item The row.
+	 * @return string
+	 */
 	protected function column_cb( $item ) {
-		return (string) ( $item['cb'] ?? '' ); // arrives escaped
+		return (string) ( $item['cb'] ?? '' ); // arrives escaped.
 	}
 
+	/**
+	 * A cell.
+	 *
+	 * @param array  $item The row.
+	 * @param string $col  The column.
+	 * @return string
+	 */
 	protected function column_default( $item, $col ) {
-		return (string) ( $item[ $col ] ?? '' ); // cells arrive escaped
+		return (string) ( $item[ $col ] ?? '' ); // cells arrive escaped.
 	}
 
+	/**
+	 * The text shown when there are no rows.
+	 */
 	public function no_items() {
 		if ( null === $this->opts['empty'] ) {
 			parent::no_items();

@@ -27,7 +27,7 @@ function directoryweb_more_products(): array {
 		'mailweb'      => array( 'MailWeb', __( 'Mailboxes, sending and a team inbox inside WordPress.', 'directoryweb' ), 'https://wugweb.com/plugins/mailweb/' ),
 		'planweb'      => array( 'PlanWeb', __( 'A content and team calendar with reminders and a weekly digest.', 'directoryweb' ), 'https://wugweb.com/plugins/planweb/' ),
 	);
-	unset( $all['directoryweb'] ); // not this one
+	unset( $all['directoryweb'] ); // Not this one.
 	return $all;
 }
 
@@ -66,7 +66,19 @@ add_action(
 		}
 		add_submenu_page( DIRECTORYWEB_PAGE, __( 'More from Kits', 'directoryweb' ), __( 'More from Kits', 'directoryweb' ), 'install_plugins', 'directoryweb-more', 'directoryweb_more_page', 90 );
 	},
-	99
+	101 // After the plugin's own menu (priority 100 at the latest), so the parent exists and the first item stays the plugin's own screen.
+);
+
+add_action(
+	'admin_init',
+	function () {
+		// A link to this plugin's copy goes to Kits Core's page when Core is active.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only page name.
+		if ( 'directoryweb' !== 'kits' && function_exists( 'kits_more_page' ) && isset( $_GET['page'] ) && 'directoryweb-more' === $_GET['page'] ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=kits-core-more' ) );
+			exit;
+		}
+	}
 );
 
 /** The page: a card for each of the other plugins. */
@@ -85,17 +97,23 @@ function directoryweb_more_page(): void {
 		'activated' => array( 'success', __( 'Activated.', 'directoryweb' ) ),
 		'failed'    => array( 'error', __( 'That did not work. Nothing was changed.', 'directoryweb' ) ),
 	);
-	wp_register_style( 'directoryweb-more', false, array(), null );
+	wp_register_style( 'directoryweb-more', false, array(), '1' );
 	wp_enqueue_style( 'directoryweb-more' );
 	wp_add_inline_style( 'directoryweb-more', '.directoryweb-more h1{font-size:28px;font-weight:700;letter-spacing:-.02em}.directoryweb-more__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px;max-width:1000px}.directoryweb-more__card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px 20px}.directoryweb-more__card h2{margin:0 0 8px;font-size:18px}.directoryweb-more__state{font-weight:600}.directoryweb-more__acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.directoryweb-more__acts form{margin:0}' );
 	echo '<div class="wrap directoryweb-more"><h1>' . esc_html__( 'More from Kits', 'directoryweb' ) . '</h1>';
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a result word only; nothing is changed by reading it.
 	$done = isset( $_GET['directoryweb_more'] ) ? sanitize_key( wp_unslash( $_GET['directoryweb_more'] ) ) : '';
 	if ( isset( $results[ $done ] ) ) {
-		wp_admin_notice( esc_html( $results[ $done ][1] ), array( 'type' => $results[ $done ][0], 'dismissible' => true ) );
+		wp_admin_notice(
+			esc_html( $results[ $done ][1] ),
+			array(
+				'type'        => $results[ $done ][0],
+				'dismissible' => true,
+			)
+		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reason is shown as text, escaped.
 		if ( 'failed' === $done && isset( $_GET['directoryweb_why'] ) ) {
-			echo '<p class="description">' . esc_html( sanitize_text_field( wp_unslash( $_GET['directoryweb_why'] ) ) ) . '</p>';
+			echo '<p class="description">' . esc_html( sanitize_text_field( wp_unslash( $_GET['directoryweb_why'] ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reason is shown as escaped text.
 		}
 	}
 	echo '<p class="description">' . esc_html__( 'The other Kits plugins. Each works on its own, and they work better together.', 'directoryweb' ) . '</p>';
@@ -135,10 +153,9 @@ function directoryweb_more_page(): void {
  * @param string $why    A short reason for a failure.
  */
 function directoryweb_more_back( string $result, string $why = '' ): void {
-	$args = array(
-		'page'          => 'directoryweb-more',
-		'directoryweb_more'      => $result,
-	);
+	$args = array( 'page' => 'directoryweb-more' );
+
+	$args['directoryweb_more'] = $result;
 	if ( '' !== $why ) {
 		$args['directoryweb_why'] = mb_substr( $why, 0, 200 );
 	}
@@ -177,7 +194,13 @@ function directoryweb_more_folder( string $key, string $cap ): string {
  */
 function directoryweb_more_release( string $folder ) {
 	$url = defined( 'KITS_REGISTRY_URL' ) ? (string) KITS_REGISTRY_URL : 'https://wugweb-git.github.io/Kits/registry/index.json';
-	$res = wp_remote_get( esc_url_raw( $url ), array( 'timeout' => 10, 'user-agent' => 'Kits-registry/1' ) );
+	$res = wp_remote_get(
+		esc_url_raw( $url ),
+		array(
+			'timeout'    => 10,
+			'user-agent' => 'Kits-registry/1',
+		)
+	);
 	if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
 		return new WP_Error( 'more_registry', __( 'The list of releases could not be reached.', 'directoryweb' ) );
 	}
@@ -191,7 +214,10 @@ function directoryweb_more_release( string $folder ) {
 	if ( 0 !== strpos( $pkg, 'https://github.com/wugweb-git/Kits/releases/download/' ) || ! preg_match( '/^[a-f0-9]{64}$/', $sum ) ) {
 		return new WP_Error( 'more_untrusted', __( 'The release is not one this plugin trusts.', 'directoryweb' ) );
 	}
-	return array( 'url' => $pkg, 'sha256' => $sum );
+	return array(
+		'url'    => $pkg,
+		'sha256' => $sum,
+	);
 }
 
 /** Install: an administrator, a nonce, a release from the registry, the checksum, then WordPress's own installer. */
@@ -230,7 +256,7 @@ add_action( 'admin_post_directoryweb_more_install', 'directoryweb_more_install' 
 
 /** Activate a plugin that is installed. */
 function directoryweb_more_activate(): void {
-	$folder = directoryweb_more_folder( 'directoryweb_more_activate_', 'activate_plugins' );
+	$folder               = directoryweb_more_folder( 'directoryweb_more_activate_', 'activate_plugins' );
 	list( $state, $file ) = directoryweb_more_state( $folder );
 	if ( 'installed' !== $state ) {
 		directoryweb_more_back( 'failed', __( 'It is not installed, or it is already active.', 'directoryweb' ) );

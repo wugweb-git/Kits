@@ -27,6 +27,35 @@ Kits Core is the shared layer of Kits by Wugweb sites. The site configures it th
 
 The JavaScript in `build/` is compiled with `@wordpress/scripts`. Its unminified source is in the `src/` folder of this plugin and is public at https://github.com/wugweb-git/Kits/tree/kits-suite/plugins/kits-core. To rebuild it, run `npm install` and then `npm run build` in that folder.
 
+== Installation ==
+
+1. Upload the plugin zip in Plugins, Add New, Upload Plugin, or copy the `kits-core` folder to `wp-content/plugins/`.
+2. Activate it. The Kits menu appears with Home, Theme Options, Settings, Tools and Help.
+3. Open Kits, Settings and switch on what the site needs (forms, share bar, analytics, content types). Everything is off until switched on.
+4. Optional: install the Kits by Wugweb theme, and any of the other Kits plugins. Each one works on its own; Kits Core only adds the shared screens and extras.
+
+== Frequently Asked Questions ==
+
+= Do the other Kits plugins need Kits Core? =
+
+No. DirectoryWeb, RankWeb, SourceWeb, InsightWeb, MailWeb and PlanWeb each activate and work alone. With Kits Core active they share the admin shell and the Kits menu.
+
+= Does it send data to another site? =
+
+Not by default. Each outside service it can use is listed under External services, and each one is off until you configure it.
+
+= Where is the code for the compiled scripts? =
+
+In the `src/` folder of the plugin, and in the public repository named under Source code above.
+
+= What happens when I delete the plugin? =
+
+Nothing is deleted unless you switch on the delete-data option first. A backup is written before anything is removed.
+
+= How do I find the other Kits plugins? =
+
+Kits, More from Kits lists them, says which are installed, and in the direct-download build installs or activates one when an administrator presses the button.
+
 == Uninstall ==
 
 By default, deleting the plugin deletes nothing — theme options, form settings and saved keys all stay (the publisher records and keyword tables are SourceWeb's and InsightWeb's since 18 Nov 2026), so reinstalling finds everything as it was. Scheduled events (aw_daily, aw_error_count_daily, aw_daily_backup, kits_checkin_weekly) are always unscheduled. Only when you tick Kits &rarr; Settings &rarr; Uninstall &rarr; "Delete this plugin's data when it is deleted" does it remove Kits Core's own options and transients (including kits_active_style_variation, kits_update_channel, kits_global_styles_backup and the kits_registry transient) after first writing a backup of the options to wp-content/uploads/wugweb-backups/ (nothing is deleted if the backup fails). A site layer can list its own options, events and tables through the filter kits_core_uninstall_options and the actions kits_core_uninstall and kits_core_uninstall_data. Shared data and anything belonging to another plugin are never touched. Items of the content types are posts: they are never deleted, also when a type is switched off.

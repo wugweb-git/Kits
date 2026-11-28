@@ -144,7 +144,7 @@ add_action(
 add_action(
 	'admin_menu',
 	function () {
-		// Under Kits menu
+		// Under Kits menu.
 		add_submenu_page(
 			'kits',
 			__( 'Brand Customizer', 'kits-core' ),
@@ -154,7 +154,7 @@ add_action(
 			'kits_brand_customizer_render_page'
 		);
 
-		// Also shortcut under Appearance
+		// Also shortcut under Appearance.
 		add_theme_page(
 			__( 'Brand Tokens', 'kits-core' ),
 			__( 'Brand Tokens', 'kits-core' ),
@@ -221,7 +221,7 @@ function kits_brand_customizer_render_page() {
 			}
 			$notices[] = array(
 				'type' => 'success',
-				'msg' => __( 'Brand tokens restored to the active tenant preset.', 'kits-core' ),
+				'msg'  => __( 'Brand tokens restored to the active tenant preset.', 'kits-core' ),
 			);
 		} elseif ( 'clear_brand' === $action ) {
 			kits_brand_clear();
@@ -230,7 +230,7 @@ function kits_brand_customizer_render_page() {
 			}
 			$notices[] = array(
 				'type' => 'success',
-				'msg' => __( 'All tenant brand overrides cleared to theme defaults.', 'kits-core' ),
+				'msg'  => __( 'All tenant brand overrides cleared to theme defaults.', 'kits-core' ),
 			);
 		} elseif ( 'apply_preset' === $action ) {
 			$preset_key = isset( $_POST['preset_key'] ) ? sanitize_key( wp_unslash( $_POST['preset_key'] ) ) : '';
@@ -246,7 +246,7 @@ function kits_brand_customizer_render_page() {
 				$notices[] = array(
 					'type' => 'success',
 					/* translators: %s: Preset name */
-					'msg' => sprintf( __( 'Preset "%s" applied successfully!', 'kits-core' ), esc_html( $presets[ $preset_key ]['name'] ) ),
+					'msg'  => sprintf( __( 'Preset "%s" applied successfully!', 'kits-core' ), esc_html( $presets[ $preset_key ]['name'] ) ),
 				);
 			}
 		} elseif ( 'import_json' === $action ) {
@@ -261,16 +261,16 @@ function kits_brand_customizer_render_page() {
 				}
 				$notices[] = array(
 					'type' => 'success',
-					'msg' => __( 'Brand tokens imported successfully!', 'kits-core' ),
+					'msg'  => __( 'Brand tokens imported successfully!', 'kits-core' ),
 				);
 			} else {
 				$notices[] = array(
 					'type' => 'error',
-					'msg' => __( 'Invalid JSON format for import.', 'kits-core' ),
+					'msg'  => __( 'Invalid JSON format for import.', 'kits-core' ),
 				);
 			}
 		} else {
-			// Standard Save
+			// Standard Save.
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Per-token sanitization by kits_brand_sanitize_tokens().
 			$raw_tokens = isset( $_POST['tokens'] ) && is_array( $_POST['tokens'] ) ? wp_unslash( $_POST['tokens'] ) : array();
 			$sanitized  = kits_brand_sanitize_tokens( (array) $raw_tokens );
@@ -280,20 +280,20 @@ function kits_brand_customizer_render_page() {
 			}
 			$notices[] = array(
 				'type' => 'success',
-				'msg' => __( 'Brand tokens updated successfully. Live cache purged.', 'kits-core' ),
+				'msg'  => __( 'Brand tokens updated successfully. Live cache purged.', 'kits-core' ),
 			);
 		}
 	}
 
-	$saved   = kits_get_brand_tokens();
-	$defs    = kits_brand_token_definitions();
+	$saved          = kits_get_brand_tokens();
+	$defs           = kits_brand_token_definitions();
 	$brand_defaults = kits_get_brand_defaults();
 	foreach ( $defs as $def_key => $def_row ) {
 		$defs[ $def_key ]['default'] = $brand_defaults[ $def_key ] ?? $def_row['default'];
 	}
 	$presets = kits_brand_presets();
 
-	// Group tokens by category
+	// Group tokens by category.
 	$categories = array();
 	foreach ( $defs as $key => $def ) {
 		$cat = $def['category'];

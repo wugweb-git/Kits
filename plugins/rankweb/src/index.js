@@ -138,22 +138,22 @@ const TREND_METRICS = [
 	{
 		metric: 'titles',
 		label: __( 'Search titles missing', 'rankweb' ),
-		unit: __( 'items', 'rankweb' ),
+		unit: [ __( 'item', 'rankweb' ), __( 'items', 'rankweb' ) ],
 	},
 	{
 		metric: 'descs',
 		label: __( 'Descriptions missing', 'rankweb' ),
-		unit: __( 'items', 'rankweb' ),
+		unit: [ __( 'item', 'rankweb' ), __( 'items', 'rankweb' ) ],
 	},
 	{
 		metric: 'focus',
 		label: __( 'Focus keywords missing', 'rankweb' ),
-		unit: __( 'items', 'rankweb' ),
+		unit: [ __( 'item', 'rankweb' ), __( 'items', 'rankweb' ) ],
 	},
 	{
 		metric: 'schema',
 		label: __( 'Schema entries to write', 'rankweb' ),
-		unit: __( 'items', 'rankweb' ),
+		unit: [ __( 'item', 'rankweb' ), __( 'items', 'rankweb' ) ],
 	},
 	{
 		metric: 'faq',
@@ -435,7 +435,7 @@ function Dashboard( { view } ) {
 								key={ t.key }
 								label={ t.label }
 								points={ t.dist }
-								unit={ __( 'items', 'rankweb' ) }
+								unit={ [ __( 'item', 'rankweb' ), __( 'items', 'rankweb' ) ] }
 							/>
 						) ) }
 					</div>
@@ -1034,7 +1034,7 @@ function Services() {
 			id={ `rankweb-group-${ SERVICES }` }
 			title={ __( 'Connected services', 'rankweb' ) }
 			description={ __(
-				'What RankWeb works with. Keys stay in Kits → Keys.',
+				'What RankWeb works with. Keys are set in Settings and are never shown.',
 				'rankweb'
 			) }
 		>

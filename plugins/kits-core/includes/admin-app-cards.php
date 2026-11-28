@@ -41,11 +41,11 @@ function kits_cards_space_tokens(): array {
  * @return array Keyed by the path under settings.custom.kits.card ('stacked.gap' = stacked → gap).
  */
 function kits_cards_fields(): array {
-	$space = kits_cards_space_tokens();
-	$token = function ( string $name ) use ( $space ): string {
+	$space  = kits_cards_space_tokens();
+	$token  = function ( string $name ) use ( $space ): string {
 		return '--' . $name . ( '' !== ( $space[ $name ] ?? '' ) ? ' (' . $space[ $name ] . ')' : '' );
 	};
-	$pick  = function ( array $names ) use ( $token ): array {
+	$pick   = function ( array $names ) use ( $token ): array {
 		$out = array();
 		foreach ( $names as $n ) {
 			$out[] = array(

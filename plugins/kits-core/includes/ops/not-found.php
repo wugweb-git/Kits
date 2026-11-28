@@ -118,26 +118,26 @@ function kits_not_found_html(): string {
 	} else {
 		$html .= '<h1 class="wp-block-heading">Page not found</h1><p class="kit-error-lead">This page doesn’t exist or has moved. Search the site, or go to a section.</p>';
 	}
-	$html .= $media; // after the lead on phones and tablets; from 1200px the photo fills the section behind the text
+	$html .= $media; // after the lead on phones and tablets; from 1200px the photo fills the section behind the text.
 	$html .= '<form class="kit-error-search" action="' . esc_url( home_url( '/search/' ) ) . '" method="get" role="search"><label class="screen-reader-text" for="kit-404-q">Search</label><span class="kit-error-field"><span class="kit-ico kit-ico--search" aria-hidden="true"></span><input id="kit-404-q" type="search" name="q" value="' . esc_attr( $q ) . '" placeholder="Search" autocomplete="off"></span><button type="submit" class="kit-btn kit-btn--brand kit-btn--label">Search</button></form>';
 
 	if ( $section ) {
 		$posts = get_posts(
 			array(
-				'post_type' => $section[0],
+				'post_type'   => $section[0],
 				'post_status' => 'publish',
 				'numberposts' => 3,
-				'orderby' => 'date',
-				'order' => 'DESC',
+				'orderby'     => 'date',
+				'order'       => 'DESC',
 			)
 		);
 		if ( $posts ) {
-			do_action( 'kits_not_found_section_styles', $section[0] ); // the site loads its list styles
+			do_action( 'kits_not_found_section_styles', $section[0] ); // the site loads its list styles.
 			$m     = (array) apply_filters(
 				'kits_not_found_markup',
 				array(
 					'section' => 'kit-not-found-group',
-					'list' => '',
+					'list'    => '',
 				),
 				$section[0]
 			);
@@ -157,7 +157,7 @@ function kits_not_found_html(): string {
 	return $html . '</ul></nav>';
 }
 add_shortcode( 'kits_not_found', 'kits_not_found_html' );
-add_shortcode( 'aw_not_found', 'kits_not_found_html' ); // the name the 404 template and stored pages carry
+add_shortcode( 'aw_not_found', 'kits_not_found_html' ); // the name the 404 template and stored pages carry.
 
 /**
  * An error page's photo, from the folder a site names with the filter kits_error_picture_source (array of 'dir' and
@@ -170,15 +170,15 @@ add_shortcode( 'aw_not_found', 'kits_not_found_html' ); // the name the 404 temp
  * @return string
  */
 function kits_error_picture( $name ) {
-	$src   = (array) apply_filters(
+	$src = (array) apply_filters(
 		'kits_error_picture_source',
 		array(
 			'dir' => '',
 			'url' => '',
 		)
 	);
-	$dir   = (string) ( $src['dir'] ?? '' );
-	$url   = (string) ( $src['url'] ?? '' );
+	$dir = (string) ( $src['dir'] ?? '' );
+	$url = (string) ( $src['url'] ?? '' );
 	if ( '' === $dir || '' === $url ) {
 		return '';
 	}

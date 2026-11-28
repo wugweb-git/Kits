@@ -35,7 +35,7 @@ function kits_admin_app_global_styles_data( array $data ): array {
 	$id  = (int) WP_Theme_JSON_Resolver::get_user_global_styles_post_id();
 	$raw = $id ? json_decode( (string) get_post_field( 'post_content', $id ), true ) : null;
 	$raw = is_array( $raw ) ? $raw : array();
-	// An empty list ("styles": []) is sent as {}.
+	// An empty styles list is sent as an empty object.
 	$data['globalStyles'] = array(
 		'id'       => $id,
 		'settings' => (object) ( is_array( $raw['settings'] ?? null ) ? $raw['settings'] : array() ),

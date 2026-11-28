@@ -29,7 +29,7 @@ function kits_activity_types(): array {
 		array_values(
 			get_post_types(
 				array(
-					'public' => true,
+					'public'   => true,
 					'_builtin' => false,
 				)
 			)
@@ -38,7 +38,11 @@ function kits_activity_types(): array {
 	return array_values( array_unique( $types ) );
 }
 
-/** One query: published in the last 7 days, scheduled, awaiting review. */
+/**
+ * One query: published in the last 7 days, scheduled, awaiting review.
+ *
+ * @param array $types Post types to count.
+ */
 function kits_activity_counts( array $types ): array {
 	global $wpdb;
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
@@ -51,7 +55,12 @@ function kits_activity_counts( array $types ): array {
 	);
 }
 
-/** The 5 newest published items, or the next 5 scheduled ones ('future'). */
+/**
+ * The 5 newest published items, or the next 5 scheduled ones ('future').
+ *
+ * @param array  $types Post types to list.
+ * @param string $status Post status: "publish" or "future".
+ */
 function kits_activity_items( array $types, string $status ): array {
 	global $wpdb;
 	$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
@@ -59,16 +68,21 @@ function kits_activity_items( array $types, string $status ): array {
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_title, post_type, post_date_gmt FROM {$wpdb->posts} WHERE post_type IN ({$in}) AND post_status = %s ORDER BY post_date {$order}, ID {$order} LIMIT 5", array_merge( $types, array( 'future' === $status ? 'future' : 'publish' ) ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- placeholders and a fixed ASC/DESC only.
 }
 
-/** A table of items: Item (linked to its edit screen when allowed), Type, Date; a core list table. */
+/**
+ * A table of items: Item (linked to its edit screen when allowed), Type, Date; a core list table.
+ *
+ * @param array  $items Posts to list.
+ * @param string $caption Table caption for screen readers.
+ */
 function kits_activity_table( array $items, string $caption ): string {
 	$cells = array();
 	foreach ( $items as $p ) {
-		$id    = (int) $p->ID;
-		$title = '' !== trim( (string) $p->post_title ) ? (string) $p->post_title : '(no title)';
-		$link  = current_user_can( 'edit_post', $id ) ? get_edit_post_link( $id ) : '';
-		$obj   = get_post_type_object( (string) $p->post_type );
-		$type  = $obj ? (string) $obj->labels->singular_name : (string) $p->post_type;
-		$ts    = strtotime( (string) $p->post_date_gmt . ' UTC' );
+		$id      = (int) $p->ID;
+		$title   = '' !== trim( (string) $p->post_title ) ? (string) $p->post_title : '(no title)';
+		$link    = current_user_can( 'edit_post', $id ) ? get_edit_post_link( $id ) : '';
+		$obj     = get_post_type_object( (string) $p->post_type );
+		$type    = $obj ? (string) $obj->labels->singular_name : (string) $p->post_type;
+		$ts      = strtotime( (string) $p->post_date_gmt . ' UTC' );
 		$cells[] = array(
 			'item' => $link ? '<a href="' . esc_url( $link ) . '">' . esc_html( $title ) . '</a>' : esc_html( $title ),
 			'type' => esc_html( $type ),
@@ -85,7 +99,7 @@ function kits_activity_table( array $items, string $caption ): string {
 		),
 		$cells,
 		array(
-			'foot'    => false, // a short table in a Dashboard widget: no repeated header row
+			'foot'    => false, // a short table in a Dashboard widget: no repeated header row.
 			'caption' => $caption,
 		)
 	);

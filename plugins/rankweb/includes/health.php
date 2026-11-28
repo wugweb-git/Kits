@@ -100,11 +100,17 @@ add_action(
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
+		// Only where it belongs: RankWeb's own screens, the Dashboard and the Plugins list. Not above every other plugin's screen.
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$sid    = $screen ? (string) $screen->id : '';
+		if ( ! in_array( $sid, array( 'dashboard', 'plugins' ), true ) && false === strpos( $sid, 'aw-seo-plus' ) && false === strpos( $sid, 'rankweb' ) ) {
+			return;
+		}
 		$last = (array) get_option( 'aw_seo_endpoints_last', array() );
 		$problems = array_intersect_key( (array) ( $last['problems'] ?? array() ), rankweb_seo_watched_endpoints() ); // a saved result for an address no longer watched is dropped
 		if ( ! $problems ) {
 			return;
 		}
-		wp_admin_notice( '<strong>' . esc_html__( 'Sitemap or llms.txt is not answering.', 'rankweb' ) . '</strong> ' . esc_html( implode( ' ', $problems ) ) . ' ' . esc_html( sprintf( 'Checked %s.', wp_date( 'j M Y, g:i a', (int) $last['at'] ) ) ), array( 'type' => 'error' ) );
+		wp_admin_notice( '<strong>' . esc_html__( 'Sitemap or llms.txt is not answering.', 'rankweb' ) . '</strong> ' . esc_html( implode( ' ', $problems ) ) . ' ' . esc_html( sprintf( 'Checked %s.', wp_date( 'j M Y, g:i a', (int) $last['at'] ) ) ) . ' <a href="' . esc_url( admin_url( 'options-permalink.php' ) ) . '">' . esc_html__( 'Check Settings → Permalinks', 'rankweb' ) . '</a>', array( 'type' => 'error', 'dismissible' => true ) );
 	}
 );

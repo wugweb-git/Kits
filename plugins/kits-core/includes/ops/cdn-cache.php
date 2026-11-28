@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** Pages that carry a form, a nonce or personal data: never in the shared cache. */
 function kits_cdn_excluded_slugs() {
 	$slugs = (array) apply_filters(
-		'aw_cdn_excluded_slugs', // the older name of this filter, still applied
+		'aw_cdn_excluded_slugs', // the older name of this filter, still applied.
 		array( 'contact', 'volunteer', 'claim', 'remove-my-data', 'report', 'thank-you', 'corrections', 'helplines', 'search', 'login', 'register', 'my-account' )
 	);
 	return (array) apply_filters( 'kits_cdn_excluded_slugs', $slugs );
@@ -66,7 +66,7 @@ function kits_cdn_ttl() {
 	if ( is_page( kits_cdn_excluded_slugs() ) || ( is_singular() && false !== stripos( (string) get_post_field( 'post_content', get_queried_object_id() ), 'fluentform' ) ) ) {
 		return 0;
 	}
-	if ( is_singular() && in_array( get_queried_object_id(), array_map( 'intval', (array) apply_filters( 'kits_cdn_excluded_ids', array() ) ), true ) ) { // the site's never-cached pages (a site's crisis guides, for example)
+	if ( is_singular() && in_array( get_queried_object_id(), array_map( 'intval', (array) apply_filters( 'kits_cdn_excluded_ids', array() ) ), true ) ) { // the site's never-cached pages (a site's crisis guides, for example).
 		return 0;
 	}
 	if ( headers_sent() || preg_grep( '/^set-cookie:/i', headers_list() ) ) {
@@ -81,7 +81,7 @@ function kits_cdn_ttl() {
 
 /** Whether this page changes rarely: a Directory listing, a Library item or a Resource (not a hub, not a crisis guide). */
 function kits_cdn_is_long_lived() {
-	return is_singular( (array) apply_filters( 'kits_cdn_long_lived_types', array( 'post' ) ) ); // a site adds its listings and Library items
+	return is_singular( (array) apply_filters( 'kits_cdn_long_lived_types', array( 'post' ) ) ); // a site adds its listings and Library items.
 }
 
 add_action(
@@ -132,20 +132,20 @@ add_action(
 			'aw_cdn',
 			'kits_cdn_ttl',
 			array(
-				'type' => 'integer',
-				'default' => 0,
+				'type'              => 'integer',
+				'default'           => 0,
 				'sanitize_callback' => 'kits_cdn_ttl_sanitize',
-				'show_in_rest' => false,
+				'show_in_rest'      => false,
 			)
 		);
 		register_setting(
 			'aw_cdn',
 			'aw_cdn_ttl_long',
 			array(
-				'type' => 'integer',
-				'default' => 3600,
+				'type'              => 'integer',
+				'default'           => 3600,
 				'sanitize_callback' => 'kits_cdn_ttl_sanitize',
-				'show_in_rest' => false,
+				'show_in_rest'      => false,
 			)
 		);
 		add_settings_section( 'aw_cdn', 'Shared cache (CDN)', 'kits_cdn_settings_intro', 'aw-cdn' );
@@ -157,8 +157,8 @@ add_action(
 			'aw_cdn',
 			array(
 				'label_for' => 'kits_cdn_ttl',
-				'default' => 0,
-				'note' => 'Home, News, hubs, Directory places and campaigns. 0 = off.',
+				'default'   => 0,
+				'note'      => 'Home, News, hubs, Directory places and campaigns. 0 = off.',
 			)
 		);
 		add_settings_field(
@@ -169,8 +169,8 @@ add_action(
 			'aw_cdn',
 			array(
 				'label_for' => 'aw_cdn_ttl_long',
-				'default' => 3600,
-				'note' => '0 = the same as public pages.',
+				'default'   => 3600,
+				'note'      => '0 = the same as public pages.',
 			)
 		);
 	}
@@ -197,7 +197,11 @@ function kits_cdn_settings_field( $args ) {
 	);
 }
 
-/** The Cache-Control header public pages get with the saved options ('' when off). */
+/**
+ * The Cache-Control header public pages get with the saved options ('' when off).
+ *
+ * @param bool $long True for long-lived content.
+ */
 function kits_cdn_header_now( bool $long ): string {
 	$ttl = kits_cdn_ttl_sanitize( get_option( 'kits_cdn_ttl', 0 ) );
 	if ( ! $ttl ) {
@@ -217,7 +221,7 @@ function kits_cdn_settings_box() {
 		return;
 	}
 	if ( ! function_exists( 'kits_sections_page' ) ) {
-		settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu; Kits → Settings prints it itself)
+		settings_errors( 'general' ); // options.php's "Settings saved." (core prints it only under the Settings menu; Kits → Settings prints it itself).
 	}
 	echo '<form method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'aw_cdn' );

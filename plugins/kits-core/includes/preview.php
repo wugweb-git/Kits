@@ -35,9 +35,9 @@ function kits_preview_mark() {
 		KITS_PREVIEW_MARK,
 		'1',
 		array(
-			'expires' => time() + 400 * DAY_IN_SECONDS,
-			'path' => '/',
-			'secure' => true,
+			'expires'  => time() + 400 * DAY_IN_SECONDS,
+			'path'     => '/',
+			'secure'   => true,
 			'httponly' => false,
 			'samesite' => 'Lax',
 		)
@@ -47,8 +47,10 @@ function kits_preview_mark() {
 // Administrators: marked on any admin screen.
 add_action( 'admin_init', fn() => current_user_can( 'manage_options' ) ? kits_preview_mark() : null );
 
-/** Items only previewers see (post IDs). */
 if ( ! function_exists( 'kits_preview_only_ids' ) ) {
+	/**
+	 * Items only previewers see (post IDs).
+	 */
 	function kits_preview_only_ids() {
 		return array_values( array_filter( array_map( 'intval', (array) apply_filters( 'kits_preview_only_ids', array() ) ) ) );
 	}
@@ -64,7 +66,11 @@ function kits_client_ip() {
 	return trim( (string) ( $_SERVER['REMOTE_ADDR'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 }
 
-/** Is an IP on the preview list? IPv4: exact. IPv6: same /64 network (an entry may be written as "prefix::/64"). */
+/**
+ * Is an IP on the preview list? IPv4: exact. IPv6: same /64 network (an entry may be written as "prefix::/64").
+ *
+ * @param string $ip IP address to check.
+ */
 function kits_preview_ip_allowed( $ip ) {
 	$bin = @inet_pton( $ip ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
 	if ( false === $bin ) {
@@ -82,7 +88,11 @@ function kits_preview_ip_allowed( $ip ) {
 	return false;
 }
 
-/** Hash of a device token (only hashes are stored). */
+/**
+ * Hash of a device token (only hashes are stored).
+ *
+ * @param string $token Device token.
+ */
 function kits_preview_hash( $token ) {
 	return hash_hmac( 'sha256', (string) $token, wp_salt( 'auth' ) );
 }
@@ -115,10 +125,14 @@ function kits_preview_request() {
 	return current_user_can( 'manage_options' ) || kits_preview_ip_allowed( kits_client_ip() ) || kits_preview_device_ok();
 }
 
-/** Register the current browser as a preview device: random token in a cookie, its hash stored. */
+/**
+ * Register the current browser as a preview device: random token in a cookie, its hash stored.
+ *
+ * @param string $label Name the owner gives the device; "Device" when empty.
+ */
 function kits_preview_register_device( $label ) {
-	$token = bin2hex( random_bytes( 32 ) );
-	$all   = kits_preview_devices();
+	$token                              = bin2hex( random_bytes( 32 ) );
+	$all                                = kits_preview_devices();
 	$all[ kits_preview_hash( $token ) ] = array(
 		'label' => '' !== trim( (string) $label ) ? sanitize_text_field( (string) $label ) : 'Device',
 		'added' => gmdate( 'Y-m-d' ),
@@ -130,7 +144,7 @@ function kits_preview_register_device( $label ) {
 		KITS_PREVIEW_COOKIE,
 		$token,
 		array(
-			'expires'  => time() + 400 * DAY_IN_SECONDS, // the longest browsers keep a cookie
+			'expires'  => time() + 400 * DAY_IN_SECONDS, // the longest browsers keep a cookie.
 			'path'     => '/',
 			'secure'   => true,
 			'httponly' => true,
@@ -164,7 +178,7 @@ add_action(
 					kits_preview_nocache();
 					$yes = kits_preview_ip_allowed( kits_client_ip() ) || kits_preview_device_ok() || current_user_can( 'manage_options' );
 					if ( $yes ) {
-						kits_preview_mark(); // later pages ask only from this browser
+						kits_preview_mark(); // later pages ask only from this browser.
 					}
 					$r = new WP_REST_Response( array( 'preview' => $yes ) );
 					$r->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, private' );
@@ -183,7 +197,7 @@ add_action(
 	'wp_head',
 	function () {
 		$url = wp_json_encode( esc_url_raw( rest_url( 'kits/v1/preview' ) ) );
-		$js = '(function(d){var h=d.documentElement,k="kitsPreview",v=null;try{if(/[?&]kits-preview=1/.test(location.search)){sessionStorage.removeItem(k);}v=sessionStorage.getItem(k);}catch(e){}'
+		$js  = '(function(d){var h=d.documentElement,k="kitsPreview",v=null;try{if(/[?&]kits-preview=1/.test(location.search)){sessionStorage.removeItem(k);}v=sessionStorage.getItem(k);}catch(e){}'
 			. 'if(v==="1"){h.classList.add("kits-preview");return;}if(v==="0"){return;}'
 			. 'function go(){if(!d.querySelector(".kits-preview-only")||(!/(^|; )kits_pv=1/.test(d.cookie)&&!/[?&]kits-preview=1/.test(location.search))){return;}fetch(' . $url . ',{credentials:"same-origin",cache:"no-store"}).then(function(r){return r.json();}).then(function(j){var p=!!(j&&j.preview);try{sessionStorage.setItem(k,p?"1":"0");}catch(e){}if(p){h.classList.add("kits-preview");}}).catch(function(){});}'
 			. 'if(d.readyState==="loading"){d.addEventListener("DOMContentLoaded",go);}else{go();}})(document);';
@@ -295,8 +309,8 @@ function kits_preview_devices_screen() {
 			'preview-devices',
 			array(
 				'device' => 'Device',
-				'added' => 'Added',
-				'seen' => 'Last seen',
+				'added'  => 'Added',
+				'seen'   => 'Last seen',
 				'remove' => '<span class="screen-reader-text">Remove</span>',
 			),
 			$cells
@@ -346,8 +360,8 @@ add_action(
 	function () {
 		check_admin_referer( 'kits_preview_link' );
 		if ( current_user_can( 'manage_options' ) ) {
-			$token = bin2hex( random_bytes( 24 ) );
-			$links = array_filter( (array) get_option( 'kits_preview_links', array() ), fn( $l ) => (int) ( $l['until'] ?? 0 ) > time() );
+			$token                                = bin2hex( random_bytes( 24 ) );
+			$links                                = array_filter( (array) get_option( 'kits_preview_links', array() ), fn( $l ) => (int) ( $l['until'] ?? 0 ) > time() );
 			$links[ kits_preview_hash( $token ) ] = array(
 				'until' => time() + DAY_IN_SECONDS,
 				'label' => sanitize_text_field( wp_unslash( $_POST['label'] ?? '' ) ),

@@ -29,7 +29,7 @@ add_action(
 		}
 		add_submenu_page( KITS_MENU, __( 'Home', 'kits-core' ), __( 'Home', 'kits-core' ), KITS_CAP, KITS_MENU, 'kits_home_page' );
 	},
-	8 // before the other Kits screens join the menu
+	8 // before the other Kits screens join the menu.
 );
 
 /** The theme's settings in the Site Editor: label, address (relative to wp-admin) and description. Linked from Home and Docs. */
@@ -49,7 +49,12 @@ add_filter(
 	fn( $links ) => array_merge( array( '<a href="' . esc_url( admin_url( 'admin.php?page=' . KITS_MENU ) ) . '">Home</a>' ), (array) $links )
 );
 
-/** A link for the Overview tables. */
+/**
+ * A link for the Overview tables.
+ *
+ * @param string $label Link text.
+ * @param string $path Admin page path.
+ */
 function kits_link( string $label, string $path ): string {
 	return '<a href="' . esc_url( admin_url( $path ) ) . '">' . esc_html( $label ) . '</a>';
 }
@@ -57,6 +62,9 @@ function kits_link( string $label, string $path ): string {
 /**
  * Rows: a list of [feature, what, where (HTML), status (HTML)] as a core list table of three columns: the feature with
  * where it lives under it (as a list table's row links), what it is, and its state on this site. No footer row.
+ *
+ * @param string $name Table name.
+ * @param array  $rows Rows to show.
  */
 function kits_overview_table( string $name, array $rows ): void {
 	$cells = array();
@@ -75,8 +83,8 @@ function kits_overview_table( string $name, array $rows ): void {
 		$name,
 		array(
 			'feature' => 'Feature',
-			'what' => 'What it is',
-			'status' => 'On this site',
+			'what'    => 'What it is',
+			'status'  => 'On this site',
 		),
 		$cells,
 		$opts

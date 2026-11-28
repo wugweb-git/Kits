@@ -55,7 +55,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 foreach ( array( 'aw_daily', 'aw_error_count_daily', 'aw_daily_backup', 'kits_checkin_weekly' ) as $kits_hook ) {
 	wp_unschedule_hook( $kits_hook );
 }
-do_action( 'kits_core_uninstall' ); // a site layer unschedules its own events here
+do_action( 'kits_core_uninstall' ); // a site layer unschedules its own events here.
 
 if ( true !== (bool) get_option( 'kits_delete_data_on_uninstall', false ) ) {
 	return; // The default: keep everything.
@@ -102,7 +102,7 @@ $kits_options = array(
 	'kits_daily_event',
 	'kits_public_gate_routes',
 );
-$kits_options = array_values( array_unique( array_merge( $kits_options, array_map( 'strval', (array) apply_filters( 'kits_core_uninstall_options', array() ) ) ) ) ); // a site layer's own options
+$kits_options = array_values( array_unique( array_merge( $kits_options, array_map( 'strval', (array) apply_filters( 'kits_core_uninstall_options', array() ) ) ) ) ); // a site layer's own options.
 
 // The ALTCHA signing key is deleted but kept OUT of the backup file: it is a secret (regenerated on demand), and the
 // backup lives under uploads/, which is URL-reachable on servers that ignore .htaccess (for example nginx).
@@ -121,22 +121,22 @@ global $wpdb;
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'aw_media_merge_data_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: the merge tool's per-group records, once.
 $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'kits_altcha_used_' ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: used ALTCHA challenges, once.
 delete_transient( 'kits_brand_theme_data' );
-delete_transient( 'aw_error_count_mailed' ); // includes/ops/error-count.php
+delete_transient( 'aw_error_count_mailed' ); // includes/ops/error-count.php.
 foreach ( array( 'kits_preview_link_', 'kits_thanks_', 'kits_transfer_result_', 'kits_altcha_', 'kits_dl_' ) as $kits_prefix ) {
 	foreach ( array( '_transient_', '_transient_timeout_' ) as $kits_kind ) {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $kits_kind . $kits_prefix ) . '%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- uninstall: transients by prefix, once.
 	}
 }
 delete_site_transient( 'kits_update_release' );
-delete_transient( 'kits_registry' ); // includes/registry-updates.php
+delete_transient( 'kits_registry' ); // includes/registry-updates.php.
 delete_site_transient( 'kits_registry' );
 
-do_action( 'kits_core_uninstall_data' ); // a site layer deletes its own tables and transients here
+do_action( 'kits_core_uninstall_data' ); // a site layer deletes its own tables and transients here.
 
 wp_unschedule_hook( 'kits_spot_map_daily' );
-wp_unschedule_hook( 'aw_error_count_daily' ); // includes/ops/error-count.php
-wp_unschedule_hook( 'aw_site_check_deploy' ); // includes/ops/site-check.php
-wp_unschedule_hook( 'aw_daily_backup' ); // the daily backup (backups.php); the backup files in ~/backups stay
-delete_transient( 'aw_error_pages_checked' ); // error-pages.php; the drop-ins in wp-content stay
+wp_unschedule_hook( 'aw_error_count_daily' ); // includes/ops/error-count.php.
+wp_unschedule_hook( 'aw_site_check_deploy' ); // includes/ops/site-check.php.
+wp_unschedule_hook( 'aw_daily_backup' ); // the daily backup (backups.php); the backup files in ~/backups stay.
+delete_transient( 'aw_error_pages_checked' ); // error-pages.php; the drop-ins in wp-content stay.
 
 delete_option( 'kits_delete_data_on_uninstall' ); // Last, so a run that stops half-way can be repeated.

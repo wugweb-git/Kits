@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function kits_brand_token_definitions(): array {
 	return array(
 		// --- 1. Brand Colors ---
-		'accent' => array(
+		'accent'         => array(
 			'label'       => 'Brand Accent',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-accent',
@@ -29,7 +29,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'Primary accent color for buttons, active pills, badges and key links.',
 		),
-		'accent_ink' => array(
+		'accent_ink'     => array(
 			'label'       => 'Accent Contrast Ink',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-accent-ink',
@@ -38,7 +38,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'Darker accent contrast for focus outlines, text links, and hover states.',
 		),
-		'bg' => array(
+		'bg'             => array(
 			'label'       => 'Canvas Background',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-bg',
@@ -47,7 +47,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'Base background canvas color behind page sections.',
 		),
-		'raised' => array(
+		'raised'         => array(
 			'label'       => 'Card / Surface Background',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-raised',
@@ -56,7 +56,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'Surface color for cards, panels, search bars, and dropdown menus.',
 		),
-		'ink' => array(
+		'ink'            => array(
 			'label'       => 'Headings & Strong Ink',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-ink',
@@ -65,7 +65,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'High-contrast ink color for titles, headlines, and bold text.',
 		),
-		'text' => array(
+		'text'           => array(
 			'label'       => 'Body Text',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-text',
@@ -74,7 +74,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'Main body copy, paragraphs, and general reading text.',
 		),
-		'muted' => array(
+		'muted'          => array(
 			'label'       => 'Muted Text',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-muted',
@@ -83,7 +83,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'color',
 			'description' => 'Secondary metadata, dates, breadcrumbs, and subtle captions.',
 		),
-		'line' => array(
+		'line'           => array(
 			'label'       => 'Borders & Rules',
 			'category'    => 'Colors',
 			'css_var'     => '--kit-color-line',
@@ -94,7 +94,7 @@ function kits_brand_token_definitions(): array {
 		),
 
 		// --- 2. Typography ---
-		'font_display' => array(
+		'font_display'   => array(
 			'label'       => 'Heading / Display Font',
 			'category'    => 'Typography',
 			'css_var'     => '--kit-font-display',
@@ -102,7 +102,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'text',
 			'description' => 'Font family stack for page titles, heroes, and Section headlines.',
 		),
-		'font_body' => array(
+		'font_body'      => array(
 			'label'       => 'Body Font',
 			'category'    => 'Typography',
 			'css_var'     => '--kit-font-body',
@@ -121,7 +121,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'text',
 			'description' => 'Corner radius for inputs, textareas, selects, and standard buttons.',
 		),
-		'radius_card' => array(
+		'radius_card'    => array(
 			'label'       => 'Card & Box Radius',
 			'category'    => 'Shape',
 			'css_var'     => '--kit-radius-card',
@@ -130,7 +130,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'text',
 			'description' => 'Corner radius for content cards, grid items, and callout boxes.',
 		),
-		'radius_media' => array(
+		'radius_media'   => array(
 			'label'       => 'Media & Hero Radius',
 			'category'    => 'Shape',
 			'css_var'     => '--kit-radius-media',
@@ -139,7 +139,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'text',
 			'description' => 'Corner radius for featured images, video frames, and hero pictures.',
 		),
-		'radius_pill' => array(
+		'radius_pill'    => array(
 			'label'       => 'Pills & Badges Radius',
 			'category'    => 'Shape',
 			'css_var'     => '--kit-radius-pill',
@@ -150,7 +150,7 @@ function kits_brand_token_definitions(): array {
 		),
 
 		// --- 4. Layout & Spacing ---
-		'width_content' => array(
+		'width_content'  => array(
 			'label'       => 'Content Max Width',
 			'category'    => 'Layout',
 			'css_var'     => '--kit-width-content',
@@ -158,7 +158,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'text',
 			'description' => 'Maximum line measure for readable editorial text columns.',
 		),
-		'width_wide' => array(
+		'width_wide'     => array(
 			'label'       => 'Wide Grid Max Width',
 			'category'    => 'Layout',
 			'css_var'     => '--kit-width-wide',
@@ -166,7 +166,7 @@ function kits_brand_token_definitions(): array {
 			'type'        => 'text',
 			'description' => 'Maximum width for headers, navigation, wide cards, and footer grids.',
 		),
-		'space_section' => array(
+		'space_section'  => array(
 			'label'       => 'Section Vertical Padding',
 			'category'    => 'Layout',
 			'css_var'     => '--kit-space-section-base',
@@ -184,7 +184,7 @@ function kits_brand_token_definitions(): array {
  */
 function kits_brand_presets(): array {
 	$presets = array(
-		'default' => array(
+		'default'            => array(
 			'name'        => 'Default (Neutral Kits)',
 			'description' => 'Signature warm gold, deep slate and clean rounded cards.',
 			'tokens'      => array(
@@ -207,7 +207,7 @@ function kits_brand_presets(): array {
 				'space_section'  => '48px',
 			),
 		),
-		'tech_modern' => array(
+		'tech_modern'        => array(
 			'name'        => 'Tenant 1: Modern Tech & SaaS',
 			'description' => 'Crisp electric blue accent, slate darks, tight 6px corners.',
 			'tokens'      => array(
@@ -253,7 +253,7 @@ function kits_brand_presets(): array {
 				'space_section'  => '64px',
 			),
 		),
-		'eco_wellness' => array(
+		'eco_wellness'       => array(
 			'name'        => 'Tenant 3: Eco, Flora & Community',
 			'description' => 'Lush forest emerald, soft mint canvas, organic pill controls and soft 16px cards.',
 			'tokens'      => array(
@@ -305,7 +305,7 @@ function kits_brand_sanitize_tokens( array $input ): array {
 
 		if ( 'color' === $def['type'] ) {
 			if ( preg_match( '/[{};<>]/', $raw ) ) {
-				continue; // never a colour: it could close a CSS rule or open a tag
+				continue; // never a colour: it could close a CSS rule or open a tag.
 			}
 			// Validate 3, 6 or 8-digit hex, or rgb/rgba/hsl.
 			if ( preg_match( '/^#([a-f0-9]{3}|[a-f0-9]{6}|[a-f0-9]{8})$/i', $raw ) ||
@@ -384,7 +384,7 @@ function kits_brand_resolve_defaults( array $settings ): array {
  * @return string CSS text.
  */
 function kits_brand_compile_css( array $tokens, ?array $defaults = null ): string {
-	$defs = kits_brand_token_definitions();
+	$defs      = kits_brand_token_definitions();
 	$css_lines = array();
 
 	foreach ( $defs as $key => $def ) {
@@ -395,7 +395,7 @@ function kits_brand_compile_css( array $tokens, ?array $defaults = null ): strin
 		$val     = $tokens[ $key ];
 		$default = isset( $defaults[ $key ] ) ? (string) $defaults[ $key ] : (string) $def['default'];
 		if ( '' === $val || 'inherit' === $val || 0 === strcasecmp( (string) $val, $default ) ) {
-			continue; // Do not output redundant defaults
+			continue; // Do not output redundant defaults.
 		}
 
 		$css_lines[] = "  {$def['css_var']}: {$val};";
@@ -430,7 +430,7 @@ function kits_brand_build_theme_json( array $tokens, array $base_theme_data ): a
 	$settings = isset( $base_theme_data['settings'] ) && is_array( $base_theme_data['settings'] ) ? $base_theme_data['settings'] : array();
 	$patch    = array();
 
-	$color_overrides = array();
+	$color_overrides  = array();
 	$radius_overrides = array();
 	foreach ( $defs as $key => $def ) {
 		if ( empty( $tokens[ $key ] ) || 'inherit' === $tokens[ $key ] ) {

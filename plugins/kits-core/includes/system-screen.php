@@ -66,8 +66,8 @@ function kits_registry() {
 		return $reg;
 	}
 	$reg = array(
-		'items' => array(),
-		'nav' => array(),
+		'items'      => array(),
+		'nav'        => array(),
 		'nav_status' => array(),
 	);
 	foreach ( kits_system_dirs() as $dir ) {
@@ -252,7 +252,12 @@ function kits_token_resolve( $name, $vals ) {
 	return strtolower( trim( $v ) );
 }
 
-/** Contrast ratio of two #rrggbb colours, or 0 when either is not a plain hex colour. */
+/**
+ * Contrast ratio of two #rrggbb colours, or 0 when either is not a plain hex colour.
+ *
+ * @param string $a First colour, as #rrggbb.
+ * @param string $b Second colour, as #rrggbb.
+ */
 function kits_contrast( $a, $b ) {
 	$lum = function ( $hex ) {
 		if ( ! preg_match( '/^#([0-9a-f]{3}|[0-9a-f]{6})$/', $hex ) ) {
@@ -263,8 +268,8 @@ function kits_contrast( $a, $b ) {
 		$c   = array_map( fn( $x ) => $x <= 0.03928 ? $x / 12.92 : ( ( $x + 0.055 ) / 1.055 ) ** 2.4, $c );
 		return 0.2126 * $c[0] + 0.7152 * $c[1] + 0.0722 * $c[2];
 	};
-	$la = $lum( $a );
-	$lb = $lum( $b );
+	$la  = $lum( $a );
+	$lb  = $lum( $b );
 	if ( null === $la || null === $lb ) {
 		return 0;
 	}
@@ -401,8 +406,8 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 			'Audited Color Pairs',
 			(string) $total_count,
 			array(
-				'unit' => 'pairs',
-				'trend' => 'WCAG AA',
+				'unit'      => 'pairs',
+				'trend'     => 'WCAG AA',
 				'trend_dir' => 'up',
 			)
 		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -410,8 +415,8 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 			'Compliance Rate',
 			(string) round( ( $pass_count / $total_count ) * 100 ) . '%',
 			array(
-				'unit' => 'passing',
-				'trend' => $pass_count . '/' . $total_count . ' pass',
+				'unit'      => 'passing',
+				'trend'     => $pass_count . '/' . $total_count . ' pass',
 				'trend_dir' => 'up',
 			)
 		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -419,8 +424,8 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 			'Minimum AA Standard',
 			'4.5:1',
 			array(
-				'unit' => 'contrast ratio',
-				'trend' => 'WCAG 2.1 AA',
+				'unit'      => 'contrast ratio',
+				'trend'     => 'WCAG 2.1 AA',
 				'trend_dir' => 'neutral',
 			)
 		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -429,11 +434,11 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 	kits_simple_table(
 		'contrast',
 		array(
-			'name' => 'Component',
-			'text' => 'Text',
-			'on' => 'On',
+			'name'  => 'Component',
+			'text'  => 'Text',
+			'on'    => 'On',
 			'ratio' => 'Ratio',
-			'aa' => 'AA (4.5:1 text)',
+			'aa'    => 'AA (4.5:1 text)',
 		),
 		$cells
 	);
@@ -441,21 +446,21 @@ function kits_system_contrast_table( array $reg, array $vals ): void {
 
 /** Kits → Help → Design system. */
 function kits_system_page() {
-	$reg   = kits_registry();
-	$tab   = sanitize_key( $_GET['tab'] ?? 'components' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$type  = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
-	$base  = admin_url( 'admin.php?page=kits-help' ) . '#design-system';
-	$used  = kits_class_usage();
-	$vals  = kits_token_values();
-	$demo  = get_page_by_path( 'kits-demo' );
-	$tabs  = array(
+	$reg  = kits_registry();
+	$tab  = sanitize_key( $_GET['tab'] ?? 'components' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$type = sanitize_key( $_GET['type'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification
+	$base = admin_url( 'admin.php?page=kits-help' ) . '#design-system';
+	$used = kits_class_usage();
+	$vals = kits_token_values();
+	$demo = get_page_by_path( 'kits-demo' );
+	$tabs = array(
 		'components' => 'Components, blocks and patterns',
-		'states' => 'States sheet',
-		'menus' => 'Menu types',
-		'contrast' => 'Colour contrast',
-		'tokens' => 'Tokens',
+		'states'     => 'States sheet',
+		'menus'      => 'Menu types',
+		'contrast'   => 'Colour contrast',
+		'tokens'     => 'Tokens',
 	);
-	$pref  = array();
+	$pref = array();
 	foreach ( $reg['items'] as $it ) {
 		$pref = array_merge( $pref, (array) ( $it['classes'] ?? array() ) );
 	}
@@ -468,9 +473,9 @@ function kits_system_page() {
 		wp_admin_notice(
 			'<p><strong>' . count( $missing ) . ' class(es) in use with no registry entry.</strong> The deploy check stops on these.</p><details><summary>' . esc_html( 'Classes' ) . '</summary><p>' . esc_html( implode( ', ', $missing ) ) . '</p></details>',
 			array(
-				'type' => 'error',
+				'type'               => 'error',
 				'additional_classes' => array( 'inline' ),
-				'paragraph_wrap' => false,
+				'paragraph_wrap'     => false,
 			)
 		);
 	}
@@ -482,7 +487,7 @@ function kits_system_page() {
 	}
 	echo '</div></div>';
 
-	if ( 'states' === $tab ) { // every primitive and block in every state, drawn by the site's own styles (the private page /kits-demo/)
+	if ( 'states' === $tab ) { // every primitive and block in every state, drawn by the site's own styles (the private page /kits-demo/).
 		if ( ! $demo ) {
 			echo '<p>No states sheet yet: create a private page with the slug <code>kits-demo</code> holding <code>[kits_demo]</code>.</p></div>';
 			return;
@@ -496,19 +501,19 @@ function kits_system_page() {
 		foreach ( $reg['nav'] as $n ) {
 			$st      = $reg['nav_status'][ $n['slug'] ] ?? $n['status'];
 			$cells[] = array(
-				'name' => '<strong>' . esc_html( $n['name'] ) . '</strong>',
+				'name'   => '<strong>' . esc_html( $n['name'] ) . '</strong>',
 				'status' => esc_html( $st ),
-				'where' => esc_html( $n['where'] ),
-				'a11y' => esc_html( $n['a11y'] ),
+				'where'  => esc_html( $n['where'] ),
+				'a11y'   => esc_html( $n['a11y'] ),
 			);
 		}
 		kits_simple_table(
 			'menu-types',
 			array(
-				'name' => 'Menu type',
+				'name'   => 'Menu type',
 				'status' => 'On this site',
-				'where' => 'Where',
-				'a11y' => 'Accessibility',
+				'where'  => 'Where',
+				'a11y'   => 'Accessibility',
 			),
 			$cells
 		);
@@ -599,13 +604,13 @@ function kits_system_page() {
 
 		$acc = array();
 		foreach ( array(
-			'element' => 'Element',
-			'aria' => 'ARIA',
+			'element'  => 'Element',
+			'aria'     => 'ARIA',
 			'keyboard' => 'Keyboard',
-			'focus' => 'Focus',
-			'target' => 'Target',
-			'motion' => 'Motion',
-			'sr' => 'Screen reader',
+			'focus'    => 'Focus',
+			'target'   => 'Target',
+			'motion'   => 'Motion',
+			'sr'       => 'Screen reader',
 		) as $k => $l ) {
 			if ( ! empty( $a[ $k ] ) && 'none' !== $a[ $k ] && 'n/a' !== $a[ $k ] && 'not interactive' !== $a[ $k ] ) {
 				$acc[] = array(
@@ -617,9 +622,9 @@ function kits_system_page() {
 		$seo = array();
 		foreach ( array(
 			'heading' => 'Heading',
-			'link' => 'Links',
-			'alt' => 'Images',
-			'schema' => 'Schema',
+			'link'    => 'Links',
+			'alt'     => 'Images',
+			'schema'  => 'Schema',
 		) as $k => $l ) {
 			if ( ! empty( $s[ $k ] ) && ! in_array( $s[ $k ], array( 'none', 'n/a' ), true ) ) {
 				$seo[] = array(
@@ -633,26 +638,26 @@ function kits_system_page() {
 		$preview_url  = kits_system_preview_url( $it, $demo );
 		$entry_id     = sanitize_title( $it['name'] );
 
-		// Data payload for slide-over drawer
+		// Data payload for slide-over drawer.
 		$inspector_payload[ $entry_id ] = array(
-			'name'     => $it['name'],
-			'type'     => $it['type'],
-			'status'   => $it['status'] ?? 'live',
-			'owner'    => $it['owner'] ?? '',
-			'note'     => $it['note'] ?? '',
-			'block'    => $it['block'] ?? '',
-			'classes'  => (array) ( $it['classes'] ?? array() ),
-			'style'    => $style ? $style[0] . ' → ' . $style[1] : '',
+			'name'        => $it['name'],
+			'type'        => $it['type'],
+			'status'      => $it['status'] ?? 'live',
+			'owner'       => $it['owner'] ?? '',
+			'note'        => $it['note'] ?? '',
+			'block'       => $it['block'] ?? '',
+			'classes'     => (array) ( $it['classes'] ?? array() ),
+			'style'       => $style ? $style[0] . ' → ' . $style[1] : '',
 			'style_where' => $style ? 'styles.blocks.' . $style[0] . '.variations.' . $style[1] : '',
-			'tokens'   => $entry_tokens,
-			'a11y'     => $acc,
-			'seo'      => $seo,
-			'states'   => (array) ( $it['states'] ?? array() ),
-			'files'    => array_values( $files ),
-			'preview'  => $preview_url,
+			'tokens'      => $entry_tokens,
+			'a11y'        => $acc,
+			'seo'         => $seo,
+			'states'      => (array) ( $it['states'] ?? array() ),
+			'files'       => array_values( $files ),
+			'preview'     => $preview_url,
 		);
 
-		// Column 1: Component & Type
+		// Column 1: Component & Type.
 		$badge_class = 'kits-badge--' . sanitize_html_class( $it['type'] );
 		$status_html = ( isset( $it['status'] ) && 'live' !== $it['status'] ) ? ' <span class="kits-badge kits-badge--status">' . esc_html( $it['status'] ) . '</span>' : '';
 		$note_html   = ! empty( $it['note'] ) ? '<br><small class="description">' . esc_html( $it['note'] ) . '</small>' : '';
@@ -660,7 +665,7 @@ function kits_system_page() {
 			. '<span class="kits-badge ' . esc_attr( $badge_class ) . '">' . esc_html( $it['type'] ) . '</span>'
 			. $status_html . $note_html;
 
-		// Column 2: Implementation & Source
+		// Column 2: Implementation & Source.
 		$code_chips = array();
 		if ( ! empty( $it['block'] ) ) {
 			$code_chips[] = '<button type="button" class="kits-copy-code" data-copy="' . esc_attr( $it['block'] ) . '" title="' . esc_attr__( 'Click to copy block name', 'kits-core' ) . '"><code>' . esc_html( $it['block'] ) . '</code></button>';
@@ -675,7 +680,7 @@ function kits_system_page() {
 		$owner_label = ! empty( $it['owner'] ) ? '<br><small class="description">From: ' . esc_html( $it['owner'] ) . '</small>' : '';
 		$cell_what   = implode( ' ', $code_chips ) . $owner_label;
 
-		// Column 3: Tokens & Styles
+		// Column 3: Tokens & Styles.
 		$token_items = array();
 		if ( $style ) {
 			$token_items[] = '<div><small class="description">Style:</small> <code>' . esc_html( $style[1] ) . '</code></div>';
@@ -686,7 +691,7 @@ function kits_system_page() {
 		}
 		$cell_tokens = $token_items ? implode( '', $token_items ) : '<span class="description">—</span>';
 
-		// Column 4: Quality & Accessibility
+		// Column 4: Quality & Accessibility.
 		$qual = array();
 		$pair = $it['a11y']['contrast'] ?? null;
 		if ( $pair ) {
@@ -705,10 +710,10 @@ function kits_system_page() {
 		}
 		$cell_quality = $qual ? implode( ' ', $qual ) : '<span class="description">—</span>';
 
-		// Column 5: Inspect Action
+		// Column 5: Inspect Action.
 		$cell_action = '<button type="button" class="button button-small kits-inspect-trigger" data-entry-id="' . esc_attr( $entry_id ) . '">' . esc_html__( 'Inspect →', 'kits-core' ) . '</button>';
 
-		// Search keywords for fast client-side filtering
+		// Search keywords for fast client-side filtering.
 		$search_corpus = strtolower( $it['name'] . ' ' . ( $it['type'] ?? '' ) . ' ' . ( $it['owner'] ?? '' ) . ' ' . ( $it['block'] ?? '' ) . ' ' . implode( ' ', (array) ( $it['classes'] ?? array() ) ) );
 
 		$cells[] = array(
@@ -718,7 +723,7 @@ function kits_system_page() {
 			'quality' => $cell_quality,
 			'action'  => $cell_action,
 			'_sort'   => array( 'name' => $it['name'] ),
-			'_after'  => '', // Eliminates the 172 unpaginated iframes
+			'_after'  => '', // Eliminates the 172 unpaginated iframes.
 		);
 	}
 
@@ -738,7 +743,7 @@ function kits_system_page() {
 		)
 	);
 
-	// Pagination Controls (15 items per page to prevent vertical scroll overflow)
+	// Pagination Controls (15 items per page to prevent vertical scroll overflow).
 	echo '<div id="kits-reg-pagination" class="kits-reg-pagination" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--ks-surface);border:1px solid var(--ks-border);border-top:none;border-radius:0 0 var(--ks-r) var(--ks-r);margin-bottom:20px;">';
 	echo '<div class="kits-reg-pagination__info"><span id="kits-reg-page-info" class="description">' . esc_html__( 'Page 1 of 12', 'kits-core' ) . '</span></div>';
 	echo '<div class="kits-reg-pagination__nav" style="display:flex;gap:8px;">';
@@ -747,7 +752,7 @@ function kits_system_page() {
 	echo '</div>';
 	echo '</div>';
 
-	// Slide-Over Drawer Markup
+	// Slide-Over Drawer Markup.
 	echo '<div id="kits-drawer-backdrop" class="kits-drawer-backdrop" aria-hidden="true"></div>';
 	echo '<aside id="kits-inspector" class="kits-drawer" aria-hidden="true" role="dialog" aria-labelledby="kits-drawer-title">';
 	echo '<div class="kits-drawer__head">';
@@ -757,7 +762,7 @@ function kits_system_page() {
 	echo '<div id="kits-drawer-body" class="kits-drawer__body"></div>';
 	echo '</aside>';
 
-	// Inline JavaScript for Instant Search, Filtering & Drawer Inspection
+	// Inline JavaScript for Instant Search, Filtering & Drawer Inspection.
 	ob_start();
 	echo 'window.kitsInspectorPayload = ' . wp_json_encode( $inspector_payload ) . ';';
 	?>
@@ -1147,6 +1152,10 @@ function kits_block_style_values( $block, $variation ) {
  * Under each entry: its states, its token values and its visual (owner, 18 Oct 2026). The visual is the states sheet
  * showing only that entry (its classes, or its block in the heading), a pattern drawn on its own, or a live page at the
  * entry's first use; it loads only when opened.
+ *
+ * @param array $it The registry entry.
+ * @param array $vals Its token values.
+ * @param array $demo The demo context.
  */
 function kits_system_visual_row( $it, $vals, $demo ) {
 	$toks = array();
@@ -1171,13 +1180,13 @@ function kits_system_visual_row( $it, $vals, $demo ) {
 		} elseif ( ! empty( $it['classes'] ) ) {
 			$src = add_query_arg( 'kits_only_classes', rawurlencode( implode( ',', (array) $it['classes'] ) ), $url );
 		}
-		if ( ! $src && $demo && 'pattern' !== ( $it['type'] ?? '' ) ) { // no class or block (e.g. core block styles): its section by name
+		if ( ! $src && $demo && 'pattern' !== ( $it['type'] ?? '' ) ) { // no class or block (e.g. core block styles): its section by name.
 			$src = add_query_arg( 'kits_only_classes', '', add_query_arg( 'kits_embed', '1', get_permalink( $demo ) ) );
 		}
 		if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) {
 			$src = add_query_arg( 'kits_only_name', rawurlencode( $it['name'] ), $src );
 		}
-		if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) { // where it is used, for an entry the sheet does not draw
+		if ( $src && 'pattern' !== ( $it['type'] ?? '' ) ) { // where it is used, for an entry the sheet does not draw.
 			$spot = kits_spot_map()[ $it['name'] ] ?? '';
 			$src  = add_query_arg( 'kits_spot_url', rawurlencode( '' !== $spot ? $spot : 'none' ), $src );
 		}
@@ -1200,6 +1209,8 @@ function kits_system_visual_row( $it, $vals, $demo ) {
  * Where each registry entry is first used on the site's sample pages (kits_spot_pages(), demo.php): read once a day from
  * the pages' HTML as a visitor gets it, so an entry's visual opens on that page at once.
  *
+ * @param bool $rebuild True to rebuild the map instead of using the saved copy.
+ *
  * @return array Entry name => page address.
  */
 function kits_spot_map( $rebuild = false ) {
@@ -1207,7 +1218,7 @@ function kits_spot_map( $rebuild = false ) {
 	if ( is_array( $map ) && ! $rebuild ) {
 		return $map;
 	}
-	$found = array(); // class => first page using it
+	$found = array(); // class => first page using it.
 	foreach ( function_exists( 'kits_spot_pages' ) ? kits_spot_pages() : array() as $url ) {
 		$r = wp_remote_get(
 			$url,
@@ -1238,7 +1249,7 @@ function kits_spot_map( $rebuild = false ) {
 			foreach ( $want as $p ) {
 				if ( $c === $p || 0 === strpos( $c, $p . '-' ) ) {
 					$map[ $it['name'] ] = $url;
-					break 2; // next entry
+					break 2; // next entry.
 				}
 			}
 		}

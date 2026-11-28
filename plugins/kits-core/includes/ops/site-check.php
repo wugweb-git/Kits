@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array<string,string>
  */
 function kits_site_check_urls() {
-	$own = apply_filters( 'kits_site_check_urls', null ); // a site that names its own list skips the generic queries below
+	$own = apply_filters( 'kits_site_check_urls', null ); // a site that names its own list skips the generic queries below.
 	if ( is_array( $own ) ) {
 		return $own;
 	}
@@ -39,10 +39,10 @@ function kits_site_check_urls() {
 		}
 		$p = get_posts(
 			array(
-				'post_type' => $type,
+				'post_type'   => $type,
 				'post_status' => 'publish',
 				'numberposts' => 1,
-				'fields' => 'ids',
+				'fields'      => 'ids',
 			)
 		);
 		if ( $p ) {
@@ -51,8 +51,8 @@ function kits_site_check_urls() {
 	}
 	$t = get_terms(
 		array(
-			'taxonomy' => 'category',
-			'number' => 1,
+			'taxonomy'   => 'category',
+			'number'     => 1,
 			'hide_empty' => true,
 		)
 	);
@@ -68,9 +68,9 @@ add_action(
 		if ( current_user_can( 'manage_options' ) ) {
 			$bar->add_node(
 				array(
-					'id' => 'aw-site-check',
+					'id'    => 'aw-site-check',
 					'title' => 'Check site',
-					'href' => wp_nonce_url( admin_url( 'admin-post.php?action=aw_site_check' ), 'aw_site_check' ),
+					'href'  => wp_nonce_url( admin_url( 'admin-post.php?action=aw_site_check' ), 'aw_site_check' ),
 				)
 			);
 		}
@@ -82,19 +82,19 @@ add_action(
 function kits_site_check_run() {
 	$out = array();
 	foreach ( kits_site_check_urls() as $label => $path ) {
-		$t0   = microtime( true );
-		$r    = wp_remote_get(
+		$t0    = microtime( true );
+		$r     = wp_remote_get(
 			add_query_arg( 'ck', wp_generate_password( 8, false ), home_url( $path ) ),
 			array(
-				'timeout' => 30,
+				'timeout'     => 30,
 				'redirection' => 0,
-				'headers' => array( 'Cache-Control' => 'no-cache' ),
+				'headers'     => array( 'Cache-Control' => 'no-cache' ),
 			)
 		);
-		$ms   = (int) round( ( microtime( true ) - $t0 ) * 1000 );
-		$code = is_wp_error( $r ) ? 0 : (int) wp_remote_retrieve_response_code( $r );
-		$body = is_wp_error( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
-		$why  = is_wp_error( $r ) ? $r->get_error_message() : ( 200 !== $code ? 'HTTP ' . $code : ( preg_match( '/critical error|Fatal error|Parse error/i', $body ) ? 'error text on the page' : '' ) );
+		$ms    = (int) round( ( microtime( true ) - $t0 ) * 1000 );
+		$code  = is_wp_error( $r ) ? 0 : (int) wp_remote_retrieve_response_code( $r );
+		$body  = is_wp_error( $r ) ? '' : (string) wp_remote_retrieve_body( $r );
+		$why   = is_wp_error( $r ) ? $r->get_error_message() : ( 200 !== $code ? 'HTTP ' . $code : ( preg_match( '/critical error|Fatal error|Parse error/i', $body ) ? 'error text on the page' : '' ) );
 		$out[] = array( $label, $path, $code, $ms, $why );
 	}
 	$head = function_exists( 'kits_deployed_head' ) ? kits_deployed_head() : '';
@@ -229,7 +229,7 @@ function kits_site_check_results() {
 	wp_admin_notice(
 		esc_html( $sum['text'] ),
 		array(
-			'type' => $bad ? 'error' : ( $sum['ok'] ? 'success' : 'warning' ),
+			'type'               => $bad ? 'error' : ( $sum['ok'] ? 'success' : 'warning' ),
 			'additional_classes' => array( 'inline' ),
 		)
 	);
@@ -246,10 +246,10 @@ function kits_site_check_results() {
 	kits_simple_table(
 		'site-check',
 		array(
-			'page' => 'Page',
+			'page'    => 'Page',
 			'address' => 'Address',
-			'status' => 'Status',
-			'time' => 'Time',
+			'status'  => 'Status',
+			'time'    => 'Time',
 			'problem' => 'Problem',
 		),
 		$cells
@@ -269,7 +269,7 @@ function kits_site_check_joined() {
 	wp_admin_notice(
 		'<strong>' . esc_html( 'Joined component files:' ) . '</strong> ' . esc_html( trim( $s['text'] . '. ' . $s['fix'] ) ),
 		array(
-			'type' => $s['warn'] ? 'warning' : 'info',
+			'type'               => $s['warn'] ? 'warning' : 'info',
 			'additional_classes' => array( 'inline' ),
 		)
 	);

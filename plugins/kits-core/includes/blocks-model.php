@@ -113,8 +113,8 @@ function kits_socials_clean( array $raw ): array {
 		't.me'          => 'Telegram',
 		'github.com'    => 'GitHub',
 	);
-	$out  = array();
-	$seen = array();
+	$out   = array();
+	$seen  = array();
 	foreach ( $raw as $item ) {
 		$url = trim( (string) $item );
 		if ( 0 !== strpos( $url, 'https://' ) || preg_match( '/[\s"<>]/', $url ) ) {
@@ -124,9 +124,9 @@ function kits_socials_clean( array $raw ): array {
 		if ( '' === $host || isset( $seen[ $url ] ) ) {
 			continue;
 		}
-		$host          = preg_replace( '/^(www|m|mobile)\./', '', $host );
-		$seen[ $url ]  = true;
-		$out[]         = array(
+		$host         = preg_replace( '/^(www|m|mobile)\./', '', $host );
+		$seen[ $url ] = true;
+		$out[]        = array(
 			'label' => $names[ $host ] ?? $host,
 			'url'   => $url,
 		);

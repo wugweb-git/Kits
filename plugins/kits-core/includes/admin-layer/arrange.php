@@ -105,7 +105,7 @@ add_filter(
 	'register_taxonomy_args',
 	function ( $args, $tax ) {
 		if ( in_array( $tax, kits_admin_shared_taxonomies(), true ) ) {
-			$args['show_in_menu'] = false; // listed once, under Classification
+			$args['show_in_menu'] = false; // listed once, under Classification.
 		}
 		return $args;
 	},
@@ -120,7 +120,7 @@ add_filter(
 			$args['labels'] = array_merge( (array) ( $args['labels'] ?? array() ), $labels[ $type ] );
 		}
 		if ( in_array( $type, (array) apply_filters( 'kits_admin_hidden_post_types', array() ), true ) ) {
-			$args['show_in_menu'] = false; // retired from the menu; items keep their data
+			$args['show_in_menu'] = false; // retired from the menu; items keep their data.
 		}
 		return $args;
 	},

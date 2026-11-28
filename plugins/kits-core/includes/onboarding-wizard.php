@@ -103,7 +103,7 @@ add_action(
 			if ( in_array( $variation, array( 'default', 'slate', 'forest', 'dark' ), true ) ) {
 				$confirmed = ! empty( $_POST['kits_confirm_default'] );
 				if ( 'default' === $variation && ! $confirmed ) {
-					$variation = ''; // Kits Default would wipe the saved styles: only with the confirmation box ticked
+					$variation = ''; // Kits Default would wipe the saved styles: only with the confirmation box ticked.
 				}
 				if ( '' !== $variation ) {
 					update_option( 'kits_active_style_variation', $variation );
@@ -115,7 +115,7 @@ add_action(
 		wp_safe_redirect(
 			add_query_arg(
 				array(
-					'page' => 'kits-onboarding',
+					'page'    => 'kits-onboarding',
 					'updated' => '1',
 				),
 				admin_url( 'admin.php' )
@@ -133,9 +133,9 @@ function kits_onboarding_page() {
 		return;
 	}
 
-	$logo_id   = (int) get_theme_mod( 'custom_logo' );
-	$logo_url  = $logo_id ? wp_get_attachment_image_url( $logo_id, 'full' ) : '';
-	$active_v  = get_option( 'kits_active_style_variation', 'default' );
+	$logo_id  = (int) get_theme_mod( 'custom_logo' );
+	$logo_url = $logo_id ? wp_get_attachment_image_url( $logo_id, 'full' ) : '';
+	$active_v = get_option( 'kits_active_style_variation', 'default' );
 	if ( 'ink' === $active_v ) {
 		$active_v = 'dark'; // The variation was called ink before 1.3.0.
 	}
@@ -177,7 +177,7 @@ function kits_onboarding_page() {
 	echo '<form method="post" action="" class="kits-action-list" style="margin-top:20px;max-width:960px;">';
 	wp_nonce_field( 'kits_onboarding_save', 'kits_onboarding_nonce' );
 
-	// Step 1: Site Identity
+	// Step 1: Site Identity.
 	echo '<div class="kits-action-row" style="flex-direction:column;align-items:flex-start;gap:16px;">';
 	echo '<div class="kits-action-row__main">';
 	echo '<span class="kits-action-row__title" style="font-size:16px;">' . esc_html__( 'Step 1: Brand Identity & Logo', 'kits-core' ) . '</span>';
@@ -208,7 +208,7 @@ function kits_onboarding_page() {
 	echo '</div>';
 	echo '</div>';
 
-	// Step 2: Design System Style Variation
+	// Step 2: Design System Style Variation.
 	echo '<div class="kits-action-row" style="flex-direction:column;align-items:flex-start;gap:16px;">';
 	echo '<div class="kits-action-row__main">';
 	echo '<span class="kits-action-row__title" style="font-size:16px;">' . esc_html__( 'Step 2: Theme Style Variation & Color Palette', 'kits-core' ) . '</span>';
@@ -236,7 +236,7 @@ function kits_onboarding_page() {
 
 	echo '<label style="display:block;margin-top:-4px;"><input type="checkbox" name="kits_confirm_default" value="1"> ' . esc_html__( 'Confirm: Kits Default clears all saved Global Styles changes.', 'kits-core' ) . '</label>';
 
-	// Step 3: Starter Block Patterns & Full Site Editor
+	// Step 3: Starter Block Patterns & Full Site Editor.
 	echo '<div class="kits-action-row" style="align-items:center;justify-content:space-between;">';
 	echo '<div class="kits-action-row__main">';
 	echo '<span class="kits-action-row__title" style="font-size:16px;">' . esc_html__( 'Step 3: Starter Patterns & Site Editor', 'kits-core' ) . '</span>';
@@ -262,7 +262,7 @@ function kits_onboarding_page() {
 	}
 	echo '</div>';
 
-	// Media upload JS script
+	// Media upload JS script.
 	ob_start();
 	?>
 	jQuery(document).ready(function($){
@@ -371,7 +371,7 @@ function kits_onboarding_restore_global_styles(): bool {
 	$current = get_post( (int) $post['ID'] );
 	$res     = wp_update_post(
 		array(
-			'ID' => (int) $post['ID'],
+			'ID'           => (int) $post['ID'],
 			'post_content' => wp_slash( $backup ),
 		)
 	);
@@ -394,7 +394,7 @@ add_action(
 		wp_safe_redirect(
 			add_query_arg(
 				array(
-					'page' => 'kits-onboarding',
+					'page'     => 'kits-onboarding',
 					'restored' => '1',
 				),
 				admin_url( 'admin.php' )

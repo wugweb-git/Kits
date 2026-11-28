@@ -56,7 +56,7 @@ function kits_update_release() {
 		kits_update_url(),
 		array(
 			'timeout'    => 10,
-			'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address
+			'user-agent' => 'Kits-registry/1', // generic: WordPress's default User-Agent carries this site's address.
 		)
 	);
 	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
@@ -65,7 +65,7 @@ function kits_update_release() {
 			$sha     = strtolower( (string) ( $json['sha256'] ?? '' ) );
 			$package = esc_url_raw( (string) ( $json['package'] ?? '' ) );
 			if ( 0 !== strpos( $package, 'https://' ) || ! preg_match( '/^[0-9a-f]{64}$/', $sha ) ) {
-				$package = ''; // no install without an https address and a checksum
+				$package = ''; // no install without an https address and a checksum.
 				$sha     = '';
 			}
 			$release = array(

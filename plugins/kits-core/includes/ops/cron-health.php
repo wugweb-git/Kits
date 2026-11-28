@@ -66,7 +66,7 @@ add_action(
 			$runs[ $k ] = array_values( array_filter( (array) $times, fn( $t ) => $now - (int) $t < KITS_CRON_KEEP ) );
 		}
 		$runs[ $key ][] = $now;
-		update_option( 'kits_cron_runs', $runs, true ); // autoloaded: every request's alert check reads it
+		update_option( 'kits_cron_runs', $runs, true ); // autoloaded: every request's alert check reads it.
 	},
 	0
 );
@@ -91,11 +91,15 @@ function kits_cron_stats( $times, $since, $now ) {
 	}
 	return array(
 		'runs' => count( $t ),
-		'gap' => max( $gap, $now - $prev ),
+		'gap'  => max( $gap, $now - $prev ),
 	);
 }
 
-/** "2 h 05 min" / "12 min". */
+/**
+ * "2 h 05 min" / "12 min".
+ *
+ * @param int|float $s Seconds.
+ */
 function kits_cron_span( $s ) {
 	$m = (int) round( $s / 60 );
 	return $m >= 60 ? sprintf( '%d h %02d min', intdiv( $m, 60 ), $m % 60 ) : $m . ' min';
@@ -120,11 +124,11 @@ add_action(
 				$last    = kits_cron_last();
 				$running = $last && $now - $last < KITS_CRON_STALE;
 				$names   = array(
-					'hostinger' => 'Hostinger server cron',
-					'github' => 'GitHub Actions',
-					'uptimerobot' => 'UptimeRobot',
+					'hostinger'    => 'Hostinger server cron',
+					'github'       => 'GitHub Actions',
+					'uptimerobot'  => 'UptimeRobot',
 					'cron-job.org' => 'cron-job.org',
-					'other' => 'Other',
+					'other'        => 'Other',
 				);
 				$marks   = array(
 					'ok'   => array( 'dashicons-yes-alt', '#007017', 'OK' ),
@@ -173,7 +177,7 @@ add_action(
 				}
 				$cells = array();
 				$used  = array_filter( $rows, fn( $r ) => 'none' !== $r['state'] );
-				foreach ( $used ? $used : $rows as $r ) { // triggers never used are left out once one has called in
+				foreach ( $used ? $used : $rows as $r ) { // triggers never used are left out once one has called in.
 					$m       = $marks[ $r['state'] ];
 					$cells[] = array(
 						'trigger' => esc_html( $r['name'] ) . ( '' !== $r['gap'] ? '<br><span class="description">' . esc_html( 'Longest gap, 24 h: ' . $r['gap'] ) . '</span>' : '' ),
@@ -191,7 +195,7 @@ add_action(
 						'status'  => 'Status',
 					),
 					$cells,
-					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row
+					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row.
 				);
 				do_action( 'aw_cron_health_after' );
 				if ( ! $running ) {
@@ -220,8 +224,8 @@ add_action(
  * @return true|WP_Error
  */
 function kits_dispatch_workflow( $file, $inputs = array() ) {
-	$token = defined( 'KITS_GITHUB_DISPATCH_TOKEN' ) ? (string) KITS_GITHUB_DISPATCH_TOKEN : ( defined( 'AW_GITHUB_DISPATCH_TOKEN' ) ? (string) AW_GITHUB_DISPATCH_TOKEN : '' ); // the constant the site already has in wp-config.php keeps working
-	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started
+	$token = defined( 'KITS_GITHUB_DISPATCH_TOKEN' ) ? (string) KITS_GITHUB_DISPATCH_TOKEN : ( defined( 'AW_GITHUB_DISPATCH_TOKEN' ) ? (string) AW_GITHUB_DISPATCH_TOKEN : '' ); // the constant the site already has in wp-config.php keeps working.
+	$repo  = (string) apply_filters( 'kits_dispatch_repo', '' ); // owner/repository whose workflows are started.
 	$file  = sanitize_file_name( $file );
 	if ( '' === $token ) {
 		$res = new WP_Error( 'aw_dispatch_token', 'AW_GITHUB_DISPATCH_TOKEN is not set in wp-config.php' );
@@ -241,7 +245,7 @@ function kits_dispatch_workflow( $file, $inputs = array() ) {
 				),
 				'body'    => wp_json_encode(
 					array(
-						'ref' => 'main',
+						'ref'    => 'main',
 						'inputs' => (object) array_map( 'strval', $inputs ),
 					)
 				),
@@ -252,8 +256,8 @@ function kits_dispatch_workflow( $file, $inputs = array() ) {
 	}
 	$log          = (array) get_option( 'aw_dispatch_log', array() );
 	$log[ $file ] = array(
-		'at' => time(),
-		'ok' => true === $res,
+		'at'  => time(),
+		'ok'  => true === $res,
 		'msg' => true === $res ? 'started' : $res->get_error_message(),
 	);
 	update_option( 'aw_dispatch_log', $log, false );

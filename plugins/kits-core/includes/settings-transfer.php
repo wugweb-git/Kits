@@ -398,8 +398,8 @@ function kits_settings_transfer_url(): string {
 	set_transient( 'kits_dl_' . hash( 'sha256', $token ), get_current_user_id(), 10 * MINUTE_IN_SECONDS );
 	return add_query_arg(
 		array(
-			'action'   => 'kits_settings_download',
-			'kits_dl'  => $token,
+			'action'  => 'kits_settings_download',
+			'kits_dl' => $token,
 		),
 		admin_url( 'admin-post.php' )
 	);
@@ -419,7 +419,7 @@ function kits_settings_transfer_claim( $token, $user_id ): bool {
 	}
 	$key = 'kits_dl_' . hash( 'sha256', $token );
 	$for = get_transient( $key );
-	delete_transient( $key ); // used or not, it is spent
+	delete_transient( $key ); // used or not, it is spent.
 	return false !== $for && (int) $for === (int) $user_id && (int) $user_id > 0;
 }
 

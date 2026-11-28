@@ -98,10 +98,10 @@ add_filter(
 			'aw-site-check'   => KITS_MENU . '#page-check',
 			'aw-elsewhere'    => 'kits-options#socials',
 			'aw-edit-screens' => 'kits-help#developer/edit-screens',
-			'aw-keys'         => defined( 'INSIGHTWEB_LOADED' ) ? 'aw-search-insights#keys' : 'kits-settings', // the shared Keys screen is retired (19 Nov 2026): each plugin keeps its own keys on its own Settings
+			'aw-keys'         => defined( 'INSIGHTWEB_LOADED' ) ? 'aw-search-insights#keys' : 'kits-settings', // the shared Keys screen is retired (19 Nov 2026): each plugin keeps its own keys on its own Settings.
 			'aw-theme-parts'  => 'kits-help#developer/theme-parts',
 			'aw-core'         => KITS_MENU, // 12 Nov 2026: these two answered 403
-			'aw-cron-health'  => 'index.php', // the Scheduled tasks box is on the Dashboard
+			'aw-cron-health'  => 'index.php', // the Scheduled tasks box is on the Dashboard.
 		)
 	)
 );
@@ -283,7 +283,7 @@ function kits_site_status( bool $full = true ): array {
 	if ( ! $full ) {
 		return $s;
 	}
-	$ttl        = (int) get_option( 'aw_cdn_ttl', 0 ); // kits_cdn_ttl() is 0 in wp-admin (no header there), so the option itself
+	$ttl        = (int) get_option( 'aw_cdn_ttl', 0 ); // kits_cdn_ttl() is 0 in wp-admin (no header there), so the option itself.
 	$ttl        = $ttl > 0 ? max( 60, min( 3600, $ttl ) ) : 0;
 	$long       = (int) get_option( 'aw_cdn_ttl_long', 3600 );
 	$s['cdn']   = esc_html( $ttl ? 'CDN keeps public pages ' . $ttl . ' s' . ( $long > $ttl ? '; listings, Library items and Resources ' . min( 3600, $long ) . ' s.' : '.' ) : 'CDN caching off.' );

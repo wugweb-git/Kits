@@ -58,25 +58,25 @@ foreach ( array( 'fluentforms', 'dashboard-forms' ) as $kits_forms_file ) {
 }
 unset( $kits_forms_file );
 require_once KITS_CORE_DIR . 'includes/primitives.php';
-require_once KITS_CORE_DIR . 'includes/scf.php'; // SCF/ACF bridge (admin): Local JSON folders and the field group registry
-require_once KITS_CORE_DIR . 'includes/bindings.php'; // Block Bindings source kits/post-field; sites register keys on kits_post_fields
-require_once KITS_CORE_DIR . 'includes/presets.php'; // Content-type presets (kits-portfolio … kits-testimonial), each off until switched on in Kits → Settings
-require_once KITS_CORE_DIR . 'includes/presets-scf.php'; // SCF field groups (Local JSON, acf-json/) for the switched-on presets
+require_once KITS_CORE_DIR . 'includes/scf.php'; // SCF/ACF bridge (admin): Local JSON folders and the field group registry.
+require_once KITS_CORE_DIR . 'includes/bindings.php'; // Block Bindings source kits/post-field; sites register keys on kits_post_fields.
+require_once KITS_CORE_DIR . 'includes/presets.php'; // Content-type presets (kits-portfolio … kits-testimonial), each off until switched on in Kits → Settings.
+require_once KITS_CORE_DIR . 'includes/presets-scf.php'; // SCF field groups (Local JSON, acf-json/) for the switched-on presets.
 require_once KITS_CORE_DIR . 'includes/blocks.php';
 require_once KITS_CORE_DIR . 'includes/demo.php';
 require_once KITS_CORE_DIR . 'includes/system-screen.php';
 require_once KITS_CORE_DIR . 'includes/landmarks.php';
 require_once KITS_CORE_DIR . 'includes/sections.php';
 require_once KITS_CORE_DIR . 'includes/share.php';
-require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js
+require_once KITS_CORE_DIR . 'includes/frontend-scripts.php'; // share, forms (ALTCHA) and analytics scripts, before the theme's kit.js.
 require_once KITS_CORE_DIR . 'includes/image-context.php';
-require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST
-require_once KITS_CORE_DIR . 'includes/media-webp.php'; // resized copies of JPEG and PNG uploads as WebP; Media → Make WebP with Undo
-require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools: Media → Duplicate files (one-off clean-up, Undo, never deletes)
+require_once KITS_CORE_DIR . 'includes/media-groups.php'; // Media group label for every attachment: core taxonomy, column, REST.
+require_once KITS_CORE_DIR . 'includes/media-webp.php'; // resized copies of JPEG and PNG uploads as WebP; Media → Make WebP with Undo.
+require_once KITS_CORE_DIR . 'includes/tools/media-merge.php'; // Kits → Tools: Media → Duplicate files (one-off clean-up, Undo, never deletes).
 require_once KITS_CORE_DIR . 'includes/slugs.php';
 require_once KITS_CORE_DIR . 'includes/analytics.php';
 require_once KITS_CORE_DIR . 'includes/performance.php';
-require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page)
+require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined stylesheets (the Kits theme's core files, the component files per kind of page).
 require_once KITS_CORE_DIR . 'includes/preview.php';
 // The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
 // InsightWeb's.
@@ -86,7 +86,7 @@ require_once KITS_CORE_DIR . 'includes/site-checkin.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';
 require_once KITS_CORE_DIR . 'includes/theme-options.php';
-require_once KITS_CORE_DIR . 'includes/brand-customizer.php'; // Brand Customizer: tenant brand tokens UI (admin.php?page=kits-brand) and live CSS
+require_once KITS_CORE_DIR . 'includes/brand-customizer.php'; // Brand Customizer: tenant brand tokens UI (admin.php?page=kits-brand) and live CSS.
 require_once KITS_CORE_DIR . 'includes/onboarding-wizard.php'; // 1-Click Theme Setup & Onboarding Wizard (Astra/Kadence benchmark).
 if ( file_exists( KITS_CORE_DIR . 'includes/more-products.php' ) ) { // More from Kits: the one page where the plugins promote each other; the WordPress.org build leaves it out.
 	require_once KITS_CORE_DIR . 'includes/more-products.php';
@@ -115,12 +115,12 @@ require_once KITS_CORE_DIR . 'includes/admin-layer/edit-fields.php';
 require_once KITS_CORE_DIR . 'includes/admin-layer/site-options.php';
 require_once KITS_CORE_DIR . 'includes/site-parts.php';
 require_once KITS_CORE_DIR . 'includes/fonts.php';
-require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert
+require_once KITS_CORE_DIR . 'includes/backups.php'; // the daily database and code backup into ~/backups, its REST download and the UpdraftPlus alert.
 require_once KITS_CORE_DIR . 'includes/error-pages.php'; // the branded 500 and 503 drop-ins copied from dropins/ into wp-content
 // Site operations: scheduled-task health and Run now, the daily event, deploy purge and status, technical saves keeping
 // the modified date, CDN cache times, Check site, the PHP error count and the 404 page. A site's own values (page lists,
 // sections, repository) come through filters.
-require_once KITS_CORE_DIR . 'includes/dashboard-activity.php'; // the Dashboard Activity box, off unless the site switches it on
+require_once KITS_CORE_DIR . 'includes/dashboard-activity.php'; // the Dashboard Activity box, off unless the site switches it on.
 foreach ( array( 'cron-health', 'daily', 'deploy-purge', 'deploy-status', 'keep-modified', 'cdn-cache', 'site-check', 'error-count', 'not-found' ) as $kits_ops_file ) {
 	require_once KITS_CORE_DIR . 'includes/ops/' . $kits_ops_file . '.php';
 }
@@ -142,10 +142,10 @@ register_deactivation_hook(
 		if ( function_exists( 'kits_brand_clear_theme_cache' ) ) {
 			kits_brand_clear_theme_cache();
 		}
-		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026
-		wp_unschedule_hook( 'kits_checkin_weekly' ); // the optional site check-in (includes/site-checkin.php)
+		wp_unschedule_hook( 'kits_spot_map_daily' ); // aw_fetch_favicons is SourceWeb's since 18 Nov 2026.
+		wp_unschedule_hook( 'kits_checkin_weekly' ); // the optional site check-in (includes/site-checkin.php).
 		foreach ( array( 'aw_daily', 'aw_error_count_daily', 'aw_daily_backup' ) as $kits_hook ) {
-			wp_unschedule_hook( $kits_hook ); // booked again on the next request after it is switched back on, where its switch is on
+			wp_unschedule_hook( $kits_hook ); // booked again on the next request after it is switched back on, where its switch is on.
 		}
 		do_action( 'kits_core_deactivated' ); // a site layer unschedules its own events here
 		// While it is off the rules may be rebuilt without the preset types and consent items may be published:

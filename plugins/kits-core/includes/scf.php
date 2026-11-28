@@ -16,12 +16,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * True when SCF (or ACF) is active and loads local field groups.
- *
- * @return bool
- */
 if ( ! function_exists( 'kits_scf_active' ) ) {
+	/**
+	 * True when SCF (or ACF) is active and loads local field groups.
+	 *
+	 * @return bool
+	 */
 	function kits_scf_active() {
 		return function_exists( 'acf_add_local_field_group' );
 	}

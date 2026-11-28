@@ -25,7 +25,7 @@ function kits_consent_regions() {
 
 /** IANA time zones of the consent regions (what a browser reports), for scripts that cannot ask Google for the region. */
 function kits_consent_timezones() {
-	$zones = array( 'Europe/Mariehamn', 'Arctic/Longyearbyen', 'Europe/Nicosia', 'Europe/Belfast' ); // aliases browsers may report
+	$zones = array( 'Europe/Mariehamn', 'Arctic/Longyearbyen', 'Europe/Nicosia', 'Europe/Belfast' ); // aliases browsers may report.
 	foreach ( kits_consent_regions() as $cc ) {
 		$zones = array_merge( $zones, (array) DateTimeZone::listIdentifiers( DateTimeZone::PER_COUNTRY, $cc ) );
 	}
@@ -170,8 +170,8 @@ add_action(
 		if ( is_admin() ) {
 			return;
 		}
-		$ga  = (array) get_option( 'googlesitekit_analytics-4_settings', array() );
-		$ctx = array(
+		$ga          = (array) get_option( 'googlesitekit_analytics-4_settings', array() );
+		$ctx         = array(
 			'page_type'    => is_front_page() ? 'home' : ( is_404() ? '404' : ( is_singular() ? get_post_type() : 'list' ) ),
 			'section'      => '',
 			'category'     => '',

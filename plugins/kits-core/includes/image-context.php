@@ -1,6 +1,6 @@
 <?php
 /**
- * imageContext: an editor-facing note on the copy an image supports (Media Library). Never shown on the site.
+ * The imageContext field: an editor-facing note on the copy an image supports (Media Library). Never shown on the site.
  *
  * @package kits-core
  */
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter(
 	'attachment_fields_to_edit',
 	function ( $fields, $post ) {
-		$fields['kits_image_context'] = array(
+		$fields['kits_image_context']   = array(
 			'label' => 'Image context',
 			'input' => 'textarea',
 			'value' => (string) get_post_meta( $post->ID, 'kits_image_context', true ),

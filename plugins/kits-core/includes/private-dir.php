@@ -11,8 +11,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Private folder (blocked from the web), used for claim logos. Created on first use. */
 if ( ! function_exists( 'kits_private_dir' ) ) {
+	/**
+	 * Private folder (blocked from the web), used for claim logos. Created on first use.
+	 */
 	function kits_private_dir(): string {
 		$up  = wp_upload_dir();
 		$dir = trailingslashit( $up['basedir'] ) . 'aw-private';

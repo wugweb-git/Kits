@@ -30,7 +30,7 @@ function kits_media_group_register() {
 		kits_media_group_taxonomy(),
 		'attachment',
 		array(
-			'labels'               => array(
+			'labels'                => array(
 				'name'          => 'Media groups',
 				'singular_name' => 'Media group',
 			),

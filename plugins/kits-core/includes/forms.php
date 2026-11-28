@@ -48,10 +48,10 @@ function kits_form_state( $form ) {
  * @param string $notice Optional form-level message.
  */
 function kits_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' ) {
-	if ( kits_form_is_fetch() ) { // submitted with fetch(): answer in JSON, the page keeps what was typed
+	if ( kits_form_is_fetch() ) { // submitted with fetch(): answer in JSON, the page keeps what was typed.
 		wp_send_json(
 			array(
-				'ok' => false,
+				'ok'     => false,
 				'errors' => (object) $errors,
 				'notice' => $notice,
 			)
@@ -61,7 +61,7 @@ function kits_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' )
 	set_transient(
 		'kits_form_' . $token,
 		array(
-			'form' => $form,
+			'form'   => $form,
 			'errors' => $errors,
 			'values' => $values,
 			'notice' => $notice,
@@ -72,7 +72,11 @@ function kits_form_fail( $form, $errors, $values, $back, $anchor, $notice = '' )
 	exit;
 }
 
-/** The form-level message when sending fails (a form can set its own with the kits_form_generic_error filter). */
+/**
+ * The form-level message when sending fails (a form can set its own with the kits_form_generic_error filter).
+ *
+ * @param string $form Form name.
+ */
 function kits_form_generic_error( $form ) {
 	return (string) apply_filters( 'kits_form_generic_error', 'Couldn\'t send. Your details are still here — try again.', $form );
 }
@@ -97,9 +101,9 @@ function kits_form_success( $url, $title, $text = '', $more = array() ) {
 		wp_send_json(
 			array_merge(
 				array(
-					'ok' => true,
+					'ok'    => true,
 					'title' => $title,
-					'text' => $text,
+					'text'  => $text,
 				),
 				$more,
 				$go
@@ -117,7 +121,11 @@ function kits_thanks_path() {
 	return '/' . trim( (string) apply_filters( 'kits_thanks_path', '/thank-you/' ), '/' ) . '/';
 }
 
-/** Is $url the thank-you page? */
+/**
+ * Is $url the thank-you page?
+ *
+ * @param string $url Address to test.
+ */
 function kits_is_thanks_url( $url ) {
 	return trailingslashit( (string) wp_parse_url( (string) $url, PHP_URL_PATH ) ) === trailingslashit( (string) wp_parse_url( home_url( kits_thanks_path() ), PHP_URL_PATH ) );
 }
@@ -147,9 +155,9 @@ function kits_thanks_url( $form, $args = array(), $title = '', $text = '' ) {
 		set_transient(
 			'kits_thanks_' . $token,
 			array(
-				'form' => $q['form'],
+				'form'  => $q['form'],
 				'title' => $title,
-				'text' => $text,
+				'text'  => $text,
 			),
 			30 * MINUTE_IN_SECONDS
 		);
@@ -180,7 +188,11 @@ function kits_thanks_from() {
 	return wp_validate_redirect( $url, '' ) === $url ? $url : '';
 }
 
-/** Email cleaned as the server checks it: trimmed, domain in lower case. */
+/**
+ * Email cleaned as the server checks it: trimmed, domain in lower case.
+ *
+ * @param string $email The address as typed.
+ */
 function kits_clean_email( $email ) {
 	$email = trim( (string) $email );
 	$at    = strrpos( $email, '@' );
@@ -206,27 +218,27 @@ function kits_form_back( $fallback ) {
  * @return string
  */
 function kits_form_open( $form, $attrs = array() ) {
-	$GLOBALS['kits_form_copies'][ $form ] = ( $GLOBALS['kits_form_copies'][ $form ] ?? 0 ) + 1; // the same form twice on a page (a page's own and the footer's)
-	$state  = kits_form_state( $form );
-	$altcha = (string) ( $attrs['data-altcha'] ?? '' ); // "invisible": the check runs on send, no check box
-	$attrs = array_merge(
+	$GLOBALS['kits_form_copies'][ $form ] = ( $GLOBALS['kits_form_copies'][ $form ] ?? 0 ) + 1; // the same form twice on a page (a page's own and the footer's).
+	$state                                = kits_form_state( $form );
+	$altcha                               = (string) ( $attrs['data-altcha'] ?? '' ); // "invisible": the check runs on send, no check box
+	$attrs                                = array_merge(
 		array(
-			'class'  => 'kit-form',
-			'method' => 'post',
-			'action' => admin_url( 'admin-post.php' ),
-			'id'     => 'aw-form-' . $form . kits_form_copy_suffix( $form ),
+			'class'              => 'kit-form',
+			'method'             => 'post',
+			'action'             => admin_url( 'admin-post.php' ),
+			'id'                 => 'aw-form-' . $form . kits_form_copy_suffix( $form ),
 			'data-generic-error' => kits_form_generic_error( $form ),
 		),
 		$attrs
 	);
-	$html = '<form';
+	$html                                 = '<form';
 	foreach ( $attrs as $k => $v ) {
 		$html .= ' ' . esc_attr( $k ) . '="' . esc_attr( $v ) . '"';
 	}
 	$html .= '>';
 	// One status region per form: form-level errors and success (filled by the server or by forms.js).
 	$html .= '<div class="kit-form-status" role="status" aria-live="polite" tabindex="-1">' . ( $state['notice'] && ! $state['errors'] ? esc_html( $state['notice'] ) : '' ) . '</div>';
-	if ( count( $state['errors'] ) > 1 ) { // a summary only when there is more than one error
+	if ( count( $state['errors'] ) > 1 ) { // a summary only when there is more than one error.
 		$html .= '<div class="kit-form-summary" role="alert" tabindex="-1">';
 		if ( $state['notice'] ) {
 			$html .= '<strong>' . esc_html( $state['notice'] ) . '</strong>';
@@ -242,7 +254,7 @@ function kits_form_open( $form, $attrs = array() ) {
 		$html .= '</div>';
 	}
 	$html .= '<input type="hidden" name="action" value="' . esc_attr( $form ) . '">'
-		. str_replace( ' id="_kits_nonce"', '', wp_nonce_field( $form, '_kits_nonce', true, false ) ) // several forms on a page: no repeated id
+		. str_replace( ' id="_kits_nonce"', '', wp_nonce_field( $form, '_kits_nonce', true, false ) ) // several forms on a page: no repeated id.
 		. '<input type="hidden" name="aw_t" value="' . esc_attr( (string) time() ) . '">'
 		. '<input type="hidden" name="aw_source" value="' . esc_attr( (string) ( $attrs['data-source'] ?? kits_form_source() ) ) . '">'
 		. '<p class="kit-hp" aria-hidden="true"><label>Leave this empty <input type="text" name="kits_hp" tabindex="-1" autocomplete="off"></label></p>'
@@ -283,13 +295,13 @@ function kits_field_id( $form, $name ) {
 function kits_field( $form, $f ) {
 	$f     = array_merge(
 		array(
-			'type' => 'text',
+			'type'     => 'text',
 			'required' => false,
-			'hint' => '',
-			'options' => array(),
-			'attrs' => array(),
-			'value' => '',
-			'icon' => '',
+			'hint'     => '',
+			'options'  => array(),
+			'attrs'    => array(),
+			'value'    => '',
+			'icon'     => '',
 			'messages' => array(),
 		),
 		$f
@@ -310,10 +322,10 @@ function kits_field( $form, $f ) {
 	foreach ( $f['messages'] as $rule => $text ) {
 		$msgs[ 'data-msg-' . $rule ] = $text;
 	}
-	$a = array_merge(
+	$a    = array_merge(
 		array(
-			'id' => $id,
-			'name' => $f['name'],
+			'id'               => $id,
+			'name'             => $f['name'],
 			'aria-describedby' => implode( ' ', $by ),
 		),
 		$msgs,
@@ -347,8 +359,8 @@ function kits_field( $form, $f ) {
 			$control = '<input type="' . esc_attr( $f['type'] ) . '" value="' . esc_attr( (string) $val ) . '"' . $attr . '>';
 	}
 
-	$opt   = $f['required'] ? '' : ' <span class="kit-optional">(optional)</span>';
-	$hint  = $f['hint'] ? '<span class="kit-field-hint" id="' . esc_attr( $id ) . '-hint">' . esc_html( $f['hint'] ) . '</span>' : '';
+	$opt  = $f['required'] ? '' : ' <span class="kit-optional">(optional)</span>';
+	$hint = $f['hint'] ? '<span class="kit-field-hint" id="' . esc_attr( $id ) . '-hint">' . esc_html( $f['hint'] ) . '</span>' : '';
 	// The message line is always there (reserved space), so showing an error never moves the layout.
 	$error = '<span class="kit-field-message kit-field-error" id="' . esc_attr( $id ) . '-error" aria-live="polite">' . esc_html( $err ) . '</span>';
 	$cls   = 'kit-field kit-field--' . $f['type'] . ( $err ? ' is-invalid' : '' );
@@ -377,17 +389,17 @@ function kits_form_guard( $form, $back, $anchor, $done, $per_hour = 5 ) {
 		if ( kits_form_is_fetch() ) {
 			wp_send_json(
 				array(
-					'ok' => false,
-					'code' => 'expired',
+					'ok'     => false,
+					'code'   => 'expired',
 					'errors' => (object) array(),
 					'notice' => 'This page has been open a while. Reload it and send again.',
 				)
-			); // forms.js gets a fresh key and sends once more
+			); // forms.js gets a fresh key and sends once more.
 		}
 		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'This page has been open a while. Reload it and send again.' );
 	}
 	if ( ! empty( $_POST['kits_hp'] ) || ( time() - absint( $_POST['aw_t'] ?? 0 ) ) < 3 ) {
-		kits_form_success( $done, '' ); // bots see a success
+		kits_form_success( $done, '' ); // bots see a success.
 	}
 	if ( ! kits_altcha_verify( wp_unslash( $_POST['altcha'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		kits_form_fail( $form, array(), kits_form_kept_values(), $back, $anchor, 'Couldn\'t verify you\'re not a bot. Try again.' );
@@ -430,6 +442,7 @@ function kits_form_count( $key ) {
  * @param array $rules  field => list of rules: required, email, phone, url, max:N.
  * @param array $values field => value.
  * @param array $labels field => label, for messages.
+ * @param array $messages field => message overrides.
  * @return array<string,string>
  */
 function kits_form_validate( $rules, $values, $labels, $messages = array() ) {

@@ -23,8 +23,8 @@ function kits_forms_widget_allowed(): bool {
 /** Per form: id, title, unread, week, total (trashed entries left out), busiest first. */
 function kits_forms_widget_rows(): array {
 	global $wpdb;
-	$s    = $wpdb->prefix . 'fluentform_submissions';
-	$f    = $wpdb->prefix . 'fluentform_forms';
+	$s     = $wpdb->prefix . 'fluentform_submissions';
+	$f     = $wpdb->prefix . 'fluentform_forms';
 	$since = gmdate( 'Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS );
 	return (array) $wpdb->get_results( $wpdb->prepare( "SELECT f.id, f.title, COUNT(s.id) AS total, COALESCE(SUM(s.status = 'unread'), 0) AS unread, COALESCE(SUM(s.created_at >= %s), 0) AS week FROM %i f LEFT JOIN %i s ON s.form_id = f.id AND s.status <> 'trashed' GROUP BY f.id, f.title ORDER BY total DESC, f.title", $since, $f, $s ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 }
@@ -33,7 +33,7 @@ add_action(
 	'wp_dashboard_setup',
 	function () {
 		if ( ! defined( 'FLUENTFORM' ) && ! class_exists( '\FluentForm\Framework\Foundation\Application' ) ) {
-			return; // Fluent Forms is not active
+			return; // Fluent Forms is not active.
 		}
 		if ( ! kits_forms_widget_allowed() ) {
 			return;
@@ -83,7 +83,7 @@ add_action(
 						'total'  => 'Total',
 					),
 					$cells,
-					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row
+					array( 'foot' => false ) // a short table in a Dashboard widget: no repeated header row.
 				);
 				echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=fluent_forms_all_entries' ) ) . '">All entries</a></p>';
 			}

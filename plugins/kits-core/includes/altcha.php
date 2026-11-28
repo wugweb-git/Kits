@@ -13,9 +13,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const KITS_ALTCHA_MAX = 100000; // about half a second on a mid-range phone
+const KITS_ALTCHA_MAX = 100000; // about half a second on a mid-range phone.
 const KITS_ALTCHA_TTL = 20 * MINUTE_IN_SECONDS;
 
+/**
+ * The signing key for challenges, created on first use.
+ */
 function kits_altcha_key() {
 	$key = get_option( 'kits_altcha_key' );
 	if ( ! $key ) {
@@ -60,9 +63,13 @@ function kits_altcha_claim( $challenge, $expires ) {
 	return $won;
 }
 
-/** True when the posted payload is a solved, unexpired, unused challenge we signed. */
+/**
+ * True when the posted payload is a solved, unexpired, unused challenge we signed.
+ *
+ * @param string $payload The posted payload.
+ */
 function kits_altcha_verify( $payload ) {
-	$p = json_decode( (string) base64_decode( (string) $payload, true ), true );
+	$p = json_decode( (string) base64_decode( (string) $payload, true ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- the ALTCHA widget posts its solution as base64 JSON; it is decoded strictly and checked, never run.
 	if ( ! is_array( $p ) || 'SHA-256' !== ( $p['algorithm'] ?? '' ) ) {
 		return false;
 	}
@@ -80,7 +87,7 @@ function kits_altcha_verify( $payload ) {
 		|| ! hash_equals( hash_hmac( 'sha256', $challenge, kits_altcha_key() ), (string) $p['signature'] ) ) {
 		return false;
 	}
-	return kits_altcha_claim( $challenge, (int) $m[1] ); // each solved challenge works once
+	return kits_altcha_claim( $challenge, (int) $m[1] ); // each solved challenge works once.
 }
 
 add_action(
@@ -124,6 +131,8 @@ add_action(
 /**
  * Widget markup for a form. The script (67 KB) loads only when someone starts using a form on the page, so pages
  * with a form in the footer stay light.
+ *
+ * @param string $mode Widget mode; empty for the default.
  */
 function kits_altcha_widget( $mode = '' ) {
 	static $done = false;
@@ -132,7 +141,7 @@ function kits_altcha_widget( $mode = '' ) {
 		$src  = add_query_arg(
 			array(
 				'kits_altcha_js' => 1,
-				'ver' => '2.3.0',
+				'ver'            => '2.3.0',
 			),
 			home_url( '/' )
 		);

@@ -335,7 +335,7 @@ function kits_site_reset_sections(): array {
 	 *                        it wrote anything.
 	 */
 	$own = (array) apply_filters( 'kits_site_reset_sections', $own );
-	return (array) apply_filters( 'aw_core_reset_sections', $own ); // older name, still read
+	return (array) apply_filters( 'aw_core_reset_sections', $own ); // older name, still read.
 }
 
 /**
@@ -349,7 +349,7 @@ function kits_site_reset_options( array $names ): bool {
 	$saved      = false;
 	foreach ( $names as $name ) {
 		if ( ! isset( $registered[ $name ] ) || ! array_key_exists( 'default', $registered[ $name ] ) ) {
-			continue; // no registered default: left as it is
+			continue; // no registered default: left as it is.
 		}
 		$default = $registered[ $name ]['default'];
 		$now     = get_option( $name, $default );
@@ -441,12 +441,12 @@ add_action(
 			kits_site_reset_options( array_map( 'strval', (array) $reset ) );
 		}
 		add_settings_error( 'general', 'settings_updated', 'Defaults restored.', 'success' );
-		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen
+		set_transient( 'settings_errors', get_settings_errors(), 30 ); // as options.php does, for settings_errors() on the screen.
 		$back = wp_get_referer();
 		$back = $back ? $back : admin_url( 'admin.php?page=aw-modules' );
 		$args = array( 'settings-updated' => 'true' );
 		if ( false !== strpos( $back, 'page=kits-settings' ) ) {
-			$args['kits_section'] = 'cdn'; // Kits → Settings opens the section again
+			$args['kits_section'] = 'cdn'; // Kits → Settings opens the section again.
 		}
 		wp_safe_redirect( add_query_arg( $args, $back ) );
 		exit;

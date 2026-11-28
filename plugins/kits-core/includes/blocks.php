@@ -96,55 +96,55 @@ function kits_style_value_css( $value ) {
  * @return string CSS, or ''.
  */
 function kits_style_tokens_css() {
-	$btn  = function ( array $path ) {
+	$btn   = function ( array $path ) {
 		return wp_get_global_styles( array_merge( array( 'elements', 'button' ), $path ) );
 	};
-	$var  = function ( $slug, array $path ) {
+	$var   = function ( $slug, array $path ) {
 		return wp_get_global_styles( array_merge( array( 'variations', $slug ), $path ), array( 'block_name' => 'core/button' ) );
 	};
 	$hover = function ( $css ) {
 		return 'color-mix(in srgb, ' . $css . ' var(--kit-btn-hover-mix), var(--kit-color-ink))';
 	};
-	$map = array(
-		'--kit-hero-h'            => array(
+	$map   = array(
+		'--kit-hero-h'             => array(
 			'value'   => wp_get_global_styles( array( 'dimensions', 'minHeight' ), array( 'block_name' => 'kits/hero' ) ),
 			'default' => array( 'var(--kit-hero-h)' ),
 		),
-		'--kit-space-section'     => array(
+		'--kit-space-section'      => array(
 			'value'   => wp_get_global_styles( array( 'variations', 'kits-section', 'spacing', 'padding', 'top' ), array( 'block_name' => 'core/group' ) ),
 			'default' => array( 'var(--wp--preset--spacing--section)', 'var(--kit-space-section-base)' ),
 		),
-		'--kit-space-section-end' => array(
+		'--kit-space-section-end'  => array(
 			'value'   => wp_get_global_styles( array( 'variations', 'kits-section', 'spacing', 'padding', 'bottom' ), array( 'block_name' => 'core/group' ) ),
 			'default' => array( 'var(--wp--preset--spacing--section)', 'var(--kit-space-section-base)' ),
 		),
-		'--kit-btn-primary-bg'    => array(
+		'--kit-btn-primary-bg'     => array(
 			'value'   => $btn( array( 'color', 'background' ) ),
 			'default' => array( 'var(--wp--preset--color--secondary)', 'var(--kit-btn-primary-bg)' ),
 			'also'    => array( '--kit-btn-primary-bg-hover' => $hover ),
 		),
-		'--kit-btn-primary-fg'    => array(
+		'--kit-btn-primary-fg'     => array(
 			'value'   => $btn( array( 'color', 'text' ) ),
 			'default' => array( 'var(--wp--preset--color--on-ink)', 'var(--kit-btn-primary-fg)' ),
 			'also'    => array( '--kit-btn-primary-fg-hover' => null ),
 		),
-		'--kit-btn-radius'        => array(
+		'--kit-btn-radius'         => array(
 			'value'   => $btn( array( 'border', 'radius' ) ),
 			'default' => array( 'var(--wp--preset--border-radius--pill)', 'var(--kit-radius-pill)' ),
 		),
-		'--kit-btn-weight'        => array(
+		'--kit-btn-weight'         => array(
 			'value'   => $btn( array( 'typography', 'fontWeight' ) ),
 			'default' => array( '500', 'var(--kit-weight-medium)' ),
 		),
-		'--kit-btn-pad'           => array(
+		'--kit-btn-pad'            => array(
 			'value'   => $btn( array( 'spacing', 'padding', 'left' ) ),
 			'default' => array( 'var(--wp--preset--spacing--50)', 'var(--kit-btn-pad)' ),
 		),
-		'--kit-btn-secondary-bg'  => array(
+		'--kit-btn-secondary-bg'   => array(
 			'value'   => $var( 'kits-secondary', array( 'color', 'background' ) ),
 			'default' => array( 'var(--kit-btn-secondary-bg)' ),
 		),
-		'--kit-btn-secondary-fg'  => array(
+		'--kit-btn-secondary-fg'   => array(
 			'value'   => $var( 'kits-secondary', array( 'color', 'text' ) ),
 			'default' => array( 'var(--kit-btn-secondary-fg)' ),
 		),
@@ -152,24 +152,24 @@ function kits_style_tokens_css() {
 			'value'   => $var( 'kits-secondary', array( 'border', 'color' ) ),
 			'default' => array( 'var(--kit-btn-secondary-line)' ),
 		),
-		'--kit-btn-ghost-fg'      => array(
+		'--kit-btn-ghost-fg'       => array(
 			'value'   => $var( 'kits-ghost', array( 'color', 'text' ) ),
 			'default' => array( 'var(--kit-btn-ghost-fg)' ),
 		),
-		'--kit-btn-ghost-line'    => array(
+		'--kit-btn-ghost-line'     => array(
 			'value'   => $var( 'kits-ghost', array( 'border', 'color' ) ),
 			'default' => array( 'var(--kit-btn-ghost-line)' ),
 		),
-		'--kit-btn-brand-bg'      => array(
+		'--kit-btn-brand-bg'       => array(
 			'value'   => $var( 'kits-brand', array( 'color', 'background' ) ),
 			'default' => array( 'var(--kit-btn-brand-bg)' ),
 		),
-		'--kit-btn-brand-fg'      => array(
+		'--kit-btn-brand-fg'       => array(
 			'value'   => $var( 'kits-brand', array( 'color', 'text' ) ),
 			'default' => array( 'var(--kit-btn-brand-fg)' ),
 		),
 	);
-	$out = '';
+	$out   = '';
 	foreach ( $map as $token => $row ) {
 		$css = kits_style_value_css( $row['value'] );
 		// A value that names one of these tokens could make them cyclic and invalid everywhere, so it is left to the block

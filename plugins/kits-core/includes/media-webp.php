@@ -26,7 +26,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** True for a share file name ({name}-og.jpg, {name}-share-1080.jpg or .png), which must keep its format. */
+/**
+ * True for a share file name ({name}-og.jpg, {name}-share-1080.jpg or .png), which must keep its format.
+ *
+ * @param string $file File name.
+ */
 function kits_media_webp_is_share_file( $file ) {
 	return (bool) preg_match( '/(-og\.jpe?g|-share-1080\.(jpe?g|png))$/i', (string) $file );
 }
@@ -171,7 +175,11 @@ function kits_media_webp_check_sizes( array $old, array $new, $dir, $allowed, $i
 	return '';
 }
 
-/** True when the file really is WebP (checked by content, not by its name). */
+/**
+ * True when the file really is WebP (checked by content, not by its name).
+ *
+ * @param string $path Path of the file.
+ */
 function kits_media_webp_file_is_webp( $path ) {
 	$mime = function_exists( 'wp_get_image_mime' ) ? wp_get_image_mime( $path ) : false;
 	return 'image/webp' === $mime;
@@ -223,7 +231,11 @@ function kits_media_webp_log() {
 	return is_array( $log ) ? $log : array();
 }
 
-/** Save the log; false when it could not be written. */
+/**
+ * Save the log; false when it could not be written.
+ *
+ * @param array $log The conversion log.
+ */
 function kits_media_webp_log_save( array $log ) {
 	if ( update_option( 'aw_media_webp_log', $log, false ) ) {
 		return true;
@@ -231,7 +243,11 @@ function kits_media_webp_log_save( array $log ) {
 	return get_option( 'aw_media_webp_log' ) === $log;
 }
 
-/** True when a size entry still points at a JPEG or PNG file that is not a share file. */
+/**
+ * True when a size entry still points at a JPEG or PNG file that is not a share file.
+ *
+ * @param array $size One size entry from the attachment metadata.
+ */
 function kits_media_webp_old_size( $size ) {
 	$file = is_array( $size ) ? (string) ( $size['file'] ?? '' ) : '';
 	return '' !== $file && preg_match( '/\.(jpe?g|png)$/i', $file ) && ! kits_media_webp_is_share_file( $file );
@@ -246,8 +262,8 @@ function kits_media_webp_old_size( $size ) {
  */
 function kits_media_webp_pending( $limit = 0 ) {
 	global $wpdb;
-	$log = kits_media_webp_log();
-	$ids = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type IN ('image/jpeg','image/png') ORDER BY ID ASC" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$log    = kits_media_webp_log();
+	$ids    = $wpdb->get_col( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type IN ('image/jpeg','image/png') ORDER BY ID ASC" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$out    = array();
 	$weight = array();
 	foreach ( array_chunk( array_map( 'intval', (array) $ids ), 200 ) as $chunk ) {
@@ -296,20 +312,20 @@ function kits_media_webp_convert( $id ) {
 	}
 	$old_orig   = isset( $meta['original_image'] ) ? (string) $meta['original_image'] : null;
 	$log[ $id ] = array(
-		'sizes' => $meta['sizes'],
-		'time' => time(),
+		'sizes'  => $meta['sizes'],
+		'time'   => time(),
 		'status' => 'failed',
-		'why' => 'Stopped before it finished',
+		'why'    => 'Stopped before it finished',
 	);
 	if ( null !== $old_orig ) {
-		$log[ $id ]['original_image'] = $old_orig; // kept with the old sizes so Undo restores both
+		$log[ $id ]['original_image'] = $old_orig; // kept with the old sizes so Undo restores both.
 	}
 	if ( ! kits_media_webp_log_save( $log ) ) {
-		return false; // nothing is changed without the old list saved
+		return false; // nothing is changed without the old list saved.
 	}
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	$fresh = $meta;
-	unset( $fresh['sizes'] ); // core only makes sizes that are missing
+	unset( $fresh['sizes'] ); // core only makes sizes that are missing.
 	$why = '';
 	try {
 		wp_update_attachment_metadata( $id, $fresh );
@@ -319,7 +335,7 @@ function kits_media_webp_convert( $id ) {
 			$why = $new->get_error_message();
 		} else {
 			$new = kits_media_webp_keep_full( $new, $id, $why );
-			$new = kits_media_webp_set_original( $new, $old_orig ); // core records the scaled copy's name; keep the upload's
+			$new = kits_media_webp_set_original( $new, $old_orig ); // core records the scaled copy's name; keep the upload's.
 			wp_update_attachment_metadata( $id, $new );
 			// Core leaves out a size it could not make, and may pick an image library that cannot write WebP.
 			$why = '' !== $why ? $why : kits_media_webp_check_sizes(
@@ -334,7 +350,7 @@ function kits_media_webp_convert( $id ) {
 		$why = $e->getMessage();
 	}
 	if ( '' !== $why ) {
-		wp_update_attachment_metadata( $id, $meta ); // put the old metadata back
+		wp_update_attachment_metadata( $id, $meta ); // put the old metadata back.
 		update_attached_file( $id, $file );
 		$log[ $id ]['why'] = $why;
 		kits_media_webp_log_save( $log );
@@ -345,7 +361,11 @@ function kits_media_webp_convert( $id ) {
 	return kits_media_webp_log_save( $log );
 }
 
-/** Put the saved list of sizes back (the old files are still on disk). */
+/**
+ * Put the saved list of sizes back (the old files are still on disk).
+ *
+ * @param int $id Attachment ID.
+ */
 function kits_media_webp_undo( $id ) {
 	$id   = (int) $id;
 	$log  = kits_media_webp_log();
@@ -435,7 +455,7 @@ function kits_media_webp_body(): void {
 		wp_admin_notice(
 			(int) $_GET['aw_mw'] . ' image(s) converted.' . ( ! empty( $_GET['aw_mw_fail'] ) ? ' ' . (int) $_GET['aw_mw_fail'] . ' could not be converted and keep their old sizes (see Status).' : '' ),
 			array(
-				'type' => 'success',
+				'type'        => 'success',
 				'dismissible' => true,
 			)
 		);
@@ -444,7 +464,7 @@ function kits_media_webp_body(): void {
 		wp_admin_notice(
 			'Image ' . (int) $_GET['aw_mw_undo'] . ' has its old sizes back.',
 			array(
-				'type' => 'success',
+				'type'        => 'success',
 				'dismissible' => true,
 			)
 		);
@@ -453,7 +473,7 @@ function kits_media_webp_body(): void {
 		wp_admin_notice(
 			'Image ' . (int) $_GET['aw_mw_undo_fail'] . ' could not be put back.',
 			array(
-				'type' => 'error',
+				'type'        => 'error',
 				'dismissible' => true,
 			)
 		);
@@ -462,7 +482,7 @@ function kits_media_webp_body(): void {
 		wp_admin_notice(
 			'This server cannot write WebP, so nothing was converted.',
 			array(
-				'type' => 'error',
+				'type'        => 'error',
 				'dismissible' => true,
 			)
 		);
@@ -504,15 +524,15 @@ function kits_media_webp_body(): void {
 	kits_simple_table(
 		'aw-media-webp',
 		array(
-			'image' => 'Image',
-			'sizes' => 'Old sizes kept',
-			'state' => 'Status',
+			'image'  => 'Image',
+			'sizes'  => 'Old sizes kept',
+			'state'  => 'Status',
 			'action' => 'Action',
 		),
 		$rows,
 		array(
 			'primary' => 'image',
-			'empty' => 'Nothing converted yet.',
+			'empty'   => 'Nothing converted yet.',
 		)
 	);
 	echo '</form>';

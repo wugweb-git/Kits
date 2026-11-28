@@ -68,7 +68,7 @@ add_filter(
 		if ( preg_match_all( '/<link\b[^>]*\bdata-od-added-tag\b[^>]*>/', $html, $links ) ) {
 			foreach ( $links[0] as $link ) {
 				if ( false !== strpos( $link, 'rel="preload"' ) && false === strpos( $link, '&lt;=' ) && false === strpos( $link, '<=' ) ) {
-					return $html; // the widest group has its own preload
+					return $html; // the widest group has its own preload.
 				}
 			}
 		}
@@ -94,7 +94,7 @@ add_filter(
 				'referrerpolicy' => (string) $p->get_attribute( 'referrerpolicy' ),
 				'media'          => 'screen and (' . $min . 'px < width)',
 			);
-			$link = '<link data-kits-lcp-preload';
+			$link  = '<link data-kits-lcp-preload';
 			foreach ( $attrs as $k => $v ) {
 				if ( '' !== $v ) {
 					$link .= ' ' . $k . '="' . esc_attr( $v ) . '"';
@@ -133,7 +133,11 @@ function kits_body_font_file() {
 	return '';
 }
 
-/** Whether the main content of the current singular page contains $needle (a form, a format class). */
+/**
+ * Whether the main content of the current singular page contains $needle (a form, a format class).
+ *
+ * @param string $needle Text to look for.
+ */
 function kits_content_has( $needle ) {
 	return is_singular() && false !== strpos( (string) get_post_field( 'post_content', get_queried_object_id() ), $needle );
 }

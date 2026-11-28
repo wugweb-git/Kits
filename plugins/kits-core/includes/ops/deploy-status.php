@@ -21,7 +21,7 @@ function kits_mail_sending() {
 	$c = $wpdb->prefix . 'fc_campaigns';
 	$e = $wpdb->prefix . 'fc_campaign_emails';
 	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $c ) ) ) !== $c ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		return false; // FluentCRM not installed: nothing can be sending
+		return false; // FluentCRM not installed: nothing can be sending.
 	}
 	// Same rule as the old SSH check in tools/aw-ship.sh.
 	return (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM %i c JOIN %i e ON e.campaign_id = c.id WHERE c.status IN ('working','scheduled') AND e.status IN ('pending','scheduled','processing') LIMIT 1", $c, $e ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
@@ -35,7 +35,7 @@ function kits_public_gate_routes_on(): bool {
 	return (bool) apply_filters( 'kits_public_gate_routes', '1' === (string) get_option( 'kits_public_gate_routes', '0' ) );
 }
 
-/** permission_callback of the deploy gate's routes. */
+/** The permission_callback of the deploy gate's routes. */
 function kits_gate_route_permission(): bool {
 	return kits_public_gate_routes_on() || current_user_can( 'manage_options' );
 }
@@ -48,7 +48,7 @@ add_action(
 			'/deploy-status',
 			array(
 				'methods'             => 'GET',
-				'permission_callback' => 'kits_gate_route_permission', // manage_options, or public when kits_public_gate_routes is on (the deploy gate reads it without logging in)
+				'permission_callback' => 'kits_gate_route_permission', // manage_options, or public when kits_public_gate_routes is on (the deploy gate reads it without logging in).
 				'callback'            => function () {
 					$r = new WP_REST_Response( array( 'sending' => kits_mail_sending() ), 200 );
 					$r->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );

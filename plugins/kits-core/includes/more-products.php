@@ -27,7 +27,7 @@ function kits_more_products(): array {
 		'mailweb'      => array( 'MailWeb', __( 'Mailboxes, sending and a team inbox inside WordPress.', 'kits-core' ), 'https://wugweb.com/plugins/mailweb/' ),
 		'planweb'      => array( 'PlanWeb', __( 'A content and team calendar with reminders and a weekly digest.', 'kits-core' ), 'https://wugweb.com/plugins/planweb/' ),
 	);
-	unset( $all['kits-core'] ); // not this one
+	unset( $all['kits-core'] ); // Not this one.
 	return $all;
 }
 
@@ -66,7 +66,19 @@ add_action(
 		}
 		add_submenu_page( KITS_MENU, __( 'More from Kits', 'kits-core' ), __( 'More from Kits', 'kits-core' ), 'install_plugins', 'kits-core-more', 'kits_more_page', 90 );
 	},
-	99
+	101 // After the plugin's own menu (priority 100 at the latest), so the parent exists and the first item stays the plugin's own screen.
+);
+
+add_action(
+	'admin_init',
+	function () {
+		// A link to this plugin's copy goes to Kits Core's page when Core is active.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only page name.
+		if ( 'kits' !== 'kits' && function_exists( 'kits_more_page' ) && isset( $_GET['page'] ) && 'kits-core-more' === $_GET['page'] ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=kits-core-more' ) );
+			exit;
+		}
+	}
 );
 
 /** The page: a card for each of the other plugins. */
@@ -85,17 +97,23 @@ function kits_more_page(): void {
 		'activated' => array( 'success', __( 'Activated.', 'kits-core' ) ),
 		'failed'    => array( 'error', __( 'That did not work. Nothing was changed.', 'kits-core' ) ),
 	);
-	wp_register_style( 'kits-more', false, array(), null );
+	wp_register_style( 'kits-more', false, array(), '1' );
 	wp_enqueue_style( 'kits-more' );
 	wp_add_inline_style( 'kits-more', '.kits-more h1{font-size:28px;font-weight:700;letter-spacing:-.02em}.kits-more__grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:16px;max-width:1000px}.kits-more__card{background:#fff;border:1px solid #dcdcde;border-radius:8px;padding:16px 20px}.kits-more__card h2{margin:0 0 8px;font-size:18px}.kits-more__state{font-weight:600}.kits-more__acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.kits-more__acts form{margin:0}' );
 	echo '<div class="wrap kits-more"><h1>' . esc_html__( 'More from Kits', 'kits-core' ) . '</h1>';
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a result word only; nothing is changed by reading it.
 	$done = isset( $_GET['kits_more'] ) ? sanitize_key( wp_unslash( $_GET['kits_more'] ) ) : '';
 	if ( isset( $results[ $done ] ) ) {
-		wp_admin_notice( esc_html( $results[ $done ][1] ), array( 'type' => $results[ $done ][0], 'dismissible' => true ) );
+		wp_admin_notice(
+			esc_html( $results[ $done ][1] ),
+			array(
+				'type'        => $results[ $done ][0],
+				'dismissible' => true,
+			)
+		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reason is shown as text, escaped.
 		if ( 'failed' === $done && isset( $_GET['kits_why'] ) ) {
-			echo '<p class="description">' . esc_html( sanitize_text_field( wp_unslash( $_GET['kits_why'] ) ) ) . '</p>';
+			echo '<p class="description">' . esc_html( sanitize_text_field( wp_unslash( $_GET['kits_why'] ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the reason is shown as escaped text.
 		}
 	}
 	echo '<p class="description">' . esc_html__( 'The other Kits plugins. Each works on its own, and they work better together.', 'kits-core' ) . '</p>';
@@ -135,10 +153,9 @@ function kits_more_page(): void {
  * @param string $why    A short reason for a failure.
  */
 function kits_more_back( string $result, string $why = '' ): void {
-	$args = array(
-		'page'          => 'kits-core-more',
-		'kits_more'      => $result,
-	);
+	$args = array( 'page' => 'kits-core-more' );
+
+	$args['kits_more'] = $result;
 	if ( '' !== $why ) {
 		$args['kits_why'] = mb_substr( $why, 0, 200 );
 	}
@@ -177,7 +194,13 @@ function kits_more_folder( string $key, string $cap ): string {
  */
 function kits_more_release( string $folder ) {
 	$url = defined( 'KITS_REGISTRY_URL' ) ? (string) KITS_REGISTRY_URL : 'https://wugweb-git.github.io/Kits/registry/index.json';
-	$res = wp_remote_get( esc_url_raw( $url ), array( 'timeout' => 10, 'user-agent' => 'Kits-registry/1' ) );
+	$res = wp_remote_get(
+		esc_url_raw( $url ),
+		array(
+			'timeout'    => 10,
+			'user-agent' => 'Kits-registry/1',
+		)
+	);
 	if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
 		return new WP_Error( 'more_registry', __( 'The list of releases could not be reached.', 'kits-core' ) );
 	}
@@ -191,7 +214,10 @@ function kits_more_release( string $folder ) {
 	if ( 0 !== strpos( $pkg, 'https://github.com/wugweb-git/Kits/releases/download/' ) || ! preg_match( '/^[a-f0-9]{64}$/', $sum ) ) {
 		return new WP_Error( 'more_untrusted', __( 'The release is not one this plugin trusts.', 'kits-core' ) );
 	}
-	return array( 'url' => $pkg, 'sha256' => $sum );
+	return array(
+		'url'    => $pkg,
+		'sha256' => $sum,
+	);
 }
 
 /** Install: an administrator, a nonce, a release from the registry, the checksum, then WordPress's own installer. */
@@ -230,7 +256,7 @@ add_action( 'admin_post_kits_more_install', 'kits_more_install' );
 
 /** Activate a plugin that is installed. */
 function kits_more_activate(): void {
-	$folder = kits_more_folder( 'kits_more_activate_', 'activate_plugins' );
+	$folder               = kits_more_folder( 'kits_more_activate_', 'activate_plugins' );
 	list( $state, $file ) = kits_more_state( $folder );
 	if ( 'installed' !== $state ) {
 		kits_more_back( 'failed', __( 'It is not installed, or it is already active.', 'kits-core' ) );

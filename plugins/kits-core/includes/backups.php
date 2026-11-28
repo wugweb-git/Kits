@@ -188,7 +188,7 @@ function kits_daily_backup_run() {
 	}
 
 	// Keep 14 days of automatic backups (hand-made backups are never touched).
-	$removed = array();
+	$removed   = array();
 	$old_files = glob( $dir . '/auto-*' );
 	foreach ( is_array( $old_files ) ? $old_files : array() as $f ) { // glob() gives false on failure.
 		if ( filemtime( $f ) < time() - KITS_BACKUP_KEEP_DAYS * DAY_IN_SECONDS ) {

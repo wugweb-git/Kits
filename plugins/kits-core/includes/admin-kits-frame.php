@@ -237,7 +237,7 @@ function kits_frame_card( string $id, string $title, callable $render, array $op
  * @param array  $opts  Optional settings: 'unit', 'trend' (string like "+14%"), 'trend_dir' ('up'|'down'|'neutral'), 'badge', 'sparkline' (array of numbers 0..100).
  */
 function kits_frame_kpi_card( string $label, string $val, array $opts = array() ): string {
-	$out = '<div class="kits-kpi-card">';
+	$out  = '<div class="kits-kpi-card">';
 	$out .= '<div class="kits-kpi-card__head"><h3 class="kits-kpi-card__label">' . esc_html( $label ) . '</h3>';
 	if ( ! empty( $opts['badge'] ) ) {
 		$out .= '<span class="kits-badge">' . esc_html( $opts['badge'] ) . '</span>';
@@ -249,19 +249,19 @@ function kits_frame_kpi_card( string $label, string $val, array $opts = array() 
 		$out .= '<span class="kits-kpi-card__unit">' . esc_html( $opts['unit'] ) . '</span>';
 	}
 	if ( ! empty( $opts['trend'] ) ) {
-		$dir = in_array( $opts['trend_dir'] ?? '', array( 'up', 'down', 'neutral' ), true ) ? (string) $opts['trend_dir'] : 'up';
+		$dir  = in_array( $opts['trend_dir'] ?? '', array( 'up', 'down', 'neutral' ), true ) ? (string) $opts['trend_dir'] : 'up';
 		$out .= '<span class="kits-kpi-card__trend is-' . esc_attr( $dir ) . '">' . esc_html( $opts['trend'] ) . '</span>';
 	}
 	$out .= '</div>';
 	if ( ! empty( $opts['sparkline'] ) && is_array( $opts['sparkline'] ) ) {
-		$pts = $opts['sparkline'];
-		$max = max( 1, ...$pts );
+		$pts   = $opts['sparkline'];
+		$max   = max( 1, ...$pts );
 		$count = count( $pts );
-		$w = $count > 1 ? 100 / ( $count - 1 ) : 100;
-		$d = '';
+		$w     = $count > 1 ? 100 / ( $count - 1 ) : 100;
+		$d     = '';
 		foreach ( $pts as $i => $p ) {
-			$x = round( $i * $w, 1 );
-			$y = round( 32 - ( ( (float) $p / $max ) * 28 ), 1 );
+			$x  = round( $i * $w, 1 );
+			$y  = round( 32 - ( ( (float) $p / $max ) * 28 ), 1 );
 			$d .= ( 0 === $i ? "M $x $y" : " L $x $y" );
 		}
 		$out .= '<div class="kits-kpi-card__sparkline"><svg viewBox="0 0 100 36" preserveAspectRatio="none"><path d="' . esc_attr( $d ) . '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.65" /></svg></div>';

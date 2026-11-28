@@ -30,8 +30,8 @@ function kits_admin_app_wanted(): bool {
  * any Theme Options section a plugin added (kits_options_sections) that has no place here goes under "More".
  */
 function kits_admin_app_legacy(): array {
-	$old  = kits_options_sections();
-	$form = function ( string $section, string $label, string $back ) {
+	$old   = kits_options_sections();
+	$form  = function ( string $section, string $label, string $back ) {
 		return function () use ( $section, $label, $back ) {
 			echo '<form method="post" action="options.php">';
 			kits_options_form_fields( 'admin.php?page=kits-options&kits_section=' . rawurlencode( $back ) );
@@ -53,7 +53,7 @@ function kits_admin_app_legacy(): array {
 		}
 		kits_options_box_titled( true );
 	};
-	$list = array(
+	$list  = array(
 		// Colours, Typography, Buttons and Cards are built in the app (src/theme-options/sections/).
 		'content-types' => array( __( 'Display per type', 'kits-core' ), $types ), // "Display per type": Kits → Settings → Content types switches the types on.
 		'socials'       => array(
@@ -101,13 +101,13 @@ function kits_admin_app_legacy(): array {
  */
 function kits_admin_app_section_of( string $old ): string {
 	$map = array(
-		'general-header'    => 'header',
-		'general-footer'    => 'footer',
-		'general-layout'    => 'layout',
-		'visual-spacing'    => 'layout',
-		'visual-cards'      => 'cards',
-		'utility-socials'   => 'socials',
-		'utility-share'     => 'share',
+		'general-header'  => 'header',
+		'general-footer'  => 'footer',
+		'general-layout'  => 'layout',
+		'visual-spacing'  => 'layout',
+		'visual-cards'    => 'cards',
+		'utility-socials' => 'socials',
+		'utility-share'   => 'share',
 	);
 	if ( isset( $map[ $old ] ) ) {
 		return $map[ $old ];
@@ -154,9 +154,9 @@ add_action(
 		foreach ( $fields as $key => $f ) {
 			$inherited[ $key ] = kits_theme_option_inherited( $key );
 		}
-		$brand = kits_frame_brand();
-		$theme = wp_get_theme( get_template() );
-		$core  = get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'Version' => 'Version' ) );
+		$brand    = kits_frame_brand();
+		$theme    = wp_get_theme( get_template() );
+		$core     = get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'Version' => 'Version' ) );
 		$pd_saved = (array) get_option( 'kits_page_defaults', array() );
 		$pd_site  = array();
 		$pd_keys  = array( 'sidebar', 'title', 'crumbs' ); // Header and footer parts are chosen in the Site Editor.
@@ -218,7 +218,7 @@ add_action(
 				'styles'    => admin_url( 'site-editor.php?path=/wp_global_styles' ),
 			),
 			'legacy'       => $legacy,
-			'legacyInto'   => array(), // a built section can show today's fields of another below its own
+			'legacyInto'   => array(), // a built section can show today's fields of another below its own.
 			'elsewhere'    => $elsewhere,
 			'initial'      => $asked,
 		);

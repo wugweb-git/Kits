@@ -4,7 +4,7 @@
  * screen stays core-only). Plain HTML and inline SVG, no chart library and no script. Kits shell look from 26 Nov 2026 (black, white, greys; red only for a fault), text
  * that says up or down (never colour alone), and the exact figures stay in a table under the chart.
  *
- * kits_dash_cards( $cards ): a row of stat cards. Each card: label, value (already formatted), and optionally
+ * The parts: kits_dash_cards( $cards ): a row of stat cards. Each card: label, value (already formatted), and optionally
  * delta (number, the change), delta_text (what it is compared with, e.g. "on the 7 days before"), href (the number
  * links there), sub (one small line) and tone ('warn' or 'error': "Needs attention" / "Not working", with an icon).
  * kits_dash_bars( $values, $label ): a small bar chart; $values is label => number, oldest first.
@@ -28,7 +28,7 @@ function kits_dash_cards( array $cards ): string {
 		$out .= '<li class="aw-dash-card"><span class="aw-dash-label">' . esc_html( (string) ( $c['label'] ?? '' ) ) . '</span>';
 		$val  = esc_html( (string) ( $c['value'] ?? '' ) );
 		if ( ! empty( $c['href'] ) ) {
-			$val = '<a href="' . esc_url( (string) $c['href'] ) . '">' . $val . '</a>'; // the number opens the screen behind it
+			$val = '<a href="' . esc_url( (string) $c['href'] ) . '">' . $val . '</a>'; // the number opens the screen behind it.
 		}
 		$out .= '<span class="aw-dash-value">' . $val . '</span>';
 		if ( ! empty( $c['sub'] ) ) {
@@ -57,6 +57,7 @@ function kits_dash_cards( array $cards ): string {
  *
  * @param array  $values Label => number, oldest first.
  * @param string $label  What the bars are, e.g. "Visits per day, last 14 days".
+ * @param bool   $table Whether to add the exact figures as a table.
  * @return string HTML.
  */
 function kits_dash_bars( array $values, string $label, bool $table = false ): string {
@@ -69,7 +70,7 @@ function kits_dash_bars( array $values, string $label, bool $table = false ): st
 	$max  = max( 1, max( array_map( 'floatval', $values ) ) );
 	$w    = 280;
 	$h    = 72;
-	$top  = 14; // room for the peak label
+	$top  = 14; // room for the peak label.
 	$gap  = 2;
 	$slot = ( $w - $gap * ( $n - 1 ) ) / $n;
 	$bw   = min( 24, max( 2, $slot ) );
@@ -97,7 +98,7 @@ function kits_dash_bars( array $values, string $label, bool $table = false ): st
 	}
 	$base = '<line x1="0" y1="' . $h . '" x2="' . $w . '" y2="' . $h . '"></line>';
 	$out  = '<figure class="aw-dash-chart"><svg viewBox="0 0 ' . $w . ' ' . ( $h + 1 ) . '" role="img" aria-label="' . esc_attr( $sum ) . '">' . $bars . $base . $peak . '</svg><figcaption class="description">' . esc_html( $label ) . '</figcaption></figure>';
-	if ( $table ) { // the exact figures (a table view for every chart)
+	if ( $table ) { // the exact figures (a table view for every chart).
 		$rows = '';
 		foreach ( array_reverse( $values, true ) as $k => $v ) {
 			$rows .= '<tr><td>' . esc_html( (string) $k ) . '</td><td>' . esc_html( number_format_i18n( (float) $v ) ) . '</td></tr>';

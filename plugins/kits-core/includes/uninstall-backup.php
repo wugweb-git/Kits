@@ -254,13 +254,13 @@ function kits_uninstall_backup( string $plugin, string $main, array $names, arra
 	if ( ! $gz ) {
 		return $fail( 'gzopen failed: ' . $part );
 	}
-	$put = static function ( string $line ) use ( $gz ): bool {
+	$put   = static function ( string $line ) use ( $gz ): bool {
 		return '' !== $line && strlen( $line ) === gzwrite( $gz, $line );
 	};
 	$abort = static function ( string $why ) use ( $gz, $part, $fail ): bool {
 		gzclose( $gz );
 		if ( is_file( $part ) ) {
-			wp_delete_file( $part ); // our own incomplete file
+			wp_delete_file( $part ); // our own incomplete file.
 		}
 		return $fail( $why );
 	};
