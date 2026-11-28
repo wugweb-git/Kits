@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.3
+
+- Checks for its own updates from the registry. Calls to SourceWeb, InsightWeb and RankWeb use their current names, and the earlier aw_ shims are gone from the plugin. The Claims screen has a title in the tab and header.
+
 ## 1.5.2
 
 - Claims: no stray "0" above the list; older claim status keys map to approved, rejected or pending. Listings rows have View profile and Edit listing links named for the listing. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

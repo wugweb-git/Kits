@@ -262,7 +262,7 @@ function kits_site_options_short(): void {
 	foreach ( (array) get_option( 'aw_issuer_short', array() ) as $slug => $short ) {
 		$lines[] = $slug . ' = ' . $short;
 	}
-	$slugs = function_exists( 'aw_issuers' ) ? implode( ', ', array_keys( aw_issuers() ) ) : '';
+	$slugs = function_exists( 'sourceweb_issuers' ) ? implode( ', ', array_keys( sourceweb_issuers() ) ) : '';
 	printf(
 		'<textarea class="large-text code" rows="4" spellcheck="false" id="aw_issuer_short" name="aw_issuer_short" aria-describedby="aw_issuer_short-help">%1$s</textarea><p class="description" id="aw_issuer_short-help">%2$s</p>',
 		esc_textarea( implode( "\n", $lines ) ),

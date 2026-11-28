@@ -4,7 +4,7 @@ Tags: search console, analytics, keywords, pagespeed, seo
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,6 +92,9 @@ InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt
 
 == Changelog ==
 
+= 1.4.3 =
+* Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.
+
 = 1.4.2 =
 * The Dashboard no longer says "All working" above sources that have never run; the Search Console import tile says no import is logged yet. Larger link targets in the Priorities box. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
 
@@ -151,6 +154,9 @@ InsightWeb also requests pages of your own site (home page, robots.txt, llms.txt
 * Standalone release with native admin UI fallback, daily telemetry cron, credential status diagnostics, and honest empty-state dashboard tiles.
 
 == Upgrade Notice ==
+
+= 1.4.3 =
+Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.
 
 = 1.0.0 =
 Initial standalone release of InsightWeb.

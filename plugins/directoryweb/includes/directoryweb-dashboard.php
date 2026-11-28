@@ -263,12 +263,12 @@ function directoryweb_count_badges(): array {
  * @return array|null Null when SourceWeb is not active.
  */
 function directoryweb_count_enrichment(): ?array {
-	if ( ! function_exists( 'aw_enrich_progress' ) || ! function_exists( 'aw_enrich_table' ) ) {
+	if ( ! function_exists( 'sourceweb_enrich_progress' ) || ! function_exists( 'sourceweb_enrich_table' ) ) {
 		return null;
 	}
 	global $wpdb;
-	$p    = aw_enrich_progress();
-	$last = get_option( 'aw_enrich_db' ) ? (string) $wpdb->get_var( $wpdb->prepare( 'SELECT MAX( created ) FROM %i', aw_enrich_table() ) ) : ''; // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is SourceWeb's
+	$p    = sourceweb_enrich_progress();
+	$last = get_option( 'aw_enrich_db' ) ? (string) $wpdb->get_var( $wpdb->prepare( 'SELECT MAX( created ) FROM %i', sourceweb_enrich_table() ) ) : ''; // phpcs:ignore WordPress.DB -- hourly count in the background; the table name is SourceWeb's
 	return array(
 		'pending' => (int) $p['pending'],
 		'checked' => (int) $p['checked'],

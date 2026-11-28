@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 2.5.5
+
+- Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.
+
 ## 2.5.4
 
 - The first menu item reads Dashboard, matching the header tab. Checkboxes and radios in labels have a 24px hit area.

@@ -74,8 +74,8 @@ function sourceweb_section_categories( $type ): array {
  * @return string[]
  */
 function sourceweb_post_types(): array {
-	if ( function_exists( 'aw_post_types' ) ) {
-		return array_keys( aw_post_types() );
+	if ( function_exists( 'directoryweb_post_types' ) ) {
+		return array_keys( directoryweb_post_types() );
 	}
 	return array_keys( (array) sourceweb_sources_config()['sections'] );
 }

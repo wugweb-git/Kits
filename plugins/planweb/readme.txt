@@ -4,7 +4,7 @@ Tags: calendar, planner, schedule, content calendar, team
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.7.2
+Stable tag: 0.7.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ The iCalendar feed it serves is read by your own calendar app (Google, Apple or 
 4. The Add an entry form, with date, time, title, note, type, channels, owner, status, repeat and link.
 
 == Changelog ==
+
+= 0.7.3 =
+* Checks for its own updates from the registry.
 
 = 0.7.2 =
 * Entries table fits at 1280 and stacks on phones. Scheduled jobs are a card in Settings, not a block far below it. An empty Dashboard offers Add an entry. Timeline marks have 24px hit areas. Each screen has its own tab title. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

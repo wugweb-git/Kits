@@ -172,7 +172,7 @@ function planweb_more_back( string $result, string $why = '' ): void {
  * @return string Folder.
  */
 function planweb_more_folder( string $key, string $cap ): string {
-	if ( 'POST' !== strtoupper( (string) ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) {
+	if ( 'POST' !== strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) ) {
 		wp_die( esc_html__( 'This action needs a form post.', 'planweb' ), 405 );
 	}
 	if ( ! current_user_can( $cap ) ) {

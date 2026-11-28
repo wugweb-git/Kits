@@ -78,7 +78,7 @@ function kits_report_url( $id, $field = '' ) {
 /** Which item the page is about: its name (linked back to it) and, for a listing, its place; otherwise its type. */
 function kits_form_page_for( $listing ) {
 	kits_ff_style( 'aw-forms' ); // aw-form-for
-	$place = 'aw_listing' !== $listing->post_type ? ( KITS_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'aw_listing_place' ) ? implode( ', ', array_filter( array_reverse( aw_listing_place( $listing->ID ) ) ) ) : '' );
+	$place = 'aw_listing' !== $listing->post_type ? ( KITS_REPORT_TYPES[ $listing->post_type ] ?? '' ) : ( function_exists( 'directoryweb_listing_place' ) ? implode( ', ', array_filter( array_reverse( directoryweb_listing_place( $listing->ID ) ) ) ) : '' );
 	return '<p class="aw-form-for"><a href="' . esc_url( get_permalink( $listing ) ) . '">' . esc_html( get_the_title( $listing ) ) . '</a>'
 		. ( '' !== $place ? '<span>' . esc_html( $place ) . '</span>' : '' ) . '</p>';
 }

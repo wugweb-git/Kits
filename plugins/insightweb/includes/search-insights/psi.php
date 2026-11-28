@@ -31,9 +31,9 @@ const AW_SI_PSI_BUDGET = 25; // Seconds: no new call starts after this, so a run
  */
 function insightweb_si_psi_pages(): array {
 	$paths = array( '/', '/news/', '/directory/', '/library/', '/resources/', '/opportunities/', '/campaigns/', '/about/' );
-	if ( function_exists( 'aw_directory_url' ) ) {
+	if ( function_exists( 'directoryweb_directory_url' ) ) {
 		foreach ( array( 'kerala', 'pune' ) as $slug ) {
-			$paths[] = insightweb_si_path( (string) aw_directory_url( $slug ) );
+			$paths[] = insightweb_si_path( (string) directoryweb_directory_url( $slug ) );
 		}
 	}
 	// Every published campaign (a handful), so each campaign page gets LCP and TBT figures.

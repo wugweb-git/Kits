@@ -135,8 +135,8 @@ function rankweb_seo_item_description( $post ) {
 	}
 	$desc = preg_replace( '/\s+,/u', ',', html_entity_decode( wp_strip_all_tags( (string) $desc ), ENT_QUOTES, 'UTF-8' ) ); // "Jaipur , Rajasthan"
 	// A summary's description is the summary condensed (Summary rules): its lead, or the first sentences that fit whole.
-	if ( has_excerpt( $post ) && function_exists( 'aw_summary_section' ) && '' !== aw_summary_section( $post ) ) {
-		return aw_summary_description( trim( str_replace( '[Needs legal review]', '', $desc ) ) );
+	if ( has_excerpt( $post ) && function_exists( 'sourceweb_summary_section' ) && '' !== sourceweb_summary_section( $post ) ) {
+		return sourceweb_summary_description( trim( str_replace( '[Needs legal review]', '', $desc ) ) );
 	}
 	return rankweb_seo_cut( $desc, AW_SEO_DESC_MAX );
 }

@@ -35,7 +35,7 @@ const AW_GLIVE_COST = 0.025;
 /* ---------- Sources line ---------- */
 
 add_filter(
-	'aw_listing_sources',
+	'directoryweb_listing_sources',
 	function ( $out, $id ) {
 		if ( ! function_exists( 'sourceweb_enrich_listing_source_keys' ) ) {
 			return $out;

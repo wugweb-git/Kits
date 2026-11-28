@@ -21,7 +21,7 @@ $seedfx = json_decode( file_get_contents( __DIR__ . '/fixtures/enrich_field_rule
 $acf_gs = array_map( fn( $f ) => json_decode( file_get_contents( $f ), true ), glob( dirname( __DIR__, 2 ) . '/directoryweb/acf-json/group_aw_listing*.json' ) );
 $acf    = array( 'fields' => sourceweb_enrich_listing_groups_fields( $acf_gs, 'group_aw_listing' ) );
 $fields = array_keys( $p3['enrich_fields'] );
-$p3_order = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing' ); // The order of aw_post_types().
+$p3_order = array( 'aw_news', 'aw_legal', 'post', 'aw_campaign', 'aw_opportunity', 'aw_listing' ); // The order of directoryweb_post_types().
 
 // ---- sections from the post types ----
 $types = sourceweb_rules_section_types( $p3['public_types'], array( 'aw_press' ), $p3_order );

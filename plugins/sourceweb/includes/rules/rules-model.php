@@ -174,7 +174,7 @@ const AW_ENRICH_APPLY = array(
 );
 
 /**
- * The sections in order: the site's own content types first (aw_post_types() order), then any other public type,
+ * The sections in order: the site's own content types first (directoryweb_post_types() order), then any other public type,
  * then the opted-in ones.
  *
  * @param string[] $public Public post types (get_post_types( public )).

@@ -447,6 +447,30 @@ add_filter(
 	PHP_INT_MAX - 1
 );
 
+// The item is moved out of its first menu, so WordPress finds no title for the screen: give it one (browser tab and header).
+add_filter(
+	'admin_title',
+	function ( $admin_title, $title ) {
+		global $plugin_page;
+		if ( 'aw-claims' === $plugin_page && '' === trim( (string) $title ) ) {
+			return sprintf( '%1$s ‹ %2$s — WordPress', __( 'Claims', 'directoryweb' ), get_bloginfo( 'name' ) );
+		}
+		return $admin_title;
+	},
+	10,
+	2
+);
+add_action(
+	'admin_head',
+	function () {
+		global $plugin_page, $title;
+		if ( 'aw-claims' === $plugin_page && empty( $title ) ) {
+			$title = __( 'Claims', 'directoryweb' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- the screen has no menu title of its own.
+		}
+	},
+	0
+);
+
 /** Directory → Claims: the list (DirectoryWeb's shell screen), one claim (&entry=), or the notice after a review (&done=). */
 function directoryweb_claims_screen() {
 	if ( ! current_user_can( DIRECTORYWEB_CAP ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- DirectoryWeb's own capability (directoryweb-caps.php)
@@ -651,12 +675,12 @@ function directoryweb_claim_sideload( $file, $lid, $title ) {
 function directoryweb_claim_apply_field( $c, $key ) {
 	$lid = $c['listing'];
 	$src = array( array( 'key' => 'claim', 'name' => 'Claimed by organisation', 'url' => '', 'fetched_at' => wp_date( 'c' ) ) );
-	$on   = function_exists( 'aw_enrich_add_row' ) && function_exists( 'aw_enrich_snapshot' ) && function_exists( 'aw_enrich_install' );
-	$snap = fn( $field ) => $on ? aw_enrich_snapshot( $lid, $field ) : null;
+	$on   = function_exists( 'sourceweb_enrich_add_row' ) && function_exists( 'sourceweb_enrich_snapshot' ) && function_exists( 'sourceweb_enrich_install' );
+	$snap = fn( $field ) => $on ? sourceweb_enrich_snapshot( $lid, $field ) : null;
 	$log  = function ( $field, $value, $old = null ) use ( $lid, $src, $c, $on ) {
 		if ( $on ) {
-			aw_enrich_install();
-			aw_enrich_add_row( $lid, $field, $value, null !== $old ? $old : aw_enrich_snapshot( $lid, $field ), $src, 'high', 'approved', 'claim-' . $c['id'], 'Claimed by organisation' );
+			sourceweb_enrich_install();
+			sourceweb_enrich_add_row( $lid, $field, $value, null !== $old ? $old : sourceweb_enrich_snapshot( $lid, $field ), $src, 'high', 'approved', 'claim-' . $c['id'], 'Claimed by organisation' );
 		}
 	};
 	if ( 'logo' === $key ) {
@@ -765,8 +789,8 @@ add_action(
 			if ( function_exists( 'directoryweb_org_people_link' ) ) { // one of the listing's people, privately; name and role shown only if they ticked "Show my name"
 				directoryweb_org_people_link( $lid, $c['email'], $c['role'], $c['show'] );
 			}
-			if ( function_exists( 'aw_enrich_after_change' ) ) {
-				aw_enrich_after_change( $lid );
+			if ( function_exists( 'sourceweb_enrich_after_change' ) ) {
+				sourceweb_enrich_after_change( $lid );
 			}
 			$review += array( 'status' => 'approved', 'fields' => $ok );
 		} else {

@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.7.3
+Stable tag: 0.7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 6. Workers: one row per scheduled workflow, with its group, workflow file, schedule and a run now button.
 
 == Changelog ==
+
+= 0.7.4 =
+* Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls to DirectoryWeb use its current names.
 
 = 0.7.3 =
 * The menu item Overview reads Dashboard and AI models comes before Places, so the WordPress tab bar and the header agree and the bar is hidden. A failed Add place scrolls the message into view. Checkboxes and radios in labels have a 24px hit area.
@@ -178,6 +181,9 @@ Deleting the plugin deletes no data by default: sources, keywords, rules, review
 * Standalone release with native admin UI fallback, domain trust overrides, and feed tag exclusions. (Corrected in 0.2.7: this entry also said 'worker/feed retry backoff'. The backoff code exists but nothing calls it, so there is no retry backoff.)
 
 == Upgrade Notice ==
+
+= 0.7.4 =
+Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls to DirectoryWeb use its current names.
 
 = 0.1.0 =
 Initial standalone release of SourceWeb.

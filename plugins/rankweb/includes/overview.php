@@ -82,10 +82,10 @@ function rankweb_seo_overview_endpoints_status(): string {
 
 /** Status of Search Insights from its Site Health test. */
 function rankweb_seo_overview_si_status(): string {
-	if ( ! function_exists( 'aw_si_health_test' ) ) {
+	if ( ! function_exists( 'insightweb_si_health_test' ) ) {
 		return '';
 	}
-	$t = aw_si_health_test();
+	$t = insightweb_si_health_test();
 	return '<span class="dashicons dashicons-' . ( 'good' === $t['status'] ? 'yes' : 'warning' ) . '" aria-hidden="true"></span> ' . esc_html( $t['label'] );
 }
 

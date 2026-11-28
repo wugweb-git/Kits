@@ -311,7 +311,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			 */
 			public function keyphrase_guard( $args, $assoc ) {
 				global $wpdb;
-				if ( ! insightweb_si_ready() || ! function_exists( 'aw_seo_kp_replay' ) ) {
+				if ( ! insightweb_si_ready() || ! function_exists( 'rankweb_seo_kp_replay' ) ) {
 					WP_CLI::error( 'Search Insights tables or the focus-keyword module are not loaded.' );
 				}
 				$k    = insightweb_si_table( 'keywords' );
@@ -335,7 +335,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 					if ( count( $kw['pages'] ) < 2 ) {
 						continue; // one owner: a conflict only because Google shows another page; the guard cannot prevent that
 					}
-					$r = aw_seo_kp_replay( $kw['pages'] );
+					$r = rankweb_seo_kp_replay( $kw['pages'] );
 					++$prevented;
 					$refused += count( $r['refused'] );
 					$news    += count( array_filter( $r['refused'], fn( $x ) => insightweb_is_type( $x['type'], 'news' ) ) );

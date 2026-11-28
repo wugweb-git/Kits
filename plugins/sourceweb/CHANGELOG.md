@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 0.7.4
+
+- Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls to DirectoryWeb use its current names.
+
 ## 0.7.3
 
 - The menu item Overview reads Dashboard and AI models comes before Places, so the WordPress tab bar and the header agree and the bar is hidden. A failed Add place scrolls the message into view. Checkboxes and radios in labels have a 24px hit area.

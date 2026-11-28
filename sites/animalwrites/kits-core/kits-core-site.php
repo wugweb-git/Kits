@@ -36,6 +36,7 @@ function animalwrites_kits_core_site_load(): void {
 		return; // Kits Core is not here, or is older than 1.4.0 (which still has these functions itself).
 	}
 	$dir = ANIMALWRITES_KITS_CORE_SITE_DIR . 'includes/';
+	require_once $dir . 'aw-names.php'; // the earlier aw_* names for the theme and layers; the plugins no longer define them
 	// The same order Kits Core loaded them in before 1.4.0.
 	foreach ( array(
 		'taxonomy-rename.php',

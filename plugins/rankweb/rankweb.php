@@ -11,7 +11,7 @@
  * Plugin Name:       RankWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/rankweb/
  * Description:       Complete SEO suite for WordPress: structured schema, canonicals, robots directives, sitemaps, breadcrumbs, internal links, media optimization, and content analysis. Integrates with Rank Math when active.
- * Version:           2.5.4
+ * Version:           2.5.5
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'RANKWEB_VERSION' ) || define( 'RANKWEB_VERSION', '2.5.4' ); // keep equal to the Version header above
+defined( 'RANKWEB_VERSION' ) || define( 'RANKWEB_VERSION', '2.5.5' ); // keep equal to the Version header above
 
 if ( ! defined( 'RANKWEB_DIR' ) ) {
 	define( 'RANKWEB_DIR', plugin_dir_path( __FILE__ ) );
@@ -40,6 +40,10 @@ require_once RANKWEB_DIR . 'includes/post-type-roles.php'; // which content type
 require_once RANKWEB_DIR . 'includes/text.php'; // rankweb_plain_text(), used by every file.
 require_once RANKWEB_DIR . 'includes/rankweb-caps.php'; // RankWeb's own capability, manage_rankweb (granted from manage_categories).
 require_once RANKWEB_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen, with or without Rank Math.
+// Its own update check against the registry (the direct build only; the WordPress.org build leaves the file out).
+if ( file_exists( RANKWEB_DIR . 'includes/registry-updates.php' ) ) {
+	require_once RANKWEB_DIR . 'includes/registry-updates.php';
+}
 require_once RANKWEB_DIR . 'includes/kits-hub.php'; // a tab and a status row in the Kits admin, when Kits Core is loaded.
 require_once RANKWEB_DIR . 'includes/breadcrumbs-render.php'; // the visible trail above the page title, with or without Rank Math and the Breadcrumbs module.
 require_once RANKWEB_DIR . 'includes/media-autofill.php'; // new image uploads: empty name, alt, caption, description, image context and keyphrase filled, with or without Rank Math.

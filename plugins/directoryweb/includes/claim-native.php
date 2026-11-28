@@ -279,8 +279,8 @@ function directoryweb_claim_transition( int $id, string $to, int $by, string $no
 		if ( ! empty( $c['person']['email'] ) && function_exists( 'directoryweb_org_people_link' ) ) {
 			directoryweb_org_people_link( $lid, $c['person']['email'], DIRECTORYWEB_CLAIM_ROLES[ $c['person']['role'] ?? '' ] ?? '', ! empty( $c['person']['show'] ) );
 		}
-		if ( function_exists( 'aw_enrich_after_change' ) ) {
-			aw_enrich_after_change( $lid );
+		if ( function_exists( 'sourceweb_enrich_after_change' ) ) {
+			sourceweb_enrich_after_change( $lid );
 		}
 	}
 	if ( 'revoked' === $to ) {

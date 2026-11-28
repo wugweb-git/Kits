@@ -11,7 +11,7 @@
  * Plugin Name:       PlanWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/planweb/
  * Description:       The team's calendar in WordPress: dates and content, social, email and campaign plans. Posts nothing to social networks; emails site users only if you switch reminders or the digest on.
- * Version:           0.7.2
+ * Version:           0.7.3
  * Update URI:           https://wugweb.com/plugins/planweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -50,7 +50,7 @@ if ( defined( 'PLANWEB_VERSION' ) ) {
 	return; // Loaded already.
 }
 
-define( 'PLANWEB_VERSION', '0.7.2' );
+define( 'PLANWEB_VERSION', '0.7.3' );
 define( 'PLANWEB_FILE', __FILE__ );
 define( 'PLANWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PLANWEB_URL', plugin_dir_url( __FILE__ ) );
@@ -64,6 +64,10 @@ require_once PLANWEB_DIR . 'includes/admin-table.php';
 require_once PLANWEB_DIR . 'includes/admin.php';
 require_once PLANWEB_DIR . 'includes/help-tab.php';
 require_once PLANWEB_DIR . 'includes/plugin-info.php';
+// Its own update check against the registry (the direct build only; the WordPress.org build leaves the file out).
+if ( file_exists( PLANWEB_DIR . 'includes/registry-updates.php' ) ) {
+	require_once PLANWEB_DIR . 'includes/registry-updates.php';
+}
 require_once PLANWEB_DIR . 'includes/dashboard.php';
 require_once PLANWEB_DIR . 'includes/kits-hub.php';
 require_once PLANWEB_DIR . 'includes/planweb-dashboard.php';

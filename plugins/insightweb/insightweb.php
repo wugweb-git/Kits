@@ -16,7 +16,7 @@
  * Plugin Name:       InsightWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/insightweb/
  * Description:       Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
- * Version:           1.4.2
+ * Version:           1.4.3
  * Update URI:           https://wugweb.com/plugins/insightweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -32,7 +32,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'INSIGHTWEB_VERSION', '1.4.2' ); // equal to the header's Version.
+define( 'INSIGHTWEB_VERSION', '1.4.3' ); // equal to the header's Version.
 define( 'INSIGHTWEB_FILE', __FILE__ ); // RankWeb's bridge loads Search Insights only while this is not defined.
 if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the request that activates InsightWeb
 	define( 'INSIGHTWEB_DIR', plugin_dir_path( __FILE__ ) );
@@ -41,6 +41,10 @@ if ( ! defined( 'INSIGHTWEB_DIR' ) ) { // already set by the bootstrap on the re
 require_once INSIGHTWEB_DIR . 'includes/keywords.php'; // the keyword table SourceWeb shares (moved from Kits Core, 18 Nov 2026); needs no other plugin
 require_once INSIGHTWEB_DIR . 'includes/insightweb-caps.php'; // InsightWeb's own capability, manage_insightweb (granted from manage_options).
 require_once INSIGHTWEB_DIR . 'includes/plugin-info.php'; // icon, banner and View details on the Plugins screen.
+// Its own update check against the registry (the direct build only; the WordPress.org build leaves the file out).
+if ( file_exists( INSIGHTWEB_DIR . 'includes/registry-updates.php' ) ) {
+	require_once INSIGHTWEB_DIR . 'includes/registry-updates.php';
+}
 require_once INSIGHTWEB_DIR . 'includes/kits-hub.php'; // a row in Kits System Status, when Kits Core is loaded.
 
 // Priority 5, as Search Insights loaded inside RankWeb. The bootstrap loads once, whoever calls it first.

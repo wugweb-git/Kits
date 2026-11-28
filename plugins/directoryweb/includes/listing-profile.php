@@ -327,7 +327,7 @@ function directoryweb_block_org_details( $a, $id ) {
 			$facts .= '<div class="aw-org-fact"><dt><span class="aw-org-fact-ico">' . directoryweb_icon( $icons[ $k ] ) . '</span>' . esc_html( $label ) . '</dt><dd>' . $missing( $k ) . '</dd></div>';
 		}
 	}
-	$extra = function_exists( 'aw_enrich_profile_extras' ) ? aw_enrich_profile_extras( $id ) : ''; // live Google block, signals, news mentions
+	$extra = function_exists( 'sourceweb_enrich_profile_extras' ) ? sourceweb_enrich_profile_extras( $id ) : ''; // live Google block, signals, news mentions
 	if ( '' === $links . $photos . $facts . $extra ) {
 		return '';
 	}

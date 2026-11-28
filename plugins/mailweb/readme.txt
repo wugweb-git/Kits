@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.7.3
+Stable tag: 3.7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -115,6 +115,9 @@ MailWeb connects to external services only when configured by the site administr
 
 == Upgrade Notice ==
 
+= 3.7.4 =
+Checks for its own updates from the registry. Log lines go through one helper and are written only with WP_DEBUG_LOG on. The bundled vendor/ ships with its composer.json.
+
 = 3.5.0 =
 Site-specific code left the plugin. A site that relied on it (website forms in the Inbox, the newsletter shortcode, volunteer fields, `wp aw crm-setup`) needs its own site layer loaded; nothing changes for other sites.
 
@@ -146,6 +149,9 @@ Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each pack
 5. A website form message open in the Inbox, with the sender's fields and Reply, Mark unread and Move to Trash.
 
 == Changelog ==
+
+= 3.7.4 =
+* Checks for its own updates from the registry. Log lines go through one helper and are written only with WP_DEBUG_LOG on. The bundled vendor/ ships with its composer.json.
 
 = 3.7.3 =
 * The first screens read Inbox, Dashboard, Settings in the menu and the header, and the Overview item reads Dashboard. Checkboxes and radios in labels have a 24px hit area.

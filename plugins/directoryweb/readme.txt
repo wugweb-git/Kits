@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -97,6 +97,9 @@ By default, deleting the plugin removes nothing: listings, places, claims, setti
 
 == Changelog ==
 
+= 1.5.3 =
+* Checks for its own updates from the registry. Calls to SourceWeb, InsightWeb and RankWeb use their current names, and the earlier aw_ shims are gone from the plugin. The Claims screen has a title in the tab and header.
+
 = 1.5.2 =
 * Claims: no stray "0" above the list; older claim status keys map to approved, rejected or pending. Listings rows have View profile and Edit listing links named for the listing. The More from Kits link of a plugin goes to Kits Core's page when Core is active.
 
@@ -160,6 +163,9 @@ By default, deleting the plugin removes nothing: listings, places, claims, setti
 * The Directory becomes its own plugin. Same pages, data, field groups, blocks, shortcodes and routes; nothing changes on the site.
 
 == Upgrade Notice ==
+
+= 1.5.3 =
+Checks for its own updates from the registry. Calls to SourceWeb, InsightWeb and RankWeb use their current names, and the earlier aw_ shims are gone from the plugin. The Claims screen has a title in the tab and header.
 
 = 1.1.0 =
 The listing fields are registered by DirectoryWeb now; no change on the site.

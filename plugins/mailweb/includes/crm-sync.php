@@ -18,6 +18,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * One line to the PHP error log, only when the site has WP_DEBUG and WP_DEBUG_LOG on.
+ *
+ * @param string $message What went wrong.
+ */
+function mailweb_log( string $message ): void {
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ) {
+		error_log( $message ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- debug log only.
+	}
+}
+
 /** FluentCRM feed settings: on, tag (title), boxes (mailbox keys; empty = all). */
 function mailweb_crm_settings() {
 	return wp_parse_args(
@@ -71,7 +82,7 @@ function mailweb_crm_contact_for( $email, $name ) {
 		}
 		return is_object( $c ) ? $c : null;
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb crm_contact_for error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb crm_contact_for error: ' . $e->getMessage() );
 		return null;
 	}
 }
@@ -107,7 +118,7 @@ function mailweb_crm_upsert( $email, $name, $source ) {
 		}
 		return is_object( $c ) ? $c : null;
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb crm_upsert error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb crm_upsert error: ' . $e->getMessage() );
 		return null;
 	}
 }
@@ -206,7 +217,7 @@ function mailweb_crm_note_email( $key, $folder, $m ) {
 		mailweb_crm_mark_done( $mid, $note ? (int) $note->id : 0 );
 		return $note ? 'noted' : 'error';
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb crm_note_email error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb crm_note_email error: ' . $e->getMessage() );
 		return 'error';
 	}
 }
@@ -249,7 +260,7 @@ function mailweb_crm_sync( $key, $folder = 'INBOX', $all = false, $per = 25 ) {
 	try {
 		$n = mailweb_crm_sync_pages( $key, $folder, $all, $per );
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb crm_sync error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb crm_sync error: ' . $e->getMessage() );
 		$n = array( 'error' => $e->getMessage() );
 	} finally {
 		mailweb_crm_unlock();
@@ -302,7 +313,7 @@ add_action(
 				mailweb_crm_sync( $key, 'INBOX', false, 5 );
 			}
 		} catch ( \Throwable $e ) {
-			error_log( 'MailWeb webhook sync error: ' . $e->getMessage() );
+			mailweb_log( 'MailWeb webhook sync error: ' . $e->getMessage() );
 		}
 	}
 );
@@ -348,7 +359,7 @@ function mailweb_crm_note_reply( $from, $to, $subject, $html ) {
 			}
 		}
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb crm_note_reply error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb crm_note_reply error: ' . $e->getMessage() );
 	}
 }
 

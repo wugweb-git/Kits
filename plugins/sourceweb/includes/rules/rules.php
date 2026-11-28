@@ -42,7 +42,7 @@ function sourceweb_rules_live() {
 
 /**
  * The sections: post type => [label, the workers' item type ('' = the workers never file items there)]. From the
- * phase 3 migration, the site's content types (public, or opted in); before it, the six of aw_post_types() as before.
+ * phase 3 migration, the site's content types (public, or opted in); before it, the six of directoryweb_post_types() as before.
  *
  * @param bool $from_types The content types whatever the phase (the migration's dry run).
  * @return array<string, array{label: string, worker_type: string}>
@@ -53,12 +53,12 @@ function sourceweb_rules_sections( $from_types = false ) {
 	if ( isset( $memo[ (int) $live ] ) && did_action( 'init' ) ) {
 		return $memo[ (int) $live ];
 	}
-	$order = function_exists( 'aw_post_types' ) ? array_keys( aw_post_types() ) : array();
+	$order = function_exists( 'directoryweb_post_types' ) ? array_keys( directoryweb_post_types() ) : array();
 	$types = $live ? sourceweb_rules_section_types( array_values( get_post_types( array( 'public' => true ) ) ), array_values( get_post_types_by_support( 'aw-section' ) ), $order ) : $order;
 	$out   = array();
 	foreach ( $types as $t ) {
 		$obj       = get_post_type_object( $t );
-		$own       = function_exists( 'aw_post_types' ) ? ( aw_post_types()[ $t ][1] ?? '' ) : '';
+		$own       = function_exists( 'directoryweb_post_types' ) ? ( directoryweb_post_types()[ $t ][1] ?? '' ) : '';
 		$out[ $t ] = array(
 			'label'       => '' !== $own ? $own : ( $obj ? (string) $obj->labels->name : $t ),
 			'worker_type' => (string) ( sourceweb_rules_worker_types()[ $t ] ?? '' ),

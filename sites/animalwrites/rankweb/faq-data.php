@@ -595,7 +595,7 @@ function rankweb_faq_legal_pdf( $id, $doc ) {
 	if ( '' === $url ) {
 		return null;
 	}
-	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	$iss = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 	$what = rankweb_faq_is_topic_name( $doc ) ? 'PDF of the ' . esc_html( $doc ) : esc_html( $doc ) . ' PDF';
 	return array( 'Download the official ' . $what . ' ' . rankweb_faq_a( $url, 'here' ) . ( $iss ? ' (from ' . esc_html( rankweb_faq_the( $iss->name ) ) . ')' : '' ) . '.', 'pdf' );
 }
@@ -630,7 +630,7 @@ function rankweb_faq_legal_date( $id, $doc ) {
 	}
 	if ( '' === $no ) {
 		// Releases and circulars carry no number (owner, 25 Oct 2026): the date alone, with who released or issued it.
-		$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+		$iss = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 		if ( ! $iss || ! in_array( rankweb_faq_legal_kind( $id ), array( 'official-release', 'circular' ), true ) ) {
 			return null;
 		}
@@ -645,7 +645,7 @@ function rankweb_faq_legal_date( $id, $doc ) {
 }
 
 function rankweb_faq_legal_issuer( $id, $doc ) {
-	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	$iss = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 	if ( ! $iss || in_array( rankweb_faq_legal_kind( $id ), array( 'act', 'rule', 'template' ), true ) ) {
 		return null; // an Act's or Rule's stored issuer is whose copy it is, not the law-maker
 	}
@@ -664,7 +664,7 @@ function rankweb_faq_legal_issuer( $id, $doc ) {
  */
 function rankweb_faq_legal_read( $id, $doc ) {
 	$src = (string) get_post_meta( $id, 'aw_source_url', true );
-	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	$iss = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 	if ( '' === $src || ! $iss || 'official-release' !== rankweb_faq_legal_kind( $id ) || '' !== rankweb_faq_legal_pdf_url( $id ) ) {
 		return null;
 	}
@@ -1286,7 +1286,7 @@ function rankweb_faq_tag_library( $term_id ) {
 	if ( ! $ids ) {
 		return null;
 	}
-	$iss = function_exists( 'aw_item_issuer' ) && ! in_array( rankweb_faq_legal_kind( $ids[0] ), array( 'act', 'rule', 'template' ), true ) ? aw_item_issuer( $ids[0] ) : null;
+	$iss = function_exists( 'sourceweb_item_issuer' ) && ! in_array( rankweb_faq_legal_kind( $ids[0] ), array( 'act', 'rule', 'template' ), true ) ? sourceweb_item_issuer( $ids[0] ) : null;
 	$a   = 'The latest is ' . rankweb_faq_tag_item_text( $ids[0] ) . ( $iss ? ', from ' . esc_html( rankweb_faq_the( $iss->name ) ) : '' ) . '. ' . rankweb_faq_a( (string) get_permalink( $ids[0] ), 'Read it' ) . '.';
 	return array( $a, 'tag-library' );
 }
@@ -1564,7 +1564,7 @@ function rankweb_faq_tag_districts( $term_id ) {
 function rankweb_faq_tag_issuers( $term_id ) {
 	$counts = array();
 	foreach ( rankweb_faq_tag_items( $term_id )['aw_legal'] ?? array() as $id ) {
-		$iss = function_exists( 'aw_item_issuer' ) && ! in_array( rankweb_faq_legal_kind( $id ), array( 'act', 'rule', 'template' ), true ) ? aw_item_issuer( $id ) : null; // an Act's or Rule's stored issuer is whose copy it is
+		$iss = function_exists( 'sourceweb_item_issuer' ) && ! in_array( rankweb_faq_legal_kind( $id ), array( 'act', 'rule', 'template' ), true ) ? sourceweb_item_issuer( $id ) : null; // an Act's or Rule's stored issuer is whose copy it is
 		if ( $iss ) {
 			$counts[ rankweb_faq_the( $iss->name ) ] = ( $counts[ rankweb_faq_the( $iss->name ) ] ?? 0 ) + 1;
 		}

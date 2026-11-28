@@ -385,8 +385,8 @@ function directoryweb_block_listing_photos( $a, $id ) {
  */
 function directoryweb_listing_last_updated( $id ) {
 	$dates = array( directoryweb_lf( $id, 'aw_verified_on' ), directoryweb_lf( $id, 'aw_source_date' ) );
-	if ( function_exists( 'aw_enrich_last_applied' ) ) {
-		$dates[] = substr( aw_enrich_last_applied( $id ), 0, 10 );
+	if ( function_exists( 'sourceweb_enrich_last_applied' ) ) {
+		$dates[] = substr( sourceweb_enrich_last_applied( $id ), 0, 10 );
 	}
 	$n     = (int) get_post_meta( $id, 'aw_detail_sources', true );
 	for ( $i = 0; $i < $n; $i++ ) {

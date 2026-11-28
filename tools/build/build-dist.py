@@ -244,7 +244,7 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
         patterns.extend(SRC_EXCLUDE)
     else:
         # "More from Kits" installs other plugins from GitHub releases; WordPress.org does not allow that, so its build leaves the page out.
-        patterns.extend(["more-from-kits.php", "more-products.php"])
+        patterns.extend(["more-from-kits.php", "more-products.php", "registry-updates.php", "theme-updates.php"])
         # Icons, banners and screenshots go to the WordPress.org assets folder (SVN /assets), not into the zip: see below.
         patterns.extend(["assets/banner-*.png", "assets/icon-128x128.png", "assets/icon-256x256.png", "assets/screenshot-*.png", "assets/screenshots.json"])
 
@@ -268,6 +268,10 @@ def build(target: str, track: str, out_dir: pathlib.Path) -> pathlib.Path:
 
     if target in VENDOR_BUNDLED_TARGETS:
         count += install_production_vendor(src, stage)
+        # A bundled vendor/ needs its composer.json beside it (WordPress.org's Plugin Check asks for it).
+        if (src / "composer.json").is_file():
+            shutil.copy2(src / "composer.json", stage / "composer.json")
+            count += 1
 
     if target == "theme":
         set_theme_update_uri(stage / "style.css", spec["update_uri"] if track == "commercial" else None)

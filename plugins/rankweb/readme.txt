@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Mo
 5. Modules: each RankWeb module with where it is set up, its status and an on or off switch.
 
 == Changelog ==
+
+= 2.5.5 =
+* Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.
 
 = 2.5.4 =
 * The first menu item reads Dashboard, matching the header tab. Checkboxes and radios in labels have a 24px hit area.

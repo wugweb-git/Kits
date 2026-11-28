@@ -259,14 +259,14 @@ function directoryweb_dashboard_payload(): array {
 		$tile['sub'] = sprintf( __( '%1$s with no contact (kept out of search) · %2$s kept indexed on purpose', 'directoryweb' ), $num( $x['nocontact'] ?? 0 ), $num( $x['kept'] ?? 0 ) );
 	}
 	$tiles[] = $tile;
-	$si      = defined( 'INSIGHTWEB_LOADED' ) && function_exists( 'aw_si_url' );
+	$si      = defined( 'INSIGHTWEB_LOADED' ) && function_exists( 'insightweb_si_url' );
 	$tiles[] = array(
 		'key'     => 'search',
 		'section' => 'indexing',
 		'label'   => __( 'Directory search clicks', 'directoryweb' ),
 		'value'   => $si ? __( 'In InsightWeb', 'directoryweb' ) : '',
 		'sub'     => $si ? __( 'Search Console clicks for /directory/ pages are in Search Insights', 'directoryweb' ) : '',
-		'href'    => $si && function_exists( 'aw_si_cap' ) && current_user_can( aw_si_cap() ) ? aw_si_url() : '',
+		'href'    => $si && function_exists( 'insightweb_si_cap' ) && current_user_can( insightweb_si_cap() ) ? insightweb_si_url() : '',
 		'missing' => $si ? '' : 'InsightWeb',
 		'hide'    => ! $si,
 		'live'    => true,
@@ -305,7 +305,7 @@ function directoryweb_dashboard_payload(): array {
 		'key'     => 'enrichment',
 		'section' => 'enrichment',
 		'label'   => __( 'Enrichment queue', 'directoryweb' ),
-		'href'    => function_exists( 'aw_enrich_review_page' ) ? add_query_arg( 'page', 'aw-enrich-review', admin_url( 'admin.php' ) ) : '',
+		'href'    => function_exists( 'sourceweb_enrich_review_page' ) ? add_query_arg( 'page', 'aw-enrich-review', admin_url( 'admin.php' ) ) : '',
 	);
 	if ( ! $counting && null === $e ) {
 		$tile['missing'] = 'SourceWeb';
@@ -601,14 +601,14 @@ function directoryweb_field_label( string $key ): string {
  * @return array|null [ 'id', 'status' ].
  */
 function directoryweb_claim_log_row( array $c, string $key ): ?array {
-	if ( ! function_exists( 'aw_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! function_exists( 'directoryweb_claim_fields' ) ) {
+	if ( ! function_exists( 'sourceweb_enrich_table' ) || ! get_option( 'aw_enrich_db' ) || ! function_exists( 'directoryweb_claim_fields' ) ) {
 		return null;
 	}
 	global $wpdb;
 	$row = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- one row of SourceWeb's change log
 		$wpdb->prepare(
 			'SELECT id, status FROM %i WHERE listing_id = %d AND run = %s AND field = %s ORDER BY id DESC LIMIT 1',
-			aw_enrich_table(),
+			sourceweb_enrich_table(),
 			(int) $c['listing'],
 			'claim-' . (int) $c['id'],
 			directoryweb_enrich_field( $key, directoryweb_claim_fields() )
@@ -925,9 +925,9 @@ function directoryweb_settings_payload(): array {
 			'status'  => $iw ? __( 'Active', 'directoryweb' ) : __( 'Not active', 'directoryweb' ),
 			'tone'    => '',
 			'summary' => __( 'Search Console clicks for the Directory pages.', 'directoryweb' ),
-			'link'    => $iw && function_exists( 'aw_si_url' ) ? array(
+			'link'    => $iw && function_exists( 'insightweb_si_url' ) ? array(
 				'label' => __( 'Search Insights', 'directoryweb' ),
-				'url'   => aw_si_url(),
+				'url'   => insightweb_si_url(),
 			) : null,
 		),
 	);

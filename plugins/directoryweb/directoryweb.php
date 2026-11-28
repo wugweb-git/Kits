@@ -11,7 +11,7 @@
  * Plugin Name:       DirectoryWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/directoryweb/
  * Description:       The Directory in WordPress: listings with their places and types, a map and Near me, claims from the organisations, Claimed and Verified marks. Enhanced by Kits Core.
- * Version:           1.5.2
+ * Version:           1.5.3
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb
@@ -45,7 +45,7 @@ add_action(
 );
 
 define( 'DIRECTORYWEB_LOADED', '1.1.0' );
-define( 'DIRECTORYWEB_VERSION', '1.5.2' );
+define( 'DIRECTORYWEB_VERSION', '1.5.3' );
 define( 'DIRECTORYWEB_FILE', __FILE__ );
 define( 'DIRECTORYWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DIRECTORYWEB_URL', plugin_dir_url( __FILE__ ) );
@@ -66,7 +66,6 @@ $directoryweb_includes = array(
 	'claim-page',
 	'claim-evidence', // DirectoryWeb's own private store for claim logos, photos and proof
 	'claims-review',
-	'legacy-aliases', // the old aw_* function names, for other plugins that still call them
 	'claim-native', // standalone claim path: state machine, form, REST (no Fluent Forms)
 	'claim-native-mail', // notification emails for native claims (wp_mail; MailWeb can take over per message)
 	'claim-crm', // claim events for a CRM: an action for any listener, and FluentCRM contacts and tags when it is active
@@ -102,6 +101,11 @@ foreach ( $directoryweb_includes as $directoryweb_include ) {
 	require_once DIRECTORYWEB_DIR . 'includes/' . $directoryweb_include . '.php';
 }
 unset( $directoryweb_includes, $directoryweb_include );
+
+// Its own update check against the registry (the direct build only; the WordPress.org build leaves the file out).
+if ( file_exists( DIRECTORYWEB_DIR . 'includes/registry-updates.php' ) ) {
+	require_once DIRECTORYWEB_DIR . 'includes/registry-updates.php';
+}
 
 add_action( 'activate_directoryweb/directoryweb.php', 'directoryweb_activate' );
 add_action( 'deactivate_directoryweb/directoryweb.php', 'directoryweb_deactivate' );

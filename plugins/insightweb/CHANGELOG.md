@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.4.3
+
+- Checks for its own updates from the registry. The earlier aw_ shims are gone from the plugin; calls use the current names.
+
 ## 1.4.2
 
 - The Dashboard no longer says "All working" above sources that have never run; the Search Console import tile says no import is logged yet. Larger link targets in the Priorities box. The More from Kits link of a plugin goes to Kits Core's page when Core is active.

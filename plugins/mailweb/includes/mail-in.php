@@ -193,7 +193,7 @@ function mailweb_in( WP_REST_Request $req ) {
 		do_action( 'mailweb_webhook_noted', $key, $req );
 		return new WP_REST_Response( array( 'status' => 'noted' ), 200 );
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb mail_in error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb mail_in error: ' . $e->getMessage() );
 		return new WP_REST_Response(
 			array(
 				'status'  => 'error',

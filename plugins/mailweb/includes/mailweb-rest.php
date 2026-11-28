@@ -1123,7 +1123,7 @@ function mailweb_rest_save_crm( WP_REST_Request $r ) {
 			)
 		);
 	} catch ( \Throwable $e ) {
-		error_log( 'MailWeb rest_save_crm error: ' . $e->getMessage() );
+		mailweb_log( 'MailWeb rest_save_crm error: ' . $e->getMessage() );
 		return new WP_Error( 'mailweb_save_error', $e->getMessage(), array( 'status' => 500 ) );
 	}
 }

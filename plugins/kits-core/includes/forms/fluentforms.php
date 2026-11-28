@@ -193,7 +193,7 @@ function kits_ff_date_ymd( $v ) {
  */
 function kits_ff_normalise( $data ) {
 	if ( array_key_exists( 'org_listing', $data ) ) { // the Organisation picked from the Directory: only a published listing; its own name.
-		$lid                 = function_exists( 'aw_org_listing_ok' ) && kits_ff_ticked( $data, 'org_assoc' ) ? aw_org_listing_ok( $data['org_listing'] ) : 0;
+		$lid                 = function_exists( 'directoryweb_org_listing_ok' ) && kits_ff_ticked( $data, 'org_assoc' ) ? directoryweb_org_listing_ok( $data['org_listing'] ) : 0;
 		$data['org_listing'] = $lid ? (string) $lid : '';
 		if ( $lid ) {
 			$data['org_name'] = html_entity_decode( get_the_title( $lid ), ENT_QUOTES );
@@ -514,7 +514,7 @@ function kits_ff_render_places( $element, $form ) {
 	$sid  = $f . '-state';
 	$did  = $f . '-district';
 	$opts = '<option value="">Choose a state</option>';
-	foreach ( aw_place_states() as $st ) {
+	foreach ( directoryweb_place_states() as $st ) {
 		$opts .= '<option value="' . esc_attr( $st->slug ) . '"' . selected( (string) ( $cf['vol_state'] ?? '' ), $st->name, false ) . '>' . esc_html( $st->name ) . '</option>';
 	}
 	$html .= kits_ff_group(
@@ -527,9 +527,9 @@ function kits_ff_render_places( $element, $form ) {
 		)
 	);
 	$opts  = '<option value="" data-none="Choose a state first" data-all="Choose a district">Choose a state first</option>';
-	foreach ( aw_place_states() as $st ) {
+	foreach ( directoryweb_place_states() as $st ) {
 		$opts .= '<optgroup label="' . esc_attr( $st->name ) . '" data-state="' . esc_attr( $st->slug ) . '" hidden disabled>';
-		foreach ( aw_place_districts( $st->code ) as $d ) {
+		foreach ( directoryweb_place_districts( $st->code ) as $d ) {
 			$opts .= '<option value="' . esc_attr( $d->slug ) . '">' . esc_html( $d->name ) . '</option>';
 		}
 		$opts .= '</optgroup>';
@@ -1014,7 +1014,7 @@ function kits_ff_upload() {
 	if ( (int) get_transient( $rl ) >= 20 ) { // a claim can send 7 (logo, 5 photos, proof).
 		wp_send_json_error( 'Too many tries. Wait a minute, then try again.' );
 	}
-	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in aw_claim_logo_ok()
+	$logo = $_FILES['logo'] ?? null; // phpcs:ignore WordPress.Security.NonceVerification,WordPress.Security.ValidatedSanitizedInput -- checked in directoryweb_claim_logo_ok()
 	$why  = function_exists( 'dw_claim_upload_error' ) ? dw_claim_upload_error( $logo ) : kits_ff_upload_error( $logo );
 	if ( '' !== $why ) {
 		wp_send_json_error( $why );
@@ -1025,7 +1025,7 @@ function kits_ff_upload() {
 		}
 	}
 	$token = bin2hex( random_bytes( 16 ) );
-	if ( ! function_exists( 'aw_claim_logo_store' ) || ! aw_claim_logo_store( $logo['tmp_name'], 'tmp-' . $token . '.png' ) ) {
+	if ( ! function_exists( 'directoryweb_claim_logo_store' ) || ! directoryweb_claim_logo_store( $logo['tmp_name'], 'tmp-' . $token . '.png' ) ) {
 		wp_send_json_error( 'We could not read this picture. Try another file, or a smaller one.' );
 	}
 	set_transient( $rl, (int) get_transient( $rl ) + 1, HOUR_IN_SECONDS );

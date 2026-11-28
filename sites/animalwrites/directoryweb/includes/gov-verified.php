@@ -32,7 +32,7 @@ const AW_GOV_REG_KEYS = array( 'aw_registration' => 'registration', 'aw_reg_12a'
  * wrote it from a source that is not a government one.
  */
 function directoryweb_gov_value_official( $id, $enrich_field ) {
-	$p = function_exists( 'aw_enrich_provenance' ) ? aw_enrich_provenance( $id, $enrich_field ) : null;
+	$p = function_exists( 'sourceweb_enrich_provenance' ) ? sourceweb_enrich_provenance( $id, $enrich_field ) : null;
 	if ( ! $p ) {
 		return true; // never changed by enrichment: the import's own value
 	}

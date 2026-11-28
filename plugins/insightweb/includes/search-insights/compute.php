@@ -92,8 +92,8 @@ function insightweb_si_is_place( string $label ): bool {
 	}
 	if ( null === $re ) {
 		$names = array();
-		if ( function_exists( 'aw_lgd' ) ) {
-			$lgd = aw_lgd();
+		if ( function_exists( 'directoryweb_lgd' ) ) {
+			$lgd = directoryweb_lgd();
 			foreach ( array_merge( (array) $lgd['states'], (array) $lgd['districts'] ) as $p ) {
 				$n = strtolower( (string) $p->name );
 				if ( strlen( $n ) >= 4 ) { // Short names (Mau, Una …) match ordinary words too often.

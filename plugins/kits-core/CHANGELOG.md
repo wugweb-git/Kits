@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## 1.5.4
+
+- Each plugin now answers its own update check against the registry (no change when Kits Core is active). Calls to other plugins use their current function names. The REQUEST_METHOD read is sanitised.
+
 ## 1.5.3
 
 - Kits Home step icons are inline SVG, so they no longer depend on an emoji image URL.

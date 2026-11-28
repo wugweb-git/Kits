@@ -415,7 +415,7 @@ function kits_preview_device_link() {
 	if ( ! headers_sent() ) {
 		header( 'Referrer-Policy: no-referrer' );
 	}
-	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+	if ( 'POST' !== sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ) { //
 		wp_die( kits_preview_link_page(), 'Preview device', array( 'response' => 200 ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed markup
 	}
 	$label = kits_preview_link_take( sanitize_text_field( wp_unslash( $_POST['t'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification -- the token is the check

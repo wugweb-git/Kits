@@ -340,9 +340,9 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 	}
 	// Place: names are matched to the LGD file (places.php); an unknown name is ignored, never added.
 	if ( $req->get_param( 'city' ) && ( $is_listing || $is_news ) ) {
-		$places = aw_places_from_text( (string) $req->get_param( 'city' ) );
+		$places = directoryweb_places_from_text( (string) $req->get_param( 'city' ) );
 		if ( $places ) {
-			aw_set_item_places( $post_id, $places );
+			directoryweb_set_item_places( $post_id, $places );
 		} else {
 			$ignored[] = 'city: ' . sanitize_text_field( (string) $req->get_param( 'city' ) );
 		}
@@ -362,9 +362,9 @@ function sourceweb_ingest( WP_REST_Request $req ) {
 			update_post_meta( $post_id, 'aw_employment_type', $emp );
 		}
 		// Place as published ("Pune/Hyderabad", "Bhopal, Madhya Pradesh"): every part that names an LGD state or district.
-		$places = aw_places_from_text( (string) $req->get_param( 'place' ) );
+		$places = directoryweb_places_from_text( (string) $req->get_param( 'place' ) );
 		if ( $places ) {
-			aw_set_item_places( $post_id, $places );
+			directoryweb_set_item_places( $post_id, $places );
 		}
 	}
 

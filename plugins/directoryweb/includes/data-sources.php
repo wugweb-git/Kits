@@ -111,8 +111,8 @@ function directoryweb_source_hosts(): array {
  * @return string
  */
 function directoryweb_source_logo( $slug, $id, $link ) {
-	if ( 0 === strpos( $slug, 'enrich-' ) && function_exists( 'aw_enrich_icon' ) ) { // a source of the enrichment worker: its site's favicon
-		return aw_enrich_icon( array( 'key' => substr( $slug, 7 ), 'name' => '', 'url' => $link ), $id );
+	if ( 0 === strpos( $slug, 'enrich-' ) && function_exists( 'sourceweb_enrich_icon' ) ) { // a source of the enrichment worker: its site's favicon
+		return sourceweb_enrich_icon( array( 'key' => substr( $slug, 7 ), 'name' => '', 'url' => $link ), $id );
 	}
 	if ( 'organisation' === $slug ) {
 		$tid = (int) get_post_thumbnail_id( $id );

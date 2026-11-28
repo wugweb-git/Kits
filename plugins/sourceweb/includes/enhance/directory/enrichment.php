@@ -297,7 +297,7 @@ function sourceweb_enrich_snapshot( $lid, $field ) {
 		case 'content':
 			return (string) get_post_field( 'post_content', $lid );
 		case 'phones':
-			return array( 'rows' => function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $lid ) : array(), 'unv' => aw_unverified_list( $lid ) );
+			return array( 'rows' => function_exists( 'directoryweb_listing_phones' ) ? directoryweb_listing_phones( $lid ) : array(), 'unv' => directoryweb_unverified_list( $lid ) );
 		case 'hours':
 			return function_exists( 'directoryweb_listing_hours' ) ? directoryweb_listing_hours( $lid ) : array();
 		case 'services':
@@ -309,13 +309,13 @@ function sourceweb_enrich_snapshot( $lid, $field ) {
 		case 'photos':
 			return (string) get_post_meta( $lid, 'aw_gallery', true );
 		case 'place':
-			list( $states, $districts ) = aw_item_codes( $lid );
+			list( $states, $districts ) = directoryweb_item_codes( $lid );
 			return array( 'states' => $states, 'districts' => $districts );
 		case 'merge':
 			return '';
 		default:
 			if ( isset( AW_ENRICH_ALT[ $field ] ) ) {
-				return array( 'v' => (string) get_post_meta( $lid, $def[1], true ), 'alt' => (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ), 'unv' => aw_unverified_list( $lid ) );
+				return array( 'v' => (string) get_post_meta( $lid, $def[1], true ), 'alt' => (string) get_post_meta( $lid, AW_ENRICH_ALT[ $field ], true ), 'unv' => directoryweb_unverified_list( $lid ) );
 			}
 			return (string) get_post_meta( $lid, $def[1], true );
 	}
@@ -408,7 +408,7 @@ function sourceweb_enrich_write( $lid, $field, $value, $mode = 'apply', $sources
 			}
 			if ( null === $hit ) {
 				if ( 'both' === $mode && $rows ) { // another number is already there: both are shown as unverified
-					aw_unverified_add( $lid, array_merge( wp_list_pluck( $rows, 'number' ), array( $num ) ) );
+					directoryweb_unverified_add( $lid, array_merge( wp_list_pluck( $rows, 'number' ), array( $num ) ) );
 				}
 				$rows[] = array( 'number' => $num, 'label' => 'emergency' === $field ? 'Emergency' : '', 'whatsapp' => 'whatsapp' === $field );
 			} elseif ( 'whatsapp' === $field ) {
@@ -485,7 +485,7 @@ function sourceweb_enrich_write( $lid, $field, $value, $mode = 'apply', $sources
 			if ( 'both' === $mode && isset( AW_ENRICH_ALT[ $field ] ) ) { // keep the value already there, add this one next to it
 				$now = (string) get_post_meta( $lid, $def[1], true );
 				update_post_meta( $lid, AW_ENRICH_ALT[ $field ], $v );
-				aw_unverified_add( $lid, array( $now, $v ) );
+				directoryweb_unverified_add( $lid, array( $now, $v ) );
 				break;
 			}
 			update_post_meta( $lid, $def[1], $v );
@@ -641,7 +641,7 @@ function sourceweb_enrich_hours_key( $rows ) {
 /** Whether a field is empty on the listing. */
 function sourceweb_enrich_is_empty( $lid, $field ) {
 	if ( 'place' === $field ) {
-		return ! aw_item_codes( $lid )[1]; // a state without a district is a place still to fill
+		return ! directoryweb_item_codes( $lid )[1]; // a state without a district is a place still to fill
 	}
 	if ( in_array( $field, array( 'whatsapp', 'emergency' ), true ) ) {
 		return true; // adding a marked number never removes one
@@ -811,7 +811,7 @@ function sourceweb_enrich_approve( $id ) {
 	sourceweb_enrich_set_status( $id, 'approved' );
 	sourceweb_enrich_supersede( $lid, $r['field'], $id );
 	if ( is_scalar( $r['value'] ) ) {
-		aw_unverified_remove( $lid, $r['value'] ); // a person confirmed this value
+		directoryweb_unverified_remove( $lid, $r['value'] ); // a person confirmed this value
 	}
 	return true;
 }
@@ -1126,7 +1126,7 @@ function sourceweb_enrich_rest_index( WP_REST_Request $req ) {
 	$page = max( 1, (int) ( $req['page'] ?? 1 ) );
 	$out  = array();
 	$code = 0;
-	foreach ( aw_place_states() as $st ) {
+	foreach ( directoryweb_place_states() as $st ) {
 		if ( strtolower( $st->name ) === $want ) {
 			$code = (int) $st->code;
 		}
@@ -1137,7 +1137,7 @@ function sourceweb_enrich_rest_index( WP_REST_Request $req ) {
 	$is_l = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) );
 	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE {$is_l} AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB
 	foreach ( $ids as $id ) {
-		$pl    = function_exists( 'aw_listing_place' ) ? aw_listing_place( (int) $id ) : array( '', '' );
+		$pl    = function_exists( 'directoryweb_listing_place' ) ? directoryweb_listing_place( (int) $id ) : array( '', '' );
 		$out[] = (array) apply_filters( 'sourceweb_enrich_index_item', array(
 			'id'        => (int) $id,
 			'name'      => html_entity_decode( get_the_title( (int) $id ), ENT_QUOTES ),
@@ -1203,7 +1203,7 @@ function sourceweb_enrich_rest_queue( WP_REST_Request $req ) {
 
 /** What the worker needs to know about one listing. */
 function sourceweb_enrich_listing_payload( $id ) {
-	list( $state, $district ) = function_exists( 'aw_listing_place' ) ? aw_listing_place( $id ) : array( '', '' );
+	list( $state, $district ) = function_exists( 'directoryweb_listing_place' ) ? directoryweb_listing_place( $id ) : array( '', '' );
 	$now = array();
 	foreach ( array_keys( sourceweb_enrich_fields_all() ) as $f ) {
 		$v = sourceweb_enrich_current( $id, $f );

@@ -773,7 +773,7 @@ function sourceweb_enrich_filters( array $q ): array {
 		)
 	);
 	$states = array();
-	foreach ( function_exists( 'aw_place_states' ) ? (array) aw_place_states() : array() as $s ) {
+	foreach ( function_exists( 'directoryweb_place_states' ) ? (array) directoryweb_place_states() : array() as $s ) {
 		$states[ (string) $s->code ] = (string) $s->name;
 	}
 	$out = array(

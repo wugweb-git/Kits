@@ -76,16 +76,3 @@ function rankweb_seo_kp_replay( array $pages ): array {
 	);
 }
 
-// Earlier names, kept here (this file is loaded on its own by SourceWeb's and InsightWeb's tests).
-if ( ! function_exists( 'aw_seo_kp_refusal' ) ) {
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
-	function aw_seo_kp_refusal( ...$args ) {
-		return rankweb_seo_kp_refusal( ...$args );
-	}
-}
-if ( ! function_exists( 'aw_seo_kp_replay' ) ) {
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals -- legacy name
-	function aw_seo_kp_replay( ...$args ) {
-		return rankweb_seo_kp_replay( ...$args );
-	}
-}

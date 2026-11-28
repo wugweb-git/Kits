@@ -406,7 +406,7 @@ function rankweb_schema_pdf( $id ) {
 
 /** The issuing body of a Library item (court, ministry, board) as a GovernmentOrganization, or null. */
 function rankweb_schema_issuer( $id ) {
-	$iss = function_exists( 'aw_item_issuer' ) ? aw_item_issuer( $id ) : null;
+	$iss = function_exists( 'sourceweb_item_issuer' ) ? sourceweb_item_issuer( $id ) : null;
 	return $iss ? array( '@type' => 'GovernmentOrganization', 'name' => rankweb_plain_text( $iss->name ) ) : null;
 }
 
@@ -516,7 +516,7 @@ function rankweb_article_nodes( $id ) {
 			array( 'author' => $us, 'publisher' => $us )
 		);
 	} elseif ( rankweb_is_type( $type, 'library' ) ) {
-		$court = $issuer && function_exists( 'aw_item_issuer' ) && defined( 'AW_COURT_ISSUERS' ) && in_array( aw_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
+		$court = $issuer && function_exists( 'sourceweb_item_issuer' ) && defined( 'AW_COURT_ISSUERS' ) && in_array( sourceweb_item_issuer( $id )->slug, AW_COURT_ISSUERS, true );
 		$doc   = array_filter(
 			array(
 				'@type'         => 'CreativeWork',

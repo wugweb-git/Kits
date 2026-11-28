@@ -11,7 +11,7 @@
  * Plugin Name:       MailWeb
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
- * Version:           3.7.3
+ * Version:           3.7.4
  * Update URI:           https://wugweb.com/plugins/mailweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
@@ -41,7 +41,7 @@ add_action(
 	1
 );
 
-define( 'MAILWEB_VERSION', '3.7.3' );
+define( 'MAILWEB_VERSION', '3.7.4' );
 define( 'MAILWEB_FILE', __FILE__ );
 define( 'MAILWEB_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAILWEB_WEBMAIL', 'https://mail.hostinger.com' );
@@ -80,6 +80,10 @@ require_once MAILWEB_DIR . 'includes/mailweb-caps.php'; // MailWeb's own capabil
 require_once MAILWEB_DIR . 'includes/admin-table.php';
 require_once MAILWEB_DIR . 'includes/help-tab.php';
 require_once MAILWEB_DIR . 'includes/plugin-info.php';
+// Its own update check against the registry (the direct build only; the WordPress.org build leaves the file out).
+if ( file_exists( MAILWEB_DIR . 'includes/registry-updates.php' ) ) {
+	require_once MAILWEB_DIR . 'includes/registry-updates.php';
+}
 require_once MAILWEB_DIR . 'includes/crypto.php';
 require_once MAILWEB_DIR . 'includes/addresses.php';
 require_once MAILWEB_DIR . 'includes/mailweb-settings-save.php';

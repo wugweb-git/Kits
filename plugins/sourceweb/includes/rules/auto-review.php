@@ -45,15 +45,15 @@ function sourceweb_title_places( $title ) {
 	static $index = null;
 	if ( null === $index ) {
 		$index = array();
-		if ( function_exists( 'aw_lgd' ) ) {
-			$lgd = aw_lgd();
+		if ( function_exists( 'directoryweb_lgd' ) ) {
+			$lgd = directoryweb_lgd();
 			foreach ( $lgd['districts'] as $p ) {
-				foreach ( array_unique( array( aw_place_key( $p->name ), aw_place_key( $p->lgd ) ) ) as $k ) { // common and LGD spelling (Angul, Anugola)
+				foreach ( array_unique( array( directoryweb_place_key( $p->name ), directoryweb_place_key( $p->lgd ) ) ) as $k ) { // common and LGD spelling (Angul, Anugola)
 					$index[ $k ][] = array( 'd' . $p->code, 's' . $p->state );
 				}
 			}
 			foreach ( $lgd['states'] as $p ) {
-				$index[ aw_place_key( $p->name, 'state' ) ][] = array( '', 's' . $p->code );
+				$index[ directoryweb_place_key( $p->name, 'state' ) ][] = array( '', 's' . $p->code );
 			}
 		}
 	}
@@ -66,7 +66,7 @@ function sourceweb_title_places( $title ) {
 			if ( array_filter( $run, fn( $w ) => ! preg_match( '/^\p{Lu}/u', $w ) ) ) {
 				break; // place names are capitalised
 			}
-			foreach ( $index[ aw_place_key( implode( ' ', $run ) ) ] ?? array() as $hit ) {
+			foreach ( $index[ directoryweb_place_key( implode( ' ', $run ) ) ] ?? array() as $hit ) {
 				if ( $hit[0] ) {
 					$out['d'][] = $hit[0];
 				}

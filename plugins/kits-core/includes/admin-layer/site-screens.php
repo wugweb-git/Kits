@@ -302,7 +302,7 @@ function kits_site_status( bool $full = true ): array {
 	}
 	$label       = $next && function_exists( 'aw_team_date_label' ) ? aw_team_date_label( $next[0] ) : ( $next ? (string) $next[0] : '' );
 	$s['dates']  = esc_html( $next ? 'Next: ' . $label . ( $next[1] ? ', ' . $next[1] : '' ) . '.' : 'Nothing coming up.' );
-	$s['review'] = function_exists( 'aw_review_count' ) ? esc_html( (int) aw_review_count() . ' items waiting.' ) : esc_html( 'SourceWeb is off.' );
+	$s['review'] = function_exists( 'sourceweb_review_count' ) ? esc_html( (int) sourceweb_review_count() . ' items waiting.' ) : esc_html( 'SourceWeb is off.' );
 	return $s;
 }
 

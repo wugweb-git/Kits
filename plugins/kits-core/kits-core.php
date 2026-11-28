@@ -3,7 +3,7 @@
  * Plugin Name: Kits Core
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/kits-core/
  * Description: Shared layer for Kits by Wugweb sites: form engine with spam guard (ALTCHA), share bar, consent-mode analytics, attribution and Kits admin.
- * Version: 1.5.3
+ * Version: 1.5.4
  * Requires at least: 7.1
  * Requires PHP: 8.0
  * Author: Wugweb
@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.5.3' ); // keep equal to the Version header above
+defined( 'KITS_CORE_VERSION' ) || define( 'KITS_CORE_VERSION', '1.5.4' ); // keep equal to the Version header above
 // A site plugin may load Kits Core itself; never load twice.
 if ( defined( 'KITS_CORE_LOADED' ) ) {
 	return;
@@ -80,8 +80,13 @@ require_once KITS_CORE_DIR . 'includes/joined-css.php'; // Performance: joined s
 require_once KITS_CORE_DIR . 'includes/preview.php';
 // The sourcing lists, source rows, publisher icons and the favicon run are SourceWeb's, and the keyword table is
 // InsightWeb's.
-require_once KITS_CORE_DIR . 'includes/theme-updates.php';
-require_once KITS_CORE_DIR . 'includes/registry-updates.php';
+if ( file_exists( KITS_CORE_DIR . 'includes/theme-updates.php' ) ) { // direct build only, like the updater below.
+	require_once KITS_CORE_DIR . 'includes/theme-updates.php';
+}
+// The updater for the direct build; the WordPress.org build leaves it out (WordPress.org updates the plugin itself).
+if ( file_exists( KITS_CORE_DIR . 'includes/registry-updates.php' ) ) {
+	require_once KITS_CORE_DIR . 'includes/registry-updates.php';
+}
 require_once KITS_CORE_DIR . 'includes/site-checkin.php';
 require_once KITS_CORE_DIR . 'includes/page-options.php';
 require_once KITS_CORE_DIR . 'includes/settings-transfer.php';

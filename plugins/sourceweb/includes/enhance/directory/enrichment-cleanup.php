@@ -29,15 +29,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** A listing's place as a proposal is shaped: {state, district} (first codes), or '' when it has none. */
 function sourceweb_enrich_place_current( $lid ) {
-	list( $states, $districts ) = aw_item_codes( $lid );
+	list( $states, $districts ) = directoryweb_item_codes( $lid );
 	return $states ? array( 'state' => (int) $states[0], 'district' => (int) ( $districts[0] ?? 0 ) ) : '';
 }
 
 /** A proposed place, checked against the LGD file: [state, district or 0], or null. */
 function sourceweb_enrich_place_value( $value ) {
 	$v = is_array( $value ) ? $value : (array) json_decode( (string) $value, true );
-	$s = function_exists( 'aw_place_state' ) ? aw_place_state( (int) ( $v['state'] ?? 0 ) ) : null;
-	$d = ! empty( $v['district'] ) && function_exists( 'aw_place_district' ) ? aw_place_district( (int) $v['district'] ) : null;
+	$s = function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( (int) ( $v['state'] ?? 0 ) ) : null;
+	$d = ! empty( $v['district'] ) && function_exists( 'directoryweb_place_district' ) ? directoryweb_place_district( (int) $v['district'] ) : null;
 	if ( ! $s || ( ! empty( $v['district'] ) && ( ! $d || (int) $d->state !== (int) $s->code ) ) ) {
 		return null;
 	}
@@ -50,21 +50,21 @@ function sourceweb_enrich_place_held( $lid, $value ) {
 	if ( ! $p ) {
 		return false;
 	}
-	list( $states, $districts ) = aw_item_codes( $lid );
+	list( $states, $districts ) = directoryweb_item_codes( $lid );
 	return in_array( $p[0], $states, true ) && ( 0 === $p[1] || in_array( $p[1], $districts, true ) );
 }
 
 /** Whether a proposed place only fills what is empty: no district yet, and no state or the same state. */
 function sourceweb_enrich_place_fills( $lid, $value ) {
 	$p = sourceweb_enrich_place_value( $value );
-	list( $states, $districts ) = aw_item_codes( $lid );
+	list( $states, $districts ) = directoryweb_item_codes( $lid );
 	return $p && ! $districts && count( $states ) <= 1 && ( ! $states || $states[0] === $p[0] );
 }
 
 /** Store a place (refused when the codes are not in the LGD file). */
 function sourceweb_enrich_place_write( $lid, $value ) {
 	$p = sourceweb_enrich_place_value( $value );
-	return $p && function_exists( 'aw_set_item_places' ) && aw_set_item_places( $lid, array( $p ) );
+	return $p && function_exists( 'directoryweb_set_item_places' ) && directoryweb_set_item_places( $lid, array( $p ) );
 }
 
 /** Put a place snapshot back: {states: [...], districts: [...]}. */
@@ -77,8 +77,8 @@ function sourceweb_enrich_place_restore( $lid, $snap ) {
 	foreach ( array_map( 'intval', (array) ( $snap['districts'] ?? array() ) ) as $c ) {
 		add_post_meta( $lid, 'aw_district_code', $c );
 	}
-	if ( function_exists( 'aw_place_counts_reset' ) ) {
-		aw_place_counts_reset();
+	if ( function_exists( 'directoryweb_place_counts_reset' ) ) {
+		directoryweb_place_counts_reset();
 	}
 }
 
@@ -88,8 +88,8 @@ function sourceweb_enrich_place_label( $v ) {
 	if ( isset( $v['states'] ) ) {
 		$v = array( 'state' => (int) ( $v['states'][0] ?? 0 ), 'district' => (int) ( $v['districts'][0] ?? 0 ) );
 	}
-	$s = ! empty( $v['state'] ) && function_exists( 'aw_place_state' ) ? aw_place_state( (int) $v['state'] ) : null;
-	$d = ! empty( $v['district'] ) && function_exists( 'aw_place_district' ) ? aw_place_district( (int) $v['district'] ) : null;
+	$s = ! empty( $v['state'] ) && function_exists( 'directoryweb_place_state' ) ? directoryweb_place_state( (int) $v['state'] ) : null;
+	$d = ! empty( $v['district'] ) && function_exists( 'directoryweb_place_district' ) ? directoryweb_place_district( (int) $v['district'] ) : null;
 	return $s ? ( $d ? $d->name . ', ' : '' ) . $s->name : '';
 }
 
@@ -226,8 +226,8 @@ function sourceweb_enrich_merge( $from, $into, $rid ) {
 	sourceweb_enrich_after_change( $from );
 	delete_transient( 'aw_seo_dir_data' );
 	delete_transient( 'aw_featured_names' );
-	if ( function_exists( 'aw_place_counts_reset' ) ) {
-		aw_place_counts_reset();
+	if ( function_exists( 'directoryweb_place_counts_reset' ) ) {
+		directoryweb_place_counts_reset();
 	}
 	return $undo;
 }
@@ -278,8 +278,8 @@ function sourceweb_enrich_unmerge( $from, $u ) {
 	sourceweb_enrich_after_change( $into );
 	sourceweb_enrich_after_change( $from );
 	delete_transient( 'aw_seo_dir_data' );
-	if ( function_exists( 'aw_place_counts_reset' ) ) {
-		aw_place_counts_reset();
+	if ( function_exists( 'directoryweb_place_counts_reset' ) ) {
+		directoryweb_place_counts_reset();
 	}
 }
 
@@ -300,7 +300,7 @@ function sourceweb_enrich_rest_cleanup( WP_REST_Request $req ) {
 	$m     = fn( $id, $k ) => (string) get_post_meta( $id, $k, true );
 	$items = array();
 	foreach ( $ids as $id ) {
-		list( $states, $districts ) = aw_item_codes( $id );
+		list( $states, $districts ) = directoryweb_item_codes( $id );
 		$items[] = (array) apply_filters( 'sourceweb_enrich_cleanup_item', array(
 			'id'             => (int) $id,
 			'name'           => html_entity_decode( get_the_title( $id ), ENT_QUOTES ),
@@ -326,8 +326,8 @@ function sourceweb_enrich_rest_cleanup( WP_REST_Request $req ) {
 		), (int) $id ); // filter sourceweb_enrich_cleanup_item( array $item, int $id ): a site adds the values it keeps for its own sources
 	}
 	$out = array( 'items' => $items, 'page' => $page, 'pages' => max( 1, (int) ceil( $total / 1000 ) ), 'total' => $total );
-	if ( 1 === $page && function_exists( 'aw_lgd' ) ) {
-		$lgd          = aw_lgd();
+	if ( 1 === $page && function_exists( 'directoryweb_lgd' ) ) {
+		$lgd          = directoryweb_lgd();
 		$out['places'] = array(
 			'states'    => array_values( array_map( fn( $s ) => array( 'code' => $s->code, 'name' => $s->name ), $lgd['states'] ) ),
 			'districts' => array_values( array_map( fn( $d ) => array( 'code' => $d->code, 'state' => $d->state, 'name' => $d->name ), $lgd['districts'] ) ),

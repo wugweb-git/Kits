@@ -488,8 +488,8 @@ add_action(
 		}
 		mailweb_fcrm_nl_box( $c, kits_ff_ticked( $data, 'nl_optin' ), KITS_FF_FORMS[ $key ]['title'], (string) ( $data['consent_version'] ?? '' ) );
 		if ( 'volunteer' === $key ) { // the LGD picker's values (a link only maps Fluent Forms' own fields): names, not slugs
-			$st = ! empty( $data['state'] ) && function_exists( 'aw_place_by_slug' ) ? aw_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;
-			$di = ! empty( $data['district'] ) && function_exists( 'aw_place_by_slug' ) ? aw_place_by_slug( sanitize_title( (string) $data['district'] ) ) : null;
+			$st = ! empty( $data['state'] ) && function_exists( 'directoryweb_place_by_slug' ) ? directoryweb_place_by_slug( sanitize_title( (string) $data['state'] ) ) : null;
+			$di = ! empty( $data['district'] ) && function_exists( 'directoryweb_place_by_slug' ) ? directoryweb_place_by_slug( sanitize_title( (string) $data['district'] ) ) : null;
 			// and the ticks as 1/0: an unticked box sends nothing, so the link leaves the field blank
 			$c->syncCustomFieldValues(
 				array_filter( array( 'vol_state' => $st ? $st->name : '', 'vol_district' => $di ? $di->name : '', 'vol_pincode' => preg_replace( '/\D/', '', (string) ( $data['pincode'] ?? '' ) ) ) )

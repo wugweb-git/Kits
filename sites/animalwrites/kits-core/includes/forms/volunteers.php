@@ -90,12 +90,12 @@ function kits_volunteer_errors( $v ) {
 	list( $rules, $msgs ) = kits_dict_rules( array( 'name' => 'name', 'email' => 'email', 'phone' => 'phone', 'pincode' => 'pincode', 'state' => 'state', 'consent' => 'consent' ), array( 'name', 'email', 'state', 'consent' ) );
 	$msgs['consent']['required'] = 'Tick the box to agree';
 	$errors = kits_form_validate( $rules, $v, array( 'name' => 'Your name', 'email' => 'Email', 'phone' => 'Phone', 'pincode' => 'PIN code', 'state' => 'State', 'consent' => 'Agreement' ), $msgs );
-	$term = $v['state'] ? aw_place_by_slug( $v['state'] ) : null;
+	$term = $v['state'] ? directoryweb_place_by_slug( $v['state'] ) : null;
 	$term = $term && 'state' === $term->kind ? $term : null;
 	if ( $v['state'] && ! $term ) {
 		$errors['state'] = 'Choose a state';
 	}
-	$dist = $v['district'] ? aw_place_by_slug( $v['district'] ) : null;
+	$dist = $v['district'] ? directoryweb_place_by_slug( $v['district'] ) : null;
 	if ( $v['district'] && ( ! $dist || 'district' !== $dist->kind || ! $term || $dist->state !== $term->code ) ) {
 		$errors['district'] = 'Choose a district';
 	}

@@ -10,6 +10,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Inert without PlanWeb: nothing below loads, hooks or registers until PlanWeb is on (it defines PLANWEB_VERSION on load).
+if ( ! function_exists( 'planweb_next' ) && ! defined( 'PLANWEB_VERSION' ) ) {
+	add_action(
+		'plugins_loaded',
+		function () {
+			if ( defined( 'PLANWEB_VERSION' ) ) {
+				require_once __FILE__;
+			}
+		},
+		20
+	);
+	return;
+}
+
 // The team's Dates calendar (Kits → Dates), aw_team_dates() and the seeded and campaign dates, moved here unchanged.
 require_once __DIR__ . '/team-dates.php';
 

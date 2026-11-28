@@ -191,8 +191,8 @@ function sourceweb_summary_entities( $text ) {
 			$out[ sourceweb_is_type( $page[0], 'library' ) ? 'laws' : 'organisations' ][] = array( 'name' => $parts[0], 'id' => $page[1] );
 		}
 	}
-	if ( function_exists( 'aw_lgd' ) ) {
-		$lgd    = aw_lgd();
+	if ( function_exists( 'directoryweb_lgd' ) ) {
+		$lgd    = directoryweb_lgd();
 		$states = array();
 		foreach ( $lgd['states'] as $s ) {
 			if ( sourceweb_summary_names( $text, $s->name ) ) {

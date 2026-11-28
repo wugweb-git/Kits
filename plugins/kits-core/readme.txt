@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,9 @@ The ALTCHA spam guard runs locally (proof of work) and contacts no third-party s
 5. Tools: export and import of the settings file, restore defaults, media clean-up links and the optional weekly site check-in message.
 
 == Changelog ==
+
+= 1.5.4 =
+* Each plugin now answers its own update check against the registry (no change when Kits Core is active). Calls to other plugins use their current function names. The REQUEST_METHOD read is sanitised.
 
 = 1.5.3 =
 * Kits Home step icons are inline SVG, so they no longer depend on an emoji image URL.

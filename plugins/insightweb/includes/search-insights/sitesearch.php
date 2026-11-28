@@ -75,7 +75,7 @@ add_action(
 			return;
 		}
 		$q = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- a public search, counted only.
-		if ( '' !== $q && function_exists( 'aw_is_directory_view' ) && aw_is_directory_view() ) {
+		if ( '' !== $q && function_exists( 'directoryweb_is_directory_view' ) && directoryweb_is_directory_view() ) {
 			$pin = preg_replace( '/\s/', '', $q );
 			insightweb_si_count_search( preg_match( '/^[1-9][0-9]{5}$/', $pin ) ? 'dir-pin' : 'dir-q', preg_match( '/^[1-9][0-9]{5}$/', $pin ) ? $pin : $q );
 		}
