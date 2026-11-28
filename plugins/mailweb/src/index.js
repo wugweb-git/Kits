@@ -485,11 +485,15 @@ function Queue( { data } ) {
 					],
 					[
 						__( 'Room left today for notices', 'mailweb' ),
-						q.room1.toLocaleString(),
+						q.room1 >= 1e15
+							? __( 'No limit', 'mailweb' )
+							: q.room1.toLocaleString(),
 					],
 					[
 						__( 'Room left today for campaigns', 'mailweb' ),
-						q.room3.toLocaleString(),
+						q.room3 >= 1e15
+							? __( 'No limit', 'mailweb' )
+							: q.room3.toLocaleString(),
 					],
 				] }
 			/>

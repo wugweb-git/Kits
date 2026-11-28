@@ -4,7 +4,7 @@ Tags: seo, schema, sitemap, faq, breadcrumbs
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -82,7 +82,18 @@ By default, deleting the plugin deletes no data: settings, FAQ records, focus ke
 
 Tick "Delete this plugin's data when it is deleted" (RankWeb → Settings → Modules) and deleting the plugin removes its settings, stored scores and counts, link tables, scheduled jobs, the manage_rankweb capability, the page cache folder (wp-content/cache/rankweb) and the local font folder (wp-content/uploads/rankweb-fonts). A backup of the options and tables is first written to wp-content/uploads/wugweb-backups/; if it cannot be written, nothing is deleted. Posts, pages, post meta, Rank Math's data and the .webp copies in your media library are never deleted.
 
+== Screenshots ==
+
+1. The Dashboard, listing the RankWeb tools and counts of missing search titles, descriptions and focus keywords.
+2. The FAQ screen, with the pages that show an FAQ, the post types that have the FAQ box, and counts by type.
+3. Settings, Titles and descriptions: description length, section hub titles, item types and title separator.
+4. Internal links, Audit: items with their links in and out, clicks from the home page and the findings for each.
+5. Modules: each RankWeb module with where it is set up, its status and an on or off switch.
+
 == Changelog ==
+
+= 2.5.2 =
+* The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. The sitemap and llms.txt notice shows only on RankWeb screens, the Dashboard and the Plugins list, can be dismissed, and links to Settings > Permalinks. Singular and plural item labels. Keys copy points to Settings.
 
 = 2.5.1 =
 * The SEO column width on the list screens is added as a registered inline style instead of a raw style tag in the page head (WordPress.org readiness).

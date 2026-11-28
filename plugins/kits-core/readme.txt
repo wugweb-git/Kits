@@ -4,7 +4,7 @@ Tags: forms, spam protection, share, analytics, admin
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,7 +81,18 @@ Each of these loads only when you turn it on; none runs by default.
 
 The ALTCHA spam guard runs locally (proof of work) and contacts no third-party service.
 
+== Screenshots ==
+
+1. The Kits Home screen, with design-system counts, a three-step quick start, shortcuts into the Site Editor and the site's versions.
+2. Theme Options, Header section: switches for a sticky header and the announcement bar, with the other sections one tab away.
+3. Settings, Performance section: switches for the joined stylesheet, deferred scripts, emoji script, form styles and font preload.
+4. Brand Tokens under Appearance: one-click presets and colour tokens with their CSS variable names, defaults and reset buttons.
+5. Tools: export and import of the settings file, restore defaults, media clean-up links and the optional weekly site check-in message.
+
 == Changelog ==
+
+= 1.5.1 =
+* The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. Chart tables take a singular and plural unit. Coding-standard cleanup across the plugin (no behaviour change).
 
 = 1.5.0 =
 * A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).

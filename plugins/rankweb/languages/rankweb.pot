@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: RankWeb 2.5.1\n"
+"Project-Id-Version: RankWeb 2.5.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rankweb\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T05:53:41+00:00\n"
+"POT-Creation-Date: 2026-11-28T06:38:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: rankweb\n"
@@ -381,8 +381,12 @@ msgstr[1] ""
 msgid "Counted again."
 msgstr ""
 
-#: includes/health.php:108
+#: includes/health.php:114
 msgid "Sitemap or llms.txt is not answering."
+msgstr ""
+
+#: includes/health.php:114
+msgid "Check Settings → Permalinks"
 msgstr ""
 
 #: includes/help-tab.php:33
@@ -866,121 +870,121 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-from-kits.php:67
-#: includes/more-from-kits.php:91
+#: includes/more-from-kits.php:103
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-from-kits.php:75
+#: includes/more-from-kits.php:87
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-from-kits.php:78
+#: includes/more-from-kits.php:90
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-from-kits.php:79
+#: includes/more-from-kits.php:91
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-from-kits.php:80
+#: includes/more-from-kits.php:92
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-from-kits.php:84
+#: includes/more-from-kits.php:96
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-from-kits.php:85
+#: includes/more-from-kits.php:97
 msgid "Activated."
 msgstr ""
 
-#: includes/more-from-kits.php:86
+#: includes/more-from-kits.php:98
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-from-kits.php:101
+#: includes/more-from-kits.php:119
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-from-kits.php:103
+#: includes/more-from-kits.php:121
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:114
+#: includes/more-from-kits.php:132
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:114
+#: includes/more-from-kits.php:132
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:120
+#: includes/more-from-kits.php:138
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-from-kits.php:120
+#: includes/more-from-kits.php:138
 msgid "Activate"
 msgstr ""
 
-#: includes/more-from-kits.php:122
+#: includes/more-from-kits.php:140
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-from-kits.php:126
+#: includes/more-from-kits.php:144
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-from-kits.php:158
+#: includes/more-from-kits.php:175
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-from-kits.php:161
+#: includes/more-from-kits.php:178
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-from-kits.php:166
+#: includes/more-from-kits.php:183
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:182
+#: includes/more-from-kits.php:205
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-from-kits.php:189
+#: includes/more-from-kits.php:212
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-from-kits.php:192
+#: includes/more-from-kits.php:215
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-from-kits.php:201
+#: includes/more-from-kits.php:227
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-from-kits.php:204
+#: includes/more-from-kits.php:230
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-from-kits.php:215
+#: includes/more-from-kits.php:241
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-from-kits.php:219
+#: includes/more-from-kits.php:245
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-from-kits.php:225
+#: includes/more-from-kits.php:251
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-from-kits.php:236
+#: includes/more-from-kits.php:262
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -2593,6 +2597,14 @@ msgstr ""
 #: src/index.js:151
 #: src/index.js:156
 #: src/index.js:438
+msgid "item"
+msgstr ""
+
+#: src/index.js:141
+#: src/index.js:146
+#: src/index.js:151
+#: src/index.js:156
+#: src/index.js:438
 #: src/tools/files.js:294
 #: src/tools/files.js:305
 #: src/tools/transport.js:144
@@ -2836,7 +2848,7 @@ msgid "Connected services"
 msgstr ""
 
 #: src/index.js:1036
-msgid "What RankWeb works with. Keys stay in Kits → Keys."
+msgid "What RankWeb works with. Keys are set in Settings and are never shown."
 msgstr ""
 
 #: src/index.js:1130

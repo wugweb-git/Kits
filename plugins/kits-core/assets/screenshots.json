@@ -1,0 +1,7 @@
+{
+  "1": "The Kits Home screen, with design-system counts, a three-step quick start, shortcuts into the Site Editor and the site's versions.",
+  "2": "Theme Options, Header section: switches for a sticky header and the announcement bar, with the other sections one tab away.",
+  "3": "Settings, Performance section: switches for the joined stylesheet, deferred scripts, emoji script, form styles and font preload.",
+  "4": "Brand Tokens under Appearance: one-click presets and colour tokens with their CSS variable names, defaults and reset buttons.",
+  "5": "Tools: export and import of the settings file, restore defaults, media clean-up links and the optional weekly site check-in message."
+}

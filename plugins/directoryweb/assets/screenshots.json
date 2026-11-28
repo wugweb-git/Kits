@@ -1,0 +1,7 @@
+{
+  "1": "The Dashboard, with counts of published and unpublished listings, waiting claims and claimed listings, and three small charts.",
+  "2": "The Listings screen, a table of eight demo listings with status filters, search and a view and edit link for each row.",
+  "3": "Settings, Connected services: the place source, geocoder, map tiles, claim form, FluentCRM and the other plugins DirectoryWeb works with.",
+  "4": "The Claims list, showing claims sent through the claim form with status filters, claimant, contact and number of fields changed.",
+  "5": "Schema & Fields: every field a listing can hold, with its label, key, type and whether it is required."
+}

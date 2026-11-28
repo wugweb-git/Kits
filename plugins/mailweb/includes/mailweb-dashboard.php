@@ -253,7 +253,7 @@ function mailweb_dashboard_tiles( array $c, array $live ): array {
 		'value'  => sprintf( __( '%1$s of %2$s', 'mailweb' ), $num( $sent ), $num( $budget ) ),
 		'raw'    => $sent,
 		/* translators: 1: emails notices may still send, 2: emails campaigns may still send. */
-		'sub'    => sprintf( __( 'Room left: notices %1$s · campaigns %2$s', 'mailweb' ), $num( $c['room1'] ?? 0 ), $num( $c['room3'] ?? 0 ) ),
+		'sub'    => ( ( $c['room1'] ?? 0 ) >= PHP_INT_MAX ? __( 'No daily limit set', 'mailweb' ) : sprintf( __( 'Room left: notices %1$s · campaigns %2$s', 'mailweb' ), $num( $c['room1'] ?? 0 ), $num( $c['room3'] ?? 0 ) ) ),
 		'href'   => $live['urls']['sending'] ?? '',
 		'tone'   => $sent >= $budget ? 'warn' : '',
 		'metric' => 'sent24',

@@ -1,0 +1,7 @@
+{
+  "1": "The Dashboard, with unread mail, website forms, the daily sending limit, the queue and what is waiting to send.",
+  "2": "The Inbox on the Website forms folder, showing six demo messages with unread ones in bold and a reading pane.",
+  "3": "Settings, Sending: the number of emails allowed in 24 hours and how many are kept back from campaigns.",
+  "4": "Email Logs: recent messages with time, recipient, subject, delivery status and the route they were sent through.",
+  "5": "A website form message open in the Inbox, with the sender's fields and Reply, Mark unread and Move to Trash."
+}

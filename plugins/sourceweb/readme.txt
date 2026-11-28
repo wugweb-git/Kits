@@ -4,7 +4,7 @@ Tags: news, sources, feeds, curation, ai
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 0.7.0
+Stable tag: 0.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,7 +74,19 @@ SourceWeb may connect to external services only when the corresponding feature o
 
 Deleting the plugin deletes no data by default: sources, keywords, rules, review queues, logs, AI model settings, and media library icons stay intact. To remove SourceWeb's own options, schedules, and enrichment table on deletion, enable **Delete this plugin's data when it is deleted** under **SourceWeb → Settings**.
 
+== Screenshots ==
+
+1. The Dashboard, with counts of items waiting for review, refused items, allowed sources and workers on time, and the pipeline charts.
+2. To review: four demo items held by the automatic checks, each with the reason it was held and publish and reject buttons.
+3. Settings, Connected services: the workers, Google Maps, enrichment sources, AI providers and relay SourceWeb works with.
+4. Sources: publishers with their status (Allowed, Neutral or Blocked), short name and quick actions.
+5. Keywords: the Include, Topic, Context, Exclude, Search and Press words the relevance check uses.
+6. Workers: one row per scheduled workflow, with its group, workflow file, schedule and a run now button.
+
 == Changelog ==
+
+= 0.7.1 =
+* The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. The Run now notice names SOURCEWEB_GITHUB_TOKEN and SOURCEWEB_WORKERS_REPO. Singular and plural item labels.
 
 = 0.7.0 =
 * A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).

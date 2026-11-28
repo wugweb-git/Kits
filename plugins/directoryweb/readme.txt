@@ -4,7 +4,7 @@ Tags: directory, listings, places, claims, map
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -87,7 +87,18 @@ Links shown in the admin and on listings to registers a site configures are plai
 
 By default, deleting the plugin removes nothing: listings, places, claims, settings and every option stay, so reinstalling finds everything as it was. Only if the option `directoryweb_delete_data_on_uninstall` is true does uninstall delete DirectoryWeb's own bookkeeping options (`directoryweb_caps`, `directoryweb_rewrite_ver`), its two cached counts and its scheduled count job, after writing a backup to `wp-content/uploads/wugweb-backups/`. It never deletes listings, claims, uploads, users, terms or any post, term or user meta. Deactivating the plugin unschedules the hourly count job and flushes the rewrite rules, and deletes nothing.
 
+== Screenshots ==
+
+1. The Dashboard, with counts of published and unpublished listings, waiting claims and claimed listings, and three small charts.
+2. The Listings screen, a table of eight demo listings with status filters, search and a view and edit link for each row.
+3. Settings, Connected services: the place source, geocoder, map tiles, claim form, FluentCRM and the other plugins DirectoryWeb works with.
+4. The Claims list, showing claims sent through the claim form with status filters, claimant, contact and number of fields changed.
+5. Schema & Fields: every field a listing can hold, with its label, key, type and whether it is required.
+
 == Changelog ==
+
+= 1.5.1 =
+* The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. Keys copy points to Settings.
 
 = 1.5.0 =
 * A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).

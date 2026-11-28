@@ -1,0 +1,8 @@
+{
+  "1": "The Dashboard, with counts of items waiting for review, refused items, allowed sources and workers on time, and the pipeline charts.",
+  "2": "To review: four demo items held by the automatic checks, each with the reason it was held and publish and reject buttons.",
+  "3": "Settings, Connected services: the workers, Google Maps, enrichment sources, AI providers and relay SourceWeb works with.",
+  "4": "Sources: publishers with their status (Allowed, Neutral or Blocked), short name and quick actions.",
+  "5": "Keywords: the Include, Topic, Context, Exclude, Search and Press words the relevance check uses.",
+  "6": "Workers: one row per scheduled workflow, with its group, workflow file, schedule and a run now button."
+}

@@ -4,7 +4,7 @@ Tags: email, inbox, hostinger, smtp, signature
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 3.7.0
+Stable tag: 3.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -137,7 +137,18 @@ MailWeb ships these Composer libraries in `vendor/`, all under the MIT licence (
 
 Sources: https://packagist.org/packages/hostinger/mail-api-php-sdk and each package's page on Packagist.
 
+== Screenshots ==
+
+1. The Dashboard, with unread mail, website forms, the daily sending limit, the queue and what is waiting to send.
+2. The Inbox on the Website forms folder, showing six demo messages with unread ones in bold and a reading pane.
+3. Settings, Sending: the number of emails allowed in 24 hours and how many are kept back from campaigns.
+4. Email Logs: recent messages with time, recipient, subject, delivery status and the route they were sent through.
+5. A website form message open in the Inbox, with the sender's fields and Reply, Mark unread and Move to Trash.
+
 == Changelog ==
+
+= 3.7.1 =
+* The Plugins screen now shows Version, By, View details (Description, Installation, FAQ, Changelog, Screenshots, Reviews), Getting Started and Documentation for this plugin, and the plugin carries its screenshots. The More from Kits page registers after the plugin's own menu and a deep link goes to Kits Core's page when Core is active. The Dashboard says "No daily limit set" instead of a huge number when the limit is off.
 
 = 3.7.0 =
 * A new More from Kits page lists the other Wugweb plugins with their release version and lets an administrator install and activate one (direct build only; nothing is requested until Install is clicked; the download is checked against its SHA-256; not in the WordPress.org build).

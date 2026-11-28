@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-28T05:53:38+00:00\n"
+"POT-Creation-Date: 2026-11-28T06:38:15+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: kits-core\n"
@@ -402,54 +402,54 @@ msgstr ""
 msgid "Kits post field"
 msgstr ""
 
-#: includes/blocks-dynamic.php:56
+#: includes/blocks-dynamic.php:58
 msgid "Closed"
 msgstr ""
 
-#: includes/blocks-dynamic.php:59
+#: includes/blocks-dynamic.php:61
 msgid "Last day"
 msgstr ""
 
-#: includes/blocks-dynamic.php:63
+#: includes/blocks-dynamic.php:65
 msgid "day left"
 msgid_plural "days left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/blocks-dynamic.php:141
+#: includes/blocks-dynamic.php:143
 msgid "Tick the grounds to include"
 msgstr ""
 
-#: includes/blocks-dynamic.php:145
+#: includes/blocks-dynamic.php:147
 msgid "Your name"
 msgstr ""
 
-#: includes/blocks-dynamic.php:146
+#: includes/blocks-dynamic.php:148
 msgid "Your letter"
 msgstr ""
 
-#: includes/blocks-dynamic.php:147
+#: includes/blocks-dynamic.php:149
 msgid "Open in Gmail"
 msgstr ""
 
-#: includes/blocks-dynamic.php:147
+#: includes/blocks-dynamic.php:149
 msgid "Open in your email app"
 msgstr ""
 
-#: includes/blocks-dynamic.php:147
+#: includes/blocks-dynamic.php:149
 msgid "Copy the letter"
 msgstr ""
 
-#: includes/blocks-dynamic.php:173
 #: includes/blocks-dynamic.php:175
+#: includes/blocks-dynamic.php:177
 msgid "Sponsored"
 msgstr ""
 
-#: includes/blocks-dynamic.php:223
+#: includes/blocks-dynamic.php:225
 msgid "Social profiles"
 msgstr ""
 
-#: includes/blocks-dynamic.php:231
+#: includes/blocks-dynamic.php:233
 msgid "(opens in a new tab)"
 msgstr ""
 
@@ -722,121 +722,121 @@ msgid "A content and team calendar with reminders and a weekly digest."
 msgstr ""
 
 #: includes/more-products.php:67
-#: includes/more-products.php:91
+#: includes/more-products.php:103
 msgid "More from Kits"
 msgstr ""
 
-#: includes/more-products.php:75
+#: includes/more-products.php:87
 msgid "You are not allowed to access this page."
 msgstr ""
 
-#: includes/more-products.php:78
+#: includes/more-products.php:90
 msgid "Active on this site"
 msgstr ""
 
-#: includes/more-products.php:79
+#: includes/more-products.php:91
 msgid "Installed, not active"
 msgstr ""
 
-#: includes/more-products.php:80
+#: includes/more-products.php:92
 msgid "Not installed"
 msgstr ""
 
-#: includes/more-products.php:84
+#: includes/more-products.php:96
 msgid "Installed. It is not active yet: press Activate."
 msgstr ""
 
-#: includes/more-products.php:85
+#: includes/more-products.php:97
 msgid "Activated."
 msgstr ""
 
-#: includes/more-products.php:86
+#: includes/more-products.php:98
 msgid "That did not work. Nothing was changed."
 msgstr ""
 
-#: includes/more-products.php:101
+#: includes/more-products.php:119
 msgid "The other Kits plugins. Each works on its own, and they work better together."
 msgstr ""
 
-#: includes/more-products.php:103
+#: includes/more-products.php:121
 msgid "This copy of the plugin does not install other plugins. Use the links to find them."
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:114
+#: includes/more-products.php:132
 #, php-format
 msgid "Install %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:114
+#: includes/more-products.php:132
 msgid "Install"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:120
+#: includes/more-products.php:138
 #, php-format
 msgid "Activate %s"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: includes/more-products.php:120
+#: includes/more-products.php:138
 msgid "Activate"
 msgstr ""
 
-#: includes/more-products.php:122
+#: includes/more-products.php:140
 msgid "Learn more"
 msgstr ""
 
-#: includes/more-products.php:126
+#: includes/more-products.php:144
 msgid "Install downloads the plugin from its public release on GitHub and checks its checksum first. Nothing is downloaded until you press the button."
 msgstr ""
 
-#: includes/more-products.php:158
+#: includes/more-products.php:175
 msgid "This action needs a form post."
 msgstr ""
 
-#: includes/more-products.php:161
+#: includes/more-products.php:178
 msgid "You are not allowed to do that."
 msgstr ""
 
-#: includes/more-products.php:166
+#: includes/more-products.php:183
 msgid "That is not one of the Kits plugins."
 msgstr ""
 
-#: includes/more-products.php:182
+#: includes/more-products.php:205
 msgid "The list of releases could not be reached."
 msgstr ""
 
-#: includes/more-products.php:189
+#: includes/more-products.php:212
 msgid "There is no stable release of that plugin yet."
 msgstr ""
 
-#: includes/more-products.php:192
+#: includes/more-products.php:215
 msgid "The release is not one this plugin trusts."
 msgstr ""
 
-#: includes/more-products.php:201
+#: includes/more-products.php:227
 msgid "This copy does not install plugins."
 msgstr ""
 
-#: includes/more-products.php:204
+#: includes/more-products.php:230
 msgid "It is already installed."
 msgstr ""
 
-#: includes/more-products.php:215
+#: includes/more-products.php:241
 msgid "The download failed."
 msgstr ""
 
-#: includes/more-products.php:219
+#: includes/more-products.php:245
 msgid "The download did not match its checksum, so it was not installed."
 msgstr ""
 
-#: includes/more-products.php:225
+#: includes/more-products.php:251
 msgid "WordPress could not install it."
 msgstr ""
 
-#: includes/more-products.php:236
+#: includes/more-products.php:262
 msgid "It is not installed, or it is already active."
 msgstr ""
 
@@ -974,8 +974,8 @@ msgstr ""
 msgid "Use this Logo"
 msgstr ""
 
-#: includes/ops/cdn-cache.php:231
-#: includes/preview.php:266
+#: includes/ops/cdn-cache.php:235
+#: includes/preview.php:280
 msgid "Save Changes"
 msgstr ""
 
@@ -995,19 +995,19 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-#: includes/plugin-info.php:114
+#: includes/plugin-info.php:112
 msgid "Works with"
 msgstr ""
 
-#: includes/plugin-info.php:118
+#: includes/plugin-info.php:116
 msgid "None of these is required to activate the plugin."
 msgstr ""
 
-#: includes/plugin-info.php:167
+#: includes/plugin-info.php:165
 msgid "Tell us how Kits Core works for you, or what is missing, on the plugin page."
 msgstr ""
 
-#: includes/plugin-info.php:167
+#: includes/plugin-info.php:165
 msgid "Open the Kits Core page"
 msgstr ""
 
@@ -1870,23 +1870,23 @@ msgstr ""
 msgid "Consent date (DD-MM-YY)"
 msgstr ""
 
-#: includes/primitives.php:172
+#: includes/primitives.php:198
 msgid "Completed"
 msgstr ""
 
-#: includes/primitives.php:173
+#: includes/primitives.php:199
 msgid "Current"
 msgstr ""
 
-#: includes/primitives.php:174
+#: includes/primitives.php:200
 msgid "Ongoing"
 msgstr ""
 
-#: includes/primitives.php:175
+#: includes/primitives.php:201
 msgid "Upcoming"
 msgstr ""
 
-#: includes/primitives.php:176
+#: includes/primitives.php:202
 msgid "Date not set"
 msgstr ""
 
@@ -1941,65 +1941,65 @@ msgstr ""
 msgid "Follow us on %s"
 msgstr ""
 
-#: includes/system-screen.php:567
+#: includes/system-screen.php:572
 msgid "Filter components, classes, blocks, tokens..."
 msgstr ""
 
-#: includes/system-screen.php:567
+#: includes/system-screen.php:572
 msgid "Filter design system entries"
 msgstr ""
 
 #. translators: %d: total number of entries.
-#: includes/system-screen.php:569
+#: includes/system-screen.php:574
 #, php-format
 msgid "Showing %d entries"
 msgstr ""
 
-#: includes/system-screen.php:571
+#: includes/system-screen.php:576
 msgid "Filter by type"
 msgstr ""
 
-#: includes/system-screen.php:572
+#: includes/system-screen.php:577
 msgid "All"
 msgstr ""
 
-#: includes/system-screen.php:666
+#: includes/system-screen.php:671
 msgid "Click to copy block name"
 msgstr ""
 
-#: includes/system-screen.php:669
+#: includes/system-screen.php:674
 msgid "Click to copy class"
 msgstr ""
 
-#: includes/system-screen.php:709
+#: includes/system-screen.php:714
 msgid "Inspect →"
 msgstr ""
 
-#: includes/system-screen.php:736
+#: includes/system-screen.php:741
 msgid "No entries matched your criteria."
 msgstr ""
 
-#: includes/system-screen.php:737
+#: includes/system-screen.php:742
 msgid "Kits Design System Components and Registry"
 msgstr ""
 
-#: includes/system-screen.php:743
+#: includes/system-screen.php:748
 msgid "Page 1 of 12"
 msgstr ""
 
-#: includes/system-screen.php:745
+#: includes/system-screen.php:750
 msgid "« Previous"
 msgstr ""
 
-#: includes/system-screen.php:746
+#: includes/system-screen.php:751
 msgid "Next »"
 msgstr ""
 
-#: includes/system-screen.php:754
+#: includes/system-screen.php:759
 msgid "Component Details"
 msgstr ""
 
-#: includes/system-screen.php:755
+#: includes/system-screen.php:760
 msgid "Close Inspector"
 msgstr ""
 
@@ -2154,7 +2154,7 @@ msgstr ""
 
 #: src/shell/detail.js:224
 #: src/shell/detail.js:334
-#: src/shell/extras.js:170
+#: src/shell/extras.js:184
 msgid "Remove"
 msgstr ""
 
@@ -2176,61 +2176,61 @@ msgid "Add row"
 msgstr ""
 
 #. translators: 1: first label, 2: last label.
-#: src/shell/extras.js:54
+#: src/shell/extras.js:68
 #, js-format
 msgid "(%1$s to %2$s)"
 msgstr ""
 
-#: src/shell/extras.js:100
+#: src/shell/extras.js:114
 msgid "This could not be added."
 msgstr ""
 
-#: src/shell/extras.js:124
+#: src/shell/extras.js:138
 msgid "Add"
 msgstr ""
 
-#: src/shell/extras.js:129
+#: src/shell/extras.js:143
 msgid "Kept only as a fingerprint: once added, it is never shown again."
 msgstr ""
 
 #. translators: %d: number of entries.
-#: src/shell/extras.js:142
+#: src/shell/extras.js:156
 #, js-format
 msgid "%d kept"
 msgstr ""
 
 #. translators: %d: entry number.
-#: src/shell/extras.js:153
+#: src/shell/extras.js:167
 #, js-format
 msgid "Entry %d"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: src/shell/extras.js:200
+#: src/shell/extras.js:214
 #, js-format
 msgid "Kept in %s: change it there"
 msgstr ""
 
 #. translators: %s: plugin name.
-#: src/shell/extras.js:207
+#: src/shell/extras.js:221
 #, js-format
 msgid "Kept in %s, which is not active."
 msgstr ""
 
-#: src/shell/extras.js:242
+#: src/shell/extras.js:256
 msgid "Select metrics"
 msgstr ""
 
-#: src/shell/extras.js:251
+#: src/shell/extras.js:265
 msgid "Tiles to show"
 msgstr ""
 
-#: src/shell/extras.js:286
+#: src/shell/extras.js:300
 #: src/theme-options/index.js:477
 msgid "Save"
 msgstr ""
 
-#: src/shell/extras.js:293
+#: src/shell/extras.js:307
 #: src/shell/inputs.js:226
 msgid "Cancel"
 msgstr ""
