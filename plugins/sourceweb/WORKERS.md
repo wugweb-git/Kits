@@ -49,7 +49,7 @@ The AI work itself is six jobs, each wanting a different *kind* of model, not a 
 | Find facts with a source | **web search grounding** (today only Gemini) | press, directory lead finder |
 | Read a page that hides its text | scrape tool, not a model | Firecrawl |
 
-Keys are chosen one by one and attached to workers. The better unit is the job: each job says what it needs (fast, long, reasoning, search), and keys are matched by capability, with the free daily caps already tracked (`AW_AI_DAILY`). Providers with no free route or no capability anyone needs can be retired from the list.
+Keys are chosen one by one and attached to workers. The better unit is the job: each job says what it needs (fast, long, reasoning, search), and keys are matched by capability, with the daily caps the workers report (option `aw_ai_free_caps`). Providers with no free route or no capability anyone needs can be retired from the list.
 
 ## 3. Where workers come from, and whether they accept manual changes
 

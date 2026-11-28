@@ -1,11 +1,15 @@
 <?php
 /**
- * Sourcing → AI models (owner, 10 + 12 Oct 2026; a tab since 24 Oct 2026): paste a key; the site works out the provider and a model that
- * answers, and shows whether the key works. One row per key, tried top to bottom, each kept separately.
- * Option aw_ai_models = list of {key, provider, model, url, status, checked, label, workers} (not autoloaded).
- * label: the owner's note. workers: the worker IDs (workers-meta.php) the key is for; empty or missing = every worker.
- * The workers read the usable rows (GET /aw/v1/ai-keys; with ?worker=<id>, only the keys for that worker or for all)
- * and try them before their GitHub Actions secrets.
+ * Sourcing → AI models (a tab since 24 Oct 2026). Each row is one connection the administrator entered on this site: a
+ * label, an OpenAI-compatible base address, a model name and a key (a tool connection: label, address and key). Nothing
+ * is shipped in the code: no provider, address, model or key. One row per key, tried top to bottom, each kept separately.
+ * Option aw_ai_models = list of {key, label, url, model, kind (ai|tool), provider (an id the workers pick it by), status,
+ * checked, workers, caps?} (not autoloaded). workers: the worker IDs (workers-meta.php) the key is for; empty or missing =
+ * every worker. The workers read the usable rows (GET /aw/v1/ai-keys; with ?worker=<id>, only the keys for that worker or
+ * for all) and try them before their GitHub Actions secrets.
+ *
+ * On WordPress 7.0 and later the plugin's own text tasks use the core AI client first (ai-core-client.php), with the keys
+ * saved under Settings > Connectors; these rows are for the workers, which run outside WordPress, and for older WordPress.
  * Administrators and the ingest user only.
  *
  * @package aw-sourcing
@@ -16,58 +20,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Known providers: label, key prefixes, API base ('' = own client), models to try in order.
- * A key whose prefix matches is tried against those providers first, then every other one.
+ * Kinds of connection a row can be. Nothing here names a provider: the administrator enters the label, the address and
+ * the model (a "tool" connection has no model and is never tested as one).
  */
-const AW_AI_PROVIDERS = array(
-	'openrouter' => array( 'OpenRouter', array( 'sk-or-' ), 'https://openrouter.ai/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free', 'nvidia/nemotron-3-super-120b-a12b:free', 'thinkingmachines/inkling:free' ) ), // free models only, never a paid one (owner, 25 Oct 2026); minimax-m3.1-flash:free is gone from OpenRouter; inkling:free replaced laguna-s-2.1:free, which expires 31 Oct 2026
-	'requesty'   => array( 'Requesty', array( 'rqst' ), 'https://router.requesty.ai/v1', array( 'google/gemma-4-31b-it', 'nvidia/nemotron-3-ultra-550b-a55b' ) ), // free models; paid ones need a top-up (22 Oct 2026)
-	'cline'      => array( 'Cline', array( 'sk_' ), 'https://api.cline.bot/api/v1', array( 'nvidia/nemotron-3-ultra-550b-a55b:free', 'google/gemma-4-31b-it:free' ) ), // free models (22 Oct 2026); minimax-m3.1-flash:free is gone (25 Oct 2026)
-	'commandcode' => array( 'Command Code', array( 'user_' ), 'https://api.commandcode.ai/provider/v1', array( 'reflection/beam:free', 'poolside/laguna-s-2.1-free', 'stealth/glyph-cluster:free' ) ), // needs the Provider plan's credit even for free models (22 Oct 2026)
-	'nvidia'     => array( 'NVIDIA', array( 'nvapi-' ), 'https://integrate.api.nvidia.com/v1', array( 'nvidia/nemotron-3.5-lightning-30b-a3b', 'nvidia/nemotron-3-ultra-550b-a55b', 'meta/muse-glimmer-30b' ) ), // free developer access; about 20 s a call (22 Oct 2026)
-	'vercel'     => array( 'Vercel AI Gateway', array( 'vck_' ), 'https://ai-gateway.vercel.sh/v1', array( 'poolside/laguna-s-2.1-free', 'reflection/beam-free', 'convaiinnovations/laya-free' ) ), // free models, but only once the team has a card on file (22 Oct 2026)
-	'huggingface' => array( 'Hugging Face', array( 'hf_' ), 'https://router.huggingface.co/v1', array( 'openai/gpt-oss-120b', 'meta-llama/Llama-3.3-70B-Instruct', 'Qwen/Qwen3-32B' ) ), // small free credit each month (22 Oct 2026)
-	'sambanova'  => array( 'SambaNova', array(), 'https://api.sambanova.ai/v1', array( 'Meta-Llama-3.3-70B-Instruct', 'DeepSeek-V3.1', 'gpt-oss-120b' ) ), // UUID keys; needs a payment method on file (22 Oct 2026)
-	'groq'       => array( 'Groq', array( 'gsk_' ), 'https://api.groq.com/openai/v1', array( 'openai/gpt-oss-120b', 'llama-3.3-70b-versatile' ) ),
-	'gemini'     => array( 'Google Gemini', array( 'AIza', 'AQ.' ), '', array( 'gemini-flash-latest', 'gemini-3-flash-preview', 'gemini-2.5-flash' ) ),
-	'mistral'    => array( 'Mistral', array( 'mstr' ), 'https://api.mistral.ai/v1', array( 'mistral-small-latest' ) ),
-	'cerebras'   => array( 'Cerebras', array( 'csk-' ), 'https://api.cerebras.ai/v1', array( 'gpt-oss-120b', 'llama-3.3-70b' ) ),
+const AW_AI_KINDS = array(
+	'ai'   => array( 'AI model', 'An OpenAI-compatible address, a model name and a key.' ),
+	'tool' => array( 'Tool', 'Not an AI model: an address and a key a worker calls.' ),
 );
 
-/** Keys for tools the workers use that are not AI models (owner, 22 Oct 2026): recognised by prefix, never tested as a model. */
-const AW_AI_TOOLS = array(
-	'firecrawl' => array( 'Firecrawl (article text)', array( 'fc-' ) ),
-	'tinyfish'  => array( 'TinyFish (web agent)', array( 'sk-tinyfish-' ) ),
-);
-
-/** Groups (owner, 22 Oct 2026): free and daily-quota keys only; paid providers are not used by the workers. */
-const AW_AI_TIERS = array(
-	'free'  => array( 'Free', 'No cost; only per-minute limits.' ),
-	'quota' => array( 'Free daily quota', 'No cost up to a daily allowance per account; the workers spread it over the day.' ),
-	'card'  => array( 'Free, needs a card or credit', 'Free models, but the provider asks for a card on file or a small credit first.' ),
-	'paid'  => array( 'Paid', 'Costs money per call: not used by the workers.' ),
-	'tool'  => array( 'Tool', 'Not an AI model.' ),
-);
-
-/** Each provider's group and what it is good for. Every AI worker uses the same list, top down. */
-const AW_AI_INFO = array(
-	'nvidia'      => array( 'free', 'Background jobs (summary rewrites, focus keywords, research): good models, about 20 s a call' ),
-	'groq'        => array( 'free', 'Quick checks (relevance, categories, titles): very fast' ),
-	'cerebras'    => array( 'free', 'Quick checks and summaries: very fast' ),
-	'requesty'    => array( 'free', 'Summaries and backup: 6 free models' ),
-	'cline'       => array( 'free', 'Backup: 2 free models' ),
-	'openrouter'  => array( 'quota', 'News summaries: 50 free requests a day per account' ),
-	'gemini'      => array( 'quota', 'Summaries and relevance: daily limit per Google project' ),
-	'sambanova'   => array( 'card', 'Fast large models once a payment method is on file' ),
-	'huggingface' => array( 'quota', 'Backup: a small free credit each month, then nothing until it renews' ),
-	'mistral'     => array( 'quota', 'Summaries: free Experiment plan, low per-minute limit' ),
-	'vercel'      => array( 'card', 'Backup once a card is on file: 3 free models' ),
-	'commandcode' => array( 'card', 'Backup once the Provider plan has credit' ),
-	'firecrawl'   => array( 'tool', 'Full article text when a news page hides it (Sourcing; 1,000 credits a month)' ),
-	'tinyfish'    => array( 'tool', 'Web agent: not used yet' ),
-);
-
-/** What each key can do, as icons (owner, 22 Oct 2026: "label like directories do"). dashicon, label. */
+/** What each connection can do, as icons (owner, 22 Oct 2026: "label like directories do"). dashicon, label. Rows may carry a `caps` list. */
 const AW_AI_CAP_ICONS = array(
 	'text'      => array( 'editor-paragraph', 'Text' ),
 	'fast'      => array( 'performance', 'Fast' ),
@@ -80,64 +41,66 @@ const AW_AI_CAP_ICONS = array(
 	'search'    => array( 'search', 'Web search' ),
 	'agent'     => array( 'admin-users', 'Web agent' ),
 );
-const AW_AI_CAPS = array(
-	'nvidia'      => array( 'text', 'reasoning', 'slow' ),
-	'groq'        => array( 'text', 'fast', 'code' ),
-	'cerebras'    => array( 'text', 'fast', 'code' ),
-	'requesty'    => array( 'text' ),
-	'cline'       => array( 'text', 'code' ),
-	'openrouter'  => array( 'text', 'reasoning', 'long' ),
-	'gemini'      => array( 'text', 'vision', 'long' ),
-	'mistral'     => array( 'text', 'code' ),
-	'huggingface' => array( 'text' ),
-	'sambanova'   => array( 'text', 'fast' ),
-	'vercel'      => array( 'text' ),
-	'commandcode' => array( 'text', 'code' ),
-	'firecrawl'   => array( 'scrape', 'search' ),
-	'tinyfish'    => array( 'agent' ),
-);
 
-/**
- * Free requests a day, per key ('key') or per account ('account'), from the providers' published free limits (about;
- * they change). null: no daily cap, only per-minute limits. 0: nothing until a card or credit is added.
- */
-const AW_AI_DAILY = array(
-	'openrouter'  => array( 50, 'account' ),
-	'groq'        => array( 1000, 'key' ),
-	'cerebras'    => array( 14400, 'key' ),
-	'gemini'      => array( 250, 'key' ),
-	'nvidia'      => array( null, 'key' ),
-	'mistral'     => array( null, 'key' ),
-	'requesty'    => array( null, 'key' ),
-	'cline'       => array( null, 'key' ),
-	'huggingface' => array( 0, 'key' ),
-	'sambanova'   => array( 0, 'key' ),
-	'vercel'      => array( 0, 'key' ),
-	'commandcode' => array( 0, 'key' ),
-);
-
-function sourceweb_ai_tier( string $provider ): string {
-	return AW_AI_INFO[ $provider ][0] ?? ( '' === $provider ? '' : 'paid' );
-}
-
-function sourceweb_ai_tier_label( string $provider ): string {
-	$t = sourceweb_ai_tier( $provider );
-	return '' === $t ? '—' : AW_AI_TIERS[ $t ][0];
-}
-
-/** The provider's own site icon (owner, 22 Oct 2026: "use AI icons"). */
 const AW_AI_STATUS = array(
-	'card'       => 'Needs a card on file (free models)',
+	'card'       => 'Needs a card on file',
 	'works'      => 'Works',
 	'tool'       => 'Tool key, not an AI model',
 	'no-credit'  => 'No credit',
 	'limited'    => 'Rate-limited for now',
 	'invalid'    => 'Key refused',
-	'unknown'    => 'Provider not recognised',
+	'incomplete' => 'Address or model missing',
 	'unchecked'  => 'Not checked yet',
 	'no-model'   => 'No model answered',
-	'workspace'  => 'Key not tied to a workspace: create the key inside a workspace',
 );
+
+/** The option holding the optional model preference passed to the WordPress AI client (empty = the client chooses). */
+const SOURCEWEB_AI_MODEL_PREFERENCE_OPTION = 'sourceweb_ai_model_preference';
+
+/**
+ * A connection's base address, tidied: http or https only, no trailing slash, nothing else.
+ *
+ * @param string $url As typed.
+ * @return string '' when it is not a web address.
+ */
+function sourceweb_ai_clean_url( string $url ): string {
+	$url = trim( $url );
+	if ( '' === $url || ! preg_match( '#^https?://[^\s/]+#i', $url ) ) {
+		return '';
+	}
+	$url = (string) preg_replace( '#/chat/completions/?$#i', '', $url );
+	return rtrim( function_exists( 'esc_url_raw' ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : $url, '/' );
+}
+
+/** The host of a connection's address, for display. */
+function sourceweb_ai_host( string $url ): string {
+	$h = parse_url( $url, PHP_URL_HOST );
+	return is_string( $h ) ? $h : '';
+}
+
+/**
+ * The id a row gets for the workers to pick it out by: the label as a slug, else the address' host as a slug. Rows saved
+ * before 28 Nov 2026 keep the id they had.
+ */
+function sourceweb_ai_provider_id( string $label, string $url ): string {
+	$id = sanitize_key( $label );
+	return '' !== $id ? $id : sanitize_key( str_replace( '.', '-', sourceweb_ai_host( $url ) ) );
+}
+
+/** A connection's name for lists and the change log: its label, else the id it was saved with, else its host. */
+function sourceweb_ai_row_name( array $row ): string {
+	foreach ( array( (string) ( $row['label'] ?? '' ), (string) ( $row['provider'] ?? '' ), sourceweb_ai_host( (string) ( $row['url'] ?? '' ) ) ) as $n ) {
+		if ( '' !== $n ) {
+			return $n;
+		}
+	}
+	return '';
+}
+
+/** A row is a tool connection (not an AI model). */
+function sourceweb_ai_row_is_tool( array $row ): bool {
+	return 'tool' === ( $row['kind'] ?? ( 'tool' === ( $row['status'] ?? '' ) ? 'tool' : 'ai' ) );
+}
 
 /**
  * The AI models screen's address.
@@ -192,7 +155,7 @@ add_action(
 				'title'   => 'Keys overview',
 				'content' => '<p>A read-only view of every key saved on the AI models tab and of what each worker gets. Keys show only their last 4 characters. To change a key, use Edit on the AI models tab.</p>'
 					. '<p><strong>Attached to</strong>: the workers a key is for. <em>All workers</em> means the key is attached to none, so every worker may use it, also workers added later.</p>'
-					. '<p><strong>Usable keys per worker</strong>: what GET aw/v1/ai-keys serves that worker now: AI keys that work or are rate-limited for now, from free or free-tier providers (paid ones are never served), plus tool keys (such as Firecrawl). A key that is not checked yet, refused or out of credit is not counted.</p>',
+					. '<p><strong>Usable keys per worker</strong>: what GET aw/v1/ai-keys serves that worker now: AI keys that work or are rate-limited for now, plus tool keys. A key that is not checked yet, refused or out of credit is not counted.</p>',
 			)
 		);
 	}
@@ -228,8 +191,19 @@ function sourceweb_ai_key_id( string $key ): string {
 	return substr( hash( 'sha256', $key ), 0, 16 );
 }
 
-function sourceweb_ai_blank_row( string $key ): array {
-	return array( 'key' => $key, 'provider' => '', 'model' => '', 'url' => '', 'status' => 'unchecked', 'checked' => 0 );
+function sourceweb_ai_blank_row( string $key, array $conn = array() ): array {
+	$kind  = 'tool' === ( $conn['kind'] ?? '' ) ? 'tool' : 'ai';
+	$url   = sourceweb_ai_clean_url( (string) ( $conn['url'] ?? '' ) );
+	$label = (string) ( $conn['label'] ?? '' );
+	return array(
+		'key'      => $key,
+		'kind'     => $kind,
+		'provider' => sourceweb_ai_provider_id( $label, $url ),
+		'model'    => 'tool' === $kind ? '' : sanitize_text_field( (string) ( $conn['model'] ?? '' ) ),
+		'url'      => $url,
+		'status'   => 'unchecked',
+		'checked'  => 0,
+	);
 }
 
 /** The worker IDs a saved key is for; empty = every worker (owner, 24 Oct 2026; keys saved before have none). */
@@ -252,24 +226,26 @@ function sourceweb_ai_key_for_worker( array $row, string $worker ): bool {
  */
 function sourceweb_ai_served( string $worker = '', string $job = '' ): array {
 	$out   = array();
-	$tools = array(); // Firecrawl and the like: the workers pick them out by provider
+	$tools = array(); // Tool connections: the workers pick them out by provider (the id saved with the row)
+	$caps  = array();
 	foreach ( sourceweb_ai_rows() as $r ) {
 		if ( '' !== $worker && ! sourceweb_ai_key_for_worker( $r, $worker ) ) {
 			continue;
 		}
-		if ( 'tool' === $r['status'] && isset( AW_AI_TOOLS[ $r['provider'] ] ) ) {
-			$tools[] = array( 'provider' => $r['provider'], 'key' => $r['key'] );
+		if ( sourceweb_ai_row_is_tool( $r ) ) {
+			$tools[] = array( 'provider' => (string) $r['provider'], 'name' => sourceweb_ai_row_name( $r ), 'url' => (string) ( $r['url'] ?? '' ), 'key' => $r['key'] );
 			continue;
 		}
-		if ( empty( $r['provider'] ) || 'paid' === sourceweb_ai_tier( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
+		if ( empty( $r['provider'] ) || ! in_array( $r['status'], array( 'works', 'limited' ), true ) ) {
 			continue;
 		}
-		$out[] = array( 'provider' => $r['provider'], 'name' => $r['provider'], 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
+		$caps[ $r['provider'] ] = array_values( array_filter( (array) ( $r['caps'] ?? array() ), 'is_string' ) );
+		$out[]                  = array( 'provider' => $r['provider'], 'name' => sourceweb_ai_row_name( $r ), 'model' => $r['model'], 'url' => $r['url'] ? $r['url'] . '/chat/completions' : '', 'key' => $r['key'] );
 	}
 	if ( '' === $job && '' !== $worker ) {
 		$job = SOURCEWEB_AI_WORKER_JOBS[ $worker ] ?? '';
 	}
-	return array( 'rows' => sourceweb_ai_order_for_job( $out, $job, AW_AI_CAPS ), 'tools' => $tools );
+	return array( 'rows' => sourceweb_ai_order_for_job( $out, $job, $caps ), 'tools' => $tools );
 }
 
 /**
@@ -289,10 +265,10 @@ function sourceweb_ai_mask_served( array $served ): array {
 	return $served;
 }
 
-/** "…abcd (Groq, label)" for notices and the change log: never more of the key than its last 4. */
+/** "…abcd (label)" for notices and the change log: never more of the key than its last 4. */
 function sourceweb_ai_key_short( array $row ): string {
-	$p = (string) ( $row['provider'] ?? '' );
-	$n = $p ? ( AW_AI_PROVIDERS[ $p ][0] ?? AW_AI_TOOLS[ $p ][0] ?? $p ) : 'provider not known yet';
+	$n = sourceweb_ai_row_name( $row );
+	$n = '' !== $n ? $n : 'no label';
 	return '…' . substr( (string) $row['key'], -4 ) . ' (' . $n . ( ! empty( $row['label'] ) ? ', ' . $row['label'] : '' ) . ')';
 }
 
@@ -304,39 +280,22 @@ function sourceweb_ai_workers_words( array $ids ): string {
 	return implode( ', ', array_map( fn( $id ) => function_exists( 'sourceweb_worker' ) && sourceweb_worker( $id ) ? sourceweb_worker( $id )['name'] . ' (' . $id . ')' : $id, $ids ) );
 }
 
-/** The key's prefix names a provider or tool (a quick check); other keys are tried against every provider (slow). */
-function sourceweb_ai_is_uuid( string $key ): bool {
-	return (bool) preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $key );
-}
-
-function sourceweb_ai_prefix_known( string $key ): bool {
-	if ( sourceweb_ai_is_uuid( $key ) ) {
-		return true;
-	}
-	foreach ( array_merge( array_values( AW_AI_PROVIDERS ), array_values( AW_AI_TOOLS ) ) as $p ) {
-		foreach ( $p[1] as $prefix ) {
-			if ( str_starts_with( $key, $prefix ) ) {
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
-/** HTTP status of a short test request ($chat = false: list models only). */
-function sourceweb_ai_call( string $provider, string $key, string $model = '', bool $chat = true ): array {
-	$p   = AW_AI_PROVIDERS[ $provider ];
-	$arg = array( 'timeout' => $chat ? 45 : 15 ); // some free models take 20 s or more to answer
-	if ( 'gemini' === $provider ) {
-		$arg['headers'] = array( 'x-goog-api-key' => $key, 'content-type' => 'application/json' );
-		$url            = 'https://generativelanguage.googleapis.com/v1beta/models' . ( $chat ? '/' . $model . ':generateContent' : '' );
-		$body           = array( 'contents' => array( array( 'parts' => array( array( 'text' => 'Say ok' ) ) ) ) );
-	} else {
-		$arg['headers'] = array( 'Authorization' => 'Bearer ' . $key, 'content-type' => 'application/json' );
-		$url            = $p[2] . ( $chat ? '/chat/completions' : ( 'openrouter' === $provider ? '/key' : '/models' ) ); // OpenRouter's model list is public.
-		$body           = array( 'model' => $model, 'max_tokens' => 5, 'messages' => array( array( 'role' => 'user', 'content' => 'Say ok' ) ) );
-	}
-	$r = $chat ? wp_remote_post( $url, $arg + array( 'body' => wp_json_encode( $body ) ) ) : wp_remote_get( $url, $arg );
+/**
+ * HTTP status of a short test request to the connection's own address: a chat completion of a few tokens.
+ *
+ * @param string $url   Base address (no trailing slash).
+ * @param string $key   Key.
+ * @param string $model Model name.
+ * @return array { status code (0 = no answer), lower-cased start of the body, headers }
+ */
+function sourceweb_ai_call( string $url, string $key, string $model ): array {
+	$arg  = array(
+		'timeout'            => 45, // some models take 20 s or more to answer
+		'reject_unsafe_urls' => true,
+		'headers'            => array( 'Authorization' => 'Bearer ' . $key, 'content-type' => 'application/json' ),
+		'body'               => wp_json_encode( array( 'model' => $model, 'max_tokens' => 5, 'messages' => array( array( 'role' => 'user', 'content' => 'Say ok' ) ) ) ),
+	);
+	$r = wp_remote_post( $url . '/chat/completions', $arg );
 	if ( is_wp_error( $r ) ) {
 		return array( 0, '', array() );
 	}
@@ -345,14 +304,14 @@ function sourceweb_ai_call( string $provider, string $key, string $model = '', b
 	return array( (int) wp_remote_retrieve_response_code( $r ), strtolower( substr( wp_remote_retrieve_body( $r ), 0, 3000 ) ), $headers );
 }
 
-/** Limits a provider reports on a test call (OpenAI-style and Anthropic headers, Retry-After, Gemini's retryDelay). */
+/** Limits a connection reports on a test call (x-ratelimit headers, Retry-After, a retry delay in the body). */
 function sourceweb_ai_limits( array $h, string $body, int $code ): array {
 	$get   = fn( $k ) => isset( $h[ $k ] ) ? ( is_array( $h[ $k ] ) ? reset( $h[ $k ] ) : $h[ $k ] ) : null;
 	$parts = array();
 	foreach ( array( 'requests', 'tokens' ) as $what ) {
-		$left  = $get( "x-ratelimit-remaining-$what" ) ?? $get( "anthropic-ratelimit-$what-remaining" );
-		$limit = $get( "x-ratelimit-limit-$what" ) ?? $get( "anthropic-ratelimit-$what-limit" );
-		$reset = $get( "x-ratelimit-reset-$what" ) ?? $get( "anthropic-ratelimit-$what-reset" );
+		$left  = $get( "x-ratelimit-remaining-$what" );
+		$limit = $get( "x-ratelimit-limit-$what" );
+		$reset = $get( "x-ratelimit-reset-$what" );
 		if ( null !== $left && null !== $limit ) {
 			$parts[] = ucfirst( $what ) . ': ' . number_format_i18n( (float) $left ) . ' of ' . number_format_i18n( (float) $limit ) . ' left' . ( $reset ? ' (resets ' . ( is_numeric( $reset ) ? $reset . 's' : ( strtotime( $reset ) ? wp_date( 'H:i', strtotime( $reset ) ) : $reset ) ) . ')' : '' );
 		}
@@ -371,98 +330,42 @@ function sourceweb_ai_limits( array $h, string $body, int $code ): array {
 	return array( 'limits' => implode( ' · ', $parts ), 'cooldown' => null !== $wait ? time() + $wait : 0 );
 }
 
-/** Work out a key's provider (prefix first, then every provider) and the first model that answers. */
+/**
+ * Test a saved connection once, with the address and model it was saved with. A tool connection is not tested as a
+ * model. A row with no address (a connection saved before addresses were entered by hand, which the workers still read
+ * as it is) keeps the status it had; one that was never checked is marked incomplete.
+ */
 function sourceweb_ai_check( array $row ): array {
-	$key   = $row['key'];
-	$order  = array();
-	$strong = array(); // Providers whose own distinctive prefix the key carries: theirs even if the model list refuses.
-	if ( ! empty( $row['provider'] ) && isset( AW_AI_PROVIDERS[ $row['provider'] ] ) ) {
-		$order[]  = $row['provider']; // Already known: just re-test it.
-		$strong[] = $row['provider'];
-	} else {
-		foreach ( AW_AI_PROVIDERS as $id => $p ) {
-			foreach ( $p[1] as $prefix ) {
-				if ( str_starts_with( $key, $prefix ) ) {
-					$order[] = $id;
-					if ( 'sk-' !== $prefix ) {
-						$strong[] = $id;
-					}
-					break;
-				}
-			}
-		}
-		// Then only providers whose keys have no prefix of their own (or a plain sk-): a provider with a distinctive
-		// prefix (Cline sk_, Requesty rqst ...) cannot own a key without it, and some list their models to anyone,
-		// which made unrelated keys look like theirs (22 Oct 2026).
-		$open  = array_keys( array_filter( AW_AI_PROVIDERS, fn( $p, $id ) => ( ! $p[1] || in_array( 'sk-', $p[1], true ) || 'mistral' === $id ) && 'sambanova' !== $id, ARRAY_FILTER_USE_BOTH ) ); // older Mistral keys have no prefix
-		$order = array_unique( array_merge( $order, $open ) );
-		if ( sourceweb_ai_is_uuid( $key ) ) { // SambaNova keys are plain UUIDs
-			array_unshift( $order, 'sambanova' );
-			$strong[] = 'sambanova';
-		}
-		$order = array_values( array_unique( $order ) );
-	}
-	foreach ( AW_AI_TOOLS as $id => $t ) {
-		foreach ( $t[1] as $prefix ) {
-			if ( str_starts_with( $key, $prefix ) ) {
-				return array_merge( $row, array( 'provider' => $id, 'model' => '', 'url' => '', 'status' => 'tool', 'checked' => time() ) );
-			}
-		}
-	}
 	$row['checked'] = time();
-	// Only the provider's listed (free) models are tried, in order; a model saved on the row is not, so a paid one can never come back (owner, 25 Oct 2026).
-	foreach ( $order as $id ) {
-		list( $code ) = sourceweb_ai_call( $id, $key, '', false );
-		if ( in_array( $code, array( 0, 400, 401, 403, 404 ), true ) && ! in_array( $id, $strong, true ) ) {
-			continue; // Not this provider's key (or not reachable).
-		}
-		$row['provider'] = $id;
-		$row['url']      = AW_AI_PROVIDERS[ $id ][2];
-		$row['status']   = 'no-model';
-		$models          = AW_AI_PROVIDERS[ $id ][3];
-		$no_credit = false;
-		foreach ( array_unique( $models ) as $model ) {
-			list( $code, $body, $headers ) = sourceweb_ai_call( $id, $key, $model );
-			$row['model'] = $model;
-			$row          = array_merge( $row, sourceweb_ai_limits( $headers, $body, $code ) );
-			if ( $code >= 200 && $code < 300 ) {
-				$row['status']  = 'works';
-				$row['last_ok'] = time();
-				return $row;
-			}
-			if ( str_contains( $body, 'credit card' ) || str_contains( $body, 'card on file' ) || str_contains( $body, 'payment_method_required' ) ) {
-				$row['status'] = 'card';
-				return $row;
-			}
-			if ( str_contains( $body, 'not scoped to a workspace' ) ) {
-				$row['status'] = 'workspace';
-				return $row;
-			}
-			if ( 429 === $code && ! str_contains( $body, 'insufficient_quota' ) ) { // A free tier's daily/minute limit, not an empty account.
-				$row['status'] = 'limited';
-				return $row;
-			}
-			if ( 402 === $code || preg_match( '/credit|balance|insufficient|billing|quota exceeded/', $body ) ) {
-				$no_credit = true; // This model needs credit; a later (free) model may still work.
-				continue;
-			}
-			if ( 429 === $code ) {
-				$row['status'] = 'limited';
-				return $row;
-			}
-			if ( 401 === $code || 403 === $code ) {
-				$row['status'] = 'invalid';
-				return $row;
-			}
-		}
-		if ( $no_credit ) {
-			$row['status'] = 'no-credit';
+	if ( sourceweb_ai_row_is_tool( $row ) ) {
+		return array_merge( $row, array( 'kind' => 'tool', 'model' => '', 'status' => 'tool' ) );
+	}
+	$url   = (string) ( $row['url'] ?? '' );
+	$model = (string) ( $row['model'] ?? '' );
+	if ( '' === $url || '' === $model ) {
+		if ( 'unchecked' === ( $row['status'] ?? 'unchecked' ) ) {
+			$row['status'] = 'incomplete';
 		}
 		return $row;
 	}
-	$row['provider'] = '';
-	$row['model']    = '';
-	$row['status']   = 'unknown';
+	list( $code, $body, $headers ) = sourceweb_ai_call( $url, $row['key'], $model );
+	$row                           = array_merge( $row, sourceweb_ai_limits( $headers, $body, $code ) );
+	if ( $code >= 200 && $code < 300 ) {
+		$row['status']  = 'works';
+		$row['last_ok'] = time();
+	} elseif ( str_contains( $body, 'credit card' ) || str_contains( $body, 'card on file' ) || str_contains( $body, 'payment_method_required' ) ) {
+		$row['status'] = 'card';
+	} elseif ( 429 === $code && ! str_contains( $body, 'insufficient_quota' ) ) { // A free tier's daily/minute limit, not an empty account.
+		$row['status'] = 'limited';
+	} elseif ( 402 === $code || preg_match( '/credit|balance|insufficient|billing|quota exceeded/', $body ) ) {
+		$row['status'] = 'no-credit';
+	} elseif ( 429 === $code ) {
+		$row['status'] = 'limited';
+	} elseif ( 401 === $code || 403 === $code ) {
+		$row['status'] = 'invalid';
+	} else {
+		$row['status'] = 'no-model';
+	}
 	return $row;
 }
 
@@ -636,7 +539,7 @@ add_action(
 /**
  * Add New Key (owner, 24 Oct 2026): one key or several (spaces, commas or new lines between them), each with the same
  * label and workers (none = every worker). Keys already saved are skipped. New keys are checked in the background,
- * never during the save: one slow provider (NVIDIA, 18 s a call) times ten keys was enough for a 503 (owner, 22 Oct
+ * never during the save: one slow provider (18 s a call) times ten keys was enough for a 503 (owner, 22 Oct
  * 2026). Keys removed while this save ran stay removed. Used by POST sourceweb/v1/ai/keys/add.
  *
  * @param string     $pasted  The keys as pasted.
@@ -644,9 +547,10 @@ add_action(
  * @param array      $workers Worker IDs (known ones, from sourceweb_workers_posted_ids()).
  * @param array|null $rows    The rows to keep, in order (the older one-form list); null keeps the saved rows.
  * @param bool       $recheck Also check every saved key again.
- * @return array { added: string[] (each "…last4 (provider)"), dupes: int, saved: bool }
+ * @param array      $conn    The connection every pasted key shares: url (base address), model, kind (ai or tool).
+ * @return array { added: string[] (each "…last4 (label)"), dupes: int, saved: bool }
  */
-function sourceweb_ai_keys_add( string $pasted, string $label, array $workers, ?array $rows = null, bool $recheck = false ): array {
+function sourceweb_ai_keys_add( string $pasted, string $label, array $workers, ?array $rows = null, bool $recheck = false, array $conn = array() ): array {
 	$saved = sourceweb_ai_rows();
 	$keep  = null !== $rows;
 	$rows  = $keep ? $rows : $saved;
@@ -662,7 +566,7 @@ function sourceweb_ai_keys_add( string $pasted, string $label, array $workers, ?
 			++$dupes;
 			continue;
 		}
-		$row     = sourceweb_ai_blank_row( $k ) + array(
+		$row     = sourceweb_ai_blank_row( $k, $conn + array( 'label' => $label ) ) + array(
 			'label'   => $label,
 			'workers' => $workers,
 		);
@@ -703,9 +607,10 @@ function sourceweb_ai_keys_add( string $pasted, string $label, array $workers, ?
  * @param string $id      Key id (sourceweb_ai_key_id()).
  * @param string $label   Label.
  * @param array  $workers Worker IDs (known ones).
+ * @param array  $conn    Optional: url and model to change (a blank one is left as it is).
  * @return int|null 1 saved, 0 nothing changed, null no such key.
  */
-function sourceweb_ai_key_edit_save( string $id, string $label, array $workers ): ?int {
+function sourceweb_ai_key_edit_save( string $id, string $label, array $workers, array $conn = array() ): ?int {
 	$rows  = sourceweb_ai_rows_fresh();
 	$label = mb_substr( $label, 0, 80 );
 	foreach ( $rows as $i => $r ) {
@@ -723,6 +628,18 @@ function sourceweb_ai_key_edit_save( string $id, string $label, array $workers )
 		sort( $b );
 		if ( $a !== $b ) {
 			$what[] = 'used by ' . sourceweb_ai_workers_words( $was ) . ' → ' . sourceweb_ai_workers_words( $workers );
+		}
+		$url = isset( $conn['url'] ) ? sourceweb_ai_clean_url( (string) $conn['url'] ) : '';
+		if ( '' !== $url && $url !== (string) ( $r['url'] ?? '' ) ) {
+			$what[]                = 'address ' . sourceweb_ai_host( (string) ( $r['url'] ?? '' ) ) . ' → ' . sourceweb_ai_host( $url );
+			$rows[ $i ]['url']     = $url;
+			$rows[ $i ]['recheck'] = 1;
+		}
+		$model = isset( $conn['model'] ) && ! sourceweb_ai_row_is_tool( $r ) ? sanitize_text_field( (string) $conn['model'] ) : '';
+		if ( '' !== $model && $model !== (string) ( $r['model'] ?? '' ) ) {
+			$what[]                = 'model "' . ( $r['model'] ?? '' ) . '" → "' . $model . '"';
+			$rows[ $i ]['model']   = $model;
+			$rows[ $i ]['recheck'] = 1;
 		}
 		if ( ! $what ) {
 			return 0;
@@ -784,7 +701,7 @@ function sourceweb_ai_keys_list_op( string $op, array $ids, string $worker = '' 
 			$rows[ $i ]['workers'] = $new;
 			$did[]                 = sourceweb_ai_key_short( $r );
 		} elseif ( 'remove' === $op ) {
-			$gone[] = '…' . substr( $r['key'], -4 ) . ' (' . ( $r['provider'] ? ( AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? $r['provider'] ) : 'unknown provider' ) . ')';
+			$gone[] = '…' . substr( $r['key'], -4 ) . ' (' . ( '' !== sourceweb_ai_row_name( $r ) ? sourceweb_ai_row_name( $r ) : 'no label' ) . ')';
 			unset( $rows[ $i ] );
 		} elseif ( 'recheck' === $op ) {
 			$rows[ $i ]['recheck'] = 1; // checked in the background by aw_ai_check_new; the key keeps its status (and stays in use) meanwhile
@@ -850,6 +767,10 @@ function sourceweb_ai_key_records(): array {
 			'id'       => $uid,
 			'last4'    => substr( $r['key'], -4 ),
 			'provider' => (string) $r['provider'],
+			'name'     => sourceweb_ai_row_name( $r ),
+			'kind'     => sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai',
+			'url'      => (string) ( $r['url'] ?? '' ),
+			'caps'     => array_values( array_filter( (array) ( $r['caps'] ?? array() ), 'is_string' ) ),
 			'model'    => (string) $r['model'],
 			'label'    => (string) ( $r['label'] ?? '' ),
 			'workers'  => sourceweb_ai_row_workers( $r ),
@@ -873,10 +794,14 @@ function sourceweb_ai_key_records(): array {
 			'id'       => (string) $uid,
 			'last4'    => (string) ( $u['last4'] ?? '' ),
 			'provider' => $prov,
+			'name'     => $prov,
+			'kind'     => 'ai',
+			'url'      => '',
+			'caps'     => array(),
 			'model'    => implode( ', ', array_keys( (array) ( $last['models'] ?? array() ) ) ),
 			'label'    => '',
 			'workers'  => array(),
-			'status'   => 'paid' === sourceweb_ai_tier( $prov ) ? 'paid' : ( ! empty( $last['ok'] ) ? 'works' : ( ! empty( $last['limited'] ) ? 'limited' : 'failed' ) ),
+			'status'   => ! empty( $last['ok'] ) ? 'works' : ( ! empty( $last['limited'] ) ? 'limited' : 'failed' ),
 			'last_ok'  => 0,
 			'limits'   => '',
 			'usage'    => sourceweb_ai_usage_line( $u ),
@@ -910,7 +835,7 @@ function sourceweb_ai_free_caps_rows(): array {
 	foreach ( (array) get_option( 'aw_ai_free_caps', array() ) as $acct => $c ) {
 		$fresh = gmdate( 'Y-m-d', (int) $c['at'] ) === gmdate( 'Y-m-d' );
 		$out[] = array(
-			'provider' => (string) ( AW_AI_PROVIDERS[ $c['provider'] ][0] ?? $c['provider'] ),
+			'provider' => (string) $c['provider'],
 			'account'  => (string) $acct,
 			'limit'    => (int) $c['limit'],
 			'left'     => $fresh ? (string) max( 0, $c['remaining'] - $c['used'] ) : 'Full again (reset since the last run)',
@@ -934,27 +859,20 @@ function sourceweb_ai_free_caps_rows(): array {
 function sourceweb_ai_overview_data( array $rows ): array {
 	$workers = sourceweb_workers_all();
 	$working = 0;
-	$daily   = 0;
-	$nocap   = 0;
-	$seen    = array();
-	$caps    = (array) get_option( 'aw_ai_free_caps', array() );
 	foreach ( $rows as $r ) {
-		$p = (string) $r['provider'];
-		if ( ! in_array( $r['status'], array( 'works', 'limited' ), true ) || 'paid' === sourceweb_ai_tier( $p ) ) {
-			continue;
-		}
-		++$working;
-		$d = AW_AI_DAILY[ $p ] ?? array( null, 'key' );
-		if ( null === $d[0] ) {
-			++$nocap;
-		} elseif ( 'key' === $d[1] ) {
-			$daily += $d[0];
-		} elseif ( empty( $seen[ $p ] ) ) { // per account: OpenRouter's accounts as the workers reported them
-			$seen[ $p ] = true;
-			$n          = count( array_filter( $caps, fn( $c ) => ( $c['provider'] ?? '' ) === $p ) );
-			$daily     += $d[0] * max( 1, $n );
+		if ( in_array( $r['status'], array( 'works', 'limited' ), true ) && ! sourceweb_ai_row_is_tool( $r ) ) {
+			++$working;
 		}
 	}
+	// The daily supply is what the workers reported per account (aw_ai_free_caps), never a figure kept in the code.
+	$caps    = (array) get_option( 'aw_ai_free_caps', array() );
+	$daily   = 0;
+	$covered = 0;
+	foreach ( $caps as $c ) {
+		$daily   += max( 0, (int) ( $c['limit'] ?? 0 ) );
+		$covered += count( (array) ( $c['keys'] ?? array() ) );
+	}
+	$nocap = max( 0, $working - $covered );
 	$calls = 0;
 	$ok    = 0;
 	$miss  = 0;
@@ -1010,7 +928,7 @@ function sourceweb_ai_usage_worker( string $name ): string {
 }
 
 /**
- * Keys per group and provider (owner, 22 Oct 2026), as plain text.
+ * Keys per kind and connection (owner, 22 Oct 2026), as plain text.
  *
  * @param array $rows Saved rows.
  * @return array [ { group, means, providers } ]
@@ -1018,14 +936,13 @@ function sourceweb_ai_usage_worker( string $name ): string {
 function sourceweb_ai_tier_groups( array $rows ): array {
 	$g = array();
 	foreach ( $rows as $r ) {
-		$t = sourceweb_ai_tier( (string) $r['provider'] );
-		$t = '' === $t ? 'unknown' : $t;
-		$n = AW_AI_PROVIDERS[ $r['provider'] ][0] ?? AW_AI_TOOLS[ $r['provider'] ][0] ?? 'Not recognised';
+		$t = sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai';
+		$n = '' !== sourceweb_ai_row_name( $r ) ? sourceweb_ai_row_name( $r ) : 'No label';
 		$g[ $t ][ $n ]['all']   = ( $g[ $t ][ $n ]['all'] ?? 0 ) + 1;
 		$g[ $t ][ $n ]['works'] = ( $g[ $t ][ $n ]['works'] ?? 0 ) + ( in_array( $r['status'], array( 'works', 'tool' ), true ) ? 1 : 0 );
 	}
 	$out = array();
-	foreach ( array_merge( array_keys( AW_AI_TIERS ), array( 'unknown' ) ) as $t ) {
+	foreach ( array_keys( AW_AI_KINDS ) as $t ) {
 		if ( empty( $g[ $t ] ) ) {
 			continue;
 		}
@@ -1034,8 +951,8 @@ function sourceweb_ai_tier_groups( array $rows ): array {
 			$parts[] = $n . ' ' . $c['works'] . ' / ' . $c['all'];
 		}
 		$out[] = array(
-			'group'     => (string) ( AW_AI_TIERS[ $t ][0] ?? 'Not recognised' ),
-			'means'     => (string) ( AW_AI_TIERS[ $t ][1] ?? 'Tell Claude where the key is from.' ),
+			'group'     => (string) AW_AI_KINDS[ $t ][0],
+			'means'     => (string) AW_AI_KINDS[ $t ][1],
 			'providers' => implode( ' · ', $parts ),
 		);
 	}

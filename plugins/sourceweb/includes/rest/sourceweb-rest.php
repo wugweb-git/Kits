@@ -904,6 +904,9 @@ function sourceweb_settings_now(): array {
 		'workers'    => array( 'live' => sourceweb_live_now() ),
 		'enrichment' => array_map( 'boolval', sourceweb_enrich_sources_on() ) + array( 'live_cap' => (int) get_option( 'aw_enrich_live_cap', '20' ) ),
 	);
+	if ( function_exists( 'sourceweb_ai_core_ready' ) && sourceweb_ai_core_ready() ) {
+		$out['ai'] = array( 'model_preference' => sourceweb_ai_model_preference() ); // shown only where the WordPress AI client can answer
+	}
 	if ( function_exists( 'aw_social_on' ) ) {
 		$out['social'] = array(
 			'aw_social_on'   => '1' === (string) get_option( 'aw_social_on', '' ),
@@ -1039,6 +1042,22 @@ function sourceweb_settings_payload(): array {
 			),
 		),
 	);
+	if ( isset( $now['ai'] ) ) {
+		$groups[] = array(
+			'slug'        => 'ai',
+			'label'       => __( 'AI text tasks', 'sourceweb' ),
+			'description' => __( 'SourceWeb\'s text tasks inside WordPress use the AI connection set up under Settings > Connectors. Keys are kept there, not here.', 'sourceweb' ),
+			'fields'      => array(
+				array(
+					'key'   => 'model_preference',
+					'type'  => 'text',
+					'label' => __( 'Model preference', 'sourceweb' ),
+					'help'  => __( 'Optional. A model name to ask for first; the AI client may use another. Empty: it chooses.', 'sourceweb' ),
+					'value' => $now['ai']['model_preference'],
+				),
+			),
+		);
+	}
 	if ( isset( $now['social'] ) ) {
 		$groups[] = array(
 			'slug'        => 'social',
@@ -1141,6 +1160,11 @@ function sourceweb_rest_save_group( WP_REST_Request $request ) {
 			sourceweb_src_log( 'enrich', 'Live block monthly cap: $' . $cap );
 			$changed['live_cap'] = $cap;
 		}
+	}
+	if ( 'ai' === $group && isset( $changed['model_preference'] ) ) {
+		$changed['model_preference'] = sanitize_text_field( (string) $changed['model_preference'] );
+		update_option( SOURCEWEB_AI_MODEL_PREFERENCE_OPTION, $changed['model_preference'], false );
+		sourceweb_src_log( 'settings', 'AI model preference: ' . ( '' === $changed['model_preference'] ? 'none' : $changed['model_preference'] ) );
 	}
 	if ( 'social' === $group ) {
 		foreach ( $changed as $k => $v ) {

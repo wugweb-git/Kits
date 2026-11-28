@@ -1371,6 +1371,15 @@ function Group( { group, onSaved, onDirty } ) {
 						checked={ !! v[ f.key ] }
 						onChange={ ( on ) => setV( { ...v, [ f.key ]: on } ) }
 					/>
+				) : 'text' === f.type ? (
+					<TextField
+						key={ f.key }
+						label={ f.label }
+						help={ f.help }
+						value={ v[ f.key ] }
+						onChange={ ( val ) => setV( { ...v, [ f.key ]: val } ) }
+						input={ { maxLength: 120, spellCheck: false } }
+					/>
 				) : (
 					<Field
 						key={ f.key }
@@ -6358,7 +6367,7 @@ function AiGlance() {
 				id="ai-caps"
 				title={ __( 'Daily caps on free models', 'sourceweb' ) }
 				description={ __(
-					'Free models have a daily limit per account, not per key: OpenRouter allows 50 free requests a day per account (1,000 once the account has 10 credits), however many keys it has. The news workers share each account’s requests out over the day and stop calling an account once it reaches the limit. The limit resets at 05:30 IST (00:00 UTC).',
+					'Free models can have a daily limit per account, not per key, however many keys the account has. The workers report each account’s limit after a run, and the figures below are theirs. The news workers share each account’s requests out over the day and stop calling an account once it reaches the limit. The limit resets at 05:30 IST (00:00 UTC).',
 					'sourceweb'
 				) }
 			>
@@ -6756,7 +6765,15 @@ function AiKeyForm( { id, onDone } ) {
 	const { data, error, load, v, setV, msg, busy, send } = useForm(
 		'ai/key',
 		{ id },
-		( d ) => ( { keys: '', many: '', label: d.label, workers: d.workers } )
+		( d ) => ( {
+			keys: '',
+			many: '',
+			label: d.label,
+			url: d.url,
+			model: d.modelValue,
+			kind: d.kind,
+			workers: d.workers,
+		} )
 	);
 	if ( error ) {
 		return <ErrorState message={ error } onRetry={ load } />;
@@ -6774,13 +6791,22 @@ function AiKeyForm( { id, onDone } ) {
 					{
 						keys: `${ v.keys }\n${ v.many }`,
 						label: v.label,
+						url: v.url,
+						model: v.model,
+						kind: v.kind,
 						workers: v.workers,
 					},
 					onDone
 				)
 			: send(
 					'ai/key/save',
-					{ id, label: v.label, workers: v.workers },
+					{
+						id,
+						label: v.label,
+						url: v.url,
+						model: v.model,
+						workers: v.workers,
+					},
 					onDone
 				);
 	return (
@@ -6811,10 +6837,48 @@ function AiKeyForm( { id, onDone } ) {
 			{ msg && <Notice tone={ msg.tone }>{ msg.text }</Notice> }
 			{ data.new ? (
 				<>
+					<SelectField
+						label={ __( 'Type', 'sourceweb' ) }
+						help={ __(
+							'An AI model is tested with the address and model below. A tool is not an AI model: the workers call it with its key.',
+							'sourceweb'
+						) }
+						value={ v.kind }
+						options={ [
+							{
+								value: 'ai',
+								label: __( 'AI model', 'sourceweb' ),
+							},
+							{ value: 'tool', label: __( 'Tool', 'sourceweb' ) },
+						] }
+						onChange={ put( 'kind' ) }
+					/>
+					<TextField
+						label={ __( 'Address', 'sourceweb' ) }
+						help={ __(
+							'The base address of an OpenAI-compatible API, starting with https://. Copy it from your provider’s documentation.',
+							'sourceweb'
+						) }
+						value={ v.url }
+						onChange={ put( 'url' ) }
+						input={ { type: 'url', spellCheck: false } }
+					/>
+					{ 'tool' !== v.kind && (
+						<TextField
+							label={ __( 'Model', 'sourceweb' ) }
+							help={ __(
+								'The model name exactly as your provider writes it.',
+								'sourceweb'
+							) }
+							value={ v.model }
+							onChange={ put( 'model' ) }
+							input={ { spellCheck: false } }
+						/>
+					) }
 					<TextField
 						label={ __( 'Key', 'sourceweb' ) }
 						help={ __(
-							'The provider and a model that answers are worked out in the background after you save. The key is never shown again: only its last 4 characters.',
+							'The key is checked in the background after you save. It is never shown again: only its last 4 characters.',
 							'sourceweb'
 						) }
 						value={ v.keys }
@@ -6855,12 +6919,8 @@ function AiKeyForm( { id, onDone } ) {
 							</span>,
 						],
 						[
-							__( 'Provider', 'sourceweb' ),
+							__( 'Connection', 'sourceweb' ),
 							`${ data.providerLabel } (${ data.group })`,
-						],
-						[
-							__( 'Model', 'sourceweb' ),
-							<code key="m">{ data.model }</code>,
 						],
 						[
 							__( 'Status', 'sourceweb' ),
@@ -6874,10 +6934,28 @@ function AiKeyForm( { id, onDone } ) {
 					] }
 				/>
 			) }
+			{ ! data.new && (
+				<>
+					<TextField
+						label={ __( 'Address', 'sourceweb' ) }
+						value={ v.url }
+						onChange={ put( 'url' ) }
+						input={ { type: 'url', spellCheck: false } }
+					/>
+					{ 'tool' !== data.kind && (
+						<TextField
+							label={ __( 'Model', 'sourceweb' ) }
+							value={ v.model }
+							onChange={ put( 'model' ) }
+							input={ { spellCheck: false } }
+						/>
+					) }
+				</>
+			) }
 			<TextField
 				label={ __( 'Label', 'sourceweb' ) }
 				help={ __(
-					'Optional: a note for you, e.g. which account the key is from.',
+					'A name for the connection, e.g. which account the key is from.',
 					'sourceweb'
 				) }
 				value={ v.label }
@@ -6922,7 +7000,7 @@ function AiOverview( { onBack } ) {
 			id="ai-overview"
 			title={ __( 'Keys overview', 'sourceweb' ) }
 			description={ __(
-				'Read-only. Keys show only their last 4 characters. All workers means the key is attached to none, so every worker may use it, also workers added later. Usable keys: AI keys that work or are rate-limited for now, from free or free-tier providers (paid ones are never served), plus tool keys.',
+				'Read-only. Keys show only their last 4 characters. All workers means the key is attached to none, so every worker may use it, also workers added later. Usable keys: AI keys that work or are rate-limited for now, plus tool keys.',
 				'sourceweb'
 			) }
 			actions={

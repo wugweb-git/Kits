@@ -250,7 +250,7 @@ function sourceweb_sourcing_ai_counts() {
 			++$n['tool'];
 		} elseif ( 'works' === $st ) {
 			++$n['works'];
-			$provs[ $p ] = defined( 'AW_AI_PROVIDERS' ) && isset( AW_AI_PROVIDERS[ $p ] ) ? AW_AI_PROVIDERS[ $p ][0] : $p;
+			$provs[ $p ] = function_exists( 'sourceweb_ai_row_name' ) ? sourceweb_ai_row_name( $r ) : $p;
 		} elseif ( in_array( $st, array( 'limited', 'unchecked', 'card' ), true ) ) {
 			++$n['wait'];
 		} else {

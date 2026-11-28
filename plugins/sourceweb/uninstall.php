@@ -12,7 +12,7 @@
  * Options:
  *   Settings: aw_backfill_floor, sourceweb_allow_publish, sourceweb_animal_writes_context, sourceweb_enrich_sources, aw_enrich_google_key, aw_enrich_live_cap, sourceweb_enrich_field_rules,
  *   sourceweb_summary_rules, sourceweb_sourcing_dismissed, aw_workers_groups.
- *   Records, logs and markers: aw_ai_free_caps, sourceweb_ai_usage, aw_ai_provider_icons, aw_enrich_db, aw_enrich_hosts,
+ *   Records, logs and markers: aw_ai_free_caps, sourceweb_ai_usage, aw_ai_provider_icons, sourceweb_ai_conn_migrated, sourceweb_ai_model_preference, aw_enrich_db, aw_enrich_hosts,
  *   aw_enrich_ledger, aw_ingest_heartbeat, aw_ingest_watchdog_at, aw_ingest_watchdog_last, sourceweb_relay_log,
  *   aw_relevance_alert_notice, aw_relevance_alert_pending, aw_relevance_rejected, aw_site_opportunities_last,
  *   aw_source_icons, aw_sourcing_migrating, sourceweb_sourcing_phase, aw_sourcing_phase1_record … aw_sourcing_phase4_record,
@@ -81,6 +81,8 @@ $sourceweb_src_options = array(
 	'aw_ai_free_caps',
 	'aw_ai_usage',
 	'aw_ai_provider_icons',
+	'sourceweb_ai_conn_migrated',
+	'sourceweb_ai_model_preference',
 	'aw_enrich_db',
 	'aw_enrich_hosts',
 	'aw_enrich_ledger',

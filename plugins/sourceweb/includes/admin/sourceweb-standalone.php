@@ -102,9 +102,9 @@ function sourceweb_standalone_sources_screen(): void {
 function sourceweb_standalone_ai_screen(): void {
 	sourceweb_standalone_notice();
 	$rows = function_exists( 'sourceweb_ai_key_records' ) ? sourceweb_ai_key_records() : array();
-	echo '<p>' . esc_html__( 'Keys for the AI services your workers use to check relevance and write summaries. A key is sent to the provider it belongs to and to your workers when they ask for it; it is shown here only as its last four characters. Stored in the WordPress database as saved (not encrypted).', 'sourceweb' ) . '</p>';
+	echo '<p>' . esc_html__( 'Connections for the AI services your workers use to check relevance and write summaries: a label, the OpenAI-compatible address, a model name and a key, all entered by you. A key is sent to the address you gave and to your workers when they ask for it; it is shown here only as its last four characters. Stored in the WordPress database as saved (not encrypted).', 'sourceweb' ) . '</p>';
 	echo '<table class="widefat striped"><thead><tr>';
-	foreach ( array( __( 'Key', 'sourceweb' ), __( 'Provider', 'sourceweb' ), __( 'Status', 'sourceweb' ), __( 'Actions', 'sourceweb' ) ) as $h ) {
+	foreach ( array( __( 'Key', 'sourceweb' ), __( 'Label', 'sourceweb' ), __( 'Status', 'sourceweb' ), __( 'Actions', 'sourceweb' ) ) as $h ) {
 		echo '<th scope="col">' . esc_html( $h ) . '</th>';
 	}
 	echo '</tr></thead><tbody>';
@@ -114,8 +114,7 @@ function sourceweb_standalone_ai_screen(): void {
 			continue; // a key only the workers hold (GitHub secrets): not editable here
 		}
 		$any   = true;
-		$prov  = (string) $r['provider'];
-		$label = '' !== $prov ? ( defined( 'AW_AI_PROVIDERS' ) && isset( AW_AI_PROVIDERS[ $prov ] ) ? AW_AI_PROVIDERS[ $prov ][0] : $prov ) : __( 'Not known yet', 'sourceweb' );
+		$label = '' !== (string) $r['name'] ? (string) $r['name'] : __( 'No label', 'sourceweb' );
 		echo '<tr><td><code>…' . esc_html( (string) $r['last4'] ) . '</code></td><td>' . esc_html( $label ) . '</td><td>' . esc_html( (string) $r['status'] ) . '</td><td>';
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="sourceweb_sa_key_remove"><input type="hidden" name="id" value="' . esc_attr( (string) $r['id'] ) . '">';
@@ -131,6 +130,9 @@ function sourceweb_standalone_ai_screen(): void {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	echo '<input type="hidden" name="action" value="sourceweb_sa_key_add">';
 	wp_nonce_field( 'sourceweb_sa_key_add' );
+	echo '<p><label for="sw_ai_label">' . esc_html__( 'Label', 'sourceweb' ) . '</label><br><input type="text" id="sw_ai_label" name="label" class="regular-text" maxlength="80"></p>';
+	echo '<p><label for="sw_ai_url">' . esc_html__( 'Address (OpenAI-compatible, https)', 'sourceweb' ) . '</label><br><input type="url" id="sw_ai_url" name="url" class="regular-text code" required></p>';
+	echo '<p><label for="sw_ai_model">' . esc_html__( 'Model name (leave empty for a tool)', 'sourceweb' ) . '</label><br><input type="text" id="sw_ai_model" name="model" class="regular-text code"></p>';
 	echo '<p><label for="sw_ai_keys">' . esc_html__( 'Paste one key, or several separated by spaces or new lines', 'sourceweb' ) . '</label><br>';
 	echo '<textarea id="sw_ai_keys" name="keys" rows="3" class="large-text code" autocomplete="off" spellcheck="false"></textarea></p>';
 	submit_button( __( 'Save keys', 'sourceweb' ) );
@@ -214,7 +216,13 @@ add_action(
 		}
 		check_admin_referer( 'sourceweb_sa_key_add' );
 		$pasted = isset( $_POST['keys'] ) ? sanitize_textarea_field( wp_unslash( $_POST['keys'] ) ) : '';
-		$res    = function_exists( 'sourceweb_ai_keys_add' ) ? sourceweb_ai_keys_add( $pasted, '', array() ) : array( 'added' => array() );
+		$label  = isset( $_POST['label'] ) ? sanitize_text_field( wp_unslash( $_POST['label'] ) ) : '';
+		$conn   = array(
+			'url'   => isset( $_POST['url'] ) ? sanitize_text_field( wp_unslash( $_POST['url'] ) ) : '',
+			'model' => isset( $_POST['model'] ) ? sanitize_text_field( wp_unslash( $_POST['model'] ) ) : '',
+		);
+		$conn['kind'] = '' === $conn['model'] ? 'tool' : 'ai';
+		$res    = function_exists( 'sourceweb_ai_keys_add' ) && '' !== sourceweb_ai_clean_url( $conn['url'] ) ? sourceweb_ai_keys_add( $pasted, $label, array(), null, false, $conn ) : array( 'added' => array() );
 		sourceweb_standalone_back( 'ai', ! empty( $res['added'] ) ? 'key_added' : 'key_none' );
 	}
 );

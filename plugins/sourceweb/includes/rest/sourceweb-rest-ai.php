@@ -8,8 +8,8 @@
  *   GET  ai/keys          the keys list (view, search, orderby, order, page), with the workers to attach to
  *   GET  ai/key           one saved key for its form (id; 'new' for Add New Key)
  *   GET  ai/overview      Keys overview: every saved key and the usable keys per worker (read-only)
- *   POST ai/keys/add      add one key or several (sourceweb_ai_keys_add())
- *   POST ai/key/save      a key's label and workers (sourceweb_ai_key_edit_save())
+ *   POST ai/keys/add      add one key or several, with their label, address and model (sourceweb_ai_keys_add())
+ *   POST ai/key/save      a key's label, workers, address and model (sourceweb_ai_key_edit_save())
  *   POST ai/keys/decide   up, down, recheck, remove, attach, detach (sourceweb_ai_keys_list_op())
  *
  * A key never goes out: only its id (a hash) and its last 4 characters.
@@ -57,6 +57,9 @@ add_action(
 				array(
 					'keys'    => $text,
 					'label'   => $text,
+					'url'     => $text,
+					'model'   => $text,
+					'kind'    => $text,
 					'workers' => $ids,
 				),
 			),
@@ -69,6 +72,8 @@ add_action(
 						'required' => true,
 					),
 					'label'   => $text,
+					'url'     => $text,
+					'model'   => $text,
 					'workers' => $ids,
 				),
 			),
@@ -121,12 +126,13 @@ function sourceweb_ai_worker_choices(): array {
 }
 
 /**
- * A provider's name.
+ * A connection's name as the list shows it: the label the administrator gave it, else its saved id, else its host.
  *
- * @param string $p Provider slug.
+ * @param array $r A row of sourceweb_ai_key_records().
  */
-function sourceweb_ai_provider( string $p ): string {
-	return '' !== $p ? (string) ( AW_AI_PROVIDERS[ $p ][0] ?? AW_AI_TOOLS[ $p ][0] ?? $p ) : '—';
+function sourceweb_ai_provider( array $r ): string {
+	$n = (string) ( $r['name'] ?? '' );
+	return '' !== $n ? $n : '—';
 }
 
 /**
@@ -135,30 +141,29 @@ function sourceweb_ai_provider( string $p ): string {
  * @param array $r A row of sourceweb_ai_key_records().
  */
 function sourceweb_ai_key_row( array $r ): array {
-	$p     = $r['provider'];
 	$tone  = sourceweb_ai_key_tone( $r['status'] );
 	$names = array_map( fn( $id ) => sourceweb_worker( $id ) ? sourceweb_worker( $id )['name'] : $id . ' (no longer exists)', $r['workers'] );
-	if ( 'paid' === $r['status'] ) {
-		$status = 'Not used (paid)';
-	} elseif ( 'failed' === $r['status'] ) {
+	if ( 'failed' === $r['status'] ) {
 		$status = 'Failed in the last run';
 	} else {
 		$status = (string) ( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] );
 	}
-	$caps = array_map( fn( $c ) => AW_AI_CAP_ICONS[ $c ][1], AW_AI_CAPS[ $p ] ?? array() );
+	$caps = array_map( fn( $c ) => AW_AI_CAP_ICONS[ $c ][1], array_filter( (array) $r['caps'], fn( $c ) => isset( AW_AI_CAP_ICONS[ $c ] ) ) );
 	return array(
 		'id'            => $r['id'],
 		'pos'           => $r['pos'],
 		'last4'         => $r['last4'],
 		'title'         => '…' . $r['last4'],
-		'provider'      => $p,
-		'providerLabel' => sourceweb_ai_provider( $p ),
+		'provider'      => $r['provider'],
+		'providerLabel' => sourceweb_ai_provider( $r ),
+		'url'           => $r['url'],
+		'kind'          => $r['kind'],
 		'model'         => '' !== $r['model'] ? $r['model'] : '—',
 		'label'         => $r['label'],
 		'usedBy'        => $r['workers'] ? implode( ', ', $names ) : 'All workers',
-		'group'         => sourceweb_ai_tier_label( $p ),
+		'group'         => $r['secret'] ? '—' : AW_AI_KINDS[ $r['kind'] ][0],
 		'caps'          => $caps ? implode( ', ', $caps ) : '—',
-		'capsNote'      => (string) ( AW_AI_INFO[ $p ][1] ?? '' ),
+		'capsNote'      => '',
 		'status'        => $r['status'],
 		'statusLabel'   => $status,
 		'tone'          => $tone,
@@ -182,14 +187,18 @@ function sourceweb_rest_ai() {
 	$d    = sourceweb_ai_overview_data( $rows );
 	$all  = sourceweb_workers_all();
 	$used = array_map( fn( $id ) => $all[ $id ]['name'] ?? $id, array_keys( $d['used'] ) );
+	$via  = sourceweb_ai_text_source();
 	return rest_ensure_response(
 		array(
-			'glance'  => array(
-				array( 'Keys', $d['keys'] . ' saved, ' . $d['working'] . ' working now' ),
-				array( 'Supply', 'About ' . number_format_i18n( $d['daily'] ) . ' free requests a day with a daily cap' . ( $d['nocap'] ? ', plus ' . $d['nocap'] . ' keys with no daily cap' : '' ) ),
+			'glance'  => array_merge(
+				array( array( 'Keys', $d['keys'] . ' saved, ' . $d['working'] . ' working now' ) ),
+				$via ? array( array( 'Text tasks in WordPress', 'core' === $via ? 'The WordPress AI client (Settings > Connectors)' : 'The saved connection' ) ) : array(),
+				array(
+					array( 'Supply', 'About ' . number_format_i18n( $d['daily'] ) . ' free requests a day with a daily cap, as the workers reported them' . ( $d['nocap'] ? ', plus ' . $d['nocap'] . ' keys with no reported daily cap' : '' ) ),
 				array( 'Demand', number_format_i18n( $d['ok'] ) . ' answers the workers needed in the last 24 h' . ( $d['miss'] ? ' (+' . number_format_i18n( $d['miss'] ) . ' tries that hit a limit or failed)' : '' ) ),
-				array( 'Demand against supply', $d['pct'] . '% of the daily supply with caps (' . number_format_i18n( $d['ok'] ) . ' of about ' . number_format_i18n( $d['daily'] ) . '). Supply uses the providers\' published free limits, so it is an estimate.' ),
+				array( 'Demand against supply', $d['pct'] . '% of the daily supply with caps (' . number_format_i18n( $d['ok'] ) . ' of about ' . number_format_i18n( $d['daily'] ) . '). Supply is the daily limits the workers reported, so it is an estimate.' ),
 				array( 'AI workers', count( $used ) . ' of ' . count( $all ) . ' workers' . ( $used ? ' used AI in the last 24 h: ' . implode( ', ', $used ) : ': none used AI in the last 24 h' ) ),
+				)
 			),
 			'pct'     => $d['pct'],
 			'workers' => array_map(
@@ -257,6 +266,9 @@ function sourceweb_rest_ai_key( WP_REST_Request $request ) {
 			array(
 				'new'     => true,
 				'label'   => '',
+				'url'     => '',
+				'modelValue' => '',
+				'kind'    => 'ai',
 				'workers' => array(),
 				'choices' => $choices,
 			)
@@ -266,14 +278,16 @@ function sourceweb_rest_ai_key( WP_REST_Request $request ) {
 		if ( sourceweb_ai_key_id( $r['key'] ) !== $id ) {
 			continue;
 		}
-		$p = (string) $r['provider'];
 		return rest_ensure_response(
 			array(
 				'new'           => false,
 				'id'            => $id,
 				'last4'         => substr( $r['key'], -4 ),
-				'providerLabel' => sourceweb_ai_provider( $p ),
-				'group'         => sourceweb_ai_tier_label( $p ),
+				'providerLabel' => '' !== sourceweb_ai_row_name( $r ) ? sourceweb_ai_row_name( $r ) : '—',
+				'group'         => AW_AI_KINDS[ sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai' ][0],
+				'url'           => (string) ( $r['url'] ?? '' ),
+				'kind'          => sourceweb_ai_row_is_tool( $r ) ? 'tool' : 'ai',
+				'modelValue'    => (string) ( $r['model'] ?? '' ),
 				'model'         => '' !== (string) $r['model'] ? (string) $r['model'] : '—',
 				'statusLabel'   => (string) ( AW_AI_STATUS[ $r['status'] ] ?? $r['status'] ),
 				'tone'          => sourceweb_ai_key_tone( (string) $r['status'] ),
@@ -328,10 +342,25 @@ function sourceweb_rest_ai_overview() {
  */
 function sourceweb_rest_ai_keys_add( WP_REST_Request $request ) {
 	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, Squiz.PHP.DiscouragedFunctions.Discouraged -- long AI run, as the form's save
+	$kind = 'tool' === (string) $request['kind'] ? 'tool' : 'ai';
+	$conn = array(
+		'url'   => sanitize_text_field( (string) $request['url'] ),
+		'model' => sanitize_text_field( (string) $request['model'] ),
+		'kind'  => $kind,
+	);
+	if ( '' === sourceweb_ai_clean_url( $conn['url'] ) ) {
+		return new WP_Error( 'sourceweb_no_url', 'Nothing added: enter the address (starting with https://).', array( 'status' => 400 ) );
+	}
+	if ( 'ai' === $kind && '' === $conn['model'] ) {
+		return new WP_Error( 'sourceweb_no_model', 'Nothing added: enter the model name.', array( 'status' => 400 ) );
+	}
 	$res = sourceweb_ai_keys_add(
 		sanitize_textarea_field( (string) $request['keys'] ),
 		sanitize_text_field( (string) $request['label'] ),
-		sourceweb_workers_posted_ids( (array) $request['workers'] )
+		sourceweb_workers_posted_ids( (array) $request['workers'] ),
+		null,
+		false,
+		$conn
 	);
 	if ( ! $res['saved'] ) {
 		return new WP_Error( 'sourceweb_no_key', $res['dupes'] ? 'Nothing added: that key is already saved.' : 'Nothing added: paste a key.', array( 'status' => 400 ) );
@@ -359,7 +388,15 @@ function sourceweb_rest_ai_keys_add( WP_REST_Request $request ) {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_ai_key_save( WP_REST_Request $request ) {
-	$n = sourceweb_ai_key_edit_save( sanitize_key( (string) $request['id'] ), sanitize_text_field( (string) $request['label'] ), sourceweb_workers_posted_ids( (array) $request['workers'] ) );
+	$n = sourceweb_ai_key_edit_save(
+		sanitize_key( (string) $request['id'] ),
+		sanitize_text_field( (string) $request['label'] ),
+		sourceweb_workers_posted_ids( (array) $request['workers'] ),
+		array(
+			'url'   => sanitize_text_field( (string) $request['url'] ),
+			'model' => sanitize_text_field( (string) $request['model'] ),
+		)
+	);
 	if ( null === $n ) {
 		return new WP_Error( 'sourceweb_no_key', 'No such key.', array( 'status' => 404 ) );
 	}

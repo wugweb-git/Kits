@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 const SOURCEWEB_AI_OPEN_CONSENT_OPTION    = 'sourceweb_ai_open_model_consent';
-const SOURCEWEB_AI_OPEN_PROVIDERS         = array( 'openrouter', 'requesty', 'huggingface' );
 const SOURCEWEB_SOURCE_QUALITY_THRESHOLD  = 0.60;
 
 /**
@@ -27,7 +26,8 @@ function sourceweb_ai_open_models_allowed(): bool {
 }
 
 /**
- * Filters a provider map so free/open-model routers are only exposed when owner consent is granted.
+ * Filters a provider map so free/open-model routers are only exposed when owner consent is granted. The code names no
+ * router: a site or plugin lists the slugs through the `sourceweb_ai_open_providers` filter (default: none, so nothing is hidden).
  *
  * @param array<string, mixed> $providers Provider map keyed by provider slug.
  * @param bool|null            $consented Optional explicit consent override (for unit tests).
@@ -38,7 +38,8 @@ function sourceweb_ai_filter_router_models( array $providers, ?bool $consented =
 	if ( $allowed ) {
 		return $providers;
 	}
-	foreach ( SOURCEWEB_AI_OPEN_PROVIDERS as $slug ) {
+	$open = function_exists( 'apply_filters' ) ? (array) apply_filters( 'sourceweb_ai_open_providers', array() ) : array();
+	foreach ( $open as $slug ) {
 		unset( $providers[ $slug ] );
 	}
 	return $providers;

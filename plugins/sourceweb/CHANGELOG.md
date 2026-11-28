@@ -2,6 +2,10 @@
 
 Each version's notes also sit in `readme.txt`. Newest first.
 
+## Unreleased
+
+- No AI provider, address, model or key is written in the plugin. An AI connection is a label, an OpenAI-compatible address, a model name and a key that the administrator enters on the AI models tab (a tool connection: label, address and key); it is stored in this site's options. The workers read the saved address, model and key as before (GET aw/v1/ai-keys). Where WordPress's AI client has a text connection (Settings > Connectors) SourceWeb's own text tasks use it, with an optional model preference under Settings. Saved keys are carried over once from the address and model each row already holds.
+
 ## 0.7.5
 
 - Plugin Check clean-up: hook names, variables and request-method reads carry each plugin's own prefix (hooks named aw_si_*, aw_enrich_* and similar are now insightweb_*, sourceweb_*, kits_*, rankweb_*, directoryweb_*), and the update code no longer touches WordPress's update cache.

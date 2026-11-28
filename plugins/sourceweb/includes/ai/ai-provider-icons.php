@@ -1,6 +1,6 @@
 <?php
 /**
- * Each AI provider's own site icon, kept in option aw_ai_provider_icons (host => attachment ID, 0 = tried and none
+ * The site icon of each saved AI connection's host (nothing is listed in the code), kept in option aw_ai_provider_icons (host => attachment ID, 0 = tried and none
  * found). It fills the way SourceWeb fills the publishers' icons (attribution.php): on the hourly aw_fetch_favicons event, a few hosts a
  * run, Google's favicon service then the host's /favicon.ico, saved once into the media library.
  *
@@ -11,32 +11,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** The site of each provider and tool in AW_AI_PROVIDERS and AW_AI_TOOLS. */
-const AW_AI_HOSTS = array(
-	'openrouter'  => 'openrouter.ai',
-	'requesty'    => 'requesty.ai',
-	'cline'       => 'cline.bot',
-	'commandcode' => 'commandcode.ai',
-	'nvidia'      => 'build.nvidia.com',
-	'vercel'      => 'vercel.com',
-	'huggingface' => 'huggingface.co',
-	'sambanova'   => 'sambanova.ai',
-	'groq'        => 'groq.com',
-	'gemini'      => 'ai.google.dev',
-	'mistral'     => 'mistral.ai',
-	'cerebras'    => 'cerebras.ai',
-	'firecrawl'   => 'firecrawl.dev',
-	'tinyfish'    => 'tinyfish.ai',
-);
-
-// The hourly favicon run (attribution.php): also fetch the icons of the providers that have a saved key (five a run at most).
+// The hourly favicon run (attribution.php): also fetch the icons of the hosts of the saved connections (five a run at most).
 add_action(
 	'aw_fetch_favicons',
 	function () {
 		$have = (array) get_option( 'aw_ai_provider_icons', array() );
 		$want = array();
 		foreach ( (array) get_option( 'aw_ai_models', array() ) as $r ) {
-			$host = AW_AI_HOSTS[ $r['provider'] ?? '' ] ?? '';
+			$host = is_array( $r ) ? sourceweb_ai_host( (string) ( $r['url'] ?? '' ) ) : ''; // the host of the address the administrator entered
 			if ( '' !== $host && ! array_key_exists( $host, $have ) && ( ! function_exists( 'sourceweb_favicon_url' ) || '' === sourceweb_favicon_url( $host ) ) ) {
 				$want[ $host ] = true;
 			}

@@ -133,6 +133,8 @@ require_once SOURCEWEB_SOURCING_DIR . 'includes/review/review-queue.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-suggestions.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-jobs.php'; // what each AI job needs (pure)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-keys.php';
+require_once SOURCEWEB_SOURCING_DIR . 'includes/ai/ai-core-client.php'; // text tasks: the WordPress AI client first (7.0+), else the saved connection
+require_once SOURCEWEB_SOURCING_DIR . 'includes/lifecycle/ai-connection-migrate.php'; // one-time: saved key rows to the generic connection fields (removable)
 require_once SOURCEWEB_SOURCING_DIR . 'includes/admin/site-health.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/workers/relay.php';
 require_once SOURCEWEB_SOURCING_DIR . 'includes/keywords/keyword-stats.php';
