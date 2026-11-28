@@ -18,7 +18,7 @@
  * Author URI:        https://wugweb.com/
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://wugweb.com/plugins/rankweb/
+ * Update URI:        https://wugweb-git.github.io/Kits/plugins/rankweb/
  * Text Domain:       rankweb
  * Domain Path:       /languages
  */

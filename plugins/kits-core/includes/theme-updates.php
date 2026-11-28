@@ -2,7 +2,7 @@
 /**
  * Updates for the Kits by Wugweb theme, the way WordPress updates any theme.
  *
- * The theme's style.css names an Update URI on wugweb.com, so WordPress asks this file instead of WordPress.org
+ * The theme's style.css names an Update URI on wugweb-git.github.io, so WordPress asks this file instead of WordPress.org
  * (core filter update_themes_{hostname}, WordPress 6.1+). The answer comes from a small JSON file:
  *
  *     { "version": "2.3.0", "package": "https://…/kits-by-wugweb-2.3.0.zip",
@@ -84,7 +84,7 @@ function kits_update_release() {
 }
 
 add_filter(
-	'update_themes_wugweb.com',
+	'update_themes_wugweb-git.github.io',
 	/**
 	 * Answer WordPress's update check for Kits by Wugweb.
 	 *

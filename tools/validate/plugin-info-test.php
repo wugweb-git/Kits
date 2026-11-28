@@ -43,7 +43,7 @@ require "$root/$rel";
 $fail = 0;
 $ok = function ( $n, $c ) use ( &$fail, $slug ) { if ( ! $c ) { $fail++; echo "FAIL: $slug: $n\n"; } };
 
-$ok( 'the three hooks are added', isset( $hooks['plugins_api'], $hooks['plugin_row_meta'], $hooks['update_plugins_wugweb.com'] ) );
+$ok( 'the three hooks are added', isset( $hooks['plugins_api'], $hooks['plugin_row_meta'], $hooks['update_plugins_wugweb-git.github.io'] ) );
 $links = $p . '_row_meta';
 $out   = $links( array( 'x' ), plugin_basename( MAIN_FILE ) );
 $ok( 'the row gets exactly Getting Started and Documentation', 3 === count( $out ) && false !== strpos( $out[1], 'Getting Started' ) && false !== strpos( $out[2], 'Documentation' ) );

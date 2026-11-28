@@ -18,7 +18,7 @@
  * Author URI:        https://wugweb.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://wugweb.com/plugins/directoryweb/
+ * Update URI:        https://wugweb-git.github.io/Kits/plugins/directoryweb/
  * Text Domain:       directoryweb
  * Domain Path:       /languages
  */

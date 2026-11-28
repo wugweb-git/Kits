@@ -30,7 +30,7 @@ function wp_delete_file( $f ) { @unlink( $f ); }
 require dirname( __DIR__, 2 ) . "/plugins/$slug/$rel";
 $fail = 0;
 $ok   = function ( $n, $c ) use ( &$fail ) { if ( ! $c ) { $fail++; echo "FAIL: $n\n"; } };
-$upd  = $GLOBALS['hooks']['update_plugins_wugweb.com'][0];
+$upd  = $GLOBALS['hooks']['update_plugins_wugweb-git.github.io'][0];
 $pre  = $GLOBALS['hooks']['upgrader_pre_download'][0];
 $file = tempnam( sys_get_temp_dir(), 'kreg' );
 file_put_contents( $file, 'zipbytes' );

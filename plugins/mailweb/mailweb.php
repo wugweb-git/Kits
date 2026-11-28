@@ -12,7 +12,7 @@
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Description:       Hostinger Mail inside WordPress: read, reply and send from your mailboxes, website form messages in the same inbox, plus SMTP sending with a daily limit and queue and a FluentCRM feed. Own menu: Mail (Inbox, Overview, Settings).
  * Version:           3.7.5
- * Update URI:           https://wugweb.com/plugins/mailweb/
+ * Update URI:           https://wugweb-git.github.io/Kits/plugins/mailweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb

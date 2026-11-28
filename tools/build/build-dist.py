@@ -45,7 +45,7 @@ TARGETS = {
     "theme": {
         "src": REPO / "themes" / "kits-by-wugweb",
         "slug": "kits-by-wugweb",
-        "update_uri": "https://wugweb.com/kits/",
+        "update_uri": "https://wugweb-git.github.io/Kits/themes/kits-by-wugweb/",
     },
 }
 

@@ -99,7 +99,7 @@ function mailweb_reg_offer( string $installed ): ?array {
 }
 
 add_filter(
-	'update_plugins_wugweb.com',
+	'update_plugins_wugweb-git.github.io',
 	/**
 	 * Offer a newer registry release of this plugin.
 	 *

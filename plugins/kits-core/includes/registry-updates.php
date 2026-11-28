@@ -2,7 +2,7 @@
 /**
  * Updates for the Wugweb plugins and the Kits theme from the public registry (registry/index.json on the project's
  * GitHub Pages site, built from the GitHub releases). Each product's Update URI names wugweb.com, so WordPress asks
- * update_plugins_wugweb.com / update_themes_wugweb.com; this file answers from the registry, after each product's own
+ * update_plugins_wugweb-git.github.io / update_themes_wugweb-git.github.io; this file answers from the registry, after each product's own
  * "up to date" answer (priority 20).
  *
  * Decisions (26 Nov 2026): the registry and the release files are public (no per-site login); only stable releases are
@@ -106,7 +106,7 @@ function kits_registry_offer( string $slug, string $installed ): ?array {
 }
 
 add_filter(
-	'update_plugins_wugweb.com',
+	'update_plugins_wugweb-git.github.io',
 	/**
 	 * Offer a newer registry release of a Wugweb plugin.
 	 *
@@ -143,7 +143,7 @@ add_filter(
 );
 
 add_filter(
-	'update_themes_wugweb.com',
+	'update_themes_wugweb-git.github.io',
 	/**
 	 * Offer a newer registry release of the theme when no update address is set (theme-updates.php).
 	 *

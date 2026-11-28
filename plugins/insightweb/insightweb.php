@@ -17,7 +17,7 @@
  * Plugin URI:        https://wugweb-git.github.io/Kits/plugins/insightweb/
  * Description:       Search Console, GA4, Clarity, PageSpeed, Bing, keywords and rising terms for Kits sites.
  * Version:           1.4.4
- * Update URI:           https://wugweb.com/plugins/insightweb/
+ * Update URI:           https://wugweb-git.github.io/Kits/plugins/insightweb/
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            Wugweb

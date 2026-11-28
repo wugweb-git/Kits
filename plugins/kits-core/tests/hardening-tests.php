@@ -94,13 +94,13 @@ $serve = function ( array $json ) {
 		'code' => 200,
 		'body' => json_encode( $json ),
 	);
-	add_filter( 'update_themes_wugweb.com', function () {
+	add_filter( 'update_themes_wugweb-git.github.io', function () {
 		return false;
 	}, 5, 3 ); // keeps the hook list non-empty like core
 };
 $update = function () {
 	$cb = array();
-	foreach ( t_hook_callbacks( 'update_themes_wugweb.com' ) as $c ) {
+	foreach ( t_hook_callbacks( 'update_themes_wugweb-git.github.io' ) as $c ) {
 		$cb[] = $c;
 	}
 	return $cb;

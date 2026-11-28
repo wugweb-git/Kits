@@ -3,7 +3,7 @@
  * Kits Core on the Plugins screen: its icon and banner, the row links Getting Started and Documentation, and a "View details"
  * window with Description, Installation, FAQ, Changelog, Screenshots and Reviews, all read from the plugin's own
  * readme.txt and assets/screenshot-N.png, through WordPress's own hooks for a plugin with an Update URI:
- * update_plugins_wugweb.com (WordPress 5.8+) and plugins_api. It reports the installed version, so WordPress never
+ * update_plugins_wugweb-git.github.io (WordPress 5.8+) and plugins_api. It reports the installed version, so WordPress never
  * offers an update from here; nothing is downloaded and no other site is asked. Generated from
  * tools/build/gen-plugin-info.py; change the template, not this copy.
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // The direct build (with an Update URI header) supplies its own row and View details window. The WordPress.org build has none:
 // WordPress.org supplies the window from the readme and its assets, and updates the plugin itself.
 if ( is_admin() && '' !== trim( (string) get_file_data( KITS_CORE_DIR . 'kits-core.php', array( 'uri' => 'Update URI' ) )['uri'] ) ) {
-	add_filter( 'update_plugins_wugweb.com', 'kits_plugin_update_row', 10, 3 );
+	add_filter( 'update_plugins_wugweb-git.github.io', 'kits_plugin_update_row', 10, 3 );
 	add_filter( 'plugins_api', 'kits_plugin_details', 10, 3 );
 }
 add_filter( 'plugin_row_meta', 'kits_plugin_row_meta', 10, 2 );
