@@ -315,7 +315,7 @@ function kits_media_merge_restore( array $data ) {
 			++$skipped;
 			continue;
 		}
-		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['old'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['old'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- a single row updated by its meta_id, not a meta_value search
 		wp_cache_delete( $m['post_id'], 'post_meta' );
 	}
 	foreach ( array_reverse( (array) ( $data['content'] ?? array() ), true ) as $pid => $c ) {
@@ -380,7 +380,7 @@ function kits_media_merge_group( $keep ) {
 		);
 	}
 	foreach ( $c['meta'] as $m ) {
-		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['new'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$wpdb->update( $wpdb->postmeta, array( 'meta_value' => $m['new'] ), array( 'meta_id' => $m['meta_id'] ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- a single row updated by its meta_id, not a meta_value search
 		wp_cache_delete( $m['post_id'], 'post_meta' );
 	}
 	// 2. Replace the image addresses and block image IDs written in post content (each post's old text is saved first).

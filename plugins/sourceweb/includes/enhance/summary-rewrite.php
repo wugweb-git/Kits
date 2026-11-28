@@ -114,7 +114,7 @@ function sourceweb_summary_types_sql( $column ) {
 /** GET ?short=1: the short items due another try, oldest first (the day they were judged or re-read). */
 function sourceweb_summary_rw_short_list( $per ) {
 	global $wpdb;
-	$rows = $wpdb->get_results( "SELECT p.ID, p.post_type, p.post_title, p.post_excerpt, p.post_date, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_summary_rw' WHERE p.post_status = 'publish' AND " . sourceweb_summary_types_sql( 'p.post_type' ) . " AND m.meta_value LIKE '%short%'" ); // phpcs:ignore WordPress.DB
+	$rows = $wpdb->get_results( "SELECT p.ID, p.post_type, p.post_title, p.post_excerpt, p.post_date, m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_summary_rw' WHERE p.post_status = 'publish' AND " . sourceweb_summary_types_sql( 'p.post_type' ) . " AND m.meta_value LIKE '%short%'" ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 	$now  = strtotime( current_time( 'mysql' ) ); // the meta's times are local, as current_time( 'mysql' )
 	$due  = array();
 	foreach ( $rows as $r ) {
@@ -234,7 +234,7 @@ function sourceweb_summary_rw_list( WP_REST_Request $req ) {
 
 function sourceweb_summary_rw_progress() {
 	global $wpdb;
-	$rows  = $wpdb->get_results( "SELECT ID, post_type, post_excerpt FROM {$wpdb->posts} WHERE post_status = 'publish' AND " . sourceweb_summary_types_sql( 'post_type' ) ); // phpcs:ignore WordPress.DB
+	$rows  = $wpdb->get_results( "SELECT ID, post_type, post_excerpt FROM {$wpdb->posts} WHERE post_status = 'publish' AND " . sourceweb_summary_types_sql( 'post_type' ) ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 	$count = array();
 	$list  = array();
 	foreach ( $rows as $r ) {
@@ -386,7 +386,7 @@ function sourceweb_summary_rw_post( WP_REST_Request $req ) {
 			'short' === $state ? $short_by + array( 'checked' => current_time( 'mysql' ) ) : array()
 		)
 	);
-	do_action( 'litespeed_purge_post', $id ); // this item only // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+	do_action( 'litespeed_purge_post', $id ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- another plugin's or core's hook, only invoked here (this item only)
 	return new WP_REST_Response(
 		array(
 			'id'          => $id,

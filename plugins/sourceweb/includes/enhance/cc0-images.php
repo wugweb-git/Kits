@@ -93,7 +93,7 @@ function sourceweb_cc0_run() {
 	}
 	set_transient( 'aw_cc0_lock', 1, 10 * MINUTE_IN_SECONDS );
 	if ( function_exists( 'set_time_limit' ) ) {
-		@set_time_limit( SOURCEWEB_CC0_BUDGET + 120 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		@set_time_limit( SOURCEWEB_CC0_BUDGET + 120 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, Squiz.PHP.DiscouragedFunctions.Discouraged -- long import/AI run
 	}
 	$start = time();
 	global $wpdb;
@@ -104,21 +104,23 @@ function sourceweb_cc0_run() {
 	// 0b. Linked publisher images stored in the Media Library (no hotlinking).
 	$local = sourceweb_source_localise_run( 25, 60 );
 	// 0c. Documents whose source is a PDF: the first page as their picture.
-	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND " . sourceweb_sql_in_types( 'p.post_type', sourceweb_types_with( array( 'library', 'news' ), array( 'post' ) ) ) . " AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) { // phpcs:ignore WordPress.DB
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL: the plugin's own clauses and a type list built by sourceweb_sql_in_types(), no request data; a bounded cron read
+	foreach ( $wpdb->get_col( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE '%.pdf%' WHERE p.post_status = 'publish' AND " . sourceweb_sql_in_types( 'p.post_type', sourceweb_types_with( array( 'library', 'news' ), array( 'post' ) ) ) . " AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} d WHERE d.post_id = p.ID AND d.meta_key IN ('aw_doc_preview','aw_file_id','aw_pdf_cover_tried','aw_cover_reused')) ORDER BY p.post_date DESC LIMIT 5" ) as $pid ) {
 		update_post_meta( $pid, 'aw_pdf_cover_tried', current_time( 'mysql', true ) );
 		sourceweb_source_pdf_cover( (int) $pid );
 	}
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 	// 1. Publisher images: unchecked first, then failures older than a week.
 	$week = gmdate( 'Y-m-d H:i:s', time() - WEEK_IN_SECONDS );
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '') // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " AND EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value <> '')
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} sf WHERE sf.post_id = p.ID AND sf.meta_key = 'aw_source_image_off' AND sf.meta_value = '1')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} c WHERE c.post_id = p.ID AND c.meta_key = 'aw_source_image_checked')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o JOIN {$wpdb->postmeta} c2 ON c2.post_id = o.post_id AND c2.meta_key = 'aw_source_image_checked'
 		              WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0' AND c2.meta_value < %s) )
 		ORDER BY p.post_date DESC LIMIT %d", $week, 60 ) ); // phpcs:ignore WordPress.DB
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$checked = 0;
 	foreach ( $ids as $id ) {
 		if ( time() - $start > 60 ) {
@@ -132,15 +134,15 @@ function sourceweb_cc0_run() {
 	}
 
 	// 2. Items with no usable picture of their own.
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
-	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . " // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses (sourceweb_cc0_items_sql() is a constant fragment); values go in as placeholders
+	$ids  = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID " . sourceweb_cc0_items_sql() . "
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value <> '' AND t.meta_value <> '0')
 		AND ( NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} si WHERE si.post_id = p.ID AND si.meta_key = 'aw_source_image' AND si.meta_value LIKE 'https://%%')
 		   OR EXISTS (SELECT 1 FROM {$wpdb->postmeta} o WHERE o.post_id = p.ID AND o.meta_key = 'aw_source_image_ok' AND o.meta_value = '0') )
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr WHERE tr.post_id = p.ID AND tr.meta_key = 'aw_cc0_tried' AND tr.meta_value > %s)
 		ORDER BY p.post_date DESC LIMIT %d", SOURCEWEB_CC0_MAX_ATTEMPTS, $week, SOURCEWEB_CC0_BATCH ) ); // phpcs:ignore WordPress.DB
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$done = 0;
 	$none = 0;
 	foreach ( $ids as $id ) {
@@ -156,8 +158,8 @@ function sourceweb_cc0_run() {
 	}
 	// 2b. Our own guides with no picture (owner, 18 Oct 2026): a CC0 photo of their own, used once site-wide. A guide
 	// linked to a campaign (campaign-links.php) is left to the campaign's own pictures (its motif), never a stock photo.
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
-	$own = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- needed here and bounded; see the surrounding code.
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses; values go in as placeholders
+	$own = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p
 		WHERE p.post_status = 'publish' AND p.post_type = 'post'
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} su WHERE su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value <> '')
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} t WHERE t.post_id = p.ID AND t.meta_key = '_thumbnail_id' AND t.meta_value NOT IN ('','0'))
@@ -165,7 +167,7 @@ function sourceweb_cc0_run() {
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} a WHERE a.post_id = p.ID AND a.meta_key = 'aw_cc0_attempts' AND a.meta_value >= %d)
 		AND NOT EXISTS (SELECT 1 FROM {$wpdb->postmeta} tr2 WHERE tr2.post_id = p.ID AND tr2.meta_key = 'aw_cc0_tried' AND tr2.meta_value > %s)
 		ORDER BY p.post_date DESC LIMIT 5", ( defined( 'KITS_CAMPAIGN_LINK' ) ? KITS_CAMPAIGN_LINK : ( function_exists( 'kits_taxonomy_current' ) ? kits_taxonomy_current( 'kits_campaign_link' ) : 'kits_campaign_link' ) ), SOURCEWEB_CC0_MAX_ATTEMPTS, $week ) ); // phpcs:ignore WordPress.DB
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	foreach ( $own as $id ) {
 		if ( time() - $start > SOURCEWEB_CC0_BUDGET || get_transient( 'aw_ov_pause' ) || ! sourceweb_ov_quota_left() ) {
 			break;
@@ -313,8 +315,8 @@ function sourceweb_source_og_image_as( $page, $ua ) {
  */
 function sourceweb_source_og_run( $limit = 40 ) {
 	global $wpdb;
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
-	$ids = $wpdb->get_col( // phpcs:ignore WordPress.DB
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses; values go in as placeholders
+	$ids = $wpdb->get_col(
 		$wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
 			JOIN {$wpdb->postmeta} su ON su.post_id = p.ID AND su.meta_key = 'aw_source_url' AND su.meta_value LIKE 'http%%'
@@ -328,7 +330,7 @@ function sourceweb_source_og_run( $limit = 40 ) {
 			$limit
 		)
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$stored = 0;
 	$start  = time();
 	foreach ( $ids as $id ) {
@@ -515,7 +517,7 @@ function sourceweb_source_localise( $post_id ) {
 function sourceweb_source_localise_run( $limit = 25, $budget = 60 ) {
 	global $wpdb;
 	$host = (string) wp_parse_url( home_url(), PHP_URL_HOST );
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$ids  = $wpdb->get_col( // phpcs:ignore WordPress.DB
 		$wpdb->prepare(
 			"SELECT p.ID FROM {$wpdb->posts} p
@@ -530,7 +532,7 @@ function sourceweb_source_localise_run( $limit = 25, $budget = 60 ) {
 			$limit
 		)
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	$stored = 0;
 	$start  = time();
 	foreach ( $ids as $id ) {
@@ -940,7 +942,7 @@ function sourceweb_cc0_sideload( $post_id, $x, $q, &$used ) {
 function sourceweb_cc0_counts() {
 	global $wpdb;
 	$from = sourceweb_cc0_items_sql();
-	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery -- fixed SQL and the plugin's own clauses; values go in as placeholders
+	// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- fixed SQL and the plugin's own clauses; values go in as placeholders
 	$row  = $wpdb->get_row( // phpcs:ignore WordPress.DB
 		"SELECT COUNT(*) total,
 			SUM( si.meta_value LIKE 'https://%' AND COALESCE(ok.meta_value,'') = '1' ) pub_ok,
@@ -963,7 +965,7 @@ function sourceweb_cc0_counts() {
 		),
 		ARRAY_A
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery
+	// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.LikeWildcardsInQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	return array_map( 'intval', (array) $row );
 }
 

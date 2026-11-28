@@ -229,7 +229,7 @@ add_action(
 			$cmp['diffs'][] = 'GET enrich/config: schema, priority or field_rules missing';
 		}
 		// The policy: sections_v2 holds the same lists as the v1 sections dict.
-		$policy = apply_filters( 'kits_sourcing_policy', array() );
+		$policy = apply_filters( 'sourceweb_sourcing_policy', array() );
 		if ( isset( $policy['config']['sections'] ) ) {
 			$v1 = (array) $policy['config']['sections'];
 			$ok = true;

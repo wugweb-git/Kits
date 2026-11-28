@@ -328,7 +328,7 @@ function sourceweb_routes_from_rows( array $rows, array $places ): array {
  * @param int    $words Most words.
  */
 function sourceweb_summary_short( string $text, int $words = 30 ): string {
-	$text = trim( preg_replace( '/\s+/', ' ', wp_strip_all_tags_safe( $text ) ) );
+	$text = trim( preg_replace( '/\s+/', ' ', sourceweb_strip_all_tags_safe( $text ) ) );
 	if ( '' === $text || $words < 1 ) {
 		return '';
 	}
@@ -350,7 +350,7 @@ function sourceweb_summary_short( string $text, int $words = 30 ): string {
 }
 
 /** strip_tags without WordPress. */
-function wp_strip_all_tags_safe( string $s ): string {
+function sourceweb_strip_all_tags_safe( string $s ): string {
 	return function_exists( 'wp_strip_all_tags' ) ? wp_strip_all_tags( $s ) : wp_strip_all_tags( $s );
 }
 

@@ -509,7 +509,7 @@ function directoryweb_listing_public_count() {
 function directoryweb_verified_count() {
 	$n = get_transient( 'aw_verified_count' );
 	if ( false === $n ) {
-		$n = count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_verified', 'meta_value' => '1', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array() ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery
+		$n = count( get_posts( array( 'post_type' => 'aw_listing', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'meta_key' => 'aw_verified', 'meta_value' => '1', 'post__not_in' => function_exists( 'kits_preview_only_ids' ) ? kits_preview_only_ids() : array() ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery, WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- the list is only the few preview-only ids; the result is cached for an hour
 		set_transient( 'aw_verified_count', $n, HOUR_IN_SECONDS );
 	}
 	return (int) $n;

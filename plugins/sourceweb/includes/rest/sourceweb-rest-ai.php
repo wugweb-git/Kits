@@ -327,7 +327,7 @@ function sourceweb_rest_ai_overview() {
  * @param WP_REST_Request $request Request.
  */
 function sourceweb_rest_ai_keys_add( WP_REST_Request $request ) {
-	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors -- as the form's save
+	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, Squiz.PHP.DiscouragedFunctions.Discouraged -- long AI run, as the form's save
 	$res = sourceweb_ai_keys_add(
 		sanitize_textarea_field( (string) $request['keys'] ),
 		sanitize_text_field( (string) $request['label'] ),

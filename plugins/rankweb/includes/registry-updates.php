@@ -5,8 +5,8 @@
  * registry/index.json on the project's GitHub Pages site (built from the GitHub releases); this file asks for it at most
  * every 12 hours (1 hour after a failed check), offers a newer stable release through WordPress's Updates screen, and
  * keeps the downloaded file only when its SHA-256 matches the registry. Off with KITS_NO_REGISTRY_UPDATES or the
- * kits_registry_updates filter returning false; pre-releases only with the kits_update_channel filter or option set to
- * "pre". When Kits Core is active its updater answers instead. Generated from tools/build/gen-registry-updates.py; change
+ * rankweb_registry_updates filter returning false; pre-releases only with the rankweb_update_channel filter or the
+ * kits_update_channel option set to "pre". When Kits Core is active its updater answers instead. Generated from tools/build/gen-registry-updates.py; change
  * the template, not this copy.
  *
  * @package rankweb
@@ -19,12 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 /** The registry address. */
 function rankweb_reg_url(): string {
 	$url = defined( 'KITS_REGISTRY_URL' ) ? (string) KITS_REGISTRY_URL : 'https://wugweb-git.github.io/Kits/registry/index.json';
-	return esc_url_raw( (string) apply_filters( 'kits_registry_url', $url ) );
+	return esc_url_raw( (string) apply_filters( 'rankweb_registry_url', $url ) );
 }
 
 /** Whether the registry is asked at all. */
 function rankweb_reg_enabled(): bool {
-	return ! defined( 'KITS_NO_REGISTRY_UPDATES' ) && (bool) apply_filters( 'kits_registry_updates', true );
+	return ! defined( 'KITS_NO_REGISTRY_UPDATES' ) && (bool) apply_filters( 'rankweb_registry_updates', true );
 }
 
 /**
@@ -77,7 +77,7 @@ function rankweb_reg_offer( string $installed ): ?array {
 	if ( ! is_array( $e ) || empty( $e['released'] ) || empty( $e['version'] ) ) {
 		return null;
 	}
-	$channel = (string) apply_filters( 'kits_update_channel', (string) get_option( 'kits_update_channel', 'stable' ) );
+	$channel = (string) apply_filters( 'rankweb_update_channel', (string) get_option( 'kits_update_channel', 'stable' ) );
 	if ( ! empty( $e['prerelease'] ) && 'pre' !== $channel ) {
 		return null;
 	}

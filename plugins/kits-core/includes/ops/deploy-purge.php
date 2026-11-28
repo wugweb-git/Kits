@@ -67,7 +67,7 @@ function kits_deploy_purge_if_new(): bool {
 	if ( function_exists( 'kits_site_check_after_deploy' ) ) {
 		kits_site_check_after_deploy(); // Check site runs again for the new commit (site-check.php).
 	}
-	do_action( 'litespeed_purge_all' ); // LiteSpeed Cache's own hook; nothing happens if it is not active. // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+	do_action( 'litespeed_purge_all' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- another plugin's or core's hook, only invoked here (LiteSpeed Cache's own hook; nothing happens if it is not active)
 	return true;
 }
 
@@ -78,7 +78,7 @@ add_action(
 			return; // no response to carry the purge header: leave the commit for a web request.
 		}
 		if ( isset( $_GET['aw_deploy_nudge'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-			do_action( 'litespeed_control_set_nocache', 'deploy nudge' ); // one-off URLs: keep them out of the cache. // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+			do_action( 'litespeed_control_set_nocache', 'deploy nudge' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- another plugin's or core's hook, only invoked here (one-off URLs: keep them out of the cache)
 		}
 		kits_deploy_purge_if_new();
 	},

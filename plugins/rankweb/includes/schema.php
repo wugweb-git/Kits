@@ -1241,7 +1241,7 @@ function rankweb_page_lists_schema_nodes( $page_id ) {
 	$skip  = rankweb_seo_preview_ids();
 	foreach ( $loops as $query ) {
 		$loop = (object) array( 'context' => array( 'query' => $query ) );
-		$vars = apply_filters( 'query_loop_block_query_vars', build_query_vars_from_query_block( $loop, 1 ), $loop, 1 ); // the same rules the list follows (open Opportunities only) // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+		$vars = apply_filters( 'query_loop_block_query_vars', build_query_vars_from_query_block( $loop, 1 ), $loop, 1 ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- another plugin's or core's hook, only invoked here (the same rules the list follows (open Opportunities only))
 		foreach ( get_posts( $vars + array( 'post_status' => 'publish', 'suppress_filters' => false ) ) as $p ) {
 			if ( isset( $seen[ $p->ID ] ) || rankweb_is_noindex_item( $p->ID ) || in_array( (int) $p->ID, $skip, true ) ) {
 				continue;

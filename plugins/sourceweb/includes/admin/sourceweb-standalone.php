@@ -146,7 +146,7 @@ add_action(
 		}
 		check_admin_referer( 'sourceweb_sa_source_add' );
 		$name  = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
-		$url   = isset( $_POST['url'] ) ? esc_url_raw( trim( wp_unslash( $_POST['url'] ) ), array( 'http', 'https' ) ) : '';
+		$url   = isset( $_POST['url'] ) ? esc_url_raw( trim( wp_unslash( $_POST['url'] ) ), array( 'http', 'https' ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- esc_url_raw() cleans it; trimmed first so a trailing space does not become %20
 		$type  = isset( $_POST['type'] ) ? sanitize_key( wp_unslash( $_POST['type'] ) ) : 'news';
 		$type  = isset( sourceweb_standalone_source_types()[ $type ] ) ? $type : 'news';
 		$cfg   = (array) sourceweb_sources_config();

@@ -345,7 +345,7 @@ function directoryweb_claim_native_form( int $listing ): string {
 	}
 	$err = '';
 	if ( 'error' === $sent && isset( $_GET['msg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
-		$err = '<p class="aw-claim-error" role="alert">' . esc_html( sanitize_text_field( rawurldecode( wp_unslash( $_GET['msg'] ) ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification
+		$err = '<p class="aw-claim-error" role="alert">' . esc_html( sanitize_text_field( rawurldecode( wp_unslash( $_GET['msg'] ) ) ) ) . '</p>'; // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized right after decoding (sanitize_text_field() first would strip the %xx the redirect adds), then escaped
 	}
 	$css = '.aw-claim-form label{display:block;margin:.6em 0}.aw-claim-form input[type=text],.aw-claim-form input[type=email],.aw-claim-form input[type=tel],.aw-claim-form input[type=url],.aw-claim-form select,.aw-claim-form textarea{display:block;width:100%;max-width:34em;box-sizing:border-box}.aw-claim-form fieldset{margin:1em 0;padding:.6em 1em}.aw-claim-svc{display:inline-block;margin-right:1em}.aw-claim-error{color:#b32d2e}';
 	wp_register_style( 'directoryweb-claim-form', false, array(), DIRECTORYWEB_VERSION );
@@ -402,7 +402,7 @@ function directoryweb_claim_handle_submit(): void {
 	if ( ! isset( $_POST['_dw_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_dw_nonce'] ) ), 'directoryweb_claim_submit_' . $listing ) ) {
 		directoryweb_claim_back( $listing, 'error', 'The form expired. Reload the page and try again.' );
 	}
-	if ( '' !== trim( (string) wp_unslash( $_POST['directoryweb_website_hp'] ?? '' ) ) ) {
+	if ( '' !== trim( (string) wp_unslash( $_POST['directoryweb_website_hp'] ?? '' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- the honeypot is only tested for being empty, never stored or printed
 		directoryweb_claim_back( $listing, 'sent' ); // a bot filled the hidden field: look successful, store nothing
 	}
 	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';

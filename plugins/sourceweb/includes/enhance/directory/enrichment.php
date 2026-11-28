@@ -1110,8 +1110,8 @@ function sourceweb_enrich_rest_config() {
 function sourceweb_enrich_progress() {
 	global $wpdb;
 	$is_l    = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) ); // 1=0 without a listing type
-	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p WHERE {$is_l} AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
-	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE {$is_l} AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB
+	$total   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p WHERE {$is_l} AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
+	$checked = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_enrich_checked' WHERE {$is_l} AND p.post_status = 'publish'" ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 	$pending = get_option( 'aw_enrich_db' ) ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM %i WHERE status = 'pending'", sourceweb_enrich_table() ) ) : 0; // phpcs:ignore WordPress.DB
 	return array( 'total' => $total, 'checked' => $checked, 'pending' => $pending );
 }
@@ -1135,7 +1135,7 @@ function sourceweb_enrich_rest_index( WP_REST_Request $req ) {
 		return array( 'items' => array(), 'state' => (string) $req['state'] );
 	}
 	$is_l = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) );
-	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE {$is_l} AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB
+	$ids = $wpdb->get_col( $wpdb->prepare( "SELECT p.ID FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'aw_state_code' AND m.meta_value = %d WHERE {$is_l} AND p.post_status = 'publish' ORDER BY p.ID LIMIT 1000 OFFSET %d", $code, ( $page - 1 ) * 1000 ) ); // phpcs:ignore WordPress.DB, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 	foreach ( $ids as $id ) {
 		$pl    = function_exists( 'directoryweb_listing_place' ) ? directoryweb_listing_place( (int) $id ) : array( '', '' );
 		$out[] = (array) apply_filters( 'sourceweb_enrich_index_item', array(

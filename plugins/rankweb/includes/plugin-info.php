@@ -1,10 +1,12 @@
 <?php
 /**
  * RankWeb on the Plugins screen: its icon and banner, the row links Getting Started and Documentation, and a "View details"
- * window with Description, Installation, FAQ, Changelog, Screenshots and Reviews, all read from the plugin's own
+ * link and window with Description, Installation, FAQ, Changelog, Screenshots and Reviews, all read from the plugin's own
  * readme.txt and assets/screenshot-N.png, through WordPress's own hooks for a plugin with an Update URI:
  * update_plugins_wugweb-git.github.io (WordPress 5.8+) and plugins_api. It reports the installed version, so WordPress never
- * offers an update from here; nothing is downloaded and no other site is asked. Generated from
+ * offers an update from here; nothing is downloaded and no other site is asked. WordPress prints "View details" in a row only
+ * when update data exists for the plugin; on a site that cannot reach WordPress.org it does not, so the plugin adds the
+ * missing "up to date" entry when it reads that data (never an update) and, as a fallback, the link itself, once. Generated from
  * tools/build/gen-plugin-info.py; change the template, not this copy.
  *
  * @package rankweb
@@ -16,16 +18,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // The direct build (with an Update URI header) supplies its own row and View details window. The WordPress.org build has none:
 // WordPress.org supplies the window from the readme and its assets, and updates the plugin itself.
-if ( is_admin() && '' !== trim( (string) get_file_data( defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : RANKWEB_DIR . 'rankweb.php', array( 'uri' => 'Update URI' ) )['uri'] ) ) {
+if ( is_admin() && rankweb_seo_plugin_direct() ) {
 	add_filter( 'update_plugins_wugweb-git.github.io', 'rankweb_seo_plugin_update_row', 10, 3 );
+	add_filter( 'site_transient_update_plugins', 'rankweb_seo_plugin_known', 10, 1 );
 	add_filter( 'plugins_api', 'rankweb_seo_plugin_details', 10, 3 );
 }
-add_filter( 'plugin_row_meta', 'rankweb_seo_plugin_row_meta', 10, 2 );
+add_filter( 'plugin_row_meta', 'rankweb_seo_plugin_row_meta', 10, 4 );
 add_action( 'admin_enqueue_scripts', fn( $hook ) => 'plugins.php' === $hook ? add_thickbox() : null );
 
 /** The plugin's main file. */
 function rankweb_seo_plugin_file(): string {
 	return defined( 'RANKWEB_FILE' ) ? RANKWEB_FILE : RANKWEB_DIR . 'rankweb.php';
+}
+
+/** True for the direct build (it has an Update URI header); the WordPress.org build has none and gets none of this. */
+function rankweb_seo_plugin_direct(): bool {
+	static $direct = null;
+	if ( null === $direct ) {
+		$direct = '' !== trim( (string) get_file_data( rankweb_seo_plugin_file(), array( 'uri' => 'Update URI' ) )['uri'] );
+	}
+	return $direct;
 }
 
 /** The product page, which is also the plugin's documentation (built from the repository by tools/release). */
@@ -36,13 +48,34 @@ function rankweb_seo_plugin_docs_url(): string {
 /**
  * Adds Getting Started and Documentation after the "Version | By | View details" WordPress prints itself.
  *
- * @param array<int, string> $links Existing row meta links.
- * @param string             $file  Plugin file basename.
+ * WordPress prints "View details" itself only when update data exists for the plugin. When it did not (no entry, for
+ * example a site that cannot reach WordPress.org), the same link is added here, so the row never has two or none.
+ *
+ * @param array<int, string> $links       Existing row meta links.
+ * @param string             $file        Plugin file basename.
+ * @param array              $plugin_data The plugin's header data.
  * @return array<int, string>
  */
-function rankweb_seo_plugin_row_meta( array $links, string $file ): array {
+function rankweb_seo_plugin_row_meta( array $links, string $file, $plugin_data = array() ): array {
 	if ( plugin_basename( rankweb_seo_plugin_file() ) !== $file ) {
 		return $links;
+	}
+	$has_details = false;
+	foreach ( $links as $link ) {
+		if ( false !== strpos( (string) $link, 'open-plugin-details-modal' ) ) {
+			$has_details = true;
+			break;
+		}
+	}
+	if ( ! $has_details && rankweb_seo_plugin_direct() ) {
+		$name    = (string) ( is_array( $plugin_data ) && ! empty( $plugin_data['Name'] ) ? $plugin_data['Name'] : 'RankWeb' );
+		$links[] = sprintf(
+			'<a href="%s" class="thickbox open-plugin-details-modal" aria-label="%s" data-title="%s">%s</a>',
+			esc_url( self_admin_url( 'plugin-install.php?tab=plugin-information&plugin=rankweb&TB_iframe=true&width=600&height=550' ) ),
+			esc_attr( sprintf( /* translators: %s: plugin name. */ __( 'More information about %s' ), $name ) ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own string, so the link reads exactly like core's.
+			esc_attr( $name ),
+			esc_html__( 'View details' ) // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own string.
+		);
 	}
 	$page  = (string) ( defined( 'AW_SEO_MENU' ) ? AW_SEO_MENU : 'rankweb' );
 	$start = menu_page_url( $page, false );
@@ -101,6 +134,44 @@ function rankweb_seo_plugin_update_row( $update, $plugin_data, $plugin_file ) {
 		),
 		rankweb_seo_plugin_art()
 	);
+}
+
+/**
+ * Makes WordPress's own plugin data know this plugin as "up to date" when it knows nothing about it (no update check
+ * reached an answer, so there is no entry). Only the "no update" list is touched, and only for a plugin in neither list:
+ * an update WordPress or the registry reports is left alone, and none is ever offered from here. WordPress then prints
+ * "View details" itself and shows the Auto-updates column. Nothing is stored: the entry is added as the data is read.
+ *
+ * @param mixed $value The update_plugins site transient.
+ * @return mixed
+ */
+function rankweb_seo_plugin_known( $value ) {
+	if ( ! is_object( $value ) ) {
+		return $value;
+	}
+	$file = plugin_basename( rankweb_seo_plugin_file() );
+	if ( isset( $value->response[ $file ] ) || isset( $value->no_update[ $file ] ) ) {
+		return $value;
+	}
+	if ( ! function_exists( 'get_plugin_data' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+	}
+	$head = get_plugin_data( rankweb_seo_plugin_file(), false, false );
+	if ( empty( $head['Version'] ) ) {
+		return $value;
+	}
+	$entry = (object) array_merge(
+		(array) rankweb_seo_plugin_update_row( false, $head, $file ),
+		array(
+			'plugin'      => $file,
+			'new_version' => (string) $head['Version'],
+		)
+	);
+	if ( ! isset( $value->no_update ) || ! is_array( $value->no_update ) ) {
+		$value->no_update = array();
+	}
+	$value->no_update[ $file ] = $entry;
+	return $value;
 }
 
 /**

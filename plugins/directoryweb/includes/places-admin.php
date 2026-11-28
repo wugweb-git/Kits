@@ -90,7 +90,7 @@ add_action(
 		$state    = absint( $_POST['aw_state_code'] ?? 0 );
 		$district = absint( $_POST['aw_district_code'] ?? 0 );
 		$places   = $state ? array( array( $state, $district ) ) : array();
-		$more_raw = isset( $_POST['aw_place_more'] ) ? (array) wp_unslash( $_POST['aw_place_more'] ) : array();
+		$more_raw = isset( $_POST['aw_place_more'] ) ? array_map( 'sanitize_text_field', (array) wp_unslash( $_POST['aw_place_more'] ) ) : array();
 		foreach ( $more_raw as $more ) {
 			$more  = sanitize_text_field( $more );
 			$parts = array_map( 'absint', explode( ':', (string) $more ) );

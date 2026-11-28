@@ -468,7 +468,7 @@ function sourceweb_ai_check( array $row ): array {
 
 /** Test every saved key (owner, 12 Oct 2026): twice a day by WP-Cron, so the list and the workers only use keys that answer. */
 function sourceweb_ai_check_all( bool $new_only = false ): void {
-	@set_time_limit( 1200 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	@set_time_limit( 1200 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors, Squiz.PHP.DiscouragedFunctions.Discouraged -- long import/AI run
 	$checked = array();
 	foreach ( sourceweb_ai_rows() as $r ) {
 		if ( ! $new_only || 'unchecked' === $r['status'] || ! empty( $r['recheck'] ) ) { // recheck: "Check again" on the list

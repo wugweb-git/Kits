@@ -320,7 +320,7 @@ function sourceweb_extra_parts( string $screen ): array {
 }
 
 /**
- * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: sourceweb_sources_edit_form()'s output, so Add Feed and Update post to the same admin-post handler (kits_sourcing_save_feeds),
+ * The feed form (Sources &feed=<id|new>, with &type= and &host=) as Kits page parts: sourceweb_sources_edit_form()'s output, so Add Feed and Update post to the same admin-post handler (sourceweb_sourcing_save_feeds),
  * with its nonce, and come back to the screen the form was opened from. Empty without a feed in the address.
  *
  * @return array[]

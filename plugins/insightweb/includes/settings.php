@@ -81,14 +81,16 @@ function insightweb_si_settings_saved(): array {
 	return (array) ( $all['search-insights'] ?? array() );
 }
 
-// The constants, from the saved numbers or the defaults.
-$insightweb_si_saved = insightweb_si_settings_saved();
-foreach ( insightweb_si_setting_fields() as $insightweb_si_const => $insightweb_si_field ) {
-	if ( ! defined( $insightweb_si_const ) ) {
-		define( $insightweb_si_const, array_key_exists( $insightweb_si_const, $insightweb_si_saved ) ? $insightweb_si_saved[ $insightweb_si_const ] : $insightweb_si_field['default'] );
+// The constants, from the saved numbers or the defaults (in a function, so no loop variable is left in the global scope).
+function insightweb_si_define_constants(): void {
+	$saved = insightweb_si_settings_saved();
+	foreach ( insightweb_si_setting_fields() as $name => $field ) {
+		if ( ! defined( $name ) ) {
+			define( $name, array_key_exists( $name, $saved ) ? $saved[ $name ] : $field['default'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- the names come from the fixed list in insightweb_si_setting_fields() (the AW_SI_ settings constants other code reads).
+		}
 	}
 }
-unset( $insightweb_si_const, $insightweb_si_field, $insightweb_si_saved );
+insightweb_si_define_constants();
 
 /** Whether the current request may use the Search Insights APIs: administrators, or the workers' user (sourceweb_worker). */
 function insightweb_si_api_allowed() {

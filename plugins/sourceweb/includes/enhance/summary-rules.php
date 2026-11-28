@@ -163,7 +163,7 @@ function sourceweb_summary_names( $text, $phrase ) {
 function sourceweb_summary_entity_page( $name ) {
 	global $wpdb;
 	$in  = sourceweb_sql_in_types( 'post_type', sourceweb_types( array( 'library', 'listing' ) ) ); // 1=0 when the site has neither
-	$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID, post_type FROM {$wpdb->posts} WHERE post_status = 'publish' AND {$in} AND (post_title = %s OR post_title = %s OR post_title LIKE %s OR post_title LIKE %s OR post_title LIKE %s) ORDER BY post_type = %s DESC, LENGTH(post_title) ASC LIMIT 1", $name, 'The ' . $name, $wpdb->esc_like( $name ) . ' (%', 'The ' . $wpdb->esc_like( $name ) . ' (%', '% - ' . $wpdb->esc_like( $name ), sourceweb_type( 'library' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$row = $wpdb->get_row( $wpdb->prepare( "SELECT ID, post_type FROM {$wpdb->posts} WHERE post_status = 'publish' AND {$in} AND (post_title = %s OR post_title = %s OR post_title LIKE %s OR post_title LIKE %s OR post_title LIKE %s) ORDER BY post_type = %s DESC, LENGTH(post_title) ASC LIMIT 1", $name, 'The ' . $name, $wpdb->esc_like( $name ) . ' (%', 'The ' . $wpdb->esc_like( $name ) . ' (%', '% - ' . $wpdb->esc_like( $name ), sourceweb_type( 'library' ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 	return $row ? array( $row->post_type, (int) $row->ID ) : null;
 }
 

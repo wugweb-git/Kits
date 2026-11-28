@@ -267,7 +267,7 @@ function insightweb_si_gsc_days( ?DateTimeImmutable $today = null, int $per_run 
  * @return array Report: days, rows, truncated, error, per-day row counts.
  */
 function insightweb_si_gsc_run( array $args = array() ): array {
-	@set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	@set_time_limit( 600 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Squiz.PHP.DiscouragedFunctions.Discouraged -- long import/AI run
 	$days   = $args['days'] ?? insightweb_si_gsc_days();
 	$dry    = ! empty( $args['dry'] );
 	$report = insightweb_si_with_module(

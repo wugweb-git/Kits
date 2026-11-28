@@ -219,7 +219,7 @@ add_action(
 
 // The workers learn the allow list from the sourcing policy (whether or not they use the site's lists).
 add_filter(
-	'kits_sourcing_policy',
+	'sourceweb_sourcing_policy',
 	function ( $data ) {
 		$data['relay_hosts'] = sourceweb_relay_hosts();
 		return $data;

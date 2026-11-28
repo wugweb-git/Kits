@@ -141,7 +141,7 @@ function sourceweb_relevance_sections() {
 function sourceweb_relevance_directory() {
 	global $wpdb;
 	$is_l = sourceweb_sql_in_types( 'p.post_type', array( sourceweb_type( 'listing' ) ) ); // 1=0 without a listing type
-	return $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	return $wpdb->get_col( // phpcs:ignore WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 		"SELECT DISTINCT p.post_title FROM {$wpdb->posts} p
 		 JOIN {$wpdb->term_relationships} tr ON tr.object_id = p.ID
 		 JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'post_tag'

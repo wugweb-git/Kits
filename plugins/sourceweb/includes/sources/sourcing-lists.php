@@ -196,7 +196,7 @@ function sourceweb_sources_feed_op( $op, array $ids ) {
 
 // The Add New / Edit Feed form's save (admin_post_aw_sourcing, tab feeds).
 add_action(
-	'kits_sourcing_save_feeds',
+	'sourceweb_sourcing_save_feeds',
 	function () {
 		$c    = sourceweb_sources_config();
 		$rows = (array) wp_unslash( $_POST['src'] ?? array() ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- checked by the Kits save handler; each field is sanitized below
@@ -358,7 +358,7 @@ add_filter(
  * sources_v2, keywords_v2, and sections_v2 from rules.php). The v1 code stays for a rollback.
  */
 add_filter(
-	'kits_sourcing_policy',
+	'sourceweb_sourcing_policy',
 	function ( $data ) {
 		$c = sourceweb_sources_config();
 		if ( empty( $c['live'] ) ) {

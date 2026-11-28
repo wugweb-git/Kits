@@ -331,7 +331,7 @@ WP_CLI::add_command(
 			$cmp['diffs'][] = 'aw_sources (other than sources) changed: ' . implode( ', ', array_keys( array_filter( array_unique( array_merge( array_keys( $rest_old ), array_keys( $rest_now ) ) ), fn( $k ) => ( $rest_old[ $k ] ?? null ) !== ( $rest_now[ $k ] ?? null ) ) ) );
 		}
 		// The policy: sources_v2 is the v1 list plus host, relay, read_by and check; relay_hosts is the switch list.
-		$policy = apply_filters( 'kits_sourcing_policy', array() );
+		$policy = apply_filters( 'sourceweb_sourcing_policy', array() );
 		if ( isset( $policy['config']['sources'] ) ) {
 			$v1 = (array) $policy['config']['sources'];
 			$v2 = (array) ( $policy['config']['sources_v2'] ?? array() );

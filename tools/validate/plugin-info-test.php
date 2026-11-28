@@ -24,7 +24,9 @@ function plugin_basename( $f ) { return basename( dirname( $f ) ) . '/' . basena
 function plugins_url( $p, $f ) { return 'https://example.test/wp-content/plugins/' . basename( dirname( $f ) ) . '/' . $p; }
 function menu_page_url( $s, $e ) { return 'https://example.test/wp-admin/admin.php?page=' . $s; }
 function admin_url( $p ) { return 'https://example.test/wp-admin/' . $p; }
-function esc_url( $u ) { return $u; }
+function self_admin_url( $p ) { return 'https://example.test/wp-admin/' . $p; }
+function __( $s ) { return $s; }
+function esc_url( $u ) { return str_replace( '&', '&#038;', $u ); }
 function esc_html( $s ) { return htmlspecialchars( (string) $s ); }
 function esc_attr( $s ) { return htmlspecialchars( (string) $s ); }
 function esc_html__( $s ) { return htmlspecialchars( $s ); }
@@ -43,13 +45,45 @@ require "$root/$rel";
 $fail = 0;
 $ok = function ( $n, $c ) use ( &$fail, $slug ) { if ( ! $c ) { $fail++; echo "FAIL: $slug: $n\n"; } };
 
-$ok( 'the three hooks are added', isset( $hooks['plugins_api'], $hooks['plugin_row_meta'], $hooks['update_plugins_wugweb-git.github.io'] ) );
+$ok( 'the hooks are added', isset( $hooks['plugins_api'], $hooks['plugin_row_meta'], $hooks['update_plugins_wugweb-git.github.io'], $hooks['site_transient_update_plugins'] ) );
 $links = $p . '_row_meta';
-$out   = $links( array( 'x' ), plugin_basename( MAIN_FILE ) );
-$ok( 'the row gets exactly Getting Started and Documentation', 3 === count( $out ) && false !== strpos( $out[1], 'Getting Started' ) && false !== strpos( $out[2], 'Documentation' ) );
-$ok( 'Getting Started opens an admin page', false !== strpos( $out[1], 'admin.php?page=' ) );
-$ok( 'Documentation is the product page', false !== strpos( $out[2], "https://wugweb-git.github.io/Kits/plugins/$slug/" ) );
+$base  = plugin_basename( MAIN_FILE );
+$count = function ( array $l ) { $n = 0; foreach ( $l as $x ) { $n += false !== strpos( $x, 'open-plugin-details-modal' ) ? 1 : 0; } return $n; };
+$core  = '<a href="https://example.test/wp-admin/plugin-install.php?tab=plugin-information&#038;plugin=' . $slug . '&#038;TB_iframe=true&#038;width=600&#038;height=550" class="thickbox open-plugin-details-modal">View details</a>';
+
+// No update data: core printed no View details, so the plugin adds exactly one, with core's markup.
+$out = $links( array( 'x' ), $base, array( 'Name' => 'My Name' ) );
+$ok( 'without update data the row gets View details once, Getting Started and Documentation', 4 === count( $out ) && 1 === $count( $out ) );
+$vd = implode( '', array_filter( $out, fn( $x ) => false !== strpos( $x, 'open-plugin-details-modal' ) ) );
+$ok( 'View details has core\'s classes, address, label and title', false !== strpos( $vd, 'class="thickbox open-plugin-details-modal"' )
+	&& false !== strpos( $vd, 'plugin-install.php?tab=plugin-information&#038;plugin=' . $slug . '&#038;TB_iframe=true&#038;width=600&#038;height=550' )
+	&& false !== strpos( $vd, 'aria-label="More information about My Name"' ) && false !== strpos( $vd, 'data-title="My Name"' ) && false !== strpos( $vd, '>View details</a>' ) );
+$gs = array_values( array_filter( $out, fn( $x ) => false !== strpos( $x, 'Getting Started' ) ) );
+$dc = array_values( array_filter( $out, fn( $x ) => false !== strpos( $x, 'Documentation' ) ) );
+$ok( 'Getting Started opens an admin page', 1 === count( $gs ) && false !== strpos( $gs[0], 'admin.php?page=' ) );
+$ok( 'Documentation is the product page', 1 === count( $dc ) && false !== strpos( $dc[0], "https://wugweb-git.github.io/Kits/plugins/$slug/" ) );
+// Core already printed it (update data exists): no second link.
+$out = $links( array( 'x', $core ), $base, array( 'Name' => 'X' ) );
+$ok( 'with core\'s own View details there is still exactly one', 4 === count( $out ) && 1 === $count( $out ) );
 $ok( 'another plugin\'s row is left alone', array( 'x' ) === $links( array( 'x' ), 'other/other.php' ) );
+
+// The update data: an "up to date" entry is added only when the plugin is in neither list.
+$known = $p . '_known';
+$ver   = get_plugin_data( MAIN_FILE )['Version'];
+$mk    = fn( $r, $n ) => (object) array( 'last_checked' => 1, 'response' => $r, 'no_update' => $n, 'checked' => array() );
+$v     = $known( $mk( array(), array() ) );
+$e     = $v->no_update[ $base ] ?? null;
+$ok( 'an entry is added with the plugin\'s own details', is_object( $e ) && $slug === $e->slug && $base === $e->plugin && $ver === $e->new_version && $ver === $e->version && '' === $e->package && '' !== $e->url );
+$ok( 'it is never an update', array() === $v->response );
+$r = array( $base => (object) array( 'new_version' => '99.0.0', 'slug' => $slug, 'package' => 'https://example.test/x.zip' ) );
+$v = $known( $mk( $r, array() ) );
+$ok( 'an update that exists is left untouched and gets no entry beside it', $v->response === $r && ! isset( $v->no_update[ $base ] ) );
+$n = array( $base => (object) array( 'slug' => $slug, 'new_version' => 'from-core' ) );
+$v = $known( $mk( array(), $n ) );
+$ok( 'an existing no_update entry is kept', $v->no_update === $n );
+$ok( 'nothing to extend (no transient) is returned as it was', false === $known( false ) );
+$v = $known( $mk( array(), array() ) );
+$ok( 'with the entry core prints View details itself and the plugin adds none', 1 === $count( $links( array( 'x', isset( $v->no_update[ $base ] ) ? $core : '' ), $base ) ) );
 
 $details = $p . '_details';
 $api     = $details( false, 'plugin_information', (object) array( 'slug' => $slug ) );
@@ -65,6 +99,8 @@ if ( $shots ) {
 	$ok( 'the Screenshots tab shows the screenshot files', ! empty( $s['screenshots'] ) && substr_count( $s['screenshots'], '<img' ) <= $shots );
 }
 $ok( 'the version is the header version', preg_match( '/^[ \t\/*#@]*Version:\s*' . preg_quote( $api->version, '/' ) . '\s*$/mi', file_get_contents( MAIN_FILE ) ) === 1 );
+$tested = preg_match( '/^Tested up to:\s*(\S+)/mi', $readme, $tm ) ? $tm[1] : '';
+$ok( 'tested is the readme Tested up to (' . $api->tested . ')', '' !== $tested && $tested === $api->tested );
 $ok( 'the author is Wugweb', false !== strpos( $api->author, 'Wugweb' ) );
 echo $fail ? "$slug plugin-info: $fail failed\n" : "$slug: plugin info ok\n";
 exit( $fail ? 1 : 0 );

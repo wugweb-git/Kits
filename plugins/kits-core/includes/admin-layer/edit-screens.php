@@ -235,7 +235,7 @@ function kits_edit_screen_read_boxes( array &$out ): void {
 			register_and_do_post_meta_boxes( $dummy ); // core boxes + add_meta_boxes + add_meta_boxes_{type} + do_meta_boxes.
 		} else {
 			do_action( 'add_meta_boxes', $type, $dummy );
-			do_action( "add_meta_boxes_{$type}", $dummy );
+			do_action( "add_meta_boxes_{$type}", $dummy ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core's own hook, only invoked here
 		}
 		$out[ $type ] = array();
 		foreach ( (array) ( $wp_meta_boxes[ $type ] ?? array() ) as $ctx => $prios ) {

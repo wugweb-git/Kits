@@ -321,7 +321,7 @@ function sourceweb_sourcing_policy_payload() {
 		'publishers' => array( 'blocked' => $by( 'block' ), 'allowed' => $by( 'allow' ), 'gnews_allow_only' => ! empty( $rel['gnews_allow_only'] ) ),
 		'relevance'  => array( 'enabled' => ! empty( $rel['enabled'] ), 'strong' => $rel['strong'] ?? array(), 'animal' => $rel['animal'] ?? array(), 'context' => $rel['context'] ?? array(), 'exclude' => $rel['exclude'] ?? array() ), // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- needed here and bounded; see the surrounding code.
 	);
-	$data = apply_filters( 'kits_sourcing_policy', $data ); // a site adds its source lists here // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+	$data = apply_filters( 'sourceweb_sourcing_policy', $data ); // a site adds its source lists here
 	if ( sourceweb_sourcing_phase() < 4 || ! function_exists( 'sourceweb_retire_policy' ) ) {
 		return $data;
 	}
@@ -393,7 +393,7 @@ function sourceweb_sourcing_shorts_apply( array $pubs, array $shorts ) {
 
 /**
  * The feed form (Sources &feed=<id|new>, sourceweb_feed_parts()) posts here with tab feeds; the tab's own save hook
- * (kits_sourcing_save_feeds, sourcing-lists.php) saves and logs it, then the browser goes back to the screen it came from.
+ * (sourceweb_sourcing_save_feeds, sourcing-lists.php) saves and logs it, then the browser goes back to the screen it came from.
  */
 add_action(
 	'admin_post_aw_sourcing',
@@ -402,10 +402,10 @@ add_action(
 			wp_die( 'Not allowed.', 403 );
 		}
 		$tab = sanitize_key( $_POST['tab'] ?? '' );
-		if ( ! has_action( 'kits_sourcing_save_' . $tab ) ) { // a form from a screen that no longer exists: say so, never "Saved"
+		if ( ! has_action( 'sourceweb_sourcing_save_' . $tab ) ) { // a form from a screen that no longer exists: say so, never "Saved"
 			wp_die( 'Nothing saved: this form is from an older version of the Sourcing screens. Open the screen again and make the change there.', 'Sourcing', array( 'response' => 409, 'back_link' => true ) );
 		}
-		do_action( 'kits_sourcing_save_' . $tab );
+		do_action( 'sourceweb_sourcing_save_' . $tab );
 		$from = wp_validate_redirect( esc_url_raw( wp_unslash( $_POST['src_back'] ?? '' ) ), '' );
 		wp_safe_redirect( add_query_arg( 'updated', 1, '' !== $from ? $from : admin_url( 'admin.php?page=aw-sourcing&tab=sources&view=feeds' ) ) );
 		exit;

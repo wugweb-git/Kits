@@ -83,8 +83,9 @@ function rankweb_cache_request(): array {
 	return array(
 		'method'  => (string) ( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ?? '' ) ) ),
 		'cookies' => array_keys( (array) $_COOKIE ),
-		'query'   => (string) ( $_SERVER['QUERY_STRING'] ?? '' ),
-		'path'    => (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH ),
+		// esc_url_raw() keeps the percent-encoding (sanitize_text_field() would drop it, and two different paths would share one cached copy).
+		'query'   => (string) substr( esc_url_raw( '?' . wp_unslash( $_SERVER['QUERY_STRING'] ?? '' ) ), 1 ),
+		'path'    => (string) wp_parse_url( esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ), PHP_URL_PATH ),
 	);
 }
 
@@ -99,7 +100,7 @@ add_action(
 		if ( ! RankWeb_Page_Cache::cacheable_request( $req ) ) {
 			return;
 		}
-		$file = rankweb_cache_dir() . RankWeb_Page_Cache::file_name( (string) ( $_SERVER['HTTP_HOST'] ?? '' ), $req['path'] );
+		$file = rankweb_cache_dir() . RankWeb_Page_Cache::file_name( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), $req['path'] );
 		if ( is_readable( $file ) && RankWeb_Page_Cache::fresh( (int) filemtime( $file ), (int) ( defined( 'RANKWEB_CACHE_HOURS' ) ? RANKWEB_CACHE_HOURS : 12 ), time() ) ) {
 			header( 'X-RankWeb-Cache: HIT' );
 			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
@@ -188,7 +189,7 @@ function rankweb_pipeline_output( $html ) {
 				file_put_contents( $dir . 'index.html', '' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 			}
 			$req = rankweb_cache_request();
-			file_put_contents( $dir . RankWeb_Page_Cache::file_name( (string) ( $_SERVER['HTTP_HOST'] ?? '' ), $req['path'] ), $page . "\n<!-- Cached by RankWeb " . gmdate( 'c' ) . " -->", LOCK_EX ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+			file_put_contents( $dir . RankWeb_Page_Cache::file_name( sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ?? '' ) ), $req['path'] ), $page . "\n<!-- Cached by RankWeb " . gmdate( 'c' ) . " -->", LOCK_EX ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 		}
 	}
 	return $page;

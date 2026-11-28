@@ -294,7 +294,7 @@ function sourceweb_enrich_unmerge( $from, $u ) {
 function sourceweb_enrich_rest_cleanup( WP_REST_Request $req ) {
 	global $wpdb;
 	$page  = max( 1, (int) ( $req['page'] ?? 1 ) );
-	$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE " . sourceweb_sql_in_types( 'post_type', array( sourceweb_type( 'listing' ) ) ) . " AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- the type comes from sourceweb_type() and is escaped
+	$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE " . sourceweb_sql_in_types( 'post_type', array( sourceweb_type( 'listing' ) ) ) . " AND post_status = 'publish'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the type comes from sourceweb_type() and is escaped
 	$ids   = ! sourceweb_type( 'listing' ) ? array() : get_posts( array( 'post_type' => sourceweb_type( 'listing' ), 'post_status' => 'publish', 'numberposts' => 1000, 'offset' => ( $page - 1 ) * 1000, 'orderby' => 'ID', 'order' => 'ASC', 'fields' => 'ids' ) );
 	update_meta_cache( 'post', $ids );
 	$m     = fn( $id, $k ) => (string) get_post_meta( $id, $k, true );

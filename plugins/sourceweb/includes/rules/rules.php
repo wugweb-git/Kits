@@ -272,7 +272,7 @@ function sourceweb_rules_sections_v2() {
 }
 
 add_filter(
-	'kits_sourcing_policy',
+	'sourceweb_sourcing_policy',
 	function ( $data ) {
 		if ( ! sourceweb_rules_live() || ! isset( $data['config'] ) || ! is_array( $data['config'] ) ) {
 			return $data;

@@ -284,7 +284,7 @@ function insightweb_si_bing_run( array $args = array() ): array {
 	if ( ! $dry && get_option( 'aw_si_off' ) ) { // After Delete data nothing is written until Search Insights is switched back on.
 		return array( 'error' => __( 'Search Insights is off (its data was deleted), so Bing Webmaster did not run.', 'insightweb' ) );
 	}
-	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	@set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, Squiz.PHP.DiscouragedFunctions.Discouraged -- long import/AI run
 	if ( ! $dry ) {
 		insightweb_si_install();
 		insightweb_si_run_start( 'bing' );

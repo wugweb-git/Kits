@@ -376,16 +376,18 @@ function rankweb_seo_files_off(): array {
 	return $off;
 }
 
-// The constants, from the saved settings or the defaults.
-foreach ( rankweb_seo_modules() as $rankweb_seo_key => $rankweb_seo_mod ) {
-	$rankweb_seo_saved = rankweb_seo_saved()[ $rankweb_seo_key ] ?? array();
-	foreach ( $rankweb_seo_mod['fields'] as $rankweb_seo_const => $rankweb_seo_field ) {
-		if ( ! defined( $rankweb_seo_const ) ) {
-			define( $rankweb_seo_const, array_key_exists( $rankweb_seo_const, $rankweb_seo_saved ) ? $rankweb_seo_saved[ $rankweb_seo_const ] : $rankweb_seo_field['default'] );
+// The constants, from the saved settings or the defaults (in a function, so no loop variable is left in the global scope).
+function rankweb_seo_define_constants(): void {
+	foreach ( rankweb_seo_modules() as $key => $mod ) {
+		$saved = rankweb_seo_saved()[ $key ] ?? array();
+		foreach ( $mod['fields'] as $name => $field ) {
+			if ( ! defined( $name ) ) {
+				define( $name, array_key_exists( $name, $saved ) ? $saved[ $name ] : $field['default'] ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.VariableConstantNameFound -- the names come from the fixed field lists in rankweb_seo_modules() (the AW_ settings constants other code reads).
+			}
 		}
 	}
 }
-unset( $rankweb_seo_key, $rankweb_seo_mod, $rankweb_seo_saved, $rankweb_seo_const, $rankweb_seo_field );
+rankweb_seo_define_constants();
 
 /* ---------- Text in the form and back ---------- */
 

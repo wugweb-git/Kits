@@ -498,7 +498,7 @@ function insightweb_si_sync_roles(): array {
 
 	// Listings: mark existing records (from Search Console or the map) whose phrase is a listing's name.
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- the type list is built by *_sql_in_types()/*_sql_list(), which esc_sql() every slug
-	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE " . insightweb_sql_in_types( 'p.post_type', insightweb_types( array( 'listing' ) ) ) . " AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$names = $wpdb->get_col( "SELECT m.meta_value FROM {$wpdb->posts} p JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = 'rank_math_focus_keyword' WHERE " . insightweb_sql_in_types( 'p.post_type', insightweb_types( array( 'listing' ) ) ) . " AND p.post_status = 'publish' AND m.meta_value <> ''" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, PluginCheck.Security.DirectDB.UnescapedDBParameter -- the SQL is built from the plugin's own fixed lists (types escaped by esc_sql()), never request data; a one-off admin/cron read
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	$read  = '' === $wpdb->last_error; // the flags are rebuilt only from a list that was read
 	$map   = insightweb_si_kw_map();

@@ -118,7 +118,7 @@ function directoryweb_place_intro_store( $key, array $entry ): bool {
 	}
 	ksort( $all, SORT_NATURAL );
 	update_option( AW_PLACE_INTROS, $all, false ); // read only on place pages and this screen
-	do_action( 'litespeed_purge_url', directoryweb_directory_url( directoryweb_place_intro_place_of( $key )->slug ) ); // the page shows the change now, not when its cached copy runs out // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- a hook of WordPress core, another plugin, or the shared Kits set
+	do_action( 'litespeed_purge_url', directoryweb_directory_url( directoryweb_place_intro_place_of( $key )->slug ) ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- another plugin's or core's hook, only invoked here (the page shows the change now, not when its cached copy runs out)
 	return true;
 }
 

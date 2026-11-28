@@ -72,7 +72,7 @@ function rankweb_transport_payload(): array {
 			$n = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(DISTINCT m.post_id) FROM {$wpdb->postmeta} m JOIN {$wpdb->posts} p ON p.ID = m.post_id WHERE m.meta_key IN ($k) AND m.meta_value <> '' AND p.post_type IN ($in)", array_merge( $keys, $types ) ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- counts for the screen; placeholders built from fixed lists
 		}
 		if ( 'aioseo' === $key && '' !== rankweb_transport_aioseo_table() ) {
-			$n += (int) $wpdb->get_var( "SELECT COUNT(*) FROM " . rankweb_transport_aioseo_table() ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- the table name is built from the prefix
+			$n += (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', rankweb_transport_aioseo_table() ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counts for the screen; the table name is built from the prefix
 		}
 		$out[] = array( 'key' => $key, 'name' => $name, 'items' => $n );
 	}
@@ -165,8 +165,8 @@ function rankweb_transport_run( string $source, bool $apply, int $after = 0, str
 	}
 	$rows = array();
 	if ( 'aioseo' === $source && $ids && '' !== rankweb_transport_aioseo_table() ) {
-		$in   = implode( ',', array_map( 'intval', $ids ) );
-		$res  = (array) $wpdb->get_results( 'SELECT post_id, title, description, keyphrases, robots_default, robots_noindex, robots_nofollow, robots_noarchive, robots_nosnippet, robots_max_snippet FROM ' . rankweb_transport_aioseo_table() . " WHERE post_id IN ($in)", ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.NotPrepared -- ids are integers, the table is another plugin's
+		$in   = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+		$res  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT post_id, title, description, keyphrases, robots_default, robots_noindex, robots_nofollow, robots_noarchive, robots_nosnippet, robots_max_snippet FROM %i WHERE post_id IN ($in)", array_merge( array( rankweb_transport_aioseo_table() ), array_map( 'intval', $ids ) ) ), ARRAY_A ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- the table is another plugin's; one %d per id
 		foreach ( $res as $r ) {
 			$rows[ (int) $r['post_id'] ] = $r;
 		}
@@ -239,7 +239,8 @@ function rankweb_transport_run_other( string $kind, string $source, bool $apply,
 	if ( 'terms' === $kind && 'aioseo' === $source && $ids ) {
 		$table = $wpdb->prefix . 'aioseo_terms';
 		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-			foreach ( (array) $wpdb->get_results( "SELECT term_id, title, description, robots_default, robots_noindex FROM $table WHERE term_id IN (" . implode( ',', array_map( 'intval', $ids ) ) . ')', ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- integer ids, another plugin's table
+			$in = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+			foreach ( (array) $wpdb->get_results( $wpdb->prepare( "SELECT term_id, title, description, robots_default, robots_noindex FROM %i WHERE term_id IN ($in)", array_merge( array( $table ), array_map( 'intval', $ids ) ) ), ARRAY_A ) as $r ) { // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders -- another plugin's table; one %d per id
 				$rows[ (int) $r['term_id'] ] = $r;
 			}
 		}
